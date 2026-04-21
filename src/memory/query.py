@@ -96,72 +96,118 @@ def _score_timeline_event(
     score = 0
     reasons: list[str] = []
 
-    confidence = str(event.get("confidence") or "derived")
-    confidence_bonus = _CONFIDENCE_RANKS.get(confidence, 0) // 2
-    if confidence_bonus:
-        score += confidence_bonus
-        reasons.append(f"confidence:{confidence}")
-
-    event_family = str(event.get("event_family") or "")
-    family_bonus = _TIMELINE_PROFILE_BONUS[normalized_profile].get(event_family, 0)
-    if family_bonus:
-        score += family_bonus
-        reasons.append(f"event_family:{event_family}")
-
-    severity = str(event.get("severity") or "")
-    if severity == "error":
-        score += 18
-        reasons.append("severity:error")
-    elif severity == "warning":
-        score += 10
-        reasons.append("severity:warning")
-
-    lowered_query = query.lower() if query is not None else None
-    if lowered_query:
-        tokens = [token for token in lowered_query.split() if token]
-        event_type = str(event.get("event_type") or "").lower()
-        source_refs = " ".join(
-            str(item) for item in event.get("source_refs") or []
-        ).lower()
-        related_refs = " ".join(
-            str(item) for item in event.get("related_refs") or []
-        ).lower()
-        graph_refs = " ".join(
-            str(item) for item in event.get("graph_node_refs") or []
-        ).lower()
-        payload_text = json.dumps(
-            event.get("payload") or {}, sort_keys=True, ensure_ascii=True
-        ).lower()
-
-        if lowered_query in event_type:
-            score += 25
-            reasons.append("query:event_type")
-        if lowered_query in related_refs:
-            score += 25
-            reasons.append("query:related")
-        if lowered_query in graph_refs:
-            score += 20
-            reasons.append("query:graph")
-        if lowered_query in payload_text:
-            score += 12
-            reasons.append("query:payload")
-        if lowered_query in source_refs:
-            score += 10
-            reasons.append("query:source")
-
-        for token in tokens:
-            if token in event_type:
-                score += 8
-            if token in related_refs:
-                score += 9
-            if token in graph_refs:
-                score += 7
-            if token in payload_text:
-                score += 3
-            if token in source_refs:
-                score += 2
+    score += _score_timeline_confidence(event, reasons)
+    score += _score_timeline_family(event, normalized_profile, reasons)
+    score += _score_timeline_severity(event, reasons)
+    score += _score_timeline_query(event, query, reasons)
 
     return score, reasons
+
+
+def _score_timeline_confidence(event: dict[str, Any], reasons: list[str]) -> int:
+    confidence = str(event.get("confidence") or "derived")
+    bonus = _CONFIDENCE_RANKS.get(confidence, 0) // 2
+    if bonus:
+        reasons.append(f"confidence:{confidence}")
+    return bonus
+
+
+def _score_timeline_family(
+    event: dict[str, Any], profile: str, reasons: list[str]
+) -> int:
+    event_family = str(event.get("event_family") or "")
+    bonus = _TIMELINE_PROFILE_BONUS[profile].get(event_family, 0)
+    if bonus:
+        reasons.append(f"event_family:{event_family}")
+    return bonus
+
+
+def _score_timeline_severity(event: dict[str, Any], reasons: list[str]) -> int:
+    severity = str(event.get("severity") or "")
+    if severity == "error":
+        reasons.append("severity:error")
+        return 18
+    if severity == "warning":
+        reasons.append("severity:warning")
+        return 10
+    return 0
+
+
+def _timeline_query_fields(event: dict[str, Any]) -> dict[str, str]:
+    return {
+        "event_type": str(event.get("event_type") or "").lower(),
+        "source": " ".join(str(item) for item in event.get("source_refs") or []).lower(),
+        "related": " ".join(str(item) for item in event.get("related_refs") or []).lower(),
+        "graph": " ".join(str(item) for item in event.get("graph_node_refs") or []).lower(),
+        "payload": json.dumps(
+            event.get("payload") or {}, sort_keys=True, ensure_ascii=True
+        ).lower(),
+    }
+
+
+def _score_timeline_query(
+    event: dict[str, Any],
+    query: str | None,
+    reasons: list[str],
+) -> int:
+    if query is None:
+        return 0
+    lowered_query = query.lower()
+    if not lowered_query:
+        return 0
+    fields = _timeline_query_fields(event)
+    score = _score_timeline_exact_query(lowered_query, fields, reasons)
+    for token in (token for token in lowered_query.split() if token):
+        score += _score_timeline_query_token(token, fields)
+    return score
+
+
+def _score_timeline_exact_query(
+    lowered_query: str,
+    fields: dict[str, str],
+    reasons: list[str],
+) -> int:
+    weights = {
+        "event_type": 25,
+        "related": 25,
+        "graph": 20,
+        "payload": 12,
+        "source": 10,
+    }
+    score = 0
+    for field, weight in weights.items():
+        if lowered_query in fields[field]:
+            score += weight
+            reasons.append(f"query:{field}")
+    return score
+
+
+def _score_timeline_query_token(token: str, fields: dict[str, str]) -> int:
+    weights = {
+        "event_type": 8,
+        "related": 9,
+        "graph": 7,
+        "payload": 3,
+        "source": 2,
+    }
+    return sum(weight for field, weight in weights.items() if token in fields[field])
+
+
+def _timeline_event_matches(
+    event: dict[str, Any],
+    *,
+    event_family: str | None,
+    event_type: str | None,
+    lowered_query: str | None,
+) -> bool:
+    if event_family is not None and event.get("event_family") != event_family:
+        return False
+    if event_type is not None and event.get("event_type") != event_type:
+        return False
+    if lowered_query is None:
+        return True
+    haystack = json.dumps(event, sort_keys=True, ensure_ascii=True).lower()
+    return lowered_query in haystack
 
 
 def query_timeline(
@@ -178,14 +224,13 @@ def query_timeline(
     lowered_query = query.lower() if query is not None else None
     for path in _iter_timeline_paths(events_dir):
         for event in read_jsonl(path):
-            if event_family is not None and event.get("event_family") != event_family:
+            if not _timeline_event_matches(
+                event,
+                event_family=event_family,
+                event_type=event_type,
+                lowered_query=lowered_query,
+            ):
                 continue
-            if event_type is not None and event.get("event_type") != event_type:
-                continue
-            if lowered_query is not None:
-                haystack = json.dumps(event, sort_keys=True, ensure_ascii=True).lower()
-                if lowered_query not in haystack:
-                    continue
             score, reasons = _score_timeline_event(event, query=query, profile=profile)
             enriched = dict(event)
             enriched["score"] = score
@@ -334,9 +379,10 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
+    status_code = 0 if payload.get("ok", True) else 1
     if as_json:
         print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
-        return 0
+        return status_code
 
     kind = payload.get("kind")
     if kind == "catalog":
@@ -344,7 +390,7 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
         print(
             json.dumps(payload["payload"], indent=2, sort_keys=True, ensure_ascii=True)
         )
-        return 0
+        return status_code
     if kind in {"rag", "timeline"}:
         print(f"{kind} results: {payload['count']}")
         for item in payload["results"]:
@@ -355,16 +401,16 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
                 or item.get("id")
             )
             print(f"- {title}")
-        return 0
+        return status_code
     if kind == "all":
         results = payload["results"]
         print(f"All-surface query: {payload['query']}")
         print(f"- catalog matches: {len(results['catalog'])}")
         print(f"- rag matches: {len(results['rag'])}")
         print(f"- timeline matches: {len(results['timeline'])}")
-        return 0
+        return status_code
     print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
-    return 0
+    return status_code
 
 
 def main(argv: list[str] | None = None) -> int:

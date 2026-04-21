@@ -41,11 +41,11 @@ def test_memory_scaffold_validation_accepts_valid_note_files(tmp_path: Path) -> 
             "id": "valid-lesson",
             "title": "Valid lesson",
             "kind": "lesson",
-                "source_refs": ["src/memory/README.md"],
-                "confidence": "curated",
-                "last_verified": "2026-04-20T00:00:00Z",
-                "summary": "Durable lesson for repeated reuse.",
-            },
+            "source_refs": ["src/memory/README.md"],
+            "confidence": "curated",
+            "last_verified": "2026-04-20T00:00:00Z",
+            "summary": "Durable lesson for repeated reuse.",
+        },
         body="# Lesson\n\n## Observation\n\n- Durable guidance\n\n## Reuse guidance\n\n- Apply again when the same conditions hold.\n",
     )
     write_markdown_note(
@@ -84,7 +84,9 @@ def test_memory_scaffold_validation_flags_invalid_note_files(tmp_path: Path) -> 
     )
 
     issues = validate_memory_scaffold(memory_root)
-    messages = {issue.message for issue in issues if issue.path.endswith("broken-lesson.md")}
+    messages = {
+        issue.message for issue in issues if issue.path.endswith("broken-lesson.md")
+    }
     assert "note missing required field: last_verified" in messages
     assert "note confidence must be 'curated' for curated_note" in messages
     assert "curated note summary contains placeholder text" in messages
@@ -93,13 +95,13 @@ def test_memory_scaffold_validation_flags_invalid_note_files(tmp_path: Path) -> 
     assert "curated note missing required heading: ## Reuse guidance" in messages
 
 
-def test_memory_scaffold_validation_flags_duplicate_curated_titles(tmp_path: Path) -> None:
+def test_memory_scaffold_validation_flags_duplicate_curated_titles(
+    tmp_path: Path,
+) -> None:
     memory_root = tmp_path / "memory"
     shutil.copytree(MEMORY_ROOT, memory_root)
 
-    body = (
-        "# Lesson\n\n## Observation\n\n- Stable lesson\n\n## Reuse guidance\n\n- Reuse again later.\n"
-    )
+    body = "# Lesson\n\n## Observation\n\n- Stable lesson\n\n## Reuse guidance\n\n- Reuse again later.\n"
     write_markdown_note(
         memory_root / "curated" / "lessons" / "duplicate-a.md",
         metadata={
@@ -128,11 +130,18 @@ def test_memory_scaffold_validation_flags_duplicate_curated_titles(tmp_path: Pat
     )
 
     issues = validate_memory_scaffold(memory_root)
-    messages = {issue.message for issue in issues if issue.path.endswith("duplicate-b.md")}
-    assert any(message.startswith("duplicate curated note title also used by ") for message in messages)
+    messages = {
+        issue.message for issue in issues if issue.path.endswith("duplicate-b.md")
+    }
+    assert any(
+        message.startswith("duplicate curated note title also used by ")
+        for message in messages
+    )
 
 
-def test_memory_scaffold_validation_flags_invalid_storage_policy(tmp_path: Path) -> None:
+def test_memory_scaffold_validation_flags_invalid_storage_policy(
+    tmp_path: Path,
+) -> None:
     memory_root = tmp_path / "memory"
     shutil.copytree(MEMORY_ROOT, memory_root)
 
@@ -149,9 +158,8 @@ artifact_classes:
     )
 
     issues = validate_memory_scaffold(memory_root)
-    messages = {issue.message for issue in issues if issue.path == "policy/storage.yaml"}
+    messages = {
+        issue.message for issue in issues if issue.path == "policy/storage.yaml"
+    }
     assert "missing storage policy for artifact class: rag_manifest" in messages
-    assert (
-        "default path for policy must stay under src/memory/: policy"
-        in messages
-    )
+    assert "default path for policy must stay under src/memory/: policy" in messages

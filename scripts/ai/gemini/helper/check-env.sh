@@ -6,6 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-gemini-cli.sh"
 
 # Colors
 RED='\033[0;31m'
@@ -55,42 +56,38 @@ else
     exit 1
 fi
 
-# 2. Check Python3
-log_info "Checking Python3..."
-if command -v python3 >/dev/null 2>&1; then
-    PY_VER=$(python3 --version)
-    log_success "Python3 is installed: $PY_VER"
+# 2. Check Node.js
+log_info "Checking Node.js..."
+if command -v node >/dev/null 2>&1; then
+    NODE_VER=$(node --version)
+    log_success "Node.js is installed: $NODE_VER"
 else
-    log_warn "Python3 not found"
+    log_warn "Node.js not found"
     ALL_CHECKS=false
 fi
 
-# 3. Check pip3
-log_info "Checking pip3..."
-if command -v pip3 >/dev/null 2>&1; then
-    PIP_VER=$(pip3 --version)
-    log_success "pip3 is installed: $PIP_VER"
+# 3. Check npm
+log_info "Checking npm..."
+if command -v npm >/dev/null 2>&1; then
+    NPM_VER=$(npm --version)
+    log_success "npm is installed: $NPM_VER"
 else
-    log_warn "pip3 not found"
+    log_warn "npm not found"
     ALL_CHECKS=false
 fi
 
-# 4. Check google-generativeai package
-log_info "Checking Gemini Python SDK..."
-PYTHON_BIN="python3"
-VENV_DIR="${HOME}/.cache/tools/gemini-venv"
-if [[ -x "${VENV_DIR}/bin/python" ]]; then
-    PYTHON_BIN="${VENV_DIR}/bin/python"
+# 4. Check managed Gemini CLI
+log_info "Checking Gemini CLI..."
+GEMINI_BIN=""
+if [[ -x "${ENSURE_SCRIPT}" ]]; then
+    GEMINI_BIN="$("${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null || true)"
 fi
 
-if "${PYTHON_BIN}" -c "import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('google.genai') or importlib.util.find_spec('google.generativeai') else 1)" 2>/dev/null; then
-    if "${PYTHON_BIN}" -c "import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('google.genai') else 1)" 2>/dev/null; then
-        log_success "Google GenAI SDK is installed"
-    else
-        log_warn "Legacy google-generativeai package is installed; rerun setup to migrate"
-    fi
+if [[ -x "${GEMINI_BIN}" ]]; then
+    GEMINI_VER=$("${GEMINI_BIN}" --version 2>/dev/null || echo "unknown")
+    log_success "Gemini CLI is installed: $GEMINI_VER"
 else
-    log_warn "Gemini Python SDK not installed"
+    log_warn "Gemini CLI not found"
     ALL_CHECKS=false
 fi
 
@@ -98,9 +95,7 @@ fi
 log_info "Checking API key..."
 ENV_FILE="${ROOT_DIR}/.env.gemini"
 if [[ -f "${ENV_FILE}" ]]; then
-    if grep -q "GEMINI_API_KEY=AIzaSy" "${ENV_FILE}"; then
-        log_success "API key found in .env.gemini"
-    elif grep -q "GEMINI_API_KEY=" "${ENV_FILE}" && ! grep -q "GEMINI_API_KEY=your-api-key-here" "${ENV_FILE}"; then
+    if grep -Eq '^GEMINI_API_KEY="?[^"#[:space:]]+' "${ENV_FILE}" && ! grep -q "GEMINI_API_KEY=your-api-key-here" "${ENV_FILE}"; then
         log_success "API key found in .env.gemini"
     else
         log_warn ".env.gemini exists but API key missing or not set"

@@ -34,13 +34,21 @@ Detail line.
 
 
 def test_infer_source_metadata_from_repo_paths() -> None:
-    assert infer_source_type(Path("docs/02-architecture/decisions/ADR-043-example.md")) == "adr"
-    assert infer_source_type(Path("docs/05-operations/runbooks/example.md")) == "runbook"
+    assert (
+        infer_source_type(Path("docs/02-architecture/decisions/ADR-043-example.md"))
+        == "adr"
+    )
+    assert (
+        infer_source_type(Path("docs/05-operations/runbooks/example.md")) == "runbook"
+    )
     assert infer_source_type(Path("docs/00-project/overview.md")) == "doc"
     assert infer_source_type(Path("src/bioetl/application/service.py")) == "code"
     assert infer_source_type(Path("tests/unit/test_service.py")) == "test"
     assert infer_source_type(Path("configs/app.yaml")) == "config"
-    assert infer_domain(Path("docs/02-architecture/decisions/ADR-043-example.md")) == "architecture"
+    assert (
+        infer_domain(Path("docs/02-architecture/decisions/ADR-043-example.md"))
+        == "architecture"
+    )
     assert infer_domain(Path("docs/05-operations/runbooks/example.md")) == "operations"
     assert infer_domain(Path("docs/00-project/overview.md")) == "project"
     assert infer_domain(Path("src/bioetl/application/service.py")) == "runtime"
@@ -65,7 +73,11 @@ def run() -> None:
 '''
     sections = split_python_symbols(text)
     assert [section.title for section in sections] == ["module-preamble", "Demo", "run"]
-    assert [section.symbol_kind for section in sections] == ["module_preamble", "class", "function"]
+    assert [section.symbol_kind for section in sections] == [
+        "module_preamble",
+        "class",
+        "function",
+    ]
 
 
 def test_split_config_sections_extracts_top_level_keys() -> None:
@@ -79,7 +91,9 @@ sources:
     assert all(section.symbol_kind == "config_section" for section in sections)
 
 
-def test_build_rag_manifests_indexes_docs_code_tests_and_configs(tmp_path: Path) -> None:
+def test_build_rag_manifests_indexes_docs_code_tests_and_configs(
+    tmp_path: Path,
+) -> None:
     (tmp_path / "docs/00-project").mkdir(parents=True)
     (tmp_path / "docs/02-architecture/decisions").mkdir(parents=True)
     (tmp_path / "docs/05-operations/runbooks").mkdir(parents=True)
@@ -88,7 +102,9 @@ def test_build_rag_manifests_indexes_docs_code_tests_and_configs(tmp_path: Path)
     (tmp_path / "tests/unit").mkdir(parents=True)
     (tmp_path / "configs").mkdir(parents=True)
 
-    (tmp_path / "docs/00-project/overview.md").write_text("# Overview\nAlpha\n", encoding="utf-8")
+    (tmp_path / "docs/00-project/overview.md").write_text(
+        "# Overview\nAlpha\n", encoding="utf-8"
+    )
     (tmp_path / "docs/02-architecture/decisions/ADR-999-test.md").write_text(
         "# ADR Test\nDecision body.\n",
         encoding="utf-8",
@@ -123,11 +139,23 @@ def test_build_rag_manifests_indexes_docs_code_tests_and_configs(tmp_path: Path)
         "config",
     }
     assert all("99-archive" not in chunk["source_path"] for chunk in chunks)
-    assert {chunk["repo_zone"] for chunk in chunks if chunk["source_type"] == "code"} == {"canonical_runtime"}
+    assert {
+        chunk["repo_zone"] for chunk in chunks if chunk["source_type"] == "code"
+    } == {"canonical_runtime"}
     assert any(chunk["symbol_kind"] == "config_section" for chunk in chunks)
-    code_chunk = next(chunk for chunk in chunks if chunk["source_type"] == "code" and chunk["symbol_kind"] == "class")
-    assert "module_surface:src/bioetl/application/service.py" in code_chunk["graph_node_refs"]
-    assert "class_surface:src.bioetl.application.service.Demo" in code_chunk["graph_node_refs"]
+    code_chunk = next(
+        chunk
+        for chunk in chunks
+        if chunk["source_type"] == "code" and chunk["symbol_kind"] == "class"
+    )
+    assert (
+        "module_surface:src/bioetl/application/service.py"
+        in code_chunk["graph_node_refs"]
+    )
+    assert (
+        "class_surface:src.bioetl.application.service.Demo"
+        in code_chunk["graph_node_refs"]
+    )
     assert "module::src.bioetl.application.service" in code_chunk["related_refs"]
     assert "class::src.bioetl.application.service.Demo" in code_chunk["related_refs"]
     test_chunk = next(chunk for chunk in chunks if chunk["source_type"] == "test")
@@ -163,5 +191,19 @@ def test_write_and_reload_rag_manifests(tmp_path: Path) -> None:
     assert catalog["chunk_count"] == 4
     assert len(chunks) == 4
     assert len(filter_chunks(chunks, source_type="doc", query="scope")) == 1
-    assert len(filter_chunks(chunks, source_type="code", symbol_kind="function", query="run")) == 1
-    assert len(filter_chunks(chunks, source_type="config", repo_zone="unclassified", query="version")) == 1
+    assert (
+        len(
+            filter_chunks(
+                chunks, source_type="code", symbol_kind="function", query="run"
+            )
+        )
+        == 1
+    )
+    assert (
+        len(
+            filter_chunks(
+                chunks, source_type="config", repo_zone="unclassified", query="version"
+            )
+        )
+        == 1
+    )

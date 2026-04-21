@@ -30,6 +30,24 @@ class PostrunDependencyOverrides:
     gold_dq_config: object | None = None
 
 
+_DEPENDENCY_OVERRIDE_FIELDS = frozenset(
+    PostrunDependencyOverrides.__dataclass_fields__
+)
+
+
+def _resolve_dependency_overrides(
+    overrides: PostrunDependencyOverrides | None,
+    dependency_kwargs: dict[str, object],
+) -> PostrunDependencyOverrides:
+    unknown_keys = set(dependency_kwargs) - _DEPENDENCY_OVERRIDE_FIELDS
+    if unknown_keys:
+        unknown = ", ".join(sorted(unknown_keys))
+        raise TypeError(f"unknown postrun dependency override(s): {unknown}")
+    if overrides is not None and dependency_kwargs:
+        raise TypeError("pass either overrides or direct dependency kwargs, not both")
+    return overrides or PostrunDependencyOverrides(**dependency_kwargs)
+
+
 def build_test_postrun_service(
     *,
     config: object,
@@ -41,26 +59,16 @@ def build_test_postrun_service(
     logger: LoggerPort,
     metrics: object | None = None,
     tracer: object | None = None,
-    metadata_coordinator: object | None = None,
-    metadata_writer: object | None = None,
-    dq_report_service: object | None = None,
-    bronze_dq_config: object | None = None,
-    silver_dq_config: object | None = None,
-    gold_dq_config: object | None = None,
     overrides: PostrunDependencyOverrides | None = None,
+    **dependency_kwargs: object,
 ) -> PostrunService:
     """Build PostrunService with explicit injected collaborators for tests.
 
     The helper accepts either a pre-built ``overrides`` bundle or direct keyword
     overrides for older tests that injected collaborators individually.
     """
-    dependency_overrides = overrides or PostrunDependencyOverrides(
-        metadata_coordinator=metadata_coordinator,
-        metadata_writer=metadata_writer,
-        dq_report_service=dq_report_service,
-        bronze_dq_config=bronze_dq_config,
-        silver_dq_config=silver_dq_config,
-        gold_dq_config=gold_dq_config,
+    dependency_overrides = _resolve_dependency_overrides(
+        overrides, dependency_kwargs
     )
     return PostrunService(
         config=config,

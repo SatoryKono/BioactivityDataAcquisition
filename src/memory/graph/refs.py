@@ -13,6 +13,8 @@ TEST_SURFACE_NAMES: dict[str, str] = {
     "benchmarks": "benchmarks",
 }
 
+COMPOSITE_CONFIG_PREFIX = "configs/composites/"
+ENTITY_CONFIG_PREFIX = "configs/entities/"
 RUN_MANIFEST_ARTIFACT_REF = "run_manifest::json"
 RUN_LEDGER_ARTIFACT_REF = "run_ledger::jsonl"
 
@@ -64,11 +66,11 @@ def _pipeline_like_name_from_path(source_path: str) -> str | None:
     parts = path.parts
     stem = path.stem
 
-    if source_path.startswith("configs/entities/") and len(parts) >= 4:
+    if source_path.startswith(ENTITY_CONFIG_PREFIX) and len(parts) >= 4:
         provider = parts[2]
         entity = path.stem
         return f"{provider}_{entity}"
-    if source_path.startswith("configs/composites/") and stem != "__init__":
+    if source_path.startswith(COMPOSITE_CONFIG_PREFIX) and stem != "__init__":
         return stem
     if (
         source_path.startswith("src/bioetl/application/pipelines/")
@@ -84,7 +86,7 @@ def _pipeline_like_name_from_path(source_path: str) -> str | None:
 def _provider_from_path(source_path: str) -> str | None:
     path = Path(source_path)
     parts = path.parts
-    if source_path.startswith("configs/entities/") and len(parts) >= 4:
+    if source_path.startswith(ENTITY_CONFIG_PREFIX) and len(parts) >= 4:
         return parts[2]
     if (
         source_path.startswith("src/bioetl/infrastructure/adapters/")
@@ -102,7 +104,7 @@ def _config_graph_refs(source_path: str) -> list[str]:
     refs = [node_ref("config_artifact", source_path)]
     path = Path(source_path)
     parts = path.parts
-    if source_path.startswith("configs/entities/") and len(parts) >= 4:
+    if source_path.startswith(ENTITY_CONFIG_PREFIX) and len(parts) >= 4:
         provider = parts[2]
         entity = path.stem
         pipeline_name = f"{provider}_{entity}"
@@ -113,7 +115,7 @@ def _config_graph_refs(source_path: str) -> list[str]:
                 node_ref("pipeline_surface", pipeline_name),
             ]
         )
-    elif source_path.startswith("configs/composites/") and path.stem != "__init__":
+    elif source_path.startswith(COMPOSITE_CONFIG_PREFIX) and path.stem != "__init__":
         refs.extend(
             [
                 node_ref("composite_config", path.stem),
@@ -133,37 +135,84 @@ def related_refs_for_source(
     """Derive stable cross-layer refs from one source path."""
     refs: list[str] = [related_ref("file", source_path)]
     path = Path(source_path)
+    refs.extend(
+        _related_refs_by_source_type(
+            source_path,
+            source_type,
+            symbol_kind=symbol_kind,
+            symbol_name=symbol_name,
+            path=path,
+        )
+    )
+    refs.extend(_related_refs_for_provider_and_pipeline(source_path))
+    return _dedupe(refs)
 
+
+def _related_refs_by_source_type(
+    source_path: str,
+    source_type: str,
+    *,
+    symbol_kind: str | None,
+    symbol_name: str | None,
+    path: Path,
+) -> list[str]:
     if source_type == "adr":
-        refs.append(related_ref("adr", path.stem))
-    elif source_type == "runbook":
-        refs.append(related_ref("runbook", source_path))
-        if any(token in path.stem for token in ("incident", "failure")):
-            refs.append(related_ref("incident", path.stem))
-    elif source_type == "doc":
-        refs.append(related_ref("doc", source_path))
-    elif source_type == "code":
-        dotted_path = module_dotted_name(source_path)
-        refs.append(related_ref("module", dotted_path))
-        if symbol_name:
-            if symbol_kind == "class":
-                refs.append(related_ref("class", f"{dotted_path}.{symbol_name}"))
-            elif symbol_kind in {"function", "async_function"}:
-                refs.append(related_ref("function", f"{dotted_path}.{symbol_name}"))
-    elif source_type == "test":
-        refs.append(related_ref("test-artifact", source_path))
-        suite_name = test_suite_name(source_path)
-        if suite_name is not None:
-            refs.append(related_ref("test-suite", suite_name))
-    elif source_type == "config":
-        refs.append(related_ref("config", source_path))
-        if source_path.startswith("configs/entities/") and len(path.parts) >= 4:
-            provider = path.parts[2]
-            entity = path.stem
-            refs.append(related_ref("entity", f"{provider}.{entity}"))
-        elif source_path.startswith("configs/composites/") and path.stem != "__init__":
-            refs.append(related_ref("composite", path.stem))
+        return [related_ref("adr", path.stem)]
+    if source_type == "runbook":
+        return _related_runbook_refs(source_path, path)
+    if source_type == "doc":
+        return [related_ref("doc", source_path)]
+    if source_type == "code":
+        return _related_code_refs(source_path, symbol_kind, symbol_name)
+    if source_type == "test":
+        return _related_test_refs(source_path)
+    if source_type == "config":
+        return _related_config_refs(source_path, path)
+    return []
 
+
+def _related_runbook_refs(source_path: str, path: Path) -> list[str]:
+    refs = [related_ref("runbook", source_path)]
+    if any(token in path.stem for token in ("incident", "failure")):
+        refs.append(related_ref("incident", path.stem))
+    return refs
+
+
+def _related_code_refs(
+    source_path: str,
+    symbol_kind: str | None,
+    symbol_name: str | None,
+) -> list[str]:
+    dotted_path = module_dotted_name(source_path)
+    refs = [related_ref("module", dotted_path)]
+    if symbol_name and symbol_kind == "class":
+        refs.append(related_ref("class", f"{dotted_path}.{symbol_name}"))
+    elif symbol_name and symbol_kind in {"function", "async_function"}:
+        refs.append(related_ref("function", f"{dotted_path}.{symbol_name}"))
+    return refs
+
+
+def _related_test_refs(source_path: str) -> list[str]:
+    refs = [related_ref("test-artifact", source_path)]
+    suite_name = test_suite_name(source_path)
+    if suite_name is not None:
+        refs.append(related_ref("test-suite", suite_name))
+    return refs
+
+
+def _related_config_refs(source_path: str, path: Path) -> list[str]:
+    refs = [related_ref("config", source_path)]
+    if source_path.startswith(ENTITY_CONFIG_PREFIX) and len(path.parts) >= 4:
+        provider = path.parts[2]
+        entity = path.stem
+        refs.append(related_ref("entity", f"{provider}.{entity}"))
+    elif source_path.startswith(COMPOSITE_CONFIG_PREFIX) and path.stem != "__init__":
+        refs.append(related_ref("composite", path.stem))
+    return refs
+
+
+def _related_refs_for_provider_and_pipeline(source_path: str) -> list[str]:
+    refs: list[str] = []
     provider = _provider_from_path(source_path)
     if provider is not None:
         refs.append(related_ref("provider", provider))
@@ -174,8 +223,7 @@ def related_refs_for_source(
         provider_name, entity_name = pipeline_family_from_name(pipeline_name)
         if provider_name is not None and entity_name is not None:
             refs.append(related_ref("entity", f"{provider_name}.{entity_name}"))
-
-    return _dedupe(refs)
+    return refs
 
 
 def graph_refs_for_source(
@@ -187,39 +235,77 @@ def graph_refs_for_source(
 ) -> list[str]:
     """Derive deterministic graph node refs from a repository source path."""
     refs: list[str] = [node_ref("file_surface", source_path)]
+    refs.extend(
+        _graph_refs_by_source_type(
+            source_path,
+            source_type,
+            symbol_kind=symbol_kind,
+            symbol_name=symbol_name,
+        )
+    )
+    return _dedupe(refs)
 
+
+def _graph_refs_by_source_type(
+    source_path: str,
+    source_type: str,
+    *,
+    symbol_kind: str | None,
+    symbol_name: str | None,
+) -> list[str]:
     if source_type in {"doc", "adr", "runbook"}:
-        refs.append(node_ref("doc_artifact", source_path))
-    elif source_type == "code":
-        refs.append(node_ref("module_surface", source_path))
-        provider = _provider_from_path(source_path)
-        if provider is not None:
-            refs.append(node_ref("provider_surface", provider))
-        pipeline_name = _pipeline_like_name_from_path(source_path)
-        if pipeline_name is not None:
-            refs.append(node_ref("pipeline_surface", pipeline_name))
-        if symbol_name:
-            dotted_path = module_dotted_name(source_path)
-            if symbol_kind == "class":
-                refs.append(node_ref("class_surface", f"{dotted_path}.{symbol_name}"))
-            elif symbol_kind in {"function", "async_function"}:
-                refs.append(
-                    node_ref("function_surface", f"{dotted_path}.{symbol_name}")
-                )
-    elif source_type == "test":
-        refs.append(node_ref("test_artifact", source_path))
-        suite_name = test_suite_name(source_path)
-        if suite_name is not None:
-            refs.append(node_ref("test_surface", suite_name))
-        pipeline_name = _pipeline_like_name_from_path(source_path)
-        if pipeline_name is not None:
-            refs.append(node_ref("pipeline_surface", pipeline_name))
-        provider = _provider_from_path(source_path)
-        if provider is not None:
-            refs.append(node_ref("provider_surface", provider))
-    elif source_type == "config":
-        refs.extend(_config_graph_refs(source_path))
+        return [node_ref("doc_artifact", source_path)]
+    if source_type == "code":
+        return _graph_code_refs(source_path, symbol_kind, symbol_name)
+    if source_type == "test":
+        return _graph_test_refs(source_path)
+    if source_type == "config":
+        return _config_graph_refs(source_path)
+    return []
 
+
+def _graph_code_refs(
+    source_path: str,
+    symbol_kind: str | None,
+    symbol_name: str | None,
+) -> list[str]:
+    refs = [node_ref("module_surface", source_path)]
+    provider = _provider_from_path(source_path)
+    if provider is not None:
+        refs.append(node_ref("provider_surface", provider))
+    pipeline_name = _pipeline_like_name_from_path(source_path)
+    if pipeline_name is not None:
+        refs.append(node_ref("pipeline_surface", pipeline_name))
+    refs.extend(_graph_symbol_refs(source_path, symbol_kind, symbol_name))
+    return refs
+
+
+def _graph_symbol_refs(
+    source_path: str,
+    symbol_kind: str | None,
+    symbol_name: str | None,
+) -> list[str]:
+    if not symbol_name:
+        return []
+    dotted_path = module_dotted_name(source_path)
+    if symbol_kind == "class":
+        return [node_ref("class_surface", f"{dotted_path}.{symbol_name}")]
+    if symbol_kind in {"function", "async_function"}:
+        return [node_ref("function_surface", f"{dotted_path}.{symbol_name}")]
+    return []
+
+
+def _graph_test_refs(source_path: str) -> list[str]:
+    refs = [node_ref("test_artifact", source_path)]
+    suite_name = test_suite_name(source_path)
+    if suite_name is not None:
+        refs.append(node_ref("test_surface", suite_name))
+    pipeline_name = _pipeline_like_name_from_path(source_path)
+    if pipeline_name is not None:
+        refs.append(node_ref("pipeline_surface", pipeline_name))
+    provider = _provider_from_path(source_path)
+    if provider is not None:
+        refs.append(node_ref("provider_surface", provider))
     return _dedupe(refs)
 
 

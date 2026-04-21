@@ -68,17 +68,13 @@ def _iter_active_curated_notes(root: Path) -> list[Path]:
     return notes
 
 
-def review_curated_notes(
-    root: Path | None = None,
-    *,
-    now: datetime | None = None,
-) -> dict[str, Any]:
-    """Build a review report for active curated memory."""
-    current_time = now or datetime.now(UTC)
-    review_every_days = _review_every_days()
-    notes_root = root or _curated_root()
-    records: list[CuratedReviewRecord] = []
-
+def _collect_curated_note_indexes(
+    notes_root: Path,
+) -> tuple[
+    list[tuple[Path, dict[str, Any]]],
+    dict[str, list[Path]],
+    dict[str, list[Path]],
+]:
     normalized_titles: dict[str, list[Path]] = {}
     ids: dict[str, list[Path]] = {}
     raw_notes: list[tuple[Path, dict[str, Any]]] = []
@@ -89,77 +85,121 @@ def review_curated_notes(
         note_id = str(note.metadata.get("id") or path.stem)
         normalized_titles.setdefault(normalize_text_key(title), []).append(path)
         ids.setdefault(note_id, []).append(path)
+    return raw_notes, normalized_titles, ids
 
-    for path, metadata in raw_notes:
-        title = str(metadata.get("title") or path.stem)
-        note_id = str(metadata.get("id") or path.stem)
-        kind = str(metadata.get("kind") or "unknown")
-        last_verified_raw = metadata.get("last_verified")
-        parsed_last_verified = _parse_iso_datetime(
-            last_verified_raw if isinstance(last_verified_raw, str) else None
+
+def _freshness_review(
+    *,
+    last_verified_raw: object,
+    current_time: datetime,
+    review_every_days: int,
+) -> tuple[int | None, str, str, list[str]]:
+    parsed_last_verified = _parse_iso_datetime(
+        last_verified_raw if isinstance(last_verified_raw, str) else None
+    )
+    if parsed_last_verified is None:
+        return None, "unknown", "review", ["verification:missing"]
+
+    days_since_verified = max(0, (current_time - parsed_last_verified).days)
+    if days_since_verified >= review_every_days * 2:
+        return (
+            days_since_verified,
+            "stale",
+            "review_or_archive",
+            ["verification:stale"],
         )
-        days_since_verified: int | None = None
-        review_status = "unknown"
-        recommendation = "review"
-        reasons: list[str] = []
+    if days_since_verified >= review_every_days:
+        return days_since_verified, "due", "review", ["verification:due"]
+    return days_since_verified, "current", "keep", ["verification:current"]
 
-        if parsed_last_verified is not None:
-            days_since_verified = max(0, (current_time - parsed_last_verified).days)
-            if days_since_verified >= review_every_days * 2:
-                review_status = "stale"
-                recommendation = "review_or_archive"
-                reasons.append("verification:stale")
-            elif days_since_verified >= review_every_days:
-                review_status = "due"
-                recommendation = "review"
-                reasons.append("verification:due")
-            else:
-                review_status = "current"
-                recommendation = "keep"
-                reasons.append("verification:current")
-        else:
-            reasons.append("verification:missing")
 
-        normalized_title = normalize_text_key(title)
-        if len(normalized_titles.get(normalized_title, [])) > 1:
-            reasons.append("duplicate:title")
-            if recommendation == "keep":
-                recommendation = "review"
+def _duplicate_reasons(
+    *,
+    title: str,
+    note_id: str,
+    normalized_titles: dict[str, list[Path]],
+    ids: dict[str, list[Path]],
+) -> list[str]:
+    reasons: list[str] = []
+    if len(normalized_titles.get(normalize_text_key(title), [])) > 1:
+        reasons.append("duplicate:title")
+    if len(ids.get(note_id, [])) > 1:
+        reasons.append("duplicate:id")
+    return reasons
 
-        if len(ids.get(note_id, [])) > 1:
-            reasons.append("duplicate:id")
-            if recommendation == "keep":
-                recommendation = "review"
 
-        source_refs = metadata.get("source_refs")
-        source_ref_count = len(source_refs) if isinstance(source_refs, list) else 0
-        if source_ref_count < 2:
-            reasons.append("source_refs:thin")
+def _quality_reasons(metadata: dict[str, Any]) -> tuple[int, list[str]]:
+    reasons: list[str] = []
+    source_refs = metadata.get("source_refs")
+    source_ref_count = len(source_refs) if isinstance(source_refs, list) else 0
+    if source_ref_count < 2:
+        reasons.append("source_refs:thin")
 
-        summary = str(metadata.get("summary") or "")
-        if len(summary.split()) < 6:
-            reasons.append("summary:brief")
+    summary = str(metadata.get("summary") or "")
+    if len(summary.split()) < 6:
+        reasons.append("summary:brief")
+    return source_ref_count, reasons
 
-        promoted_from = metadata.get("promoted_from")
-        records.append(
-            CuratedReviewRecord(
-                path=str(path),
-                note_id=note_id,
-                title=title,
-                kind=kind,
-                last_verified=str(last_verified_raw or ""),
-                days_since_verified=days_since_verified,
-                review_status=review_status,
-                recommendation=recommendation,
-                source_ref_count=source_ref_count,
-                promoted_from=str(promoted_from)
-                if isinstance(promoted_from, str)
-                else None,
-                review_reasons=reasons,
-            )
+
+def _review_recommendation(current: str, reasons: list[str]) -> str:
+    if "verification:stale" in reasons:
+        return "review_or_archive"
+    if current == "keep" and any(reason.startswith("duplicate:") for reason in reasons):
+        return "review"
+    return current
+
+
+def _build_review_record(
+    path: Path,
+    metadata: dict[str, Any],
+    *,
+    current_time: datetime,
+    review_every_days: int,
+    normalized_titles: dict[str, list[Path]],
+    ids: dict[str, list[Path]],
+) -> CuratedReviewRecord:
+    title = str(metadata.get("title") or path.stem)
+    note_id = str(metadata.get("id") or path.stem)
+    kind = str(metadata.get("kind") or "unknown")
+    days_since_verified, review_status, recommendation, reasons = _freshness_review(
+        last_verified_raw=metadata.get("last_verified"),
+        current_time=current_time,
+        review_every_days=review_every_days,
+    )
+    reasons.extend(
+        _duplicate_reasons(
+            title=title,
+            note_id=note_id,
+            normalized_titles=normalized_titles,
+            ids=ids,
         )
+    )
+    source_ref_count, quality_reasons = _quality_reasons(metadata)
+    reasons.extend(quality_reasons)
+    recommendation = _review_recommendation(recommendation, reasons)
 
-    summary = {
+    promoted_from = metadata.get("promoted_from")
+    return CuratedReviewRecord(
+        path=str(path),
+        note_id=note_id,
+        title=title,
+        kind=kind,
+        last_verified=str(metadata.get("last_verified") or ""),
+        days_since_verified=days_since_verified,
+        review_status=review_status,
+        recommendation=recommendation,
+        source_ref_count=source_ref_count,
+        promoted_from=str(promoted_from) if isinstance(promoted_from, str) else None,
+        review_reasons=reasons,
+    )
+
+
+def _review_summary(
+    records: list[CuratedReviewRecord],
+    *,
+    review_every_days: int,
+) -> dict[str, int]:
+    return {
         "note_count": len(records),
         "current_count": sum(record.review_status == "current" for record in records),
         "due_count": sum(record.review_status == "due" for record in records),
@@ -167,10 +207,33 @@ def review_curated_notes(
         "review_every_days": review_every_days,
         "review_candidates": sum(record.recommendation != "keep" for record in records),
     }
+
+
+def review_curated_notes(
+    root: Path | None = None,
+    *,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Build a review report for active curated memory."""
+    current_time = now or datetime.now(UTC)
+    review_every_days = _review_every_days()
+    notes_root = root or _curated_root()
+    raw_notes, normalized_titles, ids = _collect_curated_note_indexes(notes_root)
+    records = [
+        _build_review_record(
+            path,
+            metadata,
+            current_time=current_time,
+            review_every_days=review_every_days,
+            normalized_titles=normalized_titles,
+            ids=ids,
+        )
+        for path, metadata in raw_notes
+    ]
     return {
         "ok": True,
         "kind": "curated_review",
-        "summary": summary,
+        "summary": _review_summary(records, review_every_days=review_every_days),
         "records": [asdict(record) for record in records],
     }
 
@@ -190,6 +253,11 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Emit the review report as JSON.",
     )
+    parser.add_argument(
+        "--fail-on-review-candidates",
+        action="store_true",
+        help="Exit non-zero when due, stale, duplicate, or thin curated notes need review.",
+    )
     return parser
 
 
@@ -197,9 +265,10 @@ def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
     report = review_curated_notes(args.root.resolve())
+    has_review_candidates = bool(report["summary"]["review_candidates"])
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))
-        return 0
+        return 1 if args.fail_on_review_candidates and has_review_candidates else 0
 
     summary = report["summary"]
     print("Curated memory review:")
@@ -216,7 +285,7 @@ def main(argv: list[str] | None = None) -> int:
             f"- {record['path']} [{record['recommendation']}] "
             f"(status={record['review_status']}, reasons={reasons})"
         )
-    return 0
+    return 1 if args.fail_on_review_candidates and has_review_candidates else 0
 
 
 if __name__ == "__main__":

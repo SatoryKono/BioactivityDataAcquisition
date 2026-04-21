@@ -9,7 +9,9 @@ from memory.notes import parse_markdown_note
 from memory.tooling import workflow
 
 
-def test_pre_task_workflow_creates_session_note_and_uses_local_surfaces(tmp_path: Path) -> None:
+def test_pre_task_workflow_creates_session_note_and_uses_local_surfaces(
+    tmp_path: Path,
+) -> None:
     chunks_path = tmp_path / "chunks.jsonl"
     chunks_path.write_text(
         json.dumps(
@@ -72,7 +74,9 @@ def test_pre_task_workflow_creates_session_note_and_uses_local_surfaces(tmp_path
     assert note.metadata["query"] == "chembl_activity"
 
 
-def test_pre_task_workflow_refreshes_if_manifests_are_missing(tmp_path: Path, monkeypatch) -> None:
+def test_pre_task_workflow_refreshes_if_manifests_are_missing(
+    tmp_path: Path, monkeypatch
+) -> None:
     refresh_calls: list[tuple[Path, Path]] = []
 
     def _fake_refresh_all(
@@ -165,11 +169,18 @@ def test_post_task_workflow_writes_summary_and_promotes_note(
         prune_calls.append(apply)
         return {"apply": apply, "candidate_count": 0, "removed_count": 0}
 
-    def _fake_promote_note(source: Path, *, target_kind: str, move: bool = False) -> Path:
+    def _fake_promote_note(
+        source: Path,
+        *,
+        target_kind: str,
+        summary: str,
+        move: bool = False,
+    ) -> Path:
         target = tmp_path / "curated" / f"{target_kind}.md"
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
         promoted_targets.append(target)
+        assert summary == "Completed the daily workflow integration."
         return target
 
     monkeypatch.setattr(workflow, "validate_memory_scaffold", _fake_validate)

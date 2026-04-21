@@ -208,6 +208,7 @@ def post_task_workflow(
         curated_path = promote_note(
             summary_path,
             target_kind=promote_to,
+            summary=summary,
             move=move_on_promote,
         )
 
@@ -232,9 +233,7 @@ def review_curated_workflow(
     report = review_curated_notes(curated_root)
     summary = report["summary"]
     cadence = "Run this review on a regular engineering cadence and before release or audit checkpoints."
-    next_action = (
-        "Review due and stale notes, refresh last_verified for durable knowledge, and archive superseded notes."
-    )
+    next_action = "Review due and stale notes, refresh last_verified for durable knowledge, and archive superseded notes."
     return {
         "kind": "review-curated",
         "ok": True,
@@ -295,9 +294,10 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
+    status_code = 0 if payload.get("ok", True) else 1
     if as_json:
         print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
-        return 0 if payload.get("ok", True) else 1
+        return status_code
 
     if payload["kind"] == "pre-task":
         print(f"Pre-task workflow: {payload['task_id']}")
@@ -309,7 +309,7 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
         print(f"- catalog hits: {len(results['catalog'])}")
         print(f"- rag hits: {len(results['rag'])}")
         print(f"- timeline hits: {len(results['timeline'])}")
-        return 0
+        return status_code
 
     print(f"Post-task workflow: {payload['task_id']}")
     print(f"- summary note: {payload['summary_note']}")
@@ -317,9 +317,7 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
         print(f"- refresh output root: {payload['refresh_output_root']}")
     if payload.get("promoted_note"):
         print(f"- promoted note: {payload['promoted_note']}")
-    return 0 if payload.get("ok", True) else 1
-
-    
+    return status_code
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -359,7 +357,7 @@ def main(argv: list[str] | None = None) -> int:
         payload = review_curated_workflow(curated_root=args.root)
         if args.json:
             print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
-            return 0
+            return 0 if payload.get("ok", True) else 1
 
         summary = payload["summary"]
         print("Curated review ritual:")
@@ -369,7 +367,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"- review candidates: {summary['review_candidates']}")
         print(f"- cadence: {payload['cadence']}")
         print(f"- next action: {payload['next_action']}")
-        return 0
+        return 0 if payload.get("ok", True) else 1
 
     parser.error(f"unsupported command: {args.command}")
     return 2

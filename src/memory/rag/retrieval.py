@@ -104,32 +104,54 @@ def filter_chunks(
     lowered_query = query.lower() if query is not None else None
     result: list[dict[str, Any]] = []
     for chunk in chunks:
-        if source_type is not None and chunk.get("source_type") != source_type:
-            continue
-        if domain is not None and chunk.get("domain") != domain:
-            continue
-        if repo_zone is not None and chunk.get("repo_zone") != repo_zone:
-            continue
-        if symbol_kind is not None and chunk.get("symbol_kind") != symbol_kind:
-            continue
-        if lowered_query is not None:
-            haystack = " ".join(
-                str(chunk.get(field, ""))
-                for field in (
-                    "title",
-                    "content",
-                    "source_path",
-                    "source_type",
-                    "repo_zone",
-                    "symbol_kind",
-                    "graph_node_refs",
-                    "related_refs",
-                )
-            ).lower()
-            if lowered_query not in haystack:
-                continue
-        result.append(chunk)
+        if _chunk_matches_filters(
+            chunk,
+            source_type=source_type,
+            domain=domain,
+            repo_zone=repo_zone,
+            symbol_kind=symbol_kind,
+            lowered_query=lowered_query,
+        ):
+            result.append(chunk)
     return result
+
+
+def _chunk_matches_filters(
+    chunk: dict[str, Any],
+    *,
+    source_type: str | None,
+    domain: str | None,
+    repo_zone: str | None,
+    symbol_kind: str | None,
+    lowered_query: str | None,
+) -> bool:
+    if source_type is not None and chunk.get("source_type") != source_type:
+        return False
+    if domain is not None and chunk.get("domain") != domain:
+        return False
+    if repo_zone is not None and chunk.get("repo_zone") != repo_zone:
+        return False
+    if symbol_kind is not None and chunk.get("symbol_kind") != symbol_kind:
+        return False
+    if lowered_query is None:
+        return True
+    return lowered_query in _chunk_search_haystack(chunk)
+
+
+def _chunk_search_haystack(chunk: dict[str, Any]) -> str:
+    return " ".join(
+        str(chunk.get(field, ""))
+        for field in (
+            "title",
+            "content",
+            "source_path",
+            "source_type",
+            "repo_zone",
+            "symbol_kind",
+            "graph_node_refs",
+            "related_refs",
+        )
+    ).lower()
 
 
 def score_chunk(
@@ -139,24 +161,43 @@ def score_chunk(
     profile: str = "general",
 ) -> tuple[int, list[str]]:
     """Return deterministic ranking score and brief reasons for one chunk."""
-    normalized_profile = profile if profile in TASK_PROFILES else "general"
-    weights = TASK_PROFILES[normalized_profile]
     score = 0
     reasons: list[str] = []
 
+    score += _score_source_priority(chunk, reasons)
+    score += _score_confidence(chunk, reasons)
+    score += _score_profile_fields(chunk, profile, reasons)
+    score += _score_query_matches(chunk, query, reasons)
+
+    return score, reasons
+
+
+def _score_source_priority(chunk: dict[str, Any], reasons: list[str]) -> int:
     source_bucket = SOURCE_BUCKET_BY_TYPE.get(str(chunk.get("source_type") or ""))
-    if source_bucket is not None:
-        bonus = _SOURCE_PRIORITY_BONUS.get(source_bucket, 0)
-        if bonus:
-            score += bonus
-            reasons.append(f"source:{source_bucket}")
+    if source_bucket is None:
+        return 0
+    bonus = _SOURCE_PRIORITY_BONUS.get(source_bucket, 0)
+    if bonus:
+        reasons.append(f"source:{source_bucket}")
+    return bonus
 
+
+def _score_confidence(chunk: dict[str, Any], reasons: list[str]) -> int:
     confidence = str(chunk.get("confidence") or "derived")
-    confidence_bonus = _CONFIDENCE_RANKS.get(confidence, 0) // 2
-    if confidence_bonus:
-        score += confidence_bonus
+    bonus = _CONFIDENCE_RANKS.get(confidence, 0) // 2
+    if bonus:
         reasons.append(f"confidence:{confidence}")
+    return bonus
 
+
+def _score_profile_fields(
+    chunk: dict[str, Any],
+    profile: str,
+    reasons: list[str],
+) -> int:
+    normalized_profile = profile if profile in TASK_PROFILES else "general"
+    weights = TASK_PROFILES[normalized_profile]
+    score = 0
     for key, field in (
         ("source_type", "source_type"),
         ("domain", "domain"),
@@ -168,49 +209,65 @@ def score_chunk(
         if bonus:
             score += bonus
             reasons.append(f"{field}:{value}")
+    return score
 
-    lowered_query = query.lower() if query is not None else None
-    if lowered_query:
-        tokens = [token for token in lowered_query.split() if token]
-        title = str(chunk.get("title") or "").lower()
-        source_path = str(chunk.get("source_path") or "").lower()
-        content = str(chunk.get("content") or "").lower()
-        related_refs = " ".join(
-            str(item) for item in chunk.get("related_refs") or []
-        ).lower()
-        graph_refs = " ".join(
-            str(item) for item in chunk.get("graph_node_refs") or []
-        ).lower()
 
-        if lowered_query in title:
-            score += 30
-            reasons.append("query:title")
-        if lowered_query in source_path:
-            score += 22
-            reasons.append("query:path")
-        if lowered_query in related_refs:
-            score += 25
-            reasons.append("query:related")
-        if lowered_query in graph_refs:
-            score += 20
-            reasons.append("query:graph")
-        if lowered_query in content:
-            score += 10
-            reasons.append("query:content")
+def _query_fields(chunk: dict[str, Any]) -> dict[str, str]:
+    return {
+        "title": str(chunk.get("title") or "").lower(),
+        "path": str(chunk.get("source_path") or "").lower(),
+        "content": str(chunk.get("content") or "").lower(),
+        "related": " ".join(str(item) for item in chunk.get("related_refs") or []).lower(),
+        "graph": " ".join(str(item) for item in chunk.get("graph_node_refs") or []).lower(),
+    }
 
-        for token in tokens:
-            if token in title:
-                score += 10
-            if token in source_path:
-                score += 8
-            if token in related_refs:
-                score += 9
-            if token in graph_refs:
-                score += 7
-            if token in content:
-                score += 2
 
-    return score, reasons
+def _score_query_matches(
+    chunk: dict[str, Any],
+    query: str | None,
+    reasons: list[str],
+) -> int:
+    if query is None:
+        return 0
+    lowered_query = query.lower()
+    if not lowered_query:
+        return 0
+    fields = _query_fields(chunk)
+    score = _score_exact_query_matches(lowered_query, fields, reasons)
+    for token in (token for token in lowered_query.split() if token):
+        score += _score_query_token(token, fields)
+    return score
+
+
+def _score_exact_query_matches(
+    lowered_query: str,
+    fields: dict[str, str],
+    reasons: list[str],
+) -> int:
+    weights = {
+        "title": 30,
+        "path": 22,
+        "related": 25,
+        "graph": 20,
+        "content": 10,
+    }
+    score = 0
+    for field, weight in weights.items():
+        if lowered_query in fields[field]:
+            score += weight
+            reasons.append(f"query:{field}")
+    return score
+
+
+def _score_query_token(token: str, fields: dict[str, str]) -> int:
+    weights = {
+        "title": 10,
+        "path": 8,
+        "related": 9,
+        "graph": 7,
+        "content": 2,
+    }
+    return sum(weight for field, weight in weights.items() if token in fields[field])
 
 
 def rank_chunks(

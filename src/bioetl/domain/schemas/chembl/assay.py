@@ -6,6 +6,7 @@ Aligned with RULES.md v5.24 and ChEMBL 34 schema.
 from __future__ import annotations
 
 import pandera.pandas as pa
+import pandas as pd
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
@@ -115,7 +116,9 @@ class AssaySchema(ETLRecordSchema):
     #     ge=0,
     #     description="Activity count.",
     # )
-    src_id: Series[int] | None = pa.Field(nullable=True, description="Source ID.")
+    src_id: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Source ID."
+    )
     src_assay_id: Series[str] | None = pa.Field(
         nullable=True, description="Source Assay ID."
     )

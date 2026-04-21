@@ -36,7 +36,9 @@ def test_graph_sync_parser_is_exposed_from_native_module() -> None:
 
 def test_graph_sync_prefers_canonical_mapping_path() -> None:
     mapping_path = graph_sync._memory_mapping_path(graph_sync.DEFAULT_ROOT)
-    assert mapping_path == graph_sync.DEFAULT_ROOT / graph_sync.DEFAULT_MEMORY_MAPPING_PATH
+    assert (
+        mapping_path == graph_sync.DEFAULT_ROOT / graph_sync.DEFAULT_MEMORY_MAPPING_PATH
+    )
 
 
 def test_graph_ontology_and_mapping_assets_exist() -> None:
@@ -48,7 +50,9 @@ def test_graph_ontology_and_mapping_assets_exist() -> None:
     assert ontology.exists()
 
     ontology_payload = yaml.safe_load(ontology.read_text(encoding="utf-8"))
-    assert ontology_payload["canonical_mapping_path"] == "src/memory/graph/mappings.yaml"
+    assert (
+        ontology_payload["canonical_mapping_path"] == "src/memory/graph/mappings.yaml"
+    )
     assert "topology" in ontology_payload["node_families"]
 
 

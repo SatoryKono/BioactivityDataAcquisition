@@ -12,7 +12,9 @@ from memory.tooling.refresh_all import refresh_all
 
 def test_refresh_all_generates_rag_and_timeline_outputs(tmp_path: Path) -> None:
     (tmp_path / "docs/00-project").mkdir(parents=True)
-    (tmp_path / "docs/00-project/overview.md").write_text("# Overview\nAlpha\n", encoding="utf-8")
+    (tmp_path / "docs/00-project/overview.md").write_text(
+        "# Overview\nAlpha\n", encoding="utf-8"
+    )
     (tmp_path / "docs/02-architecture/decisions").mkdir(parents=True)
     (tmp_path / "docs/05-operations/runbooks").mkdir(parents=True)
     (tmp_path / ".github/workflows").mkdir(parents=True)
