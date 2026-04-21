@@ -230,9 +230,7 @@ def test_query_rag_boosts_file_relation_context(tmp_path: Path) -> None:
 
     assert [item["id"] for item in payload["results"][:2]] == ["focus", "related"]
     assert "file_context:focus" in payload["results"][0]["ranking_reasons"]
-    assert "file_relation:references_file" in payload["results"][1][
-        "ranking_reasons"
-    ]
+    assert "file_relation:references_file" in payload["results"][1]["ranking_reasons"]
 
 
 def test_query_timeline_filters_local_events(tmp_path: Path) -> None:

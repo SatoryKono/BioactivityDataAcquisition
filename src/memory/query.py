@@ -143,7 +143,11 @@ def _refresh_module_relation_index(
         snapshot_path.resolve(),
         output_root.resolve(),
     )
-    return output_root / "graph" / "indexes" / "module_relations.json", output_root, report
+    return (
+        output_root / "graph" / "indexes" / "module_relations.json",
+        output_root,
+        report,
+    )
 
 
 def _resolve_file_relation_index(

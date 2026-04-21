@@ -7,12 +7,13 @@ Current state:
 
 - `sync.py` builds and optionally applies the graph snapshot
 - `query.py` exposes operator-facing query shortcuts over the canonical graph
-- `importers/expanded_json.py` imports file-level relation projections from
-  optional expanded graph snapshots
+- `importers/expanded_json.py` imports file-level and module-level relation
+  projections from optional expanded graph snapshots
 - `mappings.yaml` is the canonical graph mapping/configuration surface
 - `ontology.yaml` records the high-signal ontology families and invariants
 - `projections/` and `indexes/` are rebuild-only output locations for compact
-  relation artifacts such as `file_references.jsonl` and `file_relations.json`
+  relation artifacts such as `file_references.jsonl`, `file_relations.json`,
+  `module_references.jsonl`, and `module_relations.json`
 - `scripts/memory/` still exists as a compatibility surface for legacy callers
 
 Primary entrypoints:
