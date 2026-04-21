@@ -1,3 +1,7 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:33a1e2d993c9f5d3b31973dc7ffbcc93ac0f9008e9282cfc068176d0f608aafd
-size 307
+schema_version: 1
+provider: openalex
+cassette_rel_path: tests/fixtures/vcr/openalex/rf013_openalex_health_case_01.yaml
+metadata_status: seeded_partial_backfill
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: c9500d85840250f5169a2f21a0d2f5046051dd204cb67bc91772b6c53f2f781a
+staleness_ready: false

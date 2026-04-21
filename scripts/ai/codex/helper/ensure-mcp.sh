@@ -35,16 +35,19 @@ done
 fail() {
     echo "[mcp] ERROR: $*" >&2
     exit 1
+    return 1
 }
 
 warn() {
     echo "[mcp] WARN: $*" >&2
+    return 0
 }
 
 check_file_contains_repo() {
     local path="$1"
     [[ -f "${path}" ]] || fail "Missing MCP config: ${path}"
     grep -Fq "${REPO_ROOT}" "${path}" || fail "MCP config does not reference current repo: ${path}"
+    return 0
 }
 
 check_codex_config() {
@@ -53,6 +56,7 @@ check_codex_config() {
     grep -Eq '^\[mcp_servers\.filesystem\]' "${config_path}" || fail "Codex config has no filesystem MCP server"
     grep -Eq '^\[mcp_servers\.memory\]' "${config_path}" || fail "Codex config has no memory MCP server"
     grep -Fq "${REPO_ROOT}" "${config_path}" || fail "Codex config does not reference current repo: ${config_path}"
+    return 0
 }
 
 validate_codex_mcp_list() {
@@ -87,6 +91,9 @@ case "${MODE}" in
             --skip-gemini-settings >/dev/null
         ;;
     check)
+        ;;
+    *)
+        fail "Unsupported MCP mode: ${MODE}"
         ;;
 esac
 
