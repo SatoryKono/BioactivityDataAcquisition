@@ -31,6 +31,43 @@ def test_refresh_all_generates_rag_and_timeline_outputs(tmp_path: Path) -> None:
     assert (output_root / "timeline/events/ci.jsonl").exists()
 
 
+def test_refresh_all_can_import_expanded_graph_file_relations(tmp_path: Path) -> None:
+    snapshot_path = tmp_path / "bioetl_knowledge_graph_expanded.json"
+    snapshot_path.write_text(
+        json.dumps(
+            {
+                "meta": {"generated_at": "2026-04-17"},
+                "nodes": {
+                    "file:src/a.py": {"source_path": "src/a.py"},
+                    "file:src/b.py": {"source_path": "src/b.py"},
+                },
+                "edges": {
+                    "edge-1": {
+                        "source": "file:src/a.py",
+                        "target": "file:src/b.py",
+                        "edge_type": "references_file",
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    output_root = tmp_path / "memory-out"
+    summary = refresh_all(
+        tmp_path,
+        output_root,
+        include_rag=False,
+        include_timeline=False,
+        include_graph_relations=True,
+        expanded_graph_path=snapshot_path,
+    )
+
+    assert summary["ok"] is True
+    assert (output_root / "graph/projections/file_references.jsonl").exists()
+    assert (output_root / "graph/indexes/file_relations.json").exists()
+
+
 def test_find_prunable_episodic_notes_uses_metadata_ttl(tmp_path: Path) -> None:
     note = tmp_path / "old.json"
     note.write_text(

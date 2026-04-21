@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-21T06:44:25.721100+00:00",
+  "generated_at": "2026-04-21T08:02:49.710692+00:00",
   "summary": {
     "total_scripts": 429,
     "status_counts": {
-      "active": 317,
+      "active": 301,
       "legacy": 15,
-      "orphan": 85,
+      "orphan": 101,
       "unknown": 12
     },
     "reference_group_coverage": {
@@ -14,9 +14,9 @@
       "build": 1,
       "ci": 49,
       "docs": 131,
-      "scripts": 281,
+      "scripts": 285,
       "skills": 8,
-      "tests": 152
+      "tests": 122
     }
   },
   "scripts": [
@@ -1061,17 +1061,11 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 100,
-          "source_group": "tests",
-          "text": "servers[\"github\"], \"powershell\", \"scripts/ai/mcp/github-mcp-wrapper.ps1\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 286,
+          "line": 162,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         }
@@ -1082,19 +1076,19 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 57,
+          "line": 61,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/github-mcp-wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/github-mcp-wrapper.sh\""
         },
         {
           "path": "scripts/ai/.vscode/mcp.json",
-          "line": 57,
+          "line": 61,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/github-mcp-wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/github-mcp-wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
@@ -1104,13 +1098,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 182,
-          "source_group": "tests",
-          "text": "servers[\"github\"], \"bash\", \"scripts/ai/mcp/github-mcp-wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 283,
+          "line": 159,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         },
@@ -1125,290 +1113,281 @@
     {
       "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
       "type": "ps1",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 138,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\","
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 108,
+          "line": 112,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
         },
         {
           "path": "scripts/ai/.vscode/mcp.json",
-          "line": 108,
+          "line": 112,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 16,
           "source_group": "scripts",
           "text": "EXPECTED_BRAVE_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 216,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\","
         }
       ]
     },
     {
       "path": "scripts/ai/mcp/mcp_chembl_wrapper.ps1",
       "type": "ps1",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 163,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_chembl_wrapper.ps1\","
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/mcp/mcp_chembl_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 241,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_chembl_wrapper.sh\","
+          "path": "scripts/ai/.mcp.json",
+          "line": 142,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_chembl_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 142,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_chembl_wrapper.sh\""
         }
       ]
     },
     {
       "path": "scripts/ai/mcp/mcp_context7_wrapper.ps1",
       "type": "ps1",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 113,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.ps1\","
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/mcp/mcp_context7_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 78,
+          "line": 82,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_context7_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_context7_wrapper.sh\""
         },
         {
           "path": "scripts/ai/.vscode/mcp.json",
-          "line": 78,
+          "line": 82,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_context7_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_context7_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 11,
           "source_group": "scripts",
           "text": "EXPECTED_CONTEXT7_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_context7_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 193,
-          "source_group": "tests",
-          "text": "servers[\"context7\"], \"bash\", \"scripts/ai/mcp/mcp_context7_wrapper.sh\""
         }
       ]
     },
     {
       "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.ps1",
       "type": "ps1",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 108,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_docker_docs_wrapper.ps1\","
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 72,
+          "line": 76,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
         },
         {
           "path": "scripts/ai/.vscode/mcp.json",
-          "line": 72,
+          "line": 76,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 10,
           "source_group": "scripts",
           "text": "EXPECTED_DOCKER_DOCS_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 190,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_docker_docs_wrapper.sh\","
         }
       ]
     },
     {
       "path": "scripts/ai/mcp/mcp_docker_wrapper.ps1",
       "type": "ps1",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 103,
-          "source_group": "tests",
-          "text": "servers[\"docker\"], \"powershell\", \"scripts/ai/mcp/mcp_docker_wrapper.ps1\""
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/mcp/mcp_docker_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 66,
+          "line": 70,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_docker_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_wrapper.sh\""
         },
         {
           "path": "scripts/ai/.vscode/mcp.json",
-          "line": 66,
+          "line": 70,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_docker_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 9,
           "source_group": "scripts",
           "text": "EXPECTED_DOCKER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_docker_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 185,
-          "source_group": "tests",
-          "text": "servers[\"docker\"], \"bash\", \"scripts/ai/mcp/mcp_docker_wrapper.sh\""
         }
       ]
     },
     {
       "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.ps1",
       "type": "ps1",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 123,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_dockerhub_wrapper.ps1\","
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 90,
+          "line": 94,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
         },
         {
           "path": "scripts/ai/.vscode/mcp.json",
-          "line": 90,
+          "line": 94,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 13,
           "source_group": "scripts",
           "text": "EXPECTED_DOCKERHUB_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 203,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_dockerhub_wrapper.sh\","
         }
       ]
     },
     {
       "path": "scripts/ai/mcp/mcp_grafana_wrapper.ps1",
       "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_grafana_wrapper.sh",
+      "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
         {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 133,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.ps1\","
+          "path": "scripts/ai/.mcp.json",
+          "line": 106,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 106,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "EXPECTED_GRAFANA_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
         }
       ]
     },
     {
-      "path": "scripts/ai/mcp/mcp_grafana_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_mermaid_wrapper.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_mermaid_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 160,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 160,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_needle_wrapper.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_needle_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -1416,93 +1395,21 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 102,
+          "line": 136,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_needle_wrapper.sh\""
         },
         {
           "path": "scripts/ai/.vscode/mcp.json",
-          "line": 102,
+          "line": 136,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_needle_wrapper.sh\""
         },
-        {
-          "path": "scripts/ai/mcp/check.sh",
-          "line": 15,
-          "source_group": "scripts",
-          "text": "EXPECTED_GRAFANA_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 211,
-          "source_group": "tests",
-          "text": "servers[\"grafana\"], \"bash\", \"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_mermaid_wrapper.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 178,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.ps1\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_mermaid_wrapper.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 256,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.sh\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_needle_wrapper.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 158,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_needle_wrapper.ps1\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_needle_wrapper.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 20,
           "source_group": "scripts",
           "text": "EXPECTED_NEEDLE_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_needle_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 236,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_needle_wrapper.sh\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
@@ -1515,72 +1422,52 @@
     {
       "path": "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1",
       "type": "ps1",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 148,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\","
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 120,
+          "line": 124,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
         },
         {
           "path": "scripts/ai/.vscode/mcp.json",
-          "line": 120,
+          "line": 124,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 18,
           "source_group": "scripts",
           "text": "EXPECTED_NEO4J_CYPHER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 226,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\","
         }
       ]
     },
     {
       "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1",
       "type": "ps1",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 153,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\","
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 24,
+      "reference_count": 23,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -1635,68 +1522,141 @@
     {
       "path": "scripts/ai/mcp/mcp_paper_search_wrapper.ps1",
       "type": "ps1",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 118,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_paper_search_wrapper.ps1\","
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/mcp/mcp_paper_search_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 84,
+          "line": 88,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
         },
         {
           "path": "scripts/ai/.vscode/mcp.json",
-          "line": 84,
+          "line": 88,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 12,
           "source_group": "scripts",
           "text": "EXPECTED_PAPER_SEARCH_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 198,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_paper_search_wrapper.sh\","
         }
       ]
     },
     {
       "path": "scripts/ai/mcp/mcp_prometheus_wrapper.ps1",
       "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_prometheus_wrapper.sh",
+      "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
         {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 128,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.ps1\","
+          "path": "scripts/ai/.mcp.json",
+          "line": 100,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 100,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "EXPECTED_PROMETHEUS_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
         }
       ]
     },
     {
-      "path": "scripts/ai/mcp/mcp_prometheus_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_pubchem_wrapper.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_pubchem_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 148,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubchem_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 148,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubchem_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_pubmed_wrapper.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_pubmed_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 154,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubmed_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 154,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubmed_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_sonarqube_wrapper.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_sonarqube_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -1704,123 +1664,15 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 96,
+          "line": 118,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
         },
         {
           "path": "scripts/ai/.vscode/mcp.json",
-          "line": 96,
+          "line": 118,
           "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/mcp/check.sh",
-          "line": 14,
-          "source_group": "scripts",
-          "text": "EXPECTED_PROMETHEUS_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 208,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_pubchem_wrapper.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 168,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_pubchem_wrapper.ps1\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_pubchem_wrapper.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 246,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_pubchem_wrapper.sh\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_pubmed_wrapper.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 173,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_pubmed_wrapper.ps1\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_pubmed_wrapper.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 251,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_pubmed_wrapper.sh\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_sonarqube_wrapper.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 143,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_sonarqube_wrapper.ps1\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_sonarqube_wrapper.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 5,
-      "references": [
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 114,
-          "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
-          "line": 114,
-          "source_group": "scripts",
-          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
@@ -1833,12 +1685,6 @@
           "line": 40,
           "source_group": "scripts",
           "text": "return [str(_repo_root() / \"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\")]"
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 221,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\","
         }
       ]
     },
@@ -7353,7 +7199,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 274,
+          "line": 150,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/setup_copilot_codex_mcp.ps1\").read_text("
         }
@@ -7431,7 +7277,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 265,
+          "line": 141,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/setup_copilot_codex_mcp.sh\").read_text("
         }

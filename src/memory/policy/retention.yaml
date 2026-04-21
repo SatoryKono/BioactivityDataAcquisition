@@ -15,6 +15,9 @@ artifact_classes:
   graph_export:
     ttl_days: 30
     rebuildable: true
+  graph_projection:
+    ttl_days: 30
+    rebuildable: true
   timeline_event:
     ttl_days: null
     rebuildable: true

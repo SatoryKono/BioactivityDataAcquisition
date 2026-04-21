@@ -76,13 +76,16 @@ Typical follow-up commands:
 ```bash
 python -m memory.query graph owner-pipeline chembl_activity
 python -m memory.query rag --query chembl_activity --source-type code --profile implementation
+python -m memory.query rag --query runner --file-context src/bioetl/application/core/runner.py --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
 python -m memory.query timeline --event-family run --query chembl_activity --profile operations
+python -m memory.query refs src/bioetl/application/core/runner.py --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
+python -m memory.query impact src/bioetl/application/core/runner.py --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
 python -m memory.query all chembl_activity --profile architecture --auto-refresh
 ```
 
-Use `--auto-refresh` when rebuild-only RAG or timeline artifacts are absent and
-you want a temporary query-local refresh instead of writing generated manifests
-under `src/memory/`.
+Use `--auto-refresh` when rebuild-only RAG, timeline, or file-relation artifacts
+are absent and you want a temporary query-local refresh instead of writing
+generated manifests under `src/memory/`.
 
 ## Post-Task
 

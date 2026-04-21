@@ -332,7 +332,38 @@ workers_for_shard() {
     return 0
 }
 
+python_has_modules() {
+    local python_bin="$1"
+    shift
+
+    [[ -x "$python_bin" ]] || return 1
+    "$python_bin" - "$@" <<'PY' >/dev/null 2>&1
+from __future__ import annotations
+
+import importlib.util
+import sys
+
+raise SystemExit(
+    0
+    if all(importlib.util.find_spec(module) is not None for module in sys.argv[1:])
+    else 1
+)
+PY
+}
+
+windows_venv_supports_pytest_cov() {
+    python_has_modules ".venv-win/Scripts/python.exe" pytest pytest_cov coverage
+}
+
 selected_python() {
+    if [[ -n "${BIOETL_PYTEST_RUNTIME_PYTHON:-}" ]] && python_has_modules "$BIOETL_PYTEST_RUNTIME_PYTHON" coverage; then
+        printf '%s\n' "$BIOETL_PYTEST_RUNTIME_PYTHON"
+        return 0
+    fi
+    if windows_venv_supports_pytest_cov; then
+        printf '%s\n' "$REPO_ROOT/.venv-win/Scripts/python.exe"
+        return 0
+    fi
     if [[ -x "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" ]]; then
         printf '%s\n' "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"
         return 0
@@ -390,6 +421,14 @@ normalize_coverage_dir_for_environment() {
     fi
 
     DISABLE_COVERAGE=1
+    if windows_venv_supports_pytest_cov; then
+        DISABLE_COVERAGE=0
+        echo \
+            "[run_pytest_sharded][info] Keeping pytest-cov enabled because .venv-win has pytest-cov and coverage installed." \
+            >&2
+        return 0
+    fi
+
     echo \
         "[run_pytest_sharded][info] Disabling pytest-cov for mounted WSL checkout to avoid coverage instability under /mnt/* (including sqlite lock/malformed shard data)" \
         >&2

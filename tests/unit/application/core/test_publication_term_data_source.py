@@ -565,18 +565,10 @@ class MockFilterableDataSource:
         self.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
         self.aclose = AsyncMock()
 
-    async def _yield_documents(self):
-        await asyncio.sleep(0)
-        for doc in self._documents:
-            yield doc
-
-    async def _delegate_documents(self):
-        async for doc in self._yield_documents():
-            yield doc
-
     async def _passthrough_fetch(self, *args: object, **kwargs: object):
         del args, kwargs
-        async for doc in self._delegate_documents():
+        await asyncio.sleep(0)
+        for doc in self._documents:
             yield doc
 
     fetch = _passthrough_fetch
@@ -822,7 +814,8 @@ class TestPublicationTermFilterable:
                         "limit": limit,
                     }
                 )
-                async for doc in self._yield_documents():
+                await asyncio.sleep(0)
+                for doc in self._documents:
                     yield doc
 
         source = _RecordingFilterableDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])

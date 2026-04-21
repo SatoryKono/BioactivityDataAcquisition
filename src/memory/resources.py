@@ -37,6 +37,7 @@ REQUIRED_SCHEMA_FILES = (
     "rag_chunk.schema.json",
     "graph_node.schema.json",
     "graph_edge.schema.json",
+    "graph_relation_record.schema.json",
     "timeline_event.schema.json",
     "curated_note.schema.json",
     "episodic_note.schema.json",

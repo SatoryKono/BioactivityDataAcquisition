@@ -29,6 +29,13 @@ artifact_classes:
     commit_to_git: false
     default_paths: ["src/memory/graph/exports"]
     notes: "Graph snapshots are derived from canonical repo sources and graph mappings."
+  graph_projection:
+    storage_mode: rebuild_only
+    commit_to_git: false
+    default_paths:
+      - "src/memory/graph/projections"
+      - "src/memory/graph/indexes"
+    notes: "Graph relation projections and lookup indexes are derived from graph snapshots."
   timeline_event:
     storage_mode: rebuild_only
     commit_to_git: false

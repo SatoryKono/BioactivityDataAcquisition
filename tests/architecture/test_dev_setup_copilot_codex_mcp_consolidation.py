@@ -9,6 +9,53 @@ from pathlib import Path
 from tests.helpers import repo_root, run_repo_python
 
 
+EXPECTED_MCP_SERVERS = {
+    "memory",
+    "filesystem",
+    "sequential-thinking",
+    "fetch",
+    "pdf",
+    "github",
+    "docker",
+    "docker-docs",
+    "context7",
+    "paper-search",
+    "dockerhub",
+    "prometheus",
+    "grafana",
+    "brave-search",
+    "sonarqube",
+    "neo4j-cypher",
+    "neo4j-memory",
+    "needle",
+    "chembl",
+    "pubchem",
+    "pubmed",
+    "mermaid",
+    "openaiDeveloperDocs",
+}
+
+WRAPPER_SCRIPT_STEMS = {
+    "github": "github-mcp-wrapper",
+    "docker": "mcp_docker_wrapper",
+    "docker-docs": "mcp_docker_docs_wrapper",
+    "context7": "mcp_context7_wrapper",
+    "paper-search": "mcp_paper_search_wrapper",
+    "dockerhub": "mcp_dockerhub_wrapper",
+    "prometheus": "mcp_prometheus_wrapper",
+    "grafana": "mcp_grafana_wrapper",
+    "brave-search": "mcp_brave_search_wrapper",
+    "sonarqube": "mcp_sonarqube_wrapper",
+    "neo4j-cypher": "mcp_neo4j_cypher_wrapper",
+    "neo4j-memory": "mcp_neo4j_memory_wrapper",
+    "needle": "mcp_needle_wrapper",
+    "chembl": "mcp_chembl_wrapper",
+    "pubchem": "mcp_pubchem_wrapper",
+    "pubmed": "mcp_pubmed_wrapper",
+    "mermaid": "mcp_mermaid_wrapper",
+}
+
+
 def _posix(path_str: str) -> str:
     return path_str.replace("\\", "/")
 
@@ -43,36 +90,24 @@ def _assert_shell_wrapper(
     assert str(server["args"][-1]).endswith(expected_suffix)
 
 
+def _assert_platform_wrappers(servers: dict[str, object]) -> None:
+    shell_name = "powershell" if os.name == "nt" else "bash"
+    suffix = ".ps1" if os.name == "nt" else ".sh"
+
+    for server_name, script_stem in WRAPPER_SCRIPT_STEMS.items():
+        _assert_shell_wrapper(
+            servers[server_name],
+            shell_name,
+            f"scripts/ai/mcp/{script_stem}{suffix}",
+        )
+
+
 def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None:
     """Workspace MCP config should match the canonical server layout."""
     root = repo_root()
     payload, _config_root = _load_workspace_mcp_config(root, tmp_path)
     servers = payload["servers"]
-    assert set(servers) == {
-        "memory",
-        "filesystem",
-        "sequential-thinking",
-        "fetch",
-        "pdf",
-        "github",
-        "docker",
-        "docker-docs",
-        "context7",
-        "paper-search",
-        "dockerhub",
-        "prometheus",
-        "grafana",
-        "brave-search",
-        "sonarqube",
-        "neo4j-cypher",
-        "neo4j-memory",
-        "needle",
-        "chembl",
-        "pubchem",
-        "pubmed",
-        "mermaid",
-        "openaiDeveloperDocs",
-    }
+    assert set(servers) == EXPECTED_MCP_SERVERS
     assert servers["memory"]["command"] == "npx"
     assert _posix(servers["memory"]["env"]["MEMORY_FILE_PATH"]).endswith(
         "/docs/00-project/ai/memory/mcp-memory.json"
@@ -95,166 +130,7 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         "@modelcontextprotocol/server-pdf@1.3.1",
         "--stdio",
     ]
-    if os.name == "nt":
-        _assert_shell_wrapper(
-            servers["github"], "powershell", "scripts/ai/mcp/github-mcp-wrapper.ps1"
-        )
-        _assert_shell_wrapper(
-            servers["docker"], "powershell", "scripts/ai/mcp/mcp_docker_wrapper.ps1"
-        )
-        _assert_shell_wrapper(
-            servers["docker-docs"],
-            "powershell",
-            "scripts/ai/mcp/mcp_docker_docs_wrapper.ps1",
-        )
-        _assert_shell_wrapper(
-            servers["context7"],
-            "powershell",
-            "scripts/ai/mcp/mcp_context7_wrapper.ps1",
-        )
-        _assert_shell_wrapper(
-            servers["paper-search"],
-            "powershell",
-            "scripts/ai/mcp/mcp_paper_search_wrapper.ps1",
-        )
-        _assert_shell_wrapper(
-            servers["dockerhub"],
-            "powershell",
-            "scripts/ai/mcp/mcp_dockerhub_wrapper.ps1",
-        )
-        _assert_shell_wrapper(
-            servers["prometheus"],
-            "powershell",
-            "scripts/ai/mcp/mcp_prometheus_wrapper.ps1",
-        )
-        _assert_shell_wrapper(
-            servers["grafana"],
-            "powershell",
-            "scripts/ai/mcp/mcp_grafana_wrapper.ps1",
-        )
-        _assert_shell_wrapper(
-            servers["brave-search"],
-            "powershell",
-            "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
-        )
-        _assert_shell_wrapper(
-            servers["sonarqube"],
-            "powershell",
-            "scripts/ai/mcp/mcp_sonarqube_wrapper.ps1",
-        )
-        _assert_shell_wrapper(
-            servers["neo4j-cypher"],
-            "powershell",
-            "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1",
-        )
-        _assert_shell_wrapper(
-            servers["neo4j-memory"],
-            "powershell",
-            "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1",
-        )
-        _assert_shell_wrapper(
-            servers["needle"],
-            "powershell",
-            "scripts/ai/mcp/mcp_needle_wrapper.ps1",
-        )
-        _assert_shell_wrapper(
-            servers["chembl"],
-            "powershell",
-            "scripts/ai/mcp/mcp_chembl_wrapper.ps1",
-        )
-        _assert_shell_wrapper(
-            servers["pubchem"],
-            "powershell",
-            "scripts/ai/mcp/mcp_pubchem_wrapper.ps1",
-        )
-        _assert_shell_wrapper(
-            servers["pubmed"],
-            "powershell",
-            "scripts/ai/mcp/mcp_pubmed_wrapper.ps1",
-        )
-        _assert_shell_wrapper(
-            servers["mermaid"],
-            "powershell",
-            "scripts/ai/mcp/mcp_mermaid_wrapper.ps1",
-        )
-    else:
-        _assert_shell_wrapper(
-            servers["github"], "bash", "scripts/ai/mcp/github-mcp-wrapper.sh"
-        )
-        _assert_shell_wrapper(
-            servers["docker"], "bash", "scripts/ai/mcp/mcp_docker_wrapper.sh"
-        )
-        _assert_shell_wrapper(
-            servers["docker-docs"],
-            "bash",
-            "scripts/ai/mcp/mcp_docker_docs_wrapper.sh",
-        )
-        _assert_shell_wrapper(
-            servers["context7"], "bash", "scripts/ai/mcp/mcp_context7_wrapper.sh"
-        )
-        _assert_shell_wrapper(
-            servers["paper-search"],
-            "bash",
-            "scripts/ai/mcp/mcp_paper_search_wrapper.sh",
-        )
-        _assert_shell_wrapper(
-            servers["dockerhub"],
-            "bash",
-            "scripts/ai/mcp/mcp_dockerhub_wrapper.sh",
-        )
-        _assert_shell_wrapper(
-            servers["prometheus"],
-            "bash",
-            "scripts/ai/mcp/mcp_prometheus_wrapper.sh",
-        )
-        _assert_shell_wrapper(
-            servers["grafana"], "bash", "scripts/ai/mcp/mcp_grafana_wrapper.sh"
-        )
-        _assert_shell_wrapper(
-            servers["brave-search"],
-            "bash",
-            "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
-        )
-        _assert_shell_wrapper(
-            servers["sonarqube"],
-            "bash",
-            "scripts/ai/mcp/mcp_sonarqube_wrapper.sh",
-        )
-        _assert_shell_wrapper(
-            servers["neo4j-cypher"],
-            "bash",
-            "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh",
-        )
-        _assert_shell_wrapper(
-            servers["neo4j-memory"],
-            "bash",
-            "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
-        )
-        _assert_shell_wrapper(
-            servers["needle"],
-            "bash",
-            "scripts/ai/mcp/mcp_needle_wrapper.sh",
-        )
-        _assert_shell_wrapper(
-            servers["chembl"],
-            "bash",
-            "scripts/ai/mcp/mcp_chembl_wrapper.sh",
-        )
-        _assert_shell_wrapper(
-            servers["pubchem"],
-            "bash",
-            "scripts/ai/mcp/mcp_pubchem_wrapper.sh",
-        )
-        _assert_shell_wrapper(
-            servers["pubmed"],
-            "bash",
-            "scripts/ai/mcp/mcp_pubmed_wrapper.sh",
-        )
-        _assert_shell_wrapper(
-            servers["mermaid"],
-            "bash",
-            "scripts/ai/mcp/mcp_mermaid_wrapper.sh",
-        )
+    _assert_platform_wrappers(servers)
     assert servers["openaiDeveloperDocs"]["type"] == "http"
     assert servers["openaiDeveloperDocs"]["url"] == "https://developers.openai.com/mcp"
 

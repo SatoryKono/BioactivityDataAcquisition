@@ -124,6 +124,20 @@ Optional graph export during refresh:
 python -m memory.tooling.refresh_all --include-graph-export
 ```
 
+Optional file-level relation projection import from an expanded graph snapshot:
+
+```bash
+python -m memory.tooling.refresh_all \
+  --skip-rag \
+  --skip-timeline \
+  --include-graph-relations \
+  --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
+```
+
+This generates rebuild-only artifacts under `graph/projections/` and
+`graph/indexes/`. The raw expanded graph snapshot is treated as derived input;
+it does not replace source code, docs, configs, ADRs, or tests.
+
 Dry-run prune for episodic memory:
 
 ```bash
@@ -163,10 +177,19 @@ Local memory retrieval can be routed through one entry point:
 ```bash
 python -m memory.query catalog sources
 python -m memory.query rag --query chembl_activity --source-type code --profile implementation
+python -m memory.query rag --query runner --file-context src/bioetl/application/core/runner.py --file-relation-index /tmp/memory/graph/indexes/file_relations.json
 python -m memory.query timeline --event-family run --query manifest --profile operations
 python -m memory.query all chembl_activity --profile architecture
+python -m memory.query all runner --file-context src/bioetl/application/core/runner.py --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
+python -m memory.query refs src/bioetl/application/core/runner.py --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
+python -m memory.query impact src/bioetl/application/core/runner.py --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
+python -m memory.query neighborhood src/bioetl/application/core/runner.py --depth 2 --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
 python -m memory.query graph owner-pipeline chembl_activity
 ```
+
+Use `--file-context` when the task starts from a specific file. RAG ranking then
+boosts chunks from that file and from files connected through the generated
+`references_file` relation index.
 
 Generated RAG and timeline artifacts are rebuild-only. If they are absent,
 either refresh them explicitly or use the query facade's temporary refresh mode:
@@ -192,7 +215,8 @@ Current default stance:
 
 - `policy/`, `catalog/`, `schemas/`, and `curated/` are versioned
 - `episodic/` is ephemeral and prunable
-- `rag/manifests/`, `graph/exports/`, and `timeline/events/` are rebuild-only
+- `rag/manifests/`, `graph/exports/`, `graph/projections/`, `graph/indexes/`,
+  and `timeline/events/` are rebuild-only
 
 ## Notes workflow
 

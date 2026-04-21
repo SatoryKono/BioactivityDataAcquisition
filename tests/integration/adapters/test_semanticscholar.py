@@ -14,9 +14,9 @@ from __future__ import annotations
 
 import asyncio
 import os
-from pathlib import Path
 import time
 from collections.abc import AsyncIterator
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -56,14 +56,6 @@ def mock_logger() -> MagicMock:
     return logger
 
 
-@pytest.fixture(scope="module")
-def event_loop() -> AsyncIterator[asyncio.AbstractEventLoop]:
-    """Provide a module-scoped event loop for module-scoped async fixtures."""
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
-
-
 def _reset_http_client_state(client: UnifiedHTTPClient) -> None:
     """Reset mutable HTTP client state between tests sharing one client."""
     client.circuit_breaker.reset()
@@ -81,7 +73,7 @@ async def _consume_async_iter(async_iter) -> list[object]:
     return items
 
 
-@pytest_asyncio.fixture(scope="module")
+@pytest_asyncio.fixture(scope="module", loop_scope="module")
 async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
     """Create and manage Semantic Scholar HTTP client lifecycle for tests."""
     client = UnifiedHTTPClient(

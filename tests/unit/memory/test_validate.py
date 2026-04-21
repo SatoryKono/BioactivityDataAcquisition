@@ -182,6 +182,12 @@ def test_generated_memory_artifact_classifier_blocks_rebuild_only_outputs() -> N
         "src/memory/timeline/events/runs.jsonl"
     )
     assert _is_tracked_generated_memory_artifact(
+        "src/memory/graph/projections/file_references.jsonl"
+    )
+    assert _is_tracked_generated_memory_artifact(
+        "src/memory/graph/indexes/file_relations.json"
+    )
+    assert _is_tracked_generated_memory_artifact(
         "src/memory/__pycache__/query.cpython-312.pyc"
     )
     assert not _is_tracked_generated_memory_artifact(

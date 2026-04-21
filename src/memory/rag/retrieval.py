@@ -196,6 +196,8 @@ def score_chunk(
     *,
     query: str | None,
     profile: str = "general",
+    file_context_path: str | None = None,
+    related_file_paths: set[str] | None = None,
 ) -> tuple[int, list[str]]:
     """Return deterministic ranking score and brief reasons for one chunk."""
     score = 0
@@ -205,8 +207,33 @@ def score_chunk(
     score += _score_confidence(chunk, reasons)
     score += _score_profile_fields(chunk, profile, reasons)
     score += _score_query_matches(chunk, query, reasons)
+    score += _score_file_relation_context(
+        chunk,
+        file_context_path=file_context_path,
+        related_file_paths=related_file_paths,
+        reasons=reasons,
+    )
 
     return score, reasons
+
+
+def _score_file_relation_context(
+    chunk: dict[str, Any],
+    *,
+    file_context_path: str | None,
+    related_file_paths: set[str] | None,
+    reasons: list[str],
+) -> int:
+    chunk_path = str(chunk.get("source_path") or "").replace("\\", "/").lstrip("./")
+    if not chunk_path:
+        return 0
+    if file_context_path is not None and chunk_path == file_context_path:
+        reasons.append("file_context:focus")
+        return 45
+    if related_file_paths is not None and chunk_path in related_file_paths:
+        reasons.append("file_relation:references_file")
+        return 32
+    return 0
 
 
 def _score_source_priority(chunk: dict[str, Any], reasons: list[str]) -> int:
@@ -320,6 +347,8 @@ def rank_chunks(
     symbol_kind: str | None = None,
     query: str | None = None,
     profile: str = "general",
+    file_context_path: str | None = None,
+    related_file_paths: set[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Filter and rank chunk records for task-aware retrieval."""
     ranked: list[dict[str, Any]] = []
@@ -331,7 +360,13 @@ def rank_chunks(
         symbol_kind=symbol_kind,
         query=query,
     ):
-        score, reasons = score_chunk(chunk, query=query, profile=profile)
+        score, reasons = score_chunk(
+            chunk,
+            query=query,
+            profile=profile,
+            file_context_path=file_context_path,
+            related_file_paths=related_file_paths,
+        )
         enriched = dict(chunk)
         enriched["score"] = score
         enriched["ranking_reasons"] = reasons
