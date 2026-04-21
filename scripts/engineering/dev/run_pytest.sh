@@ -9,6 +9,13 @@ export UV_CACHE_DIR="${UV_CACHE_DIR:-/tmp/uv-cache}"
 export UV_LINK_MODE="${UV_LINK_MODE:-copy}"
 export BIOETL_WSL_VENV_DIR="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}"
 export PYTHONPYCACHEPREFIX="${PYTHONPYCACHEPREFIX:-/tmp/bioetl-pycache}"
+case ":${PYTHONPATH:-}:" in
+    *":$REPO_ROOT/src:"*)
+        ;;
+    *)
+        export PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}"
+        ;;
+esac
 PYTEST_RUNTIME_ENV_FILE="$REPO_ROOT/.pytest_cache/setup_plugins_runtime.sh"
 
 DEFAULT_FLAGS=(--cov=src/bioetl --cov-report=term -q --maxfail=1)
