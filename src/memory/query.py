@@ -16,13 +16,25 @@ from memory.graph.importers.expanded_json import (
     load_entity_relation_index,
     load_file_relation_index,
     load_module_relation_index,
-    query_entity_neighborhood as _query_entity_neighborhood,
-    query_entity_relations as _query_entity_relations,
-    query_file_neighborhood as _query_file_neighborhood,
-    query_file_relations as _query_file_relations,
-    query_module_neighborhood as _query_module_neighborhood,
-    query_module_relations as _query_module_relations,
     write_expanded_graph_relation_artifacts,
+)
+from memory.graph.importers.expanded_json import (
+    query_entity_neighborhood as _query_entity_neighborhood,
+)
+from memory.graph.importers.expanded_json import (
+    query_entity_relations as _query_entity_relations,
+)
+from memory.graph.importers.expanded_json import (
+    query_file_neighborhood as _query_file_neighborhood,
+)
+from memory.graph.importers.expanded_json import (
+    query_file_relations as _query_file_relations,
+)
+from memory.graph.importers.expanded_json import (
+    query_module_neighborhood as _query_module_neighborhood,
+)
+from memory.graph.importers.expanded_json import (
+    query_module_relations as _query_module_relations,
 )
 from memory.rag.retrieval import TASK_PROFILES, load_chunk_manifest, rank_chunks
 from memory.resources import CATALOG_DIR, MEMORY_ROOT, POLICY_DIR, load_yaml_resource
