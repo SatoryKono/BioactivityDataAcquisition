@@ -41,8 +41,24 @@ if (-not $env:NEO4J_PASSWORD) {
     }
 }
 if (-not $env:NPM_CONFIG_CACHE) {
-    $env:NPM_CONFIG_CACHE = "/tmp/npm-cache"
+    $env:NPM_CONFIG_CACHE = Join-Path $repoRoot ".cache/npm-cache"
 }
 
-& npx -y @modelcontextprotocol/server-neo4j@1.0.0 @args
+$managedNodePrefixes = @(
+    (Join-Path $repoRoot ".cache/tools/gemini-cli/npm-global"),
+    (Join-Path $repoRoot ".cache/tools/codex-cli/npm-global")
+)
+foreach ($managedNodePrefix in $managedNodePrefixes) {
+    $managedNode = Join-Path $managedNodePrefix "bin/node"
+    if (Test-Path $managedNode) {
+        $env:PATH = "$(Join-Path $managedNodePrefix "bin")$([IO.Path]::PathSeparator)$env:PATH"
+        break
+    }
+}
+
+if (-not $env:NEO4J_URL) {
+    $env:NEO4J_URL = $env:NEO4J_URI
+}
+
+& npx -y @daanrongen/neo4j-mcp@1.1.4 @args
 exit $LASTEXITCODE

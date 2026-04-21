@@ -320,6 +320,4 @@ def test_query_all_auto_refreshes_missing_rebuild_only_artifacts(
     assert payload["refresh_output_root"] == str(tmp_path / "memory-refresh")
     assert payload["refresh_report"]["ok"] is True
     assert len(payload["results"]["rag"]) >= 1
-    assert any(
-        item["source_type"] == "workflow" for item in payload["results"]["rag"]
-    )
+    assert any(item["source_type"] == "workflow" for item in payload["results"]["rag"])

@@ -26,20 +26,19 @@ docker_args=(
   -i
   --init
   --pull=always
-  -e
-  SONARQUBE_TOKEN
+  -e "SONARQUBE_TOKEN=${SONARQUBE_TOKEN}"
 )
 
 if [[ -n "${SONARQUBE_ORG:-}" ]]; then
-  docker_args+=(-e SONARQUBE_ORG)
+  docker_args+=(-e "SONARQUBE_ORG=${SONARQUBE_ORG}")
 fi
 
 if [[ -n "${SONARQUBE_URL:-}" ]]; then
-  docker_args+=(-e SONARQUBE_URL)
+  docker_args+=(-e "SONARQUBE_URL=${SONARQUBE_URL}")
 fi
 
 if [[ -n "${TELEMETRY_DISABLED:-}" ]]; then
-  docker_args+=(-e TELEMETRY_DISABLED)
+  docker_args+=(-e "TELEMETRY_DISABLED=${TELEMETRY_DISABLED}")
 fi
 
 docker_args+=(mcp/sonarqube)

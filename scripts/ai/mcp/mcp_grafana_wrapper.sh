@@ -23,6 +23,23 @@ elif [[ -n "${GRAFANA_ADMIN_USER:-}" && -n "${GRAFANA_ADMIN_PASSWORD:-}" ]]; the
   grafana_username="${GRAFANA_ADMIN_USER}"
   grafana_password="${GRAFANA_ADMIN_PASSWORD}"
 fi
+
+if [[ -z "${grafana_password}" ]]; then
+  grafana_container_env="$(
+    "${docker_bin}" inspect bioetl-grafana \
+      --format '{{range .Config.Env}}{{println .}}{{end}}' 2>/dev/null || true
+  )"
+  if [[ -n "${grafana_container_env}" ]]; then
+    grafana_username="$(
+      grep -m1 '^GF_SECURITY_ADMIN_USER=' <<<"${grafana_container_env}" | cut -d= -f2- || true
+    )"
+    grafana_password="$(
+      grep -m1 '^GF_SECURITY_ADMIN_PASSWORD=' <<<"${grafana_container_env}" | cut -d= -f2- || true
+    )"
+    grafana_username="${grafana_username:-admin}"
+  fi
+fi
+
 docker_args=(
   run
   --rm
