@@ -16,7 +16,9 @@ def test_create_episodic_session_note(tmp_path: Path) -> None:
         note_kind="episodic-session",
         title="Memory rollout task",
         task_id="task-123",
-        source_refs=["docs/plans/project-memory-layer-implementation-plan-2026-04-20.md"],
+        source_refs=[
+            "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md"
+        ],
         output_path=tmp_path / "session.md",
     )
     assert path.exists()

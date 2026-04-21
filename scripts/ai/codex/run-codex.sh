@@ -81,6 +81,8 @@ case "$COMMAND" in
         bash "${HELPER_DIR}/setup-env.sh"
         exit $?
         ;;
+    *)
+        ;;
 esac
 
 # Check environment

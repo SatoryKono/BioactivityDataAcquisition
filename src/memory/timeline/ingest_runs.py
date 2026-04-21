@@ -66,78 +66,84 @@ def _manifest_event(manifest_path: Path, payload: dict[str, Any]) -> dict[str, A
     }
 
 
+def _ledger_severity(entry: dict[str, Any]) -> str:
+    status = entry.get("status")
+    error_type = entry.get("error_type")
+    return "error" if error_type or status in {"failed", "error"} else "info"
+
+
+def _optional_str(value: object) -> str | None:
+    return str(value) if isinstance(value, str) else None
+
+
+def _ledger_related_refs(entry: dict[str, Any]) -> list[str]:
+    manifest_id = entry.get("manifest_id")
+    if not manifest_id:
+        return []
+    return dedupe_preserve_order(
+        related_refs_for_runtime_event(
+            "run_ledger",
+            manifest_id=str(manifest_id),
+            run_id=str(entry["run_id"]) if entry.get("run_id") else None,
+            pipeline_name=_optional_str(entry.get("pipeline_name")),
+            provider=_optional_str(entry.get("provider")),
+            entity=_optional_str(entry.get("entity")),
+        )
+    )
+
+
+def _ledger_event(ledger_path: Path, root: Path, entry: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": f"run-ledger::{entry.get('entry_id')}",
+        "event_type": f"run.{entry.get('event_type', 'unknown')}",
+        "event_family": str(entry.get("event_family") or "run"),
+        "severity": _ledger_severity(entry),
+        "occurred_at": entry.get("occurred_at"),
+        "source_refs": [ledger_path.relative_to(root).as_posix()],
+        "graph_node_refs": graph_refs_for_runtime_event("run_ledger"),
+        "related_refs": _ledger_related_refs(entry),
+        "confidence": "derived",
+        "payload": {
+            "entry_id": entry.get("entry_id"),
+            "manifest_id": entry.get("manifest_id"),
+            "run_id": entry.get("run_id"),
+            "pipeline_name": entry.get("pipeline_name"),
+            "provider": entry.get("provider"),
+            "entity": entry.get("entity"),
+            "event_family": entry.get("event_family"),
+            "stage": entry.get("stage"),
+            "status": entry.get("status"),
+            "error_type": entry.get("error_type"),
+        },
+    }
+
+
+def _manifest_events(root: Path, manifest_dir: Path) -> list[dict[str, Any]]:
+    if not manifest_dir.exists():
+        return []
+    return [
+        _manifest_event(manifest_path.relative_to(root), read_json(manifest_path))
+        for manifest_path in sorted(manifest_dir.glob("*.json"))
+    ]
+
+
+def _ledger_events(root: Path, ledger_dir: Path) -> list[dict[str, Any]]:
+    if not ledger_dir.exists():
+        return []
+    events: list[dict[str, Any]] = []
+    for ledger_path in sorted(ledger_dir.glob("*.jsonl")):
+        events.extend(
+            _ledger_event(ledger_path, root, entry)
+            for entry in read_jsonl(ledger_path)
+        )
+    return events
+
+
 def build_run_events(root: Path) -> list[dict[str, Any]]:
     """Build deterministic timeline events from run manifests and ledgers."""
     manifest_dir = root / DEFAULT_RUN_MANIFEST_DIR
     ledger_dir = root / DEFAULT_RUN_LEDGER_DIR
-    events: list[dict[str, Any]] = []
-
-    if manifest_dir.exists():
-        for manifest_path in sorted(manifest_dir.glob("*.json")):
-            manifest = read_json(manifest_path)
-            events.append(_manifest_event(manifest_path.relative_to(root), manifest))
-
-    if ledger_dir.exists():
-        for ledger_path in sorted(ledger_dir.glob("*.jsonl")):
-            for entry in read_jsonl(ledger_path):
-                status = entry.get("status")
-                error_type = entry.get("error_type")
-                severity = (
-                    "error" if error_type or status in {"failed", "error"} else "info"
-                )
-                related_refs = []
-                manifest_id = entry.get("manifest_id")
-                if manifest_id:
-                    related_refs.extend(
-                        related_refs_for_runtime_event(
-                            "run_ledger",
-                            manifest_id=str(manifest_id),
-                            run_id=str(entry["run_id"])
-                            if entry.get("run_id")
-                            else None,
-                            pipeline_name=(
-                                str(entry["pipeline_name"])
-                                if isinstance(entry.get("pipeline_name"), str)
-                                else None
-                            ),
-                            provider=(
-                                str(entry["provider"])
-                                if isinstance(entry.get("provider"), str)
-                                else None
-                            ),
-                            entity=(
-                                str(entry["entity"])
-                                if isinstance(entry.get("entity"), str)
-                                else None
-                            ),
-                        )
-                    )
-                events.append(
-                    {
-                        "id": f"run-ledger::{entry.get('entry_id')}",
-                        "event_type": f"run.{entry.get('event_type', 'unknown')}",
-                        "event_family": str(entry.get("event_family") or "run"),
-                        "severity": severity,
-                        "occurred_at": entry.get("occurred_at"),
-                        "source_refs": [ledger_path.relative_to(root).as_posix()],
-                        "graph_node_refs": graph_refs_for_runtime_event("run_ledger"),
-                        "related_refs": dedupe_preserve_order(related_refs),
-                        "confidence": "derived",
-                        "payload": {
-                            "entry_id": entry.get("entry_id"),
-                            "manifest_id": entry.get("manifest_id"),
-                            "run_id": entry.get("run_id"),
-                            "pipeline_name": entry.get("pipeline_name"),
-                            "provider": entry.get("provider"),
-                            "entity": entry.get("entity"),
-                            "event_family": entry.get("event_family"),
-                            "stage": entry.get("stage"),
-                            "status": entry.get("status"),
-                            "error_type": entry.get("error_type"),
-                        },
-                    }
-                )
-    return events
+    return _manifest_events(root, manifest_dir) + _ledger_events(root, ledger_dir)
 
 
 def write_run_events(root: Path, output_path: Path | None = None) -> Path:

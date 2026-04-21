@@ -118,7 +118,6 @@ from bioetl.domain.ports.runtime import (
     MemoryMonitorPort,
     MemoryStats,
     MetricsExtractorPort,
-    PipelineCreateWithServicesRequest,
     PipelineDebugPort,
     PipelineFactoryPort,
     PipelineRegistryPort,
@@ -129,6 +128,7 @@ from bioetl.domain.ports.runtime import (
     ShutdownPort,
     StageBreakpoint,
 )
+from bioetl.domain.ports.runtime.runner import PipelineCreateWithServicesRequest
 from bioetl.domain.ports.serialization import JsonEncoderPort
 from bioetl.domain.ports.storage import (
     BronzeStoragePort,

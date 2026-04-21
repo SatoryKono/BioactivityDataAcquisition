@@ -8,7 +8,6 @@ from pathlib import Path
 from memory.notes import parse_markdown_note, slugify, utc_now_iso, write_markdown_note
 from memory.resources import discover_memory_root
 
-
 NOTE_KINDS: dict[str, dict[str, str]] = {
     "episodic-session": {
         "target_dir": "episodic/sessions",

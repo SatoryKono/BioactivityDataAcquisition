@@ -59,7 +59,9 @@ def test_query_rag_filters_local_manifest(tmp_path: Path) -> None:
     assert payload["results"][0]["score"] > 0
 
 
-def test_query_rag_profile_prefers_runtime_code_for_implementation_tasks(tmp_path: Path) -> None:
+def test_query_rag_profile_prefers_runtime_code_for_implementation_tasks(
+    tmp_path: Path,
+) -> None:
     chunks_path = tmp_path / "chunks.jsonl"
     rows = [
         {
@@ -84,7 +86,10 @@ def test_query_rag_profile_prefers_runtime_code_for_implementation_tasks(tmp_pat
             "domain": "runtime",
             "repo_zone": "canonical_runtime",
             "symbol_kind": "function",
-            "related_refs": ["pipeline::chembl_activity", "module::src.bioetl.application.pipelines.chembl_activity"],
+            "related_refs": [
+                "pipeline::chembl_activity",
+                "module::src.bioetl.application.pipelines.chembl_activity",
+            ],
             "graph_node_refs": ["pipeline_surface:chembl_activity"],
             "confidence": "derived",
         },
@@ -146,7 +151,9 @@ def test_query_timeline_filters_local_events(tmp_path: Path) -> None:
     assert payload["results"][0]["id"] == "e2"
 
 
-def test_query_timeline_profile_prefers_incidents_for_operations_tasks(tmp_path: Path) -> None:
+def test_query_timeline_profile_prefers_incidents_for_operations_tasks(
+    tmp_path: Path,
+) -> None:
     events_dir = tmp_path / "events"
     events_dir.mkdir()
     rows = [
@@ -169,8 +176,13 @@ def test_query_timeline_profile_prefers_incidents_for_operations_tasks(tmp_path:
             "severity": "warning",
             "occurred_at": None,
             "source_refs": ["docs/05-operations/runbooks/incident-response.md"],
-            "related_refs": ["pipeline::chembl_activity", "incident::incident-response"],
-            "graph_node_refs": ["doc_artifact:docs/05-operations/runbooks/incident-response.md"],
+            "related_refs": [
+                "pipeline::chembl_activity",
+                "incident::incident-response",
+            ],
+            "graph_node_refs": [
+                "doc_artifact:docs/05-operations/runbooks/incident-response.md"
+            ],
             "confidence": "derived",
             "payload": {"title": "Incident Response"},
         },

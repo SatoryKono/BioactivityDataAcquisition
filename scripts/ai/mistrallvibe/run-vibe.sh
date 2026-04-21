@@ -35,6 +35,7 @@ Commands:
 
 All other arguments are forwarded to scripts/ai/vibe/launch.sh.
 EOF
+    return 0
 }
 
 case "${1:-}" in
@@ -47,6 +48,8 @@ case "${1:-}" in
         ;;
     setup)
         exec bash "${HELPER_DIR}/setup-env.sh"
+        ;;
+    *)
         ;;
 esac
 

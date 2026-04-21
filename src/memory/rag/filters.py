@@ -99,25 +99,49 @@ def _is_excluded(rel_path: str, patterns: list[str]) -> bool:
     return False
 
 
+def _candidate_source_paths(
+    *,
+    root: Path,
+    source_id: str,
+    base: Path,
+) -> list[Path]:
+    suffixes = SOURCE_SUFFIXES.get(source_id, MARKDOWN_SUFFIXES)
+    source_dir = root / base
+    if not source_dir.exists():
+        return []
+    return [
+        path
+        for path in sorted(source_dir.rglob("*"))
+        if path.is_file() and path.suffix.lower() in suffixes
+    ]
+
+
+def _should_include_source(
+    *,
+    rel_path: str,
+    seen: set[str],
+    exclusion_patterns: list[str],
+) -> bool:
+    if rel_path in seen:
+        return False
+    if _is_excluded(rel_path, exclusion_patterns):
+        return False
+    return "/notes/" not in rel_path
+
+
 def iter_rag_sources(root: Path) -> list[Path]:
     """Return deterministic RAG sources across docs, code, tests, and configs."""
     exclusion_patterns = _load_exclusion_patterns()
     results: list[Path] = []
     seen: set[str] = set()
     for source_id, base in _load_source_specs():
-        suffixes = SOURCE_SUFFIXES.get(source_id, MARKDOWN_SUFFIXES)
-        source_dir = root / base
-        if not source_dir.exists():
-            continue
-        for path in sorted(source_dir.rglob("*")):
-            if not path.is_file() or path.suffix.lower() not in suffixes:
-                continue
+        for path in _candidate_source_paths(root=root, source_id=source_id, base=base):
             rel_path = path.relative_to(root).as_posix()
-            if rel_path in seen:
-                continue
-            if _is_excluded(rel_path, exclusion_patterns):
-                continue
-            if "/notes/" in rel_path:
+            if not _should_include_source(
+                rel_path=rel_path,
+                seen=seen,
+                exclusion_patterns=exclusion_patterns,
+            ):
                 continue
             seen.add(rel_path)
             results.append(path)

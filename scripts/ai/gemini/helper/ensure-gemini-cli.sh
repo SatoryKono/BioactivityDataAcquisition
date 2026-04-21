@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+# Ensure a writable Gemini CLI installation for project launchers.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../../.." && pwd))}"
+
+GEMINI_TOOL_HOME_DEFAULT="${REPO_ROOT}/.cache/tools/gemini-cli"
+GEMINI_NPM_PREFIX="${GEMINI_NPM_PREFIX:-${GEMINI_TOOL_HOME_DEFAULT}/npm-global}"
+GEMINI_NPM_CACHE="${GEMINI_NPM_CACHE:-${GEMINI_TOOL_HOME_DEFAULT}/npm-cache}"
+GEMINI_BIN="${GEMINI_NPM_PREFIX}/bin/gemini"
+
+MODE="ensure"
+PRINT_BIN=0
+PRINT_PREFIX=0
+ALLOW_INSTALL=1
+
+for arg in "$@"; do
+    case "$arg" in
+        --ensure)
+            MODE="ensure"
+            ;;
+        --update)
+            MODE="update"
+            ;;
+        --print-bin)
+            PRINT_BIN=1
+            ;;
+        --print-prefix)
+            PRINT_PREFIX=1
+            ;;
+        --no-install)
+            ALLOW_INSTALL=0
+            ;;
+        *)
+            echo "[ensure-gemini] ERROR: Unsupported argument: $arg" >&2
+            exit 2
+            ;;
+    esac
+done
+
+if ! command -v node >/dev/null 2>&1; then
+    echo "[ensure-gemini] ERROR: Node.js is required but was not found in PATH" >&2
+    exit 1
+fi
+
+if ! command -v npm >/dev/null 2>&1; then
+    echo "[ensure-gemini] ERROR: npm is required but was not found in PATH" >&2
+    exit 1
+fi
+
+if [[ "${ALLOW_INSTALL}" -eq 1 ]]; then
+    mkdir -p "${GEMINI_NPM_PREFIX}"
+    mkdir -p "${GEMINI_NPM_CACHE}"
+fi
+
+export NPM_CONFIG_PREFIX="${GEMINI_NPM_PREFIX}"
+export npm_config_prefix="${GEMINI_NPM_PREFIX}"
+export NPM_CONFIG_CACHE="${GEMINI_NPM_CACHE}"
+export npm_config_cache="${GEMINI_NPM_CACHE}"
+export PATH="${GEMINI_NPM_PREFIX}/bin:${PATH}"
+
+need_install=0
+if [[ "${MODE}" == "update" || ! -x "${GEMINI_BIN}" ]]; then
+    need_install=1
+fi
+
+if [[ "${need_install}" -eq 1 && "${ALLOW_INSTALL}" -eq 1 ]]; then
+    if [[ "${MODE}" == "update" ]]; then
+        echo "[ensure-gemini] Updating Gemini CLI in ${GEMINI_NPM_PREFIX}..." >&2
+    else
+        echo "[ensure-gemini] Installing Gemini CLI in ${GEMINI_NPM_PREFIX}..." >&2
+    fi
+
+    npm install --global --prefix "${GEMINI_NPM_PREFIX}" --silent @google/gemini-cli@latest \
+        2>/dev/null || npm install --global --prefix "${GEMINI_NPM_PREFIX}" @google/gemini-cli@latest >&2
+fi
+
+if [[ ! -x "${GEMINI_BIN}" ]]; then
+    echo "[ensure-gemini] ERROR: Gemini CLI binary not found after installation: ${GEMINI_BIN}" >&2
+    exit 1
+fi
+
+if [[ "${PRINT_PREFIX}" -eq 1 ]]; then
+    printf '%s\n' "${GEMINI_NPM_PREFIX}"
+fi
+
+if [[ "${PRINT_BIN}" -eq 1 ]]; then
+    printf '%s\n' "${GEMINI_BIN}"
+fi
