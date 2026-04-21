@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-21T05:41:45.926102+00:00",
+  "generated_at": "2026-04-21T06:30:09.032759+00:00",
   "summary": {
-    "total_scripts": 428,
+    "total_scripts": 429,
     "status_counts": {
-      "active": 316,
+      "active": 317,
       "legacy": 15,
       "orphan": 85,
       "unknown": 12
@@ -14,7 +14,7 @@
       "build": 1,
       "ci": 49,
       "docs": 131,
-      "scripts": 280,
+      "scripts": 281,
       "skills": 8,
       "tests": 152
     }
@@ -192,26 +192,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 3,
       "references": [
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 17,
-          "source_group": "scripts",
-          "text": "│   ├── ensure-mcp.sh          # Sync .mcp.json and ~/.codex/config.toml"
-        },
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 122,
-          "source_group": "scripts",
-          "text": "`run-codex.sh` runs `helper/ensure-mcp.sh` before launching Codex. This writes:"
-        },
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 199,
-          "source_group": "scripts",
-          "text": "- `ensure-mcp.sh` - Sync MCP configs before launching Codex"
-        },
         {
           "path": "scripts/ai/codex/helper/check-env.sh",
           "line": 11,
@@ -229,18 +211,6 @@
           "line": 10,
           "source_group": "scripts",
           "text": "ENSURE_MCP_SCRIPT=\"${SCRIPT_DIR}/ensure-mcp.sh\""
-        },
-        {
-          "path": "scripts/ai/codex/run-codex.ps1",
-          "line": 183,
-          "source_group": "scripts",
-          "text": "wsl -d Ubuntu -e bash -- \"$HelperWSL/ensure-mcp.sh\" --check"
-        },
-        {
-          "path": "scripts/ai/codex/run-codex.ps1",
-          "line": 190,
-          "source_group": "scripts",
-          "text": "wsl -d Ubuntu -e bash -- \"$HelperWSL/ensure-mcp.sh\" --ensure"
         }
       ]
     },
@@ -632,8 +602,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "scripts/ai/gemini/helper/ensure-mcp.sh",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "SETUP_MCP=\"${REPO_ROOT}/scripts/ai/codex/setup_mcp.py\""
+        },
         {
           "path": "scripts/engineering/dev/setup_copilot_codex_mcp.ps1",
           "line": 5,
@@ -691,7 +667,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": "scripts/ai/gemini/README.md",
@@ -701,7 +677,7 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 68,
+          "line": 71,
           "source_group": "scripts",
           "text": "`helper/ensure-gemini-cli.sh` installs `node@22` and `@google/gemini-cli@latest` into the repo-local prefix. The local Node 22 is required because current Gemini CLI uses JavaScript features unsupport"
         },
@@ -718,6 +694,12 @@
           "text": "ENSURE_SCRIPT=\"${SCRIPT_DIR}/ensure-gemini-cli.sh\""
         },
         {
+          "path": "scripts/ai/gemini/helper/ensure-mcp.sh",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "ENSURE_GEMINI=\"${SCRIPT_DIR}/ensure-gemini-cli.sh\""
+        },
+        {
           "path": "scripts/ai/gemini/helper/run-gemini-impl.sh",
           "line": 10,
           "source_group": "scripts",
@@ -731,9 +713,36 @@
         },
         {
           "path": "scripts/ai/gemini/run-gemini.sh",
-          "line": 100,
+          "line": 110,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/ensure-gemini-cli.sh\" --update"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/gemini/helper/ensure-mcp.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ai/gemini/helper/check-env.sh",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "ENSURE_MCP_SCRIPT=\"${SCRIPT_DIR}/ensure-mcp.sh\""
+        },
+        {
+          "path": "scripts/ai/gemini/helper/run-gemini-impl.sh",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "ENSURE_MCP_SCRIPT=\"${SCRIPT_DIR}/ensure-mcp.sh\""
+        },
+        {
+          "path": "scripts/ai/gemini/helper/setup-env.sh",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "ENSURE_MCP_SCRIPT=\"${SCRIPT_DIR}/ensure-mcp.sh\""
         }
       ]
     },
@@ -776,7 +785,7 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 19,
+          "line": 20,
           "source_group": "scripts",
           "text": "│   └── run-gemini-impl.sh         # Runtime launcher implementation"
         },
@@ -788,7 +797,7 @@
         },
         {
           "path": "scripts/ai/gemini/run-gemini.sh",
-          "line": 128,
+          "line": 138,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" \"$@\""
         }
@@ -864,7 +873,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 33,
+      "reference_count": 36,
       "references": [
         {
           "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
@@ -910,7 +919,7 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini/run-gemini.sh check"
         }
@@ -9160,7 +9169,7 @@
         },
         {
           "path": "scripts/engineering/dev/pretest_guardrails.sh",
-          "line": 356,
+          "line": 371,
           "source_group": "scripts",
           "text": "run_step cleanup env BIOETL_PREFLIGHT_PRESERVE_PYTEST_CACHE=1 bash scripts/engineering/repo/preflight_cleanup.sh"
         },
@@ -9380,7 +9389,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
@@ -9419,10 +9428,16 @@
           "text": "- `query.py` is now a compatibility module alias to `memory.graph.query`."
         },
         {
-          "path": "tests/unit/memory/test_review_curated.py",
-          "line": 105,
+          "path": "tests/unit/memory/test_rag_indexing.py",
+          "line": 46,
           "source_group": "tests",
-          "text": "\"source_refs\": [\"src/memory/query.py\", \"src/memory/README.md\"],"
+          "text": "assert infer_source_type(Path(\"src/memory/query.py\")) == \"memory\""
+        },
+        {
+          "path": "tests/unit/memory/test_rag_indexing.py",
+          "line": 60,
+          "source_group": "tests",
+          "text": "assert infer_domain(Path(\"src/memory/query.py\")) == \"memory_subsystem\""
         }
       ]
     },

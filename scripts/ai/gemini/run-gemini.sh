@@ -57,6 +57,8 @@ Commands:
   exec           Auto-execute in headless mode (YOLO approvals)
   check          Check environment setup
   setup          Setup missing components
+  mcp-check      Check Gemini MCP configuration
+  mcp-setup      Sync Gemini MCP configuration
   update         Update managed Gemini runtime
   help           Show this help
 
@@ -95,6 +97,14 @@ case "${COMMAND}" in
             log_info "Check system logs for details"
         fi
         exit $setupExit
+        ;;
+    mcp-check)
+        bash "${HELPER_DIR}/ensure-mcp.sh" --check
+        exit $?
+        ;;
+    mcp-setup)
+        bash "${HELPER_DIR}/ensure-mcp.sh" --ensure
+        exit $?
         ;;
     update)
         bash "${HELPER_DIR}/ensure-gemini-cli.sh" --update

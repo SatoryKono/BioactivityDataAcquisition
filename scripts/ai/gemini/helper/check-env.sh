@@ -7,6 +7,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-gemini-cli.sh"
+ENSURE_MCP_SCRIPT="${SCRIPT_DIR}/ensure-mcp.sh"
 
 # Colors
 RED='\033[0;31m'
@@ -119,6 +120,23 @@ GEMINI_API_KEY=your-api-key-here
 # GEMINI_MODEL=gemini-2.5-flash
 EOF
     log_warn ".env.gemini created - please edit and add your API key"
+fi
+
+# 7. Check MCP configuration
+log_info "Checking MCP configuration..."
+if [[ -x "${ENSURE_MCP_SCRIPT}" ]]; then
+    if GEMINI_BIN="${GEMINI_BIN}" GEMINI_PREFIX="${GEMINI_PREFIX:-}" "${ENSURE_MCP_SCRIPT}" \
+        --check \
+        --gemini-bin "${GEMINI_BIN}" \
+        --gemini-prefix "${GEMINI_PREFIX:-}" >/dev/null 2>&1; then
+        log_success "MCP configuration is ready"
+    else
+        log_warn "MCP configuration is missing or stale"
+        ALL_CHECKS=false
+    fi
+else
+    log_warn "MCP setup helper not found"
+    ALL_CHECKS=false
 fi
 
 echo ""

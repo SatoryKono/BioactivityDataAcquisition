@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -11,10 +13,15 @@ from memory.graph import query as graph_query
 from memory.rag.retrieval import TASK_PROFILES, load_chunk_manifest, rank_chunks
 from memory.resources import CATALOG_DIR, MEMORY_ROOT, POLICY_DIR, load_yaml_resource
 from memory.timeline._common import read_jsonl
+from memory.tooling.refresh_all import refresh_all
 
 DEFAULT_RAG_CHUNKS = MEMORY_ROOT / "rag" / "manifests" / "chunks.jsonl"
 DEFAULT_TIMELINE_DIR = MEMORY_ROOT / "timeline" / "events"
 DEFAULT_PROFILE = "general"
+MISSING_MANIFEST_HINT = (
+    "Run `python -m memory.tooling.refresh_all` first or pass `--auto-refresh` "
+    "to build temporary rebuild-only manifests for this query."
+)
 
 _CONFIDENCE_RANKS = {
     level["id"]: int(level["rank"])
@@ -47,6 +54,64 @@ def query_catalog(view: str) -> dict[str, Any]:
     return {"kind": "catalog", "view": view, "payload": payload}
 
 
+def _missing_manifest_error(path: Path, artifact: str) -> FileNotFoundError:
+    return FileNotFoundError(
+        f"Missing {artifact} memory artifact at {path}. {MISSING_MANIFEST_HINT}"
+    )
+
+
+def _resolve_refresh_output_root(output_root: Path | None) -> Path:
+    return output_root or Path(tempfile.mkdtemp(prefix="memory-query-"))
+
+
+def _refresh_query_artifacts(
+    *,
+    refresh_output_root: Path | None,
+    refresh_repo_root: Path | None,
+) -> tuple[Path, dict[str, Any]]:
+    output_root = _resolve_refresh_output_root(refresh_output_root)
+    repo_root = refresh_repo_root or Path(__file__).resolve().parents[2]
+    report = refresh_all(
+        repo_root.resolve(),
+        output_root.resolve(),
+        include_rag=True,
+        include_timeline=True,
+        include_graph_export=False,
+    )
+    return output_root, report
+
+
+def _resolve_query_paths(
+    *,
+    chunks_path: Path,
+    events_dir: Path,
+    auto_refresh: bool,
+    refresh_output_root: Path | None,
+    refresh_repo_root: Path | None,
+    require_chunks: bool = True,
+    require_events: bool = True,
+) -> tuple[Path, Path, Path | None, dict[str, Any] | None]:
+    chunks_ready = chunks_path.exists() or not require_chunks
+    events_ready = events_dir.exists() or not require_events
+    if chunks_ready and events_ready:
+        return chunks_path, events_dir, None, None
+    if not auto_refresh:
+        if require_chunks and not chunks_path.exists():
+            raise _missing_manifest_error(chunks_path, "RAG chunk manifest")
+        raise _missing_manifest_error(events_dir, "timeline events directory")
+
+    output_root, report = _refresh_query_artifacts(
+        refresh_output_root=refresh_output_root,
+        refresh_repo_root=refresh_repo_root,
+    )
+    return (
+        output_root / "rag" / "manifests" / "chunks.jsonl",
+        output_root / "timeline" / "events",
+        output_root,
+        report,
+    )
+
+
 def query_rag(
     *,
     query: str | None,
@@ -57,9 +122,20 @@ def query_rag(
     chunks_path: Path = DEFAULT_RAG_CHUNKS,
     limit: int = 20,
     profile: str = DEFAULT_PROFILE,
+    auto_refresh: bool = False,
+    refresh_output_root: Path | None = None,
+    refresh_repo_root: Path | None = None,
 ) -> dict[str, Any]:
     """Return filtered deterministic RAG chunks."""
-    chunks = load_chunk_manifest(chunks_path)
+    resolved_chunks_path, _, output_root, refresh_report = _resolve_query_paths(
+        chunks_path=chunks_path,
+        events_dir=DEFAULT_TIMELINE_DIR,
+        auto_refresh=auto_refresh,
+        refresh_output_root=refresh_output_root,
+        refresh_repo_root=refresh_repo_root,
+        require_events=False,
+    )
+    chunks = load_chunk_manifest(resolved_chunks_path)
     matches = rank_chunks(
         chunks,
         source_type=source_type,
@@ -74,6 +150,9 @@ def query_rag(
         "query": query,
         "profile": profile,
         "count": len(matches),
+        "chunks_path": str(resolved_chunks_path),
+        "refresh_output_root": str(output_root) if output_root else None,
+        "refresh_report": refresh_report,
         "results": matches,
     }
 
@@ -224,11 +303,22 @@ def query_timeline(
     events_dir: Path = DEFAULT_TIMELINE_DIR,
     limit: int = 20,
     profile: str = DEFAULT_PROFILE,
+    auto_refresh: bool = False,
+    refresh_output_root: Path | None = None,
+    refresh_repo_root: Path | None = None,
 ) -> dict[str, Any]:
     """Return filtered timeline events from generated local projections."""
+    _, resolved_events_dir, output_root, refresh_report = _resolve_query_paths(
+        chunks_path=DEFAULT_RAG_CHUNKS,
+        events_dir=events_dir,
+        auto_refresh=auto_refresh,
+        refresh_output_root=refresh_output_root,
+        refresh_repo_root=refresh_repo_root,
+        require_chunks=False,
+    )
     matches: list[dict[str, Any]] = []
     lowered_query = query.lower() if query is not None else None
-    for path in _iter_timeline_paths(events_dir):
+    for path in _iter_timeline_paths(resolved_events_dir):
         for event in read_jsonl(path):
             if not _timeline_event_matches(
                 event,
@@ -255,6 +345,9 @@ def query_timeline(
         "query": query,
         "profile": profile,
         "count": len(matches),
+        "events_dir": str(resolved_events_dir),
+        "refresh_output_root": str(output_root) if output_root else None,
+        "refresh_report": refresh_report,
         "results": matches,
     }
 
@@ -266,15 +359,27 @@ def query_all(
     events_dir: Path = DEFAULT_TIMELINE_DIR,
     limit: int = 10,
     profile: str = DEFAULT_PROFILE,
+    auto_refresh: bool = False,
+    refresh_output_root: Path | None = None,
+    refresh_repo_root: Path | None = None,
 ) -> dict[str, Any]:
     """Run a lightweight local search across catalog, RAG, and timeline."""
+    resolved_chunks_path, resolved_events_dir, output_root, refresh_report = (
+        _resolve_query_paths(
+            chunks_path=chunks_path,
+            events_dir=events_dir,
+            auto_refresh=auto_refresh,
+            refresh_output_root=refresh_output_root,
+            refresh_repo_root=refresh_repo_root,
+        )
+    )
     rag_payload = query_rag(
         query=query,
         source_type=None,
         domain=None,
         repo_zone=None,
         symbol_kind=None,
-        chunks_path=chunks_path,
+        chunks_path=resolved_chunks_path,
         limit=limit,
         profile=profile,
     )
@@ -282,7 +387,7 @@ def query_all(
         query=query,
         event_family=None,
         event_type=None,
-        events_dir=events_dir,
+        events_dir=resolved_events_dir,
         limit=limit,
         profile=profile,
     )
@@ -301,6 +406,10 @@ def query_all(
         "kind": "all",
         "query": query,
         "profile": profile,
+        "chunks_path": str(resolved_chunks_path),
+        "events_dir": str(resolved_events_dir),
+        "refresh_output_root": str(output_root) if output_root else None,
+        "refresh_report": refresh_report,
         "results": {
             "catalog": catalog_hits,
             "rag": rag_payload["results"],
@@ -341,6 +450,12 @@ def _build_parser() -> argparse.ArgumentParser:
     rag_parser.add_argument("--chunks-path", type=Path, default=DEFAULT_RAG_CHUNKS)
     rag_parser.add_argument("--limit", type=int, default=20)
     rag_parser.add_argument(
+        "--auto-refresh",
+        action="store_true",
+        help="Build temporary RAG/timeline artifacts first when manifests are missing.",
+    )
+    rag_parser.add_argument("--refresh-output-root", type=Path, default=None)
+    rag_parser.add_argument(
         "--profile", choices=tuple(TASK_PROFILES.keys()), default=DEFAULT_PROFILE
     )
 
@@ -357,6 +472,12 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     timeline_parser.add_argument("--limit", type=int, default=20)
     timeline_parser.add_argument(
+        "--auto-refresh",
+        action="store_true",
+        help="Build temporary RAG/timeline artifacts first when event projections are missing.",
+    )
+    timeline_parser.add_argument("--refresh-output-root", type=Path, default=None)
+    timeline_parser.add_argument(
         "--profile",
         choices=tuple(TASK_PROFILES.keys()),
         default=DEFAULT_PROFILE,
@@ -371,6 +492,12 @@ def _build_parser() -> argparse.ArgumentParser:
     all_parser.add_argument("--chunks-path", type=Path, default=DEFAULT_RAG_CHUNKS)
     all_parser.add_argument("--events-dir", type=Path, default=DEFAULT_TIMELINE_DIR)
     all_parser.add_argument("--limit", type=int, default=10)
+    all_parser.add_argument(
+        "--auto-refresh",
+        action="store_true",
+        help="Build temporary RAG/timeline artifacts first when generated artifacts are missing.",
+    )
+    all_parser.add_argument("--refresh-output-root", type=Path, default=None)
     all_parser.add_argument(
         "--profile", choices=tuple(TASK_PROFILES.keys()), default=DEFAULT_PROFILE
     )
@@ -422,47 +549,57 @@ def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
 
-    if args.command == "catalog":
-        return _emit(query_catalog(args.view), as_json=args.json)
-    if args.command == "rag":
-        return _emit(
-            query_rag(
-                query=args.query,
-                source_type=args.source_type,
-                domain=args.domain,
-                repo_zone=args.repo_zone,
-                symbol_kind=args.symbol_kind,
-                chunks_path=args.chunks_path,
-                limit=args.limit,
-                profile=args.profile,
-            ),
-            as_json=args.json,
-        )
-    if args.command == "timeline":
-        return _emit(
-            query_timeline(
-                query=args.query,
-                event_family=args.event_family,
-                event_type=args.event_type,
-                events_dir=args.events_dir,
-                limit=args.limit,
-                profile=args.profile,
-            ),
-            as_json=args.json,
-        )
-    if args.command == "all":
-        return _emit(
-            query_all(
-                query=args.query,
-                chunks_path=args.chunks_path,
-                events_dir=args.events_dir,
-                limit=args.limit,
-                profile=args.profile,
-            ),
-            as_json=args.json,
-        )
-    if args.command == "graph":
-        return graph_query.main(args.graph_args)
+    try:
+        if args.command == "catalog":
+            return _emit(query_catalog(args.view), as_json=args.json)
+        if args.command == "rag":
+            return _emit(
+                query_rag(
+                    query=args.query,
+                    source_type=args.source_type,
+                    domain=args.domain,
+                    repo_zone=args.repo_zone,
+                    symbol_kind=args.symbol_kind,
+                    chunks_path=args.chunks_path,
+                    limit=args.limit,
+                    profile=args.profile,
+                    auto_refresh=args.auto_refresh,
+                    refresh_output_root=args.refresh_output_root,
+                ),
+                as_json=args.json,
+            )
+        if args.command == "timeline":
+            return _emit(
+                query_timeline(
+                    query=args.query,
+                    event_family=args.event_family,
+                    event_type=args.event_type,
+                    events_dir=args.events_dir,
+                    limit=args.limit,
+                    profile=args.profile,
+                    auto_refresh=args.auto_refresh,
+                    refresh_output_root=args.refresh_output_root,
+                ),
+                as_json=args.json,
+            )
+        if args.command == "all":
+            return _emit(
+                query_all(
+                    query=args.query,
+                    chunks_path=args.chunks_path,
+                    events_dir=args.events_dir,
+                    limit=args.limit,
+                    profile=args.profile,
+                    auto_refresh=args.auto_refresh,
+                    refresh_output_root=args.refresh_output_root,
+                ),
+                as_json=args.json,
+            )
+        if args.command == "graph":
+            return graph_query.main(args.graph_args)
+    except FileNotFoundError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
     parser.error(f"unsupported command: {args.command}")
     return 2
 

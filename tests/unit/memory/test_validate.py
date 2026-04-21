@@ -15,7 +15,10 @@ from memory.resources import (
     iter_policy_paths,
     iter_schema_paths,
 )
-from memory.validation import validate_memory_scaffold
+from memory.validation import (
+    _is_tracked_generated_memory_artifact,
+    validate_memory_scaffold,
+)
 
 
 def test_required_memory_resource_files_exist() -> None:
@@ -46,7 +49,13 @@ def test_memory_scaffold_validation_accepts_valid_note_files(tmp_path: Path) -> 
             "last_verified": "2026-04-20T00:00:00Z",
             "summary": "Durable lesson for repeated reuse.",
         },
-        body="# Lesson\n\n## Observation\n\n- Durable guidance\n\n## Reuse guidance\n\n- Apply again when the same conditions hold.\n",
+        body=(
+            "# Lesson\n\n"
+            "## Observation\n\n"
+            "- Durable guidance\n\n"
+            "## Reuse guidance\n\n"
+            "- Apply again when the same conditions hold.\n"
+        ),
     )
     write_markdown_note(
         memory_root / "episodic" / "sessions" / "valid-session.md",
@@ -163,3 +172,19 @@ artifact_classes:
     }
     assert "missing storage policy for artifact class: rag_manifest" in messages
     assert "default path for policy must stay under src/memory/: policy" in messages
+
+
+def test_generated_memory_artifact_classifier_blocks_rebuild_only_outputs() -> None:
+    assert _is_tracked_generated_memory_artifact(
+        "src/memory/rag/manifests/chunks.jsonl"
+    )
+    assert _is_tracked_generated_memory_artifact(
+        "src/memory/timeline/events/runs.jsonl"
+    )
+    assert _is_tracked_generated_memory_artifact(
+        "src/memory/__pycache__/query.cpython-312.pyc"
+    )
+    assert not _is_tracked_generated_memory_artifact(
+        "src/memory/rag/manifests/README.md"
+    )
+    assert not _is_tracked_generated_memory_artifact("src/memory/README.md")

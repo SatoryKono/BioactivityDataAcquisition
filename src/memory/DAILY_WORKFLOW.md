@@ -77,8 +77,12 @@ Typical follow-up commands:
 python -m memory.query graph owner-pipeline chembl_activity
 python -m memory.query rag --query chembl_activity --source-type code --profile implementation
 python -m memory.query timeline --event-family run --query chembl_activity --profile operations
-python -m memory.query all chembl_activity --profile architecture
+python -m memory.query all chembl_activity --profile architecture --auto-refresh
 ```
+
+Use `--auto-refresh` when rebuild-only RAG or timeline artifacts are absent and
+you want a temporary query-local refresh instead of writing generated manifests
+under `src/memory/`.
 
 ## Post-Task
 

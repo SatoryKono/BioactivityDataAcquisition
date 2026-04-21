@@ -77,10 +77,15 @@ These legacy `scripts.memory.*` modules now resolve to the canonical
 The current RAG MVP builds deterministic manifests for:
 
 - active project and operations docs
+- requirements and working rollout plans
 - accepted ADRs
 - runtime code under `src/bioetl/`
+- memory subsystem implementation, policies, schemas, and playbooks under
+  `src/memory/`
 - test evidence under `tests/`
 - project configs under `configs/`
+- operational engineering assets under `.github/workflows/`, `grafana/`, and
+  `scripts/engineering/`
 
 Generate manifests with:
 
@@ -161,14 +166,23 @@ python -m memory.query rag --query chembl_activity --source-type code --profile 
 python -m memory.query timeline --event-family run --query manifest --profile operations
 python -m memory.query all chembl_activity --profile architecture
 python -m memory.query graph owner-pipeline chembl_activity
+```
+
+Generated RAG and timeline artifacts are rebuild-only. If they are absent,
+either refresh them explicitly or use the query facade's temporary refresh mode:
+
+```bash
+python -m memory.tooling.refresh_all
+python -m memory.query all chembl_activity --profile architecture --auto-refresh
+```
 
 Task-aware retrieval profiles:
+
 - `general`: balanced default retrieval across memory surfaces.
 - `architecture`: prefer ADR, architecture docs, and structural evidence.
 - `implementation`: prefer runtime code, configs, and test-adjacent implementation surfaces.
-- `operations`: prefer runbooks, incident context, and run/CI operational evidence.
-- `audit`: prefer tests, ADRs, configs, and broad review evidence.
-```
+- `operations`: prefer runbooks, workflows, dashboards, scripts, incident context, and run/CI operational evidence.
+- `audit`: prefer tests, workflows, ADRs, configs, and broad review evidence.
 
 ## Storage policy
 

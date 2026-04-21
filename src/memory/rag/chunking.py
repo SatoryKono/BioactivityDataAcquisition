@@ -219,12 +219,30 @@ def split_config_sections(text: str, path: Path) -> list[ChunkSection]:
 def chunk_source(path: Path, text: str) -> list[ChunkSection]:
     """Dispatch source chunking by file type and repository surface."""
     source_type = infer_source_type(path)
-    if source_type in {"adr", "runbook", "doc"}:
+    if source_type in {"adr", "runbook", "doc", "plan"}:
         return split_markdown_sections(text)
     if source_type in {"code", "test"}:
         return split_python_symbols(text)
-    if source_type == "config":
+    if source_type == "memory":
+        if path.suffix == ".py":
+            return split_python_symbols(text)
+        if path.suffix == ".md":
+            return split_markdown_sections(text)
+        if path.suffix in {".yaml", ".yml", ".json", ".toml"}:
+            return split_config_sections(text, path)
+        return [
+            ChunkSection(
+                index=0,
+                title="document",
+                level=0,
+                content=text.strip(),
+                symbol_kind="memory_document",
+            )
+        ]
+    if source_type in {"config", "workflow", "dashboard"}:
         return split_config_sections(text, path)
+    if source_type == "script" and path.suffix == ".py":
+        return split_python_symbols(text)
     return [
         ChunkSection(
             index=0,
@@ -256,12 +274,22 @@ def infer_source_type(path: Path) -> str:
         return "adr"
     if normalized.startswith("docs/05-operations/runbooks/"):
         return "runbook"
+    if normalized.startswith("docs/plans/"):
+        return "plan"
+    if normalized.startswith("src/memory/"):
+        return "memory"
     if normalized.startswith("src/bioetl/") and path.suffix == ".py":
         return "code"
     if normalized.startswith("tests/") and path.suffix == ".py":
         return "test"
     if normalized.startswith("configs/"):
         return "config"
+    if normalized.startswith(".github/workflows/"):
+        return "workflow"
+    if normalized.startswith("grafana/"):
+        return "dashboard"
+    if normalized.startswith("scripts/"):
+        return "script"
     return "doc"
 
 
@@ -271,6 +299,10 @@ def infer_domain(path: Path) -> str:
     if normalized.startswith("docs/02-architecture/"):
         return "architecture"
     if normalized.startswith("docs/05-operations/"):
+        return "operations"
+    if normalized.startswith("src/memory/"):
+        return "memory_subsystem"
+    if normalized.startswith((".github/", "grafana/", "scripts/")):
         return "operations"
     if normalized.startswith("src/bioetl/"):
         return "runtime"

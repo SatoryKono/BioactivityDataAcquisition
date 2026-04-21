@@ -38,7 +38,11 @@
         "--from",
         "mcp-server-fetch==2025.4.7",
         "mcp-server-fetch"
-      ]
+      ],
+      "env": {
+        "UV_CACHE_DIR": "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/.cache/uv-cache",
+        "UV_TOOL_DIR": "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/.cache/uv-tools"
+      }
     },
     "pdf": {
       "command": "npx",

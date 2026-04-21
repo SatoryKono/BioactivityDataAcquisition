@@ -12,10 +12,15 @@ from memory.resources import POLICY_DIR, load_yaml_resource
 SOURCE_BUCKET_BY_TYPE = {
     "code": "runtime_code",
     "config": "project_configs",
+    "memory": "memory_implementation",
     "adr": "accepted_adrs",
     "doc": "active_docs",
+    "plan": "active_docs",
     "runbook": "active_docs",
     "test": "tests",
+    "workflow": "operational_assets",
+    "dashboard": "operational_assets",
+    "script": "operational_assets",
 }
 
 TASK_PROFILES: dict[str, dict[str, dict[str, int]]] = {
@@ -26,14 +31,26 @@ TASK_PROFILES: dict[str, dict[str, dict[str, int]]] = {
         "symbol_kind": {},
     },
     "architecture": {
-        "source_type": {"adr": 40, "doc": 20, "test": 10, "code": 5},
-        "domain": {"architecture": 35, "project": 10},
+        "source_type": {
+            "adr": 40,
+            "memory": 35,
+            "doc": 20,
+            "plan": 15,
+            "test": 10,
+            "code": 5,
+        },
+        "domain": {"architecture": 35, "memory_subsystem": 25, "project": 10},
         "repo_zone": {"canonical_architecture_docs": 20},
         "symbol_kind": {"markdown_section": 8, "class": 5, "function": 5},
     },
     "implementation": {
-        "source_type": {"code": 45, "config": 30, "test": 20, "adr": 10},
-        "domain": {"runtime": 25, "configuration": 20, "quality": 10},
+        "source_type": {"code": 45, "memory": 35, "config": 30, "test": 20, "adr": 10},
+        "domain": {
+            "runtime": 25,
+            "memory_subsystem": 25,
+            "configuration": 20,
+            "quality": 10,
+        },
         "repo_zone": {"canonical_runtime": 25},
         "symbol_kind": {
             "class": 15,
@@ -43,15 +60,35 @@ TASK_PROFILES: dict[str, dict[str, dict[str, int]]] = {
         },
     },
     "operations": {
-        "source_type": {"runbook": 50, "config": 20, "doc": 15, "test": 5},
+        "source_type": {
+            "runbook": 50,
+            "workflow": 35,
+            "dashboard": 30,
+            "script": 25,
+            "config": 20,
+            "doc": 15,
+            "test": 5,
+        },
         "domain": {"operations": 35, "configuration": 15},
         "repo_zone": {"canonical_operations_docs": 25},
         "symbol_kind": {"markdown_section": 10, "config_section": 10},
     },
     "audit": {
-        "source_type": {"test": 35, "adr": 25, "config": 20, "doc": 15, "code": 10},
+        "source_type": {
+            "test": 35,
+            "workflow": 30,
+            "memory": 28,
+            "adr": 25,
+            "config": 20,
+            "dashboard": 20,
+            "script": 18,
+            "plan": 15,
+            "doc": 15,
+            "code": 10,
+        },
         "domain": {
             "quality": 25,
+            "memory_subsystem": 25,
             "architecture": 20,
             "configuration": 20,
             "runtime": 10,
