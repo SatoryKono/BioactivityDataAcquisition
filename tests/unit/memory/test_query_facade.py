@@ -12,6 +12,8 @@ from memory.query import (
     query_catalog,
     query_file_impact,
     query_file_refs,
+    query_module_impact,
+    query_module_refs,
     query_rag,
     query_timeline,
 )
@@ -487,3 +489,67 @@ def test_query_file_refs_reads_generated_relation_index(tmp_path: Path) -> None:
     assert refs["resolved_path"] == "src/a.py"
     assert refs["outbound"][0]["target_path"] == "src/b.py"
     assert impact["impact_candidates"]["files_that_reference_query"] == ["src/a.py"]
+
+
+def test_query_module_refs_reads_generated_relation_index(tmp_path: Path) -> None:
+    index_path = tmp_path / "module_relations.json"
+    index_path.write_text(
+        json.dumps(
+            {
+                "kind": "module_relation_index",
+                "relation": "references",
+                "source_snapshot": "snapshot.json",
+                "by_module": {
+                    "pkg.a": {
+                        "outbound": [
+                            {
+                                "id": "pkg.a|references|pkg.b",
+                                "direction": "outbound",
+                                "relation": "references",
+                                "source_name": "pkg.a",
+                                "source_path": "src/a.py",
+                                "target_name": "pkg.b",
+                                "target_path": "src/b.py",
+                                "confidence": "derived",
+                                "provenance": "test",
+                                "source_generated_at": "2026-04-17",
+                                "evidence": {},
+                            }
+                        ],
+                        "inbound": [],
+                    },
+                    "pkg.b": {
+                        "outbound": [],
+                        "inbound": [
+                            {
+                                "id": "pkg.a|references|pkg.b",
+                                "direction": "inbound",
+                                "relation": "references",
+                                "source_name": "pkg.a",
+                                "source_path": "src/a.py",
+                                "target_name": "pkg.b",
+                                "target_path": "src/b.py",
+                                "confidence": "derived",
+                                "provenance": "test",
+                                "source_generated_at": "2026-04-17",
+                                "evidence": {},
+                            }
+                        ],
+                    },
+                },
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+
+    refs = query_module_refs(
+        module_name="a",
+        direction="outbound",
+        index_path=index_path,
+    )
+    impact = query_module_impact(module_name="pkg.b", index_path=index_path)
+
+    assert refs["resolved_module"] == "pkg.a"
+    assert refs["outbound"][0]["target_name"] == "pkg.b"
+    assert impact["impact_candidates"]["modules_that_reference_query"] == ["pkg.a"]
