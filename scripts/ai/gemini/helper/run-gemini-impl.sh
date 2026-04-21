@@ -33,6 +33,7 @@ fi
 
 GEMINI_BIN="$("${ENSURE_SCRIPT}" --print-bin)"
 GEMINI_PREFIX="$("${ENSURE_SCRIPT}" --print-prefix)"
+GEMINI_HOME="$(cd "${GEMINI_PREFIX}/.." && pwd)/home"
 echo "[INFO] Using Gemini CLI from managed prefix: ${GEMINI_BIN}"
 
 if [[ -z "${GEMINI_BIN}" ]] || [[ ! -x "${GEMINI_BIN}" ]]; then
@@ -43,9 +44,11 @@ fi
 
 export GEMINI_API_KEY
 export GEMINI_MODEL="${GEMINI_MODEL:-gemini-2.5-flash}"
+export GEMINI_CLI_HOME="${GEMINI_CLI_HOME:-${GEMINI_HOME}}"
 export NPM_CONFIG_PREFIX="${GEMINI_PREFIX}"
 export npm_config_prefix="${GEMINI_PREFIX}"
 export PATH="${GEMINI_PREFIX}/bin:/usr/local/bin:${PATH}"
 
+mkdir -p "${GEMINI_CLI_HOME}"
 cd "${REPO_ROOT}"
 exec "${GEMINI_BIN}" "$@"

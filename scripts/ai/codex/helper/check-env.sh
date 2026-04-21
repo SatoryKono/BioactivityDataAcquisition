@@ -8,6 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))}"
 ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-codex-cli.sh"
+ENSURE_MCP_SCRIPT="${SCRIPT_DIR}/ensure-mcp.sh"
 
 # Colors
 RED='\033[0;31m'
@@ -103,6 +104,20 @@ if [[ -x "${CODEX_BIN}" ]]; then
     log_success "Codex CLI is installed: $CODEX_VER"
 else
     log_warn "Codex CLI not found"
+    ALL_CHECKS=false
+fi
+
+# 6. Check MCP configuration
+log_info "Checking MCP configuration..."
+if [[ -x "${ENSURE_MCP_SCRIPT}" ]]; then
+    if CODEX_BIN="${CODEX_BIN}" "${ENSURE_MCP_SCRIPT}" --check --codex-bin "${CODEX_BIN}" >/dev/null 2>&1; then
+        log_success "MCP configuration is ready"
+    else
+        log_warn "MCP configuration is missing or stale"
+        ALL_CHECKS=false
+    fi
+else
+    log_warn "MCP setup helper not found"
     ALL_CHECKS=false
 fi
 

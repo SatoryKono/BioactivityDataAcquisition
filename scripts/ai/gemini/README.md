@@ -1,8 +1,8 @@
-# Gemini - Local Launcher
+# Gemini - Coding Agent Launcher
 
-Canonical launcher for Google Gemini from `scripts/ai/gemini`.
+Canonical launcher for Google Gemini CLI from `scripts/ai/gemini`.
 
-This surface mirrors the operational shape of `scripts/ai/codex`: one entrypoint, managed repo-local runtime, explicit `check/setup/update`, WSL proxy support, and portable PowerShell delegation. It is still a Gemini SDK chat/prompt wrapper, not a Codex-style auto-editing coding agent.
+This surface mirrors the operational shape of `scripts/ai/codex`: one entrypoint, managed repo-local npm install, explicit `check/setup/update`, WSL proxy support, and portable PowerShell delegation.
 
 ## Structure
 
@@ -14,9 +14,8 @@ scripts/ai/gemini/
 ├── helper/
 │   ├── check-env.ps1              # PowerShell compatibility check wrapper
 │   ├── check-env.sh               # Environment check
-│   ├── ensure-gemini-cli.sh       # Managed repo-local runtime bootstrap
-│   ├── gemini_client.py           # Stable Python SDK client
-│   ├── setup-env.sh               # Setup managed runtime and env template
+│   ├── ensure-gemini-cli.sh       # Managed Gemini CLI bootstrap
+│   ├── setup-env.sh               # Setup managed CLI and env template
 │   └── run-gemini-impl.sh         # Runtime launcher implementation
 └── README.md
 ```
@@ -44,26 +43,29 @@ bash scripts/ai/gemini/run-gemini.sh
 ## Commands
 
 ```bash
-bash scripts/ai/gemini/run-gemini.sh              # Interactive mode
-bash scripts/ai/gemini/run-gemini.sh "prompt"    # Single prompt
-bash scripts/ai/gemini/run-gemini.sh prompt "..." # Explicit single prompt
-bash scripts/ai/gemini/run-gemini.sh exec "..."   # Alias for prompt mode
-bash scripts/ai/gemini/run-gemini.sh check        # Check setup
-bash scripts/ai/gemini/run-gemini.sh setup        # Install managed runtime
-bash scripts/ai/gemini/run-gemini.sh update       # Reinstall/update runtime
+bash scripts/ai/gemini/run-gemini.sh                # Interactive Gemini CLI
+bash scripts/ai/gemini/run-gemini.sh "prompt"      # Headless prompt mode
+bash scripts/ai/gemini/run-gemini.sh prompt "..."  # Explicit headless prompt
+bash scripts/ai/gemini/run-gemini.sh exec "..."    # Headless YOLO approvals
+bash scripts/ai/gemini/run-gemini.sh check         # Check setup
+bash scripts/ai/gemini/run-gemini.sh setup         # Install managed CLI
+bash scripts/ai/gemini/run-gemini.sh update        # Reinstall/update CLI
 ```
 
-`exec` is intentionally only a single-prompt alias. It does not provide Codex `--full-auto` behavior and does not edit repository files by itself.
+`exec` maps to Gemini CLI headless mode with `--approval-mode yolo`. Use it only for tasks where auto-approved file/tool actions are acceptable.
 
 ## Runtime Model
 
 The managed runtime lives under:
 
 ```text
-.cache/tools/gemini-sdk/venv
+.cache/tools/gemini-cli/
+├── npm-global/   # node@22 + @google/gemini-cli
+├── npm-cache/
+└── home/         # GEMINI_CLI_HOME
 ```
 
-`helper/ensure-gemini-cli.sh` owns creation and updates. The launcher no longer depends on the old `$HOME/.cache/tools/gemini-venv` location.
+`helper/ensure-gemini-cli.sh` installs `node@22` and `@google/gemini-cli@latest` into the repo-local prefix. The local Node 22 is required because current Gemini CLI uses JavaScript features unsupported by the system Node 18 in this WSL image.
 
 ## Configuration
 
@@ -71,7 +73,7 @@ Create or edit `scripts/ai/gemini/.env.gemini`:
 
 ```bash
 GEMINI_API_KEY=your-api-key-here
-GEMINI_MODEL=gemini-2.5-flash
+# GEMINI_MODEL=gemini-2.5-flash
 ```
 
 Get an API key from https://aistudio.google.com/app/apikeys.

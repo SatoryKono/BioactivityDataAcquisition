@@ -602,12 +602,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded Gemini environment helper while historical setup flows still reference helper scripts; remove or consolidate once the Gemini surface is retired or unified."
     },
-    "scripts/ai/gemini/helper/check-env.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Gemini environment helper while shell-based setup flows still reference helper scripts; remove or consolidate once the Gemini surface is retired or unified."
-    },
     "scripts/ai/gemini/helper/setup-env.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_helper_orphan",

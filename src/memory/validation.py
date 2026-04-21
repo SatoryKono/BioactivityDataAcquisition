@@ -166,6 +166,7 @@ def _validate_storage_class_coverage(
                 )
             )
 
+
 def _validate_storage_class_entry(
     artifact_class: str,
     entry: Any,
@@ -533,7 +534,11 @@ def _validate_episodic_note_ttl(
 ) -> None:
     ttl_days = metadata.get("ttl_days")
     policy_ttl = policy_entry.get("ttl_days") if policy_entry else None
-    if isinstance(policy_ttl, int) and isinstance(ttl_days, int) and ttl_days > policy_ttl:
+    if (
+        isinstance(policy_ttl, int)
+        and isinstance(ttl_days, int)
+        and ttl_days > policy_ttl
+    ):
         issues.append(
             ValidationIssue(
                 path=str(path),
@@ -555,8 +560,7 @@ def _validate_curated_note_kind(
             ValidationIssue(
                 path=str(path),
                 message=(
-                    f"curated note kind must be {expected_kind!r} "
-                    f"inside {parent_dir}/"
+                    f"curated note kind must be {expected_kind!r} inside {parent_dir}/"
                 ),
             )
         )
@@ -640,9 +644,7 @@ def _validate_note_governance(
     issues: list[ValidationIssue],
 ) -> None:
     source_refs = _validate_note_source_refs(path, metadata, issues)
-    _validate_note_confidence(
-        path, artifact_class, metadata, confidence_policy, issues
-    )
+    _validate_note_confidence(path, artifact_class, metadata, confidence_policy, issues)
     policy_entry = _retention_entry(retention_policy, artifact_class)
     if artifact_class == "episodic_note":
         _validate_episodic_note_ttl(path, metadata, policy_entry, issues)

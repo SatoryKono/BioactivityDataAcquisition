@@ -233,7 +233,10 @@ def review_curated_workflow(
     report = review_curated_notes(curated_root)
     summary = report["summary"]
     cadence = "Run this review on a regular engineering cadence and before release or audit checkpoints."
-    next_action = "Review due and stale notes, refresh last_verified for durable knowledge, and archive superseded notes."
+    next_action = (
+        "Review due and stale notes, refresh last_verified for durable knowledge, "
+        "and archive superseded notes."
+    )
     return {
         "kind": "review-curated",
         "ok": True,
@@ -293,13 +296,14 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _payload_exit_code(payload: dict[str, Any]) -> int:
+    return 0 if payload.get("ok", True) else 1
+
+
 def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
-    status_code = 0 if payload.get("ok", True) else 1
     if as_json:
         print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
-        return status_code
-
-    if payload["kind"] == "pre-task":
+    elif payload["kind"] == "pre-task":
         print(f"Pre-task workflow: {payload['task_id']}")
         if payload.get("session_note"):
             print(f"- session note: {payload['session_note']}")
@@ -309,15 +313,14 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
         print(f"- catalog hits: {len(results['catalog'])}")
         print(f"- rag hits: {len(results['rag'])}")
         print(f"- timeline hits: {len(results['timeline'])}")
-        return status_code
-
-    print(f"Post-task workflow: {payload['task_id']}")
-    print(f"- summary note: {payload['summary_note']}")
-    if payload.get("refresh_output_root"):
-        print(f"- refresh output root: {payload['refresh_output_root']}")
-    if payload.get("promoted_note"):
-        print(f"- promoted note: {payload['promoted_note']}")
-    return status_code
+    else:
+        print(f"Post-task workflow: {payload['task_id']}")
+        print(f"- summary note: {payload['summary_note']}")
+        if payload.get("refresh_output_root"):
+            print(f"- refresh output root: {payload['refresh_output_root']}")
+        if payload.get("promoted_note"):
+            print(f"- promoted note: {payload['promoted_note']}")
+    return _payload_exit_code(payload)
 
 
 def main(argv: list[str] | None = None) -> int:

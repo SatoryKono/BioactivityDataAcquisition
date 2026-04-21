@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-21T04:40:15.440441+00:00",
+  "generated_at": "2026-04-21T05:32:35.298810+00:00",
   "summary": {
-    "total_scripts": 426,
+    "total_scripts": 428,
     "status_counts": {
-      "active": 305,
+      "active": 308,
       "legacy": 15,
-      "orphan": 94,
+      "orphan": 93,
       "unknown": 12
     },
     "reference_group_coverage": {
@@ -14,7 +14,7 @@
       "build": 1,
       "ci": 49,
       "docs": 131,
-      "scripts": 277,
+      "scripts": 280,
       "skills": 8,
       "tests": 144
     }
@@ -100,19 +100,19 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 17,
+          "line": 18,
           "source_group": "scripts",
           "text": "│   ├── diagnose-hang.ps1      # 🔧 Debug setup hangs"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 129,
+          "line": 145,
           "source_group": "scripts",
           "text": ".\\helper\\diagnose-hang.ps1"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 186,
+          "line": 203,
           "source_group": "scripts",
           "text": "- `diagnose-hang.ps1` - **NEW**: Debug tool for setup hangs"
         },
@@ -188,6 +188,63 @@
       ]
     },
     {
+      "path": "scripts/ai/codex/helper/ensure-mcp.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 10,
+      "references": [
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 17,
+          "source_group": "scripts",
+          "text": "│   ├── ensure-mcp.sh          # Sync .mcp.json and ~/.codex/config.toml"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 122,
+          "source_group": "scripts",
+          "text": "`run-codex.sh` runs `helper/ensure-mcp.sh` before launching Codex. This writes:"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 199,
+          "source_group": "scripts",
+          "text": "- `ensure-mcp.sh` - Sync MCP configs before launching Codex"
+        },
+        {
+          "path": "scripts/ai/codex/helper/check-env.sh",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "ENSURE_MCP_SCRIPT=\"${SCRIPT_DIR}/ensure-mcp.sh\""
+        },
+        {
+          "path": "scripts/ai/codex/helper/run-codex-impl.sh",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "ENSURE_MCP_SCRIPT=\"${SCRIPT_DIR}/ensure-mcp.sh\""
+        },
+        {
+          "path": "scripts/ai/codex/helper/setup-env.sh",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "ENSURE_MCP_SCRIPT=\"${SCRIPT_DIR}/ensure-mcp.sh\""
+        },
+        {
+          "path": "scripts/ai/codex/run-codex.ps1",
+          "line": 183,
+          "source_group": "scripts",
+          "text": "wsl -d Ubuntu -e bash -- \"$HelperWSL/ensure-mcp.sh\" --check"
+        },
+        {
+          "path": "scripts/ai/codex/run-codex.ps1",
+          "line": 190,
+          "source_group": "scripts",
+          "text": "wsl -d Ubuntu -e bash -- \"$HelperWSL/ensure-mcp.sh\" --ensure"
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/codex/helper/run-codex-impl.sh",
       "type": "sh",
       "status": "active",
@@ -214,13 +271,13 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 18,
+          "line": 19,
           "source_group": "scripts",
           "text": "│   └── run-codex-impl.sh      # Codex launcher implementation"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 187,
+          "line": 204,
           "source_group": "scripts",
           "text": "- `run-codex-impl.sh` - Launch Codex with environment"
         },
@@ -413,7 +470,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 121,
+      "reference_count": 122,
       "references": [
         {
           "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
@@ -470,7 +527,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 27,
+      "reference_count": 31,
       "references": [
         {
           "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
@@ -504,19 +561,19 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "bash run-codex.sh check"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "bash run-codex.sh setup"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "bash run-codex.sh \"analyze the code\""
         }
@@ -617,17 +674,75 @@
     {
       "path": "scripts/ai/gemini/helper/check-env.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/gemini/helper/check-env.ps1",
+          "line": 19,
+          "source_group": "scripts",
+          "text": "$CheckWSL = \"$RepoWSL/scripts/ai/gemini/helper/check-env.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/gemini/helper/ensure-gemini-cli.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 17,
+          "source_group": "scripts",
+          "text": "│   ├── ensure-gemini-cli.sh       # Managed Gemini CLI bootstrap"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 68,
+          "source_group": "scripts",
+          "text": "`helper/ensure-gemini-cli.sh` installs `node@22` and `@google/gemini-cli@latest` into the repo-local prefix. The local Node 22 is required because current Gemini CLI uses JavaScript features unsupport"
+        },
+        {
+          "path": "scripts/ai/gemini/SETUP_COMPLETE.md",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "├── ensure-gemini-cli.sh"
+        },
+        {
+          "path": "scripts/ai/gemini/helper/check-env.sh",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "ENSURE_SCRIPT=\"${SCRIPT_DIR}/ensure-gemini-cli.sh\""
+        },
+        {
+          "path": "scripts/ai/gemini/helper/run-gemini-impl.sh",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "ENSURE_SCRIPT=\"${SCRIPT_DIR}/ensure-gemini-cli.sh\""
+        },
+        {
+          "path": "scripts/ai/gemini/helper/setup-env.sh",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "ENSURE_SCRIPT=\"${SCRIPT_DIR}/ensure-gemini-cli.sh\""
+        },
+        {
+          "path": "scripts/ai/gemini/run-gemini.sh",
+          "line": 100,
+          "source_group": "scripts",
+          "text": "bash \"${HELPER_DIR}/ensure-gemini-cli.sh\" --update"
+        }
+      ]
     },
     {
       "path": "scripts/ai/gemini/helper/run-gemini-impl.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
@@ -661,21 +776,21 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 16,
+          "line": 19,
           "source_group": "scripts",
-          "text": "│   └── run-gemini-impl.sh     # Gemini launcher implementation"
-        },
-        {
-          "path": "scripts/ai/gemini/README.md",
-          "line": 127,
-          "source_group": "scripts",
-          "text": "- `run-gemini-impl.sh` - Launch Gemini with environment"
+          "text": "│   └── run-gemini-impl.sh         # Runtime launcher implementation"
         },
         {
           "path": "scripts/ai/gemini/SETUP_COMPLETE.md",
-          "line": 18,
+          "line": 17,
           "source_group": "scripts",
-          "text": "│   └── run-gemini-impl.sh     Gemini launcher"
+          "text": "└── run-gemini-impl.sh"
+        },
+        {
+          "path": "scripts/ai/gemini/run-gemini.sh",
+          "line": 128,
+          "source_group": "scripts",
+          "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" \"$@\""
         }
       ]
     },
@@ -692,7 +807,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 80,
+      "reference_count": 55,
       "references": [
         {
           "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
@@ -749,7 +864,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 33,
       "references": [
         {
           "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
@@ -789,15 +904,15 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 10,
+          "line": 12,
           "source_group": "scripts",
-          "text": "├── run-gemini.sh              ⭐ Main entry point (WSL/Bash)"
+          "text": "├── run-gemini.sh                  # WSL/Bash entrypoint"
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 46,
+          "line": 37,
           "source_group": "scripts",
-          "text": "bash run-gemini.sh check"
+          "text": "bash scripts/ai/gemini/run-gemini.sh check"
         }
       ]
     },
@@ -2072,43 +2187,43 @@
         },
         {
           "path": "scripts/ai/mistrall/run-mistrall.sh",
-          "line": 120,
+          "line": 122,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-mistrall-impl.sh\" start \"$@\""
         },
         {
           "path": "scripts/ai/mistrall/run-mistrall.sh",
-          "line": 124,
+          "line": 126,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-mistrall-impl.sh\" daemon \"$@\""
         },
         {
           "path": "scripts/ai/mistrall/run-mistrall.sh",
-          "line": 128,
+          "line": 130,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-mistrall-impl.sh\" stop \"$@\""
         },
         {
           "path": "scripts/ai/mistrall/run-mistrall.sh",
-          "line": 132,
+          "line": 134,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-mistrall-impl.sh\" status \"$@\""
         },
         {
           "path": "scripts/ai/mistrall/run-mistrall.sh",
-          "line": 136,
+          "line": 138,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-mistrall-impl.sh\" logs \"$@\""
         },
         {
           "path": "scripts/ai/mistrall/run-mistrall.sh",
-          "line": 140,
+          "line": 142,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-mistrall-impl.sh\" shell \"$@\""
         },
         {
           "path": "scripts/ai/mistrall/run-mistrall.sh",
-          "line": 144,
+          "line": 146,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-mistrall-impl.sh\" pull \"$@\""
         }
@@ -6270,7 +6385,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 30,
+      "reference_count": 31,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",

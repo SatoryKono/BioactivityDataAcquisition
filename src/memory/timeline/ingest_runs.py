@@ -92,7 +92,9 @@ def _ledger_related_refs(entry: dict[str, Any]) -> list[str]:
     )
 
 
-def _ledger_event(ledger_path: Path, root: Path, entry: dict[str, Any]) -> dict[str, Any]:
+def _ledger_event(
+    ledger_path: Path, root: Path, entry: dict[str, Any]
+) -> dict[str, Any]:
     return {
         "id": f"run-ledger::{entry.get('entry_id')}",
         "event_type": f"run.{entry.get('event_type', 'unknown')}",
@@ -133,8 +135,7 @@ def _ledger_events(root: Path, ledger_dir: Path) -> list[dict[str, Any]]:
     events: list[dict[str, Any]] = []
     for ledger_path in sorted(ledger_dir.glob("*.jsonl")):
         events.extend(
-            _ledger_event(ledger_path, root, entry)
-            for entry in read_jsonl(ledger_path)
+            _ledger_event(ledger_path, root, entry) for entry in read_jsonl(ledger_path)
         )
     return events
 

@@ -10,81 +10,82 @@ Consolidated registry of BioETL-focused local skills under `.codex/skills/`.
 - Verify and sync the local docs mirror with:
 
 ```bash
-bash scripts/check_skills_mirror.sh --check
-bash scripts/check_skills_mirror.sh --sync
+bash scripts/ops/check_skills_mirror.sh --check
+bash scripts/ops/check_skills_mirror.sh --sync
 ```
 
 ## Skill Groups
 
 ### Orchestration
 
-| Skill | Path | Purpose |
-|------|------|---------|
-| `agent-orchestration` | `.codex/skills/agent-orchestration` | Multi-agent coordination map |
-| `py-review-orchestrator` | `.codex/skills/py-review-orchestrator` | Hierarchical review campaign |
-| `py-test-swarm` | `.codex/skills/py-test-swarm` | Hierarchical test swarm (L1/L2/L3) |
+| Skill                    | Path                                   | Purpose                            |
+| ------------------------ | -------------------------------------- | ---------------------------------- |
+| `agent-orchestration`    | `.codex/skills/agent-orchestration`    | Multi-agent coordination map       |
+| `py-review-orchestrator` | `.codex/skills/py-review-orchestrator` | Hierarchical review campaign       |
+| `py-test-swarm`          | `.codex/skills/py-test-swarm`          | Hierarchical test swarm (L1/L2/L3) |
 
 ### Profile Skills
 
-| Skill | Path | Purpose |
-|------|------|---------|
-| `py-audit-bot` | `.codex/skills/py-audit-bot` | Audit profile workflow |
-| `py-code-bot` | `.codex/skills/py-code-bot` | Deprecated compatibility profile for historical references |
-| `py-config-bot` | `.codex/skills/py-config-bot` | Config profile workflow |
-| `py-debug-bot` | `.codex/skills/py-debug-bot` | Debug profile workflow |
-| `py-doc-bot` | `.codex/skills/py-doc-bot` | Documentation profile workflow |
-| `py-plan-bot` | `.codex/skills/py-plan-bot` | Planning profile workflow |
-| `py-test-bot` | `.codex/skills/py-test-bot` | Test profile workflow |
+| Skill                      | Path                                     | Purpose                                                    |
+| -------------------------- | ---------------------------------------- | ---------------------------------------------------------- |
+| `py-audit-bot`             | `.codex/skills/py-audit-bot`             | Audit profile workflow                                     |
+| `py-code-bot`              | `.codex/skills/py-code-bot`              | Deprecated compatibility profile for historical references |
+| `py-architecture-debt-bot` | `.codex/skills/py-architecture-debt-bot` | Full architecture-debt reduction workflow                  |
+| `py-config-bot`            | `.codex/skills/py-config-bot`            | Config profile workflow                                    |
+| `py-debug-bot`             | `.codex/skills/py-debug-bot`             | Debug profile workflow                                     |
+| `py-doc-bot`               | `.codex/skills/py-doc-bot`               | Documentation profile workflow                             |
+| `py-plan-bot`              | `.codex/skills/py-plan-bot`              | Planning profile workflow                                  |
+| `py-test-bot`              | `.codex/skills/py-test-bot`              | Test profile workflow                                      |
 
 `py-code-bot` is retained only as a compatibility surface for historical references. In the current Codex workflow, production code is written directly by the orchestrator.
 
 ### Architecture and Quality
 
-| Skill | Path | Purpose |
-|------|------|---------|
+| Skill                   | Path                                         | Purpose                          |
+| ----------------------- | -------------------------------------------- | -------------------------------- |
 | `architecture-guardian` | `.codex/skills/public/architecture-guardian` | Architecture boundary validation |
-| `verify-architecture` | `.codex/skills/verify-architecture` | Quick/full architecture checks |
-| `vcr-record` | `.codex/skills/vcr-record` | VCR cassette recording/safety |
+| `verify-architecture`   | `.codex/skills/verify-architecture`          | Quick/full architecture checks   |
+| `vcr-record`            | `.codex/skills/vcr-record`                   | VCR cassette recording/safety    |
 
 ### Observability
 
-| Skill | Path | Purpose |
-|------|------|---------|
-| `grafana-dashboard-extension` | `.codex/skills/grafana-dashboard-extension` | Edit and validate shipped Grafana dashboards |
-| `prometheus-metric-discovery` | `.codex/skills/prometheus-metric-discovery` | Discover real metrics, labels, and selectors |
-| `prometheus-query-debugger` | `.codex/skills/prometheus-query-debugger` | Debug PromQL semantics and empty-state behavior |
-| `prometheus-alert-rule-editor` | `.codex/skills/prometheus-alert-rule-editor` | Create and tune Prometheus-backed alert rules |
-| `prometheus-rule-testing` | `.codex/skills/prometheus-rule-testing` | Validate repo-backed Prometheus rules with `promtool` |
+| Skill                          | Path                                         | Purpose                                               |
+| ------------------------------ | -------------------------------------------- | ----------------------------------------------------- |
+| `grafana-dashboard-extension`  | `.codex/skills/grafana-dashboard-extension`  | Edit and validate shipped Grafana dashboards          |
+| `prometheus-metric-discovery`  | `.codex/skills/prometheus-metric-discovery`  | Discover real metrics, labels, and selectors          |
+| `prometheus-query-debugger`    | `.codex/skills/prometheus-query-debugger`    | Debug PromQL semantics and empty-state behavior       |
+| `prometheus-alert-rule-editor` | `.codex/skills/prometheus-alert-rule-editor` | Create and tune Prometheus-backed alert rules         |
+| `prometheus-rule-testing`      | `.codex/skills/prometheus-rule-testing`      | Validate repo-backed Prometheus rules with `promtool` |
 
 ### Documentation
 
-| Skill | Path | Purpose |
-|------|------|---------|
-| `documentation-audit` | `.codex/skills/documentation-audit` | Full docs audit and updates |
+| Skill                         | Path                                        | Purpose                               |
+| ----------------------------- | ------------------------------------------- | ------------------------------------- |
+| `documentation-audit`         | `.codex/skills/documentation-audit`         | Full docs audit and updates           |
 | `documentation-cascade-audit` | `.codex/skills/documentation-cascade-audit` | Hierarchical docs audit orchestration |
 
 ### Research and Planning Utilities
 
-| Skill | Path | Purpose |
-|------|------|---------|
-| `capability-discovery` | `.codex/skills/capability-discovery` | Discover available agents/skills/quality commands |
-| `collecting-evidence` | `.codex/skills/collecting-evidence` | Build traceable evidence objects |
-| `deep-research` | `.codex/skills/deep-research` | Structured deep research workflow |
-| `synthesizing-pillars` | `.codex/skills/synthesizing-pillars` | Convert evidence into synthesis insights |
-| `making-decisions` | `.codex/skills/making-decisions` | Turn synthesis into explicit decisions |
-| `generating-constrained-specs` | `.codex/skills/generating-constrained-specs` | Generate PRD/architecture specs from decisions |
-| `initializing-ledger` | `.codex/skills/initializing-ledger` | Initialize decision/evidence workspace |
-| `repo-config` | `.codex/skills/repo-config` | Resolve dynamic repository configuration |
-| `suggest-users` | `.codex/skills/suggest-users` | Suggest reviewers/assignees from repo context |
-| `create-pr` | `.codex/skills/create-pr` | PR creation workflow guidance |
-| `nci-analysis` | `.codex/skills/nci-analysis` | Manipulation/disinformation pattern analysis |
+| Skill                          | Path                                         | Purpose                                           |
+| ------------------------------ | -------------------------------------------- | ------------------------------------------------- |
+| `capability-discovery`         | `.codex/skills/capability-discovery`         | Discover available agents/skills/quality commands |
+| `collecting-evidence`          | `.codex/skills/collecting-evidence`          | Build traceable evidence objects                  |
+| `deep-research`                | `.codex/skills/deep-research`                | Structured deep research workflow                 |
+| `synthesizing-pillars`         | `.codex/skills/synthesizing-pillars`         | Convert evidence into synthesis insights          |
+| `making-decisions`             | `.codex/skills/making-decisions`             | Turn synthesis into explicit decisions            |
+| `generating-constrained-specs` | `.codex/skills/generating-constrained-specs` | Generate PRD/architecture specs from decisions    |
+| `initializing-ledger`          | `.codex/skills/initializing-ledger`          | Initialize decision/evidence workspace            |
+| `repo-config`                  | `.codex/skills/repo-config`                  | Resolve dynamic repository configuration          |
+| `suggest-users`                | `.codex/skills/suggest-users`                | Suggest reviewers/assignees from repo context     |
+| `create-pr`                    | `.codex/skills/create-pr`                    | PR creation workflow guidance                     |
+| `nci-analysis`                 | `.codex/skills/nci-analysis`                 | Manipulation/disinformation pattern analysis      |
 
 ### Build and Design Utilities
 
-| Skill | Path | Purpose |
-|------|------|---------|
-| `new-pipeline` | `.codex/skills/new-pipeline` | Provider/entity pipeline scaffolding |
-| `technical-designer-mermaid` | `.codex/skills/technical-designer-mermaid` | Mermaid technical diagram design |
+| Skill                        | Path                                       | Purpose                              |
+| ---------------------------- | ------------------------------------------ | ------------------------------------ |
+| `new-pipeline`               | `.codex/skills/new-pipeline`               | Provider/entity pipeline scaffolding |
+| `technical-designer-mermaid` | `.codex/skills/technical-designer-mermaid` | Mermaid technical diagram design     |
 
 ## Current Consolidation Status
 
@@ -107,6 +108,7 @@ bash scripts/check_skills_mirror.sh --sync
 - [nci-analysis](nci-analysis/SKILL.md)
 - [new-pipeline](new-pipeline/SKILL.md)
 - [py-audit-bot](py-audit-bot/SKILL.md)
+- [py-architecture-debt-bot](py-architecture-debt-bot/SKILL.md)
 - [py-code-bot](py-code-bot/SKILL.md)
 - [py-config-bot](py-config-bot/SKILL.md)
 - [py-debug-bot](py-debug-bot/SKILL.md)

@@ -13,7 +13,6 @@ description: |
   - Изменение scope задачи
 model: opus
 ---
-*Статус: internal*
 
 Ты — **py-plan-bot**, центральный координатор проекта BioETL. Ты формируешь план RF-*, на основе которого работают остальные субагенты.
 
@@ -24,6 +23,7 @@ model: opus
 > **При старте** прочитай специализированную память:
 > `docs/00-project/ai/memory/memory-py-plan-bot.md` — RF-* routing, DAG, composite design, parallelization, ADR reference.
 > Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
+> Evidence calibration: `docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md`, `docs/reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md`, `docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md`, `docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md`
 
 ---
 
@@ -63,12 +63,9 @@ model: opus
 
 ## Выходы
 
-Сохранять в `reports/plans/<task_id>/`:
-
-| Файл | Когда создаётся |
-|------|----------------|
-| `01-plan-initial.md` | При старте задачи |
-| `03-plan-updated.md` | После baseline-тестов / debug-итераций / изменения scope |
+- Итоговый отчёт: `reports/{LLM}/review_py-plan-bot_{YYYYMMDD}_{HHMM}.md`
+  - Включить актуальный план (initial/update), список RF-*, зависимости, риски.
+  - Дополнительные вложения (DAG/таблицы) можно добавлять рядом в той же папке.
 
 ---
 
@@ -161,7 +158,7 @@ find configs/ -name "*.yaml" | xargs grep -l "<entity>"
 
 **Workflow для composite pipeline:**
 1. Analyze Requirements — data sources, target layers, DQ needs
-2. Design Pipeline Configuration — YAML в `configs/composites/`
+2. Design Composite Configuration — YAML в `configs/composites/`
 3. Implement Transformers — extend `BaseTransformer`
 4. Wire Dependencies — factories в `composition/factories/`
 5. Add Tests — unit, integration, architecture
@@ -187,7 +184,7 @@ find configs/ -name "*.yaml" | xargs grep -l "<entity>"
 
 | RF type | Primary agent | Secondary agent |
 |---------|:------------:|:---------------:|
-| `refactor` / `feature` / `bugfix` | direct implementation | py-config-bot (если config impact) |
+| `refactor` / `feature` / `bugfix` | orchestrator (direct) | py-config-bot (если config impact) |
 | `config` | py-config-bot | — |
 | `doc` | py-doc-bot | — |
 | `test` | py-test-bot | — |
@@ -226,6 +223,6 @@ find configs/ -name "*.yaml" | xargs grep -l "<entity>"
 | Событие | Действие |
 |---------|----------|
 | Baseline audit done (py-audit-bot) | → py-plan-bot формирует план |
-| Plan ready | → py-test-bot (baseline) → implementation owner |
+| Plan ready | → py-test-bot (baseline) → orchestrator (implement) |
 | Debug escalation (py-debug-bot) | → py-plan-bot корректирует план |
 | Scope change | → py-plan-bot обновляет `03-plan-updated.md` |

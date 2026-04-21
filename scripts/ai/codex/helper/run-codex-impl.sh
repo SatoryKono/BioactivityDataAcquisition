@@ -8,6 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../../.." && pwd))}"
 ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-codex-cli.sh"
+ENSURE_MCP_SCRIPT="${SCRIPT_DIR}/ensure-mcp.sh"
 
 # Load environment
 ENV_FILE="${ROOT_DIR}/.env.codex"
@@ -48,6 +49,17 @@ export PATH="${CODEX_PREFIX}/bin:/usr/local/bin:${PATH}"
 # Load proxy if available
 if [[ -f "${REPO_ROOT}/.wsl_proxy_env.sh" ]]; then
     source "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null || true
+fi
+
+# Keep Codex's native config.toml in sync with the repo MCP config before
+# launching. Codex reads ~/.codex/config.toml, not .mcp.json directly.
+if [[ "${CODEX_SKIP_MCP_SETUP:-0}" != "1" ]]; then
+    if [[ ! -x "${ENSURE_MCP_SCRIPT}" ]]; then
+        echo "[ERROR] MCP setup helper not found: ${ENSURE_MCP_SCRIPT}" >&2
+        exit 1
+    fi
+    "${ENSURE_MCP_SCRIPT}" --ensure --codex-bin "${CODEX_BIN}" >/dev/null
+    echo "[INFO] MCP configuration synchronized"
 fi
 
 # Launch Codex

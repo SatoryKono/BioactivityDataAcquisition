@@ -53,6 +53,8 @@ if ($Command -eq "help" -or $Command -eq "-h" -or $Command -eq "--help") {
     Write-Host "  device-login       Login with device auth"
     Write-Host "  check              Check environment setup"
     Write-Host "  setup              Setup missing components"
+    Write-Host "  mcp-check          Check Codex MCP configuration"
+    Write-Host "  mcp-setup          Sync Codex MCP configuration"
     Write-Host "  help               Show this help"
     Write-Host ""
     Write-Host "Examples:" -ForegroundColor Green
@@ -173,6 +175,20 @@ switch -Regex ($Command) {
             Write-Info "Check WSL logs: wsl -d Ubuntu -- journalctl -xe"
         }
         exit $setupExit
+    }
+
+    "^mcp-check$" {
+        Write-Info "Checking Codex MCP configuration..."
+        Write-Host ""
+        wsl -d Ubuntu -e bash -- "$HelperWSL/ensure-mcp.sh" --check
+        exit $LASTEXITCODE
+    }
+
+    "^mcp-setup$" {
+        Write-Info "Synchronizing Codex MCP configuration..."
+        Write-Host ""
+        wsl -d Ubuntu -e bash -- "$HelperWSL/ensure-mcp.sh" --ensure
+        exit $LASTEXITCODE
     }
     
     default {

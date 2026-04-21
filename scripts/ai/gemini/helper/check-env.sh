@@ -81,10 +81,12 @@ log_info "Checking Gemini CLI..."
 GEMINI_BIN=""
 if [[ -x "${ENSURE_SCRIPT}" ]]; then
     GEMINI_BIN="$("${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null || true)"
+    GEMINI_PREFIX="$("${ENSURE_SCRIPT}" --no-install --print-prefix 2>/dev/null || true)"
 fi
 
 if [[ -x "${GEMINI_BIN}" ]]; then
-    GEMINI_VER=$("${GEMINI_BIN}" --version 2>/dev/null || echo "unknown")
+    GEMINI_HOME="$(cd "${GEMINI_PREFIX}/.." && pwd)/home"
+    GEMINI_VER=$(GEMINI_CLI_HOME="${GEMINI_HOME}" PATH="${GEMINI_PREFIX}/bin:${PATH}" "${GEMINI_BIN}" --version 2>/dev/null || echo "unknown")
     log_success "Gemini CLI is installed: $GEMINI_VER"
 else
     log_warn "Gemini CLI not found"

@@ -30,9 +30,7 @@ class PostrunDependencyOverrides:
     gold_dq_config: object | None = None
 
 
-_DEPENDENCY_OVERRIDE_FIELDS = frozenset(
-    PostrunDependencyOverrides.__dataclass_fields__
-)
+_DEPENDENCY_OVERRIDE_FIELDS = frozenset(PostrunDependencyOverrides.__dataclass_fields__)
 
 
 def _resolve_dependency_overrides(
@@ -67,9 +65,7 @@ def build_test_postrun_service(
     The helper accepts either a pre-built ``overrides`` bundle or direct keyword
     overrides for older tests that injected collaborators individually.
     """
-    dependency_overrides = _resolve_dependency_overrides(
-        overrides, dependency_kwargs
-    )
+    dependency_overrides = _resolve_dependency_overrides(overrides, dependency_kwargs)
     return PostrunService(
         config=config,
         runtime=runtime,
