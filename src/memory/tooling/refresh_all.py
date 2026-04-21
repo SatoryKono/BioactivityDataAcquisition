@@ -131,8 +131,10 @@ def refresh_all(
                 }
             )
         else:
-            _, _, relation_summary = (
-                write_expanded_graph_relation_artifacts(snapshot_path, output_root)
+            _, _, relation_summary = write_expanded_graph_relation_artifacts(
+                snapshot_path,
+                output_root,
+                repo_root=root,
             )
             summary["artifacts"].append(
                 {
@@ -140,10 +142,13 @@ def refresh_all(
                     "paths": relation_summary["paths"],
                     "relation_count": relation_summary["relation_count"],
                     "file_count": relation_summary["file_count"],
-                    "module_relation_count": relation_summary[
-                        "module_relation_count"
-                    ],
+                    "module_relation_count": relation_summary["module_relation_count"],
                     "module_count": relation_summary["module_count"],
+                    "entity_relation_count": relation_summary["entity_relation_count"],
+                    "entity_count": relation_summary["entity_count"],
+                    "entity_relation_counts": relation_summary[
+                        "entity_relation_counts"
+                    ],
                     "source_snapshot": relation_summary["source_snapshot"],
                 }
             )

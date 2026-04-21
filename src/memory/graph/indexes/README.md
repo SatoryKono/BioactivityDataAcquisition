@@ -1,6 +1,5 @@
 # Graph Indexes
 
 This directory is reserved for rebuild-only lookup indexes derived from graph
-projections. Generated files such as `file_relations.json` must not be
-committed.
-
+projections. Generated files such as `file_relations.json` and
+`module_relations.json` must not be committed.

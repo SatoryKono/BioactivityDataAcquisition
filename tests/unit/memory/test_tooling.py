@@ -40,13 +40,28 @@ def test_refresh_all_can_import_expanded_graph_file_relations(tmp_path: Path) ->
                 "nodes": {
                     "file:src/a.py": {"source_path": "src/a.py"},
                     "file:src/b.py": {"source_path": "src/b.py"},
+                    "mod:pkg.a": {
+                        "id": "mod:pkg.a",
+                        "node_type": "Module",
+                        "source_path": "src/a.py",
+                    },
+                    "mod:pkg.b": {
+                        "id": "mod:pkg.b",
+                        "node_type": "Module",
+                        "source_path": "src/b.py",
+                    },
                 },
                 "edges": {
                     "edge-1": {
                         "source": "file:src/a.py",
                         "target": "file:src/b.py",
                         "edge_type": "references_file",
-                    }
+                    },
+                    "edge-2": {
+                        "source": "mod:pkg.a",
+                        "target": "mod:pkg.b",
+                        "edge_type": "references",
+                    },
                 },
             }
         ),
@@ -64,8 +79,11 @@ def test_refresh_all_can_import_expanded_graph_file_relations(tmp_path: Path) ->
     )
 
     assert summary["ok"] is True
+    assert summary["artifacts"][0]["module_relation_count"] == 1
     assert (output_root / "graph/projections/file_references.jsonl").exists()
     assert (output_root / "graph/indexes/file_relations.json").exists()
+    assert (output_root / "graph/projections/module_references.jsonl").exists()
+    assert (output_root / "graph/indexes/module_relations.json").exists()
 
 
 def test_find_prunable_episodic_notes_uses_metadata_ttl(tmp_path: Path) -> None:

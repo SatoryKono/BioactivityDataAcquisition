@@ -8,11 +8,13 @@ import json
 from pathlib import Path
 from typing import Any, cast
 
+import pytest
 import yaml
 
 from tests.contract._provider_contract_drift import compare_provider_probe_to_snapshot
 
 ROOT = Path(__file__).resolve().parents[2]
+_GIT_LFS_POINTER_PREFIX = "version https://git-lfs.github.com/spec/v1"
 
 
 @dataclass(frozen=True)
@@ -139,9 +141,22 @@ PROVIDER_CONTRACT_REPLAY_PROBES: tuple[ProviderContractReplayProbe, ...] = (
 
 def load_provider_contract_replay_payload(case: ProviderContractReplayProbe) -> Any:
     """Load JSON payload from a replay cassette interaction."""
-    cassette_payload = cast(
-        dict[str, Any], yaml.safe_load(case.cassette_path.read_text(encoding="utf-8"))
-    )
+    cassette_text = case.cassette_path.read_text(encoding="utf-8")
+    if cassette_text.startswith(_GIT_LFS_POINTER_PREFIX):
+        pytest.skip(
+            "Provider contract replay cassette is a Git LFS pointer; "
+            f"run git lfs pull before replaying {case.cassette_rel_path}"
+        )
+
+    cassette_payload_raw = yaml.safe_load(cassette_text)
+    if not isinstance(cassette_payload_raw, dict):
+        raise AssertionError(
+            f"{case.cassette_rel_path} must be a VCR cassette YAML mapping for "
+            f"{case.provider}.{case.probe}, got "
+            f"{type(cassette_payload_raw).__name__}"
+        )
+
+    cassette_payload = cast(dict[str, Any], cassette_payload_raw)
     interactions = cast(list[dict[str, Any]], cassette_payload.get("interactions", []))
     if case.interaction_index >= len(interactions):
         raise AssertionError(

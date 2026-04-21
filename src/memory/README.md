@@ -124,7 +124,8 @@ Optional graph export during refresh:
 python -m memory.tooling.refresh_all --include-graph-export
 ```
 
-Optional file-level relation projection import from an expanded graph snapshot:
+Optional file- and module-level relation projection import from an expanded
+graph snapshot:
 
 ```bash
 python -m memory.tooling.refresh_all \
@@ -135,8 +136,10 @@ python -m memory.tooling.refresh_all \
 ```
 
 This generates rebuild-only artifacts under `graph/projections/` and
-`graph/indexes/`. The raw expanded graph snapshot is treated as derived input;
-it does not replace source code, docs, configs, ADRs, or tests.
+`graph/indexes/`, including `file_references.jsonl`, `file_relations.json`,
+`module_references.jsonl`, and `module_relations.json`. The raw expanded graph
+snapshot is treated as derived input; it does not replace source code, docs,
+configs, ADRs, or tests.
 
 Dry-run prune for episodic memory:
 
@@ -184,12 +187,18 @@ python -m memory.query all runner --file-context src/bioetl/application/core/run
 python -m memory.query refs src/bioetl/application/core/runner.py --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
 python -m memory.query impact src/bioetl/application/core/runner.py --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
 python -m memory.query neighborhood src/bioetl/application/core/runner.py --depth 2 --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
+python -m memory.query module-refs bioetl.application.core.runner --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
+python -m memory.query module-impact bioetl.application.core.runner --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
+python -m memory.query module-neighborhood bioetl.application.core.runner --depth 2 --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
 python -m memory.query graph owner-pipeline chembl_activity
 ```
 
 Use `--file-context` when the task starts from a specific file. RAG ranking then
 boosts chunks from that file and from files connected through the generated
 `references_file` relation index.
+
+Use `module-refs`, `module-impact`, and `module-neighborhood` when the task
+starts from a Python import/module boundary rather than a concrete file path.
 
 Generated RAG and timeline artifacts are rebuild-only. If they are absent,
 either refresh them explicitly or use the query facade's temporary refresh mode:

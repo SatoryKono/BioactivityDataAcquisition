@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-21T08:02:49.710692+00:00",
+  "generated_at": "2026-04-21T10:10:16.189819+00:00",
   "summary": {
     "total_scripts": 429,
     "status_counts": {
@@ -219,7 +219,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 17,
       "references": [
         {
           "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
@@ -497,7 +497,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 31,
+      "reference_count": 32,
       "references": [
         {
           "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",

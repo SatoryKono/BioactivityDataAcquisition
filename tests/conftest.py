@@ -244,6 +244,55 @@ def populated_isolated_registry(isolated_registry: Any) -> Any:
 
 
 # --- VCR Configuration ---
+_GIT_LFS_POINTER_PREFIX = b"version https://git-lfs.github.com/spec/v1"
+
+
+def _is_git_lfs_pointer(path: Path) -> bool:
+    """Return whether a file is a Git LFS pointer instead of cassette YAML."""
+    try:
+        with path.open("rb") as handle:
+            return handle.read(len(_GIT_LFS_POINTER_PREFIX)) == _GIT_LFS_POINTER_PREFIX
+    except OSError:
+        return False
+
+
+def _vcr_cassette_path(request: pytest.FixtureRequest) -> Path | None:
+    """Resolve the cassette path without opening it through vcrpy."""
+    try:
+        vcr_config_value = request.getfixturevalue("vcr_config")
+        cassette_dir = vcr_config_value.get("cassette_library_dir")
+        if cassette_dir is None:
+            cassette_dir = request.getfixturevalue("vcr_cassette_dir")
+        cassette_name = str(request.getfixturevalue("vcr_cassette_name"))
+    except pytest.FixtureLookupError:
+        return None
+
+    if not cassette_name.endswith(".yaml"):
+        cassette_name = f"{cassette_name}.yaml"
+
+    cassette_path = Path(cassette_name)
+    if cassette_path.is_absolute():
+        return cassette_path
+    return Path(str(cassette_dir)) / cassette_path
+
+
+@pytest.fixture(autouse=True)
+def _vcr_marker(request: pytest.FixtureRequest) -> None:
+    """Open pytest-vcr cassettes, skipping unresolved Git LFS pointers safely."""
+    marker = request.node.get_closest_marker("vcr")
+    if marker is None:
+        return
+
+    cassette_path = _vcr_cassette_path(request)
+    if cassette_path is not None and _is_git_lfs_pointer(cassette_path):
+        pytest.skip(
+            "VCR cassette is a Git LFS pointer; run git lfs pull before replaying "
+            f"this cassette: {cassette_path}"
+        )
+
+    request.getfixturevalue("vcr_cassette")
+
+
 @pytest.fixture(scope="module")
 def vcr_config() -> dict[str, object]:
     """VCR configuration for integration tests."""

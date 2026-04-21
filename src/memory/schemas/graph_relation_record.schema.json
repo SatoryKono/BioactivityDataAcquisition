@@ -14,8 +14,10 @@
   "properties": {
     "id": {"type": "string"},
     "source_id": {"type": "string"},
+    "source_name": {"type": "string"},
     "source_path": {"type": "string"},
     "target_id": {"type": "string"},
+    "target_name": {"type": "string"},
     "target_path": {"type": "string"},
     "relation": {"type": "string"},
     "confidence": {"type": "string"},
