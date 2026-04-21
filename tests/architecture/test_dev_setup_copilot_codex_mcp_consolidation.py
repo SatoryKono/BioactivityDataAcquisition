@@ -67,6 +67,10 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         "neo4j-cypher",
         "neo4j-memory",
         "needle",
+        "chembl",
+        "pubchem",
+        "pubmed",
+        "mermaid",
         "openaiDeveloperDocs",
     }
     assert servers["memory"]["command"] == "npx"
@@ -153,6 +157,26 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
             "powershell",
             "scripts/ai/mcp/mcp_needle_wrapper.ps1",
         )
+        _assert_shell_wrapper(
+            servers["chembl"],
+            "powershell",
+            "scripts/ai/mcp/mcp_chembl_wrapper.ps1",
+        )
+        _assert_shell_wrapper(
+            servers["pubchem"],
+            "powershell",
+            "scripts/ai/mcp/mcp_pubchem_wrapper.ps1",
+        )
+        _assert_shell_wrapper(
+            servers["pubmed"],
+            "powershell",
+            "scripts/ai/mcp/mcp_pubmed_wrapper.ps1",
+        )
+        _assert_shell_wrapper(
+            servers["mermaid"],
+            "powershell",
+            "scripts/ai/mcp/mcp_mermaid_wrapper.ps1",
+        )
     else:
         _assert_shell_wrapper(
             servers["github"], "bash", "scripts/ai/mcp/github-mcp-wrapper.sh"
@@ -210,6 +234,26 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
             servers["needle"],
             "bash",
             "scripts/ai/mcp/mcp_needle_wrapper.sh",
+        )
+        _assert_shell_wrapper(
+            servers["chembl"],
+            "bash",
+            "scripts/ai/mcp/mcp_chembl_wrapper.sh",
+        )
+        _assert_shell_wrapper(
+            servers["pubchem"],
+            "bash",
+            "scripts/ai/mcp/mcp_pubchem_wrapper.sh",
+        )
+        _assert_shell_wrapper(
+            servers["pubmed"],
+            "bash",
+            "scripts/ai/mcp/mcp_pubmed_wrapper.sh",
+        )
+        _assert_shell_wrapper(
+            servers["mermaid"],
+            "bash",
+            "scripts/ai/mcp/mcp_mermaid_wrapper.sh",
         )
     assert servers["openaiDeveloperDocs"]["type"] == "http"
     assert servers["openaiDeveloperDocs"]["url"] == "https://developers.openai.com/mcp"
