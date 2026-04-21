@@ -14,6 +14,7 @@ scripts/ai/codex/
 │   ├── check-env.ps1          # Check environment (PowerShell)
 │   ├── check-env.sh           # Check environment (Bash)
 │   ├── setup-env.sh           # Setup (skips hanging apt, uses Node.js binaries)
+│   ├── ensure-mcp.sh          # Sync .mcp.json and ~/.codex/config.toml
 │   ├── diagnose-hang.ps1      # 🔧 Debug setup hangs
 │   └── run-codex-impl.sh      # Codex launcher implementation
 ├── README.md                  # This file
@@ -59,6 +60,8 @@ bash run-codex.sh "analyze the code"
 .\run-codex.ps1 exec "prompt"     # Auto-exec mode
 .\run-codex.ps1 check             # Check setup
 .\run-codex.ps1 setup             # Install missing components
+.\run-codex.ps1 mcp-check         # Check MCP configuration
+.\run-codex.ps1 mcp-setup         # Sync MCP configuration
 .\run-codex.ps1 login             # Login with API key
 .\run-codex.ps1 device-login      # Device auth login
 ```
@@ -71,18 +74,20 @@ bash run-codex.sh "prompt"        # With prompt
 bash run-codex.sh exec "prompt"   # Auto-exec mode
 bash run-codex.sh check           # Check setup
 bash run-codex.sh setup           # Install missing components
+bash run-codex.sh mcp-check       # Check MCP configuration
+bash run-codex.sh mcp-setup       # Sync MCP configuration
 bash run-codex.sh login           # Login with API key
 bash run-codex.sh device-login    # Device auth login
 ```
 
 ## 🔧 What run-codex does
 
-1. **Quick check** (~2 sec) - Validates WSL, Node.js, npm, Codex CLI
-2. **Background setup** (if needed) - Auto-installs missing components in background
-3. **Immediate launch** - Runs Codex right away (doesn't wait for setup)
-4. **Setup completion** - Missing components finish installing in background
+1. **Quick check** (~2 sec) - Validates WSL, Node.js, npm, Codex CLI, and MCP config
+2. **Setup** (if needed) - Installs missing components and syncs MCP configuration
+3. **MCP sync before launch** - Regenerates `.mcp.json`, `.vscode/mcp.json`, and the Codex-native `~/.codex/config.toml` MCP block
+4. **Launch** - Runs Codex from the repo root with the managed Codex CLI
 
-✅ **Key improvement**: No blocking on setup! You can start using Codex immediately.
+Codex does not read the workspace `.mcp.json` directly. The launcher keeps `~/.codex/config.toml` synchronized so Codex starts with the repository MCP servers configured.
 
 ## ⚙️ Setup
 
@@ -109,7 +114,18 @@ Get API key from: https://platform.openai.com/api-keys
 This will:
 - Check all dependencies
 - Install missing components in background (if any)
+- Synchronize MCP configuration for Codex
 - Launch Codex immediately
+
+## MCP configuration
+
+`run-codex.sh` runs `helper/ensure-mcp.sh` before launching Codex. This writes:
+
+- `.mcp.json` - workspace MCP config used by compatible tools
+- `.vscode/mcp.json` - VS Code MCP config
+- `~/.codex/config.toml` - Codex-native MCP config used by `codex`
+
+Set `CODEX_SKIP_MCP_SETUP=1` only when you intentionally want to launch Codex without synchronizing MCP. Set `CODEX_VALIDATE_MCP_LIST=1` to additionally run `codex mcp list --json`; this validation is off by default because some local MCP/server environments can make the CLI list operation hang.
 
 ## 🐧 Requirements
 
@@ -180,6 +196,7 @@ All logic is in `helper/` folder:
 
 - `check-env.ps1` / `check-env.sh` - Verify setup
 - `setup-env.sh` - Install components (Node.js, npm, Codex)
+- `ensure-mcp.sh` - Sync MCP configs before launching Codex
   - **NEW**: Skips apt-get if it hangs
   - **NEW**: Downloads Node.js binaries directly
   - **NEW**: 3 retry attempts for npm install

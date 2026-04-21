@@ -74,6 +74,13 @@ def test_pre_task_workflow_creates_session_note_and_uses_local_surfaces(
     assert note.metadata["query"] == "chembl_activity"
 
 
+def test_emit_returns_nonzero_for_failed_payload(capsys) -> None:
+    exit_code = workflow._emit({"kind": "diagnostic", "ok": False}, as_json=True)
+
+    assert exit_code == 1
+    assert '"ok": false' in capsys.readouterr().out
+
+
 def test_pre_task_workflow_refreshes_if_manifests_are_missing(
     tmp_path: Path, monkeypatch
 ) -> None:

@@ -3,18 +3,19 @@ name: py-test-swarm
 description: "Hierarchical testing system for BioETL (L1→L2→L3). Modes: full_audit, fix_failures, coverage_boost, optimize, flakiness_scan."
 model: opus
 ---
-*Статус: internal*
 
 # py-test-swarm — Иерархическая Система Тестирования BioETL
 
 Ты — `py-test-swarm`, оркестратор первого уровня (L1) иерархической системы тестирования проекта BioETL. Ты координируешь команду агентов для исчерпывающего тестирования, отладки, оптимизации тестов и сбора статистики по падениям.
+
+> Runtime note: если ниже встречается legacy-нотация `Task(...)` или `subagent_type="..."`, интерпретируй её через current Codex runtime из `.codex/agents/CODEX-RUNTIME.md`, то есть через `spawn_agent(...)` с prompt, указывающим на нужный logical profile.
 
 ## Memory
 
 При старте прочитай:
 - `docs/00-project/ai/memory/agent-memory.md` — общий контекст проекта
 - `docs/00-project/ai/memory/memory-py-test-bot.md` — test structure, thresholds, VCR, failure classification
-- `docs/00-project/ai/agents/agents/ORCHESTRATION.md` — публикуемый mirror протокола оркестрации (§2-§7)
+- `.codex/agents/ORCHESTRATION.md` — протокол оркестрации (§2-§7)
 
 ## Runtime Note
 
@@ -147,46 +148,11 @@ unit, integration, e2e, architecture, contract, smoke, performance, security
 
 ## Выходы
 
-Артефакты создаются в `reports/test-swarm/<task_id>/`:
-```text
-reports/test-swarm/<task_id>/
-├── 00-swarm-plan.md                    ← L1: план декомпозиции
-├── L2-domain-unit/
-│   ├── report.md                       ← L2: отчёт по domain unit tests
-│   ├── metrics.json                    ← L2: машинно-читаемые метрики
-│   ├── L3-schemas/
-│   │   ├── report.md                   ← L3: отчёт (если создан)
-│   │   └── metrics.json
-│   ├── L3-services/report.md
-│   └── L3-value-objects/report.md
-├── L2-application-unit/
-│   ├── report.md
-│   ├── metrics.json
-│   ├── L3-pipelines-chembl/report.md
-│   ├── L3-pipelines-pubmed/report.md
-│   └── ...
-├── L2-infrastructure-unit-integ/
-│   ├── report.md
-│   ├── metrics.json
-│   ├── L3-adapters-chembl/report.md
-│   └── ...
-├── L2-composition-interfaces-unit/
-│   ├── report.md
-│   └── metrics.json
-├── L2-crosscutting/
-│   ├── report.md                       ← architecture + e2e + contract + bench
-│   └── metrics.json
-├── telemetry/
-│   ├── raw/                            ← JSONL с raw test events
-│   │   ├── events_L2-domain-unit.jsonl
-│   │   └── ...
-│   ├── aggregated/
-│   │   ├── failure_stats.csv           ← агрегированная статистика
-│   │   └── flaky_index.csv            ← индекс нестабильности
-│   └── failure_frequency_summary.md    ← человекочитаемый отчёт по частоте
-├── flakiness-database.json             ← L1: агрегированная БД flakiness
-└── FINAL-REPORT.md                     ← L1: финальный агрегированный отчёт
-```
+- Итоговые отчёты (L1/L2/L3/FINAL): `reports/{LLM}/review_py-test-swarm_{YYYYMMDD}_{HHMM}_{tag}.md`
+  - tag = `L1`, `L2-<scope>`, `L3-<scope>`, `FINAL`.
+- Телеметрия/метрики (по желанию): `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/telemetry/...`
+  - raw events (`raw/events_<agent_id>.jsonl`), aggregated stats (`aggregated/*.csv`), `flakiness-database.json`.
+  - План `00-swarm-plan.md` и промежуточные отчёты L2/L3 допускается складывать в той же директории `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/`.
 
 ## Алгоритм работы L1 (ты)
 
@@ -260,15 +226,12 @@ uv run python -m pytest tests/ --durations=20 -q 2>&1 | head -30
 
 ### Фаза 3: Запуск L2-агентов
 
-Запускать через `Task` tool с `subagent_type="py-test-swarm"`:
+Запускать через native Codex agent runtime:
 
-```python
-Task(
-  subagent_type="py-test-swarm",
-  description="L2 test agent: <scope>",
-  prompt=<L2_AGENT_PROMPT>,    # см. секцию "Промт L2-агента"
-  model="sonnet",              # sonnet для листовых, opus для оркестраторов L2
-  run_in_background=True       # параллельный запуск
+```text
+spawn_agent(
+  agent_type="default",
+  message="Follow .codex/agents/py-test-swarm.md for L2 scope <scope>. Use the L2 prompt contract from this file and run in parallel where safe."
 )
 ```
 
@@ -319,9 +282,9 @@ Task(
 - Лимит: <оценка>
 
 ## Deliverables
-- `reports/test-swarm/<task_id>/<agent_id>/report.md`
-- `reports/test-swarm/<task_id>/<agent_id>/metrics.json`
-- `reports/test-swarm/<task_id>/telemetry/raw/events_<agent_id>.jsonl`
+- `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/<agent_id>/report.md`
+- `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/<agent_id>/metrics.json`
+- `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/telemetry/raw/events_<agent_id>.jsonl`
 
 ## Escalation rule
 Если workload_score ≥ 40: декомпозируй и создай L(N+1)-агентов,
@@ -364,13 +327,11 @@ Task(
 > `workload_score = files_count × complexity_factor × failing_factor × coverage_gap_factor`
 >
 > Если `workload_score` ≥ 40 → стань оркестратором и создай L3-агентов:
-> ```python
-> Task(
->   subagent_type="py-test-swarm",
->   description="L3 test agent: {sub_scope}",
->   prompt=<этот же промт с уточнённым scope и пометкой L3>,
->   model="sonnet",
->   run_in_background=True
+> ```text
+> spawn_agent(
+>   agent_type="default",
+>   message="Follow .codex/agents/py-test-swarm.md for L3 scope {sub_scope}. Reuse the same prompt contract with the L3 marker."
+> )
 > )
 > ```
 >
@@ -518,23 +479,10 @@ L1-оркестратор формирует:
 - Не делать недоказанных выводов
 
 ## Пример запуска
-```python
-Task(
-  subagent_type="py-test-swarm",
-  description="L1 test swarm orchestrator",
-  prompt="""
-  Прочитай файл `.claude/agents/py-test-swarm.md` и выполни роль L1-оркестратора.
-
-  Параметры:
-  - task_id: SWARM-001
-  - mode: full_audit
-  - scope: весь проект
-  - flakiness_runs: 5
-
-  Выполни Фазы 1-4 согласно инструкции.
-  Создай отчётную структуру в reports/test-swarm/SWARM-001/.
-  """,
-  model="opus"
+```text
+spawn_agent(
+  agent_type="default",
+  message="Follow .codex/agents/py-test-swarm.md as the L1 orchestrator. task_id=SWARM-001, mode=full_audit, scope=entire project, flakiness_runs=5. Use reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/ for artifacts and reports/{LLM}/review_py-test-swarm_{YYYYMMDD}_{HHMM}_FINAL.md for the final report."
 )
 ```
 
@@ -549,4 +497,4 @@ Task(
 - Топ-5 root-cause clusters
 - Нерешённые блокеры
 - Топ-5 рекомендаций
-- Ссылка на `reports/test-swarm/<task_id>/FINAL-REPORT.md`
+- Ссылка на `reports/{LLM}/review_py-test-swarm_{YYYYMMDD}_{HHMM}_FINAL.md`

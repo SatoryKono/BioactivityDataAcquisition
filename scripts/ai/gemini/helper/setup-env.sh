@@ -81,7 +81,8 @@ fi
 
 GEMINI_BIN="$("${ENSURE_SCRIPT}" --print-bin)"
 GEMINI_PREFIX="$("${ENSURE_SCRIPT}" --print-prefix)"
-log_success "Gemini CLI ready: $("${GEMINI_BIN}" --version 2>/dev/null || echo unknown)"
+GEMINI_HOME="$(cd "${GEMINI_PREFIX}/.." && pwd)/home"
+log_success "Gemini CLI ready: $(GEMINI_CLI_HOME="${GEMINI_HOME}" PATH="${GEMINI_PREFIX}/bin:${PATH}" "${GEMINI_BIN}" --version 2>/dev/null || echo unknown)"
 log_success "Binary: ${GEMINI_BIN}"
 log_success "Prefix: ${GEMINI_PREFIX}"
 

@@ -58,6 +58,8 @@ Commands:
   device-login   Login with device auth
   check          Check environment setup
   setup          Setup missing components
+  mcp-check      Check Codex MCP configuration
+  mcp-setup      Sync Codex MCP configuration
   help           Show this help
 
 Examples:
@@ -79,6 +81,14 @@ case "$COMMAND" in
         ;;
     setup)
         bash "${HELPER_DIR}/setup-env.sh"
+        exit $?
+        ;;
+    mcp-check)
+        bash "${HELPER_DIR}/ensure-mcp.sh" --check
+        exit $?
+        ;;
+    mcp-setup)
+        bash "${HELPER_DIR}/ensure-mcp.sh" --ensure
         exit $?
         ;;
     *)

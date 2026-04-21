@@ -217,8 +217,12 @@ def _query_fields(chunk: dict[str, Any]) -> dict[str, str]:
         "title": str(chunk.get("title") or "").lower(),
         "path": str(chunk.get("source_path") or "").lower(),
         "content": str(chunk.get("content") or "").lower(),
-        "related": " ".join(str(item) for item in chunk.get("related_refs") or []).lower(),
-        "graph": " ".join(str(item) for item in chunk.get("graph_node_refs") or []).lower(),
+        "related": " ".join(
+            str(item) for item in chunk.get("related_refs") or []
+        ).lower(),
+        "graph": " ".join(
+            str(item) for item in chunk.get("graph_node_refs") or []
+        ).lower(),
     }
 
 

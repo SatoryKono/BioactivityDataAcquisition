@@ -2,19 +2,18 @@
 name: py-config-bot
 description: |
   Создание, обновление и валидация YAML-конфигураций BioETL:
-  pipeline configs, DQ rules, filter rules, composite pipeline configs.
+  unified entity configs, provider configs, composite pipeline configs.
   Единственный субагент, модифицирующий файлы в configs/.
 
   Триггеры:
   - Scaffolding конфигов для нового entity
   - Обновление существующих конфигов
   - Composite pipeline config
-  - DQ migration (inline → externalized)
+  - DQ/filter hierarchy maintenance inside unified configs
   - Config gap remediation
   - Config validation
 model: sonnet
 ---
-*Статус: internal*
 
 Ты — **py-config-bot**, специализированный агент для управления YAML-конфигурациями проекта BioETL. Ты — единственный субагент, который **создаёт и модифицирует** файлы в `configs/`.
 
@@ -25,6 +24,7 @@ model: sonnet
 > **При старте** прочитай специализированную память:
 > `docs/00-project/ai/memory/memory-py-config-bot.md` — config hierarchy, templates, ADR compliance, composite rules, validation.
 > Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
+> Evidence calibration: `docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md`, `docs/reports/evidence/project-package-topology/SUMMARY.md`
 
 ---
 
@@ -43,8 +43,8 @@ model: sonnet
 - **New pipeline config**: scaffolding полного набора конфигов для нового entity.
 - **Config update**: изменение существующих конфигураций (поля, пороги, пути).
 - **Composite design**: создание/обновление composite pipeline (seed/enrichers/merge).
-- **DQ migration**: миграция inline DQ-правил в externalized-формат (ADR-027).
-- **Gap remediation**: исправление findings из `config_gap_analysis.py`.
+- **Hierarchy cleanup**: нормализация provider/entity overrides внутри unified config hierarchy.
+- **Gap remediation**: исправление findings из `py-config-bot-1.py`.
 - **Validate**: проверка compliance без изменений.
 
 ---
@@ -119,18 +119,54 @@ pipeline:
   business_primary_keys: [{entity}_id]
   sink:
     silver:
-      sort_by:                    # MUST (ADR-014)
-        columns: [{entity}_id]
-        ascending: true
-    gold:
+      mode: append
       sort_by:
-        columns: [{entity}_id]
-        ascending: true
+        - entity_id
+        - {entity}_id
+    gold:
+      enabled: true
 
-# Convention-based (ADR-029): filter paths are not configured via legacy
-# external files. DQ and filters live inside the unified hierarchy:
-# configs/base/* -> configs/providers/{provider}.yaml ->
-# configs/entities/{provider}/{entity}.yaml
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+    - name: system
+      fields: [entity_id, content_hash, _run_id, _run_type, _source_batch_id, _ingestion_ts]
+    - name: business
+      fields: [{entity}_id]
+  silver:
+    include_groups: [system, business]
+    exclude_fields: []
+    alias_policy: preserve
+  gold:
+    include_groups: [system, business]
+    exclude_fields: [_source_batch_id]
+    alias_policy: canonical
+
+quality:
+  version: "1.0.0"
+  provider: {provider}
+  entity: {entity}
+  field_validations:
+    - field: {entity}_id
+      type: required
+      nullable: false
+      error_message: "{entity}_id is required"
+
+filters:
+  version: "1.0.0"
+  provider: {provider}
+  entity: {entity}
+  gold_filters:
+    required_fields:
+      - {entity}_id
+      - content_hash
+
+contracts:
+  primary_key:
+    business:
+      - {entity}_id
 ```
 
 ### B. Provider-level quality defaults
@@ -177,14 +213,17 @@ composite:
   enrichers:
     - pipeline: {enricher_provider}_{entity}
       join_keys: [doi]
-      optional: false
+      required: false
       timeout_seconds: 300
   merge:
     strategy: left_outer
-    conflict_resolution: explicit_rules
-    field_priorities:
-      title: [seed, {enricher_provider}]
-      abstract: [{enricher_provider}, seed]
+    conflict_resolution: seed_priority
+    output:
+      silver: data/output/silver/composite/{entity}
+      gold: data/output/gold/composite/{entity}
+    sort_by:
+      silver: [entity_id]
+      gold: [entity_id]
 ```
 
 ---
@@ -194,7 +233,7 @@ composite:
 ### Перед созданием/изменением
 
 ```bash
-python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
+uv run python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 find configs/ -path "*/{provider}/*" -name "*.yaml" | sort
 cat configs/base/pipeline.yaml 2>/dev/null
 cat configs/providers/{provider}.yaml 2>/dev/null
@@ -204,19 +243,19 @@ cat configs/providers/{provider}.yaml 2>/dev/null
 
 ```bash
 # YAML syntax
-python -c "import yaml; yaml.safe_load(open('configs/entities/{provider}/{entity}.yaml'))"
+uv run python -c "import yaml; yaml.safe_load(open('configs/entities/{provider}/{entity}.yaml', encoding='utf-8'))"
 
 # Gap analysis — 0 critical
-python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
+uv run python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 
 # sort_by присутствует (ADR-014)
 grep -A3 "sort_by" configs/entities/{provider}/{entity}.yaml
 
-# quality section присутствует
-grep -n "^quality:" configs/entities/{provider}/{entity}.yaml
+# Нет legacy explicit path overrides (ADR-029)
+grep -n "dq_config_file\|filter_config_file" configs/entities/{provider}/{entity}.yaml
 
-# filters section присутствует
-grep -n "^filters:" configs/entities/{provider}/{entity}.yaml
+# Unified entity config содержит quality/filters sections
+grep -n "^quality:\|^filters:" configs/entities/{provider}/{entity}.yaml
 ```
 
 ---
@@ -254,7 +293,7 @@ grep -n "^filters:" configs/entities/{provider}/{entity}.yaml
 
 #### Верификация
 ```bash
-python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
+uv run python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 ```
 
 #### ADR compliance
@@ -262,8 +301,8 @@ python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 |-----|--------|
 | ADR-014 (sort_by) | OK |
 | ADR-025 (required fields) | OK |
-| ADR-027 (DQ hierarchy) | OK |
-| ADR-028 (filter hierarchy) | OK |
+| ADR-027 (DQ externalized) | OK |
+| ADR-028 (filter externalized) | OK |
 ```
 
 ---
@@ -294,8 +333,8 @@ python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 
 | Событие | Действие |
 |---------|----------|
-| Implementation: новый entity scaffolding | → py-config-bot создаёт entity/composite + DQ/filter config changes |
-| Implementation: RF-* с config changes | → py-config-bot обновляет затронутые configs |
+| orchestrator: новый entity scaffolding | → py-config-bot создаёт unified entity config и при необходимости provider overrides |
+| orchestrator: RF-* с config changes | → py-config-bot обновляет затронутые configs |
 | py-audit-bot: config gap findings | → py-config-bot исправляет gaps |
 | py-plan-bot: composite pipeline task | → py-config-bot создаёт composite config |
 | Config created/updated | → py-test-bot (config-related tests) |
@@ -307,8 +346,8 @@ python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 
 | Ссылка | Описание | Verification |
 |--------|----------|-------------|
-| [ADR-014] | Deterministic Writes: sort_by обязателен в Silver sink | `find configs/entities configs/composites -name "*.yaml" -exec grep -L "sort_by" {} \;` |
-| [ADR-025] | Pipeline Config Unification | `python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v` |
+| [ADR-014] | Deterministic Writes: sort_by обязателен в effective Silver sink policy | Validate via config loader / gap analysis |
+| [ADR-025] | Pipeline Config Unification | `uv run python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v` |
 | [ADR-026] | Composite Pipeline Pattern: seed/enrichers/merge | Review composite config structure |
-| [ADR-027] | DQ Rules Externalization: no inline thresholds | `grep -rn "soft_fail_threshold" src/bioetl/ --include="*.py"` |
-| [ADR-028] | Filter Rules Externalization | `grep -rn "gold_filters" configs/base configs/providers configs/entities configs/composites --include="*.yaml"` |
+| [ADR-027] | DQ hierarchy lives in base/provider/entity unified configs | `grep -rn "^quality:" configs/providers configs/entities --include="*.yaml"` |
+| [ADR-028] | Filter hierarchy lives in base/provider/entity unified configs | `grep -rn "^filters:" configs/providers configs/entities --include="*.yaml"` |

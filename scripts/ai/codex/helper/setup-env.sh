@@ -7,6 +7,7 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-codex-cli.sh"
+ENSURE_MCP_SCRIPT="${SCRIPT_DIR}/ensure-mcp.sh"
 
 # Colors
 GREEN='\033[0;32m'
@@ -112,6 +113,22 @@ EOF
     log_warn ".env.codex created - please add your API key"
 else
     log_success ".env.codex exists"
+fi
+
+echo ""
+
+# STEP 5: Setup MCP
+log_info "STEP 5: Configuring MCP for Codex..."
+if [[ ! -x "${ENSURE_MCP_SCRIPT}" ]]; then
+    log_error "MCP helper not found: ${ENSURE_MCP_SCRIPT}"
+    exit 1
+fi
+
+if CODEX_BIN="${CODEX_BIN}" "${ENSURE_MCP_SCRIPT}" --ensure --codex-bin "${CODEX_BIN}" >/dev/null; then
+    log_success "MCP configuration synchronized"
+else
+    log_error "MCP configuration failed"
+    exit 1
 fi
 
 echo ""

@@ -136,9 +136,15 @@ def _score_timeline_severity(event: dict[str, Any], reasons: list[str]) -> int:
 def _timeline_query_fields(event: dict[str, Any]) -> dict[str, str]:
     return {
         "event_type": str(event.get("event_type") or "").lower(),
-        "source": " ".join(str(item) for item in event.get("source_refs") or []).lower(),
-        "related": " ".join(str(item) for item in event.get("related_refs") or []).lower(),
-        "graph": " ".join(str(item) for item in event.get("graph_node_refs") or []).lower(),
+        "source": " ".join(
+            str(item) for item in event.get("source_refs") or []
+        ).lower(),
+        "related": " ".join(
+            str(item) for item in event.get("related_refs") or []
+        ).lower(),
+        "graph": " ".join(
+            str(item) for item in event.get("graph_node_refs") or []
+        ).lower(),
         "payload": json.dumps(
             event.get("payload") or {}, sort_keys=True, ensure_ascii=True
         ).lower(),
@@ -378,20 +384,20 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _payload_exit_code(payload: dict[str, Any]) -> int:
+    return 0 if payload.get("ok", True) else 1
+
+
 def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
-    status_code = 0 if payload.get("ok", True) else 1
     if as_json:
         print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
-        return status_code
-
-    kind = payload.get("kind")
-    if kind == "catalog":
+    elif payload.get("kind") == "catalog":
         print(f"Catalog view: {payload['view']}")
         print(
             json.dumps(payload["payload"], indent=2, sort_keys=True, ensure_ascii=True)
         )
-        return status_code
-    if kind in {"rag", "timeline"}:
+    elif payload.get("kind") in {"rag", "timeline"}:
+        kind = payload["kind"]
         print(f"{kind} results: {payload['count']}")
         for item in payload["results"]:
             title = (
@@ -401,16 +407,15 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
                 or item.get("id")
             )
             print(f"- {title}")
-        return status_code
-    if kind == "all":
+    elif payload.get("kind") == "all":
         results = payload["results"]
         print(f"All-surface query: {payload['query']}")
         print(f"- catalog matches: {len(results['catalog'])}")
         print(f"- rag matches: {len(results['rag'])}")
         print(f"- timeline matches: {len(results['timeline'])}")
-        return status_code
-    print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
-    return status_code
+    else:
+        print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
+    return _payload_exit_code(payload)
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -132,6 +132,30 @@
         "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_needle_wrapper.sh"
       ]
     },
+    "chembl": {
+      "command": "bash",
+      "args": [
+        "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_chembl_wrapper.sh"
+      ]
+    },
+    "pubchem": {
+      "command": "bash",
+      "args": [
+        "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubchem_wrapper.sh"
+      ]
+    },
+    "pubmed": {
+      "command": "bash",
+      "args": [
+        "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubmed_wrapper.sh"
+      ]
+    },
+    "mermaid": {
+      "command": "bash",
+      "args": [
+        "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_mermaid_wrapper.sh"
+      ]
+    },
     "openaiDeveloperDocs": {
       "type": "http",
       "url": "https://developers.openai.com/mcp"

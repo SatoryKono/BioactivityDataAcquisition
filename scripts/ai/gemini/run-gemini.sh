@@ -54,7 +54,7 @@ Commands:
   (no args)      Start interactive Gemini
   start          Start interactive mode
   prompt         Send a single prompt
-  exec           Alias for prompt mode (does not auto-edit files)
+  exec           Auto-execute in headless mode (YOLO approvals)
   check          Check environment setup
   setup          Setup missing components
   update         Update managed Gemini runtime
@@ -64,6 +64,7 @@ Examples:
   ./run-gemini.sh
   ./run-gemini.sh "what is AI?"
   ./run-gemini.sh prompt "explain this repository"
+  ./run-gemini.sh exec "fix formatting issues"
   ./run-gemini.sh "explain quantum computing"
 
 EOF
@@ -127,21 +128,31 @@ case "$COMMAND" in
         bash "${HELPER_DIR}/run-gemini-impl.sh" "$@"
         ;;
 
-    prompt|exec)
+    prompt)
         if [[ $# -eq 0 ]]; then
-            log_error "${COMMAND} mode requires a prompt"
+            log_error "prompt mode requires a prompt"
             exit 1
         fi
         log_info "Launching Gemini with prompt..."
         echo ""
-        bash "${HELPER_DIR}/run-gemini-impl.sh" "$@"
+        bash "${HELPER_DIR}/run-gemini-impl.sh" --prompt "$*"
+        ;;
+
+    exec)
+        if [[ $# -eq 0 ]]; then
+            log_error "exec mode requires a prompt"
+            exit 1
+        fi
+        log_info "Launching Gemini in headless auto-execute mode..."
+        echo ""
+        bash "${HELPER_DIR}/run-gemini-impl.sh" --prompt "$*" --approval-mode yolo
         ;;
     
     *)
         # Treat first arg as prompt
         log_info "Launching Gemini with prompt..."
         echo ""
-        bash "${HELPER_DIR}/run-gemini-impl.sh" "$COMMAND" "$@"
+        bash "${HELPER_DIR}/run-gemini-impl.sh" --prompt "$COMMAND $*"
         ;;
 esac
 

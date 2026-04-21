@@ -9,7 +9,9 @@ REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SC
 GEMINI_TOOL_HOME_DEFAULT="${REPO_ROOT}/.cache/tools/gemini-cli"
 GEMINI_NPM_PREFIX="${GEMINI_NPM_PREFIX:-${GEMINI_TOOL_HOME_DEFAULT}/npm-global}"
 GEMINI_NPM_CACHE="${GEMINI_NPM_CACHE:-${GEMINI_TOOL_HOME_DEFAULT}/npm-cache}"
+GEMINI_CLI_HOME="${GEMINI_CLI_HOME:-${GEMINI_TOOL_HOME_DEFAULT}/home}"
 GEMINI_BIN="${GEMINI_NPM_PREFIX}/bin/gemini"
+GEMINI_NODE_BIN="${GEMINI_NPM_PREFIX}/bin/node"
 
 MODE="ensure"
 PRINT_BIN=0
@@ -53,6 +55,7 @@ fi
 if [[ "${ALLOW_INSTALL}" -eq 1 ]]; then
     mkdir -p "${GEMINI_NPM_PREFIX}"
     mkdir -p "${GEMINI_NPM_CACHE}"
+    mkdir -p "${GEMINI_CLI_HOME}"
 fi
 
 export NPM_CONFIG_PREFIX="${GEMINI_NPM_PREFIX}"
@@ -62,7 +65,7 @@ export npm_config_cache="${GEMINI_NPM_CACHE}"
 export PATH="${GEMINI_NPM_PREFIX}/bin:${PATH}"
 
 need_install=0
-if [[ "${MODE}" == "update" || ! -x "${GEMINI_BIN}" ]]; then
+if [[ "${MODE}" == "update" || ! -x "${GEMINI_BIN}" || ! -x "${GEMINI_NODE_BIN}" ]]; then
     need_install=1
 fi
 
@@ -73,12 +76,22 @@ if [[ "${need_install}" -eq 1 && "${ALLOW_INSTALL}" -eq 1 ]]; then
         echo "[ensure-gemini] Installing Gemini CLI in ${GEMINI_NPM_PREFIX}..." >&2
     fi
 
-    npm install --global --prefix "${GEMINI_NPM_PREFIX}" --silent @google/gemini-cli@latest \
-        2>/dev/null || npm install --global --prefix "${GEMINI_NPM_PREFIX}" @google/gemini-cli@latest >&2
+    npm install --global --prefix "${GEMINI_NPM_PREFIX}" --silent node@22 @google/gemini-cli@latest \
+        2>/dev/null || npm install --global --prefix "${GEMINI_NPM_PREFIX}" node@22 @google/gemini-cli@latest >&2
 fi
 
 if [[ ! -x "${GEMINI_BIN}" ]]; then
     echo "[ensure-gemini] ERROR: Gemini CLI binary not found after installation: ${GEMINI_BIN}" >&2
+    exit 1
+fi
+
+if [[ ! -x "${GEMINI_NODE_BIN}" ]]; then
+    echo "[ensure-gemini] ERROR: Managed Node.js binary not found after installation: ${GEMINI_NODE_BIN}" >&2
+    exit 1
+fi
+
+if ! GEMINI_CLI_HOME="${GEMINI_CLI_HOME}" PATH="${GEMINI_NPM_PREFIX}/bin:${PATH}" "${GEMINI_BIN}" --version >/dev/null 2>&1; then
+    echo "[ensure-gemini] ERROR: Gemini CLI failed to start from managed prefix: ${GEMINI_BIN}" >&2
     exit 1
 fi
 

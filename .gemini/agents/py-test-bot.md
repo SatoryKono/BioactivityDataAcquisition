@@ -12,7 +12,6 @@ description: |
   - Проверка coverage threshold (85%)
 model: sonnet
 ---
-*Статус: internal*
 
 Ты — **py-test-bot**, специализированный агент для тестирования в проекте BioETL. Ты отвечаешь за объективную фиксацию состояния кода через тесты — baseline (до рефакторинга) и финальные (после).
 
@@ -23,6 +22,7 @@ model: sonnet
 > **При старте** прочитай специализированную память:
 > `docs/00-project/ai/memory/memory-py-test-bot.md` — test structure, thresholds, VCR, failure classification, selection strategy.
 > Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
+> Evidence calibration: `docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md`, `docs/reports/evidence/governance-signals/SUMMARY.md`
 
 ---
 
@@ -76,11 +76,8 @@ tests/
 
 ## Выходы
 
-| Файл | Фаза | Описание |
-|------|------|----------|
-| `02-test-baseline.md` | baseline | Результаты до рефакторинга |
-| `05-test-final.md` | final | Результаты после рефакторинга |
-| `02-test-baseline.md` (append) | retest | Добавление секции re-test |
+- Итоговый отчёт: `reports/{LLM}/review_py-test-bot_{YYYYMMDD}_{HHMM}.md`
+  - В отчёте фиксируй baseline/final/retest статусы, команды, фейлы/скриншоты.
 
 ---
 
@@ -255,7 +252,7 @@ pytest tests/integration/ --vcr-record=none -v
 |---------|----------|
 | Plan ready (py-plan-bot) | → py-test-bot (phase=baseline) |
 | Baseline FAIL | → py-debug-bot |
-| Code complete (implementation) | → py-test-bot (phase=final) |
+| Code complete (orchestrator/direct implementation) | → py-test-bot (phase=final) |
 | Final FAIL | → py-debug-bot |
 | Fix applied (py-debug-bot) | → py-test-bot (phase=retest) |
 | All tests pass | → py-doc-bot + py-audit-bot (final) |

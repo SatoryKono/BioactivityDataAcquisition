@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from memory.query import query_all, query_catalog, query_rag, query_timeline
+from memory.query import _emit, query_all, query_catalog, query_rag, query_timeline
 
 
 def test_query_catalog_returns_sources_view() -> None:
@@ -13,6 +13,13 @@ def test_query_catalog_returns_sources_view() -> None:
     assert payload["kind"] == "catalog"
     assert payload["view"] == "sources"
     assert "sources" in payload["payload"]
+
+
+def test_emit_returns_nonzero_for_failed_payload(capsys) -> None:
+    exit_code = _emit({"kind": "diagnostic", "ok": False}, as_json=True)
+
+    assert exit_code == 1
+    assert '"ok": false' in capsys.readouterr().out
 
 
 def test_query_rag_filters_local_manifest(tmp_path: Path) -> None:
