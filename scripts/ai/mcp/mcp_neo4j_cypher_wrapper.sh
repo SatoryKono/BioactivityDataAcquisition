@@ -2,6 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
 # shellcheck source=./support/load_repo_env.sh
 export BIOETL_SKIP_ENV_LOCAL=1
 source "${SCRIPT_DIR}/support/load_repo_env.sh"
@@ -26,8 +27,18 @@ if [[ -z "${NEO4J_USERNAME}" || -z "${NEO4J_PASSWORD}" ]] && mapfile -t auth_par
 fi
 
 export NEO4J_URI
+export NEO4J_URL="${NEO4J_URL:-${NEO4J_URI}}"
 export NEO4J_USERNAME="${NEO4J_USERNAME:-neo4j}"
 export NEO4J_PASSWORD="${NEO4J_PASSWORD:-bioetl_secure_password}"
-export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-/tmp/npm-cache}"
+export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
 
-exec npx -y @modelcontextprotocol/server-neo4j@1.0.0 "$@"
+for managed_node_prefix in \
+    "${REPO_ROOT}/.cache/tools/gemini-cli/npm-global" \
+    "${REPO_ROOT}/.cache/tools/codex-cli/npm-global"; do
+    if [[ -x "${managed_node_prefix}/bin/node" ]]; then
+        export PATH="${managed_node_prefix}/bin:${PATH}"
+        break
+    fi
+done
+
+exec npx -y @daanrongen/neo4j-mcp@1.1.4 "$@"

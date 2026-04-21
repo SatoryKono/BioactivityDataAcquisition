@@ -119,7 +119,7 @@ services:
       - ollama-data:/root/.ollama
     entrypoint: ["ollama", "serve"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      test: ["CMD", "ollama", "list"]
       interval: 10s
       timeout: 5s
       retries: 3

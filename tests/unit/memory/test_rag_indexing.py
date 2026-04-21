@@ -200,9 +200,10 @@ def test_build_rag_manifests_indexes_docs_code_tests_and_configs(
         chunk for chunk in chunks if chunk["source_type"] == "workflow"
     )
     assert "workflow::.github/workflows/tests.yml" in workflow_chunk["related_refs"]
-    assert "operational_artifact:.github/workflows/tests.yml" in workflow_chunk[
-        "graph_node_refs"
-    ]
+    assert (
+        "operational_artifact:.github/workflows/tests.yml"
+        in workflow_chunk["graph_node_refs"]
+    )
 
 
 def test_write_and_reload_rag_manifests(tmp_path: Path) -> None:
