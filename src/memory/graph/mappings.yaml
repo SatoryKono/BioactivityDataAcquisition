@@ -168,6 +168,15 @@ pipeline_tests:
   ownership_config: "configs/quality/test_matrix.yaml"
   provider_regression_suites: true
 
+graph_entity_relations:
+  generated_index: "src/memory/graph/indexes/entity_relations.json"
+  generated_projection: "src/memory/graph/projections/entity_relations.jsonl"
+  relation_types:
+    pipeline_defined_by_config: "defined_by"
+    pipeline_described_by_doc: "described_by"
+    pipeline_tested_by_test: "tested_by"
+    adr_constrains_target: "constrains"
+
 normalization:
   relation_type: "DEPENDS_ON"
   entity_relation_type: "DEPENDS_ON"

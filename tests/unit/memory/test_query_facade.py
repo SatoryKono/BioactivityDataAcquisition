@@ -6,10 +6,13 @@ import json
 from pathlib import Path
 
 from memory.query import (
+    RagQueryOptions,
     _emit,
     main,
     query_all,
     query_catalog,
+    query_entity_impact,
+    query_entity_refs,
     query_file_impact,
     query_file_refs,
     query_module_impact,
@@ -63,13 +66,15 @@ def test_query_rag_filters_local_manifest(tmp_path: Path) -> None:
     )
 
     payload = query_rag(
-        query="pipeline",
-        source_type="code",
-        domain="runtime",
-        repo_zone="canonical_runtime",
-        symbol_kind="function",
-        chunks_path=chunks_path,
-        limit=5,
+        RagQueryOptions(
+            query="pipeline",
+            source_type="code",
+            domain="runtime",
+            repo_zone="canonical_runtime",
+            symbol_kind="function",
+            chunks_path=chunks_path,
+            limit=5,
+        )
     )
     assert payload["kind"] == "rag"
     assert payload["count"] == 1
@@ -118,14 +123,12 @@ def test_query_rag_profile_prefers_runtime_code_for_implementation_tasks(
     )
 
     payload = query_rag(
-        query="chembl_activity",
-        source_type=None,
-        domain=None,
-        repo_zone=None,
-        symbol_kind=None,
-        chunks_path=chunks_path,
-        limit=5,
-        profile="implementation",
+        RagQueryOptions(
+            query="chembl_activity",
+            chunks_path=chunks_path,
+            limit=5,
+            profile="implementation",
+        )
     )
     assert payload["results"][0]["id"] == "code-1"
     assert payload["results"][0]["score"] >= payload["results"][1]["score"]
@@ -217,15 +220,13 @@ def test_query_rag_boosts_file_relation_context(tmp_path: Path) -> None:
     )
 
     payload = query_rag(
-        query="shared",
-        source_type=None,
-        domain=None,
-        repo_zone=None,
-        symbol_kind=None,
-        chunks_path=chunks_path,
-        limit=5,
-        file_context="focus.py",
-        file_relation_index_path=index_path,
+        RagQueryOptions(
+            query="shared",
+            chunks_path=chunks_path,
+            limit=5,
+            file_context="focus.py",
+            file_relation_index_path=index_path,
+        )
     )
 
     assert [item["id"] for item in payload["results"][:2]] == ["focus", "related"]
@@ -551,3 +552,85 @@ def test_query_module_refs_reads_generated_relation_index(tmp_path: Path) -> Non
     assert refs["resolved_module"] == "pkg.a"
     assert refs["outbound"][0]["target_name"] == "pkg.b"
     assert impact["impact_candidates"]["modules_that_reference_query"] == ["pkg.a"]
+
+
+def test_query_entity_refs_reads_generated_relation_index(tmp_path: Path) -> None:
+    index_path = tmp_path / "entity_relations.json"
+    index_path.write_text(
+        json.dumps(
+            {
+                "kind": "entity_relation_index",
+                "source_snapshot": "snapshot.json",
+                "relation_count": 1,
+                "entity_count": 2,
+                "relation_counts": {"defined_by": 1},
+                "by_entity": {
+                    "pipeline:chembl_activity": {
+                        "name": "chembl_activity",
+                        "kind": "pipeline",
+                        "path": "configs/entities/chembl/activity.yaml",
+                        "outbound": [
+                            {
+                                "id": "pipeline:chembl_activity|defined_by|config:activity",
+                                "direction": "outbound",
+                                "relation": "defined_by",
+                                "source_id": "pipeline:chembl_activity",
+                                "source_name": "chembl_activity",
+                                "source_kind": "pipeline",
+                                "source_path": "configs/entities/chembl/activity.yaml",
+                                "target_id": "config:activity",
+                                "target_name": "activity.yaml",
+                                "target_kind": "config",
+                                "target_path": "configs/entities/chembl/activity.yaml",
+                                "confidence": "derived",
+                                "provenance": "test",
+                                "source_generated_at": "2026-04-17",
+                                "evidence": {},
+                            }
+                        ],
+                        "inbound": [],
+                    },
+                    "config:activity": {
+                        "name": "activity.yaml",
+                        "kind": "config",
+                        "path": "configs/entities/chembl/activity.yaml",
+                        "outbound": [],
+                        "inbound": [
+                            {
+                                "id": "pipeline:chembl_activity|defined_by|config:activity",
+                                "direction": "inbound",
+                                "relation": "defined_by",
+                                "source_id": "pipeline:chembl_activity",
+                                "source_name": "chembl_activity",
+                                "source_kind": "pipeline",
+                                "source_path": "configs/entities/chembl/activity.yaml",
+                                "target_id": "config:activity",
+                                "target_name": "activity.yaml",
+                                "target_kind": "config",
+                                "target_path": "configs/entities/chembl/activity.yaml",
+                                "confidence": "derived",
+                                "provenance": "test",
+                                "source_generated_at": "2026-04-17",
+                                "evidence": {},
+                            }
+                        ],
+                    },
+                },
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+
+    refs = query_entity_refs(
+        entity="chembl_activity",
+        direction="outbound",
+        index_path=index_path,
+    )
+    impact = query_entity_impact(entity="config:activity", index_path=index_path)
+
+    assert refs["resolved_entity"] == "pipeline:chembl_activity"
+    assert refs["outbound"][0]["target_id"] == "config:activity"
+    assert impact["impact_candidates"]["entities_that_reference_query"] == [
+        "pipeline:chembl_activity"
+    ]

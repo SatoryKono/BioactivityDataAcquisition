@@ -76,6 +76,7 @@ validate_codex_mcp_list() {
         fi
         warn "'codex mcp list --json' failed or timed out; config files were still synchronized"
     fi
+    return 0
 }
 
 if [[ ! -f "${SETUP_MCP}" ]]; then

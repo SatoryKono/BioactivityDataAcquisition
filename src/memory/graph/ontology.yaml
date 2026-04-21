@@ -55,7 +55,9 @@ relation_families:
     - DECLARES
     - BACKED_BY
     - DESCRIBED_IN
+    - DEFINED_BY
     - GOVERNS
+    - CONSTRAINS
   engineering_links:
     - DEPENDS_ON
     - TESTED_BY

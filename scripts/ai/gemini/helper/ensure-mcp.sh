@@ -112,6 +112,7 @@ validate_gemini_mcp_list() {
         fi
         warn "'gemini mcp list' failed or timed out; workspace settings were still synchronized"
     fi
+    return 0
 }
 
 sync_required_server_enablement() {
@@ -151,6 +152,7 @@ for name in ("memory", "filesystem", "sequential-thinking", "openaiDeveloperDocs
 
 path.write_text(json.dumps(payload, indent=2, ensure_ascii=True) + "\n", encoding="utf-8")
 PY
+    return 0
 }
 
 if [[ ! -f "${SETUP_MCP}" ]]; then

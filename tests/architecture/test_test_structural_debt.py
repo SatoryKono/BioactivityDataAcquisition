@@ -9,7 +9,7 @@ MAX_TEST_FILE_LOC = 2000
 MAX_TEST_FUNCTION_LOC = 200
 
 TEST_FILE_LOC_EXEMPTIONS = {
-    "tests/unit/scripts/ops/test_neo4j_memory_sync.py": 3040,
+    "tests/unit/scripts/ops/test_neo4j_memory_sync.py": 3082,
     "tests/unit/infrastructure/storage/test_bronze_writer.py": 2016,
 }
 

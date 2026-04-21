@@ -952,6 +952,20 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "docs/04-reference/contracts/run-manifest-ledger.md",
     ),
     (
+        "module_surface",
+        "src/bioetl/domain/control_plane/run_manifest.py",
+        "DESCRIBED_IN",
+        "doc_artifact",
+        "docs/04-reference/contracts/run-manifest-ledger.md",
+    ),
+    (
+        "decision",
+        "ADR-018-gold-strict-validation",
+        "CONSTRAINS",
+        "config_artifact",
+        "configs/entities/chembl/activity.yaml",
+    ),
+    (
         "contract_surface",
         "chembl.activity",
         "DEPENDS_ON",
@@ -1010,6 +1024,20 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     (
         "pipeline_surface",
         "chembl_activity",
+        "DEFINED_BY",
+        "config_artifact",
+        "configs/entities/chembl/activity.yaml",
+    ),
+    (
+        "pipeline_surface",
+        "chembl_activity",
+        "DESCRIBED_IN",
+        "doc_artifact",
+        "docs/04-reference/pipelines/chembl/05-activity-spec.md",
+    ),
+    (
+        "pipeline_surface",
+        "chembl_activity",
         "RUNS_VIA",
         "execution_path",
         "uv run python -m bioetl run --pipeline",
@@ -1049,6 +1077,13 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "TESTED_BY",
         "test_surface",
         "integration tests",
+    ),
+    (
+        "pipeline_surface",
+        "composite_activity",
+        "DEFINED_BY",
+        "config_artifact",
+        "configs/composites/activity.yaml",
     ),
     (
         "pipeline_surface",
@@ -2075,6 +2110,13 @@ def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
         "DESCRIBES",
         "module_surface",
         "src/bioetl/domain/control_plane/run_manifest.py",
+    ) in relation_keys
+    assert (
+        "module_surface",
+        "src/bioetl/domain/control_plane/run_manifest.py",
+        "DESCRIBED_IN",
+        "doc_artifact",
+        "docs/04-reference/contracts/run-manifest-ledger.md",
     ) in relation_keys
     assert (
         "doc_claim_surface",
