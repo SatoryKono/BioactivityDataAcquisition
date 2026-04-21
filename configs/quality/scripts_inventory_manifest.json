@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-21T10:30:58.658468+00:00",
+  "generated_at": "2026-04-21T11:32:49.522508+00:00",
   "summary": {
     "total_scripts": 429,
     "status_counts": {
@@ -6547,13 +6547,13 @@
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 378,
+          "line": 385,
           "source_group": "scripts",
           "text": "if should_run_preflight && [[ -f \"scripts/engineering/dev/pretest_guardrails.sh\" ]]; then"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 381,
+          "line": 388,
           "source_group": "scripts",
           "text": "preflight_cmd=(bash scripts/engineering/dev/pretest_guardrails.sh --mode \"$preflight_mode\" --scope \"$preflight_scope\")"
         }
@@ -10071,19 +10071,19 @@
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 438,
+          "line": 445,
           "source_group": "scripts",
           "text": "if [[ -f \"scripts/ops/launchers/codex/setup_plugins.sh\" ]]; then"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 439,
+          "line": 446,
           "source_group": "scripts",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 443,
+          "line": 450,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
         },

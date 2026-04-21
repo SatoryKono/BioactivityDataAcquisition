@@ -360,24 +360,38 @@ selected_python() {
         printf '%s\n' "$BIOETL_PYTEST_RUNTIME_PYTHON"
         return 0
     fi
-    if windows_venv_supports_pytest_cov; then
-        printf '%s\n' "$REPO_ROOT/.venv-win/Scripts/python.exe"
-        return 0
-    fi
     if [[ -x "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" ]]; then
-        printf '%s\n' "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"
-        return 0
+        local wsl_python="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"
+        if python_has_modules "$wsl_python" coverage; then
+            printf '%s\n' "$wsl_python"
+            return 0
+        fi
     fi
     if [[ -x ".venv/bin/python" ]]; then
-        printf '%s\n' "$REPO_ROOT/.venv/bin/python"
-        return 0
+        local repo_python="$REPO_ROOT/.venv/bin/python"
+        if python_has_modules "$repo_python" coverage; then
+            printf '%s\n' "$repo_python"
+            return 0
+        fi
     fi
     if command -v python3 >/dev/null 2>&1; then
-        command -v python3
-        return 0
+        local system_python3
+        system_python3="$(command -v python3)"
+        if python_has_modules "$system_python3" coverage; then
+            printf '%s\n' "$system_python3"
+            return 0
+        fi
     fi
     if command -v python >/dev/null 2>&1; then
-        command -v python
+        local system_python
+        system_python="$(command -v python)"
+        if python_has_modules "$system_python" coverage; then
+            printf '%s\n' "$system_python"
+            return 0
+        fi
+    fi
+    if windows_venv_supports_pytest_cov; then
+        printf '%s\n' "$REPO_ROOT/.venv-win/Scripts/python.exe"
         return 0
     fi
     return 1
