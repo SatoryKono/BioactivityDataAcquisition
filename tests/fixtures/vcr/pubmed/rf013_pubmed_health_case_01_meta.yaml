@@ -1,3 +1,7 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:f06a2dff9da4c55ec33cf13bae229c5df37b1c880925680a268d510c1a918cdb
-size 301
+schema_version: 1
+provider: pubmed
+cassette_rel_path: tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_01.yaml
+metadata_status: seeded_partial_backfill
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: bc5f7981f125256fccf4d497262a21cfdc35d50334e6157ae715b1e604a94580
+staleness_ready: false

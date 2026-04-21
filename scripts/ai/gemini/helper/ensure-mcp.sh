@@ -41,10 +41,12 @@ done
 fail() {
     echo "[mcp] ERROR: $*" >&2
     exit 1
+    return 1
 }
 
 warn() {
     echo "[mcp] WARN: $*" >&2
+    return 0
 }
 
 resolve_gemini_runtime() {
@@ -56,6 +58,7 @@ resolve_gemini_runtime() {
             GEMINI_PREFIX="$("${ENSURE_GEMINI}" --no-install --print-prefix 2>/dev/null || true)"
         fi
     fi
+    return 0
 }
 
 check_workspace_settings() {
@@ -79,6 +82,7 @@ rendered = json.dumps(servers, sort_keys=True)
 if repo_root not in rendered:
     raise SystemExit("mcpServers does not reference current repository root")
 PY
+    return 0
 }
 
 validate_gemini_mcp_list() {
@@ -164,6 +168,9 @@ case "${MODE}" in
             --skip-codex-config >/dev/null
         ;;
     check)
+        ;;
+    *)
+        fail "Unsupported MCP mode: ${MODE}"
         ;;
 esac
 

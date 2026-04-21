@@ -40,3 +40,7 @@
 
 # Git LFS tracking for large VCR cassettes
 tests/fixtures/vcr/**/*.yaml filter=lfs diff=lfs merge=lfs -text
+
+# VCR metadata sidecars are small governance payloads and must remain readable
+# text for architecture tests and review diffs.
+tests/fixtures/vcr/**/*_meta.yaml text eol=lf -filter -diff -merge

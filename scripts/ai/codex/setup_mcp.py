@@ -19,6 +19,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 FETCH_SPEC = ["--from", "mcp-server-fetch==2025.4.7", "mcp-server-fetch"]
 MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
 MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
+CACHE_DIR_NAME = ".cache"
 
 
 def _wrapper_command(script_name: str, workspace_root: Path) -> dict[str, Any]:
@@ -39,9 +40,10 @@ def _wrapper_command(script_name: str, workspace_root: Path) -> dict[str, Any]:
 
 def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
     memory_file_path = workspace_root / "docs/00-project/ai/memory/mcp-memory.json"
-    npm_cache_dir = str((workspace_root / ".cache" / "npm-cache").resolve())
-    uv_cache_dir = str((workspace_root / ".cache" / "uv-cache").resolve())
-    uv_tool_dir = str((workspace_root / ".cache" / "uv-tools").resolve())
+    cache_root = workspace_root / CACHE_DIR_NAME
+    npm_cache_dir = str((cache_root / "npm-cache").resolve())
+    uv_cache_dir = str((cache_root / "uv-cache").resolve())
+    uv_tool_dir = str((cache_root / "uv-tools").resolve())
     servers: dict[str, dict[str, Any]] = {
         "memory": {
             "command": "npx",

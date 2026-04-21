@@ -1,3 +1,7 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:21e4f55d9c3a549b3470ff0a4b1db938a56e8352eea9d891845b0cf981f4a833
-size 305
+schema_version: 1
+provider: chembl
+cassette_rel_path: tests/fixtures/vcr/chembl/test_all_chembl_pipelines_chain.yaml
+metadata_status: seeded_partial_backfill
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: 29ab47d227caa23138fae2f0f01ed78bcb0b15b18f41af228e6055a586908ba5
+staleness_ready: false

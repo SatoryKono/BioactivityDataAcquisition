@@ -1,3 +1,7 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:221784de7594fefb6bea9a216ff4beaf9a4c24eb59586d9beabdcabef8019fbc
-size 308
+schema_version: 1
+provider: pubchem
+cassette_rel_path: tests/fixtures/vcr/pubchem/test_pubchem_compound_full_cycle.yaml
+metadata_status: seeded_partial_backfill
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: 33a7830935fe91d2b7e1342af0beb2c031bf4f521f2a33fb24b583ff39d65927
+staleness_ready: false

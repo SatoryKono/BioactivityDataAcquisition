@@ -1,3 +1,7 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:4472ae0f3e52a286029b34a78e090836d786f82df4dad7a75aa410e6200b64cf
-size 307
+schema_version: 1
+provider: crossref
+cassette_rel_path: tests/fixtures/vcr/crossref/rf013_crossref_health_case_01.yaml
+metadata_status: seeded_partial_backfill
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: c0e77ba25d3023709fd308ab633148f5731846dfe856023d77b9f79e04abc499
+staleness_ready: false
