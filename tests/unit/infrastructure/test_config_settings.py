@@ -111,6 +111,15 @@ class TestPipelineSettings:
 
     def test_control_plane_checkpoint_policy_validation(self) -> None:
         """Checkpoint compatibility policy must be a supported literal."""
+        settings = PipelineSettings(
+            control_plane={
+                "checkpoint_compatibility_policy": "legacy_observe",
+            }
+        )
+        assert settings.control_plane.checkpoint_compatibility_policy == (
+            "legacy_observe"
+        )
+
         with pytest.raises(ValidationError):
             PipelineSettings(
                 control_plane={

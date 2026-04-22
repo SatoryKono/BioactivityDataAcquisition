@@ -160,6 +160,37 @@ def test_build_checkpoint_manager_uses_control_plane_policy() -> None:
 
 
 @pytest.mark.unit
+def test_build_checkpoint_manager_supports_legacy_observe_policy() -> None:
+    pipeline = cast(Any, _make_pipeline())
+    logger = MagicMock()
+    pipeline.settings.pipeline.control_plane.checkpoint_compatibility_policy = (
+        "legacy_observe"
+    )
+
+    with (
+        patch(
+            "bioetl.composition.factories.pipeline.runner_assembly"
+            ".CheckpointCompatibilityService",
+            return_value=MagicMock(),
+        ),
+        patch(
+            "bioetl.composition.factories.pipeline.runner_assembly"
+            ".ServicesBuilder.create_checkpoint_manager",
+            return_value=MagicMock(),
+        ) as mock_create_manager,
+    ):
+        _build_checkpoint_manager(
+            pipeline=pipeline,
+            logger_port=logger,
+        )
+
+    assert (
+        mock_create_manager.call_args.kwargs["compatibility_policy"]
+        == "legacy_observe"
+    )
+
+
+@pytest.mark.unit
 def test_build_checkpoint_manager_supports_hard_fail_policy() -> None:
     pipeline = cast(Any, _make_pipeline())
     logger = MagicMock()

@@ -80,6 +80,8 @@ def _make_manifest() -> RunManifest:
             pipeline_version="1.0.0",
             git_commit="abc1234",
             config_hash=_VALID_CONFIG_HASH,
+            resolved_config_hash="b" * 64,
+            effective_config_hash=_VALID_CONFIG_HASH,
             contract_ref="chembl.activity",
             contract_version="1.2.0",
             dq_policy_ref="chembl_activity.gold",
@@ -271,6 +273,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "entity": "activity",
         "execution_fingerprint": "fingerprint-diagnostics",
         "config_hash": _VALID_CONFIG_HASH,
+        "resolved_config_hash": "b" * 64,
         "effective_config_hash": _VALID_CONFIG_HASH,
         "pipeline_version": "1.0.0",
         "contract_ref": "chembl.activity",
@@ -367,6 +370,59 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
             "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
             "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         ],
+        "reproducibility_audit_score": {
+            "schema_version": "1.0",
+            "scale": "0-10",
+            "overall_score": 7.3,
+            "category_scores": {
+                "determinism": {
+                    "score": 6,
+                    "evidence": [
+                        "effective_config_hash_present",
+                        "missing_immutable_input_snapshots",
+                        "exact_replay_blockers_present",
+                    ],
+                },
+                "idempotency": {
+                    "score": 6,
+                    "evidence": ["no_published_artifacts_observed"],
+                },
+                "run_identity": {
+                    "score": 10,
+                    "evidence": [
+                        "manifest_id_present",
+                        "execution_fingerprint_present",
+                        "resolved_config_hash_present",
+                        "effective_config_hash_present",
+                        "effective_config_artifact_id_present",
+                        "contract_ref_present",
+                    ],
+                },
+                "checkpoint_safety": {"score": 8, "evidence": []},
+                "lineage_completeness": {
+                    "score": 7,
+                    "evidence": [
+                        "identity_graph_incomplete",
+                        "no_lineage_fragments_observed",
+                    ],
+                },
+                "replay_readiness": {
+                    "score": 6,
+                    "evidence": [
+                        "exact_replay_not_eligible",
+                        "exact_replay_blockers_present",
+                    ],
+                },
+                "layer_consistency": {
+                    "score": 8,
+                    "evidence": [
+                        "legacy_config_hash_alias_matches_effective_hash",
+                        "resolved_and_effective_hashes_exposed",
+                    ],
+                },
+            },
+            "source": "run_manifest_diagnostics",
+        },
     }
 
 
@@ -539,6 +595,8 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "run_id": str(manifest.run_id),
         "manifest_id": "manifest-diagnostics",
         "execution_fingerprint": "fingerprint-diagnostics",
+        "config_hash": _VALID_CONFIG_HASH,
+        "resolved_config_hash": "b" * 64,
         "effective_config_hash": _VALID_CONFIG_HASH,
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
@@ -623,6 +681,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
     }
     assert summary["correlation_anchor_gaps"] == {
+        "resolved_config_hash": 0,
         "effective_config_hash": 0,
         "contract_ref": 0,
         "contract_version": 0,

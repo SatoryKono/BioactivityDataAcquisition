@@ -120,6 +120,29 @@ def test_create_manifest_persists_and_links_run_id() -> None:
     assert store.get_by_run_id(manifest.run_id) == manifest
 
 
+def test_create_manifest_preserves_distinct_config_hash_surfaces() -> None:
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-config-hashes",
+    )
+    request = replace(
+        _make_request(),
+        config_hash="c" * 64,
+        resolved_config_hash="a" * 64,
+        effective_config_hash="b" * 64,
+    )
+
+    manifest = service.create_manifest(request)
+
+    provenance = manifest.code_provenance
+    assert provenance.config_hash == "c" * 64
+    assert provenance.resolved_config_hash == "a" * 64
+    assert provenance.effective_config_hash == "b" * 64
+    assert manifest.to_dict()["code_provenance"]["resolved_config_hash"] == "a" * 64
+    assert manifest.to_dict()["code_provenance"]["effective_config_hash"] == "b" * 64
+
+
 def test_create_manifest_preserves_resume_only_replay_capability() -> None:
     store = _InMemoryRunManifestStore()
     service = RunManifestService(

@@ -1,10 +1,5 @@
 {
   "artifact_id": "effective-config-c5c28f1c9ba38857",
-  "occurrence_envelope": {
-    "created_at": "2026-04-14T15:05:27.560348+00:00",
-    "effective_execution_timestamp": "2026-04-14T15:05:27.560253+00:00",
-    "resolved_config_timestamp": "2026-04-14T15:05:27.559714+00:00"
-  },
   "schema_version": "1.0",
   "semantic_artifact": {
     "artifact_id": "effective-config-c5c28f1c9ba38857",
