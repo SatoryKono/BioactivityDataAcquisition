@@ -3,32 +3,32 @@ entity: activity
 records:
   - name: baseline_record
     input:
-      activity_chembl_id: " CHEMBL_ACT_1 "
-      assay_chembl_id: CHEMBL615373
-      molecule_chembl_id: CHEMBL25
+      activity_id: " CHEMBL_ACT_1 "
+      assay_id: CHEMBL615373
+      molecule_id: CHEMBL25
       standard_type: " IC50 "
       standard_relation: "="
       standard_value: 123.456789012345
       standard_units: " nM "
       pchembl_value: .nan
       confidence_score: .inf
-      document_chembl_id: CHEMBL112233
-      year: 2024
+      publication_id: CHEMBL112233
+      publication_year: 2024
       _run_id: run-001
       _ingestion_ts: 2026-01-01T12:00:00Z
       _dq_warn: true
   - name: date_and_null_stability
     input:
-      activity_chembl_id: CHEMBL_ACT_2
-      assay_chembl_id: CHEMBL999
-      molecule_chembl_id: CHEMBL111
+      activity_id: CHEMBL_ACT_2
+      assay_id: CHEMBL999
+      molecule_id: CHEMBL111
       standard_type: Ki
       standard_relation: "="
       standard_value: 42.0
       standard_units: nM
       pchembl_value: null
       confidence_score: 8.0
-      document_chembl_id: CHEMBL334455
-      year: 2025-01-15
+      publication_id: CHEMBL334455
+      publication_year: 2025-01-15
       notes: "  should_be_trimmed  "
       _run_type: incremental

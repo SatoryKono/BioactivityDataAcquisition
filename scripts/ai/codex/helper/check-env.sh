@@ -6,7 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))}"
+REPO_ROOT="${REPO_ROOT:-$(timeout 5 git rev-parse --show-toplevel 2>/dev/null || echo "${SCRIPT_DIR}/../../..")}"
 ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-codex-cli.sh"
 ENSURE_MCP_SCRIPT="${SCRIPT_DIR}/ensure-mcp.sh"
 
@@ -51,7 +51,7 @@ ALL_CHECKS=true
 
 # 1. Check if in WSL
 log_info "Checking WSL environment..."
-if grep -qi microsoft /proc/version 2>/dev/null; then
+if [[ -f /proc/version ]] && timeout 2 grep -q microsoft /proc/version 2>/dev/null; then
     log_success "Running in WSL"
 else
     log_error "Not running in WSL - this script requires WSL"
@@ -97,7 +97,7 @@ fi
 log_info "Checking Codex CLI..."
 CODEX_BIN=""
 if [[ -x "${ENSURE_SCRIPT}" ]]; then
-    CODEX_BIN="$("${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null || true)"
+    CODEX_BIN="$(timeout 10 "${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null || true)"
 fi
 if [[ -x "${CODEX_BIN}" ]]; then
     CODEX_VER=$("${CODEX_BIN}" --version 2>/dev/null || echo "unknown")
@@ -110,7 +110,7 @@ fi
 # 6. Check MCP configuration
 log_info "Checking MCP configuration..."
 if [[ -x "${ENSURE_MCP_SCRIPT}" ]]; then
-    if CODEX_BIN="${CODEX_BIN}" "${ENSURE_MCP_SCRIPT}" --check --codex-bin "${CODEX_BIN}" >/dev/null 2>&1; then
+    if timeout 30 bash -c "CODEX_BIN='${CODEX_BIN}' '${ENSURE_MCP_SCRIPT}' --check --codex-bin '${CODEX_BIN}'" >/dev/null 2>&1; then
         log_success "MCP configuration is ready"
     else
         log_warn "MCP configuration is missing or stale"

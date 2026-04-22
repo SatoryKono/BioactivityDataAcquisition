@@ -112,6 +112,68 @@ def test_compute_content_hashes_by_version_returns_ordered_multi_hash_payload() 
 
 
 @pytest.mark.unit
+def test_profile_backed_hash_policy_fails_closed_for_unknown_include_fields() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="activity",
+        content_hash_policy_by_version=ContentHashPolicyByVersion(
+            active_version="1.0.0",
+            policies=(
+                ContentHashVersionPolicy(
+                    version="1.0.0",
+                    include_fields=frozenset({"activity_chembl_id"}),
+                    exclude_fields=frozenset(),
+                ),
+            ),
+        ),
+    )
+
+    with pytest.raises(ValueError, match="activity_chembl_id"):
+        processor.compute_content_hash({"activity_id": "CHEMBL1"})
+
+
+@pytest.mark.unit
+def test_profile_backed_hash_policy_fails_closed_for_unknown_exclude_fields() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="activity",
+        content_hash_policy_by_version=ContentHashPolicyByVersion(
+            active_version="1.0.0",
+            policies=(
+                ContentHashVersionPolicy(
+                    version="1.0.0",
+                    include_fields=frozenset({"activity_id"}),
+                    exclude_fields=frozenset({"document_chembl_id"}),
+                ),
+            ),
+        ),
+    )
+
+    with pytest.raises(ValueError, match="document_chembl_id"):
+        processor.compute_content_hash({"activity_id": "CHEMBL1"})
+
+
+@pytest.mark.unit
+def test_profile_backed_hash_policy_allows_explicit_technical_exclusions() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="activity",
+        content_hash_policy_by_version=ContentHashPolicyByVersion(
+            active_version="1.0.0",
+            policies=(
+                ContentHashVersionPolicy(
+                    version="1.0.0",
+                    include_fields=frozenset({"activity_id"}),
+                    exclude_fields=frozenset({"entity_id", "_future_runtime_field"}),
+                ),
+            ),
+        ),
+    )
+
+    assert processor.compute_content_hash({"activity_id": "CHEMBL1"})
+
+
+@pytest.mark.unit
 def test_finalize_pre_silver_attaches_active_and_versioned_content_hashes() -> None:
     processor = RecordNormalizationProcessor(
         provider="crossref",

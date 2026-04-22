@@ -200,7 +200,7 @@ quality:
             type: enum
             allowed:
                 - nM
-                - uM
+                - µM
                 - mM
                 - pM
                 - M

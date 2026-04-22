@@ -94,26 +94,6 @@ class AssayParametersTransformer(BaseChemblTransformer):
     entity_class = AssayParameters
     primary_id_field = "assay_param_id"
 
-    # Any: ChEMBL API returns unt...
-    def _normalize_type(
-        self,
-        param_type: Any,  # Any: raw API value type varies
-    ) -> str | None:  # Any: raw API value type varies
-        """Normalize parameter type to uppercase.
-
-        Uses DataNormalizationService via DI for consistent normalization.
-
-        Args:
-            param_type: Raw parameter type from API (may be Any type).
-
-        Returns:
-            Normalized uppercase type or None if not available.
-        """
-        if param_type is None:
-            return None
-        normalized = self._data_normalizer.normalize_to_string(param_type)
-        return normalized.upper() if normalized else None
-
     def _extract_business_data(
         self,
         record: BronzeRecord,
@@ -128,10 +108,6 @@ class AssayParametersTransformer(BaseChemblTransformer):
         Returns:
             Dictionary of AssayParameters business fields.
         """
-        # Normalize type
-        raw_type = record.get("type")
-        normalized_type = self._normalize_type(raw_type)
-
         # Build business data dictionary
         business_data: dict[
             str, Any  # Any: transformer record has heterogeneous values
@@ -140,8 +116,8 @@ class AssayParametersTransformer(BaseChemblTransformer):
             "assay_param_id": int(primary_id),
             # Foreign key
             "assay_id": record.get("assay_id") or record.get("assay_chembl_id"),
-            # Normalized type
-            "type": normalized_type,
+            # Profile-owned controlled vocabulary normalization runs centrally.
+            "type": record.get("type"),
         }
 
         # Apply declarative field groups

@@ -84,3 +84,14 @@ def test_chembl_activity_bao_identifier_rules_are_profile_visible() -> None:
     assert format_rule.normalizer("bao:0000019") == "BAO_0000019"
     assert "BAO" in (endpoint_rule.notes or "")
     assert "BAO" in (format_rule.notes or "")
+
+
+def test_chembl_activity_qudt_units_has_explicit_unit_normalization_rule() -> None:
+    qudt_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("qudt_units")
+
+    assert qudt_rule is not None
+    assert qudt_rule.normalizer(" uM ") == "µM"
+    assert qudt_rule.normalizer("http://qudt.org/vocab/unit/NanoM") == (
+        "http://qudt.org/vocab/unit/NanoM"
+    )
+    assert "Canonicalize units" in (qudt_rule.notes or "")

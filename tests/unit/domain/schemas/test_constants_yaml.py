@@ -80,6 +80,13 @@ class TestActivitySync:
             chembl_yaml["activity"]["data_validity_comments"]
         )
 
+    def test_activity_standard_units(self, chembl_yaml: dict[str, Any]) -> None:
+        from bioetl.domain.schemas.constants import ACTIVITY_STANDARD_UNITS
+
+        assert ACTIVITY_STANDARD_UNITS == frozenset(
+            chembl_yaml["activity"]["standard_units"]
+        )
+
 
 class TestAssaySync:
     """Assay enum constants must match YAML."""
@@ -171,6 +178,13 @@ class TestPublicationSync:
 
         assert PUBLICATION_TYPES == frozenset(chembl_yaml["publication"]["types"])
 
+    def test_publication_native_doc_types_are_declared(
+        self, chembl_yaml: dict[str, Any]
+    ) -> None:
+        assert frozenset(chembl_yaml["publication"]["native_doc_types"]) == frozenset(
+            {"PUBLICATION", "PATENT", "DATASET", "BOOK"}
+        )
+
     def test_publication_term_types(self, chembl_yaml: dict[str, Any]) -> None:
         from bioetl.domain.schemas.constants import PUBLICATION_TERM_TYPES
 
@@ -211,6 +225,7 @@ class TestConstantInvariants:
     def test_all_frozensets_are_nonempty(self) -> None:
         from bioetl.domain.schemas.constants import (
             ACTIVITY_STANDARD_TYPES,
+            ACTIVITY_STANDARD_UNITS,
             ASSAY_CATEGORIES,
             ASSAY_TYPES,
             MOLECULE_TYPES,
@@ -223,6 +238,7 @@ class TestConstantInvariants:
         for const in [
             STANDARD_RELATIONS,
             ACTIVITY_STANDARD_TYPES,
+            ACTIVITY_STANDARD_UNITS,
             ASSAY_TYPES,
             ASSAY_CATEGORIES,
             MOLECULE_TYPES,

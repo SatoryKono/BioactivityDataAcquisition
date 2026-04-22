@@ -295,12 +295,12 @@ class TestAssayParametersTransformer:
         assert result["value"] is None
 
     @pytest.mark.asyncio
-    async def test_transform_normalizes_type_to_uppercase(
+    async def test_transform_leaves_type_canonicalization_to_profile(
         self,
         transformer: AssayParametersTransformer,
         mock_context,
     ) -> None:
-        """Test that parameter type is normalized to uppercase."""
+        """Transformer maps source values; profile layer owns type canonicalization."""
         record = {
             "assay_param_id": 12347,
             "assay_id": "CHEMBL1217643",
@@ -310,7 +310,7 @@ class TestAssayParametersTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["type"] == "CONC"
+        assert result["type"] == "conc"
 
     @pytest.mark.asyncio
     async def test_transform_handles_none_type(

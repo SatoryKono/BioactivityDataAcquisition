@@ -86,6 +86,61 @@ quality:
     pattern: ^.{1,100}$
     nullable: false
     error_message: Parameter type is required
+  - field: standard_type
+    type: enum
+    allowed:
+    - IC50
+    - EC50
+    - Ki
+    - Kd
+    - AC50
+    - GI50
+    - Potency
+    - Inhibition
+    - '% Inhibition'
+    - Activity
+    - Ratio
+    - ED50
+    - ID50
+    - CONC
+    - PH
+    - TEMP
+    - TIME
+    - DOSE
+    - VOLUME
+    - WAVELENGTH
+    - PERCENT
+    - PRESSURE
+    - HUMIDITY
+    - CELL_COUNT
+    - CELL_DENSITY
+    - SERUM
+    nullable: true
+    error_message: Invalid assay parameter standard_type value
+  - field: standard_relation
+    type: enum
+    allowed:
+    - '='
+    - <
+    - <=
+    - '>'
+    - '>='
+    - '~'
+    nullable: true
+    error_message: Invalid assay parameter standard_relation value
+  - field: standard_units
+    type: enum
+    allowed:
+    - nM
+    - µM
+    - mM
+    - pM
+    - M
+    - '%'
+    - ug.mL-1
+    - mg.kg-1
+    nullable: true
+    error_message: Invalid assay parameter standard_units value
   entity_cross_field_validations:
   - name: param_linkage
     fields:

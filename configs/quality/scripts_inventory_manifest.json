@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-22T13:48:55.019042+00:00",
+  "generated_at": "2026-04-22T15:34:09.213253+00:00",
   "summary": {
-    "total_scripts": 430,
+    "total_scripts": 433,
     "status_counts": {
-      "active": 302,
+      "active": 303,
       "legacy": 15,
-      "orphan": 101,
+      "orphan": 103,
       "unknown": 12
     },
     "reference_group_coverage": {
@@ -14,7 +14,7 @@
       "build": 1,
       "ci": 49,
       "docs": 136,
-      "scripts": 286,
+      "scripts": 287,
       "skills": 8,
       "tests": 132
     }
@@ -436,6 +436,33 @@
       ]
     },
     {
+      "path": "scripts/ai/codex/launch-interactive.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ai/codex/run-codex.ps1",
+          "line": 40,
+          "source_group": "scripts",
+          "text": "start         Start interactive Codex (use launch-interactive.ps1)"
+        },
+        {
+          "path": "scripts/ai/codex/run-codex.ps1",
+          "line": 48,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\codex\\launch-interactive.ps1"
+        },
+        {
+          "path": "scripts/ai/codex/run-codex.ps1",
+          "line": 200,
+          "source_group": "scripts",
+          "text": "Write-Host \"    .\\scripts\\ai\\codex\\launch-interactive.ps1\""
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/codex/run-codex.ps1",
       "type": "ps1",
       "status": "active",
@@ -497,7 +524,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 32,
+      "reference_count": 37,
       "references": [
         {
           "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
@@ -6795,6 +6822,22 @@
           "text": "\"mock-quarantine\": \"quarantine_explorer_mock_server.py\","
         }
       ]
+    },
+    {
+      "path": "scripts/engineering/dev/run_100_stability_waves.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/engineering/dev/run_100_stability_waves_simple.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/engineering/dev/run_mypy.ps1",

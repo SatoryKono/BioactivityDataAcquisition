@@ -6,6 +6,7 @@ from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 
 from ._chembl_activity_fields import (
     ACTIVITY_STANDARD_TYPES,
+    ACTIVITY_STANDARD_UNITS,
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
     DATA_VALIDITY_COMMENTS,
     FLOAT_FIELDS,
@@ -25,6 +26,7 @@ from .profile_normalizers import (
 
 __all__ = [
     "ACTIVITY_STANDARD_TYPES",
+    "ACTIVITY_STANDARD_UNITS",
     "ASSAY_TYPES",
     "CHEMBL_ACTIVITY_PROFILE",
     "CHEMBL_ACTIVITY_SCHEMA_FIELDS",
@@ -60,6 +62,7 @@ _ENUM_FIELDS = {
     "assay_type": ASSAY_TYPES,
 }
 _ONTOLOGY_ID_FIELDS = frozenset({"uo_units"})
+_UNIT_FIELDS = frozenset({"standard_units", "qudt_units"})
 
 _SPECIAL_RULE_COMPONENTS = {
     "canonical_smiles": (
@@ -113,7 +116,7 @@ CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
         "data_validity_comment": DATA_VALIDITY_COMMENTS,
     },
     special_rules=_SPECIAL_RULE_COMPONENTS,
-    unit_fields={"standard_units"},
+    unit_fields=_UNIT_FIELDS,
     null_fields=NULL_FIELDS,
 )
 
