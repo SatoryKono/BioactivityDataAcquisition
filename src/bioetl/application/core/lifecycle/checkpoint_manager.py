@@ -182,6 +182,9 @@ class CheckpointManagerService:
                 else "incompatible"
             )
             return None
+        if disposition == "legacy_observe_loaded_degraded":
+            self._emit_checkpoint_load_status("legacy_observe_loaded_degraded")
+            return result
         self._emit_checkpoint_load_status(
             "observe_loaded_degraded"
             if disposition == "observe_loaded_degraded"
