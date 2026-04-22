@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
-
 PUBMED_SILVER_EXCLUDED_FIELDS: tuple[str, ...] = (
     "vernacular_title",
     "epub_date",
@@ -26,12 +24,12 @@ def build_pubmed_publication_type_fields(
         classification: Optional dict of pre-computed unified classification fields to merge in.
 
     Returns:
-        Dictionary with 'publication_type' key set to the normalized type,
+        Dictionary with 'publication_type' key set to the raw provider type,
         plus any additional fields from classification if provided.
     """
     raw_type = "|".join(pub_types) if pub_types else None
     result: dict[str, str | None] = {
-        "publication_type": normalize_publication_type(raw_type),
+        "publication_type": raw_type,
     }
     if classification:
         result.update(classification)

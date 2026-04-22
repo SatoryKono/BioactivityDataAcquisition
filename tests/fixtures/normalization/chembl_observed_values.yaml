@@ -1,0 +1,85 @@
+version: 1
+source: issue_3035_observed_value_governance
+description: Representative offline observed values for ChEMBL non-activity enum and unit-like normalization governance.
+observed_values:
+  assay:
+    assay_type:
+      - B
+      - F
+      - A
+      - T
+      - P
+      - U
+    assay_test_type:
+      - In vivo
+      - In vitro
+      - Ex vivo
+    assay_category:
+      - screening
+      - confirmatory
+      - Affinity biochemical assay
+      - NanoBRET assay
+    assay_group:
+      - FUNCTIONAL
+      - BINDING
+    relationship_type:
+      - D
+      - H
+      - M
+      - "N"
+      - S
+      - U
+    confidence_description:
+      - Active
+      - Inconclusive
+      - Not determined
+    subcellular_fraction:
+      - Membrane
+      - Nucleus
+      - Cytoplasm
+  assay_parameters:
+    standard_type:
+      - CONC
+      - PH
+      - TEMP
+      - TIME
+      - CELL_COUNT
+      - IC50
+      - "% Inhibition"
+    standard_relation:
+      - "="
+      - "<"
+      - "<="
+      - ">"
+      - ">="
+      - "~"
+    standard_units:
+      - nM
+      - µM
+      - mM
+      - "%"
+      - ug.mL-1
+  molecule:
+    molecule_type:
+      - Small molecule
+      - Antibody
+      - Protein
+      - Unknown
+    structure_type:
+      - MOL
+      - SEQ
+      - BOTH
+      - NONE
+  target:
+    target_type:
+      - SINGLE PROTEIN
+      - PROTEIN FAMILY
+      - PROTEIN COMPLEX
+      - CELL-LINE
+      - UNKNOWN
+  publication:
+    publication_type:
+      - PUBLICATION
+      - PATENT
+      - DATASET
+      - BOOK

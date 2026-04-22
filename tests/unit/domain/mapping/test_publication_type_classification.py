@@ -7,9 +7,11 @@ import pytest
 from bioetl.domain.mapping.publication_type_classification import (
     _ENTRY_BY_SPECIFICITY,
     _PROVIDER_LOOKUPS,
+    build_publication_type_classification_payload,
     classify_publication_type,
     get_classification_table_size,
     is_initialized,
+    normalize_publication_classification_field,
 )
 
 
@@ -281,6 +283,70 @@ class TestEdgeCases:
         entry = s2_lookup.get("lettersandcomments")
         assert entry is not None
         assert entry.unified_type == "Letter"
+
+
+class TestPublicationTypePayload:
+    """Test raw-provider and derived classification payload construction."""
+
+    def test_default_payload_uses_explicit_raw_sidecar_field(self) -> None:
+        payload = build_publication_type_classification_payload(
+            "openalex",
+            raw_type="article",
+        )
+
+        assert payload == {
+            "publication_type_raw": "article",
+            "publication_type_unified": "Journal Article",
+            "publication_subclass": "Original Experimental Data",
+            "publication_class": "EXP",
+        }
+
+    def test_silver_payload_can_target_publication_type_raw_contract(self) -> None:
+        payload = build_publication_type_classification_payload(
+            "semanticscholar",
+            raw_types_list=["JournalArticle", "Review"],
+            raw_field_name="publication_type",
+        )
+
+        assert payload["publication_type"] == "JournalArticle|Review"
+        assert payload["publication_type_unified"] == "Review"
+        assert payload["publication_class"] == "REV"
+
+    @pytest.mark.parametrize(
+        ("raw_type", "expected_unified"),
+        [
+            ("PUBLICATION", "Journal Article"),
+            ("PATENT", "Patent"),
+            ("DATASET", "Dataset"),
+            ("BOOK", "Book"),
+        ],
+    )
+    def test_chembl_native_doc_types_classify_via_unified_taxonomy(
+        self, raw_type: str, expected_unified: str
+    ) -> None:
+        payload = build_publication_type_classification_payload(
+            "chembl",
+            raw_type=raw_type,
+            raw_field_name="publication_type",
+        )
+
+        assert payload["publication_type"] == raw_type
+        assert payload["publication_type_unified"] == expected_unified
+
+    def test_derived_field_normalizer_is_registry_backed(self) -> None:
+        assert (
+            normalize_publication_classification_field(
+                "publication_type_unified", "journal article"
+            )
+            == "Journal Article"
+        )
+        assert normalize_publication_classification_field("publication_class", "exp") == "EXP"
+        assert (
+            normalize_publication_classification_field(
+                "publication_subclass", "not-a-subclass"
+            )
+            is None
+        )
 
 
 class TestInitializationGuard:

@@ -204,7 +204,7 @@ quality:
   - field: publication_type
     type: enum
     allowed:
-    - journal-article
+    - article
     - book-chapter
     - book
     - dataset

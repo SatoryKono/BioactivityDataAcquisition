@@ -24,28 +24,6 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId
 
 
-# Known parameter types for validation/metrics
-KNOWN_PARAM_TYPES: frozenset[str] = frozenset(
-    {
-        "CONC",
-        "PH",
-        "TEMP",
-        "TIME",
-        "CELL_COUNT",
-        "SERUM",
-        "DOSE",
-        "VOLUME",
-        "WAVELENGTH",
-        "PERCENT",
-        "PRESSURE",
-        "HUMIDITY",
-        "PASSAGE",
-        "CELL_DENSITY",
-        "INCUBATION",
-    }
-)
-
-
 # ============================================================================
 # Declarative field groups for AssayParameters entity
 # ============================================================================
@@ -147,4 +125,4 @@ class AssayParametersTransformer(BaseChemblTransformer):
         )
 
 
-__all__ = ["KNOWN_PARAM_TYPES", "AssayParametersTransformer"]
+__all__ = ["AssayParametersTransformer"]

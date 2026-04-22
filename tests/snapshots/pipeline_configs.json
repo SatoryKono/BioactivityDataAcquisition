@@ -644,8 +644,10 @@
           "column": "term_type",
           "operator": "in",
           "values": [
+            "CONCEPT",
             "KEYWORD",
-            "MESH_HEADING"
+            "MESH_HEADING",
+            "MESH_QUALIFIER"
           ]
         }
       ],

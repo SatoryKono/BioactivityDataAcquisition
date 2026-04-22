@@ -19,7 +19,6 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_published_date,
     extract_references,
 )
-from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization import extract_first_string
 from bioetl.domain.types import GoldRecord, JsonDict
 
@@ -177,7 +176,6 @@ def _build_crossref_identity_fields(
         "abstract": None,
         "title": extract_first_string(record.get("title", [])),
         **author_bundle,
-        "publication_type": normalize_publication_type(record.get("type")),
         "_source": "crossref",
         "_lookup_method": record.get("_lookup_method", "doi"),
         "_original_id": record.get("_original_id"),

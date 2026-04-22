@@ -42,6 +42,7 @@ def test_chembl_assay_parameters_profile_centralizes_business_canonicalization()
 
     assert standard_relation_rule is not None
     assert standard_relation_rule.normalizer("gte") == ">="
+    assert standard_relation_rule.normalizer(">>") is None
 
     assert units_rule is not None
     assert units_rule.normalizer("uM") == "µM"

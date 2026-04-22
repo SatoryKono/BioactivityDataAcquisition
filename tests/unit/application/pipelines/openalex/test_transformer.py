@@ -99,7 +99,8 @@ class TestOpenAlexPublicationTransformer:
         assert result["title"] == "Example Publication Title"
         assert result["publication_year"] == 2024
         assert result["publication_date"] == "2024-05-15"
-        assert result["publication_type"] == "journal-article"  # Normalized canonical
+        assert result["publication_type"] == "article"
+        assert result["publication_type_unified"] == "Journal Article"
         assert result["abstract"] == "This is an abstract"
         assert result["journal"] == "Nature"
         assert result["issn"] == "0028-0836"
@@ -195,16 +196,16 @@ class TestOpenAlexPublicationTransformer:
         transformer: OpenAlexPublicationTransformer,
         pipeline_context: PipelineContext,
     ) -> None:
-        """Should normalize OpenAlex type to canonical kebab-case."""
+        """Should preserve OpenAlex type while deriving unified classification."""
         test_cases = [
-            ("article", "journal-article"),
-            ("preprint", "preprint"),
-            ("book-chapter", "book-chapter"),
-            ("dataset", "dataset"),
-            ("unknown_type", "unknown_type"),  # Fallback: lowercase
+            ("article", "article", "Journal Article"),
+            ("preprint", "preprint", "Preprint"),
+            ("book-chapter", "book-chapter", "Book Chapter"),
+            ("dataset", "dataset", "Dataset"),
+            ("unknown_type", "unknown_type", None),
         ]
 
-        for openalex_type, expected in test_cases:
+        for openalex_type, expected_raw, expected_unified in test_cases:
             record = {
                 "id": "https://openalex.org/W1234567890",
                 "title": "Test",
@@ -212,7 +213,8 @@ class TestOpenAlexPublicationTransformer:
             }
             result = await transformer.transform(pipeline_context, record, 0)
             assert result is not None
-            assert result["publication_type"] == expected
+            assert result["publication_type"] == expected_raw
+            assert result["publication_type_unified"] == expected_unified
 
     @pytest.mark.asyncio
     async def test_transform_empty_abstract_inverted_index(

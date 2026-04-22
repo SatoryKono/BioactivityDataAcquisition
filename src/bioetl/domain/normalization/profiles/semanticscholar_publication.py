@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles._publication_classification_rules import (
+    publication_classification_rules,
+)
 from bioetl.domain.schemas.semanticscholar.publication import (
     SemanticScholarPublicationSchema,
 )
@@ -100,6 +103,7 @@ SEMANTICSCHOLAR_PUBLICATION_PROFILE = build_standard_profile(
     int_fields=_INT_FIELDS,
     set_like_fields=_SET_LIKE_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
+    special_rules=publication_classification_rules(),
 )
 
 SEMANTICSCHOLAR_PUBLICATION_PROFILE.assert_covers_schema(

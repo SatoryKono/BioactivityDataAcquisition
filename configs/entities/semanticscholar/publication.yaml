@@ -178,10 +178,10 @@ quality:
     error_message: "Publication year before 1950 \u2014 will be filtered at Gold stage"
   - field: publication_type
     type: pattern
-    pattern: ^[a-z][a-z0-9-]+(\|[a-z][a-z0-9-]+)*$
+    pattern: ^[A-Za-z][A-Za-z0-9]*(\|[A-Za-z][A-Za-z0-9]*)*$
     nullable: true
     severity: warn
-    error_message: Unexpected publication_type format after normalization
+    error_message: Unexpected raw publication_type format
   - field: citations_received
     type: range
     min: 0
