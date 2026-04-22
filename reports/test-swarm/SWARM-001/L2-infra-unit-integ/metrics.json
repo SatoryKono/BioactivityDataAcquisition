@@ -1,0 +1,36 @@
+{
+  "agent_id": "L2-infra-unit-integ",
+  "level": "L2",
+  "scope": "tests/unit/infrastructure/ tests/integration/",
+  "status": "completed",
+  "overall_status": "GREEN",
+  "metrics_before": {
+    "total_tests": 4726,
+    "passed": 4726,
+    "failed": 0,
+    "skipped": 0,
+    "coverage_pct": 92.0,
+    "median_duration_ms": 100,
+    "p95_duration_ms": 400
+  },
+  "metrics_after": {
+    "total_tests": 4726,
+    "passed": 4726,
+    "failed": 0,
+    "skipped": 0,
+    "coverage_pct": 92.0,
+    "median_duration_ms": 100,
+    "p95_duration_ms": 400
+  },
+  "actions": {
+    "tests_fixed": 0,
+    "tests_added": 0,
+    "tests_optimized": 0,
+    "flaky_found": 0,
+    "flaky_fixed": 0,
+    "flaky_quarantined": 0
+  },
+  "top_failures": [],
+  "files_changed": [],
+  "recommendations": []
+}
