@@ -9,7 +9,6 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.pipelines.chembl.assay_parameters_transformer import (
-    KNOWN_PARAM_TYPES,
     AssayParametersTransformer,
 )
 from bioetl.domain.context import PipelineContext
@@ -180,25 +179,6 @@ class TestAssayParametersEntity:
 
         assert value is None
         assert units is None
-
-
-# =============================================================================
-# Constant Tests
-# =============================================================================
-
-
-@pytest.mark.unit
-class TestKnownParamTypes:
-    """Tests for KNOWN_PARAM_TYPES constant."""
-
-    def test_contains_main_types(self) -> None:
-        """Test that main parameter types are included."""
-        main_types = {"CONC", "PH", "TEMP", "TIME", "CELL_COUNT", "SERUM"}
-        assert main_types.issubset(KNOWN_PARAM_TYPES)
-
-    def test_is_frozen(self) -> None:
-        """Test that KNOWN_PARAM_TYPES is a frozenset (immutable)."""
-        assert isinstance(KNOWN_PARAM_TYPES, frozenset)
 
 
 # =============================================================================

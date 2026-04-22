@@ -294,9 +294,6 @@ def test_build_crossref_business_data_assembles_expected_payload(
         builder, "extract_license_url", lambda record: "https://license.test"
     )
     monkeypatch.setattr(
-        builder, "normalize_publication_type", lambda value: "journal-article"
-    )
-    monkeypatch.setattr(
         builder, "extract_first_string", lambda value: value[0] if value else None
     )
 
@@ -371,7 +368,6 @@ def test_build_crossref_business_data_falls_back_to_online_publication_date(
     monkeypatch.setattr(builder, "extract_author_details", lambda record: [])
     monkeypatch.setattr(builder, "extract_author_orcids", lambda record: [])
     monkeypatch.setattr(builder, "extract_license_url", lambda record: None)
-    monkeypatch.setattr(builder, "normalize_publication_type", lambda value: "unknown")
     monkeypatch.setattr(builder, "extract_first_string", lambda value: None)
 
     result = builder.build_crossref_business_data(

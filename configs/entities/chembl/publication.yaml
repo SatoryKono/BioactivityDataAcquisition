@@ -114,10 +114,10 @@ quality:
         -   field: publication_type
             type: enum
             allowed:
-                - journal-article
-                - book
-                - dataset
-                - patent
+                - PUBLICATION
+                - BOOK
+                - DATASET
+                - PATENT
             nullable: false
         -   field: publication_year
             type: range

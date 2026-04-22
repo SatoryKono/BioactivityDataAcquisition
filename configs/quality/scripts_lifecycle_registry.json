@@ -787,6 +787,12 @@
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a simplified 100-wave pytest stability troubleshooting helper for local validation of JUnit aggregation; remove it once the full stability-wave helper or canonical sharded pytest runner covers the workflow."
+    },
+    "scripts/engineering/ci/validate_control_plane_artifacts.py": {
+      "owner": "@bioetl-platform",
+      "decision": "active",
+      "next_step": "Retain as the canonical script for validating control plane artifacts in CI workflows.",
+      "review_by": "2026-07-15"
     }
   }
 }

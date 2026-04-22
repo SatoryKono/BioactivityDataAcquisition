@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles._publication_classification_rules import (
+    publication_classification_rules,
+)
 from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
 
 __all__ = [
@@ -95,6 +98,7 @@ OPENALEX_PUBLICATION_PROFILE = build_standard_profile(
     float_fields=_FLOAT_FIELDS,
     set_like_fields=_SET_LIKE_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
+    special_rules=publication_classification_rules(),
 )
 
 OPENALEX_PUBLICATION_PROFILE.assert_covers_schema(OPENALEX_PUBLICATION_SCHEMA_FIELDS)

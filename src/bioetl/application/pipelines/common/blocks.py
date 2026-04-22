@@ -18,7 +18,6 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_published_date,
     extract_references,
 )
-from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization import extract_first_string
 from bioetl.domain.ports import DataNormalizationPort
 from bioetl.domain.types import BronzeRecord, JsonDict
@@ -73,7 +72,6 @@ class _CrossRefCoreBlock:
             "pmc_id": None,
             "abstract": None,
             "title": extract_first_string(record.get("title", [])),
-            "publication_type": normalize_publication_type(raw_type),
             **self.classify_pub_type(raw_type),
             "language": record.get("language"),
             "_source": "crossref",

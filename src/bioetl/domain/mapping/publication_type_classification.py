@@ -14,15 +14,19 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.domain.normalization.text import normalize_string
+
 if TYPE_CHECKING:
     from bioetl.domain.mapping.classification_data import ClassificationData
 
 __all__ = [
     "PublicationTypeEntry",
+    "build_publication_type_classification_payload",
     "classify_publication_type",
     "get_classification_table_size",
     "initialize_classification",
     "is_initialized",
+    "normalize_publication_classification_field",
 ]
 
 
@@ -48,6 +52,7 @@ class PublicationTypeEntry:
 # see the updated data after initialization.
 _data: ClassificationData | None = None
 _ENTRY_BY_SPECIFICITY: list[PublicationTypeEntry] = []
+_ENTRY_BY_UNIFIED_TYPE: dict[str, PublicationTypeEntry] = {}
 _PROVIDER_LOOKUPS: dict[str, dict[str, PublicationTypeEntry]] = {}
 
 
@@ -111,6 +116,13 @@ def initialize_classification(data: ClassificationData) -> None:
     _ENTRY_BY_SPECIFICITY.extend(entries)
 
     entries_tuple = tuple(entries)
+    _ENTRY_BY_UNIFIED_TYPE.clear()
+    _ENTRY_BY_UNIFIED_TYPE.update(
+        {
+            _canonical_publication_type_key(entry.unified_type): entry
+            for entry in entries_tuple
+        }
+    )
     _PROVIDER_LOOKUPS.clear()
     _PROVIDER_LOOKUPS.update(
         {
@@ -159,11 +171,72 @@ def classify_publication_type(
         return None
 
     if raw_type is not None:
-        return lookup.get(raw_type.lower())
+        if provider.lower() == "chembl":
+            return _classify_chembl_publication_type(raw_type)
+        return lookup.get(raw_type.strip().lower())
 
     if raw_types_list is not None:
+        if provider.lower() == "chembl":
+            return _best_chembl_match(raw_types_list)
         return _best_match(lookup, raw_types_list)
 
+    return None
+
+
+def build_publication_type_classification_payload(
+    provider: str,
+    raw_type: str | None = None,
+    raw_types_list: list[str] | None = None,
+    *,
+    raw_field_name: str = "publication_type_raw",
+) -> dict[str, str | None]:
+    """Build the raw-provider and unified classification payload.
+
+    The default raw field is intentionally named ``publication_type_raw`` for
+    callers that need an explicit sidecar field. Existing Silver schemas use
+    ``publication_type`` for the same raw value and pass that name explicitly.
+    """
+    raw_value = _raw_publication_type(raw_type=raw_type, raw_types_list=raw_types_list)
+    entry = classify_publication_type(
+        provider,
+        raw_type=raw_type,
+        raw_types_list=raw_types_list,
+    )
+    payload: dict[str, str | None] = {
+        raw_field_name: raw_value,
+        "publication_type_unified": None,
+        "publication_subclass": None,
+        "publication_class": None,
+    }
+    if entry is not None:
+        payload.update(
+            {
+                "publication_type_unified": entry.unified_type,
+                "publication_subclass": entry.subclass,
+                "publication_class": entry.class_code,
+            }
+        )
+    return payload
+
+
+def normalize_publication_classification_field(
+    field_name: str,
+    value: object,
+) -> object:
+    """Normalize derived publication classification fields against loaded taxonomy."""
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        return None
+    normalized = normalize_string(value)
+    if normalized is None:
+        return None
+    allowed = _classification_values(field_name)
+    if not allowed:
+        return normalized
+    for allowed_value in allowed:
+        if normalized.lower() == allowed_value.lower():
+            return allowed_value
     return None
 
 
@@ -182,4 +255,52 @@ def _best_match(
 
 def _get_lookup(provider: str) -> dict[str, PublicationTypeEntry] | None:
     """Return provider lookup dict, if provider is supported."""
-    return _PROVIDER_LOOKUPS.get(provider.lower())
+    provider_key = provider.lower()
+    if provider_key == "chembl":
+        return {}
+    return _PROVIDER_LOOKUPS.get(provider_key)
+
+
+def _classification_values(field_name: str) -> frozenset[str]:
+    if field_name == "publication_type_unified":
+        return frozenset(entry.unified_type for entry in _ENTRY_BY_SPECIFICITY)
+    if field_name == "publication_subclass":
+        return frozenset(entry.subclass for entry in _ENTRY_BY_SPECIFICITY)
+    if field_name == "publication_class":
+        return frozenset(entry.class_code for entry in _ENTRY_BY_SPECIFICITY)
+    raise ValueError(f"Unknown publication classification field: {field_name}")
+
+
+def _raw_publication_type(
+    *,
+    raw_type: str | None,
+    raw_types_list: list[str] | None,
+) -> str | None:
+    if raw_type is not None:
+        raw = raw_type.strip()
+        return raw or None
+    if raw_types_list is None:
+        return None
+    parts = [raw.strip() for raw in raw_types_list if raw and raw.strip()]
+    return "|".join(parts) if parts else None
+
+
+def _canonical_publication_type_key(value: str) -> str:
+    from bioetl.domain.mapping.publication_type_mapping import (
+        normalize_publication_type,
+    )
+
+    return normalize_publication_type(value) or value.strip().lower()
+
+
+def _classify_chembl_publication_type(raw_type: str) -> PublicationTypeEntry | None:
+    return _ENTRY_BY_UNIFIED_TYPE.get(_canonical_publication_type_key(raw_type))
+
+
+def _best_chembl_match(raw_types: list[str]) -> PublicationTypeEntry | None:
+    matches = [
+        entry
+        for raw in raw_types
+        if raw and (entry := _classify_chembl_publication_type(raw.strip())) is not None
+    ]
+    return max(matches, key=lambda entry: entry.specificity, default=None)

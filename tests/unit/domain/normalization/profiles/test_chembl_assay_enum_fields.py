@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 
 from bioetl.domain.normalization.profiles.chembl_assay import CHEMBL_ASSAY_PROFILE
 from bioetl.domain.schemas.constants import (
@@ -186,3 +187,32 @@ class TestAssayOntologyNormalization:
 
         assert rule.normalizer("  CELL-BASED FORMAT  ") == "cell-based format"
         assert "BAO label" in (rule.notes or "")
+
+
+class TestAssayStructuredFieldNormalization:
+    """Test structured ChEMBL assay fields governed by profile rules."""
+
+    def test_json_fields_canonicalize_order_without_transformer_logic(self) -> None:
+        for field_name in (
+            "assay_classifications",
+            "assay_parameters",
+            "variant_sequence_json",
+        ):
+            rule = CHEMBL_ASSAY_PROFILE.field_rules[field_name]
+
+            normalized = rule.normalizer('[{"b":2,"a":1},{"d":4,"c":3}]')
+
+            assert normalized == '[{"a":1,"b":2},{"c":3,"d":4}]'
+            assert json.loads(normalized) == [
+                {"a": 1, "b": 2},
+                {"c": 3, "d": 4},
+            ]
+            assert "JSON" in (rule.notes or "")
+
+    def test_bao_code_and_label_are_separate_profile_contracts(self) -> None:
+        format_rule = CHEMBL_ASSAY_PROFILE.field_rules["bao_format"]
+        label_rule = CHEMBL_ASSAY_PROFILE.field_rules["bao_label"]
+
+        assert format_rule.normalizer("bao:0000219") == "BAO_0000219"
+        assert label_rule.normalizer("  CELL-BASED FORMAT ") == "cell-based format"
+        assert format_rule.normalizer("cell-based format") == "cell-based format"

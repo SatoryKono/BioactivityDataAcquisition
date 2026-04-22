@@ -34,7 +34,9 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import ChemblPublication
-from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
+from bioetl.domain.mapping.publication_type_classification import (
+    build_publication_type_classification_payload,
+)
 from bioetl.domain.types import BronzeRecord, GoldRecord
 from bioetl.domain.value_objects import DOI, PublicationYear
 
@@ -195,8 +197,15 @@ class PublicationTransformer(BaseChemblTransformer):
         record: BronzeRecord,
     ) -> None:
         """Normalize publication identifiers and value-object backed fields."""
-        data["publication_type"] = normalize_publication_type(
-            data.get("publication_type")
+        raw_publication_type = data.get("publication_type")
+        data.update(
+            build_publication_type_classification_payload(
+                "chembl",
+                raw_type=str(raw_publication_type)
+                if raw_publication_type is not None
+                else None,
+                raw_field_name="publication_type",
+            )
         )
         data["publication_pmid"] = data.get("publication_pmid") or PMID(
             record.get("pmid")

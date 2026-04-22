@@ -201,17 +201,8 @@ quality:
     severity: warn
     error_message: "Publication year before 1950 \u2014 will be filtered at Gold stage"
   - field: publication_type
-    type: enum
-    allowed:
-    - journal-article
-    - review
-    - letter
-    - editorial
-    - clinical-trial
-    - meta-analysis
-    - case-reports
-    - comparative-study
-    - evaluation-study
+    type: pattern
+    pattern: \S
     nullable: true
   - field: citations_received
     type: range

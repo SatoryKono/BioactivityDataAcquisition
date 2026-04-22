@@ -33,7 +33,7 @@ from bioetl.application.pipelines.common.publication_assembly import (
     prepare_publication_payload,
 )
 from bioetl.domain.mapping.publication_type_classification import (
-    classify_publication_type,
+    build_publication_type_classification_payload,
 )
 
 if TYPE_CHECKING:
@@ -160,22 +160,12 @@ def _classification_payload(
     raw_types_list: list[str] | None,
 ) -> dict[str, str | None]:
     """Build the normalized publication-type classification payload."""
-    entry = classify_publication_type(
+    return build_publication_type_classification_payload(
         provider,
         raw_type=raw_type,
         raw_types_list=raw_types_list,
+        raw_field_name="publication_type",
     )
-    if entry is None:
-        return {
-            "publication_type_unified": None,
-            "publication_subclass": None,
-            "publication_class": None,
-        }
-    return {
-        "publication_type_unified": entry.unified_type,
-        "publication_subclass": entry.subclass,
-        "publication_class": entry.class_code,
-    }
 
 
 def _resolve_publication_entity_id(
