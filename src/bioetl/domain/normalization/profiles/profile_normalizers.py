@@ -4,6 +4,10 @@ from __future__ import annotations
 
 import math
 
+from bioetl.domain.normalization.chembl import (
+    normalize_bao_identifier,
+    normalize_chembl_organism_name,
+)
 from bioetl.domain.normalization.dates import normalize_partial_date
 from bioetl.domain.normalization.identifiers import (
     normalize_doi,
@@ -27,10 +31,12 @@ from bioetl.domain.value_objects import SMILES
 
 __all__ = [
     "normalize_profile_abstract",
+    "normalize_profile_bao_identifier",
     "normalize_profile_binary_flag",
     "normalize_profile_boolean",
     "normalize_profile_canonical_smiles",
     "normalize_profile_case",
+    "normalize_profile_chembl_organism_name",
     "normalize_profile_date",
     "normalize_profile_doi",
     "normalize_profile_enum",
@@ -93,6 +99,20 @@ def normalize_profile_boolean(value: object) -> bool | None:
 def normalize_profile_binary_flag(value: object) -> int | None:
     """Normalize common boolean-like profile fields to canonical 0/1."""
     return normalize_binary_flag(value)
+
+
+def normalize_profile_bao_identifier(value: object) -> object:
+    """Normalize BAO identifier profile fields to canonical underscore form."""
+    if value is None or isinstance(value, str):
+        return normalize_bao_identifier(value)
+    return value
+
+
+def normalize_profile_chembl_organism_name(value: object) -> object:
+    """Normalize ChEMBL organism display-name fields."""
+    if value is None or isinstance(value, str):
+        return normalize_chembl_organism_name(value)
+    return value
 
 
 def normalize_profile_operator(

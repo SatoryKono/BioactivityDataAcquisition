@@ -272,6 +272,90 @@ def test_summarize_junit_writes_test_health_json(tmp_path: Path) -> None:
     assert summary["command"] == "pytest tests/unit"
 
 
+def test_summarize_junit_uses_junit_suite_duration(tmp_path: Path) -> None:
+    junit = tmp_path / "junit-fast.xml"
+    junit.write_text(
+        """<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="pytest" tests="1" failures="0" errors="0" skipped="0" time="2.3456">
+  <testcase classname="tests.unit.test_sample" name="test_pass" file="tests/unit/test_sample.py" time="2.3456" />
+</testsuite>
+""",
+        encoding="utf-8",
+    )
+
+    rc = test_health.main(
+        [
+            "summarize-junit",
+            "--suite",
+            "unit-fast",
+            "--run-id",
+            "unit-fast-ci",
+            "--reports-dir",
+            str(tmp_path / "runs"),
+            "--junit",
+            str(junit),
+            "--command",
+            "pytest tests/unit",
+        ]
+    )
+
+    summary = json.loads(
+        (tmp_path / "runs" / "unit-fast-ci.json").read_text(encoding="utf-8")
+    )
+    assert rc == 0
+    assert summary["duration_seconds"] == 2.346
+
+
+def test_repeated_run_id_preserves_test_health_history(
+    tmp_path: Path, capsys
+) -> None:
+    junit = tmp_path / "junit-fast.xml"
+    junit.write_text(
+        """<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="pytest" tests="1" failures="0" errors="0" skipped="0">
+  <testcase classname="tests.unit.test_sample" name="test_pass" file="tests/unit/test_sample.py" />
+</testsuite>
+""",
+        encoding="utf-8",
+    )
+    reports_dir = tmp_path / "runs"
+
+    for _ in range(2):
+        rc = test_health.main(
+            [
+                "summarize-junit",
+                "--suite",
+                "unit-fast",
+                "--run-id",
+                "unit-fast-local",
+                "--reports-dir",
+                str(reports_dir),
+                "--junit",
+                str(junit),
+            ]
+        )
+        assert rc == 0
+
+    json_files = sorted(reports_dir.glob("unit-fast-local*.json"))
+    assert len(json_files) == 2
+    assert (reports_dir / "unit-fast-local.json").exists()
+
+    rc = test_health.main(
+        [
+            "test-health",
+            "--reports-dir",
+            str(reports_dir),
+            "--last",
+            "30",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert rc == 0
+    assert "Test health rollup: last 2 runs" in output
+    assert "unit-fast: runs=2" in output
+
+
 def test_test_health_can_summarize_junit_before_rollup(tmp_path: Path, capsys) -> None:
     junit = tmp_path / "junit" / "S1-domain-core.xml"
     junit.parent.mkdir()

@@ -10,6 +10,7 @@ import pytest
 from scripts.docs.generate_pipeline_normalization_field_matrix import (
     CSV_NAME,
     COMPOSITE_JOIN_KEY_COVERAGE_KPI,
+    COMPOSITE_SOURCE_FIELD_COVERAGE_KPI,
     CONTROL_PLANE_NORMALIZATION_COVERAGE_KPI,
     DEFAULT_OUT_DIR,
     ENTITY_SILVER_SCHEMA_REGISTRY,
@@ -22,6 +23,7 @@ from scripts.docs.generate_pipeline_normalization_field_matrix import (
     _load_yaml,
     build_artifacts,
     build_composite_join_key_policy_coverage_kpi,
+    build_composite_sensitive_source_field_profile_coverage_kpi,
     build_control_plane_normalization_coverage_kpi,
     build_entity_profile_coverage_kpi,
     build_field_matrix_rows,
@@ -239,6 +241,13 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     )
     assert bao_format["strictness"] == "canonical_ontology_id"
 
+    publication_term_type = _row(rows, "chembl_publication_term", "term_type")
+    assert publication_term_type["controlled_vocabulary_source"] == (
+        "configs/enums/chembl.yaml"
+    )
+    assert publication_term_type["strictness"] == "strict_enum"
+    assert publication_term_type["dq_coverage"] == "enum:error"
+
 
 def test_build_entity_profile_coverage_kpi_summarizes_entity_rows() -> None:
     kpi = build_entity_profile_coverage_kpi(
@@ -269,6 +278,18 @@ def test_build_composite_join_key_policy_coverage_kpi_reports_configured_keys() 
     assert float(cast(float, kpi["value_pct"])) == pytest.approx(100.0)
 
 
+def test_build_composite_sensitive_source_field_profile_coverage_kpi_reports_governed_fields() -> (
+    None
+):
+    kpi = build_composite_sensitive_source_field_profile_coverage_kpi()
+
+    assert kpi["surface"] == "composite_source_field"
+    assert kpi["name"] == COMPOSITE_SOURCE_FIELD_COVERAGE_KPI
+    assert int(cast(int, kpi["denominator"])) > 0
+    assert float(cast(float, kpi["value_pct"])) == pytest.approx(100.0)
+    assert list(kpi["regressions"]) == []
+
+
 def test_build_control_plane_normalization_coverage_kpi_reports_governed_seams() -> (
     None
 ):
@@ -291,6 +312,7 @@ def test_build_surface_coverage_kpis_lists_entity_composite_and_control_plane() 
     assert [kpi["surface"] for kpi in kpis] == [
         "entity_record",
         "composite_join_key",
+        "composite_source_field",
         "control_plane_reproducibility",
     ]
 
@@ -351,6 +373,10 @@ def test_render_markdown_mentions_surface_scoped_coverage_kpis() -> None:
         in markdown
     )
     assert "composite_join_key / composite_join_key_policy_coverage_pct" in markdown
+    assert (
+        "composite_source_field / composite_sensitive_source_field_profile_coverage_pct"
+        in markdown
+    )
     assert (
         "control_plane_reproducibility / control_plane_normalization_coverage_pct"
         in markdown

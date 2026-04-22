@@ -116,6 +116,27 @@ def test_order_columns_by_priority_appends_remaining_columns_in_input_order(
     ]
 
 
+def test_order_columns_by_priority_deduplicates_remaining_columns(
+    orderer: ColumnOrderService,
+) -> None:
+    columns = [
+        "crossref.publication.title",
+        "openalex.publication.title",
+        "openalex.publication.title",
+    ]
+    ordered = orderer.order_columns_by_priority(
+        field="title",
+        columns=columns,
+        priorities=("crossref.publication",),
+        seed_pipeline=None,
+    )
+
+    assert ordered == [
+        "crossref.publication.title",
+        "openalex.publication.title",
+    ]
+
+
 def test_filter_compatible_columns_returns_empty_for_no_ordered_columns(
     orderer: ColumnOrderService,
 ) -> None:

@@ -29,6 +29,7 @@ ______________________________________________________________________
 - `MESH_HEADING` — MeSH-дескрипторы
 - `MESH_QUALIFIER` — MeSH-квалификаторы/подзаголовки
 - `KEYWORD` — Ключевые слова, заданные авторами
+- `CONCEPT` — ChEMBL-derived concept terms
 
 ______________________________________________________________________
 
@@ -40,7 +41,7 @@ ______________________________________________________________________
 | ---------------- | ----- | ---------------------------------------------------- |
 | `publication_id` | `str` | FK → ChEMBL ID родительской публикации               |
 | `term`           | `str` | Текст термина (напр., "Aspirin", "kinase inhibitor") |
-| `term_type`      | `str` | Тип термина: MESH_HEADING, MESH_QUALIFIER, KEYWORD   |
+| `term_type`      | `str` | Тип термина: MESH_HEADING, MESH_QUALIFIER, KEYWORD, CONCEPT |
 
 ### MeSH-специфичные поля
 
@@ -64,7 +65,12 @@ composite = f"{publication_id}:{term_type}:{normalized_term}"
 entity_id = hashlib.sha256(composite.encode()).hexdigest()[:16]
 ```
 
-**Нормализация термина:** `term.lower().strip()`
+**Нормализация термина:** `term` проходит profile `normalize_profile_title`.
+`term_type` нормализуется через общий enum source `configs/enums/chembl.yaml`
+и schema constant `PUBLICATION_TERM_TYPES`; lowercase и пробельные варианты
+канонизируются к одному из `MESH_HEADING`, `MESH_QUALIFIER`, `KEYWORD`,
+`CONCEPT`, а неизвестные значения схлопываются в `None` и затем ловятся
+DQ/schema контрактом.
 
 ### Извлечение терминов
 
@@ -81,14 +87,14 @@ ______________________________________________________________________
 
 1. **`publication_id`** — обязательное, формат `CHEMBL\d+`
 1. **`term`** — обязательное, минимум 1 символ
-1. **`term_type`** — обязательное, одно из: MESH_HEADING, MESH_QUALIFIER, KEYWORD
+1. **`term_type`** — обязательное, одно из: MESH_HEADING, MESH_QUALIFIER, KEYWORD, CONCEPT
 
 ### Gold-фильтры
 
 ```yaml
 gold_filters:
   columns:
-    term_type: [MESH_HEADING, KEYWORD]  # Основные типы терминов
+    term_type: [MESH_HEADING, MESH_QUALIFIER, KEYWORD, CONCEPT]
   required_fields:
     - publication_id
     - term

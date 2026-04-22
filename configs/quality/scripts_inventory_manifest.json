@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-22T08:40:40.828714+00:00",
+  "generated_at": "2026-04-22T11:45:07.067474+00:00",
   "summary": {
     "total_scripts": 430,
     "status_counts": {
@@ -5189,7 +5189,7 @@
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 605,
+          "line": 607,
           "source_group": "docs",
           "text": "- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministi"
         },
@@ -5201,7 +5201,7 @@
         },
         {
           "path": "tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py",
-          "line": 53,
+          "line": 55,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_pipeline_normalization_field_matrix.py\""
         }
@@ -6988,7 +6988,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 69,
+      "reference_count": 68,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7705,11 +7705,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 92,
+      "reference_count": 95,
       "references": [
         {
           "path": ".github/workflows/duplication-complexity.yml",
-          "line": 207,
+          "line": 206,
           "source_group": "ci",
           "text": "run: python -m scripts.engineering.qa check-constructor-args --warn-only"
         },
@@ -7739,21 +7739,21 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 710,
+          "line": 721,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 719,
+          "line": 730,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 727,
+          "line": 739,
           "source_group": "ci",
-          "text": "uv run python -m scripts.engineering.qa test-health \\"
+          "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         }
       ]
     },
@@ -9114,7 +9114,7 @@
         },
         {
           "path": "scripts/engineering/dev/pretest_guardrails.sh",
-          "line": 372,
+          "line": 371,
           "source_group": "scripts",
           "text": "run_step cleanup env BIOETL_PREFLIGHT_PRESERVE_PYTEST_CACHE=1 bash scripts/engineering/repo/preflight_cleanup.sh"
         },

@@ -126,7 +126,7 @@ def _validate_rule_bundle_compatibility(
 def _validate_execution_identity_compatibility(
     current_metadata: CheckpointMetadata,
     checkpoint_metadata: CheckpointMetadata,
-) -> tuple[bool, list[str]]:
+) -> tuple[bool, bool, list[str]]:
     messages: list[str] = []
     execution_identity_compatible = True
     execution_identity_result = check_execution_identity_compatibility(
@@ -182,9 +182,14 @@ def _validate_execution_identity_compatibility(
         checkpoint_metadata,
         execution_identity_result,
     )
+    identity_continuity_proven = (
+        execution_identity_result["reason"] != "execution_identity_not_enforced"
+    )
+    if not identity_continuity_proven:
+        execution_identity_compatible = False
     if execution_fingerprints_present(current_metadata, checkpoint_metadata):
         compatible = bool(execution_identity_result["compatible"])
-        return compatible, reason_messages
+        return compatible, True, reason_messages
     if (
         current_metadata.execution_fingerprint
         and checkpoint_metadata.execution_fingerprint
@@ -196,7 +201,7 @@ def _validate_execution_identity_compatibility(
                 f"current={current_metadata.execution_fingerprint}, "
                 f"checkpoint={checkpoint_metadata.execution_fingerprint}"
             )
-        return execution_identity_compatible, messages
+        return execution_identity_compatible, True, messages
     if execution_identity_result["reason"] == "composite_run_identity_missing":
         execution_identity_compatible = False
         messages.append(
@@ -228,17 +233,25 @@ def _validate_execution_identity_compatibility(
         current_metadata, checkpoint_metadata, messages, execution_identity_compatible
     )
 
+    metadata_mismatch_messages = execution_identity_metadata_mismatch_messages(
+        current_metadata,
+        checkpoint_metadata,
+    )
+    if metadata_mismatch_messages:
+        identity_continuity_proven = True
+
     final_messages = [
         *reason_messages,
         *messages,
-        *execution_identity_metadata_mismatch_messages(
-            current_metadata,
-            checkpoint_metadata,
-        ),
+        *metadata_mismatch_messages,
         *exact_replay_mismatch_messages(current_metadata, checkpoint_metadata),
         *input_snapshot_mismatch_messages(current_metadata, checkpoint_metadata),
     ]
-    return execution_identity_compatible and not messages, final_messages
+    return (
+        execution_identity_compatible and not messages,
+        identity_continuity_proven,
+        final_messages,
+    )
 
 
 def _validate_mismatch_reasons(
@@ -475,7 +488,7 @@ def _has_explicit_execution_identity(metadata: CheckpointMetadata) -> bool:
 def _validate_lenient_execution_identity_compatibility(
     current_metadata: CheckpointMetadata,
     checkpoint_metadata: CheckpointMetadata,
-) -> tuple[bool, list[str]]:
+) -> tuple[bool, bool, list[str]]:
     """Relax degraded identity checks for lenient compatibility mode.
 
     Lenient mode should not fail solely because fallback execution identity
@@ -487,7 +500,7 @@ def _validate_lenient_execution_identity_compatibility(
         _has_explicit_execution_identity(current_metadata)
         or _has_explicit_execution_identity(checkpoint_metadata)
     ):
-        return True, []
+        return True, False, []
     return _validate_execution_identity_compatibility(
         current_metadata,
         checkpoint_metadata,
@@ -556,7 +569,11 @@ class CheckpointCompatibilityService:
             current_metadata,
             checkpoint_metadata,
         )
-        execution_identity_compatible, execution_identity_messages = (
+        (
+            execution_identity_compatible,
+            identity_continuity_proven,
+            execution_identity_messages,
+        ) = (
             _validate_execution_identity_compatibility(
                 current_metadata,
                 checkpoint_metadata,
@@ -583,6 +600,7 @@ class CheckpointCompatibilityService:
             dq_compatible=dq_compatible,
             pipeline_compatible=pipeline_compatible,
             execution_identity_compatible=execution_identity_compatible,
+            identity_continuity_proven=identity_continuity_proven,
             messages=messages,
         )
 
@@ -602,7 +620,11 @@ class CheckpointCompatibilityService:
                 checkpoint_metadata,
             )
         )
-        execution_identity_compatible, execution_identity_messages = (
+        (
+            execution_identity_compatible,
+            identity_continuity_proven,
+            execution_identity_messages,
+        ) = (
             _validate_lenient_execution_identity_compatibility(
                 current_metadata,
                 checkpoint_metadata,
@@ -626,6 +648,7 @@ class CheckpointCompatibilityService:
             pipeline_compatible=pipeline_compatible,
             messages=messages,
             execution_identity_compatible=execution_identity_compatible,
+            identity_continuity_proven=identity_continuity_proven,
         )
 
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from bioetl.domain.normalization.profiles import (
+    CHEMBL_TARGET_PROFILE,
     CROSSREF_PUBLICATION_PROFILE,
     CROSSREF_PUBLICATION_SCHEMA_FIELDS,
     PUBCHEM_COMPOUND_PROFILE,
@@ -13,9 +14,15 @@ from bioetl.domain.normalization.profiles import (
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles._chembl_profile_helpers import (
+    CHEMBL_META_FIELDS,
+    build_chembl_profile,
+    chembl_schema_fields,
+)
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_canonical_smiles,
 )
+from bioetl.domain.schemas.chembl.publication_term import PublicationTermSchema
 
 
 def test_crossref_publication_profile_covers_schema_exactly() -> None:
@@ -46,6 +53,27 @@ def test_pubchem_smiles_rules_use_domain_smiles_normalization() -> None:
     assert canonical_rule.apply(" C ") == "C"
     assert isomeric_rule is not None
     assert isomeric_rule.apply(" C ") == "C"
+
+
+def test_chembl_target_organism_display_normalization_is_profile_visible() -> None:
+    organism_rule = CHEMBL_TARGET_PROFILE.rule_for("organism")
+
+    assert organism_rule is not None
+    assert organism_rule.apply("  homo   sapiens  ") == "Homo sapiens"
+    assert organism_rule.apply("e. coli") == "Escherichia coli"
+    assert "organism" in (organism_rule.notes or "").lower()
+
+
+def test_chembl_profile_helpers_preserve_standard_meta_semantics() -> None:
+    schema_fields = chembl_schema_fields(PublicationTermSchema)
+    profile = build_chembl_profile(
+        entity="helper_probe",
+        schema_fields=schema_fields,
+    )
+
+    assert profile.meta_fields == CHEMBL_META_FIELDS
+    assert "_run_id" in profile.hash_excluded_fields
+    assert "term_type" in profile.hash_included_fields
 
 
 def test_standard_profile_builder_accepts_legacy_single_item_special_rules() -> None:

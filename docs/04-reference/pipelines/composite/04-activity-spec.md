@@ -41,6 +41,11 @@ ______________________________________________________________________
   `document_journal`.
 - The dependency uses multi-field filtering via `filter_fields` and joins on the
   composite key defined in the YAML config.
+- Composite join/control fields inherit canonical source-profile normalization.
+  `molecule_id` and `publication_id` are covered by composite join-key policy;
+  propagated fields such as `standard_type`, `standard_relation`, `standard_flag`,
+  `assay_type`, `bao_format`, and `bao_endpoint` must remain governed by
+  `chembl_activity` profile rules before merge.
 - This page no longer republishes the older dashed field tables, conflict notes,
   or threshold summaries.
 - For merge settings, column groups, DQ rules, and output ordering, use the

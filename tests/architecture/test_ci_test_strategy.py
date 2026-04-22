@@ -82,8 +82,27 @@ def test_tests_workflow_publishes_duration_telemetry_artifact() -> None:
 def test_tests_workflow_publishes_test_health_telemetry_artifact() -> None:
     """Tests workflow should fold JUnit telemetry into test-health summaries."""
     workflow = _read_workflow(".github/workflows/tests.yml")
+    assert "duration-telemetry:\n        if: always()" in workflow, (
+        "duration-telemetry must run even when upstream test jobs fail"
+    )
+    assert "continue-on-error: true" in workflow, (
+        "duration-telemetry should still publish an empty rollup when no telemetry "
+        "artifacts are available"
+    )
+    assert "unit_junit=()" in workflow, (
+        "duration-telemetry must not pass missing literal JUnit paths to the aggregator"
+    )
     assert "summarize-junit" in workflow, (
         "duration telemetry job should convert existing JUnit XML into test-health JSON"
+    )
+    assert "--suite security" in workflow, (
+        "security matrix telemetry should be represented in test-health summaries"
+    )
+    assert "--suite memory" in workflow, (
+        "memory lane telemetry should be represented in test-health summaries"
+    )
+    assert "--suite track-d" in workflow, (
+        "Track D telemetry should be represented in test-health summaries"
     )
     assert "--github-step-summary" in workflow, (
         "test-health rollup should publish Markdown into the GitHub job summary"

@@ -379,9 +379,10 @@ class TestConfigHashStability:
             dq_policy_hash="policy_hash_123",
         )
 
-        # Policy hashes don't affect basic compatibility
+        # Policy hashes alone are not checkpoint identity continuity anchors.
         result = self.service.validate_checkpoint_compatibility(metadata1, metadata2)
-        assert result.compatible is True
+        assert result.compatible is False
+        assert result.identity_continuity_proven is False
 
     def test_rule_bundle_version_consistency(self) -> None:
         """Test that rule bundle versions are handled consistently."""
@@ -395,9 +396,10 @@ class TestConfigHashStability:
             dq_rule_bundle_version="2024.1",
         )
 
-        # Same rule bundle versions should be compatible
+        # Rule bundle versions alone are not checkpoint identity continuity anchors.
         result = self.service.validate_checkpoint_compatibility(metadata1, metadata2)
-        assert result.compatible is True
+        assert result.compatible is False
+        assert result.identity_continuity_proven is False
 
     def test_hash_changes_detected(self) -> None:
         """Test that hash changes are detected correctly."""

@@ -9,7 +9,7 @@ import csv
 import io
 import sys
 from datetime import UTC, datetime
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
@@ -144,9 +144,13 @@ FALLBACK_BUSINESS = "fallback_business"
 FALLBACK_TECHNICAL_PASSTHROUGH = "fallback_technical_passthrough"
 EXPLICIT_PROFILE_COVERAGE_KPI = "explicit_profile_coverage_pct"
 COMPOSITE_JOIN_KEY_COVERAGE_KPI = "composite_join_key_policy_coverage_pct"
+COMPOSITE_SOURCE_FIELD_COVERAGE_KPI = (
+    "composite_sensitive_source_field_profile_coverage_pct"
+)
 CONTROL_PLANE_NORMALIZATION_COVERAGE_KPI = "control_plane_normalization_coverage_pct"
 ENTITY_RECORD_SURFACE = "entity_record"
 COMPOSITE_JOIN_KEY_SURFACE = "composite_join_key"
+COMPOSITE_SOURCE_FIELD_SURFACE = "composite_source_field"
 CONTROL_PLANE_REPRODUCIBILITY_SURFACE = "control_plane_reproducibility"
 PROFILE_SEMANTICS_SURFACE = "profile_semantics"
 PROFILE_META_PASSTHROUGH_KPI = "shipped_profile_meta_passthrough_pct"
@@ -229,6 +233,7 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("chembl", "assay", "relationship_type"): "configs/enums/chembl.yaml",
     ("chembl", "molecule", "molecule_type"): "configs/enums/chembl.yaml",
     ("chembl", "molecule", "structure_type"): "configs/enums/chembl.yaml",
+    ("chembl", "publication_term", "term_type"): "configs/enums/chembl.yaml",
     ("chembl", "target", "target_type"): "configs/enums/chembl.yaml",
     ("uniprot", "protein", "entry_type"): "configs/enums/uniprot.yaml",
     ("uniprot", "protein", "flag"): "configs/enums/uniprot.yaml",
@@ -241,6 +246,24 @@ COMPOSITE_GOLD_SCHEMA_TYPE_REGISTRY: dict[str, str] = {
     "composite_molecule": "unknown",
     "composite_publication": "unknown",
     "composite_target": "unknown",
+}
+COMPOSITE_SENSITIVE_SOURCE_FIELDS: dict[str, tuple[tuple[str, str], ...]] = {
+    "activity_id": (("chembl", "activity"),),
+    "assay_id": (("chembl", "activity"), ("chembl", "assay")),
+    "molecule_id": (("chembl", "activity"), ("chembl", "molecule")),
+    "target_id": (("chembl", "activity"), ("chembl", "target")),
+    "publication_id": (
+        ("chembl", "activity"),
+        ("chembl", "assay"),
+        ("chembl", "publication"),
+    ),
+    "assay_type": (("chembl", "activity"), ("chembl", "assay")),
+    "standard_type": (("chembl", "activity"),),
+    "standard_relation": (("chembl", "activity"),),
+    "target_type": (("chembl", "target"),),
+    "molecule_type": (("chembl", "molecule"),),
+    "bao_format": (("chembl", "activity"), ("chembl", "assay")),
+    "standard_flag": (("chembl", "activity"),),
 }
 
 
@@ -296,6 +319,8 @@ def _controlled_vocabulary_source(
         return "domain.normalization.rules.operator_aliases"
     if "unit" in normalizer_name or "unit" in normalized_notes:
         return "domain.normalization.rules.unit_aliases"
+    if "bao" in normalizer_name or "bao identifier" in normalized_notes:
+        return "domain.normalization.ontology_id_prefixes"
     if "ontology id" in normalized_notes or "ontology_id" in normalizer_name:
         return "domain.normalization.ontology_id_prefixes"
     return ""
@@ -331,6 +356,8 @@ def _strictness(
         return "strict_enum"
     if "unit" in normalizer_name or "unit" in normalized_notes:
         return "controlled_unit"
+    if "bao" in normalizer_name or "bao identifier" in normalized_notes:
+        return "canonical_ontology_id"
     if "ontology id" in normalized_notes or "ontology_id" in normalizer_name:
         return "canonical_ontology_id"
     if normalizer_name in {
@@ -362,7 +389,7 @@ def _check_type_for_check(check: Any) -> str | None:
     return None
 
 
-@lru_cache(maxsize=None)
+@cache
 def _domain_schema_field_coverage_by_pipeline(pipeline_name: str) -> dict[str, str]:
     schema_model = ENTITY_DOMAIN_SCHEMA_REGISTRY.get(pipeline_name)
     if schema_model is None:
@@ -398,7 +425,7 @@ def _schema_coverage(
     return f"silver_arrow:present(nullable={arrow_nullable});{domain_coverage}"
 
 
-@lru_cache(maxsize=None)
+@cache
 def _dq_rule_coverage_by_field(provider: str, entity: str) -> dict[str, str]:
     dq_config = _load_dq_config(provider, entity)
     if dq_config is None:
@@ -416,7 +443,7 @@ def _dq_rule_coverage_by_field(provider: str, entity: str) -> dict[str, str]:
     }
 
 
-@lru_cache(maxsize=None)
+@cache
 def _load_dq_config(provider: str, entity: str) -> Any | None:
     try:
         return DQConfigLoader(Path("configs")).load(provider, entity)
@@ -992,6 +1019,54 @@ def build_composite_join_key_policy_coverage_kpi() -> dict[str, object]:
     }
 
 
+def _iter_composite_sensitive_source_field_requirements() -> list[
+    tuple[str, str, str]
+]:
+    composite_fields = {
+        row["field_name"]
+        for row in _composite_field_matrix_rows()
+        if row["normalization_source"] == "upstream_inherited"
+        or row["normalization_source"] == "composite_join_key_policy"
+    }
+    requirements: list[tuple[str, str, str]] = []
+    for field_name, source_profiles in COMPOSITE_SENSITIVE_SOURCE_FIELDS.items():
+        if field_name not in composite_fields:
+            continue
+        requirements.extend(
+            (field_name, provider, entity) for provider, entity in source_profiles
+        )
+    return requirements
+
+
+def build_composite_sensitive_source_field_profile_coverage_kpi() -> dict[str, object]:
+    """Report source-profile coverage for composite-sensitive inherited fields."""
+    requirements = _iter_composite_sensitive_source_field_requirements()
+    regressions: list[str] = []
+    covered = 0
+    for field_name, provider, entity in requirements:
+        profile = resolve_normalization_profile(provider, entity)
+        rule = None if profile is None else profile.rule_for(field_name)
+        if rule is None:
+            regressions.append(f"{provider}.{entity}.{field_name}")
+            continue
+        covered += 1
+
+    denominator = len(requirements)
+    value_pct = round((covered * 100 / denominator) if denominator else 0.0, 2)
+    return {
+        "surface": COMPOSITE_SOURCE_FIELD_SURFACE,
+        "name": COMPOSITE_SOURCE_FIELD_COVERAGE_KPI,
+        "description": (
+            "Percent of composite-sensitive source fields covered by explicit "
+            "source normalization profiles."
+        ),
+        "numerator": covered,
+        "denominator": denominator,
+        "value_pct": value_pct,
+        "regressions": regressions,
+    }
+
+
 def _control_plane_surface_statuses() -> list[dict[str, object]]:
     occurred_at = datetime(2026, 4, 8, 12, 53, 47, tzinfo=UTC)
     manifest_status = normalize_run_manifest_spec(
@@ -1197,6 +1272,7 @@ def build_surface_coverage_kpis(
     return [
         build_entity_profile_coverage_kpi(matrix_rows),
         build_composite_join_key_policy_coverage_kpi(),
+        build_composite_sensitive_source_field_profile_coverage_kpi(),
         build_control_plane_normalization_coverage_kpi(),
     ]
 

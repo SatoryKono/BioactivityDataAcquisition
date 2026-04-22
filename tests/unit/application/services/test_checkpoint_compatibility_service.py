@@ -385,6 +385,39 @@ class TestCheckpointCompatibilityService:
         assert result.execution_identity_compatible is False
         assert any("Input snapshot identity mismatch" in msg for msg in result.messages)
 
+    def test_strict_resume_blocks_missing_execution_identity_proof(self) -> None:
+        """Strict mode should fail closed when identity continuity is unproven."""
+        current = CheckpointMetadata(
+            records_processed=1000,
+            execution_fingerprint="current-fingerprint",
+        )
+        checkpoint = CheckpointMetadata(records_processed=500)
+
+        result = self.service.validate_checkpoint_compatibility(current, checkpoint)
+
+        assert result.compatible is False
+        assert result.execution_identity_compatible is False
+        assert result.identity_continuity_proven is False
+        assert any(
+            "Execution identity continuity not proven" in msg
+            for msg in result.messages
+        )
+
+    def test_strict_resume_blocks_missing_fallback_identity_anchors(self) -> None:
+        """Strict mode should not resume when no comparable fallback anchors exist."""
+        current = CheckpointMetadata(records_processed=1000)
+        checkpoint = CheckpointMetadata(records_processed=500)
+
+        result = self.service.validate_checkpoint_compatibility(current, checkpoint)
+
+        assert result.compatible is False
+        assert result.execution_identity_compatible is False
+        assert result.identity_continuity_proven is False
+        assert any(
+            "Execution identity continuity not proven" in msg
+            for msg in result.messages
+        )
+
     def test_validate_minimum_compatibility_same_contracts(self) -> None:
         """Test lenient mode with same DQ contracts."""
         current = CheckpointMetadata(
@@ -538,9 +571,13 @@ class TestCheckpointCompatibilityServiceEdgeCases:
 
         result = self.service.validate_checkpoint_compatibility(current, checkpoint)
 
-        assert result.compatible is True
-        assert len(result.messages) == 1  # "Checkpoint is compatible for resume"
-        assert "Checkpoint is compatible for resume" in result.messages[0]
+        assert result.compatible is False
+        assert result.execution_identity_compatible is False
+        assert result.identity_continuity_proven is False
+        assert any(
+            "Execution identity continuity not proven" in msg
+            for msg in result.messages
+        )
 
     def test_malformed_version_strings(self) -> None:
         """Test with malformed version strings."""
@@ -575,6 +612,8 @@ class TestCheckpointCompatibilityServiceEdgeCases:
 
         result = self.service.validate_checkpoint_compatibility(current, checkpoint)
 
-        assert result.compatible is True
+        assert result.compatible is False
         assert result.dq_compatible is True
         assert result.pipeline_compatible is True
+        assert result.execution_identity_compatible is False
+        assert result.identity_continuity_proven is False

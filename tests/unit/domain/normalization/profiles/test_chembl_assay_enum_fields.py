@@ -171,3 +171,18 @@ class TestAssayOntologyNormalization:
 
         # Test unknown format preservation
         assert rule.normalizer("unknown_format") == "unknown_format"
+
+    def test_assay_organism_display_normalization_is_profile_visible(self) -> None:
+        """Test assay organism display-name normalization in the profile."""
+        rule = CHEMBL_ASSAY_PROFILE.field_rules["assay_organism"]
+
+        assert rule.normalizer("  homo   sapiens  ") == "Homo sapiens"
+        assert rule.normalizer("e. coli") == "Escherichia coli"
+        assert "organism" in (rule.notes or "").lower()
+
+    def test_bao_label_cleanup_is_profile_visible(self) -> None:
+        """Test profile-visible BAO label cleanup."""
+        rule = CHEMBL_ASSAY_PROFILE.field_rules["bao_label"]
+
+        assert rule.normalizer("  CELL-BASED FORMAT  ") == "cell-based format"
+        assert "BAO label" in (rule.notes or "")

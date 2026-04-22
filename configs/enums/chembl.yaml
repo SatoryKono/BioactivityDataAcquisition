@@ -215,3 +215,10 @@ publication:
         - standard
         - dissertation
         - other
+
+publication_term:
+    term_types:
+        - MESH_HEADING
+        - MESH_QUALIFIER
+        - KEYWORD
+        - CONCEPT

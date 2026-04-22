@@ -75,9 +75,9 @@ quality:
     type: enum
     allowed:
     - MESH_HEADING
+    - MESH_QUALIFIER
     - KEYWORD
-    - AUTHOR
-    - INSTITUTION
+    - CONCEPT
     nullable: false
     error_message: term_type is required and must be valid
   - field: term
@@ -124,7 +124,9 @@ filters:
     columns:
       term_type:
       - MESH_HEADING
+      - MESH_QUALIFIER
       - KEYWORD
+      - CONCEPT
     required_fields:
     - publication_id
     - term

@@ -13,6 +13,9 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.config.dq import DQConfig
+from bioetl.domain.control_plane.config_source_hashing import (
+    compute_canonical_yaml_sha256,
+)
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
     ConfigSourceRef,
@@ -352,7 +355,7 @@ def test_get_effective_config_artifact_handles_present_and_missing_dq_config() -
     assert second_call["dq_config"] is None
 
 
-def test_get_effective_config_artifact_persists_real_source_hashes(
+def test_get_effective_config_artifact_persists_semantic_and_raw_source_hashes(
     tmp_path: Path,
 ) -> None:
     logger = MagicMock()
@@ -379,8 +382,16 @@ def test_get_effective_config_artifact_persists_real_source_hashes(
 
     source_refs = effective_service.create_calls[0]["source_refs"]
     assert [src.source_hash for src in source_refs] == [
+        compute_canonical_yaml_sha256(base_config.read_bytes()),
+        compute_canonical_yaml_sha256(provider_config.read_bytes()),
+    ]
+    assert [src.raw_source_hash for src in source_refs] == [
         hashlib.sha256(base_config.read_bytes()).hexdigest(),
         hashlib.sha256(provider_config.read_bytes()).hexdigest(),
+    ]
+    assert [src.source_hash_strategy for src in source_refs] == [
+        "canonical_yaml",
+        "canonical_yaml",
     ]
 
 

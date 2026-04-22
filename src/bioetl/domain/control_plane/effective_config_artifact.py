@@ -6,6 +6,9 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Literal
 
+from bioetl.domain.control_plane.config_source_hashing import (
+    ConfigSourceHashStrategy,
+)
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 
@@ -46,6 +49,8 @@ class ConfigSourceRef:
     source_path: str
     source_hash: str | None = None
     priority: int = 0
+    raw_source_hash: str | None = None
+    source_hash_strategy: ConfigSourceHashStrategy | None = None
 
 
 @dataclass(frozen=True)

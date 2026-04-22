@@ -8,6 +8,9 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
 from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_chembl_organism_name,
+)
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.constants import TARGET_TYPES
 
@@ -53,6 +56,12 @@ _NULL_FIELDS = chembl_pseudo_null_fields("target")
 _ENUM_FIELDS = {
     "target_type": TARGET_TYPES,
 }
+_SPECIAL_RULE_COMPONENTS = {
+    "organism": (
+        normalize_profile_chembl_organism_name,
+        "Normalize ChEMBL target organism display name using curated organism aliases.",
+    ),
+}
 
 CHEMBL_TARGET_PROFILE = build_standard_profile(
     profile_name="chembl.target",
@@ -64,6 +73,7 @@ CHEMBL_TARGET_PROFILE = build_standard_profile(
     boolean_fields=_BOOLEAN_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
     enum_fields=_ENUM_FIELDS,
+    special_rules=_SPECIAL_RULE_COMPONENTS,
     null_fields=_NULL_FIELDS,
 )
 

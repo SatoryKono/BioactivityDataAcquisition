@@ -45,3 +45,17 @@ Hash policy фиксирует детерминированные правила
 
 - Snapshot стабильности hash на фиксированных fixtures.
 - Проверка, что policy-изменение требует version bump + migration note.
+
+## Effective-config source hashes
+
+Effective-config artifacts use two separate hashes for file-backed config sources:
+
+- `source_hash`: semantic identity hash. For YAML files this is computed from
+  parsed YAML data serialized as canonical JSON with sorted mapping keys. Comments,
+  whitespace, and mapping order do not change this hash.
+- `raw_source_hash`: forensic byte-level SHA-256. This changes whenever the file
+  bytes change, including formatting-only edits.
+
+For non-YAML config sources, `source_hash` and `raw_source_hash` both use the raw
+byte SHA-256. YAML duplicate mapping keys are rejected before hashing so ambiguous
+config files cannot receive a semantic identity.

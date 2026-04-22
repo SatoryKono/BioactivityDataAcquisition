@@ -140,12 +140,14 @@ def handle_incompatible_checkpoint(
     current_metadata: CheckpointMetadata | None,
     checkpoint_metadata: CheckpointMetadata,
     execution_identity_compatible: bool,
+    identity_continuity_proven: bool,
     messages: list[str],
 ) -> CheckpointMetadata | None:
     """Apply configured policy to an incompatible checkpoint."""
     disposition = resolve_incompatible_checkpoint_disposition(
         compatibility_policy=compatibility_policy,
         execution_identity_compatible=execution_identity_compatible,
+        identity_continuity_proven=identity_continuity_proven,
     )
     forced_resume_rejection = disposition == "observe_blocked_identity"
     payload = {
@@ -154,6 +156,7 @@ def handle_incompatible_checkpoint(
         "compatibility_disposition": disposition,
         "resume_rejected": compatibility_policy != "observe" or forced_resume_rejection,
         "execution_identity_compatible": execution_identity_compatible,
+        "identity_continuity_proven": identity_continuity_proven,
         "identity_mismatch_forces_rejection": forced_resume_rejection,
         "messages": messages,
         "checkpoint_metadata": checkpoint_metadata.to_dict(),
@@ -216,10 +219,11 @@ def resolve_incompatible_checkpoint_disposition(
     *,
     compatibility_policy: CheckpointCompatibilityPolicy,
     execution_identity_compatible: bool,
+    identity_continuity_proven: bool = True,
 ) -> CheckpointCompatibilityDisposition:
     """Return the bounded incompatibility disposition for telemetry and logging."""
     if compatibility_policy == "observe":
-        if execution_identity_compatible:
+        if execution_identity_compatible or not identity_continuity_proven:
             return "observe_loaded_degraded"
         return "observe_blocked_identity"
     if compatibility_policy == "soft_fail":

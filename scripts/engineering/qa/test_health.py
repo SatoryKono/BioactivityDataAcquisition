@@ -86,6 +86,20 @@ def _default_run_id(suite: str) -> str:
     return f"{suite}-{stamp}"
 
 
+def _unique_run_id(reports_dir: Path, run_id: str) -> str:
+    """Return a run ID that preserves existing local history artifacts."""
+    if not (reports_dir / f"{run_id}.json").exists():
+        return run_id
+
+    timestamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    candidate = f"{run_id}-{timestamp}"
+    index = 2
+    while (reports_dir / f"{candidate}.json").exists():
+        candidate = f"{run_id}-{timestamp}-{index}"
+        index += 1
+    return candidate
+
+
 def _relative_to_root(path: Path) -> str:
     try:
         return path.relative_to(ROOT).as_posix()
@@ -364,6 +378,19 @@ def _resolve_junit_inputs(junit_paths: list[str], junit_globs: list[str]) -> lis
     return sorted({path for path in paths if path.exists()})
 
 
+def _junit_duration_seconds(xml_paths: list[Path]) -> float:
+    total = 0.0
+    for xml_path in xml_paths:
+        root = ElementTree.parse(xml_path).getroot()
+        suites = [root] if root.tag == "testsuite" else list(root.iter("testsuite"))
+        for suite in suites:
+            try:
+                total += float(suite.attrib.get("time", "0") or 0)
+            except ValueError:
+                continue
+    return total
+
+
 def _write_junit_summary(
     *,
     suite: str,
@@ -387,7 +414,7 @@ def _write_junit_summary(
         suite=suite,
         shards=[path.stem for path in xml_paths],
         started_at=datetime.now(UTC).isoformat(),
-        duration_seconds=0.0,
+        duration_seconds=_junit_duration_seconds(xml_paths),
         command=rendered_command,
         exit_code=exit_code,
         classifier_config_path=classifier_config_path,
@@ -421,7 +448,10 @@ def _run_tests(argv: list[str]) -> int:
     )
     args, runner_args = parser.parse_known_args(wrapper_args)
 
-    run_id = args.run_id or _default_run_id(args.suite)
+    run_id = _unique_run_id(
+        args.reports_dir,
+        args.run_id or _default_run_id(args.suite),
+    )
     plan = build_run_plan(
         suite=args.suite,
         run_id=run_id,
@@ -510,7 +540,10 @@ def _summarize_junit(argv: list[str]) -> int:
     )
     args = parser.parse_args(argv)
 
-    run_id = args.run_id or _default_run_id(args.suite)
+    run_id = _unique_run_id(
+        args.reports_dir,
+        args.run_id or _default_run_id(args.suite),
+    )
     summary_path = _write_junit_summary(
         suite=args.suite,
         run_id=run_id,
@@ -734,7 +767,10 @@ def _rollup(argv: list[str]) -> int:
     if args.junit or args.junit_glob:
         if not args.suite:
             parser.error("--suite is required when --junit or --junit-glob is used")
-        run_id = args.run_id or _default_run_id(args.suite)
+        run_id = _unique_run_id(
+            args.reports_dir,
+            args.run_id or _default_run_id(args.suite),
+        )
         summary_path = _write_junit_summary(
             suite=args.suite,
             run_id=run_id,

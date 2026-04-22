@@ -29,12 +29,16 @@ class TestConfigSourceRef:
             source_type="file",
             source_path="/config/pipeline.yaml",
             source_hash="abc123",
+            raw_source_hash="rawabc123",
+            source_hash_strategy="canonical_yaml",
             priority=1,
         )
 
         assert source_ref.source_type == "file"
         assert source_ref.source_path == "/config/pipeline.yaml"
         assert source_ref.source_hash == "abc123"
+        assert source_ref.raw_source_hash == "rawabc123"
+        assert source_ref.source_hash_strategy == "canonical_yaml"
         assert source_ref.priority == 1
 
         # Test immutability
@@ -50,6 +54,8 @@ class TestConfigSourceRef:
         assert source_ref.source_type == "default"
         assert source_ref.source_path == "internal://defaults"
         assert source_ref.source_hash is None
+        assert source_ref.raw_source_hash is None
+        assert source_ref.source_hash_strategy is None
         assert source_ref.priority == 0
 
 

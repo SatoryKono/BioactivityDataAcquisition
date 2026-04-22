@@ -17,6 +17,7 @@ from ._chembl_activity_fields import (
 from ._standard_profile_builder import build_standard_profile
 from .chembl_pseudo_nulls import chembl_pseudo_null_fields
 from .profile_normalizers import (
+    normalize_profile_bao_identifier,
     normalize_profile_canonical_smiles,
     normalize_profile_enum,
     normalize_profile_operator,
@@ -58,7 +59,7 @@ _ENUM_FIELDS = {
     "standard_type": ACTIVITY_STANDARD_TYPES,
     "assay_type": ASSAY_TYPES,
 }
-_ONTOLOGY_ID_FIELDS = frozenset({"bao_format", "bao_endpoint", "uo_units"})
+_ONTOLOGY_ID_FIELDS = frozenset({"uo_units"})
 
 _SPECIAL_RULE_COMPONENTS = {
     "canonical_smiles": (
@@ -75,6 +76,14 @@ _SPECIAL_RULE_COMPONENTS = {
     "assay_type": (
         lambda value: normalize_profile_enum(value, allowed_values=ASSAY_TYPES),
         "Normalize assay_type to uppercase enum value and collapse unknown values to None.",
+    ),
+    "bao_endpoint": (
+        normalize_profile_bao_identifier,
+        "Normalize BAO endpoint identifier to canonical BAO underscore form.",
+    ),
+    "bao_format": (
+        normalize_profile_bao_identifier,
+        "Normalize BAO format identifier to canonical BAO underscore form.",
     ),
 }
 
