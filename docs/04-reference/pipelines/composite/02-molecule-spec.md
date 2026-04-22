@@ -41,6 +41,10 @@ ______________________________________________________________________
 - Canonical field aliasing between ChEMBL and PubChem is maintained in the
   composite YAML config; this page no longer republishes the older dashed join
   notes.
+- Composite join/control fields inherit canonical source-profile normalization.
+  `inchi_key` and `canonical_smiles` are covered by composite join-key policy,
+  while `molecule_id` and propagated controlled fields such as `molecule_type`
+  must remain governed by the `chembl_molecule` profile before merge.
 - For merge priorities, field aliases, and output groups, use the composite
   YAML config above.
 

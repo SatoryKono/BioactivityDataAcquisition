@@ -169,6 +169,10 @@ class EffectiveConfigSerializer:
         }
         if source_ref.source_hash:
             result["source_hash"] = source_ref.source_hash
+        if source_ref.raw_source_hash:
+            result["raw_source_hash"] = source_ref.raw_source_hash
+        if source_ref.source_hash_strategy:
+            result["source_hash_strategy"] = source_ref.source_hash_strategy
         return result
 
     def _resolution_policy_to_dict(

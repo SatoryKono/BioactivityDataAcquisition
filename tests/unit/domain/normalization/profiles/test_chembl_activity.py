@@ -73,3 +73,14 @@ def test_chembl_activity_meta_fields_use_passthrough_normalizer() -> None:
         CHEMBL_ACTIVITY_PROFILE.rule_for("activity_id").normalizer
         is normalize_profile_text
     )
+
+
+def test_chembl_activity_bao_identifier_rules_are_profile_visible() -> None:
+    endpoint_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("bao_endpoint")
+    format_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("bao_format")
+
+    assert endpoint_rule.normalizer("bao:0000357") == "BAO_0000357"
+    assert endpoint_rule.normalizer(" BAO_0000357 ") == "BAO_0000357"
+    assert format_rule.normalizer("bao:0000019") == "BAO_0000019"
+    assert "BAO" in (endpoint_rule.notes or "")
+    assert "BAO" in (format_rule.notes or "")

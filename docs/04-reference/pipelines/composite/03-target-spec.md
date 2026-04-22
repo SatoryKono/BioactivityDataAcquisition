@@ -40,6 +40,11 @@ ______________________________________________________________________
 - Chained dependency behavior is defined in the composite YAML via `key_source`,
   `filter_field`, and `key_filter`; this page no longer republishes the older
   dashed dependency tables.
+- Composite join/control fields inherit canonical source-profile normalization.
+  `target_id`, `primary_component_id`, `protein_classification_id`, and
+  `uniprot_accession` are covered by composite join-key policy; propagated
+  controlled fields such as `target_type` must remain governed by the
+  `chembl_target` profile before merge.
 - For dependency order, merge priorities, and column groups, use the composite
   YAML config above.
 

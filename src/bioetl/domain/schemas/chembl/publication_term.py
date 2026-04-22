@@ -14,6 +14,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import PUBLICATION_TERM_TYPES
 
 __all__ = [
     "PublicationTermSchema",
@@ -46,7 +47,7 @@ class PublicationTermSchema(ETLRecordSchema):
     )
     term_type: Series[str] = pa.Field(
         nullable=False,
-        isin=["MESH_HEADING", "MESH_QUALIFIER", "KEYWORD", "CONCEPT"],
+        isin=sorted(PUBLICATION_TERM_TYPES),
         description="Term type classification.",
     )
 

@@ -232,6 +232,15 @@ PUBLICATION_TYPES: frozenset[str] = frozenset(
     ]
 )
 
+PUBLICATION_TERM_TYPES: frozenset[str] = frozenset(
+    [
+        "MESH_HEADING",
+        "MESH_QUALIFIER",
+        "KEYWORD",
+        "CONCEPT",
+    ]
+)
+
 # =============================================================================
 # CANONICAL VALIDATION BOUNDS (Gold / Composite layer)
 # =============================================================================

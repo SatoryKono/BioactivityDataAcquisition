@@ -163,6 +163,7 @@ class FileAuditAdapter:
         event_data: JsonDict | None,
         timestamp: datetime,
     ) -> None:
+        self._ensure_directory()
         file_path = self._get_event_file_path(timestamp)
         payload = {
             "event_name": event_name,
@@ -226,12 +227,13 @@ class FileAuditAdapter:
     def log_event(
         self,
         event_name: str,
-        timestamp: datetime,
         event_data: JsonDict | None = None,
+        timestamp: datetime | None = None,
     ) -> None:
         """Log a non-write lifecycle event to the audit trail."""
         if self._closed:
             raise RuntimeError("FileAuditAdapter has been closed")
+        timestamp = timestamp or datetime.now(UTC)
         with self._tracer.start_as_current_span("audit.log_event") as span:
             span.set_attribute("bioetl.audit.event_name", event_name)
             try:

@@ -39,7 +39,14 @@ class TestYamlFileIntegrity:
         assert "version" in chembl_yaml
 
     def test_chembl_yaml_has_all_sections(self, chembl_yaml: dict[str, Any]) -> None:
-        expected = {"activity", "assay", "molecule", "target", "publication"}
+        expected = {
+            "activity",
+            "assay",
+            "molecule",
+            "target",
+            "publication",
+            "publication_term",
+        }
         assert expected <= set(chembl_yaml.keys())
 
     def test_uniprot_yaml_exists(self) -> None:
@@ -164,6 +171,13 @@ class TestPublicationSync:
 
         assert PUBLICATION_TYPES == frozenset(chembl_yaml["publication"]["types"])
 
+    def test_publication_term_types(self, chembl_yaml: dict[str, Any]) -> None:
+        from bioetl.domain.schemas.constants import PUBLICATION_TERM_TYPES
+
+        assert PUBLICATION_TERM_TYPES == frozenset(
+            chembl_yaml["publication_term"]["term_types"]
+        )
+
 
 class TestUniProtSync:
     """UniProt enum constants must match YAML."""
@@ -200,6 +214,7 @@ class TestConstantInvariants:
             ASSAY_CATEGORIES,
             ASSAY_TYPES,
             MOLECULE_TYPES,
+            PUBLICATION_TERM_TYPES,
             PUBLICATION_TYPES,
             STANDARD_RELATIONS,
             TARGET_TYPES,
@@ -213,5 +228,6 @@ class TestConstantInvariants:
             MOLECULE_TYPES,
             TARGET_TYPES,
             PUBLICATION_TYPES,
+            PUBLICATION_TERM_TYPES,
         ]:
             assert len(const) > 0

@@ -149,6 +149,9 @@ class CheckpointManagerService:
             execution_identity_compatible=(
                 compatibility_result.execution_identity_compatible
             ),
+            identity_continuity_proven=(
+                compatibility_result.identity_continuity_proven
+            ),
         )
         try:
             result = handle_incompatible_checkpoint(
@@ -159,6 +162,9 @@ class CheckpointManagerService:
                 checkpoint_metadata=checkpoint_metadata,
                 execution_identity_compatible=(
                     compatibility_result.execution_identity_compatible
+                ),
+                identity_continuity_proven=(
+                    compatibility_result.identity_continuity_proven
                 ),
                 messages=compatibility_result.messages,
             )

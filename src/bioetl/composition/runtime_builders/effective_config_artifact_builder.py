@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 from dataclasses import asdict, is_dataclass
 from enum import Enum
@@ -15,6 +14,9 @@ from bioetl.application.services.control_plane.effective_config_service import (
 )
 from bioetl.composition.runtime_builders._run_manifest_refs import (
     control_plane_root as _shared_control_plane_root,
+)
+from bioetl.domain.control_plane.config_source_hashing import (
+    compute_config_source_hashes,
 )
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 from bioetl.infrastructure.control_plane import FileEffectiveConfigArtifactStore
@@ -106,11 +108,19 @@ def _build_runtime_overrides_snapshot(ctx: PipelineRunContext) -> dict[str, obje
     }
 
 
-def _compute_file_hash(path: Path) -> str | None:
-    """Return a stable SHA-256 hash for one config source file when available."""
+def _compute_file_hashes(
+    *,
+    relative_path: str,
+    path: Path,
+) -> tuple[str | None, str | None, str | None]:
+    """Return semantic and raw hashes for one config source file when available."""
     if not path.exists() or not path.is_file():
-        return None
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+        return None, None, None
+    hashes = compute_config_source_hashes(
+        source_path=relative_path,
+        raw_bytes=path.read_bytes(),
+    )
+    return hashes.semantic_hash, hashes.raw_hash, hashes.hash_strategy
 
 
 def _build_config_source_ref(
@@ -121,10 +131,16 @@ def _build_config_source_ref(
 ) -> ConfigSourceRef:
     """Build one canonical file-backed source ref with provenance hash."""
     source_path = repo_root / relative_path
+    source_hash, raw_source_hash, source_hash_strategy = _compute_file_hashes(
+        relative_path=relative_path,
+        path=source_path,
+    )
     return ConfigSourceRef(
         source_type="file",
         source_path=relative_path,
-        source_hash=_compute_file_hash(source_path),
+        source_hash=source_hash,
+        raw_source_hash=raw_source_hash,
+        source_hash_strategy=source_hash_strategy,
         priority=priority,
     )
 

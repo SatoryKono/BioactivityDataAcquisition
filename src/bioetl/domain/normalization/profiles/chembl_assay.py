@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+from bioetl.domain.normalization.chembl import normalize_bao_label
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
 from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
+)
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_bao_identifier,
+    normalize_profile_chembl_organism_name,
 )
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.schemas.chembl.assay import AssaySchema
@@ -80,8 +85,6 @@ def create_case_normalizer(strategy: str = "uppercase"):
     return normalizer
 
 
-_ONTOLOGY_ID_FIELDS = frozenset({"bao_format"})
-
 # Enum fields for strict validation
 _ENUM_FIELDS = {
     "assay_type": ASSAY_TYPES,
@@ -90,6 +93,21 @@ _ENUM_FIELDS = {
     "assay_group": ASSAY_GROUPS,
     "confidence_description": CONFIDENCE_DESCRIPTIONS,
     "relationship_type": RELATIONSHIP_TYPES,
+}
+_SPECIAL_RULE_COMPONENTS = {
+    "assay_organism": (
+        normalize_profile_chembl_organism_name,
+        "Normalize ChEMBL assay organism display name using curated organism aliases.",
+    ),
+    "bao_format": (
+        normalize_profile_bao_identifier,
+        "Normalize BAO format identifier to canonical BAO underscore form.",
+    ),
+    "bao_label": (
+        normalize_bao_label,
+        "Normalize BAO label text; transformer-derived labels may use bao_format "
+        "context before this field-level cleanup.",
+    ),
 }
 
 CHEMBL_ASSAY_PROFILE = build_standard_profile(
@@ -101,8 +119,8 @@ CHEMBL_ASSAY_PROFILE = build_standard_profile(
     int_fields=_INT_FIELDS,
     float_fields=_FLOAT_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
-    ontology_id_fields=_ONTOLOGY_ID_FIELDS,
     enum_fields=_ENUM_FIELDS,
+    special_rules=_SPECIAL_RULE_COMPONENTS,
     null_fields=_NULL_FIELDS,
 )
 

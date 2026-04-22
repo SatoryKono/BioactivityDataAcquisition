@@ -42,6 +42,10 @@ ______________________________________________________________________
 - Namespace disambiguation for overlapping enricher fields is defined in the
   YAML config via `field_mappings`; this page no longer republishes the older
   dashed rename tables.
+- Composite join/control fields inherit canonical source-profile normalization.
+  `cell_id` and `tissue_id` are covered by composite join-key policy, while
+  propagated controlled fields such as `assay_type` and `bao_format` must remain
+  governed by the `chembl_assay` profile before merge.
 - For enricher thresholds, filter conditions, column groups, and merge rules,
   use the composite YAML config above.
 

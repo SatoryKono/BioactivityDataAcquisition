@@ -17,6 +17,7 @@ def test_pretest_guardrails_script_runs_memory_phase() -> None:
     assert '"$PYTHON_BIN" -m memory.tooling.validate' in script
     assert "memory-refresh-smoke" in script
     assert '"$PYTHON_BIN" -m memory.tooling.refresh_all' in script
+    assert "TMP_DIR" not in script
     assert "memory-prune-dry-run" in script
     assert '"$PYTHON_BIN" -m memory.tooling.prune --json' in script
     assert "run_memory_checks" in script.split("main() {", 1)[1]

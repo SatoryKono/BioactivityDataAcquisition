@@ -26,7 +26,6 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.entities import Bioactivity
 from bioetl.domain.normalization.chembl import (
-    normalize_bao_identifier,
     normalize_qudt_unit,
     normalize_standard_unit,
     normalize_uo_identifier,
@@ -259,12 +258,6 @@ class ActivityTransformer(BaseChemblTransformer):
         business_data["publication_id"] = business_data.get(
             "publication_id"
         ) or record.get("publication_id")
-        business_data["bao_endpoint"] = normalize_bao_identifier(
-            cast(OptionalString, business_data.get("bao_endpoint"))
-        )
-        business_data["bao_format"] = normalize_bao_identifier(
-            cast(OptionalString, business_data.get("bao_format"))
-        )
         business_data["uo_units"] = normalize_uo_identifier(
             cast(OptionalString, business_data.get("uo_units"))
         )

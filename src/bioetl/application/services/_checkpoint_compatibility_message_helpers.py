@@ -38,6 +38,7 @@ def execution_identity_reason_messages(
             checkpoint_metadata,
             execution_identity_result,
         ),
+        *unenforced_execution_identity_reason_messages(execution_identity_result),
     ]
 
 
@@ -97,6 +98,19 @@ def execution_fingerprint_reason_messages(
         "Execution fingerprint mismatch: "
         f"current={current_metadata.execution_fingerprint}, "
         f"checkpoint={checkpoint_metadata.execution_fingerprint}"
+    ]
+
+
+def unenforced_execution_identity_reason_messages(
+    execution_identity_result: dict[str, object],
+) -> list[str]:
+    """Return fail-closed diagnostics when no comparable identity proof exists."""
+    if str(execution_identity_result["reason"]) != "execution_identity_not_enforced":
+        return []
+    return [
+        "Execution identity continuity not proven: missing or inconclusive "
+        "execution_fingerprint, composite_run_identity, canonical checkpoint "
+        "execution identity fallback, and degraded runtime-anchor fingerprints"
     ]
 
 

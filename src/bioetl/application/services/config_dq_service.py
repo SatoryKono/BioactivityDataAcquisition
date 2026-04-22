@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 from dataclasses import dataclass
 from datetime import datetime
@@ -13,6 +12,10 @@ from bioetl.application.services.control_plane.effective_config_service import (
     EffectiveConfigService,
 )
 from bioetl.domain.config.dq import DQConfig
+from bioetl.domain.control_plane.config_source_hashing import (
+    ConfigSourceHashStrategy,
+    compute_config_source_hashes,
+)
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
     ConfigSourceRef,
@@ -97,11 +100,19 @@ def _dq_config_to_dict(dq_config: DQConfig) -> JsonDict:
     }
 
 
-def _compute_file_hash(path: Path) -> str | None:
-    """Return a stable SHA-256 hash for one config source file when available."""
+def _compute_file_hashes(
+    *,
+    relative_path: str,
+    path: Path,
+) -> tuple[str | None, str | None, str | None]:
+    """Return semantic and raw hashes for one config source file when available."""
     if not path.exists() or not path.is_file():
-        return None
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+        return None, None, None
+    hashes = compute_config_source_hashes(
+        source_path=relative_path,
+        raw_bytes=path.read_bytes(),
+    )
+    return hashes.semantic_hash, hashes.raw_hash, hashes.hash_strategy
 
 
 def _build_config_source_ref(
@@ -112,10 +123,16 @@ def _build_config_source_ref(
 ) -> ConfigSourceRef:
     """Build one file-backed source ref for admin effective-config tooling."""
     source_path = repo_root / relative_path
+    source_hash, raw_source_hash, source_hash_strategy = _compute_file_hashes(
+        relative_path=relative_path,
+        path=source_path,
+    )
     return ConfigSourceRef(
         source_type="file",
         source_path=relative_path,
-        source_hash=_compute_file_hash(source_path),
+        source_hash=source_hash,
+        raw_source_hash=raw_source_hash,
+        source_hash_strategy=source_hash_strategy,
         priority=priority,
     )
 
@@ -127,6 +144,14 @@ def _build_source_refs(artifact_dict: JsonDict) -> list[ConfigSourceRef]:
             source_type=str(src["source_type"]),
             source_path=str(src["source_path"]),
             source_hash=str(src["source_hash"]) if src.get("source_hash") else None,
+            raw_source_hash=(
+                str(src["raw_source_hash"]) if src.get("raw_source_hash") else None
+            ),
+            source_hash_strategy=(
+                cast("ConfigSourceHashStrategy", str(src["source_hash_strategy"]))
+                if src.get("source_hash_strategy")
+                else None
+            ),
             priority=int(src["priority"]),
         )
         for src in artifact_dict["source_refs"]

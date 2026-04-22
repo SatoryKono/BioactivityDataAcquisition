@@ -11,6 +11,9 @@ import pytest
 from bioetl.application.core.lifecycle.checkpoint_manager import (
     CheckpointManagerService as CheckpointManager,
 )
+from bioetl.application.services.checkpoint_compatibility_service import (
+    CheckpointCompatibilityService,
+)
 from bioetl.domain.types.checkpoint_metadata import (
     CheckpointCompatibilityResult,
     CheckpointMetadata,
@@ -785,3 +788,42 @@ class TestCheckpointManagerCompatibilityPolicy:
         )
         assert warning_extra["checkpoint_identity"]["manifest_id"] == "manifest-old"
         assert warning_extra["checkpoint_identity"]["exact_replay"] is True
+
+    async def test_observe_resume_continues_on_unproven_identity_with_diagnostic(
+        self, mock_checkpoint_port, mock_logger, mock_metrics
+    ) -> None:
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {"records_processed": 42},
+        )
+
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            resume=True,
+            metrics=mock_metrics,
+            checkpoint_compatibility_service=CheckpointCompatibilityService(
+                logger=mock_logger
+            ),
+            current_metadata=CheckpointMetadata(records_processed=0),
+            compatibility_policy="observe",
+        )
+
+        result = await manager.load_checkpoint()
+
+        assert result is not None
+        warning_extra = mock_logger.warning.call_args.kwargs
+        assert warning_extra["resume_rejected"] is False
+        assert warning_extra["identity_continuity_proven"] is False
+        assert any(
+            "Execution identity continuity not proven" in message
+            for message in warning_extra["messages"]
+        )
+        mock_metrics.increment_counter.assert_called_once_with(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {"pipeline": "chembl_activity", "status": "observe_loaded_degraded"},
+        )

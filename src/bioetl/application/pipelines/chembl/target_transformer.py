@@ -18,7 +18,6 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import Target
-from bioetl.domain.normalization.chembl import normalize_chembl_organism_name
 from bioetl.domain.services import OrganismClassificationService
 from bioetl.domain.transformations import safe_int
 from bioetl.domain.types import GoldRecord, JsonDict
@@ -191,9 +190,7 @@ class TargetTransformer(BaseChemblTransformer):
         taxonomy_id = taxonomy_id_vo.value if taxonomy_id_vo else None
 
         # Classify organism cellularity using OrganismClassificationService
-        organism_name = normalize_chembl_organism_name(
-            cast("str | None", record.get("organism"))
-        )
+        organism_name = cast("str | None", record.get("organism"))
         classification = self._organism_classifier.classify(organism_name, raw_tax_id)
         organism_class = (
             classification.organism_class.value

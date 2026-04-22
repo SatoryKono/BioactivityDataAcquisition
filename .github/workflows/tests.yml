@@ -673,10 +673,13 @@ jobs:
                     retention-days: 30
 
     duration-telemetry:
+        if: always()
         runs-on: ubuntu-latest
         needs:
+            - track-d-gates
             - test-fast
             - test-matrix
+            - memory-tests
         timeout-minutes: 10
 
         steps:
@@ -690,6 +693,7 @@ jobs:
 
             -   name: Download JUnit telemetry shards
                 uses: actions/download-artifact@v4
+                continue-on-error: true
                 with:
                     pattern: test-telemetry-*
                     path: reports/test-telemetry/raw
@@ -699,9 +703,16 @@ jobs:
                 shell: bash
                 run: |
                     mkdir -p reports/quality/test-runs
+                    mkdir -p reports/test-telemetry/raw
                     shopt -s nullglob
 
-                    unit_junit=(reports/test-telemetry/raw/junit-fast.xml reports/test-telemetry/raw/junit.unit-*.xml)
+                    unit_junit=()
+                    if [ -f reports/test-telemetry/raw/junit-fast.xml ]; then
+                      unit_junit+=(reports/test-telemetry/raw/junit-fast.xml)
+                    fi
+                    for junit_path in reports/test-telemetry/raw/junit.unit-*.xml; do
+                      unit_junit+=("$junit_path")
+                    done
                     if [ "${#unit_junit[@]}" -gt 0 ]; then
                       junit_args=()
                       for junit_path in "${unit_junit[@]}"; do
@@ -722,6 +733,33 @@ jobs:
                         --reports-dir reports/quality/test-runs \
                         --junit reports/test-telemetry/raw/junit.integration.xml \
                         --command "tests.yml integration shard"
+                    fi
+
+                    if [ -f reports/test-telemetry/raw/junit.security.xml ]; then
+                      uv run python -m scripts.engineering.qa summarize-junit \
+                        --suite security \
+                        --run-id "security-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+                        --reports-dir reports/quality/test-runs \
+                        --junit reports/test-telemetry/raw/junit.security.xml \
+                        --command "tests.yml security shard"
+                    fi
+
+                    if [ -f reports/test-telemetry/raw/junit-memory.xml ]; then
+                      uv run python -m scripts.engineering.qa summarize-junit \
+                        --suite memory \
+                        --run-id "memory-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+                        --reports-dir reports/quality/test-runs \
+                        --junit reports/test-telemetry/raw/junit-memory.xml \
+                        --command "tests.yml memory lane"
+                    fi
+
+                    if [ -f reports/test-telemetry/raw/junit-track-d.xml ]; then
+                      uv run python -m scripts.engineering.qa summarize-junit \
+                        --suite track-d \
+                        --run-id "track-d-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+                        --reports-dir reports/quality/test-runs \
+                        --junit reports/test-telemetry/raw/junit-track-d.xml \
+                        --command "tests.yml track-d gates"
                     fi
 
                     uv run python -m scripts.engineering.qa test-health \

@@ -65,6 +65,17 @@ max_tani = round(max(tid_tani, mol_tani), 6)
 
 Если один из коэффициентов отсутствует, используется доступное значение.
 
+### Нормализация
+
+`publication_similarity` не имеет отдельного `similarity_type` enum в текущей
+schema/config surface. Тип сходства представлен числовыми metric columns:
+`tid_tani`, `mol_tani`, `avg_tani`, `max_tani`. Нормализация профиля
+канонизирует `pubmed_id1` и `pubmed_id2` как PMID, `sim_id`/`doc_1`/`doc_2`
+как integer-like fields, и Tanimoto metrics как finite float semantics.
+Если отдельный controlled vocabulary field появится в будущей schema, его нужно
+добавить в `configs/enums/chembl.yaml`, Pandera schema и normalization profile
+одним изменением.
+
 ---
 
 ## 4. Валидация

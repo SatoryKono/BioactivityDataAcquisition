@@ -201,7 +201,11 @@ def _build_source_class_provenance() -> tuple[SourceClassProvenance, ...]:
             provenance_status="identity_anchored",
             artifact_surface="semantic_artifact.source_refs[*]",
             anchor_field="source_hash",
-            notes="File-backed config sources are persisted when they participate in materialization.",
+            notes=(
+                "File-backed YAML config sources use canonical semantic "
+                "source_hash values for identity; raw_source_hash preserves "
+                "forensic byte-level integrity when available."
+            ),
         ),
         SourceClassProvenance(
             source_class="cli_override",

@@ -90,9 +90,9 @@ def check_execution_identity_compatibility(
     if runtime_anchor_result is not None:
         return runtime_anchor_result
     return {
-        "compatible": True,
+        "compatible": False,
         "reason": "execution_identity_not_enforced",
-        "severity": _SEVERITY_NONE,
+        "severity": _SEVERITY_MAJOR,
     }
 
 
