@@ -121,18 +121,41 @@ def collect_explicit_group_columns(
     ordered: list[str] = []
     used: set[str] = set()
 
-    extracted_fields = {col: extract_field_fn(col) for col in available}
+    # ⚡ Bolt: Fix O(N*M) nested loop iteration over available columns.
+    # Convert `available` to a list to fix iteration order for this function
+    # call, and build a dictionary to preserve the exact same O(N) iteration
+    # ordering guarantee as the original implementation.
+    available_list = list(available)
+    col_order = {col: i for i, col in enumerate(available_list)}
+
+    extracted_fields = {col: extract_field_fn(col) for col in available_list}
+
+    # Pre-compute reverse mapping for O(1) alias lookups
+    field_to_columns: dict[str, list[str]] = {}
+    for col, field in extracted_fields.items():
+        if field not in field_to_columns:
+            field_to_columns[field] = []
+        field_to_columns[field].append(col)
 
     for field_name in group.fields:
-        field_matches: list[str] = []
         aliases = resolve_aliases_fn(field_name)
-        for column in available:
-            if column in used:
-                continue
-            extracted = extracted_fields[column]
-            if extracted in aliases or column in aliases:
-                field_matches.append(column)
-                used.add(column)
+
+        # ⚡ Bolt: Fast O(1) lookup for all candidate columns instead of O(N) loop
+        raw_matches = set()
+        for alias in aliases:
+            if alias in field_to_columns:
+                raw_matches.update(field_to_columns[alias])
+            if alias in col_order:
+                raw_matches.add(alias)
+
+        # ⚡ Bolt: Sort matched columns by their original order in `available_list`
+        # to ensure exact functional equivalence with the original nested loop
+        field_matches: list[str] = []
+        for col in sorted(raw_matches, key=col_order.get):  # type: ignore[arg-type]
+            if col not in used:
+                field_matches.append(col)
+                used.add(col)
+
         ordered.extend(sort_fn(field_matches, group.provider_order))
 
     return ordered, used
