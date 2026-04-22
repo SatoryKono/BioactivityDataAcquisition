@@ -79,6 +79,7 @@ def _make_manifest() -> RunManifest:
         code_provenance=RunCodeProvenance(
             pipeline_version="1.0.0",
             git_commit="abc1234",
+            source_revision_state="clean",
             config_hash=_VALID_CONFIG_HASH,
             resolved_config_hash="b" * 64,
             effective_config_hash=_VALID_CONFIG_HASH,
@@ -265,8 +266,55 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
 
     summary = build_diagnostics_summary(manifest, ())
 
-    assert summary == {
+    score = summary["reproducibility_audit_score"]
+    assert score["schema_version"] == "1.0"
+    assert score["contract_version"] == "1.2.0"
+    assert score["scale"] == "0-10"
+    assert score["overall_score"] == 7.3
+    assert score["scored_at"] == manifest.created_at.isoformat()
+    assert score["source"] == "run_manifest_diagnostics"
+    assert score["blockers"] == [
+        "exact_replay_not_eligible",
+        "identity_graph_incomplete",
+        "immutable_input_snapshots_missing",
+        "missing_immutable_input_snapshots",
+    ]
+    assert "diagnostics.git_commit" in score["evidence_refs"]
+    assert "diagnostics.source_revision_state" in score["evidence_refs"]
+    assert score["category_scores"]["run_identity"] == {
+        "score": 10,
+        "evidence": [
+            "manifest_id_present",
+            "execution_fingerprint_present",
+            "resolved_config_hash_present",
+            "effective_config_hash_present",
+            "effective_config_artifact_id_present",
+            "contract_ref_present",
+            "git_commit_present",
+            "source_revision_state_present",
+        ],
+        "blockers": [],
+        "evidence_refs": [
+            "diagnostics.manifest_id",
+            "diagnostics.execution_fingerprint",
+            "diagnostics.resolved_config_hash",
+            "diagnostics.effective_config_hash",
+            "diagnostics.effective_config_artifact_id",
+            "diagnostics.contract_ref",
+            "diagnostics.git_commit",
+            "diagnostics.source_revision_state",
+        ],
+        "confidence": "high",
+    }
+
+    summary_without_score = {
+        key: value
+        for key, value in summary.items()
+        if key != "reproducibility_audit_score"
+    }
+    assert summary_without_score == {
         "manifest_id": "manifest-diagnostics",
+        "manifest_created_at": manifest.created_at.isoformat(),
         "run_id": str(manifest.run_id),
         "pipeline_name": "chembl_activity",
         "provider": "chembl",
@@ -276,6 +324,13 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "resolved_config_hash": "b" * 64,
         "effective_config_hash": _VALID_CONFIG_HASH,
         "pipeline_version": "1.0.0",
+        "git_commit": "abc1234",
+        "source_revision_state": "clean",
+        "code_provenance_state": {
+            "git_commit": "abc1234",
+            "source_revision_state": "clean",
+            "strict_code_provenance_ready": True,
+        },
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
         "dq_policy_ref": "chembl_activity.gold",
@@ -293,6 +348,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "replay_capability_reason": "immutable_input_snapshots_missing",
         "exact_replay_eligible": False,
         "exact_replay_blockers": ["immutable_input_snapshots_missing"],
+        "append_mode_semantic_sinks": [],
         "input_snapshot_ids": [],
         "input_snapshot_content_hashes": [],
         "input_snapshot_identity_fingerprint": None,
@@ -316,6 +372,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
             "surfaces": {
                 "control_plane_manifest": True,
                 "effective_config_artifact": True,
+                "reproducible_semantic_output_mode": True,
                 "strict_replay_execution_context_support": True,
                 "immutable_input_snapshots": False,
                 "exact_replay_capability": False,
@@ -357,6 +414,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
             "lineage_gap": False,
             "immutable_input_snapshot_gap": True,
             "strict_replay_boundary_gap": False,
+            "reproducible_semantic_output_mode_gap": False,
             "lineage_closure_boundary_gap": False,
             "composite_resume_reconstructability_gap": False,
             "required_persistence_profile_gap": False,
@@ -370,59 +428,6 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
             "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
             "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         ],
-        "reproducibility_audit_score": {
-            "schema_version": "1.0",
-            "scale": "0-10",
-            "overall_score": 7.3,
-            "category_scores": {
-                "determinism": {
-                    "score": 6,
-                    "evidence": [
-                        "effective_config_hash_present",
-                        "missing_immutable_input_snapshots",
-                        "exact_replay_blockers_present",
-                    ],
-                },
-                "idempotency": {
-                    "score": 6,
-                    "evidence": ["no_published_artifacts_observed"],
-                },
-                "run_identity": {
-                    "score": 10,
-                    "evidence": [
-                        "manifest_id_present",
-                        "execution_fingerprint_present",
-                        "resolved_config_hash_present",
-                        "effective_config_hash_present",
-                        "effective_config_artifact_id_present",
-                        "contract_ref_present",
-                    ],
-                },
-                "checkpoint_safety": {"score": 8, "evidence": []},
-                "lineage_completeness": {
-                    "score": 7,
-                    "evidence": [
-                        "identity_graph_incomplete",
-                        "no_lineage_fragments_observed",
-                    ],
-                },
-                "replay_readiness": {
-                    "score": 6,
-                    "evidence": [
-                        "exact_replay_not_eligible",
-                        "exact_replay_blockers_present",
-                    ],
-                },
-                "layer_consistency": {
-                    "score": 8,
-                    "evidence": [
-                        "legacy_config_hash_alias_matches_effective_hash",
-                        "resolved_and_effective_hashes_exposed",
-                    ],
-                },
-            },
-            "source": "run_manifest_diagnostics",
-        },
     }
 
 
@@ -547,6 +552,67 @@ def test_build_diagnostics_summary_does_not_report_exact_replay_from_intent_alon
     assert summary["exact_replay_blockers"] == ["immutable_input_snapshots_missing"]
 
 
+def test_build_diagnostics_summary_flags_append_mode_semantic_sinks() -> None:
+    manifest = replace(
+        _make_manifest(),
+        runtime_config={"sink": {"silver": {"enabled": True, "mode": "append"}}},
+        replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+        source_refs=(
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                input_snapshots=(
+                    RunInputSnapshotRef(
+                        snapshot_id="snapshot-1",
+                        content_hash="sha256:snapshot-1",
+                        immutable_uri="file:///workspace/bronze/batch_1.jsonl.zst",
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    summary = build_diagnostics_summary(manifest, ())
+
+    assert summary["append_mode_semantic_sinks"] == ["sink.silver.mode=append"]
+    assert summary["replay_capability_reason"] == (
+        "append_mode_semantic_outputs_block_exact_replay"
+    )
+    assert summary["exact_replay_eligible"] is False
+    assert "append_mode_semantic_outputs" in summary["exact_replay_blockers"]
+    assert (
+        "reproducible_semantic_output_mode"
+        in summary["persistence_profile"]["replay_ready_missing_requirements"]
+    )
+    assert summary["alert_signals"]["reproducible_semantic_output_mode_gap"] is True
+
+
+def test_build_diagnostics_summary_surfaces_legacy_observe_resume_contract() -> None:
+    manifest = replace(
+        _make_manifest(),
+        launch_context={
+            "resume": True,
+            "checkpoint_compatibility_policy": "legacy_observe",
+        },
+    )
+
+    summary = build_diagnostics_summary(manifest, ())
+
+    resume_contract = summary["resume_contract"]
+    assert resume_contract["requested_checkpoint_compatibility_policy"] == (
+        "legacy_observe"
+    )
+    assert resume_contract["applied_checkpoint_compatibility_policy"] == (
+        "legacy_observe"
+    )
+    score = summary["reproducibility_audit_score"]
+    assert (
+        "legacy_observe_checkpoint_policy"
+        in (score["category_scores"]["checkpoint_safety"]["blockers"])
+    )
+
+
 @pytest.mark.parametrize(
     ("terminal_status", "expected_event_type", "signal_key"),
     [
@@ -598,6 +664,13 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "config_hash": _VALID_CONFIG_HASH,
         "resolved_config_hash": "b" * 64,
         "effective_config_hash": _VALID_CONFIG_HASH,
+        "git_commit": "abc1234",
+        "source_revision_state": "clean",
+        "code_provenance_state": {
+            "git_commit": "abc1234",
+            "source_revision_state": "clean",
+            "strict_code_provenance_ready": True,
+        },
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
         "replay_of_run_id": None,
@@ -614,6 +687,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "replay_capability_reason": "immutable_input_snapshots_missing",
         "exact_replay_eligible": False,
         "exact_replay_blockers": ["immutable_input_snapshots_missing"],
+        "append_mode_semantic_sinks": [],
         "input_snapshot_ids": [],
         "input_snapshot_content_hashes": [],
         "input_snapshot_identity_fingerprint": None,
@@ -647,6 +721,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "surfaces": {
             "control_plane_manifest": True,
             "effective_config_artifact": True,
+            "reproducible_semantic_output_mode": True,
             "strict_replay_execution_context_support": True,
             "immutable_input_snapshots": False,
             "exact_replay_capability": False,
@@ -695,6 +770,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
     assert alert_signals["lineage_gap"] is False
     assert alert_signals["immutable_input_snapshot_gap"] is True
     assert alert_signals["strict_replay_boundary_gap"] is False
+    assert alert_signals["reproducible_semantic_output_mode_gap"] is False
     assert alert_signals["lineage_closure_boundary_gap"] is False
     assert alert_signals["composite_resume_reconstructability_gap"] is False
     assert alert_signals["required_persistence_profile_gap"] is False
@@ -887,6 +963,7 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
     assert summary["persistence_profile"]["surfaces"] == {
         "control_plane_manifest": True,
         "effective_config_artifact": True,
+        "reproducible_semantic_output_mode": True,
         "strict_replay_execution_context_support": True,
         "immutable_input_snapshots": False,
         "exact_replay_capability": False,

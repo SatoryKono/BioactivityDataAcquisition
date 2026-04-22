@@ -169,6 +169,9 @@ Checkpoint load telemetry uses bounded statuses. In particular:
   canonical execution identity mismatched.
 - `observe_loaded_degraded` means `observe` mode allowed resume only after a
   non-identity compatibility warning.
+- `legacy_observe_loaded_degraded` is the explicit legacy override for
+  degraded resume when identity continuity is unproven; canonical `observe`
+  does not continue in that case.
 
 **Типы запуска:**
 
@@ -404,6 +407,17 @@ bioetl run-manifest show 7f26d7b2-2c25-4aef-bf4c-030e4f8a4f87
 bioetl run-manifest show 8d166b4d-c4a8-4755-896e-cf9158c5b5ec --format yaml
 bioetl run-manifest show 7f26d7b2-2c25-4aef-bf4c-030e4f8a4f87 --format json
 ```
+
+#### `run-manifest score` — Показать reproducibility audit score
+
+```bash
+bioetl run-manifest score <run-id|manifest-id> [--format json|yaml|text]
+```
+
+Команда выводит только machine-readable `reproducibility_audit_score` block
+из manifest diagnostics. JSON/YAML payload содержит `schema_version`,
+`contract_version`, `overall_score`, `category_scores`, `blockers`,
+`evidence_refs`, `scored_at` и `source`.
 
 #### `run-manifest diff` — Сравнить два запуска
 

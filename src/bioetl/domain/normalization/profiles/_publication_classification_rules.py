@@ -13,8 +13,8 @@ def publication_classification_rules() -> dict[str, tuple[object, str]]:
     """Return strict taxonomy-backed rules for derived publication fields."""
     return {
         field_name: (
-            lambda value, field_name=field_name: normalize_publication_classification_field(
-                field_name, value
+            lambda value, field_name=field_name: (
+                normalize_publication_classification_field(field_name, value)
             ),
             (
                 f"Normalize derived {field_name} against the unified "

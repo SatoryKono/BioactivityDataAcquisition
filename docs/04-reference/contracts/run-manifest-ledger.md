@@ -422,6 +422,12 @@ published effective-config baseline is:
 - `dq_contract_compatibility_hash`
 - `effective_config_artifact_id`
 
+Strict exact-replay, `replay_ready`, and `forensic_grade` manifests require
+`git_commit` to be present. Inspection diagnostics must expose both
+`git_commit` and `source_revision_state` through `diagnostics`,
+`code_provenance_state`, and `identity_graph` so missing or dirty code
+provenance is visible to operators and automation.
+
 Checkpoint / resume compatibility may additionally rely on a narrower
 runtime-anchor contract derived from a subset of control-plane fields such as
 `manifest_id`, `composite_run_identity`, `effective_config_hash`,
@@ -553,6 +559,7 @@ Supported inspection commands:
 ```bash
 bioetl run-manifest show <run-id|manifest-id>
 bioetl run-manifest diff <left> <right>
+bioetl run-manifest score <run-id|manifest-id>
 ```
 
 The CLI resolves `manifest_id` directly and falls back to `run_id` lookup when
@@ -570,6 +577,15 @@ The `diagnostics` block is built from
 `src/bioetl/application/services/control_plane/run_manifest_diagnostics.py` and is the
 published operator-facing summary for event counts, artifact linkage, DQ
 anchors, correlation-anchor gaps, replay capability, and suggested next steps.
+Diagnostics also include `append_mode_semantic_sinks`; any enabled Silver/Gold
+semantic sink with `mode=append` is reported as
+`append_mode_semantic_outputs` in `exact_replay_blockers` and as a
+`reproducible_semantic_output_mode` persistence gap.
+
+`score` emits the `reproducibility_audit_score` block directly for automation.
+The score payload includes `schema_version`, `contract_version`, `scale`,
+`overall_score`, category scores, `blockers`, `evidence_refs`, `scored_at`,
+and `source`.
 
 Current published lineage closure boundary for Bronze -> Silver -> Gold
 operator-grade trace/debug support covers these source families:

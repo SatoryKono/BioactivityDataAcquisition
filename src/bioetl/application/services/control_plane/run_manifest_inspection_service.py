@@ -229,6 +229,16 @@ class RunManifestInspectionService:
             "config_hash": code_provenance.config_hash,
             "resolved_config_hash": code_provenance.resolved_config_hash,
             "effective_config_hash": code_provenance.effective_config_hash,
+            "git_commit": code_provenance.git_commit,
+            "source_revision_state": code_provenance.source_revision_state,
+            "code_provenance_state": diagnostics.get(
+                "code_provenance_state",
+                {
+                    "git_commit": code_provenance.git_commit,
+                    "source_revision_state": code_provenance.source_revision_state,
+                    "strict_code_provenance_ready": bool(code_provenance.git_commit),
+                },
+            ),
             "contract_ref": code_provenance.contract_ref,
             "contract_version": code_provenance.contract_version,
             "replay_of_run_id": diagnostics.get("replay_of_run_id"),
@@ -268,6 +278,10 @@ class RunManifestInspectionService:
                 manifest.replay_capability.value == "exact_replay_supported",
             ),
             "exact_replay_blockers": diagnostics.get("exact_replay_blockers", []),
+            "append_mode_semantic_sinks": diagnostics.get(
+                "append_mode_semantic_sinks",
+                [],
+            ),
             "resume_contract": diagnostics.get("resume_contract"),
             "resume_diagnostics": diagnostics.get("resume_diagnostics"),
             "input_snapshot_ids": diagnostics.get("input_snapshot_ids", []),

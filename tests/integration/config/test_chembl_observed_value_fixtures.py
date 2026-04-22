@@ -47,7 +47,7 @@ OBSERVED_VALUE_POLICIES: tuple[ObservedValuePolicy, ...] = (
     ),
     ObservedValuePolicy(
         "assay",
-        "subcellular_fraction",
+        "assay_subcellular_fraction",
         ("assay", "subcellular_fractions"),
     ),
     ObservedValuePolicy(

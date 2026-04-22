@@ -265,6 +265,34 @@ class _FakeRunManifestService:
                         " policy anchors before retry or quarantine changes."
                     ),
                 ],
+                "reproducibility_audit_score": {
+                    "schema_version": "1.0",
+                    "contract_version": "1.2.0",
+                    "scale": "0-10",
+                    "overall_score": 9.4,
+                    "blockers": [],
+                    "evidence_refs": [
+                        "diagnostics.git_commit",
+                        "diagnostics.source_revision_state",
+                    ],
+                    "scored_at": self._manifest.created_at.isoformat(),
+                    "source": "run_manifest_diagnostics",
+                    "category_scores": {
+                        "run_identity": {
+                            "score": 10,
+                            "evidence": [
+                                "git_commit_present",
+                                "source_revision_state_present",
+                            ],
+                            "blockers": [],
+                            "evidence_refs": [
+                                "diagnostics.git_commit",
+                                "diagnostics.source_revision_state",
+                            ],
+                            "confidence": "high",
+                        }
+                    },
+                },
             },
             identity_graph={
                 "run_id": str(self._run_id),
@@ -364,6 +392,7 @@ class TestRunManifestCommands:
         assert result.exit_code == 0
         assert "show" in result.output
         assert "diff" in result.output
+        assert "score" in result.output
 
     def test_run_manifest_help_avoids_eager_registry_build(
         self,
@@ -419,6 +448,27 @@ class TestRunManifestCommands:
             "composite.cross_validation.quarantine"
         ]
         assert "alert_signals" in payload["diagnostics"]
+
+    def test_score_json_outputs_machine_readable_audit_score(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_run_manifest_service(monkeypatch, _FakeRunManifestService())
+
+        result = cli_runner.invoke(
+            cli,
+            ["run-manifest", "score", "manifest-1"],
+        )
+
+        assert result.exit_code == 0
+        payload = json.loads(result.output)
+        score = payload["reproducibility_audit_score"]
+        assert payload["manifest_id"] == "manifest-1"
+        assert score["schema_version"] == "1.0"
+        assert score["contract_version"] == "1.2.0"
+        assert score["blockers"] == []
+        assert "diagnostics.git_commit" in score["evidence_refs"]
 
     def test_show_yaml_outputs_manifest_and_diagnostics(
         self,

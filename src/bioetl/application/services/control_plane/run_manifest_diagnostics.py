@@ -16,6 +16,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_persist
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
     _build_replay_parentage,
     _build_resume_contract,
+    _collect_append_mode_semantic_sinks,
     _collect_input_snapshot_content_hashes,
     _collect_input_snapshot_ids,
     _collect_input_snapshot_refs,
@@ -68,6 +69,7 @@ def _build_base_summary(
     replay_family_contract = _resolve_replay_family_contract(manifest)
     summary: dict[str, object] = {
         "manifest_id": manifest.manifest_id,
+        "manifest_created_at": manifest.created_at.isoformat(),
         "run_id": str(manifest.run_id),
         "pipeline_name": manifest.pipeline_name,
         "provider": manifest.provider,
@@ -77,6 +79,13 @@ def _build_base_summary(
         "resolved_config_hash": code_provenance.resolved_config_hash,
         "effective_config_hash": code_provenance.effective_config_hash,
         "pipeline_version": code_provenance.pipeline_version,
+        "git_commit": code_provenance.git_commit,
+        "source_revision_state": code_provenance.source_revision_state,
+        "code_provenance_state": {
+            "git_commit": code_provenance.git_commit,
+            "source_revision_state": code_provenance.source_revision_state,
+            "strict_code_provenance_ready": bool(code_provenance.git_commit),
+        },
         "contract_ref": code_provenance.contract_ref,
         "contract_version": code_provenance.contract_version,
         "dq_policy_ref": code_provenance.dq_policy_ref,
@@ -98,8 +107,10 @@ def _build_base_summary(
         "replay_capability_reason": replay_capability_reason,
         "exact_replay_eligible": (
             manifest.replay_capability.value == "exact_replay_supported"
+            and not exact_replay_blockers
         ),
         "exact_replay_blockers": exact_replay_blockers,
+        "append_mode_semantic_sinks": _collect_append_mode_semantic_sinks(manifest),
         "input_snapshot_ids": _collect_input_snapshot_ids(input_snapshots),
         "input_snapshot_content_hashes": _collect_input_snapshot_content_hashes(
             input_snapshots

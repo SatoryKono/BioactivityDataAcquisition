@@ -44,6 +44,8 @@ def _resolve_replay_capability_reason(
     profile = _resolve_reproducibility_profile(manifest)
     if not profile.strict_exact_replay_supported:
         return "family_outside_supported_exact_replay_boundary"
+    if _collect_append_mode_semantic_sinks(manifest):
+        return "append_mode_semantic_outputs_block_exact_replay"
     if (
         manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
         and input_snapshots
@@ -63,19 +65,64 @@ def _resolve_exact_replay_blockers(
 ) -> list[str]:
     """Return explicit blockers preventing exact replay eligibility."""
     profile = _resolve_reproducibility_profile(manifest)
+    append_mode_sinks = _collect_append_mode_semantic_sinks(manifest)
     if (
         profile.strict_exact_replay_supported
         and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+        and not append_mode_sinks
     ):
         return []
     blockers: list[str] = []
     if not profile.strict_exact_replay_supported:
         blockers.append("family_outside_supported_exact_replay_boundary")
+    if append_mode_sinks:
+        blockers.append("append_mode_semantic_outputs")
     if not input_snapshots:
         blockers.append("immutable_input_snapshots_missing")
     elif manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
         blockers.append("exact_replay_capability_unavailable")
     return blockers
+
+
+def _collect_append_mode_semantic_sinks(manifest: RunManifest) -> list[str]:
+    """Return enabled Silver/Gold sinks that use append mode."""
+    blocked: set[str] = set()
+    for payload in (manifest.runtime_config, manifest.resolved_config):
+        for sink in _candidate_sink_mappings(payload):
+            for layer_name in ("silver", "gold"):
+                layer_config = sink.get(layer_name)
+                if not isinstance(layer_config, Mapping):
+                    continue
+                if (
+                    _sink_layer_enabled(layer_config)
+                    and _sink_layer_mode(layer_config) == "append"
+                ):
+                    blocked.add(f"sink.{layer_name}.mode=append")
+    return sorted(blocked)
+
+
+def _candidate_sink_mappings(
+    payload: Mapping[str, object],
+) -> list[Mapping[str, object]]:
+    """Return possible sink mappings from known config payload shapes."""
+    candidates: list[Mapping[str, object]] = []
+    direct_sink = payload.get("sink")
+    if isinstance(direct_sink, Mapping):
+        candidates.append(direct_sink)
+    pipeline = payload.get("pipeline")
+    if isinstance(pipeline, Mapping):
+        nested_sink = pipeline.get("sink")
+        if isinstance(nested_sink, Mapping):
+            candidates.append(nested_sink)
+    return candidates
+
+
+def _sink_layer_enabled(layer_config: Mapping[str, object]) -> bool:
+    return bool(layer_config.get("enabled", True))
+
+
+def _sink_layer_mode(layer_config: Mapping[str, object]) -> str:
+    return str(layer_config.get("mode") or "").strip().lower()
 
 
 def _resolve_exact_replay_support_boundary(manifest: RunManifest) -> str:
@@ -185,7 +232,7 @@ def _resolve_requested_checkpoint_compatibility_policy(
     for candidate in candidates:
         if isinstance(candidate, str):
             normalized = candidate.strip().lower()
-            if normalized in {"observe", "soft_fail", "hard_fail"}:
+            if normalized in {"observe", "legacy_observe", "soft_fail", "hard_fail"}:
                 return normalized
     return None
 

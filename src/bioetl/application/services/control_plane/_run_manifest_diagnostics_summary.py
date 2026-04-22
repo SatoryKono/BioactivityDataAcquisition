@@ -108,6 +108,9 @@ def _build_final_summary(
         "config_hash": request.base_summary.get("config_hash"),
         "resolved_config_hash": request.base_summary.get("resolved_config_hash"),
         "effective_config_hash": request.base_summary.get("effective_config_hash"),
+        "git_commit": request.base_summary.get("git_commit"),
+        "source_revision_state": request.base_summary.get("source_revision_state"),
+        "code_provenance_state": request.base_summary.get("code_provenance_state"),
         "contract_ref": request.base_summary.get("contract_ref"),
         "contract_version": request.base_summary.get("contract_version"),
         "replay_of_run_id": request.base_summary.get("replay_of_run_id"),
@@ -124,6 +127,10 @@ def _build_final_summary(
         ),
         "exact_replay_eligible": request.base_summary.get("exact_replay_eligible"),
         "exact_replay_blockers": request.base_summary.get("exact_replay_blockers", []),
+        "append_mode_semantic_sinks": request.base_summary.get(
+            "append_mode_semantic_sinks",
+            [],
+        ),
         "resume_contract": request.base_summary.get("resume_contract"),
         "resume_diagnostics": request.resume_diagnostics,
         "lineage_closure_boundary": request.base_summary.get(

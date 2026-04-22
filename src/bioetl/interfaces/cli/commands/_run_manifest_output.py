@@ -87,6 +87,7 @@ def _render_manifest_section(manifest: dict[str, object]) -> list[str]:
             (
                 ("pipeline_version", provenance.get("pipeline_version")),
                 ("git_commit", provenance.get("git_commit")),
+                ("source_revision_state", provenance.get("source_revision_state")),
                 ("config_hash", provenance.get("config_hash")),
                 ("resolved_config_hash", provenance.get("resolved_config_hash")),
                 ("effective_config_hash", provenance.get("effective_config_hash")),
@@ -149,6 +150,12 @@ def _render_diagnostics_section(diagnostics: dict[str, object]) -> list[str]:
                 ("config_hash", diagnostics.get("config_hash")),
                 ("resolved_config_hash", diagnostics.get("resolved_config_hash")),
                 ("effective_config_hash", diagnostics.get("effective_config_hash")),
+                ("git_commit", diagnostics.get("git_commit")),
+                (
+                    "source_revision_state",
+                    diagnostics.get("source_revision_state"),
+                ),
+                ("code_provenance_state", diagnostics.get("code_provenance_state")),
                 ("contract_ref", diagnostics.get("contract_ref")),
                 ("contract_version", diagnostics.get("contract_version")),
                 ("dq_policy_ref", diagnostics.get("dq_policy_ref")),
@@ -172,6 +179,10 @@ def _render_diagnostics_section(diagnostics: dict[str, object]) -> list[str]:
                     diagnostics.get("replay_capability_reason"),
                 ),
                 ("exact_replay_blockers", diagnostics.get("exact_replay_blockers")),
+                (
+                    "append_mode_semantic_sinks",
+                    diagnostics.get("append_mode_semantic_sinks"),
+                ),
                 ("input_snapshot_ids", diagnostics.get("input_snapshot_ids")),
                 (
                     "input_snapshot_content_hashes",
@@ -255,6 +266,9 @@ def _render_identity_graph_section(identity_graph: object) -> list[str]:
             ("config_hash", identity_graph.get("config_hash")),
             ("resolved_config_hash", identity_graph.get("resolved_config_hash")),
             ("effective_config_hash", identity_graph.get("effective_config_hash")),
+            ("git_commit", identity_graph.get("git_commit")),
+            ("source_revision_state", identity_graph.get("source_revision_state")),
+            ("code_provenance_state", identity_graph.get("code_provenance_state")),
             ("contract_ref", identity_graph.get("contract_ref")),
             ("contract_version", identity_graph.get("contract_version")),
             ("replay_capability", identity_graph.get("replay_capability")),
@@ -270,6 +284,10 @@ def _render_identity_graph_section(identity_graph: object) -> list[str]:
             ),
             ("exact_replay_eligible", identity_graph.get("exact_replay_eligible")),
             ("exact_replay_blockers", identity_graph.get("exact_replay_blockers")),
+            (
+                "append_mode_semantic_sinks",
+                identity_graph.get("append_mode_semantic_sinks"),
+            ),
             ("input_snapshot_ids", identity_graph.get("input_snapshot_ids")),
             (
                 "input_snapshot_content_hashes",

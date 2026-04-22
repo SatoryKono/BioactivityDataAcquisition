@@ -340,7 +340,10 @@ class TestPublicationTypePayload:
             )
             == "Journal Article"
         )
-        assert normalize_publication_classification_field("publication_class", "exp") == "EXP"
+        assert (
+            normalize_publication_classification_field("publication_class", "exp")
+            == "EXP"
+        )
         assert (
             normalize_publication_classification_field(
                 "publication_subclass", "not-a-subclass"

@@ -220,7 +220,7 @@ filters:
     silver_filters:
         columns:
             publication_type:
-                - journal-article
+                - PUBLICATION
         ranges:
             publication_year:
                 min: 1950
@@ -232,7 +232,7 @@ filters:
     gold_filters:
         columns:
             publication_type:
-                - journal-article
+                - PUBLICATION
         ranges:
             publication_year:
                 min: 1950
