@@ -50,17 +50,20 @@ def _build_cached_bronze_snapshot_ref(
 ) -> RunInputSnapshotRef:
     """Build one immutable snapshot ref for one cached Bronze batch file."""
     content_hash = _compute_cached_bronze_batch_content_hash(batch_file)
-    relative_path = str(batch_file.relative_to(bronze_root))
-    snapshot_id = hashlib.sha256(
-        f"{pipeline_name}:{relative_path}:{content_hash}".encode()
-    ).hexdigest()
+    relative_path = batch_file.relative_to(bronze_root).as_posix()
+    snapshot_id = _content_addressed_snapshot_id(content_hash)
     captured_at = datetime.fromtimestamp(batch_file.stat().st_mtime, tz=UTC)
     return RunInputSnapshotRef(
         snapshot_id=snapshot_id,
         content_hash=content_hash,
-        immutable_uri=str(batch_file),
+        immutable_uri=f"bronze://{relative_path}",
         captured_at=captured_at,
     )
+
+
+def _content_addressed_snapshot_id(content_hash: str) -> str:
+    """Return a portable snapshot identity derived only from captured content."""
+    return f"sha256:{content_hash}"
 
 
 def _compute_cached_bronze_batch_content_hash(batch_file: Path) -> str:

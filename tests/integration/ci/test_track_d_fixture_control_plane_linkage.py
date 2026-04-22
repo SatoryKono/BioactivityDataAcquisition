@@ -168,6 +168,10 @@ async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
     assert isinstance(snapshots_first[0].get("snapshot_id"), str)
     assert isinstance(snapshots_first[0].get("content_hash"), str)
     assert isinstance(snapshots_first[0].get("immutable_uri"), str)
+    assert snapshots_first[0]["snapshot_id"] == (
+        f"sha256:{snapshots_first[0]['content_hash']}"
+    )
+    assert str(snapshots_first[0]["immutable_uri"]).startswith("bronze://")
     assert code_provenance_first["contract_ref"] == "chembl.activity"
     assert code_provenance_second["contract_ref"] == "chembl.activity"
     assert isinstance(code_provenance_first.get("contract_version"), str)
@@ -211,7 +215,7 @@ async def test_tracked_fixture_exact_replay_avoids_live_data_source_path(
 
     tracked_fixture_path = PROJECT_ROOT / fixture_path_raw
     cached_root = tmp_path / "cached_bronze" / "chembl" / "activity"
-    batch_path = _materialize_cached_bronze_batch(
+    _materialize_cached_bronze_batch(
         tracked_fixture_path=tracked_fixture_path,
         cache_root=cached_root,
         date="2026-03-25",
@@ -247,7 +251,9 @@ async def test_tracked_fixture_exact_replay_avoids_live_data_source_path(
     assert manifest_payload["launch_context"]["exact_replay"] is True
     assert manifest_payload["runtime_config"]["exact_replay"] is True
     assert len(snapshots) == 1
-    assert snapshots[0]["immutable_uri"] == str(batch_path)
+    assert snapshots[0]["immutable_uri"] == (
+        "bronze://2026-03-25/batch_2026-03-25_tracked_fixture.jsonl.zst"
+    )
 
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()

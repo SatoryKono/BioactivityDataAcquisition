@@ -63,8 +63,7 @@ def test_public_facade_merges_runtime_anchors_into_checkpoint_state() -> None:
     assert merged.effective_config_artifact_id == anchors.effective_config_artifact_id
     assert merged.execution_fingerprint == anchors.execution_fingerprint
     assert (
-        merged.dq_contract_compatibility_hash
-        == anchors.dq_contract_compatibility_hash
+        merged.dq_contract_compatibility_hash == anchors.dq_contract_compatibility_hash
     )
     assert merged.contract_ref == anchors.contract_ref
     assert merged.contract_version == anchors.contract_version
@@ -73,6 +72,8 @@ def test_public_facade_merges_runtime_anchors_into_checkpoint_state() -> None:
     assert fresh.effective_config_hash == anchors.effective_config_hash
     assert fresh.effective_config_artifact_id == anchors.effective_config_artifact_id
     assert fresh.execution_fingerprint == anchors.execution_fingerprint
-    assert fresh.dq_contract_compatibility_hash == anchors.dq_contract_compatibility_hash
+    assert (
+        fresh.dq_contract_compatibility_hash == anchors.dq_contract_compatibility_hash
+    )
     assert fresh.contract_ref == anchors.contract_ref
     assert fresh.state == CompositePipelineState.NOT_STARTED

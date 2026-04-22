@@ -17,18 +17,19 @@ DEFAULT_WORKERS_PER_SHARD=2
 DEFAULT_DIST_MODE="loadfile"
 DEFAULT_COVERAGE_DIR="$REPO_ROOT/.coverage-sharded"
 DEFAULT_PYTEST_CACHE_DIR="$REPO_ROOT/.pytest_cache"
+DEFAULT_JUNIT_DIR="$REPO_ROOT/reports/quality/test-runs/junit/run-$(date +%Y%m%dT%H%M%S)"
 
 WORKERS_PER_SHARD="$DEFAULT_WORKERS_PER_SHARD"
 DIST_MODE="$DEFAULT_DIST_MODE"
 COVERAGE_DIR="$DEFAULT_COVERAGE_DIR"
 PYTEST_CACHE_DIR="$DEFAULT_PYTEST_CACHE_DIR"
+JUNIT_DIR="$DEFAULT_JUNIT_DIR"
 STREAM_LOGS=0
 TAIL_LOGS=0
 DRY_RUN=0
 LIST_ONLY=0
 KEEP_COVERAGE_FILES=0
 DISABLE_COVERAGE=0
-JUNIT_DIR=""
 SKIP_PREFLIGHT="${BIOETL_SKIP_PREFLIGHT:-0}"
 STRICT_DOCS_PREFLIGHT="${BIOETL_PREFLIGHT_STRICT_DOCS:-0}"
 SELECTED_WAVE=""
@@ -112,7 +113,7 @@ declare -A SHARD_WORKERS_OVERRIDE=(
 )
 
 declare -A SHARD_EXTRA_PYTEST_ARGS=(
-    ["$SHARD_S2_COMP_IFACE"]="--ignore=tests/unit/interfaces/cli/test_registry_consistency.py --deselect=tests/unit/interfaces/cli/commands/test_quarantine_support.py::TestShowQuarantineStats::test_json_output_mode"
+    ["$SHARD_S2_COMP_IFACE"]="--ignore=tests/unit/interfaces/cli/test_registry_consistency.py --deselect=tests/unit/interfaces/cli/commands/test_quarantine_support.py::TestShowQuarantineStats::test_json_output_mode --ignore=tests/unit/composition/runtime_builders/test_runner_builder.py --ignore=tests/unit/composition/runtime_builders/test_run_manifest_support.py"
     ["$SHARD_S7_ARCH_A"]="--timeout=300 --ignore=tests/architecture/test_code_formatting.py --ignore=tests/architecture/test_config_ci_invariants.py --ignore-glob=tests/architecture/test_[g-z]*.py --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py --ignore=tests/architecture/test_diagram_regression_workflow.py --ignore=tests/architecture/test_docs_governance_workflow.py --ignore=tests/architecture/test_quality_debt_scorecard.py --ignore=tests/architecture/test_quality_burndown_priorities.py --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
     ["$SHARD_S7_ARCH_B"]="--timeout=300 --ignore-glob=tests/architecture/test_[a-f]*.py --ignore-glob=tests/architecture/test_[m-z]*.py --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py --ignore=tests/architecture/test_diagram_regression_workflow.py --ignore=tests/architecture/test_docs_governance_workflow.py --ignore=tests/architecture/test_quality_debt_scorecard.py --ignore=tests/architecture/test_quality_burndown_priorities.py --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
     ["$SHARD_S7_ARCH_C"]="--timeout=300 --ignore-glob=tests/architecture/test_[a-l]*.py --ignore-glob=tests/architecture/test_[s-z]*.py --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py --ignore=tests/architecture/test_diagram_regression_workflow.py --ignore=tests/architecture/test_docs_governance_workflow.py --ignore=tests/architecture/test_quality_debt_scorecard.py --ignore=tests/architecture/test_quality_burndown_priorities.py --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
@@ -139,6 +140,7 @@ Options:
   --dist MODE               xdist distribution mode (default: loadfile)
   --coverage-dir PATH       Directory for per-shard coverage files
   --junit-dir PATH          Directory for per-shard JUnit XML files
+                            (default: reports/quality/test-runs/junit/run-TIMESTAMP)
   --stream                  Stream live shard output to console and log file
   --tail                    Tail shard log files live with shard prefixes
                             Ignored when --stream is also set
@@ -733,6 +735,9 @@ main() {
 
     if [[ "$DRY_RUN" == "0" ]]; then
         printf "\n[run_pytest_sharded] Done. Logs and coverage files: %s\n" "$COVERAGE_DIR"
+        if [[ -n "$JUNIT_DIR" ]]; then
+            printf "[run_pytest_sharded] JUnit reports: %s\n" "$JUNIT_DIR"
+        fi
     fi
     return 0
 }

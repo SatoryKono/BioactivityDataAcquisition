@@ -35,9 +35,7 @@ def _business_schema_fields(config: dict[str, Any]) -> frozenset[str]:
 def test_chembl_activity_hash_policy_uses_normalized_business_fields() -> None:
     """Hash policy include fields must stay aligned to runtime-normalized names."""
     config = _load_activity_config()
-    include_fields = frozenset(
-        config["hash_policy"]["hash_policy"]["include_fields"]
-    )
+    include_fields = frozenset(config["hash_policy"]["hash_policy"]["include_fields"])
     business_fields = _business_schema_fields(config)
     profile_fields = frozenset(CHEMBL_ACTIVITY_SCHEMA_FIELDS)
 

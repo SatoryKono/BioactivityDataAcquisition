@@ -306,9 +306,7 @@ def test_summarize_junit_uses_junit_suite_duration(tmp_path: Path) -> None:
     assert summary["duration_seconds"] == 2.346
 
 
-def test_repeated_run_id_preserves_test_health_history(
-    tmp_path: Path, capsys
-) -> None:
+def test_repeated_run_id_preserves_test_health_history(tmp_path: Path, capsys) -> None:
     junit = tmp_path / "junit-fast.xml"
     junit.write_text(
         """<?xml version="1.0" encoding="utf-8"?>
