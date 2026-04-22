@@ -803,7 +803,7 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
             "resume": False,
             "exact_replay": False,
             "execution_context": "composite",
-            "exact_replay_support_boundary": "composite_execution_unsupported",
+            "exact_replay_support_boundary": "composite_snapshot_backed_input_envelope",
         },
         replay_capability=ReplayCapability.REBUILD_ONLY,
         source_refs=(),
@@ -816,22 +816,19 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
 
     summary = build_diagnostics_summary(manifest, ())
 
-    assert summary["exact_replay_support_boundary"] == "composite_execution_unsupported"
+    assert (
+        summary["exact_replay_support_boundary"]
+        == "composite_snapshot_backed_input_envelope"
+    )
     assert summary["replay_family_contract"] == _expected_replay_family_contract(
         manifest
     )
-    assert (
-        summary["replay_capability_reason"]
-        == "exact_replay_not_supported_for_composite_execution"
-    )
-    assert summary["exact_replay_blockers"] == [
-        "exact_replay_not_supported_for_composite_execution",
-        "immutable_input_snapshots_missing",
-    ]
+    assert summary["replay_capability_reason"] == "composite_snapshot_envelope_missing"
+    assert summary["exact_replay_blockers"] == ["immutable_input_snapshots_missing"]
     assert summary["persistence_profile"]["surfaces"] == {
         "control_plane_manifest": True,
         "effective_config_artifact": True,
-        "strict_replay_execution_context_support": False,
+        "strict_replay_execution_context_support": True,
         "immutable_input_snapshots": False,
         "exact_replay_capability": False,
         "run_ledger_history": False,
@@ -839,18 +836,24 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
         "lineage_closure_boundary_support": False,
     }
     assert summary["persistence_profile"]["replay_ready_missing_requirements"] == [
-        "strict_replay_execution_context_support",
         "exact_replay_capability",
         "immutable_input_snapshots",
     ]
-    assert summary["alert_signals"]["strict_replay_boundary_gap"] is True
+    assert summary["alert_signals"]["strict_replay_boundary_gap"] is False
     assert summary["alert_signals"]["lineage_closure_boundary_gap"] is True
     assert summary["alert_signals"]["composite_resume_reconstructability_gap"] is True
     assert summary["next_steps"] == [
         "Persist immutable cached Bronze input snapshots before treating this run as strict exact-replay capable.",
-        "Treat this execution context as outside the strict exact-replay support boundary; use rebuild/resume semantics instead of exact replay.",
-        "Treat this pipeline family as outside the current operator-grade lineage closure boundary; do not claim forensic-grade trace/debug support for it.",
-        "Treat composite resume as checkpoint snapshot plus ledger suffix replay only; do not expect per-provider result maps or other rich checkpoint payloads to be reconstructed.",
+        (
+            "Treat this pipeline family as outside the current operator-grade "
+            "lineage closure boundary; do not claim forensic-grade trace/debug "
+            "support for it."
+        ),
+        (
+            "Treat composite resume as checkpoint snapshot plus ledger suffix "
+            "replay only; do not expect per-provider result maps or other rich "
+            "checkpoint payloads to be reconstructed."
+        ),
         "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
         "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
     ]

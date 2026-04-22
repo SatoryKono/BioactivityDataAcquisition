@@ -35,7 +35,10 @@ from bioetl.composition.runtime_builders.run_manifest_support import (
 from bioetl.composition.runtime_builders.runner_builder_support import (
     validate_required_persistence_profile,
 )
-from bioetl.composition.services.versioning import compute_config_hash, get_git_commit
+from bioetl.composition.services.versioning import (
+    compute_config_hash,
+    get_code_revision_provenance,
+)
 from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
@@ -74,7 +77,7 @@ def resolve_composite_control_plane_flags(settings: object) -> tuple[bool, bool]
         ledger_enabled=ledger_enabled,
         required_profile=required_profile,
         execution_label="Composite execution",
-        exact_replay_execution_context_supported=False,
+        exact_replay_execution_context_supported=True,
     )
     return True, ledger_enabled
 
@@ -165,6 +168,16 @@ def _build_composite_manifest_create_request(
     required_persistence_profile: str,
 ) -> RunManifestCreateSpec:
     """Build the manifest creation payload for one composite execution."""
+    source_refs = build_composite_source_refs(
+        config,
+        runtime=runtime,
+        settings=getattr(infra_context, "settings", None),
+    )
+    replay_capability = _resolve_composite_replay_capability(
+        source_refs=source_refs,
+        required_persistence_profile=required_persistence_profile,
+    )
+    code_revision = get_code_revision_provenance()
     return RunManifestCreateSpec(
         run_id=_coerce_run_id(infra_context.run_id),
         run_type=RunType.INCREMENTAL,
@@ -178,15 +191,37 @@ def _build_composite_manifest_create_request(
         ),
         runtime_config=build_composite_runtime_config_snapshot(runtime),
         resolved_config=build_composite_resolved_config_snapshot(config),
-        source_refs=build_composite_source_refs(config),
+        source_refs=source_refs,
         planned_artifacts=build_composite_planned_artifacts(config),
         pipeline_version=contract_version or None,
-        git_commit=get_git_commit(),
+        git_commit=code_revision.git_commit,
+        source_revision_state=code_revision.source_revision_state,
         config_hash=config_hash or None,
         contract_ref=contract_ref,
         contract_version=contract_version or None,
-        replay_capability=ReplayCapability.REBUILD_ONLY,
+        replay_capability=replay_capability,
     )
+
+
+def _resolve_composite_replay_capability(
+    *,
+    source_refs: tuple[object, ...],
+    required_persistence_profile: str,
+) -> ReplayCapability:
+    """Return exact capability only when every composite member has snapshots."""
+    has_full_snapshot_envelope = bool(source_refs) and all(
+        bool(getattr(source_ref, "input_snapshots", ())) for source_ref in source_refs
+    )
+    if has_full_snapshot_envelope:
+        return ReplayCapability.EXACT_REPLAY_SUPPORTED
+    if required_persistence_profile in {"replay_ready", "forensic_grade"}:
+        raise RuntimeError(
+            "Composite execution cannot satisfy required persistence profile "
+            f"'{required_persistence_profile}' because the full cached-Bronze "
+            "input snapshot envelope was not captured for every seed, "
+            "dependency, and enricher pipeline"
+        )
+    return ReplayCapability.REBUILD_ONLY
 
 
 def _build_run_ledger_service(

@@ -239,7 +239,7 @@ sink:
 | publication (chembl/pubmed/crossref/openalex/semanticscholar)                                                                         | implicit `overwrite` | `scd2`               | Yes      | Bootstrap snapshot, затем включить `mode: scd2` + `scd_config` и backfill интервалов валидности |
 | reference dictionaries (chembl: assay, assay-parameters, cell-line, tissue, protein-class, subcellular-fraction)                      | implicit `overwrite` | `scd2`               | Yes      | Единоразовый rebuild + переход на versioned upsert                                              |
 | slowly evolving records (chembl: target, target-component, molecule, compound-record; uniprot: protein, idmapping; pubchem: compound) | implicit `overwrite` | `scd2`               | Yes      | Инициализировать current как version=1, дальнейшие изменения писать как новые версии            |
-| high-volume facts (chembl: activity)                                                                                                  | implicit `overwrite` | `append`             | No       | Явно зафиксировать append в pipeline YAML                                                       |
+| high-volume facts (chembl: activity)                                                                                                  | implicit `overwrite` | `merge`              | No       | Явно зафиксировать merge/upsert в pipeline YAML со стабильными business keys                    |
 | recomputed derived outputs (chembl: publication-similarity, publication-term)                                                         | implicit `overwrite` | explicit `overwrite` | No       | Оставить overwrite, но задать явно в pipeline YAML                                              |
 
 ### 2.1.3. Инфраструктура Delta Lake
@@ -1679,7 +1679,7 @@ pipeline:
   batch_size: 1000
   sink:
     silver:
-      mode: append
+      mode: merge
     gold:
       enabled: false
 

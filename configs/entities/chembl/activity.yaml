@@ -11,7 +11,7 @@ pipeline:
     batch_size: 1000
     sink:
         silver:
-            mode: append
+            mode: merge
         gold:
             enabled: false
 schema:

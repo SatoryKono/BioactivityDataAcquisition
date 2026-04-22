@@ -6,7 +6,7 @@ business logic but rather assemble components.
 
 Services:
 - MetadataCoordinator: Centralized metadata creation for Medallion layers
-- Versioning utilities: Git commit, config hash, pipeline version
+- Versioning utilities: code revision provenance, config hash, pipeline version
 """
 
 from __future__ import annotations
@@ -15,6 +15,7 @@ from importlib import import_module
 
 from bioetl.composition.services.versioning import (
     compute_config_hash,
+    get_code_revision_provenance,
     get_git_commit,
     get_pipeline_version,
 )
@@ -36,6 +37,7 @@ __all__ = [
     "MetadataCoordinator",
     "SilverMetadataInput",
     "compute_config_hash",
+    "get_code_revision_provenance",
     "get_git_commit",
     "get_pipeline_version",
 ]

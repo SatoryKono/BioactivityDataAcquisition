@@ -218,7 +218,7 @@ def test_build_launch_context_snapshot_marks_ordinary_source_boundary() -> None:
 
 
 @pytest.mark.unit
-def test_build_launch_context_snapshot_marks_composite_boundary_as_unsupported() -> (
+def test_build_launch_context_snapshot_marks_composite_snapshot_envelope_boundary() -> (
     None
 ):
     ctx = _make_run_context(limit=10)
@@ -234,7 +234,7 @@ def test_build_launch_context_snapshot_marks_composite_boundary_as_unsupported()
     assert launch_context["required_persistence_profile"] == "degraded_observable"
     assert (
         launch_context["exact_replay_support_boundary"]
-        == "composite_execution_unsupported"
+        == "composite_snapshot_backed_input_envelope"
     )
 
 

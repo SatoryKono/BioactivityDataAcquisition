@@ -88,6 +88,7 @@ def _make_request() -> RunManifestCreateRequest:
         ),
         pipeline_version="1.2.3",
         git_commit="abc1234",
+        source_revision_state="clean",
         config_hash="a" * 64,
         contract_ref="chembl.activity",
         contract_version="1.0.0",
@@ -109,6 +110,7 @@ def test_create_manifest_persists_and_links_run_id() -> None:
 
     assert manifest.manifest_id == "manifest-1"
     assert manifest.code_provenance.git_commit == "abc1234"
+    assert manifest.code_provenance.source_revision_state == "clean"
     assert manifest.code_provenance.contract_ref == "chembl.activity"
     assert manifest.code_provenance.contract_version == "1.0.0"
     assert manifest.code_provenance.contract_schema_hash == "abc123"
@@ -134,6 +136,19 @@ def test_create_manifest_preserves_resume_only_replay_capability() -> None:
 
     assert manifest.replay_capability == ReplayCapability.RESUME_ONLY
     assert manifest.to_dict()["replay_capability"] == "resume_only"
+
+
+def test_create_manifest_requires_git_commit_for_exact_replay_capability() -> None:
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-missing-git",
+    )
+
+    with pytest.raises(RuntimeError, match="requires git_commit code provenance"):
+        service.create_manifest(replace(_make_request(), git_commit=None))
+
+    assert store.get("manifest-missing-git") is None
 
 
 def test_create_manifest_persists_explicit_replay_parentage() -> None:

@@ -99,7 +99,7 @@ def _determine_replay_support_boundary(execution_context_value: str) -> str:
     return (
         "snapshot_backed_source_runs_only"
         if execution_context_value != "composite"
-        else "composite_execution_unsupported"
+        else "composite_snapshot_backed_input_envelope"
     )
 
 
