@@ -171,10 +171,14 @@ class FileControlPlaneArtifactLifecycleStore:
             created_at = _resolve_payload_or_file_time(manifest_path, payload)
             if created_at is not None and created_at < cutoff:
                 continue
-            state["manifest_ids"].add(str(payload.get("manifest_id") or manifest_path.stem))
+            state["manifest_ids"].add(
+                str(payload.get("manifest_id") or manifest_path.stem)
+            )
             if (run_id := _optional_text(payload.get("run_id"))) is not None:
                 state["run_ids"].add(run_id)
-            if (replay_id := _optional_text(payload.get("replay_of_manifest_id"))) is not None:
+            if (
+                replay_id := _optional_text(payload.get("replay_of_manifest_id"))
+            ) is not None:
                 state["manifest_ids"].add(replay_id)
             if (artifact_id := _effective_config_artifact_id(payload)) is not None:
                 state["effective_config_artifact_ids"].add(artifact_id)
@@ -197,7 +201,9 @@ class FileControlPlaneArtifactLifecycleStore:
                 state["run_ids"].add(run_id)
             if (manifest_id := _payload_text(payload, "manifest_id")) is not None:
                 state["manifest_ids"].add(manifest_id)
-            if (artifact_id := _payload_text(payload, "effective_config_artifact_id")) is not None:
+            if (
+                artifact_id := _payload_text(payload, "effective_config_artifact_id")
+            ) is not None:
                 state["effective_config_artifact_ids"].add(artifact_id)
 
     def _extract_lineage_refs(self, state: dict[str, set[str]]) -> None:
@@ -211,7 +217,9 @@ class FileControlPlaneArtifactLifecycleStore:
             if _manifest_or_run_is_protected(
                 payload, manifest_ids=frozen_manifests, run_ids=frozen_runs
             ):
-                state["lineage_fragment_ids"].update(_lineage_fragment_id_candidates(payload))
+                state["lineage_fragment_ids"].update(
+                    _lineage_fragment_id_candidates(payload)
+                )
 
     def _resolve_protected_refs(
         self,
@@ -224,7 +232,9 @@ class FileControlPlaneArtifactLifecycleStore:
             "manifest_ids": set(policy.protected_manifest_ids),
             "run_ids": set(policy.protected_run_ids),
             "input_snapshot_ids": set(policy.protected_input_snapshot_ids),
-            "effective_config_artifact_ids": set(policy.protected_effective_config_artifact_ids),
+            "effective_config_artifact_ids": set(
+                policy.protected_effective_config_artifact_ids
+            ),
             "lineage_fragment_ids": set(policy.protected_lineage_fragment_ids),
         }
         self._extract_manifest_refs(cutoff, state)
@@ -235,7 +245,9 @@ class FileControlPlaneArtifactLifecycleStore:
             manifest_ids=frozenset(state["manifest_ids"]),
             run_ids=frozenset(state["run_ids"]),
             input_snapshot_ids=frozenset(state["input_snapshot_ids"]),
-            effective_config_artifact_ids=frozenset(state["effective_config_artifact_ids"]),
+            effective_config_artifact_ids=frozenset(
+                state["effective_config_artifact_ids"]
+            ),
             lineage_fragment_ids=frozenset(state["lineage_fragment_ids"]),
         )
 
@@ -292,7 +304,11 @@ class FileControlPlaneArtifactLifecycleStore:
         )
 
     def _protected_by_run_manifest_or_ledger(
-        self, path: Path, payload: dict[str, object], protected_refs: _ProtectedRefs, reasons: list[str]
+        self,
+        path: Path,
+        payload: dict[str, object],
+        protected_refs: _ProtectedRefs,
+        reasons: list[str],
     ) -> None:
         manifest_id = str(payload.get("manifest_id") or path.stem)
         run_id = _optional_text(payload.get("run_id"))
@@ -305,7 +321,11 @@ class FileControlPlaneArtifactLifecycleStore:
             reasons.append(f"run:{indexed_run_id}")
 
     def _protected_by_effective_config(
-        self, path: Path, payload: dict[str, object], protected_refs: _ProtectedRefs, reasons: list[str]
+        self,
+        path: Path,
+        payload: dict[str, object],
+        protected_refs: _ProtectedRefs,
+        reasons: list[str],
     ) -> None:
         artifact_id = str(payload.get("artifact_id") or path.stem)
         run_id = _optional_text(payload.get("run_id")) or _indexed_stem(path)
@@ -315,7 +335,11 @@ class FileControlPlaneArtifactLifecycleStore:
             reasons.append(f"run:{run_id}")
 
     def _protected_by_lineage(
-        self, path: Path, payload: dict[str, object], protected_refs: _ProtectedRefs, reasons: list[str]
+        self,
+        path: Path,
+        payload: dict[str, object],
+        protected_refs: _ProtectedRefs,
+        reasons: list[str],
     ) -> None:
         for fragment_id in _lineage_fragment_id_candidates(payload) or (path.stem,):
             if fragment_id in protected_refs.lineage_fragment_ids:
@@ -333,7 +357,10 @@ class FileControlPlaneArtifactLifecycleStore:
                 reasons.append(f"run:{run_id}")
 
     def _protected_by_checkpoint(
-        self, payload: dict[str, object], protected_refs: _ProtectedRefs, reasons: list[str]
+        self,
+        payload: dict[str, object],
+        protected_refs: _ProtectedRefs,
+        reasons: list[str],
     ) -> None:
         run_id = _payload_text(payload, "run_id")
         manifest_id = _payload_text(payload, "manifest_id")
@@ -358,7 +385,9 @@ class FileControlPlaneArtifactLifecycleStore:
             ControlPlaneArtifactSurface.RUN_MANIFEST,
             ControlPlaneArtifactSurface.RUN_LEDGER,
         }:
-            self._protected_by_run_manifest_or_ledger(path, payload, protected_refs, reasons)
+            self._protected_by_run_manifest_or_ledger(
+                path, payload, protected_refs, reasons
+            )
         elif surface is ControlPlaneArtifactSurface.EFFECTIVE_CONFIG:
             self._protected_by_effective_config(path, payload, protected_refs, reasons)
         elif surface is ControlPlaneArtifactSurface.LINEAGE:
