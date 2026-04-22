@@ -20,7 +20,9 @@ def test_chembl_assay_parameters_profile_covers_schema_exactly() -> None:
     assert extra == frozenset()
 
 
-def test_chembl_assay_parameters_profile_centralizes_business_canonicalization() -> None:
+def test_chembl_assay_parameters_profile_centralizes_business_canonicalization() -> (
+    None
+):
     type_rule = CHEMBL_ASSAY_PARAMETERS_PROFILE.rule_for("type")
     relation_rule = CHEMBL_ASSAY_PARAMETERS_PROFILE.rule_for("relation")
     standard_relation_rule = CHEMBL_ASSAY_PARAMETERS_PROFILE.rule_for(
