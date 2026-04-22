@@ -119,7 +119,12 @@
     "unique": false
   },
   "assay_group": {
-    "checks": [],
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
     "coerce": false,
     "description": "Assay group.",
     "dtype": "str",
@@ -274,7 +279,12 @@
     "unique": false
   },
   "confidence_description": {
-    "checks": [],
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
     "coerce": false,
     "description": "Confidence description.",
     "dtype": "str",

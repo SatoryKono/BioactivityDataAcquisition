@@ -169,7 +169,12 @@
     "unique": false
   },
   "assay_type": {
-    "checks": [],
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
     "coerce": false,
     "description": "Assay type (B/F/A/T/P/U).",
     "dtype": "str",
@@ -210,7 +215,12 @@
     "unique": false
   },
   "bao_format": {
-    "checks": [],
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^BAO[_:]\\d+$"
+      }
+    ],
     "coerce": false,
     "description": "BioAssay Ontology format ID.",
     "dtype": "str",

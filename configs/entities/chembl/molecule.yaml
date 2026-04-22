@@ -138,13 +138,17 @@ quality:
             type: enum
             allowed:
                 - Small molecule
+                - Inorganic small molecule
+                - Polymeric small molecule
                 - Protein
                 - Antibody
+                - Antibody drug conjugate
                 - Oligosaccharide
                 - Oligonucleotide
                 - Cell
                 - Enzyme
                 - Unknown
+                - Unclassified
             nullable: true
         -   field: structure_type
             type: enum

@@ -86,22 +86,19 @@ quality:
             type: enum
             allowed:
                 - SINGLE PROTEIN
-                - PROTEIN COMPLEX
                 - PROTEIN FAMILY
+                - PROTEIN COMPLEX
+                - PROTEIN COMPLEX GROUP
                 - SELECTIVITY GROUP
-                - ORGANISM
-                - TISSUE
-                - CELL-LINE
-                - SUBCELLULAR
-                - UNKNOWN
                 - CHIMERIC PROTEIN
-                - PROTEIN-PROTEIN INTERACTION
-                - NUCLEIC-ACID
-                - METAL
-                - LIPID
+                - CELL-LINE
+                - TISSUE
+                - ORGANISM
                 - MACROMOLECULE
-                - PHENOTYPE
-                - ADMET
+                - SMALL MOLECULE
+                - LIPID
+                - METAL
+                - UNKNOWN
             nullable: true
             error_message: Invalid target_type value
         -   field: organism
