@@ -7,6 +7,7 @@ import math
 from bioetl.domain.normalization.dates import normalize_partial_date
 from bioetl.domain.normalization.identifiers import (
     normalize_doi,
+    normalize_ontology_id,
     normalize_pmc_id,
     normalize_pmid,
 )
@@ -38,6 +39,7 @@ __all__ = [
     "normalize_profile_isomeric_smiles",
     "normalize_profile_json_string",
     "normalize_profile_null",
+    "normalize_profile_ontology_id",
     "normalize_profile_operator",
     "normalize_profile_passthrough",
     "normalize_profile_pmc_id",
@@ -98,6 +100,13 @@ def normalize_profile_operator(
 ) -> str | None:
     """Normalize operator-like profile fields to canonical ASCII forms."""
     return normalize_operator(value, allowed_values=allowed_values)
+
+
+def normalize_profile_ontology_id(value: object) -> object:
+    """Normalize ontology identifier fields to canonical prefix form."""
+    if not isinstance(value, str):
+        return value
+    return normalize_ontology_id(value)
 
 
 def normalize_profile_unit(value: object) -> object:

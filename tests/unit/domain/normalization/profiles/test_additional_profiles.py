@@ -72,16 +72,18 @@ def test_standard_profile_builder_applies_boolean_flag_and_operator_families() -
     profile = build_standard_profile(
         profile_name="test.rule_families",
         description="Regression profile for shared normalization rule families.",
-        schema_fields=("reviewed", "standard_flag", "standard_relation"),
+        schema_fields=("reviewed", "standard_flag", "standard_relation", "bto_id"),
         meta_fields=(),
         boolean_fields=("reviewed",),
         flag_fields=("standard_flag",),
         operator_fields=("standard_relation",),
+        ontology_id_fields=("bto_id",),
     )
 
     reviewed_rule = profile.rule_for("reviewed")
     flag_rule = profile.rule_for("standard_flag")
     relation_rule = profile.rule_for("standard_relation")
+    bto_rule = profile.rule_for("bto_id")
 
     assert reviewed_rule is not None
     assert reviewed_rule.apply("Y") is True
@@ -92,3 +94,6 @@ def test_standard_profile_builder_applies_boolean_flag_and_operator_families() -
     assert relation_rule is not None
     assert relation_rule.apply("≤") == "<="
     assert relation_rule.apply("approx") == "~"
+    assert bto_rule is not None
+    assert bto_rule.apply("bto:0000089") == "BTO_0000089"
+    assert "ontology ID" in (bto_rule.notes or "")

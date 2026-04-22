@@ -79,6 +79,23 @@ def test_tests_workflow_publishes_duration_telemetry_artifact() -> None:
     )
 
 
+def test_tests_workflow_publishes_test_health_telemetry_artifact() -> None:
+    """Tests workflow should fold JUnit telemetry into test-health summaries."""
+    workflow = _read_workflow(".github/workflows/tests.yml")
+    assert "summarize-junit" in workflow, (
+        "duration telemetry job should convert existing JUnit XML into test-health JSON"
+    )
+    assert "--github-step-summary" in workflow, (
+        "test-health rollup should publish Markdown into the GitHub job summary"
+    )
+    assert "test-health-telemetry" in workflow, (
+        "tests workflow should upload the test-health run history artifact"
+    )
+    assert "reports/quality/test-runs/" in workflow, (
+        "test-health artifacts should be routed under reports/quality/test-runs"
+    )
+
+
 def test_tests_workflow_has_dedicated_memory_lane_outside_coverage() -> None:
     """Neo4j memory tests should run in their own non-coverage lane."""
     workflow = _read_workflow(".github/workflows/tests.yml")

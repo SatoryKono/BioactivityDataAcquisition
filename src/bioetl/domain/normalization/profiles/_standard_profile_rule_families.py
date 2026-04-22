@@ -13,6 +13,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_float,
     normalize_profile_int,
     normalize_profile_json_string,
+    normalize_profile_ontology_id,
     normalize_profile_operator,
     normalize_profile_pmc_id,
     normalize_profile_pmid,
@@ -38,6 +39,7 @@ def _rule_family_specs(
     boolean_fields: frozenset[str],
     flag_fields: frozenset[str],
     operator_fields: frozenset[str],
+    ontology_id_fields: frozenset[str],
 ) -> tuple[RuleFamilySpec, ...]:
     return (
         (
@@ -84,6 +86,11 @@ def _rule_family_specs(
             operator_fields,
             normalize_profile_operator,
             "Canonicalize operator-like values to ASCII comparison symbols.",
+        ),
+        (
+            ontology_id_fields,
+            normalize_profile_ontology_id,
+            "Normalize ontology ID to canonical prefix form before hashing.",
         ),
         (
             int_fields,

@@ -41,6 +41,7 @@ class _RuleComponentContext:
     boolean_fields: frozenset[str]
     flag_fields: frozenset[str]
     operator_fields: frozenset[str]
+    ontology_id_fields: frozenset[str]
     enum_fields: Mapping[str, frozenset[str]]
     case_fields: Mapping[str, frozenset[str] | None]
     unit_fields: frozenset[str]
@@ -128,7 +129,11 @@ def _handle_enum_fields(
         allowed_values = enum_fields[field_name]
         return (
             lambda value: normalize_profile_enum(value, allowed_values=allowed_values),
-            f"Normalize enum field '{field_name}' against allowed values.",
+            (
+                f"Normalize enum field '{field_name}' against allowed values, "
+                "preserving canonical allowed-value casing and uppercase values "
+                "when the registry defines uppercase enums."
+            ),
         )
     return None
 
@@ -180,6 +185,7 @@ def _compose_null_aware_rule(
             return None
         return base_normalizer(null_normalized)
 
+    _normalize.__name__ = getattr(base_normalizer, "__name__", "_normalize")
     return (
         _normalize,
         f"{base_notes} Pseudo-null values also collapse to None for field '{field_name}'.",
@@ -201,6 +207,7 @@ def _handle_field_families(
     boolean_fields: frozenset[str],
     flag_fields: frozenset[str],
     operator_fields: frozenset[str],
+    ontology_id_fields: frozenset[str],
 ) -> RuleComponent | None:
     for fields, normalizer, notes in _rule_family_specs(
         title_fields=title_fields,
@@ -216,6 +223,7 @@ def _handle_field_families(
         boolean_fields=boolean_fields,
         flag_fields=flag_fields,
         operator_fields=operator_fields,
+        ontology_id_fields=ontology_id_fields,
     ):
         if field_name in fields:
             return normalizer, notes
@@ -263,6 +271,7 @@ def _resolve_base_rule(
             boolean_fields=context.boolean_fields,
             flag_fields=context.flag_fields,
             operator_fields=context.operator_fields,
+            ontology_id_fields=context.ontology_id_fields,
         ),
     )
     for handler in handlers:

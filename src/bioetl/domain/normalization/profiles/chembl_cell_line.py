@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.normalization.identifiers import normalize_ontology_id
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
@@ -33,18 +32,7 @@ _META_FIELDS = frozenset(
 )
 _TITLE_FIELDS = frozenset({"cell_name", "cell_source_tissue"})
 _INT_FIELDS = frozenset({"cell_source_taxonomy_id"})
-
-# Special rules for ontology ID fields
-_SPECIAL_RULE_COMPONENTS = {
-    "clo_id": (
-        normalize_ontology_id,
-        "Normalize CLO ontology ID to canonical underscore format.",
-    ),
-    "efo_id": (
-        normalize_ontology_id,
-        "Normalize EFO ontology ID to canonical underscore format.",
-    ),
-}
+_ONTOLOGY_ID_FIELDS = frozenset({"clo_id", "efo_id"})
 
 CHEMBL_CELL_LINE_PROFILE = build_standard_profile(
     profile_name="chembl.cell_line",
@@ -53,7 +41,7 @@ CHEMBL_CELL_LINE_PROFILE = build_standard_profile(
     meta_fields=_META_FIELDS,
     title_fields=_TITLE_FIELDS,
     int_fields=_INT_FIELDS,
-    special_rules=_SPECIAL_RULE_COMPONENTS,
+    ontology_id_fields=_ONTOLOGY_ID_FIELDS,
     null_fields=chembl_pseudo_null_fields("cell_line"),
 )
 

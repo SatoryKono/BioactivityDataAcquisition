@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.normalization.identifiers import normalize_ontology_id
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
@@ -32,26 +31,7 @@ _META_FIELDS = frozenset(
     }
 )
 _TITLE_FIELDS = frozenset({"pref_name"})
-
-# Special rules for ontology ID fields
-_SPECIAL_RULE_COMPONENTS = {
-    "bto_id": (
-        normalize_ontology_id,
-        "Normalize BTO ontology ID to canonical underscore format.",
-    ),
-    "caloha_id": (
-        normalize_ontology_id,
-        "Normalize CALOHA ontology ID to canonical format.",
-    ),
-    "efo_id": (
-        normalize_ontology_id,
-        "Normalize EFO ontology ID to canonical underscore format.",
-    ),
-    "uberon_id": (
-        normalize_ontology_id,
-        "Normalize UBERON ontology ID to canonical underscore format.",
-    ),
-}
+_ONTOLOGY_ID_FIELDS = frozenset({"bto_id", "caloha_id", "efo_id", "uberon_id"})
 
 CHEMBL_TISSUE_PROFILE = build_standard_profile(
     profile_name="chembl.tissue",
@@ -59,7 +39,7 @@ CHEMBL_TISSUE_PROFILE = build_standard_profile(
     schema_fields=CHEMBL_TISSUE_SCHEMA_FIELDS,
     meta_fields=_META_FIELDS,
     title_fields=_TITLE_FIELDS,
-    special_rules=_SPECIAL_RULE_COMPONENTS,
+    ontology_id_fields=_ONTOLOGY_ID_FIELDS,
     null_fields=chembl_pseudo_null_fields("tissue"),
 )
 

@@ -41,6 +41,7 @@ class StandardProfileSpec:
     boolean_fields: Collection[str] = field(default_factory=tuple)
     flag_fields: Collection[str] = field(default_factory=tuple)
     operator_fields: Collection[str] = field(default_factory=tuple)
+    ontology_id_fields: Collection[str] = field(default_factory=tuple)
     enum_fields: Mapping[str, frozenset[str]] | None = None
     case_fields: Mapping[str, frozenset[str] | None] | None = None
     unit_fields: Collection[str] | None = None
@@ -68,6 +69,7 @@ _STANDARD_PROFILE_OPTIONAL_DEFAULTS: dict[str, object] = {
     "boolean_fields": (),
     "flag_fields": (),
     "operator_fields": (),
+    "ontology_id_fields": (),
     "enum_fields": None,
     "case_fields": None,
     "unit_fields": None,
@@ -182,6 +184,7 @@ def build_standard_profile(
         normalized_boolean_fields,
         normalized_flag_fields,
         normalized_operator_fields,
+        normalized_ontology_id_fields,
     ) = _normalize_field_collections(
         profile_spec.meta_fields,
         profile_spec.title_fields,
@@ -197,6 +200,7 @@ def build_standard_profile(
         profile_spec.boolean_fields,
         profile_spec.flag_fields,
         profile_spec.operator_fields,
+        profile_spec.ontology_id_fields,
     )
 
     # Normalize mapping fields
@@ -222,6 +226,7 @@ def build_standard_profile(
         boolean_fields=normalized_boolean_fields,
         flag_fields=normalized_flag_fields,
         operator_fields=normalized_operator_fields,
+        ontology_id_fields=normalized_ontology_id_fields,
         enum_fields=normalized_enum_fields,
         case_fields=normalized_case_fields,
         unit_fields=normalized_unit_fields,

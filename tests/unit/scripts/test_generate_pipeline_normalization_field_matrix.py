@@ -90,9 +90,13 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
     rows = build_field_matrix_rows()
 
     chembl_activity_doi = _row(rows, "chembl_activity", "publication_doi")
+    assert chembl_activity_doi["provider"] == "chembl"
+    assert chembl_activity_doi["entity"] == "activity"
     assert chembl_activity_doi["normalization_source"] == "profile"
     assert chembl_activity_doi["normalizer"] == "normalize_profile_doi"
     assert chembl_activity_doi["include_in_content_hash"] == "true"
+    assert chembl_activity_doi["hash_ordering"] == "order_sensitive"
+    assert chembl_activity_doi["strictness"] == "canonical_identifier"
 
     crossref_title = _row(rows, "crossref_publication", "title")
     assert crossref_title["normalization_source"] == "profile"
@@ -161,9 +165,10 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
 
     chembl_assay_parameters_json = _row(rows, "chembl_assay", "assay_parameters")
     assert chembl_assay_parameters_json["normalizer"] == "normalize_profile_json_string"
+    assert chembl_assay_parameters_json["strictness"] == "canonical_json"
 
     chembl_assay_description = _row(rows, "chembl_assay", "description")
-    assert chembl_assay_description["normalizer"] == "normalize_profile_text"
+    assert chembl_assay_description["normalizer"] == "normalize_profile_null"
 
     chembl_target_component_id = _row(
         rows, "chembl_target_component", "protein_classification_id"
@@ -184,8 +189,11 @@ def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields(
     rows = build_field_matrix_rows()
 
     molecule_id = _row(rows, "composite_activity", "molecule_id")
+    assert molecule_id["provider"] == "composite"
+    assert molecule_id["entity"] == "activity"
     assert molecule_id["normalization_source"] == "composite_join_key_policy"
     assert molecule_id["normalizer"] == "join_key_policy"
+    assert molecule_id["strictness"] == "join_key_policy"
 
     composite_pmid = _row(rows, "composite_publication", "pmid")
     assert (
@@ -196,6 +204,40 @@ def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields(
     standard_type = _row(rows, "composite_activity", "standard_type")
     assert standard_type["normalization_source"] == "upstream_inherited"
     assert standard_type["normalizer"] == "none"
+
+
+def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> None:
+    rows = build_field_matrix_rows()
+
+    standard_relation = _row(rows, "chembl_activity", "standard_relation")
+    assert standard_relation["controlled_vocabulary_source"] == (
+        "configs/enums/chembl.yaml"
+    )
+    assert standard_relation["strictness"] == "strict_operator"
+    assert "domain_schema:present" in standard_relation["schema_coverage"]
+    assert "checks=isin" in standard_relation["schema_coverage"]
+    assert standard_relation["dq_coverage"] == "enum:error"
+
+    assay_type = _row(rows, "chembl_activity", "assay_type")
+    assert assay_type["controlled_vocabulary_source"] == "configs/enums/chembl.yaml"
+    assert assay_type["strictness"] == "strict_enum"
+    assert assay_type["dq_coverage"] == "enum:error"
+
+    standard_flag = _row(rows, "chembl_activity", "standard_flag")
+    assert standard_flag["strictness"] == "strict_flag"
+    assert "checks=isin" in standard_flag["schema_coverage"]
+    assert standard_flag["dq_coverage"] == "range:error"
+
+    activity_properties = _row(rows, "chembl_activity", "activity_properties")
+    assert activity_properties["normalizer"] == "normalize_profile_json_string"
+    assert activity_properties["hash_ordering"] == "set_like"
+    assert activity_properties["strictness"] == "canonical_json"
+
+    bao_format = _row(rows, "chembl_activity", "bao_format")
+    assert bao_format["controlled_vocabulary_source"] == (
+        "domain.normalization.ontology_id_prefixes"
+    )
+    assert bao_format["strictness"] == "canonical_ontology_id"
 
 
 def test_build_entity_profile_coverage_kpi_summarizes_entity_rows() -> None:
@@ -301,6 +343,9 @@ def test_render_markdown_mentions_surface_scoped_coverage_kpis() -> None:
     assert "## Surface Coverage Summary" in markdown
     assert "## Semantic Invariant Summary" in markdown
     assert "Entity coverage is entity-scoped only" in markdown
+    assert "controlled_vocabulary_source" in markdown
+    assert "schema_coverage" in markdown
+    assert "dq_coverage" in markdown
     assert (
         "- entity_record / explicit_profile_coverage_pct: `50.00%` (`1` / `2`)"
         in markdown

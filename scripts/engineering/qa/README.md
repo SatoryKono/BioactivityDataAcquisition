@@ -31,6 +31,9 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-duplication-baseline` | `report_duplication_baseline.py`          | Generate report-only duplication baseline for `composition`/`application`                         |
 | `analyze-duplicate-functions` | `analyze_duplicate_functions.py`          | Compatibility wrapper for the legacy AST duplicate-function analyzer                              |
 | `calibrate-hotspots`          | `scripts/engineering/qa/calibrate_hotspot_budgets.py` | Calibrate hotspot budgets                                                                         |
+| `run-tests`                   | `test_health.py`                          | Run a named test-health lane and emit JUnit XML plus JSON summary                                 |
+| `summarize-junit`             | `test_health.py`                          | Aggregate existing JUnit XML into test-health JSON summary                                        |
+| `test-health`                 | `test_health.py`                          | Summarize recent `reports/quality/test-runs/*.json` history                                      |
 
 ## When to Use
 
@@ -54,6 +57,9 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-duplication-baseline` | When reviewing duplication pressure in `composition` or `application`; generates report-only baseline artifacts without creating a blocking gate | Manual, on-demand                          |
 | `analyze-duplicate-functions` | When you need the older duplicate-function AST report through the canonical QA entrypoint                                                        | Manual, audit/reporting                    |
 | `calibrate-hotspots`          | After collecting new performance observations; recalculates budget thresholds                                                                    | Manual, on-demand                          |
+| `run-tests`                   | When a local or CI run should be recorded under a canonical `test_lanes` suite name                                                              | Local / CI test-health telemetry           |
+| `summarize-junit`             | When an existing CI pytest job already wrote JUnit XML and should be folded into the test-health format                                          | CI test-health telemetry migration         |
+| `test-health`                 | When reviewing recent lane history, failing nodeids, and skip/failure counts                                                                     | Local / CI test-health reporting           |
 
 Important distinction:
 
@@ -78,12 +84,21 @@ python scripts/engineering/qa/report_vcr_metadata_catalog.py --update
 python scripts/engineering/qa/report_provider_contract_drift.py --output reports/quality/provider-contract-drift-report.json --fail-on breaking
 python -m scripts.engineering.qa report-family-baseline --check
 python -m scripts.engineering.qa report-family-baseline --update
+python -m scripts.engineering.qa run-tests --suite unit-fast --skip-preflight -- --no-cov
+python -m scripts.engineering.qa summarize-junit --suite unit-fast --junit-glob 'reports/test-telemetry/*.xml'
+python -m scripts.engineering.qa test-health --last 30 --markdown-out reports/quality/test-runs/rollup.md
+python -m scripts.engineering.qa test-health --suite coverage-verify --run-id coverage-verify-local --junit-glob 'reports/quality/test-runs/junit/*.xml' --last 30 --markdown-out reports/quality/test-runs/rollup.md
 python scripts/engineering/qa/report_duplication_baseline.py
 python -m scripts.engineering.qa check-architecture
 python -m scripts.engineering.qa check-app-deps
 python -m scripts.engineering.qa check-constructor-args -- --warn-only
 python -m scripts.engineering.qa analyze-duplicate-functions
 ```
+
+`run-tests` and `summarize-junit` classify failures with
+`configs/quality/test_health_classifiers.yaml`. Those classes are
+informational; pytest exit codes and quality gates remain the blocking source of
+truth.
 
 The legacy direct paths for the historical architecture, application-deps, and
 constructor-args checks remain supported during the migration window, but new

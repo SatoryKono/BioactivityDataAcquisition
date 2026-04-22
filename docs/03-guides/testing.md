@@ -49,6 +49,19 @@ The same execution contract is represented in `test_lanes.execution_defaults`;
 future test-health tooling should preserve the logical `suite_name` while
 recording sharded runner details separately.
 
+The QA entrypoint can record named lane runs as JUnit XML plus JSON summaries:
+
+```bash
+python -m scripts.engineering.qa run-tests --suite unit-fast --skip-preflight -- --no-cov
+python -m scripts.engineering.qa summarize-junit --suite unit-fast --junit-glob 'reports/test-telemetry/*.xml'
+python -m scripts.engineering.qa test-health --last 30 --markdown-out reports/quality/test-runs/rollup.md
+python -m scripts.engineering.qa test-health --suite coverage-verify --run-id coverage-verify-local --junit-glob 'reports/quality/test-runs/junit/*.xml' --last 30 --markdown-out reports/quality/test-runs/rollup.md
+```
+
+Failure classifications are informational and come from
+`configs/quality/test_health_classifiers.yaml`; pytest exit codes and quality
+gates remain the blocking signals.
+
 Canonical local execution paths:
 
 - **CI / single-OS checkout**: `uv run python -m ...` или поддерживаемые

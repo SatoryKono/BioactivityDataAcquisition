@@ -28,6 +28,9 @@ Commands:
     report-observability-metric-inventory Generate registry/runtime/docs observability metric inventory
     analyze-duplicate-functions Analyze duplicate function names across selected code areas
     calibrate-hotspots   Calibrate hotspot budgets
+    run-tests            Run a named test-health lane and emit JUnit/JSON artifacts
+    summarize-junit      Aggregate existing JUnit XML into test-health JSON
+    test-health          Summarize recent test-health run JSON artifacts
 """
 
 from __future__ import annotations
@@ -36,7 +39,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-COMMANDS: dict[str, str] = {
+CommandTarget = str | tuple[str, str]
+
+COMMANDS: dict[str, CommandTarget] = {
     "check-naming": "naming_audit.py",
     "check-architecture": "check_architecture.py",
     "check-app-deps": "check_application_deps.py",
@@ -59,12 +64,20 @@ COMMANDS: dict[str, str] = {
     "report-observability-metric-inventory": "report_observability_metric_inventory.py",
     "analyze-duplicate-functions": "analyze_duplicate_functions.py",
     "calibrate-hotspots": "calibrate_hotspot_budgets.py",
+    "run-tests": ("test_health.py", "run-tests"),
+    "summarize-junit": ("test_health.py", "summarize-junit"),
+    "test-health": ("test_health.py", "test-health"),
 }
 
 _DIR = Path(__file__).parent
 
 
-def _run_script(name: str, argv: list[str]) -> int:
+def _run_script(target: CommandTarget, argv: list[str]) -> int:
+    if isinstance(target, tuple):
+        name, subcommand = target
+        argv = [subcommand, *argv]
+    else:
+        name = target
     script = _DIR / name
     result = subprocess.run([sys.executable, str(script), *argv], check=False)
     return result.returncode
