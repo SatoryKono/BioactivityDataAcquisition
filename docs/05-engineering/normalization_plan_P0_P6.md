@@ -57,6 +57,29 @@ These rules are mandatory for all phases.
 9. Only fields explicitly marked `set_like` are permutation-invariant for hashing.
 10. Technical meta fields do not participate in `content_hash`.
 
+## 2026-04-21 Data Normalization Audit Closure
+
+Issues `#3011`-`#3025` turn the normalization audit into explicit code
+guardrails. The active implementation policy is:
+
+- `RecordNormalizationProcessor.compute_content_hash()` always hashes with
+  `exclude_none=True` and passes profile `set_like_fields` to the domain hash
+  identity seam.
+- DOI, PMID, and PMC identifiers are normalized through domain identifier
+  helpers from every shipped publication profile.
+- ChEMBL strict enum fields are centralized in `configs/enums/chembl.yaml`,
+  mirrored by `domain/schemas/constants.py`, applied by normalization profiles,
+  and guarded by Pandera `isin`/pattern checks where schemas expose the field.
+- Shared profile rule families cover boolean-like values, binary flags,
+  comparison operators, units, pseudo-null collapse, canonical JSON strings,
+  and set-like JSON/list hash behavior.
+- ChEMBL ontology identifiers are normalized in profiles for BAO, BTO, CALOHA,
+  CLO, EFO, UBERON, UO, and related prefixed IDs instead of transformer-local
+  one-offs.
+- Composite join keys must have an explicit policy in
+  `JOIN_KEY_NORMALIZATION_POLICIES`; configuration coverage is enforced by unit
+  tests over `configs/composites/*.yaml`.
+
 ## Canonical Hash and Serialization Rules
 
 ### Canonical JSON

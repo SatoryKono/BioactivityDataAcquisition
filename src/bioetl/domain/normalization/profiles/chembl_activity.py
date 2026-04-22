@@ -18,6 +18,8 @@ from ._chembl_activity_fields import (
 from ._standard_profile_builder import build_standard_profile
 from .profile_normalizers import (
     normalize_profile_canonical_smiles,
+    normalize_profile_enum,
+    normalize_profile_operator,
 )
 
 __all__ = [
@@ -62,21 +64,28 @@ _SPECIAL_RULE_COMPONENTS = {
         normalize_profile_canonical_smiles,
         "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",
     ),
+    "standard_relation": (
+        lambda value: normalize_profile_operator(
+            value,
+            allowed_values=STANDARD_RELATIONS,
+        ),
+        "Normalize standard_relation to a canonical ASCII operator enum.",
+    ),
     "bao_format": (
         normalize_ontology_id,
         "Normalize BAO ontology ID to underscore format (e.g., 'BAO:0000190' -> 'BAO_0000190').",
     ),
+    "bao_endpoint": (
+        normalize_ontology_id,
+        "Normalize BAO endpoint ontology ID to underscore format.",
+    ),
+    "uo_units": (
+        normalize_ontology_id,
+        "Normalize Units Ontology ID to underscore format.",
+    ),
     "assay_type": (
-        create_case_normalizer("uppercase"),
-        "Normalize assay_type to uppercase enum value.",
-    ),
-    "assay_test_type": (
-        create_case_normalizer("preserve"),
-        "Normalize assay_test_type preserving original case (e.g., 'In vivo').",
-    ),
-    "assay_category": (
-        create_case_normalizer("preserve"),
-        "Normalize assay_category preserving original case.",
+        lambda value: normalize_profile_enum(value, allowed_values=ASSAY_TYPES),
+        "Normalize assay_type to uppercase enum value and collapse unknown values to None.",
     ),
 }
 
@@ -117,10 +126,13 @@ CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
     pmc_id_fields={"publication_pmc_id"},
     int_fields=INT_FIELDS,
     float_fields=FLOAT_FIELDS,
+    flag_fields={"standard_flag", "potential_duplicate", "manual_curation_flag"},
+    operator_fields={"relation"},
     set_like_fields=SET_LIKE_FIELDS,
     enum_fields={
         "standard_relation": STANDARD_RELATIONS,
         "standard_type": ACTIVITY_STANDARD_TYPES,
+        "assay_type": ASSAY_TYPES,
         "data_validity_comment": DATA_VALIDITY_COMMENTS,
     },
     special_rules=_SPECIAL_RULE_COMPONENTS,

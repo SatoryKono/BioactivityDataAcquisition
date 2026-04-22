@@ -55,6 +55,7 @@ _DATE_FIELDS = frozenset({"publication_date", "creation_date"})
 _INT_FIELDS = frozenset(
     {"publication_year", "src_id", "citations_received", "citations_made"}
 )
+_SET_LIKE_FIELDS = frozenset({"affiliation_list", "author_orcids"})
 _JSON_STRING_FIELDS = frozenset({"authors", "affiliation_list", "author_orcids"})
 
 CHEMBL_PUBLICATION_PROFILE = build_standard_profile(
@@ -69,6 +70,7 @@ CHEMBL_PUBLICATION_PROFILE = build_standard_profile(
     pmc_id_fields=_PMC_ID_FIELDS,
     date_fields=_DATE_FIELDS,
     int_fields=_INT_FIELDS,
+    set_like_fields=_SET_LIKE_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
 )
 

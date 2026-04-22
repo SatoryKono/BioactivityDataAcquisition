@@ -66,3 +66,29 @@ def test_standard_profile_builder_accepts_legacy_single_item_special_rules() -> 
     assert canonical_rule.notes == (
         "Apply custom normalization rule for field 'canonical_smiles'."
     )
+
+
+def test_standard_profile_builder_applies_boolean_flag_and_operator_families() -> None:
+    profile = build_standard_profile(
+        profile_name="test.rule_families",
+        description="Regression profile for shared normalization rule families.",
+        schema_fields=("reviewed", "standard_flag", "standard_relation"),
+        meta_fields=(),
+        boolean_fields=("reviewed",),
+        flag_fields=("standard_flag",),
+        operator_fields=("standard_relation",),
+    )
+
+    reviewed_rule = profile.rule_for("reviewed")
+    flag_rule = profile.rule_for("standard_flag")
+    relation_rule = profile.rule_for("standard_relation")
+
+    assert reviewed_rule is not None
+    assert reviewed_rule.apply("Y") is True
+    assert reviewed_rule.apply("false") is False
+    assert flag_rule is not None
+    assert flag_rule.apply("yes") == 1
+    assert flag_rule.apply("0") == 0
+    assert relation_rule is not None
+    assert relation_rule.apply("≤") == "<="
+    assert relation_rule.apply("approx") == "~"

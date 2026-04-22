@@ -226,8 +226,8 @@ class FileAuditAdapter:
     def log_event(
         self,
         event_name: str,
-        event_data: JsonDict | None = None,
         timestamp: datetime,
+        event_data: JsonDict | None = None,
     ) -> None:
         """Log a non-write lifecycle event to the audit trail."""
         if self._closed:

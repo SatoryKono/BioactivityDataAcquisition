@@ -20,6 +20,7 @@ activity:
         - "<="
         - ">"
         - ">="
+        - "~"
 
     standard_types:
         - IC50

@@ -55,10 +55,16 @@ _INT_FIELDS = frozenset({"citations_made", "citations_received", "publication_ye
 _FLOAT_FIELDS = frozenset({"fwci"})
 _SET_LIKE_FIELDS = frozenset(
     {
+        "affiliation_list",
+        "author_openalex_ids",
+        "author_orcids",
+        "grants",
         "institution_country_codes",
         "institution_ids",
+        "ror_ids",
         "subject_keywords",
         "subject_mesh",
+        "subject_topics",
     }
 )
 _JSON_STRING_FIELDS = frozenset(

@@ -6,11 +6,14 @@ from collections.abc import Callable
 
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_abstract,
+    normalize_profile_binary_flag,
+    normalize_profile_boolean,
     normalize_profile_date,
     normalize_profile_doi,
     normalize_profile_float,
     normalize_profile_int,
     normalize_profile_json_string,
+    normalize_profile_operator,
     normalize_profile_pmc_id,
     normalize_profile_pmid,
     normalize_profile_title,
@@ -32,6 +35,9 @@ def _rule_family_specs(
     float_fields: frozenset[str],
     set_like_fields: frozenset[str],
     json_string_fields: frozenset[str],
+    boolean_fields: frozenset[str],
+    flag_fields: frozenset[str],
+    operator_fields: frozenset[str],
 ) -> tuple[RuleFamilySpec, ...]:
     return (
         (
@@ -63,6 +69,21 @@ def _rule_family_specs(
             date_fields,
             normalize_profile_date,
             "Canonicalize partial-date text to stable date semantics.",
+        ),
+        (
+            boolean_fields,
+            normalize_profile_boolean,
+            "Coerce boolean-like source values to canonical bool semantics.",
+        ),
+        (
+            flag_fields,
+            normalize_profile_binary_flag,
+            "Coerce boolean-like source values to canonical 0/1 flag semantics.",
+        ),
+        (
+            operator_fields,
+            normalize_profile_operator,
+            "Canonicalize operator-like values to ASCII comparison symbols.",
         ),
         (
             int_fields,

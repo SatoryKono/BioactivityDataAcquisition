@@ -5,6 +5,11 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.schemas.uniprot._core import (
+    ENTRY_TYPES,
+    PROTEIN_EXISTENCE_LEVELS,
+    PROTEIN_FLAGS,
+)
 from bioetl.domain.schemas.uniprot.protein import UniprotTargetSchema
 
 __all__ = [
@@ -37,7 +42,23 @@ _META_FIELDS = frozenset(
 )
 _TITLE_FIELDS = frozenset({"protein_name"})
 _INT_FIELDS = frozenset({"annotation_score", "organism_id", "sequence_length"})
-_SET_LIKE_FIELDS = frozenset({"gene_names"})
+_SET_LIKE_FIELDS = frozenset(
+    {
+        "chembl_ids",
+        "drugbank_ids",
+        "gene_names",
+        "gene_orf_names",
+        "gene_synonyms",
+        "go_terms",
+        "guidetopharmacology_ids",
+        "interpro_xrefs",
+        "keywords",
+        "pdb_xrefs",
+        "pfam_xrefs",
+        "reactome_xrefs",
+        "secondary_accessions",
+    }
+)
 _JSON_STRING_FIELDS = frozenset(
     {
         "alternative_products",
@@ -46,6 +67,12 @@ _JSON_STRING_FIELDS = frozenset(
         "features_json",
     }
 )
+_BOOLEAN_FIELDS = frozenset({"reviewed"})
+_ENUM_FIELDS = {
+    "entry_type": frozenset(ENTRY_TYPES),
+    "flag": frozenset(PROTEIN_FLAGS),
+    "protein_existence": frozenset(PROTEIN_EXISTENCE_LEVELS),
+}
 
 UNIPROT_PROTEIN_PROFILE = build_standard_profile(
     profile_name="uniprot.protein",
@@ -56,6 +83,8 @@ UNIPROT_PROTEIN_PROFILE = build_standard_profile(
     int_fields=_INT_FIELDS,
     set_like_fields=_SET_LIKE_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
+    boolean_fields=_BOOLEAN_FIELDS,
+    enum_fields=_ENUM_FIELDS,
 )
 
 UNIPROT_PROTEIN_PROFILE.assert_covers_schema(UNIPROT_PROTEIN_SCHEMA_FIELDS)

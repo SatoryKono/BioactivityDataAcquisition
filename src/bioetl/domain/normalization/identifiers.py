@@ -17,7 +17,12 @@ __all__ = [
 
 _DOI_URL_PREFIXES = (
     *(f"{scheme}://doi.org/" for scheme in ("https", "http")),
+    *(f"{scheme}://dx.doi.org/" for scheme in ("https", "http")),
     "doi:",
+)
+_PMID_URL_PREFIXES = (
+    *(f"{scheme}://pubmed.ncbi.nlm.nih.gov/" for scheme in ("https", "http")),
+    "pmid:",
 )
 PMID_MAX_EXCLUSIVE = 10_000_000_000
 
@@ -48,6 +53,12 @@ def _normalize_pmid_from_int(pmid: int) -> str | None:
 def _normalize_pmid_from_str(pmid: str) -> str | None:
     """Normalize string PMID input."""
     value = pmid.strip()
+    lowered = value.lower()
+    for prefix in _PMID_URL_PREFIXES:
+        if lowered.startswith(prefix):
+            value = value[len(prefix) :]
+            break
+    value = value.strip().rstrip("/")
     if not value.isdigit():
         return None
 
@@ -90,6 +101,8 @@ ONTOLOGY_PREFIXES = {
     "CLO": "CLO_",  # Cell Line Ontology
     "EFO": "EFO_",  # Experimental Factor Ontology
     "UBERON": "UBERON_",  # Uber Anatomical Ontology
+    "BTO": "BTO_",  # BRENDA Tissue Ontology
+    "CALOHA": "CALOHA_",  # CALOHA tissue/cell ontology
     "BAO": "BAO_",  # BioAssay Ontology
     "GO": "GO_",  # Gene Ontology
     "CHEBI": "CHEBI_",  # Chemical Entities of Biological Interest

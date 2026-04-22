@@ -85,6 +85,18 @@ class TestAssaySync:
             chembl_yaml["assay"]["relationship_types"]
         )
 
+    def test_assay_groups(self, chembl_yaml: dict[str, Any]) -> None:
+        from bioetl.domain.schemas.constants import ASSAY_GROUPS
+
+        assert ASSAY_GROUPS == frozenset(chembl_yaml["assay"]["assay_groups"])
+
+    def test_confidence_descriptions(self, chembl_yaml: dict[str, Any]) -> None:
+        from bioetl.domain.schemas.constants import CONFIDENCE_DESCRIPTIONS
+
+        assert CONFIDENCE_DESCRIPTIONS == frozenset(
+            chembl_yaml["assay"]["confidence_descriptions"]
+        )
+
     def test_assay_parameter_standard_types(self, chembl_yaml: dict[str, Any]) -> None:
         from bioetl.domain.schemas.constants import ASSAY_PARAMETER_STANDARD_TYPES
 
