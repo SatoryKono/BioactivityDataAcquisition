@@ -183,6 +183,7 @@ class PipelineCreateWithServicesRequest:
     settings: SettingsPort
     logger: LoggerPort
     manifest_id: str | None = None
+    execution_fingerprint: str | None = None
     config_hash: str | None = None
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
@@ -223,6 +224,7 @@ class PipelineFactoryPort(Protocol):
         settings: SettingsPort,
         observability: ExecutionObservabilityPort,
         manifest_id: str | None = None,
+        execution_fingerprint: str | None = None,
         config_hash: str | None = None,
         dq_contract_compatibility_hash: str | None = None,
         effective_config_artifact_id: str | None = None,
@@ -238,6 +240,7 @@ class PipelineFactoryPort(Protocol):
             settings: Domain-facing execution settings contract.
             observability: Domain-facing observability context for runner wiring.
             manifest_id: Optional immutable run-manifest identifier.
+            execution_fingerprint: Optional canonical execution identity fingerprint.
             config_hash: Optional canonical execution config hash.
             dq_contract_compatibility_hash: Optional DQ compatibility hash.
             effective_config_artifact_id: Optional effective-config artifact reference.

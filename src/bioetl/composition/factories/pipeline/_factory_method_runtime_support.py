@@ -87,6 +87,9 @@ def create_factory_runner_from_request(
         settings=settings,
         logger=observability.logger,
         manifest_id=None if artifacts is None else artifacts.manifest_id,
+        execution_fingerprint=(
+            None if artifacts is None else artifacts.execution_fingerprint
+        ),
         config_hash=None if artifacts is None else artifacts.config_hash,
         dq_contract_compatibility_hash=(
             None if artifacts is None else artifacts.dq_contract_compatibility_hash

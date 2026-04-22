@@ -226,11 +226,15 @@ class TestBronzeMetadata:
             started_at=datetime.now(UTC),
             provider="chembl",
             entity="activity",
+            config_hash="a" * 64,
+            effective_config_artifact_id="artifact-001",
+            execution_fingerprint="fingerprint-001",
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             contract_schema_hash="schema-hash-123",
             dq_policy_ref="chembl.dq.v1",
             rule_bundle_version="dq-rules.v1.0",
+            dq_contract_compatibility_hash="dq-hash-001",
         )
         coordinator = MetadataCoordinator(context)
         input_data = BronzeMetadataInput(
@@ -244,11 +248,15 @@ class TestBronzeMetadata:
 
         metadata = coordinator.create_bronze_metadata(input_data)
 
+        assert metadata.pipeline.effective_config_hash == "a" * 64
+        assert metadata.pipeline.effective_config_artifact_id == "artifact-001"
+        assert metadata.pipeline.execution_fingerprint == "fingerprint-001"
         assert metadata.pipeline.contract_ref == "chembl.activity"
         assert metadata.pipeline.contract_version == "1.0.0"
         assert metadata.pipeline.contract_schema_hash == "schema-hash-123"
         assert metadata.pipeline.dq_policy_ref == "chembl.dq.v1"
         assert metadata.pipeline.rule_bundle_version == "dq-rules.v1.0"
+        assert metadata.pipeline.dq_contract_compatibility_hash == "dq-hash-001"
 
     def test_bronze_output_metadata(self, coordinator: MetadataCoordinator) -> None:
         """Test Bronze output metadata contains file info (ADR-029 unified structure)."""
@@ -1204,6 +1212,10 @@ class TestLineageFragments:
             provider="chembl",
             entity="activity",
             manifest_id="manifest-001",
+            execution_fingerprint="fingerprint-001",
+            config_hash="a" * 64,
+            effective_config_artifact_id="artifact-001",
+            dq_contract_compatibility_hash="dq-hash-001",
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             contract_schema_hash="schema-hash-123",
@@ -1245,11 +1257,19 @@ class TestLineageFragments:
             if node.node_type == LineageNodeType.MANIFEST
         )
         assert run.attributes["contract_ref"] == "chembl.activity"
+        assert run.attributes["execution_fingerprint"] == "fingerprint-001"
+        assert run.attributes["effective_config_hash"] == "a" * 64
+        assert run.attributes["effective_config_artifact_id"] == "artifact-001"
+        assert run.attributes["dq_contract_compatibility_hash"] == "dq-hash-001"
         assert run.attributes["contract_version"] == "1.0.0"
         assert run.attributes["contract_schema_hash"] == "schema-hash-123"
         assert run.attributes["dq_policy_ref"] == "chembl.dq.v1"
         assert run.attributes["rule_bundle_version"] == "dq-rules.v1.0"
         assert manifest.attributes["contract_ref"] == "chembl.activity"
+        assert manifest.attributes["execution_fingerprint"] == "fingerprint-001"
+        assert manifest.attributes["effective_config_hash"] == "a" * 64
+        assert manifest.attributes["effective_config_artifact_id"] == "artifact-001"
+        assert manifest.attributes["dq_contract_compatibility_hash"] == "dq-hash-001"
         assert manifest.attributes["contract_version"] == "1.0.0"
         assert any(
             edge.edge_type == LineageEdgeType.PRODUCED_BY for edge in fragment.edges

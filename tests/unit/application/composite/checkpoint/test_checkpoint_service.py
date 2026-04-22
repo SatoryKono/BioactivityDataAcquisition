@@ -78,6 +78,9 @@ def _make_service(
     logger: MagicMock | None = None,
     resume: bool = False,
     expected_effective_config_hash: str | None = None,
+    expected_effective_config_artifact_id: str | None = None,
+    expected_execution_fingerprint: str | None = None,
+    expected_dq_contract_compatibility_hash: str | None = None,
     expected_contract_ref: str | None = None,
     expected_contract_version: str | None = None,
     expected_manifest_id: str | None = None,
@@ -95,6 +98,11 @@ def _make_service(
         logger=lg,
         resume=resume,
         expected_effective_config_hash=expected_effective_config_hash,
+        expected_effective_config_artifact_id=expected_effective_config_artifact_id,
+        expected_execution_fingerprint=expected_execution_fingerprint,
+        expected_dq_contract_compatibility_hash=(
+            expected_dq_contract_compatibility_hash
+        ),
         expected_contract_ref=expected_contract_ref,
         expected_contract_version=expected_contract_version,
         expected_manifest_id=expected_manifest_id,
@@ -228,12 +236,18 @@ class TestFilenameFormat:
         """Expected checkpoint anchors stay readable for dependent helpers."""
         svc, _, _ = _make_service(
             expected_effective_config_hash=VALID_EFFECTIVE_HASH,
+            expected_effective_config_artifact_id="artifact-123",
+            expected_execution_fingerprint="fingerprint-123",
+            expected_dq_contract_compatibility_hash="dq-hash-123",
             expected_contract_ref="composite_publication",
             expected_contract_version="2.1.0",
             expected_manifest_id="manifest-123",
         )
 
         assert svc.expected_effective_config_hash == VALID_EFFECTIVE_HASH
+        assert svc.expected_effective_config_artifact_id == "artifact-123"
+        assert svc.expected_execution_fingerprint == "fingerprint-123"
+        assert svc.expected_dq_contract_compatibility_hash == "dq-hash-123"
         assert svc.expected_contract_ref == "composite_publication"
         assert svc.expected_contract_version == "2.1.0"
         assert svc.expected_manifest_id == "manifest-123"
@@ -242,12 +256,18 @@ class TestFilenameFormat:
         """Expected checkpoint anchors are canonicalized on service construction."""
         svc, _, _ = _make_service(
             expected_effective_config_hash=f" SHA256:{'A' * 64} ",
+            expected_effective_config_artifact_id=" artifact-123 ",
+            expected_execution_fingerprint=" fingerprint-123 ",
+            expected_dq_contract_compatibility_hash=" DQ-HASH-123 ",
             expected_contract_ref=" Composite_Publication ",
             expected_contract_version=" v2 ",
             expected_manifest_id=" manifest-123 ",
         )
 
         assert svc.expected_effective_config_hash == VALID_EFFECTIVE_HASH
+        assert svc.expected_effective_config_artifact_id == "artifact-123"
+        assert svc.expected_execution_fingerprint == "fingerprint-123"
+        assert svc.expected_dq_contract_compatibility_hash == "dq-hash-123"
         assert svc.expected_contract_ref == "composite_publication"
         assert svc.expected_contract_version == "2.0.0"
         assert svc.expected_manifest_id == "manifest-123"
@@ -486,9 +506,9 @@ class TestLoadResume:
             await svc.load()
 
     @pytest.mark.asyncio
-    async def test_resume_warns_when_effective_hash_missing(self) -> None:
-        """Missing effective_config_hash anchor logs warning and allows resume."""
-        svc, storage, logger = _make_service(
+    async def test_resume_blocks_when_effective_hash_missing(self) -> None:
+        """Missing effective_config_hash anchor blocks resume when expected."""
+        svc, storage, _ = _make_service(
             resume=True,
             run_id="run-old",
             expected_contract_ref="composite_publication",
@@ -507,14 +527,8 @@ class TestLoadResume:
         storage.exists.return_value = True
         storage.read.return_value = json.dumps(state_data.to_dict())
 
-        state = await svc.load()
-
-        assert state.state == CompositePipelineState.ENRICHING
-        warning_calls = [str(c) for c in logger.warning.call_args_list]
-        assert any(
-            "checkpoint_anchor_missing_effective_config_hash" in c
-            for c in warning_calls
-        )
+        with pytest.raises(CheckpointConflictError):
+            await svc.load()
 
     @pytest.mark.asyncio
     async def test_resume_blocks_on_effective_hash_mismatch(self) -> None:
@@ -533,6 +547,53 @@ class TestLoadResume:
             contract_ref="composite_publication",
             contract_version="1.0.0",
             effective_config_hash=ALTERNATE_EFFECTIVE_HASH,
+            composite_run_identity="run-old",
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(state_data.to_dict())
+
+        with pytest.raises(CheckpointConflictError):
+            await svc.load()
+
+    @pytest.mark.asyncio
+    async def test_resume_blocks_when_execution_fingerprint_missing(self) -> None:
+        """Resume is blocked when a checkpoint lacks an expected fingerprint."""
+        svc, storage, _ = _make_service(
+            resume=True,
+            run_id="run-old",
+            expected_execution_fingerprint="fingerprint-current",
+        )
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-old",
+            state=CompositePipelineState.ENRICHING,
+            seed_completed=True,
+            composite_run_identity="run-old",
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(state_data.to_dict())
+
+        with pytest.raises(CheckpointConflictError):
+            await svc.load()
+
+    @pytest.mark.asyncio
+    async def test_resume_blocks_on_full_semantic_anchor_mismatch(self) -> None:
+        """Resume is blocked when explicit semantic identity anchors mismatch."""
+        svc, storage, _ = _make_service(
+            resume=True,
+            run_id="run-old",
+            expected_execution_fingerprint="fingerprint-current",
+            expected_effective_config_artifact_id="artifact-current",
+            expected_dq_contract_compatibility_hash="dq-current",
+        )
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-old",
+            state=CompositePipelineState.ENRICHING,
+            seed_completed=True,
+            execution_fingerprint="fingerprint-old",
+            effective_config_artifact_id="artifact-old",
+            dq_contract_compatibility_hash="dq-old",
             composite_run_identity="run-old",
         )
         storage.exists.return_value = True
@@ -838,6 +899,9 @@ class TestLoadWarnOnOverwrite:
         svc, storage, _ = _make_service(
             resume=False,
             expected_effective_config_hash=VALID_EFFECTIVE_HASH,
+            expected_effective_config_artifact_id="artifact-123",
+            expected_execution_fingerprint="fingerprint-123",
+            expected_dq_contract_compatibility_hash="dq-hash-123",
             expected_contract_ref="composite_publication",
             expected_contract_version="2.1.0",
         )
@@ -846,6 +910,9 @@ class TestLoadWarnOnOverwrite:
         state = await svc.load()
 
         assert state.effective_config_hash == VALID_EFFECTIVE_HASH
+        assert state.effective_config_artifact_id == "artifact-123"
+        assert state.execution_fingerprint == "fingerprint-123"
+        assert state.dq_contract_compatibility_hash == "dq-hash-123"
         assert state.contract_ref == "composite_publication"
         assert state.contract_version == "2.1.0"
         assert state.composite_run_identity == "run-001"

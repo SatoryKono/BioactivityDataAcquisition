@@ -164,6 +164,7 @@ def create_factory_runner(
         yaml_config=yaml_config,
         control_plane_artifacts=_ControlPlaneArtifacts(
             manifest_id=request.manifest_id,
+            execution_fingerprint=request.execution_fingerprint,
             config_hash=request.config_hash,
             dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
             effective_config_artifact_id=request.effective_config_artifact_id,

@@ -247,6 +247,7 @@ class TestCreatePipelineInstanceWithServices:
             settings=MagicMock(),
             logger=MagicMock(),
             manifest_id="manifest-123",
+            execution_fingerprint="fingerprint-123",
             config_hash="hash-123",
             dq_contract_compatibility_hash="dq-hash-123",
             effective_config_artifact_id="artifact-123",
@@ -262,6 +263,7 @@ class TestCreatePipelineInstanceWithServices:
         inputs = call_kwargs["inputs"]
 
         assert inputs.request.manifest_id == "manifest-123"
+        assert inputs.request.execution_fingerprint == "fingerprint-123"
         assert inputs.request.config_hash == "hash-123"
         assert inputs.request.dq_contract_compatibility_hash == "dq-hash-123"
         assert inputs.request.effective_config_artifact_id == "artifact-123"

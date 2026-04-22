@@ -43,6 +43,7 @@ class RunContextCreateInput:
     rule_bundle_version: str | None = None
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
+    execution_fingerprint: str | None = None
 
 
 _RUN_CONTEXT_REQUIRED_FIELDS = (
@@ -66,6 +67,7 @@ _RUN_CONTEXT_OPTIONAL_DEFAULTS: dict[str, object] = {
     "rule_bundle_version": None,
     "dq_contract_compatibility_hash": None,
     "effective_config_artifact_id": None,
+    "execution_fingerprint": None,
 }
 
 
@@ -156,6 +158,7 @@ class RunContext:
         manifest_id: Optional control-plane manifest identifier linked to the run.
         dq_contract_compatibility_hash: SHA256 hash of DQ contract compatibility for reproducibility.
         effective_config_artifact_id: Reference to the effective config artifact for this run.
+        execution_fingerprint: Canonical execution identity fingerprint from the run manifest.
 
     Example:
         >>> from datetime import UTC, datetime
@@ -195,6 +198,7 @@ class RunContext:
     # Data Quality integration
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
+    execution_fingerprint: str | None = None
 
     def __post_init__(self) -> None:
         """Validate run context after initialization."""
@@ -241,4 +245,5 @@ class RunContext:
             rule_bundle_version=create_input.rule_bundle_version,
             dq_contract_compatibility_hash=create_input.dq_contract_compatibility_hash,
             effective_config_artifact_id=create_input.effective_config_artifact_id,
+            execution_fingerprint=create_input.execution_fingerprint,
         )

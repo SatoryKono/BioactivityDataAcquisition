@@ -323,6 +323,9 @@ filters:
             - journal
             - publication_year
             - _state
+            - assay_type
+            - potential_duplicate
+            - standard_relation
         exclude_if_present:
             - data_validity_comment
     gold_filters:
@@ -359,22 +362,21 @@ hash_policy:
     entity: activity
     contract:
         version: 1.0.0
-        migration_note: Initial hash policy baseline for chembl/activity.
+        migration_note: 'Documentation-aligned: Align config with runtime normalized business schema.'
     hash_policy:
         algorithm: sha256
         canonicalization: provider + canonical_json_dumps(normalized_record)
         include_fields:
-            - activity_chembl_id
-            - assay_chembl_id
-            - molecule_chembl_id
+            - activity_id
+            - assay_id
+            - molecule_id
             - standard_type
             - standard_relation
             - standard_value
             - standard_units
             - pchembl_value
-            - confidence_score
-            - document_chembl_id
-            - year
+            - publication_id
+            - publication_year
         exclude_fields:
             - _ingestion_ts
             - _run_id

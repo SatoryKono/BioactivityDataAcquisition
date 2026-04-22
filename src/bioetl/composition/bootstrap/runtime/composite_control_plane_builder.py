@@ -140,8 +140,15 @@ def build_composite_control_plane_bundle(
         run_ledger_service.record_manifest_created(manifest)
     return CompositeControlPlaneBundle(
         manifest_id=manifest.manifest_id,
+        execution_fingerprint=manifest.execution_fingerprint,
         run_ledger_service=run_ledger_service,
         config_hash=config_hash or None,
+        dq_contract_compatibility_hash=(
+            manifest.code_provenance.dq_contract_compatibility_hash
+        ),
+        effective_config_artifact_id=(
+            manifest.code_provenance.effective_config_artifact_id
+        ),
         contract_ref=contract_ref,
         contract_version=contract_version or None,
     )

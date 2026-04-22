@@ -243,6 +243,7 @@ def create_run_manifest(
         ledger_service.record_manifest_created(manifest)
     control_plane_refs = _create_control_plane_refs(
         manifest.manifest_id,
+        manifest.execution_fingerprint,
         effective_config_hash,
         dq_contract_compatibility_hash,
         effective_config_artifact_id,

@@ -150,8 +150,11 @@ def test_build_uses_canonical_composite_checkpoint_port(
     mock_bootstrap_checkpoint_port.return_value = checkpoint_storage
     mock_build_control_plane_bundle.return_value = SimpleNamespace(
         manifest_id="manifest-123",
+        execution_fingerprint="fingerprint-123",
         run_ledger_service=MagicMock(name="run_ledger_service"),
         config_hash="hash-123",
+        dq_contract_compatibility_hash="dq-hash-123",
+        effective_config_artifact_id="artifact-123",
         contract_ref="composite_publication",
         contract_version="1.0.0",
     )
@@ -182,6 +185,9 @@ def test_build_uses_canonical_composite_checkpoint_port(
         expected_contract_ref="composite_publication",
         expected_contract_version="1.0.0",
         expected_manifest_id="manifest-123",
+        expected_execution_fingerprint="fingerprint-123",
+        expected_dq_contract_compatibility_hash="dq-hash-123",
+        expected_effective_config_artifact_id="artifact-123",
         run_ledger_port=(
             mock_build_control_plane_bundle.return_value.run_ledger_service.ledger_port
         ),

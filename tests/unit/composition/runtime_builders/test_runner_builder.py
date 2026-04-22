@@ -454,6 +454,9 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
     assert manifest_path.exists()
     payload = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert payload["manifest_id"] == manifest_id
+    assert payload["execution_fingerprint"] == fake_factory.kwargs[
+        "execution_fingerprint"
+    ]
     assert payload["pipeline_name"] == "chembl_activity"
     code_provenance = payload["code_provenance"]
     assert isinstance(code_provenance, dict)

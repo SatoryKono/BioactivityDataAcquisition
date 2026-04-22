@@ -462,6 +462,9 @@ class TestToDict:
             "merge_result",
             "checkpoint_schema_version",
             "effective_config_hash",
+            "effective_config_artifact_id",
+            "execution_fingerprint",
+            "dq_contract_compatibility_hash",
             "contract_ref",
             "contract_version",
             "manifest_id",
@@ -611,6 +614,9 @@ class TestFromDict:
             dependency_results={"uniprot": dep},
             completed_enrichers=frozenset({"crossref"}),
             enrichment_results={"crossref": er},
+            effective_config_artifact_id="artifact-123",
+            execution_fingerprint="fingerprint-123",
+            dq_contract_compatibility_hash="dq-hash-123",
             manifest_id="manifest-123",
             last_event_id="evt-123",
             last_event_occurred_at=updated,
@@ -630,6 +636,9 @@ class TestFromDict:
         assert restored.dependency_results["uniprot"].pipeline_name == dep.pipeline_name
         assert "crossref" in restored.completed_enrichers
         assert restored.enrichment_results["crossref"].enricher_name == er.enricher_name
+        assert restored.effective_config_artifact_id == "artifact-123"
+        assert restored.execution_fingerprint == "fingerprint-123"
+        assert restored.dq_contract_compatibility_hash == "dq-hash-123"
         assert restored.manifest_id == "manifest-123"
         assert restored.last_event_id == "evt-123"
         assert restored.last_event_occurred_at == updated
@@ -659,6 +668,9 @@ class TestFromDict:
             composite_name="c",
             run_id="r",
             effective_config_hash=effective_config_hash,
+            effective_config_artifact_id=" artifact-123 ",
+            execution_fingerprint=" fp-123 ",
+            dq_contract_compatibility_hash=" DQ-HASH-123 ",
             contract_ref=" ChemBL.Activity ",
             contract_version=" v2 ",
             manifest_id=" manifest-123 ",
@@ -669,11 +681,17 @@ class TestFromDict:
         restored = CompositeCheckpointState.from_dict(payload)
 
         assert payload["effective_config_hash"] == ("abcdef12" * 8)
+        assert payload["effective_config_artifact_id"] == "artifact-123"
+        assert payload["execution_fingerprint"] == "fp-123"
+        assert payload["dq_contract_compatibility_hash"] == "dq-hash-123"
         assert payload["contract_ref"] == "chembl.activity"
         assert payload["contract_version"] == "2.0.0"
         assert payload["manifest_id"] == "manifest-123"
         assert payload["composite_run_identity"] == "run-42"
         assert restored.effective_config_hash == ("abcdef12" * 8)
+        assert restored.effective_config_artifact_id == "artifact-123"
+        assert restored.execution_fingerprint == "fp-123"
+        assert restored.dq_contract_compatibility_hash == "dq-hash-123"
         assert restored.contract_ref == "chembl.activity"
         assert restored.contract_version == "2.0.0"
         assert restored.manifest_id == "manifest-123"

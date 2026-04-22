@@ -107,6 +107,7 @@ def _create_runner_from_factory(
                 inputs.observability,
             ),
             manifest_id=getattr(ctx, "manifest_id", None),
+            execution_fingerprint=getattr(ctx, "execution_fingerprint", None),
             config_hash=getattr(ctx, "config_hash", None),
             dq_contract_compatibility_hash=getattr(
                 ctx, "dq_contract_compatibility_hash", None
@@ -214,6 +215,7 @@ def _handle_control_plane_setup(
         ctx = attach_manifest_id(
             ctx,
             control_plane_refs.manifest_id,
+            execution_fingerprint=control_plane_refs.execution_fingerprint,
             config_hash=control_plane_refs.config_hash,
             dq_contract_compatibility_hash=control_plane_refs.dq_contract_compatibility_hash,
             effective_config_artifact_id=control_plane_refs.effective_config_artifact_id,
