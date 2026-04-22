@@ -156,21 +156,10 @@ class FileControlPlaneArtifactLifecycleStore:
                 labels={"dry_run": str(plan.dry_run).lower()},
             )
 
-    def _resolve_protected_refs(
-        self,
-        *,
-        policy: ControlPlaneArtifactLifecyclePolicy,
-        cutoff: datetime,
-    ) -> _ProtectedRefs:
-        """Resolve explicit and live-reference protections before planning."""
-        manifest_ids = set(policy.protected_manifest_ids)
-        run_ids = set(policy.protected_run_ids)
-        input_snapshot_ids = set(policy.protected_input_snapshot_ids)
-        effective_config_artifact_ids = set(
-            policy.protected_effective_config_artifact_ids
-        )
-        lineage_fragment_ids = set(policy.protected_lineage_fragment_ids)
-
+    def _extract_manifest_refs(
+        self, cutoff: datetime, state: dict[str, set[str]]
+    ) -> None:
+        """Extract live references from recent manifest artifacts."""
         for manifest_path in self._iter_surface_files(
             ControlPlaneArtifactSurface.RUN_MANIFEST
         ):
@@ -180,21 +169,21 @@ class FileControlPlaneArtifactLifecycleStore:
             if not payload:
                 continue
             created_at = _resolve_payload_or_file_time(manifest_path, payload)
-            manifest_id = str(payload.get("manifest_id") or manifest_path.stem)
-            run_id = _optional_text(payload.get("run_id"))
             if created_at is not None and created_at < cutoff:
                 continue
-            manifest_ids.add(manifest_id)
-            if run_id is not None:
-                run_ids.add(run_id)
-            replay_of_manifest_id = _optional_text(payload.get("replay_of_manifest_id"))
-            if replay_of_manifest_id is not None:
-                manifest_ids.add(replay_of_manifest_id)
-            artifact_id = _effective_config_artifact_id(payload)
-            if artifact_id is not None:
-                effective_config_artifact_ids.add(artifact_id)
-            input_snapshot_ids.update(_input_snapshot_ids(payload))
+            state["manifest_ids"].add(str(payload.get("manifest_id") or manifest_path.stem))
+            if (run_id := _optional_text(payload.get("run_id"))) is not None:
+                state["run_ids"].add(run_id)
+            if (replay_id := _optional_text(payload.get("replay_of_manifest_id"))) is not None:
+                state["manifest_ids"].add(replay_id)
+            if (artifact_id := _effective_config_artifact_id(payload)) is not None:
+                state["effective_config_artifact_ids"].add(artifact_id)
+            state["input_snapshot_ids"].update(_input_snapshot_ids(payload))
 
+    def _extract_checkpoint_refs(
+        self, cutoff: datetime, state: dict[str, set[str]]
+    ) -> None:
+        """Extract live references from recent checkpoint artifacts."""
         for checkpoint_path in self._iter_surface_files(
             ControlPlaneArtifactSurface.CHECKPOINT
         ):
@@ -204,33 +193,50 @@ class FileControlPlaneArtifactLifecycleStore:
             created_at = _resolve_payload_or_file_time(checkpoint_path, payload)
             if created_at is not None and created_at < cutoff:
                 continue
-            run_id = _payload_text(payload, "run_id")
-            if run_id is not None:
-                run_ids.add(run_id)
-            manifest_id = _payload_text(payload, "manifest_id")
-            if manifest_id is not None:
-                manifest_ids.add(manifest_id)
-            artifact_id = _payload_text(payload, "effective_config_artifact_id")
-            if artifact_id is not None:
-                effective_config_artifact_ids.add(artifact_id)
+            if (run_id := _payload_text(payload, "run_id")) is not None:
+                state["run_ids"].add(run_id)
+            if (manifest_id := _payload_text(payload, "manifest_id")) is not None:
+                state["manifest_ids"].add(manifest_id)
+            if (artifact_id := _payload_text(payload, "effective_config_artifact_id")) is not None:
+                state["effective_config_artifact_ids"].add(artifact_id)
 
+    def _extract_lineage_refs(self, state: dict[str, set[str]]) -> None:
+        """Extract live references from active lineage fragments."""
+        frozen_manifests = frozenset(state["manifest_ids"])
+        frozen_runs = frozenset(state["run_ids"])
         for fragment_path in self._lineage_fragment_files():
             payload = _read_json_object_or_empty(fragment_path)
             if not payload:
                 continue
             if _manifest_or_run_is_protected(
-                payload,
-                manifest_ids=frozenset(manifest_ids),
-                run_ids=frozenset(run_ids),
+                payload, manifest_ids=frozen_manifests, run_ids=frozen_runs
             ):
-                lineage_fragment_ids.update(_lineage_fragment_id_candidates(payload))
+                state["lineage_fragment_ids"].update(_lineage_fragment_id_candidates(payload))
+
+    def _resolve_protected_refs(
+        self,
+        *,
+        policy: ControlPlaneArtifactLifecyclePolicy,
+        cutoff: datetime,
+    ) -> _ProtectedRefs:
+        """Resolve explicit and live-reference protections before planning."""
+        state = {
+            "manifest_ids": set(policy.protected_manifest_ids),
+            "run_ids": set(policy.protected_run_ids),
+            "input_snapshot_ids": set(policy.protected_input_snapshot_ids),
+            "effective_config_artifact_ids": set(policy.protected_effective_config_artifact_ids),
+            "lineage_fragment_ids": set(policy.protected_lineage_fragment_ids),
+        }
+        self._extract_manifest_refs(cutoff, state)
+        self._extract_checkpoint_refs(cutoff, state)
+        self._extract_lineage_refs(state)
 
         return _ProtectedRefs(
-            manifest_ids=frozenset(manifest_ids),
-            run_ids=frozenset(run_ids),
-            input_snapshot_ids=frozenset(input_snapshot_ids),
-            effective_config_artifact_ids=frozenset(effective_config_artifact_ids),
-            lineage_fragment_ids=frozenset(lineage_fragment_ids),
+            manifest_ids=frozenset(state["manifest_ids"]),
+            run_ids=frozenset(state["run_ids"]),
+            input_snapshot_ids=frozenset(state["input_snapshot_ids"]),
+            effective_config_artifact_ids=frozenset(state["effective_config_artifact_ids"]),
+            lineage_fragment_ids=frozenset(state["lineage_fragment_ids"]),
         )
 
     def _iter_artifact_refs(
@@ -285,6 +291,60 @@ class FileControlPlaneArtifactLifecycleStore:
             protected_by=protected_by,
         )
 
+    def _protected_by_run_manifest_or_ledger(
+        self, path: Path, payload: dict[str, object], protected_refs: _ProtectedRefs, reasons: list[str]
+    ) -> None:
+        manifest_id = str(payload.get("manifest_id") or path.stem)
+        run_id = _optional_text(payload.get("run_id"))
+        if manifest_id in protected_refs.manifest_ids:
+            reasons.append(f"manifest:{manifest_id}")
+        if run_id in protected_refs.run_ids:
+            reasons.append(f"run:{run_id}")
+        indexed_run_id = _indexed_stem(path)
+        if indexed_run_id in protected_refs.run_ids:
+            reasons.append(f"run:{indexed_run_id}")
+
+    def _protected_by_effective_config(
+        self, path: Path, payload: dict[str, object], protected_refs: _ProtectedRefs, reasons: list[str]
+    ) -> None:
+        artifact_id = str(payload.get("artifact_id") or path.stem)
+        run_id = _optional_text(payload.get("run_id")) or _indexed_stem(path)
+        if artifact_id in protected_refs.effective_config_artifact_ids:
+            reasons.append(f"effective_config:{artifact_id}")
+        if run_id in protected_refs.run_ids:
+            reasons.append(f"run:{run_id}")
+
+    def _protected_by_lineage(
+        self, path: Path, payload: dict[str, object], protected_refs: _ProtectedRefs, reasons: list[str]
+    ) -> None:
+        for fragment_id in _lineage_fragment_id_candidates(payload) or (path.stem,):
+            if fragment_id in protected_refs.lineage_fragment_ids:
+                reasons.append(f"lineage:{fragment_id}")
+        if _manifest_or_run_is_protected(
+            payload,
+            manifest_ids=protected_refs.manifest_ids,
+            run_ids=protected_refs.run_ids,
+        ):
+            manifest_id = _optional_text(payload.get("manifest_id"))
+            run_id = _optional_text(payload.get("run_id"))
+            if manifest_id is not None:
+                reasons.append(f"manifest:{manifest_id}")
+            if run_id is not None:
+                reasons.append(f"run:{run_id}")
+
+    def _protected_by_checkpoint(
+        self, payload: dict[str, object], protected_refs: _ProtectedRefs, reasons: list[str]
+    ) -> None:
+        run_id = _payload_text(payload, "run_id")
+        manifest_id = _payload_text(payload, "manifest_id")
+        artifact_id = _payload_text(payload, "effective_config_artifact_id")
+        if run_id in protected_refs.run_ids:
+            reasons.append(f"run:{run_id}")
+        if manifest_id in protected_refs.manifest_ids:
+            reasons.append(f"manifest:{manifest_id}")
+        if artifact_id in protected_refs.effective_config_artifact_ids:
+            reasons.append(f"effective_config:{artifact_id}")
+
     def _protected_by(
         self,
         *,
@@ -298,47 +358,13 @@ class FileControlPlaneArtifactLifecycleStore:
             ControlPlaneArtifactSurface.RUN_MANIFEST,
             ControlPlaneArtifactSurface.RUN_LEDGER,
         }:
-            manifest_id = str(payload.get("manifest_id") or path.stem)
-            run_id = _optional_text(payload.get("run_id"))
-            if manifest_id in protected_refs.manifest_ids:
-                reasons.append(f"manifest:{manifest_id}")
-            if run_id in protected_refs.run_ids:
-                reasons.append(f"run:{run_id}")
-            indexed_run_id = _indexed_stem(path)
-            if indexed_run_id in protected_refs.run_ids:
-                reasons.append(f"run:{indexed_run_id}")
+            self._protected_by_run_manifest_or_ledger(path, payload, protected_refs, reasons)
         elif surface is ControlPlaneArtifactSurface.EFFECTIVE_CONFIG:
-            artifact_id = str(payload.get("artifact_id") or path.stem)
-            run_id = _optional_text(payload.get("run_id")) or _indexed_stem(path)
-            if artifact_id in protected_refs.effective_config_artifact_ids:
-                reasons.append(f"effective_config:{artifact_id}")
-            if run_id in protected_refs.run_ids:
-                reasons.append(f"run:{run_id}")
+            self._protected_by_effective_config(path, payload, protected_refs, reasons)
         elif surface is ControlPlaneArtifactSurface.LINEAGE:
-            for fragment_id in _lineage_fragment_id_candidates(payload) or (path.stem,):
-                if fragment_id in protected_refs.lineage_fragment_ids:
-                    reasons.append(f"lineage:{fragment_id}")
-            if _manifest_or_run_is_protected(
-                payload,
-                manifest_ids=protected_refs.manifest_ids,
-                run_ids=protected_refs.run_ids,
-            ):
-                manifest_id = _optional_text(payload.get("manifest_id"))
-                run_id = _optional_text(payload.get("run_id"))
-                if manifest_id is not None:
-                    reasons.append(f"manifest:{manifest_id}")
-                if run_id is not None:
-                    reasons.append(f"run:{run_id}")
+            self._protected_by_lineage(path, payload, protected_refs, reasons)
         elif surface is ControlPlaneArtifactSurface.CHECKPOINT:
-            run_id = _payload_text(payload, "run_id")
-            manifest_id = _payload_text(payload, "manifest_id")
-            artifact_id = _payload_text(payload, "effective_config_artifact_id")
-            if run_id in protected_refs.run_ids:
-                reasons.append(f"run:{run_id}")
-            if manifest_id in protected_refs.manifest_ids:
-                reasons.append(f"manifest:{manifest_id}")
-            if artifact_id in protected_refs.effective_config_artifact_ids:
-                reasons.append(f"effective_config:{artifact_id}")
+            self._protected_by_checkpoint(payload, protected_refs, reasons)
         elif surface is ControlPlaneArtifactSurface.CACHED_BRONZE:
             snapshot_id = _content_addressed_file_snapshot_id(path)
             if snapshot_id in protected_refs.input_snapshot_ids:

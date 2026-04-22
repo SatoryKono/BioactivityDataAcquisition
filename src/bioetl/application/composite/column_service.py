@@ -128,23 +128,16 @@ def collect_explicit_group_columns(
     available_list = list(available)
     col_order = {col: i for i, col in enumerate(available_list)}
 
-    extracted_fields = {col: extract_field_fn(col) for col in available_list}
-
     # Pre-compute reverse mapping for O(1) alias lookups
-    field_to_columns: dict[str, list[str]] = {}
-    for col, field in extracted_fields.items():
-        if field not in field_to_columns:
-            field_to_columns[field] = []
-        field_to_columns[field].append(col)
+    field_to_cols: dict[str, list[str]] = {}
+    for col in available_list:
+        field_to_cols.setdefault(extract_field_fn(col), []).append(col)
 
     for field_name in group.fields:
-        aliases = resolve_aliases_fn(field_name)
-
         # ⚡ Bolt: Fast O(1) lookup for all candidate columns instead of O(N) loop
         raw_matches = set()
-        for alias in aliases:
-            if alias in field_to_columns:
-                raw_matches.update(field_to_columns[alias])
+        for alias in resolve_aliases_fn(field_name):
+            raw_matches.update(field_to_cols.get(alias, []))
             if alias in col_order:
                 raw_matches.add(alias)
 
