@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
+    chembl_pseudo_null_fields,
+)
 from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
 
 __all__ = [
@@ -72,6 +75,7 @@ CHEMBL_PUBLICATION_PROFILE = build_standard_profile(
     int_fields=_INT_FIELDS,
     set_like_fields=_SET_LIKE_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
+    null_fields=chembl_pseudo_null_fields("publication"),
 )
 
 CHEMBL_PUBLICATION_PROFILE.assert_covers_schema(CHEMBL_PUBLICATION_SCHEMA_FIELDS)

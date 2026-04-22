@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
+    chembl_pseudo_null_fields,
+)
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.constants import TARGET_TYPES
 
@@ -44,7 +47,7 @@ _JSON_STRING_FIELDS = frozenset(
         "component_relationships",
     }
 )
-_NULL_FIELDS = frozenset({"description", "organism_class", "component_relationships"})
+_NULL_FIELDS = chembl_pseudo_null_fields("target")
 
 # Enum fields for strict validation
 _ENUM_FIELDS = {

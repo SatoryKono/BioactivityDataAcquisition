@@ -82,6 +82,14 @@ def _provider_suite_index(provider_suites: Any) -> dict[str, set[str]]:
     return suite_index
 
 
+def _lane_paths(lane: YamlMap) -> list[Path]:
+    return [ROOT / str(path) for path in lane.get("paths", [])]
+
+
+def _lane_runner(lane: YamlMap) -> Path:
+    return ROOT / str(lane.get("runner"))
+
+
 def _represented_golden_master_entities() -> dict[str, set[str]]:
     from tests.architecture.test_config_golden_master import PIPELINES
 
@@ -161,6 +169,120 @@ class TestLayerTestCoverage:
                     f"Layer '{layer}' requires unit tests but none found in "
                     f"{layer_test_dir.relative_to(ROOT)}"
                 )
+
+
+@pytest.mark.architecture
+class TestCanonicalTestLanes:
+    """Validate named test-health lanes stay stable and wrapper-ready."""
+
+    EXPECTED_LANES = {
+        "unit-fast",
+        "integration-replay",
+        "contracts",
+        "architecture",
+        "e2e",
+        "memory",
+        "coverage-verify",
+    }
+
+    def test_matrix_declares_exact_canonical_test_lanes(self) -> None:
+        matrix = _load_matrix()
+        test_lanes = matrix.get("test_lanes", {})
+        lanes = test_lanes.get("lanes", {})
+        execution_defaults = test_lanes.get("execution_defaults", {})
+
+        assert test_lanes.get("schema_version") == 1
+        assert execution_defaults.get("pythonpath") == "src"
+        assert (
+            execution_defaults.get("direct_runner")
+            == "scripts/engineering/dev/run_pytest.sh"
+        )
+        assert (
+            execution_defaults.get("sharded_runner")
+            == "scripts/engineering/dev/run_pytest_sharded.sh"
+        )
+        assert set(lanes) == self.EXPECTED_LANES
+
+        for lane_name, lane in lanes.items():
+            assert lane.get("suite_name") == lane_name
+            assert lane.get("description")
+            assert lane.get("marker_expression")
+            assert lane.get("pytest_args")
+            assert lane.get("runner_backend") in {
+                "run_pytest",
+                "run_pytest_sharded",
+            }
+            assert lane.get("runner")
+            assert lane.get("coverage_gate") in {"none", "repo-wide"}
+            assert lane.get("replay_mode") in {
+                "mixed",
+                "not_applicable",
+                "replay_or_no_api",
+                "vcr_replay_only",
+            }
+            artifacts = lane.get("expected_artifacts", {})
+            assert artifacts.get("junit_xml") is True
+            assert artifacts.get("json_summary") is True
+
+    def test_canonical_test_lane_paths_and_runners_exist(self) -> None:
+        matrix = _load_matrix()
+        lanes = matrix["test_lanes"]["lanes"]
+
+        for lane_name, lane in lanes.items():
+            runner = _lane_runner(lane)
+            assert runner.exists(), (
+                f"{lane_name} references missing runner: "
+                f"{runner.relative_to(ROOT)}"
+            )
+
+            paths = _lane_paths(lane)
+            assert paths, f"{lane_name} must declare at least one path"
+            for path in paths:
+                assert path.exists(), (
+                    f"{lane_name} references missing test path: "
+                    f"{path.relative_to(ROOT)}"
+                )
+
+    def test_only_coverage_verify_enforces_repo_wide_coverage(self) -> None:
+        matrix = _load_matrix()
+        lanes = matrix["test_lanes"]["lanes"]
+
+        repo_wide_coverage_lanes = {
+            lane_name
+            for lane_name, lane in lanes.items()
+            if lane.get("coverage_gate") == "repo-wide"
+        }
+        lanes_with_coverage_args = {
+            lane_name
+            for lane_name, lane in lanes.items()
+            if any(str(arg).startswith("--cov") for arg in lane.get("pytest_args", []))
+        }
+
+        assert repo_wide_coverage_lanes == {"coverage-verify"}
+        assert lanes_with_coverage_args == {"coverage-verify"}
+
+    def test_lane_marker_boundaries_match_current_policy(self) -> None:
+        matrix = _load_matrix()
+        lanes = matrix["test_lanes"]["lanes"]
+
+        assert (
+            lanes["unit-fast"]["marker_expression"]
+            == "not slow and not benchmark and not memory"
+        )
+        assert lanes["integration-replay"]["replay_mode"] == "vcr_replay_only"
+        assert "--vcr-record=none" in lanes["integration-replay"]["pytest_args"]
+        assert lanes["architecture"]["runner_backend"] == "run_pytest_sharded"
+        assert (
+            "S7-crosscutting-architecture"
+            in lanes["architecture"]["runner_options"]
+        )
+        assert lanes["memory"]["marker_expression"] == "memory and not benchmark"
+        assert lanes["coverage-verify"]["runner_backend"] == "run_pytest_sharded"
+        assert "--keep-coverage-files" in lanes["coverage-verify"]["runner_options"]
+        assert (
+            lanes["coverage-verify"]["marker_expression"]
+            == "not e2e and not benchmark and not memory"
+        )
 
 
 @pytest.mark.architecture

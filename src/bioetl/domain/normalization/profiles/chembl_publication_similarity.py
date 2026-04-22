@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
+    chembl_pseudo_null_fields,
+)
 from bioetl.domain.schemas.chembl.publication_similarity import (
     PublicationSimilaritySchema,
 )
@@ -43,6 +46,7 @@ CHEMBL_PUBLICATION_SIMILARITY_PROFILE = build_standard_profile(
     pmid_fields=_PMID_FIELDS,
     int_fields=_INT_FIELDS,
     float_fields=_FLOAT_FIELDS,
+    null_fields=chembl_pseudo_null_fields("publication_similarity"),
 )
 
 CHEMBL_PUBLICATION_SIMILARITY_PROFILE.assert_covers_schema(

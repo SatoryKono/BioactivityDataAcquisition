@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
+    chembl_pseudo_null_fields,
+)
 from bioetl.domain.schemas.chembl.subcellular_fraction import (
     SubcellularFractionSchema,
 )
@@ -41,6 +44,7 @@ CHEMBL_SUBCELLULAR_FRACTION_PROFILE = build_standard_profile(
     meta_fields=_META_FIELDS,
     title_fields=_TITLE_FIELDS,
     int_fields=_INT_FIELDS,
+    null_fields=chembl_pseudo_null_fields("subcellular_fraction"),
 )
 
 CHEMBL_SUBCELLULAR_FRACTION_PROFILE.assert_covers_schema(

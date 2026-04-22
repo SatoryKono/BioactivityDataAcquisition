@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
+    chembl_pseudo_null_fields,
+)
 from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
 
 __all__ = [
@@ -41,6 +44,7 @@ CHEMBL_TARGET_COMPONENT_PROFILE = build_standard_profile(
     meta_fields=_META_FIELDS,
     int_fields=_INT_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
+    null_fields=chembl_pseudo_null_fields("target_component"),
 )
 
 CHEMBL_TARGET_COMPONENT_PROFILE.assert_covers_schema(

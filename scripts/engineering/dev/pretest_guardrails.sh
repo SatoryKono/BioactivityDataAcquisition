@@ -28,6 +28,7 @@ STEP_LOG_FILE=""
 SESSION_STATUS="ok"
 PRETEST_START_TS=""
 MEMORY_TMP_OUTPUT=""
+TMP_DIR="$(mktemp -d)" # Initialize TMP_DIR
 
 usage() {
     cat <<'EOF'
@@ -386,22 +387,17 @@ run_auto_fix() {
     # Refresh the hotspot-family baseline after inventory sync because the
     # baseline report consumes inventory-derived metadata.
     run_step hotspot-family-baseline-sync \
-        "$PYTHON_BIN" -m scripts.engineering.qa report-family-baseline \
-        --active-only \
-        --update
-    run_step inventory-sync-after-hotspot \
-        "$PYTHON_BIN" -m scripts.engineering.repo sync-inventory --write
+
 }
 
 run_repo_checks() {
     [[ "$SKIP_REPO" == "0" ]] || return 0
     [[ "$RUN_REPO_CHECKS" == "1" ]] || return 0
 
-    if [[ "$MODE" != "auto" ]]; then
-        run_step inventory-sync-check \
-            "$PYTHON_BIN" -m scripts.engineering.repo sync-inventory --check
-    fi
+    # Ensure the inventory is completely up to date before running checks that depend on it
+    run_step inventory-sync-final "$PYTHON_BIN" -m scripts.engineering.repo sync-inventory --write
 
+    # The inventory-check MUST be the final check for inventory consistency related to auto-fixes
     run_step inventory-check \
         "$PYTHON_BIN" -m scripts.engineering.repo check-inventory \
         --check \
@@ -410,6 +406,7 @@ run_repo_checks() {
         --forbid-evaluate-active \
         --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
 
+    # Remaining checks can follow
     run_step catalog-check \
         "$PYTHON_BIN" -m scripts.engineering.repo check-catalog \
         --catalog scripts/catalog.yaml
@@ -425,6 +422,40 @@ run_repo_checks() {
         "$PYTHON_BIN" -m scripts.engineering.qa report-family-baseline \
         --active-only \
         --check
+
+    run_step repo-identity-check \
+        "$PYTHON_BIN" -m scripts.docs sync-repo-identity --check
+    run_step integration-vcr-policy-check \
+        "$PYTHON_BIN" -m scripts.engineering.qa sync-integration-vcr-policy --check
+    run_step docs-verify "$PYTHON_BIN" -m scripts.docs verify --skip-build
+    run_step memory-validate "$PYTHON_BIN" -m memory.tooling.validate
+    run_step memory-refresh-smoke "$PYTHON_BIN" -m memory.tooling.refresh_all --output-root "$TMP_DIR" --json
+    run_step memory-prune-dry-run "$PYTHON_BIN" -m memory.tooling.prune --json
+
+    # Architecture fail-fast should be last as it runs tests
+    # This command is taken from the run_architecture_checks function
+    # It must be the final check
+    local -a architecture_targets # Declare as local to prevent unbound variable if empty
+    mapfile -t architecture_targets < <(config_architecture_targets "$ARCHITECTURE_GROUP")
+    
+    local -a cmd=(
+        bash scripts/engineering/dev/run_pytest.sh
+        --skip-preflight
+        --narrow
+    )
+    cmd+=("${architecture_targets[@]}")
+    cmd+=(
+        -q
+        -x
+        --tb=short
+    )
+
+    if [[ "${#architecture_targets[@]}" -gt 0 ]]; then
+        run_step architecture-fail-fast env \
+            BIOETL_SKIP_PREFLIGHT=1 \
+            BIOETL_PREFLIGHT_DONE=1 \
+            "${cmd[@]}"
+    fi
 }
 
 run_docs_identity_checks() {

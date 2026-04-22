@@ -6,6 +6,9 @@ from bioetl.domain.normalization.identifiers import normalize_ontology_id
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
+    chembl_pseudo_null_fields,
+)
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.schemas.chembl.assay import AssaySchema
 from bioetl.domain.schemas.constants import (
@@ -59,23 +62,7 @@ _JSON_STRING_FIELDS = frozenset(
         "variant_sequence_json",
     }
 )
-_NULL_FIELDS = frozenset(
-    {
-        "assay_test_type",
-        "assay_category",
-        "assay_group",
-        "relationship_type",
-        "confidence_description",
-        "assay_organism",
-        "assay_strain",
-        "assay_tissue",
-        "assay_cell_type",
-        "assay_subcellular_fraction",
-        "bao_format",
-        "bao_label",
-        "variant_sequence_json",
-    }
-)
+_NULL_FIELDS = chembl_pseudo_null_fields("assay")
 
 
 def create_case_normalizer(strategy: str = "uppercase"):

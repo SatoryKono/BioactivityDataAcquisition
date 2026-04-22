@@ -25,6 +25,30 @@ Source of truth для тестовой governance:
 - `configs/quality/test_matrix.yaml`
 - `configs/quality/integration_vcr_policy.yaml`
 
+Canonical named pytest lanes are defined in
+`configs/quality/test_matrix.yaml` under `test_lanes.lanes`. Test-health tooling
+must use these `suite_name` values for comparable local and CI runs:
+
+- `unit-fast`: `tests/unit/`, excluding `slow`, `benchmark`, and `memory`;
+- `integration-replay`: `tests/integration/` in VCR replay-only mode;
+- `contracts`: schema, contract, and snapshot tests;
+- `architecture`: layer boundary, contract, and governance checks;
+- `e2e`: dedicated slow end-to-end lane;
+- `memory`: dedicated Neo4j project-memory and MCP lane, outside coverage;
+- `coverage-verify`: the only lane that enforces the repo-wide coverage gate.
+
+Large local runs should use the maintained sharded runner rather than invoking
+pytest directly:
+
+```powershell
+$env:PYTHONPATH="src"
+bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=html
+```
+
+The same execution contract is represented in `test_lanes.execution_defaults`;
+future test-health tooling should preserve the logical `suite_name` while
+recording sharded runner details separately.
+
 Canonical local execution paths:
 
 - **CI / single-OS checkout**: `uv run python -m ...` или поддерживаемые

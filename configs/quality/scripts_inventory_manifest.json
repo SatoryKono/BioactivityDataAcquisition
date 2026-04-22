@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-22T05:07:39.759161+00:00",
+  "generated_at": "2026-04-22T05:43:43.354809+00:00",
   "summary": {
     "total_scripts": 429,
     "status_counts": {
@@ -13,10 +13,10 @@
       "agents": 4,
       "build": 1,
       "ci": 49,
-      "docs": 134,
+      "docs": 135,
       "scripts": 285,
       "skills": 8,
-      "tests": 131
+      "tests": 132
     }
   },
   "scripts": [
@@ -6988,7 +6988,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 65,
+      "reference_count": 66,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7053,55 +7053,55 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 21,
       "references": [
         {
-          "path": "scripts/engineering/dev/README.md",
+          "path": "docs/03-guides/testing.md",
+          "line": 45,
+          "source_group": "docs",
+          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=html"
+        },
+        {
+          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
+          "line": 29,
+          "source_group": "docs",
+          "text": "`scripts/engineering/dev/run_pytest_sharded.sh`."
+        },
+        {
+          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
+          "line": 39,
+          "source_group": "docs",
+          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=html"
+        },
+        {
+          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
+          "line": 45,
+          "source_group": "docs",
+          "text": "PYTHONPATH=src bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=html"
+        },
+        {
+          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
           "line": 49,
-          "source_group": "scripts",
-          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh"
+          "source_group": "docs",
+          "text": "`run_pytest_sharded.sh` и его опций, а не заменять его новым независимым"
         },
         {
-          "path": "scripts/engineering/dev/README.md",
-          "line": 50,
-          "source_group": "scripts",
-          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --stream"
+          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
+          "line": 129,
+          "source_group": "docs",
+          "text": "- несколько JUnit XML файлов для `run_pytest_sharded.sh`, объединенных в один"
         },
         {
-          "path": "scripts/engineering/dev/README.md",
-          "line": 51,
-          "source_group": "scripts",
-          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --tail"
+          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
+          "line": 146,
+          "source_group": "docs",
+          "text": "PYTHONPATH=src bash scripts/engineering/dev/run_pytest_sharded.sh <runner-options> -- <pytest-options>"
         },
         {
-          "path": "scripts/engineering/dev/README.md",
+          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
           "line": 153,
-          "source_group": "scripts",
-          "text": "| `pytest-sharded` | `scripts/engineering/dev/run_pytest_sharded.sh`      | Run the recommended path-based pytest shards                     |"
-        },
-        {
-          "path": "scripts/engineering/dev/README.md",
-          "line": 186,
-          "source_group": "scripts",
-          "text": "| `scripts/engineering/dev/run_pytest_sharded.sh`       | Run the recommended path-based pytest shard plan (shell variant)                          |"
-        },
-        {
-          "path": "scripts/engineering/dev/__main__.py",
-          "line": 43,
-          "source_group": "scripts",
-          "text": "\"pytest-sharded\": \"run_pytest_sharded.sh\","
-        },
-        {
-          "path": "scripts/engineering/dev/fix_hypothesis_db.patch",
-          "line": 2,
-          "source_group": "scripts",
-          "text": "*** Update File: scripts/engineering/dev/run_pytest_sharded.sh"
-        },
-        {
-          "path": "scripts/engineering/dev/fix_hypothesis_db.sh",
-          "line": 6,
-          "source_group": "scripts",
-          "text": "*** Update File: scripts/engineering/dev/run_pytest_sharded.sh"
+          "source_group": "docs",
+          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=html"
         }
       ]
     },
@@ -7705,7 +7705,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 73,
+      "reference_count": 76,
       "references": [
         {
           "path": ".github/workflows/duplication-complexity.yml",
@@ -8533,7 +8533,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 74,
+          "line": 98,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для partial rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadata"
         },
@@ -8662,7 +8662,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 399,
+          "line": 423,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         }
@@ -8707,7 +8707,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 312,
+          "line": 434,
           "source_group": "tests",
           "text": "\"python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\" in workflow"
         }
@@ -8752,7 +8752,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 315,
+          "line": 437,
           "source_group": "tests",
           "text": "\"python scripts/engineering/qa/vcr/check_vcr_filename_policy.py\" in workflow"
         }
@@ -9063,7 +9063,7 @@
         },
         {
           "path": "scripts/engineering/dev/pretest_guardrails.sh",
-          "line": 371,
+          "line": 372,
           "source_group": "scripts",
           "text": "run_step cleanup env BIOETL_PREFLIGHT_PRESERVE_PYTEST_CACHE=1 bash scripts/engineering/repo/preflight_cleanup.sh"
         },
@@ -10107,7 +10107,7 @@
       "references": [
         {
           "path": "docs/03-guides/testing.md",
-          "line": 42,
+          "line": 66,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
         },
@@ -10511,7 +10511,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 74,
+          "line": 98,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для partial rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadata"
         },
