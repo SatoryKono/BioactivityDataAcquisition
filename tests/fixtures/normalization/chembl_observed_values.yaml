@@ -33,7 +33,7 @@ observed_values:
       - Active
       - Inconclusive
       - Not determined
-    subcellular_fraction:
+    assay_subcellular_fraction:
       - Membrane
       - Nucleus
       - Cytoplasm

@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 
 def validate_control_plane_artifacts(root: Path) -> list[str]:
     """Return contract violations for committed control-plane artifacts."""
@@ -15,6 +17,8 @@ def validate_control_plane_artifacts(root: Path) -> list[str]:
     _validate_effective_config_artifacts(control_root, violations)
     _validate_run_manifests(control_root, violations)
     _validate_run_ledgers(control_root, violations)
+    _validate_metadata_sidecar_examples(root, violations)
+    _validate_lineage_fragment_examples(root, violations)
     return violations
 
 
@@ -89,10 +93,9 @@ def _validate_run_manifests(control_root: Path, violations: list[str]) -> None:
             "git_commit"
         ):
             violations.append(f"{path}: strict replay manifest lacks git_commit")
-        if (
-            payload.get("replay_capability") == "exact_replay_supported"
-            and not _manifest_has_input_snapshots(payload)
-        ):
+        if payload.get(
+            "replay_capability"
+        ) == "exact_replay_supported" and not _manifest_has_input_snapshots(payload):
             violations.append(
                 f"{path}: exact replay manifest lacks immutable input snapshots"
             )
@@ -101,7 +104,9 @@ def _validate_run_manifests(control_root: Path, violations: list[str]) -> None:
 def _validate_run_ledgers(control_root: Path, violations: list[str]) -> None:
     for path in sorted((control_root / "run_ledger").glob("*.jsonl")):
         seen_entries = False
-        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        for line_number, line in enumerate(
+            path.read_text(encoding="utf-8").splitlines(), 1
+        ):
             if not line.strip():
                 continue
             seen_entries = True
@@ -124,6 +129,56 @@ def _validate_run_ledgers(control_root: Path, violations: list[str]) -> None:
             violations.append(f"{path}: empty run ledger")
 
 
+def _validate_metadata_sidecar_examples(root: Path, violations: list[str]) -> None:
+    """Validate bounded committed sidecar examples against control-plane anchors."""
+    for path in sorted(
+        (root / "data" / "output" / "bronze").glob("*/*/*_metadata.yaml")
+    ):
+        payload = _load_yaml_object(path, violations)
+        if payload is None:
+            continue
+        runtime = payload.get("runtime")
+        pipeline = payload.get("pipeline")
+        output = payload.get("output")
+        if not isinstance(runtime, dict):
+            violations.append(f"{path}: metadata sidecar lacks runtime object")
+            continue
+        if not isinstance(pipeline, dict):
+            violations.append(f"{path}: metadata sidecar lacks pipeline object")
+            continue
+        if not isinstance(output, dict):
+            violations.append(f"{path}: metadata sidecar lacks output object")
+            continue
+        _require_fields(path, runtime, violations, ("run_id", "manifest_id"))
+        _require_fields(
+            path,
+            pipeline,
+            violations,
+            ("config_hash", "contract_ref"),
+        )
+        _require_fields(
+            path, output, violations, ("artifact_id", "lineage_fragment_id")
+        )
+
+
+def _validate_lineage_fragment_examples(root: Path, violations: list[str]) -> None:
+    """Validate committed lineage fragments expose manifest/run identity anchors."""
+    fragment_root = root / "data" / "output" / "bronze" / "chembl" / "control"
+    for path in sorted((fragment_root / "lineage" / "fragments").glob("*.json")):
+        payload = _load_json_object(path, violations)
+        if payload is None:
+            continue
+        _require_fields(
+            path, payload, violations, ("fragment_id", "run_id", "manifest_id")
+        )
+        nodes = payload.get("nodes")
+        edges = payload.get("edges")
+        if not isinstance(nodes, list) or not nodes:
+            violations.append(f"{path}: lineage fragment lacks nodes")
+        if not isinstance(edges, list) or not edges:
+            violations.append(f"{path}: lineage fragment lacks edges")
+
+
 def _load_json_object(path: Path, violations: list[str]) -> dict[str, Any] | None:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -132,6 +187,18 @@ def _load_json_object(path: Path, violations: list[str]) -> dict[str, Any] | Non
         return None
     if not isinstance(payload, dict):
         violations.append(f"{path}: JSON payload is not an object")
+        return None
+    return payload
+
+
+def _load_yaml_object(path: Path, violations: list[str]) -> dict[str, Any] | None:
+    try:
+        payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        violations.append(f"{path}: invalid YAML: {exc}")
+        return None
+    if not isinstance(payload, dict):
+        violations.append(f"{path}: YAML payload is not an object")
         return None
     return payload
 
@@ -163,8 +230,7 @@ def _manifest_has_input_snapshots(payload: dict[str, Any]) -> bool:
     if not isinstance(source_refs, list):
         return False
     return any(
-        isinstance(source_ref, dict)
-        and bool(source_ref.get("input_snapshots"))
+        isinstance(source_ref, dict) and bool(source_ref.get("input_snapshots"))
         for source_ref in source_refs
     )
 

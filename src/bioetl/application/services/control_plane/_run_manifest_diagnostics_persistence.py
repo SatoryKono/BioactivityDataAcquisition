@@ -15,6 +15,7 @@ def missing_replay_ready_requirements(
     exact_replay_supported: bool,
     immutable_input_snapshots_present: bool,
     effective_config_artifact_present: bool,
+    reproducible_semantic_output_mode: bool,
 ) -> list[str]:
     """Return replay-ready persistence requirements missing for this run."""
     requirements = (
@@ -25,6 +26,7 @@ def missing_replay_ready_requirements(
         ("exact_replay_capability", exact_replay_supported),
         ("immutable_input_snapshots", immutable_input_snapshots_present),
         ("effective_config_artifact", effective_config_artifact_present),
+        ("reproducible_semantic_output_mode", reproducible_semantic_output_mode),
     )
     return [name for name, present in requirements if not present]
 
@@ -98,6 +100,9 @@ def build_persistence_profile(
         str(base_summary.get("effective_config_artifact_id") or "").strip()
     )
     immutable_input_snapshots_present = bool(base_summary.get("input_snapshot_ids", []))
+    reproducible_semantic_output_mode = not bool(
+        base_summary.get("append_mode_semantic_sinks", [])
+    )
     exact_replay_supported = bool(base_summary.get("exact_replay_eligible", False))
     exact_replay_boundary = str(
         base_summary.get("exact_replay_support_boundary")
@@ -119,6 +124,7 @@ def build_persistence_profile(
         exact_replay_supported=exact_replay_supported,
         immutable_input_snapshots_present=immutable_input_snapshots_present,
         effective_config_artifact_present=effective_config_artifact_present,
+        reproducible_semantic_output_mode=reproducible_semantic_output_mode,
     )
     forensic_grade_missing_requirements = list(replay_ready_missing_requirements)
     if not ledger_entries_present:
@@ -152,6 +158,7 @@ def build_persistence_profile(
         "surfaces": {
             "control_plane_manifest": True,
             "effective_config_artifact": effective_config_artifact_present,
+            "reproducible_semantic_output_mode": (reproducible_semantic_output_mode),
             "strict_replay_execution_context_support": (
                 strict_replay_execution_context_supported
             ),
@@ -217,6 +224,9 @@ def build_alert_signals(
     strict_replay_boundary_gap = (
         "strict_replay_execution_context_support" in replay_ready_missing_requirements
     )
+    reproducible_semantic_output_mode_gap = (
+        "reproducible_semantic_output_mode" in replay_ready_missing_requirements
+    )
     lineage_closure_boundary_gap = (
         "lineage_closure_boundary_support" in forensic_grade_missing_requirements
     )
@@ -227,6 +237,9 @@ def build_alert_signals(
         "lineage_gap": has_artifact_refs and not lineage_fragment_ids,
         "immutable_input_snapshot_gap": immutable_input_snapshot_gap,
         "strict_replay_boundary_gap": strict_replay_boundary_gap,
+        "reproducible_semantic_output_mode_gap": (
+            reproducible_semantic_output_mode_gap
+        ),
         "lineage_closure_boundary_gap": lineage_closure_boundary_gap,
         "composite_resume_reconstructability_gap": (
             composite_resume_reconstructability_gap
@@ -268,6 +281,13 @@ def build_next_steps(alert_signals: dict[str, bool]) -> list[str]:
             (
                 "Treat this execution context as outside the strict exact-replay "
                 "support boundary; use rebuild/resume semantics instead of exact replay."
+            ),
+        ),
+        (
+            "reproducible_semantic_output_mode_gap",
+            (
+                "Replace append-mode Silver/Gold semantic sinks before claiming "
+                "replay-ready or forensic-grade reproducibility."
             ),
         ),
         (

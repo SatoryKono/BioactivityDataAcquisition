@@ -320,7 +320,8 @@ def test_build_crossref_business_data_assembles_expected_payload(
             int(value) if value is not None else None
         ),
         classify_publication_type=lambda value: {
-            "publication_category": f"classified:{value}"
+            "publication_type": value,
+            "publication_category": f"classified:{value}",
         },
         serialize_json=lambda value: json.dumps(value, sort_keys=True),
         serialize_json_list=lambda value: (
@@ -375,7 +376,7 @@ def test_build_crossref_business_data_falls_back_to_online_publication_date(
         data_normalizer=_StubNormalizer(),
         validate_doi=lambda value: str(value),
         validate_publication_year=lambda value: value,
-        classify_publication_type=lambda value: {},
+        classify_publication_type=lambda value: {"publication_type": value},
         serialize_json=lambda value: json.dumps(value),
         serialize_json_list=lambda value: (
             json.dumps(value) if value is not None else None

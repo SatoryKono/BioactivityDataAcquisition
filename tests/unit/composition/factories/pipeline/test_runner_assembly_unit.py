@@ -185,8 +185,7 @@ def test_build_checkpoint_manager_supports_legacy_observe_policy() -> None:
         )
 
     assert (
-        mock_create_manager.call_args.kwargs["compatibility_policy"]
-        == "legacy_observe"
+        mock_create_manager.call_args.kwargs["compatibility_policy"] == "legacy_observe"
     )
 
 

@@ -23,6 +23,7 @@ __all__ = [
     "COMMANDS",
     "diff_command",
     "run_manifest",
+    "score_command",
     "show_command",
 ]
 
@@ -65,6 +66,39 @@ def show_command(identifier: str, output_format: str) -> None:
     )
 
 
+@run_manifest.command("score")  # type: ignore[untyped-decorator]
+@click.argument("identifier")  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
+    "--format",
+    "output_format",
+    type=click.Choice(["json", "yaml", "text"]),
+    default="json",
+    help="Output format",
+)
+def score_command(identifier: str, output_format: str) -> None:
+    """Emit one machine-readable reproducibility audit score."""
+    service = get_run_manifest_service()
+    try:
+        result = service.show(identifier)
+    except ValueError as exc:
+        echo_error("Run manifest not found", str(exc))
+        return
+    payload = {
+        "identifier": identifier,
+        "manifest_id": result.manifest.manifest_id,
+        "run_id": str(result.manifest.run_id),
+        "reproducibility_audit_score": result.diagnostics.get(
+            "reproducibility_audit_score",
+            {},
+        ),
+    }
+    emit_inspection_payload(
+        payload,
+        output_format,
+        text_renderer=render_text_payload,
+    )
+
+
 @run_manifest.command("diff")  # type: ignore[untyped-decorator]
 @click.argument("left_identifier")  # type: ignore[untyped-decorator]
 @click.argument("right_identifier")  # type: ignore[untyped-decorator]
@@ -96,5 +130,6 @@ def diff_command(
 
 COMMANDS = (
     diff_command,
+    score_command,
     show_command,
 )
