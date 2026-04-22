@@ -46,6 +46,16 @@ activity:
         - Non standard unit for type
         - Author confirmed error
 
+    standard_units:
+        - nM
+        - µM
+        - mM
+        - pM
+        - M
+        - "%"
+        - ug.mL-1
+        - mg.kg-1
+
 # =============================================================================
 # Assay
 # =============================================================================
@@ -194,6 +204,12 @@ target:
 # ChEMBL-native types (PUBLICATION, PATENT, DATASET, BOOK) are mapped
 # to these canonical values by normalize_publication_type().
 publication:
+    native_doc_types:
+        - PUBLICATION
+        - PATENT
+        - DATASET
+        - BOOK
+
     types:
         - journal-article
         - patent

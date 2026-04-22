@@ -5,6 +5,7 @@ from __future__ import annotations
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
 from bioetl.domain.schemas.constants import (
     ACTIVITY_STANDARD_TYPES,
+    ACTIVITY_STANDARD_UNITS,
     DATA_VALIDITY_COMMENTS,
     STANDARD_RELATIONS,
 )
@@ -60,6 +61,7 @@ SET_LIKE_FIELDS = frozenset({"activity_properties"})
 # Export enum constants for use in normalization
 __all__ = [
     "ACTIVITY_STANDARD_TYPES",
+    "ACTIVITY_STANDARD_UNITS",
     "CHEMBL_ACTIVITY_SCHEMA_FIELDS",
     "DATA_VALIDITY_COMMENTS",
     "FLOAT_FIELDS",

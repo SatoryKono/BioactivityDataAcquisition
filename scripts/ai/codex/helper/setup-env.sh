@@ -86,16 +86,21 @@ if [[ ! -x "${ENSURE_SCRIPT}" ]]; then
     exit 1
 fi
 
-if CODEX_BIN="$("${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null)" && [[ -x "${CODEX_BIN}" ]]; then
-    log_success "Codex already installed: $("${CODEX_BIN}" --version)"
+CODEX_BIN=""
+if CODEX_BIN="$(timeout 10 "${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null)" && [[ -x "${CODEX_BIN}" ]]; then
+    log_success "Codex already installed: $(timeout 5 "${CODEX_BIN}" --version 2>/dev/null || echo 'version check timeout')"
 else
     log_info "Installing managed Codex CLI into repo-local prefix..."
-    if ! "${ENSURE_SCRIPT}" --ensure >/dev/null; then
-        log_error "Codex installation failed"
+    if ! timeout 120 "${ENSURE_SCRIPT}" --ensure >/dev/null 2>&1; then
+        log_error "Codex installation failed or timed out"
         exit 1
     fi
-    CODEX_BIN="$("${ENSURE_SCRIPT}" --print-bin)"
-    log_success "Codex installed: $("${CODEX_BIN}" --version)"
+    CODEX_BIN="$(timeout 10 "${ENSURE_SCRIPT}" --print-bin 2>/dev/null || echo "")"
+    if [[ -z "${CODEX_BIN}" ]]; then
+        log_error "Could not determine Codex binary path"
+        exit 1
+    fi
+    log_success "Codex installed: $(timeout 5 "${CODEX_BIN}" --version 2>/dev/null || echo 'version check timeout')"
 fi
 
 echo ""
@@ -105,11 +110,11 @@ log_info "STEP 4: Configuring .env.codex..."
 ENV_FILE="${ROOT_DIR}/.env.codex"
 
 if [[ ! -f "${ENV_FILE}" ]]; then
-    cat > "${ENV_FILE}" <<EOF
+    cat > "${ENV_FILE}" <<'ENVEOF'
 # OpenAI Codex Configuration
 # Get your API key from: https://platform.openai.com/api-keys
 OPENAI_API_KEY=sk-your-key-here
-EOF
+ENVEOF
     log_warn ".env.codex created - please add your API key"
 else
     log_success ".env.codex exists"
@@ -124,10 +129,10 @@ if [[ ! -x "${ENSURE_MCP_SCRIPT}" ]]; then
     exit 1
 fi
 
-if CODEX_BIN="${CODEX_BIN}" "${ENSURE_MCP_SCRIPT}" --ensure --codex-bin "${CODEX_BIN}" >/dev/null; then
+if timeout 30 bash -c "CODEX_BIN='${CODEX_BIN}' '${ENSURE_MCP_SCRIPT}' --ensure --codex-bin '${CODEX_BIN}'" >/dev/null 2>&1; then
     log_success "MCP configuration synchronized"
 else
-    log_error "MCP configuration failed"
+    log_error "MCP configuration failed or timed out"
     exit 1
 fi
 

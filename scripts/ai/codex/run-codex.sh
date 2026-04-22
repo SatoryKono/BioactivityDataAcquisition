@@ -6,7 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HELPER_DIR="${SCRIPT_DIR}/helper"
-REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))}"
+REPO_ROOT="${REPO_ROOT:-$(timeout 5 git rev-parse --show-toplevel 2>/dev/null || echo "${SCRIPT_DIR}/../../..")}"
 
 # Colors
 RED='\033[0;31m'
@@ -95,24 +95,60 @@ case "$COMMAND" in
         ;;
 esac
 
-# Check environment
+# Check environment (with retry limit)
 log_info "Checking environment setup..."
 echo ""
 
-if ! bash "${HELPER_DIR}/check-env.sh" 2>/dev/null; then
-    log_warn "Some components missing"
-    log_info "Running setup to install missing components..."
-    echo ""
-    
-    if ! bash "${HELPER_DIR}/setup-env.sh"; then
-        log_error "Setup failed"
-        exit 1
+RETRY_COUNT=0
+MAX_RETRIES=2
+
+while [[ $RETRY_COUNT -lt $MAX_RETRIES ]]; do
+    if bash "${HELPER_DIR}/check-env.sh" 2>/dev/null; then
+        break
     fi
+    
+    RETRY_COUNT=$((RETRY_COUNT + 1))
+    
+    if [[ $RETRY_COUNT -lt $MAX_RETRIES ]]; then
+        log_warn "Some components missing (attempt $RETRY_COUNT/$MAX_RETRIES)"
+        log_info "Running setup to install missing components..."
+        echo ""
+        
+        if ! bash "${HELPER_DIR}/setup-env.sh"; then
+            log_error "Setup failed on attempt $RETRY_COUNT"
+            exit 1
+        fi
+        echo ""
+    fi
+done
+
+if [[ $RETRY_COUNT -eq $MAX_RETRIES ]]; then
+    log_error "Environment check failed after $MAX_RETRIES attempts"
+    exit 1
 fi
 
 echo ""
 log_info "Environment ready - launching Codex"
 echo ""
+
+# Ensure .env.codex exists with minimal setup
+SCRIPT_DIR_CODEX="${SCRIPT_DIR}"
+ENV_FILE="${SCRIPT_DIR_CODEX}/.env.codex"
+if [[ ! -f "${ENV_FILE}" ]]; then
+    log_warn ".env.codex not found, checking repo root..."
+    # Try repo root as fallback
+    ENV_FILE="${REPO_ROOT}/.env.codex"
+    if [[ ! -f "${ENV_FILE}" ]]; then
+        log_warn "Creating .env.codex in scripts/ai/codex/..."
+        cat > "${SCRIPT_DIR_CODEX}/.env.codex" <<'ENVEOF'
+# OpenAI Codex Configuration
+# Get your API key from: https://platform.openai.com/api-keys
+OPENAI_API_KEY=sk-your-key-here
+ENVEOF
+        log_error "Please edit ${SCRIPT_DIR_CODEX}/.env.codex and add your OpenAI API key"
+        exit 1
+    fi
+fi
 
 # Process command
 shift || true

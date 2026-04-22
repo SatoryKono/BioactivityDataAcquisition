@@ -73,8 +73,10 @@ if [[ "${need_install}" -eq 1 && "${ALLOW_INSTALL}" -eq 1 ]]; then
         echo "[ensure-codex] Installing Codex in ${CODEX_NPM_PREFIX}..." >&2
     fi
 
-    npm install --global --prefix "${CODEX_NPM_PREFIX}" --silent @openai/codex@latest \
-        2>/dev/null || npm install --global --prefix "${CODEX_NPM_PREFIX}" @openai/codex@latest >&2
+    # Add 120-second timeout to prevent npm from hanging
+    timeout 120 npm install --global --prefix "${CODEX_NPM_PREFIX}" --silent @openai/codex@latest \
+        2>/dev/null || timeout 120 npm install --global --prefix "${CODEX_NPM_PREFIX}" @openai/codex@latest >&2 || \
+        echo "[ensure-codex] WARNING: npm install timed out or failed" >&2
 fi
 
 if [[ ! -x "${CODEX_BIN}" ]]; then

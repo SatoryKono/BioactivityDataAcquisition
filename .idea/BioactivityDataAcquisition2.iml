@@ -233,6 +233,7 @@
       <excludeFolder url="file://$MODULE_DIR$/htmlcov" />
       <excludeFolder url="file://$MODULE_DIR$/scripts/ai/.vscode" />
       <excludeFolder url="file://$MODULE_DIR$/test-output" />
+      <excludeFolder url="file://$MODULE_DIR$/.coverage-sharded/htmlcov" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.13 (BioactivityDataAcquisition2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

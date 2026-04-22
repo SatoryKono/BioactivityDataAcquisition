@@ -2,13 +2,22 @@
 
 from __future__ import annotations
 
+from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
 from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_operator,
+    normalize_profile_text,
+)
 from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
+from bioetl.domain.schemas.constants import (
+    ASSAY_PARAMETER_STANDARD_TYPES,
+    STANDARD_RELATIONS,
+)
 
 __all__ = [
     "CHEMBL_ASSAY_PARAMETERS_PROFILE",
@@ -34,7 +43,25 @@ _META_FIELDS = frozenset(
 )
 _INT_FIELDS = frozenset({"assay_param_id"})
 _FLOAT_FIELDS = frozenset({"standard_value", "value"})
-_JSON_STRING_FIELDS = frozenset({"comments"})
+_OPERATOR_FIELDS = frozenset({"relation"})
+_UNIT_FIELDS = frozenset({"units", "standard_units"})
+_SPECIAL_RULE_COMPONENTS = {
+    "type": (
+        lambda value: normalize_cross_pipeline_case(value, "uppercase"),
+        "Normalize controlled-vocabulary assay parameter type to uppercase without rejecting unknown observed values.",
+    ),
+    "comments": (
+        normalize_profile_text,
+        "Normalize assay parameter comments as plain text; comments are not JSON-canonicalized by default.",
+    ),
+    "standard_relation": (
+        lambda value: normalize_profile_operator(
+            value,
+            allowed_values=STANDARD_RELATIONS,
+        ),
+        "Normalize standard_relation to a canonical ASCII operator enum.",
+    ),
+}
 
 CHEMBL_ASSAY_PARAMETERS_PROFILE = build_standard_profile(
     profile_name="chembl.assay_parameters",
@@ -43,7 +70,12 @@ CHEMBL_ASSAY_PARAMETERS_PROFILE = build_standard_profile(
     meta_fields=_META_FIELDS,
     int_fields=_INT_FIELDS,
     float_fields=_FLOAT_FIELDS,
-    json_string_fields=_JSON_STRING_FIELDS,
+    operator_fields=_OPERATOR_FIELDS,
+    enum_fields={
+        "standard_type": ASSAY_PARAMETER_STANDARD_TYPES,
+    },
+    special_rules=_SPECIAL_RULE_COMPONENTS,
+    unit_fields=_UNIT_FIELDS,
     null_fields=chembl_pseudo_null_fields("assay_parameters"),
 )
 

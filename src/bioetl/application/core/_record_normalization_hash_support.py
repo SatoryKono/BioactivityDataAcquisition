@@ -21,6 +21,10 @@ class RecordNormalizationHashSupportMixin:
     profile: object
     provider: str
 
+    _TECHNICAL_HASH_POLICY_FIELDS = frozenset(
+        {"entity_id", "content_hash", "_content_hashes_by_version"}
+    )
+
     def _should_project_hashes_by_version(self) -> bool:
         policy = self.content_hash_policy_by_version
         return policy is not None and policy.requires_projected_hashes
@@ -89,6 +93,10 @@ class RecordNormalizationHashSupportMixin:
             include_source = policy.include_fields
         else:
             include_source = profile_include or self.content_hash_include_fields
+        self._validate_hash_policy_fields(
+            include_source,
+            policy_kind="include_fields",
+        )
         return set(include_source) if include_source else None
 
     def _resolve_hash_exclude_fields(
@@ -97,11 +105,39 @@ class RecordNormalizationHashSupportMixin:
         profile_exclude: frozenset[str],
         policy: ContentHashVersionPolicy | None,
     ) -> set[str]:
-        return (
+        exclude_source = (
             set(self.content_hash_exclude_fields)
             | set(profile_exclude)
             | (set(policy.exclude_fields) if policy is not None else set())
             | {"entity_id", "content_hash", "_content_hashes_by_version"}
+        )
+        self._validate_hash_policy_fields(
+            exclude_source,
+            policy_kind="exclude_fields",
+        )
+        return exclude_source
+
+    def _validate_hash_policy_fields(
+        self,
+        fields: frozenset[str] | set[str],
+        *,
+        policy_kind: str,
+    ) -> None:
+        if self.profile is None or not fields:
+            return
+        allowed_fields = self.profile.fields | self._TECHNICAL_HASH_POLICY_FIELDS
+        unknown_fields = frozenset(
+            field
+            for field in fields
+            if field not in allowed_fields and not field.startswith("_")
+        )
+        if not unknown_fields:
+            return
+        raise ValueError(
+            f"Unknown content hash {policy_kind} for {self.provider}: "
+            f"{', '.join(sorted(unknown_fields))}. "
+            "Hash policy fields must be current profile/schema fields or explicit "
+            "technical fields."
         )
 
     def _resolve_hash_policy(

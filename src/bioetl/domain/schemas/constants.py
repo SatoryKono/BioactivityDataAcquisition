@@ -91,6 +91,19 @@ DATA_VALIDITY_COMMENTS: frozenset[str] = frozenset(
     ]
 )
 
+ACTIVITY_STANDARD_UNITS: frozenset[str] = frozenset(
+    [
+        "nM",
+        "µM",
+        "mM",
+        "pM",
+        "M",
+        "%",
+        "ug.mL-1",
+        "mg.kg-1",
+    ]
+)
+
 # =============================================================================
 # CHEMBL ASSAY ENUMS
 # =============================================================================

@@ -6,7 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../../.." && pwd))}"
+REPO_ROOT="${REPO_ROOT:-$(timeout 5 git rev-parse --show-toplevel 2>/dev/null || echo "${SCRIPT_DIR}/../../../..")}"
 ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-codex-cli.sh"
 ENSURE_MCP_SCRIPT="${SCRIPT_DIR}/ensure-mcp.sh"
 
@@ -30,8 +30,22 @@ if [[ ! -x "${ENSURE_SCRIPT}" ]]; then
     exit 1
 fi
 
-CODEX_BIN="$("${ENSURE_SCRIPT}" --print-bin)"
-CODEX_PREFIX="$("${ENSURE_SCRIPT}" --print-prefix)"
+# Use timeout on ENSURE_SCRIPT calls
+CODEX_BIN="" 
+CODEX_PREFIX=""
+if timeout 10 "${ENSURE_SCRIPT}" --no-install --print-bin >/dev/null 2>&1; then
+    CODEX_BIN="$(timeout 10 "${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null || echo "")"
+    CODEX_PREFIX="$(timeout 10 "${ENSURE_SCRIPT}" --no-install --print-prefix 2>/dev/null || echo "")"
+fi
+
+if [[ -z "$CODEX_BIN" ]]; then
+    echo "[INFO] Codex binary not found, attempting installation..."
+    if timeout 120 "${ENSURE_SCRIPT}" --ensure >/dev/null 2>&1; then
+        CODEX_BIN="$(timeout 10 "${ENSURE_SCRIPT}" --print-bin 2>/dev/null || echo "")"
+        CODEX_PREFIX="$(timeout 10 "${ENSURE_SCRIPT}" --print-prefix 2>/dev/null || echo "")"
+    fi
+fi
+
 echo "[INFO] Using Codex from managed prefix: ${CODEX_BIN}"
 
 # Verify we found it
@@ -58,8 +72,12 @@ if [[ "${CODEX_SKIP_MCP_SETUP:-0}" != "1" ]]; then
         echo "[ERROR] MCP setup helper not found: ${ENSURE_MCP_SCRIPT}" >&2
         exit 1
     fi
-    "${ENSURE_MCP_SCRIPT}" --ensure --codex-bin "${CODEX_BIN}" >/dev/null
-    echo "[INFO] MCP configuration synchronized"
+    # Add 60-second timeout to prevent hanging on setup_mcp.py
+    if ! timeout 60 "${ENSURE_MCP_SCRIPT}" --ensure --codex-bin "${CODEX_BIN}" >/dev/null 2>&1; then
+        echo "[WARN] MCP setup timed out or failed, continuing anyway" >&2
+    else
+        echo "[INFO] MCP configuration synchronized"
+    fi
 fi
 
 # Launch Codex

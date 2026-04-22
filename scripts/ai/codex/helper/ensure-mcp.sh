@@ -85,11 +85,13 @@ fi
 
 case "${MODE}" in
     ensure)
-        python3 "${SETUP_MCP}" \
+        # Add 30-second timeout to prevent hanging on Python script
+        timeout 30 python3 "${SETUP_MCP}" \
             --root "${REPO_ROOT}" \
             --workspace-root "${REPO_ROOT}" \
             --skip-codex \
-            --skip-gemini-settings >/dev/null
+            --skip-gemini-settings >/dev/null 2>&1 || \
+        warn "MCP setup timed out; config may be incomplete"
         ;;
     check)
         ;;
