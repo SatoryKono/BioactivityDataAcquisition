@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-22T05:43:43.354809+00:00",
+  "generated_at": "2026-04-22T08:40:40.828714+00:00",
   "summary": {
-    "total_scripts": 429,
+    "total_scripts": 430,
     "status_counts": {
-      "active": 301,
+      "active": 302,
       "legacy": 15,
       "orphan": 101,
       "unknown": 12
@@ -13,8 +13,8 @@
       "agents": 4,
       "build": 1,
       "ci": 49,
-      "docs": 135,
-      "scripts": 285,
+      "docs": 136,
+      "scripts": 286,
       "skills": 8,
       "tests": 132
     }
@@ -4566,7 +4566,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 97,
+      "reference_count": 98,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -5189,7 +5189,7 @@
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 558,
+          "line": 605,
           "source_group": "docs",
           "text": "- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministi"
         },
@@ -6988,7 +6988,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 66,
+      "reference_count": 69,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7053,7 +7053,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 23,
       "references": [
         {
           "path": "docs/03-guides/testing.md",
@@ -7087,21 +7087,21 @@
         },
         {
           "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
-          "line": 129,
+          "line": 62,
+          "source_group": "docs",
+          "text": "`run_pytest_sharded.sh`, добавляет JUnit artifacts и пишет JSON summary."
+        },
+        {
+          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
+          "line": 69,
+          "source_group": "docs",
+          "text": "summary, чтобы прямые `run_pytest_sharded.sh --junit-dir ...` запуски сразу"
+        },
+        {
+          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
+          "line": 158,
           "source_group": "docs",
           "text": "- несколько JUnit XML файлов для `run_pytest_sharded.sh`, объединенных в один"
-        },
-        {
-          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
-          "line": 146,
-          "source_group": "docs",
-          "text": "PYTHONPATH=src bash scripts/engineering/dev/run_pytest_sharded.sh <runner-options> -- <pytest-options>"
-        },
-        {
-          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
-          "line": 153,
-          "source_group": "docs",
-          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=html"
         }
       ]
     },
@@ -7705,7 +7705,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 76,
+      "reference_count": 92,
       "references": [
         {
           "path": ".github/workflows/duplication-complexity.yml",
@@ -7738,22 +7738,22 @@
           "text": "run: uv run python -m scripts.engineering.qa report-family-baseline --active-only --check"
         },
         {
-          "path": "docs/00-project/RULES.md",
-          "line": 172,
-          "source_group": "docs",
-          "text": "uv run python -m scripts.engineering.qa check-exemptions"
+          "path": ".github/workflows/tests.yml",
+          "line": 710,
+          "source_group": "ci",
+          "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         },
         {
-          "path": "docs/00-project/TOOLS.md",
-          "line": 69,
-          "source_group": "docs",
-          "text": "uv run python -m scripts.engineering.qa check-c901 --target src/bioetl"
+          "path": ".github/workflows/tests.yml",
+          "line": 719,
+          "source_group": "ci",
+          "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         },
         {
-          "path": "docs/00-project/TOOLS.md",
-          "line": 100,
-          "source_group": "docs",
-          "text": "| `naming_audit.py`              | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-naming`         | —            | Аудит naming conventions                "
+          "path": ".github/workflows/tests.yml",
+          "line": 727,
+          "source_group": "ci",
+          "text": "uv run python -m scripts.engineering.qa test-health \\"
         }
       ]
     },
@@ -7772,7 +7772,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 60,
+          "line": 65,
           "source_group": "scripts",
           "text": "\"analyze-duplicate-functions\": \"analyze_duplicate_functions.py\","
         }
@@ -7793,7 +7793,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 61,
+          "line": 66,
           "source_group": "scripts",
           "text": "\"calibrate-hotspots\": \"calibrate_hotspot_budgets.py\","
         }
@@ -7814,7 +7814,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 42,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"check-app-deps\": \"check_application_deps.py\","
         }
@@ -7835,7 +7835,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 41,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"check-architecture\": \"check_architecture.py\","
         }
@@ -7862,7 +7862,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 44,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"check-c901\": \"check_c901_baseline.py\","
         },
@@ -7889,7 +7889,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 43,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"check-constructor-args\": \"check_constructor_args.py\","
         }
@@ -7931,7 +7931,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 45,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": \"check_naming_package_consistency.py\","
         },
@@ -7988,7 +7988,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 46,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"check-exemptions\": \"check_quality_exemptions.py\","
         }
@@ -8009,13 +8009,13 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 68,
+          "line": 74,
           "source_group": "scripts",
           "text": "- `scripts/engineering/qa/generate_architecture_debt_tasks.py` (`python -m scripts.engineering.qa generate-debt-tasks`) generates the canonical architecture debt task backlog."
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 47,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"generate-debt-tasks\": \"generate_architecture_debt_tasks.py\","
         },
@@ -8180,7 +8180,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 55,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"report-hotspots\": \"generate_hotspot_degradation_report.py\","
         }
@@ -8246,7 +8246,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 49,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"check-terminology\": \"lint_terminology.py\","
         },
@@ -8291,7 +8291,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 40,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"check-naming\": \"naming_audit.py\","
         },
@@ -8338,13 +8338,13 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 69,
+          "line": 75,
           "source_group": "scripts",
           "text": "- `scripts/engineering/qa/reduce_architecture_debt.py` (`python -m scripts.engineering.qa reduce-architecture-debt`) builds the orchestration plan consumed by the architecture-debt agent."
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 48,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"reduce-architecture-debt\": \"reduce_architecture_debt.py\","
         },
@@ -8377,19 +8377,19 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 67,
+          "line": 73,
           "source_group": "scripts",
           "text": "- `scripts/engineering/qa/report_duplication_baseline.py` (`python -m scripts.engineering.qa report-duplication-baseline`) generates report-only duplication baseline artifacts for governance review."
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 81,
+          "line": 91,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_duplication_baseline.py"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 56,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"report-duplication-baseline\": \"report_duplication_baseline.py\","
         }
@@ -8404,7 +8404,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 57,
+          "line": 62,
           "source_group": "scripts",
           "text": "\"report-function-length-inventory\": \"report_function_length_inventory.py\","
         }
@@ -8425,7 +8425,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 54,
+          "line": 59,
           "source_group": "scripts",
           "text": "\"report-family-baseline\": \"report_hotspot_family_baseline.py\","
         }
@@ -8452,7 +8452,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 58,
+          "line": 63,
           "source_group": "scripts",
           "text": "\"report-normalization-fallback-inventory\": \"report_normalization_fallback_inventory.py\","
         },
@@ -8473,7 +8473,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 59,
+          "line": 64,
           "source_group": "scripts",
           "text": "\"report-observability-metric-inventory\": \"report_observability_metric_inventory.py\","
         }
@@ -8506,13 +8506,13 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 78,
+          "line": 84,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_provider_contract_drift.py --output reports/quality/provider-contract-drift-report.json --fail-on breaking"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 52,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"report-provider-contract-drift\": \"report_provider_contract_drift.py\","
         }
@@ -8533,7 +8533,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 98,
+          "line": 111,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для partial rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadata"
         },
@@ -8545,19 +8545,19 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 76,
+          "line": 82,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_vcr_metadata_catalog.py --check"
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 77,
+          "line": 83,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_vcr_metadata_catalog.py --update"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 51,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"report-vcr-metadata\": \"report_vcr_metadata_catalog.py\","
         },
@@ -8584,9 +8584,60 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 53,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"sync-integration-vcr-policy\": \"sync_integration_vcr_policy.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/qa/test_health.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
+          "line": 57,
+          "source_group": "docs",
+          "text": "- Этап 2 начат: `scripts/engineering/qa/test_health.py` агрегирует один или"
+        },
+        {
+          "path": "scripts/engineering/qa/README.md",
+          "line": 34,
+          "source_group": "scripts",
+          "text": "| `run-tests`                   | `test_health.py`                          | Run a named test-health lane and emit JUnit XML plus JSON summary                                 |"
+        },
+        {
+          "path": "scripts/engineering/qa/README.md",
+          "line": 35,
+          "source_group": "scripts",
+          "text": "| `summarize-junit`             | `test_health.py`                          | Aggregate existing JUnit XML into test-health JSON summary                                        |"
+        },
+        {
+          "path": "scripts/engineering/qa/README.md",
+          "line": 36,
+          "source_group": "scripts",
+          "text": "| `test-health`                 | `test_health.py`                          | Summarize recent `reports/quality/test-runs/*.json` history                                      |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 67,
+          "source_group": "scripts",
+          "text": "\"run-tests\": (\"test_health.py\", \"run-tests\"),"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 68,
+          "source_group": "scripts",
+          "text": "\"summarize-junit\": (\"test_health.py\", \"summarize-junit\"),"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 69,
+          "source_group": "scripts",
+          "text": "\"test-health\": (\"test_health.py\", \"test-health\"),"
         }
       ]
     },
@@ -8662,7 +8713,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 423,
+          "line": 436,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         }
@@ -8707,7 +8758,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 434,
+          "line": 430,
           "source_group": "tests",
           "text": "\"python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\" in workflow"
         }
@@ -8752,7 +8803,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 437,
+          "line": 433,
           "source_group": "tests",
           "text": "\"python scripts/engineering/qa/vcr/check_vcr_filename_policy.py\" in workflow"
         }
@@ -10107,7 +10158,7 @@
       "references": [
         {
           "path": "docs/03-guides/testing.md",
-          "line": 66,
+          "line": 79,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
         },
@@ -10511,7 +10562,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 98,
+          "line": 111,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для partial rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadata"
         },

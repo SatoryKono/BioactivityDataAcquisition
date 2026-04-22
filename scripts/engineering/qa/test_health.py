@@ -1,0 +1,815 @@
+#!/usr/bin/env python3
+"""Test-health lane wrapper, JUnit aggregation, and history rollup."""
+
+from __future__ import annotations
+
+import argparse
+import glob
+import json
+import os
+import re
+import shlex
+import subprocess
+import sys
+import time
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from functools import lru_cache
+from pathlib import Path
+from typing import Any
+from xml.etree import ElementTree
+
+import yaml
+
+ROOT = Path(__file__).resolve().parents[3]
+MATRIX_PATH = ROOT / "configs" / "quality" / "test_matrix.yaml"
+CLASSIFIERS_PATH = ROOT / "configs" / "quality" / "test_health_classifiers.yaml"
+DEFAULT_REPORTS_DIR = ROOT / "reports" / "quality" / "test-runs"
+
+
+@dataclass(frozen=True)
+class RunPlan:
+    """Concrete command and artifact paths for one logical test-health run."""
+
+    suite: str
+    run_id: str
+    backend: str
+    command: list[str]
+    junit_paths: list[Path]
+    junit_dir: Path | None
+    summary_path: Path
+
+
+def _load_lanes(matrix_path: Path = MATRIX_PATH) -> dict[str, dict[str, Any]]:
+    payload = yaml.safe_load(matrix_path.read_text(encoding="utf-8")) or {}
+    return payload.get("test_lanes", {}).get("lanes", {})
+
+
+@lru_cache(maxsize=8)
+def _load_failure_classifiers(
+    config_path: Path = CLASSIFIERS_PATH,
+) -> tuple[tuple[str, re.Pattern[str]], str, str, str]:
+    payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+    classifiers = payload.get("classifiers", [])
+    if not isinstance(classifiers, list) or not classifiers:
+        raise ValueError(f"{config_path}: classifiers must be a non-empty list")
+
+    compiled: list[tuple[str, re.Pattern[str]]] = []
+    for item in classifiers:
+        if not isinstance(item, dict):
+            raise ValueError(f"{config_path}: classifier entries must be mappings")
+        category = item.get("category")
+        pattern = item.get("pattern")
+        if not isinstance(category, str) or not category:
+            raise ValueError(f"{config_path}: classifier category is required")
+        if not isinstance(pattern, str) or not pattern:
+            raise ValueError(f"{config_path}: classifier pattern is required")
+        compiled.append((category, re.compile(pattern, re.I)))
+
+    return (
+        tuple(compiled),
+        str(payload.get("default_error_classification", "setup_error")),
+        str(payload.get("default_failure_classification", "assertion")),
+        str(payload.get("default_unknown_classification", "unknown")),
+    )
+
+
+def _split_passthrough(argv: list[str]) -> tuple[list[str], list[str]]:
+    if "--" not in argv:
+        return argv, []
+    separator = argv.index("--")
+    return argv[:separator], argv[separator + 1 :]
+
+
+def _default_run_id(suite: str) -> str:
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    return f"{suite}-{stamp}"
+
+
+def _relative_to_root(path: Path) -> str:
+    try:
+        return path.relative_to(ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _git_sha() -> str | None:
+    try:
+        completed = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if completed.returncode != 0:
+        return None
+    return completed.stdout.strip() or None
+
+
+def _with_pythonpath_src(env: dict[str, str]) -> dict[str, str]:
+    updated = env.copy()
+    src = str(ROOT / "src")
+    parts = (
+        [] if not updated.get("PYTHONPATH") else updated["PYTHONPATH"].split(os.pathsep)
+    )
+    if src not in parts:
+        parts.insert(0, src)
+    updated["PYTHONPATH"] = os.pathsep.join(parts)
+    return updated
+
+
+def _strip_lane_paths(pytest_args: list[str], paths: list[str]) -> list[str]:
+    path_set = {path.rstrip("/") for path in paths}
+    return [arg for arg in pytest_args if str(arg).rstrip("/") not in path_set]
+
+
+def build_run_plan(
+    *,
+    suite: str,
+    run_id: str,
+    reports_dir: Path,
+    runner_args: list[str],
+    pytest_extra: list[str],
+    skip_preflight: bool,
+    lanes: dict[str, dict[str, Any]] | None = None,
+) -> RunPlan:
+    """Build the backend command for a logical test-health lane."""
+    lane_map = lanes if lanes is not None else _load_lanes()
+    if suite not in lane_map:
+        available = ", ".join(sorted(lane_map))
+        raise ValueError(f"Unknown test-health suite '{suite}'. Available: {available}")
+
+    lane = lane_map[suite]
+    backend = str(lane["runner_backend"])
+    runner = str(lane["runner"])
+    summary_path = reports_dir / f"{run_id}.json"
+    junit_root = reports_dir / "junit"
+
+    command = ["bash", runner]
+    if skip_preflight:
+        command.append("--skip-preflight")
+
+    if backend == "run_pytest_sharded":
+        junit_dir = junit_root / run_id
+        junit_paths: list[Path] = []
+        command.extend(str(arg) for arg in lane.get("runner_options", []))
+        command.extend(runner_args)
+        command.extend(["--junit-dir", _relative_to_root(junit_dir), "--"])
+        pytest_args = _strip_lane_paths(
+            [str(arg) for arg in lane.get("pytest_args", [])],
+            [str(path) for path in lane.get("paths", [])],
+        )
+        command.extend([*pytest_args, *pytest_extra])
+    else:
+        junit_dir = None
+        junit_path = junit_root / f"{run_id}.xml"
+        junit_paths = [junit_path]
+        command.extend(runner_args)
+        command.extend(str(arg) for arg in lane.get("pytest_args", []))
+        command.extend(pytest_extra)
+        command.append(f"--junitxml={_relative_to_root(junit_path)}")
+
+    return RunPlan(
+        suite=suite,
+        run_id=run_id,
+        backend=backend,
+        command=command,
+        junit_paths=junit_paths,
+        junit_dir=junit_dir,
+        summary_path=summary_path,
+    )
+
+
+def _iter_testcases(xml_path: Path) -> list[ElementTree.Element]:
+    root = ElementTree.parse(xml_path).getroot()
+    if root.tag == "testcase":
+        return [root]
+    return list(root.iter("testcase"))
+
+
+def _case_nodeid(case: ElementTree.Element) -> str:
+    file_attr = case.attrib.get("file")
+    name = case.attrib.get("name", "")
+    classname = case.attrib.get("classname", "")
+    if file_attr:
+        return f"{file_attr}::{name}" if name else file_attr
+    if classname and name:
+        return f"{classname}::{name}"
+    return name or classname or "<unknown>"
+
+
+def _failure_entry(
+    *,
+    case: ElementTree.Element,
+    child: ElementTree.Element,
+    xml_path: Path,
+    classifier_config_path: Path,
+) -> dict[str, str]:
+    message = child.attrib.get("message") or (child.text or "").strip()
+    first_line = message.splitlines()[0] if message else ""
+    return {
+        "nodeid": _case_nodeid(case),
+        "file": case.attrib.get("file", ""),
+        "phase": child.tag,
+        "message": first_line,
+        "classification": classify_failure(
+            phase=child.tag,
+            message=first_line,
+            file=case.attrib.get("file", ""),
+            classifier_config_path=classifier_config_path,
+        ),
+        "junit_xml": _relative_to_root(xml_path),
+    }
+
+
+def classify_failure(
+    *,
+    phase: str,
+    message: str,
+    file: str = "",
+    classifier_config_path: Path = CLASSIFIERS_PATH,
+) -> str:
+    """Classify test failures using conservative, overrideable heuristics."""
+    classifiers, default_error, default_failure, default_unknown = (
+        _load_failure_classifiers(classifier_config_path)
+    )
+    haystack = f"{phase}\n{file}\n{message}"
+    phase_lower = phase.lower()
+    if phase_lower in {"error", "setup", "teardown"}:
+        for category, pattern in classifiers:
+            if pattern.search(haystack):
+                return category
+        return default_error
+    for category, pattern in classifiers:
+        if pattern.search(haystack):
+            return category
+    return default_failure if phase_lower == "failure" else default_unknown
+
+
+def _is_xfail(skipped: ElementTree.Element) -> bool:
+    marker = " ".join(
+        str(value)
+        for value in (
+            skipped.attrib.get("type"),
+            skipped.attrib.get("message"),
+            skipped.text,
+        )
+        if value
+    ).lower()
+    return "xfail" in marker
+
+
+def aggregate_junit(
+    *,
+    xml_paths: list[Path],
+    run_id: str,
+    suite: str,
+    shards: list[str],
+    started_at: str,
+    duration_seconds: float,
+    command: list[str],
+    exit_code: int,
+    classifier_config_path: Path = CLASSIFIERS_PATH,
+) -> dict[str, Any]:
+    """Aggregate one or more pytest JUnit XML files into a run summary."""
+    counts = {
+        "collected": 0,
+        "passed": 0,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xfailed": 0,
+        "xpassed": 0,
+    }
+    failures: list[dict[str, str]] = []
+    cases: list[dict[str, str]] = []
+
+    for xml_path in xml_paths:
+        for case in _iter_testcases(xml_path):
+            counts["collected"] += 1
+            failure = case.find("failure")
+            error = case.find("error")
+            skipped = case.find("skipped")
+            nodeid = _case_nodeid(case)
+            file_attr = case.attrib.get("file", "")
+            if error is not None:
+                counts["errors"] += 1
+                cases.append({"nodeid": nodeid, "file": file_attr, "status": "error"})
+                failures.append(
+                    _failure_entry(
+                        case=case,
+                        child=error,
+                        xml_path=xml_path,
+                        classifier_config_path=classifier_config_path,
+                    )
+                )
+            elif failure is not None:
+                counts["failed"] += 1
+                cases.append({"nodeid": nodeid, "file": file_attr, "status": "failed"})
+                failures.append(
+                    _failure_entry(
+                        case=case,
+                        child=failure,
+                        xml_path=xml_path,
+                        classifier_config_path=classifier_config_path,
+                    )
+                )
+            elif skipped is not None:
+                if _is_xfail(skipped):
+                    counts["xfailed"] += 1
+                    cases.append(
+                        {"nodeid": nodeid, "file": file_attr, "status": "xfailed"}
+                    )
+                else:
+                    counts["skipped"] += 1
+                    cases.append(
+                        {"nodeid": nodeid, "file": file_attr, "status": "skipped"}
+                    )
+            else:
+                counts["passed"] += 1
+                cases.append({"nodeid": nodeid, "file": file_attr, "status": "passed"})
+
+    return {
+        "run_id": run_id,
+        "suite": suite,
+        "shards": shards,
+        "started_at": started_at,
+        "duration_seconds": round(duration_seconds, 3),
+        "command": shlex.join(command),
+        "git_sha": _git_sha(),
+        "ci_job": os.environ.get("GITHUB_JOB") or os.environ.get("CI_JOB_NAME"),
+        "exit_code": exit_code,
+        "counts": counts,
+        "cases": cases,
+        "failures": failures,
+    }
+
+
+def _write_summary(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+
+def _resolve_junit_inputs(junit_paths: list[str], junit_globs: list[str]) -> list[Path]:
+    paths = [Path(path) for path in junit_paths]
+    for pattern in junit_globs:
+        matches = sorted(glob.glob(pattern, recursive=True))
+        paths.extend(Path(match) for match in matches)
+    return sorted({path for path in paths if path.exists()})
+
+
+def _write_junit_summary(
+    *,
+    suite: str,
+    run_id: str,
+    reports_dir: Path,
+    junit_paths: list[str],
+    junit_globs: list[str],
+    command: str,
+    exit_code: int,
+    classifier_config_path: Path,
+) -> Path | None:
+    xml_paths = _resolve_junit_inputs(junit_paths, junit_globs)
+    if not xml_paths:
+        print("[test-health] no JUnit XML inputs found", file=sys.stderr)
+        return None
+
+    rendered_command = shlex.split(command) if command else ["pytest"]
+    payload = aggregate_junit(
+        xml_paths=xml_paths,
+        run_id=run_id,
+        suite=suite,
+        shards=[path.stem for path in xml_paths],
+        started_at=datetime.now(UTC).isoformat(),
+        duration_seconds=0.0,
+        command=rendered_command,
+        exit_code=exit_code,
+        classifier_config_path=classifier_config_path,
+    )
+    summary_path = reports_dir / f"{run_id}.json"
+    _write_summary(summary_path, payload)
+    print(f"[test-health] summary: {_relative_to_root(summary_path)}")
+    return summary_path
+
+
+def _discover_junit_paths(plan: RunPlan) -> tuple[list[Path], list[str]]:
+    if plan.junit_dir is not None:
+        paths = sorted(plan.junit_dir.glob("*.xml"))
+        return paths, [path.stem for path in paths]
+    return [path for path in plan.junit_paths if path.exists()], []
+
+
+def _run_tests(argv: list[str]) -> int:
+    wrapper_args, pytest_extra = _split_passthrough(argv)
+    parser = argparse.ArgumentParser(description="Run a named test-health lane.")
+    parser.add_argument("--suite", required=True)
+    parser.add_argument("--run-id")
+    parser.add_argument("--reports-dir", type=Path, default=DEFAULT_REPORTS_DIR)
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--skip-preflight", action="store_true")
+    parser.add_argument(
+        "--classifier-config",
+        type=Path,
+        default=CLASSIFIERS_PATH,
+        help="YAML failure-classifier rules.",
+    )
+    args, runner_args = parser.parse_known_args(wrapper_args)
+
+    run_id = args.run_id or _default_run_id(args.suite)
+    plan = build_run_plan(
+        suite=args.suite,
+        run_id=run_id,
+        reports_dir=args.reports_dir,
+        runner_args=runner_args,
+        pytest_extra=pytest_extra,
+        skip_preflight=args.skip_preflight,
+    )
+
+    print(f"[test-health] suite={plan.suite} run_id={plan.run_id}")
+    print(f"[test-health] command: {shlex.join(plan.command)}")
+    if args.dry_run:
+        return 0
+
+    args.reports_dir.mkdir(parents=True, exist_ok=True)
+    (args.reports_dir / "junit").mkdir(parents=True, exist_ok=True)
+    if plan.junit_dir is not None:
+        plan.junit_dir.mkdir(parents=True, exist_ok=True)
+
+    started = datetime.now(UTC)
+    start_time = time.monotonic()
+    completed = subprocess.run(
+        plan.command,
+        cwd=ROOT,
+        env=_with_pythonpath_src(os.environ),
+        check=False,
+    )
+    duration = time.monotonic() - start_time
+    xml_paths, shards = _discover_junit_paths(plan)
+    if xml_paths:
+        payload = aggregate_junit(
+            xml_paths=xml_paths,
+            run_id=plan.run_id,
+            suite=plan.suite,
+            shards=shards,
+            started_at=started.isoformat(),
+            duration_seconds=duration,
+            command=plan.command,
+            exit_code=completed.returncode,
+            classifier_config_path=args.classifier_config,
+        )
+    else:
+        payload = {
+            "run_id": plan.run_id,
+            "suite": plan.suite,
+            "shards": shards,
+            "started_at": started.isoformat(),
+            "duration_seconds": round(duration, 3),
+            "command": shlex.join(plan.command),
+            "git_sha": _git_sha(),
+            "ci_job": os.environ.get("GITHUB_JOB") or os.environ.get("CI_JOB_NAME"),
+            "exit_code": completed.returncode,
+            "counts": {
+                "collected": 0,
+                "passed": 0,
+                "failed": 0,
+                "errors": 0,
+                "skipped": 0,
+                "xfailed": 0,
+                "xpassed": 0,
+            },
+            "failures": [],
+            "warnings": ["No JUnit XML files were found for this run."],
+        }
+    _write_summary(plan.summary_path, payload)
+    print(f"[test-health] summary: {_relative_to_root(plan.summary_path)}")
+    return completed.returncode
+
+
+def _summarize_junit(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(
+        description="Aggregate existing pytest JUnit XML into a test-health summary."
+    )
+    parser.add_argument("--suite", required=True)
+    parser.add_argument("--run-id")
+    parser.add_argument("--reports-dir", type=Path, default=DEFAULT_REPORTS_DIR)
+    parser.add_argument("--junit", action="append", default=[])
+    parser.add_argument("--junit-glob", action="append", default=[])
+    parser.add_argument("--command", default="")
+    parser.add_argument("--exit-code", type=int, default=0)
+    parser.add_argument(
+        "--classifier-config",
+        type=Path,
+        default=CLASSIFIERS_PATH,
+        help="YAML failure-classifier rules.",
+    )
+    args = parser.parse_args(argv)
+
+    run_id = args.run_id or _default_run_id(args.suite)
+    summary_path = _write_junit_summary(
+        suite=args.suite,
+        run_id=run_id,
+        reports_dir=args.reports_dir,
+        junit_paths=args.junit,
+        junit_globs=args.junit_glob,
+        command=args.command,
+        exit_code=args.exit_code,
+        classifier_config_path=args.classifier_config,
+    )
+    if summary_path is None:
+        return 2
+    return 0
+
+
+def _read_run_summaries(reports_dir: Path, limit: int) -> list[dict[str, Any]]:
+    files = sorted(
+        (path for path in reports_dir.glob("*.json") if path.is_file()),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )[:limit]
+    return [json.loads(path.read_text(encoding="utf-8")) for path in files]
+
+
+def _green_run(run: dict[str, Any]) -> bool:
+    counts = run.get("counts", {})
+    failed_tests = int(counts.get("failed", 0)) + int(counts.get("errors", 0))
+    return failed_tests == 0 and int(run.get("exit_code", 0)) == 0
+
+
+def _case_outcomes(runs: list[dict[str, Any]]) -> dict[str, set[str]]:
+    outcomes: dict[str, set[str]] = {}
+    for run in runs:
+        failures = {
+            str(failure.get("nodeid", "<unknown>"))
+            for failure in run.get("failures", [])
+        }
+        for nodeid in failures:
+            outcomes.setdefault(nodeid, set()).add("failed")
+        for case in run.get("cases", []):
+            nodeid = str(case.get("nodeid", "<unknown>"))
+            status = str(case.get("status", "unknown"))
+            if status in {"passed", "failed", "error"}:
+                outcomes.setdefault(nodeid, set()).add(status)
+    return outcomes
+
+
+def build_rollup(runs: list[dict[str, Any]]) -> dict[str, Any]:
+    """Build aggregate test-health history metrics from run summaries."""
+    suites: dict[str, dict[str, Any]] = {}
+    failing_nodeids: dict[str, int] = {}
+    classification_counts: dict[str, int] = {}
+    latest_green_failures_by_suite: dict[str, set[str]] = {}
+    newest_failures_by_suite: dict[str, set[str]] = {}
+
+    for run in reversed(runs):
+        suite = str(run.get("suite", "unknown"))
+        failures = {
+            str(failure.get("nodeid", "<unknown>"))
+            for failure in run.get("failures", [])
+        }
+        if _green_run(run):
+            latest_green_failures_by_suite[suite] = set()
+        else:
+            newest_failures_by_suite[suite] = failures
+
+    for run in runs:
+        suite = str(run.get("suite", "unknown"))
+        counts = run.get("counts", {})
+        bucket = suites.setdefault(
+            suite,
+            {
+                "run_count": 0,
+                "failure_count": 0,
+                "test_failure_count": 0,
+                "unique_failing_tests": set(),
+                "skipped": 0,
+                "green_count": 0,
+            },
+        )
+        bucket["run_count"] += 1
+        failed_tests = int(counts.get("failed", 0)) + int(counts.get("errors", 0))
+        bucket["test_failure_count"] += failed_tests
+        bucket["skipped"] += int(counts.get("skipped", 0))
+        if _green_run(run):
+            bucket["green_count"] += 1
+        else:
+            bucket["failure_count"] += 1
+        for failure in run.get("failures", []):
+            nodeid = str(failure.get("nodeid", "<unknown>"))
+            bucket["unique_failing_tests"].add(nodeid)
+            failing_nodeids[nodeid] = failing_nodeids.get(nodeid, 0) + 1
+            classification = str(failure.get("classification", "unknown"))
+            classification_counts[classification] = (
+                classification_counts.get(classification, 0) + 1
+            )
+
+    rendered_suites: dict[str, dict[str, Any]] = {}
+    for suite, stats in suites.items():
+        run_count = int(stats["run_count"])
+        rendered_suites[suite] = {
+            "run_count": run_count,
+            "failure_count": stats["failure_count"],
+            "pass_rate": round(stats["green_count"] / run_count, 4)
+            if run_count
+            else 0.0,
+            "test_failure_count": stats["test_failure_count"],
+            "unique_failing_tests": len(stats["unique_failing_tests"]),
+            "skipped": stats["skipped"],
+        }
+
+    outcomes = _case_outcomes(runs)
+    flaky_candidates = sorted(
+        nodeid
+        for nodeid, statuses in outcomes.items()
+        if "failed" in statuses and "passed" in statuses
+    )
+    new_failures: dict[str, list[str]] = {}
+    for suite, failures in newest_failures_by_suite.items():
+        baseline_failures = latest_green_failures_by_suite.get(suite, set())
+        new_failures[suite] = sorted(failures - baseline_failures)
+
+    return {
+        "run_count": len(runs),
+        "suites": rendered_suites,
+        "top_failing_nodeids": dict(
+            sorted(failing_nodeids.items(), key=lambda item: (-item[1], item[0]))[:10]
+        ),
+        "classification_counts": dict(sorted(classification_counts.items())),
+        "flaky_candidates": flaky_candidates,
+        "new_failures": new_failures,
+    }
+
+
+def format_rollup_markdown(rollup: dict[str, Any]) -> str:
+    """Render a test-health rollup as GitHub job-summary friendly Markdown."""
+    lines = ["# Test Health Rollup", "", f"Runs analyzed: {rollup['run_count']}", ""]
+    suites = rollup.get("suites", {})
+    if suites:
+        lines.extend(
+            [
+                "## Suites",
+                "",
+                "| Suite | Runs | Non-green | Pass rate | Test failures | Unique failing tests | Skipped |",
+                "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+            ]
+        )
+        for suite, stats in sorted(suites.items()):
+            lines.append(
+                f"| {suite} | {stats['run_count']} | {stats['failure_count']} | "
+                f"{stats['pass_rate']:.1%} | {stats['test_failure_count']} | "
+                f"{stats['unique_failing_tests']} | {stats['skipped']} |"
+            )
+        lines.append("")
+    else:
+        lines.extend(["No test-health runs found.", ""])
+
+    classification_counts = rollup.get("classification_counts", {})
+    if classification_counts:
+        lines.extend(["## Failure Classifications", ""])
+        for classification, count in classification_counts.items():
+            lines.append(f"- `{classification}`: {count}")
+        lines.append("")
+
+    new_failures = rollup.get("new_failures", {})
+    if new_failures:
+        lines.extend(["## New Failures", ""])
+        for suite, nodeids in sorted(new_failures.items()):
+            for nodeid in nodeids[:10]:
+                lines.append(f"- `{suite}`: `{nodeid}`")
+        lines.append("")
+
+    flaky_candidates = rollup.get("flaky_candidates", [])
+    if flaky_candidates:
+        lines.extend(["## Flaky Candidates", ""])
+        for nodeid in flaky_candidates[:10]:
+            lines.append(f"- `{nodeid}`")
+        lines.append("")
+
+    top_failing_nodeids = rollup.get("top_failing_nodeids", {})
+    if top_failing_nodeids:
+        lines.extend(["## Top Failing Nodeids", ""])
+        for nodeid, count in top_failing_nodeids.items():
+            lines.append(f"- {count}x `{nodeid}`")
+        lines.append("")
+
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _rollup(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(description="Summarize test-health history.")
+    parser.add_argument("--last", type=int, default=30)
+    parser.add_argument("--reports-dir", type=Path, default=DEFAULT_REPORTS_DIR)
+    parser.add_argument(
+        "--suite",
+        help="Optionally aggregate matching JUnit XML into this suite before rollup.",
+    )
+    parser.add_argument("--run-id")
+    parser.add_argument("--junit", action="append", default=[])
+    parser.add_argument("--junit-glob", action="append", default=[])
+    parser.add_argument("--command", default="")
+    parser.add_argument("--exit-code", type=int, default=0)
+    parser.add_argument(
+        "--classifier-config",
+        type=Path,
+        default=CLASSIFIERS_PATH,
+        help="YAML failure-classifier rules.",
+    )
+    parser.add_argument(
+        "--markdown-out",
+        type=Path,
+        help="Write a Markdown rollup artifact for CI summaries.",
+    )
+    parser.add_argument(
+        "--github-step-summary",
+        action="store_true",
+        help="Append Markdown rollup to $GITHUB_STEP_SUMMARY when available.",
+    )
+    args = parser.parse_args(argv)
+
+    if args.junit or args.junit_glob:
+        if not args.suite:
+            parser.error("--suite is required when --junit or --junit-glob is used")
+        run_id = args.run_id or _default_run_id(args.suite)
+        summary_path = _write_junit_summary(
+            suite=args.suite,
+            run_id=run_id,
+            reports_dir=args.reports_dir,
+            junit_paths=args.junit,
+            junit_globs=args.junit_glob,
+            command=args.command,
+            exit_code=args.exit_code,
+            classifier_config_path=args.classifier_config,
+        )
+        if summary_path is None:
+            return 2
+
+    rollup = build_rollup(_read_run_summaries(args.reports_dir, args.last))
+    print(f"Test health rollup: last {rollup['run_count']} runs")
+    for suite, stats in sorted(rollup["suites"].items()):
+        print(
+            f"- {suite}: runs={stats['run_count']} "
+            f"non_green={stats['failure_count']} "
+            f"pass_rate={stats['pass_rate']:.1%} "
+            f"test_failures={stats['test_failure_count']} "
+            f"unique_failing_tests={stats['unique_failing_tests']} "
+            f"skipped={stats['skipped']}"
+        )
+    if rollup["classification_counts"]:
+        print("Failure classifications:")
+        for classification, count in rollup["classification_counts"].items():
+            print(f"- {classification}: {count}")
+    if rollup["flaky_candidates"]:
+        print("Flaky candidates:")
+        for nodeid in rollup["flaky_candidates"][:10]:
+            print(f"- {nodeid}")
+    if rollup["new_failures"]:
+        print("New failures:")
+        for suite, nodeids in sorted(rollup["new_failures"].items()):
+            for nodeid in nodeids[:10]:
+                print(f"- {suite}: {nodeid}")
+    if rollup["top_failing_nodeids"]:
+        print("Top failing nodeids:")
+        for nodeid, count in rollup["top_failing_nodeids"].items():
+            print(f"- {count}x {nodeid}")
+    if args.markdown_out or args.github_step_summary:
+        markdown = format_rollup_markdown(rollup)
+        if args.markdown_out:
+            args.markdown_out.parent.mkdir(parents=True, exist_ok=True)
+            args.markdown_out.write_text(markdown, encoding="utf-8")
+            print(f"Markdown rollup: {_relative_to_root(args.markdown_out)}")
+        step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
+        if args.github_step_summary and step_summary:
+            Path(step_summary).parent.mkdir(parents=True, exist_ok=True)
+            with Path(step_summary).open("a", encoding="utf-8") as handle:
+                handle.write(markdown)
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = list(sys.argv[1:] if argv is None else argv)
+    if not args or args[0] in {"--help", "-h"}:
+        print(
+            "Usage:\n"
+            "  python -m scripts.engineering.qa run-tests --suite SUITE [-- pytest args]\n"
+            "  python -m scripts.engineering.qa summarize-junit --suite SUITE --junit-glob 'reports/**/*.xml'\n"
+            "  python -m scripts.engineering.qa test-health --last 30 [--suite SUITE --junit-glob 'reports/**/*.xml']"
+        )
+        return 0
+    command, rest = args[0], args[1:]
+    if command == "run-tests":
+        return _run_tests(rest)
+    if command == "summarize-junit":
+        return _summarize_junit(rest)
+    if command == "test-health":
+        return _rollup(rest)
+    print(f"Unknown test-health command: {command}", file=sys.stderr)
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

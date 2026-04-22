@@ -167,19 +167,27 @@ class TestNormalizeOntologyID:
 
     def test_normalize_ontology_id_bto(self) -> None:
         """Test BTO ontology ID normalization."""
-        assert (
-            normalize_ontology_id("BTO:0000089") == "BTO:0000089"
-        )  # Keeps colon format (not in prefix list)
-        assert (
-            normalize_ontology_id("bto:0000089") == "bto:0000089"
-        )  # Unknown prefix preserved
+        assert normalize_ontology_id("BTO:0000089") == "BTO_0000089"
+        assert normalize_ontology_id("bto:0000089") == "BTO_0000089"
+        assert normalize_ontology_id("bto_0000089") == "BTO_0000089"
 
     def test_normalize_ontology_id_caloha(self) -> None:
         """Test CALOHA ID normalization."""
+        assert normalize_ontology_id("TS-1234") == "TS-1234"
+        assert normalize_ontology_id("ts-1234") == "TS-1234"
+        assert normalize_ontology_id("CALOHA:1234") == "TS-1234"
+        assert normalize_ontology_id("caloha_ts-1234") == "TS-1234"
+
+    def test_normalize_ontology_id_obo_uri(self) -> None:
+        """Test OBO URI normalization."""
         assert (
-            normalize_ontology_id("TS-1234") == "TS-1234"
-        )  # Keeps original format (not in prefix list)
-        assert normalize_ontology_id("ts-1234") == "ts-1234"  # Unknown prefix preserved
+            normalize_ontology_id("https://purl.obolibrary.org/obo/BTO_0000089")
+            == "BTO_0000089"
+        )
+        assert (
+            normalize_ontology_id("http://purl.obolibrary.org/obo/BAO_0000190")
+            == "BAO_0000190"
+        )
 
     def test_normalize_ontology_id_zero_padding(self) -> None:
         """Test zero-padding for space format IDs."""

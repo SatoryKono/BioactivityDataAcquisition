@@ -49,6 +49,35 @@ PYTHONPATH=src bash scripts/engineering/dev/run_pytest_sharded.sh --stream --kee
 `run_pytest_sharded.sh` и его опций, а не заменять его новым независимым
 раннером.
 
+## Состояние реализации на 2026-04-22
+
+- Этап 1 выполнен: canonical lanes живут в
+  `configs/quality/test_matrix.yaml` под `test_lanes.lanes`, включая runner
+  backend metadata и единственный `coverage-verify` repo-wide coverage gate.
+- Этап 2 начат: `scripts/engineering/qa/test_health.py` агрегирует один или
+  несколько pytest JUnit XML файлов в
+  `reports/quality/test-runs/{run_id}.json`.
+- Этап 3 начат: `python -m scripts.engineering.qa run-tests --suite ...`
+  делегирует выполнение существующим `run_pytest.sh` /
+  `run_pytest_sharded.sh`, добавляет JUnit artifacts и пишет JSON summary.
+- Для мягкой CI-миграции добавлен `summarize-junit`, который агрегирует уже
+  существующие JUnit XML jobs в тот же JSON summary format.
+- Этап 4 начат минимально: `python -m scripts.engineering.qa test-health
+  --last 30` читает JSON summaries и показывает run/failure/skip rollup, top
+  failing nodeids, flaky candidates и новые падения. Эта же команда может
+  принять `--suite ... --junit-glob ...` и сначала агрегировать JUnit XML в JSON
+  summary, чтобы прямые `run_pytest_sharded.sh --junit-dir ...` запуски сразу
+  попадали в rollup.
+- Этап 5 начат: aggregator пишет эвристическую `classification` для failures
+  по `phase`, `message` и `file`; правила живут в
+  `configs/quality/test_health_classifiers.yaml` и могут быть переопределены
+  через `--classifier-config`.
+- Этап 6 начат: `test-health --markdown-out ...` может писать combined
+  Markdown rollup, а `--github-step-summary` добавляет его в
+  `$GITHUB_STEP_SUMMARY`. `.github/workflows/tests.yml` теперь собирает
+  test-health summaries из существующих JUnit artifacts в `duration-telemetry`;
+  PR reporting остается следующим шагом.
+
 ## Этап 1. Зафиксировать тестовые lanes
 
 Ввести именованные lanes, чтобы каждый запуск был сравнимым:

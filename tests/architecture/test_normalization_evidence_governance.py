@@ -31,3 +31,20 @@ def test_normalization_plan_references_governed_evidence_surfaces() -> None:
     assert "explicit_profile_coverage_pct" in plan_text
     assert "composite_join_key_policy_coverage_pct" in plan_text
     assert "control_plane_normalization_coverage_pct" in plan_text
+
+
+def test_normalization_plan_references_final_dq_schema_reconciliation() -> None:
+    plan_text = NORMALIZATION_PLAN_PATH.read_text(encoding="utf-8")
+
+    for matrix_column in (
+        "controlled_vocabulary_source",
+        "hash_ordering",
+        "strictness",
+        "schema_coverage",
+        "dq_coverage",
+    ):
+        assert matrix_column in plan_text
+
+    assert "test_chembl_enum_normalization_policy.py" in plan_text
+    assert "test_chembl_activity_flag_policy.py" in plan_text
+    assert "test_normalization_cross_layer_contracts.py" in plan_text

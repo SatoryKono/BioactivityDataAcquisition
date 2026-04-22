@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.normalization.identifiers import normalize_ontology_id
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 
 from ._chembl_activity_fields import (
@@ -59,6 +58,7 @@ _ENUM_FIELDS = {
     "standard_type": ACTIVITY_STANDARD_TYPES,
     "assay_type": ASSAY_TYPES,
 }
+_ONTOLOGY_ID_FIELDS = frozenset({"bao_format", "bao_endpoint", "uo_units"})
 
 _SPECIAL_RULE_COMPONENTS = {
     "canonical_smiles": (
@@ -71,18 +71,6 @@ _SPECIAL_RULE_COMPONENTS = {
             allowed_values=STANDARD_RELATIONS,
         ),
         "Normalize standard_relation to a canonical ASCII operator enum.",
-    ),
-    "bao_format": (
-        normalize_ontology_id,
-        "Normalize BAO ontology ID to underscore format (e.g., 'BAO:0000190' -> 'BAO_0000190').",
-    ),
-    "bao_endpoint": (
-        normalize_ontology_id,
-        "Normalize BAO endpoint ontology ID to underscore format.",
-    ),
-    "uo_units": (
-        normalize_ontology_id,
-        "Normalize Units Ontology ID to underscore format.",
     ),
     "assay_type": (
         lambda value: normalize_profile_enum(value, allowed_values=ASSAY_TYPES),
@@ -108,6 +96,7 @@ CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
     flag_fields={"standard_flag", "potential_duplicate", "manual_curation_flag"},
     operator_fields={"relation"},
     set_like_fields=SET_LIKE_FIELDS,
+    ontology_id_fields=_ONTOLOGY_ID_FIELDS,
     enum_fields={
         "standard_relation": STANDARD_RELATIONS,
         "standard_type": ACTIVITY_STANDARD_TYPES,

@@ -217,6 +217,14 @@ routes:
       - reports/junit/contract-results.xml
     notes: Contract test JUnit XML artifacts are uploaded from reports/junit.
 
+  - id: test-health-run-history
+    generator: scripts/engineering/qa/test_health.py
+    output_kind: test_report
+    commit_policy: ignored_local_output
+    outputs:
+      - reports/quality/test-runs/
+    notes: Test-health JUnit XML and JSON run summaries are runtime and CI artifacts.
+
   - id: architecture-debt-task-backlog-quality-report
     generator: scripts/engineering/qa/generate_architecture_debt_tasks.py
     output_kind: working_report

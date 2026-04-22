@@ -21,17 +21,24 @@ class FileSystemEnumLoader(EnumLoaderPort):
         """
         self.base_path = base_path
 
+    def load_provider_enums(
+        self,
+        provider: str,
+    ) -> dict[str, Any]:  # Any: Dynamic YAML content structure
+        """Load provider enum configurations from filesystem."""
+        from bioetl.infrastructure.config.enum_file_loader import (
+            load_provider_enums_from_file,
+        )
+
+        if self.base_path is None:
+            return load_provider_enums_from_file(provider)
+        return load_provider_enums_from_file(
+            provider,
+            self.base_path / "configs" / "enums" / f"{provider.strip().lower()}.yaml",
+        )
+
     def load_chembl_enums(
         self,
     ) -> dict[str, Any]:  # Any: Dynamic YAML content structure
         """Load ChEMBL enum configurations from filesystem."""
-        from bioetl.infrastructure.config.enum_file_loader import (
-            load_chembl_enums_from_file,
-        )
-
-        if self.base_path is None:
-            return load_chembl_enums_from_file()
-        else:
-            return load_chembl_enums_from_file(
-                self.base_path / "configs" / "enums" / "chembl.yaml"
-            )
+        return self.load_provider_enums("chembl")

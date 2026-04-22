@@ -680,8 +680,11 @@ jobs:
         timeout-minutes: 10
 
         steps:
-            -   name: Set up Python 3.11
-                uses: actions/setup-python@v5
+            -   name: Checkout code
+                uses: actions/checkout@v6
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
                 with:
                     python-version: "3.11"
 
@@ -691,6 +694,41 @@ jobs:
                     pattern: test-telemetry-*
                     path: reports/test-telemetry/raw
                     merge-multiple: true
+
+            -   name: Build test-health summaries
+                shell: bash
+                run: |
+                    mkdir -p reports/quality/test-runs
+                    shopt -s nullglob
+
+                    unit_junit=(reports/test-telemetry/raw/junit-fast.xml reports/test-telemetry/raw/junit.unit-*.xml)
+                    if [ "${#unit_junit[@]}" -gt 0 ]; then
+                      junit_args=()
+                      for junit_path in "${unit_junit[@]}"; do
+                        junit_args+=(--junit "$junit_path")
+                      done
+                      uv run python -m scripts.engineering.qa summarize-junit \
+                        --suite unit-fast \
+                        --run-id "unit-fast-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+                        --reports-dir reports/quality/test-runs \
+                        --command "tests.yml unit-fast shards" \
+                        "${junit_args[@]}"
+                    fi
+
+                    if [ -f reports/test-telemetry/raw/junit.integration.xml ]; then
+                      uv run python -m scripts.engineering.qa summarize-junit \
+                        --suite integration-replay \
+                        --run-id "integration-replay-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+                        --reports-dir reports/quality/test-runs \
+                        --junit reports/test-telemetry/raw/junit.integration.xml \
+                        --command "tests.yml integration shard"
+                    fi
+
+                    uv run python -m scripts.engineering.qa test-health \
+                      --reports-dir reports/quality/test-runs \
+                      --last 100 \
+                      --markdown-out reports/quality/test-runs/rollup.md \
+                      --github-step-summary
 
             -   name: Build slow-test duration summary
                 shell: bash
@@ -776,5 +814,14 @@ jobs:
                     path: |
                         reports/test-telemetry/slowest-tests.md
                         reports/test-telemetry/slowest-tests.json
+                    if-no-files-found: warn
+                    retention-days: 14
+
+            -   name: Upload test-health telemetry
+                if: always()
+                uses: actions/upload-artifact@v4
+                with:
+                    name: test-health-telemetry
+                    path: reports/quality/test-runs/
                     if-no-files-found: warn
                     retention-days: 14

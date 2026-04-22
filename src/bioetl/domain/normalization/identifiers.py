@@ -24,6 +24,9 @@ _PMID_URL_PREFIXES = (
     *(f"{scheme}://pubmed.ncbi.nlm.nih.gov/" for scheme in ("https", "http")),
     "pmid:",
 )
+_OBO_IRI_PREFIXES = (
+    *(f"{scheme}://purl.obolibrary.org/obo/" for scheme in ("https", "http")),
+)
 PMID_MAX_EXCLUSIVE = 10_000_000_000
 
 
@@ -102,7 +105,7 @@ ONTOLOGY_PREFIXES = {
     "EFO": "EFO_",  # Experimental Factor Ontology
     "UBERON": "UBERON_",  # Uber Anatomical Ontology
     "BTO": "BTO_",  # BRENDA Tissue Ontology
-    "CALOHA": "CALOHA_",  # CALOHA tissue/cell ontology
+    "CALOHA": "TS-",  # CALOHA tissue/cell ontology
     "BAO": "BAO_",  # BioAssay Ontology
     "GO": "GO_",  # Gene Ontology
     "CHEBI": "CHEBI_",  # Chemical Entities of Biological Interest
@@ -118,15 +121,27 @@ def _normalize_colon_format(value: str) -> str | None:
         prefix, id_part = value.split(":", 1)
         prefix = prefix.upper()
         if prefix in ONTOLOGY_PREFIXES:
+            if prefix == "CALOHA":
+                normalized_id_part = id_part.upper()
+                if normalized_id_part.startswith("TS-"):
+                    return normalized_id_part
             return f"{ONTOLOGY_PREFIXES[prefix]}{id_part}"
     return None
 
 
 def _normalize_underscore_format(value: str) -> str | None:
     """Handle underscore format ontology IDs (already correct format)."""
-    for prefix in ONTOLOGY_PREFIXES.values():
-        if value.startswith(prefix):
-            return value
+    upper_value = value.upper()
+    for prefix, canonical_prefix in ONTOLOGY_PREFIXES.items():
+        upper_canonical = canonical_prefix.upper()
+        if upper_value.startswith(upper_canonical):
+            return f"{canonical_prefix}{value[len(canonical_prefix) :]}"
+        underscore_prefix = f"{prefix}_"
+        if upper_value.startswith(underscore_prefix):
+            suffix = value[len(underscore_prefix) :]
+            if prefix == "CALOHA" and suffix.upper().startswith("TS-"):
+                return suffix.upper()
+            return f"{canonical_prefix}{suffix}"
     return None
 
 
@@ -137,6 +152,15 @@ def _normalize_space_format(value: str) -> str | None:
         prefix = ONTOLOGY_PREFIXES[parts[0].upper()]
         id_part = parts[1].zfill(7)  # Pad to 7 digits
         return f"{prefix}{id_part}"
+    return None
+
+
+def _normalize_obo_iri_format(value: str) -> str | None:
+    """Handle OBO IRIs such as purl.obolibrary.org/obo/GO_0008150."""
+    lowered = value.lower()
+    for prefix in _OBO_IRI_PREFIXES:
+        if lowered.startswith(prefix):
+            return _apply_normalization_strategies(value[len(prefix) :])
     return None
 
 
@@ -160,6 +184,7 @@ def _validate_input(value: str) -> str | None:
 def _apply_normalization_strategies(normalized: str) -> str:
     """Apply normalization strategies in priority order."""
     strategies = [
+        _normalize_obo_iri_format,
         _normalize_colon_format,
         _normalize_underscore_format,
         _normalize_space_format,

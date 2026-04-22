@@ -5,7 +5,7 @@ Class: published
 Owner: Architecture / Domain
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-10'
+Last verified: '2026-04-22'
 ---
 
 # Normalization Plan P0-P6
@@ -281,6 +281,53 @@ Governance rules:
   compatibility-only shim and is not a sanctioned new first-party import style
 - join-key policies must remain part of the same normalization evidence story as entity profiles
 - drift between plan, registry, matrix, and fallback inventory is a governance defect
+
+## 2026-04-22 Final Profile/DQ/Schema Reconciliation
+
+Issue `#3018` closes the normalization audit by making profile, schema, DQ,
+and reference visibility explicit in the generated matrix instead of relying on
+manual provider prose.
+
+Generated inventory contract:
+
+- source inputs are shipped entity configs, Silver Arrow schemas, domain Pandera
+  schemas, active normalization profiles, DQ configs, and composite join-key
+  configs
+- each field row publishes `provider`, `pipeline_name`, `entity`, `field_name`,
+  `normalizer`, `controlled_vocabulary_source`, `include_in_content_hash`,
+  `set_like`, `hash_ordering`, `strictness`, `schema_coverage`, and
+  `dq_coverage`
+- `controlled_vocabulary_source` points to `configs/enums/chembl.yaml`,
+  `configs/enums/uniprot.yaml`, or the explicit profile/domain vocabulary seam
+  when a field is not backed by a provider YAML enum file
+- `schema_coverage` reports both Silver Arrow presence and domain schema
+  presence/nullability/check visibility
+- `dq_coverage` reports configured DQ validation type and effective severity,
+  or `not_configured` when invalid values are intentionally handled only by
+  normalization/schema behavior
+
+Governed field-family visibility:
+
+| Family | Profile source | Schema/DQ visibility | Hash/migration note |
+| --- | --- | --- | --- |
+| ChEMBL strict enum and operator fields | `enum_fields`, special enum/operator rules, and `configs/enums/chembl.yaml` | `tests/contract/test_chembl_enum_normalization_policy.py` verifies profile/schema/DQ/filter alignment for strict ChEMBL enum fields | Invalid values collapse before `content_hash`; canonical enum casing may change hashes for previously dirty values |
+| ChEMBL activity flags | `flag_fields` on `chembl.activity` | `tests/contract/test_chembl_activity_flag_policy.py` verifies profile/schema/DQ range alignment for `standard_flag`, `potential_duplicate`, and `manual_curation_flag` | Persisted canonical values are integer `0`/`1`; molecule binary-like fields remain separately governed by their current profile/schema contracts |
+| DOI/PMID/PMC identifiers | `doi_fields`, `pmid_fields`, and `pmc_id_fields` | `tests/contract/test_normalization_cross_layer_contracts.py` verifies helper, value-object, schema, profile, and processor convergence for publication identifiers | Canonical identifier cleanup can change hashes for dirty casing, URL prefixes, leading zeros, or PMC prefix variants |
+| JSON/list canonicalization | `json_string_fields` plus `set_like_fields` | Matrix `hash_ordering` exposes `set_like` versus `order_sensitive`; cross-layer tests verify set-like hash invariance | Only explicit `set_like` fields are permutation-invariant; order-sensitive lists continue to affect `content_hash` |
+| Boolean, flag, operator, and unit families | `boolean_fields`, `flag_fields`, `operator_fields`, and `unit_fields` | Matrix `strictness`, `schema_coverage`, and `dq_coverage` expose whether schema/DQ also validates the field | Invalid operational values either collapse to `None` before hashing or are rejected by schema/DQ where configured |
+| Ontology identifiers | `ontology_id_fields` | Matrix rows expose `domain.normalization.ontology_id_prefixes` as the vocabulary seam | OBO IRIs, lowercase prefixes, and numeric suffix variants canonicalize before hashing |
+| Pseudo-null collapse | provider pseudo-null field sets | Matrix `strictness=normalization_only` and field notes identify collapse-to-`None` behavior | Collapsing sentinel values to `None` changes hashes only for records that previously carried pseudo-null text |
+
+Verification commands for this closure:
+
+```bash
+uv run pytest tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py tests/unit/scripts/test_generate_chembl_activity_field_matrix.py -q
+uv run pytest tests/contract/test_normalization_cross_layer_contracts.py tests/contract/silver_schemas -q
+uv run pytest tests/integration/config/test_dq_config_loading.py -q
+uv run pytest tests/unit/application/services/test_dq_report_service.py -q
+uv run python -m scripts.docs build-site --strict --clean --site-dir /tmp/docs-site-strict
+uv run ruff check src/bioetl tests
+```
 
 ## P0 - Update and Publish the Plan
 

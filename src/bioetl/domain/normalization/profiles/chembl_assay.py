@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.normalization.identifiers import normalize_ontology_id
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
@@ -81,12 +80,7 @@ def create_case_normalizer(strategy: str = "uppercase"):
     return normalizer
 
 
-_SPECIAL_RULE_COMPONENTS = {
-    "bao_format": (
-        normalize_ontology_id,
-        "Normalize BAO ontology ID to underscore format (e.g., 'BAO:0000190' -> 'BAO_0000190').",
-    ),
-}
+_ONTOLOGY_ID_FIELDS = frozenset({"bao_format"})
 
 # Enum fields for strict validation
 _ENUM_FIELDS = {
@@ -107,8 +101,8 @@ CHEMBL_ASSAY_PROFILE = build_standard_profile(
     int_fields=_INT_FIELDS,
     float_fields=_FLOAT_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
+    ontology_id_fields=_ONTOLOGY_ID_FIELDS,
     enum_fields=_ENUM_FIELDS,
-    special_rules=_SPECIAL_RULE_COMPONENTS,
     null_fields=_NULL_FIELDS,
 )
 

@@ -57,6 +57,10 @@ _SET_LIKE_FIELDS = frozenset(
         "pfam_xrefs",
         "reactome_xrefs",
         "secondary_accessions",
+        "isoform_ids",
+        "protein_alternative_names",
+        "protein_ec_numbers",
+        "protein_short_names",
     }
 )
 _JSON_STRING_FIELDS = frozenset(
@@ -65,6 +69,11 @@ _JSON_STRING_FIELDS = frozenset(
         "biophysicochemical_properties",
         "cofactors",
         "features_json",
+        "isoform_ids",
+        "lineage",
+        "protein_alternative_names",
+        "protein_ec_numbers",
+        "protein_short_names",
     }
 )
 _BOOLEAN_FIELDS = frozenset({"reviewed"})

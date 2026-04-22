@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: E402
 """Generate deterministic normalization field-matrix artifacts for all pipelines."""
 
 from __future__ import annotations
@@ -8,6 +9,7 @@ import csv
 import io
 import sys
 from datetime import UTC, datetime
+from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
@@ -52,6 +54,36 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_json_string,
     normalize_profile_passthrough,
 )
+from bioetl.domain.schemas.chembl.activity import ActivitySchema
+from bioetl.domain.schemas.chembl.assay import AssaySchema
+from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
+from bioetl.domain.schemas.chembl.cell_line import CellLineSchema
+from bioetl.domain.schemas.chembl.compound_record import CompoundRecordSchema
+from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
+from bioetl.domain.schemas.chembl.protein_classification import (
+    ProteinClassificationSchema,
+)
+from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
+from bioetl.domain.schemas.chembl.publication_similarity import (
+    PublicationSimilaritySchema,
+)
+from bioetl.domain.schemas.chembl.publication_term import PublicationTermSchema
+from bioetl.domain.schemas.chembl.subcellular_fraction import (
+    SubcellularFractionSchema,
+)
+from bioetl.domain.schemas.chembl.target import TargetSchema
+from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
+from bioetl.domain.schemas.chembl.tissue import TissueSchema
+from bioetl.domain.schemas.crossref.publication import PublicationEnrichedSchema
+from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
+from bioetl.domain.schemas.pubchem.compound import PubchemMoleculeSchema
+from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
+from bioetl.domain.schemas.semanticscholar.publication import (
+    SemanticScholarPublicationSchema,
+)
+from bioetl.domain.schemas.uniprot.idmapping import IDMappingSchema
+from bioetl.domain.schemas.uniprot.protein import UniprotTargetSchema
+from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
     CHEMBL_ASSAY_PARAMETERS_SCHEMA,
@@ -84,15 +116,22 @@ CSV_NAME = "pipeline_normalization_field_matrix.csv"
 MD_NAME = "pipeline_normalization_field_matrix.md"
 
 CSV_COLUMNS = (
+    "provider",
     "pipeline_name",
     "pipeline_kind",
+    "entity",
     "field_name",
     "field_type",
     "normalization_source",
     "normalizer",
     "normalization_summary",
+    "controlled_vocabulary_source",
     "include_in_content_hash",
     "set_like",
+    "hash_ordering",
+    "strictness",
+    "schema_coverage",
+    "dq_coverage",
     "notes",
 )
 ENTITY_PIPELINE_KIND = "entity"
@@ -153,6 +192,49 @@ ENTITY_SILVER_SCHEMA_REGISTRY: dict[str, Any] = {
     "uniprot_protein": UNIPROT_PROTEIN_SCHEMA,
 }
 
+ENTITY_DOMAIN_SCHEMA_REGISTRY: dict[str, Any] = {
+    "chembl_activity": ActivitySchema,
+    "chembl_assay": AssaySchema,
+    "chembl_assay_parameters": AssayParametersSchema,
+    "chembl_cell_line": CellLineSchema,
+    "chembl_compound_record": CompoundRecordSchema,
+    "chembl_molecule": MoleculeSchema,
+    "chembl_protein_class": ProteinClassificationSchema,
+    "chembl_publication": ChemblPublicationSchema,
+    "chembl_publication_similarity": PublicationSimilaritySchema,
+    "chembl_publication_term": PublicationTermSchema,
+    "chembl_subcellular_fraction": SubcellularFractionSchema,
+    "chembl_target": TargetSchema,
+    "chembl_target_component": TargetComponentSchema,
+    "chembl_tissue": TissueSchema,
+    "crossref_publication": PublicationEnrichedSchema,
+    "openalex_publication": OpenAlexPublicationSchema,
+    "pubchem_compound": PubchemMoleculeSchema,
+    "pubmed_publication": PubMedPublicationSchema,
+    "semanticscholar_publication": SemanticScholarPublicationSchema,
+    "uniprot_idmapping": IDMappingSchema,
+    "uniprot_protein": UniprotTargetSchema,
+}
+
+ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
+    ("chembl", "activity", "assay_type"): "configs/enums/chembl.yaml",
+    ("chembl", "activity", "data_validity_comment"): "configs/enums/chembl.yaml",
+    ("chembl", "activity", "standard_relation"): "configs/enums/chembl.yaml",
+    ("chembl", "activity", "standard_type"): "configs/enums/chembl.yaml",
+    ("chembl", "assay", "assay_category"): "configs/enums/chembl.yaml",
+    ("chembl", "assay", "assay_group"): "configs/enums/chembl.yaml",
+    ("chembl", "assay", "assay_test_type"): "configs/enums/chembl.yaml",
+    ("chembl", "assay", "assay_type"): "configs/enums/chembl.yaml",
+    ("chembl", "assay", "confidence_description"): "configs/enums/chembl.yaml",
+    ("chembl", "assay", "relationship_type"): "configs/enums/chembl.yaml",
+    ("chembl", "molecule", "molecule_type"): "configs/enums/chembl.yaml",
+    ("chembl", "molecule", "structure_type"): "configs/enums/chembl.yaml",
+    ("chembl", "target", "target_type"): "configs/enums/chembl.yaml",
+    ("uniprot", "protein", "entry_type"): "configs/enums/uniprot.yaml",
+    ("uniprot", "protein", "flag"): "configs/enums/uniprot.yaml",
+    ("uniprot", "protein", "protein_existence"): "configs/enums/uniprot.yaml",
+}
+
 COMPOSITE_GOLD_SCHEMA_TYPE_REGISTRY: dict[str, str] = {
     "composite_activity": "unknown",
     "composite_assay": "unknown",
@@ -193,6 +275,162 @@ def _normalizer_name(
     if field_name == "isomeric_smiles" or "isomeric smiles" in normalized_notes:
         return "normalize_profile_isomeric_smiles"
     return "lambda"
+
+
+def _controlled_vocabulary_source(
+    *,
+    provider: str,
+    entity: str,
+    field_name: str,
+    normalizer_name: str,
+    notes: str,
+) -> str:
+    configured_source = ENUM_CONFIG_SOURCES.get((provider, entity, field_name))
+    if configured_source is not None:
+        return configured_source
+
+    normalized_notes = notes.casefold()
+    if "enum field" in normalized_notes or "allowed values" in normalized_notes:
+        return f"profile:{provider}.{entity}"
+    if "operator" in normalizer_name or "operator" in normalized_notes:
+        return "domain.normalization.rules.operator_aliases"
+    if "unit" in normalizer_name or "unit" in normalized_notes:
+        return "domain.normalization.rules.unit_aliases"
+    if "ontology id" in normalized_notes or "ontology_id" in normalizer_name:
+        return "domain.normalization.ontology_id_prefixes"
+    return ""
+
+
+def _hash_ordering(*, include_in_hash: bool | None, set_like: bool) -> str:
+    if include_in_hash is False:
+        return "not_hashed"
+    if set_like:
+        return "set_like"
+    return "order_sensitive"
+
+
+def _strictness(
+    *,
+    field_name: str,
+    normalization_source: str,
+    normalizer_name: str,
+    notes: str,
+) -> str:
+    normalized_notes = notes.casefold()
+    if normalization_source == "composite_join_key_policy":
+        return "join_key_policy"
+    if normalization_source == "upstream_inherited":
+        return "upstream_inherited"
+    if normalizer_name == "normalize_profile_passthrough":
+        return "technical_passthrough"
+    if field_name.endswith("_flag") or normalizer_name == "normalize_profile_binary_flag":
+        return "strict_flag"
+    if "operator" in normalizer_name or "operator" in normalized_notes:
+        return "strict_operator"
+    if "enum" in normalized_notes or "allowed values" in normalized_notes:
+        return "strict_enum"
+    if "unit" in normalizer_name or "unit" in normalized_notes:
+        return "controlled_unit"
+    if "ontology id" in normalized_notes or "ontology_id" in normalizer_name:
+        return "canonical_ontology_id"
+    if normalizer_name in {
+        "normalize_profile_doi",
+        "normalize_profile_pmid",
+        "normalize_profile_pmc_id",
+    }:
+        return "canonical_identifier"
+    if normalizer_name == "normalize_profile_json_string":
+        return "canonical_json"
+    if normalizer_name == "normalize_profile_boolean":
+        return "strict_boolean"
+    return "normalization_only"
+
+
+def _check_type_for_check(check: Any) -> str | None:
+    check_fn = str(getattr(check, "_check_fn", ""))
+    markers = (
+        ("isin", ("isin",)),
+        ("ge", ("ge", "greater_than_or_equal")),
+        ("le", ("le", "less_than_or_equal")),
+        ("gt", ("gt",)),
+        ("lt", ("lt",)),
+        ("str_length", ("str_length",)),
+    )
+    for check_type, values in markers:
+        if any(value in check_fn for value in values):
+            return check_type
+    return None
+
+
+@lru_cache(maxsize=None)
+def _domain_schema_field_coverage_by_pipeline(pipeline_name: str) -> dict[str, str]:
+    schema_model = ENTITY_DOMAIN_SCHEMA_REGISTRY.get(pipeline_name)
+    if schema_model is None:
+        return {}
+    schema = schema_model.to_schema()
+    coverage: dict[str, str] = {}
+    for column_name, column in schema.columns.items():
+        check_types = sorted(
+            {
+                check_type
+                for check in column.checks
+                if (check_type := _check_type_for_check(check)) is not None
+            }
+        )
+        checks = "+".join(check_types) if check_types else "none"
+        coverage[column_name] = (
+            f"domain_schema:present(nullable={column.nullable},checks={checks})"
+        )
+    return coverage
+
+
+def _schema_coverage(
+    *,
+    pipeline_name: str,
+    field_name: str,
+    arrow_nullable: bool,
+) -> str:
+    domain_coverage = _domain_schema_field_coverage_by_pipeline(pipeline_name).get(
+        field_name
+    )
+    if domain_coverage is None:
+        return f"silver_arrow:present(nullable={arrow_nullable});domain_schema:missing"
+    return f"silver_arrow:present(nullable={arrow_nullable});{domain_coverage}"
+
+
+@lru_cache(maxsize=None)
+def _dq_rule_coverage_by_field(provider: str, entity: str) -> dict[str, str]:
+    dq_config = _load_dq_config(provider, entity)
+    if dq_config is None:
+        return {}
+
+    rules_by_field: dict[str, list[Any]] = {}
+    for rule in dq_config.field_validations:
+        rules_by_field.setdefault(rule.field, []).append(rule)
+    return {
+        field_name: ",".join(
+            f"{rule.validation_type}:{rule.effective_severity(is_enricher=False)}"
+            for rule in sorted(rules, key=lambda rule: rule.validation_type)
+        )
+        for field_name, rules in rules_by_field.items()
+    }
+
+
+@lru_cache(maxsize=None)
+def _load_dq_config(provider: str, entity: str) -> Any | None:
+    try:
+        return DQConfigLoader(Path("configs")).load(provider, entity)
+    except (FileNotFoundError, ValueError, TypeError):
+        return None
+
+
+def _dq_coverage(*, provider: str, entity: str, field_name: str) -> str:
+    if provider != "composite" and _load_dq_config(provider, entity) is None:
+        return "dq_config:unavailable"
+    coverage = _dq_rule_coverage_by_field(provider, entity).get(field_name)
+    if coverage is None:
+        return "not_configured"
+    return coverage
 
 
 def _entity_config_paths() -> list[Path]:
@@ -336,9 +574,12 @@ def _build_entity_rows_for_pipeline(
         if profile_rule is not None:
             rows.append(
                 _entity_profile_row(
+                    provider=provider,
+                    entity=entity,
                     pipeline_name=pipeline_name,
                     field_name=field_name,
                     field_type=field_type,
+                    arrow_nullable=field.nullable,
                     profile_rule=profile_rule,
                 )
             )
@@ -351,9 +592,12 @@ def _build_entity_rows_for_pipeline(
         )
         rows.append(
             _entity_fallback_row(
+                provider=provider,
+                entity=entity,
                 pipeline_name=pipeline_name,
                 field_name=field_name,
                 field_type=field_type,
+                arrow_nullable=field.nullable,
                 source=source,
                 normalizer=normalizer,
                 summary=summary,
@@ -364,51 +608,113 @@ def _build_entity_rows_for_pipeline(
 
 def _entity_profile_row(
     *,
+    provider: str,
+    entity: str,
     pipeline_name: str,
     field_name: str,
     field_type: str,
+    arrow_nullable: bool,
     profile_rule: Any,
 ) -> dict[str, str]:
     """Build one entity matrix row sourced from an explicit profile rule."""
     notes = profile_rule.notes or ""
+    normalizer_name = _normalizer_name(
+        profile_rule.normalizer,
+        field_name=field_name,
+        notes=profile_rule.notes,
+    )
     return {
+        "provider": provider,
         "pipeline_name": pipeline_name,
         "pipeline_kind": ENTITY_PIPELINE_KIND,
+        "entity": entity,
         "field_name": field_name,
         "field_type": field_type,
         "normalization_source": PROFILE_NORMALIZATION_SOURCE,
-        "normalizer": _normalizer_name(
-            profile_rule.normalizer,
-            field_name=field_name,
-            notes=profile_rule.notes,
-        ),
+        "normalizer": normalizer_name,
         "normalization_summary": notes,
+        "controlled_vocabulary_source": _controlled_vocabulary_source(
+            provider=provider,
+            entity=entity,
+            field_name=field_name,
+            normalizer_name=normalizer_name,
+            notes=notes,
+        ),
         "include_in_content_hash": _render_bool(profile_rule.include_in_hash),
         "set_like": _render_bool(profile_rule.set_like),
+        "hash_ordering": _hash_ordering(
+            include_in_hash=profile_rule.include_in_hash,
+            set_like=profile_rule.set_like,
+        ),
+        "strictness": _strictness(
+            field_name=field_name,
+            normalization_source=PROFILE_NORMALIZATION_SOURCE,
+            normalizer_name=normalizer_name,
+            notes=notes,
+        ),
+        "schema_coverage": _schema_coverage(
+            pipeline_name=pipeline_name,
+            field_name=field_name,
+            arrow_nullable=arrow_nullable,
+        ),
+        "dq_coverage": _dq_coverage(
+            provider=provider,
+            entity=entity,
+            field_name=field_name,
+        ),
         "notes": notes,
     }
 
 
 def _entity_fallback_row(
     *,
+    provider: str,
+    entity: str,
     pipeline_name: str,
     field_name: str,
     field_type: str,
+    arrow_nullable: bool,
     source: str,
     normalizer: str,
     summary: str,
 ) -> dict[str, str]:
     """Build one entity matrix row sourced from fallback normalization policy."""
     return {
+        "provider": provider,
         "pipeline_name": pipeline_name,
         "pipeline_kind": ENTITY_PIPELINE_KIND,
+        "entity": entity,
         "field_name": field_name,
         "field_type": field_type,
         "normalization_source": source,
         "normalizer": normalizer,
         "normalization_summary": summary,
+        "controlled_vocabulary_source": _controlled_vocabulary_source(
+            provider=provider,
+            entity=entity,
+            field_name=field_name,
+            normalizer_name=normalizer,
+            notes=summary,
+        ),
         "include_in_content_hash": "",
         "set_like": FALSE_TEXT,
+        "hash_ordering": "fallback_policy",
+        "strictness": _strictness(
+            field_name=field_name,
+            normalization_source=source,
+            normalizer_name=normalizer,
+            notes=summary,
+        ),
+        "schema_coverage": _schema_coverage(
+            pipeline_name=pipeline_name,
+            field_name=field_name,
+            arrow_nullable=arrow_nullable,
+        ),
+        "dq_coverage": _dq_coverage(
+            provider=provider,
+            entity=entity,
+            field_name=field_name,
+        ),
         "notes": "",
     }
 
@@ -498,17 +804,27 @@ def _composite_row(
     """Build one composite matrix row."""
     source, normalizer, summary, notes = _composite_field_policy(field_name, join_keys)
     return {
+        "provider": "composite",
         "pipeline_name": pipeline_name,
         "pipeline_kind": COMPOSITE_PIPELINE_KIND,
+        "entity": pipeline_name.removeprefix("composite_"),
         "field_name": field_name,
-        "field_type": COMPOSITE_GOLD_SCHEMA_TYPE_REGISTRY.get(
-            pipeline_name, "unknown"
-        ),
+        "field_type": COMPOSITE_GOLD_SCHEMA_TYPE_REGISTRY.get(pipeline_name, "unknown"),
         "normalization_source": source,
         "normalizer": normalizer,
         "normalization_summary": summary,
+        "controlled_vocabulary_source": "",
         "include_in_content_hash": "",
         "set_like": FALSE_TEXT,
+        "hash_ordering": "not_applicable",
+        "strictness": _strictness(
+            field_name=field_name,
+            normalization_source=source,
+            normalizer_name=normalizer,
+            notes=summary,
+        ),
+        "schema_coverage": "gold_contract:inherited",
+        "dq_coverage": "not_applicable",
         "notes": notes,
     }
 
@@ -621,7 +937,8 @@ def build_entity_profile_coverage_kpi(
     rows: list[dict[str, str]] | None = None,
 ) -> dict[str, object]:
     entity_rows = [
-        row for row in (build_field_matrix_rows() if rows is None else rows)
+        row
+        for row in (build_field_matrix_rows() if rows is None else rows)
         if row["pipeline_kind"] == ENTITY_PIPELINE_KIND
     ]
     entity_field_count = len(entity_rows)
@@ -631,7 +948,9 @@ def build_entity_profile_coverage_kpi(
         if row["normalization_source"] == PROFILE_NORMALIZATION_SOURCE
     )
     value_pct = round(
-        (explicit_profile_field_count * 100 / entity_field_count) if entity_field_count else 0.0,
+        (explicit_profile_field_count * 100 / entity_field_count)
+        if entity_field_count
+        else 0.0,
         2,
     )
     return {
@@ -829,16 +1148,14 @@ def _runtime_anchor_status_covered(runtime_anchor_status: dict[str, object]) -> 
         runtime_anchor_status.get("effective_config_hash")
         == CANONICAL_EFFECTIVE_CONFIG_HASH
         and runtime_anchor_status.get("contract_ref") == CANONICAL_CONTRACT_REF
-        and runtime_anchor_status.get("contract_version")
-        == CANONICAL_CONTRACT_VERSION
+        and runtime_anchor_status.get("contract_version") == CANONICAL_CONTRACT_VERSION
     )
 
 
 def _checkpoint_context_covered(checkpoint_context: object) -> bool:
     """Return whether checkpoint context normalization preserves canonical anchors."""
     return (
-        checkpoint_context.effective_config_hash
-        == CANONICAL_EFFECTIVE_CONFIG_HASH
+        checkpoint_context.effective_config_hash == CANONICAL_EFFECTIVE_CONFIG_HASH
         and checkpoint_context.contract_ref == CANONICAL_CONTRACT_REF
         and checkpoint_context.contract_version == CANONICAL_CONTRACT_VERSION
     )
@@ -847,8 +1164,7 @@ def _checkpoint_context_covered(checkpoint_context: object) -> bool:
 def _checkpoint_anchor_merge_covered(merged_checkpoint: object) -> bool:
     """Return whether merged checkpoint anchors preserve canonical values."""
     return (
-        merged_checkpoint.effective_config_hash
-        == CANONICAL_EFFECTIVE_CONFIG_HASH
+        merged_checkpoint.effective_config_hash == CANONICAL_EFFECTIVE_CONFIG_HASH
         and merged_checkpoint.contract_ref == CANONICAL_CONTRACT_REF
         and merged_checkpoint.contract_version == CANONICAL_CONTRACT_VERSION
         and merged_checkpoint.manifest_id == CANONICAL_MANIFEST_ID
@@ -910,7 +1226,9 @@ def build_profile_semantic_invariants() -> list[dict[str, object]]:
     stats = _ProfileSemanticStats()
     for (provider, entity), profile in sorted(NORMALIZATION_PROFILE_REGISTRY.items()):
         for field_name, rule in sorted(profile.field_rules.items()):
-            _update_profile_semantic_stats(stats, provider, entity, profile, field_name, rule)
+            _update_profile_semantic_stats(
+                stats, provider, entity, profile, field_name, rule
+            )
 
     return [
         _build_profile_semantic_kpi(
@@ -966,8 +1284,18 @@ def _profile_rule_location(provider: str, entity: str, field_name: str) -> str:
 
 def _normalizer_regression(location: str, rule: Any) -> str:
     """Render one regression string with the effective normalizer name."""
-    normalizer_name = getattr(rule.normalizer, "__name__", type(rule.normalizer).__name__)
+    normalizer_name = getattr(
+        rule.normalizer, "__name__", type(rule.normalizer).__name__
+    )
     return f"{location} -> {normalizer_name}"
+
+
+def _is_json_string_normalizer(rule: Any) -> bool:
+    """Return whether a rule uses the effective JSON-string normalizer family."""
+    return (
+        rule.normalizer is normalize_profile_json_string
+        or getattr(rule.normalizer, "__name__", "") == "normalize_profile_json_string"
+    )
 
 
 def _update_meta_profile_semantics(
@@ -997,7 +1325,7 @@ def _update_non_meta_profile_semantics(
     if not rule.set_like:
         return
     stats.set_like_total += 1
-    if rule.normalizer is normalize_profile_json_string:
+    if _is_json_string_normalizer(rule):
         stats.set_like_ok += 1
         return
     stats.set_like_regressions.append(_normalizer_regression(location, rule))
@@ -1032,7 +1360,10 @@ def _markdown_intro_lines() -> list[str]:
     return [
         "# Pipeline Normalization Field Matrix",
         "",
-        "Generated from active pipeline configs, Silver schemas, and current normalization code paths.",
+        (
+            "Generated from active pipeline configs, Silver schemas, domain schema "
+            "contracts, DQ policy configs, and current normalization code paths."
+        ),
         "",
         "This matrix is a normalization inventory, not a persisted-row publication contract.",
         (
@@ -1040,6 +1371,12 @@ def _markdown_intro_lines() -> list[str]:
             "or config policy still references them,"
         ),
         "but canonical Silver/Gold row contracts are defined by provider references and Gold contract exports.",
+        "",
+        (
+            "Governance columns expose controlled-vocabulary sources, content_hash "
+            "inclusion, hash ordering, strictness, domain/Silver schema visibility, "
+            "and DQ rule visibility for each field."
+        ),
         "",
         "## Surface Coverage Summary",
         "",
@@ -1072,11 +1409,7 @@ def _semantic_kpi_lines(semantic_kpis: list[dict[str, object]]) -> list[str]:
 def _semantic_kpi_line(kpi: dict[str, object]) -> str:
     """Render one semantic invariant KPI line with optional regressions."""
     regressions = list(kpi.get("regressions", []))
-    regression_note = (
-        f" Regressions: {', '.join(regressions)}."
-        if regressions
-        else ""
-    )
+    regression_note = f" Regressions: {', '.join(regressions)}." if regressions else ""
     return (
         f"- {kpi['surface']} / {kpi['name']}: `{kpi['value_pct']:.2f}%` "
         f"(`{kpi['numerator']}` / `{kpi['denominator']}`) {kpi['description']}"
@@ -1100,7 +1433,7 @@ def _markdown_table_lines(
 
 def _markdown_table_row(row: dict[str, str], headers: list[str]) -> str:
     """Render one markdown table row."""
-    return "| " + " | ".join(row[header] for header in headers) + " |"
+    return "| " + " | ".join(row.get(header, "") for header in headers) + " |"
 
 
 def build_artifacts() -> dict[str, str]:

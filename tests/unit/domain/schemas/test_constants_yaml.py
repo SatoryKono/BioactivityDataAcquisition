@@ -21,6 +21,14 @@ def chembl_yaml() -> dict[str, Any]:
         return yaml.safe_load(f)
 
 
+@pytest.fixture(scope="module")
+def uniprot_yaml() -> dict[str, Any]:
+    """Load UniProt enum config for comparison."""
+    yaml_path = Path("configs/enums/uniprot.yaml")
+    with yaml_path.open() as f:
+        return yaml.safe_load(f)
+
+
 class TestYamlFileIntegrity:
     """Ensure the YAML enum config exists and is well-formed."""
 
@@ -33,6 +41,12 @@ class TestYamlFileIntegrity:
     def test_chembl_yaml_has_all_sections(self, chembl_yaml: dict[str, Any]) -> None:
         expected = {"activity", "assay", "molecule", "target", "publication"}
         assert expected <= set(chembl_yaml.keys())
+
+    def test_uniprot_yaml_exists(self) -> None:
+        assert Path("configs/enums/uniprot.yaml").exists()
+
+    def test_uniprot_yaml_has_version(self, uniprot_yaml: dict[str, Any]) -> None:
+        assert "version" in uniprot_yaml
 
 
 class TestActivitySync:
@@ -149,6 +163,24 @@ class TestPublicationSync:
         from bioetl.domain.schemas.constants import PUBLICATION_TYPES
 
         assert PUBLICATION_TYPES == frozenset(chembl_yaml["publication"]["types"])
+
+
+class TestUniProtSync:
+    """UniProt enum constants must match YAML."""
+
+    def test_uniprot_protein_enums(self, uniprot_yaml: dict[str, Any]) -> None:
+        from bioetl.domain.schemas.uniprot._core import (
+            ENTRY_TYPES,
+            PROTEIN_EXISTENCE_LEVELS,
+            PROTEIN_FLAGS,
+        )
+
+        assert ENTRY_TYPES == uniprot_yaml["protein"]["entry_types"]
+        assert PROTEIN_FLAGS == uniprot_yaml["protein"]["protein_flags"]
+        assert (
+            PROTEIN_EXISTENCE_LEVELS
+            == uniprot_yaml["protein"]["protein_existence_levels"]
+        )
 
 
 class TestConstantInvariants:

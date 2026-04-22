@@ -231,8 +231,7 @@ class TestCanonicalTestLanes:
         for lane_name, lane in lanes.items():
             runner = _lane_runner(lane)
             assert runner.exists(), (
-                f"{lane_name} references missing runner: "
-                f"{runner.relative_to(ROOT)}"
+                f"{lane_name} references missing runner: {runner.relative_to(ROOT)}"
             )
 
             paths = _lane_paths(lane)
@@ -272,10 +271,7 @@ class TestCanonicalTestLanes:
         assert lanes["integration-replay"]["replay_mode"] == "vcr_replay_only"
         assert "--vcr-record=none" in lanes["integration-replay"]["pytest_args"]
         assert lanes["architecture"]["runner_backend"] == "run_pytest_sharded"
-        assert (
-            "S7-crosscutting-architecture"
-            in lanes["architecture"]["runner_options"]
-        )
+        assert "S7-crosscutting-architecture" in lanes["architecture"]["runner_options"]
         assert lanes["memory"]["marker_expression"] == "memory and not benchmark"
         assert lanes["coverage-verify"]["runner_backend"] == "run_pytest_sharded"
         assert "--keep-coverage-files" in lanes["coverage-verify"]["runner_options"]

@@ -111,7 +111,9 @@ def _dq_enum_allowed(entity: str, field_name: str) -> frozenset[str]:
         if rule.field == field_name and rule.validation_type == "enum"
     ]
     assert matches, f"Missing DQ enum rule for chembl.{entity}.{field_name}"
-    assert len(matches) == 1, f"Duplicate DQ enum rules for chembl.{entity}.{field_name}"
+    assert len(matches) == 1, (
+        f"Duplicate DQ enum rules for chembl.{entity}.{field_name}"
+    )
     return frozenset(matches[0].allowed)
 
 
@@ -130,7 +132,9 @@ def _filter_value_set(raw_values: object) -> frozenset[str]:
     if raw_values is None:
         return frozenset()
     if isinstance(raw_values, str):
-        return frozenset(value for value in (v.strip() for v in raw_values.split(",")) if value)
+        return frozenset(
+            value for value in (v.strip() for v in raw_values.split(",")) if value
+        )
     if isinstance(raw_values, (list, tuple, set)):
         return frozenset(
             value for value in (str(v).strip() for v in raw_values) if value
@@ -172,7 +176,9 @@ def test_strict_chembl_enum_fields_share_profile_schema_and_dq_policy(
     ]
 
     rule = profile.rule_for(field_name)
-    assert rule is not None, f"Missing normalization rule for chembl.{entity}.{field_name}"
+    assert rule is not None, (
+        f"Missing normalization rule for chembl.{entity}.{field_name}"
+    )
     assert rule.normalizer("__BIOETL_INVALID_ENUM__") is None
     assert rule.normalizer(next(iter(allowed_values))) in allowed_values
 

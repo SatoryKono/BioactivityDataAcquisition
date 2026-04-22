@@ -30,7 +30,9 @@ def _activity_flag_dq_rule(field_name: str):
         if rule.field == field_name and rule.validation_type == "range"
     ]
     assert matches, f"Missing DQ range rule for chembl.activity.{field_name}"
-    assert len(matches) == 1, f"Duplicate DQ range rules for chembl.activity.{field_name}"
+    assert len(matches) == 1, (
+        f"Duplicate DQ range rules for chembl.activity.{field_name}"
+    )
     return matches[0]
 
 
