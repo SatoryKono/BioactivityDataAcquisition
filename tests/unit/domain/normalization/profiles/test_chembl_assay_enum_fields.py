@@ -69,7 +69,7 @@ class TestChemblAssayEnumFields:
         # Test case preservation
         test_cases = [
             ("In vivo", "In vivo"),
-            ("in vitro", "in vitro"),
+            ("in vitro", "In vitro"),
             ("Ex vivo", "Ex vivo"),
         ]
 

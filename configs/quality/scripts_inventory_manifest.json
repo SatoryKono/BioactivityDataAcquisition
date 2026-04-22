@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-21T19:27:09.356943+00:00",
+  "generated_at": "2026-04-22T04:49:45.315958+00:00",
   "summary": {
     "total_scripts": 429,
     "status_counts": {
@@ -5177,19 +5177,19 @@
       "references": [
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 120,
+          "line": 143,
           "source_group": "docs",
           "text": "| Matrix generation | [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) | Determin"
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 216,
+          "line": 239,
           "source_group": "docs",
           "text": "- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py)"
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 535,
+          "line": 558,
           "source_group": "docs",
           "text": "- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministi"
         },
@@ -8440,13 +8440,13 @@
       "references": [
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 121,
+          "line": 144,
           "source_group": "docs",
           "text": "| Fallback inventory | [report_normalization_fallback_inventory.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/engineering/qa/report_normalization_fallback_inventory.py) | Reports"
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 243,
+          "line": 266,
           "source_group": "docs",
           "text": "- fallback inventory report: [report_normalization_fallback_inventory.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/engineering/qa/report_normalization_fallback_inventory.py)"
         },
