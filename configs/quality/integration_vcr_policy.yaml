@@ -138,6 +138,7 @@ tracked_suite_inventory:
     - tests/integration/composite/test_molecule_pipeline.py
     config_and_storage_surfaces:
     - tests/integration/ci/test_config_stability.py
+    - tests/integration/config/test_chembl_enum_parity.py
     - tests/integration/config/test_dq_config_loading.py
     - tests/integration/infrastructure/storage/test_export_reader_version_fallback.py
     - tests/integration/infrastructure/storage/test_gold_writer_versioning.py

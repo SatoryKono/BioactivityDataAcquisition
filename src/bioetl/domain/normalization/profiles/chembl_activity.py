@@ -7,6 +7,7 @@ from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from ._chembl_activity_fields import (
     ACTIVITY_STANDARD_TYPES,
     ACTIVITY_STANDARD_UNITS,
+    ASSAY_TYPES,
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
     DATA_VALIDITY_COMMENTS,
     FLOAT_FIELDS,
@@ -34,9 +35,6 @@ __all__ = [
     "NULL_FIELDS",
     "STANDARD_RELATIONS",
 ]
-
-# Assay types enum (B, F, A, T, P, U)
-ASSAY_TYPES = frozenset(["B", "F", "A", "T", "P", "U"])
 
 
 def create_case_normalizer(strategy: str = "uppercase"):

@@ -3,17 +3,16 @@
 from __future__ import annotations
 
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
-from bioetl.domain.schemas.constants import (
-    ACTIVITY_STANDARD_TYPES,
-    ACTIVITY_STANDARD_UNITS,
-    DATA_VALIDITY_COMMENTS,
-    STANDARD_RELATIONS,
-)
+
+from ._chembl_vocab import chembl_enum
 
 CHEMBL_ACTIVITY_SCHEMA_FIELDS = tuple(ActivitySchema.to_schema().columns.keys())
 
-# Use enum configurations from centralized constants (loaded from YAML)
-# These are already properly loaded and don't require runtime I/O
+ACTIVITY_STANDARD_TYPES = chembl_enum("activity", "standard_type")
+ACTIVITY_STANDARD_UNITS = chembl_enum("activity", "standard_units")
+ASSAY_TYPES = chembl_enum("activity", "assay_type")
+DATA_VALIDITY_COMMENTS = chembl_enum("activity", "data_validity_comment")
+STANDARD_RELATIONS = chembl_enum("activity", "standard_relation")
 
 INT_FIELDS = frozenset(
     {
@@ -62,6 +61,7 @@ SET_LIKE_FIELDS = frozenset({"activity_properties"})
 __all__ = [
     "ACTIVITY_STANDARD_TYPES",
     "ACTIVITY_STANDARD_UNITS",
+    "ASSAY_TYPES",
     "CHEMBL_ACTIVITY_SCHEMA_FIELDS",
     "DATA_VALIDITY_COMMENTS",
     "FLOAT_FIELDS",
