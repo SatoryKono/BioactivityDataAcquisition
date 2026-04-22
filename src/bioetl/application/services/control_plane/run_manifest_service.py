@@ -58,6 +58,7 @@ class RunManifestCreateSpec:
     planned_artifacts: tuple[RunArtifactRef, ...] = ()
     pipeline_version: str | None = None
     git_commit: str | None = None
+    source_revision_state: str | None = None
     config_hash: str | None = None
     contract_ref: str | None = None
     contract_version: str | None = None
@@ -67,6 +68,29 @@ class RunManifestCreateSpec:
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
     replay_capability: ReplayCapability = ReplayCapability.REBUILD_ONLY
+
+
+def _validate_strict_code_provenance(
+    request: RunManifestCreateSpec,
+    code_provenance: RunCodeProvenance,
+) -> None:
+    """Fail closed when strict replay contexts cannot pin code revision."""
+    required_profile = str(
+        request.launch_context.get("required_persistence_profile")
+        or "degraded_observable"
+    )
+    strict_context = (
+        bool(request.launch_context.get("exact_replay"))
+        or required_profile in {"replay_ready", "forensic_grade"}
+        or request.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+    )
+    if not strict_context:
+        return
+    if not code_provenance.git_commit:
+        raise RuntimeError(
+            "Run manifest requires git_commit code provenance for exact "
+            "replay, replay_ready, and forensic_grade contexts"
+        )
 
 
 @dataclass(slots=True)
@@ -91,6 +115,7 @@ class RunManifestService:
         return RunCodeProvenance(
             pipeline_version=request.pipeline_version,
             git_commit=request.git_commit,
+            source_revision_state=request.source_revision_state,
             config_hash=request.config_hash,
             contract_ref=request.contract_ref,
             contract_version=request.contract_version,
@@ -109,6 +134,10 @@ class RunManifestService:
         return RunCodeProvenance(
             pipeline_version=_optional_payload_string(payload, "pipeline_version"),
             git_commit=_optional_payload_string(payload, "git_commit"),
+            source_revision_state=_optional_payload_string(
+                payload,
+                "source_revision_state",
+            ),
             config_hash=_optional_payload_string(payload, "config_hash"),
             contract_ref=_optional_payload_string(payload, "contract_ref"),
             contract_version=_optional_payload_string(payload, "contract_version"),
@@ -285,6 +314,7 @@ class RunManifestService:
         created_at = datetime.now(UTC)
         normalized_run_type = self._normalize_run_type(request.run_type)
         code_provenance = self._build_code_provenance(request)
+        _validate_strict_code_provenance(request, code_provenance)
         normalized_payload = normalize_run_manifest_spec(
             self._build_manifest_payload(
                 request=request,
@@ -353,6 +383,7 @@ class RunManifestService:
             "code_provenance": {
                 "pipeline_version": code_provenance.pipeline_version,
                 "git_commit": code_provenance.git_commit,
+                "source_revision_state": code_provenance.source_revision_state,
                 "config_hash": code_provenance.config_hash,
                 "contract_ref": code_provenance.contract_ref,
                 "contract_version": code_provenance.contract_version,

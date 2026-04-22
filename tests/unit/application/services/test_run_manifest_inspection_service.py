@@ -737,7 +737,7 @@ def test_show_composite_manifest_surfaces_bounded_reconstructability_contract() 
             "resume": False,
             "exact_replay": False,
             "execution_context": "composite",
-            "exact_replay_support_boundary": "composite_execution_unsupported",
+            "exact_replay_support_boundary": "composite_snapshot_backed_input_envelope",
         },
         runtime_config={"run_type": "incremental"},
         resolved_config={"composite": "publications"},
@@ -750,7 +750,7 @@ def test_show_composite_manifest_surfaces_bounded_reconstructability_contract() 
     result = service.show("manifest-composite")
 
     assert result.diagnostics["exact_replay_support_boundary"] == (
-        "composite_execution_unsupported"
+        "composite_snapshot_backed_input_envelope"
     )
     assert result.diagnostics[
         "replay_family_contract"

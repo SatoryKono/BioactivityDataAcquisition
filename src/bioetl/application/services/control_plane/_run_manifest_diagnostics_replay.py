@@ -42,8 +42,6 @@ def _resolve_replay_capability_reason(
 ) -> str:
     """Return one operator-facing explanation for replay capability."""
     profile = _resolve_reproducibility_profile(manifest)
-    if _is_composite_execution_context(manifest):
-        return "exact_replay_not_supported_for_composite_execution"
     if not profile.strict_exact_replay_supported:
         return "family_outside_supported_exact_replay_boundary"
     if (
@@ -53,6 +51,8 @@ def _resolve_replay_capability_reason(
         return "immutable_input_snapshots_present"
     if manifest.replay_capability == ReplayCapability.RESUME_ONLY or resume_requested:
         return "resume_requested_without_snapshot_backed_inputs"
+    if _is_composite_execution_context(manifest):
+        return "composite_snapshot_envelope_missing"
     return "immutable_input_snapshots_missing"
 
 
@@ -69,9 +69,7 @@ def _resolve_exact_replay_blockers(
     ):
         return []
     blockers: list[str] = []
-    if _is_composite_execution_context(manifest):
-        blockers.append("exact_replay_not_supported_for_composite_execution")
-    elif not profile.strict_exact_replay_supported:
+    if not profile.strict_exact_replay_supported:
         blockers.append("family_outside_supported_exact_replay_boundary")
     if not input_snapshots:
         blockers.append("immutable_input_snapshots_missing")

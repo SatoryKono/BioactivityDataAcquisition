@@ -337,9 +337,10 @@ than silently accepting the bundle as canonical.
 - `replay_family_contract.strict_exact_replay_supported=true` means the current
   family is inside the published strict exact-replay contract; `false` is a
   fail-closed signal even if immutable input snapshots exist;
-- `exact_replay_support_boundary=composite_execution_unsupported` means the
-  current composite execution path must not be interpreted as exact-replayable
-  even when cached Bronze inputs are used;
+- `exact_replay_support_boundary=composite_snapshot_backed_input_envelope`
+  means composite exact replay requires immutable snapshot refs for every seed,
+  dependency, and enricher input before the run can be treated as
+  exact-replayable;
 - `replay_of_run_id`, `replay_of_manifest_id`, and `replay_parentage` identify
   explicit exact-replay ancestry and distinguish it from a merely semantically
   equivalent fresh run;

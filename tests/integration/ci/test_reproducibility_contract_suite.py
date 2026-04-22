@@ -767,7 +767,7 @@ def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed(
     ).show(manifest.manifest_id)
 
     assert result.diagnostics["exact_replay_support_boundary"] == (
-        "composite_execution_unsupported"
+        "composite_snapshot_backed_input_envelope"
     )
     assert (
         result.diagnostics["persistence_profile"]["required_profile_satisfied"] is False
@@ -775,11 +775,10 @@ def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed(
     assert result.diagnostics["persistence_profile"][
         "required_profile_missing_requirements"
     ] == [
-        "strict_replay_execution_context_support",
         "exact_replay_capability",
         "immutable_input_snapshots",
     ]
-    assert result.diagnostics["alert_signals"]["strict_replay_boundary_gap"] is True
+    assert result.diagnostics["alert_signals"]["strict_replay_boundary_gap"] is False
     assert (
         result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
     )

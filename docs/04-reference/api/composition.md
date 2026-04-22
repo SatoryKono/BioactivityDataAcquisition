@@ -34,7 +34,7 @@ seams are exposed through dedicated submodules such as `entrypoints`,
 | `composition.bootstrap` | Application bootstrapping and stable bootstrap access seams | `bootstrap_pipeline_runner`, `bootstrap_pipeline_runner_service`, `bootstrap_composite_runner`, CLI bootstrap helpers, `load_pipeline_config` (re-export), `load_composite_config` |
 | `composition.providers` | Provider registration and discovery | `ProviderRegistry`, `create_provider_registry`, `ensure_providers_loaded` |
 | `composition.runtime_builders` | Leaf runtime assembly helpers | `build_pipeline_runner` |
-| `composition.services` | Thin re-exports for metadata/version helpers | `MetadataCoordinator`, `compute_config_hash`, `get_git_commit`, `get_pipeline_version` |
+| `composition.services` | Thin re-exports for metadata/version helpers | `MetadataCoordinator`, `compute_config_hash`, `get_code_revision_provenance`, `get_git_commit`, `get_pipeline_version` |
 | `composition` (top-level) | Narrow package-root facade | `PipelineDefinition`, `PipelineRegistry`, `create_registry`, `get_default_registry`; broader APIs live in submodules |
 
 ---

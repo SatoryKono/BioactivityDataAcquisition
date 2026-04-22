@@ -14,7 +14,11 @@ _PUBLISHED_SUPPORTED_SOURCE_FAMILIES = (
 )
 
 ReproducibilityExecutionContext = Literal["source", "composite"]
-ReplayFamilyContractName = Literal["snapshot_backed_exact_replay", "rebuild_only"]
+ReplayFamilyContractName = Literal[
+    "snapshot_backed_exact_replay",
+    "composite_snapshot_backed_exact_replay",
+    "rebuild_only",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -77,11 +81,11 @@ def resolve_reproducibility_family_profile(
             family=family,
             execution_context=execution_context,
             lineage_closure_supported=False,
-            strict_exact_replay_supported=False,
-            exact_replay_support_boundary="composite_execution_unsupported",
-            replay_family_contract="rebuild_only",
-            support_scope="operator_grade_trace_debug",
-            reason="family_outside_supported_boundary",
+            strict_exact_replay_supported=True,
+            exact_replay_support_boundary="composite_snapshot_backed_input_envelope",
+            replay_family_contract="composite_snapshot_backed_exact_replay",
+            support_scope="snapshot_backed_composite_trace_debug",
+            reason="composite_family_requires_full_snapshot_envelope",
         )
     supported = family in _PUBLISHED_SUPPORTED_SOURCE_FAMILIES
     return ReproducibilityFamilyProfile(

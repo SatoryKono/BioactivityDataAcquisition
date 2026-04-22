@@ -361,7 +361,9 @@ provenance.
 - `execution_context` distinguishes ordinary source execution from composite execution;
 - `exact_replay_support_boundary` publishes the strict replay boundary for that execution context:
   - `snapshot_backed_source_runs_only` for ordinary source execution;
-  - `composite_execution_unsupported` for composite execution.
+  - `composite_snapshot_backed_input_envelope` for composite execution when
+    every seed, dependency, and enricher input is represented by immutable
+    snapshot refs.
 
 ### Input snapshot identity vs locator
 
@@ -410,6 +412,7 @@ published effective-config baseline is:
 
 - `pipeline_version`
 - `git_commit`
+- `source_revision_state`
 - `config_hash`
 - `contract_ref`
 - `contract_version`
@@ -630,7 +633,8 @@ surface:
   `launch_context.exact_replay`;
 - `exact_replay_support_boundary` reports whether the manifested execution
   context can ever be strict-replayable. Current published values are
-  `snapshot_backed_source_runs_only` and `composite_execution_unsupported`;
+  `snapshot_backed_source_runs_only` and
+  `composite_snapshot_backed_input_envelope`;
 - `replay_family_contract` publishes the per-family replay contract that
   decides whether strict exact replay is supported for this manifested family;
 - `replay_capability` and `exact_replay_eligible` report what the persisted
@@ -652,10 +656,11 @@ surface:
   `replay_relationship` so replay parentage is visible without collapsing it
   into occurrence-only or semantic drift classifications.
 
-Composite execution is currently outside the strict exact-replay support
-boundary. Composite manifests therefore publish
-`exact_replay_support_boundary=composite_execution_unsupported` and remain
-`rebuild_only` even when they consume cached Bronze inputs.
+Composite execution can publish `exact_replay_supported` only when the manifest
+captures a full immutable snapshot envelope for every seed, dependency, and
+enricher pipeline. Composite manifests without that full envelope remain
+`rebuild_only`, and `replay_ready` / `forensic_grade` composite launches fail
+closed before execution.
 
 For replay-safe runs the published inspection surface MUST expose compact replay
 anchors derived from manifest source refs:

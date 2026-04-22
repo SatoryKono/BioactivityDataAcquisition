@@ -40,7 +40,7 @@ pipeline:
     batch_size: 1000
     sink:
         silver:
-            mode: append
+            mode: merge
         gold:
             enabled: false
 
@@ -388,7 +388,7 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
 | Параметр                 | Значение                                      |
 | ------------------------ | --------------------------------------------- |
 | **Формат**               | Delta Lake                                    |
-| **Режим записи**         | `append` (active pipeline config)             |
+| **Режим записи**         | `merge` (active pipeline config)              |
 | **Бизнес-ключ**          | `activity_id`                                 |
 | **Партиционирование**    | Не задано в активном entity config            |
 | **Приоритет конфликтов** | REBUILD > BACKFILL > INCREMENTAL (run_type metadata) |

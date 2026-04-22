@@ -79,6 +79,7 @@ class RunCodeProvenance:
 
     pipeline_version: str | None = None
     git_commit: str | None = None
+    source_revision_state: str | None = None
     config_hash: str | None = None
     contract_ref: str | None = None
     contract_version: str | None = None
@@ -169,6 +170,7 @@ def _load_code_provenance(raw_code: object) -> RunCodeProvenance:
     return RunCodeProvenance(
         pipeline_version=_load_optional_str(payload, "pipeline_version"),
         git_commit=_load_optional_str(payload, "git_commit"),
+        source_revision_state=_load_optional_str(payload, "source_revision_state"),
         config_hash=_load_optional_str(payload, "config_hash"),
         contract_ref=_load_optional_str(payload, "contract_ref"),
         contract_version=_load_optional_str(payload, "contract_version"),

@@ -13,6 +13,7 @@ from bioetl.composition.services import versioning
 @pytest.fixture(autouse=True)
 def _clear_git_commit_cache() -> None:
     versioning.get_git_commit.cache_clear()
+    versioning.get_code_revision_provenance.cache_clear()
 
 
 @pytest.mark.unit
@@ -37,6 +38,38 @@ def test_get_git_commit_returns_none_on_exception(mock_run: MagicMock) -> None:
     mock_run.side_effect = FileNotFoundError("git missing")
 
     assert versioning.get_git_commit() is None
+
+
+@pytest.mark.unit
+@patch("bioetl.composition.services.versioning.subprocess.run")
+def test_get_code_revision_provenance_reports_clean_state(
+    mock_run: MagicMock,
+) -> None:
+    mock_run.side_effect = [
+        SimpleNamespace(returncode=0, stdout="abc1234\n"),
+        SimpleNamespace(returncode=0, stdout=""),
+    ]
+
+    provenance = versioning.get_code_revision_provenance()
+
+    assert provenance.git_commit == "abc1234"
+    assert provenance.source_revision_state == "clean"
+
+
+@pytest.mark.unit
+@patch("bioetl.composition.services.versioning.subprocess.run")
+def test_get_code_revision_provenance_reports_dirty_state(
+    mock_run: MagicMock,
+) -> None:
+    mock_run.side_effect = [
+        SimpleNamespace(returncode=0, stdout="abc1234\n"),
+        SimpleNamespace(returncode=1, stdout=""),
+    ]
+
+    provenance = versioning.get_code_revision_provenance()
+
+    assert provenance.git_commit == "abc1234"
+    assert provenance.source_revision_state == "dirty"
 
 
 @pytest.mark.unit

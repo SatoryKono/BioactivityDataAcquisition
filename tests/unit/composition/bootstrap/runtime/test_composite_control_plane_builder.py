@@ -21,6 +21,7 @@ from bioetl.composition.bootstrap.runtime.composite_control_plane_builder import
 from bioetl.domain.control_plane import (
     ReplayCapability,
     RunArtifactRef,
+    RunInputSnapshotRef,
     RunManifest,
     RunSourceRef,
 )
@@ -80,6 +81,13 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
             provider="pubmed",
             entity="publication",
             pipeline_name="pubmed_publication",
+            input_snapshots=(
+                RunInputSnapshotRef(
+                    snapshot_id="sha256:seed",
+                    content_hash="seed",
+                    immutable_uri="bronze://pubmed/publication/batch_seed.jsonl.zst",
+                ),
+            ),
         ),
     )
     planned_artifacts = (
@@ -110,8 +118,11 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
             return_value=resolved_snapshot,
         ),
         patch(
-            "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_git_commit",
-            return_value="abc1234",
+            "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_code_revision_provenance",
+            return_value=SimpleNamespace(
+                git_commit="abc1234",
+                source_revision_state="clean",
+            ),
         ),
     ):
         request = _build_composite_manifest_create_request(
@@ -135,10 +146,11 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
     assert request.planned_artifacts == planned_artifacts
     assert request.pipeline_version == "1.0.0"
     assert request.git_commit == "abc1234"
+    assert request.source_revision_state == "clean"
     assert request.config_hash == "hash-123"
     assert request.contract_ref == "composite_publication"
     assert request.contract_version == "1.0.0"
-    assert request.replay_capability == ReplayCapability.REBUILD_ONLY
+    assert request.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
 
 
 def test_normalize_object_delegates_to_shared_manifest_support() -> None:
@@ -236,8 +248,11 @@ def test_build_composite_control_plane_bundle_can_disable_ledger_while_keeping_m
     )
 
     with patch(
-        "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_git_commit",
-        return_value="abc1234",
+        "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_code_revision_provenance",
+        return_value=SimpleNamespace(
+            git_commit="abc1234",
+            source_revision_state="clean",
+        ),
     ):
         bundle = build_composite_control_plane_bundle(
             config=config,
@@ -260,7 +275,7 @@ def test_build_composite_control_plane_bundle_can_disable_ledger_while_keeping_m
     assert bundle.execution_fingerprint == manifest.execution_fingerprint
     assert (
         manifest.launch_context["exact_replay_support_boundary"]
-        == "composite_execution_unsupported"
+        == "composite_snapshot_backed_input_envelope"
     )
 
 
@@ -332,7 +347,7 @@ def test_build_composite_control_plane_bundle_rejects_replay_ready_profile(
 
     with pytest.raises(
         RuntimeError,
-        match="outside the strict exact-replay support boundary",
+        match="full cached-Bronze input snapshot envelope was not captured",
     ):
         build_composite_control_plane_bundle(
             config=config,
@@ -342,6 +357,69 @@ def test_build_composite_control_plane_bundle_rejects_replay_ready_profile(
 
     assert not (tmp_path / "output" / "control" / "run_manifest").exists()
     assert not (tmp_path / "output" / "control" / "run_ledger").exists()
+
+
+def test_build_composite_control_plane_bundle_allows_replay_ready_with_full_snapshot_envelope(
+    tmp_path: Path,
+) -> None:
+    config = cast(Any, _RichMockCompositeConfig())
+    bronze_root = tmp_path / "cached-bronze"
+    for provider, entity in (
+        ("pubmed", "publication"),
+        ("crossref", "publication"),
+        ("openalex", "publication"),
+    ):
+        bronze_day = bronze_root / provider / entity / "2026-01-01"
+        bronze_day.mkdir(parents=True)
+        (bronze_day / f"batch_{provider}.jsonl.zst").write_bytes(
+            f"{provider}-snapshot".encode()
+        )
+    runtime = CompositeRuntimeConfig(
+        resume=True,
+        use_cached_bronze=True,
+        cached_bronze_path=str(bronze_root),
+        cached_bronze_date="2026-01-01",
+    )
+    infra_context = cast(
+        Any,
+        SimpleNamespace(
+            run_id=_VALID_RUN_ID,
+            settings=SimpleNamespace(
+                data_dir=str(tmp_path),
+                pipeline=SimpleNamespace(
+                    control_plane=SimpleNamespace(
+                        run_manifest_enabled=True,
+                        run_ledger_enabled=True,
+                        required_persistence_profile="replay_ready",
+                    )
+                ),
+            ),
+            logger=MagicMock(),
+            metrics=MagicMock(),
+            storage=MagicMock(),
+            lock=MagicMock(),
+        ),
+    )
+
+    with patch(
+        "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_code_revision_provenance",
+        return_value=SimpleNamespace(
+            git_commit="abc1234",
+            source_revision_state="clean",
+        ),
+    ):
+        bundle = build_composite_control_plane_bundle(
+            config=config,
+            runtime=runtime,
+            infra_context=infra_context,
+        )
+
+    manifest_path = (
+        tmp_path / "output" / "control" / "run_manifest" / f"{bundle.manifest_id}.json"
+    )
+    manifest = RunManifest.from_dict(json.loads(manifest_path.read_text("utf-8")))
+    assert manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+    assert all(source_ref.input_snapshots for source_ref in manifest.source_refs)
 
 
 def test_build_composite_control_plane_bundle_persists_manifest_created_when_ledger_enabled(
@@ -370,8 +448,11 @@ def test_build_composite_control_plane_bundle_persists_manifest_created_when_led
     )
 
     with patch(
-        "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_git_commit",
-        return_value="abc1234",
+        "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_code_revision_provenance",
+        return_value=SimpleNamespace(
+            git_commit="abc1234",
+            source_revision_state="clean",
+        ),
     ):
         bundle = build_composite_control_plane_bundle(
             config=config,

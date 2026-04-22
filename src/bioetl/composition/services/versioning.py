@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import subprocess
+from dataclasses import dataclass
 from functools import lru_cache
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as pkg_version
@@ -23,10 +24,20 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
+    "CodeRevisionProvenance",
     "compute_config_hash",
+    "get_code_revision_provenance",
     "get_git_commit",
     "get_pipeline_version",
 ]
+
+
+@dataclass(frozen=True, slots=True)
+class CodeRevisionProvenance:
+    """Resolved source revision anchors for replay/debug provenance."""
+
+    git_commit: str | None
+    source_revision_state: str
 
 
 @lru_cache(maxsize=1)
@@ -62,6 +73,37 @@ def get_git_commit() -> str | None:
         return None
     except (subprocess.SubprocessError, FileNotFoundError, OSError):
         return None
+
+
+@lru_cache(maxsize=1)
+def get_code_revision_provenance() -> CodeRevisionProvenance:
+    """Return git commit plus coarse source revision state for manifests."""
+    commit = get_git_commit()
+    if commit is None:
+        return CodeRevisionProvenance(
+            git_commit=None,
+            source_revision_state="git_unavailable",
+        )
+    try:
+        result = subprocess.run(
+            ["git", "diff-index", "--quiet", "HEAD", "--"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+    except (subprocess.SubprocessError, FileNotFoundError, OSError):
+        return CodeRevisionProvenance(
+            git_commit=commit,
+            source_revision_state="dirty_state_unknown",
+        )
+    if result.returncode == 0:
+        state = "clean"
+    elif result.returncode == 1:
+        state = "dirty"
+    else:
+        state = "dirty_state_unknown"
+    return CodeRevisionProvenance(git_commit=commit, source_revision_state=state)
 
 
 def _normalize_for_hash(obj: object) -> object:

@@ -56,7 +56,7 @@ pipeline:
   batch_size: 1000
   sink:
     silver:
-      mode: append
+      mode: merge
     gold:
       enabled: false
 ```
@@ -116,7 +116,7 @@ Mode: append-only
 ```text
 Path: data/output/silver/chembl/activity/
 Format: Delta Lake
-Mode: append
+Mode: merge
 Primary key semantics: activity_id
 ```
 

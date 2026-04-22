@@ -49,7 +49,7 @@ from bioetl.composition.runtime_builders._run_manifest_support import (
     to_serializable_mapping as _to_serializable_mapping,
 )
 from bioetl.composition.services.versioning import (
-    get_git_commit,
+    get_code_revision_provenance,
     get_pipeline_version,
 )
 from bioetl.domain.control_plane import ReplayCapability
@@ -78,6 +78,10 @@ class _RunManifestCreateRequestInputs:
     rule_bundle_version: str | None
     dq_contract_compatibility_hash: str
     effective_config_artifact_id: str
+
+
+_STRICT_PERSISTENCE_PROFILES = {"replay_ready", "forensic_grade"}
+_REPRODUCIBLE_APPEND_BLOCKED_LAYERS = ("silver", "gold")
 
 
 def _create_ledger_service(
@@ -128,6 +132,12 @@ def _build_manifest_create_request(
             "degraded_observable",
         )
     )
+    _validate_reproducible_sink_modes(
+        yaml_config=yaml_config,
+        strict_replay_requested=bool(getattr(ctx, "exact_replay", False))
+        or required_persistence_profile in _STRICT_PERSISTENCE_PROFILES,
+    )
+    code_revision = get_code_revision_provenance()
     request = RunManifestCreateSpec(
         run_id=ctx.run_id,
         run_type=getattr(ctx, "run_type", "incremental"),
@@ -151,7 +161,8 @@ def _build_manifest_create_request(
             entity=entity,
         ),
         pipeline_version=get_pipeline_version(yaml_config),
-        git_commit=get_git_commit(),
+        git_commit=code_revision.git_commit,
+        source_revision_state=code_revision.source_revision_state,
         config_hash=request_inputs.effective_config_hash,
         contract_ref=request_inputs.contract_ref,
         contract_version=request_inputs.contract_version,
@@ -170,6 +181,49 @@ def _build_manifest_create_request(
         required_persistence_profile=required_persistence_profile,
     )
     return request
+
+
+def _validate_reproducible_sink_modes(
+    *,
+    yaml_config: object,
+    strict_replay_requested: bool,
+) -> None:
+    """Reject append-mode semantic outputs for strict reproducibility contexts."""
+    if not strict_replay_requested:
+        return
+    sink = getattr(yaml_config, "sink", None)
+    if not isinstance(sink, dict):
+        return
+    blocked: list[str] = []
+    for layer_name in _REPRODUCIBLE_APPEND_BLOCKED_LAYERS:
+        layer_config = sink.get(layer_name)
+        if layer_config is None or not _sink_layer_enabled(layer_config):
+            continue
+        mode = _sink_layer_mode(layer_config)
+        if mode == "append":
+            blocked.append(f"sink.{layer_name}.mode=append")
+    if blocked:
+        details = ", ".join(blocked)
+        raise RuntimeError(
+            "Strict reproducibility contexts cannot use append-mode Silver/Gold "
+            f"semantic outputs ({details}); use merge/upsert, overwrite, or SCD2 "
+            "semantics with stable keys instead"
+        )
+
+
+def _sink_layer_enabled(layer_config: object) -> bool:
+    if isinstance(layer_config, dict):
+        return bool(layer_config.get("enabled", True))
+    return bool(getattr(layer_config, "enabled", True))
+
+
+def _sink_layer_mode(layer_config: object) -> str:
+    raw_mode = (
+        layer_config.get("mode", "")
+        if isinstance(layer_config, dict)
+        else getattr(layer_config, "mode", "")
+    )
+    return str(raw_mode or "").strip().lower()
 
 
 def _validate_required_runtime_persistence_profile(
