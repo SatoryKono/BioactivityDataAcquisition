@@ -38,6 +38,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          lfs: true
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
