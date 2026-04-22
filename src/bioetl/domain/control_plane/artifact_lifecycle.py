@@ -19,6 +19,8 @@ __all__ = [
 class ControlPlaneArtifactSurface(StrEnum):
     """Known file-backed control-plane artifact surfaces."""
 
+    CACHED_BRONZE = "bronze"
+    CHECKPOINT = "checkpoints"
     EFFECTIVE_CONFIG = "effective_config"
     LINEAGE = "lineage"
     RUN_LEDGER = "run_ledger"
@@ -40,6 +42,7 @@ class ControlPlaneArtifactLifecyclePolicy:
     now: datetime
     protected_manifest_ids: frozenset[str] = field(default_factory=frozenset)
     protected_run_ids: frozenset[str] = field(default_factory=frozenset)
+    protected_input_snapshot_ids: frozenset[str] = field(default_factory=frozenset)
     protected_effective_config_artifact_ids: frozenset[str] = field(
         default_factory=frozenset
     )

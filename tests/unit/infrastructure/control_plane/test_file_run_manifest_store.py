@@ -52,7 +52,12 @@ def test_file_store_round_trips_manifest_by_id_and_run_id(tmp_path) -> None:
                     RunInputSnapshotRef(
                         snapshot_id="snapshot-1",
                         content_hash="hash-1",
-                        immutable_uri="file:///snapshots/1.jsonl",
+                        immutable_uri="s3://bioetl-snapshots/chembl/activity/1.jsonl",
+                        storage_provider="s3",
+                        object_bucket="bioetl-snapshots",
+                        object_key="chembl/activity/1.jsonl",
+                        object_version_id="version-1",
+                        etag='"etag-1"',
                     ),
                 ),
             ),

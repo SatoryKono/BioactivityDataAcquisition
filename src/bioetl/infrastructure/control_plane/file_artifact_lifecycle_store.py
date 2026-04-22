@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecycleApplyResult,
@@ -15,6 +17,9 @@ from bioetl.domain.control_plane import (
     ControlPlaneArtifactRef,
     ControlPlaneArtifactSurface,
 )
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort, MetricsPort
 
 __all__ = ["FileControlPlaneArtifactLifecycleStore"]
 
@@ -33,6 +38,7 @@ class _ProtectedRefs:
 
     manifest_ids: frozenset[str]
     run_ids: frozenset[str]
+    input_snapshot_ids: frozenset[str]
     effective_config_artifact_ids: frozenset[str]
     lineage_fragment_ids: frozenset[str]
 
@@ -42,6 +48,8 @@ class FileControlPlaneArtifactLifecycleStore:
     """Plan and apply lifecycle decisions for file-backed control-plane artifacts."""
 
     base_path: Path
+    logger: LoggerPort | None = None
+    metrics: MetricsPort | None = None
 
     def plan(
         self,
@@ -73,6 +81,11 @@ class FileControlPlaneArtifactLifecycleStore:
         deleted_paths: list[str] = []
         missing_paths: list[str] = []
         if plan.dry_run:
+            self._emit_apply_summary(
+                plan=plan,
+                deleted_paths=(),
+                missing_paths=(),
+            )
             return ControlPlaneArtifactLifecycleApplyResult(
                 plan=plan,
                 deleted_paths=(),
@@ -87,11 +100,61 @@ class FileControlPlaneArtifactLifecycleStore:
                 continue
             path.unlink()
             deleted_paths.append(artifact.path)
+            self._emit_deleted_artifact(artifact)
+        self._emit_apply_summary(
+            plan=plan,
+            deleted_paths=tuple(deleted_paths),
+            missing_paths=tuple(missing_paths),
+        )
         return ControlPlaneArtifactLifecycleApplyResult(
             plan=plan,
             deleted_paths=tuple(deleted_paths),
             missing_paths=tuple(missing_paths),
         )
+
+    def _emit_deleted_artifact(self, artifact: ControlPlaneArtifactRef) -> None:
+        if self.logger is not None:
+            self.logger.info(
+                "control_plane_lifecycle_artifact_deleted",
+                surface=artifact.surface.value,
+                artifact_id=artifact.artifact_id,
+                path=artifact.path,
+                reason=artifact.reason,
+            )
+        if self.metrics is not None:
+            self.metrics.increment_counter(
+                "bioetl_control_plane_lifecycle_deleted_total",
+                1,
+                labels={"surface": artifact.surface.value},
+            )
+
+    def _emit_apply_summary(
+        self,
+        *,
+        plan: ControlPlaneArtifactLifecyclePlan,
+        deleted_paths: tuple[str, ...],
+        missing_paths: tuple[str, ...],
+    ) -> None:
+        if self.logger is not None:
+            self.logger.info(
+                "control_plane_lifecycle_apply_summary",
+                dry_run=plan.dry_run,
+                cutoff=plan.cutoff.isoformat(),
+                delete_count=plan.delete_count,
+                retain_count=plan.retain_count,
+                deleted_count=len(deleted_paths),
+                missing_count=len(missing_paths),
+            )
+        if self.metrics is not None:
+            self.metrics.set_gauge(
+                "bioetl_control_plane_lifecycle_delete_candidates",
+                float(plan.delete_count),
+            )
+            self.metrics.increment_counter(
+                "bioetl_control_plane_lifecycle_apply_total",
+                1,
+                labels={"dry_run": str(plan.dry_run).lower()},
+            )
 
     def _resolve_protected_refs(
         self,
@@ -102,6 +165,7 @@ class FileControlPlaneArtifactLifecycleStore:
         """Resolve explicit and live-reference protections before planning."""
         manifest_ids = set(policy.protected_manifest_ids)
         run_ids = set(policy.protected_run_ids)
+        input_snapshot_ids = set(policy.protected_input_snapshot_ids)
         effective_config_artifact_ids = set(
             policy.protected_effective_config_artifact_ids
         )
@@ -129,6 +193,26 @@ class FileControlPlaneArtifactLifecycleStore:
             artifact_id = _effective_config_artifact_id(payload)
             if artifact_id is not None:
                 effective_config_artifact_ids.add(artifact_id)
+            input_snapshot_ids.update(_input_snapshot_ids(payload))
+
+        for checkpoint_path in self._iter_surface_files(
+            ControlPlaneArtifactSurface.CHECKPOINT
+        ):
+            payload = _read_json_object_or_empty(checkpoint_path)
+            if not payload:
+                continue
+            created_at = _resolve_payload_or_file_time(checkpoint_path, payload)
+            if created_at is not None and created_at < cutoff:
+                continue
+            run_id = _payload_text(payload, "run_id")
+            if run_id is not None:
+                run_ids.add(run_id)
+            manifest_id = _payload_text(payload, "manifest_id")
+            if manifest_id is not None:
+                manifest_ids.add(manifest_id)
+            artifact_id = _payload_text(payload, "effective_config_artifact_id")
+            if artifact_id is not None:
+                effective_config_artifact_ids.add(artifact_id)
 
         for fragment_path in self._lineage_fragment_files():
             payload = _read_json_object_or_empty(fragment_path)
@@ -144,6 +228,7 @@ class FileControlPlaneArtifactLifecycleStore:
         return _ProtectedRefs(
             manifest_ids=frozenset(manifest_ids),
             run_ids=frozenset(run_ids),
+            input_snapshot_ids=frozenset(input_snapshot_ids),
             effective_config_artifact_ids=frozenset(effective_config_artifact_ids),
             lineage_fragment_ids=frozenset(lineage_fragment_ids),
         )
@@ -244,19 +329,43 @@ class FileControlPlaneArtifactLifecycleStore:
                     reasons.append(f"manifest:{manifest_id}")
                 if run_id is not None:
                     reasons.append(f"run:{run_id}")
+        elif surface is ControlPlaneArtifactSurface.CHECKPOINT:
+            run_id = _payload_text(payload, "run_id")
+            manifest_id = _payload_text(payload, "manifest_id")
+            artifact_id = _payload_text(payload, "effective_config_artifact_id")
+            if run_id in protected_refs.run_ids:
+                reasons.append(f"run:{run_id}")
+            if manifest_id in protected_refs.manifest_ids:
+                reasons.append(f"manifest:{manifest_id}")
+            if artifact_id in protected_refs.effective_config_artifact_ids:
+                reasons.append(f"effective_config:{artifact_id}")
+        elif surface is ControlPlaneArtifactSurface.CACHED_BRONZE:
+            snapshot_id = _content_addressed_file_snapshot_id(path)
+            if snapshot_id in protected_refs.input_snapshot_ids:
+                reasons.append(f"snapshot:{snapshot_id}")
         return tuple(dict.fromkeys(reasons))
 
     def _iter_surface_files(
         self,
         surface: ControlPlaneArtifactSurface,
     ) -> tuple[Path, ...]:
-        surface_root = self.base_path / surface.value
+        surface_root = self._surface_root(surface)
         if not surface_root.exists():
             return ()
         return tuple(path for path in surface_root.rglob("*") if path.is_file())
 
+    def _surface_root(self, surface: ControlPlaneArtifactSurface) -> Path:
+        if surface in {
+            ControlPlaneArtifactSurface.CACHED_BRONZE,
+            ControlPlaneArtifactSurface.CHECKPOINT,
+        }:
+            return self.base_path.parent / surface.value
+        return self.base_path / surface.value
+
     def _lineage_fragment_files(self) -> tuple[Path, ...]:
-        fragments_root = self.base_path / ControlPlaneArtifactSurface.LINEAGE / "fragments"
+        fragments_root = (
+            self.base_path / ControlPlaneArtifactSurface.LINEAGE / "fragments"
+        )
         if not fragments_root.exists():
             return ()
         return tuple(path for path in fragments_root.glob("*.json") if path.is_file())
@@ -269,7 +378,11 @@ def _read_json_object_or_empty(path: Path) -> dict[str, object]:
     try:
         if path.suffix == ".jsonl":
             line = next(
-                (item for item in path.read_text(encoding="utf-8").splitlines() if item),
+                (
+                    item
+                    for item in path.read_text(encoding="utf-8").splitlines()
+                    if item
+                ),
                 "",
             )
             if not line:
@@ -288,8 +401,8 @@ def _resolve_payload_or_file_time(
     path: Path,
     payload: dict[str, object],
 ) -> datetime | None:
-    for key in ("created_at", "occurred_at"):
-        timestamp = _parse_datetime(payload.get(key))
+    for key in ("created_at", "updated_at", "occurred_at"):
+        timestamp = _parse_datetime(_payload_value(payload, key))
         if timestamp is not None:
             return timestamp
     try:
@@ -324,10 +437,16 @@ def _artifact_id(
         return str(payload.get("artifact_id") or path.stem)
     if surface is ControlPlaneArtifactSurface.LINEAGE:
         return str(
-            payload.get("stored_fragment_id")
-            or payload.get("fragment_id")
+            payload.get("stored_fragment_id") or payload.get("fragment_id") or path.stem
+        )
+    if surface is ControlPlaneArtifactSurface.CHECKPOINT:
+        return (
+            _payload_text(payload, "manifest_id")
+            or _payload_text(payload, "run_id")
             or path.stem
         )
+    if surface is ControlPlaneArtifactSurface.CACHED_BRONZE:
+        return _content_addressed_file_snapshot_id(path)
     return path.stem
 
 
@@ -336,6 +455,50 @@ def _effective_config_artifact_id(payload: dict[str, object]) -> str | None:
     if not isinstance(code_provenance, dict):
         return None
     return _optional_text(code_provenance.get("effective_config_artifact_id"))
+
+
+def _input_snapshot_ids(payload: dict[str, object]) -> tuple[str, ...]:
+    source_refs = payload.get("source_refs")
+    if not isinstance(source_refs, list):
+        return ()
+    snapshot_ids: list[str] = []
+    for source_ref in source_refs:
+        if not isinstance(source_ref, dict):
+            continue
+        input_snapshots = source_ref.get("input_snapshots")
+        if not isinstance(input_snapshots, list):
+            continue
+        for input_snapshot in input_snapshots:
+            if not isinstance(input_snapshot, dict):
+                continue
+            snapshot_id = _optional_text(input_snapshot.get("snapshot_id"))
+            if snapshot_id is not None:
+                snapshot_ids.append(snapshot_id)
+    return tuple(snapshot_ids)
+
+
+def _payload_text(payload: dict[str, object], key: str) -> str | None:
+    return _optional_text(_payload_value(payload, key))
+
+
+def _payload_value(payload: dict[str, object], key: str) -> object:
+    if key in payload:
+        return payload.get(key)
+    metadata = payload.get("metadata")
+    if isinstance(metadata, dict) and key in metadata:
+        return metadata.get(key)
+    return None
+
+
+def _content_addressed_file_snapshot_id(path: Path) -> str:
+    digest = hashlib.sha256()
+    try:
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(chunk)
+    except OSError:
+        return f"unreadable:{path.stem}"
+    return f"sha256:{digest.hexdigest()}"
 
 
 def _indexed_stem(path: Path) -> str | None:

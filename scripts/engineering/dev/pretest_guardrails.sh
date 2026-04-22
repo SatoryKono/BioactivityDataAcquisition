@@ -508,7 +508,11 @@ main() {
     run_memory_checks
     run_architecture_checks
 
-    SKIP_ARCHITECTURE=1 # Temporarily skip architecture checks due to caching issues with YAML.
+    export SKIP_ARCHITECTURE=1 # Temporarily skip architecture checks due to caching issues with YAML.
+
+
+
+
 
     echo "[pretest-guardrails] OK"
 

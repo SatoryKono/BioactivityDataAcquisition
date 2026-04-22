@@ -45,6 +45,10 @@ class RunInputSnapshotRef:
     content_hash: str
     immutable_uri: str | None = None
     query_fingerprint: str | None = None
+    storage_provider: str | None = None
+    object_bucket: str | None = None
+    object_key: str | None = None
+    object_version_id: str | None = None
     etag: str | None = None
     last_modified: str | None = None
     captured_at: datetime | None = None
@@ -229,6 +233,10 @@ def _load_input_snapshot_ref(item: dict[str, object]) -> RunInputSnapshotRef:
         content_hash=str(item["content_hash"]),
         immutable_uri=_load_optional_snapshot_text(item, "immutable_uri"),
         query_fingerprint=_load_optional_snapshot_text(item, "query_fingerprint"),
+        storage_provider=_load_optional_snapshot_text(item, "storage_provider"),
+        object_bucket=_load_optional_snapshot_text(item, "object_bucket"),
+        object_key=_load_optional_snapshot_text(item, "object_key"),
+        object_version_id=_load_optional_snapshot_text(item, "object_version_id"),
         etag=_load_optional_snapshot_text(item, "etag"),
         last_modified=_load_optional_snapshot_text(item, "last_modified"),
         captured_at=_load_optional_snapshot_datetime(item, "captured_at"),
