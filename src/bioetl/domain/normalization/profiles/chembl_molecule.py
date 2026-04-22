@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
+    chembl_pseudo_null_fields,
+)
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_canonical_smiles,
 )
@@ -89,18 +92,7 @@ _JSON_STRING_FIELDS = frozenset(
         "atc_classifications",
     }
 )
-_NULL_FIELDS = frozenset(
-    {
-        "pref_name",
-        "usan_stem",
-        "usan_substem",
-        "usan_stem_definition",
-        "molecule_species",
-        "canonical_smiles",
-        "standard_inchi",
-        "inchi_key",
-    }
-)
+_NULL_FIELDS = chembl_pseudo_null_fields("molecule")
 
 _SPECIAL_RULES = {
     "canonical_smiles": (

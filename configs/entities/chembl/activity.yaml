@@ -120,6 +120,24 @@ quality:
             max: 1000000000
             nullable: true
             error_message: standard_value must be non-negative and below 1B
+        -   field: standard_flag
+            type: range
+            min: 0
+            max: 1
+            nullable: false
+            error_message: standard_flag must be 0 or 1
+        -   field: potential_duplicate
+            type: range
+            min: 0
+            max: 1
+            nullable: false
+            error_message: potential_duplicate must be 0 or 1
+        -   field: manual_curation_flag
+            type: range
+            min: 0
+            max: 1
+            nullable: true
+            error_message: manual_curation_flag must be 0 or 1 when present
         -   field: pchembl_value
             type: range
             min: 0

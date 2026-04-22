@@ -249,6 +249,7 @@ class TestFieldTypes:
     @pytest.mark.parametrize(
         "schema_name,guard_fields",
         [
+            ("chembl_activity", {"manual_curation_flag"}),
             ("chembl_publication", {"src_id"}),
             ("pubmed_publication", {"pub_month", "pub_day", "author_count"}),
             (

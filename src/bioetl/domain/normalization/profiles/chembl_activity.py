@@ -16,6 +16,7 @@ from ._chembl_activity_fields import (
     STANDARD_RELATIONS,
 )
 from ._standard_profile_builder import build_standard_profile
+from .chembl_pseudo_nulls import chembl_pseudo_null_fields
 from .profile_normalizers import (
     normalize_profile_canonical_smiles,
     normalize_profile_enum,
@@ -90,29 +91,7 @@ _SPECIAL_RULE_COMPONENTS = {
 }
 
 
-# Fields that commonly contain pseudo-null values and should be normalized
-NULL_FIELDS = frozenset(
-    [
-        "standard_value",
-        "value",
-        "upper_value",
-        "standard_upper_value",
-        "pchembl_value",
-        "data_validity_comment",
-        "assay_description",
-        "target_relation",
-        "target_organism",
-        "target_taxonomy",
-        "cell_line",
-        "tissue",
-        "assay_type",
-        "assay_test_type",
-        "assay_category",
-        "bao_format",
-        "bao_label",
-        "bao_endpoint",
-    ]
-)
+NULL_FIELDS = chembl_pseudo_null_fields("activity")
 
 CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
     profile_name="chembl.activity",

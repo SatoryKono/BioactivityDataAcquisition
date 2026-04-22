@@ -8,6 +8,174 @@
 version: "1.0.0"
 adr_ref: ADR-042
 
+# ── Canonical test-health lanes ─────────────────────────────
+
+test_lanes:
+  schema_version: 1
+  source: configs/quality/test_matrix.yaml
+  summary: >
+    Canonical named pytest lanes for comparable local and CI test-health runs.
+    Later test-health wrappers must emit these values as suite names instead of
+    treating ad hoc pytest commands as comparable runs.
+  execution_defaults:
+    pythonpath: src
+    direct_runner: scripts/engineering/dev/run_pytest.sh
+    sharded_runner: scripts/engineering/dev/run_pytest_sharded.sh
+    default_sharded_options:
+      - --stream
+      - --keep-coverage-files
+      - --coverage-dir
+      - .coverage-sharded
+    default_pytest_passthrough:
+      - -vv
+      - --cov-report=html
+    powershell_env_example: '$env:PYTHONPATH="src"'
+    bash_env_example: PYTHONPATH=src
+  lanes:
+    unit-fast:
+      suite_name: unit-fast
+      description: "Fast unit lane; excludes slow, benchmark, and Neo4j/MCP memory tests."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/unit/
+      marker_expression: "not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/unit/
+        - -m
+        - not slow and not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    integration-replay:
+      suite_name: integration-replay
+      description: "Integration lane in VCR/replay mode; live network access is not part of this lane."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/integration/
+      marker_expression: "not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/integration/
+        - -m
+        - not slow and not benchmark and not memory
+        - --vcr-record=none
+      environment:
+        VCR_RECORD_MODE: none
+      replay_mode: vcr_replay_only
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    contracts:
+      suite_name: contracts
+      description: "Schema, provider-contract, and snapshot drift tests."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/contract/
+        - tests/unit/contracts/
+      marker_expression: "not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/contract/
+        - tests/unit/contracts/
+        - -m
+        - not slow and not benchmark and not memory
+      replay_mode: replay_or_no_api
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    architecture:
+      suite_name: architecture
+      description: "Layer boundary, contract, governance, and repository policy checks."
+      runner_backend: run_pytest_sharded
+      runner: scripts/engineering/dev/run_pytest_sharded.sh
+      runner_options:
+        - --shard
+        - S7-crosscutting-architecture
+        - --shard
+        - S7-crosscutting-architecture-guardrails
+      paths:
+        - tests/architecture/
+      marker_expression: "not slow and not benchmark and not memory"
+      pytest_args:
+        - tests/architecture/
+        - -m
+        - not slow and not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    e2e:
+      suite_name: e2e
+      description: "Slow end-to-end lane; kept separate from fast feedback and coverage verification."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/e2e/
+      marker_expression: "e2e and not benchmark and not memory"
+      pytest_args:
+        - tests/e2e/
+        - -m
+        - e2e and not benchmark and not memory
+      replay_mode: mixed
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    memory:
+      suite_name: memory
+      description: "Dedicated Neo4j project-memory and MCP lane; excluded from coverage verification."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/unit/scripts/ops/
+      marker_expression: "memory and not benchmark"
+      pytest_args:
+        - tests/unit/scripts/ops/
+        - -m
+        - memory and not benchmark
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    coverage-verify:
+      suite_name: coverage-verify
+      description: "The only lane allowed to enforce the repo-wide coverage gate."
+      runner_backend: run_pytest_sharded
+      runner: scripts/engineering/dev/run_pytest_sharded.sh
+      runner_options:
+        - --stream
+        - --keep-coverage-files
+        - --coverage-dir
+        - .coverage-sharded
+      paths:
+        - tests/
+      marker_expression: "not e2e and not benchmark and not memory"
+      pytest_args:
+        - tests/
+        - -m
+        - not e2e and not benchmark and not memory
+        - --cov=src/bioetl
+        - --cov-report=term-missing
+        - --cov-fail-under=85
+      replay_mode: replay_or_no_api
+      coverage_gate: repo-wide
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
 # ── Layer-level requirements ─────────────────────────────────
 
 layers:

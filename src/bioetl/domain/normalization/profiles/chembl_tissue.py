@@ -6,6 +6,9 @@ from bioetl.domain.normalization.identifiers import normalize_ontology_id
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
+    chembl_pseudo_null_fields,
+)
 from bioetl.domain.schemas.chembl.tissue import TissueSchema
 
 __all__ = [
@@ -57,6 +60,7 @@ CHEMBL_TISSUE_PROFILE = build_standard_profile(
     meta_fields=_META_FIELDS,
     title_fields=_TITLE_FIELDS,
     special_rules=_SPECIAL_RULE_COMPONENTS,
+    null_fields=chembl_pseudo_null_fields("tissue"),
 )
 
 CHEMBL_TISSUE_PROFILE.assert_covers_schema(CHEMBL_TISSUE_SCHEMA_FIELDS)

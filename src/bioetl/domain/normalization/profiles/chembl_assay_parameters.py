@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
+    chembl_pseudo_null_fields,
+)
 from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
 
 __all__ = [
@@ -41,6 +44,7 @@ CHEMBL_ASSAY_PARAMETERS_PROFILE = build_standard_profile(
     int_fields=_INT_FIELDS,
     float_fields=_FLOAT_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
+    null_fields=chembl_pseudo_null_fields("assay_parameters"),
 )
 
 CHEMBL_ASSAY_PARAMETERS_PROFILE.assert_covers_schema(

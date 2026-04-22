@@ -5,6 +5,7 @@ Aligned with RULES.md v5.24 and ChEMBL 34 schema.
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -148,10 +149,10 @@ class ActivitySchema(ETLRecordSchema):
     toid: Series[float] | None = pa.Field(
         nullable=True, description="Test Occasion ID (float for nullable int)."
     )
-    manual_curation_flag: Series[float] | None = pa.Field(
+    manual_curation_flag: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         isin=[0, 1],
-        description="Manual curation flag (float for nullable int).",
+        description="Manual curation flag.",
     )
     original_activity_id: Series[float] | None = pa.Field(
         nullable=True, description="Original activity ID (float for nullable int)."

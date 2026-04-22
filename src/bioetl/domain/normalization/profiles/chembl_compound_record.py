@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
+    chembl_pseudo_null_fields,
+)
 from bioetl.domain.schemas.chembl.compound_record import CompoundRecordSchema
 
 __all__ = [
@@ -39,6 +42,7 @@ CHEMBL_COMPOUND_RECORD_PROFILE = build_standard_profile(
     meta_fields=_META_FIELDS,
     title_fields=_TITLE_FIELDS,
     int_fields=_INT_FIELDS,
+    null_fields=chembl_pseudo_null_fields("compound_record"),
 )
 
 CHEMBL_COMPOUND_RECORD_PROFILE.assert_covers_schema(

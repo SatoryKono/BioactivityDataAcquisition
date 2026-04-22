@@ -5,6 +5,9 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
+    chembl_pseudo_null_fields,
+)
 from bioetl.domain.schemas.chembl.publication_term import PublicationTermSchema
 
 __all__ = [
@@ -33,7 +36,7 @@ _TITLE_FIELDS = frozenset({"term"})
 _ENUM_FIELDS = {
     "term_type": frozenset({"MESH_HEADING", "MESH_QUALIFIER", "KEYWORD", "CONCEPT"}),
 }
-_NULL_FIELDS = frozenset({"mesh_id", "qualifier"})
+_NULL_FIELDS = chembl_pseudo_null_fields("publication_term")
 
 CHEMBL_PUBLICATION_TERM_PROFILE = build_standard_profile(
     profile_name="chembl.publication_term",
