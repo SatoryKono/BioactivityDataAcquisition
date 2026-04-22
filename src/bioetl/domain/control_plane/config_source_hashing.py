@@ -109,7 +109,9 @@ def _to_canonical_jsonable(value: object) -> object:
         for raw_key, raw_value in value.items():
             key = str(raw_key)
             if key in normalized:
-                raise ValueError(f"Canonical YAML key collision after string coercion: {key!r}")
+                raise ValueError(
+                    f"Canonical YAML key collision after string coercion: {key!r}"
+                )
             normalized[key] = _to_canonical_jsonable(raw_value)
         return {key: normalized[key] for key in sorted(normalized)}
     if isinstance(value, (list, tuple)):

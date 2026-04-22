@@ -197,8 +197,8 @@ class TestBronzeWriterSideEffectsMixin:
         assert metadata.output.lineage_fragment_id == "bronze:fragment-1"
         assert coordinator.last_input is not None
         assert len(coordinator.last_input.input_snapshots) == 1
-        assert coordinator.last_input.input_snapshots[0].immutable_uri == str(
-            batch_path
+        assert coordinator.last_input.input_snapshots[0].immutable_uri == (
+            "bronze://chembl/activity/file.jsonl.zst"
         )
 
     @pytest.mark.asyncio

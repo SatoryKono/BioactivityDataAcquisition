@@ -96,7 +96,12 @@ class TestPrepareBronzeMetadataWrite:
         assert bronze_input.record_count == 5
         assert bronze_input.output_path == output_path
         assert len(bronze_input.input_snapshots) == 1
-        assert bronze_input.input_snapshots[0].immutable_uri == str(full_path)
+        assert bronze_input.input_snapshots[0].immutable_uri == (
+            "bronze://pubmed/publication/file.jsonl.zst"
+        )
+        assert bronze_input.input_snapshots[0].snapshot_id == (
+            f"sha256:{bronze_input.input_snapshots[0].content_hash}"
+        )
         assert bronze_input.input_snapshots[0].query_fingerprint is not None
         assert prepared.metadata is metadata
         assert prepared.lineage_fragment is fragment

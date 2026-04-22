@@ -76,8 +76,38 @@ def test_cached_bronze_snapshot_refs_keep_stable_identity_when_mtime_changes(
     assert first[0].snapshot_id == second[0].snapshot_id
     assert first[0].content_hash == second[0].content_hash
     assert first[0].immutable_uri == second[0].immutable_uri
+    assert first[0].immutable_uri == "bronze://2026-04-12/batch_demo.jsonl.zst"
     assert first[0].captured_at != second[0].captured_at
     assert datetime.fromtimestamp(original_mtime, tz=UTC) == first[0].captured_at
+
+
+@pytest.mark.unit
+def test_cached_bronze_snapshot_identity_is_content_addressed_not_locator(
+    tmp_path: Path,
+) -> None:
+    bronze_root = tmp_path / "bronze"
+    first_day = bronze_root / "2026-04-12"
+    second_day = bronze_root / "2026-04-13"
+    first_day.mkdir(parents=True)
+    second_day.mkdir(parents=True)
+    (first_day / "batch_demo.jsonl.zst").write_bytes(b"same-payload")
+    (second_day / "batch_renamed.jsonl.zst").write_bytes(b"same-payload")
+
+    first = build_cached_bronze_input_snapshot_refs(
+        bronze_root=bronze_root,
+        bronze_date="2026-04-12",
+        pipeline_name="chembl_activity",
+    )
+    second = build_cached_bronze_input_snapshot_refs(
+        bronze_root=bronze_root,
+        bronze_date="2026-04-13",
+        pipeline_name="chembl_activity",
+    )
+
+    assert first[0].snapshot_id == second[0].snapshot_id
+    assert first[0].snapshot_id == f"sha256:{first[0].content_hash}"
+    assert first[0].immutable_uri == "bronze://2026-04-12/batch_demo.jsonl.zst"
+    assert second[0].immutable_uri == "bronze://2026-04-13/batch_renamed.jsonl.zst"
 
 
 @pytest.mark.unit

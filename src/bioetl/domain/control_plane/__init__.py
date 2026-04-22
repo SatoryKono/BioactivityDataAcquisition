@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+from bioetl.domain.control_plane.artifact_lifecycle import (
+    ControlPlaneArtifactLifecycleApplyResult,
+    ControlPlaneArtifactLifecycleDecision,
+    ControlPlaneArtifactLifecyclePlan,
+    ControlPlaneArtifactLifecyclePolicy,
+    ControlPlaneArtifactRef,
+    ControlPlaneArtifactSurface,
+)
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
     ConfigSourceRef,
@@ -34,6 +42,12 @@ from bioetl.domain.control_plane.run_manifest import (
 __all__ = [
     "ConfigResolutionPolicy",
     "ConfigSourceRef",
+    "ControlPlaneArtifactLifecycleApplyResult",
+    "ControlPlaneArtifactLifecycleDecision",
+    "ControlPlaneArtifactLifecyclePlan",
+    "ControlPlaneArtifactLifecyclePolicy",
+    "ControlPlaneArtifactRef",
+    "ControlPlaneArtifactSurface",
     "DQPolicySnapshot",
     "EffectiveConfigArtifact",
     "EffectiveConfigHashes",

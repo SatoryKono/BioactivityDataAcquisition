@@ -309,10 +309,14 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
     snapshots = source_refs[0]["input_snapshots"]
     assert len(snapshots) == 2
     assert sorted(snapshot["immutable_uri"] for snapshot in snapshots) == [
-        str(bronze_day / "batch_2026-01-01_demo.jsonl.zst"),
-        str(bronze_day / "batch_2026-01-01_extra.jsonl.zst"),
+        "bronze://2026-01-01/batch_2026-01-01_demo.jsonl.zst",
+        "bronze://2026-01-01/batch_2026-01-01_extra.jsonl.zst",
     ]
     assert all(snapshot["content_hash"] for snapshot in snapshots)
+    assert all(
+        snapshot["snapshot_id"] == f"sha256:{snapshot['content_hash']}"
+        for snapshot in snapshots
+    )
     assert [snapshot["snapshot_id"] for snapshot in snapshots] == sorted(
         snapshot["snapshot_id"] for snapshot in snapshots
     )
@@ -454,9 +458,9 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
     assert manifest_path.exists()
     payload = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert payload["manifest_id"] == manifest_id
-    assert payload["execution_fingerprint"] == fake_factory.kwargs[
-        "execution_fingerprint"
-    ]
+    assert (
+        payload["execution_fingerprint"] == fake_factory.kwargs["execution_fingerprint"]
+    )
     assert payload["pipeline_name"] == "chembl_activity"
     code_provenance = payload["code_provenance"]
     assert isinstance(code_provenance, dict)

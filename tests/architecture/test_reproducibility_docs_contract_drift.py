@@ -64,3 +64,20 @@ def test_normalization_matrix_declares_non_contract_scope_and_drops_storage_word
         "Technical field is passed through unchanged when no explicit profile rule is defined."
         not in text
     )
+
+
+@pytest.mark.architecture
+def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces() -> (
+    None
+):
+    text = _read("docs/04-reference/contracts/run-manifest-ledger.md")
+
+    assert "## Lifecycle Management" in text
+    assert "Protected-reference rules are fail-closed" in text
+    assert "FileControlPlaneArtifactLifecycleStore.plan(..., dry_run=True)" in text
+    assert "### Input snapshot identity vs locator" in text
+    assert "`snapshot_id` is content-addressed as `sha256:{content_hash}`" in text
+    assert "`bronze://{relative_path_from_bronze_root}`" in text
+    assert "## Reproducibility Scoring Rubric" in text
+    assert "|   100 | `forensic_grade`" in text
+    assert "| Evidence surface" in text

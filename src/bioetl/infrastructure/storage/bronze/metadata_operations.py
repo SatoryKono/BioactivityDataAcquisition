@@ -257,16 +257,20 @@ def _build_live_input_snapshot_ref(
         if not query_string
         else hashlib.sha256(query_string.encode("utf-8")).hexdigest()
     )
-    snapshot_id = hashlib.sha256(
-        f"bronze:{relative_path}:{content_hash}".encode()
-    ).hexdigest()
+    portable_relative_path = Path(relative_path).as_posix()
+    snapshot_id = _content_addressed_snapshot_id(content_hash)
     return InputSnapshotRef(
         snapshot_id=snapshot_id,
         content_hash=content_hash,
-        immutable_uri=str(full_path),
+        immutable_uri=f"bronze://{portable_relative_path}",
         query_fingerprint=query_fingerprint,
         captured_at=datetime.fromtimestamp(full_path.stat().st_mtime, tz=UTC),
     )
+
+
+def _content_addressed_snapshot_id(content_hash: str) -> str:
+    """Return a portable snapshot identity derived only from captured content."""
+    return f"sha256:{content_hash}"
 
 
 def _compute_file_sha256(path: Path) -> str:

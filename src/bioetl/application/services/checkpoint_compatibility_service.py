@@ -573,11 +573,9 @@ class CheckpointCompatibilityService:
             execution_identity_compatible,
             identity_continuity_proven,
             execution_identity_messages,
-        ) = (
-            _validate_execution_identity_compatibility(
-                current_metadata,
-                checkpoint_metadata,
-            )
+        ) = _validate_execution_identity_compatibility(
+            current_metadata,
+            checkpoint_metadata,
         )
         messages = (
             dq_messages
@@ -624,11 +622,9 @@ class CheckpointCompatibilityService:
             execution_identity_compatible,
             identity_continuity_proven,
             execution_identity_messages,
-        ) = (
-            _validate_lenient_execution_identity_compatibility(
-                current_metadata,
-                checkpoint_metadata,
-            )
+        ) = _validate_lenient_execution_identity_compatibility(
+            current_metadata,
+            checkpoint_metadata,
         )
         messages = dq_messages + pipeline_messages + execution_identity_messages
         compatible = (

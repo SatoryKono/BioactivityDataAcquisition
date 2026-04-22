@@ -122,9 +122,7 @@ def merge_expected_anchors(
         replace(
             state,
             effective_config_hash=merged["effective_config_hash"] or "",
-            effective_config_artifact_id=(
-                merged["effective_config_artifact_id"] or ""
-            ),
+            effective_config_artifact_id=(merged["effective_config_artifact_id"] or ""),
             execution_fingerprint=merged["execution_fingerprint"] or "",
             dq_contract_compatibility_hash=(
                 merged["dq_contract_compatibility_hash"] or ""

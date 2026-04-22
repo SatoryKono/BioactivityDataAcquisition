@@ -109,7 +109,6 @@ def _run_isort_check() -> subprocess.CompletedProcess[str]:
 
 
 class TestCodeFormatting:
-
     @pytest.mark.slow
     @pytest.mark.skipif(not _ruff_available, reason="ruff not installed")
     def test_ruff_formatting_src(self) -> None:

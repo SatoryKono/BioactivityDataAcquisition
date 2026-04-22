@@ -399,8 +399,7 @@ class TestCheckpointCompatibilityService:
         assert result.execution_identity_compatible is False
         assert result.identity_continuity_proven is False
         assert any(
-            "Execution identity continuity not proven" in msg
-            for msg in result.messages
+            "Execution identity continuity not proven" in msg for msg in result.messages
         )
 
     def test_strict_resume_blocks_missing_fallback_identity_anchors(self) -> None:
@@ -414,8 +413,7 @@ class TestCheckpointCompatibilityService:
         assert result.execution_identity_compatible is False
         assert result.identity_continuity_proven is False
         assert any(
-            "Execution identity continuity not proven" in msg
-            for msg in result.messages
+            "Execution identity continuity not proven" in msg for msg in result.messages
         )
 
     def test_validate_minimum_compatibility_same_contracts(self) -> None:
@@ -575,8 +573,7 @@ class TestCheckpointCompatibilityServiceEdgeCases:
         assert result.execution_identity_compatible is False
         assert result.identity_continuity_proven is False
         assert any(
-            "Execution identity continuity not proven" in msg
-            for msg in result.messages
+            "Execution identity continuity not proven" in msg for msg in result.messages
         )
 
     def test_malformed_version_strings(self) -> None:

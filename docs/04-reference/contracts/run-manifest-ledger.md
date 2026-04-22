@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
   - BioETL Team
-Last verified: "2026-04-02"
+Last verified: "2026-04-22"
 ---
 
 # Run Manifest and Run Ledger Contract
@@ -67,10 +67,45 @@ File-backed control-plane persistence uses the following canonical paths:
 | Effective config semantic artifact   | `data/output/control/effective_config/{artifact_id}.json`         |
 | Effective config occurrence envelope | `data/output/control/effective_config/_occurrences/{run_id}.json` |
 | Effective config run-id index        | `data/output/control/effective_config/_by_run_id/{run_id}.txt`    |
+| Lineage fragment payload             | `data/output/control/lineage/fragments/{stable_fragment_key}.json` |
+| Lineage lookup indexes               | `data/output/control/lineage/_by_*/*.jsonl`                       |
 
 `run_manifest` and `run_ledger` stores are bootstrapped from
 `Path(settings.data_dir) / "output" / "control" / <leaf>` and are therefore
 runtime-aligned with the current composition layer.
+
+## Lifecycle Management
+
+File-backed control-plane lifecycle management is planner-driven:
+
+- `ControlPlaneArtifactLifecyclePolicy` declares the retention window, planning
+  timestamp, and explicit protected references.
+- `FileControlPlaneArtifactLifecycleStore.plan(..., dry_run=True)` returns a
+  complete dry-run plan and MUST NOT delete files.
+- `FileControlPlaneArtifactLifecycleStore.plan(..., dry_run=False)` returns the
+  same decision model for apply mode.
+- `FileControlPlaneArtifactLifecycleStore.apply(plan)` deletes only artifacts
+  whose plan decision is `delete`; dry-run plans are no-op during apply.
+
+Protected-reference rules are fail-closed:
+
+- manifests inside the retention window protect their `manifest_id`, `run_id`,
+  `replay_of_manifest_id`, and
+  `code_provenance.effective_config_artifact_id`;
+- explicit protected manifest/run/effective-config/lineage identifiers protect
+  matching payloads and lookup indexes regardless of age;
+- ledgers are retained when their `manifest_id` or `run_id` is protected;
+- effective-config semantic artifacts are retained when referenced by a
+  protected or retention-active manifest;
+- effective-config occurrence envelopes and run indexes are retained when their
+  `run_id` is protected;
+- lineage fragments are retained when their `manifest_id`, `run_id`,
+  `stored_fragment_id`, or semantic `fragment_id` is protected.
+
+Lifecycle planning is intentionally independent from read APIs: expired
+unprotected files can be selected for deletion even if higher-level lookup
+indexes are already orphaned. Corruption-visible read paths still fail closed
+before lifecycle apply is considered.
 
 ## Rollout Flags
 
@@ -215,6 +250,37 @@ diagnostics surface raises `alert_signals.immutable_input_snapshot_gap` and
 points the operator back to cached-Bronze snapshot persistence before exact
 replay can be claimed.
 
+## Reproducibility Scoring Rubric
+
+The profile taxonomy above is the authority for pass/fail behavior. The
+following score is an operator-facing evidence summary; it does not override
+`required_persistence_profile` or exact-replay bootstrap checks.
+
+| Score | Label                 | Required evidence                                                                 |
+| ----: | --------------------- | --------------------------------------------------------------------------------- |
+|     0 | `not_observable`      | No manifest can be resolved for the run or manifest identifier                     |
+|    25 | `manifest_observable` | Manifest resolves and exposes execution identity plus runtime/config provenance    |
+|    50 | `ledger_observable`   | Manifest plus append-only ledger history are available and corruption-visible      |
+|    75 | `replay_ready`        | Immutable input snapshots and effective-config artifact anchors support replay     |
+|   100 | `forensic_grade`      | Replay-ready evidence plus lineage/artifact closure inside the supported boundary |
+
+Evidence matrix:
+
+| Evidence surface                   | Degraded observable | Replay ready | Forensic grade |
+| ---------------------------------- | ------------------: | -----------: | -------------: |
+| Manifest payload                   | required            | required     | required       |
+| Execution fingerprint              | required            | required     | required       |
+| Effective-config semantic artifact | optional            | required     | required       |
+| Immutable input snapshot refs      | optional            | required     | required       |
+| Append-only ledger                 | optional            | optional     | required       |
+| Artifact linkage diagnostics       | optional            | optional     | required       |
+| Lineage closure boundary           | optional            | optional     | required       |
+| Supported reproducibility family   | optional            | required     | required       |
+
+Evidence scoring is conservative: a missing mandatory surface caps the score
+at the highest lower tier whose evidence is complete, and unsupported lineage
+families cannot score above `replay_ready`.
+
 Composite replay is additionally documented as a bounded reconstructability
 surface:
 
@@ -283,6 +349,21 @@ provenance.
 - `exact_replay_support_boundary` publishes the strict replay boundary for that execution context:
   - `snapshot_backed_source_runs_only` for ordinary source execution;
   - `composite_execution_unsupported` for composite execution.
+
+### Input snapshot identity vs locator
+
+`source_refs[*].input_snapshots[*]` separates portable identity from replay
+locator metadata:
+
+- `content_hash` is the SHA256 hash of captured input bytes.
+- `snapshot_id` is content-addressed as `sha256:{content_hash}` and MUST NOT
+  include local file paths, mtimes, or other locator-only fields.
+- `immutable_uri` is a replay locator. Local cached-Bronze files use portable
+  `bronze://{relative_path_from_bronze_root}` URIs instead of absolute checkout
+  paths.
+- `captured_at`, `last_modified`, `etag`, and `query_fingerprint` are
+  occurrence or lookup metadata; changing them must not change `snapshot_id`
+  when the captured bytes are unchanged.
 
 ### Effective-config provenance baseline
 
