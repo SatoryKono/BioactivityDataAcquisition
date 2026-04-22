@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-22T05:43:43.354809+00:00",
+  "generated_at": "2026-04-22T11:25:07.035131+00:00",
   "summary": {
-    "total_scripts": 429,
+    "total_scripts": 427,
     "status_counts": {
-      "active": 301,
+      "active": 300,
       "legacy": 15,
       "orphan": 101,
-      "unknown": 12
+      "unknown": 11
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 1,
       "ci": 49,
-      "docs": 135,
-      "scripts": 285,
+      "docs": 125,
+      "scripts": 284,
       "skills": 8,
       "tests": 132
     }
@@ -1076,16 +1076,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 61,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/github-mcp-wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 61,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/github-mcp-wrapper.sh\""
@@ -1123,16 +1117,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 112,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 112,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
@@ -1158,16 +1146,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 142,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_chembl_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 142,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_chembl_wrapper.sh\""
@@ -1187,16 +1169,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 82,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_context7_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 82,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_context7_wrapper.sh\""
@@ -1222,16 +1198,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 76,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 76,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
@@ -1257,16 +1227,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 70,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 70,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_wrapper.sh\""
@@ -1292,16 +1256,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 94,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 94,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
@@ -1327,16 +1285,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 106,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 106,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
@@ -1362,16 +1314,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 160,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 160,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
@@ -1391,16 +1337,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 136,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_needle_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 136,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_needle_wrapper.sh\""
@@ -1432,16 +1372,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 124,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 124,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
@@ -1467,7 +1401,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 22,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -1532,16 +1466,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 88,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 88,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
@@ -1567,16 +1495,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 100,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 100,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
@@ -1602,16 +1524,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 148,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubchem_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 148,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubchem_wrapper.sh\""
@@ -1631,16 +1547,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 154,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubmed_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 154,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubmed_wrapper.sh\""
@@ -1660,16 +1570,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 118,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 118,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
@@ -2686,7 +2590,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 39,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/02-architecture/05-composition-layer.md",
@@ -2951,59 +2855,10 @@
     {
       "path": "scripts/ci/_compatibility_telemetry.py",
       "type": "py",
-      "status": "unknown",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 13,
-      "references": [
-        {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/EV-compatibility-registry-curated-ssot-drift-telemetry-reporting-test-replays-inventory-counts.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"tests/architecture/test_compatibility_telemetry_reporting.py; docs/02-architecture/07-compatibility-facade-inventory.md; scripts/ci/_compatibility_telemetry.py\""
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/EV-compatibility-registry-curated-ssot-drift-telemetry-script-hardcodes-tracked-docstring-prefixes.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"scripts/ci/_compatibility_telemetry.py; docs/02-architecture/07-compatibility-facade-inventory.md\""
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/RAW-compatibility-registry-curated-ssot-drift-2026-03-21.md",
-          "line": 15,
-          "source_group": "docs",
-          "text": "- `scripts/ci/_compatibility_telemetry.py`"
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/RAW-compatibility-registry-curated-ssot-drift-2026-03-21.md",
-          "line": 23,
-          "source_group": "docs",
-          "text": "- `scripts/ci/_compatibility_telemetry.py` hardcodes `TRACKED_DOCSTRING_PREFIXES` and computes `measured_paths = inventory_paths | _iter_docstring_tracked_modules(...)`, so telemetry uses its own trac"
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/03-synthesis/SYN-compatibility-registry-curated-ssot-drift.md",
-          "line": 36,
-          "source_group": "docs",
-          "text": "`scripts/ci/_compatibility_telemetry.py` hardcodes `TRACKED_DOCSTRING_PREFIXES` and computes snapshot counts by combining inventory rows with an AST scan. The telemetry reporting test then re-parses t"
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-policy-history-mixing/02-evidence/compatibility-registry-policy-history-mixing/EV-compatibility-registry-policy-history-mixing-telemetry-prefix-gating.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"scripts/ci/_compatibility_telemetry.py:9-18,73-118\""
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-policy-history-mixing/RAW-compatibility-registry-policy-history-mixing-2026-03-21.md",
-          "line": 14,
-          "source_group": "docs",
-          "text": "- `scripts/ci/_compatibility_telemetry.py` defines the measured compatibility snapshot logic."
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-policy-history-mixing/RAW-compatibility-registry-policy-history-mixing-2026-03-21.md",
-          "line": 28,
-          "source_group": "docs",
-          "text": "- `scripts/ci/_compatibility_telemetry.py` tracks modules when the first docstring line starts with a compatibility prefix."
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/common/repo_paths.py",
@@ -3051,7 +2906,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 40,
+      "reference_count": 36,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -3222,7 +3077,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 11,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -3261,16 +3116,16 @@
           "text": "- запуск `check_diagram_artifacts.py` (DIAG-T010/T011/T012);"
         },
         {
-          "path": "docs/reports/evidence/project-diagram-artifact-surface/artifact-surface-reduction-need/02-evidence/artifact-surface-reduction-need/EV-artifact-surface-reduction-need-svg-primary-contract-is-already-rationalized.yaml",
-          "line": 7,
-          "source_group": "docs",
-          "text": "- scripts/diagrams/check_diagram_artifacts.py"
+          "path": "scripts/diagrams/README.md",
+          "line": 27,
+          "source_group": "scripts",
+          "text": "| `check-artifacts` | `check_diagram_artifacts.py` | Check required SVG artifacts and optional PNG compatibility artifacts |"
         },
         {
-          "path": "docs/reports/evidence/project-diagram-artifact-surface/artifact-surface-reduction-need/02-evidence/artifact-surface-reduction-need/EV-artifact-surface-svg-primary-contract.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"scripts/diagrams/check_diagram_artifacts.py; scripts/diagrams/README.md; docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md; .github/workflows/docs.yml\""
+          "path": "scripts/diagrams/__main__.py",
+          "line": 57,
+          "source_group": "scripts",
+          "text": "\"check-artifacts\": \"check_diagram_artifacts.py\","
         }
       ]
     },
@@ -3485,20 +3340,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/EV-diagram-state-tooling-and-validator-scope.yaml",
-          "line": 9,
-          "source_group": "docs",
-          "text": "- scripts/diagrams/diagram_paths.py"
-        },
-        {
-          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
-          "line": 8,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/diagram_paths.py`"
-        },
         {
           "path": "scripts/diagrams/README.md",
           "line": 101,
@@ -3668,38 +3511,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 8,
       "references": [
-        {
-          "path": "docs/reports/evidence/project-diagram-artifact-surface/artifact-surface-reduction-need/02-evidence/artifact-surface-reduction-need/EV-artifact-surface-bundles-embed-svg-and-fall-back-to-png.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"scripts/diagrams/generate_all_bundles.py; docs/02-architecture/diagrams/bundles/architecture.bundle.md; docs/02-architecture/diagrams/bundles/class.bundle.md; scripts/diagrams/README.md\""
-        },
-        {
-          "path": "docs/reports/evidence/project-diagram-artifact-surface/artifact-surface-reduction-need/02-evidence/artifact-surface-reduction-need/EV-artifact-surface-reduction-need-bundles-now-render-svg-first.yaml",
-          "line": 6,
-          "source_group": "docs",
-          "text": "- scripts/diagrams/generate_all_bundles.py"
-        },
-        {
-          "path": "docs/reports/evidence/project-diagram-artifact-surface/diagram-publication-state/02-evidence/diagram-publication-state/EV-diagram-publication-state-svg-primary-bundle-contract.yaml",
-          "line": 6,
-          "source_group": "docs",
-          "text": "- scripts/diagrams/generate_all_bundles.py"
-        },
-        {
-          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
-          "line": 10,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/generate_all_bundles.py`"
-        },
-        {
-          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
-          "line": 26,
-          "source_group": "docs",
-          "text": "- `generate_all_bundles.py` builds bundle markdown for `foundation`, `architecture`, `views`, and `class-diagrams`."
-        },
         {
           "path": "scripts/diagrams/README.md",
           "line": 98,
@@ -3717,6 +3530,36 @@
           "line": 118,
           "source_group": "scripts",
           "text": "- When bundle drift is corrected, prefer regenerating the narrow affected collection via `generate_all_bundles.py --collection <name>` instead of broad refresh of every derived artifact."
+        },
+        {
+          "path": "scripts/diagrams/generate_architecture_bundle.py",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "- scripts/diagrams/generate_all_bundles.py --collection architecture"
+        },
+        {
+          "path": "scripts/diagrams/generate_views_bundle.py",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "- scripts/diagrams/generate_all_bundles.py --collection views"
+        },
+        {
+          "path": "tests/architecture/test_diagram_bundle_generator_contracts.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "module_path = repo_root / \"scripts\" / \"diagrams\" / \"generate_all_bundles.py\""
+        },
+        {
+          "path": "tests/architecture/test_diagram_bundle_generator_contracts.py",
+          "line": 79,
+          "source_group": "tests",
+          "text": "assert \"generate_all_bundles.py --collection architecture\" in content"
+        },
+        {
+          "path": "tests/architecture/test_diagram_bundle_generator_contracts.py",
+          "line": 89,
+          "source_group": "tests",
+          "text": "assert \"generate_all_bundles.py --collection views\" in content"
         }
       ]
     },
@@ -4006,7 +3849,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 41,
+      "reference_count": 40,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -4450,7 +4293,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
@@ -4483,12 +4326,6 @@
           "text": "`uniform_diagram_sizes.py` использовать только точечно и только после ручной проверки,"
         },
         {
-          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/EV-diagram-state-uniform-sizing-supports-class-diagram-maintenance.yaml",
-          "line": 6,
-          "source_group": "docs",
-          "text": "- scripts/diagrams/uniform_diagram_sizes.py"
-        },
-        {
           "path": "scripts/diagrams/README.md",
           "line": 44,
           "source_group": "scripts",
@@ -4499,6 +4336,12 @@
           "line": 70,
           "source_group": "scripts",
           "text": "\"fix-sizes\": \"uniform_diagram_sizes.py\","
+        },
+        {
+          "path": "tests/architecture/test_uniform_diagram_group_width.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "\"\"\"Load scripts/diagrams/uniform_diagram_sizes.py as a module.\"\"\""
         }
       ]
     },
@@ -4509,7 +4352,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 19,
+      "reference_count": 16,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -4566,7 +4409,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 97,
+      "reference_count": 96,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -4652,7 +4495,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 13,
       "references": [
         {
           "path": "docs/00-project/governance/01-documentation-governance-style-guide.md",
@@ -4665,18 +4508,6 @@
           "line": 294,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/check_doc_drift.py --freshness"
-        },
-        {
-          "path": "docs/reports/evidence/documentation-cascade-decisions/02-evidence/documentation-cascade-decisions/EV-documentation-cascade-orchestration-runtime-mirror-drift.yaml",
-          "line": 10,
-          "source_group": "docs",
-          "text": "- \"Runtime mirror parity policy in `scripts/docs/check_doc_drift.py` reflects active governance.\""
-        },
-        {
-          "path": "docs/reports/evidence/project-test-health/06-backlog/BACKLOG-project-test-health-implementation-2026-03-20.md",
-          "line": 243,
-          "source_group": "docs",
-          "text": "- `uv run python scripts/docs/check_doc_drift.py --runtime-mirrors --freshness`"
         },
         {
           "path": "scripts/docs/checks/check_drift.py",
@@ -4701,6 +4532,18 @@
           "line": 18,
           "source_group": "scripts",
           "text": "python scripts/check_doc_drift.py --classes     # Only class drift"
+        },
+        {
+          "path": "scripts/docs/checks/check_drift.py",
+          "line": 19,
+          "source_group": "scripts",
+          "text": "python scripts/check_doc_drift.py --modules     # Only module path drift"
+        },
+        {
+          "path": "scripts/docs/checks/check_drift.py",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "python scripts/check_doc_drift.py --runtime-mirrors"
         }
       ]
     },
@@ -4709,7 +4552,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 28,
+      "reference_count": 22,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -4724,40 +4567,40 @@
           "text": "python scripts/docs/check_doc_links.py"
         },
         {
-          "path": "docs/reports/evidence/documentation-internal-surface-governance/02-evidence/internal-surface-governance/EV-documentation-internal-surface-governance-kpi-is-healthy-under-current-model.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"scripts/docs/report_docs_kpi.py output (2026-03-23); scripts/docs/check_doc_links.py output (2026-03-23); tests/architecture/test_documentation_sync.py\""
-        },
-        {
-          "path": "docs/reports/evidence/documentation-internal-surface-governance/02-evidence/internal-surface-governance/RAW-documentation-internal-surface-governance-2026-03-23.md",
-          "line": 14,
-          "source_group": "docs",
-          "text": "- `scripts/docs/check_doc_links.py`"
-        },
-        {
           "path": "docs/reports/evidence/documentation-publication-remediation/SUMMARY.md",
           "line": 11,
           "source_group": "docs",
           "text": "- Repo-level docs guards уже зелёные: `check_doc_links.py` проходит, `report_docs_kpi.py` находится в состоянии `on_track`."
         },
         {
-          "path": "docs/reports/evidence/documentation-remediation-options/02-evidence/documentation-remediation-options/EV-documentation-remediation-link-guard-fails-on-internal-doc-links.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"./.venv/Scripts/python.exe scripts/docs/check_doc_links.py\""
+          "path": "scripts/docs/README.md",
+          "line": 37,
+          "source_group": "scripts",
+          "text": "The only notable special case is `scripts/docs/check_doc_links.py`: it remains an"
         },
         {
-          "path": "docs/reports/evidence/documentation-remediation-options/02-evidence/documentation-remediation-options/EV-documentation-remediation-strict-build-and-kpi-need-separate-follow-up.yaml",
-          "line": 11,
-          "source_group": "docs",
-          "text": "notes: \"mkdocs is missing in the current venv, and report_docs_kpi.py reports broader outside-nav counts than check_doc_links.py.\""
+          "path": "scripts/docs/README.md",
+          "line": 150,
+          "source_group": "scripts",
+          "text": "| `scripts/docs/check_doc_links.py` | Historical special-case shim that preserves the old monkeypatchable module surface for tests      |"
         },
         {
-          "path": "docs/reports/evidence/documentation-remediation-options/02-evidence/documentation-remediation-options/RAW-documentation-remediation-options-2026-03-23.md",
-          "line": 7,
-          "source_group": "docs",
-          "text": "- `scripts/docs/check_doc_links.py` fails with `118` broken links."
+          "path": "scripts/docs/checks/check_links.py",
+          "line": 2,
+          "source_group": "scripts",
+          "text": "\"\"\"check_doc_links.py - Validate documentation links and spec file existence."
+        },
+        {
+          "path": "scripts/docs/checks/check_links.py",
+          "line": 32,
+          "source_group": "scripts",
+          "text": "python scripts/check_doc_links.py          # Full check"
+        },
+        {
+          "path": "scripts/docs/checks/check_links.py",
+          "line": 33,
+          "source_group": "scripts",
+          "text": "python scripts/check_doc_links.py --specs   # Only spec file check"
         }
       ]
     },
@@ -5418,31 +5261,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
           "line": 26,
           "source_group": "ci",
           "text": "uv run python scripts/docs/report_docs_kpi.py \\"
-        },
-        {
-          "path": "docs/reports/evidence/documentation-internal-surface-governance/02-evidence/internal-surface-governance/EV-documentation-internal-surface-governance-kpi-is-healthy-under-current-model.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"scripts/docs/report_docs_kpi.py output (2026-03-23); scripts/docs/check_doc_links.py output (2026-03-23); tests/architecture/test_documentation_sync.py\""
-        },
-        {
-          "path": "docs/reports/evidence/documentation-internal-surface-governance/02-evidence/internal-surface-governance/RAW-documentation-internal-surface-governance-2026-03-23.md",
-          "line": 15,
-          "source_group": "docs",
-          "text": "- `scripts/docs/report_docs_kpi.py`"
-        },
-        {
-          "path": "docs/reports/evidence/documentation-remediation-options/02-evidence/documentation-remediation-options/EV-documentation-remediation-strict-build-and-kpi-need-separate-follow-up.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"./.venv/Scripts/python.exe -m mkdocs build --strict + ./.venv/Scripts/python.exe scripts/docs/report_docs_kpi.py\""
         },
         {
           "path": "scripts/docs/README.md",
@@ -5910,44 +5735,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 4,
       "references": [
-        {
-          "path": "docs/reports/evidence/project-test-health/coverage-governance/02-evidence/coverage-governance/EV-project-test-health-coverage-governance-skip-conditioned-confidence-now-uses-canonical-buckets.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"configs/quality/test_health_reporting.yaml:1-50; scripts/ci/quality_integral_gate.py:340-790; tests/unit/scripts/ci/test_quality_integral_gate.py:1-220\""
-        },
-        {
-          "path": "docs/reports/evidence/project-test-health/coverage-governance/02-evidence/coverage-governance/EV-project-test-health-coverage-governance-test-health-taxonomy-is-machine-readable-and-non-blocking.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"configs/quality/test_health_reporting.yaml:1-31; scripts/ci/quality_integral_gate.py:340-786; tests/unit/scripts/ci/test_quality_integral_gate.py:13-170\""
-        },
-        {
-          "path": "docs/reports/evidence/project-test-health/coverage-governance/02-evidence/coverage-governance/RAW-coverage-governance-2026-03-21.md",
-          "line": 10,
-          "source_group": "docs",
-          "text": "- `scripts/ci/quality_integral_gate.py`"
-        },
-        {
-          "path": "docs/reports/evidence/residual-test-ci-debt/02-evidence/residual-test-ci-debt/EV-residual-test-ci-debt-current-policy-keeps-green-status-environment-limited.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"configs/quality/test_matrix.yaml:231-246; scripts/ci/quality_integral_gate.py:432-582; configs/quality/test_health_reporting.yaml:1-39\""
-        },
-        {
-          "path": "docs/reports/evidence/residual-test-ci-debt/06-backlog/BACKLOG-residual-test-ci-debt-implementation-2026-04-01.md",
-          "line": 88,
-          "source_group": "docs",
-          "text": "- `scripts/ci/quality_integral_gate.py`"
-        },
-        {
-          "path": "docs/reports/evidence/residual-test-ci-debt/06-backlog/BACKLOG-residual-test-ci-debt-implementation-2026-04-01.md",
-          "line": 123,
-          "source_group": "docs",
-          "text": "- `scripts/ci/quality_integral_gate.py`"
-        },
         {
           "path": "scripts/engineering/ci/README.md",
           "line": 17,
@@ -5959,6 +5748,18 @@
           "line": 27,
           "source_group": "scripts",
           "text": "\"quality-gate\": \"quality_integral_gate.py\","
+        },
+        {
+          "path": "tests/architecture/test_environment_limited_green_policy.py",
+          "line": 35,
+          "source_group": "tests",
+          "text": "== \"scripts/engineering/ci/quality_integral_gate.py\""
+        },
+        {
+          "path": "tests/architecture/test_generated_artifact_routing.py",
+          "line": 122,
+          "source_group": "tests",
+          "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"quality_integral_gate.py\""
         }
       ]
     },
@@ -5967,31 +5768,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/quality-debt-weekly.yml",
           "line": 30,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/ci/report_quality_debt_weekly.py \\"
-        },
-        {
-          "path": "docs/reports/evidence/technical-debt/complexity-hotspots/02-evidence/complexity-hotspots/EV-technical-debt-complexity-hotspots-policy-implies-further-burndown-to-zero.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"configs/quality/debt_scorecard.yaml:80-85; configs/quality/debt_scorecard.yaml:153-167; configs/quality/debt_scorecard.yaml:182-186; scripts/ci/report_quality_debt_weekly.py:91-125; scripts/ci/r"
-        },
-        {
-          "path": "docs/reports/evidence/technical-debt/complexity-hotspots/02-evidence/complexity-hotspots/RAW-complexity-hotspots-2026-03-20.md",
-          "line": 11,
-          "source_group": "docs",
-          "text": "- `scripts/ci/report_quality_debt_weekly.py`"
-        },
-        {
-          "path": "docs/reports/evidence/technical-debt/complexity-hotspots/02-evidence/complexity-hotspots/RAW-complexity-hotspots-2026-03-20.md",
-          "line": 45,
-          "source_group": "docs",
-          "text": "- `report_quality_debt_weekly.py` makes the registry debt visible in CI by computing `new_debt`, `growth_violations`, and optionally failing on breach."
         },
         {
           "path": "scripts/engineering/ci/README.md",
@@ -6018,7 +5801,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 11,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -6203,63 +5986,6 @@
       ]
     },
     {
-      "path": "scripts/engineering/dev/.setup_wsl_codex.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 11,
-      "references": [
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 228,
-          "source_group": "docs",
-          "text": "**Layer 1: DNS** (`scripts/engineering/dev/.setup_wsl_codex.sh`)"
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 241,
-          "source_group": "docs",
-          "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\""
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 267,
-          "source_group": "docs",
-          "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\" 2>/dev/null"
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 323,
-          "source_group": "docs",
-          "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\""
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_QUICK_REF.md",
-          "line": 6,
-          "source_group": "docs",
-          "text": ".\\scripts\\engineering\\dev\\.setup_wsl_codex.sh"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_QUICK_REF.md",
-          "line": 65,
-          "source_group": "docs",
-          "text": "| `OpenAI timeout` | Run setup: `.\\scripts\\engineering\\dev\\.setup_wsl_codex.sh` |"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
-          "line": 20,
-          "source_group": "docs",
-          "text": ".\\scripts\\engineering\\dev\\.setup_wsl_codex.sh"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
-          "line": 108,
-          "source_group": "docs",
-          "text": "- Re-run VPN setup: `.\\scripts\\engineering\\dev\\.setup_wsl_codex.sh`"
-        }
-      ]
-    },
-    {
       "path": "scripts/engineering/dev/.wsl-vpn-fix.ps1",
       "type": "ps1",
       "status": "active",
@@ -6330,14 +6056,6 @@
           "text": "uv run python -m scripts.engineering.dev setup-mcp"
         }
       ]
-    },
-    {
-      "path": "scripts/engineering/dev/bash/.setup_wsl_codex.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/engineering/dev/bash/.wsl_proxy_env.sh",
@@ -6929,7 +6647,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 51,
+      "reference_count": 50,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7727,7 +7445,7 @@
         },
         {
           "path": ".github/workflows/provider-contract-drift.yml",
-          "line": 60,
+          "line": 62,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa report-provider-contract-drift \\"
         },
@@ -8038,7 +7756,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 42,
+      "reference_count": 25,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -8095,7 +7813,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
@@ -8707,7 +8425,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 434,
+          "line": 430,
           "source_group": "tests",
           "text": "\"python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\" in workflow"
         }
@@ -8752,7 +8470,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 437,
+          "line": 433,
           "source_group": "tests",
           "text": "\"python scripts/engineering/qa/vcr/check_vcr_filename_policy.py\" in workflow"
         }
@@ -8943,25 +8661,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 12,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
           "line": 155,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/repo/check_scripts_inventory.py \\"
-        },
-        {
-          "path": "docs/reports/evidence/scripts-layer-governance/SUMMARY.md",
-          "line": 20,
-          "source_group": "docs",
-          "text": "[`scripts/repo/check_scripts_inventory.py`](scripts/repo/check_scripts_inventory.py)"
-        },
-        {
-          "path": "docs/reports/evidence/scripts-layer-governance/SUMMARY.md",
-          "line": 60,
-          "source_group": "docs",
-          "text": "`python scripts/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json`"
         },
         {
           "path": "scripts/engineering/repo/README.md",
@@ -8990,6 +8696,18 @@
         {
           "path": "tests/architecture/test_scripts_deprecation_backlog.py",
           "line": 18,
+          "source_group": "tests",
+          "text": "\"scripts/engineering/repo/check_scripts_inventory.py\","
+        },
+        {
+          "path": "tests/architecture/test_scripts_inventory_discovery.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "root / \"scripts\" / \"engineering\" / \"repo\" / \"check_scripts_inventory.py\""
+        },
+        {
+          "path": "tests/architecture/test_scripts_inventory_discovery.py",
+          "line": 125,
           "source_group": "tests",
           "text": "\"scripts/engineering/repo/check_scripts_inventory.py\","
         }
@@ -9283,7 +9001,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
@@ -9310,12 +9028,6 @@
           "text": "- `scripts/memory/query.py`"
         },
         {
-          "path": "docs/reports/evidence/project-package-topology-recursive/infrastructure/02-evidence/infrastructure-recursive-package-topology/EV-infrastructure-recursive-package-topology-adapters-crossref-is-a-client-and-fetch-pipeline-package.yaml",
-          "line": 8,
-          "source_group": "docs",
-          "text": "quote: \"client.py, query.py, fetch.py, response.py, batch.py, fallback.py, exceptions.py\""
-        },
-        {
           "path": "scripts/memory/README.md",
           "line": 24,
           "source_group": "scripts",
@@ -9332,6 +9044,12 @@
           "line": 60,
           "source_group": "tests",
           "text": "assert infer_domain(Path(\"src/memory/query.py\")) == \"memory_subsystem\""
+        },
+        {
+          "path": "tests/unit/memory/test_review_curated.py",
+          "line": 105,
+          "source_group": "tests",
+          "text": "\"source_refs\": [\"src/memory/query.py\", \"src/memory/README.md\"],"
         }
       ]
     },
@@ -10579,14 +10297,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "docs/reports/evidence/scripts-layer-governance/SUMMARY.md",
-          "line": 37,
-          "source_group": "docs",
-          "text": "[`scripts/rerender_grafana_screenshots.py`](scripts/rerender_grafana_screenshots.py)"
-        },
         {
           "path": "scripts/ops/__main__.py",
           "line": 41,
@@ -11131,7 +10843,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 39,
+      "reference_count": 19,
       "references": [
         {
           "path": "docs/02-architecture/04-interfaces-layer.md",
@@ -11188,7 +10900,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 49,
+      "reference_count": 48,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -11404,7 +11116,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 10,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -11431,12 +11143,6 @@
           "text": "> кодовых контрактов скриптом `scripts/schema/generate_contracts.py`."
         },
         {
-          "path": "docs/reports/evidence/scripts-layer-governance/SUMMARY.md",
-          "line": 50,
-          "source_group": "docs",
-          "text": "- `src/tools/scripts/generate_contracts.py`"
-        },
-        {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
           "line": 170,
           "source_group": "scripts",
@@ -11453,6 +11159,12 @@
           "line": 40,
           "source_group": "scripts",
           "text": "\"generate-contracts\": \"generate_contracts.py\","
+        },
+        {
+          "path": "scripts/schema/generate_schema_artifacts.py",
+          "line": 172,
+          "source_group": "scripts",
+          "text": "[sys.executable, \"scripts/schema/generate_contracts.py\"],"
         }
       ]
     },
@@ -12166,14 +11878,8 @@
       "type": "py",
       "status": "legacy",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "docs/reports/evidence/scripts-layer-governance/SUMMARY.md",
-          "line": 51,
-          "source_group": "docs",
-          "text": "- `src/tools/scripts/lint_terminology.py`"
-        },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
           "line": 171,
