@@ -7,9 +7,12 @@ from typing import Literal
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
-CheckpointCompatibilityPolicy = Literal["observe", "soft_fail", "hard_fail"]
+CheckpointCompatibilityPolicy = Literal[
+    "observe", "legacy_observe", "soft_fail", "hard_fail"
+]
 CheckpointCompatibilityDisposition = Literal[
     "observe_blocked_identity",
+    "legacy_observe_loaded_degraded",
     "observe_loaded_degraded",
     "soft_fail_blocked",
     "hard_fail_raised",
@@ -22,6 +25,7 @@ def validate_compatibility_policy(
     """Validate supported checkpoint compatibility handling modes."""
     allowed: tuple[CheckpointCompatibilityPolicy, ...] = (
         "observe",
+        "legacy_observe",
         "soft_fail",
         "hard_fail",
     )
@@ -150,11 +154,15 @@ def handle_incompatible_checkpoint(
         identity_continuity_proven=identity_continuity_proven,
     )
     forced_resume_rejection = disposition == "observe_blocked_identity"
+    degraded_resume_loaded = disposition in {
+        "observe_loaded_degraded",
+        "legacy_observe_loaded_degraded",
+    }
     payload = {
         "pipeline": pipeline_name,
         "compatibility_policy": compatibility_policy,
         "compatibility_disposition": disposition,
-        "resume_rejected": compatibility_policy != "observe" or forced_resume_rejection,
+        "resume_rejected": not degraded_resume_loaded or forced_resume_rejection,
         "execution_identity_compatible": execution_identity_compatible,
         "identity_continuity_proven": identity_continuity_proven,
         "identity_mismatch_forces_rejection": forced_resume_rejection,
@@ -170,9 +178,15 @@ def handle_incompatible_checkpoint(
             **payload,
         )
         return None
+    if disposition == "legacy_observe_loaded_degraded":
+        logger.warning(
+            "Checkpoint compatibility mismatch observed; legacy degraded resume continues.",
+            **payload,
+        )
+        return checkpoint_metadata
     if disposition == "observe_loaded_degraded":
         logger.warning(
-            "Checkpoint compatibility mismatch observed; resume continues.",
+            "Checkpoint non-identity compatibility mismatch observed; resume continues.",
             **payload,
         )
         return checkpoint_metadata
@@ -223,8 +237,12 @@ def resolve_incompatible_checkpoint_disposition(
 ) -> CheckpointCompatibilityDisposition:
     """Return the bounded incompatibility disposition for telemetry and logging."""
     if compatibility_policy == "observe":
+        if not identity_continuity_proven or not execution_identity_compatible:
+            return "observe_blocked_identity"
+        return "observe_loaded_degraded"
+    if compatibility_policy == "legacy_observe":
         if execution_identity_compatible or not identity_continuity_proven:
-            return "observe_loaded_degraded"
+            return "legacy_observe_loaded_degraded"
         return "observe_blocked_identity"
     if compatibility_policy == "soft_fail":
         return "soft_fail_blocked"
