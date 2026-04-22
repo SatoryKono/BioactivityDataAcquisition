@@ -127,7 +127,9 @@ def _quality_allowed_values(config: dict[str, Any], field: str) -> Iterable[str]
             yield from (str(value) for value in validation["allowed"])
 
 
-def _filter_column_values(config: dict[str, Any], stage: str, field: str) -> Iterable[str]:
+def _filter_column_values(
+    config: dict[str, Any], stage: str, field: str
+) -> Iterable[str]:
     columns = config.get("filters", {}).get(stage, {}).get("columns", {})
     if field not in columns:
         return ()
