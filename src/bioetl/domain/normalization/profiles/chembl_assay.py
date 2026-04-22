@@ -71,6 +71,7 @@ _NULL_FIELDS = frozenset(
         "assay_tissue",
         "assay_cell_type",
         "assay_subcellular_fraction",
+        "bao_format",
         "bao_label",
         "variant_sequence_json",
     }
