@@ -7,11 +7,16 @@ from typing import Any
 from bioetl.domain.normalization.text import normalize_string
 
 __all__ = [
+    "BINARY_FLAG_MAPPING",
     "NULL_PATTERNS",
+    "OPERATOR_MAPPING",
     "UNIT_MAPPING",
+    "normalize_binary_flag",
+    "normalize_boolean",
     "normalize_case",
     "normalize_cross_pipeline_case",
     "normalize_null",
+    "normalize_operator",
     "normalize_unit",
 ]
 
@@ -125,6 +130,38 @@ UNIT_MAPPING: dict[str, str] = {
     "UNITS": "U",
 }
 
+BINARY_FLAG_MAPPING: dict[str, bool] = {
+    "1": True,
+    "y": True,
+    "yes": True,
+    "true": True,
+    "t": True,
+    "0": False,
+    "n": False,
+    "no": False,
+    "false": False,
+    "f": False,
+}
+
+OPERATOR_MAPPING: dict[str, str] = {
+    "=": "=",
+    "==": "=",
+    "eq": "=",
+    "<": "<",
+    "lt": "<",
+    "≤": "<=",
+    "<=": "<=",
+    "lte": "<=",
+    ">": ">",
+    "gt": ">",
+    "≥": ">=",
+    ">=": ">=",
+    "gte": ">=",
+    "~": "~",
+    "≈": "~",
+    "approx": "~",
+}
+
 
 def _find_case_match(normalized: str, allowed_values: frozenset[str]) -> str | None:
     """Find case-insensitive match in allowed values."""
@@ -188,6 +225,53 @@ def normalize_unit(
 
     # Apply unit mapping
     return UNIT_MAPPING.get(normalized, normalized)
+
+
+def normalize_boolean(
+    value: Any,  # Any: Accepts various input types for boolean conversion
+) -> bool | None:
+    """Coerce common source-system boolean encodings to canonical bool."""
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int) and value in {0, 1}:
+        return bool(value)
+    if isinstance(value, float) and value in {0.0, 1.0}:
+        return bool(int(value))
+    if not isinstance(value, str):
+        return None
+
+    normalized = normalize_string(value)
+    if normalized is None:
+        return None
+    return BINARY_FLAG_MAPPING.get(normalized.lower())
+
+
+def normalize_binary_flag(
+    value: Any,  # Any: Handles various input representations for binary flags
+) -> int | None:
+    """Coerce common boolean-like values to the canonical 0/1 flag contract."""
+    normalized = normalize_boolean(value)
+    if normalized is None:
+        return None
+    return int(normalized)
+
+
+def normalize_operator(
+    value: Any,  # Any: Accepts various input types for operator normalization
+    allowed_values: frozenset[str] | None = None,
+) -> str | None:
+    """Canonicalize comparison operators, including Unicode variants."""
+    if value is None:
+        return None
+    normalized = normalize_string(str(value))
+    if normalized is None:
+        return None
+    operator = OPERATOR_MAPPING.get(normalized.lower(), normalized)
+    if allowed_values is not None and operator not in allowed_values:
+        return None
+    return operator
 
 
 def normalize_null(

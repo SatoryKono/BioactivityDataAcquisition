@@ -25,7 +25,7 @@ from bioetl.domain.schemas._schema_validation_patterns import (
 # CHEMBL ACTIVITY ENUMS
 # =============================================================================
 
-STANDARD_RELATIONS: frozenset[str] = frozenset(["=", "<", "<=", ">", ">="])
+STANDARD_RELATIONS: frozenset[str] = frozenset(["=", "<", "<=", ">", ">=", "~"])
 
 ACTIVITY_STANDARD_TYPES: frozenset[str] = frozenset(
     [

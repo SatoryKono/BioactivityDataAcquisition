@@ -59,6 +59,22 @@ _JSON_STRING_FIELDS = frozenset(
         "variant_sequence_json",
     }
 )
+_NULL_FIELDS = frozenset(
+    {
+        "assay_test_type",
+        "assay_category",
+        "assay_group",
+        "relationship_type",
+        "confidence_description",
+        "assay_organism",
+        "assay_strain",
+        "assay_tissue",
+        "assay_cell_type",
+        "assay_subcellular_fraction",
+        "bao_label",
+        "variant_sequence_json",
+    }
+)
 
 
 def create_case_normalizer(strategy: str = "uppercase"):
@@ -77,24 +93,7 @@ def create_case_normalizer(strategy: str = "uppercase"):
     return normalizer
 
 
-# Special rules for enum fields that need case normalization
 _SPECIAL_RULE_COMPONENTS = {
-    "assay_type": (
-        create_case_normalizer("uppercase"),
-        "Normalize assay_type to uppercase enum value.",
-    ),
-    "assay_test_type": (
-        create_case_normalizer("preserve"),
-        "Normalize assay_test_type preserving original case (e.g., 'In vivo').",
-    ),
-    "assay_category": (
-        create_case_normalizer("preserve"),
-        "Normalize assay_category preserving original case.",
-    ),
-    "relationship_type": (
-        create_case_normalizer("uppercase"),
-        "Normalize relationship_type to uppercase enum value.",
-    ),
     "bao_format": (
         normalize_ontology_id,
         "Normalize BAO ontology ID to underscore format (e.g., 'BAO:0000190' -> 'BAO_0000190').",
@@ -106,6 +105,8 @@ _ENUM_FIELDS = {
     "assay_type": ASSAY_TYPES,
     "assay_test_type": ASSAY_TEST_TYPES,
     "assay_category": ASSAY_CATEGORIES,
+    "assay_group": ASSAY_GROUPS,
+    "confidence_description": CONFIDENCE_DESCRIPTIONS,
     "relationship_type": RELATIONSHIP_TYPES,
 }
 
@@ -120,6 +121,7 @@ CHEMBL_ASSAY_PROFILE = build_standard_profile(
     json_string_fields=_JSON_STRING_FIELDS,
     enum_fields=_ENUM_FIELDS,
     special_rules=_SPECIAL_RULE_COMPONENTS,
+    null_fields=_NULL_FIELDS,
 )
 
 CHEMBL_ASSAY_PROFILE.assert_covers_schema(CHEMBL_ASSAY_SCHEMA_FIELDS)

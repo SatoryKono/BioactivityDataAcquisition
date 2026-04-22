@@ -45,9 +45,11 @@ class TestChemblAssayEnumFields:
                 f"Expected {valid_value.upper()}, got {result}"
             )
 
-        # Test invalid value (should be preserved by special rules)
+        assert rule.normalizer(" b ") == "B"
+
+        # Test invalid value (should fail closed)
         result = rule.normalizer("X")
-        assert result == "X", "Invalid value should be preserved by special rules"
+        assert result is None, "Invalid value should collapse to None"
 
     def test_relationship_type_enum_normalization(self) -> None:
         """Test relationship_type enum normalization."""
@@ -165,7 +167,7 @@ class TestAssayOntologyNormalization:
         assert rule.normalizer(None) is None
 
         # Test empty string handling
-        assert rule.normalizer("") == ""
+        assert rule.normalizer("") is None
 
         # Test unknown format preservation
         assert rule.normalizer("unknown_format") == "unknown_format"

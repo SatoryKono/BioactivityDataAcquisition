@@ -12,8 +12,11 @@ from bioetl.domain.normalization.identifiers import (
 )
 from bioetl.domain.normalization.json import canonicalize_json_string
 from bioetl.domain.normalization.rules import (
+    normalize_binary_flag,
+    normalize_boolean,
     normalize_case,
     normalize_null,
+    normalize_operator,
     normalize_unit,
 )
 from bioetl.domain.normalization.text import normalize_abstract as _normalize_abstract
@@ -23,6 +26,8 @@ from bioetl.domain.value_objects import SMILES
 
 __all__ = [
     "normalize_profile_abstract",
+    "normalize_profile_binary_flag",
+    "normalize_profile_boolean",
     "normalize_profile_canonical_smiles",
     "normalize_profile_case",
     "normalize_profile_date",
@@ -33,6 +38,7 @@ __all__ = [
     "normalize_profile_isomeric_smiles",
     "normalize_profile_json_string",
     "normalize_profile_null",
+    "normalize_profile_operator",
     "normalize_profile_passthrough",
     "normalize_profile_pmc_id",
     "normalize_profile_pmid",
@@ -77,6 +83,23 @@ def normalize_profile_case(
     return normalize_case(value, allowed_values)
 
 
+def normalize_profile_boolean(value: object) -> bool | None:
+    """Normalize common boolean-like profile fields to canonical bool."""
+    return normalize_boolean(value)
+
+
+def normalize_profile_binary_flag(value: object) -> int | None:
+    """Normalize common boolean-like profile fields to canonical 0/1."""
+    return normalize_binary_flag(value)
+
+
+def normalize_profile_operator(
+    value: object, *, allowed_values: frozenset[str] | None = None
+) -> str | None:
+    """Normalize operator-like profile fields to canonical ASCII forms."""
+    return normalize_operator(value, allowed_values=allowed_values)
+
+
 def normalize_profile_unit(value: object) -> object:
     """Canonicalize unit strings in profile fields.
 
@@ -102,8 +125,7 @@ def normalize_profile_enum(value: object, *, allowed_values: frozenset[str]) -> 
     if value is None:
         return None
     if isinstance(value, str):
-        normalized = normalize_string(value)
-        return normalized if normalized in allowed_values else None
+        return normalize_case(value, allowed_values)
     return value if value in allowed_values else None
 
 

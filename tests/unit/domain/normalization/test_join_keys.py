@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
+import yaml
 
 from bioetl.domain.normalization.join_keys import (
     JOIN_KEY_NORMALIZATION_POLICIES,
@@ -11,6 +14,20 @@ from bioetl.domain.normalization.join_keys import (
     normalize_join_key_text,
     stringify_join_key_value,
 )
+
+
+def _iter_join_keys(value: object) -> set[str]:
+    if isinstance(value, dict):
+        keys = set(value.get("join_keys", ()) or ())
+        for child_value in value.values():
+            keys.update(_iter_join_keys(child_value))
+        return keys
+    if isinstance(value, list):
+        keys: set[str] = set()
+        for item in value:
+            keys.update(_iter_join_keys(item))
+        return keys
+    return set()
 
 
 def test_normalize_join_key_text_applies_trim_and_lowercase_for_doi() -> None:
@@ -79,3 +96,12 @@ def test_join_key_policy_registry_exposes_known_keys() -> None:
     assert JOIN_KEY_NORMALIZATION_POLICIES["doi"] is policy
     assert policy.trim is True
     assert policy.lowercase is True
+
+
+def test_configured_composite_join_keys_have_explicit_normalization_policies() -> None:
+    configured_keys: set[str] = set()
+    for config_path in Path("configs/composites").glob("*.yaml"):
+        configured_keys.update(_iter_join_keys(yaml.safe_load(config_path.read_text())))
+
+    assert configured_keys
+    assert configured_keys <= set(JOIN_KEY_NORMALIZATION_POLICIES)

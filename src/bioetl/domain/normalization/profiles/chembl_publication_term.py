@@ -30,6 +30,10 @@ _META_FIELDS = frozenset(
     }
 )
 _TITLE_FIELDS = frozenset({"term"})
+_ENUM_FIELDS = {
+    "term_type": frozenset({"MESH_HEADING", "MESH_QUALIFIER", "KEYWORD", "CONCEPT"}),
+}
+_NULL_FIELDS = frozenset({"mesh_id", "qualifier"})
 
 CHEMBL_PUBLICATION_TERM_PROFILE = build_standard_profile(
     profile_name="chembl.publication_term",
@@ -37,6 +41,8 @@ CHEMBL_PUBLICATION_TERM_PROFILE = build_standard_profile(
     schema_fields=CHEMBL_PUBLICATION_TERM_SCHEMA_FIELDS,
     meta_fields=_META_FIELDS,
     title_fields=_TITLE_FIELDS,
+    enum_fields=_ENUM_FIELDS,
+    null_fields=_NULL_FIELDS,
 )
 
 CHEMBL_PUBLICATION_TERM_PROFILE.assert_covers_schema(

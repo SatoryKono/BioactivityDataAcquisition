@@ -12,10 +12,12 @@ from pandera.typing import Series
 from bioetl.domain.schemas.base import ETLRecordSchema
 from bioetl.domain.schemas.constants import (
     ASSAY_CATEGORIES,
+    ASSAY_GROUPS,
     ASSAY_TEST_TYPES,
     ASSAY_TYPES,
     BAO_ID_PATTERN,
     CHEMBL_ID_PATTERN,
+    CONFIDENCE_DESCRIPTIONS,
     RELATIONSHIP_TYPES,
 )
 
@@ -63,7 +65,9 @@ class AssaySchema(ETLRecordSchema):
         description="Assay category.",
     )
     assay_group: Series[str] | None = pa.Field(
-        nullable=True, description="Assay group."
+        nullable=True,
+        isin=list(ASSAY_GROUPS),
+        description="Assay group.",
     )
 
     # === Biological Context ===
@@ -104,7 +108,9 @@ class AssaySchema(ETLRecordSchema):
         description="Confidence score.",
     )
     confidence_description: Series[str] | None = pa.Field(
-        nullable=True, description="Confidence description."
+        nullable=True,
+        isin=list(CONFIDENCE_DESCRIPTIONS),
+        description="Confidence description.",
     )
 
     # === Curation & Metadata ===

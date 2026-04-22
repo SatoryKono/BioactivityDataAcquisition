@@ -280,6 +280,33 @@ def test_record_normalization_processor_keeps_equivalent_payloads_hash_stable() 
     ) == processor.compute_content_hash(normalized_clean)
 
 
+def test_publication_set_like_json_fields_are_hash_order_invariant() -> None:
+    """Set-like publication profile fields must not drift content_hash by array order."""
+    processor = RecordNormalizationProcessor(
+        provider="crossref", entity_type="publication"
+    )
+
+    record_a = processor.normalize_business_data(
+        {
+            "doi": "10.1000/example",
+            "author_orcids": '["0000-0002", "0000-0001"]',
+            "subject_keywords": '["kinase", "assay"]',
+        }
+    )
+    record_b = processor.normalize_business_data(
+        {
+            "doi": "10.1000/example",
+            "author_orcids": '["0000-0001", "0000-0002"]',
+            "subject_keywords": '["assay", "kinase"]',
+        }
+    )
+
+    assert record_a != record_b
+    assert processor.compute_content_hash(record_a) == processor.compute_content_hash(
+        record_b
+    )
+
+
 def test_chembl_activity_meta_passthrough_contract_is_aligned_across_profile_matrix_and_processor() -> (
     None
 ):

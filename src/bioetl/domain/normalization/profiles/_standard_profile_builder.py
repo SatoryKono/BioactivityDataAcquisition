@@ -38,6 +38,9 @@ class StandardProfileSpec:
     float_fields: Collection[str] = field(default_factory=tuple)
     set_like_fields: Collection[str] = field(default_factory=tuple)
     json_string_fields: Collection[str] = field(default_factory=tuple)
+    boolean_fields: Collection[str] = field(default_factory=tuple)
+    flag_fields: Collection[str] = field(default_factory=tuple)
+    operator_fields: Collection[str] = field(default_factory=tuple)
     enum_fields: Mapping[str, frozenset[str]] | None = None
     case_fields: Mapping[str, frozenset[str] | None] | None = None
     unit_fields: Collection[str] | None = None
@@ -62,6 +65,9 @@ _STANDARD_PROFILE_OPTIONAL_DEFAULTS: dict[str, object] = {
     "float_fields": (),
     "set_like_fields": (),
     "json_string_fields": (),
+    "boolean_fields": (),
+    "flag_fields": (),
+    "operator_fields": (),
     "enum_fields": None,
     "case_fields": None,
     "unit_fields": None,
@@ -173,6 +179,9 @@ def build_standard_profile(
         normalized_float_fields,
         normalized_set_like_fields,
         normalized_json_string_fields,
+        normalized_boolean_fields,
+        normalized_flag_fields,
+        normalized_operator_fields,
     ) = _normalize_field_collections(
         profile_spec.meta_fields,
         profile_spec.title_fields,
@@ -185,6 +194,9 @@ def build_standard_profile(
         profile_spec.float_fields,
         profile_spec.set_like_fields,
         profile_spec.json_string_fields,
+        profile_spec.boolean_fields,
+        profile_spec.flag_fields,
+        profile_spec.operator_fields,
     )
 
     # Normalize mapping fields
@@ -207,6 +219,9 @@ def build_standard_profile(
         float_fields=normalized_float_fields,
         set_like_fields=normalized_set_like_fields,
         json_string_fields=normalized_json_string_fields,
+        boolean_fields=normalized_boolean_fields,
+        flag_fields=normalized_flag_fields,
+        operator_fields=normalized_operator_fields,
         enum_fields=normalized_enum_fields,
         case_fields=normalized_case_fields,
         unit_fields=normalized_unit_fields,

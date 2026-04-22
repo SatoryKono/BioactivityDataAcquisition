@@ -32,6 +32,7 @@ _INT_FIELDS = frozenset(
     {"annotation_score", "sequence_length", "sequence_mass", "taxonomy_id"}
 )
 _JSON_STRING_FIELDS = frozenset({"all_mappings"})
+_BOOLEAN_FIELDS = frozenset({"reviewed"})
 
 UNIPROT_IDMAPPING_PROFILE = build_standard_profile(
     profile_name="uniprot.idmapping",
@@ -41,6 +42,7 @@ UNIPROT_IDMAPPING_PROFILE = build_standard_profile(
     title_fields=_TITLE_FIELDS,
     int_fields=_INT_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
+    boolean_fields=_BOOLEAN_FIELDS,
 )
 
 UNIPROT_IDMAPPING_PROFILE.assert_covers_schema(UNIPROT_IDMAPPING_SCHEMA_FIELDS)

@@ -74,7 +74,20 @@ _INT_FIELDS = frozenset(
         "publication_year",
     }
 )
-_SET_LIKE_FIELDS = frozenset({"publication_types", "subject_keywords", "subject_mesh"})
+_SET_LIKE_FIELDS = frozenset(
+    {
+        "affiliation_list",
+        "affiliation_structured",
+        "author_orcids",
+        "chemicals",
+        "databanks",
+        "gene_symbols",
+        "publication_type_list",
+        "publication_types",
+        "subject_keywords",
+        "subject_mesh",
+    }
+)
 _JSON_STRING_FIELDS = frozenset(
     {
         "affiliation_list",

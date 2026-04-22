@@ -11,6 +11,7 @@ from pandera.typing import Series
 from bioetl.domain.schemas.base import ETLRecordSchema
 from bioetl.domain.schemas.constants import (
     ACTIVITY_STANDARD_TYPES,
+    ASSAY_TYPES,
     BAO_ID_PATTERN,
     CHEMBL_ID_PATTERN,
     DATA_VALIDITY_COMMENTS,
@@ -208,7 +209,9 @@ class ActivitySchema(ETLRecordSchema):
         description="Target taxonomy ID (nullable int pattern).",
     )
     assay_type: Series[str] = pa.Field(
-        nullable=False, description="Assay type (B/F/A/T/P/U)."
+        nullable=False,
+        isin=list(ASSAY_TYPES),
+        description="Assay type (B/F/A/T/P/U).",
     )
     assay_description: Series[str] = pa.Field(
         nullable=False, description="Assay description text."
@@ -220,7 +223,9 @@ class ActivitySchema(ETLRecordSchema):
         nullable=True, description="Assay variant mutation description."
     )
     bao_format: Series[str] = pa.Field(
-        nullable=False, description="BioAssay Ontology format ID."
+        nullable=False,
+        str_matches=BAO_ID_PATTERN,
+        description="BioAssay Ontology format ID.",
     )
     bao_label: Series[str] = pa.Field(
         nullable=False, description="BioAssay Ontology label."

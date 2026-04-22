@@ -9,7 +9,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_canonical_smiles,
 )
 from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
-from bioetl.domain.schemas.constants import STRUCTURE_TYPES
+from bioetl.domain.schemas.constants import MOLECULE_TYPES, STRUCTURE_TYPES
 
 __all__ = [
     "CHEMBL_MOLECULE_PROFILE",
@@ -51,6 +51,22 @@ _INT_FIELDS = frozenset(
         "rotatable_bond_count",
     }
 )
+_BOOLEAN_FIELDS = frozenset(
+    {
+        "therapeutic_flag",
+        "oral",
+        "parenteral",
+        "topical",
+        "withdrawn_flag",
+    }
+)
+_FLAG_FIELDS = frozenset(
+    {
+        "black_box_warning",
+        "dosed_ingredient",
+        "polymer_flag",
+    }
+)
 _FLOAT_FIELDS = frozenset(
     {
         "availability_type",
@@ -63,6 +79,28 @@ _FLOAT_FIELDS = frozenset(
         "usan_year",
     }
 )
+_JSON_STRING_FIELDS = frozenset(
+    {
+        "molecule_hierarchy",
+        "molecule_properties",
+        "molecule_structures",
+        "molecule_synonyms",
+        "cross_references",
+        "atc_classifications",
+    }
+)
+_NULL_FIELDS = frozenset(
+    {
+        "pref_name",
+        "usan_stem",
+        "usan_substem",
+        "usan_stem_definition",
+        "molecule_species",
+        "canonical_smiles",
+        "standard_inchi",
+        "inchi_key",
+    }
+)
 
 _SPECIAL_RULES = {
     "canonical_smiles": (
@@ -73,7 +111,9 @@ _SPECIAL_RULES = {
 
 # Enum fields for strict validation
 _ENUM_FIELDS = {
+    "molecule_type": MOLECULE_TYPES,
     "structure_type": STRUCTURE_TYPES,
+    "ro3_pass": frozenset({"Y", "N"}),
 }
 
 CHEMBL_MOLECULE_PROFILE = build_standard_profile(
@@ -84,8 +124,12 @@ CHEMBL_MOLECULE_PROFILE = build_standard_profile(
     title_fields=_TITLE_FIELDS,
     int_fields=_INT_FIELDS,
     float_fields=_FLOAT_FIELDS,
+    boolean_fields=_BOOLEAN_FIELDS,
+    flag_fields=_FLAG_FIELDS,
+    json_string_fields=_JSON_STRING_FIELDS,
     enum_fields=_ENUM_FIELDS,
     special_rules=_SPECIAL_RULES,
+    null_fields=_NULL_FIELDS,
 )
 
 CHEMBL_MOLECULE_PROFILE.assert_covers_schema(CHEMBL_MOLECULE_SCHEMA_FIELDS)

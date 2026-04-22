@@ -38,6 +38,9 @@ class _RuleComponentContext:
     float_fields: frozenset[str]
     set_like_fields: frozenset[str]
     json_string_fields: frozenset[str]
+    boolean_fields: frozenset[str]
+    flag_fields: frozenset[str]
+    operator_fields: frozenset[str]
     enum_fields: Mapping[str, frozenset[str]]
     case_fields: Mapping[str, frozenset[str] | None]
     unit_fields: frozenset[str]
@@ -195,6 +198,9 @@ def _handle_field_families(
     float_fields: frozenset[str],
     set_like_fields: frozenset[str],
     json_string_fields: frozenset[str],
+    boolean_fields: frozenset[str],
+    flag_fields: frozenset[str],
+    operator_fields: frozenset[str],
 ) -> RuleComponent | None:
     for fields, normalizer, notes in _rule_family_specs(
         title_fields=title_fields,
@@ -207,6 +213,9 @@ def _handle_field_families(
         float_fields=float_fields,
         set_like_fields=set_like_fields,
         json_string_fields=json_string_fields,
+        boolean_fields=boolean_fields,
+        flag_fields=flag_fields,
+        operator_fields=operator_fields,
     ):
         if field_name in fields:
             return normalizer, notes
@@ -251,6 +260,9 @@ def _resolve_base_rule(
             float_fields=context.float_fields,
             set_like_fields=context.set_like_fields,
             json_string_fields=context.json_string_fields,
+            boolean_fields=context.boolean_fields,
+            flag_fields=context.flag_fields,
+            operator_fields=context.operator_fields,
         ),
     )
     for handler in handlers:
