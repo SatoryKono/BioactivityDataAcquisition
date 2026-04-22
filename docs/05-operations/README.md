@@ -35,6 +35,7 @@ standard runbook path.
 | [Runbooks](runbooks/index.md) | Operational playbooks for incident response |
 | [Performance Baselines](performance-baselines.md) | Expected performance metrics |
 | [VACUUM Retention](vacuum-retention.md) | Delta Lake vacuum retention policies |
+| [Control-Plane Lifecycle](control-plane-lifecycle.md) | Dry-run/apply cleanup for manifests, ledgers, checkpoints, lineage, and cached Bronze snapshots |
 | [Operations Archive Index](archive-index.md) | Archive-only operational material, including historical release and verification evidence |
 | [Deployment & Tooling Extras](deployment/README.md) | Internal / Extended material for experimental Kubernetes and auxiliary Neo4j/MCP setup notes |
 
@@ -49,6 +50,7 @@ standard runbook path.
 ### Maintenance
 
 - [VACUUM Procedures](runbooks/vacuum-procedures.md)
+- [Control-Plane Lifecycle](control-plane-lifecycle.md)
 - [Backfill/Rebuild](runbooks/backfill-rebuild.md)
 - [Quarantine Management](runbooks/quarantine-management.md)
 

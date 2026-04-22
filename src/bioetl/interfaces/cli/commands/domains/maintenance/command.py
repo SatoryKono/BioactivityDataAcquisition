@@ -13,6 +13,9 @@ from bioetl.interfaces.cli.commands.domains.maintenance.cleanup import (
     bronze_cleanup_command,
     cleanup_preview_command,
 )
+from bioetl.interfaces.cli.commands.domains.maintenance.control_plane_lifecycle import (
+    control_plane_lifecycle_command,
+)
 from bioetl.interfaces.cli.commands.domains.maintenance.plan import plan_command
 from bioetl.interfaces.cli.commands.domains.maintenance.vacuum import (
     vacuum_all_command,
@@ -35,4 +38,5 @@ maintenance.add_command(vacuum_all_command)
 maintenance.add_command(archive_command)
 maintenance.add_command(bronze_cleanup_command)
 maintenance.add_command(cleanup_preview_command)
+maintenance.add_command(control_plane_lifecycle_command)
 maintenance.add_command(plan_command)

@@ -81,3 +81,31 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
     assert "## Reproducibility Scoring Rubric" in text
     assert "|   100 | `forensic_grade`" in text
     assert "| Evidence surface" in text
+
+
+@pytest.mark.architecture
+def test_reproducibility_rubric_declares_repeatable_7x5_scoring_matrix() -> None:
+    text = _read("docs/04-reference/contracts/reproducibility-scoring-rubric.md")
+
+    categories = (
+        "### Determinism",
+        "### Idempotency",
+        "### Run Identity",
+        "### Checkpoint Safety",
+        "### Lineage Completeness",
+        "### Replay Readiness",
+        "### Layer Consistency",
+    )
+    for category in categories:
+        assert category in text
+
+    for prefix in ("DET", "IDE", "RID", "CPS", "LIN", "REP", "LAY"):
+        for number in range(1, 6):
+            assert f"| {prefix}-{number} |" in text
+
+    assert "| 0 | Absent, unsafe, fail-open, or not evidenced |" in text
+    assert "| 2 | Implemented, documented, and test-backed |" in text
+    assert "Reviewers MUST cite evidence for every non-zero score" in text
+    assert "## Evidence Matrix" in text
+    assert "## Criterion Evidence Index" in text
+    assert "docs/05-operations/control-plane-lifecycle.md" in text

@@ -793,6 +793,35 @@ bioetl maintenance cleanup-preview --pipeline <NAME>
 bioetl maintenance cleanup-preview --pipeline chembl_activity
 ```
 
+#### `maintenance control-plane-lifecycle` — Lifecycle cleanup control-plane artifacts
+
+```bash
+bioetl maintenance control-plane-lifecycle [OPTIONS]
+```
+
+Планирует или применяет cleanup для `data/output/control`,
+`data/output/checkpoints` и `data/output/bronze`. По умолчанию команда работает
+в dry-run режиме.
+
+| Опция                                      | Тип    | По умолчанию | Описание                                     |
+| ------------------------------------------ | ------ | ------------ | -------------------------------------------- |
+| `--retention-days`, `-r`                   | int    | 90           | Удалить unprotected artifacts старше N дней  |
+| `--apply`                                  | flag   | False        | Применить план удаления                      |
+| `--format`                                 | choice | `text`       | Формат вывода: `text`, `json`                |
+| `--protected-manifest-id`                  | repeat | None         | Manifest ID, который нельзя удалять          |
+| `--protected-run-id`                       | repeat | None         | Run ID, который нельзя удалять               |
+| `--protected-effective-config-artifact-id` | repeat | None         | Effective-config artifact ID для защиты      |
+| `--protected-lineage-fragment-id`          | repeat | None         | Lineage fragment ID для защиты               |
+| `--protected-snapshot-id`                  | repeat | None         | Content-addressed snapshot ID для защиты     |
+
+**Примеры:**
+
+```bash
+bioetl maintenance control-plane-lifecycle --retention-days 90
+bioetl maintenance control-plane-lifecycle --retention-days 90 --apply
+bioetl maintenance control-plane-lifecycle --format json
+```
+
 #### `maintenance plan` — План миграции контракта
 
 ```bash

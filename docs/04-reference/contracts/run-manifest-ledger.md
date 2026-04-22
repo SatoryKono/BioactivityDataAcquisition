@@ -69,6 +69,8 @@ File-backed control-plane persistence uses the following canonical paths:
 | Effective config run-id index        | `data/output/control/effective_config/_by_run_id/{run_id}.txt`    |
 | Lineage fragment payload             | `data/output/control/lineage/fragments/{stable_fragment_key}.json` |
 | Lineage lookup indexes               | `data/output/control/lineage/_by_*/*.jsonl`                       |
+| Checkpoint payloads                  | `data/output/checkpoints/**/*.json`                               |
+| Cached Bronze input snapshots        | `data/output/bronze/**/*`                                         |
 
 `run_manifest` and `run_ledger` stores are bootstrapped from
 `Path(settings.data_dir) / "output" / "control" / <leaf>` and are therefore
@@ -92,8 +94,12 @@ Protected-reference rules are fail-closed:
 - manifests inside the retention window protect their `manifest_id`, `run_id`,
   `replay_of_manifest_id`, and
   `code_provenance.effective_config_artifact_id`;
-- explicit protected manifest/run/effective-config/lineage identifiers protect
-  matching payloads and lookup indexes regardless of age;
+- manifests inside the retention window protect content-addressed
+  `source_refs[*].input_snapshots[*].snapshot_id` values;
+- checkpoints inside the retention window protect their `run_id`,
+  `manifest_id`, and `effective_config_artifact_id` anchors;
+- explicit protected manifest/run/effective-config/lineage/snapshot identifiers
+  protect matching payloads and lookup indexes regardless of age;
 - ledgers are retained when their `manifest_id` or `run_id` is protected;
 - effective-config semantic artifacts are retained when referenced by a
   protected or retention-active manifest;
@@ -101,6 +107,8 @@ Protected-reference rules are fail-closed:
   `run_id` is protected;
 - lineage fragments are retained when their `manifest_id`, `run_id`,
   `stored_fragment_id`, or semantic `fragment_id` is protected.
+- cached Bronze files are retained when their `sha256:{content_hash}` identity
+  is protected by a retained manifest or explicit snapshot protection.
 
 Lifecycle planning is intentionally independent from read APIs: expired
 unprotected files can be selected for deletion even if higher-level lookup
@@ -281,6 +289,11 @@ Evidence scoring is conservative: a missing mandatory surface caps the score
 at the highest lower tier whose evidence is complete, and unsupported lineage
 families cannot score above `replay_ready`.
 
+The repeatable audit rubric is maintained in
+[Reproducibility Scoring Rubric](reproducibility-scoring-rubric.md). It defines
+the required seven categories, five criteria per category, and the 0/1/2 scoring
+semantics reviewers must cite when recalculating audit scores.
+
 Composite replay is additionally documented as a bounded reconstructability
 surface:
 
@@ -361,6 +374,9 @@ locator metadata:
 - `immutable_uri` is a replay locator. Local cached-Bronze files use portable
   `bronze://{relative_path_from_bronze_root}` URIs instead of absolute checkout
   paths.
+- Object storage anchors (`storage_provider`, `object_bucket`, `object_key`,
+  `object_version_id`, `etag`, and `last_modified`) are supplemental locator
+  anchors. They do not replace `snapshot_id` as semantic identity.
 - `captured_at`, `last_modified`, `etag`, and `query_fingerprint` are
   occurrence or lookup metadata; changing them must not change `snapshot_id`
   when the captured bytes are unchanged.

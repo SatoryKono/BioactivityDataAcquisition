@@ -1,0 +1,101 @@
+"""Unit tests for control-plane lifecycle maintenance CLI."""
+
+from __future__ import annotations
+
+import json
+from datetime import UTC, datetime, timedelta
+from unittest.mock import MagicMock, patch
+
+from click.testing import CliRunner
+
+from bioetl.domain.control_plane import (
+    ControlPlaneArtifactLifecycleApplyResult,
+    ControlPlaneArtifactLifecycleDecision,
+    ControlPlaneArtifactLifecyclePlan,
+    ControlPlaneArtifactRef,
+    ControlPlaneArtifactSurface,
+)
+from bioetl.interfaces.cli.main import cli
+
+
+def _plan(*, dry_run: bool) -> ControlPlaneArtifactLifecyclePlan:
+    generated_at = datetime(2026, 4, 22, tzinfo=UTC)
+    return ControlPlaneArtifactLifecyclePlan(
+        generated_at=generated_at,
+        cutoff=generated_at - timedelta(days=90),
+        dry_run=dry_run,
+        artifacts=(
+            ControlPlaneArtifactRef(
+                surface=ControlPlaneArtifactSurface.RUN_MANIFEST,
+                path="/tmp/control/run_manifest/manifest-old.json",
+                artifact_id="manifest-old",
+                decision=ControlPlaneArtifactLifecycleDecision.DELETE,
+                reason="retention_expired",
+                created_at=datetime(2026, 1, 1, tzinfo=UTC),
+            ),
+        ),
+    )
+
+
+def test_control_plane_lifecycle_defaults_to_dry_run() -> None:
+    runner = CliRunner()
+    plan = _plan(dry_run=True)
+    store = MagicMock()
+    store.plan.return_value = plan
+    store.apply.return_value = ControlPlaneArtifactLifecycleApplyResult(
+        plan=plan,
+        deleted_paths=(),
+    )
+
+    with patch(
+        "bioetl.interfaces.cli.commands.domains.maintenance.control_plane_lifecycle.bootstrap_control_plane_lifecycle_store",
+        return_value=store,
+    ):
+        result = runner.invoke(cli, ["maintenance", "control-plane-lifecycle"])
+
+    assert result.exit_code == 0, result.output
+    assert "[DRY-RUN]" in result.output
+    assert "Would delete 1 artifacts" in result.output
+    store.plan.assert_called_once()
+    policy = store.plan.call_args.args[0]
+    assert policy.retention_days == 90
+    assert store.plan.call_args.kwargs == {"dry_run": True}
+
+
+def test_control_plane_lifecycle_apply_json_outputs_deleted_paths() -> None:
+    runner = CliRunner()
+    plan = _plan(dry_run=False)
+    store = MagicMock()
+    store.plan.return_value = plan
+    store.apply.return_value = ControlPlaneArtifactLifecycleApplyResult(
+        plan=plan,
+        deleted_paths=("/tmp/control/run_manifest/manifest-old.json",),
+    )
+
+    with patch(
+        "bioetl.interfaces.cli.commands.domains.maintenance.control_plane_lifecycle.bootstrap_control_plane_lifecycle_store",
+        return_value=store,
+    ):
+        result = runner.invoke(
+            cli,
+            [
+                "maintenance",
+                "control-plane-lifecycle",
+                "--apply",
+                "--format",
+                "json",
+                "--protected-run-id",
+                "run-1",
+                "--protected-snapshot-id",
+                "sha256:abc",
+            ],
+        )
+
+    assert result.exit_code == 0, result.output
+    payload = json.loads(result.output)
+    assert payload["dry_run"] is False
+    assert payload["deleted_paths"] == ["/tmp/control/run_manifest/manifest-old.json"]
+    policy = store.plan.call_args.args[0]
+    assert policy.protected_run_ids == frozenset({"run-1"})
+    assert policy.protected_input_snapshot_ids == frozenset({"sha256:abc"})
+    assert store.plan.call_args.kwargs == {"dry_run": False}
