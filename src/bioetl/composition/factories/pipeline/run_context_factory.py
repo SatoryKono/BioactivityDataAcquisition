@@ -117,6 +117,8 @@ class RunContextFactory:
         manifest_id: str | None = None,
         execution_fingerprint: str | None = None,
         config_hash: str | None = None,
+        resolved_config_hash: str | None = None,
+        effective_config_hash: str | None = None,
         dq_contract_compatibility_hash: str | None = None,
         effective_config_artifact_id: str | None = None,
     ) -> RunContext:
@@ -129,9 +131,12 @@ class RunContextFactory:
             dq_policy_ref,
             rule_bundle_version,
         ) = self.contract_identity_resolver(self.provider, entity)
-        resolved_config_hash = (
-            self.config_hash_getter(yaml_config) if config_hash is None else config_hash
+        resolved_hash = (
+            self.config_hash_getter(yaml_config)
+            if resolved_config_hash is None
+            else resolved_config_hash
         )
+        effective_hash = effective_config_hash or config_hash or resolved_hash
         return RunContext.create(
             RunContextCreateInput(
                 run_id=run_id,
@@ -143,7 +148,9 @@ class RunContextFactory:
                 transform_steps=self.transform_steps_getter(yaml_config),
                 pipeline_version=self.pipeline_version_getter(yaml_config),
                 git_commit=self.git_commit_getter(),
-                config_hash=resolved_config_hash,
+                config_hash=effective_hash,
+                resolved_config_hash=resolved_hash,
+                effective_config_hash=effective_hash,
                 manifest_id=manifest_id,
                 execution_fingerprint=execution_fingerprint,
                 contract_ref=contract_ref,

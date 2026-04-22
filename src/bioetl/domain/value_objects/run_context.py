@@ -35,6 +35,8 @@ class RunContextCreateInput:
     pipeline_version: str | None = None
     git_commit: str | None = None
     config_hash: str | None = None
+    resolved_config_hash: str | None = None
+    effective_config_hash: str | None = None
     manifest_id: str | None = None
     contract_ref: str | None = None
     contract_version: str | None = None
@@ -59,6 +61,8 @@ _RUN_CONTEXT_OPTIONAL_DEFAULTS: dict[str, object] = {
     "pipeline_version": None,
     "git_commit": None,
     "config_hash": None,
+    "resolved_config_hash": None,
+    "effective_config_hash": None,
     "manifest_id": None,
     "contract_ref": None,
     "contract_version": None,
@@ -155,6 +159,8 @@ class RunContext:
         pipeline_version: Pipeline version for reproducibility (e.g., '1.0.0').
         git_commit: Git commit hash for reproducibility.
         config_hash: SHA256 hash of pipeline configuration for change detection.
+        resolved_config_hash: SHA256 hash of resolved declarative configuration.
+        effective_config_hash: SHA256 hash of final effective execution configuration.
         manifest_id: Optional control-plane manifest identifier linked to the run.
         dq_contract_compatibility_hash: SHA256 hash of DQ contract compatibility for reproducibility.
         effective_config_artifact_id: Reference to the effective config artifact for this run.
@@ -189,6 +195,8 @@ class RunContext:
     pipeline_version: str | None = None
     git_commit: str | None = None
     config_hash: str | None = None
+    resolved_config_hash: str | None = None
+    effective_config_hash: str | None = None
     manifest_id: str | None = None
     contract_ref: str | None = None
     contract_version: str | None = None
@@ -237,6 +245,8 @@ class RunContext:
             pipeline_version=create_input.pipeline_version,
             git_commit=create_input.git_commit,
             config_hash=create_input.config_hash,
+            resolved_config_hash=create_input.resolved_config_hash,
+            effective_config_hash=create_input.effective_config_hash,
             manifest_id=create_input.manifest_id,
             contract_ref=create_input.contract_ref,
             contract_version=create_input.contract_version,

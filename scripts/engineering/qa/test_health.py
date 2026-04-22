@@ -476,7 +476,10 @@ def _run_tests(argv: list[str]) -> int:
     completed = subprocess.run(
         plan.command,
         cwd=ROOT,
-        env=_with_pythonpath_src(os.environ),
+        env={
+            **_with_pythonpath_src(os.environ),
+            "BIOETL_TEST_HEALTH_WRAPPER": "1",
+        },
         check=False,
     )
     duration = time.monotonic() - start_time

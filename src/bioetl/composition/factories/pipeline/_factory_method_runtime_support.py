@@ -91,6 +91,12 @@ def create_factory_runner_from_request(
             None if artifacts is None else artifacts.execution_fingerprint
         ),
         config_hash=None if artifacts is None else artifacts.config_hash,
+        resolved_config_hash=(
+            None if artifacts is None else artifacts.resolved_config_hash
+        ),
+        effective_config_hash=(
+            None if artifacts is None else artifacts.effective_config_hash
+        ),
         dq_contract_compatibility_hash=(
             None if artifacts is None else artifacts.dq_contract_compatibility_hash
         ),

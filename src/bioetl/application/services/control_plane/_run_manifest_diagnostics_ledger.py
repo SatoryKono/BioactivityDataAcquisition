@@ -109,6 +109,7 @@ def _process_ledger_entries(
     cross_validation_signal_present = False
     missing_link_count = 0
     correlation_anchor_gaps = {
+        "resolved_config_hash": 0,
         "effective_config_hash": 0,
         "contract_ref": 0,
         "contract_version": 0,

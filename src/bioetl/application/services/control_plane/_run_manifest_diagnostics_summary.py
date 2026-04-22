@@ -102,6 +102,8 @@ def _build_final_summary(
         "run_id": str(request.manifest.run_id),
         "manifest_id": request.manifest.manifest_id,
         "execution_fingerprint": request.manifest.execution_fingerprint,
+        "config_hash": request.base_summary.get("config_hash"),
+        "resolved_config_hash": request.base_summary.get("resolved_config_hash"),
         "effective_config_hash": request.base_summary.get("effective_config_hash"),
         "contract_ref": request.base_summary.get("contract_ref"),
         "contract_version": request.base_summary.get("contract_version"),

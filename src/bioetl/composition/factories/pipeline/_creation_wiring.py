@@ -102,6 +102,8 @@ class _PipelineCreationRequest:
     manifest_id: str | None = None
     execution_fingerprint: str | None = None
     config_hash: str | None = None
+    resolved_config_hash: str | None = None
+    effective_config_hash: str | None = None
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
     config: PipelineYamlConfig | None = None
@@ -161,6 +163,8 @@ def _create_pipeline_with_services_impl(
             manifest_id=request.manifest_id,
             execution_fingerprint=request.execution_fingerprint,
             config_hash=request.config_hash,
+            resolved_config_hash=request.resolved_config_hash,
+            effective_config_hash=request.effective_config_hash,
             dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
             effective_config_artifact_id=request.effective_config_artifact_id,
         )

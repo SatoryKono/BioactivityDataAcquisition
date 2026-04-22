@@ -196,7 +196,7 @@ class RunManifestInspectionService:
             pipeline_name=manifest.pipeline_name,
             run_type=manifest.run_type.value,
             pipeline_version=code_provenance.pipeline_version,
-            effective_config_hash=code_provenance.config_hash,
+            effective_config_hash=code_provenance.effective_config_hash,
             dq_contract_compatibility_hash=(
                 code_provenance.dq_contract_compatibility_hash
             ),
@@ -213,7 +213,7 @@ class RunManifestInspectionService:
             key: value
             for key, value in {
                 "manifest_id": manifest.manifest_id,
-                "effective_config_hash": code_provenance.config_hash,
+                "effective_config_hash": code_provenance.effective_config_hash,
                 "contract_ref": code_provenance.contract_ref,
                 "contract_version": code_provenance.contract_version,
                 "effective_config_artifact_id": (
@@ -226,7 +226,9 @@ class RunManifestInspectionService:
             "run_id": str(manifest.run_id),
             "manifest_id": manifest.manifest_id,
             "execution_fingerprint": manifest.execution_fingerprint,
-            "effective_config_hash": code_provenance.config_hash,
+            "config_hash": code_provenance.config_hash,
+            "resolved_config_hash": code_provenance.resolved_config_hash,
+            "effective_config_hash": code_provenance.effective_config_hash,
             "contract_ref": code_provenance.contract_ref,
             "contract_version": code_provenance.contract_version,
             "replay_of_run_id": diagnostics.get("replay_of_run_id"),

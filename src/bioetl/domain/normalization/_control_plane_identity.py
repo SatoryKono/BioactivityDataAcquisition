@@ -17,6 +17,7 @@ _RUNTIME_ANCHOR_SHA256_FIELDS = frozenset(
         "config_hash",
         "contract_schema_hash",
         "dq_contract_compatibility_hash",
+        "resolved_config_hash",
         "effective_config_hash",
     }
 )

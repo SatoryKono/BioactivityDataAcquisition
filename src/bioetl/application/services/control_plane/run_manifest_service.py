@@ -60,6 +60,8 @@ class RunManifestCreateSpec:
     git_commit: str | None = None
     source_revision_state: str | None = None
     config_hash: str | None = None
+    resolved_config_hash: str | None = None
+    effective_config_hash: str | None = None
     contract_ref: str | None = None
     contract_version: str | None = None
     contract_schema_hash: str | None = None
@@ -117,6 +119,9 @@ class RunManifestService:
             git_commit=request.git_commit,
             source_revision_state=request.source_revision_state,
             config_hash=request.config_hash,
+            resolved_config_hash=request.resolved_config_hash or request.config_hash,
+            effective_config_hash=request.effective_config_hash
+            or request.config_hash,
             contract_ref=request.contract_ref,
             contract_version=request.contract_version,
             contract_schema_hash=request.contract_schema_hash,
@@ -139,6 +144,14 @@ class RunManifestService:
                 "source_revision_state",
             ),
             config_hash=_optional_payload_string(payload, "config_hash"),
+            resolved_config_hash=(
+                _optional_payload_string(payload, "resolved_config_hash")
+                or _optional_payload_string(payload, "config_hash")
+            ),
+            effective_config_hash=(
+                _optional_payload_string(payload, "effective_config_hash")
+                or _optional_payload_string(payload, "config_hash")
+            ),
             contract_ref=_optional_payload_string(payload, "contract_ref"),
             contract_version=_optional_payload_string(payload, "contract_version"),
             contract_schema_hash=_optional_payload_string(
@@ -296,7 +309,7 @@ class RunManifestService:
             pipeline_name=request.pipeline_name,
             run_type=run_type.value,
             pipeline_version=code_provenance.pipeline_version,
-            effective_config_hash=code_provenance.config_hash,
+            effective_config_hash=code_provenance.effective_config_hash,
             dq_contract_compatibility_hash=(
                 code_provenance.dq_contract_compatibility_hash
             ),
@@ -385,6 +398,8 @@ class RunManifestService:
                 "git_commit": code_provenance.git_commit,
                 "source_revision_state": code_provenance.source_revision_state,
                 "config_hash": code_provenance.config_hash,
+                "resolved_config_hash": code_provenance.resolved_config_hash,
+                "effective_config_hash": code_provenance.effective_config_hash,
                 "contract_ref": code_provenance.contract_ref,
                 "contract_version": code_provenance.contract_version,
                 "contract_schema_hash": code_provenance.contract_schema_hash,

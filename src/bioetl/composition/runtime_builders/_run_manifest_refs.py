@@ -89,6 +89,8 @@ class ManifestControlPlaneRefs:
     manifest_id: str
     execution_fingerprint: str | None
     config_hash: str | None
+    resolved_config_hash: str | None
+    effective_config_hash: str | None
     dq_contract_compatibility_hash: str | None
     effective_config_artifact_id: str | None
     contract_ref: str | None
@@ -114,6 +116,7 @@ def resolve_run_context_values(
 def create_control_plane_refs(
     manifest_id: str,
     execution_fingerprint: str,
+    resolved_config_hash: str,
     effective_config_hash: str,
     dq_contract_compatibility_hash: str,
     effective_config_artifact_id: str,
@@ -128,6 +131,8 @@ def create_control_plane_refs(
         manifest_id=manifest_id,
         execution_fingerprint=execution_fingerprint,
         config_hash=effective_config_hash,
+        resolved_config_hash=resolved_config_hash,
+        effective_config_hash=effective_config_hash,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         effective_config_artifact_id=effective_config_artifact_id,
         contract_ref=contract_ref,

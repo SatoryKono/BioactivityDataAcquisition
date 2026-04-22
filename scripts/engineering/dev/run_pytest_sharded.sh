@@ -18,12 +18,16 @@ DEFAULT_DIST_MODE="loadfile"
 DEFAULT_COVERAGE_DIR="$REPO_ROOT/.coverage-sharded"
 DEFAULT_PYTEST_CACHE_DIR="$REPO_ROOT/.pytest_cache"
 DEFAULT_JUNIT_DIR="$REPO_ROOT/reports/quality/test-runs/junit/run-$(date +%Y%m%dT%H%M%S)"
+DEFAULT_TEST_HEALTH_REPORTS_DIR="$REPO_ROOT/reports/quality/test-runs"
 
 WORKERS_PER_SHARD="$DEFAULT_WORKERS_PER_SHARD"
 DIST_MODE="$DEFAULT_DIST_MODE"
 COVERAGE_DIR="$DEFAULT_COVERAGE_DIR"
 PYTEST_CACHE_DIR="$DEFAULT_PYTEST_CACHE_DIR"
 JUNIT_DIR="$DEFAULT_JUNIT_DIR"
+TEST_HEALTH_SUITE="${BIOETL_PYTEST_SHARDED_TEST_HEALTH_SUITE:-coverage-verify}"
+TEST_HEALTH_REPORTS_DIR="${BIOETL_PYTEST_SHARDED_TEST_HEALTH_REPORTS_DIR:-$DEFAULT_TEST_HEALTH_REPORTS_DIR}"
+TEST_HEALTH_ROLLUP_MD="${BIOETL_PYTEST_SHARDED_TEST_HEALTH_ROLLUP_MD:-$TEST_HEALTH_REPORTS_DIR/rollup.md}"
 STREAM_LOGS=0
 TAIL_LOGS=0
 DRY_RUN=0
@@ -411,6 +415,56 @@ selected_python() {
     return 1
 }
 
+selected_test_health_python() {
+    local python_bin
+    if [[ -n "${BIOETL_PYTEST_RUNTIME_PYTHON:-}" ]] && python_has_modules "$BIOETL_PYTEST_RUNTIME_PYTHON" yaml; then
+        printf '%s\n' "$BIOETL_PYTEST_RUNTIME_PYTHON"
+        return 0
+    fi
+    if [[ -x "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" ]]; then
+        python_bin="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"
+        if python_has_modules "$python_bin" yaml; then
+            printf '%s\n' "$python_bin"
+            return 0
+        fi
+    fi
+    if [[ -x ".venv/bin/python" ]]; then
+        python_bin="$REPO_ROOT/.venv/bin/python"
+        if python_has_modules "$python_bin" yaml; then
+            printf '%s\n' "$python_bin"
+            return 0
+        fi
+    fi
+    if command -v python3 >/dev/null 2>&1; then
+        python_bin="$(command -v python3)"
+        if python_has_modules "$python_bin" yaml; then
+            printf '%s\n' "$python_bin"
+            return 0
+        fi
+    fi
+    if command -v python >/dev/null 2>&1; then
+        python_bin="$(command -v python)"
+        if python_has_modules "$python_bin" yaml; then
+            printf '%s\n' "$python_bin"
+            return 0
+        fi
+    fi
+    return 1
+}
+
+shell_join() {
+    local arg
+    local first=1
+    for arg in "$@"; do
+        if [[ "$first" == "0" ]]; then
+            printf ' '
+        fi
+        printf '%q' "$arg"
+        first=0
+    done
+    return 0
+}
+
 is_wsl_mounted_checkout() {
     [[ "$REPO_ROOT" == /mnt/* ]]
     return $?
@@ -689,7 +743,51 @@ combine_coverage() {
     return 0
 }
 
+collect_test_health_summary() {
+    local exit_code="$1"
+    shift
+
+    [[ "$DRY_RUN" == "0" ]] || return 0
+    [[ "${BIOETL_PYTEST_SHARDED_TEST_HEALTH:-1}" != "0" ]] || return 0
+    [[ "${BIOETL_TEST_HEALTH_WRAPPER:-0}" != "1" ]] || return 0
+
+    if [[ -z "$JUNIT_DIR" || ! -d "$JUNIT_DIR" ]]; then
+        echo "[run_pytest_sharded][warn] Test-health summary skipped: JUnit directory does not exist: $JUNIT_DIR" >&2
+        return 0
+    fi
+    if ! compgen -G "$JUNIT_DIR/*.xml" >/dev/null; then
+        echo "[run_pytest_sharded][warn] Test-health summary skipped: no JUnit XML files found in $JUNIT_DIR" >&2
+        return 0
+    fi
+
+    local python_bin
+    python_bin="$(selected_test_health_python)" || {
+        echo "[run_pytest_sharded][warn] Test-health summary skipped: no Python with PyYAML available." >&2
+        return 0
+    }
+
+    local run_id
+    run_id="$(basename "$JUNIT_DIR")"
+    local command_display
+    command_display="$(shell_join bash scripts/engineering/dev/run_pytest_sharded.sh "$@")"
+
+    "$python_bin" -m scripts.engineering.qa test-health \
+        --suite "$TEST_HEALTH_SUITE" \
+        --run-id "$run_id" \
+        --reports-dir "$TEST_HEALTH_REPORTS_DIR" \
+        --junit-glob "$JUNIT_DIR/*.xml" \
+        --command "$command_display" \
+        --exit-code "$exit_code" \
+        --last 30 \
+        --markdown-out "$TEST_HEALTH_ROLLUP_MD" || {
+            echo "[run_pytest_sharded][warn] Test-health summary generation failed." >&2
+            return 0
+        }
+    return 0
+}
+
 main() {
+    local -a original_args=("$@")
     parse_args "$@"
     if [[ "$LIST_ONLY" == "1" ]]; then
         print_plan
@@ -714,24 +812,38 @@ main() {
     local current_wave=""
     local -a wave_shards=()
     local shard
+    local exit_code=0
+    local stop_after_wave=0
 
     for shard in "${selected_shards[@]}"; do
+        if [[ "$stop_after_wave" == "1" ]]; then
+            break
+        fi
         if [[ -z "$current_wave" ]]; then
             current_wave="${SHARD_WAVE[$shard]}"
         fi
         if [[ "${SHARD_WAVE[$shard]}" != "$current_wave" ]]; then
-            run_wave "$current_wave" "${wave_shards[@]}"
+            if ! run_wave "$current_wave" "${wave_shards[@]}"; then
+                exit_code=1
+                stop_after_wave=1
+                break
+            fi
             wave_shards=()
             current_wave="${SHARD_WAVE[$shard]}"
         fi
         wave_shards+=("$shard")
     done
 
-    if ((${#wave_shards[@]} > 0)); then
-        run_wave "$current_wave" "${wave_shards[@]}"
+    if [[ "$stop_after_wave" != "1" ]] && ((${#wave_shards[@]} > 0)); then
+        if ! run_wave "$current_wave" "${wave_shards[@]}"; then
+            exit_code=1
+        fi
     fi
 
-    combine_coverage
+    if [[ "$exit_code" == "0" ]]; then
+        combine_coverage
+    fi
+    collect_test_health_summary "$exit_code" "${original_args[@]}"
 
     if [[ "$DRY_RUN" == "0" ]]; then
         printf "\n[run_pytest_sharded] Done. Logs and coverage files: %s\n" "$COVERAGE_DIR"
@@ -739,7 +851,7 @@ main() {
             printf "[run_pytest_sharded] JUnit reports: %s\n" "$JUNIT_DIR"
         fi
     fi
-    return 0
+    return "$exit_code"
 }
 
 main "$@"

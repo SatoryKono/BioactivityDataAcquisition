@@ -70,6 +70,7 @@ class _RunManifestCreateRequestInputs:
     entity: str
     run_type_value: str
     execution_context_value: str
+    resolved_config_hash: str
     effective_config_hash: str
     contract_ref: str
     contract_version: str | None
@@ -164,6 +165,8 @@ def _build_manifest_create_request(
         git_commit=code_revision.git_commit,
         source_revision_state=code_revision.source_revision_state,
         config_hash=request_inputs.effective_config_hash,
+        resolved_config_hash=request_inputs.resolved_config_hash,
+        effective_config_hash=request_inputs.effective_config_hash,
         contract_ref=request_inputs.contract_ref,
         contract_version=request_inputs.contract_version,
         contract_schema_hash=request_inputs.contract_schema_hash,
@@ -247,6 +250,7 @@ def create_run_manifest(
     inputs: RunnerInputs,
     ledger_enabled: bool,
     effective_config_artifact_id: str,
+    resolved_config_hash: str,
     effective_config_hash: str,
     dq_contract_compatibility_hash: str,
 ) -> tuple[_ManifestControlPlaneRefs, RunLedgerService | None]:
@@ -278,6 +282,7 @@ def create_run_manifest(
             entity=entity,
             run_type_value=run_type_value,
             execution_context_value=execution_context_value,
+            resolved_config_hash=resolved_config_hash,
             effective_config_hash=effective_config_hash,
             contract_ref=contract_ref,
             contract_version=contract_version,
@@ -298,6 +303,7 @@ def create_run_manifest(
     control_plane_refs = _create_control_plane_refs(
         manifest.manifest_id,
         manifest.execution_fingerprint,
+        resolved_config_hash,
         effective_config_hash,
         dq_contract_compatibility_hash,
         effective_config_artifact_id,
