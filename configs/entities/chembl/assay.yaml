@@ -112,6 +112,44 @@ quality:
                 - U
             nullable: false
             error_message: assay_type must be one of B, F, A, T, P, U
+        -   field: assay_test_type
+            type: enum
+            allowed:
+                - In vivo
+                - In vitro
+                - Ex vivo
+            nullable: true
+            error_message: Invalid assay_test_type value
+        -   field: assay_category
+            type: enum
+            allowed:
+                - screening
+                - confirmatory
+                - panel
+                - summary
+                - other
+                - Affinity biochemical assay
+                - Affinity on-target cellular assay
+                - Affinity phenotypic cellular assay
+                - Alphascreen assay
+                - Cell health data
+                - GPCR beta-arrestin recruitment assay
+                - HTRF assay
+                - ITC assay
+                - Incucyte cell viability
+                - NanoBRET assay
+                - PDSP assay
+                - Selectivity assay
+                - Thermal shift assay
+            nullable: true
+            error_message: Invalid assay_category value
+        -   field: assay_group
+            type: enum
+            allowed:
+                - FUNCTIONAL
+                - BINDING
+            nullable: true
+            error_message: Invalid assay_group value
         -   field: confidence_score
             type: range
             min: 0
@@ -127,6 +165,18 @@ quality:
                 - S
                 - U
             nullable: true
+        -   field: confidence_description
+            type: enum
+            allowed:
+                - Likely active
+                - Active
+                - Inactive
+                - Potentially active
+                - Potentially inactive
+                - Inconclusive
+                - Not determined
+            nullable: true
+            error_message: Invalid confidence_description value
     entity_cross_field_validations:
         -   name: assay_identifiable
             fields:

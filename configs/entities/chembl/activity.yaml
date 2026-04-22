@@ -130,19 +130,54 @@ quality:
             type: enum
             allowed:
                 - IC50
+                - EC50
                 - Ki
                 - Kd
-                - EC50
                 - AC50
                 - GI50
-                - ED50
-                - MIC
-                - CC50
                 - Potency
-                - Activity
                 - Inhibition
+                - '% Inhibition'
+                - Activity
+                - Ratio
+                - ED50
+                - ID50
             nullable: true
             error_message: Invalid standard_type value
+        -   field: standard_relation
+            type: enum
+            allowed:
+                - '='
+                - <
+                - <=
+                - '>'
+                - '>='
+                - '~'
+            nullable: false
+            error_message: Invalid standard_relation value
+        -   field: assay_type
+            type: enum
+            allowed:
+                - B
+                - F
+                - A
+                - T
+                - P
+                - U
+            nullable: false
+            error_message: Invalid assay_type value
+        -   field: data_validity_comment
+            type: enum
+            allowed:
+                - Potential missing data
+                - Potential author error
+                - Manually validated
+                - Potential transcription error
+                - Outside typical range
+                - Non standard unit for type
+                - Author confirmed error
+            nullable: true
+            error_message: Invalid data_validity_comment value
         -   field: standard_units
             type: enum
             allowed:

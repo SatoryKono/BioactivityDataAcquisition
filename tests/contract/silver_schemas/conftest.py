@@ -91,7 +91,7 @@ ALLOWED_ATTR_DIFFS = {
     "molecule_id": {"dtype"},
     "publication_year": {"required"},
 }
-ALLOWED_CHECK_DIFFS = {"publication_year", "standard_relation", "usan_year"}
+ALLOWED_CHECK_DIFFS = {"publication_year", "usan_year"}
 
 
 @pytest.fixture
