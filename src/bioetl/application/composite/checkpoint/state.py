@@ -35,6 +35,9 @@ class CompositeCheckpointState:
     merge_result: JsonDict | None = None
     checkpoint_schema_version: str = "1.0.0"
     effective_config_hash: str = ""
+    effective_config_artifact_id: str = ""
+    execution_fingerprint: str = ""
+    dq_contract_compatibility_hash: str = ""
     contract_ref: str = ""
     contract_version: str = ""
     manifest_id: str = ""
@@ -82,6 +85,9 @@ class CompositeCheckpointState:
         normalized_anchors = normalize_runtime_anchor_payload(
             {
                 "effective_config_hash": self.effective_config_hash,
+                "effective_config_artifact_id": self.effective_config_artifact_id,
+                "execution_fingerprint": self.execution_fingerprint,
+                "dq_contract_compatibility_hash": self.dq_contract_compatibility_hash,
                 "contract_ref": self.contract_ref,
                 "contract_version": self.contract_version,
                 "manifest_id": self.manifest_id,
@@ -106,6 +112,13 @@ class CompositeCheckpointState:
             "merge_result": self.merge_result,
             "checkpoint_schema_version": self.checkpoint_schema_version,
             "effective_config_hash": normalized_anchors["effective_config_hash"],
+            "effective_config_artifact_id": normalized_anchors[
+                "effective_config_artifact_id"
+            ],
+            "execution_fingerprint": normalized_anchors["execution_fingerprint"],
+            "dq_contract_compatibility_hash": normalized_anchors[
+                "dq_contract_compatibility_hash"
+            ],
             "contract_ref": normalized_anchors["contract_ref"],
             "contract_version": normalized_anchors["contract_version"],
             "manifest_id": normalized_anchors["manifest_id"],
@@ -129,6 +142,13 @@ class CompositeCheckpointState:
         normalized_anchors = normalize_runtime_anchor_payload(
             {
                 "effective_config_hash": data.get("effective_config_hash"),
+                "effective_config_artifact_id": data.get(
+                    "effective_config_artifact_id"
+                ),
+                "execution_fingerprint": data.get("execution_fingerprint"),
+                "dq_contract_compatibility_hash": data.get(
+                    "dq_contract_compatibility_hash"
+                ),
                 "contract_ref": data.get("contract_ref"),
                 "contract_version": data.get("contract_version"),
                 "manifest_id": data.get("manifest_id"),
@@ -153,6 +173,13 @@ class CompositeCheckpointState:
             merge_result=data.get("merge_result"),
             checkpoint_schema_version=data.get("checkpoint_schema_version", "1.0.0"),
             effective_config_hash=normalized_anchors["effective_config_hash"] or "",
+            effective_config_artifact_id=(
+                normalized_anchors["effective_config_artifact_id"] or ""
+            ),
+            execution_fingerprint=normalized_anchors["execution_fingerprint"] or "",
+            dq_contract_compatibility_hash=(
+                normalized_anchors["dq_contract_compatibility_hash"] or ""
+            ),
             contract_ref=normalized_anchors["contract_ref"] or "",
             contract_version=normalized_anchors["contract_version"] or "",
             manifest_id=normalized_anchors["manifest_id"] or "",

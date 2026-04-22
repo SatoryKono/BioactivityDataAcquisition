@@ -75,6 +75,21 @@ def build_runtime_management_services(
                 if control_plane_bundle is None
                 else control_plane_bundle.manifest_id
             ),
+            expected_execution_fingerprint=(
+                None
+                if control_plane_bundle is None
+                else control_plane_bundle.execution_fingerprint
+            ),
+            expected_dq_contract_compatibility_hash=(
+                None
+                if control_plane_bundle is None
+                else control_plane_bundle.dq_contract_compatibility_hash
+            ),
+            expected_effective_config_artifact_id=(
+                None
+                if control_plane_bundle is None
+                else control_plane_bundle.effective_config_artifact_id
+            ),
             run_ledger_port=(
                 None
                 if control_plane_bundle is None

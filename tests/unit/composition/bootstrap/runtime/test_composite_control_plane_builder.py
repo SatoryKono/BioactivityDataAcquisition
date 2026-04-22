@@ -246,6 +246,7 @@ def test_build_composite_control_plane_bundle_can_disable_ledger_while_keeping_m
         )
 
     assert isinstance(bundle.manifest_id, str)
+    assert isinstance(bundle.execution_fingerprint, str)
     assert bundle.run_ledger_service is None
     manifest_path = (
         tmp_path / "output" / "control" / "run_manifest" / f"{bundle.manifest_id}.json"
@@ -256,6 +257,7 @@ def test_build_composite_control_plane_bundle_can_disable_ledger_while_keeping_m
     ).exists()
     manifest = RunManifest.from_dict(json.loads(manifest_path.read_text("utf-8")))
     assert manifest.replay_capability == ReplayCapability.REBUILD_ONLY
+    assert bundle.execution_fingerprint == manifest.execution_fingerprint
     assert (
         manifest.launch_context["exact_replay_support_boundary"]
         == "composite_execution_unsupported"
@@ -378,6 +380,7 @@ def test_build_composite_control_plane_bundle_persists_manifest_created_when_led
         )
 
     assert isinstance(bundle.manifest_id, str)
+    assert isinstance(bundle.execution_fingerprint, str)
     assert bundle.run_ledger_service is not None
     ledger_path = (
         tmp_path / "output" / "control" / "run_ledger" / f"{bundle.manifest_id}.jsonl"

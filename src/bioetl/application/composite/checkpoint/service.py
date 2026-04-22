@@ -41,6 +41,9 @@ class CompositeCheckpointServiceContext:
     resume: bool = False
     stale_checkpoint_threshold_hours: float | None = None
     expected_effective_config_hash: str | None = None
+    expected_effective_config_artifact_id: str | None = None
+    expected_execution_fingerprint: str | None = None
+    expected_dq_contract_compatibility_hash: str | None = None
     expected_contract_ref: str | None = None
     expected_contract_version: str | None = None
     expected_manifest_id: str | None = None
@@ -59,6 +62,9 @@ _CHECKPOINT_INIT_OPTIONAL_DEFAULTS: dict[str, object] = {
     "resume": False,
     "stale_checkpoint_threshold_hours": None,
     "expected_effective_config_hash": None,
+    "expected_effective_config_artifact_id": None,
+    "expected_execution_fingerprint": None,
+    "expected_dq_contract_compatibility_hash": None,
     "expected_contract_ref": None,
     "expected_contract_version": None,
     "expected_manifest_id": None,
@@ -132,6 +138,21 @@ def _coerce_checkpoint_service_context(
             init=init,
             overrides=overrides,
         ),
+        expected_effective_config_artifact_id=_resolve_checkpoint_init_value(
+            field_name="expected_effective_config_artifact_id",
+            init=init,
+            overrides=overrides,
+        ),
+        expected_execution_fingerprint=_resolve_checkpoint_init_value(
+            field_name="expected_execution_fingerprint",
+            init=init,
+            overrides=overrides,
+        ),
+        expected_dq_contract_compatibility_hash=_resolve_checkpoint_init_value(
+            field_name="expected_dq_contract_compatibility_hash",
+            init=init,
+            overrides=overrides,
+        ),
         expected_contract_ref=_resolve_checkpoint_init_value(
             field_name="expected_contract_ref",
             init=init,
@@ -194,6 +215,11 @@ class CompositeCheckpointService:
         )
         self._expected_checkpoint_context = create_expected_checkpoint_context(
             effective_config_hash=params.expected_effective_config_hash,
+            effective_config_artifact_id=params.expected_effective_config_artifact_id,
+            execution_fingerprint=params.expected_execution_fingerprint,
+            dq_contract_compatibility_hash=(
+                params.expected_dq_contract_compatibility_hash
+            ),
             contract_ref=params.expected_contract_ref,
             contract_version=params.expected_contract_version,
             manifest_id=params.expected_manifest_id,
@@ -232,6 +258,21 @@ class CompositeCheckpointService:
     def expected_effective_config_hash(self) -> str:
         """Expose the configured effective-config anchor for dependent helpers."""
         return self._expected_checkpoint_context.effective_config_hash
+
+    @property
+    def expected_effective_config_artifact_id(self) -> str:
+        """Expose the configured effective-config artifact anchor."""
+        return self._expected_checkpoint_context.effective_config_artifact_id
+
+    @property
+    def expected_execution_fingerprint(self) -> str:
+        """Expose the configured execution-fingerprint anchor."""
+        return self._expected_checkpoint_context.execution_fingerprint
+
+    @property
+    def expected_dq_contract_compatibility_hash(self) -> str:
+        """Expose the configured DQ compatibility anchor."""
+        return self._expected_checkpoint_context.dq_contract_compatibility_hash
 
     @property
     def expected_contract_ref(self) -> str:

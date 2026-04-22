@@ -36,6 +36,7 @@ def _contract_ref_mismatch(
     logger: LoggerPort,
     composite_name: str,
 ) -> str | None:
+    del logger, composite_name
     if not expected_contract_ref:
         return None
     if state.contract_ref:
@@ -43,12 +44,7 @@ def _contract_ref_mismatch(
             return f"contract_ref {state.contract_ref!r} != {expected_contract_ref!r}"
         return None
 
-    logger.warning(
-        "Checkpoint missing contract_ref anchor; compatibility check is partial",
-        composite=composite_name,
-        reason_code="checkpoint_anchor_missing_contract_ref",
-    )
-    return None
+    return "checkpoint missing contract_ref anchor"
 
 
 def _contract_version_mismatch(
@@ -58,9 +54,10 @@ def _contract_version_mismatch(
     logger: LoggerPort,
     composite_name: str,
 ) -> str | None:
+    del logger, composite_name
     if not expected_contract_version:
         return None
-    if state.contract_ref:
+    if state.contract_version:
         if (
             state.contract_version
             and state.contract_version != expected_contract_version
@@ -70,13 +67,7 @@ def _contract_version_mismatch(
                 f"!= {expected_contract_version!r}"
             )
         return None
-    if not state.contract_version:
-        logger.warning(
-            "Checkpoint missing contract_version anchor; compatibility check is partial",
-            composite=composite_name,
-            reason_code="checkpoint_anchor_missing_contract_version",
-        )
-    return None
+    return "checkpoint missing contract_version anchor"
 
 
 def _effective_hash_mismatch(
@@ -86,6 +77,7 @@ def _effective_hash_mismatch(
     logger: LoggerPort,
     composite_name: str,
 ) -> str | None:
+    del logger, composite_name
     if not expected_effective_config_hash:
         return None
     if state.effective_config_hash:
@@ -96,11 +88,21 @@ def _effective_hash_mismatch(
             )
         return None
 
-    logger.warning(
-        "Checkpoint missing effective_config_hash anchor; compatibility check is partial",
-        composite=composite_name,
-        reason_code="checkpoint_anchor_missing_effective_config_hash",
-    )
+    return "checkpoint missing effective_config_hash anchor"
+
+
+def _exact_anchor_mismatch(
+    *,
+    state_value: str,
+    expected_value: str,
+    anchor_name: str,
+) -> str | None:
+    if not expected_value:
+        return None
+    if not state_value:
+        return f"checkpoint missing {anchor_name} anchor"
+    if state_value != expected_value:
+        return f"{anchor_name} {state_value!r} != {expected_value!r}"
     return None
 
 
@@ -111,6 +113,7 @@ def _manifest_id_mismatch(
     logger: LoggerPort,
     composite_name: str,
 ) -> str | None:
+    del logger, composite_name
     if not expected_manifest_id:
         return None
     if state.manifest_id:
@@ -118,12 +121,7 @@ def _manifest_id_mismatch(
             return f"manifest_id {state.manifest_id!r} != {expected_manifest_id!r}"
         return None
 
-    logger.warning(
-        "Checkpoint missing manifest_id anchor; compatibility check is partial",
-        composite=composite_name,
-        reason_code="checkpoint_anchor_missing_manifest_id",
-    )
-    return None
+    return "checkpoint missing manifest_id anchor"
 
 
 def _composite_run_identity_mismatch(
@@ -172,6 +170,21 @@ def validate_resume_compatibility(
                 logger=logger,
                 composite_name=composite_name,
             ),
+            _exact_anchor_mismatch(
+                state_value=state.effective_config_artifact_id,
+                expected_value=anchors.effective_config_artifact_id,
+                anchor_name="effective_config_artifact_id",
+            ),
+            _exact_anchor_mismatch(
+                state_value=state.execution_fingerprint,
+                expected_value=anchors.execution_fingerprint,
+                anchor_name="execution_fingerprint",
+            ),
+            _exact_anchor_mismatch(
+                state_value=state.dq_contract_compatibility_hash,
+                expected_value=anchors.dq_contract_compatibility_hash,
+                anchor_name="dq_contract_compatibility_hash",
+            ),
             _manifest_id_mismatch(
                 state=state,
                 expected_manifest_id=anchors.manifest_id,
@@ -196,10 +209,20 @@ def validate_resume_compatibility(
         expected_contract_ref=anchors.contract_ref,
         expected_contract_version=anchors.contract_version,
         expected_effective_config_hash=anchors.effective_config_hash,
+        expected_effective_config_artifact_id=anchors.effective_config_artifact_id,
+        expected_execution_fingerprint=anchors.execution_fingerprint,
+        expected_dq_contract_compatibility_hash=(
+            anchors.dq_contract_compatibility_hash
+        ),
         expected_composite_run_identity=anchors.composite_run_identity,
         checkpoint_contract_ref=state.contract_ref,
         checkpoint_contract_version=state.contract_version,
         checkpoint_effective_config_hash=state.effective_config_hash,
+        checkpoint_effective_config_artifact_id=state.effective_config_artifact_id,
+        checkpoint_execution_fingerprint=state.execution_fingerprint,
+        checkpoint_dq_contract_compatibility_hash=(
+            state.dq_contract_compatibility_hash
+        ),
         checkpoint_composite_run_identity=state.composite_run_identity,
         reason_code="checkpoint_resume_incompatible",
         incompatibility=detail,

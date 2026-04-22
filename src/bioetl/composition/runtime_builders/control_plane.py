@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
 
 _OPTIONAL_CONTROL_PLANE_FIELDS = (
+    "execution_fingerprint",
     "config_hash",
     "dq_contract_compatibility_hash",
     "effective_config_artifact_id",
@@ -40,6 +41,7 @@ _OPTIONAL_CONTROL_PLANE_FIELDS = (
 
 def _iter_optional_control_plane_updates(
     *,
+    execution_fingerprint: str | None = None,
     config_hash: str | None = None,
     dq_contract_compatibility_hash: str | None = None,
     effective_config_artifact_id: str | None = None,
@@ -51,6 +53,7 @@ def _iter_optional_control_plane_updates(
 ) -> tuple[tuple[str, str], ...]:
     values = normalize_runtime_anchor_payload(
         {
+            "execution_fingerprint": execution_fingerprint,
             "config_hash": config_hash,
             "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
             "effective_config_artifact_id": effective_config_artifact_id,
@@ -97,6 +100,7 @@ def attach_manifest_id(
     ctx: PipelineRunContext,
     manifest_id: str,
     *,
+    execution_fingerprint: str | None = None,
     config_hash: str | None = None,
     dq_contract_compatibility_hash: str | None = None,
     effective_config_artifact_id: str | None = None,
@@ -108,6 +112,7 @@ def attach_manifest_id(
 ) -> PipelineRunContext:
     """Return context carrying manifest/control-plane provenance values."""
     optional_updates = _iter_optional_control_plane_updates(
+        execution_fingerprint=execution_fingerprint,
         config_hash=config_hash,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         effective_config_artifact_id=effective_config_artifact_id,

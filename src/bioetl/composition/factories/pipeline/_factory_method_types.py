@@ -60,6 +60,7 @@ _CreatePipelineWithServicesRequest = _PipelineCreationRequest
 @dataclass(frozen=True, slots=True)
 class _ControlPlaneArtifacts:
     manifest_id: str | None = None
+    execution_fingerprint: str | None = None
     config_hash: str | None = None
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
@@ -75,6 +76,7 @@ class _CreateFactoryRunnerRequest:
     settings: Settings
     observability: ObservabilityBundle
     manifest_id: str | None = None
+    execution_fingerprint: str | None = None
     config_hash: str | None = None
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
@@ -142,6 +144,7 @@ def build_create_pipeline_with_services_request(
         settings,
         logger,
         artifacts.manifest_id,
+        artifacts.execution_fingerprint,
         artifacts.config_hash,
         artifacts.dq_contract_compatibility_hash,
         artifacts.effective_config_artifact_id,

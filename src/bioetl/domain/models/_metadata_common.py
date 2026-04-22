@@ -193,6 +193,18 @@ class PipelineMetadata(BaseModel):
     config_hash: str | None = Field(
         default=None, description="SHA256 hash of pipeline config"
     )
+    effective_config_hash: str | None = Field(
+        default=None,
+        description="Canonical effective-config hash used for semantic run identity",
+    )
+    effective_config_artifact_id: str | None = Field(
+        default=None,
+        description="Immutable effective-config artifact identifier for provenance",
+    )
+    execution_fingerprint: str | None = Field(
+        default=None,
+        description="Canonical run-manifest execution identity fingerprint",
+    )
     contract_ref: str | None = Field(
         default=None,
         description="Canonical contract reference resolved for the run",
@@ -212,6 +224,10 @@ class PipelineMetadata(BaseModel):
     rule_bundle_version: str | None = Field(
         default=None,
         description="DQ rule-bundle version used with the contract",
+    )
+    dq_contract_compatibility_hash: str | None = Field(
+        default=None,
+        description="DQ contract compatibility hash included in execution identity",
     )
 
 

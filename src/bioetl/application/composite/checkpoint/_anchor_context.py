@@ -15,6 +15,9 @@ class ExpectedCheckpointContext:
     """Expected runtime anchors used to validate checkpoint resume safety."""
 
     effective_config_hash: str = ""
+    effective_config_artifact_id: str = ""
+    execution_fingerprint: str = ""
+    dq_contract_compatibility_hash: str = ""
     contract_ref: str = ""
     contract_version: str = ""
     manifest_id: str = ""
@@ -24,6 +27,9 @@ class ExpectedCheckpointContext:
 def create_expected_checkpoint_context(
     *,
     effective_config_hash: str | None,
+    effective_config_artifact_id: str | None = None,
+    execution_fingerprint: str | None = None,
+    dq_contract_compatibility_hash: str | None = None,
     contract_ref: str | None,
     contract_version: str | None,
     manifest_id: str | None,
@@ -33,6 +39,9 @@ def create_expected_checkpoint_context(
     normalized = normalize_runtime_anchor_payload(
         {
             "effective_config_hash": effective_config_hash,
+            "effective_config_artifact_id": effective_config_artifact_id,
+            "execution_fingerprint": execution_fingerprint,
+            "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
             "contract_ref": contract_ref,
             "contract_version": contract_version,
             "manifest_id": manifest_id,
@@ -41,6 +50,11 @@ def create_expected_checkpoint_context(
     )
     return ExpectedCheckpointContext(
         effective_config_hash=normalized["effective_config_hash"] or "",
+        effective_config_artifact_id=normalized["effective_config_artifact_id"] or "",
+        execution_fingerprint=normalized["execution_fingerprint"] or "",
+        dq_contract_compatibility_hash=(
+            normalized["dq_contract_compatibility_hash"] or ""
+        ),
         contract_ref=normalized["contract_ref"] or "",
         contract_version=normalized["contract_version"] or "",
         manifest_id=normalized["manifest_id"] or "",
@@ -63,6 +77,18 @@ def _build_merged_anchor_payload(
         "effective_config_hash": _coalesce_expected_anchor(
             state.effective_config_hash,
             anchors.effective_config_hash,
+        ),
+        "effective_config_artifact_id": _coalesce_expected_anchor(
+            state.effective_config_artifact_id,
+            anchors.effective_config_artifact_id,
+        ),
+        "execution_fingerprint": _coalesce_expected_anchor(
+            state.execution_fingerprint,
+            anchors.execution_fingerprint,
+        ),
+        "dq_contract_compatibility_hash": _coalesce_expected_anchor(
+            state.dq_contract_compatibility_hash,
+            anchors.dq_contract_compatibility_hash,
         ),
         "contract_ref": _coalesce_expected_anchor(
             state.contract_ref,
@@ -96,6 +122,13 @@ def merge_expected_anchors(
         replace(
             state,
             effective_config_hash=merged["effective_config_hash"] or "",
+            effective_config_artifact_id=(
+                merged["effective_config_artifact_id"] or ""
+            ),
+            execution_fingerprint=merged["execution_fingerprint"] or "",
+            dq_contract_compatibility_hash=(
+                merged["dq_contract_compatibility_hash"] or ""
+            ),
             contract_ref=merged["contract_ref"] or "",
             contract_version=merged["contract_version"] or "",
             manifest_id=merged["manifest_id"] or "",
@@ -115,6 +148,9 @@ def fresh_checkpoint_state(
         composite_name=composite_name,
         run_id=run_id,
         effective_config_hash=anchors.effective_config_hash,
+        effective_config_artifact_id=anchors.effective_config_artifact_id,
+        execution_fingerprint=anchors.execution_fingerprint,
+        dq_contract_compatibility_hash=anchors.dq_contract_compatibility_hash,
         contract_ref=anchors.contract_ref,
         contract_version=anchors.contract_version,
         manifest_id=anchors.manifest_id,

@@ -163,11 +163,17 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             version=self._context.pipeline_version or "1.0.0",
             git_commit=self._context.git_commit,
             config_hash=self._context.config_hash,
+            effective_config_hash=self._context.config_hash,
+            effective_config_artifact_id=self._context.effective_config_artifact_id,
+            execution_fingerprint=self._context.execution_fingerprint,
             contract_ref=self._context.contract_ref,
             contract_version=self._context.contract_version,
             contract_schema_hash=self._context.contract_schema_hash,
             dq_policy_ref=self._context.dq_policy_ref,
             rule_bundle_version=self._context.rule_bundle_version,
+            dq_contract_compatibility_hash=(
+                self._context.dq_contract_compatibility_hash
+            ),
         )
 
     @cached_property

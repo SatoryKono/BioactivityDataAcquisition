@@ -121,6 +121,7 @@ tracked_suite_inventory:
       control_plane:
       - tests/integration/ci/test_reproducibility_contract_suite.py
       - tests/integration/ci/test_track_d_fixture_control_plane_linkage.py
+      - tests/integration/config/test_activity_hash_policy_alignment.py
       - tests/integration/test_preflight_health_modes.py
       - tests/integration/test_runner_lifecycle.py
       data_quality:
