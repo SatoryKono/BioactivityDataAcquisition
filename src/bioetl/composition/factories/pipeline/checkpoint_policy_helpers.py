@@ -8,12 +8,15 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.domain.ports import LoggerPort
 
-CheckpointCompatibilityPolicy = Literal["observe", "soft_fail", "hard_fail"]
+CheckpointCompatibilityPolicy = Literal[
+    "observe", "legacy_observe", "soft_fail", "hard_fail"
+]
 _DEFAULT_CHECKPOINT_COMPATIBILITY_POLICY: CheckpointCompatibilityPolicy = "soft_fail"
 _ALLOWED_CHECKPOINT_COMPATIBILITY_POLICIES: tuple[
     CheckpointCompatibilityPolicy, ...
 ] = (
     "observe",
+    "legacy_observe",
     "soft_fail",
     "hard_fail",
 )

@@ -159,12 +159,14 @@ class PipelineSettings(BaseSettings):
         """When True, append run-ledger events for lifecycle and lineage."""
 
         checkpoint_compatibility_policy: Literal[
-            "observe", "soft_fail", "hard_fail"
+            "observe", "legacy_observe", "soft_fail", "hard_fail"
         ] = Field(default="soft_fail")
         """Resume behavior when checkpoint compatibility validation fails.
 
-        `observe` remains a degraded operator mode for non-identity signals, but
-        canonical execution-identity mismatches always block resume.
+        `observe` remains a degraded operator mode only when identity continuity
+        is proven and non-identity signals drift. `legacy_observe` keeps the
+        old degraded continuation behavior for migrations that cannot yet prove
+        identity continuity.
         """
 
         @model_validator(mode="after")

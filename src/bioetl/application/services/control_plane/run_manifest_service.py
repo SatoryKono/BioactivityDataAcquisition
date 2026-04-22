@@ -120,8 +120,7 @@ class RunManifestService:
             source_revision_state=request.source_revision_state,
             config_hash=request.config_hash,
             resolved_config_hash=request.resolved_config_hash or request.config_hash,
-            effective_config_hash=request.effective_config_hash
-            or request.config_hash,
+            effective_config_hash=request.effective_config_hash or request.config_hash,
             contract_ref=request.contract_ref,
             contract_version=request.contract_version,
             contract_schema_hash=request.contract_schema_hash,

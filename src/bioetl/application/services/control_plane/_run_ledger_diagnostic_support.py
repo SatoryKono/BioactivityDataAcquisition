@@ -96,9 +96,7 @@ def sync_manifest_runtime_defaults(
     )
     host.effective_config_hash = _coalesce_missing(
         host.effective_config_hash,
-        normalize_control_plane_opaque_hash_ref(
-            code_provenance.effective_config_hash
-        ),
+        normalize_control_plane_opaque_hash_ref(code_provenance.effective_config_hash),
     )
 
 
