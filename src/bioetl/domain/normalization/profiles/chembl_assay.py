@@ -15,15 +15,8 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 )
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.schemas.chembl.assay import AssaySchema
-from bioetl.domain.schemas.constants import (
-    ASSAY_CATEGORIES,
-    ASSAY_GROUPS,
-    ASSAY_TEST_TYPES,
-    ASSAY_TYPES,
-    CONFIDENCE_DESCRIPTIONS,
-    RELATIONSHIP_TYPES,
-    SUBCELLULAR_FRACTIONS,
-)
+
+from ._chembl_vocab import chembl_enum
 
 __all__ = [
     "ASSAY_CATEGORIES",
@@ -38,8 +31,13 @@ __all__ = [
     "create_case_normalizer",
 ]
 
-# Use enum configurations from centralized constants (loaded from YAML)
-# These are already properly loaded and don't require runtime I/O
+ASSAY_CATEGORIES = chembl_enum("assay", "assay_category")
+ASSAY_GROUPS = chembl_enum("assay", "assay_group")
+ASSAY_TEST_TYPES = chembl_enum("assay", "assay_test_type")
+ASSAY_TYPES = chembl_enum("assay", "assay_type")
+CONFIDENCE_DESCRIPTIONS = chembl_enum("assay", "confidence_description")
+RELATIONSHIP_TYPES = chembl_enum("assay", "relationship_type")
+SUBCELLULAR_FRACTIONS = chembl_enum("assay", "subcellular_fraction")
 
 CHEMBL_ASSAY_SCHEMA_FIELDS = tuple(AssaySchema.to_schema().columns.keys())
 

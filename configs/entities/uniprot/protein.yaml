@@ -150,6 +150,21 @@ quality:
     pattern: ^[A-Z0-9_]+$
     nullable: true
     error_message: Entry name must be alphanumeric with underscores
+  - field: entry_type
+    type: enum
+    allowed:
+      - UniProtKB reviewed (Swiss-Prot)
+      - UniProtKB unreviewed (TrEMBL)
+    nullable: true
+    error_message: Invalid UniProt entry_type value
+  - field: flag
+    type: enum
+    allowed:
+      - Fragment
+      - Precursor
+      - Fragments
+    nullable: true
+    error_message: Invalid UniProt flag value
   - field: organism_scientific
     type: pattern
     pattern: ^[A-Z][a-z]+ [a-z]+.*$
@@ -180,11 +195,15 @@ quality:
     nullable: true
     error_message: Annotation score must be between 1 and 5
   - field: protein_existence
-    type: range
-    min: 1
-    max: 5
+    type: enum
+    allowed:
+      - Evidence at protein level
+      - Evidence at transcript level
+      - Inferred from homology
+      - Predicted
+      - Uncertain
     nullable: true
-    error_message: Protein existence level must be between 1 and 5
+    error_message: Invalid UniProt protein_existence value
   - field: go_terms
     type: not_empty_list
     nullable: true

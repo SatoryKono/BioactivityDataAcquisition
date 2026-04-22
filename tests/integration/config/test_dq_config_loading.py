@@ -82,6 +82,37 @@ class TestDQConfigIntegration:
         assert config.soft_fail_threshold == pytest.approx(0.05)
         assert config.hard_fail_threshold == pytest.approx(0.20)
 
+    def test_uniprot_protein_enum_vocabulary_validations(
+        self, dq_loader: DQConfigLoader
+    ) -> None:
+        """UniProt vocabulary fields should use enum DQ, not numeric ranges."""
+        from bioetl.domain.schemas.uniprot._core import (
+            ENTRY_TYPES,
+            PROTEIN_EXISTENCE_LEVELS,
+            PROTEIN_FLAGS,
+        )
+
+        config = dq_loader.load("uniprot", "protein")
+        enum_rules = {
+            rule.field: rule
+            for rule in config.field_validations
+            if rule.validation_type == "enum"
+            and rule.field in {"entry_type", "flag", "protein_existence"}
+        }
+
+        assert enum_rules["entry_type"].allowed == tuple(ENTRY_TYPES)
+        assert enum_rules["flag"].allowed == tuple(PROTEIN_FLAGS)
+        assert enum_rules["protein_existence"].allowed == tuple(
+            PROTEIN_EXISTENCE_LEVELS
+        )
+
+        range_fields = {
+            rule.field
+            for rule in config.field_validations
+            if rule.validation_type == "range"
+        }
+        assert "protein_existence" not in range_fields
+
 
 @pytest.mark.integration
 class TestPipelineConfigLoaderWithDQResolution:

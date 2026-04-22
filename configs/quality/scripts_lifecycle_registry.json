@@ -775,6 +775,18 @@
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a legacy wrapper delegating to the canonical schema unified-config validator; remove once historical src/tools wrapper references are retired."
+    },
+    "scripts/engineering/dev/run_100_stability_waves.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded 100-wave pytest stability troubleshooting helper while the test-health rollup workflow is being validated; either promote it into a documented QA workflow with explicit call-sites or remove it after the stabilization wave completes."
+    },
+    "scripts/engineering/dev/run_100_stability_waves_simple.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a simplified 100-wave pytest stability troubleshooting helper for local validation of JUnit aggregation; remove it once the full stability-wave helper or canonical sharded pytest runner covers the workflow."
     }
   }
 }

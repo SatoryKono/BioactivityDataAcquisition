@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
@@ -13,11 +12,10 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_operator,
     normalize_profile_text,
 )
+from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
-from bioetl.domain.schemas.constants import (
-    ASSAY_PARAMETER_STANDARD_TYPES,
-    STANDARD_RELATIONS,
-)
+
+from ._chembl_vocab import chembl_enum
 
 __all__ = [
     "CHEMBL_ASSAY_PARAMETERS_PROFILE",
@@ -27,6 +25,8 @@ __all__ = [
 CHEMBL_ASSAY_PARAMETERS_SCHEMA_FIELDS = tuple(
     AssayParametersSchema.to_schema().columns.keys()
 )
+ASSAY_PARAMETER_STANDARD_TYPES = chembl_enum("assay_parameters", "standard_type")
+STANDARD_RELATIONS = chembl_enum("assay_parameters", "standard_relation")
 
 _META_FIELDS = frozenset(
     {
