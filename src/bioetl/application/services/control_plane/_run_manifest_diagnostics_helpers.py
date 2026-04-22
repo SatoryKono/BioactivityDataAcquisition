@@ -159,6 +159,8 @@ def update_correlation_anchor_gaps(
     }:
         return
     diagnostic = extract_diagnostic_context(entry)
+    if diagnostic.get("resolved_config_hash") is None:
+        gap_counter["resolved_config_hash"] += 1
     if diagnostic.get("effective_config_hash") is None:
         gap_counter["effective_config_hash"] += 1
     if diagnostic.get("contract_ref") is None:

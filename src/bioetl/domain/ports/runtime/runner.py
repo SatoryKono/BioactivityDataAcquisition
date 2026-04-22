@@ -185,6 +185,8 @@ class PipelineCreateWithServicesRequest:
     manifest_id: str | None = None
     execution_fingerprint: str | None = None
     config_hash: str | None = None
+    resolved_config_hash: str | None = None
+    effective_config_hash: str | None = None
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
     config: PipelineYamlConfigPort | None = None
@@ -226,6 +228,8 @@ class PipelineFactoryPort(Protocol):
         manifest_id: str | None = None,
         execution_fingerprint: str | None = None,
         config_hash: str | None = None,
+        resolved_config_hash: str | None = None,
+        effective_config_hash: str | None = None,
         dq_contract_compatibility_hash: str | None = None,
         effective_config_artifact_id: str | None = None,
         filter_config: InputFilterConfig | None = None,
@@ -241,7 +245,9 @@ class PipelineFactoryPort(Protocol):
             observability: Domain-facing observability context for runner wiring.
             manifest_id: Optional immutable run-manifest identifier.
             execution_fingerprint: Optional canonical execution identity fingerprint.
-            config_hash: Optional canonical execution config hash.
+            config_hash: Optional legacy alias for canonical execution config hash.
+            resolved_config_hash: Optional resolved declarative config hash.
+            effective_config_hash: Optional final effective execution config hash.
             dq_contract_compatibility_hash: Optional DQ compatibility hash.
             effective_config_artifact_id: Optional effective-config artifact reference.
             filter_config: Optional input-filter contract for record selection.

@@ -23,6 +23,7 @@ class _RunLedgerDefaultsHost(Protocol):
     provider: str | None
     entity: str | None
     run_type: str | None
+    resolved_config_hash: str | None
     effective_config_hash: str | None
     contract_ref: str | None
     contract_version: str | None
@@ -42,6 +43,7 @@ class _RunLedgerDiagnosticRequest:
     provider: str | None
     entity: str | None
     run_type: str | None
+    resolved_config_hash: str | None
     effective_config_hash: str | None
     contract_ref: str | None
     contract_version: str | None
@@ -88,9 +90,15 @@ def sync_manifest_runtime_defaults(
     host.provider = _coalesce_missing(host.provider, manifest.provider)
     host.entity = _coalesce_missing(host.entity, manifest.entity)
     host.run_type = _coalesce_missing(host.run_type, manifest.run_type.value)
+    host.resolved_config_hash = _coalesce_missing(
+        host.resolved_config_hash,
+        normalize_control_plane_opaque_hash_ref(code_provenance.resolved_config_hash),
+    )
     host.effective_config_hash = _coalesce_missing(
         host.effective_config_hash,
-        normalize_control_plane_opaque_hash_ref(code_provenance.config_hash),
+        normalize_control_plane_opaque_hash_ref(
+            code_provenance.effective_config_hash
+        ),
     )
 
 
@@ -144,12 +152,20 @@ def build_run_ledger_diagnostic_details(
     effective_config_hash = normalize_control_plane_opaque_hash_ref(
         request.effective_config_hash
     )
+    resolved_config_hash = normalize_control_plane_opaque_hash_ref(
+        request.resolved_config_hash
+    )
     contract_ref = normalize_contract_ref(request.contract_ref)
     contract_version = normalize_contract_version(request.contract_version)
     _apply_optional_diagnostic_anchor(diagnostic, "pipeline", request.pipeline_name)
     _apply_optional_diagnostic_anchor(diagnostic, "provider", request.provider)
     _apply_optional_diagnostic_anchor(diagnostic, "entity", request.entity)
     _apply_optional_diagnostic_anchor(diagnostic, "run_type", request.run_type)
+    _apply_optional_diagnostic_anchor(
+        diagnostic,
+        "resolved_config_hash",
+        resolved_config_hash,
+    )
     _apply_optional_diagnostic_anchor(
         diagnostic,
         "effective_config_hash",

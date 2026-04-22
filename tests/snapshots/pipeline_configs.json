@@ -303,7 +303,10 @@
         "uo_units",
         "journal",
         "publication_year",
-        "_state"
+        "_state",
+        "assay_type",
+        "potential_duplicate",
+        "standard_relation"
       ]
     },
     "table": {
@@ -315,7 +318,7 @@
         "activity_id"
       ],
       "silver_table": "chembl.activity",
-      "silver_write_mode": "append"
+      "silver_write_mode": "merge"
     },
     "transform_steps": [],
     "transform_version": null

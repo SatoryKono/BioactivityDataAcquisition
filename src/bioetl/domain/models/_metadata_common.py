@@ -182,7 +182,9 @@ class PipelineMetadata(BaseModel):
         entity: Entity type (e.g., 'activity').
         version: Pipeline/transform version.
         git_commit: Git commit hash for reproducibility.
-        config_hash: SHA256 hash of pipeline config.
+        config_hash: Legacy alias for the effective execution config hash.
+        resolved_config_hash: SHA256 hash of resolved declarative config.
+        effective_config_hash: SHA256 hash of final effective execution config.
     """
 
     name: str = Field(description="Pipeline name")
@@ -191,7 +193,12 @@ class PipelineMetadata(BaseModel):
     version: str = Field(default="1.0.0", description="Pipeline version")
     git_commit: str | None = Field(default=None, description="Git commit hash")
     config_hash: str | None = Field(
-        default=None, description="SHA256 hash of pipeline config"
+        default=None,
+        description="Legacy alias for the canonical effective execution config hash",
+    )
+    resolved_config_hash: str | None = Field(
+        default=None,
+        description="SHA256 hash of resolved declarative pipeline config",
     )
     effective_config_hash: str | None = Field(
         default=None,

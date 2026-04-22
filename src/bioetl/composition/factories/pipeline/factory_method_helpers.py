@@ -166,6 +166,8 @@ def create_factory_runner(
             manifest_id=request.manifest_id,
             execution_fingerprint=request.execution_fingerprint,
             config_hash=request.config_hash,
+            resolved_config_hash=request.resolved_config_hash,
+            effective_config_hash=request.effective_config_hash,
             dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
             effective_config_artifact_id=request.effective_config_artifact_id,
         ),

@@ -46,6 +46,7 @@ class RunLedgerService:
     provider: str | None = None
     entity: str | None = None
     run_type: str | None = None
+    resolved_config_hash: str | None = None
     effective_config_hash: str | None = None
     contract_ref: str | None = None
     contract_version: str | None = None
@@ -265,6 +266,7 @@ class RunLedgerService:
                         provider=self.provider,
                         entity=self.entity,
                         run_type=self.run_type,
+                        resolved_config_hash=self.resolved_config_hash,
                         effective_config_hash=self.effective_config_hash,
                         contract_ref=self.contract_ref,
                         contract_version=self.contract_version,

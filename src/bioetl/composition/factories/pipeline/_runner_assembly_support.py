@@ -121,7 +121,10 @@ def build_observer(context: RunnerAssemblyContext) -> PipelineObserver:
         tracer=context.observability.tracer,
         manifest_id=getattr(pipeline_context, "manifest_id", None),
         entity=getattr(pipeline_context, "entity", None),
-        effective_config_hash=getattr(pipeline_context, "config_hash", None),
+        effective_config_hash=(
+            getattr(pipeline_context, "effective_config_hash", None)
+            or getattr(pipeline_context, "config_hash", None)
+        ),
         contract_ref=getattr(pipeline_context, "contract_ref", None),
         contract_version=getattr(pipeline_context, "contract_version", None),
         composite_run_id=getattr(pipeline_context, "composite_run_id", None),

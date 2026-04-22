@@ -183,7 +183,7 @@ def create_and_persist_effective_config_artifact(
     inputs: RunnerInputs,
     provider: str,
     entity: str,
-) -> tuple[str, str, str]:
+) -> tuple[str, str, str, str]:
     """Create effective config artifact, persist it, and return provenance fields."""
     logger = inputs.observability.logger
     service = create_effective_config_service()
@@ -227,11 +227,13 @@ def create_and_persist_effective_config_artifact(
             "effective_config_artifact_persisted",
             artifact_id=artifact.artifact_id,
             pipeline_name=ctx.pipeline_name,
+            resolved_config_hash=artifact.resolved_config_hash,
             effective_config_hash=artifact.effective_config_hash,
             dq_contract_compatibility_hash=artifact.dq_contract_compatibility_hash,
         )
     return (
         artifact.artifact_id,
+        artifact.resolved_config_hash,
         artifact.effective_config_hash,
         artifact.dq_contract_compatibility_hash,
     )

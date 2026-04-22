@@ -29,6 +29,8 @@ if TYPE_CHECKING:
 _OPTIONAL_CONTROL_PLANE_FIELDS = (
     "execution_fingerprint",
     "config_hash",
+    "resolved_config_hash",
+    "effective_config_hash",
     "dq_contract_compatibility_hash",
     "effective_config_artifact_id",
     "contract_ref",
@@ -43,6 +45,8 @@ def _iter_optional_control_plane_updates(
     *,
     execution_fingerprint: str | None = None,
     config_hash: str | None = None,
+    resolved_config_hash: str | None = None,
+    effective_config_hash: str | None = None,
     dq_contract_compatibility_hash: str | None = None,
     effective_config_artifact_id: str | None = None,
     contract_ref: str | None = None,
@@ -55,6 +59,8 @@ def _iter_optional_control_plane_updates(
         {
             "execution_fingerprint": execution_fingerprint,
             "config_hash": config_hash,
+            "resolved_config_hash": resolved_config_hash,
+            "effective_config_hash": effective_config_hash,
             "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
             "effective_config_artifact_id": effective_config_artifact_id,
             "contract_ref": contract_ref,
@@ -102,6 +108,8 @@ def attach_manifest_id(
     *,
     execution_fingerprint: str | None = None,
     config_hash: str | None = None,
+    resolved_config_hash: str | None = None,
+    effective_config_hash: str | None = None,
     dq_contract_compatibility_hash: str | None = None,
     effective_config_artifact_id: str | None = None,
     contract_ref: str | None = None,
@@ -114,6 +122,8 @@ def attach_manifest_id(
     optional_updates = _iter_optional_control_plane_updates(
         execution_fingerprint=execution_fingerprint,
         config_hash=config_hash,
+        resolved_config_hash=resolved_config_hash,
+        effective_config_hash=effective_config_hash,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         effective_config_artifact_id=effective_config_artifact_id,
         contract_ref=contract_ref,
@@ -160,6 +170,7 @@ def create_run_manifest_with_effective_config(
         entity = ctx.pipeline_name
     (
         effective_config_artifact_id,
+        resolved_config_hash,
         effective_config_hash,
         dq_contract_compatibility_hash,
     ) = create_and_persist_effective_config_artifact(
@@ -173,6 +184,7 @@ def create_run_manifest_with_effective_config(
         inputs=inputs,
         ledger_enabled=ledger_enabled,
         effective_config_artifact_id=effective_config_artifact_id,
+        resolved_config_hash=resolved_config_hash,
         effective_config_hash=effective_config_hash,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
     )

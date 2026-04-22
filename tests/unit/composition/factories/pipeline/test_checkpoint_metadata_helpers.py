@@ -173,6 +173,7 @@ def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
             dq_contract_compatibility_hash="dq-hash",
             effective_config_artifact_id="artifact-1",
             replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+            git_commit="test-commit-hash",
         )
     )
 
