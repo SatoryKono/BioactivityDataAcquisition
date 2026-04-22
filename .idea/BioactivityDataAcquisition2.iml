@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/tmp" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/.coverage-sharded" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/.ai/mcp" />
       <excludeFolder url="file://$MODULE_DIR$/.ai/reports" />
       <excludeFolder url="file://$MODULE_DIR$/.benchmarks" />
@@ -65,7 +66,6 @@
       <excludeFolder url="file://$MODULE_DIR$/.mypy_cache" />
       <excludeFolder url="file://$MODULE_DIR$/.ruff_cache" />
       <excludeFolder url="file://$MODULE_DIR$/.pytest_cache" />
-      <excludeFolder url="file://$MODULE_DIR$/.coverage-sharded" />
       <excludeFolder url="file://$MODULE_DIR$/logs" />
       <excludeFolder url="file://$MODULE_DIR$/docs/reports/evidence/architecture-doc-drift" />
       <excludeFolder url="file://$MODULE_DIR$/docs/reports/evidence/code-duplication-dead-code" />
