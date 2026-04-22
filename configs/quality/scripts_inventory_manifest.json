@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-22T17:46:05.210983+00:00",
+  "generated_at": "2026-04-22T18:07:02.253597+00:00",
   "summary": {
-    "total_scripts": 433,
+    "total_scripts": 434,
     "status_counts": {
       "active": 303,
       "legacy": 15,
-      "orphan": 103,
+      "orphan": 104,
       "unknown": 12
     },
     "reference_group_coverage": {
@@ -6144,6 +6144,14 @@
           "text": "\"scripts/engineering/ci/validate_contract_registry.py\","
         }
       ]
+    },
+    {
+      "path": "scripts/engineering/ci/validate_control_plane_artifacts.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/engineering/ci/validate_registry_dq_refs.py",

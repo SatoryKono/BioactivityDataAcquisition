@@ -17,6 +17,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_persist
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
     _is_composite_execution_context,
 )
+from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring import (
+    build_reproducibility_audit_scoring,
+)
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
@@ -238,6 +241,9 @@ def _build_final_summary(
             "alert_signals": alert_signals,
             "next_steps": next_steps,
         }
+    )
+    summary["reproducibility_audit_score"] = build_reproducibility_audit_scoring(
+        summary
     )
     return summary
 

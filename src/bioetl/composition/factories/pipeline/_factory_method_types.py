@@ -143,21 +143,23 @@ def build_create_pipeline_with_services_request(
     """Pack runtime pipeline-creation arguments into a typed request object."""
     artifacts = control_plane_artifacts or _ControlPlaneArtifacts()
     return _CreatePipelineWithServicesRequest(
-        run_id,
-        runtime,
-        settings,
-        logger,
-        artifacts.manifest_id,
-        artifacts.execution_fingerprint,
-        artifacts.config_hash,
-        artifacts.dq_contract_compatibility_hash,
-        artifacts.effective_config_artifact_id,
-        config,
-        filter_config,
-        tracer,
-        dq_monitor,
-        metrics,
-        cached_bronze,
+        run_id=run_id,
+        runtime=runtime,
+        settings=settings,
+        logger=logger,
+        manifest_id=artifacts.manifest_id,
+        execution_fingerprint=artifacts.execution_fingerprint,
+        config_hash=artifacts.config_hash,
+        resolved_config_hash=artifacts.resolved_config_hash,
+        effective_config_hash=artifacts.effective_config_hash,
+        dq_contract_compatibility_hash=artifacts.dq_contract_compatibility_hash,
+        effective_config_artifact_id=artifacts.effective_config_artifact_id,
+        config=config,
+        filter_config=filter_config,
+        tracer=tracer,
+        dq_monitor=dq_monitor,
+        metrics=metrics,
+        cached_bronze=cached_bronze,
     )
 
 

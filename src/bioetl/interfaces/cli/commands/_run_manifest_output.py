@@ -88,6 +88,8 @@ def _render_manifest_section(manifest: dict[str, object]) -> list[str]:
                 ("pipeline_version", provenance.get("pipeline_version")),
                 ("git_commit", provenance.get("git_commit")),
                 ("config_hash", provenance.get("config_hash")),
+                ("resolved_config_hash", provenance.get("resolved_config_hash")),
+                ("effective_config_hash", provenance.get("effective_config_hash")),
             ),
         )
 
@@ -145,6 +147,8 @@ def _render_diagnostics_section(diagnostics: dict[str, object]) -> list[str]:
                 ("total_events", diagnostics.get("total_events")),
                 ("execution_fingerprint", diagnostics.get("execution_fingerprint")),
                 ("config_hash", diagnostics.get("config_hash")),
+                ("resolved_config_hash", diagnostics.get("resolved_config_hash")),
+                ("effective_config_hash", diagnostics.get("effective_config_hash")),
                 ("contract_ref", diagnostics.get("contract_ref")),
                 ("contract_version", diagnostics.get("contract_version")),
                 ("dq_policy_ref", diagnostics.get("dq_policy_ref")),
@@ -224,6 +228,10 @@ def _render_diagnostics_section(diagnostics: dict[str, object]) -> list[str]:
                 ),
                 ("correlation_anchor_gaps", diagnostics.get("correlation_anchor_gaps")),
                 ("persistence_profile", diagnostics.get("persistence_profile")),
+                (
+                    "reproducibility_audit_score",
+                    diagnostics.get("reproducibility_audit_score"),
+                ),
                 ("alert_signals", diagnostics.get("alert_signals")),
                 ("next_steps", diagnostics.get("next_steps")),
             ),
@@ -244,6 +252,8 @@ def _render_identity_graph_section(identity_graph: object) -> list[str]:
             ("run_id", identity_graph.get("run_id")),
             ("manifest_id", identity_graph.get("manifest_id")),
             ("execution_fingerprint", identity_graph.get("execution_fingerprint")),
+            ("config_hash", identity_graph.get("config_hash")),
+            ("resolved_config_hash", identity_graph.get("resolved_config_hash")),
             ("effective_config_hash", identity_graph.get("effective_config_hash")),
             ("contract_ref", identity_graph.get("contract_ref")),
             ("contract_version", identity_graph.get("contract_version")),

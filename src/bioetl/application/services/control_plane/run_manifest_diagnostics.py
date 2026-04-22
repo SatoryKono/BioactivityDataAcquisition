@@ -31,6 +31,9 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_summary
     _build_final_summary,
     _FinalSummaryRequest,
 )
+from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring import (
+    build_reproducibility_audit_scoring,
+)
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 
 
@@ -154,6 +157,9 @@ def _build_base_summary(
     )
     summary["next_steps"] = build_next_steps(
         cast(dict[str, bool], summary["alert_signals"])
+    )
+    summary["reproducibility_audit_score"] = build_reproducibility_audit_scoring(
+        summary
     )
     return summary
 

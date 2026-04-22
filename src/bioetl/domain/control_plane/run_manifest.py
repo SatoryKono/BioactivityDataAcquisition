@@ -176,10 +176,14 @@ def _load_code_provenance(raw_code: object) -> RunCodeProvenance:
         source_revision_state=_load_optional_str(payload, "source_revision_state"),
         config_hash=legacy_config_hash,
         resolved_config_hash=(
-            _load_optional_str(payload, "resolved_config_hash") or legacy_config_hash
+            _load_optional_str(payload, "resolved_config_hash")
+            if "resolved_config_hash" in payload
+            else legacy_config_hash
         ),
         effective_config_hash=(
-            _load_optional_str(payload, "effective_config_hash") or legacy_config_hash
+            _load_optional_str(payload, "effective_config_hash")
+            if "effective_config_hash" in payload
+            else legacy_config_hash
         ),
         contract_ref=_load_optional_str(payload, "contract_ref"),
         contract_version=_load_optional_str(payload, "contract_version"),
