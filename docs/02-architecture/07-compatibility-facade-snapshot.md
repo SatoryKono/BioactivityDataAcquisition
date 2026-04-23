@@ -7,7 +7,9 @@
 - Registry YAML: `configs/quality/compatibility_facade_inventory.yaml`
 - Curated inventory rows: `16`
 - Transition debt rows: `0`
-- Retained public entrypoints: `16`
+- Sanctioned public entrypoint rows: `16`
+- Retained review entrypoints: `7`
+- Permanent public entrypoints: `9`
 - Measured tracked modules: `16`
 - Measured-only modules outside curated inventory: `0`
 - Discovered docstring-tracked modules: `0`

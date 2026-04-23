@@ -36,20 +36,20 @@ Last verified: '2026-03-29'
 
 | Команда         | Модуль                       | Описание                                |
 | --------------- | ---------------------------- | --------------------------------------- |
-| `run`           | `run.py`                     | Retained public seam; canonical implementation lives in `domains/run/command.py` |
-| `run-all`       | `run_all.py`                 | Retained public seam; canonical implementation lives in `domains/run_all/command.py` |
-| `run-composite` | `run_composite.py`           | Retained public seam; canonical implementation lives in `domains/composite/command.py` |
+| `run`           | `run.py`                     | Public CLI seam; canonical implementation lives in `domains/run/command.py` |
+| `run-all`       | `run_all.py`                 | Public CLI seam; canonical implementation lives in `domains/run_all/command.py` |
+| `run-composite` | `run_composite.py`           | Public CLI seam; canonical implementation lives in `domains/composite/command.py` |
 | `run-manifest`  | `run_manifest.py`            | Inspect immutable manifest payloads and append-only ledger history |
 | `export`        | `export.py`                  | Экспорт данных из Gold                  |
-| `quarantine`    | `quarantine.py`              | Retained public seam; canonical implementation lives in `domains/quarantine/command.py` |
-| `health`        | `health.py`                  | Retained public seam; canonical implementation lives in `domains/health/command.py` |
+| `quarantine`    | `quarantine.py`              | Public CLI seam; canonical implementation lives in `domains/quarantine/command.py` |
+| `health`        | `health.py`                  | Public CLI seam; canonical implementation lives in `domains/health/command.py` |
 | `config`        | `config.py`                  | Просмотр и валидация конфигураций       |
 | `checkpoint`    | `checkpoint.py`              | Управление checkpoint-ами               |
 | `lock`          | `lock.py`                    | Управление блокировками                 |
-| `vacuum`        | `vacuum.py`                  | Retained public seam; canonical implementation lives in `domains/maintenance/vacuum.py` |
-| `cleanup`       | `cleanup.py`                 | Retained public seam; canonical implementation lives in `domains/maintenance/cleanup.py` |
-| `maintenance`   | `maintenance.py`             | Retained public seam; canonical implementation lives in `domains/maintenance/command.py` |
-| `archive`       | `archive.py`                 | Retained public seam; canonical implementation lives in `domains/maintenance/archive.py` |
+| `vacuum`        | `vacuum.py`                  | Public CLI seam; canonical implementation lives in `domains/maintenance/vacuum.py` |
+| `cleanup`       | `cleanup.py`                 | Public CLI seam; canonical implementation lives in `domains/maintenance/cleanup.py` |
+| `maintenance`   | `maintenance.py`             | Public CLI seam; canonical implementation lives in `domains/maintenance/command.py` |
+| `archive`       | `archive.py`                 | Public CLI seam; canonical implementation lives in `domains/maintenance/archive.py` |
 | `adr`           | `adr.py`                     | Управление ADR (Architecture Decisions) |
 | `debug`         | `debug.py`                   | Диагностические утилиты                 |
 

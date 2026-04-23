@@ -211,7 +211,18 @@ def _summary_section(
         f"- Registry YAML: `{DEFAULT_REGISTRY_PATH.relative_to(ROOT).as_posix()}`",
         f"- Curated inventory rows: `{len(registry.curated_rows)}`",
         f"- Transition debt rows: `{len(registry.transition_debt)}`",
-        f"- Retained public entrypoints: `{len(registry.retained_entrypoints)}`",
+        (
+            "- Sanctioned public entrypoint rows: "
+            f"`{len(registry.retained_entrypoints)}`"
+        ),
+        (
+            "- Retained review entrypoints: "
+            f"`{sum(1 for row in registry.curated_rows if row.status == 'retained-entrypoint')}`"
+        ),
+        (
+            "- Permanent public entrypoints: "
+            f"`{sum(1 for row in registry.curated_rows if row.status == 'public-entrypoint')}`"
+        ),
         f"- Measured tracked modules: `{len(registry.measured_tracked_paths)}`",
         f"- Measured-only modules outside curated inventory: `{len(registry.measured_only_paths)}`",
         f"- Discovered docstring-tracked modules: `{len(discovered_paths)}`",

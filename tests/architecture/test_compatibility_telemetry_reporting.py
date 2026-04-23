@@ -56,6 +56,7 @@ def test_compatibility_surface_snapshot_matches_registry_status_counts() -> None
     assert snapshot.compat_shim_modules == status_counts["compat-shim"]
     assert snapshot.mixed_modules == status_counts["mixed-module"]
     assert snapshot.retained_entrypoints == status_counts["retained-entrypoint"]
+    assert snapshot.public_entrypoints == status_counts["public-entrypoint"]
 
 
 @pytest.mark.architecture
@@ -78,5 +79,6 @@ def test_compatibility_surface_summary_section_lists_required_metrics() -> None:
         "compat_shim_modules",
         "mixed_modules",
         "retained_entrypoints",
+        "public_entrypoints",
     ):
         assert f"- {key}: `" in section

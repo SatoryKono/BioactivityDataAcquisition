@@ -144,7 +144,7 @@ def test_inventory_doc_exists_with_required_sections() -> None:
         "## Mandatory Artifact Sync",
         "## Inventory",
         "### Transition Debt Ledger",
-        "### Retained Public Entrypoints",
+        "### Sanctioned Public Entrypoints",
         "## Generated Snapshot",
         "## Usage Notes",
         "## Measured-Only Lifecycle Review",

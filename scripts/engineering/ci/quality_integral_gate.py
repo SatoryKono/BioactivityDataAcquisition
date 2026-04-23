@@ -1042,7 +1042,8 @@ def main() -> int:
         f"measured_only={compatibility_surface.measured_only_modules}; "
         f"compat_shims={compatibility_surface.compat_shim_modules}; "
         f"mixed={compatibility_surface.mixed_modules}; "
-        f"retained={compatibility_surface.retained_entrypoints}"
+        f"retained={compatibility_surface.retained_entrypoints}; "
+        f"public={compatibility_surface.public_entrypoints}"
     )
     print(
         "[quality-integral-gate] "

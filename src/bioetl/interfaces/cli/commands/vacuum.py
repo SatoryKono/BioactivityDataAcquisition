@@ -1,4 +1,4 @@
-"""Retained public vacuum command seam over the canonical maintenance module."""
+"""Public vacuum command seam over the canonical maintenance module."""
 
 from __future__ import annotations
 

@@ -35,6 +35,7 @@ class CompatibilitySurfaceSnapshot:
     compat_shim_modules: int
     mixed_modules: int
     retained_entrypoints: int
+    public_entrypoints: int
 
     def as_dict(self) -> dict[str, int]:
         """Return a stable JSON-serializable mapping."""
@@ -46,6 +47,7 @@ class CompatibilitySurfaceSnapshot:
             "compat_shim_modules": self.compat_shim_modules,
             "mixed_modules": self.mixed_modules,
             "retained_entrypoints": self.retained_entrypoints,
+            "public_entrypoints": self.public_entrypoints,
         }
 
 
@@ -62,6 +64,7 @@ def collect_compatibility_surface_snapshot(
         "compat-shim": 0,
         "mixed-module": 0,
         "retained-entrypoint": 0,
+        "public-entrypoint": 0,
     }
     for row in rows:
         status_counts[row.status] = status_counts.get(row.status, 0) + 1
@@ -74,6 +77,7 @@ def collect_compatibility_surface_snapshot(
         compat_shim_modules=status_counts["compat-shim"],
         mixed_modules=status_counts["mixed-module"],
         retained_entrypoints=status_counts["retained-entrypoint"],
+        public_entrypoints=status_counts["public-entrypoint"],
     )
 
 
@@ -91,5 +95,6 @@ def render_compatibility_surface_section(
             f"- compat_shim_modules: `{snapshot.compat_shim_modules}`",
             f"- mixed_modules: `{snapshot.mixed_modules}`",
             f"- retained_entrypoints: `{snapshot.retained_entrypoints}`",
+            f"- public_entrypoints: `{snapshot.public_entrypoints}`",
         ]
     )
