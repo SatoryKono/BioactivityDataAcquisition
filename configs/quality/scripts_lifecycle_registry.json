@@ -710,12 +710,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded MistrallVibe setup helper while environment bootstrap still depends on helper scripts; fold into the canonical setup path when the surface is simplified."
     },
-    "scripts/ai/mistrallvibe/launch-interactive.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded MistrallVibe interactive launcher for local development and debugging; remove or consolidate once the MistrallVibe sub-agent surface is fully unified or retired."
-    },
     "scripts/ci/_compatibility_registry.py": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_data_module",

@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-23T05:58:58.916496+00:00",
+  "generated_at": "2026-04-23T09:12:32.898537+00:00",
   "summary": {
-    "total_scripts": 434,
+    "total_scripts": 436,
     "status_counts": {
-      "active": 303,
+      "active": 302,
       "legacy": 15,
-      "orphan": 103,
-      "unknown": 13
+      "orphan": 105,
+      "unknown": 14
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 1,
       "ci": 51,
-      "docs": 134,
-      "scripts": 285,
+      "docs": 133,
+      "scripts": 284,
       "skills": 8,
-      "tests": 132
+      "tests": 131
     }
   },
   "scripts": [
@@ -25,14 +25,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
-        {
-          "path": "scripts/README.md",
-          "line": 51,
-          "source_group": "scripts",
-          "text": "python -m scripts.ai --help"
-        },
         {
           "path": "scripts/ai/src/__main__.py",
           "line": 5,
@@ -2375,17 +2369,24 @@
     {
       "path": "scripts/ai/mistrallvibe/launch-interactive.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/mistrallvibe/helper/setup-env.ps1",
+          "line": 178,
+          "source_group": "scripts",
+          "text": "Write-Host \"     .\\scripts\\ai\\mistrallvibe\\launch-interactive.ps1\""
+        }
+      ]
     },
     {
       "path": "scripts/ai/mistrallvibe/run-vibe.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
@@ -2424,6 +2425,12 @@
           "text": "# Called by: run-vibe.ps1"
         },
         {
+          "path": "scripts/ai/mistrallvibe/helper/check-env.ps1",
+          "line": 122,
+          "source_group": "scripts",
+          "text": "Write-Warn \"Some components need setup - run: .\\run-vibe.ps1 setup\""
+        },
+        {
           "path": "scripts/ai/mistrallvibe/helper/run-mistrallvibe-impl.ps1",
           "line": 101,
           "source_group": "scripts",
@@ -2436,7 +2443,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
@@ -3047,7 +3054,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 40,
+      "reference_count": 39,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -4562,7 +4569,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 98,
+      "reference_count": 96,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -5544,9 +5551,9 @@
     {
       "path": "scripts/engineering/baselines/__main__.py",
       "type": "py",
-      "status": "active",
+      "status": "unknown",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -5565,18 +5572,6 @@
           "line": 202,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.baselines dq-baseline --dry-run"
-        },
-        {
-          "path": "scripts/README.md",
-          "line": 46,
-          "source_group": "scripts",
-          "text": "python -m scripts.engineering.baselines --help"
-        },
-        {
-          "path": "scripts/README.md",
-          "line": 61,
-          "source_group": "scripts",
-          "text": "python -m scripts.engineering.baselines dq-baseline --dry-run"
         }
       ]
     },
@@ -6183,6 +6178,14 @@
       ]
     },
     {
+      "path": "scripts/engineering/common/repo_paths.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/engineering/dev/.setup_wsl_codex.sh",
       "type": "sh",
       "status": "active",
@@ -6259,7 +6262,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -6823,7 +6826,7 @@
           "path": ".codex/skills/py-test-swarm/SKILL.md",
           "line": 94,
           "source_group": "skills",
-          "text": "- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\\scripts\\dev\\run_pytest.ps1` / `.\\scripts\\dev\\run_mypy.ps1` in PowerShell, and `bash scripts/dev/run_pytest.sh` / `bash"
+          "text": "- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` in PowerShell, and `bash scripts/en"
         },
         {
           "path": ".codex/skills/py-test-swarm/references/l1-playbook.md",
@@ -6876,25 +6879,25 @@
           "path": ".codex/skills/py-test-swarm/SKILL.md",
           "line": 31,
           "source_group": "skills",
-          "text": "- WSL/Linux in a mixed checkout: `bash scripts/dev/run_pytest.sh`, `bash scripts/dev/run_mypy.sh`, or `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
+          "text": "- WSL/Linux in a mixed checkout: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, or `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
           "line": 94,
           "source_group": "skills",
-          "text": "- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\\scripts\\dev\\run_pytest.ps1` / `.\\scripts\\dev\\run_mypy.ps1` in PowerShell, and `bash scripts/dev/run_pytest.sh` / `bash"
+          "text": "- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` in PowerShell, and `bash scripts/en"
         },
         {
           "path": ".codex/skills/py-test-swarm/references/l1-playbook.md",
           "line": 6,
           "source_group": "skills",
-          "text": "- WSL/Linux in a mixed checkout: use `bash scripts/dev/run_pytest.sh` / `bash scripts/dev/run_mypy.sh` or `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`."
+          "text": "- WSL/Linux in a mixed checkout: use `bash scripts/engineering/dev/run_pytest.sh` / `bash scripts/engineering/dev/run_mypy.sh` or `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`."
         },
         {
           "path": ".codex/skills/py-test-swarm/references/report-templates.md",
           "line": 58,
           "source_group": "skills",
-          "text": "- `bash scripts/dev/run_pytest.sh ...` / `bash scripts/dev/run_mypy.sh ...` (WSL/Linux mixed checkout)"
+          "text": "- `bash scripts/engineering/dev/run_pytest.sh ...` / `bash scripts/engineering/dev/run_mypy.sh ...` (WSL/Linux mixed checkout)"
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
@@ -6980,7 +6983,7 @@
           "path": ".codex/skills/py-test-swarm/SKILL.md",
           "line": 94,
           "source_group": "skills",
-          "text": "- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\\scripts\\dev\\run_pytest.ps1` / `.\\scripts\\dev\\run_mypy.ps1` in PowerShell, and `bash scripts/dev/run_pytest.sh` / `bash"
+          "text": "- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` in PowerShell, and `bash scripts/en"
         },
         {
           "path": ".codex/skills/py-test-swarm/references/l1-playbook.md",
@@ -7033,25 +7036,25 @@
           "path": ".codex/skills/py-test-swarm/SKILL.md",
           "line": 31,
           "source_group": "skills",
-          "text": "- WSL/Linux in a mixed checkout: `bash scripts/dev/run_pytest.sh`, `bash scripts/dev/run_mypy.sh`, or `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
+          "text": "- WSL/Linux in a mixed checkout: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, or `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
           "line": 94,
           "source_group": "skills",
-          "text": "- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\\scripts\\dev\\run_pytest.ps1` / `.\\scripts\\dev\\run_mypy.ps1` in PowerShell, and `bash scripts/dev/run_pytest.sh` / `bash"
+          "text": "- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` in PowerShell, and `bash scripts/en"
         },
         {
           "path": ".codex/skills/py-test-swarm/references/l1-playbook.md",
           "line": 6,
           "source_group": "skills",
-          "text": "- WSL/Linux in a mixed checkout: use `bash scripts/dev/run_pytest.sh` / `bash scripts/dev/run_mypy.sh` or `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`."
+          "text": "- WSL/Linux in a mixed checkout: use `bash scripts/engineering/dev/run_pytest.sh` / `bash scripts/engineering/dev/run_mypy.sh` or `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`."
         },
         {
           "path": ".codex/skills/py-test-swarm/references/report-templates.md",
           "line": 58,
           "source_group": "skills",
-          "text": "- `bash scripts/dev/run_pytest.sh ...` / `bash scripts/dev/run_mypy.sh ...` (WSL/Linux mixed checkout)"
+          "text": "- `bash scripts/engineering/dev/run_pytest.sh ...` / `bash scripts/engineering/dev/run_mypy.sh ...` (WSL/Linux mixed checkout)"
         },
         {
           "path": "docs/00-project/ai/agents/agents/py-test-swarm.md",
@@ -7732,7 +7735,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 94,
+      "reference_count": 92,
       "references": [
         {
           "path": ".github/workflows/duplication-complexity.yml",
@@ -8868,7 +8871,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 15,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -9277,11 +9280,19 @@
       ]
     },
     {
+      "path": "scripts/engineering/run.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/memory/__main__.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 128,
+      "reference_count": 127,
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
@@ -9520,25 +9531,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
           "line": 164,
           "source_group": "docs",
           "text": "| `scripts.ops`         | `uv run python -m scripts.ops`         | Ops: salt rotation, Grafana, deploy        |"
-        },
-        {
-          "path": "scripts/README.md",
-          "line": 47,
-          "source_group": "scripts",
-          "text": "python -m scripts.ops --help"
-        },
-        {
-          "path": "scripts/README.md",
-          "line": 62,
-          "source_group": "scripts",
-          "text": "python -m scripts.ops rerender-grafana"
         },
         {
           "path": "scripts/ops/INDEX.md",
@@ -11118,66 +11117,17 @@
     {
       "path": "scripts/run.py",
       "type": "py",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 39,
-      "references": [
-        {
-          "path": "docs/02-architecture/04-interfaces-layer.md",
-          "line": 39,
-          "source_group": "docs",
-          "text": "| `run`           | `run.py`                     | Retained public seam; canonical implementation lives in `domains/run/command.py` |"
-        },
-        {
-          "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 118,
-          "source_group": "docs",
-          "text": "| `src/bioetl/interfaces/cli/commands/run.py` | Retained public run command seam that shields the split internal owner module `bioetl.interfaces.cli.commands.domains.run.command`. | `bioetl.interfaces"
-        },
-        {
-          "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 79,
-          "source_group": "docs",
-          "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
-        },
-        {
-          "path": "docs/02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md",
-          "line": 33,
-          "source_group": "docs",
-          "text": "> **Update 2025-12-31:** Signal handlers in `interfaces/orchestration/signals.py` were removed. Shutdown is now handled at CLI level via `KeyboardInterrupt` in the canonical domain command modules `in"
-        },
-        {
-          "path": "docs/02-architecture/diagrams/foundation/33-cli-run-interaction.mmd",
-          "line": 16,
-          "source_group": "docs",
-          "text": "participant CLI as run.py<br/>CLI command"
-        },
-        {
-          "path": "docs/02-architecture/diagrams/foundation/svg/33-cli-run-interaction.svg",
-          "line": 1,
-          "source_group": "docs",
-          "text": "<svg id=\"my-svg\" width=\"100%\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" style=\"max-width: 3340.5px; background-color: white;\" viewBox=\"-50 -16 3340.5 1284\" role=\"gr"
-        },
-        {
-          "path": "docs/02-architecture/diagrams/governance/PROMPT-diagram-expansion.md",
-          "line": 306,
-          "source_group": "docs",
-          "text": "src/bioetl/interfaces/cli/commands/run.py"
-        },
-        {
-          "path": "docs/plans/consolidated-open-tasks-plan-2026-03-21.md",
-          "line": 498,
-          "source_group": "docs",
-          "text": "`run.py`, `run_all.py`, `run_composite.py`, `health.py`,"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/schema/__main__.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 49,
+      "reference_count": 48,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
