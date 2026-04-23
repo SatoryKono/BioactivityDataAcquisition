@@ -78,6 +78,6 @@ When a review discusses file-size debt:
 1. Check exemption debt first in:
    - `configs/quality/debt_scorecard.yaml`
    - `configs/quality/architecture_metric_exemptions.yaml`
-1. If structural context is needed, generate or refresh a raw hotspot inventory snapshot using the canonical command in `scripts/README.md`.
+1. If structural context is needed, generate or refresh a raw hotspot inventory snapshot using the canonical command in `scripts/engineering/README.md`.
 1. Treat that raw snapshot as evidence for prioritization, not as a blocking gate by itself.
 1. Only convert hotspot inventory into enforceable debt through an explicit scorecard or named-hotspot decision.

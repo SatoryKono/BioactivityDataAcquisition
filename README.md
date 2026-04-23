@@ -107,7 +107,7 @@ but active docs in `docs/00-05` remain the source of truth.
 | `docs/`         | Published documentation tree: canonical active docs plus selected extended mirrors            | Start at [Project Map](docs/00-project/00-map.md)            |
 | `docs/reports/` | Repo-only curated evidence and report artifacts (not published in MkDocs)                     | [docs/reports/index.md](docs/reports/index.md)               |
 | `reports/`      | Generated or working analysis outputs before curation                                         | [reports/README.md](reports/README.md)                       |
-| `scripts/`      | Canonical tooling by domain plus a small set of compatibility wrappers at repo root           | [scripts/README.md](scripts/README.md)                       |
+| `scripts/`      | Canonical tooling by domain, with engineering governance indexed under `scripts/engineering/` | [scripts/engineering/README.md](scripts/engineering/README.md) |
 
 The current top-level layout is intentionally stable. Structural improvements
 should usually target a specific family or navigation seam rather than trigger a

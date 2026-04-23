@@ -123,12 +123,14 @@ class RunLedgerService:
         self,
         *,
         metrics_snapshot: dict[str, int],
+        details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record successful run completion."""
         return self._append_run_outcome(
             event_type=RUN_FINISHED_EVENT,
             status="success",
             metrics_snapshot=metrics_snapshot,
+            details=details,
         )
 
     def record_run_failed(
@@ -137,6 +139,7 @@ class RunLedgerService:
         message: str,
         error_type: str | None,
         metrics_snapshot: dict[str, int],
+        details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record failed run completion."""
         return self._append_run_outcome(
@@ -145,6 +148,7 @@ class RunLedgerService:
             metrics_snapshot=metrics_snapshot,
             message=message,
             error_type=error_type,
+            details=details,
         )
 
     def record_run_exception(
@@ -152,24 +156,28 @@ class RunLedgerService:
         *,
         error: Exception,
         metrics_snapshot: dict[str, int],
+        details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record failed run completion directly from an exception instance."""
         return self.record_run_failed(
             message=str(error),
             error_type=type(error).__name__,
             metrics_snapshot=metrics_snapshot,
+            details=details,
         )
 
     def record_run_shutdown(
         self,
         *,
         metrics_snapshot: dict[str, int],
+        details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Record graceful shutdown completion."""
         return self._append_run_outcome(
             event_type=RUN_SHUTDOWN_EVENT,
             status="shutdown",
             metrics_snapshot=metrics_snapshot,
+            details=details,
         )
 
     def record_artifact_published(
@@ -309,6 +317,7 @@ class RunLedgerService:
         metrics_snapshot: dict[str, int],
         message: str | None = None,
         error_type: str | None = None,
+        details: dict[str, object] | None = None,
     ) -> RunLedgerEntry:
         """Append one terminal run outcome with the canonical payload shape."""
         return self._append(
@@ -317,4 +326,5 @@ class RunLedgerService:
             message=message,
             error_type=error_type,
             metrics_snapshot=metrics_snapshot,
+            details=details,
         )

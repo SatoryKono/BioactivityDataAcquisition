@@ -2,7 +2,7 @@
 """Validate scripts catalog governance policy.
 
 Checks:
-- scripts/catalog.yaml structure and required policy sections
+- scripts/engineering/repo/catalog.yaml structure and required policy sections
 - scripts/ root wrapper-only policy (except explicit allowlist)
 - lifecycle registry coverage for non-active scripts from manifest
 - required metadata for deprecated lifecycle decisions
@@ -412,7 +412,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate scripts catalog governance")
     parser.add_argument(
         "--catalog",
-        default="scripts/catalog.yaml",
+        default="scripts/engineering/repo/catalog.yaml",
         help="Path to scripts catalog YAML.",
     )
     args = parser.parse_args(argv)

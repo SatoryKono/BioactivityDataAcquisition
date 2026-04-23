@@ -20,13 +20,13 @@ from bioetl.infrastructure.quality.exemptions_registry_paths import (
 )
 
 _CLASS_SYMBOL_REGISTRIES = frozenset({"class_method_count", "class_size", "god_object"})
-_FUNCTION_SYMBOL_REGISTRIES = frozenset(
-    {"domain_complexity", "function_complexity", "function_length"}
-)
+_FUNCTION_SYMBOL_REGISTRIES = frozenset({"function_complexity", "function_length"})
+_MIXED_SYMBOL_REGISTRIES = frozenset({"domain_complexity"})
 
 _SYMBOL_REGISTRY_CONTEXT = {
     **dict.fromkeys(_CLASS_SYMBOL_REGISTRIES, "class"),
     **dict.fromkeys(_FUNCTION_SYMBOL_REGISTRIES, "function"),
+    **dict.fromkeys(_MIXED_SYMBOL_REGISTRIES, "symbol"),
 }
 
 
@@ -134,6 +134,13 @@ def _get_symbol_registry_context(
         return symbol_kind, classes_by_module, class_counts
     if symbol_kind == "function":
         return symbol_kind, functions_by_module, function_counts
+    if symbol_kind == "symbol":
+        merged_module_symbols: dict[str, set[str]] = {
+            module_key: set(classes_by_module.get(module_key, set()))
+            | set(functions_by_module.get(module_key, set()))
+            for module_key in set(classes_by_module) | set(functions_by_module)
+        }
+        return symbol_kind, merged_module_symbols, class_counts + function_counts
     return None
 
 

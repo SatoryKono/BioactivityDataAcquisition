@@ -5,13 +5,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core._batch_tracing_support import (
+    add_memory_decision_trace_events,
     build_batch_span_attributes,
     build_execution_span_attributes,
     build_layer_span_attributes,
+    set_memory_decision_trace_attributes,
     set_execution_stats_attributes,
     set_record_result_attributes,
 )
 from bioetl.application.core._span_helpers import close_span, close_span_with_shutdown
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -121,6 +124,7 @@ class BatchTracingManagerService:
         total_quarantined: int,
         batch_size_reductions: int,
         min_batch_size_used: int,
+        memory_decision_trace: tuple[JsonDict, ...],
     ) -> None:
         """Set final execution statistics on the root span."""
         if not span:
@@ -135,6 +139,14 @@ class BatchTracingManagerService:
             total_quarantined=total_quarantined,
             batch_size_reductions=batch_size_reductions,
             min_batch_size_used=min_batch_size_used,
+        )
+        set_memory_decision_trace_attributes(
+            span,
+            memory_decision_trace=memory_decision_trace,
+        )
+        add_memory_decision_trace_events(
+            span,
+            memory_decision_trace=memory_decision_trace,
         )
 
     def set_batch_result(

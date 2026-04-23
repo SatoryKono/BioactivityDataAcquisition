@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 import pytest
 from pydantic import ValidationError
 
@@ -69,6 +71,8 @@ class TestMemoryConfig:
             ({"max_batch_memory_mb": 0}, "max_batch_memory_mb"),
             ({"memory_pressure_threshold": 0.0}, "memory_pressure_threshold"),
             ({"memory_pressure_threshold": 1.1}, "memory_pressure_threshold"),
+            ({"memory_pressure_threshold": math.inf}, "memory_pressure_threshold"),
+            ({"memory_pressure_threshold": math.nan}, "memory_pressure_threshold"),
             ({"min_batch_size": 0}, "min_batch_size"),
             ({"check_interval_records": 0}, "check_interval_records"),
             ({"max_batch_memory_mb": -1}, "max_batch_memory_mb"),

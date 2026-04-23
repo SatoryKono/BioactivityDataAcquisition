@@ -46,13 +46,13 @@ class Violation:
 
 
 def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
-    script = repo_root / "scripts" / "qa" / "naming_audit.py"
+    script = repo_root / "scripts" / "engineering" / "qa" / "naming_audit.py"
     docs_skip_path = repo_root / "docs" / "__naming_gate_skip__"
     if not script.exists():
         return [
             Violation(
                 rule="suffix-policy",
-                location="scripts/qa/naming_audit.py",
+                location="scripts/engineering/qa/naming_audit.py",
                 details="scripts/engineering/qa/naming_audit.py not found",
             )
         ]

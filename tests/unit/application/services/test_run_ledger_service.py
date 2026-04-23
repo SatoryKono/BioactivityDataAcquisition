@@ -287,6 +287,12 @@ def test_record_run_finished_captures_success_metrics() -> None:
 
     entry = service.record_run_finished(
         metrics_snapshot={"records_gold": 9},
+        details={
+            "adaptive_memory": {
+                "decision_count": 1,
+                "batch_size_reductions": 1,
+            }
+        },
     )
 
     assert entry.event_type == "run_finished"
@@ -294,6 +300,10 @@ def test_record_run_finished_captures_success_metrics() -> None:
     assert entry.status == "success"
     assert entry.metrics_snapshot == {"records_gold": 9}
     assert entry.details == {
+        "adaptive_memory": {
+            "decision_count": 1,
+            "batch_size_reductions": 1,
+        },
         "_diagnostic": {
             "diagnostic_contract_version": "v1",
             "event_type": "run_finished",
@@ -301,7 +311,7 @@ def test_record_run_finished_captures_success_metrics() -> None:
             "manifest_id": "manifest-1",
             "run_id": str(run_id),
             "status": "success",
-        }
+        },
     }
 
 

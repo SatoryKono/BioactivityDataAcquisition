@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.application.core.batch_execution._contracts import (
     BatchExecutionCountersSnapshot,
 )
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -53,6 +54,7 @@ class BatchExecutionFinalizationContext:
     total_quarantined: int
     batch_size_reductions: int
     min_batch_size_used: int
+    memory_decision_trace: tuple[JsonDict, ...]
 
 
 class _BatchProgressInitializerPort(Protocol):
@@ -96,6 +98,7 @@ class _BatchTracingLifecyclePort(Protocol):
         total_quarantined: int,
         batch_size_reductions: int,
         min_batch_size_used: int,
+        memory_decision_trace: tuple[JsonDict, ...],
     ) -> None: ...
 
     def end_span(self, span: Span | None, error: Exception | None = None) -> None: ...
@@ -151,6 +154,7 @@ class BatchExecutionLifecycleService:
         *,
         batch_size_reductions: int,
         min_batch_size_used: int,
+        memory_decision_trace: tuple[JsonDict, ...],
         error: Exception | None = None,
         shutdown: bool = False,
     ) -> None:
@@ -160,6 +164,7 @@ class BatchExecutionLifecycleService:
             lifecycle_context=lifecycle_context,
             batch_size_reductions=batch_size_reductions,
             min_batch_size_used=min_batch_size_used,
+            memory_decision_trace=memory_decision_trace,
         )
         if shutdown:
             await self._checkpoint_recovery_service.save_checkpoint_on_shutdown(
@@ -185,6 +190,7 @@ class BatchExecutionLifecycleService:
             total_quarantined=finalization_context.total_quarantined,
             batch_size_reductions=finalization_context.batch_size_reductions,
             min_batch_size_used=finalization_context.min_batch_size_used,
+            memory_decision_trace=finalization_context.memory_decision_trace,
         )
         self._tracing_manager.end_span(finalization_context.root_span)
 
@@ -195,6 +201,7 @@ class BatchExecutionLifecycleService:
         lifecycle_context: BatchExecutionLifecycleContext,
         batch_size_reductions: int,
         min_batch_size_used: int,
+        memory_decision_trace: tuple[JsonDict, ...],
     ) -> BatchExecutionFinalizationContext:
         """Capture one immutable snapshot for execution finalization paths."""
         return BatchExecutionFinalizationContext(
@@ -207,4 +214,5 @@ class BatchExecutionLifecycleService:
             total_quarantined=execution_state.records_quarantined,
             batch_size_reductions=batch_size_reductions,
             min_batch_size_used=min_batch_size_used,
+            memory_decision_trace=memory_decision_trace,
         )

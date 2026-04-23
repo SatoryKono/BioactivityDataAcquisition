@@ -151,7 +151,7 @@ def _extract_code_only(func_source: str) -> str:
     """Strip comments and docstrings from function source, keeping only code."""
     lines = []
     in_docstring = False
-    ds_quote = ""
+    ds_quote: str = ""
     for line in func_source.splitlines():
         stripped = line.strip()
         if in_docstring:
@@ -167,8 +167,8 @@ def _extract_code_only(func_source: str) -> str:
         # Remove inline comments
         code_part = line.split("#")[0]
         lines.append(code_part)
-    return "
-".join(lines)
+    return "\n".join(lines)
+
 
 
 def _iter_async_function_defs(tree: ast.AST) -> list[ast.AsyncFunctionDef]:

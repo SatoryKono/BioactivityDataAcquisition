@@ -15,14 +15,6 @@ policy:
     - removal_step
 registries:
   file_size_limits:
-    src/bioetl/domain/ports/quality/dq_report.py:
-      value: 405
-      owner: "@bioetl-platform"
-      reason: "Silver DQ request and port contracts still share one transitional protocol module while report-seam extraction is in progress."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Split Silver request coercion helpers from the public DQ report port surface until the module drops below the domain LOC cap."
     src/bioetl/infrastructure/storage/silver_writer.py:
       value: 1450
       owner: "@bioetl-platform"
@@ -42,22 +34,6 @@ registries:
       linked_rf: "RF-023"
       expires_on: "2026-06-30"
       removal_step: "Extract compatibility decision branches into dedicated helpers and retire the exemption once the entrypoint returns under the default limit."
-    src/bioetl/application/services/control_plane/_run_manifest_diagnostics_ledger.py::_process_ledger_entries:
-      value: 104
-      owner: "@bioetl-data-model"
-      reason: "Run-manifest ledger diagnostics still batch multiple ledger-shaping branches in one transitional helper."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Split ledger-entry aggregation and state-derivation branches into dedicated helpers until the function drops under the default limit."
-    src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence.py::build_persistence_profile:
-      value: 107
-      owner: "@bioetl-data-model"
-      reason: "Persistence-profile classification still combines multiple diagnostic derivations in one service helper pending the next control-plane cleanup wave."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Continue extracting persistence-profile derivation helpers until the function returns under the default limit."
     src/bioetl/application/services/control_plane/_run_manifest_diagnostics_summary.py::_build_final_summary:
       value: 187
       owner: "@bioetl-data-model"
@@ -202,7 +178,7 @@ registries:
       value: 6
       owner: "@bioetl-platform"
       reason: "MemoryConfig uses Pydantic BaseModel for validation, leading to an apparent cyclomatic complexity of 6 in static analysis, though its core logic is simple and delegated to Pydantic's internal mechanisms."
-      classification: "architectural_nuance"
+      classification: "intentional_exception"
       linked_rf: "RF-000"
       expires_on: "2026-09-30"
       removal_step: "Re-evaluate when Pydantic BaseModel cyclomatic complexity is correctly measured or when a change in validation framework occurs."

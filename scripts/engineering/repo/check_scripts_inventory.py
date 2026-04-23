@@ -132,9 +132,6 @@ LIFECYCLE_REGISTRY_DEFAULT: Final[str] = (
 SCHEMA_VERSION: Final[str] = "1.0"
 MAX_SEARCH_FILE_BYTES: Final[int] = 512 * 1024
 STRONG_ACTIVE_GROUPS: Final[frozenset[str]] = frozenset({"ci", "build", "skills", "agents"})
-LEGACY_ROOT_WRAPPERS: Final[frozenset[str]] = frozenset(
-    {"scripts/run_pytest.sh", "scripts/run_pytest.ps1"}
-)
 LEGACY_MANUAL_OPS_SCRIPTS: Final[frozenset[str]] = frozenset(
     {
         "scripts/ops/maintenance/github/close_superseded_prs.sh",
@@ -560,7 +557,6 @@ def _dedupe_refs(refs: list[RefEvidence]) -> list[RefEvidence]:
 def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
     groups = {item.source_group for item in refs}
     legacy_status_sets = (
-        LEGACY_ROOT_WRAPPERS,
         LEGACY_MANUAL_OPS_SCRIPTS,
         LEGACY_ISSUE_SPECIFIC_OPS_SCRIPTS,
         LEGACY_INTERNAL_AI_LAUNCHERS,

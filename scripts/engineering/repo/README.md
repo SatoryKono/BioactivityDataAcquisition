@@ -39,7 +39,7 @@ Both wrappers forward all arguments to their Python implementations.
 | Command                 | When                                                                    | Trigger                      |
 | ----------------------- | ----------------------------------------------------------------------- | ---------------------------- |
 | `check-inventory`       | After adding/removing/renaming scripts                                  | Manual or CI drift check     |
-| `check-catalog`         | After modifying `scripts/catalog.yaml` or adding new script directories | CI gate (`architecture.yml`) |
+| `check-catalog`         | After modifying `scripts/engineering/repo/catalog.yaml` or adding new script directories | CI gate (`architecture.yml`) |
 | `check-versions`        | Before release or after bumping version in any file                     | CI gate (`docs.yml`)         |
 | `check-cleanliness`     | After adding files to repository root                                   | Pre-commit hook              |
 | `split-testing-roadmap` | When converting a roadmap issue into executable GitHub child issues     | Manual maintenance workflow  |

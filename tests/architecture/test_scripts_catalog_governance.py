@@ -33,7 +33,7 @@ def test_scripts_catalog_governance_check_passes() -> None:
     stdout = io.StringIO()
     stderr = io.StringIO()
     with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-        rc = module.main(["--catalog", "scripts/catalog.yaml"])
+        rc = module.main(["--catalog", "scripts/engineering/repo/catalog.yaml"])
 
     assert rc == 0, (
         "Scripts catalog governance validation failed.\n"

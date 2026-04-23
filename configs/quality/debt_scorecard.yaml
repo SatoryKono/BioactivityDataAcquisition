@@ -1,6 +1,6 @@
 schema_version: 1
 baseline:
-  total_exemptions: 22
+  total_exemptions: 23
   by_registry:
     file_size_limits: 2
     function_complexity: 0
@@ -8,7 +8,7 @@ baseline:
     class_size: 9
     class_method_count: 0
     god_object: 3
-    domain_complexity: 0
+    domain_complexity: 1
 historical_baseline:
   total_exemptions: 44
   by_registry:
@@ -88,12 +88,7 @@ governance:
   review_cycle: 90
   quarterly_burndown_target: 2
   allowed_classifications:
-  - architectural_debt
-  - interface_debt
-  - domain_complexity
   - technical_debt
-  - transitional_compat
-  - legacy_artifact
   - intentional_exception
 registry_groups:
   size_metrics:
@@ -324,7 +319,7 @@ quarterly_targets:
   min_integral_score: 70
   group_budgets:
     size_metrics: 25
-    complexity_metrics: 0
+    complexity_metrics: 1
     structural_debt: 3
   registry_budgets:
     file_size_limits: 3
@@ -333,7 +328,7 @@ quarterly_targets:
     class_size: 13
     class_method_count: 0
     god_object: 3
-    domain_complexity: 0
+    domain_complexity: 1
 owner_decomposition_targets:
 - quarter: 2026-Q1
   allocations:

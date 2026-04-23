@@ -584,3 +584,52 @@ class TestValidateExemptionTargetReferences:
             errors = validate_exemption_target_references(path)
 
         assert any("must be non-empty" in error for error in errors)
+
+    def test_domain_complexity_accepts_path_qualified_class_symbol(
+        self, tmp_path: Path
+    ) -> None:
+        """Domain-complexity exemptions may target class symbols emitted by radon."""
+        src_dir = tmp_path / "src" / "bioetl" / "domain" / "config"
+        src_dir.mkdir(parents=True)
+        module_file = src_dir / "memory.py"
+        module_file.write_text(
+            "class MemoryConfig:\n    pass\n",
+            encoding="utf-8",
+        )
+
+        raw = {
+            "policy": {
+                "required_fields": [
+                    "value",
+                    "owner",
+                    "reason",
+                    "classification",
+                    "linked_rf",
+                    "expires_on",
+                    "removal_step",
+                ]
+            },
+            "registries": {name: {} for name in REQUIRED_EXEMPTION_REGISTRIES},
+        }
+        registries = raw["registries"]
+        assert isinstance(registries, dict)
+        registries["domain_complexity"] = {
+            "src/bioetl/domain/config/memory.py::MemoryConfig": {
+                "value": 6,
+                "owner": "alice",
+                "reason": "pydantic model complexity is analyzer noise",
+                "classification": "intentional_exception",
+                "linked_rf": "RF-001",
+                "expires_on": "2026-06-30",
+                "removal_step": "revisit when complexity analyzer is refined",
+            }
+        }
+
+        path = _write_registry(tmp_path, raw)
+        with patch(
+            "bioetl.infrastructure.quality.exemptions_registry._project_root",
+            return_value=tmp_path,
+        ):
+            errors = validate_exemption_target_references(path)
+
+        assert errors == []

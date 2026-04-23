@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BatchID
+    from bioetl.domain.types import JsonDict
 
 
 def build_execution_span_attributes(
@@ -81,6 +82,64 @@ def set_execution_stats_attributes(
         ("bioetl.min_batch_size_used", min_batch_size_used),
     ):
         span.set_attribute(key, value)
+
+
+def set_memory_decision_trace_attributes(
+    span: Span,
+    *,
+    memory_decision_trace: tuple[JsonDict, ...],
+) -> None:
+    """Set bounded adaptive-memory summary attributes on a span."""
+    decision_count = len(memory_decision_trace)
+    resize_count = sum(
+        1
+        for entry in memory_decision_trace
+        if entry.get("old_batch_size") != entry.get("new_batch_size")
+    )
+    pressure_event_count = sum(
+        1 for entry in memory_decision_trace if entry.get("pressure_state") is True
+    )
+    monitor_modes = sorted(
+        {
+            str(mode)
+            for entry in memory_decision_trace
+            if (mode := entry.get("monitor_mode")) is not None
+        }
+    )
+    span.set_attribute("bioetl.memory_decision_count", decision_count)
+    span.set_attribute("bioetl.memory_resize_event_count", resize_count)
+    span.set_attribute("bioetl.memory_pressure_event_count", pressure_event_count)
+    span.set_attribute(
+        "bioetl.memory_monitor_modes",
+        ",".join(monitor_modes) if monitor_modes else "none",
+    )
+
+
+def add_memory_decision_trace_events(
+    span: Span,
+    *,
+    memory_decision_trace: tuple[JsonDict, ...],
+) -> None:
+    """Attach bounded adaptive-memory decisions as root-span events."""
+    for entry in memory_decision_trace:
+        attributes = {
+            "bioetl.memory.decision_index": int(entry["decision_index"]),
+            "bioetl.memory.stage": str(entry["stage"]),
+            "bioetl.memory.old_batch_size": int(entry["old_batch_size"]),
+            "bioetl.memory.new_batch_size": int(entry["new_batch_size"]),
+            "bioetl.memory.reason": str(entry["reason"]),
+            "bioetl.memory.monitor_mode": str(entry["monitor_mode"]),
+            "bioetl.memory.adaptive_sizing_enabled": bool(
+                entry["adaptive_sizing_enabled"]
+            ),
+            "bioetl.memory.monitor_available": bool(entry["monitor_available"]),
+            "bioetl.memory.config_available": bool(entry["config_available"]),
+        }
+        if (record_index := entry.get("record_index")) is not None:
+            attributes["bioetl.memory.record_index"] = int(record_index)
+        if (pressure_state := entry.get("pressure_state")) is not None:
+            attributes["bioetl.memory.pressure_state"] = bool(pressure_state)
+        span.add_event("bioetl.memory.decision", attributes=attributes)
 
 
 def set_record_result_attributes(

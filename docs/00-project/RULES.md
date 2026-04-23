@@ -143,7 +143,7 @@ class MyAdapter:
     `configs/quality/architecture_metric_exemptions.yaml`, управляемый через
     `configs/quality/debt_scorecard.yaml`.
   - **Hotspot inventory**: raw evidence по size/LOC/duplication/fan-in из
-    `scripts/README.md` и related reports. Этот сигнал **MUST NOT**
+    `scripts/engineering/README.md` и related reports. Этот сигнал **MUST NOT**
     трактоваться как enforceable debt, пока он явно не закреплён в scorecard
     или named hotspot budget.
 - Для затронутого кода **MUST** быть проверены релевантные scorecard

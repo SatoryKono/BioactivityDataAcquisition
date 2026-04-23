@@ -11,6 +11,9 @@ from bioetl.infrastructure.quality._primitives import (
     _parse_quarter_label,
     _quarter_label,
 )
+from bioetl.infrastructure.quality.exemptions_registry_validation import (
+    _ALLOWED_CLASSIFICATIONS,
+)
 from bioetl.infrastructure.quality.report_formatter import (
     _is_rollout_cutoff_stale,
 )
@@ -146,6 +149,20 @@ def test_debt_scorecard_governance_review_policy_requires_tracking_and_classific
         if isinstance(owner, str) and owner.strip()
     }
     assert len(owners) >= 3
+
+
+def test_debt_scorecard_allowed_classifications_match_registry_validator() -> None:
+    """Scorecard taxonomy must stay aligned with live exemption validation."""
+    scorecard = load_debt_scorecard()
+    governance = scorecard.get("governance", {})
+    assert isinstance(governance, dict)
+
+    allowed = governance.get("allowed_classifications", [])
+    assert isinstance(allowed, list)
+    normalized = tuple(
+        sorted(item for item in allowed if isinstance(item, str) and item.strip())
+    )
+    assert normalized == tuple(sorted(_ALLOWED_CLASSIFICATIONS))
 
 
 def test_debt_scorecard_declares_enforceable_and_historical_baselines() -> None:
