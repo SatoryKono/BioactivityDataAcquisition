@@ -148,6 +148,18 @@ def bucket_exclusions(
     ]
 
 
+def bucket_issue_paths(
+    issues: list[dict[str, Any]],
+    *,
+    top_depth: int = DEFAULT_TOP_BUCKET_DEPTH,
+) -> list[dict[str, Any]]:
+    """Group live Sonar issues by path family to expose active debt hotspots."""
+    return bucket_exclusions(
+        [str(issue["path"]) for issue in issues if issue.get("path")],
+        top_depth=top_depth,
+    )
+
+
 def load_quarantine_from_properties(config_path: Path) -> dict[str, Any]:
     """Load the current Sonar quarantine surface from sonar-project.properties."""
     properties = parse_java_properties(config_path.read_text(encoding="utf-8"))
@@ -258,6 +270,10 @@ def fetch_live_issue_summary(
     supported_non_quarantined_total = 0
     supported_quarantined_total = 0
     out_of_scope_total = 0
+    supported_scope_issues: list[dict[str, Any]] = []
+    supported_non_quarantined_issues: list[dict[str, Any]] = []
+    supported_quarantined_issues: list[dict[str, Any]] = []
+    out_of_scope_issues: list[dict[str, Any]] = []
     for issue in issues:
         path = _issue_path(issue)
         in_supported_scope = _is_in_supported_scope(path, supported_sources)
@@ -284,6 +300,15 @@ def fetch_live_issue_summary(
                 "matches_current_quarantine": matches_current_quarantine,
             }
         )
+        rendered_issue = rendered_issues[-1]
+        if in_supported_scope:
+            supported_scope_issues.append(rendered_issue)
+            if matches_current_quarantine:
+                supported_quarantined_issues.append(rendered_issue)
+            else:
+                supported_non_quarantined_issues.append(rendered_issue)
+        else:
+            out_of_scope_issues.append(rendered_issue)
     return {
         "status": "ok",
         "total": int(paging.get("total", 0)),
@@ -294,6 +319,14 @@ def fetch_live_issue_summary(
         "supported_non_quarantined_total": supported_non_quarantined_total,
         "supported_quarantined_total": supported_quarantined_total,
         "out_of_scope_total": out_of_scope_total,
+        "supported_scope_buckets": bucket_issue_paths(supported_scope_issues),
+        "supported_non_quarantined_buckets": bucket_issue_paths(
+            supported_non_quarantined_issues
+        ),
+        "supported_quarantined_buckets": bucket_issue_paths(
+            supported_quarantined_issues
+        ),
+        "out_of_scope_buckets": bucket_issue_paths(out_of_scope_issues),
         "issues": rendered_issues,
     }
 

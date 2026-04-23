@@ -111,6 +111,18 @@ def _print_live_issue_summary(live_issues: dict[str, object]) -> None:
     print(f"Live out-of-scope issues: {live_issues.get('out_of_scope_total', 0)}")
 
 
+def _print_live_issue_buckets(
+    title: str,
+    buckets: list[dict[str, object]],
+) -> None:
+    """Print hotspot buckets for one live-issue classification."""
+    if not buckets:
+        return
+    print(title)
+    for bucket in buckets[:5]:
+        print(f"  - {bucket['path_prefix']}: {bucket['count']}")
+
+
 def _is_authoritative_scope_failed(
     *,
     assessment: dict[str, object],
@@ -139,6 +151,14 @@ def _handle_live_issue_summary(
 ) -> int:
     """Print live Sonar status and return the correct process exit code."""
     _print_live_issue_summary(live_issues)
+    _print_live_issue_buckets(
+        "Supported-scope hotspots:",
+        list(live_issues.get("supported_scope_buckets", [])),
+    )
+    _print_live_issue_buckets(
+        "Out-of-scope hotspots:",
+        list(live_issues.get("out_of_scope_buckets", [])),
+    )
     authoritative_scope_failed = _is_authoritative_scope_failed(
         assessment=assessment,
         require_authoritative_scope=require_authoritative_scope,
