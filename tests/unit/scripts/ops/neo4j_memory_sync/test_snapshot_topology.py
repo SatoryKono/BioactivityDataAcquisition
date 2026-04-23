@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from tests.unit.scripts.ops.neo4j_memory_sync.support import (  # noqa: F401
+from testing_support.neo4j_memory_sync import (  # noqa: F401
     test_development_cycle_surface_filter_is_now_a_clean_noop,
     test_duplication_analysis_config_excludes_normalization_registry_path,
     test_normalize_docs_repo_reference_strips_globs_and_keeps_repo_paths,

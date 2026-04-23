@@ -44,6 +44,25 @@ def test_bucket_exclusions_groups_by_bioetl_family() -> None:
     }
 
 
+def test_bucket_issue_paths_groups_live_issues_by_family() -> None:
+    buckets = processor.bucket_issue_paths(
+        [
+            {"path": "src/bioetl/application/services/a.py"},
+            {"path": "src/bioetl/application/services/b.py"},
+            {"path": "scripts/ai/check_sonar_issues.py"},
+        ]
+    )
+
+    assert buckets[0] == {
+        "path_prefix": "src/bioetl/application/services",
+        "count": 2,
+    }
+    assert buckets[1] == {
+        "path_prefix": "scripts/ai/check_sonar_issues.py",
+        "count": 1,
+    }
+
+
 def test_parse_sources_splits_and_normalizes_roots() -> None:
     sources = processor.parse_sources("src/bioetl, scripts/, docs ")
 
@@ -188,6 +207,15 @@ def test_fetch_live_issue_summary_tracks_scope_drift(monkeypatch) -> None:
     assert summary["supported_non_quarantined_total"] == 0
     assert summary["supported_quarantined_total"] == 1
     assert summary["out_of_scope_total"] == 1
+    assert summary["supported_scope_buckets"] == [
+        {"path_prefix": "src/bioetl/domain/file.py", "count": 1}
+    ]
+    assert summary["supported_quarantined_buckets"] == [
+        {"path_prefix": "src/bioetl/domain/file.py", "count": 1}
+    ]
+    assert summary["out_of_scope_buckets"] == [
+        {"path_prefix": "scripts/check.py", "count": 1}
+    ]
     assert summary["issues"][0]["in_supported_scope"] is True
     assert summary["issues"][0]["matches_current_quarantine"] is True
     assert summary["issues"][1]["in_supported_scope"] is False
@@ -231,6 +259,13 @@ def test_fetch_live_issue_summary_counts_active_supported_issues(monkeypatch) ->
     assert summary["supported_scope_total"] == 1
     assert summary["supported_non_quarantined_total"] == 1
     assert summary["supported_quarantined_total"] == 0
+    assert summary["supported_scope_buckets"] == [
+        {"path_prefix": "src/bioetl/domain/file.py", "count": 1}
+    ]
+    assert summary["supported_non_quarantined_buckets"] == [
+        {"path_prefix": "src/bioetl/domain/file.py", "count": 1}
+    ]
+    assert summary["out_of_scope_buckets"] == []
     assert summary["issues"][0]["matches_current_quarantine"] is False
 
 

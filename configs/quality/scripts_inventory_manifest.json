@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-23T19:42:05.854851+00:00",
+  "generated_at": "2026-04-23T19:48:23.642457+00:00",
   "summary": {
     "total_scripts": 437,
     "status_counts": {
@@ -16,7 +16,7 @@
       "docs": 136,
       "scripts": 288,
       "skills": 8,
-      "tests": 135
+      "tests": 134
     }
   },
   "scripts": [
@@ -58,7 +58,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/sonarcloud.yml",
@@ -89,6 +89,18 @@
           "line": 64,
           "source_group": "scripts",
           "text": "python3 scripts/ai/check_sonar_issues.py --max-quarantine-entries 184"
+        },
+        {
+          "path": "tests/unit/scripts/test_sonar_issue_processor.py",
+          "line": 52,
+          "source_group": "tests",
+          "text": "{\"path\": \"scripts/ai/check_sonar_issues.py\"},"
+        },
+        {
+          "path": "tests/unit/scripts/test_sonar_issue_processor.py",
+          "line": 61,
+          "source_group": "tests",
+          "text": "\"path_prefix\": \"scripts/ai/check_sonar_issues.py\","
         }
       ]
     },
@@ -2987,7 +2999,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 39,
+      "reference_count": 34,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -4502,7 +4514,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 96,
+      "reference_count": 90,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -5599,7 +5611,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 19,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -7064,7 +7076,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 68,
+      "reference_count": 64,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7781,7 +7793,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 94,
+      "reference_count": 91,
       "references": [
         {
           "path": ".github/workflows/duplication-complexity.yml",
@@ -9410,7 +9422,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 127,
+      "reference_count": 116,
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
@@ -11250,7 +11262,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 49,
+      "reference_count": 43,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
