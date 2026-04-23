@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from tests.unit.scripts.ops.neo4j_memory_sync.support import (  # noqa: F401
+from testing_support.neo4j_memory_sync import (  # noqa: F401
     test_build_audit_report_uses_bulk_summary_queries,
     test_build_diff_entries_tracks_missing_and_extra_keys,
     test_build_fast_analysis_audit_report_uses_bulk_count_queries,

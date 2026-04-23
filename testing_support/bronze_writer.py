@@ -1,4 +1,4 @@
-"""Unit tests for BronzeWriter."""
+"""Support helpers for invariant-focused BronzeWriter test suites."""
 
 from __future__ import annotations
 

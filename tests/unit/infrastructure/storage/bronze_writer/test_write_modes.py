@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from tests.unit.infrastructure.storage.bronze_writer.support import (  # noqa: F401
+from testing_support.bronze_writer import (  # noqa: F401
     TestBronzeWriterListBatches,
     TestBronzeWriterReadLocal,
     TestBronzeWriterWriteLocal,

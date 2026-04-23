@@ -1,4 +1,4 @@
-"""Tests for deterministic Neo4j repo-graph sync tooling."""
+"""Support helpers for invariant-focused Neo4j memory sync test suites."""
 
 from __future__ import annotations
 
