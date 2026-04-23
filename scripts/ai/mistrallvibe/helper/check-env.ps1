@@ -70,8 +70,7 @@ try {
         $allChecks = $false
     }
 } catch {
-    Write-Warn "Python not found"
-    $allChecks = $false
+    Write-Warn "Python not found (will be installed in WSL)"
 }
 
 # 4. Check .env.mistrallvibe
@@ -79,15 +78,18 @@ Write-Info "Checking configuration..."
 $envFile = Join-Path $RootDir ".env.mistrallvibe"
 if (Test-Path $envFile) {
     $envContent = Get-Content $envFile -Raw
-    if ($envContent -match "MISTRAL_API_KEY=" -or $envContent -match "VIBE_API_KEY=") {
-        if ($envContent -match "your-api-key-here") {
-            Write-Warn ".env.mistrallvibe exists but API key not configured"
-            $allChecks = $false
-        } else {
-            Write-Success ".env.mistrallvibe configured with API key"
-        }
+    
+    # Check if API key is configured (not the placeholder)
+    if ($envContent -match 'MISTRAL_API_KEY\s*=\s*"?[a-zA-Z0-9_-]{20,}' -or 
+        $envContent -match 'VIBE_API_KEY\s*=\s*"?[a-zA-Z0-9_-]{20,}') {
+        Write-Success ".env.mistrallvibe configured with API key"
+    } elseif ($envContent -match "your-api-key-here") {
+        Write-Warn ".env.mistrallvibe exists but API key placeholder found"
+        $allChecks = $false
+    } elseif ($envContent -match "MISTRAL_API_KEY|VIBE_API_KEY") {
+        Write-Success ".env.mistrallvibe configured"
     } else {
-        Write-Warn ".env.mistrallvibe missing MISTRAL_API_KEY"
+        Write-Warn ".env.mistrallvibe missing API key"
         $allChecks = $false
     }
 } else {
@@ -105,12 +107,10 @@ try {
     if ($vibeResult) {
         Write-Success "Mistral Vibe installed: $vibeResult"
     } else {
-        Write-Warn "Mistral Vibe not found in PATH"
-        $allChecks = $false
+        Write-Warn "Mistral Vibe not found in PATH (will be installed in WSL)"
     }
 } catch {
-    Write-Warn "Mistral Vibe not found in PATH"
-    $allChecks = $false
+    Write-Warn "Mistral Vibe not found (will be installed in WSL)"
 }
 
 Write-Host ""
@@ -119,6 +119,6 @@ if ($allChecks) {
     Write-Success "All checks passed"
     exit 0
 } else {
-    Write-Warn "Some checks failed - run setup first"
+    Write-Warn "Some components need setup - run: .\run-vibe.ps1 setup"
     exit 1
 }
