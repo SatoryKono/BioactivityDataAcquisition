@@ -128,32 +128,31 @@ def run_tests_for_strategy(strategy_name: str, coverage: bool = False) -> bool:
     print(f"Running: {' '.join(cmd)}")
 
     try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=900  # 15 minutes total timeout
-        )
-        
-        print(result.stdout)
-        if result.stderr:
-            print("STDERR:", result.stderr, file=sys.stderr)
-            
-        success = result.returncode == 0
-        
-        if success:
-            print(f"✅ Strategy '{strategy_name}' tests passed!")
-        else:
-            print(f"❌ Strategy '{strategy_name}' tests failed!")
-            
-        return success
-        
+        return _execute_strategy_command(strategy_name, cmd)
     except subprocess.TimeoutExpired:
-        print(f"❌ Test execution timed out after 15 minutes", file=sys.stderr)
+        print("❌ Test execution timed out after 15 minutes", file=sys.stderr)
         return False
     except Exception as e:
         print(f"❌ Error running tests: {e}", file=sys.stderr)
         return False
+
+
+def _execute_strategy_command(strategy_name: str, cmd: list[str]) -> bool:
+    result = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        timeout=900,  # 15 minutes total timeout
+    )
+    print(result.stdout)
+    if result.stderr:
+        print("STDERR:", result.stderr, file=sys.stderr)
+    success = result.returncode == 0
+    if success:
+        print(f"✅ Strategy '{strategy_name}' tests passed!")
+    else:
+        print(f"❌ Strategy '{strategy_name}' tests failed!")
+    return success
 
 
 def _strategy_matches_changed_files(
@@ -166,21 +165,23 @@ def _strategy_matches_changed_files(
     for trigger_pattern in trigger_files:
         if not isinstance(trigger_pattern, str):
             continue
-        if any(
-            changed_file.startswith(trigger_pattern) or trigger_pattern.endswith("*")
-            for changed_file in changed_files
-        ):
+        if any(_matches_trigger_pattern(trigger_pattern, changed_file) for changed_file in changed_files):
             return True
     return False
+
+
+def _matches_trigger_pattern(trigger_pattern: str, changed_file: str) -> bool:
+    if "*" in trigger_pattern:
+        return Path(changed_file).match(trigger_pattern)
+    return changed_file.startswith(trigger_pattern)
 
 
 def _append_python_strategy_if_needed(
     matched_strategies: List[str],
     changed_files: Set[str],
 ) -> None:
-    if any(path.endswith(".py") for path in changed_files):
-        if "python_files" not in matched_strategies:
-            matched_strategies.append("python_files")
+    if any(path.endswith(".py") for path in changed_files) and "python_files" not in matched_strategies:
+        matched_strategies.append("python_files")
 
 
 def _run_pre_checks(strategy: Dict[str, object]) -> bool:
@@ -205,7 +206,7 @@ def _run_pre_checks(strategy: Dict[str, object]) -> bool:
             return False
         if result.returncode != 0:
             print(f"❌ Pre-check failed: {cmd}")
-            print(f"   {result.stderr}")
+            print("   " + (result.stderr or "<no stderr>"))
             return False
         print(f"  ✅ {cmd} passed")
     return True

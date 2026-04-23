@@ -120,28 +120,39 @@ def validate_scorecard_registry_sync(
     )
 
 
-def _technical_debt_owner_counts(raw_registry: JsonDict) -> dict[str, int]:
-    """Return active-owner counts considering only technical_debt entries."""
+def _iter_registry_entries(raw_registry: JsonDict) -> tuple[dict[str, object], ...]:
+    """Yield normalized registry entry mappings from the raw exemptions payload."""
     registries = raw_registry.get("registries", {})
     if not isinstance(registries, dict):
-        return {}
+        return ()
 
-    by_owner: Counter[str] = Counter()
-    for entries in registries.values():
-        if not isinstance(entries, dict):
+    entries: list[dict[str, object]] = []
+    for registry_entries in registries.values():
+        if not isinstance(registry_entries, dict):
             continue
-        for entry in entries.values():
-            if not isinstance(entry, dict):
-                continue
-            if entry.get("classification") != "technical_debt":
-                continue
-            owner = entry.get("owner")
-            normalized = (
-                owner.strip()
-                if isinstance(owner, str) and owner.strip()
-                else "<missing>"
-            )
-            by_owner[normalized] += 1
+        for entry in registry_entries.values():
+            if isinstance(entry, dict):
+                entries.append(entry)
+    return tuple(entries)
+
+
+def _is_technical_debt_entry(entry: dict[str, object]) -> bool:
+    """Return True when a registry entry is classified as technical debt."""
+    return entry.get("classification") == "technical_debt"
+
+
+def _normalized_owner(owner: object) -> str:
+    """Normalize missing or blank owner values into one sortable bucket."""
+    return owner.strip() if isinstance(owner, str) and owner.strip() else "<missing>"
+
+
+def _technical_debt_owner_counts(raw_registry: JsonDict) -> dict[str, int]:
+    """Return active-owner counts considering only technical_debt entries."""
+    by_owner: Counter[str] = Counter()
+    for entry in _iter_registry_entries(raw_registry):
+        if not _is_technical_debt_entry(entry):
+            continue
+        by_owner[_normalized_owner(entry.get("owner"))] += 1
     return dict(sorted(by_owner.items()))
 
 

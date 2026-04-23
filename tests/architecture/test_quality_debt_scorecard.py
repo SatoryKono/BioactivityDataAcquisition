@@ -63,6 +63,60 @@ def _previous_quarter(quarter: tuple[int, int]) -> tuple[int, int]:
     return year, quarter_num - 1
 
 
+def _iter_registry_entries(
+    registries: dict[str, object],
+) -> tuple[dict[str, object], ...]:
+    entries: list[dict[str, object]] = []
+    for registry_entries in registries.values():
+        if not isinstance(registry_entries, dict):
+            continue
+        for entry in registry_entries.values():
+            if isinstance(entry, dict):
+                entries.append(entry)
+    return tuple(entries)
+
+
+def _is_technical_debt_entry(entry: dict[str, object]) -> bool:
+    return entry.get("classification") == "technical_debt"
+
+
+def _registry_has_technical_debt(registries: dict[str, object]) -> bool:
+    return any(
+        _is_technical_debt_entry(entry) for entry in _iter_registry_entries(registries)
+    )
+
+
+def _seed_synthetic_technical_debt_entries(
+    *,
+    registries: dict[str, object],
+    owner_cycle: tuple[str, ...],
+) -> None:
+    for index, registry_name in enumerate(
+        sorted(registries)[: max(1, len(owner_cycle))]
+    ):
+        entries = registries.get(registry_name)
+        if not isinstance(entries, dict):
+            continue
+        entries[f"{registry_name}::synthetic-{index}"] = {
+            "value": 1,
+            "owner": owner_cycle[index % len(owner_cycle)],
+            "reason": "synthetic test seed for owner diversification coverage",
+            "classification": "technical_debt",
+            "linked_rf": "RF-TEST",
+            "expires_on": "2026-06-30",
+            "removal_step": "remove synthetic seed after scorecard evaluation",
+        }
+
+
+def _assign_registry_owners(
+    *,
+    registries: dict[str, object],
+    owner_cycle: tuple[str, ...],
+) -> None:
+    for index, entry in enumerate(_iter_registry_entries(registries)):
+        entry["owner"] = owner_cycle[index % len(owner_cycle)]
+
+
 def _rewrite_registry_owners(
     *,
     owner_cycle: tuple[str, ...],
@@ -70,44 +124,12 @@ def _rewrite_registry_owners(
     registry = load_exemptions_registry()
     registries = registry.get("registries", {})
     assert isinstance(registries, dict)
-    has_technical_debt = False
-    for entries in registries.values():
-        if not isinstance(entries, dict):
-            continue
-        for entry in entries.values():
-            if (
-                isinstance(entry, dict)
-                and entry.get("classification") == "technical_debt"
-            ):
-                has_technical_debt = True
-                break
-        if has_technical_debt:
-            break
-    if not has_technical_debt:
-        for index, registry_name in enumerate(
-            sorted(registries)[: max(1, len(owner_cycle))]
-        ):
-            entries = registries.get(registry_name)
-            if not isinstance(entries, dict):
-                continue
-            entries[f"{registry_name}::synthetic-{index}"] = {
-                "value": 1,
-                "owner": owner_cycle[index % len(owner_cycle)],
-                "reason": "synthetic test seed for owner diversification coverage",
-                "classification": "technical_debt",
-                "linked_rf": "RF-TEST",
-                "expires_on": "2026-06-30",
-                "removal_step": "remove synthetic seed after scorecard evaluation",
-            }
-    idx = 0
-    for entries in registries.values():
-        if not isinstance(entries, dict):
-            continue
-        for entry in entries.values():
-            if not isinstance(entry, dict):
-                continue
-            entry["owner"] = owner_cycle[idx % len(owner_cycle)]
-            idx += 1
+    if not _registry_has_technical_debt(registries):
+        _seed_synthetic_technical_debt_entries(
+            registries=registries,
+            owner_cycle=owner_cycle,
+        )
+    _assign_registry_owners(registries=registries, owner_cycle=owner_cycle)
     return registry
 
 
@@ -116,17 +138,11 @@ def _technical_debt_entry_count() -> int:
     registry = load_exemptions_registry()
     registries = registry.get("registries", {})
     assert isinstance(registries, dict)
-    count = 0
-    for entries in registries.values():
-        if not isinstance(entries, dict):
-            continue
-        for entry in entries.values():
-            if (
-                isinstance(entry, dict)
-                and entry.get("classification") == "technical_debt"
-            ):
-                count += 1
-    return count
+    return sum(
+        1
+        for entry in _iter_registry_entries(registries)
+        if _is_technical_debt_entry(entry)
+    )
 
 
 def test_debt_scorecard_schema_is_valid() -> None:

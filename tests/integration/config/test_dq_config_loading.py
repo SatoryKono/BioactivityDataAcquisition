@@ -213,6 +213,55 @@ class TestPipelineConfigLoaderWithDQResolution:
         assert cellosaurus_rules[0].pattern == r"^CVCL_[A-Z0-9]+$"
         assert cellosaurus_rules[0].nullable is True
 
+    def test_chembl_activity_unit_family_fields_have_explicit_dq_decisions(
+        self, dq_loader: DQConfigLoader
+    ) -> None:
+        """Controlled-unit activity fields should no longer stay not_configured."""
+        config = dq_loader.load("chembl", "activity")
+
+        rules = {
+            rule.field: rule
+            for rule in config.field_validations
+            if rule.field in {"units", "qudt_units", "uo_units"}
+        }
+
+        assert rules["units"].validation_type == "pattern"
+        assert rules["qudt_units"].validation_type == "pattern"
+        assert rules["uo_units"].validation_type == "pattern"
+        assert rules["uo_units"].pattern == (
+            r"^(?:UO_[0-9]{7}|[A-Za-zµ%][A-Za-z0-9µ%._-]*)$"
+        )
+
+    def test_chembl_assay_parameters_units_have_explicit_dq_decision(
+        self, dq_loader: DQConfigLoader
+    ) -> None:
+        """Assay-parameter units should have an explicit DQ surface."""
+        config = dq_loader.load("chembl", "assay_parameters")
+
+        unit_rules = [
+            rule
+            for rule in config.field_validations
+            if rule.field == "units" and rule.validation_type == "pattern"
+        ]
+
+        assert unit_rules, "Missing assay_parameters.units DQ pattern rule"
+        assert unit_rules[0].nullable is True
+
+    def test_chembl_molecule_ro3_pass_has_explicit_enum_dq_rule(
+        self, dq_loader: DQConfigLoader
+    ) -> None:
+        """ro3_pass should be governed consistently with runtime enum normalization."""
+        config = dq_loader.load("chembl", "molecule")
+
+        ro3_rules = [
+            rule
+            for rule in config.field_validations
+            if rule.field == "ro3_pass" and rule.validation_type == "enum"
+        ]
+
+        assert ro3_rules, "Missing ro3_pass enum rule"
+        assert ro3_rules[0].allowed == ("Y", "N")
+
     def test_clear_cache_works(self, config_loader: PipelineConfigLoader) -> None:
         """clear_cache() should work without errors."""
         config_loader.clear_cache()

@@ -214,6 +214,7 @@ class TestGenericPipelineFactory:
         dq_monitor = MagicMock()
         metrics = MagicMock()
         cached_bronze = MagicMock()
+        audit = MagicMock()
 
         result = factory.create_with_services(
             build_create_pipeline_with_services_request(
@@ -221,7 +222,7 @@ class TestGenericPipelineFactory:
                 runtime=runtime,
                 settings=settings,
                 logger=logger,
-                audit=observability.audit,
+                audit=audit,
                 config=config,
                 filter_config=filter_config,
                 tracer=tracer,

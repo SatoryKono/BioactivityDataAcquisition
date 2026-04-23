@@ -141,6 +141,11 @@ quality:
     - mg.kg-1
     nullable: true
     error_message: Invalid assay parameter standard_units value
+  - field: units
+    type: pattern
+    pattern: '^(?:[A-Za-zµ%][A-Za-z0-9µ%._-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$'
+    nullable: true
+    error_message: Assay parameter units must be a canonical unit token when present
   entity_cross_field_validations:
   - name: param_linkage
     fields:

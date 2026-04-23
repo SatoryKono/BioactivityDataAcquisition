@@ -158,6 +158,13 @@ quality:
                 - NONE
                 - BOTH
             nullable: true
+        -   field: ro3_pass
+            type: enum
+            allowed:
+                - Y
+                - N
+            nullable: true
+            error_message: ro3_pass must be Y or N when present
         -   field: canonical_smiles
             type: custom
             validator: smiles_validator
