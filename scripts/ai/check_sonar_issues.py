@@ -50,6 +50,14 @@ def _build_parser() -> argparse.ArgumentParser:
         type=int,
         help="Fail if sonar.exclusions grows above this file-count threshold.",
     )
+    parser.add_argument(
+        "--require-authoritative-scope",
+        action="store_true",
+        help=(
+            "Fail if the live Sonar project still reports findings outside "
+            "sonar.sources or inside the current sonar.exclusions quarantine."
+        ),
+    )
     return parser
 
 
@@ -95,8 +103,34 @@ def main(argv: list[str] | None = None) -> int:
 
     if live_issues["status"] == "ok":
         print(f"Live unresolved issues: {live_issues['total']}")
+        print(
+            "Live supported-scope issues: "
+            f"{live_issues.get('supported_scope_total', 0)}"
+        )
+        print(
+            "Live supported non-quarantined issues: "
+            f"{live_issues.get('supported_non_quarantined_total', 0)}"
+        )
+        print(
+            "Live supported quarantined issues: "
+            f"{live_issues.get('supported_quarantined_total', 0)}"
+        )
+        print(
+            "Live out-of-scope issues: "
+            f"{live_issues.get('out_of_scope_total', 0)}"
+        )
+        authoritative_scope_failed = False
+        if args.require_authoritative_scope:
+            authoritative_scope_failed = bool(
+                assessment.get("live_scope_drift_detected")
+                or assessment.get("live_quarantine_drift_detected")
+            )
+            print(
+                "Authoritative scope status: "
+                f"{'drift-detected' if authoritative_scope_failed else 'ready'}"
+            )
         print("Live baseline status: ready")
-        return 1 if ratchet_failed else 0
+        return 1 if ratchet_failed or authoritative_scope_failed else 0
 
     print("Live baseline status: not ready")
     print(f"Reason: {live_issues.get('reason', 'unknown')}")

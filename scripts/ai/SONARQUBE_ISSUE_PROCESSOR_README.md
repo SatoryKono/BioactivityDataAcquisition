@@ -93,6 +93,11 @@ The JSON report includes:
 - `quarantine.top_buckets`
 - `live_issues.status`
 - `live_issues.total`
+- `live_issues.supported_scope_total`
+- `live_issues.supported_non_quarantined_total`
+- `live_issues.supported_quarantined_total`
+- `live_issues.out_of_scope_total`
+- `live_issues.issues`
 - `assessment.historical_near_zero_status_is_stale`
 
 ## Interpreting results
@@ -100,6 +105,15 @@ The JSON report includes:
 ### `live_issues.status = "ok"`
 
 The tool fetched a current unresolved-issues summary from Sonar.
+
+If `live_issues.out_of_scope_total > 0`, the active Sonar project state still
+contains findings outside the canonical `sonar.sources` contract and should be
+treated as scope drift until the workflow-backed scan becomes authoritative.
+
+If `live_issues.supported_quarantined_total > 0`, the live Sonar project still
+reports findings in files that are currently excluded by `sonar.exclusions`.
+Treat that as quarantine drift: the cloud-side measurement is not yet honoring
+the repo-backed quarantine contract.
 
 ### `live_issues.status = "skipped"`
 
