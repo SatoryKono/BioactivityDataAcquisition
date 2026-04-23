@@ -2,6 +2,12 @@
   "schema_version": "1.0",
   "description": "Lifecycle decisions for non-active scripts (orphan/legacy).",
   "entries": {
+    "scripts/ops/data/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the top-level scripts.ops.data module router. Promote it into a canonical supported workflow or remove it if not needed."
+    },
     "scripts/ops/maintenance/github/close_duplicate_prs_wave2.sh": {
       "owner": "@bioetl-platform",
       "decision": "legacy_issue_workflow",
@@ -386,12 +392,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as an orphan compatibility copy of the SonarQube MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
     },
-    "scripts/engineering/dev/run_project_python.py": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as a thin preferred-interpreter launcher for historical direct script/module invocations, but do not expand it into a primary contributor-facing workflow while wrapper commands remain the canonical entrypoints."
-    },
     "scripts/engineering/dev/run_s7_stability_waves.sh": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
@@ -436,9 +436,9 @@
     },
     "scripts/common/repo_paths.py": {
       "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
+      "decision": "internal_helper_orphan",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a lightweight shared path helper for older script packages while callers migrate to canonical repo-root discovery patterns; remove it once no orphan or legacy scripts depend on it."
+      "next_step": "Retain only as a bounded shared path helper while governed scripts still depend on common repository-root resolution; fold it into a canonical scripting utility surface once helper duplication is fully consolidated."
     },
     "scripts/engineering/dev/bash/.setup_wsl_codex.sh": {
       "owner": "@bioetl-platform",
@@ -614,12 +614,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a Windows-side Neo4j recovery checklist under the runtime/neo4j namespace for operator troubleshooting after Docker restarts."
     },
-    "scripts/ops/support/load_repo_env.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a low-level repo-environment loader for compatibility with older ops wrappers; do not document it as a primary user-facing entrypoint."
-    },
     "scripts/ai/codex/helper/check-env.ps1": {
       "owner": "@bioetl-platform",
       "decision": "internal_helper_orphan",
@@ -716,11 +710,11 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded MistrallVibe setup helper while environment bootstrap still depends on helper scripts; fold into the canonical setup path when the surface is simplified."
     },
-    "scripts/common/repo_paths.py": {
+    "scripts/ai/mistrallvibe/launch-interactive.ps1": {
       "owner": "@bioetl-platform",
       "decision": "internal_helper_orphan",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded shared path helper while governed scripts still depend on common repository-root resolution; fold it into a canonical scripting utility surface once helper duplication is fully consolidated."
+      "next_step": "Retain only as a bounded MistrallVibe interactive launcher for local development and debugging; remove or consolidate once the MistrallVibe sub-agent surface is fully unified or retired."
     },
     "scripts/ci/_compatibility_registry.py": {
       "owner": "@bioetl-platform",

@@ -26,7 +26,8 @@ facades that delegate to `scripts/ai/codex/`.
 
 ## Internal-only zones
 
-- `support/load_repo_env.sh`
+- `support/load_repo_env.sh` is the shared repository environment loader used by
+  ops helpers and MCP wrapper compatibility paths.
 - `support/skills/`
 
 ## Legacy maintenance zone

@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# Helper: Check Mistral Vibe environment on Windows
+# Helper: Check Mistral Vibe environment on Windows with timeouts
 # Called by: run-vibe.ps1
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -20,14 +20,17 @@ Write-Host ""
 
 $allChecks = $true
 
-# 1. Check Node.js
+# 1. Check Node.js (with timeout)
 Write-Info "Checking Node.js..."
 try {
-    $nodeVersion = node --version 2>$null
-    if ($LASTEXITCODE -eq 0) {
-        Write-Success "Node.js installed: $nodeVersion"
+    $nodeJob = Start-Job -ScriptBlock { node --version }
+    $nodeResult = Wait-Job -Job $nodeJob -Timeout 5 | Receive-Job
+    Remove-Job -Job $nodeJob -Force 2>$null
+    
+    if ($nodeResult) {
+        Write-Success "Node.js installed: $nodeResult"
     } else {
-        Write-Warn "Node.js not found"
+        Write-Warn "Node.js not found or timed out"
         $allChecks = $false
     }
 } catch {
@@ -35,14 +38,17 @@ try {
     $allChecks = $false
 }
 
-# 2. Check npm
+# 2. Check npm (with timeout)
 Write-Info "Checking npm..."
 try {
-    $npmVersion = npm --version 2>$null
-    if ($LASTEXITCODE -eq 0) {
-        Write-Success "npm installed: $npmVersion"
+    $npmJob = Start-Job -ScriptBlock { npm --version }
+    $npmResult = Wait-Job -Job $npmJob -Timeout 5 | Receive-Job
+    Remove-Job -Job $npmJob -Force 2>$null
+    
+    if ($npmResult) {
+        Write-Success "npm installed: $npmResult"
     } else {
-        Write-Warn "npm not found"
+        Write-Warn "npm not found or timed out"
         $allChecks = $false
     }
 } catch {
@@ -50,7 +56,25 @@ try {
     $allChecks = $false
 }
 
-# 3. Check .env.mistrallvibe
+# 3. Check Python (with timeout)
+Write-Info "Checking Python..."
+try {
+    $pythonJob = Start-Job -ScriptBlock { python3 --version }
+    $pythonResult = Wait-Job -Job $pythonJob -Timeout 5 | Receive-Job
+    Remove-Job -Job $pythonJob -Force 2>$null
+    
+    if ($pythonResult) {
+        Write-Success "Python installed: $pythonResult"
+    } else {
+        Write-Warn "Python not found or timed out"
+        $allChecks = $false
+    }
+} catch {
+    Write-Warn "Python not found"
+    $allChecks = $false
+}
+
+# 4. Check .env.mistrallvibe
 Write-Info "Checking configuration..."
 $envFile = Join-Path $RootDir ".env.mistrallvibe"
 if (Test-Path $envFile) {
@@ -71,14 +95,17 @@ if (Test-Path $envFile) {
     $allChecks = $false
 }
 
-# 4. Check if Vibe is installed
+# 5. Check if Vibe is installed (with timeout)
 Write-Info "Checking Mistral Vibe installation..."
 try {
-    $vibeVersion = vibe --version 2>$null
-    if ($LASTEXITCODE -eq 0) {
-        Write-Success "Mistral Vibe installed: $vibeVersion"
+    $vibeJob = Start-Job -ScriptBlock { vibe --version 2>$null }
+    $vibeResult = Wait-Job -Job $vibeJob -Timeout 5 | Receive-Job
+    Remove-Job -Job $vibeJob -Force 2>$null
+    
+    if ($vibeResult) {
+        Write-Success "Mistral Vibe installed: $vibeResult"
     } else {
-        Write-Warn "Mistral Vibe not found"
+        Write-Warn "Mistral Vibe not found in PATH"
         $allChecks = $false
     }
 } catch {

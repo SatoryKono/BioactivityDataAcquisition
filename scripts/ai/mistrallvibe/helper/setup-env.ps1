@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# Helper: Setup Mistral Vibe environment on Windows
+# Helper: Setup Mistral Vibe environment on Windows with timeouts
 # Downloads and installs official Mistral Vibe
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -18,36 +18,28 @@ Write-Host "  Mistral Vibe Setup (Windows)" -ForegroundColor Cyan
 Write-Host "================================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Step 1: Check Node.js
+# Step 1: Check Node.js (with timeout)
 Write-Info "STEP 1: Checking Node.js..."
-try {
-    $nodeVersion = node --version 2>$null
-    if ($LASTEXITCODE -eq 0) {
-        Write-Success "Node.js found: $nodeVersion"
-    } else {
-        Write-Error "Node.js not found"
-        Write-Info "Install from: https://nodejs.org/"
-        exit 1
-    }
-} catch {
-    Write-Error "Node.js not found"
-    Write-Info "Install from: https://nodejs.org/"
-    exit 1
+$nodeJob = Start-Job -ScriptBlock { node --version 2>$null }
+$nodeResult = Wait-Job -Job $nodeJob -Timeout 5 | Receive-Job
+Remove-Job -Job $nodeJob -Force 2>$null
+
+if ($nodeResult) {
+    Write-Success "Node.js found: $nodeResult"
+} else {
+    Write-Warn "Node.js not found or timed out"
 }
 
-# Step 2: Check npm
+# Step 2: Check npm (with timeout)
 Write-Info "STEP 2: Checking npm..."
-try {
-    $npmVersion = npm --version 2>$null
-    if ($LASTEXITCODE -eq 0) {
-        Write-Success "npm found: $npmVersion"
-    } else {
-        Write-Error "npm not found"
-        exit 1
-    }
-} catch {
-    Write-Error "npm not found"
-    exit 1
+$npmJob = Start-Job -ScriptBlock { npm --version 2>$null }
+$npmResult = Wait-Job -Job $npmJob -Timeout 5 | Receive-Job
+Remove-Job -Job $npmJob -Force 2>$null
+
+if ($npmResult) {
+    Write-Success "npm found: $npmResult"
+} else {
+    Write-Warn "npm not found or timed out"
 }
 
 Write-Host ""
@@ -73,31 +65,109 @@ VIBE_HOST=localhost
 
 Write-Host ""
 
-# Step 4: Download Vibe installer script
-Write-Info "STEP 4: Installing Mistral Vibe..."
-Write-Warn "This will download and execute official Mistral installer"
+# Step 4: Check for Python and WSL
+Write-Info "STEP 4: Checking Python and WSL..."
+
+$pythonJob = Start-Job -ScriptBlock { python3 --version 2>$null }
+$pythonResult = Wait-Job -Job $pythonJob -Timeout 5 | Receive-Job
+Remove-Job -Job $pythonJob -Force 2>$null
+
+if ($pythonResult) {
+    Write-Success "Python found: $pythonResult"
+} else {
+    Write-Warn "Python not found in Windows PATH"
+    Write-Info "Python will be checked in WSL if available"
+}
+
+# Check if WSL is available
+if (-not (Get-Command wsl -ErrorAction SilentlyContinue)) {
+    Write-Error "WSL not found - required for Mistral Vibe installation on Windows"
+    Write-Info "Install WSL: wsl --install"
+    exit 1
+}
+
+Write-Success "WSL is available"
+
 Write-Host ""
 
+# Step 5: Install Mistral Vibe via WSL with timeout and retry
+Write-Info "STEP 5: Installing Mistral Vibe (with timeout and retry)..."
+Write-Warn "This will install the official Mistral Vibe package via WSL"
+Write-Host ""
+
+$installScript = @'
+#!/bin/bash
+RETRY=0
+MAX_RETRIES=2
+
+# Try pipx first
+if command -v pipx >/dev/null 2>&1; then
+    echo "[info] Using pipx to install mistral-vibe"
+    RETRY=0
+    while [ $RETRY -lt $MAX_RETRIES ]; do
+        if timeout 60 pipx install mistral-vibe 2>/dev/null; then
+            echo "[success] Installed via pipx"
+            exit 0
+        fi
+        RETRY=$((RETRY + 1))
+        if [ $RETRY -lt $MAX_RETRIES ]; then
+            echo "[warn] Retry attempt $RETRY/$MAX_RETRIES"
+            sleep 2
+        fi
+    done
+fi
+
+# Fallback to pip
+echo "[info] Using pip to install mistral-vibe"
+RETRY=0
+while [ $RETRY -lt $MAX_RETRIES ]; do
+    if timeout 60 python3 -m pip install --user --upgrade mistral-vibe 2>/dev/null; then
+        echo "[success] Installed via pip"
+        exit 0
+    fi
+    RETRY=$((RETRY + 1))
+    if [ $RETRY -lt $MAX_RETRIES ]; then
+        echo "[warn] Retry attempt $RETRY/$MAX_RETRIES"
+        sleep 2
+    fi
+done
+
+echo "[error] Installation failed"
+exit 1
+'@
+
+# Write temp script
+$tempScript = [System.IO.Path]::GetTempFileName() + ".sh"
+Set-Content -Path $tempScript -Value $installScript -Encoding ASCII
+
 try {
-    # Download and execute installer
-    $installerUrl = "https://mistral.ai/vibe/install.sh"
-    Write-Info "Downloading from: $installerUrl"
-    
-    # For Windows, use powershell to download and execute
-    $installerScript = Invoke-WebRequest -Uri $installerUrl -UseBasicParsing | Select-Object -ExpandProperty Content
-    
-    Write-Success "Mistral Vibe installer downloaded"
-    Write-Info "Please run the installer manually or use WSL for automatic installation"
-    Write-Host ""
-    Write-Info "For WSL: wsl -e bash -c 'curl -LsSf https://mistral.ai/vibe/install.sh | bash'"
-} catch {
-    Write-Warn "Could not auto-download installer"
-    Write-Info "Download manually from: https://mistral.ai/vibe/install.sh"
+    $installJob = Start-Job -ScriptBlock {
+        wsl bash -c (Get-Content $args[0] -Raw)
+    } -ArgumentList $tempScript
+
+    $result = Wait-Job -Job $installJob -Timeout 300  # 5 minutes timeout
+    if ($result) {
+        $output = Receive-Job -Job $installJob
+        $output | Write-Host
+        
+        if ($output -match "success") {
+            Write-Success "Mistral Vibe installed"
+        } elseif ($output -match "error") {
+            Write-Error "Installation failed"
+        }
+    } else {
+        Write-Error "Installation timed out after 5 minutes"
+        Stop-Job -Job $installJob -PassThru | Remove-Job -Force 2>$null
+    }
+
+    Remove-Job -Job $installJob -Force 2>$null
+} finally {
+    Remove-Item -Path $tempScript -Force -ErrorAction SilentlyContinue 2>$null
 }
 
 Write-Host ""
 
-# Step 5: Display next steps
+# Step 6: Display next steps
 Write-Host "================================================" -ForegroundColor Cyan
 Write-Success "Setup completed!"
 Write-Host "================================================" -ForegroundColor Cyan
@@ -105,7 +175,10 @@ Write-Host ""
 Write-Info "Next steps:"
 Write-Host "  1. Get your API key: https://console.mistral.ai/api-keys/"
 Write-Host "  2. Edit .env.mistrallvibe and add MISTRAL_API_KEY"
-Write-Host "  3. Start Vibe: .\run-vibe.ps1"
+Write-Host "  3. Start Vibe from WSL terminal:"
+Write-Host "     wsl bash"
+Write-Host "     cd /path/to/scripts/ai/mistrallvibe"
+Write-Host "     ./run-vibe.sh"
 Write-Host ""
 
 exit 0

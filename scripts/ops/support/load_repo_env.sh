@@ -2,6 +2,7 @@
 
 load_repo_env_if_present() {
   if [[ "${BIOETL_REPO_ENV_LOADED:-0}" == "1" ]]; then
+    normalize_repo_env_aliases
     return 0
   fi
 
@@ -18,6 +19,7 @@ load_repo_env_if_present() {
 
   if [[ ! -f "${env_file}" && ! -f "${env_local_file}" ]]; then
     export BIOETL_REPO_ENV_LOADED=1
+    normalize_repo_env_aliases
     return 0
   fi
 
@@ -140,4 +142,61 @@ PY
   fi
 
   export BIOETL_REPO_ENV_LOADED=1
+  normalize_repo_env_aliases
+}
+
+normalize_repo_env_aliases() {
+  if [[ -z "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" && -n "${GITHUB_TOKEN:-}" ]]; then
+    export GITHUB_PERSONAL_ACCESS_TOKEN="${GITHUB_TOKEN}"
+  fi
+  if [[ -z "${GITHUB_TOKEN:-}" && -n "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" ]]; then
+    export GITHUB_TOKEN="${GITHUB_PERSONAL_ACCESS_TOKEN}"
+  fi
+
+  if [[ -z "${SONARQUBE_TOKEN:-}" && -n "${SONAR_TOKEN:-}" ]]; then
+    export SONARQUBE_TOKEN="${SONAR_TOKEN}"
+  fi
+  if [[ -z "${SONAR_TOKEN:-}" && -n "${SONARQUBE_TOKEN:-}" ]]; then
+    export SONAR_TOKEN="${SONARQUBE_TOKEN}"
+  fi
+  if [[ -z "${SONARQUBE_ORG:-}" && -n "${SONAR_ORG:-}" ]]; then
+    export SONARQUBE_ORG="${SONAR_ORG}"
+  fi
+  if [[ -z "${SONARQUBE_URL:-}" && -n "${SONAR_HOST_URL:-}" ]]; then
+    export SONARQUBE_URL="${SONAR_HOST_URL}"
+  fi
+
+  if [[ -z "${NEEDLE_API_KEY:-}" && -n "${NEEDLE_TOKEN:-}" ]]; then
+    export NEEDLE_API_KEY="${NEEDLE_TOKEN}"
+  fi
+
+  if [[ -z "${BRAVE_API_KEY:-}" && -n "${BRAVE_SEARCH_API_KEY:-}" ]]; then
+    export BRAVE_API_KEY="${BRAVE_SEARCH_API_KEY}"
+  fi
+
+  if [[ -z "${HUB_PAT_TOKEN:-}" ]]; then
+    if [[ -n "${DOCKERHUB_PAT:-}" ]]; then
+      export HUB_PAT_TOKEN="${DOCKERHUB_PAT}"
+    elif [[ -n "${DOCKERHUB_TOKEN:-}" ]]; then
+      export HUB_PAT_TOKEN="${DOCKERHUB_TOKEN}"
+    fi
+  fi
+  if [[ -z "${DOCKERHUB_USERNAME:-}" && -n "${DOCKER_USERNAME:-}" ]]; then
+    export DOCKERHUB_USERNAME="${DOCKER_USERNAME}"
+  fi
+
+  if [[ -z "${GRAFANA_SERVICE_ACCOUNT_TOKEN:-}" ]]; then
+    if [[ -n "${GRAFANA_TOKEN:-}" ]]; then
+      export GRAFANA_SERVICE_ACCOUNT_TOKEN="${GRAFANA_TOKEN}"
+    elif [[ -n "${GRAFANA_API_KEY:-}" ]]; then
+      export GRAFANA_SERVICE_ACCOUNT_TOKEN="${GRAFANA_API_KEY}"
+    fi
+  fi
+  if [[ -z "${GRAFANA_USERNAME:-}" && -n "${GF_SECURITY_ADMIN_USER:-}" ]]; then
+    export GRAFANA_USERNAME="${GF_SECURITY_ADMIN_USER}"
+  fi
+  if [[ -z "${GRAFANA_PASSWORD:-}" && -n "${GF_SECURITY_ADMIN_PASSWORD:-}" ]]; then
+    export GRAFANA_PASSWORD="${GF_SECURITY_ADMIN_PASSWORD}"
+  fi
+  return 0
 }

@@ -184,7 +184,7 @@ ______________________________________________________________________
 
 ## 17. Pre-flight Repository Hygiene
 
-- [ ] `uv run python -m scripts.data check-data-dir` проходит без ошибок
+- [ ] `uv run python -m scripts.ops.data check-data-dir` проходит без ошибок
 - [ ] Тяжёлые/временные локальные артефакты вынесены в `data/local/` или `tmp/`
 - [ ] В релиз не попадают локальные артефакты (`data/local/**`, `tmp/**`)
 

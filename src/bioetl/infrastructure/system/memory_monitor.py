@@ -82,7 +82,10 @@ class MemoryMonitor:
     logger: LoggerPort | None = None
     _psutil_available: bool = field(default=False, init=False)
     _last_batch_size: int = field(default=100, init=False)
+    _recovery_target_batch_size: int | None = field(default=None, init=False)
     _consecutive_pressure_count: int = field(default=0, init=False)
+    _last_monitor_mode: str = field(default="unknown", init=False)
+    _last_pressure_state: bool | None = field(default=None, init=False)
     # Any: optional psutil.Proces...
     _cached_process: Any = field(  # Any: type varies at runtime
         default=None, init=False
@@ -99,6 +102,14 @@ class MemoryMonitor:
             self.logger.debug("psutil available for memory monitoring")
         elif not self._psutil_available and self.logger:
             self.logger.debug("psutil not available, using fallback memory monitoring")
+
+    def get_monitor_mode(self) -> str:
+        """Return the bounded monitor mode observed by the last stats call."""
+        return self._last_monitor_mode
+
+    def get_last_pressure_state(self) -> bool | None:
+        """Return the pressure decision observed by the last adaptive check."""
+        return self._last_pressure_state
 
     def get_memory_stats(self) -> MemoryStats:
         """Get current memory statistics.
@@ -121,6 +132,7 @@ class MemoryMonitor:
             MemoryStats populated with system and process memory usage from psutil.
         """
         psutil = _PSUTIL_MODULE
+        self._last_monitor_mode = "psutil"
 
         vm = psutil.virtual_memory()
 
@@ -180,6 +192,7 @@ class MemoryMonitor:
                 available_mb = meminfo.get("MemAvailable", 0) / 1024
                 used_mb = total_mb - available_mb
                 percent_used = used_mb / total_mb if total_mb > 0 else 0.5
+                self._last_monitor_mode = "resource"
 
                 return MemoryStats(
                     used_mb=used_mb,
@@ -199,6 +212,7 @@ class MemoryMonitor:
         """
         # Conservative estimate: assume 50% memory used
         # This is safer than assuming low usage
+        self._last_monitor_mode = "estimate"
         return MemoryStats(
             used_mb=4096.0,  # Assume 4GB used
             available_mb=4096.0,  # Assume 4GB available
@@ -215,10 +229,13 @@ class MemoryMonitor:
 
         """
         if not self.config.enable_adaptive_sizing:
+            self._last_pressure_state = None
             return False
 
         stats = self.get_memory_stats()
-        return stats.percent_used >= self.config.memory_pressure_threshold
+        is_pressure = stats.percent_used >= self.config.memory_pressure_threshold
+        self._last_pressure_state = is_pressure
+        return is_pressure
 
     def get_recommended_batch_size(self, current_batch_size: int) -> int:
         """Return adaptive batch size recommendation based on current memory pressure.
@@ -227,10 +244,12 @@ class MemoryMonitor:
             Adjusted batch size integer, reduced under pressure or gradually recovered.
         """
         if not self.config.enable_adaptive_sizing:
+            self._last_pressure_state = None
             return current_batch_size
 
         stats = self.get_memory_stats()
         is_pressure = stats.percent_used >= self.config.memory_pressure_threshold
+        self._last_pressure_state = is_pressure
 
         if is_pressure:
             self._consecutive_pressure_count += 1
@@ -239,6 +258,14 @@ class MemoryMonitor:
                 int(current_batch_size * reduction_factor),
                 self.config.min_batch_size,
             )
+
+            if new_size < current_batch_size:
+                if (
+                    self._recovery_target_batch_size is None
+                    or current_batch_size > self._recovery_target_batch_size
+                ):
+                    self._recovery_target_batch_size = current_batch_size
+                self._last_batch_size = self._recovery_target_batch_size
 
             if self.logger and new_size < current_batch_size:
                 self.logger.warning(
@@ -249,17 +276,17 @@ class MemoryMonitor:
                     consecutive_pressure_count=self._consecutive_pressure_count,
                 )
 
-            self._last_batch_size = new_size
             return new_size
 
         # Pressure relieved - consider gradual recovery
         self._consecutive_pressure_count = 0
 
         # If we previously reduced, try to recover gradually
-        if current_batch_size < self._last_batch_size:
+        recovery_target = self._recovery_target_batch_size or self._last_batch_size
+        if current_batch_size < recovery_target:
             recovery_size = min(
-                int(current_batch_size * 1.25),  # Increase by 25%
-                self._last_batch_size,
+                max(current_batch_size + 1, int(current_batch_size * 1.25)),
+                recovery_target,
             )
             if self.logger:
                 self.logger.debug(
@@ -268,8 +295,12 @@ class MemoryMonitor:
                     new_batch_size=recovery_size,
                     memory_percent_used=round(stats.percent_used * 100, 1),
                 )
+            if recovery_size >= recovery_target:
+                self._recovery_target_batch_size = None
+                self._last_batch_size = recovery_target
             return recovery_size
 
+        self._recovery_target_batch_size = None
         self._last_batch_size = current_batch_size
         return current_batch_size
 

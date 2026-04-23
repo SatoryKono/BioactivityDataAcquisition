@@ -24,6 +24,8 @@ class MemoryDecisionTraceEntry:
     adaptive_sizing_enabled: bool
     monitor_available: bool
     config_available: bool
+    pressure_state: bool | None
+    monitor_mode: str
     reason: str
 
     def to_dict(self) -> JsonDict:
@@ -37,6 +39,8 @@ class MemoryDecisionTraceEntry:
             "adaptive_sizing_enabled": self.adaptive_sizing_enabled,
             "monitor_available": self.monitor_available,
             "config_available": self.config_available,
+            "pressure_state": self.pressure_state,
+            "monitor_mode": self.monitor_mode,
             "reason": self.reason,
         }
 
@@ -62,7 +66,11 @@ class MemoryStats:
 
     @property
     def is_under_pressure(self) -> bool:
-        """Check pressure with the legacy coarse 80% threshold."""
+        """Check pressure with the coarse 80% convenience threshold.
+
+        Runtime policy should use ``is_under_pressure_at`` with
+        ``MemoryConfig.memory_pressure_threshold`` instead of this helper.
+        """
         return self.is_under_pressure_at(0.8)
 
     def is_under_pressure_at(self, threshold: float) -> bool:

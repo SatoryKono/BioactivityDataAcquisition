@@ -90,6 +90,8 @@ def _make_request() -> RunManifestCreateRequest:
         git_commit="abc1234",
         source_revision_state="clean",
         config_hash="a" * 64,
+        resolved_config_hash="b" * 64,
+        effective_config_hash="c" * 64,
         contract_ref="chembl.activity",
         contract_version="1.0.0",
         contract_schema_hash="abc123",
@@ -141,6 +143,28 @@ def test_create_manifest_preserves_distinct_config_hash_surfaces() -> None:
     assert provenance.effective_config_hash == "b" * 64
     assert manifest.to_dict()["code_provenance"]["resolved_config_hash"] == "a" * 64
     assert manifest.to_dict()["code_provenance"]["effective_config_hash"] == "b" * 64
+
+
+def test_create_manifest_does_not_alias_missing_effective_hash() -> None:
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-missing-effective-hash",
+    )
+    request = replace(
+        _make_request(),
+        config_hash="c" * 64,
+        resolved_config_hash="a" * 64,
+        effective_config_hash=None,
+        replay_capability=ReplayCapability.REBUILD_ONLY,
+    )
+
+    manifest = service.create_manifest(request)
+
+    provenance = manifest.code_provenance
+    assert provenance.config_hash == "c" * 64
+    assert provenance.resolved_config_hash == "a" * 64
+    assert provenance.effective_config_hash is None
 
 
 def test_create_manifest_preserves_resume_only_replay_capability() -> None:
@@ -310,7 +334,7 @@ def test_execution_fingerprint_matches_golden_value() -> None:
 
     assert (
         manifest.execution_fingerprint
-        == "5bc0cc26f2bd6ef5223410aa8b818d60398ac76f46f2b5853f59818dc310ede2"
+        == "972299d2692196313d3e8e0ce70b0ed09115bd7ceb5b51d25fb48dd67dd6eb10"
     )
 
 

@@ -119,8 +119,8 @@ class RunManifestService:
             git_commit=request.git_commit,
             source_revision_state=request.source_revision_state,
             config_hash=request.config_hash,
-            resolved_config_hash=request.resolved_config_hash or request.config_hash,
-            effective_config_hash=request.effective_config_hash or request.config_hash,
+            resolved_config_hash=request.resolved_config_hash,
+            effective_config_hash=request.effective_config_hash,
             contract_ref=request.contract_ref,
             contract_version=request.contract_version,
             contract_schema_hash=request.contract_schema_hash,
@@ -143,13 +143,13 @@ class RunManifestService:
                 "source_revision_state",
             ),
             config_hash=_optional_payload_string(payload, "config_hash"),
-            resolved_config_hash=(
-                _optional_payload_string(payload, "resolved_config_hash")
-                or _optional_payload_string(payload, "config_hash")
+            resolved_config_hash=_optional_payload_string(
+                payload,
+                "resolved_config_hash",
             ),
-            effective_config_hash=(
-                _optional_payload_string(payload, "effective_config_hash")
-                or _optional_payload_string(payload, "config_hash")
+            effective_config_hash=_optional_payload_string(
+                payload,
+                "effective_config_hash",
             ),
             contract_ref=_optional_payload_string(payload, "contract_ref"),
             contract_version=_optional_payload_string(payload, "contract_version"),

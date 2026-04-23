@@ -209,6 +209,13 @@ _BOOLEAN_COERCION_DISPATCH = {
 }
 
 
+def _normalize_str_boolean(value: str) -> bool | None:
+    normalized = normalize_string(value)
+    if normalized is None:
+        return None
+    return BINARY_FLAG_MAPPING.get(normalized.lower())
+
+
 def normalize_boolean(
     value: Any,  # Any: Accepts various input types for boolean conversion
 ) -> bool | None:
@@ -216,19 +223,14 @@ def normalize_boolean(
     if value is None:
         return None
 
-    # Try dispatch for direct type conversions
-    for type_, coercer in _BOOLEAN_COERCION_DISPATCH.items():
-        if isinstance(value, type_):
-            return coercer(value)
+    coercer = _BOOLEAN_COERCION_DISPATCH.get(type(value))
+    if coercer is not None:
+        return coercer(value)
 
-    # Handle string-based normalization
-    if not isinstance(value, str):
-        return None
+    if isinstance(value, str):
+        return _normalize_str_boolean(value)
 
-    normalized = normalize_string(value)
-    if normalized is None:
-        return None
-    return BINARY_FLAG_MAPPING.get(normalized.lower())
+    return None
 
 
 def normalize_binary_flag(

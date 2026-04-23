@@ -10,8 +10,8 @@ Consolidated registry of BioETL-focused local skills under `.codex/skills/`.
 - Verify and sync the local docs mirror with:
 
 ```bash
-bash scripts/ops/check_skills_mirror.sh --check
-bash scripts/ops/check_skills_mirror.sh --sync
+bash scripts/ai/codex/check_skills_mirror.sh --check
+bash scripts/ai/codex/check_skills_mirror.sh --sync
 ```
 
 ## Skill Groups

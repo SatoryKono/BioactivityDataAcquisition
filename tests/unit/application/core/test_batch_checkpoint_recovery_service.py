@@ -175,3 +175,5 @@ async def test_save_checkpoint_persists_memory_decision_trace(
     assert payload.records_processed == 100
     assert payload.memory_decision_trace[0]["stage"] == "pressure_check"
     assert payload.memory_decision_trace[0]["reason"] == "config_budget_exceeded"
+    assert payload.memory_decision_trace[0]["pressure_state"] is True
+    assert payload.memory_decision_trace[0]["monitor_mode"] == "config_budget"

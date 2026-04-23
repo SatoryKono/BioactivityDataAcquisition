@@ -97,3 +97,38 @@ async def test_resolve_finalization_dq_metrics_normalizes_mixed_struct_and_strin
     dq_input = dq_calculator.calculate.call_args.args[0]
     normalized_records = dq_input.records
     assert all(isinstance(row["assay_taxonomy"], str) for row in normalized_records)
+    assert dq_input.validation_errors is None
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_compute_dq_metrics_passes_explicit_validation_context() -> None:
+    """Explicit DQ validation context should reach the calculator input."""
+    import pyarrow as pa
+
+    dq_calculator = MagicMock()
+    dq_calculator.calculate.return_value = BatchDQMetrics(
+        total_records=3,
+        valid_records=2,
+        error_records=1,
+        warning_records=0,
+    )
+    ops = SilverMetadataOperations(
+        _logger=MagicMock(),
+        _dq_calculator=dq_calculator,
+    )
+
+    await ops.compute_dq_metrics(
+        arrow_data=pa.Table.from_pylist(
+            [
+                {"entity_id": "CHEMBL1"},
+                {"entity_id": "CHEMBL2"},
+            ]
+        ),
+        quarantined_count=1,
+        validation_errors=("missing required activity_id",),
+    )
+
+    dq_input = dq_calculator.calculate.call_args.args[0]
+    assert dq_input.quarantined_count == 1
+    assert dq_input.validation_errors == ["missing required activity_id"]

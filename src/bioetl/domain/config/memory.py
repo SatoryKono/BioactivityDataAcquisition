@@ -5,25 +5,28 @@ Defines the MemoryConfig value object for memory-aware batch processing.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from pydantic import BaseModel, Field
 
 __all__ = [
     "MemoryConfig",
 ]
 
 
-@dataclass(frozen=True, slots=True)
-class MemoryConfig:
+class MemoryConfig(BaseModel, frozen=True, extra="forbid"):
     """Configuration for memory-aware batch processing.
 
     Used by MemoryMonitor (infrastructure layer) to configure adaptive
     batch sizing based on memory pressure detection.
 
     Attributes:
-        max_batch_memory_mb: Maximum memory per batch in MB (default: 512MB).
-        memory_pressure_threshold: Threshold (0.0-1.0) for reducing batch size (default: 0.8).
-        min_batch_size: Minimum batch size even under memory pressure (default: 10).
-        check_interval_records: Check memory every N records (default: 100).
+        max_batch_memory_mb: Positive maximum memory budget per batch in MB.
+            Memory-derived maximum batch calculations may still return
+            min_batch_size as a forward-progress floor when records are large.
+        memory_pressure_threshold: Configured pressure threshold in the range
+            (0.0, 1.0]. Infrastructure treats usage equal to the threshold as
+            pressure.
+        min_batch_size: Positive minimum batch size even under memory pressure.
+        check_interval_records: Positive interval for memory checks.
         enable_adaptive_sizing: Enable/disable adaptive batch sizing (default: True).
 
     Example:
@@ -34,21 +37,8 @@ class MemoryConfig:
         512
     """
 
-    max_batch_memory_mb: int = 512
-    memory_pressure_threshold: float = 0.8
-    min_batch_size: int = 10
-    check_interval_records: int = 100
+    max_batch_memory_mb: int = Field(default=512, gt=0)
+    memory_pressure_threshold: float = Field(default=0.8, gt=0.0, le=1.0)
+    min_batch_size: int = Field(default=10, gt=0)
+    check_interval_records: int = Field(default=100, gt=0)
     enable_adaptive_sizing: bool = True
-
-    def __post_init__(self) -> None:
-        """Validate memory-adaptive sizing limits."""
-        if self.max_batch_memory_mb <= 0:
-            raise ValueError("max_batch_memory_mb must be greater than 0")
-        if not 0.0 < self.memory_pressure_threshold <= 1.0:
-            raise ValueError(
-                "memory_pressure_threshold must be in the range (0.0, 1.0]"
-            )
-        if self.min_batch_size <= 0:
-            raise ValueError("min_batch_size must be greater than 0")
-        if self.check_interval_records <= 0:
-            raise ValueError("check_interval_records must be greater than 0")

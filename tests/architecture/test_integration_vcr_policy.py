@@ -144,7 +144,7 @@ class TestIntegrationVcrPolicy:
         assert refresh_protocol["targeted_recording_only"] is True
         assert refresh_protocol["preferred_refresh_mode"] == "new_episodes"
         assert (
-            "python -m scripts.data check-vcr-secrets"
+            "python -m scripts.engineering.qa.vcr check-secrets"
             in refresh_protocol["post_refresh_checks"]
         )
         assert (

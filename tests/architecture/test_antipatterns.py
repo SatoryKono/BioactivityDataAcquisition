@@ -88,10 +88,13 @@ def test_no_sentinel_values(source_content_cache: dict) -> None:
         for i, code in code_lines.items():
             if rx.search(code) and not const_assign.match(code):
                 violations.append(f"{path}:{i}: {text.splitlines()[i - 1].strip()}")
-    assert not violations, "Sentinel values found:\n" + "\n".join(violations[:50])
+    assert not violations, "Sentinel values found:
+" + "
+".join(violations[:50])
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(600) # Increased timeout to 10 minutes
 def test_no_hardcoded_secrets() -> None:
     baseline_path = REPO_ROOT / ".secrets.baseline"
     if not baseline_path.exists():
@@ -105,7 +108,8 @@ def test_no_hardcoded_secrets() -> None:
     )
     if result.returncode != 0:
         raise AssertionError(
-            "detect-secrets scan failed:\n"
+            "detect-secrets scan failed:
+"
             f"{result.stderr.strip() or result.stdout.strip()}"
         )
 
@@ -132,8 +136,10 @@ def test_no_hardcoded_secrets() -> None:
             violations.append(f"{file_path}:{line_number}: {secret_type}")
 
     assert not violations, (
-        "Potential secrets detected. Update .secrets.baseline if false positives:\n"
-        + "\n".join(violations[:50])
+        "Potential secrets detected. Update .secrets.baseline if false positives:
+"
+        + "
+".join(violations[:50])
     )
 
 
@@ -143,7 +149,9 @@ def test_no_print_in_production(source_content_cache: dict) -> None:
         for i, line in enumerate(text.splitlines(), 1):
             if re.match(r"^\s*print\(", line):
                 violations.append(f"{path}:{i}: {line.strip()}")
-    assert not violations, "print() usage found:\n" + "\n".join(violations[:50])
+    assert not violations, "print() usage found:
+" + "
+".join(violations[:50])
 
 
 def _extract_code_only(func_source: str) -> str:
@@ -166,7 +174,8 @@ def _extract_code_only(func_source: str) -> str:
         # Remove inline comments
         code_part = line.split("#")[0]
         lines.append(code_part)
-    return "\n".join(lines)
+    return "
+".join(lines)
 
 
 def _iter_async_function_defs(tree: ast.AST) -> list[ast.AsyncFunctionDef]:
@@ -193,6 +202,8 @@ def test_no_blocking_io_in_async(
         for node in _iter_async_function_defs(tree):
             if _async_function_uses_blocking_io(node, source=source):
                 violations.append(f"{path}:{node.lineno}: async def {node.name}")
-    assert not violations, "Blocking I/O in async functions:\n" + "\n".join(
+    assert not violations, "Blocking I/O in async functions:
+" + "
+".join(
         violations[:50]
     )

@@ -7,7 +7,17 @@ from datetime import datetime
 
 import orjson
 
-from bioetl.domain.models.metadata import SilverMetadata
+from bioetl.domain.models.metadata import (
+    BaseOutputMetadata,
+    DeltaMetrics,
+    DQSummary,
+    EnvironmentMetadata,
+    LineageMetadata,
+    PipelineMetadata,
+    RuntimeMetadata,
+    SilverMetadata,
+    SilverOutputExt,
+)
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
@@ -119,35 +129,11 @@ def _normalize_records_for_dq_metrics(
     ]
 
 
-def _build_silver_metadata(
+def _build_runtime_metadata(
     request: _SilverMetadataBuildRequest,
-) -> SilverMetadata:
-    """Build a complete SilverMetadata payload from write/finalization inputs."""
-    from bioetl.domain.models.metadata import (
-        BaseOutputMetadata,
-        DeltaMetrics,
-        DQSummary,
-        EnvironmentMetadata,
-        LineageMetadata,
-        PipelineMetadata,
-        RuntimeMetadata,
-        SilverOutputExt,
-    )
-
-    provider_name, entity_name = _split_table_name(request.table_name)
-    (
-        total_records,
-        valid_records,
-        error_records,
-        warning_records,
-        error_rate,
-        validation_passed,
-    ) = _resolve_dq_summary_values(
-        request.dq_metrics,
-        records_count=len(request.records),
-    )
-
-    runtime_metadata = RuntimeMetadata(
+) -> RuntimeMetadata:
+    """Build runtime metadata for a Silver sidecar."""
+    return RuntimeMetadata(
         run_id=str(request.run_id or "unknown"),
         manifest_id=request.manifest_id,
         run_type=request.run_type or "incremental",
@@ -162,13 +148,23 @@ def _build_silver_metadata(
             ),
         ),
     )
-    pipeline_metadata = PipelineMetadata(
+
+
+def _build_pipeline_metadata(provider_name: str, entity_name: str) -> PipelineMetadata:
+    """Build pipeline identity metadata for a Silver sidecar."""
+    return PipelineMetadata(
         name=provider_name,
         provider=provider_name,
         entity=entity_name,
         version="1.0",
     )
-    lineage_metadata = LineageMetadata(
+
+
+def _build_lineage_metadata(
+    request: _SilverMetadataBuildRequest,
+) -> LineageMetadata:
+    """Build lineage metadata for a Silver sidecar."""
+    return LineageMetadata(
         source_batch_ids=[str(request.source_batch_id)]
         if request.source_batch_id
         else [],
@@ -180,7 +176,11 @@ def _build_silver_metadata(
         if request.transform_steps
         else [],
     )
-    delta_metadata = DeltaMetrics(
+
+
+def _build_delta_metadata(request: _SilverMetadataBuildRequest) -> DeltaMetrics:
+    """Build Delta operation metadata for a Silver sidecar."""
+    return DeltaMetrics(
         table_path=request.table_path,
         operation=str(request.mode),
         primary_key=request.primary_keys or [],
@@ -193,7 +193,22 @@ def _build_silver_metadata(
         rows_updated=0,
         rows_deleted=0,
     )
-    dq_summary = DQSummary(
+
+
+def _build_dq_summary(request: _SilverMetadataBuildRequest) -> DQSummary:
+    """Build DQ summary metadata for a Silver sidecar."""
+    (
+        total_records,
+        valid_records,
+        error_records,
+        warning_records,
+        error_rate,
+        validation_passed,
+    ) = _resolve_dq_summary_values(
+        request.dq_metrics,
+        records_count=len(request.records),
+    )
+    return DQSummary(
         total_records=total_records,
         valid_records=valid_records,
         error_records=error_records,
@@ -203,26 +218,45 @@ def _build_silver_metadata(
         schema_drift=_build_schema_drift_object(request.dq_metrics),
         validation_passed=validation_passed,
     )
+
+
+def _build_output_metadata(request: _SilverMetadataBuildRequest) -> BaseOutputMetadata:
+    """Build output artifact metadata for a Silver sidecar."""
+    return BaseOutputMetadata(
+        artifact_id=f"{request.table_name}-{request.run_id or 'unknown'}",
+        record_count=len(request.records),
+        total_bytes=0,
+        content_hash="placeholder-hash",
+    )
+
+
+def _build_environment_metadata(
+    request: _SilverMetadataBuildRequest,
+) -> EnvironmentMetadata:
+    """Build runtime environment metadata for a Silver sidecar."""
+    return EnvironmentMetadata(
+        hostname=request.hostname,
+        bioetl_version=request.bioetl_version,
+        python_version=request.python_version,
+    )
+
+
+def _build_silver_metadata(
+    request: _SilverMetadataBuildRequest,
+) -> SilverMetadata:
+    """Build a complete SilverMetadata payload from write/finalization inputs."""
+    provider_name, entity_name = _split_table_name(request.table_name)
     return SilverMetadata(
         table_name=request.table_name,
-        runtime=runtime_metadata,
-        pipeline=pipeline_metadata,
-        lineage=lineage_metadata,
-        delta=delta_metadata,
-        dq_summary=dq_summary,
-        output=BaseOutputMetadata(
-            artifact_id=f"{request.table_name}-{request.run_id or 'unknown'}",
-            record_count=len(request.records),
-            total_bytes=0,
-            content_hash="placeholder-hash",
-        ),
+        runtime=_build_runtime_metadata(request),
+        pipeline=_build_pipeline_metadata(provider_name, entity_name),
+        lineage=_build_lineage_metadata(request),
+        delta=_build_delta_metadata(request),
+        dq_summary=_build_dq_summary(request),
+        output=_build_output_metadata(request),
         output_ext=SilverOutputExt(
             delta_version_before=None,
             delta_version_after=request.version_after,
         ),
-        environment=EnvironmentMetadata(
-            hostname=request.hostname,
-            bioetl_version=request.bioetl_version,
-            python_version=request.python_version,
-        ),
+        environment=_build_environment_metadata(request),
     )

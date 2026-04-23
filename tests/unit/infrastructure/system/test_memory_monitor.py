@@ -128,6 +128,7 @@ class TestGetMemoryStatsEstimate:
         assert stats.available_mb == pytest.approx(4096.0)
         assert stats.percent_used == pytest.approx(0.5)
         assert stats.process_mb == pytest.approx(256.0)
+        assert monitor.get_monitor_mode() == "estimate"
 
     def test_fallback_calls_estimate_on_win32(self) -> None:
         """On win32 platform _get_stats_fallback calls estimate."""
@@ -224,6 +225,17 @@ class TestIsUnderPressure:
         monitor = _make_monitor(threshold=0.8)
         with patch.object(monitor, "get_memory_stats", return_value=_mock_stats(0.8)):
             assert monitor.is_under_pressure() is True
+        assert monitor.get_last_pressure_state() is True
+
+    def test_monitor_mode_and_pressure_state_are_bounded(self) -> None:
+        """Adaptive decisions expose replay-safe monitor mode and pressure state."""
+        monitor = _make_monitor(threshold=0.8)
+        with patch.object(monitor, "get_memory_stats", return_value=_mock_stats(0.3)):
+            result = monitor.get_recommended_batch_size(500)
+
+        assert result == 500
+        assert monitor.get_last_pressure_state() is False
+        assert monitor.get_monitor_mode() == "unknown"
 
 
 # ---------------------------------------------------------------------------
@@ -274,6 +286,40 @@ class TestGetRecommendedBatchSize:
         # Recovery: 25% increase toward 1000
         assert result == min(int(400 * 1.25), 1000)
         assert result == 500
+
+    def test_recovery_uses_pre_pressure_batch_size_as_target(self) -> None:
+        """Recovery is anchored to the size that was active before pressure."""
+        monitor = _make_monitor(threshold=0.8)
+
+        with patch.object(monitor, "get_memory_stats") as mock_stats:
+            mock_stats.return_value = _mock_stats(0.9)
+            reduced = monitor.get_recommended_batch_size(1000)
+
+            assert reduced == 500
+            assert monitor._recovery_target_batch_size == 1000
+
+            mock_stats.return_value = _mock_stats(0.3)
+            recovered_once = monitor.get_recommended_batch_size(reduced)
+            recovered_twice = monitor.get_recommended_batch_size(recovered_once)
+
+        assert recovered_once == 625
+        assert recovered_twice == 781
+        assert monitor._last_batch_size == 1000
+
+    def test_recovery_clears_target_after_full_restore(self) -> None:
+        """Recovery target is cleared once the original size is restored."""
+        monitor = _make_monitor(threshold=0.8)
+
+        with patch.object(monitor, "get_memory_stats") as mock_stats:
+            mock_stats.return_value = _mock_stats(0.9)
+            current_size = monitor.get_recommended_batch_size(1000)
+
+            mock_stats.return_value = _mock_stats(0.3)
+            for _ in range(8):
+                current_size = monitor.get_recommended_batch_size(current_size)
+
+        assert current_size == 1000
+        assert monitor._recovery_target_batch_size is None
 
     def test_logs_warning_on_reduction(self) -> None:
         """Logger.warning is called when batch is reduced."""
