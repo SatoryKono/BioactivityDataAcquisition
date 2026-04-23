@@ -1,7 +1,41 @@
-version: 1
-source: issue_3035_observed_value_governance
-description: Representative offline observed values for ChEMBL non-activity enum and unit-like normalization governance.
+version: 2
+source: issue_3102_observed_value_governance
+description: Expanded offline observed, policy, and negative normalization evidence for ChEMBL policy-bearing fields.
+
 observed_values:
+  activity:
+    standard_relation:
+      - "="
+      - "<"
+      - "<="
+      - ">"
+      - ">="
+      - "~"
+    relation:
+      - "="
+      - "<"
+      - "~"
+    units:
+      - nM
+      - uM
+      - μM
+      - ug.mL-1
+    standard_units:
+      - nM
+      - µM
+      - mM
+      - "%"
+      - ug.mL-1
+    uo_units:
+      - UO:0000065
+      - UO_0000065
+    qudt_units:
+      - nM
+      - mg.kg-1
+    target_organism:
+      - Homo sapiens (Human)
+      - e. coli
+      - Mus musculus
   assay:
     assay_type:
       - B
@@ -37,6 +71,12 @@ observed_values:
       - Membrane
       - Nucleus
       - Cytoplasm
+    assay_classifications:
+      - '[{"level":"A"},{"level":"B"}]'
+    assay_parameters:
+      - '[{"type":"TEMP","value":"37"},{"type":"PH","value":"7.4"}]'
+    variant_sequence_json:
+      - '{"accession":"P12345","mutation":"V600E"}'
   assay_parameters:
     standard_type:
       - CONC
@@ -46,6 +86,14 @@ observed_values:
       - CELL_COUNT
       - IC50
       - "% Inhibition"
+    type:
+      - conc
+      - TEMP
+      - ph
+    relation:
+      - "="
+      - "<"
+      - "~"
     standard_relation:
       - "="
       - "<"
@@ -53,6 +101,10 @@ observed_values:
       - ">"
       - ">="
       - "~"
+    units:
+      - nM
+      - uM
+      - "%"
     standard_units:
       - nM
       - µM
@@ -73,6 +125,9 @@ observed_values:
       - Antibody
       - Protein
       - Unknown
+    ro3_pass:
+      - Y
+      - N
     structure_type:
       - MOL
       - SEQ
@@ -90,15 +145,191 @@ observed_values:
       - PROTEIN
       - DNA
       - RNA
+    organism:
+      - e. coli
+      - Homo sapiens (Human)
+    accession:
+      - P12345
+      - Q9Y243
+  cell_line:
+    cellosaurus_id:
+      - CVCL_0030
+      - cvcl:0030
+      - cvcl-0030
+    efo_id:
+      - EFO:0001187
+    clo_id:
+      - CLO:0003684
   publication:
     publication_type:
       - PUBLICATION
       - PATENT
       - DATASET
       - BOOK
+    is_oa:
+      - "1"
+      - "0"
+      - Y
+      - N
+      - "true"
+      - "false"
+    authors:
+      - '["Alice Smith","Bob Jones"]'
+    affiliation_list:
+      - '["Lab A","Lab B"]'
+    author_orcids:
+      - '["0000-0002-1825-0097","0000-0001-5109-3700"]'
   publication_term:
     term_type:
       - MESH_HEADING
       - MESH_QUALIFIER
       - KEYWORD
       - CONCEPT
+
+policy_values:
+  activity:
+    standard_relation:
+      - "="
+      - "<"
+      - "<="
+      - ">"
+      - ">="
+      - "~"
+    standard_units:
+      - nM
+      - µM
+      - mM
+      - pM
+      - M
+      - "%"
+      - ug.mL-1
+      - mg.kg-1
+  assay:
+    assay_category:
+      - screening
+      - confirmatory
+      - panel
+      - summary
+      - other
+      - Affinity biochemical assay
+      - Affinity on-target cellular assay
+      - Affinity phenotypic cellular assay
+      - Alphascreen assay
+      - Cell health data
+      - GPCR beta-arrestin recruitment assay
+      - HTRF assay
+      - ITC assay
+      - Incucyte cell viability
+      - NanoBRET assay
+      - PDSP assay
+      - Selectivity assay
+      - Thermal shift assay
+  molecule:
+    ro3_pass:
+      - Y
+      - N
+  target_component:
+    component_type:
+      - PROTEIN
+      - DNA
+      - RNA
+  publication:
+    publication_type:
+      - PUBLICATION
+      - PATENT
+      - DATASET
+      - BOOK
+
+dq_only_subsets:
+  activity:
+    standard_relation:
+      - "="
+      - "<"
+      - "<="
+      - ">"
+      - ">="
+      - "~"
+    standard_units:
+      - nM
+      - µM
+      - mM
+      - pM
+      - M
+      - "%"
+      - ug.mL-1
+      - mg.kg-1
+  molecule:
+    ro3_pass:
+      - Y
+      - N
+  target_component:
+    component_type:
+      - PROTEIN
+      - DNA
+      - RNA
+
+unexpected_observed_values:
+  activity:
+    relation:
+      - input: between
+        expected: between
+    units:
+      - input: mg/L
+        expected: mg/L
+    target_organism:
+      - input: Novelus specius
+        expected: Novelus specius
+  assay_parameters:
+    units:
+      - input: RFU
+        expected: RFU
+  target_component:
+    accession:
+      - input: ENSP00000354587
+        expected: ENSP00000354587
+  cell_line:
+    cellosaurus_id:
+      - input: HE-LA
+        expected: HE-LA
+
+negative_values:
+  activity:
+    standard_relation:
+      - input: "!="
+        expected: null
+  assay:
+    assay_classifications:
+      - input: "{not json}"
+        expected: null
+    assay_parameters:
+      - input: "{not json}"
+        expected: null
+    variant_sequence_json:
+      - input: "{not json}"
+        expected: null
+  molecule:
+    ro3_pass:
+      - input: MAYBE
+        expected: null
+  target_component:
+    component_type:
+      - input: LIPID
+        expected: null
+  publication:
+    publication_type:
+      - input: WHITEPAPER
+        expected: null
+    is_oa:
+      - input: maybe
+        expected: null
+      - input: 2
+        expected: null
+    authors:
+      - input: "{not json}"
+        expected: null
+    affiliation_list:
+      - input: "{not json}"
+        expected: null
+    author_orcids:
+      - input: "{not json}"
+        expected: null

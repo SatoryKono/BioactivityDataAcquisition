@@ -262,17 +262,29 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     assert activity_properties["strictness"] == "strict_json"
 
     activity_units = _row(rows, "chembl_activity", "units")
+    assert activity_units["semantic_category"] == "controlled_vocabulary"
     assert activity_units["normalizer"] == "normalize_profile_unit"
     assert activity_units["strictness"] == "controlled_unit"
     assert activity_units["dq_coverage"] == "pattern:error"
+    assert activity_units["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_controlled.yaml"
+    )
 
     activity_uo_units = _row(rows, "chembl_activity", "uo_units")
+    assert activity_uo_units["semantic_category"] == "ontology_reference_identifier"
     assert activity_uo_units["strictness"] == "controlled_unit"
     assert activity_uo_units["dq_coverage"] == "pattern:error"
+    assert activity_uo_units["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_ontology.yaml"
+    )
 
     activity_qudt_units = _row(rows, "chembl_activity", "qudt_units")
+    assert activity_qudt_units["semantic_category"] == "controlled_vocabulary"
     assert activity_qudt_units["strictness"] == "controlled_unit"
     assert activity_qudt_units["dq_coverage"] == "pattern:error"
+    assert activity_qudt_units["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_controlled.yaml"
+    )
 
     target_cross_references = _row(rows, "chembl_target", "cross_references")
     assert target_cross_references["normalizer"] == "normalize_profile_json_string_strict"
@@ -283,8 +295,9 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     assert molecule_properties["strictness"] == "strict_json"
 
     bao_format = _row(rows, "chembl_activity", "bao_format")
+    assert bao_format["semantic_category"] == "ontology_reference_identifier"
     assert bao_format["controlled_vocabulary_source"] == (
-        "domain.normalization.ontology_id_prefixes"
+        "configs/vocab/chembl_ontology.yaml"
     )
     assert bao_format["strictness"] == "canonical_ontology_id"
 
@@ -296,12 +309,35 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     assert publication_term_type["dq_coverage"] == "enum:error"
 
     assay_parameter_units = _row(rows, "chembl_assay_parameters", "units")
+    assert assay_parameter_units["semantic_category"] == "controlled_vocabulary"
     assert assay_parameter_units["strictness"] == "controlled_unit"
     assert assay_parameter_units["dq_coverage"] == "pattern:error"
+    assert assay_parameter_units["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_controlled.yaml"
+    )
+
+    assay_parameter_standard_type = _row(
+        rows, "chembl_assay_parameters", "standard_type"
+    )
+    assert assay_parameter_standard_type["controlled_vocabulary_source"] == (
+        "configs/enums/chembl.yaml"
+    )
+
+    publication_class = _row(rows, "chembl_publication", "publication_class")
+    assert publication_class["semantic_category"] == "derived_vocabulary"
+    assert publication_class["controlled_vocabulary_source"] == (
+        "configs/enums/publication_type_classification.csv"
+    )
 
     ro3_pass = _row(rows, "chembl_molecule", "ro3_pass")
+    assert ro3_pass["controlled_vocabulary_source"] == "configs/enums/chembl.yaml"
     assert ro3_pass["strictness"] == "strict_enum"
     assert ro3_pass["dq_coverage"] == "enum:error"
+
+    component_type = _row(rows, "chembl_target_component", "component_type")
+    assert component_type["controlled_vocabulary_source"] == (
+        "configs/enums/chembl.yaml"
+    )
 
 
 def test_chembl_policy_bearing_fields_do_not_silently_stay_dq_not_configured() -> None:
@@ -446,6 +482,7 @@ def test_render_markdown_mentions_surface_scoped_coverage_kpis() -> None:
     assert "## Semantic Invariant Summary" in markdown
     assert "Entity coverage is entity-scoped only" in markdown
     assert "controlled_vocabulary_source" in markdown
+    assert "semantic_category" in markdown
     assert "schema_coverage" in markdown
     assert "dq_coverage" in markdown
     assert (

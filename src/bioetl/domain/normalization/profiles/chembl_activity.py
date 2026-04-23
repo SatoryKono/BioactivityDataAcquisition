@@ -16,6 +16,10 @@ from ._chembl_activity_fields import (
     SET_LIKE_FIELDS,
     STANDARD_RELATIONS,
 )
+from ._chembl_policy_registry import (
+    chembl_controlled_family_fields,
+    chembl_ontology_family_fields,
+)
 from ._standard_profile_builder import build_standard_profile
 from .chembl_pseudo_nulls import chembl_pseudo_null_fields
 from .profile_normalizers import (
@@ -60,8 +64,9 @@ _ENUM_FIELDS = {
     "standard_type": ACTIVITY_STANDARD_TYPES,
     "assay_type": ASSAY_TYPES,
 }
-_ONTOLOGY_ID_FIELDS = frozenset({"uo_units"})
-_UNIT_FIELDS = frozenset({"units", "standard_units", "qudt_units"})
+_ONTOLOGY_ID_FIELDS = chembl_ontology_family_fields("uo", entity="activity")
+_UNIT_FIELDS = chembl_controlled_family_fields("units", entity="activity")
+_BAO_FIELDS = chembl_ontology_family_fields("bao", entity="activity")
 _STRICT_JSON_FIELDS = SET_LIKE_FIELDS
 
 _SPECIAL_RULE_COMPONENTS = {
@@ -80,18 +85,17 @@ _SPECIAL_RULE_COMPONENTS = {
         lambda value: normalize_profile_enum(value, allowed_values=ASSAY_TYPES),
         "Normalize assay_type to uppercase enum value and collapse unknown values to None.",
     ),
-    "bao_endpoint": (
-        normalize_profile_bao_identifier,
-        "Normalize BAO endpoint identifier to canonical BAO underscore form.",
-    ),
-    "bao_format": (
-        normalize_profile_bao_identifier,
-        "Normalize BAO format identifier to canonical BAO underscore form.",
-    ),
     "target_organism": (
         normalize_profile_chembl_organism_name,
         "Normalize target organism display name using the shared curated ChEMBL organism aliases.",
     ),
+    **{
+        field_name: (
+            normalize_profile_bao_identifier,
+            f"Normalize BAO {field_name.removeprefix('bao_')} identifier to canonical BAO underscore form.",
+        )
+        for field_name in sorted(_BAO_FIELDS)
+    },
 }
 
 
@@ -110,7 +114,7 @@ CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
     int_fields=INT_FIELDS,
     float_fields=FLOAT_FIELDS,
     flag_fields={"standard_flag", "potential_duplicate", "manual_curation_flag"},
-    operator_fields={"relation"},
+    operator_fields=chembl_controlled_family_fields("operators", entity="activity"),
     set_like_fields=SET_LIKE_FIELDS,
     strict_json_fields=_STRICT_JSON_FIELDS,
     ontology_id_fields=_ONTOLOGY_ID_FIELDS,

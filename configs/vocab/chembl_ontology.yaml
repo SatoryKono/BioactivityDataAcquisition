@@ -1,0 +1,71 @@
+version: 1
+description: Shared ChEMBL ontology/reference canonicalization registry for prefix, IRI-collapse, and code-label seams.
+
+families:
+  bao:
+    canonical_prefix: BAO_
+    accepted_inputs:
+      - prefixed_id
+      - colon_form
+      - obo_iri
+    fields:
+      - chembl_activity.bao_endpoint
+      - chembl_activity.bao_format
+      - chembl_assay.bao_format
+    code_label_fields:
+      - chembl_assay.bao_label
+  uo:
+    canonical_prefix: UO_
+    accepted_inputs:
+      - prefixed_id
+      - colon_form
+    fields:
+      - chembl_activity.uo_units
+  bto:
+    canonical_prefix: BTO_
+    accepted_inputs:
+      - prefixed_id
+      - colon_form
+      - obo_iri
+    fields:
+      - chembl_tissue.bto_id
+  caloha:
+    canonical_prefix: TS-
+    accepted_inputs:
+      - ts_code
+      - caloha_prefixed_code
+    fields:
+      - chembl_tissue.caloha_id
+  efo:
+    canonical_prefix: EFO_
+    accepted_inputs:
+      - prefixed_id
+      - colon_form
+      - obo_iri
+    fields:
+      - chembl_cell_line.efo_id
+      - chembl_tissue.efo_id
+  clo:
+    canonical_prefix: CLO_
+    accepted_inputs:
+      - prefixed_id
+      - colon_form
+      - obo_iri
+    fields:
+      - chembl_cell_line.clo_id
+  uberon:
+    canonical_prefix: UBERON_
+    accepted_inputs:
+      - prefixed_id
+      - colon_form
+      - obo_iri
+    fields:
+      - chembl_tissue.uberon_id
+  cellosaurus:
+    canonical_prefix: CVCL_
+    accepted_inputs:
+      - prefixed_id
+      - colon_form
+      - dash_form
+    fields:
+      - chembl_cell_line.cellosaurus_id

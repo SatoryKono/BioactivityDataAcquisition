@@ -178,6 +178,7 @@ MOLECULE_TYPES: frozenset[str] = frozenset(
 )
 
 STRUCTURE_TYPES: frozenset[str] = frozenset(["MOL", "SEQ", "BOTH", "NONE"])
+RO3_PASS_VALUES: frozenset[str] = frozenset(["Y", "N"])
 
 # max_phase uses float for 0.5, so tuple instead of frozenset
 MAX_PHASE_VALUES: tuple[float, ...] = (-1, 0, 0.5, 1, 2, 3, 4)

@@ -12,7 +12,8 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_chembl_organism_name,
 )
 from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
-from bioetl.domain.schemas.constants import TARGET_COMPONENT_TYPES
+
+from ._chembl_vocab import chembl_enum
 
 __all__ = [
     "CHEMBL_TARGET_COMPONENT_PROFILE",
@@ -22,6 +23,7 @@ __all__ = [
 CHEMBL_TARGET_COMPONENT_SCHEMA_FIELDS = tuple(
     TargetComponentSchema.to_schema().columns.keys()
 )
+TARGET_COMPONENT_TYPES = chembl_enum("target_component", "component_type")
 
 _META_FIELDS = frozenset(
     {

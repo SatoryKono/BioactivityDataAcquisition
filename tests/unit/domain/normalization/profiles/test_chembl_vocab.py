@@ -10,7 +10,9 @@ from bioetl.domain.schemas.constants import (
     ASSAY_PARAMETER_STANDARD_TYPES,
     ASSAY_TYPES,
     RELATIONSHIP_TYPES,
+    RO3_PASS_VALUES,
     STANDARD_RELATIONS,
+    TARGET_COMPONENT_TYPES,
 )
 
 
@@ -23,6 +25,8 @@ def test_chembl_enum_returns_immutable_profile_vocabularies() -> None:
         == ASSAY_PARAMETER_STANDARD_TYPES
     )
     assert chembl_enum("assay_parameters", "standard_relation") == STANDARD_RELATIONS
+    assert chembl_enum("molecule", "ro3_pass") == RO3_PASS_VALUES
+    assert chembl_enum("target_component", "component_type") == TARGET_COMPONENT_TYPES
     assert isinstance(chembl_enum("assay", "assay_type"), frozenset)
 
 

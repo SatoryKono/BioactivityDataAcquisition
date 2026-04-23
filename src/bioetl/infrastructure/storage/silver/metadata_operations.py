@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import time
-from collections.abc import Awaitable, Callable, Mapping, Sequence
-from dataclasses import dataclass
+from collections.abc import Awaitable, Callable, Sequence
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import Protocol, cast
 
 from deltalake import DeltaTable
 
@@ -20,7 +19,6 @@ from bioetl.domain.ports import (
     SilverMetadataInput,
 )
 from bioetl.domain.types import BronzeRecord
-from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.lineage_persistence import (
@@ -33,9 +31,14 @@ from bioetl.infrastructure.storage.metadata.builder_base import (
     _parse_table_name,
     _resolve_metadata_timestamp,
 )
-
-if TYPE_CHECKING:
-    from bioetl.domain.lineage import LineageGraphFragment
+from bioetl.infrastructure.storage.silver.metadata_request_models import (
+    _coerce_silver_metadata_write_request,
+    _PreparedSilverMetadataWriteOperation,
+    _PreparedSilverWriteFinalizationContext,
+    _ResolvedSilverMetadataContext,
+    _SilverMergedMetadataWriteRequest,
+    _SilverMetadataWriteRequest,
+)
 
 __all__ = [
     "_PreparedSilverWriteFinalizationContext",
@@ -49,182 +52,6 @@ __all__ = [
     "_prepare_silver_write_finalization_context",
     "_read_delta_version",
 ]
-
-
-@dataclass(frozen=True, slots=True)
-class _SilverMetadataWriteRequest:
-    """Normalized request payload for one standard Silver metadata write."""
-
-    table_path: str
-    table_name: str
-    records: list[BronzeRecord]
-    primary_keys: list[str]
-    mode: SilverWriteMode
-    bronze_refs: list[BronzeWriteResult] | None = None
-    dq_metrics: BatchDQMetrics | None = None
-    dq_report_path: str | None = None
-    partition_by: list[str] | None = None
-    source_batch_ids: list[str] | None = None
-    started_at: datetime | None = None
-    completed_at: datetime | None = None
-    version_after: int | None = None
-
-
-_SILVER_METADATA_WRITE_POSITIONAL_FIELDS = (
-    "table_path",
-    "table_name",
-    "records",
-    "primary_keys",
-    "mode",
-    "bronze_refs",
-    "dq_metrics",
-    "dq_report_path",
-    "partition_by",
-    "source_batch_ids",
-    "started_at",
-    "completed_at",
-    "version_after",
-)
-_SILVER_METADATA_WRITE_REQUIRED_FIELDS = (
-    "table_path",
-    "table_name",
-    "records",
-    "primary_keys",
-    "mode",
-)
-_SILVER_METADATA_WRITE_DEFAULTS: dict[str, object] = {
-    "bronze_refs": None,
-    "dq_metrics": None,
-    "dq_report_path": None,
-    "partition_by": None,
-    "source_batch_ids": None,
-    "started_at": None,
-    "completed_at": None,
-    "version_after": None,
-}
-_SILVER_METADATA_WRITE_ALLOWED_FIELDS = frozenset(
-    {
-        *_SILVER_METADATA_WRITE_POSITIONAL_FIELDS,
-        *tuple(_SILVER_METADATA_WRITE_DEFAULTS),
-    }
-)
-
-
-def _coerce_silver_metadata_write_request(
-    request: _SilverMetadataWriteRequest | str | None = None,
-    *,
-    args: tuple[object, ...] = (),
-    kwargs: Mapping[str, object] | None = None,
-) -> _SilverMetadataWriteRequest:
-    """Normalize legacy or request-style Silver metadata write arguments."""
-    resolved_kwargs = dict(kwargs or {})
-    if isinstance(request, _SilverMetadataWriteRequest):
-        if args or resolved_kwargs:
-            raise TypeError(
-                "_SilverMetadataWriteRequest cannot be combined with legacy args/kwargs"
-            )
-        return request
-
-    legacy_values: list[object]
-    legacy_values = list(args) if request is None else [request, *args]
-
-    if len(legacy_values) > len(_SILVER_METADATA_WRITE_POSITIONAL_FIELDS):
-        raise TypeError(
-            "_write_silver_metadata() received too many positional arguments"
-        )
-
-    for field_name, value in zip(
-        _SILVER_METADATA_WRITE_POSITIONAL_FIELDS,
-        legacy_values,
-        strict=False,
-    ):
-        if field_name in resolved_kwargs:
-            raise TypeError(
-                f"_write_silver_metadata() got multiple values for argument '{field_name}'"
-            )
-        resolved_kwargs[field_name] = value
-
-    unexpected_fields = sorted(
-        set(resolved_kwargs) - _SILVER_METADATA_WRITE_ALLOWED_FIELDS
-    )
-    if unexpected_fields:
-        unexpected = ", ".join(unexpected_fields)
-        raise TypeError(
-            f"_write_silver_metadata() got unexpected keyword arguments: {unexpected}"
-        )
-
-    missing_fields = [
-        field_name
-        for field_name in _SILVER_METADATA_WRITE_REQUIRED_FIELDS
-        if field_name not in resolved_kwargs
-    ]
-    if missing_fields:
-        missing = ", ".join(missing_fields)
-        raise TypeError(
-            f"_write_silver_metadata() missing required arguments: {missing}"
-        )
-
-    for field_name, default in _SILVER_METADATA_WRITE_DEFAULTS.items():
-        resolved_kwargs.setdefault(field_name, default)
-
-    return _SilverMetadataWriteRequest(
-        table_path=resolved_kwargs["table_path"],  # type: ignore[arg-type]
-        table_name=resolved_kwargs["table_name"],  # type: ignore[arg-type]
-        records=resolved_kwargs["records"],  # type: ignore[arg-type]
-        primary_keys=resolved_kwargs["primary_keys"],  # type: ignore[arg-type]
-        mode=resolved_kwargs["mode"],  # type: ignore[arg-type]
-        bronze_refs=resolved_kwargs["bronze_refs"],  # type: ignore[arg-type]
-        dq_metrics=resolved_kwargs["dq_metrics"],  # type: ignore[arg-type]
-        dq_report_path=resolved_kwargs["dq_report_path"],  # type: ignore[arg-type]
-        partition_by=resolved_kwargs["partition_by"],  # type: ignore[arg-type]
-        source_batch_ids=resolved_kwargs["source_batch_ids"],  # type: ignore[arg-type]
-        started_at=resolved_kwargs["started_at"],  # type: ignore[arg-type]
-        completed_at=resolved_kwargs["completed_at"],  # type: ignore[arg-type]
-        version_after=resolved_kwargs["version_after"],  # type: ignore[arg-type]
-    )
-
-
-@dataclass(frozen=True, slots=True)
-class _SilverMergedMetadataWriteRequest:
-    """Normalized request payload for one merged Silver metadata write."""
-
-    table_path: str
-    table_name: str
-    records: list[BronzeRecord]
-    primary_keys: list[str]
-    completed_at: datetime | None = None
-    run_id: str | None = None
-    sources_used: list[str] | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class _PreparedSilverMetadataWriteOperation:
-    """Prepared Silver metadata operation carried into sidecar execution."""
-
-    request: _SilverMetadataWriteRequest | _SilverMergedMetadataWriteRequest
-    provider_name: str
-    entity_name: str
-    metadata: SilverMetadata
-    lineage_fragment: LineageGraphFragment | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class _ResolvedSilverMetadataContext:
-    """Shared provider/entity/version context for Silver metadata preparation."""
-
-    provider_name: str
-    entity_name: str
-    version_after: int | None
-
-
-@dataclass(frozen=True, slots=True)
-class _PreparedSilverWriteFinalizationContext:
-    """Prepared metadata/result context for one completed Silver write."""
-
-    dq_metrics: BatchDQMetrics
-    version_after: int | None
-    completed_at: datetime
-
 
 class _SilverMetadataWriteHostProtocol(Protocol):
     """Typed host contract for Silver metadata sidecar stages."""

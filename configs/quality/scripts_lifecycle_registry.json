@@ -787,6 +787,18 @@
       "decision": "active",
       "next_step": "Retain as the canonical script for validating control plane artifacts in CI workflows.",
       "review_by": "2026-07-15"
+    },
+    "scripts/docs_parity_check.py": {
+      "owner": "@bioetl-platform",
+      "decision": "active",
+      "next_step": "Retain as the canonical documentation parity checking script for CI/CD integration.",
+      "review_by": "2026-07-15"
+    },
+    "scripts/generate_adr_registry.py": {
+      "owner": "@bioetl-platform",
+      "decision": "active",
+      "next_step": "Retain as the canonical ADR registry generation script for documentation automation.",
+      "review_by": "2026-07-15"
     }
   }
 }

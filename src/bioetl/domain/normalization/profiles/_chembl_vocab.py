@@ -13,8 +13,10 @@ from bioetl.domain.schemas.constants import (
     CONFIDENCE_DESCRIPTIONS,
     DATA_VALIDITY_COMMENTS,
     RELATIONSHIP_TYPES,
+    RO3_PASS_VALUES,
     STANDARD_RELATIONS,
     SUBCELLULAR_FRACTIONS,
+    TARGET_COMPONENT_TYPES,
 )
 
 __all__ = ["chembl_enum"]
@@ -36,6 +38,8 @@ _CHEMBL_ENUMS: dict[tuple[str, str], frozenset[str]] = {
     ("assay_parameters", "standard_relation"): STANDARD_RELATIONS,
     ("assay_parameters", "standard_type"): ASSAY_PARAMETER_STANDARD_TYPES,
     ("assay_parameters", "standard_units"): ACTIVITY_STANDARD_UNITS,
+    ("molecule", "ro3_pass"): RO3_PASS_VALUES,
+    ("target_component", "component_type"): TARGET_COMPONENT_TYPES,
 }
 
 

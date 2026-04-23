@@ -16,6 +16,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.schemas.chembl.assay import AssaySchema
 
+from ._chembl_policy_registry import chembl_ontology_family_fields
 from ._chembl_vocab import chembl_enum
 
 __all__ = [
@@ -65,6 +66,17 @@ _STRICT_JSON_FIELDS = frozenset(
     }
 )
 _NULL_FIELDS = chembl_pseudo_null_fields("assay")
+_BAO_FIELDS = chembl_ontology_family_fields("bao", entity="assay")
+
+
+def _normalize_bao_label_with_profile_context(
+    value: object,
+    record: dict[str, object] | None = None,
+) -> str | None:
+    bao_identifier = None if record is None else normalize_profile_bao_identifier(
+        record.get("bao_format")
+    )
+    return normalize_bao_label(value, bao_identifier=bao_identifier)
 
 
 def create_case_normalizer(strategy: str = "uppercase"):
@@ -97,15 +109,18 @@ _SPECIAL_RULE_COMPONENTS = {
         normalize_profile_chembl_organism_name,
         "Normalize ChEMBL assay organism display name using curated organism aliases.",
     ),
-    "bao_format": (
-        normalize_profile_bao_identifier,
-        "Normalize BAO format identifier to canonical BAO underscore form.",
-    ),
     "bao_label": (
-        normalize_bao_label,
-        "Normalize BAO label text; transformer-derived labels may use bao_format "
-        "context before this field-level cleanup.",
+        _normalize_bao_label_with_profile_context,
+        "Normalize BAO label text inside the profile-visible assay contract, "
+        "resolving canonical labels from sibling bao_format identifiers when present.",
     ),
+    **{
+        field_name: (
+            normalize_profile_bao_identifier,
+            f"Normalize BAO {field_name.removeprefix('bao_')} identifier to canonical BAO underscore form.",
+        )
+        for field_name in sorted(_BAO_FIELDS)
+    },
 }
 
 CHEMBL_ASSAY_PROFILE = build_standard_profile(

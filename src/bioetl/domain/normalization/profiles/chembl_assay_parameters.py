@@ -15,6 +15,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
 
+from ._chembl_policy_registry import chembl_controlled_family_fields
 from ._chembl_vocab import chembl_enum
 
 __all__ = [
@@ -43,13 +44,13 @@ _META_FIELDS = frozenset(
 )
 _INT_FIELDS = frozenset({"assay_param_id"})
 _FLOAT_FIELDS = frozenset({"standard_value", "value"})
-_OPERATOR_FIELDS = frozenset({"relation"})
-_UNIT_FIELDS = frozenset({"units", "standard_units"})
+_OPERATOR_FIELDS = chembl_controlled_family_fields("operators", entity="assay_parameters")
+_UNIT_FIELDS = chembl_controlled_family_fields("units", entity="assay_parameters")
+_TYPE_FIELDS = chembl_controlled_family_fields(
+    "assay_parameter_types",
+    entity="assay_parameters",
+)
 _SPECIAL_RULE_COMPONENTS = {
-    "type": (
-        lambda value: normalize_cross_pipeline_case(value, "uppercase"),
-        "Normalize controlled-vocabulary assay parameter type to uppercase without rejecting unknown observed values.",
-    ),
     "comments": (
         normalize_profile_text,
         "Normalize assay parameter comments as plain text; comments are not JSON-canonicalized by default.",
@@ -61,6 +62,16 @@ _SPECIAL_RULE_COMPONENTS = {
         ),
         "Normalize standard_relation to a canonical ASCII operator enum.",
     ),
+    **{
+        field_name: (
+            lambda value: normalize_cross_pipeline_case(value, "uppercase"),
+            (
+                "Normalize controlled-vocabulary assay parameter type to uppercase "
+                "without rejecting unknown observed values."
+            ),
+        )
+        for field_name in sorted(_TYPE_FIELDS)
+    },
 }
 
 CHEMBL_ASSAY_PARAMETERS_PROFILE = build_standard_profile(

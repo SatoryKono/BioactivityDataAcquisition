@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-23T14:59:40.025028+00:00",
+  "generated_at": "2026-04-23T16:05:10.455002+00:00",
   "summary": {
     "total_scripts": 436,
     "status_counts": {
@@ -56,10 +56,35 @@
     {
       "path": "scripts/ai/check_sonar_issues.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
+          "line": 17,
+          "source_group": "scripts",
+          "text": "2. `scripts/ai/check_sonar_issues.py`"
+        },
+        {
+          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
+          "line": 50,
+          "source_group": "scripts",
+          "text": "python3 scripts/ai/check_sonar_issues.py"
+        },
+        {
+          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
+          "line": 56,
+          "source_group": "scripts",
+          "text": "python3 scripts/ai/check_sonar_issues.py --strict-live"
+        },
+        {
+          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
+          "line": 64,
+          "source_group": "scripts",
+          "text": "python3 scripts/ai/check_sonar_issues.py --max-quarantine-entries 184"
+        }
+      ]
     },
     {
       "path": "scripts/ai/code_quality_analysis.py",
@@ -2620,31 +2645,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
-          "line": 9,
+          "line": 11,
           "source_group": "scripts",
-          "text": "### 1. `sonar_issue_processor.py`"
+          "text": "1. `scripts/ai/sonar_issue_processor.py`"
         },
         {
           "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
-          "line": 96,
+          "line": 38,
           "source_group": "scripts",
-          "text": "python3 sonar_issue_processor.py"
-        },
-        {
-          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
-          "line": 107,
-          "source_group": "scripts",
-          "text": "python3 sonar_issue_processor.py"
-        },
-        {
-          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
-          "line": 113,
-          "source_group": "scripts",
-          "text": "Modify the `LAYER_MAPPING` dictionary in `sonar_issue_processor.py` to match your project structure:"
+          "text": "python3 scripts/ai/sonar_issue_processor.py --write"
         },
         {
           "path": "scripts/ai/improved_sonar_prompt.md",
@@ -2675,23 +2688,10 @@
     {
       "path": "scripts/ai/sonar_issue_processor_demo.py",
       "type": "py",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
-          "line": 16,
-          "source_group": "scripts",
-          "text": "### 2. `sonar_issue_processor_demo.py`"
-        },
-        {
-          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
-          "line": 57,
-          "source_group": "scripts",
-          "text": "python3 sonar_issue_processor_demo.py"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/src/__main__.py",
@@ -5107,19 +5107,19 @@
       "references": [
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 189,
+          "line": 195,
           "source_group": "docs",
           "text": "| Matrix generation | [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) | Determin"
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 285,
+          "line": 291,
           "source_group": "docs",
           "text": "- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py)"
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 653,
+          "line": 659,
           "source_group": "docs",
           "text": "- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministi"
         },
@@ -8484,13 +8484,13 @@
       "references": [
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 190,
+          "line": 196,
           "source_group": "docs",
           "text": "| Fallback inventory | [report_normalization_fallback_inventory.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/engineering/qa/report_normalization_fallback_inventory.py) | Reports"
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 312,
+          "line": 318,
           "source_group": "docs",
           "text": "- fallback inventory report: [report_normalization_fallback_inventory.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/engineering/qa/report_normalization_fallback_inventory.py)"
         },

@@ -92,6 +92,12 @@ The active implementation policy is:
   Pandera schemas, normalization profiles, DQ configs, and extraction/filter
   subsets are checked by `test_constants_yaml.py` and
   `test_chembl_enum_parity.py`.
+- Finite-vocabulary governance is intentionally split into four categories:
+  strict externalized enums use YAML-backed SSOT and mechanical parity checks;
+  controlled vocabularies use shared canonicalizers without claiming exhaustive
+  closed sets; derived taxonomies preserve raw provider values and materialize
+  normalized classification fields separately; free-text fields keep text/title
+  semantics and must not silently acquire enum behavior.
 - `chembl_assay_parameters` owns parameter canonicalization in its shipped
   profile for `type`, `relation`, `units`, `standard_type`,
   `standard_relation`, and `standard_units`; the transformer maps provider
