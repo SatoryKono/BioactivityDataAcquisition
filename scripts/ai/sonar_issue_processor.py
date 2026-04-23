@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import os
 from collections import Counter
@@ -85,6 +86,16 @@ def parse_exclusions(raw_value: str) -> list[str]:
     return entries
 
 
+def parse_sources(raw_value: str) -> list[str]:
+    """Split sonar.sources into normalized path roots."""
+    sources: list[str] = []
+    for item in raw_value.split(","):
+        normalized = item.strip().rstrip("/")
+        if normalized:
+            sources.append(normalized)
+    return sources
+
+
 def bucket_exclusions(
     exclusions: list[str],
     *,
@@ -129,11 +140,45 @@ def _facet_counts(payload: dict[str, Any], facet_key: str) -> dict[str, int]:
     return {}
 
 
+def _issue_path(issue: dict[str, Any]) -> str:
+    component = str(issue.get("component", ""))
+    if ":" in component:
+        return component.split(":", 1)[1]
+    return component
+
+
+def _is_in_supported_scope(path: str, supported_sources: list[str]) -> bool:
+    normalized = path.rstrip("/")
+    for source in supported_sources:
+        if normalized == source or normalized.startswith(f"{source}/"):
+            return True
+    return False
+
+
+def _matches_current_quarantine(path: str, exclusion_patterns: list[str]) -> bool:
+    normalized = path.strip().lstrip("./").rstrip("/")
+    for pattern in exclusion_patterns:
+        normalized_pattern = pattern.strip().lstrip("./").rstrip("/")
+        if not normalized_pattern:
+            continue
+        if any(token in normalized_pattern for token in "*?[]"):
+            if fnmatch.fnmatchcase(normalized, normalized_pattern):
+                return True
+            continue
+        if normalized == normalized_pattern or normalized.startswith(
+            f"{normalized_pattern}/"
+        ):
+            return True
+    return False
+
+
 def fetch_live_issue_summary(
     *,
     sonar_url: str,
     project_key: str,
     token: str | None,
+    supported_sources: list[str],
+    quarantine_patterns: list[str],
 ) -> dict[str, Any]:
     """Fetch a compact unresolved-issues summary from SonarCloud/SonarQube."""
     if not token:
@@ -149,7 +194,7 @@ def fetch_live_issue_summary(
             params={
                 "componentKeys": project_key,
                 "resolved": "false",
-                "ps": 1,
+                "ps": 100,
                 "facets": "severities,types",
             },
             auth=(token, ""),
@@ -172,12 +217,49 @@ def fetch_live_issue_summary(
 
     payload = response.json()
     paging = payload.get("paging", {})
+    issues = payload.get("issues", [])
+    rendered_issues: list[dict[str, Any]] = []
+    supported_scope_total = 0
+    supported_non_quarantined_total = 0
+    supported_quarantined_total = 0
+    out_of_scope_total = 0
+    for issue in issues:
+        path = _issue_path(issue)
+        in_supported_scope = _is_in_supported_scope(path, supported_sources)
+        matches_current_quarantine = _matches_current_quarantine(
+            path, quarantine_patterns
+        )
+        if in_supported_scope:
+            supported_scope_total += 1
+            if matches_current_quarantine:
+                supported_quarantined_total += 1
+            else:
+                supported_non_quarantined_total += 1
+        else:
+            out_of_scope_total += 1
+        rendered_issues.append(
+            {
+                "key": issue.get("key"),
+                "path": path,
+                "rule": issue.get("rule"),
+                "severity": issue.get("severity"),
+                "message": issue.get("message"),
+                "line": issue.get("line"),
+                "in_supported_scope": in_supported_scope,
+                "matches_current_quarantine": matches_current_quarantine,
+            }
+        )
     return {
         "status": "ok",
         "total": int(paging.get("total", 0)),
         "page_size": int(paging.get("pageSize", 0) or 0),
         "severity_counts": _facet_counts(payload, "severities"),
         "type_counts": _facet_counts(payload, "types"),
+        "supported_scope_total": supported_scope_total,
+        "supported_non_quarantined_total": supported_non_quarantined_total,
+        "supported_quarantined_total": supported_quarantined_total,
+        "out_of_scope_total": out_of_scope_total,
+        "issues": rendered_issues,
     }
 
 
@@ -190,10 +272,13 @@ def build_baseline_report(
 ) -> dict[str, Any]:
     """Build a report combining repo-backed quarantine and live Sonar status."""
     quarantine = load_quarantine_from_properties(config_path)
+    supported_sources = parse_sources(quarantine["sources"])
     live = fetch_live_issue_summary(
         sonar_url=sonar_url,
         project_key=quarantine["project_key"],
         token=token,
+        supported_sources=supported_sources,
+        quarantine_patterns=quarantine["entries"],
     )
     top_buckets = quarantine["buckets"][:bucket_limit]
 
@@ -208,6 +293,22 @@ def build_baseline_report(
     else:
         assessment["live_measurement_ready"] = True
         assessment["live_unresolved_issue_count"] = live["total"]
+        assessment["live_scope_drift_detected"] = live["out_of_scope_total"] > 0
+        assessment["live_supported_scope_issue_count"] = live["supported_scope_total"]
+        assessment["live_supported_non_quarantined_issue_count"] = live[
+            "supported_non_quarantined_total"
+        ]
+        assessment["live_supported_quarantined_issue_count"] = live[
+            "supported_quarantined_total"
+        ]
+        assessment["live_quarantine_drift_detected"] = (
+            live["supported_quarantined_total"] > 0
+        )
+        assessment["live_out_of_scope_issue_count"] = live["out_of_scope_total"]
+        assessment["live_authoritative_scope_ready"] = (
+            not assessment["live_scope_drift_detected"]
+            and not assessment["live_quarantine_drift_detected"]
+        )
 
     return {
         "generated_at": datetime.now(UTC).isoformat(),
