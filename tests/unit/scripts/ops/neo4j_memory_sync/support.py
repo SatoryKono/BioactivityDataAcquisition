@@ -298,7 +298,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert any(label == "duplication_cluster" for label, _ in node_keys)
     assert (
         "test_artifact",
-        "tests/unit/scripts/ops/test_neo4j_memory_sync.py",
+        "tests/unit/scripts/ops/neo4j_memory_sync/test_snapshot_topology.py",
     ) in node_keys
     assert ("package_family", "composition/__pycache__") not in node_keys
     assert ("package_family", "infrastructure/__pycache__") not in node_keys
@@ -1437,7 +1437,7 @@ FORBIDDEN_RELATION_KEYS: tuple[RelationKey, ...] = (
     ),
     (
         "test_artifact",
-        "tests/unit/scripts/ops/test_neo4j_memory_sync.py",
+        "tests/unit/scripts/ops/neo4j_memory_sync/test_snapshot_topology.py",
         "TESTS_LAYER",
         "layer_family",
         "scripts",
