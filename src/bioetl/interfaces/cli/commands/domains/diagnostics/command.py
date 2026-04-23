@@ -183,6 +183,143 @@ def _build_metrics_profile_lines(profile: MetricsOperatorProfile) -> list[str]:
     ]
 
 
+def _render_run_dossier_payload(payload: dict[str, object]) -> str:
+    """Render one-run dossier payload in human-readable form."""
+    audit = payload.get("audit")
+    audit_entries = audit.get("entries", []) if isinstance(audit, dict) else []
+    status = payload.get("status")
+    traceability = payload.get("traceability")
+    quarantine_summary = payload.get("quarantine_summary")
+    run_manifest = payload.get("run_manifest")
+    lineage = payload.get("lineage")
+    checkpoint = payload.get("checkpoint")
+    missing = payload.get("missing_evidence", [])
+    degraded = payload.get("degraded_evidence", [])
+    next_steps = payload.get("next_steps", [])
+
+    lines = [
+        "Run Forensic Dossier",
+        f"  run_id: {payload.get('run_id')}",
+        f"  pipeline_name: {payload.get('pipeline_name')}",
+    ]
+    if isinstance(status, dict):
+        lines.extend(
+            [
+                f"  forensic_profile: {status.get('forensic_profile')}",
+                f"  latest_status: {status.get('latest_status')}",
+                f"  latest_event_type: {status.get('latest_event_type')}",
+                f"  checkpoint_status: {status.get('checkpoint_status')}",
+                f"  lineage_status: {status.get('lineage_status')}",
+                f"  quarantine_status: {status.get('quarantine_status')}",
+                f"  missing_evidence_count: {status.get('missing_evidence_count')}",
+                f"  degraded_evidence_count: {status.get('degraded_evidence_count')}",
+            ]
+        )
+
+    lines.extend(["", "Run Manifest"])
+    if isinstance(run_manifest, dict):
+        manifest = run_manifest.get("manifest")
+        diagnostics = run_manifest.get("diagnostics")
+        if isinstance(manifest, dict):
+            lines.extend(
+                [
+                    f"  manifest_id: {manifest.get('manifest_id')}",
+                    f"  provider: {manifest.get('provider')}",
+                    f"  entity: {manifest.get('entity')}",
+                    f"  run_type: {manifest.get('run_type')}",
+                ]
+            )
+        if isinstance(diagnostics, dict):
+            lines.extend(
+                [
+                    f"  replay_capability: {diagnostics.get('replay_capability')}",
+                    f"  persistence_profile: {diagnostics.get('persistence_profile')}",
+                    f"  alert_signals: {diagnostics.get('alert_signals')}",
+                ]
+            )
+    else:
+        lines.append("  - unavailable")
+
+    lines.extend(["", "Checkpoint"])
+    if isinstance(checkpoint, dict):
+        lines.extend(
+            [
+                f"  checkpoint_run_id: {checkpoint.get('run_id')}",
+                f"  checkpoint_metadata: {checkpoint.get('metadata')}",
+            ]
+        )
+    else:
+        lines.append("  - unavailable")
+
+    lines.extend(["", "Quarantine"])
+    if isinstance(quarantine_summary, dict):
+        lines.append(f"  total: {quarantine_summary.get('total')}")
+        lines.append(
+            f"  silver_filter_rejects: {quarantine_summary.get('silver_filter_rejects')}"
+        )
+        lines.append(f"  run_scope: {quarantine_summary.get('run_scope')}")
+    else:
+        lines.append("  - unavailable")
+
+    lines.extend(["", "Lineage"])
+    if isinstance(lineage, dict):
+        lines.extend(
+            [
+                f"  manifest_id: {lineage.get('manifest_id')}",
+                f"  fragment_ids: {lineage.get('fragment_ids')}",
+                f"  produced_datasets: {lineage.get('produced_datasets')}",
+            ]
+        )
+    else:
+        lines.append("  - unavailable")
+
+    lines.extend(["", "Traceability"])
+    if isinstance(traceability, dict):
+        lines.extend(
+            [
+                f"  audit_entries_count: {traceability.get('audit_entries_count')}",
+                f"  lineage_fragment_ids: {traceability.get('lineage_fragment_ids')}",
+                f"  artifact_refs: {traceability.get('artifact_refs')}",
+                f"  trace_links_available: {traceability.get('trace_links_available')}",
+                f"  correlation_anchor_gaps: {traceability.get('correlation_anchor_gaps')}",
+            ]
+        )
+    else:
+        lines.append("  - unavailable")
+
+    lines.extend(
+        [
+            "",
+            "Evidence Status",
+            f"  missing: {missing}",
+            f"  degraded: {degraded}",
+        ]
+    )
+    lines.extend(["", "Audit Entries"])
+    if isinstance(audit_entries, list) and audit_entries:
+        for entry in audit_entries:
+            if not isinstance(entry, dict):
+                lines.append(f"  - {entry}")
+                continue
+            lines.append(
+                "  - "
+                f"{entry.get('timestamp', '?')} "
+                f"{entry.get('layer', '?')}/{entry.get('table_name', '?')} "
+                f"{entry.get('operation', '?')} "
+                f"records={entry.get('records_count', '?')}"
+            )
+    else:
+        lines.append("  - none")
+
+    lines.extend(["", "Next Steps"])
+    if isinstance(next_steps, list) and next_steps:
+        lines.extend(f"  - {step}" for step in next_steps)
+    else:
+        lines.append("  - none")
+
+    return "\n".join(lines)
+
+
 @click.group()  # type: ignore[untyped-decorator]
 def diagnostics() -> None:
     """Unified operator diagnostics across health, checkpoints, manifests, and quarantine."""
@@ -246,13 +383,14 @@ def diagnostics_metrics(output_json: bool) -> None:
     help="Output format",
 )
 def diagnostics_run(run_id: str, limit: int, output_format: str) -> None:
-    """Inspect one pipeline run across audit and run-manifest diagnostics surfaces."""
+    """Inspect one pipeline run as a bounded forensic dossier."""
     bundle = get_observability_diagnostics_bundle()
 
     async def _inspect() -> None:
         try:
-            result = await bundle.workflow_service.inspect_audit_run(
-                run_id, limit=limit
+            result = await bundle.workflow_service.inspect_run_dossier(
+                run_id,
+                audit_limit=limit,
             )
         except ValueError as exc:
             echo_error("Run diagnostics failed", str(exc))
@@ -260,7 +398,7 @@ def diagnostics_run(run_id: str, limit: int, output_format: str) -> None:
         emit_inspection_payload(
             result.to_dict(),
             output_format,
-            text_renderer=_render_checkpoint_payload,
+            text_renderer=_render_run_dossier_payload,
         )
 
     asyncio.run(_inspect())

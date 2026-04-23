@@ -129,7 +129,10 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
             config=config,
             runtime=runtime,
             infra_context=infra_context,
-            config_hash="hash-123",
+            resolved_config_hash="resolved-hash-123",
+            effective_config_hash="effective-hash-123",
+            dq_contract_compatibility_hash="dq-compat-123",
+            effective_config_artifact_id="eca-123",
             contract_ref="composite_publication",
             contract_version="1.0.0",
             required_persistence_profile="replay_ready",
@@ -147,7 +150,11 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
     assert request.pipeline_version == "1.0.0"
     assert request.git_commit == "abc1234"
     assert request.source_revision_state == "clean"
-    assert request.config_hash == "hash-123"
+    assert request.config_hash == "resolved-hash-123"
+    assert request.resolved_config_hash == "resolved-hash-123"
+    assert request.effective_config_hash == "effective-hash-123"
+    assert request.dq_contract_compatibility_hash == "dq-compat-123"
+    assert request.effective_config_artifact_id == "eca-123"
     assert request.contract_ref == "composite_publication"
     assert request.contract_version == "1.0.0"
     assert request.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
@@ -263,16 +270,31 @@ def test_build_composite_control_plane_bundle_can_disable_ledger_while_keeping_m
     assert isinstance(bundle.manifest_id, str)
     assert isinstance(bundle.execution_fingerprint, str)
     assert bundle.run_ledger_service is None
+    assert isinstance(bundle.effective_config_artifact_id, str)
     manifest_path = (
         tmp_path / "output" / "control" / "run_manifest" / f"{bundle.manifest_id}.json"
     )
+    effective_config_path = (
+        tmp_path
+        / "output"
+        / "control"
+        / "effective_config"
+        / f"{bundle.effective_config_artifact_id}.json"
+    )
     assert manifest_path.exists()
+    assert effective_config_path.exists()
     assert not (
         tmp_path / "output" / "control" / "run_ledger" / f"{bundle.manifest_id}.jsonl"
     ).exists()
     manifest = RunManifest.from_dict(json.loads(manifest_path.read_text("utf-8")))
     assert manifest.replay_capability == ReplayCapability.REBUILD_ONLY
     assert bundle.execution_fingerprint == manifest.execution_fingerprint
+    assert (
+        manifest.code_provenance.effective_config_artifact_id
+        == bundle.effective_config_artifact_id
+    )
+    assert manifest.code_provenance.resolved_config_hash == bundle.resolved_config_hash
+    assert manifest.code_provenance.effective_config_hash == bundle.effective_config_hash
     assert (
         manifest.launch_context["exact_replay_support_boundary"]
         == "composite_snapshot_backed_input_envelope"
@@ -420,6 +442,11 @@ def test_build_composite_control_plane_bundle_allows_replay_ready_with_full_snap
     manifest = RunManifest.from_dict(json.loads(manifest_path.read_text("utf-8")))
     assert manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
     assert all(source_ref.input_snapshots for source_ref in manifest.source_refs)
+    assert (
+        manifest.code_provenance.effective_config_artifact_id
+        == bundle.effective_config_artifact_id
+    )
+    assert manifest.code_provenance.effective_config_hash == bundle.effective_config_hash
 
 
 def test_build_composite_control_plane_bundle_persists_manifest_created_when_ledger_enabled(
@@ -463,6 +490,7 @@ def test_build_composite_control_plane_bundle_persists_manifest_created_when_led
     assert isinstance(bundle.manifest_id, str)
     assert isinstance(bundle.execution_fingerprint, str)
     assert bundle.run_ledger_service is not None
+    assert isinstance(bundle.effective_config_artifact_id, str)
     ledger_path = (
         tmp_path / "output" / "control" / "run_ledger" / f"{bundle.manifest_id}.jsonl"
     )
@@ -470,3 +498,64 @@ def test_build_composite_control_plane_bundle_persists_manifest_created_when_led
     first_entry = json.loads(ledger_path.read_text(encoding="utf-8").splitlines()[0])
     assert first_entry["event_type"] == "manifest_created"
     assert first_entry["manifest_id"] == bundle.manifest_id
+
+
+def test_build_composite_control_plane_bundle_persists_effective_config_artifact_and_hashes(
+    tmp_path: Path,
+) -> None:
+    config = cast(Any, _RichMockCompositeConfig())
+    runtime = CompositeRuntimeConfig(resume=False)
+    infra_context = cast(
+        Any,
+        SimpleNamespace(
+            run_id=_VALID_RUN_ID,
+            settings=SimpleNamespace(
+                data_dir=str(tmp_path),
+                pipeline=SimpleNamespace(
+                    control_plane=SimpleNamespace(
+                        run_manifest_enabled=True,
+                        run_ledger_enabled=False,
+                    )
+                ),
+            ),
+            logger=MagicMock(),
+            metrics=MagicMock(),
+            storage=MagicMock(),
+            lock=MagicMock(),
+        ),
+    )
+
+    with patch(
+        "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_code_revision_provenance",
+        return_value=SimpleNamespace(
+            git_commit="abc1234",
+            source_revision_state="clean",
+        ),
+    ):
+        bundle = build_composite_control_plane_bundle(
+            config=config,
+            runtime=runtime,
+            infra_context=infra_context,
+        )
+
+    assert bundle.resolved_config_hash
+    assert bundle.effective_config_hash
+    assert bundle.resolved_config_hash != bundle.effective_config_hash
+    assert bundle.effective_config_artifact_id
+    semantic_artifact_path = (
+        tmp_path
+        / "output"
+        / "control"
+        / "effective_config"
+        / f"{bundle.effective_config_artifact_id}.json"
+    )
+    occurrence_artifact_path = (
+        tmp_path
+        / "output"
+        / "control"
+        / "effective_config"
+        / "_occurrences"
+        / f"{_VALID_RUN_ID}.json"
+    )
+    assert semantic_artifact_path.exists()
+    assert occurrence_artifact_path.exists()

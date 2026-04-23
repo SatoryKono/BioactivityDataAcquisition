@@ -26,6 +26,9 @@ from bioetl.composition.bootstrap.runtime._composite_control_plane_payloads impo
 from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
     CompositeControlPlaneBundle,
 )
+from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
+    create_and_persist_composite_effective_config_artifact,
+)
 from bioetl.composition.runtime_builders.run_manifest_support import (
     control_plane_root as _shared_control_plane_root,
 )
@@ -35,10 +38,7 @@ from bioetl.composition.runtime_builders.run_manifest_support import (
 from bioetl.composition.runtime_builders.runner_builder_support import (
     validate_required_persistence_profile,
 )
-from bioetl.composition.services.versioning import (
-    compute_config_hash,
-    get_code_revision_provenance,
-)
+from bioetl.composition.services.versioning import get_code_revision_provenance
 from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
@@ -112,10 +112,22 @@ def build_composite_control_plane_bundle(
         "required_persistence_profile",
         "degraded_observable",
     )
-
-    config_hash = _resolve_effective_config_hash(config)
     contract_ref = config.name
     contract_version = getattr(config, "version", "") or ""
+    (
+        effective_config_artifact_id,
+        resolved_config_hash,
+        effective_config_hash,
+        dq_contract_compatibility_hash,
+    ) = create_and_persist_composite_effective_config_artifact(
+        pipeline_name=config.name,
+        config=config,
+        runtime_config=runtime,
+        required_persistence_profile=str(required_profile),
+        settings=infra_context.settings,
+        logger=infra_context.logger,
+        run_id=_coerce_run_id(infra_context.run_id),
+    )
     manifest_store = FileRunManifestStore(
         base_path=_control_plane_root(infra_context.settings, "run_manifest"),
         metrics=infra_context.metrics,
@@ -128,7 +140,10 @@ def build_composite_control_plane_bundle(
             config=config,
             runtime=runtime,
             infra_context=infra_context,
-            config_hash=config_hash,
+            resolved_config_hash=resolved_config_hash,
+            effective_config_hash=effective_config_hash,
+            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+            effective_config_artifact_id=effective_config_artifact_id,
             contract_ref=contract_ref,
             contract_version=contract_version,
             required_persistence_profile=str(required_profile),
@@ -139,7 +154,10 @@ def build_composite_control_plane_bundle(
         ledger_enabled=ledger_enabled,
         infra_context=infra_context,
         pipeline_name=config.name,
-        config_hash=config_hash,
+        resolved_config_hash=resolved_config_hash,
+        effective_config_hash=effective_config_hash,
+        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+        effective_config_artifact_id=effective_config_artifact_id,
         contract_ref=contract_ref,
         contract_version=contract_version,
     )
@@ -149,13 +167,11 @@ def build_composite_control_plane_bundle(
         manifest_id=manifest.manifest_id,
         execution_fingerprint=manifest.execution_fingerprint,
         run_ledger_service=run_ledger_service,
-        config_hash=config_hash or None,
-        dq_contract_compatibility_hash=(
-            manifest.code_provenance.dq_contract_compatibility_hash
-        ),
-        effective_config_artifact_id=(
-            manifest.code_provenance.effective_config_artifact_id
-        ),
+        config_hash=resolved_config_hash or None,
+        resolved_config_hash=resolved_config_hash or None,
+        effective_config_hash=effective_config_hash or None,
+        dq_contract_compatibility_hash=dq_contract_compatibility_hash or None,
+        effective_config_artifact_id=effective_config_artifact_id or None,
         contract_ref=contract_ref,
         contract_version=contract_version or None,
     )
@@ -166,7 +182,10 @@ def _build_composite_manifest_create_request(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     infra_context: CompositeInfrastructureContext,
-    config_hash: str,
+    resolved_config_hash: str,
+    effective_config_hash: str,
+    dq_contract_compatibility_hash: str,
+    effective_config_artifact_id: str,
     contract_ref: str,
     contract_version: str,
     required_persistence_profile: str,
@@ -200,11 +219,13 @@ def _build_composite_manifest_create_request(
         pipeline_version=contract_version or None,
         git_commit=code_revision.git_commit,
         source_revision_state=code_revision.source_revision_state,
-        config_hash=config_hash or None,
-        resolved_config_hash=config_hash or None,
-        effective_config_hash=config_hash or None,
+        config_hash=resolved_config_hash or None,
+        resolved_config_hash=resolved_config_hash or None,
+        effective_config_hash=effective_config_hash or None,
         contract_ref=contract_ref,
         contract_version=contract_version or None,
+        dq_contract_compatibility_hash=dq_contract_compatibility_hash or None,
+        effective_config_artifact_id=effective_config_artifact_id or None,
         replay_capability=replay_capability,
     )
 
@@ -236,7 +257,10 @@ def _build_run_ledger_service(
     ledger_enabled: bool,
     infra_context: CompositeInfrastructureContext,
     pipeline_name: str,
-    config_hash: str,
+    resolved_config_hash: str,
+    effective_config_hash: str,
+    dq_contract_compatibility_hash: str,
+    effective_config_artifact_id: str,
     contract_ref: str,
     contract_version: str,
 ) -> RunLedgerService | None:
@@ -254,27 +278,14 @@ def _build_run_ledger_service(
         provider="composite",
         entity=pipeline_name,
         run_type=RunType.INCREMENTAL.value,
-        resolved_config_hash=config_hash or None,
-        effective_config_hash=config_hash or None,
+        resolved_config_hash=resolved_config_hash or None,
+        effective_config_hash=effective_config_hash or None,
         contract_ref=contract_ref,
         contract_version=contract_version or None,
+        dq_contract_compatibility_hash=dq_contract_compatibility_hash or None,
+        effective_config_artifact_id=effective_config_artifact_id or None,
         composite_run_id=infra_context.run_id,
     )
-
-
-def _resolve_effective_config_hash(config: CompositeConfig) -> str:
-    """Best-effort hash for checkpoint and manifest provenance anchors."""
-    try:
-        payload = config.to_dict()
-    except (AttributeError, TypeError, ValueError):
-        return ""
-    if not isinstance(payload, dict):
-        return ""
-    try:
-        payload_dict: dict[str, object] = payload
-        return compute_config_hash(payload_dict)
-    except (TypeError, ValueError):
-        return ""
 
 
 def _coerce_run_id(run_id: str) -> RunID:

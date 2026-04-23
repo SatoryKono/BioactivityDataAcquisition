@@ -23,6 +23,9 @@ from bioetl.application.services.checkpoint_service import CheckpointService
 from bioetl.application.services.control_plane.run_manifest_inspection_service import (
     RunManifestInspectionService,
 )
+from bioetl.application.services.lineage.lineage_inspection_service import (
+    LineageInspectionService,
+)
 from bioetl.application.services.observability_workflow_service import (
     ObservabilityWorkflowService,
 )
@@ -36,6 +39,7 @@ from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.bootstrap.cli.run_manifest import (
     bootstrap_run_manifest_service,
 )
+from bioetl.composition.bootstrap.lineage import bootstrap_lineage_service
 from bioetl.composition.factories.storage.audit import create_audit_port
 from bioetl.composition.observability_resolution import (
     resolve_metrics_port,
@@ -151,10 +155,14 @@ def bootstrap_observability_workflow_service() -> ObservabilityWorkflowService:
     run_manifest_service: RunManifestInspectionService = (
         bootstrap_run_manifest_service()
     )
+    lineage_service: LineageInspectionService = bootstrap_lineage_service()
+    quarantine_service: QuarantineService = bootstrap_quarantine_service()
     return ObservabilityWorkflowService(
         audit_service=audit_service,
         checkpoint_service=checkpoint_service,
         run_manifest_service=run_manifest_service,
+        lineage_service=lineage_service,
+        quarantine_service=quarantine_service,
         tracer=resolve_tracing_port(
             tracer=None,
             settings=settings,
