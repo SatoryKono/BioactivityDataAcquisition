@@ -32,6 +32,24 @@ test_lanes:
     powershell_env_example: '$env:PYTHONPATH="src"'
     bash_env_example: PYTHONPATH=src
   lanes:
+    smoke:
+      suite_name: smoke
+      description: "Minimal dependency and import smoke lane aligned with the CI smoke-check job."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/smoke/
+      marker_expression: "not benchmark and not memory"
+      pytest_args:
+        - tests/smoke/
+        - -m
+        - not benchmark and not memory
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
     unit-fast:
       suite_name: unit-fast
       description: "Fast unit lane; excludes slow, benchmark, and Neo4j/MCP memory tests."
@@ -66,6 +84,24 @@ test_lanes:
       environment:
         VCR_RECORD_MODE: none
       replay_mode: vcr_replay_only
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    security:
+      suite_name: security
+      description: "Dedicated security policy and secret-hygiene lane outside repo-wide coverage enforcement."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/security/
+      marker_expression: "security and not benchmark and not memory"
+      pytest_args:
+        - tests/security/
+        - -m
+        - security and not benchmark and not memory
+      replay_mode: not_applicable
       coverage_gate: none
       expected_artifacts:
         junit_xml: true
@@ -144,6 +180,26 @@ test_lanes:
         - tests/unit/scripts/ops/
         - -m
         - memory and not benchmark
+      replay_mode: not_applicable
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    performance:
+      suite_name: performance
+      description: "Benchmark-backed hotspot and performance budget lane kept outside fast feedback and coverage verification."
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/performance/
+      marker_expression: "benchmark and performance"
+      pytest_args:
+        - tests/performance/
+        - -m
+        - benchmark and performance
+        - -p
+        - no:xdist
       replay_mode: not_applicable
       coverage_gate: none
       expected_artifacts:

@@ -196,13 +196,13 @@ def default_vcr_record_mode() -> None:
     """Set deterministic default VCR mode for local runs.
 
     - CI remains strict (`none`) to prevent silent cassette rewrites.
-    - Local runs default to `once` to allow recording missing interactions.
+    - Local runs also default to strict replay (`none`).
     - Explicit VCR_RECORD_MODE always has priority.
     """
     if "VCR_RECORD_MODE" in os.environ:
         return
 
-    os.environ["VCR_RECORD_MODE"] = "none" if os.getenv("CI") else "once"
+    os.environ["VCR_RECORD_MODE"] = "none"
 
 
 @pytest.fixture(scope="session")

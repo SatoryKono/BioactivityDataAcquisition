@@ -10,7 +10,7 @@ Note:
     metadata for known DOIs and transforms it into the unified Silver schema.
 
 Recording cassettes:
-    VCR_RECORD_MODE=once pytest tests/e2e/test_openalex_publication_e2e.py -v
+    pytest tests/e2e/test_openalex_publication_e2e.py --vcr-record=new_episodes -v
 """
 
 from __future__ import annotations

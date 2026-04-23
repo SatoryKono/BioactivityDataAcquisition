@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from scripts.engineering.ci.validate_control_plane_artifacts import (
     validate_control_plane_artifacts,
 )
 
 
 ROOT = Path(__file__).resolve().parents[3]
+pytestmark = pytest.mark.integration
 
 
 def test_committed_control_plane_artifacts_match_published_contracts() -> None:
