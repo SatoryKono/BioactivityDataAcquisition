@@ -14,6 +14,8 @@ from bioetl.domain.mapping.publication_type_classification import (
     normalize_publication_classification_field,
 )
 
+pytestmark = pytest.mark.usefixtures("publication_type_classification_data")
+
 
 class TestClassificationTableIntegrity:
     """Verify the classification table is well-formed."""

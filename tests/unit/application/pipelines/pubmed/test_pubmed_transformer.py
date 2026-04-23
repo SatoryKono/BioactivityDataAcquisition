@@ -23,6 +23,8 @@ else:
     PipelineContext = Any
     PubMedPublicationTransformer = Any
 
+pytestmark = pytest.mark.usefixtures("publication_type_classification_data")
+
 # Sample PubMed XML for testing
 MINIMAL_PUBMED_XML = """<?xml version="1.0"?>
 <PubmedArticle>

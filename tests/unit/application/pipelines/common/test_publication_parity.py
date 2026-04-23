@@ -23,6 +23,8 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunID, RunType
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
+pytestmark = pytest.mark.usefixtures("publication_type_classification_data")
+
 # Directory for saving Golden Snapshots
 # tests/fixtures/snapshots/publication_transformers/
 SNAPSHOTS_DIR = (

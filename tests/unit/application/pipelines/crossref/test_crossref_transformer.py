@@ -26,6 +26,8 @@ from bioetl.domain.normalization import extract_first_string, normalize_doi
 from bioetl.domain.types import RunID, RunType
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
+pytestmark = pytest.mark.usefixtures("publication_type_classification_data")
+
 
 @pytest.fixture
 def transformer():

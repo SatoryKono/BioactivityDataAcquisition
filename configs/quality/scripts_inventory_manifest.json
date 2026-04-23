@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-23T19:14:27.538201+00:00",
+  "generated_at": "2026-04-23T19:29:35.796226+00:00",
   "summary": {
     "total_scripts": 437,
     "status_counts": {
@@ -16,7 +16,7 @@
       "docs": 136,
       "scripts": 288,
       "skills": 8,
-      "tests": 134
+      "tests": 135
     }
   },
   "scripts": [
@@ -6297,7 +6297,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 193,
+          "line": 197,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/.wsl-vpn-fix.ps1`            | Recover Windows-side VPN proxy settings for WSL interoperability                          |"
         }
@@ -6523,7 +6523,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 149,
+          "line": 153,
           "source_group": "scripts",
           "text": "| `install-deps`   | `scripts/engineering/dev/install_deps.py`            | Auxiliary helper script, not a full project bootstrap            |"
         },
@@ -6544,7 +6544,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 154,
+          "line": 158,
           "source_group": "scripts",
           "text": "| `mock-metrics`   | `scripts/engineering/dev/metrics_mock_server.py`     | Start mock metrics server                                        |"
         },
@@ -6573,7 +6573,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/run_pytest.ps1",
-          "line": 170,
+          "line": 171,
           "source_group": "scripts",
           "text": "$PreflightScript = Join-Path $ScriptDir \"pretest_guardrails.ps1\""
         }
@@ -6594,19 +6594,19 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 88,
+          "line": 92,
           "source_group": "scripts",
-          "text": "`bash scripts/engineering/dev/pretest_guardrails.sh --mode auto --scope full` before the"
+          "text": "invoke `bash scripts/engineering/dev/pretest_guardrails.sh --scope full`"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 151,
+          "line": 155,
           "source_group": "scripts",
           "text": "| `pretest-guardrails` | `scripts/engineering/dev/pretest_guardrails.sh`  | Run cleanup + repo/docs/memory/architecture preflight            |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 183,
+          "line": 187,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/pretest_guardrails.sh`       | Run cleanup + repo/docs/memory/architecture preflight before broad bash pytest runs       |"
         },
@@ -6624,13 +6624,13 @@
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 385,
+          "line": 394,
           "source_group": "scripts",
           "text": "if should_run_preflight && [[ -f \"scripts/engineering/dev/pretest_guardrails.sh\" ]]; then"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 388,
+          "line": 397,
           "source_group": "scripts",
           "text": "preflight_cmd=(bash scripts/engineering/dev/pretest_guardrails.sh --mode \"$preflight_mode\" --scope \"$preflight_scope\")"
         }
@@ -6780,13 +6780,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 150,
+          "line": 154,
           "source_group": "scripts",
           "text": "| `probe-quality`  | `scripts/engineering/dev/quality_gate_probe.py`      | Measure narrow pytest/mypy startup latency and timeout behavior  |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 187,
+          "line": 191,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quality_gate_probe.py`       | Diagnose narrow pytest/mypy startup latency and timeout behavior                          |"
         },
@@ -6807,13 +6807,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 155,
+          "line": 159,
           "source_group": "scripts",
           "text": "| `mock-quarantine`| `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock quarantine explorer API server                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 188,
+          "line": 192,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock `/ops/quarantine/*` endpoints for Silver Reject Explorer smoke checks |"
         },
@@ -7005,7 +7005,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 50,
+      "reference_count": 51,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7064,7 +7064,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 67,
+      "reference_count": 68,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7133,7 +7133,7 @@
       "references": [
         {
           "path": "docs/03-guides/testing.md",
-          "line": 45,
+          "line": 48,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=html"
         },
@@ -7206,7 +7206,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 180,
+          "line": 184,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.ps1`               | Run tests (PowerShell variant)                                                            |"
         },
@@ -7233,13 +7233,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 152,
+          "line": 156,
           "source_group": "scripts",
           "text": "| `run-tests`      | `scripts/engineering/dev/run_tests.py`               | Run tests                                                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 156,
+          "line": 160,
           "source_group": "scripts",
           "text": "| `test-changed`   | `scripts/engineering/dev/run_tests.py changed`       | Run tests for changed files only                                 |"
         },
@@ -7290,7 +7290,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 179,
+          "line": 183,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.sh`                | Run tests (shell variant)                                                                 |"
         },
@@ -7317,7 +7317,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 190,
+          "line": 194,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/setup_copilot_codex_mcp.ps1` | Setup MCP compatibility facade (PowerShell variant)                                       |"
         },
@@ -7380,7 +7380,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 157,
+          "line": 161,
           "source_group": "scripts",
           "text": "| `setup-mcp`      | `scripts/engineering/dev/setup_copilot_codex_mcp.py` | Compatibility facade for canonical Codex MCP setup               |"
         }
@@ -7395,7 +7395,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 189,
+          "line": 193,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/setup_copilot_codex_mcp.sh`  | Setup MCP compatibility facade (shell variant)                                            |"
         },
@@ -8621,7 +8621,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 111,
+          "line": 119,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для partial rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadata"
         },
@@ -8651,7 +8651,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 336,
+          "line": 333,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_vcr_metadata_catalog.py\","
         },
@@ -8789,7 +8789,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 436,
+          "line": 444,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         }
@@ -8822,7 +8822,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 251,
+          "line": 248,
           "source_group": "tests",
           "text": "\"python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\""
         },
@@ -8840,7 +8840,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 430,
+          "line": 443,
           "source_group": "tests",
           "text": "\"python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\" in workflow"
         }
@@ -8873,7 +8873,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 255,
+          "line": 252,
           "source_group": "tests",
           "text": "\"python scripts/engineering/qa/vcr/check_vcr_filename_policy.py\""
         },
@@ -8891,7 +8891,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 433,
+          "line": 446,
           "source_group": "tests",
           "text": "\"python scripts/engineering/qa/vcr/check_vcr_filename_policy.py\" in workflow"
         }
@@ -10230,31 +10230,31 @@
       "references": [
         {
           "path": "docs/03-guides/testing.md",
-          "line": 79,
+          "line": 85,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 82,
+          "line": 84,
           "source_group": "scripts",
           "text": "- `bash scripts/engineering/dev/run_pytest.sh` runs `bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only`"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 445,
+          "line": 454,
           "source_group": "scripts",
           "text": "if [[ -f \"scripts/ops/launchers/codex/setup_plugins.sh\" ]]; then"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 446,
+          "line": 455,
           "source_group": "scripts",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 450,
+          "line": 459,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
         },
@@ -10634,7 +10634,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 111,
+          "line": 119,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для partial rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadata"
         },
@@ -10646,7 +10646,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 337,
+          "line": 334,
           "source_group": "tests",
           "text": "\"scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py\","
         }
