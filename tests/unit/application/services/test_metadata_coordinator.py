@@ -398,6 +398,10 @@ class TestBronzeMetadata:
                     content_hash="a" * 64,
                     immutable_uri="snapshots/chembl/activity/batch-001.jsonl.zst",
                     query_fingerprint="f" * 64,
+                    storage_provider="s3",
+                    object_bucket="bioetl-bronze",
+                    object_key="chembl/activity/batch-001.jsonl.zst",
+                    object_version_id="version-001",
                 )
             ],
         )
@@ -418,6 +422,13 @@ class TestBronzeMetadata:
             "chembl-activity-batch-001"
         )
         assert metadata.source.input_snapshots[0].content_hash == "a" * 64
+        assert metadata.source.input_snapshots[0].storage_provider == "s3"
+        assert metadata.source.input_snapshots[0].object_bucket == "bioetl-bronze"
+        assert (
+            metadata.source.input_snapshots[0].object_key
+            == "chembl/activity/batch-001.jsonl.zst"
+        )
+        assert metadata.source.input_snapshots[0].object_version_id == "version-001"
 
     def test_bronze_metadata_query_string_defaults_to_none(
         self, coordinator: MetadataCoordinator

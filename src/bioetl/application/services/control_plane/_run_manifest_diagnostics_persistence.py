@@ -22,6 +22,7 @@ class _PersistenceInputs:
     exact_replay_supported: bool
     strict_replay_execution_context_supported: bool
     artifact_lineage_links_complete: bool
+    composite_resume_rich_replay_supported: bool
 
 
 def missing_replay_ready_requirements(
@@ -120,6 +121,9 @@ def build_persistence_profile(
         ledger_entries_present=ledger_entries_present,
         artifact_lineage_links_complete=inputs.artifact_lineage_links_complete,
         lineage_closure_boundary_supported=inputs.lineage_closure_boundary_supported,
+        composite_resume_rich_replay_supported=(
+            inputs.composite_resume_rich_replay_supported
+        ),
     )
     required_profile = str(
         base_summary.get("required_persistence_profile") or "degraded_observable"
@@ -164,6 +168,7 @@ def build_persistence_profile(
                 "per_provider_result_maps",
                 "rich_checkpoint_payloads",
             ],
+            "forensic_grade_supported": inputs.composite_resume_rich_replay_supported,
         },
         "lineage_closure_boundary": inputs.lineage_closure_boundary,
     }
@@ -189,6 +194,10 @@ def _resolve_persistence_inputs(
         base_summary.get("exact_replay_support_boundary")
         or "snapshot_backed_source_runs_only"
     )
+    replay_family_contract_name = str(
+        replay_family_contract.get("contract") or ""
+    ).strip()
+    composite_execution_context = replay_family_contract_name.startswith("composite_")
     return _PersistenceInputs(
         lineage_closure_boundary=lineage_closure_boundary,
         lineage_closure_boundary_supported=bool(
@@ -212,6 +221,7 @@ def _resolve_persistence_inputs(
         ),
         artifact_lineage_links_complete=not artifact_refs
         or (missing_link_count == 0 and bool(lineage_fragment_ids)),
+        composite_resume_rich_replay_supported=not composite_execution_context,
     )
 
 
@@ -221,6 +231,7 @@ def _build_forensic_grade_missing_requirements(
     ledger_entries_present: bool,
     artifact_lineage_links_complete: bool,
     lineage_closure_boundary_supported: bool,
+    composite_resume_rich_replay_supported: bool,
 ) -> list[str]:
     """Build the forensic-grade requirement gap list from derived inputs."""
     missing = list(replay_ready_missing_requirements)
@@ -230,6 +241,8 @@ def _build_forensic_grade_missing_requirements(
         missing.append("artifact_lineage_links")
     if not lineage_closure_boundary_supported:
         missing.append("lineage_closure_boundary_support")
+    if not composite_resume_rich_replay_supported:
+        missing.append("composite_rich_replay_projection")
     return missing
 
 

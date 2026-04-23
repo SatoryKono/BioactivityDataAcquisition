@@ -360,3 +360,51 @@ class TestBootstrapObservabilityWorkflowService:
             result = bootstrap_observability_workflow_service()
 
         assert isinstance(result.tracer, TracingPort)
+
+    def test_wires_lineage_and_quarantine_services(self):
+        """Workflow diagnostics bootstrap should wire dossier support seams."""
+        checkpoint_service = MagicMock(spec=CheckpointService)
+        audit_service = MagicMock()
+        run_manifest_service = MagicMock()
+        lineage_service = MagicMock()
+        quarantine_service = MagicMock(spec=QuarantineService)
+        tracer = MagicMock(spec=TracingPort)
+
+        with (
+            patch(
+                "bioetl.composition.bootstrap.cli.checkpoint.get_settings"
+            ) as mock_settings,
+            patch(
+                "bioetl.composition.bootstrap.cli.checkpoint.bootstrap_checkpoint_service",
+                return_value=checkpoint_service,
+            ),
+            patch(
+                "bioetl.composition.bootstrap.cli.checkpoint.bootstrap_audit_inspection_service",
+                return_value=audit_service,
+            ),
+            patch(
+                "bioetl.composition.bootstrap.cli.checkpoint.bootstrap_run_manifest_service",
+                return_value=run_manifest_service,
+            ),
+            patch(
+                "bioetl.composition.bootstrap.cli.checkpoint.bootstrap_lineage_service",
+                return_value=lineage_service,
+            ),
+            patch(
+                "bioetl.composition.bootstrap.cli.checkpoint.bootstrap_quarantine_service",
+                return_value=quarantine_service,
+            ),
+            patch(
+                "bioetl.composition.bootstrap.cli.checkpoint.resolve_tracing_port",
+                return_value=tracer,
+            ),
+        ):
+            mock_settings.return_value = MagicMock()
+            result = bootstrap_observability_workflow_service()
+
+        assert result.checkpoint_service is checkpoint_service
+        assert result.audit_service is audit_service
+        assert result.run_manifest_service is run_manifest_service
+        assert result.lineage_service is lineage_service
+        assert result.quarantine_service is quarantine_service
+        assert result.tracer is tracer

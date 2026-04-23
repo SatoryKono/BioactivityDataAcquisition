@@ -105,6 +105,10 @@ class InputSnapshotRef(BaseModel):
         content_hash: SHA256 hash of the captured payload bytes/content.
         immutable_uri: Immutable local/object-store URI for exact replay.
         query_fingerprint: Optional normalized query fingerprint for lookup.
+        storage_provider: Optional object-storage backend/provider name.
+        object_bucket: Optional object-storage bucket/container name.
+        object_key: Optional object-storage object key/path.
+        object_version_id: Optional object-storage object version anchor.
         etag: Optional upstream entity tag captured at fetch time.
         last_modified: Optional upstream last-modified marker.
         captured_at: UTC timestamp when the snapshot was captured.
@@ -119,6 +123,22 @@ class InputSnapshotRef(BaseModel):
     query_fingerprint: str | None = Field(
         default=None,
         description="Optional normalized query fingerprint for snapshot lookup",
+    )
+    storage_provider: str | None = Field(
+        default=None,
+        description="Optional object-storage backend/provider name",
+    )
+    object_bucket: str | None = Field(
+        default=None,
+        description="Optional object-storage bucket/container name",
+    )
+    object_key: str | None = Field(
+        default=None,
+        description="Optional object-storage object key/path",
+    )
+    object_version_id: str | None = Field(
+        default=None,
+        description="Optional object-storage object version anchor",
     )
     etag: str | None = Field(
         default=None,

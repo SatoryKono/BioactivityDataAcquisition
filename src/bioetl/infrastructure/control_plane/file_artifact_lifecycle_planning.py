@@ -187,7 +187,6 @@ def _iter_artifact_refs(
         for path in _iter_surface_files(base_path, surface):
             refs.append(
                 _build_artifact_ref(
-                    base_path=base_path,
                     surface=surface,
                     path=path,
                     cutoff=cutoff,
@@ -199,7 +198,6 @@ def _iter_artifact_refs(
 
 def _build_artifact_ref(
     *,
-    base_path: Path,
     surface: ControlPlaneArtifactSurface,
     path: Path,
     cutoff: datetime,

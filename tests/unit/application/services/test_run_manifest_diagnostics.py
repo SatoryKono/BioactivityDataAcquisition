@@ -100,6 +100,7 @@ def _expected_canonical_execution_identity(manifest: RunManifest) -> dict[str, o
         pipeline_name=manifest.pipeline_name,
         run_type=manifest.run_type.value,
         pipeline_version=manifest.code_provenance.pipeline_version,
+        git_commit=manifest.code_provenance.git_commit,
         effective_config_hash=manifest.code_provenance.effective_config_hash,
         dq_contract_compatibility_hash=(
             manifest.code_provenance.dq_contract_compatibility_hash
@@ -272,7 +273,11 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
     assert score["schema_version"] == "1.0"
     assert score["contract_version"] == "1.2.0"
     assert score["scale"] == "0-10"
+    assert score["required_profile"] == "degraded_observable"
     assert score["overall_score"] == pytest.approx(7.4)
+    assert score["thresholds"] == {}
+    assert score["threshold_failures"] == []
+    assert score["thresholds_satisfied"] is True
     assert score["scored_at"] == manifest.created_at.isoformat()
     assert score["source"] == "run_manifest_diagnostics"
     assert score["blockers"] == [
@@ -332,6 +337,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
             "git_commit": "abc1234",
             "source_revision_state": "clean",
             "strict_code_provenance_ready": True,
+            "strict_code_provenance_blockers": [],
         },
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
@@ -406,6 +412,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
                     "per_provider_result_maps",
                     "rich_checkpoint_payloads",
                 ],
+                "forensic_grade_supported": True,
             },
             "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
         },
@@ -508,6 +515,10 @@ def test_build_diagnostics_summary_distinguishes_snapshot_backed_runs_from_exact
                         snapshot_id="snapshot-1",
                         content_hash="sha256:snapshot-1",
                         immutable_uri="file:///workspace/bronze/batch_1.jsonl.zst",
+                        storage_provider="s3",
+                        object_bucket="bioetl-bronze",
+                        object_key="chembl/activity/batch_1.jsonl.zst",
+                        object_version_id="version-001",
                     ),
                 ),
             ),
@@ -528,6 +539,25 @@ def test_build_diagnostics_summary_distinguishes_snapshot_backed_runs_from_exact
     assert summary["replay_mode"] == "same_data_state_recovery"
     assert summary["exact_replay_blockers"] == []
     assert summary["input_snapshot_ids"] == ["snapshot-1"]
+    assert summary["input_snapshots"] == [
+        {
+            "provider": "chembl",
+            "entity": "activity",
+            "pipeline_name": "chembl_activity",
+            "query": None,
+            "snapshot_id": "snapshot-1",
+            "content_hash": "sha256:snapshot-1",
+            "immutable_uri": "file:///workspace/bronze/batch_1.jsonl.zst",
+            "query_fingerprint": None,
+            "storage_provider": "s3",
+            "object_bucket": "bioetl-bronze",
+            "object_key": "chembl/activity/batch_1.jsonl.zst",
+            "object_version_id": "version-001",
+            "etag": None,
+            "last_modified": None,
+            "captured_at": None,
+        }
+    ]
 
 
 def test_build_diagnostics_summary_does_not_report_exact_replay_from_intent_alone() -> (
@@ -672,6 +702,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
             "git_commit": "abc1234",
             "source_revision_state": "clean",
             "strict_code_provenance_ready": True,
+            "strict_code_provenance_blockers": [],
         },
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
@@ -754,6 +785,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
                 "per_provider_result_maps",
                 "rich_checkpoint_payloads",
             ],
+            "forensic_grade_supported": True,
         },
         "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
     }
@@ -976,6 +1008,13 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
     assert summary["persistence_profile"]["replay_ready_missing_requirements"] == [
         "exact_replay_capability",
         "immutable_input_snapshots",
+    ]
+    assert summary["persistence_profile"]["forensic_grade_missing_requirements"] == [
+        "exact_replay_capability",
+        "immutable_input_snapshots",
+        "run_ledger_history",
+        "lineage_closure_boundary_support",
+        "composite_rich_replay_projection",
     ]
     assert summary["alert_signals"]["strict_replay_boundary_gap"] is False
     assert summary["alert_signals"]["lineage_closure_boundary_gap"] is True

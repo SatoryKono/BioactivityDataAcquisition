@@ -1,0 +1,85 @@
+{
+  "environment": {
+    "bioetl_version": "0.0-test",
+    "hostname": "golden-host",
+    "python_version": "3.12.0"
+  },
+  "governance": null,
+  "layer": "bronze",
+  "output": {
+    "artifact_id": "bronze_batch:00000000-0000-0000-0000-000000000903",
+    "composite_run_id": null,
+    "content_hash": null,
+    "lineage_fragment_id": null,
+    "record_count": 100,
+    "total_bytes": 5000,
+    "write_completed_at": "2025-01-01T12:00:05Z",
+    "write_duration_ms": 5000,
+    "write_started_at": "2025-01-01T12:00:00Z"
+  },
+  "output_ext": {
+    "compression": "zstd",
+    "files": [
+      {
+        "checksum_blake2": null,
+        "path": "v1/chembl/activity/2025-01-01/batch-001.jsonl.zst",
+        "record_count": 100,
+        "size_bytes": 5000
+      }
+    ],
+    "format": "jsonl+zstd"
+  },
+  "pipeline": {
+    "config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "contract_ref": "chembl.activity",
+    "contract_schema_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "contract_version": "1.2.0",
+    "dq_contract_compatibility_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "dq_policy_ref": "chembl_activity.gold",
+    "effective_config_artifact_id": "eca-golden-001",
+    "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "entity": "activity",
+    "execution_fingerprint": "fp-golden-001",
+    "git_commit": "abc1234",
+    "name": "chembl_activity",
+    "provider": "chembl",
+    "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "rule_bundle_version": "2026.03",
+    "version": "1.0.0"
+  },
+  "runtime": {
+    "completed_at_utc": "2025-01-01T12:00:05Z",
+    "duration_seconds": 5.0,
+    "manifest_id": "manifest-golden-001",
+    "run_id": "00000000-0000-0000-0000-000000000902",
+    "run_type": "incremental",
+    "started_at_utc": "2025-01-01T12:00:00Z"
+  },
+  "source": {
+    "api_requests": [],
+    "api_version": null,
+    "avg_request_duration_ms": 0.0,
+    "file_path": null,
+    "input_snapshots": [
+      {
+        "captured_at": "2025-01-01T11:55:00Z",
+        "content_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "etag": "etag-001",
+        "immutable_uri": "s3://bioetl-bronze/chembl/activity/batch-001.jsonl.zst",
+        "last_modified": "2025-01-01T11:55:00Z",
+        "object_bucket": "bioetl-bronze",
+        "object_key": "chembl/activity/batch-001.jsonl.zst",
+        "object_version_id": "version-001",
+        "query_fingerprint": "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+        "snapshot_id": "snapshot-golden-001",
+        "storage_provider": "s3"
+      }
+    ],
+    "query_string": "assay_type=B",
+    "total_requests": 0,
+    "total_response_bytes": 0,
+    "type": "api",
+    "url": "https://www.ebi.ac.uk/chembl/api/data/activity"
+  },
+  "version": "1.1"
+}

@@ -16,6 +16,11 @@ This document defines the published control-plane contract for immutable run
 manifests, append-only run ledgers, and the inspection surface used by
 operators and diagnostics.
 
+Current published scope: BioETL supports strict exact replay only inside the
+explicitly published snapshot-backed support boundary. The platform does not
+currently claim universal exact reproducibility for every pipeline family and
+every historical run occurrence.
+
 It is the contract leg of the published traceability documentation pack
 required by [D-01](../../00-project/governance/01-documentation-governance-style-guide.md).
 
@@ -226,6 +231,9 @@ runtime/deployment for that run. The current published contract is:
   instead of running and merely reporting a degraded profile later. For
   ordinary source runs this also requires immutable input snapshots and
   `exact_replay_capability` on the built manifest request for the current run;
+- outside that published support boundary the contract is intentionally
+  narrower: the platform guarantees inspectable degraded observability, not
+  universal exact replay for every run;
 - `forensic_grade` requires `replay_ready` surfaces plus append-only ledger
   history and metadata-sidecar / lineage persistence for every active published
   layer in the configured sink surface.
@@ -604,8 +612,9 @@ semantic sink with `mode=append` is reported as
 
 `score` emits the `reproducibility_audit_score` block directly for automation.
 The score payload includes `schema_version`, `contract_version`, `scale`,
-`overall_score`, category scores, `blockers`, `evidence_refs`, `scored_at`,
-and `source`.
+`required_profile`, `overall_score`, category scores, score `thresholds`,
+`threshold_failures`, `thresholds_satisfied`, `blockers`, `evidence_refs`,
+`scored_at`, and `source`.
 
 Current published lineage closure boundary for Bronze -> Silver -> Gold
 operator-grade trace/debug support covers these source families:

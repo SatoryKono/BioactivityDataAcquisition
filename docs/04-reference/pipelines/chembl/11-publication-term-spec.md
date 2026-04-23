@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
 Version: 1.0.0
-Status: Historical deep spec.
+Status: Active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-03'
+  Last verified: '2026-04-23'
 
 ______________________________________________________________________
 
-# ChEMBL Publication Term Pipeline Deep Spec
+# ChEMBL Publication Term Pipeline Specification
 
-This page is preserved for historical analysis only. It describes an older contract shape and legacy loading-strategy wording.
+This document describes the current active ChEMBL Publication Term pipeline specification.
 
 Canonical sources:
 

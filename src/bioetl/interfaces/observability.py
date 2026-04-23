@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.metrics_service import MetricsService
     from bioetl.application.services.observability_workflow_service import (
         ObservabilityWorkflowService,
+        RunForensicDossierResult,
     )
     from bioetl.application.services.quarantine_service import QuarantineService
     from bioetl.composition.observability_api import MetricsOperatorProfile
@@ -44,6 +45,7 @@ __all__ = [
     "get_observability_workflow_service",
     "get_quarantine_service",
     "get_run_manifest_service",
+    "inspect_run_dossier",
     "push_metrics_to_gateway",
     "start_metrics_server",
 ]
@@ -126,6 +128,17 @@ def get_observability_workflow_service() -> ObservabilityWorkflowService:
     )
 
     return _impl()
+
+
+async def inspect_run_dossier(
+    run_id: str,
+    *,
+    audit_limit: int = 100,
+) -> RunForensicDossierResult:
+    """Inspect one run through the canonical composition dossier seam."""
+    from bioetl.composition.observability_api import inspect_run_dossier as _impl
+
+    return await _impl(run_id, audit_limit=audit_limit)
 
 
 def get_health_service() -> HealthService:

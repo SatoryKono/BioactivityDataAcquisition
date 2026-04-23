@@ -62,6 +62,7 @@ def _build_canonical_execution_identity(
         pipeline_name=request.manifest.pipeline_name,
         run_type=request.manifest.run_type.value,
         pipeline_version=cast(str | None, request.base_summary.get("pipeline_version")),
+        git_commit=cast(str | None, request.base_summary.get("git_commit")),
         effective_config_hash=cast(
             str | None, request.base_summary.get("effective_config_hash")
         ),

@@ -22,9 +22,11 @@ Last verified: '2026-04-01'
 Для верхнеуровневой навигации по всему reference-разделу используйте
 [`../index.md`](../index.md).
 
-- Gold contracts:
+- **Gold contracts**:
   generated JSON under `docs/04-reference/contracts/gold/*.json`
-- Control-plane contract:
+- **Data Quality contracts**:
+  [`dq-contracts.md`](dq-contracts.md) — canonical DQ contract pack
+- **Control-plane contract**:
   [`run-manifest-ledger.md`](run-manifest-ledger.md) — published contract for
   `RunManifest` / `RunLedger`
 

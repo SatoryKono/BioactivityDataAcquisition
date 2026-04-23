@@ -35,11 +35,11 @@ from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_checkpoint_port,
     bootstrap_quarantine_port,
 )
+from bioetl.composition.bootstrap.cli.lineage import bootstrap_lineage_service
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.bootstrap.cli.run_manifest import (
     bootstrap_run_manifest_service,
 )
-from bioetl.composition.bootstrap.lineage import bootstrap_lineage_service
 from bioetl.composition.factories.storage.audit import create_audit_port
 from bioetl.composition.observability_resolution import (
     resolve_metrics_port,

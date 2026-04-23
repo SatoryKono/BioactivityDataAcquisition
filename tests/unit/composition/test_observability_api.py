@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import sys
 from types import ModuleType
 from unittest import mock
@@ -120,6 +121,27 @@ def test_get_observability_workflow_service_delegates_to_services_api() -> None:
 
     assert result is expected
     mock_impl.assert_called_once_with()
+
+
+def test_inspect_run_dossier_delegates_to_workflow_service() -> None:
+    workflow_service = mock.AsyncMock()
+    workflow_service.inspect_run_dossier.return_value = expected = mock.Mock()
+
+    with mock.patch.object(
+        observability_api,
+        "get_observability_workflow_service",
+        return_value=workflow_service,
+    ) as mock_get_workflow:
+        result = asyncio.run(
+            observability_api.inspect_run_dossier("run-123", audit_limit=7)
+        )
+
+    assert result is expected
+    mock_get_workflow.assert_called_once_with()
+    workflow_service.inspect_run_dossier.assert_awaited_once_with(
+        "run-123",
+        audit_limit=7,
+    )
 
 
 def test_get_observability_diagnostics_bundle_builds_bundle() -> None:
