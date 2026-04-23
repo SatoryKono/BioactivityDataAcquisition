@@ -413,6 +413,39 @@ class TestMaybeRecover:
         )
         assert manager.decision_trace_dicts()[-1]["new_batch_size"] == 500
 
+    def test_repeated_config_recovery_stabilizes_at_initial_size(self) -> None:
+        """Config-driven recovery should converge monotonically to the initial size."""
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_config=_make_config(enable_adaptive_sizing=True),
+        )
+
+        current_size = 100
+        observed_sizes: list[int] = []
+        for _ in range(20):
+            current_size = manager.maybe_recover(current_size=current_size)
+            observed_sizes.append(current_size)
+
+        assert observed_sizes == sorted(observed_sizes)
+        assert all(size <= 500 for size in observed_sizes)
+        assert observed_sizes[-1] == 500
+
+    def test_decision_trace_is_bounded_after_many_recovery_steps(self) -> None:
+        """Replay-visible decision trace must stay bounded during long runs."""
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_config=_make_config(enable_adaptive_sizing=True),
+        )
+
+        current_size = 10
+        for _ in range(160):
+            current_size = manager.maybe_recover(current_size=current_size)
+
+        trace = manager.decision_trace_dicts()
+        assert len(trace) == manager._MAX_DECISION_TRACE_ENTRIES
+        assert trace[0]["decision_index"] == 33
+        assert trace[-1]["decision_index"] == 160
+
 
 # ---------------------------------------------------------------------------
 # _estimate_from_config

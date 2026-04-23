@@ -375,6 +375,57 @@ class TestBatchExecutorMemory:
         assert memory_monitor.get_recommended_batch_size.call_count >= 2
 
     @pytest.mark.asyncio
+    async def test_execution_diagnostics_expose_bounded_memory_trace_after_pressure(
+        self,
+        mock_services,
+        mock_context,
+        processor_config,
+        mock_checkpoint_manager,
+        callbacks,
+        mock_gold_validator,
+        memory_monitor,
+    ) -> None:
+        """Forced pressure should surface as bounded executor replay diagnostics."""
+        memory_monitor.get_recommended_batch_size.side_effect = [50, 50, 100, 100, 100]
+
+        executor = _create_batch_executor(
+            services=mock_services,
+            context=mock_context,
+            config=processor_config,
+            callbacks=callbacks,
+            gold_validator=mock_gold_validator,
+            checkpoint_manager=mock_checkpoint_manager,
+            batch_size=100,
+            memory_monitor=memory_monitor,
+            memory_config=MemoryConfig(
+                enable_adaptive_sizing=True,
+                check_interval_records=1,
+            ),
+        )
+
+        async def mock_fetch(**kwargs):
+            await asyncio.sleep(0)
+            for i in range(5):
+                yield {"id": i}
+
+        mock_services.data_source.fetch = mock_fetch
+
+        await executor.execute(limit=None)
+
+        diagnostics = executor.execution_diagnostics
+        adaptive = diagnostics["adaptive_memory"]
+        assert adaptive["enabled"] is True
+        assert adaptive["decision_count"] >= 1
+        assert adaptive["batch_size_reductions"] >= 1
+        assert adaptive["min_batch_size_used"] <= 50
+        assert adaptive["decision_trace"][0]["stage"] == "pressure_check"
+        assert adaptive["decision_trace"][0]["old_batch_size"] == 100
+        assert adaptive["decision_trace"][0]["new_batch_size"] == 50
+        assert adaptive["decision_trace"][0]["reason"] == (
+            "monitor_recommended_reduction"
+        )
+
+    @pytest.mark.asyncio
     async def test_estimate_batch_size_from_config(
         self,
         mock_services,
