@@ -32,6 +32,8 @@ from bioetl.domain.control_plane import (
     RunSourceRef,
 )
 from bioetl.domain.control_plane.reproducibility_profiles import (
+    published_production_reproducibility_families,
+    published_reproducibility_family_inventory,
     published_supported_reproducibility_families,
 )
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
@@ -62,6 +64,9 @@ pytestmark = pytest.mark.integration
 
 _VALID_CONFIG_HASH = "a" * 64
 _PUBLISHED_SUPPORTED_FAMILIES = tuple(published_supported_reproducibility_families())
+_PUBLISHED_PRODUCTION_FAMILIES = tuple(
+    published_production_reproducibility_families()
+)
 
 
 @dataclass(frozen=True)
@@ -186,9 +191,13 @@ def _make_manifest(
         code_provenance=RunCodeProvenance(
             pipeline_version="1.0.0",
             git_commit="abc1234",
+            source_revision_state="clean",
             config_hash=config_hash,
+            resolved_config_hash="b" * 64,
+            effective_config_hash="c" * 64,
             contract_ref=identity.contract_ref,
             contract_version="1.0.0",
+            contract_schema_hash="schema-hash-1",
             dq_policy_ref=f"{identity.contract_ref}.dq",
             rule_bundle_version="dq-rules.v1",
             dq_contract_compatibility_hash="compat-hash-1",
@@ -699,6 +708,18 @@ def test_reproducibility_contract_forensic_grade_profile_is_attained(
     assert (
         result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is False
     )
+    score = result.diagnostics["reproducibility_audit_score"]
+    assert score["required_profile"] == "forensic_grade"
+    assert score["thresholds"] == {
+        "determinism": 8,
+        "run_identity": 8,
+        "checkpoint_safety": 8,
+        "lineage_completeness": 8,
+        "replay_readiness": 8,
+        "layer_consistency": 8,
+    }
+    assert score["threshold_failures"] == []
+    assert score["thresholds_satisfied"] is True
 
 
 def test_reproducibility_contract_replay_ready_profile_requires_snapshot_backed_inputs() -> (
@@ -736,6 +757,24 @@ def test_reproducibility_contract_replay_ready_profile_requires_snapshot_backed_
         result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
     )
     assert result.diagnostics["alert_signals"]["immutable_input_snapshot_gap"] is True
+    score = result.diagnostics["reproducibility_audit_score"]
+    assert score["required_profile"] == "replay_ready"
+    assert score["thresholds"] == {
+        "determinism": 7,
+        "run_identity": 8,
+        "checkpoint_safety": 7,
+        "replay_readiness": 7,
+        "layer_consistency": 7,
+    }
+    threshold_failures = {
+        item["category"]: item for item in score["threshold_failures"]
+    }
+    assert score["thresholds_satisfied"] is False
+    assert {"determinism", "replay_readiness"} <= set(threshold_failures)
+    assert threshold_failures["determinism"]["reason"] == "below_required_threshold"
+    assert threshold_failures["replay_readiness"]["reason"] == (
+        "below_required_threshold"
+    )
 
 
 def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed() -> (
@@ -782,6 +821,13 @@ def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed(
     assert (
         result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
     )
+    score = result.diagnostics["reproducibility_audit_score"]
+    threshold_failures = {
+        item["category"]: item for item in score["threshold_failures"]
+    }
+    assert score["required_profile"] == "replay_ready"
+    assert score["thresholds_satisfied"] is False
+    assert {"determinism", "replay_readiness"} <= set(threshold_failures)
 
 
 def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_lineage_family() -> (
@@ -846,7 +892,7 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
         "family": "openalex.works",
         "support_scope": "operator_grade_trace_debug",
         "supported": False,
-        "reason": "family_outside_supported_boundary",
+        "reason": "family_outside_published_inventory",
         "supported_families": list(_PUBLISHED_SUPPORTED_FAMILIES),
     }
     assert result.diagnostics["replay_family_contract"]["family"] == "openalex.works"
@@ -888,6 +934,41 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
     assert result.diagnostics["alert_signals"]["lineage_closure_boundary_gap"] is True
     assert (
         result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
+    )
+    score = result.diagnostics["reproducibility_audit_score"]
+    threshold_failures = {
+        item["category"]: item for item in score["threshold_failures"]
+    }
+    assert score["required_profile"] == "forensic_grade"
+    assert score["thresholds_satisfied"] is False
+    assert "lineage_completeness" in threshold_failures
+
+
+def test_reproducibility_contract_inventory_covers_all_production_families() -> None:
+    entity_families = {
+        f"{path.parent.name}.{path.stem}"
+        for path in Path("configs/entities").glob("*/*.yaml")
+    }
+    composite_families = {
+        f"composite.{path.stem}" for path in Path("configs/composites").glob("*.yaml")
+    }
+
+    assert set(_PUBLISHED_PRODUCTION_FAMILIES) == entity_families | composite_families
+
+
+def test_reproducibility_contract_inventory_profiles_all_production_families() -> None:
+    inventory = published_reproducibility_family_inventory()
+    profile_by_family = {str(item["family"]): item for item in inventory}
+
+    assert set(profile_by_family) == set(_PUBLISHED_PRODUCTION_FAMILIES)
+    assert profile_by_family["chembl.activity"]["strict_exact_replay_supported"] is True
+    assert (
+        profile_by_family["openalex.publication"]["strict_exact_replay_supported"]
+        is False
+    )
+    assert (
+        profile_by_family["composite.publication"]["exact_replay_support_boundary"]
+        == "composite_snapshot_backed_input_envelope"
     )
 
 

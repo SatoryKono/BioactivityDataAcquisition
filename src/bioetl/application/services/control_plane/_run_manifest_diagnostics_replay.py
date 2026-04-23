@@ -265,6 +265,10 @@ def _collect_input_snapshot_refs(manifest: RunManifest) -> list[dict[str, object
                     "content_hash": snapshot.content_hash,
                     "immutable_uri": snapshot.immutable_uri,
                     "query_fingerprint": snapshot.query_fingerprint,
+                    "storage_provider": snapshot.storage_provider,
+                    "object_bucket": snapshot.object_bucket,
+                    "object_key": snapshot.object_key,
+                    "object_version_id": snapshot.object_version_id,
                     "etag": snapshot.etag,
                     "last_modified": snapshot.last_modified,
                     "captured_at": snapshot.captured_at.isoformat()

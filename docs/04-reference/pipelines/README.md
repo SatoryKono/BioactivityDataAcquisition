@@ -58,9 +58,7 @@ compatibility stubs that redirect readers to the current canonical contract.
 
 ### Composite Pipelines (5)
 
-Composite pipeline pages currently act as historical deep specs. Use the active
-composite configs plus the composition/application architecture docs as the
-canonical implementation source.
+Composite pipeline pages document the current active composite pipeline specifications.
 
 | #   | Pipeline ID             | Provider  | Entity      | Spec                                     |
 | --- | ----------------------- | --------- | ----------- | ---------------------------------------- |

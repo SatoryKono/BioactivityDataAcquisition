@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
 Version: 1.0.0
-Status: Historical deep spec.
+Status: Active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-03'
+  Last verified: '2026-04-23'
 
 ______________________________________________________________________
 
-# ChEMBL Target Component Pipeline Deep Spec
+# ChEMBL Target Component Pipeline Specification
 
-This document is retained as a legacy implementation note. It describes pre-normalization field names and should not be treated as the current contract.
+This document describes the current active ChEMBL Target Component pipeline specification.
 
 Canonical sources:
 

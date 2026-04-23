@@ -21,8 +21,8 @@ from bioetl.application.services.control_plane.run_manifest_inspection_service i
 
 if TYPE_CHECKING:
     from bioetl.application.services.lineage.lineage_inspection_service import (
-        LineageRunExplanationResult,
         LineageInspectionService,
+        LineageRunExplanationResult,
     )
     from bioetl.application.services.quarantine_service import QuarantineService
     from bioetl.domain.ports import TracingPort

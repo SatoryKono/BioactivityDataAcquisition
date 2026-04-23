@@ -1,16 +1,16 @@
 ---
 Version: 1.0.0
-Status: Historical deep spec.
+Status: Active
 Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-04-03'
+Last verified: '2026-04-23'
 ---
 
-# ChEMBL Publication Similarity Pipeline Deep Spec
+# ChEMBL Publication Similarity Pipeline Specification
 
-This document is kept only as archived design context. It predates the normalized snake_case contract and should not be used as active implementation guidance.
+This document describes the current active ChEMBL Publication Similarity pipeline specification.
 
 Canonical sources:
 - [ChEMBL publication provider reference](../../providers/chembl/publication.md)

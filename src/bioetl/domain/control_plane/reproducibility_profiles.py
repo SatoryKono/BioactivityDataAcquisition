@@ -2,13 +2,43 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Literal
 
+_PUBLISHED_SOURCE_FAMILIES = (
+    "chembl.activity",
+    "chembl.assay",
+    "chembl.assay_parameters",
+    "chembl.cell_line",
+    "chembl.compound_record",
+    "chembl.molecule",
+    "chembl.protein_class",
+    "chembl.publication",
+    "chembl.publication_similarity",
+    "chembl.publication_term",
+    "chembl.subcellular_fraction",
+    "chembl.target",
+    "chembl.target_component",
+    "chembl.tissue",
+    "crossref.publication",
+    "openalex.publication",
+    "pubchem.compound",
+    "pubmed.publication",
+    "semanticscholar.publication",
+    "uniprot.idmapping",
+    "uniprot.protein",
+)
+_PUBLISHED_COMPOSITE_FAMILIES = (
+    "composite.activity",
+    "composite.assay",
+    "composite.molecule",
+    "composite.publication",
+    "composite.target",
+)
 _PUBLISHED_SUPPORTED_SOURCE_FAMILIES = (
     "chembl.activity",
     "chembl.molecule",
-    "crossref.works",
+    "crossref.publication",
     "pubchem.compound",
     "pubmed.publication",
 )
@@ -38,6 +68,41 @@ class ReproducibilityFamilyProfile:
 def published_supported_reproducibility_families() -> list[str]:
     """Return the authoritative published source-family inventory."""
     return list(_PUBLISHED_SUPPORTED_SOURCE_FAMILIES)
+
+
+def published_production_reproducibility_families() -> list[str]:
+    """Return the authoritative production-family inventory."""
+    return list(_PUBLISHED_SOURCE_FAMILIES + _PUBLISHED_COMPOSITE_FAMILIES)
+
+
+def published_reproducibility_family_inventory() -> list[dict[str, object]]:
+    """Return reproducibility-profile verdicts for every published family."""
+    inventory: list[dict[str, object]] = []
+    for family in _PUBLISHED_SOURCE_FAMILIES:
+        provider, entity = family.split(".", maxsplit=1)
+        inventory.append(
+            asdict(
+                resolve_reproducibility_family_profile(
+                    provider=provider,
+                    entity=entity,
+                    contract_ref=family,
+                    execution_context="source",
+                )
+            )
+        )
+    for family in _PUBLISHED_COMPOSITE_FAMILIES:
+        provider, entity = family.split(".", maxsplit=1)
+        inventory.append(
+            asdict(
+                resolve_reproducibility_family_profile(
+                    provider=provider,
+                    entity=entity,
+                    contract_ref=family,
+                    execution_context="composite",
+                )
+            )
+        )
+    return inventory
 
 
 def _normalized_text(value: object) -> str:
@@ -88,6 +153,7 @@ def resolve_reproducibility_family_profile(
             reason="composite_family_requires_full_snapshot_envelope",
         )
     supported = family in _PUBLISHED_SUPPORTED_SOURCE_FAMILIES
+    published = family in _PUBLISHED_SOURCE_FAMILIES
     return ReproducibilityFamilyProfile(
         family=family,
         execution_context=execution_context,
@@ -101,7 +167,11 @@ def resolve_reproducibility_family_profile(
         reason=(
             "family_within_supported_boundary"
             if supported
-            else "family_outside_supported_boundary"
+            else (
+                "family_within_published_inventory_but_outside_supported_boundary"
+                if published
+                else "family_outside_published_inventory"
+            )
         ),
     )
 

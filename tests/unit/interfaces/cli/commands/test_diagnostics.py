@@ -32,22 +32,33 @@ class _FakeHealthSummary:
 
 class _FakeWorkflowService:
     def __init__(self) -> None:
-        self.audit_run_calls: list[tuple[str, int]] = []
+        self.run_dossier_calls: list[tuple[str, int]] = []
         self.checkpoint_calls: list[tuple[str, str | None, int]] = []
 
-    async def inspect_audit_run(
+    async def inspect_run_dossier(
         self,
         run_id: str,
         *,
-        limit: int = 100,
+        audit_limit: int = 100,
     ) -> _FakeInspectionResult:
         await asyncio.sleep(0)
-        self.audit_run_calls.append((run_id, limit))
+        self.run_dossier_calls.append((run_id, audit_limit))
         return _FakeInspectionResult(
             {
                 "run_id": run_id,
+                "pipeline_name": "chembl_activity",
+                "status": {
+                    "forensic_profile": "forensic_grade",
+                    "latest_status": "success",
+                    "latest_event_type": "run_finished",
+                    "checkpoint_status": "present",
+                    "lineage_status": "present",
+                    "quarantine_status": "present",
+                    "missing_evidence_count": 0,
+                    "degraded_evidence_count": 1,
+                },
                 "audit": {
-                    "query": {"run_id": run_id, "limit": limit},
+                    "query": {"run_id": run_id, "limit": audit_limit},
                     "entries": [
                         {
                             "timestamp": "2026-04-10T10:00:00+00:00",
@@ -62,17 +73,48 @@ class _FakeWorkflowService:
                     "manifest": {
                         "manifest_id": "manifest-1",
                         "pipeline_name": "chembl_activity",
+                        "provider": "chembl",
+                        "entity": "activity",
+                        "run_type": "incremental",
                     },
                     "diagnostics": {
                         "replay_capability": "exact_replay_supported",
-                        "requested_exact_replay": True,
-                        "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
-                        "replay_capability_reason": "immutable_input_snapshots_present",
-                        "exact_replay_blockers": [],
-                        "input_snapshot_ids": ["snapshot-1"],
-                        "input_snapshot_identity_fingerprint": "fingerprint-1",
+                        "persistence_profile": {"attained_profile": "forensic_grade"},
+                        "alert_signals": ["audit", "manifest"],
                     },
                 },
+                "checkpoint": {
+                    "pipeline_name": "chembl_activity",
+                    "run_id": run_id,
+                    "metadata": {"records_processed": 42},
+                },
+                "lineage": {
+                    "manifest_id": "manifest-1",
+                    "fragment_ids": ["fragment-1"],
+                    "produced_datasets": ["silver://chembl.activity"],
+                },
+                "quarantine_summary": {
+                    "total": 2,
+                    "silver_filter_rejects": {
+                        "total_count": 2,
+                        "bronze_records": 42,
+                        "bronze_ratio": 2 / 42,
+                        "bronze_ratio_pct": (2 / 42) * 100,
+                    },
+                    "run_scope": {"run_id": run_id},
+                },
+                "traceability": {
+                    "audit_entries_count": 1,
+                    "lineage_fragment_ids": ["fragment-1"],
+                    "artifact_refs": ["manifest://manifest-1"],
+                    "trace_links_available": False,
+                    "correlation_anchor_gaps": {"run_id": 0},
+                },
+                "missing_evidence": [],
+                "degraded_evidence": ["trace_links_unavailable"],
+                "next_steps": [
+                    "Use audit, manifest, and lineage sections as the current traceability fallback."
+                ],
             }
         )
 
@@ -320,16 +362,13 @@ def test_diagnostics_run_text_outputs_correlated_summary(
     )
 
     assert result.exit_code == 0
-    assert "Audit Run Diagnostics" in result.output
+    assert "Run Forensic Dossier" in result.output
+    assert "forensic_profile: forensic_grade" in result.output
     assert "manifest_id: manifest-1" in result.output
-    assert (
-        "exact_replay_support_boundary: snapshot_backed_source_runs_only"
-        in result.output
-    )
-    assert (
-        "replay_capability_reason: immutable_input_snapshots_present" in result.output
-    )
-    assert workflow_service.audit_run_calls == [
+    assert "checkpoint_run_id: 00000000-0000-0000-0000-000000000001" in result.output
+    assert "lineage_fragment_ids: ['fragment-1']" in result.output
+    assert "trace_links_available: False" in result.output
+    assert workflow_service.run_dossier_calls == [
         ("00000000-0000-0000-0000-000000000001", 100)
     ]
 

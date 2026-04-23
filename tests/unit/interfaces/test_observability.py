@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from unittest import mock
 
 import pytest
@@ -271,3 +272,18 @@ def test_get_observability_diagnostics_bundle_builds_unified_bundle() -> None:
 
     assert bundle is expected
     mock_impl.assert_called_once_with()
+
+
+def test_inspect_run_dossier_delegates_to_composition_api() -> None:
+    expected = mock.Mock()
+
+    with mock.patch(
+        "bioetl.composition.observability_api.inspect_run_dossier",
+        new=mock.AsyncMock(return_value=expected),
+    ) as mock_impl:
+        result = asyncio.run(
+            observability.inspect_run_dossier("run-123", audit_limit=9)
+        )
+
+    assert result is expected
+    mock_impl.assert_awaited_once_with("run-123", audit_limit=9)

@@ -6,6 +6,25 @@ from dataclasses import dataclass
 
 JsonDict = dict[str, object]
 
+_PROFILE_SCORE_THRESHOLDS: dict[str, dict[str, int]] = {
+    "degraded_observable": {},
+    "replay_ready": {
+        "determinism": 7,
+        "run_identity": 8,
+        "checkpoint_safety": 7,
+        "replay_readiness": 7,
+        "layer_consistency": 7,
+    },
+    "forensic_grade": {
+        "determinism": 8,
+        "run_identity": 8,
+        "checkpoint_safety": 8,
+        "lineage_completeness": 8,
+        "replay_readiness": 8,
+        "layer_consistency": 8,
+    },
+}
+
 
 @dataclass(frozen=True, slots=True)
 class _ScoreCard:
@@ -38,6 +57,14 @@ def build_reproducibility_audit_scoring(summary: JsonDict) -> JsonDict:
         _score_layer_consistency(summary),
     )
     category_scores = {card.category: card.to_dict() for card in score_cards}
+    required_profile = str(
+        summary.get("required_persistence_profile") or "degraded_observable"
+    )
+    thresholds = dict(_PROFILE_SCORE_THRESHOLDS.get(required_profile, {}))
+    threshold_failures = _evaluate_threshold_failures(
+        thresholds=thresholds,
+        category_scores=category_scores,
+    )
     overall = round(
         sum(card.score for card in score_cards) / max(len(score_cards), 1),
         1,
@@ -46,8 +73,12 @@ def build_reproducibility_audit_scoring(summary: JsonDict) -> JsonDict:
         "schema_version": "1.0",
         "contract_version": summary.get("contract_version"),
         "scale": "0-10",
+        "required_profile": required_profile,
         "overall_score": overall,
         "category_scores": category_scores,
+        "thresholds": thresholds,
+        "threshold_failures": threshold_failures,
+        "thresholds_satisfied": not threshold_failures,
         "blockers": _overall_blockers(summary, score_cards),
         "evidence_refs": _overall_evidence_refs(score_cards),
         "scored_at": summary.get("manifest_created_at"),
@@ -178,12 +209,18 @@ def _score_lineage_completeness(summary: JsonDict) -> _ScoreCard:
     refs = [
         "diagnostics.identity_graph_complete",
         "diagnostics.lineage_fragment_ids",
+        "diagnostics.lineage_closure_boundary",
     ]
     score = 10
     if not summary.get("identity_graph_complete"):
         score -= 2
         evidence.append("identity_graph_incomplete")
         blockers.append("identity_graph_incomplete")
+    lineage_boundary = summary.get("lineage_closure_boundary")
+    if isinstance(lineage_boundary, dict) and not bool(lineage_boundary.get("supported")):
+        score -= 2
+        evidence.append("lineage_closure_boundary_unsupported")
+        blockers.append("lineage_closure_boundary_unsupported")
     if summary.get("missing_artifact_links", 0):
         score -= 2
         evidence.append("artifact_lineage_links_missing")
@@ -273,6 +310,38 @@ def _string_items(value: object) -> tuple[str, ...]:
     if not isinstance(value, list):
         return ()
     return tuple(str(item) for item in value if item is not None)
+
+
+def _evaluate_threshold_failures(
+    *,
+    thresholds: dict[str, int],
+    category_scores: dict[str, JsonDict],
+) -> list[JsonDict]:
+    failures: list[JsonDict] = []
+    for category, minimum_score in thresholds.items():
+        score_payload = category_scores.get(category)
+        actual_score = score_payload.get("score") if isinstance(score_payload, dict) else None
+        if not isinstance(actual_score, int):
+            failures.append(
+                {
+                    "category": category,
+                    "required": minimum_score,
+                    "actual": None,
+                    "reason": "category_score_missing",
+                }
+            )
+            continue
+        if actual_score >= minimum_score:
+            continue
+        failures.append(
+            {
+                "category": category,
+                "required": minimum_score,
+                "actual": actual_score,
+                "reason": "below_required_threshold",
+            }
+        )
+    return failures
 
 
 def _overall_blockers(
