@@ -122,12 +122,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a narrow stdin-driven Sonar issue grouping helper for historical remediation triage; remove it once issue-wave analysis is fully folded into the canonical quality tooling."
     },
-    "scripts/ai/check_sonar_issues.py": {
-      "owner": "@bioetl-platform",
-      "decision": "active",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical GitHub/Sonar reconciliation helper for manual issue review; do not expand it into a supported automation surface without fresh call-site evidence."
-    },
     "scripts/generate_test_github_issues.py": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
@@ -139,18 +133,6 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded local changed-file test selection helper for historical manual workflows; prefer the canonical sharded pytest and test-selection tooling, and remove it once no operator workflow depends on this orphan utility."
-    },
-    "scripts/docs_parity_check.py": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded documentation-governance helper while parity checks still rely on this top-level script path; fold it into the canonical docs tooling surface or remove it once the docs parity gate is served exclusively through supported scripts.docs entrypoints."
-    },
-    "scripts/generate_adr_registry.py": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded documentation-governance helper for ADR metadata generation while the navigator remediation work still references this orphan path; promote it into the canonical docs tooling surface or remove it once ADR registry generation is fully routed through supported scripts.docs commands."
     },
     "scripts/ai/mcp/mcp_brave_search_wrapper.ps1": {
       "owner": "@bioetl-platform",
