@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import cast
 
 from bioetl.application.services.control_plane._run_manifest_diagnostics_ledger import (
@@ -38,36 +39,63 @@ from bioetl.application.services.control_plane.run_manifest_reproducibility_scor
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 
 
-def _build_base_summary(
+@dataclass(frozen=True, slots=True)
+class _BaseSummaryReplayContext:
+    """Replay- and resume-related inputs reused by base summary assembly."""
+
+    requested_exact_replay: bool
+    resume_requested: bool
+    input_snapshots: list[dict[str, object]]
+    replay_mode: str
+    replay_capability_reason: str
+    exact_replay_support_boundary: str
+    exact_replay_blockers: list[str]
+    resume_contract: dict[str, object]
+    replay_family_contract: dict[str, object]
+
+
+def _resolve_base_summary_replay_context(
     manifest: RunManifest,
-) -> dict[str, object]:
-    """Build base summary from manifest code provenance."""
-    code_provenance = manifest.code_provenance
+) -> _BaseSummaryReplayContext:
+    """Compute replay-derived context used by base summary assembly."""
     requested_exact_replay = bool(manifest.launch_context.get("exact_replay"))
     resume_requested = bool(manifest.launch_context.get("resume"))
     input_snapshots = _collect_input_snapshot_refs(manifest)
-    replay_mode = _resolve_replay_mode(
-        manifest=manifest,
+    return _BaseSummaryReplayContext(
         requested_exact_replay=requested_exact_replay,
         resume_requested=resume_requested,
-    )
-    replay_capability_reason = _resolve_replay_capability_reason(
-        manifest=manifest,
         input_snapshots=input_snapshots,
-        resume_requested=resume_requested,
+        replay_mode=_resolve_replay_mode(
+            manifest=manifest,
+            requested_exact_replay=requested_exact_replay,
+            resume_requested=resume_requested,
+        ),
+        replay_capability_reason=_resolve_replay_capability_reason(
+            manifest=manifest,
+            input_snapshots=input_snapshots,
+            resume_requested=resume_requested,
+        ),
+        exact_replay_support_boundary=_resolve_exact_replay_support_boundary(manifest),
+        exact_replay_blockers=_resolve_exact_replay_blockers(
+            manifest=manifest,
+            input_snapshots=input_snapshots,
+        ),
+        resume_contract=_build_resume_contract(
+            manifest=manifest,
+            requested_exact_replay=requested_exact_replay,
+            resume_requested=resume_requested,
+        ),
+        replay_family_contract=_resolve_replay_family_contract(manifest),
     )
-    exact_replay_support_boundary = _resolve_exact_replay_support_boundary(manifest)
-    exact_replay_blockers = _resolve_exact_replay_blockers(
-        manifest=manifest,
-        input_snapshots=input_snapshots,
-    )
-    resume_contract = _build_resume_contract(
-        manifest=manifest,
-        requested_exact_replay=requested_exact_replay,
-        resume_requested=resume_requested,
-    )
-    replay_family_contract = _resolve_replay_family_contract(manifest)
-    summary: dict[str, object] = {
+
+
+def _build_base_summary_payload(
+    manifest: RunManifest,
+    replay_context: _BaseSummaryReplayContext,
+) -> dict[str, object]:
+    """Return the manifest-derived payload before persistence overlays."""
+    code_provenance = manifest.code_provenance
+    return {
         "manifest_id": manifest.manifest_id,
         "manifest_created_at": manifest.created_at.isoformat(),
         "run_id": str(manifest.run_id),
@@ -102,39 +130,48 @@ def _build_base_summary(
             str(manifest.launch_context.get("required_persistence_profile") or "")
             or "degraded_observable"
         ),
-        "requested_exact_replay": requested_exact_replay,
-        "exact_replay_support_boundary": exact_replay_support_boundary,
-        "replay_capability_reason": replay_capability_reason,
+        "requested_exact_replay": replay_context.requested_exact_replay,
+        "exact_replay_support_boundary": replay_context.exact_replay_support_boundary,
+        "replay_capability_reason": replay_context.replay_capability_reason,
         "exact_replay_eligible": (
             manifest.replay_capability.value == "exact_replay_supported"
-            and not exact_replay_blockers
+            and not replay_context.exact_replay_blockers
         ),
-        "exact_replay_blockers": exact_replay_blockers,
+        "exact_replay_blockers": replay_context.exact_replay_blockers,
         "append_mode_semantic_sinks": _collect_append_mode_semantic_sinks(manifest),
-        "input_snapshot_ids": _collect_input_snapshot_ids(input_snapshots),
+        "input_snapshot_ids": _collect_input_snapshot_ids(
+            replay_context.input_snapshots
+        ),
         "input_snapshot_content_hashes": _collect_input_snapshot_content_hashes(
-            input_snapshots
+            replay_context.input_snapshots
         ),
         "input_snapshot_identity_fingerprint": (
-            _compute_input_snapshot_identity_fingerprint(input_snapshots)
+            _compute_input_snapshot_identity_fingerprint(replay_context.input_snapshots)
         ),
-        "replay_mode": replay_mode,
-        "replay_family_contract": replay_family_contract,
-        "resume_contract": resume_contract,
+        "replay_mode": replay_context.replay_mode,
+        "replay_family_contract": replay_context.replay_family_contract,
+        "resume_contract": replay_context.resume_contract,
         "resume_diagnostics": None,
         "lineage_closure_boundary": build_lineage_closure_boundary(
             provider=manifest.provider,
             entity=manifest.entity,
             contract_ref=code_provenance.contract_ref,
         ),
-        "input_snapshot_count": len(input_snapshots),
-        "input_snapshots": input_snapshots,
+        "input_snapshot_count": len(replay_context.input_snapshots),
+        "input_snapshots": replay_context.input_snapshots,
         "planned_artifacts": [
             {"layer": artifact.layer, "path": artifact.path}
             for artifact in manifest.planned_artifacts
         ],
         "occurrence_only_diagnostics": [],
     }
+
+
+def _attach_base_summary_runtime_views(
+    manifest: RunManifest,
+    summary: dict[str, object],
+) -> None:
+    """Attach persistence, alert, and scoring overlays to base summary."""
     persistence_profile = build_persistence_profile(
         base_summary=summary,
         ledger_entries_present=False,
@@ -172,6 +209,15 @@ def _build_base_summary(
     summary["reproducibility_audit_score"] = build_reproducibility_audit_scoring(
         summary
     )
+
+
+def _build_base_summary(
+    manifest: RunManifest,
+) -> dict[str, object]:
+    """Build base summary from manifest code provenance."""
+    replay_context = _resolve_base_summary_replay_context(manifest)
+    summary = _build_base_summary_payload(manifest, replay_context)
+    _attach_base_summary_runtime_views(manifest, summary)
     return summary
 
 

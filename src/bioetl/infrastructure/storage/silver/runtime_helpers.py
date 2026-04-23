@@ -134,6 +134,115 @@ def resolve_silver_writer_runtime(
     )
 
 
+def _build_maintenance_operations(
+    request: SilverWriterRuntimeServicesRequest,
+) -> SilverMaintenanceOperations | None:
+    """Create maintenance operations when export and retention inputs exist."""
+    if request.csv_exporter is None or request.base_path is None:
+        return None
+    retention_manager = RetentionPolicy(request.base_path)
+    return SilverMaintenanceOperations(
+        csv_exporter=request.csv_exporter,
+        retention_manager=retention_manager,
+        pipeline_name=request.pipeline_name,
+        metrics=request.metrics,
+        audit=request.audit,
+    )
+
+
+def _build_metadata_operations(
+    request: SilverWriterRuntimeServicesRequest,
+    *,
+    metadata_writer: MetadataWriterPort,
+    dq_calculator: DQMetricsCalculator,
+) -> SilverMetadataOperations:
+    """Create metadata operations bound to resolved metadata and DQ collaborators."""
+    return SilverMetadataOperations(
+        _logger=request.logger,
+        _metrics=request.metrics,
+        _audit=request.audit,
+        _metadata_writer=metadata_writer,
+        _metadata_coordinator=request.metadata_coordinator,
+        _lineage_store=request.lineage_store,
+        _dq_calculator=dq_calculator,
+        _host=None,  # Will be set later in SilverWriter.__init__
+    )
+
+
+def _build_validation_operations(
+    request: SilverWriterRuntimeServicesRequest,
+    *,
+    write_policy: WriteModePolicy,
+    silver_validator: SilverValidatorPort,
+) -> SilverValidationOperations | None:
+    """Create validation operations when validator and table base path are present."""
+    if request.base_path is None:
+        return None
+
+    # Import here to avoid circular imports
+    from bioetl.infrastructure.storage.silver.support import (
+        get_table_schema,
+        prepare_arrow_data,
+        resolve_table_path,
+    )
+
+    def _get_table_schema_wrapper(table_name: str) -> Awaitable[pa.Schema | None]:
+        """Wrapper for get_table_schema that can be patched in tests."""
+        return get_table_schema(request.base_path, table_name)
+
+    return SilverValidationOperations(
+        logger=request.logger,
+        _write_policy=write_policy,
+        _metrics=request.metrics,
+        _silver_validator=silver_validator,
+        _get_table_schema=_get_table_schema_wrapper,
+        _resolve_table_path=lambda table_name: resolve_table_path(
+            request.base_path, table_name
+        ),
+        _prepare_arrow_data=prepare_arrow_data,
+        _validate_write_mode=_validate_write_mode_impl,
+        _deduplicate_by_primary_keys=_deduplicate_by_primary_keys_impl,
+        _to_policy_write_mode=_to_policy_write_mode_impl,
+        _validate_key_nullability=_validate_key_nullability_impl,
+        _host=None,
+    )
+
+
+def _build_delta_operations(
+    request: SilverWriterRuntimeServicesRequest,
+    *,
+    merge_resilience_policy: SilverMergeResiliencePolicy,
+) -> SilverDeltaOperations:
+    """Create delta operations around the resolved resilience policy."""
+    return SilverDeltaOperations(
+        logger=request.logger,
+        _metrics=request.metrics,
+        _merge_resilience_policy=merge_resilience_policy,
+    )
+
+
+def _build_merged_operations(
+    request: SilverWriterRuntimeServicesRequest,
+) -> SilverMergedOperations | None:
+    """Create merged-write operations when a table base path is available."""
+    if request.base_path is None:
+        return None
+
+    # Import here to avoid circular imports
+    from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
+    from bioetl.infrastructure.storage.silver.support import resolve_table_path
+
+    return SilverMergedOperations(
+        logger=request.logger,
+        csv_exporter=request.csv_exporter,
+        _arrow_converter=ArrowDataConverter(),
+        _resolve_table_path=lambda table_name: resolve_table_path(
+            request.base_path, table_name
+        ),
+        _write_silver_merged_metadata=lambda **_kwargs: None,  # Placeholder
+    )
+
+
 def build_silver_writer_runtime_services(
     request: SilverWriterRuntimeServicesRequest,
 ) -> SilverWriterRuntimeServices:
@@ -153,101 +262,22 @@ def build_silver_writer_runtime_services(
         dq_calculator=request.dq_calculator,
         merge_resilience_policy=request.merge_resilience_policy,
     )
-    # Create maintenance operations if needed components are available
-    maintenance_ops = None
-    if request.csv_exporter is not None and request.base_path is not None:
-        retention_manager = RetentionPolicy(request.base_path)
-        maintenance_ops = SilverMaintenanceOperations(
-            csv_exporter=request.csv_exporter,
-            retention_manager=retention_manager,
-            pipeline_name=request.pipeline_name,
-            metrics=request.metrics,
-            audit=request.audit,
-        )
-
-    # Create metadata operations if needed components are available
-    metadata_ops = None
-    if resolved_metadata_writer is not None and resolved_dq_calculator is not None:
-        metadata_ops = SilverMetadataOperations(
-            _logger=request.logger,
-            _metrics=request.metrics,
-            _audit=request.audit,
-            _metadata_writer=resolved_metadata_writer,
-            _metadata_coordinator=request.metadata_coordinator,
-            _lineage_store=request.lineage_store,
-            _dq_calculator=resolved_dq_calculator,
-            _host=None,  # Will be set later in SilverWriter.__init__
-        )
-
-    # Create validation operations if needed components are available
-    validation_ops = None
-    if resolved_silver_validator is not None and request.base_path is not None:
-        # Import here to avoid circular imports
-        from bioetl.infrastructure.storage.silver.support import (
-            get_table_schema,
-            prepare_arrow_data,
-            resolve_table_path,
-        )
-
-        # Create a wrapper for get_table_schema that can be overridden in tests
-        # This wrapper will be replaced by the writer's _get_table_schema method
-        # when the writer is initialized
-        def _get_table_schema_wrapper(table_name: str) -> Awaitable[pa.Schema | None]:
-            """Wrapper for get_table_schema that can be patched in tests."""
-            return get_table_schema(request.base_path, table_name)
-
-        validation_ops = SilverValidationOperations(
-            logger=request.logger,
-            _write_policy=resolved_write_policy,
-            _metrics=request.metrics,
-            _silver_validator=resolved_silver_validator,
-            _get_table_schema=_get_table_schema_wrapper,
-            _resolve_table_path=lambda table_name: resolve_table_path(
-                request.base_path, table_name
-            ),
-            _prepare_arrow_data=prepare_arrow_data,
-            _validate_write_mode=_validate_write_mode_impl,
-            _deduplicate_by_primary_keys=_deduplicate_by_primary_keys_impl,
-            _to_policy_write_mode=_to_policy_write_mode_impl,
-            _validate_key_nullability=_validate_key_nullability_impl,
-            _host=None,
-        )
-
-    # Create delta operations if needed components are available
-    delta_ops = None
-    if resolved_merge_resilience_policy is not None:
-        delta_ops = SilverDeltaOperations(
-            logger=request.logger,
-            _metrics=request.metrics,
-            _merge_resilience_policy=resolved_merge_resilience_policy,
-        )
-
-    # Create arrow operations (always available since it's stateless)
-    arrow_ops = SilverArrowOperations()
-
-    # Create merged operations if needed components are available
-    merged_ops = None
-    if request.base_path is not None:
-        # Import here to avoid circular imports
-        from bioetl.infrastructure.storage.delta.arrow_converter import (
-            ArrowDataConverter,
-        )
-        from bioetl.infrastructure.storage.silver.support import resolve_table_path
-
-        # For now, we'll create the merged operations with a placeholder metadata writer
-        # The real implementation will be set when SilverWriter is fully initialized
-        merged_ops = SilverMergedOperations(
-            logger=request.logger,
-            csv_exporter=request.csv_exporter,
-            _arrow_converter=ArrowDataConverter(),
-            _resolve_table_path=lambda table_name: resolve_table_path(
-                request.base_path, table_name
-            ),
-            _write_silver_merged_metadata=lambda **_kwargs: None,  # Placeholder
-        )
-
-    # Create postwrite operations (will be initialized with host in SilverWriter.__init__)
-    postwrite_ops = None
+    maintenance_ops = _build_maintenance_operations(request)
+    metadata_ops = _build_metadata_operations(
+        request,
+        metadata_writer=resolved_metadata_writer,
+        dq_calculator=resolved_dq_calculator,
+    )
+    validation_ops = _build_validation_operations(
+        request,
+        write_policy=resolved_write_policy,
+        silver_validator=resolved_silver_validator,
+    )
+    delta_ops = _build_delta_operations(
+        request,
+        merge_resilience_policy=resolved_merge_resilience_policy,
+    )
+    merged_ops = _build_merged_operations(request)
 
     return SilverWriterRuntimeServices(
         csv_exporter=request.csv_exporter,
@@ -266,7 +296,7 @@ def build_silver_writer_runtime_services(
         metadata_operations=metadata_ops,
         validation_operations=validation_ops,
         delta_operations=delta_ops,
-        arrow_operations=arrow_ops,
+        arrow_operations=SilverArrowOperations(),
         merged_operations=merged_ops,
-        postwrite_operations=postwrite_ops,
+        postwrite_operations=None,
     )

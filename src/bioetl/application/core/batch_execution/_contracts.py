@@ -5,8 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol, TypeVar
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
-    from bioetl.domain.types import JsonDict
+    from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord, JsonDict
 
 _BatchResultT = TypeVar("_BatchResultT", covariant=True)
 

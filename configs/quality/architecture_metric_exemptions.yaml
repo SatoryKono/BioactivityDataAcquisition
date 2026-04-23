@@ -26,54 +26,7 @@ registries:
   function_complexity:
     {}
   function_length:
-    src/bioetl/application/services/checkpoint_compatibility_service_v2.py::check_compatibility:
-      value: 150
-      owner: "@bioetl-platform"
-      reason: "Checkpoint compatibility v2 remains a migration-era orchestration entrypoint with multiple decision branches not yet decomposed."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Extract compatibility decision branches into dedicated helpers and retire the exemption once the entrypoint returns under the default limit."
-    src/bioetl/application/services/control_plane/_run_manifest_diagnostics_summary.py::_build_final_summary:
-      value: 187
-      owner: "@bioetl-data-model"
-      reason: "Run-manifest final summary assembly remains a large compatibility surface while report shaping is still centralized."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Peel summary sections into dedicated formatter helpers until the final summary builder returns under the default limit."
-    src/bioetl/application/services/control_plane/run_manifest_diagnostics.py::_build_base_summary:
-      value: 121
-      owner: "@bioetl-data-model"
-      reason: "Base run-manifest diagnostics still aggregate multiple control-plane slices in a single orchestration helper."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Split base-summary assembly into smaller diagnostics helpers until the function drops below the default limit."
-    src/bioetl/application/services/control_plane/run_manifest_inspection_service.py::_build_identity_graph:
-      value: 113
-      owner: "@bioetl-data-model"
-      reason: "Identity-graph assembly still centralizes multiple node and edge shaping branches in one inspection helper."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Extract identity-graph node and edge builders into dedicated helpers until the function returns under the default limit."
-    src/bioetl/infrastructure/storage/silver/runtime_helpers.py::build_silver_writer_runtime_services:
-      value: 136
-      owner: "@bioetl-platform"
-      reason: "Silver writer runtime service wiring remains a broad transitional factory while Delta/storage seams are still being decomposed."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Extract runtime dependency groups into dedicated factory helpers until the function returns under the default limit."
-    src/bioetl/infrastructure/storage/silver_writer.py::__init__:
-      value: 142
-      owner: "@bioetl-platform"
-      reason: "SilverWriter constructor still accepts and normalizes many transitional storage dependencies while the facade is being reduced."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Move constructor normalization branches into dedicated setup helpers until the constructor drops below the default limit."
+    {}
   class_size:
     src/bioetl/application/composite/_lifecycle_observer_tracing_mixin.py::CompositeLifecycleTracingMixin:
       value: 312
@@ -131,22 +84,6 @@ registries:
       linked_rf: "RF-023"
       expires_on: "2026-06-30"
       removal_step: "Extract metric publication helpers until the service drops below the default limit."
-    src/bioetl/infrastructure/storage/silver_writer.py::SilverWriter:
-      value: 1191
-      owner: "@bioetl-platform"
-      reason: "SilverWriter remains a large façade coordinating legacy write-path responsibilities during the storage decomposition wave."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Continue extracting write-path orchestration into dedicated storage helpers until the class drops below the default limit."
-    src/bioetl/infrastructure/storage/bronze/io_mixin.py::BronzeWriterIOMixin:
-      value: 305
-      owner: "@bioetl-platform"
-      reason: "Bronze writer I/O mixin still carries transitional atomic-write and export-support branches while the bronze storage surface is being decomposed."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Split file-write, export, and manifest helper branches into smaller mixins until BronzeWriterIOMixin returns under the default limit."
   class_method_count: {}
   god_object:
     src/bioetl/application/services/_quarantine_service_sync_mixin.py::QuarantineServiceSyncMixin:

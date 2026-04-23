@@ -18,7 +18,7 @@ Last verified: '2026-04-13'
 | Dashboard | UID | Для чего |
 |---|---|---|
 | 1. Overview | `bioetl-overview-v2` | Общее состояние пайплайна, control-plane и lineage health |
-| 2. Runtime | `bioetl-runtime` | Runtime triage: warnings, unstructured logs, alert conditions |
+| 2. Runtime | `bioetl-runtime` | Runtime triage: warnings, unstructured logs, adaptive-memory signals, alert conditions |
 | 3. Provider Health | `bioetl-provider-health-v2` | Incident triage по provider health: latency/failures/degraded/retries exhausted |
 | 4. Data Quality | `bioetl-dq-v2` | Качество данных, карантин, аномалии, freshness |
 | 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | Record-level explorer для `filtered_out`/`FILTERED_OUT_SILVER` записей (quarantine-backed) |
@@ -39,14 +39,16 @@ Last verified: '2026-04-13'
 `sum(increase(gold[$__range])) / clamp_min(sum(increase(bronze[$__range])), 1)`
 2. `bioetl-runtime`, panel `id=2`, `id=3`, `id=4`, `id=5`, `id=6`, `id=7`:
 warnings, unstructured logs и alert-condition сигналы по DQ/control-plane/provider/freshness.
-3. `bioetl-provider-health-v2`, panel `id=1`, `id=104`, `id=106`, `id=107`, `id=108`, `id=109`, `id=102`:
+3. `bioetl-runtime`, panel `id=18`, `id=19`, `id=20`, `id=21`:
+adaptive-memory triage: pressure events, resize events, fallback monitor decisions и бинарный pressure-active signal.
+4. `bioetl-provider-health-v2`, panel `id=1`, `id=104`, `id=106`, `id=107`, `id=108`, `id=109`, `id=102`:
 p95 latency trend + current p95, failure/degraded trend, provider failure share и retries exhausted.
-4. `bioetl-dq-v2`, panel `id=2` (`Data Quality Score (Volume-weighted)`):
+5. `bioetl-dq-v2`, panel `id=2` (`Data Quality Score (Volume-weighted)`):
 `sum(score * record_count) / clamp_min(sum(record_count), 1)` на базе
 `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`
-5. `bioetl-dq-v2`, panel `id=6`, `id=7`, `id=12`:
+6. `bioetl-dq-v2`, panel `id=6`, `id=7`, `id=12`:
 range-based quarantine/threshold/failures for the active Grafana window.
-6. `bioetl-overview-v2`, panel `id=111`, `id=112`, `id=113`, `id=114`, `id=120`, `id=115`:
+7. `bioetl-overview-v2`, panel `id=111`, `id=112`, `id=113`, `id=114`, `id=120`, `id=115`:
 manifest/ledger failures, checkpoint incompatibilities, missing lineage refs,
 composite source selections и fragment outcomes по `layer/status`.
 
@@ -88,7 +90,7 @@ composite source selections и fragment outcomes по `layer/status`.
 ## Drilldown
 
 - `bioetl-overview-v2`: dashboard links `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` открывают соседние dashboards и Grafana Explore в текущем time range. Panel `id=1` (`Processing Volume by Stage`) дублирует Explore handoff через data links.
-- `bioetl-runtime`: dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают короткий путь из warning/unstructured-log spikes обратно в overview и в Explore. Panel `id=9` (`Log Hygiene Trend`) дублирует Explore handoff через data links.
+- `bioetl-runtime`: dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают короткий путь из warning/unstructured-log spikes, adaptive-memory regressions и alert spikes обратно в overview и в Explore. Panel `id=9` (`Log Hygiene Trend`) дублирует Explore handoff через data links.
 - `bioetl-provider-health-v2`: dashboard links `Back to Overview`, `2. Runtime`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают быстрый переход из provider health surface в runtime/overview и correlation flow. Panel `id=1` (`Health Check Latency by Provider (p95)`) дублирует Explore handoff через data links.
 - `bioetl-dq-v2`: dashboard link `Back to Overview` плюс `5. Silver Reject Explorer`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` дают тот же переход для DQ incidents и freshness investigation. Panel `id=1` (`Data Flow in Range: Bronze -> Silver -> Gold`) дублирует Explore handoff через data links.
 - `bioetl-silver-reject-explorer`: dashboard links `Back to Overview`, `Back to Data Quality`, `Open Logs`, `Open Traces`; main table поддерживает data links для self-drilldown по `payload_hash` и CLI handoff.

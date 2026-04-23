@@ -49,7 +49,8 @@ writes, ledger appends, checkpoint compatibility и read failures. Это dashbo
 реагирования на контрольные-plane regressions.
 
 `bioetl-runtime` считается канонической triage-точкой для runtime hygiene:
-warnings, unstructured logs и Prometheus-backed alert conditions. Он не
+warnings, unstructured logs, adaptive-memory signals и Prometheus-backed alert
+conditions. Он не
 заменяет `overview`/`dq`/`provider-health`, а собирает log+alert surface в одном
 месте для быстрого расследования.
 

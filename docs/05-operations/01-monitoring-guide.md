@@ -136,6 +136,11 @@ Pushgateway publication на завершении run. Это позволяет
   понять, не сломалась ли сборка DQ context, отчёты системно пропускаются или
   наоборот стабильно доходят до успешной генерации.
 
+- **Memory Pressure Events / Batch Resize Events / Fallback Monitor Decisions / Memory Pressure Active**:
+  adaptive-memory triage surface. Эти панели помогают отделить реальное memory
+  pressure от recovery/fallback-mode решений и быстро увидеть, не ушёл ли
+  runtime в `resource` / `estimate` path вместо штатного monitor mode.
+
 - **Trace-enabled Runs (24h)**: показывает, были ли за окно запуски с реальным
   tracing path. Если здесь `0`, пустой Tempo для выбранного `$pipeline/$run_type`
   ожидаем. Если здесь значение больше нуля, а `Explore Traces (Tempo, tracing profile)` пуст,

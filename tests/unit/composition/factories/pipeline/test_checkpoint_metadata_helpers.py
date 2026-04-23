@@ -167,7 +167,7 @@ def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
                 ),
             ),
             pipeline_version="1.2.3",
-            effective_config_hash=run_context.effective_config_hash,
+            effective_config_hash=run_context.config_hash,
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             dq_contract_compatibility_hash="dq-hash",

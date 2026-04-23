@@ -72,7 +72,7 @@ def test_metric_definition_exports_remain_stable() -> None:
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
     # This ratchet intentionally changes only when we add/remove public metrics.
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 106
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 110
 
 
 @pytest.mark.unit
@@ -116,6 +116,48 @@ def test_control_plane_and_lineage_metrics_are_registered() -> None:
     assert "bioetl_lineage_refs_missing_total" in COUNTERS
     assert "bioetl_composite_source_selection_total" in COUNTERS
     assert "bioetl_http_retry_budget_exhausted_total" in COUNTERS
+
+
+@pytest.mark.unit
+def test_memory_runtime_metrics_are_registered_with_bounded_labels() -> None:
+    expected_counter_labels = {
+        "bioetl_memory_pressure_events_total": {
+            "pipeline",
+            "stage",
+            "reason",
+            "monitor_mode",
+            "status",
+        },
+        "bioetl_memory_batch_resize_events_total": {
+            "pipeline",
+            "stage",
+            "reason",
+            "monitor_mode",
+            "status",
+        },
+        "bioetl_memory_monitor_fallback_events_total": {
+            "pipeline",
+            "stage",
+            "reason",
+            "monitor_mode",
+            "status",
+        },
+    }
+
+    for metric_name, labels in expected_counter_labels.items():
+        actual_labels = set(COUNTERS[metric_name]._labelnames)
+        assert actual_labels == labels
+        assert _FORBIDDEN_LABELS.isdisjoint(actual_labels)
+
+    gauge_labels = set(GAUGES["bioetl_memory_pressure_state"]._labelnames)
+    assert gauge_labels == {
+        "pipeline",
+        "stage",
+        "reason",
+        "monitor_mode",
+        "status",
+    }
+    assert _FORBIDDEN_LABELS.isdisjoint(gauge_labels)
 
 
 @pytest.mark.unit

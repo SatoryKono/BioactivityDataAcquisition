@@ -309,11 +309,12 @@ def _process_raw_types_list(raw_types_list: list[str] | None) -> str | None:
     if not raw_types_list:  # Handles None and empty list
         return None
 
-    processed_parts = []
-    for item in raw_types_list:
-        stripped = str(item).strip() if item is not None else ""
-        if stripped:
-            processed_parts.append(stripped)
+    # Filter out None and empty strings after stripping
+    processed_parts = [
+        str(item).strip()
+        for item in raw_types_list
+        if item is not None and str(item).strip()
+    ]
 
     return "|".join(processed_parts) if processed_parts else None
 

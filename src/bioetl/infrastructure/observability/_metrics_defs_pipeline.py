@@ -1,8 +1,8 @@
-"""Pipeline lifecycle, transform, and shutdown metrics."""
+"""Pipeline lifecycle, transform, shutdown, and adaptive-memory metrics."""
 
 from __future__ import annotations
 
-from prometheus_client import Counter, Histogram
+from prometheus_client import Counter, Gauge, Histogram
 
 __all__ = [
     "CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL",
@@ -21,6 +21,10 @@ __all__ = [
     "FILTER_COMBINATIONS_LOADED_TOTAL",
     "LINEAGE_FRAGMENTS_EMITTED_TOTAL",
     "LINEAGE_REFS_MISSING_TOTAL",
+    "MEMORY_BATCH_RESIZE_EVENTS_TOTAL",
+    "MEMORY_MONITOR_FALLBACK_EVENTS_TOTAL",
+    "MEMORY_PRESSURE_EVENTS_TOTAL",
+    "MEMORY_PRESSURE_STATE",
     "OBSERVABILITY_EVENTS_TOTAL",
     "PHASE_DURATION_SECONDS",
     "PIPELINE_RUNS_TOTAL",
@@ -170,6 +174,30 @@ TRACED_RUNS_TOTAL = Counter(
     "bioetl_traced_runs_total",
     "Total pipeline runs that started with real tracing enabled",
     ["pipeline", "run_type"],
+)
+
+MEMORY_PRESSURE_EVENTS_TOTAL = Counter(
+    "bioetl_memory_pressure_events_total",
+    "Total adaptive-memory decisions that observed active pressure",
+    ["pipeline", "stage", "reason", "monitor_mode", "status"],
+)
+
+MEMORY_BATCH_RESIZE_EVENTS_TOTAL = Counter(
+    "bioetl_memory_batch_resize_events_total",
+    "Total adaptive-memory decisions that changed batch size",
+    ["pipeline", "stage", "reason", "monitor_mode", "status"],
+)
+
+MEMORY_MONITOR_FALLBACK_EVENTS_TOTAL = Counter(
+    "bioetl_memory_monitor_fallback_events_total",
+    "Total adaptive-memory decisions emitted while using fallback monitor modes",
+    ["pipeline", "stage", "reason", "monitor_mode", "status"],
+)
+
+MEMORY_PRESSURE_STATE = Gauge(
+    "bioetl_memory_pressure_state",
+    "Current bounded adaptive-memory pressure state for the latest decision",
+    ["pipeline", "stage", "reason", "monitor_mode", "status"],
 )
 
 CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL = Counter(

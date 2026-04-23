@@ -8,8 +8,7 @@ if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BatchID
-    from bioetl.domain.types import JsonDict
+    from bioetl.domain.types import BatchID, JsonDict
 
 
 def build_execution_span_attributes(

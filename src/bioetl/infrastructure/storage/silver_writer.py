@@ -11,7 +11,6 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Literal, cast
 
-import polars as pl
 import pyarrow as pa
 from deltalake import DeltaTable as _DeltaTable
 from deltalake import write_deltalake as _write_deltalake
@@ -25,9 +24,7 @@ from bioetl.domain.ports import (
     MetadataWriterPort,
     MetricsPort,
     SilverValidatorPort,
-    SilverWriteRequest,
     TracingPort,
-    coerce_silver_write_request,
 )
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.types import BronzeRecord
@@ -38,12 +35,15 @@ from bioetl.infrastructure.storage.base_delta_writer import (
 from bioetl.infrastructure.storage.delta.resilience import (
     SilverMergeResiliencePolicy,
 )
+from bioetl.infrastructure.storage.silver.compatibility_mixins import (
+    SilverWriterAuditMetadataCompatibilityMixin,
+    SilverWriterDQCompatibilityMixin,
+    SilverWriterFinalizationCompatibilityMixin,
+    SilverWriterMergedCompatibilityMixin,
+    SilverWriterWriteCompatibilityMixin,
+)
 from bioetl.infrastructure.storage.silver.maintenance_mixin import (
     SilverWriterMaintenanceMixin,
-)
-from bioetl.infrastructure.storage.silver.merged_operations import (
-    _MergedSilverWriteRequest,
-    _PreparedMergedSilverWrite,
 )
 from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
     SilverPostwriteOperations,
@@ -65,7 +65,6 @@ from bioetl.infrastructure.storage.silver.operations.validation_operations impor
 from bioetl.infrastructure.storage.silver.pipeline_helpers import (
     _SilverWriteExecutionContext,
     _SilverWriteInvocation,
-    execute_silver_write_pipeline,
     execute_silver_write_with_tracing,
 )
 
@@ -90,17 +89,9 @@ write_deltalake = _write_deltalake
 # in this root module while the implementations live in split validation helpers.
 
 if TYPE_CHECKING:
-    from bioetl.domain.models.metadata import SilverMetadata
     from bioetl.domain.ports import LineageStorePort, LoggerPort
-    from bioetl.domain.types import BatchID, RunID, RunType
-    from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
-    from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics, SchemaDriftInfo
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
-    from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
-    from bioetl.infrastructure.storage.silver.metadata_operations import (
-        _PreparedSilverWriteFinalizationContext,
-    )
-__all__ = ["SilverWriteMode", "SilverWriter"]
+__all__ = ["SilverWriteMode", "SilverWriter", "_SilverWriteExecutionContext"]
 
 _UTC_OFFSET_SUFFIX = "+00:00"
 
@@ -131,6 +122,125 @@ class _AwaitTrackingAsyncCallable:
                 f"got args={getattr(actual, 'args', None)}, "
                 f"kwargs={getattr(actual, 'kwargs', None)}"
             )
+
+
+def _pop_legacy_runtime_kwargs(
+    legacy_kwargs: dict[str, object],
+) -> SilverWriterRuntimeServicesRequest:
+    """Translate historical SilverWriter kwargs into a runtime-services request."""
+    csv_exporter = cast("CsvExporter | None", legacy_kwargs.pop("csv_exporter", None))
+    tracing = cast("TracingPort | None", legacy_kwargs.pop("tracing", None))
+    write_policy = cast(
+        "WriteModePolicy | None",
+        legacy_kwargs.pop("write_policy", None),
+    )
+    metrics = cast("MetricsPort | None", legacy_kwargs.pop("metrics", None))
+    audit = cast("AuditPort | None", legacy_kwargs.pop("audit", None))
+    silver_validator = cast(
+        "SilverValidatorPort | None",
+        legacy_kwargs.pop("silver_validator", None),
+    )
+    metadata_writer = cast(
+        "MetadataWriterPort | None",
+        legacy_kwargs.pop("metadata_writer", None),
+    )
+    metadata_coordinator = cast(
+        "MetadataCoordinatorPort | None",
+        legacy_kwargs.pop("metadata_coordinator", None),
+    )
+    lineage_store = cast(
+        "LineageStorePort | None",
+        legacy_kwargs.pop("lineage_store", None),
+    )
+    dq_calculator = cast(
+        "DQMetricsCalculator | None",
+        legacy_kwargs.pop("dq_calculator", None),
+    )
+    merge_resilience_policy = cast(
+        "SilverMergeResiliencePolicy | None",
+        legacy_kwargs.pop("merge_resilience_policy", None),
+    )
+    if legacy_kwargs:
+        unexpected = ", ".join(sorted(legacy_kwargs))
+        raise TypeError(f"Unexpected SilverWriter options: {unexpected}")
+    return SilverWriterRuntimeServicesRequest(
+        csv_exporter=csv_exporter,
+        tracing=tracing,
+        write_policy=write_policy,
+        metrics=metrics,
+        audit=audit,
+        logger=None,
+        silver_validator=silver_validator,
+        metadata_writer=metadata_writer,
+        metadata_coordinator=metadata_coordinator,
+        lineage_store=lineage_store,
+        dq_calculator=dq_calculator,
+        merge_resilience_policy=merge_resilience_policy,
+    )
+
+
+def _resolve_runtime_services_for_writer(
+    *,
+    writer: SilverWriter,
+    base_path: str | Path,
+    runtime_services: SilverWriterRuntimeServices | None,
+    runtime_request: SilverWriterRuntimeServicesRequest,
+) -> SilverWriterRuntimeServices:
+    """Build runtime services for the writer when callers did not provide them."""
+    if runtime_services is not None:
+        return runtime_services
+    return build_silver_writer_runtime_services(
+        replace(
+            runtime_request,
+            logger=writer.logger,
+            base_path=base_path,
+            pipeline_name=writer._pipeline_name,
+        )
+    )
+
+
+def _assign_runtime_services(
+    writer: SilverWriter,
+    services: SilverWriterRuntimeServices,
+) -> None:
+    """Copy grouped runtime collaborators onto the writer instance."""
+    writer.csv_exporter = services.csv_exporter
+    writer._metrics = services.metrics
+    writer._audit = services.audit
+    writer._tracing = services.tracing
+    writer._write_policy = services.write_policy
+    writer._silver_validator = services.silver_validator
+    writer._metadata_writer = services.metadata_writer
+    writer._metadata_coordinator = services.metadata_coordinator
+    writer._lineage_store = services.lineage_store
+    writer._dq_calculator = services.dq_calculator
+    writer._merge_resilience_policy = services.merge_resilience_policy
+    writer._contract_rollout_policy = services.contract_rollout_policy
+    writer._maintenance = services.maintenance_operations
+    writer._metadata = services.metadata_operations
+    writer._validation = services.validation_operations
+    writer._delta = services.delta_operations
+    writer._arrow = services.arrow_operations
+    writer._merged = services.merged_operations
+    writer._postwrite = services.postwrite_operations
+
+
+def _rewire_runtime_services(writer: SilverWriter) -> None:
+    """Bind runtime collaborators that need the fully initialized writer instance."""
+    if writer._merged is not None:
+        writer._merged = replace(
+            writer._merged,
+            _write_silver_merged_metadata=writer._write_silver_merged_metadata,
+        )
+    if writer._validation is not None:
+        writer._validation = replace(
+            writer._validation,
+            _get_table_schema=writer._get_table_schema,
+        )
+    if writer._postwrite is None:
+        writer._postwrite = SilverPostwriteOperations(writer)
+    if writer._metadata is not None:
+        writer._metadata = replace(writer._metadata, _host=writer)
 
 
 def _project_records_for_contract_version(
@@ -257,6 +367,11 @@ async def _write_dual_targets(
 
 
 class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
+    SilverWriterWriteCompatibilityMixin,
+    SilverWriterMergedCompatibilityMixin,
+    SilverWriterDQCompatibilityMixin,
+    SilverWriterFinalizationCompatibilityMixin,
+    SilverWriterAuditMetadataCompatibilityMixin,
     BaseDeltaWriter,
     SilverWriterMaintenanceMixin,
 ):
@@ -292,119 +407,16 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             pipeline_name: Optional pipeline name for metric labeling.
         """
         self._pipeline_name = pipeline_name
-        csv_exporter = cast(
-            "CsvExporter | None", legacy_kwargs.pop("csv_exporter", None)
-        )
-        tracing = cast("TracingPort | None", legacy_kwargs.pop("tracing", None))
-        write_policy = cast(
-            "WriteModePolicy | None",
-            legacy_kwargs.pop("write_policy", None),
-        )
-        metrics = cast("MetricsPort | None", legacy_kwargs.pop("metrics", None))
-        audit = cast("AuditPort | None", legacy_kwargs.pop("audit", None))
-        silver_validator = cast(
-            "SilverValidatorPort | None",
-            legacy_kwargs.pop("silver_validator", None),
-        )
-        metadata_writer = cast(
-            "MetadataWriterPort | None",
-            legacy_kwargs.pop("metadata_writer", None),
-        )
-        metadata_coordinator = cast(
-            "MetadataCoordinatorPort | None",
-            legacy_kwargs.pop("metadata_coordinator", None),
-        )
-        lineage_store = cast(
-            "LineageStorePort | None",
-            legacy_kwargs.pop("lineage_store", None),
-        )
-        dq_calculator = cast(
-            "DQMetricsCalculator | None",
-            legacy_kwargs.pop("dq_calculator", None),
-        )
-        merge_resilience_policy = cast(
-            "SilverMergeResiliencePolicy | None",
-            legacy_kwargs.pop("merge_resilience_policy", None),
-        )
-        if legacy_kwargs:
-            unexpected = ", ".join(sorted(legacy_kwargs))
-            raise TypeError(f"Unexpected SilverWriter options: {unexpected}")
-
+        runtime_request = _pop_legacy_runtime_kwargs(dict(legacy_kwargs))
         super().__init__(base_path, logger, flat_structure=flat_structure)
-        services = runtime_services or build_silver_writer_runtime_services(
-            SilverWriterRuntimeServicesRequest(
-                csv_exporter=csv_exporter,
-                tracing=tracing,
-                write_policy=write_policy,
-                metrics=metrics,
-                audit=audit,
-                logger=self.logger,
-                silver_validator=silver_validator,
-                metadata_writer=metadata_writer,
-                metadata_coordinator=metadata_coordinator,
-                lineage_store=lineage_store,
-                dq_calculator=dq_calculator,
-                merge_resilience_policy=merge_resilience_policy,
-                base_path=base_path,
-                pipeline_name=(
-                    self._pipeline_name if hasattr(self, "_pipeline_name") else None
-                ),
-            )
+        services = _resolve_runtime_services_for_writer(
+            writer=self,
+            base_path=base_path,
+            runtime_services=runtime_services,
+            runtime_request=runtime_request,
         )
-        self.csv_exporter = services.csv_exporter
-        self._metrics = services.metrics
-        self._audit = services.audit
-        self._tracing = services.tracing
-        self._write_policy = services.write_policy
-        self._silver_validator = services.silver_validator
-        self._metadata_writer = services.metadata_writer
-        self._metadata_coordinator = services.metadata_coordinator
-        self._lineage_store = services.lineage_store
-        self._dq_calculator = services.dq_calculator
-        self._merge_resilience_policy = services.merge_resilience_policy
-        self._contract_rollout_policy = services.contract_rollout_policy
-        self._maintenance = services.maintenance_operations
-        self._metadata = services.metadata_operations
-        self._validation = services.validation_operations
-        self._delta = services.delta_operations
-        self._arrow = services.arrow_operations
-        self._merged = services.merged_operations
-        self._postwrite = services.postwrite_operations
-
-        # Update merged operations with the real metadata writer from this instance
-        if self._merged is not None:
-            # Create a new merged operations instance with the real metadata writer
-            from dataclasses import replace
-
-            self._merged = replace(
-                self._merged,
-                _write_silver_merged_metadata=self._write_silver_merged_metadata,
-            )
-
-        # Replace validation operations with a new instance that uses writer's _get_table_schema
-        # This ensures that tests with patched DeltaTable work correctly
-        if self._validation is not None:
-            # Create a new validation operations instance with the writer's _get_table_schema method
-            from dataclasses import replace
-
-            self._validation = replace(
-                self._validation,
-                _get_table_schema=self._get_table_schema,
-            )
-
-        # Initialize postwrite operations with this instance as host
-        if self._postwrite is None:
-            self._postwrite = SilverPostwriteOperations(self)
-
-        # Set host for metadata operations
-        if self._metadata is not None:
-            from dataclasses import replace
-
-            self._metadata = replace(
-                self._metadata,
-                _host=self,
-            )
-
+        _assign_runtime_services(self, services)
+        _rewire_runtime_services(self)
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
         self._check_schema_drift = _AwaitTrackingAsyncCallable(  # type: ignore[method-assign]
@@ -532,437 +544,6 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
 
             return SilverWriterValidationMixin._to_policy_write_mode(self, mode)
 
-    async def _log_silver_audit(
-        self,
-        table_name: str,
-        records: list[BronzeRecord],
-        mode: SilverWriteMode,
-        *,
-        run_id: RunID | None,
-        run_type: RunType | None,
-        source_batch_id: BatchID | None,
-        ingestion_ts: datetime | None,
-    ) -> None:
-        """Delegate audit logging to the metadata service."""
-        if self._metadata:
-            return await self._metadata._log_silver_audit(
-                table_name=table_name,
-                records=records,
-                mode=mode,
-                run_id=run_id,
-                run_type=run_type,
-                source_batch_id=source_batch_id,
-                ingestion_ts=ingestion_ts,
-            )
-        else:
-            # Fallback to mixin for backward compatibility
-            from bioetl.infrastructure.storage.silver.metadata_mixin import (
-                SilverWriterMetadataMixin,
-            )
-
-            return await SilverWriterMetadataMixin._log_silver_audit(
-                self,
-                table_name,
-                records,
-                mode,
-                run_id=run_id,
-                run_type=run_type,
-                source_batch_id=source_batch_id,
-                ingestion_ts=ingestion_ts,
-            )
-
-    def _should_skip_silver_metadata_write(
-        self,
-        *,
-        records: list[BronzeRecord],
-        table_path: str,
-        event_name: str,
-    ) -> bool:
-        """Compatibility seam for metadata write short-circuit checks."""
-        from bioetl.infrastructure.storage.silver.metadata_mixin import (
-            SilverWriterMetadataMixin,
-        )
-
-        return SilverWriterMetadataMixin._should_skip_silver_metadata_write(
-            self,
-            records=records,
-            table_path=table_path,
-            event_name=event_name,
-        )
-
-    async def _write_silver_metadata_file(
-        self,
-        *,
-        table_path: str,
-        metadata: SilverMetadata,
-        table_name: str,
-        provider_name: str,
-        entity_name: str,
-    ) -> None:
-        """Compatibility seam for canonical metadata writer handoff."""
-        from bioetl.infrastructure.storage.silver.metadata_mixin import (
-            SilverWriterMetadataMixin,
-        )
-
-        await SilverWriterMetadataMixin._write_silver_metadata_file(
-            self,
-            table_path=table_path,
-            metadata=metadata,
-            table_name=table_name,
-            provider_name=provider_name,
-            entity_name=entity_name,
-        )
-
-    async def _dispatch_write_with_domain_errors(
-        self,
-        *,
-        table_name: str,
-        request: _DeltaWriteRequest,
-    ) -> None:
-        """Delegate Delta write dispatch through the compatibility surface."""
-        if self._delta:
-            await self._delta._dispatch_write_with_domain_errors(
-                table_name=table_name,
-                request=request,
-            )
-            return
-
-        from bioetl.infrastructure.storage.silver.delta_mixin import (
-            SilverWriterDeltaMixin,
-        )
-
-        await SilverWriterDeltaMixin._dispatch_write_with_domain_errors(
-            self,
-            table_name=table_name,
-            request=request,
-        )
-
-    async def _maybe_export_csv(
-        self,
-        *,
-        table_name: str,
-        arrow_data: pa.Table,
-        mode: str,
-        validated_mode: SilverWriteMode,
-        primary_keys: list[str],
-    ) -> None:
-        """Compatibility seam for CSV export across composition and mixin paths."""
-        if self._maintenance is not None:
-            export_path = str(Path(self.base_path) / f"{table_name}.csv")
-            await self._maintenance.maybe_export_csv(
-                table_name=table_name,
-                arrow_data=arrow_data,
-                export_path=export_path,
-                mode=mode,
-                validated_mode=validated_mode,
-                primary_keys=primary_keys,
-            )
-
-    async def _maybe_log_silver_audit(
-        self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        mode: SilverWriteMode,
-        run_id: RunID | None,
-        run_type: RunType | None,
-        source_batch_id: BatchID | None,
-        ingestion_ts: datetime | None,
-    ) -> None:
-        """Compatibility seam for conditional Silver audit logging."""
-        from bioetl.infrastructure.storage.silver.metadata_mixin import (
-            SilverWriterMetadataMixin,
-        )
-
-        await SilverWriterMetadataMixin._maybe_log_silver_audit(
-            self,
-            table_name=table_name,
-            records=records,
-            mode=mode,
-            run_id=run_id,
-            run_type=run_type,
-            source_batch_id=source_batch_id,
-            ingestion_ts=ingestion_ts,
-        )
-
-    async def _prepare_silver_write_finalization_context(
-        self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        table_path: str,
-        started_at: datetime,
-        start_perf: float,
-    ) -> _PreparedSilverWriteFinalizationContext:
-        """Prepare finalization context for silver write.
-
-        This method provides backward compatibility for tests that expect
-        this method to exist. It delegates to the metadata operations service
-        for the actual implementation.
-        """
-        if self._metadata:
-            return await self._metadata._prepare_silver_write_finalization_context(
-                table_name=table_name,
-                records=records,
-                table_path=table_path,
-                primary_keys=[],
-                validated_mode=SilverWriteMode.MERGE,
-                started_at=started_at,
-                start_perf=start_perf,
-            )
-        else:
-            # Fallback to mixin for backward compatibility
-            from bioetl.infrastructure.storage.silver.metadata_mixin import (
-                SilverWriterMetadataMixin,
-            )
-
-            return await SilverWriterMetadataMixin._prepare_silver_write_finalization_context(
-                self,
-                table_name=table_name,
-                records=records,
-                table_path=table_path,
-                started_at=started_at,
-                start_perf=start_perf,
-            )
-
-    async def _finalize_silver_write_result(
-        self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        table_path: str,
-        primary_keys: list[str],
-        validated_mode: SilverWriteMode,
-        bronze_refs: list[BronzeWriteResult] | None,
-        partition_cols: list[str] | None,
-        source_batch_id: BatchID | None,
-        started_at: datetime,
-        start_perf: float,
-    ) -> SilverWriteResult | None:
-        """Fallback method to finalize silver write result for backward compatibility.
-
-        This method provides a fallback when the metadata service is not available.
-        It's called by postwrite operations and delegates to the metadata mixin
-        for backward compatibility with tests that don't provide full runtime_services.
-        """
-        if self._uses_legacy_mocked_delta_version():
-            return await self._finalize_legacy_mocked_silver_write_result(
-                table_name=table_name,
-                records=records,
-                table_path=table_path,
-                primary_keys=primary_keys,
-                validated_mode=validated_mode,
-                bronze_refs=bronze_refs,
-                partition_cols=partition_cols,
-                source_batch_id=source_batch_id,
-                started_at=started_at,
-            )
-
-        if self._metadata:
-            return await self._metadata._finalize_silver_write_result(
-                table_name=table_name,
-                records=records,
-                table_path=table_path,
-                primary_keys=primary_keys,
-                validated_mode=validated_mode,
-                bronze_refs=bronze_refs,
-                partition_cols=partition_cols,
-                source_batch_id=source_batch_id,
-                started_at=started_at,
-                start_perf=start_perf,
-            )
-
-        if self._metadata_writer:
-            return await self._finalize_with_direct_metadata_writer(
-                table_name=table_name,
-                records=records,
-                table_path=table_path,
-                started_at=started_at,
-            )
-
-        from bioetl.infrastructure.storage.silver.metadata_mixin import (
-            SilverWriterMetadataMixin,
-        )
-
-        return await SilverWriterMetadataMixin._finalize_silver_write_result(
-            self,
-            table_name=table_name,
-            records=records,
-            table_path=table_path,
-            primary_keys=primary_keys,
-            validated_mode=validated_mode,
-            bronze_refs=bronze_refs,
-            partition_cols=partition_cols,
-            source_batch_id=source_batch_id,
-            started_at=started_at,
-            start_perf=start_perf,
-        )
-
-    def _uses_legacy_mocked_delta_version(self) -> bool:
-        """Detect legacy tests that patch `_get_delta_version` with AsyncMock."""
-        return bool(
-            hasattr(self, "_get_delta_version")
-            and hasattr(self._get_delta_version, "__name__")
-            and self._get_delta_version.__name__ == "AsyncMock"
-        )
-
-    async def _finalize_legacy_mocked_silver_write_result(
-        self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        table_path: str,
-        primary_keys: list[str],
-        validated_mode: SilverWriteMode,
-        bronze_refs: list[BronzeWriteResult] | None,
-        partition_cols: list[str] | None,
-        source_batch_id: BatchID | None,
-        started_at: datetime,
-    ) -> SilverWriteResult:
-        """Preserve legacy mocked behavior expected by older unit tests."""
-        from bioetl.domain.value_objects.silver_result import SilverWriteResult
-
-        delta_version = await self._get_delta_version(table_path)
-        dq_metrics = await self._compute_dq_metrics(table_name, records)
-        await self._write_silver_metadata(
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-            mode=validated_mode,
-            bronze_refs=bronze_refs,
-            dq_metrics=dq_metrics,
-            partition_by=partition_cols,
-            source_batch_ids=(
-                [str(source_batch_id)] if source_batch_id is not None else None
-            ),
-            started_at=started_at,
-            completed_at=datetime.now(UTC),
-            version_after=delta_version,
-        )
-        return SilverWriteResult(
-            table_name=table_name,
-            table_path=table_path,
-            delta_version=delta_version,
-            record_count=len(records),
-        )
-
-    async def _finalize_with_direct_metadata_writer(
-        self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        table_path: str,
-        started_at: datetime,
-    ) -> SilverWriteResult:
-        """Fallback for legacy tests that inject a metadata writer directly."""
-        from bioetl.domain.models.metadata import SilverMetadata
-        from bioetl.domain.value_objects.metadata import (
-            DeltaMetrics,
-            EnvironmentMetadata,
-            PipelineMetadata,
-            RuntimeMetadata,
-            RunTypeEnum,
-        )
-        from bioetl.domain.value_objects.silver_result import SilverWriteResult
-
-        completed_at = datetime.now(UTC)
-        first_record = records[0] if records else {}
-        run_id = str(first_record.get("_run_id") or getattr(self, "run_id", "") or "")
-        manifest_id = (
-            str(
-                first_record.get("_manifest_id")
-                or getattr(self, "manifest_id", None)
-                or run_id
-            ).strip()
-            or None
-        )
-        metadata = SilverMetadata(
-            table_name=table_name,
-            runtime=RuntimeMetadata(
-                run_id=run_id or "legacy-direct-metadata-writer",
-                manifest_id=manifest_id,
-                run_type=RunTypeEnum.INCREMENTAL,
-                started_at=started_at,
-                completed_at=completed_at,
-                duration_seconds=int((completed_at - started_at).total_seconds()),
-            ),
-            pipeline=PipelineMetadata(
-                name="test",
-                version="1.0",
-            ),
-            delta=DeltaMetrics(
-                rows_inserted=len(records),
-                rows_updated=0,
-                rows_deleted=0,
-                files_added=1,
-            ),
-            environment=EnvironmentMetadata(
-                bioetl_version="test",
-                python_version="test",
-            ),
-        )
-        await self._metadata_writer.write(metadata)
-        delta_version = await self._get_delta_version(table_path)
-        return SilverWriteResult(
-            table_name=table_name,
-            table_path=table_path,
-            delta_version=delta_version,
-            record_count=len(records),
-        )
-
-    async def _write_silver_metadata(
-        self,
-        request: object = None,
-        *args: object,
-        **kwargs: object,
-    ) -> None:
-        """Backward compatibility method for writing Silver metadata.
-
-        This method provides the old interface for tests that call _write_silver_metadata
-        directly. It delegates to the new metadata operations service.
-        """
-        from bioetl.infrastructure.storage.silver.metadata_operations import (
-            _coerce_silver_metadata_write_request,
-            _SilverMetadataWriteRequest,
-        )
-
-        request_input: _SilverMetadataWriteRequest | str | None
-        legacy_args: tuple[object, ...]
-        if isinstance(request, (_SilverMetadataWriteRequest, str)) or request is None:
-            request_input = request
-            legacy_args = args
-        else:
-            request_input = None
-            legacy_args = (request, *args)
-
-        resolved_request = _coerce_silver_metadata_write_request(
-            request_input,
-            args=legacy_args,
-            kwargs=kwargs,
-        )
-        if resolved_request.dq_metrics is None:
-            from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
-
-            resolved_request = replace(
-                resolved_request,
-                dq_metrics=BatchDQMetrics(
-                    total_records=len(resolved_request.records),
-                    valid_records=len(resolved_request.records),
-                    error_records=0,
-                    warning_records=0,
-                ),
-            )
-
-        from bioetl.infrastructure.storage.silver.metadata_mixin import (
-            SilverWriterMetadataMixin,
-        )
-
-        await SilverWriterMetadataMixin._write_silver_metadata(
-            self,
-            resolved_request,
-        )
-
     async def _write_single_target(
         self,
         *,
@@ -994,456 +575,4 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         return await _write_dual_targets(
             self,
             invocation=resolved_invocation,
-        )
-
-    def _validate_silver_pandera(
-        self,
-        records: list[BronzeRecord],
-        table_name: str,
-    ) -> None:
-        """Delegate Pandera validation to the validation service."""
-        if self._validation:
-            self._validation._validate_silver_pandera(records, table_name)
-        else:
-            # Fallback to mixin for backward compatibility
-            from bioetl.infrastructure.storage.silver.validation_mixin import (
-                SilverWriterValidationMixin,
-            )
-
-            SilverWriterValidationMixin._validate_silver_pandera(
-                self, records, table_name
-            )
-
-    async def _check_schema_drift(
-        self,
-        table_name: str,
-        records: list[BronzeRecord],
-        on_schema_mismatch: Literal["error", "evolve", "ignore"],
-    ) -> None:
-        """Delegate schema-drift handling to the validation service."""
-        if self._validation:
-            await self._validation._check_schema_drift(
-                table_name, records, on_schema_mismatch
-            )
-        else:
-            # Fallback to mixin for backward compatibility
-            from bioetl.infrastructure.storage.silver.validation_mixin import (
-                SilverWriterValidationMixin,
-            )
-
-            await SilverWriterValidationMixin._check_schema_drift(
-                self, table_name, records, on_schema_mismatch
-            )
-
-    async def _detect_schema_drift(
-        self,
-        table_name: str,
-        records: list[BronzeRecord],
-    ) -> SchemaDriftInfo | None:
-        """Backward compatibility method for schema drift detection.
-
-        This method provides the old interface for tests that call _detect_schema_drift
-        directly. It uses the writer's own _get_table_schema method for test compatibility.
-        """
-        from bioetl.infrastructure.storage.silver.schema_drift_operations import (
-            _build_schema_drift_info,
-            _build_silver_schema_drift_diff,
-        )
-
-        # Use the writer's own _get_table_schema method for test compatibility
-        existing_schema = await self._get_table_schema(table_name)
-        diff = _build_silver_schema_drift_diff(existing_schema, records)
-        if diff is None:
-            return None
-        return _build_schema_drift_info(diff)
-
-    async def write_silver(
-        self,
-        request: SilverWriteRequest | str | None = None,
-        *args: object,
-        **kwargs: object,
-    ) -> SilverWriteResult | None:
-        """Write normalized records to Silver layer (Delta Lake merge/upsert).
-
-        Args:
-            table_name: Logical Delta table name (e.g., ``"chembl/activity"``).
-            records: Normalized Bronze records to upsert into the Silver table.
-            primary_keys: Field names used to construct the MERGE predicate.
-            schema: PyArrow schema for table creation or evolution.
-            mode: Write mode string (``"merge"``, ``"append"``, or ``"overwrite"``).
-            partition_cols: Optional column names for Delta table partitioning;
-                disables partitioning when None.
-            on_schema_mismatch: Policy when incoming schema differs from stored
-                table schema; one of ``"error"``, ``"evolve"``, or ``"ignore"``.
-            column_order: Optional explicit column ordering applied before writing;
-                uses schema order when None.
-            bronze_refs: Optional Bronze write results included as lineage
-                references in Silver metadata (ADR-014).
-            key_nullability_rules: Optional per-key nullability overrides applied
-                before MERGE predicate evaluation.
-            run_id: Optional run identifier for tracing and audit correlation.
-            run_type: Optional run type for tracing and audit precedence.
-            source_batch_id: Optional Bronze batch identifier for lineage metadata.
-            ingestion_ts: Optional ingestion timestamp for Silver audit entries.
-
-        Returns:
-            SilverWriteResult with record count and write metadata, or None if
-            no records were provided.
-        """
-        write_request = coerce_silver_write_request(
-            request,
-            args=args,
-            kwargs=kwargs,
-        )
-        table_name = write_request.table_name
-        records = write_request.records
-        primary_keys = write_request.primary_keys
-        schema = write_request.schema
-        mode = write_request.mode
-        partition_cols = write_request.partition_cols
-        on_schema_mismatch = write_request.on_schema_mismatch
-        column_order = write_request.column_order
-        bronze_refs = write_request.bronze_refs
-        key_nullability_rules = write_request.key_nullability_rules
-        run_id = write_request.run_id
-        run_type = write_request.run_type
-        source_batch_id = write_request.source_batch_id
-        ingestion_ts = write_request.ingestion_ts
-        if not self._should_dual_write():
-            return await self._write_single_target(
-                table_name=table_name,
-                records=records,
-                primary_keys=primary_keys,
-                schema=schema,
-                mode=mode,
-                partition_cols=partition_cols,
-                on_schema_mismatch=on_schema_mismatch,
-                column_order=column_order,
-                bronze_refs=bronze_refs,
-                key_nullability_rules=key_nullability_rules,
-                run_id=run_id,
-                run_type=run_type,
-                source_batch_id=source_batch_id,
-                ingestion_ts=ingestion_ts,
-            )
-
-        return await self._write_dual_targets(
-            logical_table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-            schema=schema,
-            mode=mode,
-            partition_cols=partition_cols,
-            on_schema_mismatch=on_schema_mismatch,
-            column_order=column_order,
-            bronze_refs=bronze_refs,
-            key_nullability_rules=key_nullability_rules,
-            run_id=run_id,
-            run_type=run_type,
-            source_batch_id=source_batch_id,
-            ingestion_ts=ingestion_ts,
-        )
-
-    async def write_silver_merged(
-        self,
-        table_name: str,
-        records: list[BronzeRecord],
-        primary_keys: list[str] | None = None,
-        *,
-        completed_at: datetime | None = None,
-        run_id: str | None = None,
-        sources_used: list[str] | None = None,
-        preserve_column_order: bool = False,
-    ) -> None:
-        """Write merged Silver records through the merged-write service surface."""
-        if self._merged is not None:
-            await self._merged.write_silver_merged(
-                table_name=table_name,
-                records=records,
-                primary_keys=primary_keys,
-                completed_at=completed_at,
-                run_id=run_id,
-                sources_used=sources_used,
-                preserve_column_order=preserve_column_order,
-            )
-            return
-
-        from bioetl.infrastructure.storage.silver.merged_mixin import (
-            SilverWriterMergedMixin,
-        )
-
-        await SilverWriterMergedMixin.write_silver_merged(
-            self,
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-            completed_at=completed_at,
-            run_id=run_id,
-            sources_used=sources_used,
-            preserve_column_order=preserve_column_order,
-        )
-
-    def _prepare_merged_silver_write(
-        self,
-        request: _MergedSilverWriteRequest,
-    ) -> _PreparedMergedSilverWrite:
-        """Compatibility seam for merged payload preparation."""
-        if self._merged is not None:
-            return self._merged._prepare_merged_silver_write(request)
-
-        from bioetl.infrastructure.storage.silver.merged_mixin import (
-            SilverWriterMergedMixin,
-        )
-
-        return SilverWriterMergedMixin._prepare_merged_silver_write(self, request)
-
-    async def _write_silver_merged_delta(
-        self,
-        *,
-        table_path: str,
-        arrow_table: pa.Table,
-    ) -> None:
-        """Compatibility seam for merged Delta overwrite execution."""
-        if self._merged is not None:
-            await self._merged._write_silver_merged_delta(
-                table_path=table_path,
-                arrow_table=arrow_table,
-            )
-            return
-
-        from bioetl.infrastructure.storage.silver.merged_mixin import (
-            SilverWriterMergedMixin,
-        )
-
-        await SilverWriterMergedMixin._write_silver_merged_delta(
-            self,
-            table_path=table_path,
-            arrow_table=arrow_table,
-        )
-
-    async def _export_silver_merged_csv(
-        self,
-        *,
-        table_name: str,
-        arrow_table: pa.Table,
-    ) -> None:
-        """Compatibility seam for merged CSV export."""
-        if self._merged is not None:
-            await self._merged._export_silver_merged_csv(
-                table_name=table_name,
-                arrow_table=arrow_table,
-            )
-            return
-
-        from bioetl.infrastructure.storage.silver.merged_mixin import (
-            SilverWriterMergedMixin,
-        )
-
-        await SilverWriterMergedMixin._export_silver_merged_csv(
-            self,
-            table_name=table_name,
-            arrow_table=arrow_table,
-        )
-
-    async def _write_silver_merged_metadata(
-        self,
-        *,
-        table_path: str,
-        table_name: str,
-        records: list[BronzeRecord],
-        primary_keys: list[str],
-        completed_at: str | datetime | None = None,
-        run_id: str | None = None,
-        sources_used: list[str] | None = None,
-    ) -> None:
-        """Write merged Silver metadata for a completed table write.
-
-        This method is called by SilverMergedOperations after a successful merge.
-        It delegates to the metadata mixin implementation.
-        """
-        from bioetl.infrastructure.storage.silver.metadata_mixin import (
-            SilverWriterMetadataMixin,
-        )
-
-        normalized_completed_at = completed_at
-        if completed_at is not None:
-            normalized_completed_at = _normalize_iso_datetime(completed_at)
-
-        await SilverWriterMetadataMixin._write_silver_merged_metadata(
-            self,
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-            completed_at=normalized_completed_at,
-            run_id=run_id,
-            sources_used=sources_used,
-        )
-
-    async def _compute_dq_metrics(
-        self, table_name: str, records: pl.DataFrame | list[dict]
-    ) -> BatchDQMetrics:
-        """Compute data quality metrics for a batch of records.
-
-        Args:
-            table_name: Name of the table being written.
-            records: DataFrame containing records to analyze.
-
-        Returns:
-            BatchDQMetrics with computed quality metrics.
-        """
-        from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
-
-        # Convert list of dicts to DataFrame if needed
-        if isinstance(records, list):
-            records = pl.DataFrame(records)
-
-        total_records = len(records)
-        valid_records = total_records  # Placeholder - add actual validation logic
-        error_records = 0  # Placeholder - add actual error counting
-
-        # Compute column statistics (exclude internal metadata fields)
-        internal_fields = {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
-        column_stats = {}
-        for col_name in records.columns:
-            if col_name in internal_fields:
-                continue  # Skip internal metadata fields
-            col_data = records[col_name]
-            column_stats[col_name] = {
-                "data_type": str(col_data.dtype),
-                "null_count": col_data.null_count(),
-                "unique_count": col_data.n_unique(),
-            }
-
-        # Detect schema drift
-        schema_drift = None
-        records_list = (
-            records.to_dicts() if isinstance(records, pl.DataFrame) else records
-        )
-
-        schema_drift = await self._detect_schema_drift(table_name, records_list)
-
-        # Convert column stats dictionaries to ColumnStats objects
-        from bioetl.domain.value_objects.dq_metrics import ColumnStats
-
-        column_stats_objects = {}
-        if hasattr(records, "__len__"):
-            records_length = len(records)
-        elif hasattr(records, "height"):
-            records_length = records.height
-        else:
-            records_length = 0
-        for col_name, stats_dict in column_stats.items():
-            column_stats_objects[col_name] = ColumnStats(
-                null_rate=stats_dict["null_count"] / records_length
-                if records_length > 0
-                else 0.0,
-                unique_count=stats_dict["unique_count"],
-                min_value=None,  # Would need actual column data for numeric stats
-                max_value=None,
-                mean_value=None,
-            )
-
-        return BatchDQMetrics(
-            total_records=total_records,
-            valid_records=valid_records,
-            error_records=error_records,
-            column_stats=column_stats_objects,
-            schema_drift=schema_drift,
-        )
-
-    async def _get_delta_version(self, table_path: str) -> int | None:
-        """Get the current Delta Lake version for a table.
-
-        This method provides backward compatibility for legacy tests and
-        delegates to the metadata service when available.
-
-        Args:
-            table_path: Path to the Delta Lake table
-
-        Returns:
-            Current Delta version if table exists, None otherwise
-        """
-        from bioetl.infrastructure.storage.silver.metadata_mixin import (
-            SilverWriterMetadataMixin,
-        )
-
-        return await SilverWriterMetadataMixin._get_delta_version(self, table_path)
-
-    async def _get_table_schema(self, table_name: str) -> pa.Schema | None:
-        """Get the schema of an existing Silver table.
-
-        This method provides backward compatibility for schema drift detection
-        in tests that don't use the full metadata service.
-
-        Args:
-            table_name: Name of the table
-
-        Returns:
-            PyArrow schema if table exists, None otherwise
-        """
-        # For tests with patched DeltaTable, we need to directly use the patched class
-        # since the base class implementation doesn't respect the patch
-        try:
-            from deltalake.exceptions import (
-                TableNotFoundError as DeltaTableNotFoundError,
-            )
-
-            from bioetl.infrastructure.storage.base_delta_writer import (
-                DeltaTable as PatchedDeltaTable,
-            )
-
-            table_path = self._resolve_table_path(table_name)
-            dt = PatchedDeltaTable(table_path)
-            return dt.schema().to_arrow()
-        except DeltaTableNotFoundError:
-            return None
-        except Exception:
-            # Fallback to base class implementation if patching doesn't work
-            return await super()._get_table_schema(table_name)
-
-    async def _complete_silver_write_pipeline(
-        self,
-        *,
-        ctx: _SilverWriteExecutionContext,
-        payload: _PreparedSilverWritePayload,
-    ) -> SilverWriteResult | None:
-        """Compatibility seam for postwrite orchestration."""
-        if self._postwrite is not None:
-            return await self._postwrite._complete_silver_write_pipeline(
-                ctx=ctx,
-                payload=payload,
-            )
-
-        from bioetl.infrastructure.storage.silver.postwrite_mixin import (
-            SilverWriterPostwriteMixin,
-        )
-
-        return await SilverWriterPostwriteMixin._complete_silver_write_pipeline(
-            self,
-            ctx=ctx,
-            payload=payload,
-        )
-
-    async def _execute_silver_write_pipeline(
-        self,
-        *,
-        invocation: _SilverWriteInvocation,
-        ctx: _SilverWriteExecutionContext,
-    ) -> SilverWriteResult | None:
-        """Orchestrate the Silver write pipeline stages.
-
-        Args:
-            invocation: Silver write invocation with records and parameters.
-            ctx: Immutable execution context with write parameters and span.
-
-        Returns:
-            SilverWriteResult with record count and write metadata, or None if no records.
-        """
-        return await execute_silver_write_pipeline(
-            invocation=invocation,
-            ctx=ctx,
-            prepare_payload=self._prepare_silver_write_payload,
-            dispatch_write=self._dispatch_write_with_domain_errors,
-            complete_pipeline=self._complete_silver_write_pipeline,
         )

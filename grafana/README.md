@@ -835,7 +835,7 @@ dashboard-variable interpolation. Дополнительное сужение п
 **UID:** `bioetl-runtime`
 **Refresh:** 30 секунд
 **Time range:** Последние 12 часов
-**Назначение:** Отдельный runtime/ops surface для triage log hygiene и alert-condition сигналов. Не заменяет `1. Overview`, а собирает warnings, unstructured logs и Prometheus-backed alert conditions в одном месте.
+**Назначение:** Отдельный runtime/ops surface для triage log hygiene, adaptive-memory и alert-condition сигналов. Не заменяет `1. Overview`, а собирает warnings, unstructured logs, adaptive-memory bounded diagnostics и Prometheus-backed alert conditions в одном месте.
 
 ### Панели
 
@@ -849,6 +849,10 @@ dashboard-variable interpolation. Дополнительное сужение п
 | 7 | Freshness Alert Conditions | Stat | Prometheus | Количество freshness conditions старше 24h. |
 | 8 | Top Warning Events | Bar gauge | Loki | Наиболее частые warning events за текущее временное окно Grafana. |
 | 9 | Log Hygiene Trend | Timeseries | Loki | Тренд warnings против unstructured rows с adaptive bucket size через `$__interval`. |
+| 18 | Memory Pressure Events | Stat | `round(sum(increase(bioetl_memory_pressure_events_total{pipeline=~"$pipeline"}[$__range])) or vector(0))` | Количество adaptive-memory решений, которые реально увидели pressure внутри выбранного окна. |
+| 19 | Batch Resize Events | Stat | `round(sum(increase(bioetl_memory_batch_resize_events_total{pipeline=~"$pipeline"}[$__range])) or vector(0))` | Сколько раз runtime менял batch size из-за pressure или recovery-шага. |
+| 20 | Fallback Monitor Decisions | Stat | `round(sum(increase(bioetl_memory_monitor_fallback_events_total{pipeline=~"$pipeline"}[$__range])) or vector(0))` | Сигнал, что memory decisions шли через bounded fallback monitor modes (`resource`, `estimate`, `unknown`), а не по основному psutil path. |
+| 21 | Memory Pressure Active | Stat | `max(max_over_time(bioetl_memory_pressure_state{pipeline=~"$pipeline"}[$__range])) or vector(0)` | Быстрый бинарный индикатор, был ли pressure хотя бы раз за выбранный диапазон. |
 | 17 | Silver Filter Rejects | Stat | `round(sum(last_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Быстрый triage-signal внутри текущего временного окна, который помогает отличить intentional Silver exclusions от DQ/schema проблем без fractional sparse-counter artefacts. Panel description направляет в `4. Data Quality` для bounded cause breakdown и в quarantine CLI для exact drilldown. |
 
 **Фильтрация:** `$pipeline`, `$run_type`.
@@ -862,6 +866,11 @@ Explore с тем же time range. Как и в остальных shipped dashb
 Панели `Pipeline/DQ/Control-plane/Provider Alert Conditions` читают recording-rule
 серии `bioetl_runtime_alert_condition_*`, чтобы dashboard JSON не дублировал
 тяжёлые alert-condition выражения целиком.
+
+Memory triage panels используют только bounded adaptive-memory metric families
+(`bioetl_memory_*`). Детали вроде `decision_index`, `record_index`,
+old/new batch sizes и host-specific memory values остаются в checkpoint metadata,
+run ledger diagnostics и trace events, а не в Grafana labels.
 
 **Silver Rejects triage sequence:**
 1. Используйте panel `Silver Filter Rejects` как быстрый runtime signal, чтобы

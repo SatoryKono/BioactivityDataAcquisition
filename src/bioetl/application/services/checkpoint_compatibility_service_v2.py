@@ -83,6 +83,20 @@ class CheckpointCompatibilityConfig:
     max_schema_version_delta: int = 1
 
 
+@dataclass(frozen=True)
+class _CompatibilityEvaluation:
+    """Intermediate compatibility results reused across final payload builders."""
+
+    phase_compatibility: JsonDict
+    config_compatibility: JsonDict
+    execution_identity_compatibility: JsonDict
+    schema_compatibility: JsonDict
+    verdict: CheckpointCompatibilityReason
+    suggestions: list[str]
+    current_identity_details: JsonDict
+    checkpoint_identity_details: JsonDict
+
+
 class CheckpointCompatibilityV2Service:
     """Enhanced checkpoint compatibility service with execution model integration."""
 
@@ -96,6 +110,41 @@ class CheckpointCompatibilityV2Service:
         validation_report: CompositeValidationReport | None = None,
     ) -> CheckpointCompatibilityResult:
         """Check compatibility between current execution and checkpoint."""
+        evaluation = self._evaluate_compatibility(
+            current_identity=current_identity,
+            checkpoint_identity=checkpoint_identity,
+            validation_report=validation_report,
+        )
+        return CheckpointCompatibilityResult(
+            verdict=evaluation.verdict,
+            message=generate_message(
+                verdict_value=evaluation.verdict.value,
+                current_phase=current_identity.execution_phase,
+                mode=self.config.mode.value,
+            ),
+            details=generate_details(
+                phase_result=evaluation.phase_compatibility,
+                config_result=evaluation.config_compatibility,
+                execution_identity_result=evaluation.execution_identity_compatibility,
+                schema_result=evaluation.schema_compatibility,
+                current_identity_details=evaluation.current_identity_details,
+                checkpoint_identity_details=evaluation.checkpoint_identity_details,
+                mode=self.config.mode.value,
+                allow_policy_override=self.config.allow_policy_override,
+                max_schema_version_delta=self.config.max_schema_version_delta,
+            ),
+            execution_phase=current_identity.execution_phase,
+            recovery_suggestions=evaluation.suggestions,
+        )
+
+    def _evaluate_compatibility(
+        self,
+        *,
+        current_identity: CheckpointIdentityRecord,
+        checkpoint_identity: CheckpointIdentityRecord,
+        validation_report: CompositeValidationReport | None,
+    ) -> _CompatibilityEvaluation:
+        """Compute reusable compatibility intermediates for the final response."""
         phase_compatibility = check_phase_compatibility(
             current_phase=current_identity.execution_phase,
             checkpoint_phase=checkpoint_identity.execution_phase,
@@ -105,52 +154,8 @@ class CheckpointCompatibilityV2Service:
             checkpoint_hash=checkpoint_identity.effective_config_hash,
         )
         execution_identity_compatibility = check_execution_identity_compatibility(
-            current=ExecutionIdentityCompatibilityContext(
-                composite_run_identity=current_identity.composite_run_identity,
-                execution_fingerprint=current_identity.execution_fingerprint,
-                manifest_id=current_identity.manifest_id,
-                fallback=CheckpointExecutionIdentityFallbackContext(
-                    pipeline_name=current_identity.pipeline_name,
-                    run_type=current_identity.run_type,
-                    pipeline_version=current_identity.pipeline_version,
-                    effective_config_hash=current_identity.effective_config_hash,
-                    dq_contract_compatibility_hash=(
-                        current_identity.dq_contract_compatibility_hash
-                    ),
-                    contract_ref=current_identity.contract_ref,
-                    contract_version=current_identity.contract_version,
-                    effective_config_artifact_id=(
-                        current_identity.effective_config_artifact_id
-                    ),
-                    exact_replay=current_identity.exact_replay,
-                    input_snapshot_fingerprint=(
-                        current_identity.input_snapshot_fingerprint
-                    ),
-                ),
-            ),
-            checkpoint=ExecutionIdentityCompatibilityContext(
-                composite_run_identity=checkpoint_identity.composite_run_identity,
-                execution_fingerprint=checkpoint_identity.execution_fingerprint,
-                manifest_id=checkpoint_identity.manifest_id,
-                fallback=CheckpointExecutionIdentityFallbackContext(
-                    pipeline_name=checkpoint_identity.pipeline_name,
-                    run_type=checkpoint_identity.run_type,
-                    pipeline_version=checkpoint_identity.pipeline_version,
-                    effective_config_hash=checkpoint_identity.effective_config_hash,
-                    dq_contract_compatibility_hash=(
-                        checkpoint_identity.dq_contract_compatibility_hash
-                    ),
-                    contract_ref=checkpoint_identity.contract_ref,
-                    contract_version=checkpoint_identity.contract_version,
-                    effective_config_artifact_id=(
-                        checkpoint_identity.effective_config_artifact_id
-                    ),
-                    exact_replay=checkpoint_identity.exact_replay,
-                    input_snapshot_fingerprint=(
-                        checkpoint_identity.input_snapshot_fingerprint
-                    ),
-                ),
-            ),
+            current=self._build_execution_identity_context(current_identity),
+            checkpoint=self._build_execution_identity_context(checkpoint_identity),
         )
         schema_compatibility = check_schema_compatibility(
             current_version=current_identity.checkpoint_schema_version,
@@ -175,69 +180,63 @@ class CheckpointCompatibilityV2Service:
             allow_policy_override=self.config.allow_policy_override,
             max_schema_version_delta=self.config.max_schema_version_delta,
         )
-        current_identity_details = build_identity_details(
-            IdentityDetailsRequest(
-                effective_config_hash=current_identity.effective_config_hash,
-                execution_phase=current_identity.execution_phase,
-                checkpoint_schema_version=current_identity.checkpoint_schema_version,
-                composite_run_identity=current_identity.composite_run_identity,
-                execution_fingerprint=current_identity.execution_fingerprint,
-                pipeline_name=current_identity.pipeline_name,
-                run_type=current_identity.run_type,
-                pipeline_version=current_identity.pipeline_version,
-                manifest_id=current_identity.manifest_id,
-                dq_contract_compatibility_hash=(
-                    current_identity.dq_contract_compatibility_hash
-                ),
-                contract_ref=current_identity.contract_ref,
-                contract_version=current_identity.contract_version,
-                effective_config_artifact_id=current_identity.effective_config_artifact_id,
-                exact_replay=current_identity.exact_replay,
-                input_snapshot_fingerprint=current_identity.input_snapshot_fingerprint,
-            )
-        )
-        checkpoint_identity_details = build_identity_details(
-            IdentityDetailsRequest(
-                effective_config_hash=checkpoint_identity.effective_config_hash,
-                execution_phase=checkpoint_identity.execution_phase,
-                checkpoint_schema_version=checkpoint_identity.checkpoint_schema_version,
-                composite_run_identity=checkpoint_identity.composite_run_identity,
-                execution_fingerprint=checkpoint_identity.execution_fingerprint,
-                pipeline_name=checkpoint_identity.pipeline_name,
-                run_type=checkpoint_identity.run_type,
-                pipeline_version=checkpoint_identity.pipeline_version,
-                manifest_id=checkpoint_identity.manifest_id,
-                dq_contract_compatibility_hash=(
-                    checkpoint_identity.dq_contract_compatibility_hash
-                ),
-                contract_ref=checkpoint_identity.contract_ref,
-                contract_version=checkpoint_identity.contract_version,
-                effective_config_artifact_id=checkpoint_identity.effective_config_artifact_id,
-                exact_replay=checkpoint_identity.exact_replay,
-                input_snapshot_fingerprint=checkpoint_identity.input_snapshot_fingerprint,
-            )
+        return _CompatibilityEvaluation(
+            phase_compatibility=phase_compatibility,
+            config_compatibility=config_compatibility,
+            execution_identity_compatibility=execution_identity_compatibility,
+            schema_compatibility=schema_compatibility,
+            verdict=verdict,
+            suggestions=suggestions,
+            current_identity_details=self._build_identity_details(current_identity),
+            checkpoint_identity_details=self._build_identity_details(
+                checkpoint_identity
+            ),
         )
 
-        return CheckpointCompatibilityResult(
-            verdict=verdict,
-            message=generate_message(
-                verdict_value=verdict.value,
-                current_phase=current_identity.execution_phase,
-                mode=self.config.mode.value,
+    @staticmethod
+    def _build_execution_identity_context(
+        identity: CheckpointIdentityRecord,
+    ) -> ExecutionIdentityCompatibilityContext:
+        """Translate checkpoint identity records into runtime compatibility contexts."""
+        return ExecutionIdentityCompatibilityContext(
+            composite_run_identity=identity.composite_run_identity,
+            execution_fingerprint=identity.execution_fingerprint,
+            manifest_id=identity.manifest_id,
+            fallback=CheckpointExecutionIdentityFallbackContext(
+                pipeline_name=identity.pipeline_name,
+                run_type=identity.run_type,
+                pipeline_version=identity.pipeline_version,
+                effective_config_hash=identity.effective_config_hash,
+                dq_contract_compatibility_hash=identity.dq_contract_compatibility_hash,
+                contract_ref=identity.contract_ref,
+                contract_version=identity.contract_version,
+                effective_config_artifact_id=identity.effective_config_artifact_id,
+                exact_replay=identity.exact_replay,
+                input_snapshot_fingerprint=identity.input_snapshot_fingerprint,
             ),
-            details=generate_details(
-                phase_result=phase_compatibility,
-                config_result=config_compatibility,
-                execution_identity_result=execution_identity_compatibility,
-                schema_result=schema_compatibility,
-                current_identity_details=current_identity_details,
-                checkpoint_identity_details=checkpoint_identity_details,
-                mode=self.config.mode.value,
-                allow_policy_override=self.config.allow_policy_override,
-                max_schema_version_delta=self.config.max_schema_version_delta,
-            ),
-            execution_phase=current_identity.execution_phase,
-            recovery_suggestions=suggestions,
+        )
+
+    @staticmethod
+    def _build_identity_details(identity: CheckpointIdentityRecord) -> JsonDict:
+        """Return compatibility detail payloads for one checkpoint identity record."""
+        return build_identity_details(
+            IdentityDetailsRequest(
+                effective_config_hash=identity.effective_config_hash,
+                execution_phase=identity.execution_phase,
+                checkpoint_schema_version=identity.checkpoint_schema_version,
+                composite_run_identity=identity.composite_run_identity,
+                execution_fingerprint=identity.execution_fingerprint,
+                pipeline_name=identity.pipeline_name,
+                run_type=identity.run_type,
+                pipeline_version=identity.pipeline_version,
+                manifest_id=identity.manifest_id,
+                dq_contract_compatibility_hash=identity.dq_contract_compatibility_hash,
+                contract_ref=identity.contract_ref,
+                contract_version=identity.contract_version,
+                effective_config_artifact_id=identity.effective_config_artifact_id,
+                exact_replay=identity.exact_replay,
+                input_snapshot_fingerprint=identity.input_snapshot_fingerprint,
+            )
         )
 
 

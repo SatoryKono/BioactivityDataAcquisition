@@ -191,8 +191,71 @@ class RunManifestInspectionService:
                 ]
             return existing
 
+        return RunManifestInspectionService._build_fallback_identity_graph(
+            manifest,
+            diagnostics,
+        )
+
+    @staticmethod
+    def _build_fallback_identity_graph(
+        manifest: RunManifest,
+        diagnostics: dict[str, object],
+    ) -> dict[str, object]:
+        """Build identity graph when diagnostics did not already provide one."""
         code_provenance = manifest.code_provenance
-        canonical_execution_identity = build_execution_identity_payload(
+        canonical_execution_identity = (
+            RunManifestInspectionService._build_canonical_execution_identity(
+                manifest,
+                diagnostics,
+            )
+        )
+        degraded_runtime_anchor_payload = (
+            RunManifestInspectionService._build_degraded_runtime_anchor_payload(
+                manifest
+            )
+        )
+        return {
+            **RunManifestInspectionService._build_identity_graph_core(
+                manifest,
+                diagnostics,
+                code_provenance=code_provenance,
+            ),
+            "canonical_execution_identity": {
+                "execution_fingerprint": manifest.execution_fingerprint,
+                "payload": canonical_execution_identity,
+            },
+            "degraded_runtime_anchor": {
+                "compatibility_scope": "legacy_fallback_only",
+                "fingerprint": (
+                    compute_execution_identity_fingerprint(
+                        degraded_runtime_anchor_payload
+                    )
+                    if degraded_runtime_anchor_payload
+                    else None
+                ),
+                "payload": degraded_runtime_anchor_payload,
+            },
+            **RunManifestInspectionService._build_identity_graph_replay_section(
+                manifest,
+                diagnostics,
+            ),
+            **RunManifestInspectionService._build_identity_graph_snapshot_section(
+                diagnostics
+            ),
+            **RunManifestInspectionService._build_identity_graph_artifact_section(
+                manifest,
+                diagnostics,
+            ),
+        }
+
+    @staticmethod
+    def _build_canonical_execution_identity(
+        manifest: RunManifest,
+        diagnostics: dict[str, object],
+    ) -> dict[str, object]:
+        """Return the canonical execution identity payload for inspection output."""
+        code_provenance = manifest.code_provenance
+        return build_execution_identity_payload(
             pipeline_name=manifest.pipeline_name,
             run_type=manifest.run_type.value,
             pipeline_version=code_provenance.pipeline_version,
@@ -209,7 +272,14 @@ class RunManifestInspectionService:
                 diagnostics.get("input_snapshot_identity_fingerprint"),
             ),
         )
-        degraded_runtime_anchor_payload = {
+
+    @staticmethod
+    def _build_degraded_runtime_anchor_payload(
+        manifest: RunManifest,
+    ) -> dict[str, object]:
+        """Return the fallback runtime anchor payload for inspection output."""
+        code_provenance = manifest.code_provenance
+        return {
             key: value
             for key, value in {
                 "manifest_id": manifest.manifest_id,
@@ -222,6 +292,15 @@ class RunManifestInspectionService:
             }.items()
             if value is not None
         }
+
+    @staticmethod
+    def _build_identity_graph_core(
+        manifest: RunManifest,
+        diagnostics: dict[str, object],
+        *,
+        code_provenance: object,
+    ) -> dict[str, object]:
+        """Return the provenance and contract section of the identity graph."""
         return {
             "run_id": str(manifest.run_id),
             "manifest_id": manifest.manifest_id,
@@ -244,21 +323,15 @@ class RunManifestInspectionService:
             "replay_of_run_id": diagnostics.get("replay_of_run_id"),
             "replay_of_manifest_id": diagnostics.get("replay_of_manifest_id"),
             "replay_parentage": diagnostics.get("replay_parentage"),
-            "canonical_execution_identity": {
-                "execution_fingerprint": manifest.execution_fingerprint,
-                "payload": canonical_execution_identity,
-            },
-            "degraded_runtime_anchor": {
-                "compatibility_scope": "legacy_fallback_only",
-                "fingerprint": (
-                    compute_execution_identity_fingerprint(
-                        degraded_runtime_anchor_payload
-                    )
-                    if degraded_runtime_anchor_payload
-                    else None
-                ),
-                "payload": degraded_runtime_anchor_payload,
-            },
+        }
+
+    @staticmethod
+    def _build_identity_graph_replay_section(
+        manifest: RunManifest,
+        diagnostics: dict[str, object],
+    ) -> dict[str, object]:
+        """Return replay/resume-related identity graph fields."""
+        replay_section = {
             "replay_capability": diagnostics.get(
                 "replay_capability",
                 manifest.replay_capability.value,
@@ -284,6 +357,20 @@ class RunManifestInspectionService:
             ),
             "resume_contract": diagnostics.get("resume_contract"),
             "resume_diagnostics": diagnostics.get("resume_diagnostics"),
+        }
+        lineage_closure_boundary = diagnostics.get("lineage_closure_boundary")
+        if lineage_closure_boundary is not None and bool(
+            diagnostics.get("total_events")
+        ):
+            replay_section["lineage_closure_boundary"] = lineage_closure_boundary
+        return replay_section
+
+    @staticmethod
+    def _build_identity_graph_snapshot_section(
+        diagnostics: dict[str, object],
+    ) -> dict[str, object]:
+        """Return input-snapshot and replay-mode fields for the identity graph."""
+        return {
             "input_snapshot_ids": diagnostics.get("input_snapshot_ids", []),
             "input_snapshot_content_hashes": diagnostics.get(
                 "input_snapshot_content_hashes",
@@ -295,6 +382,15 @@ class RunManifestInspectionService:
             "replay_mode": diagnostics.get("replay_mode", "rebuild"),
             "input_snapshot_count": diagnostics.get("input_snapshot_count", 0),
             "input_snapshots": diagnostics.get("input_snapshots", []),
+        }
+
+    @staticmethod
+    def _build_identity_graph_artifact_section(
+        manifest: RunManifest,
+        diagnostics: dict[str, object],
+    ) -> dict[str, object]:
+        """Return artifact and occurrence-only sections for the identity graph."""
+        return {
             "planned_artifacts": [
                 {"layer": artifact.layer, "path": artifact.path}
                 for artifact in manifest.planned_artifacts

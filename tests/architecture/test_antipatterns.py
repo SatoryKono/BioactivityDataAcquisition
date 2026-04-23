@@ -92,7 +92,7 @@ def test_no_sentinel_values(source_content_cache: dict) -> None:
 
 
 @pytest.mark.slow
-@pytest.mark.timeout(600) # Increased timeout to 10 minutes
+@pytest.mark.timeout(600)  # Increased timeout to 10 minutes
 def test_no_hardcoded_secrets() -> None:
     baseline_path = REPO_ROOT / ".secrets.baseline"
     if not baseline_path.exists():
@@ -168,7 +168,6 @@ def _extract_code_only(func_source: str) -> str:
         code_part = line.split("#")[0]
         lines.append(code_part)
     return "\n".join(lines)
-
 
 
 def _iter_async_function_defs(tree: ast.AST) -> list[ast.AsyncFunctionDef]:

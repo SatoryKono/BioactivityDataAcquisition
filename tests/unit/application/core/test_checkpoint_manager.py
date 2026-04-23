@@ -109,6 +109,53 @@ class TestCheckpointManagerLoadCheckpoint:
         mock_checkpoint_port.load.assert_called_once_with("test_pipeline")
         mock_logger.info.assert_called()
 
+    async def test_load_checkpoint_preserves_memory_decision_trace(
+        self, mock_checkpoint_port, mock_logger
+    ) -> None:
+        """Typed resume metadata keeps adaptive-memory trace entries for replay."""
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {
+                "records_processed": 1000,
+                "exact_replay": True,
+                "input_snapshot_ids": ["snapshot-1"],
+                "memory_decision_trace": [
+                    {
+                        "decision_index": 1,
+                        "record_index": 100,
+                        "stage": "pressure_check",
+                        "old_batch_size": 1000,
+                        "new_batch_size": 500,
+                        "adaptive_sizing_enabled": True,
+                        "monitor_available": True,
+                        "config_available": True,
+                        "pressure_state": True,
+                        "monitor_mode": "psutil",
+                        "reason": "monitor_recommended_reduction",
+                    }
+                ],
+            },
+        )
+
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="test_pipeline",
+            run_id=uuid4(),
+            resume=True,
+        )
+
+        result = await manager.load_checkpoint()
+
+        assert result is not None
+        assert result.exact_replay is True
+        assert result.input_snapshot_ids == ("snapshot-1",)
+        assert result.memory_decision_trace[0]["new_batch_size"] == 500
+        assert result.memory_decision_trace[0]["reason"] == (
+            "monitor_recommended_reduction"
+        )
+
     async def test_load_checkpoint_emits_loaded_metric(
         self, mock_checkpoint_port, mock_logger, mock_metrics
     ):
@@ -712,6 +759,21 @@ class TestCheckpointManagerCompatibilityPolicy:
                 contract_version="1.0.0",
                 exact_replay=True,
                 input_snapshot_ids=("snapshot-1",),
+                memory_decision_trace=(
+                    {
+                        "decision_index": 1,
+                        "record_index": 100,
+                        "stage": "pressure_check",
+                        "old_batch_size": 1000,
+                        "new_batch_size": 500,
+                        "adaptive_sizing_enabled": True,
+                        "monitor_available": True,
+                        "config_available": True,
+                        "pressure_state": True,
+                        "monitor_mode": "psutil",
+                        "reason": "monitor_recommended_reduction",
+                    },
+                ),
             ),
         )
 
@@ -730,6 +792,9 @@ class TestCheckpointManagerCompatibilityPolicy:
         assert call_kwargs["metadata"]["contract_version"] == "1.0.0"
         assert call_kwargs["metadata"]["exact_replay"] is True
         assert call_kwargs["metadata"]["input_snapshot_ids"] == ["snapshot-1"]
+        assert (
+            call_kwargs["metadata"]["memory_decision_trace"][0]["new_batch_size"] == 500
+        )
 
     async def test_soft_fail_resume_logs_checkpoint_identity_payload(
         self, mock_checkpoint_port, mock_logger

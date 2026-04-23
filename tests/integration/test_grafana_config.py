@@ -722,6 +722,10 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
 
     required_metrics = [
         "bioetl_records_processed_total",
+        "bioetl_memory_pressure_events_total",
+        "bioetl_memory_batch_resize_events_total",
+        "bioetl_memory_monitor_fallback_events_total",
+        "bioetl_memory_pressure_state",
         "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
         "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m",
         "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
@@ -923,6 +927,10 @@ def test_provider_health_summary_panels_use_selected_time_range(
         ("bioetl-runtime.json", "DQ Context Failures"),
         ("bioetl-runtime.json", "DQ Reports Skipped"),
         ("bioetl-runtime.json", "DQ Reports Generated"),
+        ("bioetl-runtime.json", "Memory Pressure Events"),
+        ("bioetl-runtime.json", "Batch Resize Events"),
+        ("bioetl-runtime.json", "Fallback Monitor Decisions"),
+        ("bioetl-runtime.json", "Memory Pressure Active"),
         ("bioetl-runtime.json", "Global Control-plane Lookup p95"),
         ("bioetl-runtime.json", "Top Warning Events"),
         ("bioetl-runtime.json", "Trace-enabled Runs"),

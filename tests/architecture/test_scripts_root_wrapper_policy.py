@@ -1,36 +1,36 @@
-"""Architecture policy: scripts root keeps wrappers, canonical logic lives in subfolders."""
+"""Architecture policy: scripts root stays directories-only in the final layout."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
 
-_ALLOWED_CANONICAL_ROOT_SCRIPTS = {"run.py"}
+_EXPECTED_TOP_LEVEL_DIRS = (
+    "ai",
+    "diagrams",
+    "docs",
+    "engineering",
+    "memory",
+    "ops",
+    "schema",
+)
 
 
-def test_scripts_root_contains_only_wrappers_or_allowed_entrypoints() -> None:
-    """Root scripts must be compatibility wrappers except explicit allowlist."""
+def test_scripts_root_matches_final_canonical_layout() -> None:
+    """scripts/ root must expose only the final seven canonical top-level directories."""
     root = Path("scripts")
     assert root.exists(), "scripts directory must exist"
 
-    violations: list[str] = []
-    for path in sorted(root.glob("*")):
-        if not path.is_file():
-            continue
-        if path.name == "__init__.py":
-            continue
-        if path.suffix not in {".py", ".sh", ".ps1", ".cmd", ".bat"}:
-            continue
+    entries = sorted(root.iterdir(), key=lambda item: item.name)
+    files = [entry.name for entry in entries if entry.is_file()]
+    assert not files, (
+        "scripts/ root must not contain files in the final layout:\n"
+        + "\n".join(f"  - {name}" for name in files)
+    )
 
-        if path.name in _ALLOWED_CANONICAL_ROOT_SCRIPTS:
-            continue
-
-        text = path.read_text(encoding="utf-8")
-        if "Compatibility wrapper" not in text:
-            violations.append(path.as_posix())
-
-    assert not violations, (
-        "Non-wrapper scripts detected in scripts root. "
-        "Move canonical logic into scripts/<group>/ and keep root as wrappers:\n"
-        + "\n".join(f"  - {item}" for item in violations)
+    directory_names = [entry.name for entry in entries if entry.is_dir()]
+    assert directory_names == list(_EXPECTED_TOP_LEVEL_DIRS), (
+        "scripts/ root must contain exactly the canonical top-level directories:\n"
+        f"expected: {_EXPECTED_TOP_LEVEL_DIRS}\n"
+        f"actual: {tuple(directory_names)}"
     )
