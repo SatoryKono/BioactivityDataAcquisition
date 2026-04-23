@@ -63,7 +63,15 @@ schema:
                 - page_last
         -   name: doc_type
             fields:
+                - publication_type_raw
                 - publication_type
+                - publication_type_unified
+                - publication_subclass
+                - publication_class
+        -   name: citations
+            fields:
+                - citations_received
+                - citations_made
         -   name: provider_ids
             fields:
                 - src_id
@@ -82,6 +90,7 @@ schema:
             - year
             - pagination
             - doc_type
+            - citations
             - provider_ids
             - dq
     gold:
@@ -95,6 +104,7 @@ schema:
             - year
             - pagination
             - doc_type
+            - citations
         exclude_fields:
             - _dq_*
             - _source_batch_id
@@ -247,3 +257,62 @@ contracts:
     merge_keys:
         - publication_id
     hash_include: []
+hash_policy:
+    provider: chembl
+    entity: publication
+    contract:
+        version: 1.0.0
+        migration_note: 'Explicit config-level hash contract for the normalized ChEMBL publication Silver surface, including raw-vs-canonical publication typing.'
+    hash_policy:
+        algorithm: sha256
+        canonicalization: provider + canonical_json_dumps(normalized_record)
+        include_fields:
+            - publication_id
+            - publication_doi
+            - publication_pmid
+            - publication_pmc_id
+            - title
+            - abstract
+            - authors
+            - journal
+            - publication_year
+            - volume
+            - issue
+            - page_first
+            - page_last
+            - publication_type_raw
+            - publication_type
+            - publication_type_unified
+            - publication_subclass
+            - publication_class
+            - citations_received
+            - citations_made
+            - src_id
+            - chembl_release
+            - creation_date
+        exclude_fields:
+            - _ingestion_ts
+            - _run_id
+            - _run_type
+            - _dq_warn
+            - _dq_error
+            - _source_batch_id
+            - _index
+            - _lookup_method
+            - _original_id
+            - _source
+        exclude_patterns:
+            - ^_dq_
+        field_ordering:
+            authors: order_sensitive_json
+        normalization:
+            trim_strings: true
+            round_floats:
+                enabled: true
+                precision: 10
+            dates:
+                enabled: true
+                format: YYYY-MM-DD
+            null_handling:
+                nan_to_null: true
+                inf_to_null: true

@@ -23,11 +23,35 @@ __all__ = [
 # Pseudo-null patterns to convert to None
 NULL_PATTERNS: frozenset[str] = frozenset(
     [
-        "N/A",
-        "NA",
-        "None",
         "",
         " ",
+        ".",
+        "..",
+        "...",
+        "-",
+        "--",
+        "<NA>",
+        "<NULL>",
+        "MISSING",
+        "N/A",
+        "NA",
+        "NAN",
+        "NONE",
+        "NOT_APPLICABLE",
+        "NOT_AVAILABLE",
+        "NULL",
+        "NULL_VALUE",
+        "None",
+        "UNKNOWN",
+        "missing",
+        "n/a",
+        "na",
+        "nan",
+        "none",
+        "not_applicable",
+        "not_available",
+        "null",
+        "unknown",
     ]
 )
 

@@ -249,3 +249,75 @@ contracts:
     merge_keys:
         - assay_id
     hash_include: []
+hash_policy:
+    provider: chembl
+    entity: assay
+    contract:
+        version: 1.0.0
+        migration_note: 'Explicit config-level hash contract for the normalized ChEMBL assay Silver surface.'
+    hash_policy:
+        algorithm: sha256
+        canonicalization: provider + canonical_json_dumps(normalized_record)
+        include_fields:
+            - assay_id
+            - description
+            - assay_type
+            - assay_type_description
+            - assay_test_type
+            - assay_category
+            - assay_group
+            - assay_organism
+            - assay_taxonomy_id
+            - assay_strain
+            - assay_tissue
+            - assay_cell_type
+            - assay_subcellular_fraction
+            - target_id
+            - relationship_type
+            - relationship_description
+            - confidence_score
+            - confidence_description
+            - src_id
+            - src_assay_id
+            - publication_id
+            - assay_pref_name
+            - score
+            - cell_id
+            - tissue_id
+            - bao_format
+            - bao_label
+            - aidx
+            - variant_accession
+            - variant_isoform
+            - variant_mutation
+            - variant_organism
+            - variant_sequence
+            - variant_taxonomy_id
+            - variant_sequence_json
+            - assay_classifications
+            - assay_parameters
+        exclude_fields:
+            - _ingestion_ts
+            - _run_id
+            - _run_type
+            - _dq_warn
+            - _dq_error
+            - _source_batch_id
+            - _index
+        exclude_patterns:
+            - ^_dq_
+        field_ordering:
+            variant_sequence_json: order_sensitive_json
+            assay_classifications: order_sensitive_json
+            assay_parameters: order_sensitive_json
+        normalization:
+            trim_strings: true
+            round_floats:
+                enabled: true
+                precision: 10
+            dates:
+                enabled: true
+                format: YYYY-MM-DD
+            null_handling:
+                nan_to_null: true
+                inf_to_null: true

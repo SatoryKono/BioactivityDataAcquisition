@@ -70,7 +70,7 @@ quality:
   version: 1.0.0
   provider: chembl
   entity: protein_class
-  common_field_validations:
+  entity_field_validations:
   - field: protein_class_id
     type: range
     min: 1
@@ -92,7 +92,7 @@ quality:
     min: 1
     nullable: true
     error_message: parent_id must be positive when present
-  common_cross_field_validations:
+  entity_cross_field_validations:
   - name: hierarchy_valid
     fields:
     - protein_class_id

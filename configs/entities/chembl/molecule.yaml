@@ -122,13 +122,13 @@ quality:
             type: required
             nullable: false
             error_message: Molecule ChEMBL ID is required
-        -   field: property_full_mwt
+        -   field: molecular_weight
             type: range
             min: 100
             max: 1000
             nullable: true
             error_message: Molecular weight must be between 10 and 10000 Da
-        -   field: property_alogp
+        -   field: logp
             type: range
             min: -10
             max: 20
@@ -169,17 +169,17 @@ quality:
             type: custom
             validator: smiles_validator
             nullable: true
-        -   field: property_hba
+        -   field: hba_count
             type: range
             min: 0
             max: 50
             nullable: true
-        -   field: property_hbd
+        -   field: hbd_count
             type: range
             min: 0
             max: 30
             nullable: true
-        -   field: property_psa
+        -   field: polar_surface_area
             type: range
             min: 0
             max: 1000
@@ -241,3 +241,93 @@ contracts:
     merge_keys:
         - molecule_id
     hash_include: []
+hash_policy:
+    provider: chembl
+    entity: molecule
+    contract:
+        version: 1.0.0
+        migration_note: 'Explicit config-level hash contract for the normalized ChEMBL molecule Silver surface.'
+    hash_policy:
+        algorithm: sha256
+        canonicalization: provider + canonical_json_dumps(normalized_record)
+        include_fields:
+            - molecule_id
+            - pref_name
+            - max_phase
+            - structure_type
+            - molecule_type
+            - first_approval
+            - therapeutic_flag
+            - oral
+            - parenteral
+            - topical
+            - black_box_warning
+            - natural_product
+            - first_in_class
+            - prodrug
+            - inorganic_flag
+            - polymer_flag
+            - withdrawn_flag
+            - chirality
+            - dosed_ingredient
+            - availability_type
+            - usan_year
+            - usan_stem
+            - usan_substem
+            - usan_stem_definition
+            - helm_notation
+            - molecule_species
+            - hierarchy_parent_chembl_id
+            - hierarchy_active_chembl_id
+            - hierarchy_child_chembl_id
+            - logp
+            - logp_method
+            - mw_freebase
+            - molecular_weight
+            - hba_count
+            - hbd_count
+            - polar_surface_area
+            - rotatable_bond_count
+            - ro5_violation_count
+            - heavy_atom_count
+            - aromatic_ring_count
+            - qed_score
+            - molecular_formula
+            - ro3_pass
+            - canonical_smiles
+            - standard_inchi
+            - inchi_key
+            - molecule_hierarchy
+            - molecule_properties
+            - molecule_structures
+            - molecule_synonyms
+            - cross_references
+            - atc_classifications
+        exclude_fields:
+            - _ingestion_ts
+            - _run_id
+            - _run_type
+            - _dq_warn
+            - _dq_error
+            - _source_batch_id
+            - _index
+        exclude_patterns:
+            - ^_dq_
+        field_ordering:
+            molecule_hierarchy: order_sensitive_json
+            molecule_properties: order_sensitive_json
+            molecule_structures: order_sensitive_json
+            molecule_synonyms: order_sensitive_json
+            cross_references: order_sensitive_json
+            atc_classifications: order_sensitive_json
+        normalization:
+            trim_strings: true
+            round_floats:
+                enabled: true
+                precision: 10
+            dates:
+                enabled: true
+                format: YYYY-MM-DD
+            null_handling:
+                nan_to_null: true
+                inf_to_null: true

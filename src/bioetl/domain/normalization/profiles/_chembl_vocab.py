@@ -16,6 +16,7 @@ from bioetl.domain.schemas.constants import (
     RO3_PASS_VALUES,
     STANDARD_RELATIONS,
     SUBCELLULAR_FRACTIONS,
+    TARGET_COMPONENT_RELATIONSHIPS,
     TARGET_COMPONENT_TYPES,
 )
 
@@ -33,12 +34,16 @@ _CHEMBL_ENUMS: dict[tuple[str, str], frozenset[str]] = {
     ("assay", "assay_type"): ASSAY_TYPES,
     ("assay", "confidence_description"): CONFIDENCE_DESCRIPTIONS,
     ("assay", "relationship_type"): RELATIONSHIP_TYPES,
+    ("assay", "assay_subcellular_fraction"): SUBCELLULAR_FRACTIONS,
     ("assay", "subcellular_fraction"): SUBCELLULAR_FRACTIONS,
     ("assay", "subcellular_fractions"): SUBCELLULAR_FRACTIONS,
     ("assay_parameters", "standard_relation"): STANDARD_RELATIONS,
     ("assay_parameters", "standard_type"): ASSAY_PARAMETER_STANDARD_TYPES,
     ("assay_parameters", "standard_units"): ACTIVITY_STANDARD_UNITS,
     ("molecule", "ro3_pass"): RO3_PASS_VALUES,
+    ("target", "component_relationships"): TARGET_COMPONENT_RELATIONSHIPS,
+    ("target", "component_types"): TARGET_COMPONENT_TYPES,
+    ("subcellular_fraction", "subcellular_fraction"): SUBCELLULAR_FRACTIONS,
     ("target_component", "component_type"): TARGET_COMPONENT_TYPES,
 }
 

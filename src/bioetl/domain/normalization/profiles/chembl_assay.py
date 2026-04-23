@@ -12,6 +12,7 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_bao_identifier,
     normalize_profile_chembl_organism_name,
+    normalize_profile_governed_vocabulary,
 )
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.schemas.chembl.assay import AssaySchema
@@ -113,6 +114,14 @@ _SPECIAL_RULE_COMPONENTS = {
         _normalize_bao_label_with_profile_context,
         "Normalize BAO label text inside the profile-visible assay contract, "
         "resolving canonical labels from sibling bao_format identifiers when present.",
+    ),
+    "assay_subcellular_fraction": (
+        lambda value: normalize_profile_governed_vocabulary(
+            value,
+            allowed_values=SUBCELLULAR_FRACTIONS,
+            preserve_unknown=True,
+        ),
+        "Normalize assay_subcellular_fraction against the shared ChEMBL subcellular-fraction vocabulary while preserving unknown observed lexemes for review.",
     ),
     **{
         field_name: (

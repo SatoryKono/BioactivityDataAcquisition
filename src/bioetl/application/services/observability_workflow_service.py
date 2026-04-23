@@ -34,6 +34,12 @@ __all__ = [
     "RunForensicDossierResult",
 ]
 
+_TRACE_ATTR_AUDIT_ENTRIES_COUNT = "bioetl.audit_entries_count"
+_TRACE_ATTR_COMPONENT = "bioetl.component"
+_TRACE_ATTR_HAS_RUN_MANIFEST_SERVICE = "bioetl.has_run_manifest_service"
+_TRACE_ATTR_OPERATION = "bioetl.operation"
+_TRACE_ATTR_SUCCESS = "bioetl.success"
+
 
 @dataclass(frozen=True, slots=True)
 class AuditRunWorkflowResult:
@@ -153,17 +159,17 @@ class ObservabilityWorkflowService:
             self.tracer,
             "diagnostics.inspect_audit_run",
             {
-                "bioetl.component": "observability_workflow_service",
-                "bioetl.operation": "inspect_audit_run",
+                _TRACE_ATTR_COMPONENT: "observability_workflow_service",
+                _TRACE_ATTR_OPERATION: "inspect_audit_run",
                 "bioetl.limit": limit,
-                "bioetl.has_run_manifest_service": self.run_manifest_service
+                _TRACE_ATTR_HAS_RUN_MANIFEST_SERVICE: self.run_manifest_service
                 is not None,
             },
             tracer_name=self.TRACER_NAME,
         ) as span:
             result = await self._inspect_audit_run_impl(run_id=run_id, limit=limit)
-            span.set_attribute("bioetl.success", True)
-            span.set_attribute("bioetl.audit_entries_count", len(result.audit.entries))
+            span.set_attribute(_TRACE_ATTR_SUCCESS, True)
+            span.set_attribute(_TRACE_ATTR_AUDIT_ENTRIES_COUNT, len(result.audit.entries))
             span.set_attribute(
                 "bioetl.has_run_manifest", result.run_manifest is not None
             )
@@ -200,10 +206,10 @@ class ObservabilityWorkflowService:
             self.tracer,
             "diagnostics.inspect_run_dossier",
             {
-                "bioetl.component": "observability_workflow_service",
-                "bioetl.operation": "inspect_run_dossier",
+                _TRACE_ATTR_COMPONENT: "observability_workflow_service",
+                _TRACE_ATTR_OPERATION: "inspect_run_dossier",
                 "bioetl.audit_limit": audit_limit,
-                "bioetl.has_run_manifest_service": self.run_manifest_service
+                _TRACE_ATTR_HAS_RUN_MANIFEST_SERVICE: self.run_manifest_service
                 is not None,
                 "bioetl.has_lineage_service": self.lineage_service is not None,
                 "bioetl.has_quarantine_service": self.quarantine_service is not None,
@@ -214,8 +220,8 @@ class ObservabilityWorkflowService:
                 run_id=run_id,
                 audit_limit=audit_limit,
             )
-            span.set_attribute("bioetl.success", True)
-            span.set_attribute("bioetl.audit_entries_count", len(result.audit.entries))
+            span.set_attribute(_TRACE_ATTR_SUCCESS, True)
+            span.set_attribute(_TRACE_ATTR_AUDIT_ENTRIES_COUNT, len(result.audit.entries))
             span.set_attribute(
                 "bioetl.missing_evidence_count", len(result.missing_evidence)
             )
@@ -302,12 +308,12 @@ class ObservabilityWorkflowService:
             self.tracer,
             "diagnostics.inspect_checkpoint_workflow",
             {
-                "bioetl.component": "observability_workflow_service",
-                "bioetl.operation": "inspect_checkpoint_workflow",
+                _TRACE_ATTR_COMPONENT: "observability_workflow_service",
+                _TRACE_ATTR_OPERATION: "inspect_checkpoint_workflow",
                 "bioetl.pipeline": pipeline_name,
                 "bioetl.audit_limit": audit_limit,
                 "bioetl.has_explicit_run_id": run_id is not None,
-                "bioetl.has_run_manifest_service": self.run_manifest_service
+                _TRACE_ATTR_HAS_RUN_MANIFEST_SERVICE: self.run_manifest_service
                 is not None,
             },
             tracer_name=self.TRACER_NAME,
@@ -317,8 +323,8 @@ class ObservabilityWorkflowService:
                 run_id=run_id,
                 audit_limit=audit_limit,
             )
-            span.set_attribute("bioetl.success", True)
-            span.set_attribute("bioetl.audit_entries_count", len(result.audit.entries))
+            span.set_attribute(_TRACE_ATTR_SUCCESS, True)
+            span.set_attribute(_TRACE_ATTR_AUDIT_ENTRIES_COUNT, len(result.audit.entries))
             span.set_attribute("bioetl.has_checkpoint", result.checkpoint is not None)
             span.set_attribute(
                 "bioetl.has_run_manifest", result.run_manifest is not None
@@ -442,11 +448,27 @@ class ObservabilityWorkflowService:
         summary["run_scope"] = {"run_id": run_id}
         silver_stats = summary.get("silver_filter_rejects")
         if (
-            run_manifest is None
-            or not isinstance(silver_stats, dict)
-            or not isinstance(silver_stats.get("total_count"), int)
+            run_manifest is not None
+            and isinstance(silver_stats, dict)
+            and isinstance(silver_stats.get("total_count"), int)
         ):
-            return summary
+            bronze_records = ObservabilityWorkflowService._resolve_bronze_record_count(
+                run_manifest
+            )
+            if bronze_records is not None:
+                silver_total = silver_stats["total_count"]
+                silver_stats["bronze_records"] = bronze_records
+                silver_stats["bronze_ratio"] = silver_total / bronze_records
+                silver_stats["bronze_ratio_pct"] = (
+                    silver_total / bronze_records
+                ) * 100
+        return summary
+
+    @staticmethod
+    def _resolve_bronze_record_count(
+        run_manifest: RunManifestInspectionResult,
+    ) -> int | None:
+        """Return the strongest Bronze record denominator from manifest ledger data."""
         bronze_records: int | None = None
         for entry in run_manifest.ledger_entries:
             metrics_snapshot = getattr(entry, "metrics_snapshot", None)
@@ -455,17 +477,8 @@ class ObservabilityWorkflowService:
             value = metrics_snapshot.get("records_bronze")
             if not isinstance(value, int) or value <= 0:
                 continue
-            bronze_records = (
-                value if bronze_records is None else max(bronze_records, value)
-            )
-        if bronze_records is None:
-            return summary
-        silver_total = silver_stats["total_count"]
-        silver_stats["bronze_records"] = bronze_records
-        if bronze_records > 0:
-            silver_stats["bronze_ratio"] = silver_total / bronze_records
-            silver_stats["bronze_ratio_pct"] = (silver_total / bronze_records) * 100
-        return summary
+            bronze_records = value if bronze_records is None else max(bronze_records, value)
+        return bronze_records
 
     @staticmethod
     def _build_traceability_section(
@@ -502,38 +515,68 @@ class ObservabilityWorkflowService:
         traceability: dict[str, object],
     ) -> tuple[tuple[str, ...], tuple[str, ...]]:
         """Classify missing vs degraded evidence for one dossier."""
-        missing: list[str] = []
-        degraded: list[str] = []
-        if run_manifest is None:
-            missing.append("run_manifest")
-        if checkpoint is None:
-            degraded.append("checkpoint")
-        elif checkpoint.metadata.get("status") == "mismatched_run_context":
-            degraded.append("checkpoint_mismatched_run")
+        missing = ["run_manifest"] if run_manifest is None else []
+        degraded = self._classify_checkpoint_status(checkpoint)
         if lineage is None:
             degraded.append("lineage")
         if quarantine_summary is None:
             degraded.append("quarantine_summary")
+        degraded.extend(self._collect_traceability_degradation(traceability))
+        return tuple(missing), tuple(degraded)
+
+    @staticmethod
+    def _classify_checkpoint_status(checkpoint: CheckpointInfo | None) -> list[str]:
+        """Return checkpoint-specific degraded evidence markers."""
+        if checkpoint is None:
+            return ["checkpoint"]
+        if checkpoint.metadata.get("status") == "mismatched_run_context":
+            return ["checkpoint_mismatched_run"]
+        return []
+
+    @staticmethod
+    def _collect_traceability_degradation(
+        traceability: dict[str, object],
+    ) -> list[str]:
+        """Return degraded evidence markers derived from the traceability section."""
+        degraded: list[str] = []
         persistence_profile = traceability.get("persistence_profile")
         if isinstance(persistence_profile, dict):
-            attained = persistence_profile.get("attained_profile")
-            if attained not in {None, "forensic_grade"}:
-                degraded.append(f"persistence_profile:{attained}")
-            for key in (
-                "replay_ready_missing_requirements",
-                "forensic_grade_missing_requirements",
-            ):
-                value = persistence_profile.get(key)
-                if isinstance(value, list) and value:
-                    degraded.append(key)
-        correlation_gaps = traceability.get("correlation_anchor_gaps")
-        if isinstance(correlation_gaps, dict) and any(
-            isinstance(value, int) and value > 0 for value in correlation_gaps.values()
-        ):
+            degraded.extend(
+                ObservabilityWorkflowService._collect_persistence_profile_degradation(
+                    persistence_profile
+                )
+            )
+        if ObservabilityWorkflowService._has_correlation_anchor_gaps(traceability):
             degraded.append("correlation_anchor_gaps")
         if not traceability.get("trace_links_available", False):
             degraded.append("trace_links_unavailable")
-        return tuple(missing), tuple(degraded)
+        return degraded
+
+    @staticmethod
+    def _collect_persistence_profile_degradation(
+        persistence_profile: dict[str, object],
+    ) -> list[str]:
+        """Return degraded evidence markers derived from persistence profile gaps."""
+        degraded: list[str] = []
+        attained = persistence_profile.get("attained_profile")
+        if attained not in {None, "forensic_grade"}:
+            degraded.append(f"persistence_profile:{attained}")
+        for key in (
+            "replay_ready_missing_requirements",
+            "forensic_grade_missing_requirements",
+        ):
+            value = persistence_profile.get(key)
+            if isinstance(value, list) and value:
+                degraded.append(key)
+        return degraded
+
+    @staticmethod
+    def _has_correlation_anchor_gaps(traceability: dict[str, object]) -> bool:
+        """Return whether the dossier reports correlation-anchor coverage gaps."""
+        correlation_gaps = traceability.get("correlation_anchor_gaps")
+        return isinstance(correlation_gaps, dict) and any(
+            isinstance(value, int) and value > 0 for value in correlation_gaps.values()
+        )
 
     @staticmethod
     def _build_next_steps(
