@@ -339,6 +339,49 @@ class TestGetRecommendedBatchSize:
 
         assert monitor._consecutive_pressure_count == 0
 
+    @pytest.mark.parametrize("initial_size", [1, 2, 5, 10, 25, 100])
+    def test_repeated_pressure_never_drops_below_min_batch_size(
+        self, initial_size: int
+    ) -> None:
+        """Sustained pressure must stay monotonic but never reach zero/negative sizes."""
+        monitor = _make_monitor(threshold=0.8, min_batch=10)
+        current_size = initial_size
+
+        with patch.object(monitor, "get_memory_stats", return_value=_mock_stats(0.95)):
+            observed_sizes = []
+            for _ in range(8):
+                current_size = monitor.get_recommended_batch_size(current_size)
+                observed_sizes.append(current_size)
+
+        assert all(size >= 10 for size in observed_sizes)
+        assert all(size > 0 for size in observed_sizes)
+        assert observed_sizes == sorted(observed_sizes, reverse=True)
+
+    @pytest.mark.parametrize("relief_steps", [1, 2, 4, 8, 12])
+    def test_repeated_relief_stabilizes_at_recovery_target(
+        self, relief_steps: int
+    ) -> None:
+        """Repeated relief calls recover monotonically and eventually stabilize."""
+        monitor = _make_monitor(threshold=0.8)
+
+        with patch.object(monitor, "get_memory_stats") as mock_stats:
+            mock_stats.return_value = _mock_stats(0.9)
+            current_size = monitor.get_recommended_batch_size(1000)
+
+            mock_stats.return_value = _mock_stats(0.2)
+            observed_sizes = []
+            for _ in range(relief_steps):
+                current_size = monitor.get_recommended_batch_size(current_size)
+                observed_sizes.append(current_size)
+
+        assert all(size <= 1000 for size in observed_sizes)
+        assert observed_sizes == sorted(observed_sizes)
+        if relief_steps >= 8:
+            assert observed_sizes[-1] == 1000
+            assert monitor._recovery_target_batch_size is None
+        else:
+            assert observed_sizes[-1] <= 1000
+
 
 # ---------------------------------------------------------------------------
 # _get_reduction_factor
@@ -529,6 +572,33 @@ class TestFallbackResourcePath:
 
         assert stats.total_mb == pytest.approx(8192.0)
         assert stats.percent_used == pytest.approx(0.5)
+
+    def test_windows_estimate_mode_is_used_when_psutil_unavailable(self) -> None:
+        """Windows fallback documents unavailable-monitoring semantics via estimate mode."""
+        monitor = _make_monitor()
+        monitor._psutil_available = False
+
+        with patch("sys.platform", "win32"):
+            stats = monitor.get_memory_stats()
+
+        assert stats.total_mb == pytest.approx(8192.0)
+        assert monitor.get_monitor_mode() == "estimate"
+
+    def test_unix_proc_failure_still_keeps_monitor_mode_bounded(self) -> None:
+        """Unavailable `/proc` data must degrade to the bounded estimate mode."""
+        monitor = _make_monitor()
+        fake_resource = SimpleNamespace(
+            RUSAGE_SELF=0,
+            getrusage=lambda _x: SimpleNamespace(ru_maxrss=1024 * 128),
+        )
+
+        with (
+            patch.dict("sys.modules", {"resource": fake_resource}),
+            patch("pathlib.Path.open", side_effect=OSError("missing /proc/meminfo")),
+        ):
+            monitor._get_stats_resource()
+
+        assert monitor.get_monitor_mode() == "estimate"
 
 
 @pytest.mark.unit

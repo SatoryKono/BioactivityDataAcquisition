@@ -32,9 +32,6 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics, SchemaDriftInfo
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
     from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
-    from bioetl.infrastructure.storage.silver.metadata_operations import (
-        _PreparedSilverWriteFinalizationContext,
-    )
 
 
 def _normalize_completed_at(value: datetime | str) -> datetime:
@@ -267,7 +264,7 @@ class SilverWriterFinalizationCompatibilityMixin:
         table_path: str,
         started_at: datetime,
         start_perf: float,
-    ) -> _PreparedSilverWriteFinalizationContext:
+    ) -> "_PreparedSilverWriteFinalizationContext":
         """Prepare finalization context for silver write."""
         if self._metadata:
             return await self._metadata._prepare_silver_write_finalization_context(
