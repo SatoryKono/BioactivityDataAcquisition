@@ -21,6 +21,7 @@ from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 LEGACY_HTTP_DOI = "http" + "://doi.org/10.1038/NATURE12373"
+pytestmark = pytest.mark.usefixtures("publication_type_classification_data")
 
 
 @pytest.fixture

@@ -63,14 +63,6 @@ def _normalize_enum_option(option_namespace: object, option_name: str) -> None:
 
 
 _PUBLICATION_CLASSIFICATION_TEST_PREFIXES = (
-    "tests/unit/application/pipelines/common/test_publication_parity.py",
-    "tests/unit/application/pipelines/crossref/",
-    "tests/unit/application/pipelines/openalex/",
-    "tests/unit/application/pipelines/pubmed/",
-    "tests/unit/application/pipelines/semanticscholar/",
-    "tests/unit/application/pipelines/test_publication_similarity_transformer.py",
-    "tests/unit/domain/mapping/test_publication_type_classification.py",
-    "tests/unit/domain/mapping/test_publication_type_mapping.py",
     "tests/integration/test_cross_provider_doi_normalization.py",
     "tests/integration/pipelines/test_crossref_date_normalization.py",
     "tests/integration/pipelines/test_pubmed_date_normalization.py",
@@ -154,7 +146,7 @@ def _selected_tests_need_publication_type_classification(
 
 @pytest.fixture(scope="session", autouse=True)
 def _init_publication_type_classification(request: pytest.FixtureRequest) -> None:
-    """Initialize publication type classification data only for relevant suites."""
+    """Initialize publication type classification data only for non-unit suites."""
     if not _selected_tests_need_publication_type_classification(request):
         return
 

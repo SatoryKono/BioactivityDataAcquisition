@@ -17,6 +17,8 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
+pytestmark = pytest.mark.usefixtures("publication_type_classification_data")
+
 
 @pytest.fixture
 def transformer() -> SemanticScholarPublicationTransformer:
