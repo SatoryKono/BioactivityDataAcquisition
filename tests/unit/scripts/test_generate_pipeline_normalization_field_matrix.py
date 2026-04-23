@@ -264,6 +264,15 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     activity_units = _row(rows, "chembl_activity", "units")
     assert activity_units["normalizer"] == "normalize_profile_unit"
     assert activity_units["strictness"] == "controlled_unit"
+    assert activity_units["dq_coverage"] == "pattern:error"
+
+    activity_uo_units = _row(rows, "chembl_activity", "uo_units")
+    assert activity_uo_units["strictness"] == "controlled_unit"
+    assert activity_uo_units["dq_coverage"] == "pattern:error"
+
+    activity_qudt_units = _row(rows, "chembl_activity", "qudt_units")
+    assert activity_qudt_units["strictness"] == "controlled_unit"
+    assert activity_qudt_units["dq_coverage"] == "pattern:error"
 
     target_cross_references = _row(rows, "chembl_target", "cross_references")
     assert target_cross_references["normalizer"] == "normalize_profile_json_string_strict"
@@ -285,6 +294,39 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     )
     assert publication_term_type["strictness"] == "strict_enum"
     assert publication_term_type["dq_coverage"] == "enum:error"
+
+    assay_parameter_units = _row(rows, "chembl_assay_parameters", "units")
+    assert assay_parameter_units["strictness"] == "controlled_unit"
+    assert assay_parameter_units["dq_coverage"] == "pattern:error"
+
+    ro3_pass = _row(rows, "chembl_molecule", "ro3_pass")
+    assert ro3_pass["strictness"] == "strict_enum"
+    assert ro3_pass["dq_coverage"] == "enum:error"
+
+
+def test_chembl_policy_bearing_fields_do_not_silently_stay_dq_not_configured() -> None:
+    """Policy-bearing ChEMBL fields must carry an explicit DQ decision in the matrix."""
+    rows = build_field_matrix_rows()
+    governed_strictness = {
+        "strict_enum",
+        "controlled_unit",
+        "ontology_id",
+        "bool_like",
+        "flag_like",
+        "operator_enum",
+        "controlled_vocabulary",
+        "structured_json",
+    }
+
+    missing = [
+        (row["pipeline_name"], row["field_name"], row["strictness"])
+        for row in rows
+        if row["pipeline_name"].startswith("chembl_")
+        and row["strictness"] in governed_strictness
+        and row["dq_coverage"] == "not_configured"
+    ]
+
+    assert missing == []
 
 
 def test_build_entity_profile_coverage_kpi_summarizes_entity_rows() -> None:

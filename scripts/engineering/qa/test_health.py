@@ -681,59 +681,168 @@ def build_rollup(runs: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _append_suite_table(lines: list[str], suites: dict[str, dict[str, Any]]) -> None:
+    if not suites:
+        lines.extend(["No test-health runs found.", ""])
+        return
+    lines.extend(
+        [
+            "## Suites",
+            "",
+            "| Suite | Runs | Non-green | Pass rate | Test failures | Unique failing tests | Skipped |",
+            "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+        ]
+    )
+    for suite, stats in sorted(suites.items()):
+        lines.append(
+            f"| {suite} | {stats['run_count']} | {stats['failure_count']} | "
+            f"{stats['pass_rate']:.1%} | {stats['test_failure_count']} | "
+            f"{stats['unique_failing_tests']} | {stats['skipped']} |"
+        )
+    lines.append("")
+
+
+def _append_count_section(
+    *,
+    lines: list[str],
+    title: str,
+    counts: dict[str, int],
+    formatter: Any,
+) -> None:
+    if not counts:
+        return
+    lines.extend([title, ""])
+    for key, count in counts.items():
+        lines.append(formatter(key, count))
+    lines.append("")
+
+
+def _append_simple_list_section(
+    *,
+    lines: list[str],
+    title: str,
+    items: list[str],
+) -> None:
+    if not items:
+        return
+    lines.extend([title, ""])
+    for item in items[:10]:
+        lines.append(f"- `{item}`")
+    lines.append("")
+
+
+def _append_new_failures_section(
+    lines: list[str],
+    new_failures: dict[str, list[str]],
+) -> None:
+    if not new_failures:
+        return
+    lines.extend(["## New Failures", ""])
+    for suite, nodeids in sorted(new_failures.items()):
+        for nodeid in nodeids[:10]:
+            lines.append(f"- `{suite}`: `{nodeid}`")
+    lines.append("")
+
+
 def format_rollup_markdown(rollup: dict[str, Any]) -> str:
     """Render a test-health rollup as GitHub job-summary friendly Markdown."""
     lines = ["# Test Health Rollup", "", f"Runs analyzed: {rollup['run_count']}", ""]
-    suites = rollup.get("suites", {})
-    if suites:
-        lines.extend(
-            [
-                "## Suites",
-                "",
-                "| Suite | Runs | Non-green | Pass rate | Test failures | Unique failing tests | Skipped |",
-                "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
-            ]
-        )
-        for suite, stats in sorted(suites.items()):
-            lines.append(
-                f"| {suite} | {stats['run_count']} | {stats['failure_count']} | "
-                f"{stats['pass_rate']:.1%} | {stats['test_failure_count']} | "
-                f"{stats['unique_failing_tests']} | {stats['skipped']} |"
-            )
-        lines.append("")
-    else:
-        lines.extend(["No test-health runs found.", ""])
-
-    classification_counts = rollup.get("classification_counts", {})
-    if classification_counts:
-        lines.extend(["## Failure Classifications", ""])
-        for classification, count in classification_counts.items():
-            lines.append(f"- `{classification}`: {count}")
-        lines.append("")
-
-    new_failures = rollup.get("new_failures", {})
-    if new_failures:
-        lines.extend(["## New Failures", ""])
-        for suite, nodeids in sorted(new_failures.items()):
-            for nodeid in nodeids[:10]:
-                lines.append(f"- `{suite}`: `{nodeid}`")
-        lines.append("")
-
-    flaky_candidates = rollup.get("flaky_candidates", [])
-    if flaky_candidates:
-        lines.extend(["## Flaky Candidates", ""])
-        for nodeid in flaky_candidates[:10]:
-            lines.append(f"- `{nodeid}`")
-        lines.append("")
-
-    top_failing_nodeids = rollup.get("top_failing_nodeids", {})
-    if top_failing_nodeids:
-        lines.extend(["## Top Failing Nodeids", ""])
-        for nodeid, count in top_failing_nodeids.items():
-            lines.append(f"- {count}x `{nodeid}`")
-        lines.append("")
+    _append_suite_table(lines, rollup.get("suites", {}))
+    _append_count_section(
+        lines=lines,
+        title="## Failure Classifications",
+        counts=rollup.get("classification_counts", {}),
+        formatter=lambda classification, count: f"- `{classification}`: {count}",
+    )
+    _append_new_failures_section(lines, rollup.get("new_failures", {}))
+    _append_simple_list_section(
+        lines=lines,
+        title="## Flaky Candidates",
+        items=rollup.get("flaky_candidates", []),
+    )
+    _append_count_section(
+        lines=lines,
+        title="## Top Failing Nodeids",
+        counts=rollup.get("top_failing_nodeids", {}),
+        formatter=lambda nodeid, count: f"- {count}x `{nodeid}`",
+    )
 
     return "\n".join(lines).rstrip() + "\n"
+
+
+def _maybe_ingest_rollup_junit(
+    *,
+    parser: argparse.ArgumentParser,
+    args: argparse.Namespace,
+) -> int | None:
+    if not (args.junit or args.junit_glob):
+        return None
+    if not args.suite:
+        parser.error("--suite is required when --junit or --junit-glob is used")
+    run_id = _unique_run_id(
+        args.reports_dir,
+        args.run_id or _default_run_id(args.suite),
+    )
+    summary_path = _write_junit_summary(
+        suite=args.suite,
+        run_id=run_id,
+        reports_dir=args.reports_dir,
+        junit_paths=args.junit,
+        junit_globs=args.junit_glob,
+        command=args.command,
+        exit_code=args.exit_code,
+        classifier_config_path=args.classifier_config,
+    )
+    return None if summary_path is not None else 2
+
+
+def _print_rollup_console_summary(rollup: dict[str, Any]) -> None:
+    print(f"Test health rollup: last {rollup['run_count']} runs")
+    for suite, stats in sorted(rollup["suites"].items()):
+        print(
+            f"- {suite}: runs={stats['run_count']} "
+            f"non_green={stats['failure_count']} "
+            f"pass_rate={stats['pass_rate']:.1%} "
+            f"test_failures={stats['test_failure_count']} "
+            f"unique_failing_tests={stats['unique_failing_tests']} "
+            f"skipped={stats['skipped']}"
+        )
+    if rollup["classification_counts"]:
+        print("Failure classifications:")
+        for classification, count in rollup["classification_counts"].items():
+            print(f"- {classification}: {count}")
+    if rollup["flaky_candidates"]:
+        print("Flaky candidates:")
+        for nodeid in rollup["flaky_candidates"][:10]:
+            print(f"- {nodeid}")
+    if rollup["new_failures"]:
+        print("New failures:")
+        for suite, nodeids in sorted(rollup["new_failures"].items()):
+            for nodeid in nodeids[:10]:
+                print(f"- {suite}: {nodeid}")
+    if rollup["top_failing_nodeids"]:
+        print("Top failing nodeids:")
+        for nodeid, count in rollup["top_failing_nodeids"].items():
+            print(f"- {count}x {nodeid}")
+
+
+def _write_rollup_markdown_outputs(
+    *,
+    args: argparse.Namespace,
+    rollup: dict[str, Any],
+) -> None:
+    if not (args.markdown_out or args.github_step_summary):
+        return
+    markdown = format_rollup_markdown(rollup)
+    if args.markdown_out:
+        args.markdown_out.parent.mkdir(parents=True, exist_ok=True)
+        args.markdown_out.write_text(markdown, encoding="utf-8")
+        print(f"Markdown rollup: {_relative_to_root(args.markdown_out)}")
+    step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if args.github_step_summary and step_summary:
+        Path(step_summary).parent.mkdir(parents=True, exist_ok=True)
+        with Path(step_summary).open("a", encoding="utf-8") as handle:
+            handle.write(markdown)
 
 
 def _rollup(argv: list[str]) -> int:
@@ -767,65 +876,12 @@ def _rollup(argv: list[str]) -> int:
     )
     args = parser.parse_args(argv)
 
-    if args.junit or args.junit_glob:
-        if not args.suite:
-            parser.error("--suite is required when --junit or --junit-glob is used")
-        run_id = _unique_run_id(
-            args.reports_dir,
-            args.run_id or _default_run_id(args.suite),
-        )
-        summary_path = _write_junit_summary(
-            suite=args.suite,
-            run_id=run_id,
-            reports_dir=args.reports_dir,
-            junit_paths=args.junit,
-            junit_globs=args.junit_glob,
-            command=args.command,
-            exit_code=args.exit_code,
-            classifier_config_path=args.classifier_config,
-        )
-        if summary_path is None:
-            return 2
-
+    ingest_exit_code = _maybe_ingest_rollup_junit(parser=parser, args=args)
+    if ingest_exit_code is not None:
+        return ingest_exit_code
     rollup = build_rollup(_read_run_summaries(args.reports_dir, args.last))
-    print(f"Test health rollup: last {rollup['run_count']} runs")
-    for suite, stats in sorted(rollup["suites"].items()):
-        print(
-            f"- {suite}: runs={stats['run_count']} "
-            f"non_green={stats['failure_count']} "
-            f"pass_rate={stats['pass_rate']:.1%} "
-            f"test_failures={stats['test_failure_count']} "
-            f"unique_failing_tests={stats['unique_failing_tests']} "
-            f"skipped={stats['skipped']}"
-        )
-    if rollup["classification_counts"]:
-        print("Failure classifications:")
-        for classification, count in rollup["classification_counts"].items():
-            print(f"- {classification}: {count}")
-    if rollup["flaky_candidates"]:
-        print("Flaky candidates:")
-        for nodeid in rollup["flaky_candidates"][:10]:
-            print(f"- {nodeid}")
-    if rollup["new_failures"]:
-        print("New failures:")
-        for suite, nodeids in sorted(rollup["new_failures"].items()):
-            for nodeid in nodeids[:10]:
-                print(f"- {suite}: {nodeid}")
-    if rollup["top_failing_nodeids"]:
-        print("Top failing nodeids:")
-        for nodeid, count in rollup["top_failing_nodeids"].items():
-            print(f"- {count}x {nodeid}")
-    if args.markdown_out or args.github_step_summary:
-        markdown = format_rollup_markdown(rollup)
-        if args.markdown_out:
-            args.markdown_out.parent.mkdir(parents=True, exist_ok=True)
-            args.markdown_out.write_text(markdown, encoding="utf-8")
-            print(f"Markdown rollup: {_relative_to_root(args.markdown_out)}")
-        step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
-        if args.github_step_summary and step_summary:
-            Path(step_summary).parent.mkdir(parents=True, exist_ok=True)
-            with Path(step_summary).open("a", encoding="utf-8") as handle:
-                handle.write(markdown)
+    _print_rollup_console_summary(rollup)
+    _write_rollup_markdown_outputs(args=args, rollup=rollup)
     return 0
 
 

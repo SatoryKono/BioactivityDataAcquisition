@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-23T14:36:42.816042+00:00",
+  "generated_at": "2026-04-23T14:52:26.722965+00:00",
   "summary": {
     "total_scripts": 434,
     "status_counts": {
@@ -4639,13 +4639,31 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 28,
+      "reference_count": 31,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
           "line": 84,
           "source_group": "ci",
           "text": "run: uv run python scripts/docs/check_doc_links.py --links --specs --configs"
+        },
+        {
+          "path": "docs/00-project/DOCUMENTATION_GOVERNANCE.md",
+          "line": 198,
+          "source_group": "docs",
+          "text": "- `scripts/check_doc_links.py` enhanced"
+        },
+        {
+          "path": "docs/00-project/DOCUMENTATION_GOVERNANCE.md",
+          "line": 324,
+          "source_group": "docs",
+          "text": "| **check_doc_links.py** | Link validation | Custom script |"
+        },
+        {
+          "path": "docs/00-project/DOCUMENTATION_GOVERNANCE.md",
+          "line": 331,
+          "source_group": "docs",
+          "text": "1. `scripts/check_doc_links.py` - Link validation"
         },
         {
           "path": "docs/00-project/governance/01-documentation-governance-style-guide.md",
@@ -4670,24 +4688,6 @@
           "line": 11,
           "source_group": "docs",
           "text": "- Repo-level docs guards уже зелёные: `check_doc_links.py` проходит, `report_docs_kpi.py` находится в состоянии `on_track`."
-        },
-        {
-          "path": "docs/reports/evidence/documentation-remediation-options/02-evidence/documentation-remediation-options/EV-documentation-remediation-link-guard-fails-on-internal-doc-links.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"./.venv/Scripts/python.exe scripts/docs/check_doc_links.py\""
-        },
-        {
-          "path": "docs/reports/evidence/documentation-remediation-options/02-evidence/documentation-remediation-options/EV-documentation-remediation-strict-build-and-kpi-need-separate-follow-up.yaml",
-          "line": 11,
-          "source_group": "docs",
-          "text": "notes: \"mkdocs is missing in the current venv, and report_docs_kpi.py reports broader outside-nav counts than check_doc_links.py.\""
-        },
-        {
-          "path": "docs/reports/evidence/documentation-remediation-options/02-evidence/documentation-remediation-options/RAW-documentation-remediation-options-2026-03-23.md",
-          "line": 7,
-          "source_group": "docs",
-          "text": "- `scripts/docs/check_doc_links.py` fails with `118` broken links."
         }
       ]
     },

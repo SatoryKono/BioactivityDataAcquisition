@@ -8,6 +8,7 @@ CheckpointConflictError escalation.
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 from unittest.mock import MagicMock
@@ -34,6 +35,38 @@ from tests.helpers.clock import FixedClock
 FIXED_CHECKPOINT_TIME = datetime(2024, 6, 2, 12, 0, tzinfo=UTC)
 VALID_EFFECTIVE_HASH = "a" * 64
 ALTERNATE_EFFECTIVE_HASH = "b" * 64
+
+
+@dataclass(frozen=True)
+class _ExpectedCheckpointAnchors:
+    effective_config_hash: str | None = None
+    effective_config_artifact_id: str | None = None
+    execution_fingerprint: str | None = None
+    dq_contract_compatibility_hash: str | None = None
+    contract_ref: str | None = None
+    contract_version: str | None = None
+    manifest_id: str | None = None
+
+
+def _anchors(
+    *,
+    effective_config_hash: str | None = None,
+    effective_config_artifact_id: str | None = None,
+    execution_fingerprint: str | None = None,
+    dq_contract_compatibility_hash: str | None = None,
+    contract_ref: str | None = None,
+    contract_version: str | None = None,
+    manifest_id: str | None = None,
+) -> _ExpectedCheckpointAnchors:
+    return _ExpectedCheckpointAnchors(
+        effective_config_hash=effective_config_hash,
+        effective_config_artifact_id=effective_config_artifact_id,
+        execution_fingerprint=execution_fingerprint,
+        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+        contract_ref=contract_ref,
+        contract_version=contract_version,
+        manifest_id=manifest_id,
+    )
 
 
 def _freeze_checkpoint_support_now(
@@ -79,13 +112,7 @@ def _make_service(
     storage: MagicMock | None = None,
     logger: MagicMock | None = None,
     resume: bool = False,
-    expected_effective_config_hash: str | None = None,
-    expected_effective_config_artifact_id: str | None = None,
-    expected_execution_fingerprint: str | None = None,
-    expected_dq_contract_compatibility_hash: str | None = None,
-    expected_contract_ref: str | None = None,
-    expected_contract_version: str | None = None,
-    expected_manifest_id: str | None = None,
+    expected_anchors: _ExpectedCheckpointAnchors | None = None,
     run_ledger_port: MagicMock | None = None,
     metrics: MagicMock | None = None,
     clock: FixedClock | None = None,
@@ -94,21 +121,22 @@ def _make_service(
     s = storage if storage is not None else _make_storage()
     lg = logger if logger is not None else _make_logger()
     mt = metrics if metrics is not None else MagicMock()
+    anchors = expected_anchors or _ExpectedCheckpointAnchors()
     svc = CompositeCheckpointService(
         composite_name=composite_name,
         run_id=run_id,
         storage=s,
         logger=lg,
         resume=resume,
-        expected_effective_config_hash=expected_effective_config_hash,
-        expected_effective_config_artifact_id=expected_effective_config_artifact_id,
-        expected_execution_fingerprint=expected_execution_fingerprint,
+        expected_effective_config_hash=anchors.effective_config_hash,
+        expected_effective_config_artifact_id=anchors.effective_config_artifact_id,
+        expected_execution_fingerprint=anchors.execution_fingerprint,
         expected_dq_contract_compatibility_hash=(
-            expected_dq_contract_compatibility_hash
+            anchors.dq_contract_compatibility_hash
         ),
-        expected_contract_ref=expected_contract_ref,
-        expected_contract_version=expected_contract_version,
-        expected_manifest_id=expected_manifest_id,
+        expected_contract_ref=anchors.contract_ref,
+        expected_contract_version=anchors.contract_version,
+        expected_manifest_id=anchors.manifest_id,
         run_ledger_port=run_ledger_port,
         metrics=mt,
         clock=clock,
@@ -239,13 +267,15 @@ class TestFilenameFormat:
     def test_exposes_expected_anchor_properties(self) -> None:
         """Expected checkpoint anchors stay readable for dependent helpers."""
         svc, _, _ = _make_service(
-            expected_effective_config_hash=VALID_EFFECTIVE_HASH,
-            expected_effective_config_artifact_id="artifact-123",
-            expected_execution_fingerprint="fingerprint-123",
-            expected_dq_contract_compatibility_hash="dq-hash-123",
-            expected_contract_ref="composite_publication",
-            expected_contract_version="2.1.0",
-            expected_manifest_id="manifest-123",
+            expected_anchors=_anchors(
+                effective_config_hash=VALID_EFFECTIVE_HASH,
+                effective_config_artifact_id="artifact-123",
+                execution_fingerprint="fingerprint-123",
+                dq_contract_compatibility_hash="dq-hash-123",
+                contract_ref="composite_publication",
+                contract_version="2.1.0",
+                manifest_id="manifest-123",
+            ),
         )
 
         assert svc.expected_effective_config_hash == VALID_EFFECTIVE_HASH
@@ -259,13 +289,15 @@ class TestFilenameFormat:
     def test_normalizes_expected_anchor_properties(self) -> None:
         """Expected checkpoint anchors are canonicalized on service construction."""
         svc, _, _ = _make_service(
-            expected_effective_config_hash=f" SHA256:{'A' * 64} ",
-            expected_effective_config_artifact_id=" artifact-123 ",
-            expected_execution_fingerprint=" fingerprint-123 ",
-            expected_dq_contract_compatibility_hash=" DQ-HASH-123 ",
-            expected_contract_ref=" Composite_Publication ",
-            expected_contract_version=" v2 ",
-            expected_manifest_id=" manifest-123 ",
+            expected_anchors=_anchors(
+                effective_config_hash=f" SHA256:{'A' * 64} ",
+                effective_config_artifact_id=" artifact-123 ",
+                execution_fingerprint=" fingerprint-123 ",
+                dq_contract_compatibility_hash=" DQ-HASH-123 ",
+                contract_ref=" Composite_Publication ",
+                contract_version=" v2 ",
+                manifest_id=" manifest-123 ",
+            ),
         )
 
         assert svc.expected_effective_config_hash == VALID_EFFECTIVE_HASH
@@ -339,7 +371,7 @@ class TestLoadFreshStart:
         """Fresh checkpoint state should retain manifest anchor from bootstrap."""
         svc, storage, _ = _make_service(
             resume=False,
-            expected_manifest_id="manifest-123",
+            expected_anchors=_anchors(manifest_id="manifest-123"),
         )
         storage.list_glob.return_value = []
 
@@ -479,7 +511,7 @@ class TestLoadResume:
         svc, storage, logger = _make_service(
             resume=True,
             run_id="run-old",
-            expected_contract_ref="composite_publication",
+            expected_anchors=_anchors(contract_ref="composite_publication"),
         )
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
@@ -505,8 +537,10 @@ class TestLoadResume:
         svc, storage, _ = _make_service(
             resume=True,
             run_id="run-old",
-            expected_contract_ref="composite_publication",
-            expected_contract_version="2.0.0",
+            expected_anchors=_anchors(
+                contract_ref="composite_publication",
+                contract_version="2.0.0",
+            ),
         )
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
@@ -529,8 +563,10 @@ class TestLoadResume:
         svc, storage, _ = _make_service(
             resume=True,
             run_id="run-old",
-            expected_contract_ref="composite_publication",
-            expected_effective_config_hash=VALID_EFFECTIVE_HASH,
+            expected_anchors=_anchors(
+                contract_ref="composite_publication",
+                effective_config_hash=VALID_EFFECTIVE_HASH,
+            ),
         )
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
@@ -554,8 +590,10 @@ class TestLoadResume:
         svc, storage, _ = _make_service(
             resume=True,
             run_id="run-old",
-            expected_contract_ref="composite_publication",
-            expected_effective_config_hash=VALID_EFFECTIVE_HASH,
+            expected_anchors=_anchors(
+                contract_ref="composite_publication",
+                effective_config_hash=VALID_EFFECTIVE_HASH,
+            ),
         )
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
@@ -579,7 +617,7 @@ class TestLoadResume:
         svc, storage, _ = _make_service(
             resume=True,
             run_id="run-old",
-            expected_execution_fingerprint="fingerprint-current",
+            expected_anchors=_anchors(execution_fingerprint="fingerprint-current"),
         )
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
@@ -600,9 +638,11 @@ class TestLoadResume:
         svc, storage, _ = _make_service(
             resume=True,
             run_id="run-old",
-            expected_execution_fingerprint="fingerprint-current",
-            expected_effective_config_artifact_id="artifact-current",
-            expected_dq_contract_compatibility_hash="dq-current",
+            expected_anchors=_anchors(
+                execution_fingerprint="fingerprint-current",
+                effective_config_artifact_id="artifact-current",
+                dq_contract_compatibility_hash="dq-current",
+            ),
         )
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
@@ -640,7 +680,7 @@ class TestLoadResume:
         svc, storage, _ = _make_service(
             resume=True,
             run_id="run-old",
-            expected_manifest_id="manifest-123",
+            expected_anchors=_anchors(manifest_id="manifest-123"),
             run_ledger_port=ledger_port,
         )
         state_data = CompositeCheckpointState(
@@ -688,7 +728,7 @@ class TestLoadResume:
         svc, storage, _ = _make_service(
             resume=True,
             run_id="run-old",
-            expected_manifest_id="manifest-123",
+            expected_anchors=_anchors(manifest_id="manifest-123"),
             run_ledger_port=ledger_port,
         )
         state_data = CompositeCheckpointState(
@@ -733,7 +773,7 @@ class TestLoadResume:
         svc, storage, _ = _make_service(
             resume=True,
             run_id="run-old",
-            expected_manifest_id="manifest-123",
+            expected_anchors=_anchors(manifest_id="manifest-123"),
             run_ledger_port=ledger_port,
         )
         state_data = CompositeCheckpointState(
@@ -757,7 +797,7 @@ class TestLoadResume:
         svc, storage, _ = _make_service(
             resume=True,
             run_id="run-old",
-            expected_manifest_id="manifest-current",
+            expected_anchors=_anchors(manifest_id="manifest-current"),
         )
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
@@ -779,7 +819,7 @@ class TestLoadResume:
         svc, storage, logger = _make_service(
             resume=True,
             run_id="run-current",
-            expected_manifest_id="manifest-current",
+            expected_anchors=_anchors(manifest_id="manifest-current"),
         )
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
@@ -804,7 +844,7 @@ class TestLoadResume:
         svc, storage, logger = _make_service(
             resume=True,
             run_id="run-current",
-            expected_manifest_id="manifest-current",
+            expected_anchors=_anchors(manifest_id="manifest-current"),
         )
         state_data = CompositeCheckpointState(
             composite_name="my_composite",
@@ -916,12 +956,14 @@ class TestLoadWarnOnOverwrite:
         """Fresh load should seed expected compatibility anchors into checkpoint state."""
         svc, storage, _ = _make_service(
             resume=False,
-            expected_effective_config_hash=VALID_EFFECTIVE_HASH,
-            expected_effective_config_artifact_id="artifact-123",
-            expected_execution_fingerprint="fingerprint-123",
-            expected_dq_contract_compatibility_hash="dq-hash-123",
-            expected_contract_ref="composite_publication",
-            expected_contract_version="2.1.0",
+            expected_anchors=_anchors(
+                effective_config_hash=VALID_EFFECTIVE_HASH,
+                effective_config_artifact_id="artifact-123",
+                execution_fingerprint="fingerprint-123",
+                dq_contract_compatibility_hash="dq-hash-123",
+                contract_ref="composite_publication",
+                contract_version="2.1.0",
+            ),
         )
         storage.list_glob.return_value = []
 

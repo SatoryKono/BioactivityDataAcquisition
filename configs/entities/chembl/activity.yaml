@@ -209,6 +209,21 @@ quality:
                 - mg.kg-1
             nullable: true
             error_message: Invalid standard_units value
+        -   field: units
+            type: pattern
+            pattern: '^(?:[A-Za-zµ%][A-Za-z0-9µ%._-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$'
+            nullable: true
+            error_message: units must be a canonical unit token when present
+        -   field: qudt_units
+            type: pattern
+            pattern: '^(?:[A-Za-zµ%][A-Za-z0-9µ%._-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$'
+            nullable: true
+            error_message: qudt_units must be a canonical unit token when present
+        -   field: uo_units
+            type: pattern
+            pattern: '^(?:UO_[0-9]{7}|[A-Za-zµ%][A-Za-z0-9µ%._-]*)$'
+            nullable: true
+            error_message: uo_units must be a canonical ontology/unit token when present
     entity_cross_field_validations:
         -   name: value_requires_units
             fields:
