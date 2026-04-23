@@ -82,7 +82,7 @@ _FLOAT_FIELDS = frozenset(
         "usan_year",
     }
 )
-_JSON_STRING_FIELDS = frozenset(
+_STRICT_JSON_FIELDS = frozenset(
     {
         "molecule_hierarchy",
         "molecule_properties",
@@ -118,7 +118,7 @@ CHEMBL_MOLECULE_PROFILE = build_standard_profile(
     float_fields=_FLOAT_FIELDS,
     boolean_fields=_BOOLEAN_FIELDS,
     flag_fields=_FLAG_FIELDS,
-    json_string_fields=_JSON_STRING_FIELDS,
+    strict_json_fields=_STRICT_JSON_FIELDS,
     enum_fields=_ENUM_FIELDS,
     special_rules=_SPECIAL_RULES,
     null_fields=_NULL_FIELDS,

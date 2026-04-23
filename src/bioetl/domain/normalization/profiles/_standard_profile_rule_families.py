@@ -23,26 +23,46 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 
 FieldNormalizer = Callable[[object], object]
 RuleFamilySpec = tuple[frozenset[str], FieldNormalizer, str]
+RuleFamilyFieldSets = tuple[
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+]
 
 
 def _rule_family_specs(
     *,
-    title_fields: frozenset[str],
-    abstract_fields: frozenset[str],
-    doi_fields: frozenset[str],
-    pmid_fields: frozenset[str],
-    pmc_id_fields: frozenset[str],
-    date_fields: frozenset[str],
-    int_fields: frozenset[str],
-    float_fields: frozenset[str],
-    set_like_fields: frozenset[str],
-    json_string_fields: frozenset[str],
-    strict_json_fields: frozenset[str],
-    boolean_fields: frozenset[str],
-    flag_fields: frozenset[str],
-    operator_fields: frozenset[str],
-    ontology_id_fields: frozenset[str],
+    field_sets: RuleFamilyFieldSets,
 ) -> tuple[RuleFamilySpec, ...]:
+    (
+        title_fields,
+        abstract_fields,
+        doi_fields,
+        pmid_fields,
+        pmc_id_fields,
+        date_fields,
+        int_fields,
+        float_fields,
+        set_like_fields,
+        json_string_fields,
+        strict_json_fields,
+        boolean_fields,
+        flag_fields,
+        operator_fields,
+        ontology_id_fields,
+    ) = field_sets
     return (
         (
             title_fields,

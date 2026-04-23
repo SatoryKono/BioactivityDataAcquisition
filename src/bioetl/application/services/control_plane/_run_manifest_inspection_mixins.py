@@ -54,10 +54,8 @@ class RunManifestInspectionIdentityGraphMixin:
                 diagnostics,
             )
         )
-        degraded_runtime_anchor_payload = (
-            RunManifestInspectionIdentityGraphMixin._build_degraded_runtime_anchor_payload(
-                manifest
-            )
+        degraded_runtime_anchor_payload = RunManifestInspectionIdentityGraphMixin._build_degraded_runtime_anchor_payload(
+            manifest
         )
         return {
             **RunManifestInspectionIdentityGraphMixin._build_identity_graph_core(

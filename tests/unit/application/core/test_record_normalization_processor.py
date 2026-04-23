@@ -405,6 +405,26 @@ def test_profile_auto_resolves_for_chembl_molecule() -> None:
 
 
 @pytest.mark.unit
+def test_profile_auto_resolves_for_chembl_molecule_strict_json_fields() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="molecule",
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "molecule_id": "CHEMBL25",
+            "molecule_properties": ' {"b":2,"a":1} ',
+            "cross_references": "{not json}",
+        }
+    )
+
+    assert processor.profile is not None
+    assert normalized["molecule_properties"] == '{"a":1,"b":2}'
+    assert normalized["cross_references"] is None
+
+
+@pytest.mark.unit
 def test_profile_auto_resolves_for_semanticscholar_publication() -> None:
     processor = RecordNormalizationProcessor(
         provider="semanticscholar",

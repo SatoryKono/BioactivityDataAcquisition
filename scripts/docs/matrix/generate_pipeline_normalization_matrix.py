@@ -221,24 +221,27 @@ ENTITY_DOMAIN_SCHEMA_REGISTRY: dict[str, Any] = {
     "uniprot_protein": UniprotTargetSchema,
 }
 
+_CHEMBL_ENUM_CONFIG = "configs/enums/chembl.yaml"
+_UNIPROT_ENUM_CONFIG = "configs/enums/uniprot.yaml"
+
 ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
-    ("chembl", "activity", "assay_type"): "configs/enums/chembl.yaml",
-    ("chembl", "activity", "data_validity_comment"): "configs/enums/chembl.yaml",
-    ("chembl", "activity", "standard_relation"): "configs/enums/chembl.yaml",
-    ("chembl", "activity", "standard_type"): "configs/enums/chembl.yaml",
-    ("chembl", "assay", "assay_category"): "configs/enums/chembl.yaml",
-    ("chembl", "assay", "assay_group"): "configs/enums/chembl.yaml",
-    ("chembl", "assay", "assay_test_type"): "configs/enums/chembl.yaml",
-    ("chembl", "assay", "assay_type"): "configs/enums/chembl.yaml",
-    ("chembl", "assay", "confidence_description"): "configs/enums/chembl.yaml",
-    ("chembl", "assay", "relationship_type"): "configs/enums/chembl.yaml",
-    ("chembl", "molecule", "molecule_type"): "configs/enums/chembl.yaml",
-    ("chembl", "molecule", "structure_type"): "configs/enums/chembl.yaml",
-    ("chembl", "publication_term", "term_type"): "configs/enums/chembl.yaml",
-    ("chembl", "target", "target_type"): "configs/enums/chembl.yaml",
-    ("uniprot", "protein", "entry_type"): "configs/enums/uniprot.yaml",
-    ("uniprot", "protein", "flag"): "configs/enums/uniprot.yaml",
-    ("uniprot", "protein", "protein_existence"): "configs/enums/uniprot.yaml",
+    ("chembl", "activity", "assay_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "activity", "data_validity_comment"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "activity", "standard_relation"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "activity", "standard_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "assay", "assay_category"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "assay", "assay_group"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "assay", "assay_test_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "assay", "assay_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "assay", "confidence_description"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "assay", "relationship_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "molecule", "molecule_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "molecule", "structure_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "publication_term", "term_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "target", "target_type"): _CHEMBL_ENUM_CONFIG,
+    ("uniprot", "protein", "entry_type"): _UNIPROT_ENUM_CONFIG,
+    ("uniprot", "protein", "flag"): _UNIPROT_ENUM_CONFIG,
+    ("uniprot", "protein", "protein_existence"): _UNIPROT_ENUM_CONFIG,
 }
 
 COMPOSITE_GOLD_SCHEMA_TYPE_REGISTRY: dict[str, str] = {
@@ -351,16 +354,12 @@ def _strictness(
         return "technical_passthrough"
     if field_name.endswith("_flag") or normalizer_name == "normalize_profile_binary_flag":
         return "strict_flag"
-    if "operator" in normalizer_name or "operator" in normalized_notes:
-        return "strict_operator"
-    if "enum" in normalized_notes or "allowed values" in normalized_notes:
-        return "strict_enum"
-    if "unit" in normalizer_name or "unit" in normalized_notes:
-        return "controlled_unit"
-    if "bao" in normalizer_name or "bao identifier" in normalized_notes:
-        return "canonical_ontology_id"
-    if "ontology id" in normalized_notes or "ontology_id" in normalizer_name:
-        return "canonical_ontology_id"
+    category_match = _strictness_category_match(
+        normalizer_name=normalizer_name,
+        normalized_notes=normalized_notes,
+    )
+    if category_match is not None:
+        return category_match
     if normalizer_name in {
         "normalize_profile_doi",
         "normalize_profile_pmid",
@@ -374,6 +373,29 @@ def _strictness(
     if normalizer_name == "normalize_profile_boolean":
         return "strict_boolean"
     return "normalization_only"
+
+
+def _strictness_category_match(
+    *,
+    normalizer_name: str,
+    normalized_notes: str,
+) -> str | None:
+    if "operator" in normalizer_name or "operator" in normalized_notes:
+        return "strict_operator"
+    if "enum" in normalized_notes or "allowed values" in normalized_notes:
+        return "strict_enum"
+    if "unit" in normalizer_name or "unit" in normalized_notes:
+        return "controlled_unit"
+    if (
+        "bao" in normalizer_name
+        or "bao identifier" in normalized_notes
+        or "ontology id" in normalized_notes
+        or "ontology_id" in normalizer_name
+    ):
+        return "canonical_ontology_id"
+    if "cellosaurus" in normalizer_name or "identifier" in normalized_notes:
+        return "canonical_identifier"
+    return None
 
 
 def _check_type_for_check(check: Any) -> str | None:
@@ -1101,6 +1123,7 @@ def _control_plane_surface_statuses() -> list[dict[str, object]]:
         pipeline_name=" chembl_activity ",
         run_type=" INCREMENTAL ",
         pipeline_version=" 1.2.3 ",
+        git_commit=" ABCDEF123 ",
         effective_config_hash=CANONICAL_EFFECTIVE_CONFIG_HASH_RAW,
         dq_contract_compatibility_hash=" DEADBEEF ",
         contract_ref=CANONICAL_CONTRACT_REF_RAW,

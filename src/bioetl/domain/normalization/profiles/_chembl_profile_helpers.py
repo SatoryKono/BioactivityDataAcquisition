@@ -6,6 +6,7 @@ from collections.abc import Collection, Mapping
 from typing import Any
 
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
+    StandardProfileSpec,
     build_standard_profile,
 )
 from bioetl.domain.normalization.profiles._standard_profile_rule_components import (
@@ -70,28 +71,33 @@ def build_chembl_profile(
 ) -> NormalizationProfile:
     """Build a standard ChEMBL profile with shared metadata semantics."""
     return build_standard_profile(
-        profile_name=f"chembl.{entity}",
-        description=description
-        or f"Canonical field-level normalization policy for the ChEMBL {entity} Silver schema.",
-        schema_fields=schema_fields,
-        meta_fields=CHEMBL_META_FIELDS,
-        title_fields=title_fields,
-        abstract_fields=abstract_fields,
-        doi_fields=doi_fields,
-        pmid_fields=pmid_fields,
-        pmc_id_fields=pmc_id_fields,
-        date_fields=date_fields,
-        int_fields=int_fields,
-        float_fields=float_fields,
-        set_like_fields=set_like_fields,
-        json_string_fields=json_string_fields,
-        boolean_fields=boolean_fields,
-        flag_fields=flag_fields,
-        operator_fields=operator_fields,
-        ontology_id_fields=ontology_id_fields,
-        enum_fields=enum_fields,
-        case_fields=case_fields,
-        unit_fields=unit_fields,
-        null_fields=null_fields,
-        special_rules=special_rules,
+        StandardProfileSpec(
+            profile_name=f"chembl.{entity}",
+            description=description
+            or (
+                "Canonical field-level normalization policy for the "
+                f"ChEMBL {entity} Silver schema."
+            ),
+            schema_fields=schema_fields,
+            meta_fields=CHEMBL_META_FIELDS,
+            title_fields=title_fields,
+            abstract_fields=abstract_fields,
+            doi_fields=doi_fields,
+            pmid_fields=pmid_fields,
+            pmc_id_fields=pmc_id_fields,
+            date_fields=date_fields,
+            int_fields=int_fields,
+            float_fields=float_fields,
+            set_like_fields=set_like_fields,
+            json_string_fields=json_string_fields,
+            boolean_fields=boolean_fields,
+            flag_fields=flag_fields,
+            operator_fields=operator_fields,
+            ontology_id_fields=ontology_id_fields,
+            enum_fields=enum_fields,
+            case_fields=case_fields,
+            unit_fields=unit_fields,
+            null_fields=null_fields,
+            special_rules=special_rules,
+        )
     )
