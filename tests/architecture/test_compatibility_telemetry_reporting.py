@@ -25,14 +25,14 @@ def _load_module(path: Path, module_name: str) -> ModuleType:
 
 def _load_compatibility_telemetry_module() -> ModuleType:
     return _load_module(
-        ROOT / "scripts" / "ci" / "_compatibility_telemetry.py",
+        ROOT / "scripts" / "engineering" / "ci" / "_compatibility_telemetry.py",
         "compatibility_telemetry_reporting",
     )
 
 
 def _load_compatibility_registry_module() -> ModuleType:
     return _load_module(
-        ROOT / "scripts" / "ci" / "_compatibility_registry.py",
+        ROOT / "scripts" / "engineering" / "ci" / "_compatibility_registry.py",
         "compatibility_registry_loader",
     )
 

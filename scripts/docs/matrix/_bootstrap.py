@@ -6,7 +6,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from scripts.common.repo_paths import REPO_ROOT
+from scripts.engineering.common.repo_paths import REPO_ROOT
 
 PROJECT_ROOT = REPO_ROOT
 

@@ -55,7 +55,7 @@
 ## Evidence (commands)
 - `uv run python -m pytest ...` / `uv run python -m mypy --strict ...` (CI or single-OS checkout)
 - `.\scripts\dev\run_pytest.ps1 ...` / `.\scripts\dev\run_mypy.ps1 ...` (Windows PowerShell mixed checkout)
-- `bash scripts/dev/run_pytest.sh ...` / `bash scripts/dev/run_mypy.sh ...` (WSL/Linux mixed checkout)
+- `bash scripts/engineering/dev/run_pytest.sh ...` / `bash scripts/engineering/dev/run_mypy.sh ...` (WSL/Linux mixed checkout)
 
 ## Risks & Requires Manual Review
 - ...
