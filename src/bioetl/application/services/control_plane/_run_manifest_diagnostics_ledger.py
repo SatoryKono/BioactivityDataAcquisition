@@ -4,12 +4,44 @@ from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Mapping
+from dataclasses import dataclass, field
 
 from bioetl.application.services.control_plane._run_manifest_diagnostics_helpers import (
     extract_dq_details,
     update_correlation_anchor_gaps,
 )
 from bioetl.domain.control_plane import RunLedgerEntry
+
+
+@dataclass(slots=True)
+class _LedgerProcessingState:
+    """Mutable aggregation state for manifest ledger diagnostics."""
+
+    family_counter: Counter[str] = field(default_factory=Counter)
+    type_counter: Counter[str] = field(default_factory=Counter)
+    artifact_refs: list[dict[str, object]] = field(default_factory=list)
+    lineage_fragment_ids: set[str] = field(default_factory=set)
+    dq_rule_ids: set[str] = field(default_factory=set)
+    dq_dispositions: set[str] = field(default_factory=set)
+    dq_report_paths: set[str] = field(default_factory=set)
+    dq_violation_kinds: set[str] = field(default_factory=set)
+    cross_validation_rule_ids: set[str] = field(default_factory=set)
+    cross_validation_config_paths: set[str] = field(default_factory=set)
+    cross_validation_quarantine_policies: set[str] = field(default_factory=set)
+    cross_validation_replay_contracts: set[str] = field(default_factory=set)
+    occurrence_only_diagnostic_scopes: set[str] = field(default_factory=set)
+    dq_signal_present: bool = False
+    cross_validation_signal_present: bool = False
+    missing_link_count: int = 0
+    correlation_anchor_gaps: dict[str, int] = field(
+        default_factory=lambda: {
+            "resolved_config_hash": 0,
+            "effective_config_hash": 0,
+            "contract_ref": 0,
+            "contract_version": 0,
+            "composite_run_id": 0,
+        }
+    )
 
 
 def _resume_diagnostics_present(details: Mapping[str, object]) -> bool:
@@ -52,14 +84,14 @@ def _extract_resume_diagnostics(
             "source_event_type": entry.event_type,
             "source_status": entry.status,
         }
-        for field in (
+        for field_name in (
             "compatibility_disposition",
             "resume_rejected",
             "execution_identity_compatible",
         ):
-            value = details.get(field)
+            value = details.get(field_name)
             if value is not None:
-                diagnostics[field] = value
+                diagnostics[field_name] = value
         messages = details.get("messages")
         if isinstance(messages, list):
             diagnostics["messages"] = list(messages)
@@ -92,86 +124,117 @@ def _process_ledger_entries(
     dict[str, object] | None,
 ]:
     """Process ledger entries and extract statistics."""
-    family_counter: Counter[str] = Counter()
-    type_counter: Counter[str] = Counter()
-    artifact_refs: list[dict[str, object]] = []
-    lineage_fragment_ids: set[str] = set()
-    dq_rule_ids: set[str] = set()
-    dq_dispositions: set[str] = set()
-    dq_report_paths: set[str] = set()
-    dq_violation_kinds: set[str] = set()
-    cross_validation_rule_ids: set[str] = set()
-    cross_validation_config_paths: set[str] = set()
-    cross_validation_quarantine_policies: set[str] = set()
-    cross_validation_replay_contracts: set[str] = set()
-    occurrence_only_diagnostic_scopes: set[str] = set()
-    dq_signal_present = False
-    cross_validation_signal_present = False
-    missing_link_count = 0
-    correlation_anchor_gaps = {
-        "resolved_config_hash": 0,
-        "effective_config_hash": 0,
-        "contract_ref": 0,
-        "contract_version": 0,
-        "composite_run_id": 0,
-    }
+    state = _LedgerProcessingState()
     resume_diagnostics = _extract_resume_diagnostics(ledger_entries)
 
     for entry in ledger_entries:
-        family_counter.update([entry.event_family or "diagnostic"])
-        type_counter.update([entry.event_type])
-        artifact_ref = _build_artifact_ref(entry)
-        if artifact_ref is not None:
-            artifact_refs.append(artifact_ref)
-            if (
-                artifact_ref.get("dataset_ref") is None
-                and artifact_ref.get("lineage_fragment_id") is None
-            ):
-                missing_link_count += 1
-        if entry.lineage_fragment_id:
-            lineage_fragment_ids.add(entry.lineage_fragment_id)
-        dq_details = extract_dq_details(entry)
-        dq_rule_ids.update(dq_details["rule_ids"])
-        dq_dispositions.update(dq_details["dispositions"])
-        dq_report_paths.update(dq_details["report_paths"])
-        dq_violation_kinds.update(dq_details["violation_kinds"])
-        cross_validation_rule_ids.update(dq_details["cross_validation_rule_ids"])
-        cross_validation_config_paths.update(
-            dq_details["cross_validation_config_paths"]
-        )
-        cross_validation_quarantine_policies.update(
-            dq_details["cross_validation_quarantine_policies"]
-        )
-        cross_validation_replay_contracts.update(
-            dq_details["cross_validation_replay_contracts"]
-        )
-        occurrence_only_diagnostic_scopes.update(
-            dq_details["occurrence_only_diagnostic_scopes"]
-        )
-        dq_signal_present = dq_signal_present or dq_details["has_signal"]
-        cross_validation_signal_present = (
-            cross_validation_signal_present or dq_details["has_cross_validation_signal"]
-        )
-        update_correlation_anchor_gaps(correlation_anchor_gaps, entry)
+        _update_ledger_processing_state(state, entry)
 
+    return _freeze_ledger_processing_state(state, resume_diagnostics)
+
+
+def _update_ledger_processing_state(
+    state: _LedgerProcessingState,
+    entry: RunLedgerEntry,
+) -> None:
+    """Accumulate one ledger entry into the diagnostics state."""
+    state.family_counter.update([entry.event_family or "diagnostic"])
+    state.type_counter.update([entry.event_type])
+    _register_artifact_ref(state, entry)
+    if entry.lineage_fragment_id:
+        state.lineage_fragment_ids.add(entry.lineage_fragment_id)
+    _update_dq_statistics(state, entry)
+    update_correlation_anchor_gaps(state.correlation_anchor_gaps, entry)
+
+
+def _register_artifact_ref(
+    state: _LedgerProcessingState,
+    entry: RunLedgerEntry,
+) -> None:
+    """Record artifact references and missing-link counters for one entry."""
+    artifact_ref = _build_artifact_ref(entry)
+    if artifact_ref is None:
+        return
+    state.artifact_refs.append(artifact_ref)
+    if (
+        artifact_ref.get("dataset_ref") is None
+        and artifact_ref.get("lineage_fragment_id") is None
+    ):
+        state.missing_link_count += 1
+
+
+def _update_dq_statistics(
+    state: _LedgerProcessingState,
+    entry: RunLedgerEntry,
+) -> None:
+    """Merge extracted DQ details from one ledger entry into aggregate state."""
+    dq_details = extract_dq_details(entry)
+    state.dq_rule_ids.update(dq_details["rule_ids"])
+    state.dq_dispositions.update(dq_details["dispositions"])
+    state.dq_report_paths.update(dq_details["report_paths"])
+    state.dq_violation_kinds.update(dq_details["violation_kinds"])
+    state.cross_validation_rule_ids.update(dq_details["cross_validation_rule_ids"])
+    state.cross_validation_config_paths.update(
+        dq_details["cross_validation_config_paths"]
+    )
+    state.cross_validation_quarantine_policies.update(
+        dq_details["cross_validation_quarantine_policies"]
+    )
+    state.cross_validation_replay_contracts.update(
+        dq_details["cross_validation_replay_contracts"]
+    )
+    state.occurrence_only_diagnostic_scopes.update(
+        dq_details["occurrence_only_diagnostic_scopes"]
+    )
+    state.dq_signal_present = state.dq_signal_present or dq_details["has_signal"]
+    state.cross_validation_signal_present = (
+        state.cross_validation_signal_present
+        or dq_details["has_cross_validation_signal"]
+    )
+
+
+def _freeze_ledger_processing_state(
+    state: _LedgerProcessingState,
+    resume_diagnostics: dict[str, object] | None,
+) -> tuple[
+    Counter[str],
+    Counter[str],
+    list[dict[str, object]],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    set[str],
+    bool,
+    bool,
+    int,
+    dict[str, int],
+    dict[str, object] | None,
+]:
+    """Return the legacy tuple payload expected by diagnostics callers."""
     return (
-        family_counter,
-        type_counter,
-        artifact_refs,
-        lineage_fragment_ids,
-        dq_rule_ids,
-        dq_dispositions,
-        dq_report_paths,
-        dq_violation_kinds,
-        cross_validation_rule_ids,
-        cross_validation_config_paths,
-        cross_validation_quarantine_policies,
-        cross_validation_replay_contracts,
-        occurrence_only_diagnostic_scopes,
-        dq_signal_present,
-        cross_validation_signal_present,
-        missing_link_count,
-        correlation_anchor_gaps,
+        state.family_counter,
+        state.type_counter,
+        state.artifact_refs,
+        state.lineage_fragment_ids,
+        state.dq_rule_ids,
+        state.dq_dispositions,
+        state.dq_report_paths,
+        state.dq_violation_kinds,
+        state.cross_validation_rule_ids,
+        state.cross_validation_config_paths,
+        state.cross_validation_quarantine_policies,
+        state.cross_validation_replay_contracts,
+        state.occurrence_only_diagnostic_scopes,
+        state.dq_signal_present,
+        state.cross_validation_signal_present,
+        state.missing_link_count,
+        state.correlation_anchor_gaps,
         resume_diagnostics,
     )
 

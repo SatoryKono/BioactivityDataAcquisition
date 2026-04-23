@@ -8,18 +8,17 @@ canonical_roots:
 - scripts/engineering/ci
 - scripts/engineering/dev
 - scripts/engineering/qa
-- scripts/docs
-- scripts/schema
 - scripts/engineering/repo
-- scripts/ops
 - scripts/engineering/diagnostics
 - scripts/engineering/baselines
+- scripts/engineering/common
+- scripts/docs
+- scripts/schema
+- scripts/ops
 - scripts/ops/migrations/active
 - scripts/ops/migrations/oneoff
 - scripts/diagrams
 policies:
-  root_allowlist:
-  - run.py
   canonical_invocation_required_for_new_integrations: true
   no_scripts_in_root: true
 lifecycle:
@@ -53,6 +52,18 @@ groups:
   qa:
     path: scripts/engineering/qa
     purpose: Architecture and quality-gate checks, debt telemetry
+  repo:
+    path: scripts/engineering/repo
+    purpose: Repository hygiene and inventory governance tooling
+  diagnostics:
+    path: scripts/engineering/diagnostics
+    purpose: Manual diagnostics and investigation helpers
+  baselines:
+    path: scripts/engineering/baselines
+    purpose: Baseline artifacts consumed by engineering quality gates
+  common:
+    path: scripts/engineering/common
+    purpose: Shared helpers used by engineering and adjacent script domains
   docs:
     path: scripts/docs
     purpose: Documentation lint/build/drift/maintenance
@@ -62,18 +73,9 @@ groups:
   data:
     path: scripts/ops/data
     purpose: Data integrity and storage-level operational checks
-  repo:
-    path: scripts/engineering/repo
-    purpose: Repository hygiene and inventory governance tooling
   ops:
     path: scripts/ops
     purpose: Active platform/ops automation, launchers, runtime, and maintenance tooling
-  diagnostics:
-    path: scripts/engineering/diagnostics
-    purpose: Manual diagnostics and investigation helpers
-  baselines:
-    path: scripts/engineering/baselines
-    purpose: Baseline artifacts consumed by engineering quality gates
   migrations_active:
     path: scripts/ops/migrations/active
     purpose: Active repeatable migration scripts

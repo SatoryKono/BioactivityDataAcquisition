@@ -37,7 +37,7 @@ from bioetl.application.core.lifecycle.batch_fsm import (
 from bioetl.domain.constants import (
     DEFAULT_CHECKPOINT_INTERVAL as _DOMAIN_DEFAULT_CHECKPOINT_INTERVAL,
 )
-from bioetl.domain.types import BronzeRecord, GoldRecord
+from bioetl.domain.types import BronzeRecord, GoldRecord, JsonDict
 
 _SHARED_FAILURE_POLICY = _RF005_SHARED_FAILURE_POLICY
 
@@ -206,3 +206,19 @@ class BatchExecutor(_BatchExecutorDQMixin):
         return self._execution_state_service.build_run_statistics(
             state=self,
         )
+
+    @property
+    def execution_diagnostics(self) -> JsonDict:
+        """Return bounded adaptive-memory diagnostics for run-history consumers."""
+        trace = self._memory.decision_trace_dicts()
+        if not trace:
+            return {}
+        return {
+            "adaptive_memory": {
+                "enabled": bool(self._memory.enabled),
+                "decision_count": len(trace),
+                "batch_size_reductions": int(self._memory.batch_size_reductions),
+                "min_batch_size_used": int(self._memory.min_batch_size_used),
+                "decision_trace": trace,
+            }
+        }

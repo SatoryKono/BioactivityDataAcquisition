@@ -76,7 +76,7 @@ def test_tests_workflow_enforces_scripts_catalog_governance() -> None:
     """Merge pipeline must validate scripts catalog policy."""
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
     assert "scripts/engineering/repo/check_scripts_catalog.py" in workflow
-    assert "scripts/catalog.yaml" in workflow
+    assert "scripts/engineering/repo/catalog.yaml" in workflow
 
 
 def test_pretest_guardrails_enforce_generated_artifact_routing() -> None:

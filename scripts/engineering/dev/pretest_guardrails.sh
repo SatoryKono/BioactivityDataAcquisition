@@ -408,7 +408,7 @@ run_repo_checks() {
     # Remaining checks can follow
     run_step catalog-check \
         "$PYTHON_BIN" -m scripts.engineering.repo check-catalog \
-        --catalog scripts/catalog.yaml
+        --catalog scripts/engineering/repo/catalog.yaml
 
     if [[ "$MODE" == "auto" ]]; then
         run_step hotspot-family-baseline-resync \

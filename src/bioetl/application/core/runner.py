@@ -20,6 +20,7 @@ from bioetl.application.core.runner_flow import (
     record_run_failed,
     record_run_started,
 )
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -33,6 +34,7 @@ if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort, TracingPort
+
 __all__ = ["PipelineRunner"]
 
 _RUN_FAILURE_EXCEPTIONS = (
@@ -132,6 +134,12 @@ class PipelineRunner(PipelineRunnerSupportMixin):
             "records_quarantined": int(self._executor.records_quarantined),
             "records_filtered_out": int(self._executor.records_filtered_out),
         }
+
+    @property
+    def execution_diagnostics(self) -> JsonDict:
+        """Return bounded executor diagnostics for run-ledger projection."""
+        diagnostics = getattr(self._executor, "execution_diagnostics", {})
+        return diagnostics if isinstance(diagnostics, dict) else {}
 
     @contextmanager
     def _pipeline_span(self) -> Generator[Span, None, None]:

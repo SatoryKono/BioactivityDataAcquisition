@@ -160,7 +160,7 @@ jobs:
                       --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
 
             -   name: Validate scripts catalog governance policy
-                run: uv run python scripts/engineering/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml
+                run: uv run python scripts/engineering/repo/check_scripts_catalog.py --catalog scripts/engineering/repo/catalog.yaml
 
             -   name: Validate deterministic Neo4j memory ontology invariants
                 run: uv run python -m scripts.engineering.ci neo4j-memory

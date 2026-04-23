@@ -38,7 +38,12 @@ class MemoryConfig(BaseModel, frozen=True, extra="forbid"):
     """
 
     max_batch_memory_mb: int = Field(default=512, gt=0)
-    memory_pressure_threshold: float = Field(default=0.8, gt=0.0, le=1.0)
+    memory_pressure_threshold: float = Field(
+        default=0.8,
+        gt=0.0,
+        le=1.0,
+        allow_inf_nan=False,
+    )
     min_batch_size: int = Field(default=10, gt=0)
     check_interval_records: int = Field(default=100, gt=0)
     enable_adaptive_sizing: bool = True

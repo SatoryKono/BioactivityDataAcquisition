@@ -25,14 +25,8 @@ def test_consistency_gate_script_runs_clean_in_check_mode() -> None:
     if result.returncode == 0:
         return
 
-    expected_violation = (
-        "[suffix-policy]" in result.stdout
-        and "scripts/qa/naming_audit.py" in result.stdout
-        and "scripts/engineering/qa/naming_audit.py not found" in result.stdout
-    )
-    assert expected_violation, (
-        "Naming/package consistency gate drifted beyond the known baseline "
-        "legacy suffix-policy violation.\n"
+    assert result.returncode == 0, (
+        "Naming/package consistency gate must stay clean on the current baseline.\n"
         f"stdout:\n{result.stdout}\n\nstderr:\n{result.stderr}"
     )
 

@@ -37,7 +37,7 @@ author distinguished:
 
 - `exemption debt` in `configs/quality/architecture_metric_exemptions.yaml`;
 - `hotspot inventory` / family signals in `configs/quality/debt_scorecard.yaml`
-  and `scripts/README.md`.
+  and `scripts/engineering/README.md`.
 
 ---
 

@@ -434,11 +434,11 @@
       "next_step": "Retain as the canonical repository cleanup automation script.",
       "review_by": "2026-07-15"
     },
-    "scripts/common/repo_paths.py": {
+    "scripts/engineering/common/repo_paths.py": {
       "owner": "@bioetl-platform",
       "decision": "internal_helper_orphan",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded shared path helper while governed scripts still depend on common repository-root resolution; fold it into a canonical scripting utility surface once helper duplication is fully consolidated."
+      "next_step": "Retain only as a bounded shared path helper while governed scripts still depend on repository-root resolution; fold it into broader canonical helper surfaces once the remaining bootstrap helpers converge."
     },
     "scripts/engineering/dev/bash/.setup_wsl_codex.sh": {
       "owner": "@bioetl-platform",
@@ -709,24 +709,6 @@
       "decision": "internal_helper_orphan",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded MistrallVibe setup helper while environment bootstrap still depends on helper scripts; fold into the canonical setup path when the surface is simplified."
-    },
-    "scripts/ci/_compatibility_registry.py": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_data_module",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as compatibility metadata for CI launcher bridging while canonical engineering/ci entrypoints stabilize; remove it once inventory no longer classifies this path as non-active."
-    },
-    "scripts/ci/_compatibility_telemetry.py": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_data_module",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as compatibility telemetry metadata for CI launcher bridging while canonical engineering/ci entrypoints stabilize; remove it once inventory no longer classifies this path as non-active."
-    },
-    "scripts/qa/lint_terminology.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a thin compatibility wrapper to the canonical engineering QA terminology linter while historical root-level QA references still exist."
     },
     "src/tools/scripts/check_application_deps.py": {
       "owner": "@bioetl-architecture",

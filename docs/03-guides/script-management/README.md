@@ -36,7 +36,7 @@ The script management guides provide:
 
 ## Related Documentation
 
-- **Script Catalog**: `scripts/catalog.yaml` - Canonical script locations
+- **Script Catalog**: `scripts/engineering/repo/catalog.yaml` - Canonical script locations
 - **Inventory Manifest**: `configs/quality/scripts_inventory_manifest.json` - Current inventory
 - **Lifecycle Registry**: `configs/quality/scripts_lifecycle_registry.json` - Script lifecycle decisions
 - **Governance Rules**: `docs/AGENTS.md` - Architecture and governance rules

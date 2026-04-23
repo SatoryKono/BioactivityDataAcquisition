@@ -121,9 +121,40 @@ def test_set_execution_stats(service: BatchTracingManagerService) -> None:
         total_quarantined=50,
         batch_size_reductions=2,
         min_batch_size_used=50,
+        memory_decision_trace=(
+            {
+                "decision_index": 1,
+                "record_index": 100,
+                "stage": "pressure_check",
+                "old_batch_size": 100,
+                "new_batch_size": 50,
+                "adaptive_sizing_enabled": True,
+                "monitor_available": True,
+                "config_available": True,
+                "pressure_state": True,
+                "monitor_mode": "psutil",
+                "reason": "monitor_pressure_detected",
+            },
+        ),
     )
 
-    assert span.set_attribute.call_count == 7
+    assert span.set_attribute.call_count == 11
+    span.add_event.assert_called_once_with(
+        "bioetl.memory.decision",
+        attributes={
+            "bioetl.memory.decision_index": 1,
+            "bioetl.memory.record_index": 100,
+            "bioetl.memory.stage": "pressure_check",
+            "bioetl.memory.old_batch_size": 100,
+            "bioetl.memory.new_batch_size": 50,
+            "bioetl.memory.reason": "monitor_pressure_detected",
+            "bioetl.memory.monitor_mode": "psutil",
+            "bioetl.memory.adaptive_sizing_enabled": True,
+            "bioetl.memory.monitor_available": True,
+            "bioetl.memory.config_available": True,
+            "bioetl.memory.pressure_state": True,
+        },
+    )
 
 
 def test_set_execution_stats_none_span(service: BatchTracingManagerService) -> None:
@@ -137,6 +168,7 @@ def test_set_execution_stats_none_span(service: BatchTracingManagerService) -> N
         total_quarantined=0,
         batch_size_reductions=0,
         min_batch_size_used=0,
+        memory_decision_trace=(),
     )
 
 

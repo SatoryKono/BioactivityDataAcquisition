@@ -182,7 +182,7 @@ scripts/ai/mcp/mcp_wrapper.sh  # Canonical
 ### Identification Criteria
 
 **Location Violations:**
-- ✅ Scripts not in canonical roots (`scripts/catalog.yaml`)
+- ✅ Scripts not in canonical roots (`scripts/engineering/repo/catalog.yaml`)
 - ✅ Scripts in wrong directory for their purpose
 - ✅ Scripts violating layer boundaries
 
@@ -206,7 +206,7 @@ scripts/ai/mcp/mcp_wrapper.sh  # Canonical
 mv scripts/misc/important.sh scripts/engineering/qa/important.sh
 
 # Add to catalog
-vim scripts/catalog.yaml
+vim scripts/engineering/repo/catalog.yaml
 
 # Update lifecycle registry
 vim configs/quality/scripts_lifecycle_registry.json

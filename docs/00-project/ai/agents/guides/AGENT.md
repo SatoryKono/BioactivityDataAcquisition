@@ -59,7 +59,7 @@ Operational rule:
 параметрами технического долга:
 
 - различай `exemption debt` из `configs/quality/architecture_metric_exemptions.yaml`
-  и `hotspot inventory` из `scripts/README.md`;
+  и `hotspot inventory` из `scripts/engineering/README.md`;
 - проверяй релевантные registries из `configs/quality/debt_scorecard.yaml`:
   `file_size_limits`, `function_complexity`, `function_length`, `class_size`,
   `class_method_count`, `god_object`, `domain_complexity`;

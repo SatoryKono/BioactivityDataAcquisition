@@ -81,6 +81,7 @@ class BatchExecutionRunService:
                 lifecycle_context,
                 batch_size_reductions=memory_state.batch_size_reductions,
                 min_batch_size_used=memory_state.min_batch_size_used,
+                memory_decision_trace=memory_state.decision_trace_dicts(),
                 shutdown=True,
             )
             raise
@@ -90,6 +91,7 @@ class BatchExecutionRunService:
                 lifecycle_context,
                 batch_size_reductions=memory_state.batch_size_reductions,
                 min_batch_size_used=memory_state.min_batch_size_used,
+                memory_decision_trace=memory_state.decision_trace_dicts(),
                 error=error,
             )
             raise
@@ -99,4 +101,5 @@ class BatchExecutionRunService:
                 lifecycle_context,
                 batch_size_reductions=memory_state.batch_size_reductions,
                 min_batch_size_used=memory_state.min_batch_size_used,
+                memory_decision_trace=memory_state.decision_trace_dicts(),
             )

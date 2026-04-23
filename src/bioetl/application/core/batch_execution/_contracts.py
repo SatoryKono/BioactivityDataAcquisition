@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Protocol, TypeVar
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
+    from bioetl.domain.types import JsonDict
 
 _BatchResultT = TypeVar("_BatchResultT", covariant=True)
 
@@ -32,6 +33,8 @@ class BatchExecutionMemoryState(Protocol):
 
     batch_size_reductions: int
     min_batch_size_used: int
+
+    def decision_trace_dicts(self) -> tuple[JsonDict, ...]: ...
 
 
 class BatchResultBuilderPort(Protocol[_BatchResultT]):

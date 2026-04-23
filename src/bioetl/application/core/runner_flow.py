@@ -19,6 +19,7 @@ from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.domain.events import PipelineEvent
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
@@ -44,6 +45,9 @@ class _PipelineRunnerFlowHostProtocol(Protocol):
     @property
     def execution_metrics(self) -> dict[str, int]: ...
 
+    @property
+    def execution_diagnostics(self) -> JsonDict: ...
+
 
 def _record_with_ledger_service(
     host: _PipelineRunnerFlowHostProtocol,
@@ -57,12 +61,17 @@ def _record_with_ledger_service(
 
 def _record_run_metrics_event(
     host: _PipelineRunnerFlowHostProtocol,
-    recorder: Callable[[RunLedgerService, dict[str, int]], object],
+    recorder: Callable[[RunLedgerService, dict[str, int], JsonDict | None], object],
 ) -> None:
     """Append one run-level ledger entry using the current execution metrics."""
+    details = host.execution_diagnostics or None
     _record_with_ledger_service(
         host,
-        lambda ledger_service: recorder(ledger_service, host.execution_metrics),
+        lambda ledger_service: recorder(
+            ledger_service,
+            host.execution_metrics,
+            details,
+        ),
     )
 
 
@@ -153,8 +162,11 @@ def record_run_finished(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append successful completion ledger entry."""
     _record_run_metrics_event(
         host,
-        lambda ledger_service, metrics_snapshot: ledger_service.record_run_finished(
-            metrics_snapshot=metrics_snapshot,
+        lambda ledger_service, metrics_snapshot, details: (
+            ledger_service.record_run_finished(
+                metrics_snapshot=metrics_snapshot,
+                details=details,
+            )
         ),
     )
 
@@ -163,8 +175,11 @@ def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append graceful shutdown ledger entry."""
     _record_run_metrics_event(
         host,
-        lambda ledger_service, metrics_snapshot: ledger_service.record_run_shutdown(
-            metrics_snapshot=metrics_snapshot,
+        lambda ledger_service, metrics_snapshot, details: (
+            ledger_service.record_run_shutdown(
+                metrics_snapshot=metrics_snapshot,
+                details=details,
+            )
         ),
     )
 
@@ -176,8 +191,11 @@ def record_run_failed(
     """Append failed completion ledger entry."""
     _record_run_metrics_event(
         host,
-        lambda ledger_service, metrics_snapshot: ledger_service.record_run_exception(
-            error=exc,
-            metrics_snapshot=metrics_snapshot,
+        lambda ledger_service, metrics_snapshot, details: (
+            ledger_service.record_run_exception(
+                error=exc,
+                metrics_snapshot=metrics_snapshot,
+                details=details,
+            )
         ),
     )
