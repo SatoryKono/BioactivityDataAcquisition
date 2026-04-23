@@ -49,11 +49,11 @@ class _SilverWriteExecutionContext:
     run_type: RunType | None
     source_batch_id: BatchID | None
     ingestion_ts: datetime | None
-    quarantined_count: int | None
-    validation_errors: Sequence[str] | None
     started_at: datetime
     start_perf: float
     span: Any  # Any: OpenTelemetry span interface is runtime-dependent
+    quarantined_count: int | None = None
+    validation_errors: Sequence[str] | None = None
 
 
 @dataclass(frozen=True, slots=True)

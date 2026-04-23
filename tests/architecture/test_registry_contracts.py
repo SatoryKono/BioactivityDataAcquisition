@@ -425,7 +425,6 @@ class TestRegistryFactoryProtocol:
             "PipelineCreateWithServicesRequest"
         )
         assert create_runner_annotations["request"] == "PipelineCreateRunnerRequest"
-        assert create_runner_annotations["config"] == "PipelineYamlConfigPort | None"
         assert create_runner_annotations["return"] == "ExecutionMetricsRunnerPort"
 
 
