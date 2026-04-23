@@ -8,13 +8,9 @@ from pathlib import Path
 MAX_TEST_FILE_LOC = 2000
 MAX_TEST_FUNCTION_LOC = 200
 
-TEST_FILE_LOC_EXEMPTIONS = {
-    "tests/unit/scripts/ops/test_neo4j_memory_sync.py": 3082,
-    "tests/unit/infrastructure/storage/test_bronze_writer.py": 2016,
-}
+TEST_FILE_LOC_EXEMPTIONS = {}
 
 TEST_FUNCTION_LOC_EXEMPTIONS = {
-    "tests/unit/scripts/ops/test_neo4j_memory_sync.py::test_snapshot_contains_core_repo_surfaces": 316,
     "tests/unit/domain/ports/test_protocol_contract_examples.py::test_write_silver_signature": 204,
 }
 
