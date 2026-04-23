@@ -13,9 +13,11 @@ from bioetl.composition.observability import (
     ObservabilityContractError,
 )
 from bioetl.domain.ports.noop import (
+    NoOpAudit,
     NoOpMetrics,
     NoOpTracing,
 )
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 _FIXED_UUID = UUID("abcdef01-2345-6789-abcd-ef0123456789")
 
@@ -25,6 +27,13 @@ def _settings(env: str = "dev", *, allow_noop: bool = False) -> SimpleNamespace:
         env=env,
         observability=SimpleNamespace(
             allow_noop_observability_in_prod=allow_noop,
+        ),
+        pipeline=SimpleNamespace(
+            control_plane=SimpleNamespace(
+                required_persistence_profile="degraded_observable",
+                run_manifest_enabled=True,
+                run_ledger_enabled=True,
+            )
         ),
     )
 
@@ -85,6 +94,71 @@ class TestValidateObservabilityPreflightImpl:
         assert "noop_tracing_in_production" in event_names
         assert "noop_metrics_in_production" in event_names
 
+    def test_noop_audit_warns_and_fails_closed_in_prod(self) -> None:
+        from bioetl.composition.bootstrap.runtime.observability_bundle import (
+            validate_observability_preflight_impl,
+        )
+
+        logger = MagicMock()
+        with pytest.raises(ObservabilityContractError, match="NoOpAudit"):
+            validate_observability_preflight_impl(
+                tracer=MagicMock(),
+                metrics=MagicMock(),
+                environment="prod",
+                logger=logger,
+                audit=NoOpAudit(),
+                audit_required=True,
+            )
+
+        assert logger.warning.call_args[0][0] == "noop_audit_in_production"
+
+    def test_noop_logger_fails_closed_in_prod(self) -> None:
+        from bioetl.composition.bootstrap.runtime.observability_bundle import (
+            validate_observability_preflight_impl,
+        )
+
+        with pytest.raises(ObservabilityContractError, match="NoOpLogger"):
+            validate_observability_preflight_impl(
+                tracer=MagicMock(),
+                metrics=MagicMock(),
+                environment="prod",
+                logger=NoOpLogger(),
+            )
+
+    def test_control_plane_failure_reuses_runner_builder_invariants(self) -> None:
+        from bioetl.composition.bootstrap.runtime.observability_bundle import (
+            validate_observability_preflight_impl,
+        )
+
+        logger = MagicMock()
+        with pytest.raises(
+            ObservabilityContractError,
+            match="metadata sidecars / lineage persistence for active layers",
+        ):
+            validate_observability_preflight_impl(
+                tracer=MagicMock(),
+                metrics=MagicMock(),
+                environment="prod",
+                logger=logger,
+                audit=MagicMock(),
+                control_plane=SimpleNamespace(
+                    required_persistence_profile="forensic_grade",
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=True,
+                ),
+                yaml_config=SimpleNamespace(
+                    sink={
+                        "bronze": SimpleNamespace(enabled=True, save_metadata=False),
+                        "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                        "gold": SimpleNamespace(enabled=True, save_metadata=False),
+                    }
+                ),
+            )
+
+        assert (
+            logger.warning.call_args[0][0] == "control_plane_readiness_preflight_failed"
+        )
+
     def test_non_prod_environment_silent(self) -> None:
         from bioetl.composition.bootstrap.runtime.observability_bundle import (
             validate_observability_preflight_impl,
@@ -128,6 +202,7 @@ class TestBootstrapObservabilityBundleImpl:
         logger = MagicMock()
         tracer = MagicMock()
         metrics = MagicMock()
+        audit = MagicMock()
         dq_monitor = MagicMock()
 
         bundle = bootstrap_observability_bundle_impl(
@@ -138,6 +213,7 @@ class TestBootstrapObservabilityBundleImpl:
             logger_bootstrapper=lambda _p, _r, _l: logger,
             tracer_bootstrapper=lambda _s: tracer,
             metrics_bootstrapper=lambda _s: metrics,
+            audit_bootstrapper=lambda _s, _l, _m, _t: audit,
             dq_monitor_bootstrapper=lambda _s, _lg: dq_monitor,
             preflight_validator=MagicMock(),
         )
@@ -156,6 +232,7 @@ class TestBootstrapObservabilityBundleImpl:
         tracer = MagicMock()
         metrics = MagicMock()
         logger = MagicMock()
+        audit = MagicMock()
         preflight = MagicMock()
         settings = _settings(env="prod", allow_noop=True)
 
@@ -167,17 +244,20 @@ class TestBootstrapObservabilityBundleImpl:
             logger_bootstrapper=lambda _p, _r, _l: logger,
             tracer_bootstrapper=lambda _s: tracer,
             metrics_bootstrapper=lambda _s: metrics,
+            audit_bootstrapper=lambda _s, _l, _m, _t: audit,
             dq_monitor_bootstrapper=lambda _s, _lg: None,
             preflight_validator=preflight,
         )
 
-        preflight.assert_called_once_with(
-            tracer,
-            metrics,
-            "prod",
-            logger,
-            True,
-        )
+        assert preflight.call_count == 1
+        kwargs = preflight.call_args.kwargs
+        assert kwargs["tracer"] is tracer
+        assert kwargs["metrics"] is metrics
+        assert kwargs["environment"] == "prod"
+        assert kwargs["logger"] is logger
+        assert kwargs["allow_noop_in_prod"] is True
+        assert kwargs["audit"] is audit
+        assert kwargs["audit_required"] is False
 
     def test_logs_observability_initialized_with_flat_context(self) -> None:
         from bioetl.composition.bootstrap.runtime.observability_bundle import (
@@ -185,6 +265,7 @@ class TestBootstrapObservabilityBundleImpl:
         )
 
         logger = MagicMock()
+        audit = NoOpAudit()
 
         bootstrap_observability_bundle_impl(
             pipeline="p",
@@ -194,6 +275,7 @@ class TestBootstrapObservabilityBundleImpl:
             logger_bootstrapper=lambda _p, _r, _l: logger,
             tracer_bootstrapper=lambda _s: MagicMock(),
             metrics_bootstrapper=lambda _s: MagicMock(),
+            audit_bootstrapper=lambda _s, _l, _m, _t: audit,
             dq_monitor_bootstrapper=lambda _s, _lg: None,
             preflight_validator=MagicMock(),
         )
@@ -201,7 +283,14 @@ class TestBootstrapObservabilityBundleImpl:
         logger.info.assert_called_once_with(
             "observability_initialized",
             stage="bootstrap",
+            logger_type="MagicMock",
             metrics_type="MagicMock",
             tracer_type="MagicMock",
+            audit_type="NoOpAudit",
+            audit_enabled=False,
             dq_monitor_enabled=False,
+            required_persistence_profile="degraded_observable",
+            run_manifest_enabled=True,
+            run_ledger_enabled=True,
+            preflight_status="passed",
         )

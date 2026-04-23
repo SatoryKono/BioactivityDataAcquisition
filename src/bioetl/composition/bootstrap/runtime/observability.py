@@ -9,6 +9,7 @@ from uuid import UUID
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.exceptions import MetricsServerError
 from bioetl.domain.ports import (
+    AuditPort,
     DQMonitorPort,
     LoggerPort,
     MetricsPort,
@@ -51,12 +52,43 @@ __all__ = [
 ]
 
 
+def _create_runtime_audit_port(
+    *,
+    settings: Settings,
+    logger: LoggerPort,
+    metrics: MetricsPort,
+    tracing: TracingPort,
+) -> AuditPort:
+    """Resolve the canonical runtime audit factory lazily.
+
+    Importing the broader ``bioetl.composition.factories`` package at module load
+    time can pull in unrelated assembly surfaces. Keep the audit factory import
+    at bootstrap time so runtime observability stays a thin entrypoint.
+    """
+    from bioetl.composition.factories.storage._audit import (
+        create_audit_port as create_audit_port_impl,
+    )
+
+    return create_audit_port_impl(
+        settings=settings,
+        logger=logger,
+        metrics=metrics,
+        tracing=tracing,
+    )
+
+
 def validate_observability_preflight(
     tracer: TracingPort,
     metrics: MetricsPort,
     environment: str,
     logger: LoggerPort,
     allow_noop_in_prod: bool = False,
+    *,
+    audit: AuditPort | None = None,
+    audit_required: bool = False,
+    control_plane: object | None = None,
+    yaml_config: object | None = None,
+    skip_gold: bool = False,
 ) -> None:
     """Validate observability components for production readiness.
 
@@ -72,6 +104,11 @@ def validate_observability_preflight(
         environment=environment,
         logger=logger,
         allow_noop_in_prod=allow_noop_in_prod,
+        audit=audit,
+        audit_required=audit_required,
+        control_plane=control_plane,
+        yaml_config=yaml_config,
+        skip_gold=skip_gold,
     )
 
 
@@ -211,6 +248,8 @@ def bootstrap_observability_bundle(
     run_id: UUID,
     settings: Settings,
     log_level: str = "INFO",
+    yaml_config: object | None = None,
+    skip_gold: bool = False,
 ) -> ObservabilityBundle:
     """Build validated logger/metrics/tracer/DQ-monitor bundle for a pipeline run.
 
@@ -231,6 +270,16 @@ def bootstrap_observability_bundle(
         logger_bootstrapper=bootstrap_logger_port,
         tracer_bootstrapper=bootstrap_tracer_port,
         metrics_bootstrapper=bootstrap_metrics_port,
+        audit_bootstrapper=lambda audit_settings, audit_logger, audit_metrics, audit_tracer: (
+            _create_runtime_audit_port(
+                settings=audit_settings,
+                logger=audit_logger,
+                metrics=audit_metrics,
+                tracing=audit_tracer,
+            )
+        ),
         dq_monitor_bootstrapper=bootstrap_dq_monitor_port,
         preflight_validator=validate_observability_preflight,
+        yaml_config=yaml_config,
+        skip_gold=skip_gold,
     )

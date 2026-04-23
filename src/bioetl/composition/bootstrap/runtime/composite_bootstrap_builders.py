@@ -21,6 +21,7 @@ from bioetl.composition.bootstrap.runtime.runtime_basics import (
     build_runner_factories,
     build_support_services,
 )
+from bioetl.infrastructure.time import SystemClock
 
 __all__ = [
     "bootstrap_runtime_basics",
@@ -76,6 +77,7 @@ def bootstrap_runtime_basics(
         tracer=tracer,
         storage=storage,
         lock=lock,
+        clock=SystemClock(),
     )
 
 

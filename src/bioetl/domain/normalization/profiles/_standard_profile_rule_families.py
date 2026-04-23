@@ -13,6 +13,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_float,
     normalize_profile_int,
     normalize_profile_json_string,
+    normalize_profile_json_string_strict,
     normalize_profile_ontology_id,
     normalize_profile_operator,
     normalize_profile_pmc_id,
@@ -36,6 +37,7 @@ def _rule_family_specs(
     float_fields: frozenset[str],
     set_like_fields: frozenset[str],
     json_string_fields: frozenset[str],
+    strict_json_fields: frozenset[str],
     boolean_fields: frozenset[str],
     flag_fields: frozenset[str],
     operator_fields: frozenset[str],
@@ -111,5 +113,10 @@ def _rule_family_specs(
             json_string_fields,
             normalize_profile_json_string,
             "Canonicalize JSON-bearing string payloads after textual cleanup.",
+        ),
+        (
+            strict_json_fields,
+            normalize_profile_json_string_strict,
+            "Canonicalize JSON-bearing string payloads and collapse malformed JSON to None.",
         ),
     )

@@ -1,4 +1,4 @@
-"""Compatibility re-export module for metadata coordinator helpers."""
+"""Re-export module for metadata coordinator helpers."""
 
 from __future__ import annotations
 

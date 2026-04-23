@@ -20,6 +20,7 @@ from .adapter import StorageAdapter
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
+        AuditPort,
         LoggerPort,
         MetricsPort,
         SilverValidatorPort,
@@ -57,6 +58,7 @@ class StorageFactory:
         config: PipelineYamlConfig,
         logger: LoggerPort,
         metrics: MetricsPort,
+        audit: AuditPort,
         tracing: TracingPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
         silver_validator: SilverValidatorPort | None = None,
@@ -70,6 +72,7 @@ class StorageFactory:
             config: Pipeline YAML configuration with sink layer definitions.
             logger: LoggerPort for structured logging and export status events.
             metrics: MetricsPort for storage metrics collection.
+            audit: Canonical runtime audit port shared across storage and runner lifecycle.
             tracing: Optional TracingPort. When omitted, composition resolves an
                 explicit NoOpTracing for the layer writers.
             metadata_coordinator: Optional coordinator for metadata side-effects;
@@ -107,6 +110,7 @@ class StorageFactory:
             logger=logger,
             metrics=metrics,
             tracing=resolved_tracing,
+            audit=audit,
             metadata_coordinator=metadata_coordinator,
             silver_validator=silver_validator,
         )

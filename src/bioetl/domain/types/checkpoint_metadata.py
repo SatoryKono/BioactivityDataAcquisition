@@ -43,6 +43,7 @@ class CheckpointMetadata:
         pipeline_name: Canonical pipeline name used for execution identity.
         run_type: Canonical run type used for execution identity.
         pipeline_version: Version of the pipeline configuration.
+        git_commit: Git commit anchor included in canonical execution identity.
         effective_config_hash: Canonical effective-config hash for execution identity.
         effective_config_artifact_id: Effective-config artifact reference for provenance.
         execution_fingerprint: Canonical execution-identity fingerprint shared
@@ -66,6 +67,7 @@ class CheckpointMetadata:
     pipeline_name: _OPTIONAL_STR = None
     run_type: _OPTIONAL_STR = None
     pipeline_version: _OPTIONAL_STR = None
+    git_commit: _OPTIONAL_STR = None
     effective_config_hash: _OPTIONAL_STR = None
     effective_config_artifact_id: _OPTIONAL_STR = None
     execution_fingerprint: _OPTIONAL_STR = None
@@ -99,6 +101,7 @@ class CheckpointMetadata:
             pipeline_name=cast(_OPTIONAL_STR, legacy_metadata.get("pipeline_name")),
             run_type=cast(_OPTIONAL_STR, legacy_metadata.get("run_type")),
             pipeline_version=legacy_metadata.get("pipeline_version"),
+            git_commit=cast(_OPTIONAL_STR, legacy_metadata.get("git_commit")),
             effective_config_hash=legacy_metadata.get("effective_config_hash"),
             effective_config_artifact_id=legacy_metadata.get(
                 "effective_config_artifact_id"
@@ -149,6 +152,7 @@ class CheckpointMetadata:
             ("pipeline_name", self.pipeline_name),
             ("run_type", self.run_type),
             ("pipeline_version", self.pipeline_version),
+            ("git_commit", self.git_commit),
             ("effective_config_hash", self.effective_config_hash),
             ("effective_config_artifact_id", self.effective_config_artifact_id),
             ("execution_fingerprint", self.execution_fingerprint),
@@ -186,6 +190,7 @@ class CheckpointMetadata:
             pipeline_name=cast(_OPTIONAL_STR, data.get("pipeline_name")),
             run_type=cast(_OPTIONAL_STR, data.get("run_type")),
             pipeline_version=data.get("pipeline_version"),
+            git_commit=cast(_OPTIONAL_STR, data.get("git_commit")),
             effective_config_hash=data.get("effective_config_hash"),
             effective_config_artifact_id=data.get("effective_config_artifact_id"),
             execution_fingerprint=data.get("execution_fingerprint"),
@@ -232,6 +237,7 @@ class CheckpointMetadata:
                 "pipeline_name": self.pipeline_name,
                 "run_type": self.run_type,
                 "pipeline_version": self.pipeline_version,
+                "git_commit": self.git_commit,
                 "effective_config_hash": self.effective_config_hash,
                 "dq_contract_compatibility_hash": self.dq_contract_compatibility_hash,
                 "contract_ref": self.contract_ref,

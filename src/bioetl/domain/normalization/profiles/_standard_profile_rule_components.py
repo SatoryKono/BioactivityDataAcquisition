@@ -38,6 +38,7 @@ class _RuleComponentContext:
     float_fields: frozenset[str]
     set_like_fields: frozenset[str]
     json_string_fields: frozenset[str]
+    strict_json_fields: frozenset[str]
     boolean_fields: frozenset[str]
     flag_fields: frozenset[str]
     operator_fields: frozenset[str]
@@ -204,6 +205,7 @@ def _handle_field_families(
     float_fields: frozenset[str],
     set_like_fields: frozenset[str],
     json_string_fields: frozenset[str],
+    strict_json_fields: frozenset[str],
     boolean_fields: frozenset[str],
     flag_fields: frozenset[str],
     operator_fields: frozenset[str],
@@ -220,6 +222,7 @@ def _handle_field_families(
         float_fields=float_fields,
         set_like_fields=set_like_fields,
         json_string_fields=json_string_fields,
+        strict_json_fields=strict_json_fields,
         boolean_fields=boolean_fields,
         flag_fields=flag_fields,
         operator_fields=operator_fields,
@@ -268,6 +271,7 @@ def _resolve_base_rule(
             float_fields=context.float_fields,
             set_like_fields=context.set_like_fields,
             json_string_fields=context.json_string_fields,
+            strict_json_fields=context.strict_json_fields,
             boolean_fields=context.boolean_fields,
             flag_fields=context.flag_fields,
             operator_fields=context.operator_fields,

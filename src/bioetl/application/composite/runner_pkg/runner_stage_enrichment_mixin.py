@@ -201,9 +201,17 @@ class _CompositeRunnerStageEnrichmentMixin:
         enrichment_results: dict[str, EnrichmentResult],
     ) -> CompositeCheckpointState:
         """Record successful or skipped enrichers in checkpoint state."""
+        clock = getattr(self, "_clock", None)
         for name, result in enrichment_results.items():
             if result.is_success or result.status == EnrichmentStatus.SKIPPED:
-                state = state.with_enricher_completed(name, result)
+                if clock is None:
+                    state = state.with_enricher_completed(name, result)
+                else:
+                    state = state.with_enricher_completed(
+                        name,
+                        result,
+                        clock=clock,
+                    )
         return state
 
     async def _validate_required_enrichment_results(

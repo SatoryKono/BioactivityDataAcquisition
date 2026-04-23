@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 from bioetl.application.composite.checkpoint import (
     CompositeCheckpointState,
     ExpectedCheckpointContext,
@@ -10,6 +12,7 @@ from bioetl.application.composite.checkpoint import (
     merge_expected_anchors,
 )
 from bioetl.domain.composite.state import CompositePipelineState
+from tests.helpers.clock import FixedClock
 
 
 def test_public_facade_exports_anchor_context_helpers() -> None:
@@ -77,3 +80,23 @@ def test_public_facade_merges_runtime_anchors_into_checkpoint_state() -> None:
     )
     assert fresh.contract_ref == anchors.contract_ref
     assert fresh.state == CompositePipelineState.NOT_STARTED
+
+
+def test_public_facade_fresh_state_uses_injected_clock() -> None:
+    anchors = create_expected_checkpoint_context(
+        effective_config_hash=" sha256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
+        contract_ref=" ChemBL.Activity ",
+        contract_version=" v2 ",
+        manifest_id=" manifest-123 ",
+        composite_run_identity=" run-42 ",
+    )
+    fixed_time = datetime(2026, 4, 23, 8, 30, tzinfo=UTC)
+
+    fresh = fresh_checkpoint_state(
+        composite_name="composite_publication",
+        run_id="run-3",
+        anchors=anchors,
+        clock=FixedClock(fixed_time),
+    )
+
+    assert fresh.created_at == fixed_time

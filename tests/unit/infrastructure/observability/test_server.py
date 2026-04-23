@@ -9,6 +9,7 @@ import pytest
 
 from bioetl.infrastructure.observability.server import (
     MetricsServerError,
+    is_metrics_server_running,
     push_metrics_to_gateway,
     reset_server_state,
     start_metrics_server,
@@ -148,6 +149,37 @@ class TestStartMetricsServer:
             assert result is False
             # Should only try once for EADDRINUSE
             mock_server.assert_called_once()
+
+    def test_port_conflict_does_not_mark_server_running(self):
+        """A foreign port conflict must not flip the in-process running flag."""
+        with patch(
+            "bioetl.infrastructure.observability.server.start_http_server"
+        ) as mock_server:
+            error = OSError()
+            error.errno = errno.EADDRINUSE
+            mock_server.side_effect = error
+
+            result = start_metrics_server(port=8000, fail_fast=False)
+
+            assert result is False
+            assert is_metrics_server_running() is False
+
+    def test_port_conflict_allows_future_start_attempt(self):
+        """A failed foreign bind must not short-circuit a later retry as healthy."""
+        with patch(
+            "bioetl.infrastructure.observability.server.start_http_server"
+        ) as mock_server:
+            error = OSError()
+            error.errno = errno.EADDRINUSE
+            mock_server.side_effect = [error, None]
+
+            first_result = start_metrics_server(port=8000, fail_fast=False)
+            second_result = start_metrics_server(port=8000, fail_fast=False)
+
+            assert first_result is False
+            assert second_result is True
+            assert mock_server.call_count == 2
+            assert is_metrics_server_running() is True
 
     def test_lenient_mode_returns_false_on_os_error_after_retries(self):
         """Test fail_fast=False returns False after exhausting all retries."""

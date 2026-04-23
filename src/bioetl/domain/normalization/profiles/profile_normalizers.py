@@ -6,6 +6,7 @@ import math
 
 from bioetl.domain.normalization.chembl import (
     normalize_bao_identifier,
+    normalize_cellosaurus_id,
     normalize_chembl_organism_name,
 )
 from bioetl.domain.normalization.dates import normalize_partial_date
@@ -16,6 +17,7 @@ from bioetl.domain.normalization.identifiers import (
     normalize_pmid,
 )
 from bioetl.domain.normalization.json import canonicalize_json_string
+from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization.rules import (
     normalize_binary_flag,
     normalize_boolean,
@@ -36,6 +38,7 @@ __all__ = [
     "normalize_profile_boolean",
     "normalize_profile_canonical_smiles",
     "normalize_profile_case",
+    "normalize_profile_cellosaurus_id",
     "normalize_profile_chembl_organism_name",
     "normalize_profile_date",
     "normalize_profile_doi",
@@ -44,12 +47,14 @@ __all__ = [
     "normalize_profile_int",
     "normalize_profile_isomeric_smiles",
     "normalize_profile_json_string",
+    "normalize_profile_json_string_strict",
     "normalize_profile_null",
     "normalize_profile_ontology_id",
     "normalize_profile_operator",
     "normalize_profile_passthrough",
     "normalize_profile_pmc_id",
     "normalize_profile_pmid",
+    "normalize_profile_publication_type",
     "normalize_profile_smiles",
     "normalize_profile_text",
     "normalize_profile_title",
@@ -129,6 +134,13 @@ def normalize_profile_ontology_id(value: object) -> object:
     return normalize_ontology_id(value)
 
 
+def normalize_profile_cellosaurus_id(value: object) -> object:
+    """Normalize Cellosaurus identifiers to canonical ``CVCL_XXXX`` form."""
+    if value is None or isinstance(value, str):
+        return normalize_cellosaurus_id(value)
+    return value
+
+
 def normalize_profile_unit(value: object) -> object:
     """Canonicalize unit strings in profile fields.
 
@@ -158,6 +170,20 @@ def normalize_profile_enum(value: object, *, allowed_values: frozenset[str]) -> 
     return value if value in allowed_values else None
 
 
+def normalize_profile_publication_type(
+    value: object,
+    *,
+    allowed_values: frozenset[str],
+) -> object:
+    """Normalize publication type through the canonical mapping and enum gate."""
+    if value is None or not isinstance(value, str):
+        return None
+    normalized = normalize_publication_type(value)
+    if normalized is None:
+        return None
+    return normalized if normalized in allowed_values else None
+
+
 def normalize_profile_text(value: object) -> object:
     """Normalize one textual profile field when the value is a string."""
     if not isinstance(value, str):
@@ -177,6 +203,19 @@ def normalize_profile_json_string(value: object) -> object:
     except ValueError:
         return normalized
     return canonical if canonical is not None else normalized
+
+
+def normalize_profile_json_string_strict(value: object) -> object:
+    """Canonicalize one JSON-like string and fail closed on malformed payloads."""
+    if not isinstance(value, str):
+        return value
+    normalized = normalize_string(value)
+    if normalized is None:
+        return None
+    try:
+        return canonicalize_json_string(normalized)
+    except ValueError:
+        return None
 
 
 def normalize_profile_title(value: object) -> object:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
@@ -119,6 +120,31 @@ def validate_scorecard_registry_sync(
     )
 
 
+def _technical_debt_owner_counts(raw_registry: JsonDict) -> dict[str, int]:
+    """Return active-owner counts considering only technical_debt entries."""
+    registries = raw_registry.get("registries", {})
+    if not isinstance(registries, dict):
+        return {}
+
+    by_owner: Counter[str] = Counter()
+    for entries in registries.values():
+        if not isinstance(entries, dict):
+            continue
+        for entry in entries.values():
+            if not isinstance(entry, dict):
+                continue
+            if entry.get("classification") != "technical_debt":
+                continue
+            owner = entry.get("owner")
+            normalized = (
+                owner.strip()
+                if isinstance(owner, str) and owner.strip()
+                else "<missing>"
+            )
+            by_owner[normalized] += 1
+    return dict(sorted(by_owner.items()))
+
+
 def evaluate_debt_scorecard(
     *,
     registry_path: Path | str | None = None,
@@ -173,6 +199,7 @@ def evaluate_debt_scorecard(
             scorecard=scorecard,
             quarter=quarter,
             integral_score=score,
+            owner_counts=_technical_debt_owner_counts(raw_registry),
         )
     )
 

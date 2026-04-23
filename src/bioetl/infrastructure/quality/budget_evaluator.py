@@ -151,9 +151,13 @@ def evaluate_governance_violations(
     scorecard: JsonDict,
     quarter: str,
     integral_score: float,
+    owner_counts: dict[str, int] | None = None,
 ) -> list[str]:
     """Evaluate governance-policy violations for owner/expiry/program criteria."""
     violations: list[str] = []
+    effective_owner_counts = (
+        inventory.by_owner if owner_counts is None else owner_counts
+    )
 
     owner_allocations = _owner_allocations_for_quarter(
         scorecard=scorecard,
@@ -162,14 +166,14 @@ def evaluate_governance_violations(
     if _is_owner_decomposition_active(scorecard=scorecard, quarter=quarter):
         violations.extend(
             _evaluate_owner_allocations(
-                by_owner=inventory.by_owner,
+                by_owner=effective_owner_counts,
                 allocations=owner_allocations,
                 quarter=quarter,
             )
         )
     violations.extend(
         _evaluate_owner_diversification(
-            by_owner=inventory.by_owner,
+            by_owner=effective_owner_counts,
             scorecard=scorecard,
             quarter=quarter,
         )

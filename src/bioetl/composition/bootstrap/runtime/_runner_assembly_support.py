@@ -21,6 +21,7 @@ from bioetl.application.composite.runtime_wiring_api import (
 from bioetl.application.composite.runtime_wiring_api import (
     MergeService as _MergeService,
 )
+from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     import polars as pl
@@ -40,6 +41,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.ports import (
+        ClockPort,
         LockPort,
         LoggerPort,
         MetricsPort,
@@ -72,6 +74,7 @@ class CompositeRunnerServiceInputs:
     observer: CompositeLifecycleObserverService | None
     manifest_id: str | None
     run_ledger_service: RunLedgerService | None
+    clock: ClockPort | None = None
 
 
 CompositeRunnerFactory = Callable[..., CompositePipelineRunner]
@@ -104,6 +107,7 @@ def build_composite_runner_dependencies(
         observer=inputs.observer,
         manifest_id=inputs.manifest_id,
         run_ledger_service=inputs.run_ledger_service,
+        clock=inputs.clock,
     )
 
 
@@ -148,6 +152,7 @@ def build_composite_runner_service_inputs(
         ),
         manifest_id=getattr(support_services, "manifest_id", None),
         run_ledger_service=getattr(support_services, "run_ledger_service", None),
+        clock=SystemClock(),
     )
 
 

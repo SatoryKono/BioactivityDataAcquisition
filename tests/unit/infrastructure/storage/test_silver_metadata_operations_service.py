@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
     SilverMetadataOperations,
@@ -132,3 +133,53 @@ async def test_compute_dq_metrics_passes_explicit_validation_context() -> None:
     dq_input = dq_calculator.calculate.call_args.args[0]
     assert dq_input.quarantined_count == 1
     assert dq_input.validation_errors == ["missing required activity_id"]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_prepare_finalization_context_passes_explicit_validation_context() -> None:
+    """Finalization prep should forward validation context into DQ resolution."""
+    started_at = datetime(2025, 1, 15, 12, 0, tzinfo=UTC)
+    dq_metrics = BatchDQMetrics(
+        total_records=3,
+        valid_records=2,
+        error_records=1,
+        warning_records=0,
+    )
+    ops = SilverMetadataOperations(_logger=MagicMock())
+    resolve_finalization_dq_metrics = AsyncMock(return_value=dq_metrics)
+    resolve_version_after = AsyncMock(return_value=7)
+
+    with (
+        patch.object(
+            SilverMetadataOperations,
+            "_resolve_finalization_dq_metrics",
+            resolve_finalization_dq_metrics,
+        ),
+        patch.object(
+            SilverMetadataOperations,
+            "_resolve_version_after",
+            resolve_version_after,
+        ),
+    ):
+        context = await ops._prepare_silver_write_finalization_context(
+            table_name="chembl.activity",
+            records=[{"activity_id": "A1"}, {"activity_id": "A2"}],
+            table_path="/tmp/chembl/activity",
+            primary_keys=["activity_id"],
+            validated_mode=SilverWriteMode.MERGE,
+            quarantined_count=1,
+            validation_errors=("missing required activity_id",),
+            started_at=started_at,
+            start_perf=0.0,
+        )
+
+    resolve_finalization_dq_metrics.assert_awaited_once_with(
+        table_name="chembl.activity",
+        records=[{"activity_id": "A1"}, {"activity_id": "A2"}],
+        quarantined_count=1,
+        validation_errors=("missing required activity_id",),
+    )
+    assert context.dq_metrics is dq_metrics
+    assert context.version_after == 7
+    assert context.completed_at >= started_at

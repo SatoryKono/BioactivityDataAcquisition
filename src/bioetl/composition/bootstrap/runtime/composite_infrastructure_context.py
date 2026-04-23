@@ -1,4 +1,4 @@
-"""Compatibility shim for the composite infrastructure context type."""
+"""Shim for the composite infrastructure context type."""
 
 from __future__ import annotations
 

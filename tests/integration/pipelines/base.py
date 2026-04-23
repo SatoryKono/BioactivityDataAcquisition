@@ -16,6 +16,7 @@ from bioetl.composition.factories.pipeline import GenericPipelineFactory
 # Import factories to ensure they are registered/available
 from bioetl.composition.factories.storage import StorageAdapter, StorageContext
 from bioetl.composition.observability import ObservabilityBundle
+from bioetl.domain.ports.noop import NoOpAudit
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.config import Settings
@@ -183,6 +184,7 @@ class IntegrationPipelineTestCase:
             logger=structlog.get_logger(),
             metrics=NoOpMetrics(warn_on_use=False),
             tracer=NoOpTracing(),
+            audit=NoOpAudit(),
         )
 
         # Create runner

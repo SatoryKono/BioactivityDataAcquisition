@@ -1,23 +1,23 @@
 {
   "summary": {
-    "scanned_modules": 1648,
-    "total_internal_imports": 6309,
+    "scanned_modules": 1667,
+    "total_internal_imports": 6414,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
-    "cross_layer_group_edges_total": 287,
+    "cross_layer_group_edges_total": 296,
     "violations": 0
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1043,
+      "imports": 1060,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 939,
+      "imports": 956,
       "allowed": true
     },
     {
@@ -29,37 +29,37 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 509,
+      "imports": 513,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 343,
+      "imports": 345,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 283,
+      "imports": 289,
       "allowed": true
     },
     {
       "source": "domain",
       "target": "domain",
-      "imports": 990,
+      "imports": 1030,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 695,
+      "imports": 701,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 891,
+      "imports": 897,
       "allowed": true
     },
     {
@@ -71,25 +71,25 @@
     {
       "source": "interfaces",
       "target": "composition",
-      "imports": 60,
+      "imports": 62,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 40,
+      "imports": 41,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "infrastructure",
-      "imports": 2,
+      "imports": 4,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 251,
+      "imports": 253,
       "allowed": true
     }
   ],
@@ -107,7 +107,7 @@
     {
       "source": "application.core",
       "target": "domain.types",
-      "imports": 98
+      "imports": 104
     },
     {
       "source": "infrastructure.adapters",
@@ -122,7 +122,7 @@
     {
       "source": "application.core",
       "target": "domain.ports",
-      "imports": 67
+      "imports": 68
     },
     {
       "source": "composition.factories",
@@ -132,7 +132,7 @@
     {
       "source": "application.composite",
       "target": "domain.ports",
-      "imports": 63
+      "imports": 65
     },
     {
       "source": "composition.factories",
@@ -142,22 +142,22 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.ports",
-      "imports": 58
+      "imports": 59
     },
     {
       "source": "infrastructure.storage",
       "target": "domain.types",
-      "imports": 57
+      "imports": 58
     },
     {
       "source": "application.services",
       "target": "domain.ports",
-      "imports": 53
+      "imports": 54
     },
     {
       "source": "application.services",
       "target": "domain.types",
-      "imports": 50
+      "imports": 52
     },
     {
       "source": "interfaces.cli",
@@ -170,6 +170,11 @@
       "imports": 40
     },
     {
+      "source": "infrastructure.storage",
+      "target": "domain.value_objects",
+      "imports": 39
+    },
+    {
       "source": "composition.bootstrap",
       "target": "domain.ports",
       "imports": 38
@@ -177,11 +182,6 @@
     {
       "source": "composition.factories",
       "target": "infrastructure.storage",
-      "imports": 38
-    },
-    {
-      "source": "infrastructure.storage",
-      "target": "domain.value_objects",
       "imports": 38
     },
     {
@@ -215,13 +215,13 @@
       "imports": 31
     },
     {
-      "source": "infrastructure.storage",
-      "target": "domain.models",
-      "imports": 30
-    },
-    {
       "source": "application.core",
       "target": "domain.context",
+      "imports": 29
+    },
+    {
+      "source": "infrastructure.storage",
+      "target": "domain.models",
       "imports": 29
     },
     {
@@ -250,6 +250,11 @@
       "imports": 22
     },
     {
+      "source": "infrastructure.storage",
+      "target": "domain.medallion",
+      "imports": 22
+    },
+    {
       "source": "composition.factories",
       "target": "domain.schemas",
       "imports": 21
@@ -257,11 +262,6 @@
     {
       "source": "infrastructure.config",
       "target": "domain.types",
-      "imports": 21
-    },
-    {
-      "source": "infrastructure.storage",
-      "target": "domain.medallion",
       "imports": 21
     },
     {
@@ -277,6 +277,11 @@
     {
       "source": "application.core",
       "target": "domain.config",
+      "imports": 17
+    },
+    {
+      "source": "application.services",
+      "target": "domain.control_plane",
       "imports": 17
     },
     {
@@ -310,8 +315,8 @@
       "imports": 14
     },
     {
-      "source": "application.services",
-      "target": "domain.control_plane",
+      "source": "composition.bootstrap",
+      "target": "infrastructure.observability",
       "imports": 14
     },
     {
@@ -327,11 +332,6 @@
     {
       "source": "application.pipelines",
       "target": "domain.context",
-      "imports": 13
-    },
-    {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.observability",
       "imports": 13
     },
     {

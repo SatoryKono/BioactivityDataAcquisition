@@ -3,11 +3,16 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime
+from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
+from bioetl.domain.context import current_utc_time
 from bioetl.domain.exceptions import BioETLError, StorageError
 from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort, MetricsPort
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import ClockPort
 
 CHECKPOINT_READ_ERRORS = (
     json.JSONDecodeError,
@@ -87,6 +92,8 @@ def warn_if_checkpoint_stale(
     composite_name: str,
     stale_threshold_hours: float,
     state: CompositeCheckpointState,
+    clock: ClockPort | None = None,
+    reference_time: datetime | None = None,
 ) -> None:
     """Warn when resume targets a checkpoint older than the configured threshold."""
     if stale_threshold_hours <= 0:
@@ -95,7 +102,10 @@ def warn_if_checkpoint_stale(
     if ref_time is None:
         return
 
-    age = datetime.now(tz=UTC) - ref_time
+    current_time = reference_time
+    if current_time is None:
+        current_time = clock.now() if clock is not None else current_utc_time()
+    age = current_time - ref_time
     if age.total_seconds() <= stale_threshold_hours * 3600:
         return
 

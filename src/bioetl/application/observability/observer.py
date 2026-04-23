@@ -62,7 +62,208 @@ class LifecyclePhase(StrEnum):
     CLEANUP = "cleanup"
 
 
-class _ObserverLifecycleEmissionMixin(_ObserverEventMixin):
+class _ObserverHealthEmissionMixin:
+    """Health-check and preflight emission helpers for the pipeline observer."""
+
+    pipeline_name: str
+    _metrics: MetricsPort
+
+    def emit_health_check_result(
+        self,
+        component: str,
+        healthy: bool,
+        duration_ms: float | None = None,
+        *,
+        provider: str | None = None,
+        latency_ms: float | None = None,
+        health_check_mode: str | None = None,
+        fallback_reason: str | None = None,
+        health_status: str | HealthStatus | None = None,
+        **extra: Any,  # Any: structlog-compatible context kwargs
+    ) -> None:
+        """Emit health check result for a component."""
+        resolved_status = self._resolve_health_status(
+            health_status=health_status,
+            healthy=healthy,
+        )
+        self.emit_event(
+            PipelineEvent.HEALTH_CHECK_COMPLETED,
+            LifecyclePhase.PREFLIGHT,
+            level="info" if healthy else "warning",
+            component=component,
+            healthy=healthy,
+            duration_ms=duration_ms,
+            health_status=resolved_status.value,
+            provider=provider,
+            health_check_mode=health_check_mode,
+            fallback_reason=fallback_reason,
+            **extra,
+        )
+
+        self._metrics.set_gauge(
+            "bioetl_pipeline_health_check_passed",
+            1.0 if healthy else 0.0,
+            {"pipeline": self.pipeline_name, "component": component},
+        )
+        metric_value = float(resolved_status.to_metric_value())
+        self._metrics.set_gauge(
+            "bioetl_health_check_status",
+            metric_value,
+            {"component": component},
+        )
+        if health_check_mode is not None:
+            self._metrics.set_gauge(
+                "bioetl_health_check_mode_status",
+                metric_value,
+                {"component": component, "mode": health_check_mode},
+            )
+        observed_latency_ms = latency_ms if latency_ms is not None else duration_ms
+        if provider is not None and observed_latency_ms is not None:
+            latency_seconds = observed_latency_ms / 1000.0
+            self._metrics.observe_histogram(
+                "bioetl_health_check_latency_seconds",
+                latency_seconds,
+                {"provider": provider},
+            )
+            if health_check_mode is not None:
+                self._metrics.observe_histogram(
+                    "bioetl_health_check_mode_latency_seconds",
+                    latency_seconds,
+                    {"provider": provider, "mode": health_check_mode},
+                )
+        if fallback_reason is not None:
+            self._metrics.increment_counter(
+                "bioetl_probe_mode_fallback_total",
+                1,
+                {
+                    "pipeline": self.pipeline_name,
+                    "component": component,
+                    "reason": fallback_reason,
+                },
+            )
+
+    def emit_health_check_summary(
+        self,
+        *,
+        validated: bool,
+        duration_seconds: float,
+        overall_status: str,
+        components_checked: int,
+        **extra: Any,  # Any: structlog-compatible context kwargs
+    ) -> None:
+        """Emit summary preflight health observability through the observer contract."""
+        self.emit_event(
+            PipelineEvent.HEALTH_CHECK_SUMMARY_RECORDED,
+            LifecyclePhase.PREFLIGHT,
+            level="info" if validated else "warning",
+            validated=validated,
+            overall_status=overall_status,
+            components_checked=components_checked,
+            duration_seconds=round(duration_seconds, 4),
+            **extra,
+        )
+
+        self._metrics.set_gauge(
+            "bioetl_infrastructure_validated",
+            1.0 if validated else 0.0,
+            {"pipeline": self.pipeline_name},
+        )
+        self._metrics.observe_histogram(
+            "bioetl_health_check_duration_seconds",
+            duration_seconds,
+            {"pipeline": self.pipeline_name},
+        )
+
+    @staticmethod
+    def _resolve_health_status(
+        *,
+        health_status: str | HealthStatus | None,
+        healthy: bool,
+    ) -> HealthStatus:
+        """Resolve explicit health statuses into the canonical enum."""
+        if isinstance(health_status, HealthStatus):
+            return health_status
+        if isinstance(health_status, str):
+            try:
+                return HealthStatus(health_status.upper())
+            except ValueError:
+                pass
+        return HealthStatus.HEALTHY if healthy else HealthStatus.UNHEALTHY
+
+
+class _ObserverPostrunEmissionMixin:
+    """Postrun anomaly and maintenance emission helpers."""
+
+    pipeline_name: str
+    _metrics: MetricsPort
+
+    def emit_dq_anomaly(
+        self,
+        metric_name: str,
+        severity: str,
+        anomaly_type: str,
+        current_value: float,
+        baseline_mean: float | None = None,
+        **extra: Any,  # Any: structlog-compatible context kwargs
+    ) -> None:
+        """Emit data quality anomaly detection event."""
+        level = "error" if severity == "critical" else "warning"
+        self.emit_event(
+            PipelineEvent.DQ_ANOMALY_DETECTED,
+            LifecyclePhase.POSTRUN,
+            level=level,
+            metric=metric_name,
+            dq_severity=severity,
+            anomaly_type=anomaly_type,
+            current_value=current_value,
+            baseline_mean=baseline_mean,
+            **extra,
+        )
+
+        self._metrics.increment_counter(
+            "bioetl_dq_anomaly_detected",
+            1,
+            {
+                "pipeline": self.pipeline_name,
+                "metric": metric_name,
+                "severity": severity,
+                "anomaly_type": anomaly_type,
+            },
+        )
+
+    def emit_vacuum_result(
+        self,
+        layer: str,
+        table: str,
+        files_removed: int,
+        success: bool = True,
+        **extra: Any,  # Any: structlog-compatible context kwargs
+    ) -> None:
+        """Emit VACUUM operation result."""
+        self.emit_event(
+            PipelineEvent.VACUUM_COMPLETED,
+            LifecyclePhase.POSTRUN,
+            level="info" if success else "warning",
+            layer=layer,
+            table=table,
+            files_removed=files_removed,
+            success=success,
+            **extra,
+        )
+
+        if success:
+            self._metrics.increment_counter(
+                "bioetl_vacuum_files_removed_total",
+                files_removed,
+                {"table": table, "layer": layer},
+            )
+
+
+class _ObserverLifecycleEmissionMixin(
+    _ObserverHealthEmissionMixin,
+    _ObserverPostrunEmissionMixin,
+    _ObserverEventMixin,
+):
     """Structured lifecycle/domain event emission helpers."""
 
     CANONICAL_LIFECYCLE_EMITTER = CANONICAL_LIFECYCLE_EMITTER
@@ -203,220 +404,6 @@ class _ObserverLifecycleEmissionMixin(_ObserverEventMixin):
                 "status": status,
             },
         )
-
-    def emit_health_check_result(
-        self,
-        component: str,
-        healthy: bool,
-        duration_ms: float | None = None,
-        *,
-        provider: str | None = None,
-        latency_ms: float | None = None,
-        health_check_mode: str | None = None,
-        fallback_reason: str | None = None,
-        health_status: str | HealthStatus | None = None,
-        **extra: Any,  # Any: structlog-compatible context kwargs
-    ) -> None:
-        """Emit health check result for a component.
-
-        Unified interface for health check observability.
-
-        Args:
-            component: Component name (e.g., "storage", "data_source").
-            healthy: Whether component is healthy.
-            duration_ms: Optional check duration in milliseconds.
-            provider: Optional provider identifier for enhanced probes.
-            latency_ms: Optional provider probe latency in milliseconds.
-            health_check_mode: Optional runtime health-check mode.
-            fallback_reason: Optional probe-mode fallback reason.
-            health_status: Optional explicit status override.
-            **extra: Additional context.
-        """
-        resolved_status = self._resolve_health_status(
-            health_status=health_status,
-            healthy=healthy,
-        )
-        self.emit_event(
-            PipelineEvent.HEALTH_CHECK_COMPLETED,
-            LifecyclePhase.PREFLIGHT,
-            level="info" if healthy else "warning",
-            component=component,
-            healthy=healthy,
-            duration_ms=duration_ms,
-            health_status=resolved_status.value,
-            provider=provider,
-            health_check_mode=health_check_mode,
-            fallback_reason=fallback_reason,
-            **extra,
-        )
-
-        self._metrics.set_gauge(
-            "bioetl_pipeline_health_check_passed",
-            1.0 if healthy else 0.0,
-            {"pipeline": self.pipeline_name, "component": component},
-        )
-        metric_value = float(resolved_status.to_metric_value())
-        self._metrics.set_gauge(
-            "bioetl_health_check_status",
-            metric_value,
-            {"component": component},
-        )
-        if health_check_mode is not None:
-            self._metrics.set_gauge(
-                "bioetl_health_check_mode_status",
-                metric_value,
-                {"component": component, "mode": health_check_mode},
-            )
-        observed_latency_ms = latency_ms if latency_ms is not None else duration_ms
-        if provider is not None and observed_latency_ms is not None:
-            latency_seconds = observed_latency_ms / 1000.0
-            self._metrics.observe_histogram(
-                "bioetl_health_check_latency_seconds",
-                latency_seconds,
-                {"provider": provider},
-            )
-            if health_check_mode is not None:
-                self._metrics.observe_histogram(
-                    "bioetl_health_check_mode_latency_seconds",
-                    latency_seconds,
-                    {"provider": provider, "mode": health_check_mode},
-                )
-        if fallback_reason is not None:
-            self._metrics.increment_counter(
-                "bioetl_probe_mode_fallback_total",
-                1,
-                {
-                    "pipeline": self.pipeline_name,
-                    "component": component,
-                    "reason": fallback_reason,
-                },
-            )
-
-    def emit_health_check_summary(
-        self,
-        *,
-        validated: bool,
-        duration_seconds: float,
-        overall_status: str,
-        components_checked: int,
-        **extra: Any,  # Any: structlog-compatible context kwargs
-    ) -> None:
-        """Emit summary preflight health observability through the observer contract."""
-        self.emit_event(
-            PipelineEvent.HEALTH_CHECK_SUMMARY_RECORDED,
-            LifecyclePhase.PREFLIGHT,
-            level="info" if validated else "warning",
-            validated=validated,
-            overall_status=overall_status,
-            components_checked=components_checked,
-            duration_seconds=round(duration_seconds, 4),
-            **extra,
-        )
-
-        self._metrics.set_gauge(
-            "bioetl_infrastructure_validated",
-            1.0 if validated else 0.0,
-            {"pipeline": self.pipeline_name},
-        )
-        self._metrics.observe_histogram(
-            "bioetl_health_check_duration_seconds",
-            duration_seconds,
-            {"pipeline": self.pipeline_name},
-        )
-
-    @staticmethod
-    def _resolve_health_status(
-        *,
-        health_status: str | HealthStatus | None,
-        healthy: bool,
-    ) -> HealthStatus:
-        """Resolve explicit health statuses into the canonical enum."""
-        if isinstance(health_status, HealthStatus):
-            return health_status
-        if isinstance(health_status, str):
-            try:
-                return HealthStatus(health_status.upper())
-            except ValueError:
-                pass
-        return HealthStatus.HEALTHY if healthy else HealthStatus.UNHEALTHY
-
-    def emit_dq_anomaly(
-        self,
-        metric_name: str,
-        severity: str,
-        anomaly_type: str,
-        current_value: float,
-        baseline_mean: float | None = None,
-        **extra: Any,  # Any: structlog-compatible context kwargs
-    ) -> None:
-        """Emit data quality anomaly detection event.
-
-        Args:
-            metric_name: Name of the metric with anomaly.
-            severity: AnomalyRecord severity ("warning", "critical").
-            anomaly_type: Type of anomaly detected.
-            current_value: Current metric value.
-            baseline_mean: Baseline mean for comparison.
-            **extra: Additional context.
-        """
-        level = "error" if severity == "critical" else "warning"
-        self.emit_event(
-            PipelineEvent.DQ_ANOMALY_DETECTED,
-            LifecyclePhase.POSTRUN,
-            level=level,
-            metric=metric_name,
-            dq_severity=severity,
-            anomaly_type=anomaly_type,
-            current_value=current_value,
-            baseline_mean=baseline_mean,
-            **extra,
-        )
-
-        self._metrics.increment_counter(
-            "bioetl_dq_anomaly_detected",
-            1,
-            {
-                "pipeline": self.pipeline_name,
-                "metric": metric_name,
-                "severity": severity,
-                "anomaly_type": anomaly_type,
-            },
-        )
-
-    def emit_vacuum_result(
-        self,
-        layer: str,
-        table: str,
-        files_removed: int,
-        success: bool = True,
-        **extra: Any,  # Any: structlog-compatible context kwargs
-    ) -> None:
-        """Emit VACUUM operation result.
-
-        Args:
-            layer: Storage layer ("silver", "gold").
-            table: Table name.
-            files_removed: Number of files removed.
-            success: Whether operation succeeded.
-            **extra: Additional context.
-        """
-        self.emit_event(
-            PipelineEvent.VACUUM_COMPLETED,
-            LifecyclePhase.POSTRUN,
-            level="info" if success else "warning",
-            layer=layer,
-            table=table,
-            files_removed=files_removed,
-            success=success,
-            **extra,
-        )
-
-        if success:
-            self._metrics.increment_counter(
-                "bioetl_vacuum_files_removed_total",
-                files_removed,
-                {"table": table, "layer": layer},
-            )
 
     @staticmethod
     def _derive_provider_name(pipeline_name: str) -> str:

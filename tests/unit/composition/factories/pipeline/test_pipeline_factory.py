@@ -153,6 +153,7 @@ def test_build_pipeline_services_uses_cached_bronze_when_enabled(
         create_data_source_fn=MagicMock(),
         settings=settings,
         logger=logger,
+        audit=MagicMock(),
         config=pipeline_config,
         cached_bronze=cached_bronze,
     )
@@ -189,6 +190,7 @@ def test_build_pipeline_services_uses_regular_data_source_when_cached_disabled(
         create_data_source_fn=MagicMock(),
         settings=settings,
         logger=logger,
+        audit=MagicMock(),
         config=pipeline_config,
         cached_bronze=cached_bronze,
     )

@@ -18,6 +18,7 @@ import asyncio
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 import polars as pl
 
@@ -43,6 +44,9 @@ from bioetl.domain.exceptions import (
     StorageError,
 )
 from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import ClockPort
 
 _FILTER_CONDITION_ERRORS = (
     ValueError,
@@ -82,6 +86,7 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
         dq_config: CompositeDQConfig,
         max_concurrency: int = 4,
         semaphore_factory: Callable[[int], asyncio.Semaphore] | None = None,
+        clock: ClockPort | None = None,
     ) -> None:
         """Initialize enrichment coordinator.
 
@@ -103,6 +108,7 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
         self._max_concurrency = max_concurrency
         self._semaphore_factory = semaphore_factory or asyncio.Semaphore
         self._semaphore = self._semaphore_factory(max_concurrency)
+        self._clock = clock
 
     async def run_enrichers(
         self,
@@ -214,7 +220,9 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
         keys: pl.DataFrame,
     ) -> _EnricherExecutionContext:
         """Create the canonical execution context and start log for one enricher."""
-        started_at, started_monotonic_at = capture_runtime_timing_anchor()
+        started_at, started_monotonic_at = capture_runtime_timing_anchor(
+            clock=self._clock
+        )
         execution_context = _EnricherExecutionContext(
             enricher=enricher,
             records_input=len(keys),

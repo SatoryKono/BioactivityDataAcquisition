@@ -34,6 +34,12 @@ FORBIDDEN_COMPOSITION_NOOP_METRICS_PATHS = (
     Path("src/bioetl/composition/factories/_observability_wiring.py"),
     Path("src/bioetl/composition/factories/services/port_factories.py"),
 )
+FORBIDDEN_STORAGE_LOCAL_AUDIT_CONSTRUCTION_PATHS = (
+    Path("src/bioetl/composition/factories/storage/_helpers.py"),
+)
+FORBIDDEN_RUNTIME_NOOP_AUDIT_BOOTSTRAP_PATHS = (
+    Path("src/bioetl/composition/bootstrap/runtime/runner.py"),
+)
 FORBIDDEN_UNIFIED_EVENT_COUNTER_DIRECT_PATHS = (
     Path("src/bioetl/infrastructure/storage/silver/merge_resilience_helpers.py"),
     Path("src/bioetl/infrastructure/storage/metadata/writer_operations.py"),
@@ -113,6 +119,28 @@ def test_composition_factories_delegate_noop_metrics_resolution() -> None:
         assert "NoOpMetrics" not in calls and "NoOpTracing" not in calls, (
             f"{path} must delegate NoOp observability resolution to the shared "
             "composition helper instead of constructing null objects inline."
+        )
+
+
+def test_storage_factories_do_not_construct_audit_locally() -> None:
+    """Canonical runtime audit must be injected from composition-owned wiring."""
+    for path in FORBIDDEN_STORAGE_LOCAL_AUDIT_CONSTRUCTION_PATHS:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        calls = _iter_called_names(tree)
+        assert "create_audit_port" not in calls, (
+            f"{path} must not construct AuditPort locally. "
+            "Inject the canonical runtime audit from ObservabilityBundle wiring."
+        )
+
+
+def test_runtime_bootstrap_does_not_inline_noop_audit() -> None:
+    """Pipeline runner bootstrap must use runtime observability wiring for audit."""
+    for path in FORBIDDEN_RUNTIME_NOOP_AUDIT_BOOTSTRAP_PATHS:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        calls = _iter_called_names(tree)
+        assert "NoOpAudit" not in calls, (
+            f"{path} must not inline NoOpAudit. "
+            "Bootstrap the canonical runtime audit dependency instead."
         )
 
 

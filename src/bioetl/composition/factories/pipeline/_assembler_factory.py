@@ -45,6 +45,7 @@ from bioetl.domain.filtering import (
     SilverFilterConfig,
 )
 from bioetl.domain.ports import (
+    AuditPort,
     ContractPolicyPort,
     DataNormalizationPort,
     DataSourcePort,
@@ -164,6 +165,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self,
         settings: Settings,
         logger: LoggerPort,
+        audit: AuditPort,
         config: PipelineYamlConfig | None = None,
         filter_config: InputFilterConfig | None = None,
         tracer: TracingPort | None = None,
@@ -176,6 +178,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
                 request=_BuildFactoryServicesRequest(
                     settings,
                     logger,
+                    audit,
                     config,
                     filter_config,
                     tracer,

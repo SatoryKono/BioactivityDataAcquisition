@@ -22,7 +22,7 @@ if TYPE_CHECKING:
         CompositeRunnerDependencies,
         CompositeRuntimeConfig,
     )
-    from bioetl.domain.ports import LockPort, LoggerPort
+    from bioetl.domain.ports import ClockPort, LockPort, LoggerPort
 
 __all__ = [
     "ManagedCompositeLockContext",
@@ -46,6 +46,8 @@ class _FSMRuntimeHelperProtocol(Protocol):
     def handle_resume_from_failed(
         self,
         state: CompositeCheckpointState,
+        *,
+        clock: ClockPort | None = None,
     ) -> CompositeCheckpointState: ...
 
     def log_resume_context(self, state: CompositeCheckpointState) -> None: ...
@@ -79,6 +81,7 @@ class _CompositeRunnerHostProtocol(Protocol):
     _fsm: object
     _manifest_id: str | None
     _run_ledger_service: object
+    _clock: object
     _run_id_str: str
     _run_id: RunID
     _start_time: float | None
@@ -130,6 +133,7 @@ def bind_runner_dependencies(host: object, deps: CompositeRunnerDependencies) ->
     runner_host._fsm = deps.fsm_state_helper
     runner_host._manifest_id = deps.manifest_id
     runner_host._run_ledger_service = deps.run_ledger_service
+    runner_host._clock = getattr(deps, "clock", None)
 
 
 def initialize_runner_runtime_state(host: object, run_id: str | None) -> None:
@@ -224,12 +228,16 @@ async def prepare_run_state(
     checkpoint_manager: _CheckpointManagerProtocol,
     runtime: CompositeRuntimeConfig,
     fsm: _FSMRuntimeHelperProtocol,
+    clock: ClockPort | None = None,
 ) -> CompositeCheckpointState:
     """Load checkpoint state and apply resume normalization semantics."""
     state = await checkpoint_manager.load()
 
     if runtime.resume and state.state == CompositePipelineState.FAILED:
-        state = fsm.handle_resume_from_failed(state)
+        if clock is None:
+            state = fsm.handle_resume_from_failed(state)
+        else:
+            state = fsm.handle_resume_from_failed(state, clock=clock)
     if runtime.resume and state.is_resumable:
         fsm.log_resume_context(state)
 

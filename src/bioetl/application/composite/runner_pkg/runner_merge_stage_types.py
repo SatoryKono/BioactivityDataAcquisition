@@ -28,7 +28,7 @@ from bioetl.domain.composite.result import (
     EnrichmentResult,
     MergeResult,
 )
-from bioetl.domain.ports import LoggerPort
+from bioetl.domain.ports import ClockPort, LoggerPort
 
 
 class _CompositeRunnerMergeStageHostProtocol(Protocol):
@@ -38,6 +38,7 @@ class _CompositeRunnerMergeStageHostProtocol(Protocol):
     _observer: CompositeLifecycleObserverService
     _config: CompositeConfig
     _run_id_str: str
+    _clock: ClockPort | None
     _merger: MergeService
     _checkpoint_manager: CompositeCheckpointService
 

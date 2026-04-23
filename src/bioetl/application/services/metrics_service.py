@@ -91,33 +91,9 @@ class PushResult:
     error: str | None = None
 
 
-@dataclass
-class MetricsService:
-    """Service for metrics server operations.
+class _MetricsTracingMixin:
+    """Tracing attribute helpers for metrics administration flows."""
 
-    Provides high-level operations for managing the Prometheus metrics
-    server used by CLI and other interfaces. Abstracts infrastructure
-    details for Application-layer abstraction.
-
-    Attributes:
-        logger: Structured logger for observability.
-        _server: Metrics server port implementation.
-        _port: Current configured port.
-        _started_at: Timestamp when server was started.
-
-    Example:
-        >>> service = MetricsService(logger=logger, _server=server_adapter)
-        >>> result = service.start(port=8000)
-        >>> if result.success:
-        ...     logger.info("Metrics server started", port=result.port)
-    """
-
-    logger: LoggerPort
-    _server: MetricsServerPort
-    tracer: TracingPort | None = None
-    _publisher: MetricsPublisherPort | None = field(default=None, repr=False)
-    _port: int | None = field(default=None, repr=False)
-    _started_at: datetime | None = field(default=None, repr=False)
     TRACER_NAME = "bioetl.metrics_admin"
 
     def _build_span_attributes(
@@ -148,6 +124,16 @@ class MetricsService:
         if error is not None:
             span.set_attribute("error", True)
             span.set_attribute("bioetl.error", error)
+
+
+class _MetricsStartMixin(_MetricsTracingMixin):
+    """Metrics server start lifecycle helpers."""
+
+    logger: LoggerPort
+    _server: MetricsServerPort
+    tracer: TracingPort | None
+    _port: int | None
+    _started_at: datetime | None
 
     def _handle_start_error(
         self,
@@ -292,6 +278,15 @@ class MetricsService:
         except _METRICS_START_ERRORS as e:
             return self._handle_start_error(port, addr, e, fail_fast)
 
+
+class _MetricsStatusMixin(_MetricsTracingMixin):
+    """Metrics server status helpers."""
+
+    _server: MetricsServerPort
+    tracer: TracingPort | None
+    _port: int | None
+    _started_at: datetime | None
+
     def get_status(self) -> MetricsServerStatus:
         """Get the current status of the metrics server.
 
@@ -333,6 +328,14 @@ class MetricsService:
             True if server is running, False otherwise.
         """
         return bool(self._server.is_running())
+
+
+class _MetricsGatewayMixin(_MetricsTracingMixin):
+    """Gateway publication helpers for metrics administration flows."""
+
+    logger: LoggerPort
+    tracer: TracingPort | None
+    _publisher: MetricsPublisherPort | None
 
     def push_to_gateway(
         self,
@@ -449,3 +452,19 @@ class MetricsService:
             grouping_key=labels,
             error=error,
         )
+
+
+@dataclass
+class MetricsService(
+    _MetricsStartMixin,
+    _MetricsStatusMixin,
+    _MetricsGatewayMixin,
+):
+    """Service for metrics server operations."""
+
+    logger: LoggerPort
+    _server: MetricsServerPort
+    tracer: TracingPort | None = None
+    _publisher: MetricsPublisherPort | None = field(default=None, repr=False)
+    _port: int | None = field(default=None, repr=False)
+    _started_at: datetime | None = field(default=None, repr=False)

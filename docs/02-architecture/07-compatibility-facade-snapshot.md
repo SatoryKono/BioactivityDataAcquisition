@@ -8,9 +8,9 @@
 - Curated inventory rows: `16`
 - Transition debt rows: `0`
 - Retained public entrypoints: `16`
-- Measured tracked modules: `52`
-- Measured-only modules outside curated inventory: `36`
-- Discovered docstring-tracked modules: `36`
+- Measured tracked modules: `16`
+- Measured-only modules outside curated inventory: `0`
+- Discovered docstring-tracked modules: `0`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
@@ -29,53 +29,17 @@
 ## Expected Measured Registry
 
 - `src/bioetl/application/composite/merger.py`
-- `src/bioetl/application/pipelines/chembl/_pipelines.py`
-- `src/bioetl/application/services/_checkpoint_compatibility_messages.py`
-- `src/bioetl/application/services/_metadata_coordinator_helpers.py`
-- `src/bioetl/application/services/_run_ledger_diagnostic_support.py`
-- `src/bioetl/application/services/_run_manifest_diagnostics_helpers.py`
-- `src/bioetl/application/services/cli_run_orchestration_contracts.py`
-- `src/bioetl/application/services/cli_run_orchestration_models.py`
-- `src/bioetl/application/services/cli_run_orchestration_service.py`
-- `src/bioetl/application/services/effective_config_service.py`
-- `src/bioetl/application/services/lineage/metadata_lineage_bundle.py`
-- `src/bioetl/application/services/lineage_inspection_service.py`
-- `src/bioetl/application/services/metadata_coordinator.py`
-- `src/bioetl/application/services/pipeline_run_context_service.py`
-- `src/bioetl/application/services/pipeline_run_execution_service.py`
-- `src/bioetl/application/services/pipeline_run_lifecycle_service.py`
-- `src/bioetl/application/services/pipeline_runner_models.py`
-- `src/bioetl/application/services/pipeline_runner_service.py`
-- `src/bioetl/application/services/run_ledger_service.py`
-- `src/bioetl/application/services/run_manifest_diagnostics.py`
-- `src/bioetl/application/services/run_manifest_inspection_service.py`
-- `src/bioetl/application/services/run_manifest_service.py`
-- `src/bioetl/composition/bootstrap/runtime/composite_infrastructure_context.py`
 - `src/bioetl/composition/entrypoints.py`
 - `src/bioetl/domain/composite/config.py`
-- `src/bioetl/domain/normalization_authors.py`
-- `src/bioetl/domain/normalization_chembl.py`
-- `src/bioetl/domain/normalization_dates.py`
-- `src/bioetl/domain/normalization_pages.py`
-- `src/bioetl/domain/services/_date_helpers.py`
-- `src/bioetl/domain/transformations/_hashing_normalization.py`
 - `src/bioetl/domain/value_objects/activity_values.py`
 - `src/bioetl/domain/value_objects/publication_field_groups.py`
-- `src/bioetl/infrastructure/adapters/crossref/batch.py`
 - `src/bioetl/infrastructure/adapters/pubmed/client.py`
 - `src/bioetl/infrastructure/adapters/semanticscholar/client.py`
-- `src/bioetl/infrastructure/storage/_audit_normalization.py`
 - `src/bioetl/interfaces/cli/commands/archive.py`
 - `src/bioetl/interfaces/cli/commands/cleanup.py`
 - `src/bioetl/interfaces/cli/commands/health.py`
-- `src/bioetl/interfaces/cli/commands/health_rendering.py`
-- `src/bioetl/interfaces/cli/commands/health_server_integration.py`
 - `src/bioetl/interfaces/cli/commands/maintenance.py`
-- `src/bioetl/interfaces/cli/commands/metrics_server_integration.py`
 - `src/bioetl/interfaces/cli/commands/quarantine.py`
-- `src/bioetl/interfaces/cli/commands/quarantine_execution.py`
-- `src/bioetl/interfaces/cli/commands/quarantine_rendering.py`
-- `src/bioetl/interfaces/cli/commands/quarantine_support.py`
 - `src/bioetl/interfaces/cli/commands/run.py`
 - `src/bioetl/interfaces/cli/commands/run_all.py`
 - `src/bioetl/interfaces/cli/commands/run_composite.py`
@@ -83,54 +47,19 @@
 
 ## Measured-Only Allowlist
 
-- `src/bioetl/application/services/_checkpoint_compatibility_messages.py` — owner: `bioetl.application.services`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility re-export seam for checkpoint message helpers while call sites consolidate on the canonical helper surface.
-- `src/bioetl/application/services/_metadata_coordinator_helpers.py` — owner: `bioetl.application.services.lineage`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility re-export seam for metadata coordinator helpers while first-party code keeps using the owning lineage package.
-- `src/bioetl/application/services/_run_ledger_diagnostic_support.py` — owner: `bioetl.application.services.control_plane`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility re-export seam for run-ledger diagnostic helpers while first-party code keeps using the owning control-plane package.
-- `src/bioetl/application/services/_run_manifest_diagnostics_helpers.py` — owner: `bioetl.application.services.control_plane`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility re-export seam for run-manifest diagnostic helpers while first-party code keeps using the owning control-plane package.
-- `src/bioetl/application/pipelines/chembl/_pipelines.py` — owner: `bioetl.application.pipelines.chembl`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility re-export surface for ChEMBL pipeline marker classes.
-- `src/bioetl/interfaces/cli/commands/quarantine_execution.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for quarantine execution helper imports; first-party src should keep importing the canonical domains.quarantine.execution module directly.
-- `src/bioetl/interfaces/cli/commands/quarantine_rendering.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for quarantine rendering helper imports; first-party src should keep importing the canonical domains.quarantine.rendering module directly.
-- `src/bioetl/interfaces/cli/commands/quarantine_support.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for test-facing quarantine helper imports; first-party src should keep importing the canonical domains.quarantine.support module directly.
-- `src/bioetl/interfaces/cli/commands/health_rendering.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for health rendering helper imports; first-party src should keep importing the canonical domains.health.rendering module directly.
-- `src/bioetl/interfaces/cli/commands/health_server_integration.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for test-facing health-server integration imports; first-party src should keep importing the canonical domains.health.server_integration module directly.
-- `src/bioetl/domain/normalization_authors.py` — owner: `bioetl.domain`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Deprecated compatibility wrapper for author normalization imports while callers migrate to bioetl.domain.normalization.authors.
-- `src/bioetl/domain/normalization_chembl.py` — owner: `bioetl.domain`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Deprecated compatibility wrapper for ChEMBL normalization imports while callers migrate to bioetl.domain.normalization.chembl.
-- `src/bioetl/domain/normalization_dates.py` — owner: `bioetl.domain`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Deprecated compatibility wrapper for date normalization imports while callers migrate to bioetl.domain.normalization.dates.
-- `src/bioetl/domain/normalization_pages.py` — owner: `bioetl.domain`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Deprecated compatibility wrapper for page-range normalization imports while callers migrate to bioetl.domain.normalization.pages.
-- `src/bioetl/domain/services/_date_helpers.py` — owner: `bioetl.domain.services`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility helper seam for legacy date-service imports that now delegate to bioetl.domain.normalization.dates.
-- `src/bioetl/interfaces/cli/commands/metrics_server_integration.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for test-facing metrics-server integration imports; first-party src should keep importing the canonical domains.health.metrics_server_integration module directly.
-- `src/bioetl/application/services/cli_run_orchestration_contracts.py` — owner: `bioetl.application.services.execution`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for legacy CLI orchestration contract imports while first-party code keeps using bioetl.application.services.execution.cli_run_orchestration_contracts.
-- `src/bioetl/application/services/cli_run_orchestration_models.py` — owner: `bioetl.application.services.execution`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for legacy CLI orchestration model imports while first-party code keeps using bioetl.application.services.execution.cli_run_orchestration_models.
-- `src/bioetl/application/services/cli_run_orchestration_service.py` — owner: `bioetl.application.services.execution`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for legacy CLI orchestration service imports while first-party code keeps using bioetl.application.services.execution.cli_run_orchestration_service.
-- `src/bioetl/application/services/effective_config_service.py` — owner: `bioetl.application.services.control_plane`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for effective-config service imports while first-party code keeps using bioetl.application.services.control_plane.effective_config_service.
-- `src/bioetl/application/services/lineage_inspection_service.py` — owner: `bioetl.application.services.lineage`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for lineage inspection imports while first-party code keeps using bioetl.application.services.lineage.lineage_inspection_service.
-- `src/bioetl/application/services/lineage/metadata_lineage_bundle.py` — owner: `bioetl.application.services.lineage`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility re-export seam for metadata lineage bundle imports while first-party code keeps using bioetl.domain.lineage.
-- `src/bioetl/application/services/metadata_coordinator.py` — owner: `bioetl.application.services.lineage`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for metadata coordinator imports while first-party code keeps using bioetl.application.services.lineage.metadata_coordinator.
-- `src/bioetl/application/services/pipeline_run_context_service.py` — owner: `bioetl.application.services.execution`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for pipeline run-context imports while first-party code keeps using bioetl.application.services.execution.pipeline_run_context_service.
-- `src/bioetl/application/services/pipeline_run_execution_service.py` — owner: `bioetl.application.services.execution`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for pipeline execution service imports while first-party code keeps using bioetl.application.services.execution.pipeline_run_execution_service.
-- `src/bioetl/application/services/pipeline_run_lifecycle_service.py` — owner: `bioetl.application.services.execution`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for pipeline lifecycle service imports while first-party code keeps using bioetl.application.services.execution.pipeline_run_lifecycle_service.
-- `src/bioetl/application/services/pipeline_runner_models.py` — owner: `bioetl.application.services.execution`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for pipeline runner model imports while first-party code keeps using bioetl.application.services.execution.pipeline_runner_models.
-- `src/bioetl/application/services/pipeline_runner_service.py` — owner: `bioetl.application.services.execution`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for pipeline runner service imports while first-party code keeps using bioetl.application.services.execution.pipeline_runner_service.
-- `src/bioetl/application/services/run_ledger_service.py` — owner: `bioetl.application.services.control_plane`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for run-ledger service imports while first-party code keeps using bioetl.application.services.control_plane.run_ledger_service.
-- `src/bioetl/application/services/run_manifest_diagnostics.py` — owner: `bioetl.application.services.control_plane`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for run-manifest diagnostics imports while first-party code keeps using bioetl.application.services.control_plane.run_manifest_diagnostics.
-- `src/bioetl/application/services/run_manifest_inspection_service.py` — owner: `bioetl.application.services.control_plane`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for run-manifest inspection imports while first-party code keeps using bioetl.application.services.control_plane.run_manifest_inspection_service.
-- `src/bioetl/application/services/run_manifest_service.py` — owner: `bioetl.application.services.control_plane`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for run-manifest service imports while first-party code keeps using bioetl.application.services.control_plane.run_manifest_service.
-- `src/bioetl/composition/bootstrap/runtime/composite_infrastructure_context.py` — owner: `bioetl.composition.bootstrap.runtime`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility shim for runtime bootstrap imports that still target the legacy composite infrastructure context path while the canonical owner lives under bioetl.composition.bootstrap.
-- `src/bioetl/domain/transformations/_hashing_normalization.py` — owner: `bioetl.domain.transformations`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility shim for hash-normalization imports while first-party code keeps using bioetl.domain.transformations.hashing.
-- `src/bioetl/infrastructure/adapters/crossref/batch.py` — owner: `bioetl.infrastructure.adapters.crossref`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for CrossRef batch and pagination collaborators.
-- `src/bioetl/infrastructure/storage/_audit_normalization.py` — owner: `bioetl.infrastructure.storage`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility shim for audit normalization helper imports while first-party code keeps using bioetl.infrastructure.storage.audit_normalization.
+- None.
 
 ## Measured-Only Ratchet
 
-- Max measured-only modules: `36`
-- `src/bioetl/application/services/` <= `20` measured-only modules
-- `src/bioetl/interfaces/cli/commands/` <= `6` measured-only modules
+- Max measured-only modules: `0`
+- `src/bioetl/application/services/` <= `0` measured-only modules
+- `src/bioetl/interfaces/cli/commands/` <= `0` measured-only modules
 
 ### Live Ratchet Counts
 
-- Total measured-only modules: `36`
-- `src/bioetl/application/services/` currently has `20` modules
-- `src/bioetl/interfaces/cli/commands/` currently has `6` modules
+- Total measured-only modules: `0`
+- `src/bioetl/application/services/` currently has `0` modules
+- `src/bioetl/interfaces/cli/commands/` currently has `0` modules
 
 ### Ratchet Violations
 
@@ -154,42 +83,7 @@
 
 ### Discovered Docstring-Tracked Modules
 
-- `src/bioetl/application/pipelines/chembl/_pipelines.py`
-- `src/bioetl/application/services/_checkpoint_compatibility_messages.py`
-- `src/bioetl/application/services/_metadata_coordinator_helpers.py`
-- `src/bioetl/application/services/_run_ledger_diagnostic_support.py`
-- `src/bioetl/application/services/_run_manifest_diagnostics_helpers.py`
-- `src/bioetl/application/services/cli_run_orchestration_contracts.py`
-- `src/bioetl/application/services/cli_run_orchestration_models.py`
-- `src/bioetl/application/services/cli_run_orchestration_service.py`
-- `src/bioetl/application/services/effective_config_service.py`
-- `src/bioetl/application/services/lineage/metadata_lineage_bundle.py`
-- `src/bioetl/application/services/lineage_inspection_service.py`
-- `src/bioetl/application/services/metadata_coordinator.py`
-- `src/bioetl/application/services/pipeline_run_context_service.py`
-- `src/bioetl/application/services/pipeline_run_execution_service.py`
-- `src/bioetl/application/services/pipeline_run_lifecycle_service.py`
-- `src/bioetl/application/services/pipeline_runner_models.py`
-- `src/bioetl/application/services/pipeline_runner_service.py`
-- `src/bioetl/application/services/run_ledger_service.py`
-- `src/bioetl/application/services/run_manifest_diagnostics.py`
-- `src/bioetl/application/services/run_manifest_inspection_service.py`
-- `src/bioetl/application/services/run_manifest_service.py`
-- `src/bioetl/composition/bootstrap/runtime/composite_infrastructure_context.py`
-- `src/bioetl/domain/normalization_authors.py`
-- `src/bioetl/domain/normalization_chembl.py`
-- `src/bioetl/domain/normalization_dates.py`
-- `src/bioetl/domain/normalization_pages.py`
-- `src/bioetl/domain/services/_date_helpers.py`
-- `src/bioetl/domain/transformations/_hashing_normalization.py`
-- `src/bioetl/infrastructure/adapters/crossref/batch.py`
-- `src/bioetl/infrastructure/storage/_audit_normalization.py`
-- `src/bioetl/interfaces/cli/commands/health_rendering.py`
-- `src/bioetl/interfaces/cli/commands/health_server_integration.py`
-- `src/bioetl/interfaces/cli/commands/metrics_server_integration.py`
-- `src/bioetl/interfaces/cli/commands/quarantine_execution.py`
-- `src/bioetl/interfaces/cli/commands/quarantine_rendering.py`
-- `src/bioetl/interfaces/cli/commands/quarantine_support.py`
+- None.
 
 ### Unexpected Docstring-Tracked Modules
 

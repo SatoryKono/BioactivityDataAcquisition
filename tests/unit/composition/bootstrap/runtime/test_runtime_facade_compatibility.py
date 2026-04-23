@@ -156,6 +156,8 @@ def test_observability_runtime_signatures_stable() -> None:
         "run_id",
         "settings",
         "log_level",
+        "yaml_config",
+        "skip_gold",
     )
     assert bundle_sig.parameters["log_level"].default == "INFO"
 
@@ -168,4 +170,9 @@ def test_observability_runtime_signatures_stable() -> None:
         "environment",
         "logger",
         "allow_noop_in_prod",
+        "audit",
+        "audit_required",
+        "control_plane",
+        "yaml_config",
+        "skip_gold",
     )

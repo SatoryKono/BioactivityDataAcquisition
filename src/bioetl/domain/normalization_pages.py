@@ -1,4 +1,4 @@
-"""Deprecated compatibility wrapper for page-range normalization helpers.
+"""Legacy wrapper for page-range normalization helpers.
 
 Deprecated: import from ``bioetl.domain.normalization.pages`` instead.
 Sunset target: 2026-06-30.

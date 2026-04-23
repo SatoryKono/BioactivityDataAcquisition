@@ -6,6 +6,8 @@ import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.domain.ports import ClockPort
+
 if TYPE_CHECKING:
     from bioetl.application.composite.checkpoint import CompositeCheckpointState
     from bioetl.domain.composite.config import CompositeConfig
@@ -168,7 +170,10 @@ class FSMStateHelperService:
         return True
 
     def handle_resume_from_failed(
-        self, state: CompositeCheckpointState
+        self,
+        state: CompositeCheckpointState,
+        *,
+        clock: ClockPort | None = None,
     ) -> CompositeCheckpointState:
         """Map FAILED checkpoint state to the correct resume FSM phase.
 
@@ -211,7 +216,7 @@ class FSMStateHelperService:
             phase_description=phase_description,
         )
 
-        return state.with_state(resume_phase)
+        return state.with_state(resume_phase, clock=clock)
 
     def log_resume_context(self, state: CompositeCheckpointState) -> None:
         """Log detailed resume context when resuming from checkpoint.

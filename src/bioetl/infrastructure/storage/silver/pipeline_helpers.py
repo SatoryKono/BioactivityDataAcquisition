@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable
+from collections.abc import Awaitable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Literal, Protocol
@@ -49,6 +49,8 @@ class _SilverWriteExecutionContext:
     run_type: RunType | None
     source_batch_id: BatchID | None
     ingestion_ts: datetime | None
+    quarantined_count: int | None
+    validation_errors: Sequence[str] | None
     started_at: datetime
     start_perf: float
     span: Any  # Any: OpenTelemetry span interface is runtime-dependent
@@ -72,6 +74,8 @@ class _SilverWriteInvocation:
     run_type: RunType | None
     source_batch_id: BatchID | None
     ingestion_ts: datetime | None
+    quarantined_count: int | None = None
+    validation_errors: Sequence[str] | None = None
 
 
 class _PreparedSilverWriteDispatcher(Protocol):
@@ -190,6 +194,8 @@ def build_silver_write_execution_context(
         run_type=invocation.run_type,
         source_batch_id=invocation.source_batch_id,
         ingestion_ts=invocation.ingestion_ts,
+        quarantined_count=invocation.quarantined_count,
+        validation_errors=invocation.validation_errors,
         started_at=started_at,
         start_perf=start_perf,
         span=span,

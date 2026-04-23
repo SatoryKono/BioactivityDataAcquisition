@@ -26,6 +26,7 @@ if TYPE_CHECKING:
         EnrichmentResult,
         MergeResult,
     )
+    from bioetl.domain.ports import ClockPort
 
 
 @dataclass(frozen=True, slots=True)
@@ -67,6 +68,7 @@ class MergeExecutionContext:
 class MergeWorkflowContext(MergePostJoinWorkflowContext, Protocol):
     """Subset of MergeService API required by orchestration helpers."""
 
+    _clock: ClockPort | None
     _join_planner: JoinPlannerService
 
     async def _prepare_seed_dataframe(
@@ -171,7 +173,7 @@ async def prepare_merge_execution_context(
     request: MergeExecutionRequestSpec,
 ) -> MergeExecutionContext:
     """Load all merge inputs and bind them to one execution context model."""
-    started_at, started_monotonic = capture_runtime_timing_anchor()
+    started_at, started_monotonic = capture_runtime_timing_anchor(clock=host._clock)
     return MergeExecutionContext(
         request=request,
         started_at=started_at,

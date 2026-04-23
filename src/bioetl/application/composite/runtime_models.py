@@ -28,14 +28,8 @@ if TYPE_CHECKING:
         CompositeLifecycleObserverService,
     )
     from bioetl.application.composite.merger import MergeService
-    from bioetl.application.composite.preflight_validator import (
-        CompositePreflightValidator,
-    )
-    from bioetl.application.services.control_plane.run_ledger_service import (
-        RunLedgerService,
-    )
-    from bioetl.application.services.dq_report_service import DQReportService
-    from bioetl.domain.ports import (
+    from bioetl.application.composite.port_types import (
+        ClockPort,
         ExecutionMetricsRunnerPort,
         LockPort,
         LoggerPort,
@@ -43,7 +37,13 @@ if TYPE_CHECKING:
         QuarantinePort,
         TracingPort,
     )
-
+    from bioetl.application.composite.preflight_validator import (
+        CompositePreflightValidator,
+    )
+    from bioetl.application.services.control_plane.run_ledger_service import (
+        RunLedgerService,
+    )
+    from bioetl.application.services.dq_report_service import DQReportService
 __all__ = [
     "CompositeExecutionContext",
     "CompositeRunnerDependencies",
@@ -101,6 +101,7 @@ class CompositeRunnerDependencyGroup:
     observer: CompositeLifecycleObserverService | None = None
     manifest_id: str | None = None
     run_ledger_service: RunLedgerService | None = None
+    clock: ClockPort | None = None
 
 
 CompositeRunnerDependencies = CompositeRunnerDependencyGroup

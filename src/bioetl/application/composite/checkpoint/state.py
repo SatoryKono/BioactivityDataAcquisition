@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint import _state_support as state_support
 from bioetl.domain.composite.result import (
@@ -16,6 +17,9 @@ from bioetl.domain.composite.result import (
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.normalization import normalize_runtime_anchor_payload
 from bioetl.domain.types import JsonDict
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import ClockPort
 
 
 @dataclass(frozen=True, slots=True)
@@ -47,33 +51,62 @@ class CompositeCheckpointState:
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
-    def with_seed_completed(self, result: SeedResult) -> CompositeCheckpointState:
+    def with_seed_completed(
+        self,
+        result: SeedResult,
+        *,
+        clock: ClockPort | None = None,
+    ) -> CompositeCheckpointState:
         """Return a copy with completed seed metadata."""
-        return state_support.with_seed_completed(self, result)
+        return state_support.with_seed_completed(self, result, clock=clock)
 
     def with_dependency_completed(
         self,
         dependency_name: str,
         result: DependencyResult,
+        *,
+        clock: ClockPort | None = None,
     ) -> CompositeCheckpointState:
         """Return a copy with a completed dependency."""
-        return state_support.with_dependency_completed(self, dependency_name, result)
+        return state_support.with_dependency_completed(
+            self,
+            dependency_name,
+            result,
+            clock=clock,
+        )
 
     def with_enricher_completed(
         self,
         enricher_name: str,
         result: EnrichmentResult,
+        *,
+        clock: ClockPort | None = None,
     ) -> CompositeCheckpointState:
         """Return a copy with a completed enricher."""
-        return state_support.with_enricher_completed(self, enricher_name, result)
+        return state_support.with_enricher_completed(
+            self,
+            enricher_name,
+            result,
+            clock=clock,
+        )
 
-    def with_state(self, new_state: CompositePipelineState) -> CompositeCheckpointState:
+    def with_state(
+        self,
+        new_state: CompositePipelineState,
+        *,
+        clock: ClockPort | None = None,
+    ) -> CompositeCheckpointState:
         """Return a copy with an updated FSM state."""
-        return state_support.with_state(self, new_state)
+        return state_support.with_state(self, new_state, clock=clock)
 
-    def with_merge_completed(self, result: JsonDict) -> CompositeCheckpointState:
+    def with_merge_completed(
+        self,
+        result: JsonDict,
+        *,
+        clock: ClockPort | None = None,
+    ) -> CompositeCheckpointState:
         """Return a copy with completed merge metadata."""
-        return state_support.with_merge_completed(self, result)
+        return state_support.with_merge_completed(self, result, clock=clock)
 
     @property
     def is_resumable(self) -> bool:

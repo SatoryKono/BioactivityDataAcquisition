@@ -1,4 +1,4 @@
-"""Deprecated compatibility wrapper for author-list parsing helpers.
+"""Legacy wrapper for author-list parsing helpers.
 
 Deprecated: import from ``bioetl.domain.normalization.authors`` instead.
 Sunset target: 2026-06-30.

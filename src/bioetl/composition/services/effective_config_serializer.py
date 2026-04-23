@@ -197,14 +197,20 @@ class EffectiveConfigSerializer:
         self,
         overrides: RuntimeOverrideSnapshot,
     ) -> JsonDict:
-        result: JsonDict = {
-            "cli_overrides": self._normalize_config_data(overrides.cli_overrides),
-            "env_overrides": self._normalize_config_data(overrides.env_overrides),
-            "runtime_adjustments": self._normalize_config_data(
+        result: JsonDict = {}
+        if overrides.cli_overrides:
+            result["cli_overrides"] = self._normalize_config_data(
+                overrides.cli_overrides
+            )
+        if overrides.env_overrides:
+            result["env_overrides"] = self._normalize_config_data(
+                overrides.env_overrides
+            )
+        if overrides.runtime_adjustments:
+            result["runtime_adjustments"] = self._normalize_config_data(
                 overrides.runtime_adjustments
-            ),
-        }
-        if overrides.override_hash:
+            )
+        if result and overrides.override_hash:
             result["override_hash"] = overrides.override_hash
         return result
 

@@ -1,4 +1,4 @@
-"""Compatibility re-export surface for ChEMBL pipeline marker classes.
+"""Re-export surface for ChEMBL pipeline marker classes.
 
 The canonical owner module is `pipeline_types.py`. This shim preserves legacy
 imports from `_pipelines.py` while the package surface and tests migrate to the

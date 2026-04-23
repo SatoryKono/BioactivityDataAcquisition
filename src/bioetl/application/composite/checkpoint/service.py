@@ -18,16 +18,16 @@ from bioetl.application.composite.checkpoint.persistence_service import (
     CompositeCheckpointPersistenceService,
 )
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
+from bioetl.application.composite.port_types import (
+    ClockPort,
+    CompositeCheckpointPort,
+    LoggerPort,
+    MetricsPort,
+    RunLedgerPort,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-
-    from bioetl.domain.ports import (
-        CompositeCheckpointPort,
-        LoggerPort,
-        MetricsPort,
-        RunLedgerPort,
-    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,6 +49,7 @@ class CompositeCheckpointServiceContext:
     expected_manifest_id: str | None = None
     run_ledger_port: RunLedgerPort | None = None
     metrics: MetricsPort | None = None
+    clock: ClockPort | None = None
     load_service_factory: Callable[..., CompositeCheckpointLoadService] = (
         CompositeCheckpointLoadService
     )
@@ -70,6 +71,7 @@ _CHECKPOINT_INIT_OPTIONAL_DEFAULTS: dict[str, object] = {
     "expected_manifest_id": None,
     "run_ledger_port": None,
     "metrics": None,
+    "clock": None,
     "load_service_factory": CompositeCheckpointLoadService,
     "persistence_service_factory": CompositeCheckpointPersistenceService,
 }
@@ -178,6 +180,11 @@ def _coerce_checkpoint_service_context(
             init=init,
             overrides=overrides,
         ),
+        clock=_resolve_checkpoint_init_value(
+            field_name="clock",
+            init=init,
+            overrides=overrides,
+        ),
         load_service_factory=_resolve_checkpoint_init_value(
             field_name="load_service_factory",
             init=init,
@@ -239,6 +246,7 @@ class CompositeCheckpointService:
             glob_pattern=self._glob_pattern_value,
             run_ledger_port=params.run_ledger_port,
             metrics=params.metrics,
+            clock=params.clock,
         )
         self._persistence_service = params.persistence_service_factory(
             composite_name=params.composite_name,

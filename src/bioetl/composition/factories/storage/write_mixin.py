@@ -135,6 +135,8 @@ class StorageAdapterWriteMixin:
             run_type=write_request.run_type,
             source_batch_id=write_request.source_batch_id,
             ingestion_ts=write_request.ingestion_ts,
+            quarantined_count=write_request.quarantined_count,
+            validation_errors=write_request.validation_errors,
         )
 
     async def write_gold(

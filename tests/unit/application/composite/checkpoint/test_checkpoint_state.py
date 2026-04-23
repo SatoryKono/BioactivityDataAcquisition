@@ -20,6 +20,7 @@ from bioetl.domain.composite.result import (
     SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
+from tests.helpers.clock import FixedClock
 
 
 # ---------------------------------------------------------------------------
@@ -207,6 +208,18 @@ class TestWithSeedCompleted:
         updated = initial.with_seed_completed(_make_seed_result())
         assert updated.updated_at is not None
 
+    def test_uses_injected_clock_for_updated_at(self) -> None:
+        """with_seed_completed honors the injected ClockPort timestamp seam."""
+        fixed_time = datetime(2026, 4, 23, 9, 0, tzinfo=UTC)
+        initial = CompositeCheckpointState(composite_name="c", run_id="r")
+
+        updated = initial.with_seed_completed(
+            _make_seed_result(),
+            clock=FixedClock(fixed_time),
+        )
+
+        assert updated.updated_at == fixed_time
+
     def test_preserves_completed_enrichers(self) -> None:
         """Existing completed_enrichers are not reset."""
         initial = CompositeCheckpointState(
@@ -364,6 +377,18 @@ class TestWithState:
         initial = CompositeCheckpointState(composite_name="c", run_id="r")
         updated = initial.with_state(CompositePipelineState.FAILED)
         assert updated.updated_at is not None
+
+    def test_with_state_uses_injected_clock_for_updated_at(self) -> None:
+        """with_state honors the injected ClockPort timestamp seam."""
+        fixed_time = datetime(2026, 4, 23, 10, 0, tzinfo=UTC)
+        initial = CompositeCheckpointState(composite_name="c", run_id="r")
+
+        updated = initial.with_state(
+            CompositePipelineState.FAILED,
+            clock=FixedClock(fixed_time),
+        )
+
+        assert updated.updated_at == fixed_time
 
     def test_can_transition_to_failed(self) -> None:
         """with_state allows any FSM state value including FAILED."""

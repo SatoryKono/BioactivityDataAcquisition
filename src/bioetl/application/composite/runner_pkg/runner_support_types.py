@@ -15,6 +15,13 @@ from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.lifecycle_observer_service import (
     CompositeLifecycleObserverService,
 )
+from bioetl.application.composite.port_types import (
+    ClockPort,
+    ExecutionMetricsRunnerPort,
+    LoggerPort,
+    MetricsPort,
+    TracingPort,
+)
 from bioetl.application.composite.preflight_validator import (
     CompositePreflightValidationService,
 )
@@ -24,12 +31,6 @@ from bioetl.application.composite.runtime_models import (
 )
 from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
 from bioetl.domain.composite.result import CompositeResult, EnrichmentResult
-from bioetl.domain.ports import (
-    ExecutionMetricsRunnerPort,
-    LoggerPort,
-    MetricsPort,
-    TracingPort,
-)
 
 if TYPE_CHECKING:
     from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
@@ -47,6 +48,7 @@ class _CompositeRunnerSupportHostProtocol(Protocol):
     _tracing: TracingPort | None
     _observer: CompositeLifecycleObserverService
     _run_id_str: str
+    _clock: ClockPort | None
     _start_time: float | None
     _started_at: datetime | None
     _original_run_id: str | None

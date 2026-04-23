@@ -14,102 +14,14 @@ policy:
     - expires_on
     - removal_step
 registries:
-  file_size_limits:
-    src/bioetl/infrastructure/storage/silver_writer.py:
-      value: 1450
-      owner: "@bioetl-platform"
-      reason: "SilverWriter remains a large infrastructure facade while Delta write, validation, and recovery branches are still being peeled into dedicated storage helpers."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Continue extracting write-path orchestration into storage/silver helper modules until the facade falls back under the infrastructure LOC cap."
+  file_size_limits: {}
   function_complexity:
     {}
   function_length:
     {}
-  class_size:
-    src/bioetl/application/composite/_lifecycle_observer_tracing_mixin.py::CompositeLifecycleTracingMixin:
-      value: 312
-      owner: "@bioetl-architecture"
-      reason: "Composite lifecycle tracing still centralizes transitional observer wiring and emission helpers in one mixin."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Continue extracting lifecycle emission branches into smaller tracing helpers until the mixin drops below the default limit."
-    src/bioetl/application/observability/observer.py::_ObserverLifecycleEmissionMixin:
-      value: 371
-      owner: "@bioetl-architecture"
-      reason: "Observer lifecycle emission remains a large observability mixin while compatibility hooks are still centralized."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Split lifecycle emission helpers into smaller observer mixins until the class drops below the default limit."
-    src/bioetl/application/services/_quarantine_service_sync_mixin.py::QuarantineServiceSyncMixin:
-      value: 373
-      owner: "@bioetl-platform"
-      reason: "Quarantine sync support still combines multiple synchronization branches in one transitional mixin."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Extract quarantine sync helpers into smaller mixins until the class returns under the default limit."
-    src/bioetl/application/services/control_plane/run_manifest_inspection_service.py::RunManifestInspectionService:
-      value: 328
-      owner: "@bioetl-data-model"
-      reason: "Run manifest inspection still centralizes multiple graph-building and presentation responsibilities."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Continue splitting identity graph and inspection formatting helpers until the service drops below the default limit."
-    src/bioetl/application/services/control_plane/run_manifest_service.py::RunManifestService:
-      value: 322
-      owner: "@bioetl-data-model"
-      reason: "Run manifest lifecycle operations remain grouped in one transitional control-plane service."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Extract manifest subflows into dedicated helpers until the service returns under the default limit."
-    src/bioetl/application/services/data_quality_service.py::DataQualityService:
-      value: 388
-      owner: "@bioetl-platform"
-      reason: "Data quality orchestration still carries multiple report and validation branches in one service."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Continue extracting DQ analysis/reporting helpers until the service drops below the default limit."
-    src/bioetl/application/services/metrics_service.py::MetricsService:
-      value: 357
-      owner: "@bioetl-platform"
-      reason: "Metrics orchestration still centralizes multiple metric-publication branches in one transitional service."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Extract metric publication helpers until the service drops below the default limit."
+  class_size: {}
   class_method_count: {}
-  god_object:
-    src/bioetl/application/services/_quarantine_service_sync_mixin.py::QuarantineServiceSyncMixin:
-      value: 0
-      owner: "@bioetl-platform"
-      reason: "Quarantine sync mixin remains a large compatibility surface with internal orchestration branches not yet delegated to injected collaborators."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Extract quarantine sync responsibilities into dedicated collaborators or shrink the mixin below the large-class threshold."
-    src/bioetl/application/services/control_plane/run_manifest_inspection_service.py::RunManifestInspectionService:
-      value: 0
-      owner: "@bioetl-data-model"
-      reason: "Run manifest inspection remains a large read-model assembler with low explicit delegation while graph and summary builders are still being separated."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Continue extracting identity graph and inspection rendering collaborators until the class no longer trips the god-object heuristic."
-    src/bioetl/application/services/control_plane/run_manifest_service.py::RunManifestService:
-      value: 0
-      owner: "@bioetl-data-model"
-      reason: "Run manifest service remains a transitional control-plane façade with low observable delegation while manifest subflows are still centralized."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Split manifest lifecycle responsibilities into dedicated collaborators until the class no longer triggers the god-object heuristic."
+  god_object: {}
   domain_complexity:
     src/bioetl/domain/config/memory.py::MemoryConfig:
       value: 6

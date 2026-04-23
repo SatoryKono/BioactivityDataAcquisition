@@ -34,7 +34,11 @@ CHEMBL_META_FIELDS = frozenset(
 )
 
 
-def chembl_schema_fields(schema_cls: Any) -> tuple[str, ...]:
+def chembl_schema_fields(
+    schema_cls: Any,
+) -> tuple[
+    str, ...
+]:  # Any: schema_cls is a class with a .to_schema().columns.keys() protocol
     """Return ordered Pandera schema fields for a ChEMBL profile."""
     return tuple(schema_cls.to_schema().columns.keys())
 

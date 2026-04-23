@@ -223,6 +223,8 @@ def prepare_runner_inputs(
         run_id=ctx.run_id,
         settings=settings,
         log_level=ctx.log_level,
+        yaml_config=yaml_config,
+        skip_gold=bool(getattr(ctx, "skip_gold", False)),
     )
     vacuum = assemble_vacuum_settings_fn(
         cli_vacuum=ctx.vacuum, yaml_maintenance=yaml_config.maintenance

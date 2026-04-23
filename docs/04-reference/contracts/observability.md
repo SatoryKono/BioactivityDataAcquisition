@@ -136,6 +136,18 @@ Cross-links for canonical observability governance:
   compaction, DQ evaluation, DQ report generation, vacuum и final metadata
 - `AuditPort` остаётся отдельным traceability/observability port и
   инжектируется в Bronze/Silver/Gold runtime wiring из composition layer
+- `ObservabilityBundle` является canonical runtime carrier для `logger`,
+  `metrics`, `tracer` и `audit`; PipelineRunnerService bootstrap и medallion
+  storage wiring должны получать один и тот же injected `AuditPort`, а не
+  собирать независимые audit adapters локально
+- production runtime observability bootstrap is fail-closed by default:
+  `NoOpLogger`, `NoOpMetrics`, `NoOpTracing`, and `NoOpAudit` are rejected in
+  `env=prod` unless
+  `BIOETL_OBSERVABILITY__ALLOW_NOOP_OBSERVABILITY_IN_PROD=true` is set
+- production runtime observability bootstrap MUST also validate the configured
+  control-plane persistence profile against the same manifest / ledger /
+  lineage-sidecar invariants used by runtime builder helpers; bootstrap must
+  not maintain a divergent second rule set
 - terminal Domain Event timestamps MUST be derived from the observer's captured
   `wall_start_time` plus monotonic duration; missing `wall_start_time` is an
   explicit observer invariant violation, not a trigger for `datetime.now()`

@@ -41,6 +41,7 @@ def _normalize_execution_identity_payload(
     pipeline_name: str,
     run_type: str,
     pipeline_version: str | None,
+    git_commit: str | None,
     effective_config_hash: str | None,
     dq_contract_compatibility_hash: str | None,
     manifest_id: str | None,
@@ -56,6 +57,7 @@ def _normalize_execution_identity_payload(
         pipeline_name=pipeline_name,
         run_type=run_type,
         pipeline_version=pipeline_version,
+        git_commit=git_commit,
         effective_config_hash=effective_config_hash,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         contract_ref=contract_ref,
@@ -102,8 +104,13 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
         if run_context is not None
         else None
     )
+    git_commit = (
+        _coerce_optional_str(getattr(run_context, "git_commit", None))
+        if run_context is not None
+        else None
+    )
     effective_config_hash = (
-        _coerce_optional_str(getattr(run_context, "config_hash", None))
+        _coerce_optional_str(getattr(run_context, "effective_config_hash", None))
         if run_context is not None
         else None
     )
@@ -156,6 +163,7 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
         pipeline_name=pipeline.config.pipeline_name,
         run_type=run_type_value,
         pipeline_version=pipeline_version,
+        git_commit=git_commit,
         effective_config_hash=effective_config_hash,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         manifest_id=manifest_id,
@@ -191,6 +199,7 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
             "pipeline_name": pipeline.config.pipeline_name,
             "manifest_id": manifest_id,
             "execution_fingerprint": execution_fingerprint,
+            "git_commit": git_commit,
             "effective_config_hash": identity_payload["effective_config_hash"],
             "effective_config_artifact_id": effective_config_artifact_id,
             "dq_contract_compatibility_hash": identity_payload[

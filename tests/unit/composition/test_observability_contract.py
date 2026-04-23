@@ -21,7 +21,7 @@ from bioetl.composition.observability import (
     ObservabilityBundle,
     ObservabilityContractError,
 )
-from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
+from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 
 
 @pytest.mark.unit
@@ -38,6 +38,7 @@ class TestObservabilityBundle:
                 logger=None,
                 metrics=mock_metrics,
                 tracer=tracer,
+                audit=NoOpAudit(),
             )  # type: ignore[arg-type]
 
     def test_bundle_requires_metrics(self) -> None:
@@ -52,6 +53,7 @@ class TestObservabilityBundle:
                 logger=mock_logger,
                 metrics=None,
                 tracer=tracer,
+                audit=NoOpAudit(),
             )  # type: ignore[arg-type]
 
     def test_bundle_requires_tracer(self) -> None:
@@ -64,7 +66,21 @@ class TestObservabilityBundle:
                 logger=mock_logger,
                 metrics=mock_metrics,
                 tracer=None,  # type: ignore[arg-type]
+                audit=NoOpAudit(),
                 dq_monitor=None,
+            )
+
+    def test_bundle_requires_audit(self) -> None:
+        """Test that audit must be explicit even when audit is disabled."""
+        mock_logger = MagicMock()
+        mock_metrics = MagicMock()
+
+        with pytest.raises(ObservabilityContractError, match="Audit port is required"):
+            ObservabilityBundle(
+                logger=mock_logger,
+                metrics=mock_metrics,
+                tracer=NoOpTracing(),
+                audit=None,  # type: ignore[arg-type]
             )
 
     def test_bundle_create_factory_method(self) -> None:
@@ -77,11 +93,13 @@ class TestObservabilityBundle:
             logger=mock_logger,
             metrics=mock_metrics,
             tracer=mock_tracer,
+            audit=NoOpAudit(),
         )
 
         assert bundle.logger is mock_logger
         assert bundle.metrics is mock_metrics
         assert bundle.tracer is mock_tracer
+        assert isinstance(bundle.audit, NoOpAudit)
 
     def test_bundle_bind_preserves_metrics(self) -> None:
         """Test that bind() preserves metrics reference."""
@@ -94,11 +112,13 @@ class TestObservabilityBundle:
             logger=mock_logger,
             metrics=mock_metrics,
             tracer=tracer,
+            audit=NoOpAudit(),
         )
         new_bundle = bundle.bind(run_id="test-123")
 
         assert new_bundle.metrics is mock_metrics
         assert new_bundle.tracer is tracer
+        assert new_bundle.audit is bundle.audit
 
     def test_bundle_frozen(self) -> None:
         """Test that bundle is frozen (immutable)."""
@@ -110,6 +130,7 @@ class TestObservabilityBundle:
             logger=mock_logger,
             metrics=mock_metrics,
             tracer=tracer,
+            audit=NoOpAudit(),
         )
 
         with pytest.raises(FrozenInstanceError):
@@ -146,6 +167,12 @@ class TestBootstrapObservability:
         settings.observability.tracing_enabled = False
         settings.observability.dq_monitor_enabled = False
         settings.observability.allow_noop_observability_in_prod = False
+        settings.observability.audit_enabled = False
+        settings.pipeline.control_plane.required_persistence_profile = (
+            "degraded_observable"
+        )
+        settings.pipeline.control_plane.run_manifest_enabled = True
+        settings.pipeline.control_plane.run_ledger_enabled = True
 
         bundle = bootstrap_observability_bundle(
             pipeline="test_pipeline",
@@ -177,6 +204,12 @@ class TestBootstrapObservability:
         settings.observability.tracing_enabled = False
         settings.observability.dq_monitor_enabled = False
         settings.observability.allow_noop_observability_in_prod = False
+        settings.observability.audit_enabled = False
+        settings.pipeline.control_plane.required_persistence_profile = (
+            "degraded_observable"
+        )
+        settings.pipeline.control_plane.run_manifest_enabled = True
+        settings.pipeline.control_plane.run_ledger_enabled = True
 
         bundle = bootstrap_observability_bundle(
             pipeline="test_pipeline",
@@ -204,6 +237,12 @@ class TestBootstrapObservability:
         settings.observability.tracing_enabled = False
         settings.observability.dq_monitor_enabled = False
         settings.observability.allow_noop_observability_in_prod = False
+        settings.observability.audit_enabled = False
+        settings.pipeline.control_plane.required_persistence_profile = (
+            "degraded_observable"
+        )
+        settings.pipeline.control_plane.run_manifest_enabled = True
+        settings.pipeline.control_plane.run_ledger_enabled = True
 
         bootstrap_observability_bundle(
             pipeline="test_pipeline",
@@ -215,9 +254,16 @@ class TestBootstrapObservability:
         mock_logger.info.assert_called_with(
             "observability_initialized",
             stage="bootstrap",
+            logger_type="MagicMock",
             metrics_type="NoOpMetrics",
             tracer_type="NoOpTracing",
+            audit_type="NoOpAudit",
+            audit_enabled=False,
             dq_monitor_enabled=False,
+            required_persistence_profile="degraded_observable",
+            run_manifest_enabled=True,
+            run_ledger_enabled=True,
+            preflight_status="passed",
         )
 
     def test_application_and_composition_logging_avoid_nested_extra_payloads(
@@ -523,6 +569,12 @@ class TestObservabilityPreflightValidation:
         settings.observability.tracing_enabled = False
         settings.observability.dq_monitor_enabled = False
         settings.observability.allow_noop_observability_in_prod = True
+        settings.observability.audit_enabled = False
+        settings.pipeline.control_plane.required_persistence_profile = (
+            "degraded_observable"
+        )
+        settings.pipeline.control_plane.run_manifest_enabled = True
+        settings.pipeline.control_plane.run_ledger_enabled = True
 
         bootstrap_observability_bundle(
             pipeline="test_pipeline",

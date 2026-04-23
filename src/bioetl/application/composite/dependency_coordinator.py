@@ -18,6 +18,12 @@ from bioetl.application.composite.dependency_progress_tracker import (
 from bioetl.application.composite.dependency_result_mapper import (
     DependencyResultService,
 )
+from bioetl.application.composite.port_types import (
+    ClockPort,
+    DeltaReaderPort,
+    ExecutionMetricsRunnerPort,
+    LoggerPort,
+)
 from bioetl.application.runtime_timestamps import (
     capture_runtime_timing_anchor,
     derive_completion_timestamp,
@@ -33,11 +39,6 @@ from bioetl.domain.exceptions import (
 
 if TYPE_CHECKING:
     from bioetl.domain.composite.config import DependencyConfig
-    from bioetl.domain.ports import (
-        DeltaReaderPort,
-        ExecutionMetricsRunnerPort,
-        LoggerPort,
-    )
 
 
 _DEPENDENCY_EXECUTION_ERRORS = (
@@ -128,6 +129,7 @@ class DependencyCoordinatorService:
         progress_service: DependencyProgressService,
         result_service: DependencyResultService,
         delta_reader: DeltaReaderPort | None = None,
+        clock: ClockPort | None = None,
     ) -> None:
         """Initialize dependency coordinator.
 
@@ -145,6 +147,7 @@ class DependencyCoordinatorService:
         self._chained_key_resolver = chained_key_resolver
         self._result_service = result_service
         self._progress_service = progress_service
+        self._clock = clock
 
     async def run_dependencies(
         self,
@@ -261,7 +264,7 @@ class DependencyCoordinatorService:
         Returns:
             DependencyResult with execution outcome.
         """
-        started_at, started_monotonic = capture_runtime_timing_anchor()
+        started_at, started_monotonic = capture_runtime_timing_anchor(clock=self._clock)
         _log_dependency_start(logger=self._logger, dependency=dependency, keys=keys)
         try:
             runner = await self._execute_dependency_runner(

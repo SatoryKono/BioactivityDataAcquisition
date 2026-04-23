@@ -305,17 +305,19 @@ def _classification_values(field_name: str) -> frozenset[str]:
     raise ValueError(f"Unknown publication classification field: {field_name}")
 
 
-def _process_raw_types_list(raw_types_list: list[str] | None) -> str | None:
-    if not raw_types_list:  # Handles None and empty list
-        return None
-
-    # Filter out None and empty strings after stripping
-    processed_parts = [
+def _filter_and_strip_types(raw_types_list: list[str]) -> list[str]:
+    return [
         str(item).strip()
         for item in raw_types_list
         if item is not None and str(item).strip()
     ]
 
+
+def _process_raw_types_list(raw_types_list: list[str] | None) -> str | None:
+    if not raw_types_list:
+        return None
+
+    processed_parts = _filter_and_strip_types(raw_types_list)
     return "|".join(processed_parts) if processed_parts else None
 
 

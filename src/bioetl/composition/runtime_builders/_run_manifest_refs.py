@@ -130,7 +130,7 @@ def create_control_plane_refs(
     return ManifestControlPlaneRefs(
         manifest_id=manifest_id,
         execution_fingerprint=execution_fingerprint,
-        config_hash=effective_config_hash,
+        config_hash=None,
         resolved_config_hash=resolved_config_hash,
         effective_config_hash=effective_config_hash,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,

@@ -18,6 +18,7 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     create_pipeline_instance_with_services,
     create_transformer_instance,
 )
+from bioetl.domain.ports.noop import NoOpAudit
 
 
 @pytest.mark.unit
@@ -130,6 +131,7 @@ class TestBuildFactoryServices:
         request = _BuildFactoryServicesRequest(
             settings=MagicMock(),
             logger=MagicMock(),
+            audit=NoOpAudit(),
             config=MagicMock(),
             filter_config=MagicMock(),
             tracer=MagicMock(),
@@ -146,6 +148,7 @@ class TestBuildFactoryServices:
             create_data_source_fn=factory_context.create_data_source_fn,
             settings=request.settings,
             logger=request.logger,
+            audit=request.audit,
             config=request.config,
             filter_config=request.filter_config,
             tracer=request.tracer,
@@ -192,6 +195,7 @@ class TestCreatePipelineInstanceWithServices:
             runtime=runtime,
             settings=settings,
             logger=logger,
+            audit=NoOpAudit(),
             config=config,
             filter_config=filter_config,
             tracer=tracer,
@@ -246,6 +250,7 @@ class TestCreatePipelineInstanceWithServices:
             runtime=MagicMock(),
             settings=MagicMock(),
             logger=MagicMock(),
+            audit=NoOpAudit(),
             manifest_id="manifest-123",
             execution_fingerprint="fingerprint-123",
             config_hash="hash-123",

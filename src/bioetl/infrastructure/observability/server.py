@@ -37,7 +37,6 @@ def _handle_port_in_use(
     Returns:
         False to indicate the server was not started on a new port.
     """
-    global _SERVER_STARTED
     logger.warning(
         "Metrics port already in use",
         port=port,
@@ -50,7 +49,6 @@ def _handle_port_in_use(
             reason="port_in_use",
             original_error=e,
         ) from e
-    _SERVER_STARTED = True
     return False
 
 

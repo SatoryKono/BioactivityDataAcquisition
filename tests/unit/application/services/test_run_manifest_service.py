@@ -25,6 +25,7 @@ from bioetl.domain.exceptions import StorageError
 from bioetl.domain.ports import RunManifestPort
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane import FileRunManifestStore
+from tests.helpers.clock import FixedClock
 
 
 class _InMemoryRunManifestStore(RunManifestPort):
@@ -120,6 +121,34 @@ def test_create_manifest_persists_and_links_run_id() -> None:
     assert manifest.code_provenance.rule_bundle_version == "dq-rules.v1.0"
     assert store.get("manifest-1") == manifest
     assert store.get_by_run_id(manifest.run_id) == manifest
+
+
+def test_create_manifest_uses_injected_clock_for_created_at() -> None:
+    fixed_time = datetime(2026, 4, 23, 12, 15, tzinfo=UTC)
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        clock=FixedClock(fixed_time),
+        _manifest_id_factory=lambda: "manifest-clock",
+    )
+
+    manifest = service.create_manifest(_make_request())
+
+    assert manifest.created_at == fixed_time
+
+
+def test_create_manifest_uses_created_at_factory_when_clock_not_provided() -> None:
+    fixed_time = datetime(2026, 4, 23, 12, 30, tzinfo=UTC)
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        created_at_factory=lambda: fixed_time,
+        _manifest_id_factory=lambda: "manifest-factory",
+    )
+
+    manifest = service.create_manifest(_make_request())
+
+    assert manifest.created_at == fixed_time
 
 
 def test_create_manifest_preserves_distinct_config_hash_surfaces() -> None:
@@ -334,7 +363,7 @@ def test_execution_fingerprint_matches_golden_value() -> None:
 
     assert (
         manifest.execution_fingerprint
-        == "972299d2692196313d3e8e0ce70b0ed09115bd7ceb5b51d25fb48dd67dd6eb10"
+        == "dac9e9821dab487d5492a1eb412c991b208e4fe030605d9190fb88e4e2edf0be"
     )
 
 

@@ -11,6 +11,7 @@ import pyarrow as pa
 import pytest
 from pandera.pandas import Column, DataFrameSchema
 
+from bioetl.composition.factories.storage.audit import create_audit_port
 from bioetl.composition.factories.storage.storage_factory import StorageFactory
 from bioetl.domain.ports import AuditLayer
 from bioetl.domain.ports.noop import NoOpMetrics
@@ -81,11 +82,19 @@ async def test_storage_factory_wires_file_audit_across_medallion_writers(
     run_id = RunID(uuid4())
     batch_id = BatchID(uuid4())
     audit_path = tmp_path / "audit"
+    settings = _make_settings(tmp_path=tmp_path, audit_path=audit_path)
+    metrics = NoOpMetrics(warn_on_use=False)
+    audit = create_audit_port(
+        settings=settings,
+        logger=noop_logger,
+        metrics=metrics,
+    )
     context = StorageFactory.create(
-        settings=_make_settings(tmp_path=tmp_path, audit_path=audit_path),
+        settings=settings,
         config=_make_config(tmp_path=tmp_path),
         logger=noop_logger,
-        metrics=NoOpMetrics(warn_on_use=False),
+        metrics=metrics,
+        audit=audit,
     )
 
     bronze_audit = context.adapter.bronze._audit

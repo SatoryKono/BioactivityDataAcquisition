@@ -19,7 +19,7 @@ from bioetl.application.composite.lifecycle_observer_service import (
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.composite.result import DependencyResult, SeedResult
 from bioetl.domain.composite.state import CompositePipelineState
-from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
+from bioetl.domain.ports import ClockPort, ExecutionMetricsRunnerPort, LoggerPort
 
 
 class _CompositeRunnerStageHostProtocol(Protocol):
@@ -27,6 +27,7 @@ class _CompositeRunnerStageHostProtocol(Protocol):
     _logger: LoggerPort
     _observer: CompositeLifecycleObserverService
     _run_id_str: str
+    _clock: ClockPort | None
     _fsm: FSMStateHelperService
     _dependency_coordinator: DependencyCoordinatorService | None
     _dependencies_runner_factory: (

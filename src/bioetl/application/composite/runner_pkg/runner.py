@@ -171,7 +171,9 @@ class CompositePipelineRunner(
         """Validate and log the start of one composite runner execution."""
         self._validate_config_consistency()
         self._run_preflight_validation()
-        self._started_at, self._start_time = capture_runtime_timing_anchor()
+        self._started_at, self._start_time = capture_runtime_timing_anchor(
+            clock=self._clock
+        )
         self._observer.emit_run_started(
             composite_name=self._config.name,
             run_id=self._run_id_str,
@@ -234,6 +236,7 @@ class CompositePipelineRunner(
             checkpoint_manager=self._checkpoint_manager,
             runtime=self._runtime,
             fsm=self._fsm,
+            clock=self._clock,
         )
         self._original_run_id = resolve_original_run_id(
             runtime=self._runtime,

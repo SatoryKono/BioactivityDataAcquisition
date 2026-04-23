@@ -32,6 +32,7 @@ class TestPipelineCreationInputs:
                 runtime=SimpleNamespace(),
                 settings=SimpleNamespace(),
                 logger=MagicMock(),
+                audit=MagicMock(),
             ),
         )
 
@@ -52,6 +53,7 @@ class TestPipelineCreationInputs:
                 runtime=SimpleNamespace(),
                 settings=SimpleNamespace(),
                 logger=MagicMock(),
+                audit=MagicMock(),
             ),
         )
 
@@ -147,6 +149,7 @@ class TestCreatePipelineWithServicesImpl:
                 runtime=MagicMock(),
                 settings=settings,
                 logger=MagicMock(),
+                audit=MagicMock(),
             ),
         )
 
@@ -224,6 +227,7 @@ class TestCreatePipelineWithServicesImpl:
                 dq_monitor=dq_monitor,
                 metrics=metrics,
                 cached_bronze=cached_bronze,
+                audit=MagicMock(),
             ),
             pandera_silver_schema=MagicMock(),
         )
@@ -243,6 +247,7 @@ class TestCreatePipelineWithServicesImpl:
             create_data_source_fn=inputs.create_data_source_fn,
             settings=settings,
             logger=logger,
+            audit=inputs.request.audit,
             config=explicit_config,
             filter_config=filter_config,
             tracer=tracer,
@@ -309,6 +314,7 @@ class TestCreatePipelineWithServicesImpl:
                 runtime=MagicMock(),
                 settings=settings,
                 logger=MagicMock(),
+                audit=MagicMock(),
             ),
         )
         build_services_fn = MagicMock(return_value=services)

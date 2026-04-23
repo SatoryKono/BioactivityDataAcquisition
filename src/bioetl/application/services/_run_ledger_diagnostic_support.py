@@ -1,4 +1,4 @@
-"""Compatibility re-export module for run-ledger diagnostic helpers."""
+"""Re-export module for run-ledger diagnostic helpers."""
 
 from __future__ import annotations
 

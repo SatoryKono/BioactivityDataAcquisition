@@ -53,7 +53,7 @@ def transition_state_with_fsm_log(
     previous_state = state.state
     if validate:
         host._fsm.validate_fsm_transition(previous_state, to_state)
-    next_state = state.with_state(to_state)
+    next_state = state.with_state(to_state, clock=getattr(host, "_clock", None))
     host._fsm.log_fsm_transition(
         from_state=previous_state,
         to_state=to_state,
@@ -106,7 +106,10 @@ async def complete_seed_phase(
 ) -> CompositeCheckpointState:
     """Record successful seed completion and persist checkpoint."""
     previous_state = state.state
-    completed_state = state.with_seed_completed(seed_result)
+    completed_state = state.with_seed_completed(
+        seed_result,
+        clock=getattr(host, "_clock", None),
+    )
     host._fsm.validate_fsm_transition(
         previous_state,
         CompositePipelineState.SEED_COMPLETED,

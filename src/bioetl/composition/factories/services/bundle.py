@@ -48,6 +48,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import (
+        AuditPort,
         DataSourcePort,
         DQMonitorPort,
         LoggerPort,
@@ -143,6 +144,7 @@ def build_pipeline_services(
     create_data_source_fn: DataSourceCreatorProtocol,
     settings: Settings,
     logger: LoggerPort,
+    audit: AuditPort,
     config: PipelineYamlConfig | None = None,
     filter_config: InputFilterConfig | None = None,
     tracer: TracingPort | None = None,
@@ -175,6 +177,7 @@ def build_pipeline_services(
         data_source=data_source,
         pipeline_config=pipeline_config,
         pipeline_name=pipeline_name,
+        audit=audit,
         metrics=shared_metrics,
         tracer=tracer,
         dq_monitor=dq_monitor,

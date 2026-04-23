@@ -1,4 +1,4 @@
-"""Compatibility facade for CrossRef batch and pagination collaborators."""
+"""Facade for CrossRef batch and pagination collaborators."""
 
 from __future__ import annotations
 

@@ -24,6 +24,7 @@ from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.exceptions import CheckpointConflictError, StorageError
 from bioetl.domain.types import RunID
+from tests.helpers.clock import FixedClock
 
 
 # ---------------------------------------------------------------------------
@@ -48,6 +49,7 @@ def _freeze_checkpoint_support_now(
             return current_time.astimezone(tz)
 
     monkeypatch.setattr(checkpoint_runtime, "datetime", _FrozenDateTime)
+    monkeypatch.setattr(checkpoint_runtime, "current_utc_time", lambda: current_time)
 
 
 def _make_logger() -> MagicMock:
@@ -86,6 +88,7 @@ def _make_service(
     expected_manifest_id: str | None = None,
     run_ledger_port: MagicMock | None = None,
     metrics: MagicMock | None = None,
+    clock: FixedClock | None = None,
 ) -> tuple[CompositeCheckpointService, MagicMock, MagicMock]:
     """Convenience factory — returns (service, storage_mock, logger_mock)."""
     s = storage if storage is not None else _make_storage()
@@ -108,6 +111,7 @@ def _make_service(
         expected_manifest_id=expected_manifest_id,
         run_ledger_port=run_ledger_port,
         metrics=mt,
+        clock=clock,
     )
     return svc, s, lg
 
@@ -315,6 +319,20 @@ class TestLoadFreshStart:
         state = await svc.load()
 
         assert state.created_at is not None
+
+    @pytest.mark.asyncio
+    async def test_fresh_load_uses_injected_clock_for_created_at(self) -> None:
+        """Fresh checkpoint bootstrap should use the injected ClockPort."""
+        fixed_time = datetime(2026, 4, 23, 11, 0, tzinfo=UTC)
+        svc, storage, _ = _make_service(
+            resume=False,
+            clock=FixedClock(fixed_time),
+        )
+        storage.list_glob.return_value = []
+
+        state = await svc.load()
+
+        assert state.created_at == fixed_time
 
     @pytest.mark.asyncio
     async def test_fresh_load_carries_expected_manifest_id(self) -> None:

@@ -57,7 +57,7 @@ _META_FIELDS = frozenset(
 _TITLE_FIELDS = frozenset({"assay_pref_name"})
 _INT_FIELDS = frozenset({"confidence_score", "src_id"})
 _FLOAT_FIELDS = frozenset({"assay_taxonomy_id", "score", "variant_taxonomy_id"})
-_JSON_STRING_FIELDS = frozenset(
+_STRICT_JSON_FIELDS = frozenset(
     {
         "assay_classifications",
         "assay_parameters",
@@ -116,7 +116,7 @@ CHEMBL_ASSAY_PROFILE = build_standard_profile(
     title_fields=_TITLE_FIELDS,
     int_fields=_INT_FIELDS,
     float_fields=_FLOAT_FIELDS,
-    json_string_fields=_JSON_STRING_FIELDS,
+    strict_json_fields=_STRICT_JSON_FIELDS,
     enum_fields=_ENUM_FIELDS,
     special_rules=_SPECIAL_RULE_COMPONENTS,
     null_fields=_NULL_FIELDS,

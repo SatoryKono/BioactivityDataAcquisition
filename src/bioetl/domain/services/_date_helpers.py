@@ -1,4 +1,4 @@
-"""Deprecated compatibility wrappers for date normalization helpers.
+"""Legacy wrappers for date normalization helpers.
 
 Deprecated: import pure helpers from ``bioetl.domain.normalization.dates``
 instead.

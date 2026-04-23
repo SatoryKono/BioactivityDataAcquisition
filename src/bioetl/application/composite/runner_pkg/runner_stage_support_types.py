@@ -26,7 +26,7 @@ from bioetl.domain.composite.result import (
     SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
-from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
+from bioetl.domain.ports import ClockPort, ExecutionMetricsRunnerPort, LoggerPort
 
 
 class _CompositeRunnerStageSupportHostProtocol(Protocol):
@@ -35,6 +35,7 @@ class _CompositeRunnerStageSupportHostProtocol(Protocol):
     _logger: LoggerPort
     _observer: CompositeLifecycleObserverService
     _run_id_str: str
+    _clock: ClockPort | None
     _fsm: FSMStateHelperService
     _checkpoint_manager: CompositeCheckpointService
     _dependency_coordinator: DependencyCoordinatorService | None

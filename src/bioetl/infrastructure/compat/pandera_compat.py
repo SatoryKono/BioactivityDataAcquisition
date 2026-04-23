@@ -34,7 +34,7 @@ def _find_fn_by_subclass_or_union(
     registry: dict[
         typing.Any,  # Any: multipledispatch requires erased types
         typing.Any,  # Any: multipledispatch requires erased types
-    ],  # Any: multipledispatch requires erased types
+    ],
     input_data_type: type,
     typing_inspect_module: typing.Any,  # Any: imported module is runtime-defined
 ) -> typing.Any:  # Any: multipledispatch requires erased types

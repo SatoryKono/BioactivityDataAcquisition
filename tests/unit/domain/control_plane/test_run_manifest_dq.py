@@ -274,3 +274,32 @@ class TestRunManifestDQIntegration:
         )
 
         assert manifest1 != manifest3
+
+    def test_from_dict_does_not_alias_legacy_config_hash_to_explicit_hash_fields(
+        self,
+    ) -> None:
+        """Legacy config_hash must not backfill resolved/effective hashes on hydrate."""
+        manifest = RunManifest.from_dict(
+            {
+                "manifest_id": "manifest_legacy",
+                "execution_fingerprint": "exec_fingerprint_legacy",
+                "schema_version": "1.0",
+                "created_at": "2023-01-01T12:00:00",
+                "run_id": "12345678-1234-5678-1234-567812345678",
+                "run_type": "incremental",
+                "pipeline_name": "chembl_activity",
+                "provider": "chembl",
+                "entity": "activity",
+                "launch_context": {},
+                "runtime_config": {},
+                "resolved_config": {},
+                "code_provenance": {
+                    "config_hash": "legacy_hash_123",
+                    "git_commit": "abc123",
+                },
+            }
+        )
+
+        assert manifest.code_provenance.config_hash == "legacy_hash_123"
+        assert manifest.code_provenance.resolved_config_hash is None
+        assert manifest.code_provenance.effective_config_hash is None

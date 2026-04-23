@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 import pytest
@@ -267,6 +268,22 @@ class TestEffectiveConfigService:
         assert ambient_environment.provenance_status == "unsupported"
         assert ambient_environment.artifact_surface == "not_persisted"
         assert ambient_environment.anchor_field is None
+
+    def test_semantic_serialization_omits_empty_runtime_override_sections(
+        self,
+    ) -> None:
+        """Serialized semantic payload should not imply absent override provenance."""
+        artifact = self.service.create_effective_config_artifact(
+            pipeline_name="test_pipeline",
+            pipeline_kind="standard",
+            resolved_config={"pipeline": {"name": "test_pipeline"}},
+            runtime_overrides={},
+            source_refs=[],
+        )
+
+        payload = json.loads(self.service.serialize_semantic_artifact(artifact))
+
+        assert payload["runtime_overrides"] == {}
 
     def test_semantic_serialization_is_stable_across_occurrence_timestamps(
         self,

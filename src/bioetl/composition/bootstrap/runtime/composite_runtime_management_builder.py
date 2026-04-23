@@ -58,45 +58,47 @@ def build_runtime_management_services(
     quarantine_port = (
         bootstrap_quarantine_port() if config.cross_validation.enabled else None
     )
-    return RuntimeManagementServicesBundle(
-        checkpoint_manager=checkpoint_manager_cls(
-            composite_name=config.name,
-            run_id=run_id,
-            storage=checkpoint_storage,
-            logger=logger,
-            resume=runtime.resume,
-            expected_effective_config_hash=expected_effective_config_hash,
-            expected_contract_ref=normalize_contract_ref(config.name),
-            expected_contract_version=normalize_contract_version(
-                getattr(config, "version", "")
-            ),
-            expected_manifest_id=(
-                None
-                if control_plane_bundle is None
-                else control_plane_bundle.manifest_id
-            ),
-            expected_execution_fingerprint=(
-                None
-                if control_plane_bundle is None
-                else control_plane_bundle.execution_fingerprint
-            ),
-            expected_dq_contract_compatibility_hash=(
-                None
-                if control_plane_bundle is None
-                else control_plane_bundle.dq_contract_compatibility_hash
-            ),
-            expected_effective_config_artifact_id=(
-                None
-                if control_plane_bundle is None
-                else control_plane_bundle.effective_config_artifact_id
-            ),
-            run_ledger_port=(
-                None
-                if control_plane_bundle is None
-                or control_plane_bundle.run_ledger_service is None
-                else control_plane_bundle.run_ledger_service.ledger_port
-            ),
+    checkpoint_clock = infra_context.clock
+    checkpoint_manager_kwargs: dict[str, object] = {
+        "composite_name": config.name,
+        "run_id": run_id,
+        "storage": checkpoint_storage,
+        "logger": logger,
+        "resume": runtime.resume,
+        "expected_effective_config_hash": expected_effective_config_hash,
+        "expected_contract_ref": normalize_contract_ref(config.name),
+        "expected_contract_version": normalize_contract_version(
+            getattr(config, "version", "")
         ),
+        "expected_manifest_id": (
+            None if control_plane_bundle is None else control_plane_bundle.manifest_id
+        ),
+        "expected_execution_fingerprint": (
+            None
+            if control_plane_bundle is None
+            else control_plane_bundle.execution_fingerprint
+        ),
+        "expected_dq_contract_compatibility_hash": (
+            None
+            if control_plane_bundle is None
+            else control_plane_bundle.dq_contract_compatibility_hash
+        ),
+        "expected_effective_config_artifact_id": (
+            None
+            if control_plane_bundle is None
+            else control_plane_bundle.effective_config_artifact_id
+        ),
+        "run_ledger_port": (
+            None
+            if control_plane_bundle is None
+            or control_plane_bundle.run_ledger_service is None
+            else control_plane_bundle.run_ledger_service.ledger_port
+        ),
+    }
+    if checkpoint_clock is not None:
+        checkpoint_manager_kwargs["clock"] = checkpoint_clock
+    return RuntimeManagementServicesBundle(
+        checkpoint_manager=checkpoint_manager_cls(**checkpoint_manager_kwargs),
         dq_report_service=create_dq_report_service(
             logger,
             settings,

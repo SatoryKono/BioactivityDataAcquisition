@@ -44,6 +44,7 @@ from bioetl.domain.types import JsonDict
 if TYPE_CHECKING:
     from bioetl.composition.factories.storage import StorageContext
     from bioetl.domain.ports import (
+        AuditPort,
         CheckpointPort,
         DataSourcePort,
         DQMonitorPort,
@@ -82,6 +83,7 @@ class BaseServicesFactory:
         data_source: DataSourcePort,
         pipeline_config: PipelineYamlConfig,
         pipeline_name: str,
+        audit: AuditPort,
         metrics: MetricsPort | None = None,
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
@@ -96,6 +98,7 @@ class BaseServicesFactory:
                 logger=logger,
                 pipeline_config=pipeline_config,
                 pipeline_name=pipeline_name,
+                audit=audit,
                 metrics=metrics,
                 tracer=tracer,
                 metadata_coordinator=metadata_coordinator,

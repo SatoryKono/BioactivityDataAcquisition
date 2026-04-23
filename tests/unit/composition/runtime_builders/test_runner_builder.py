@@ -11,7 +11,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.domain.ports.noop import NoOpTracing
+from bioetl.domain.ports.noop import NoOpAudit, NoOpTracing
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import observability_builder
@@ -63,7 +63,13 @@ def _namespace_observability(logger: object | None = None) -> SimpleNamespace:
     effective_logger = (
         logger if logger is not None else SimpleNamespace(info=lambda *_, **__: None)
     )
-    return SimpleNamespace(logger=effective_logger, metrics=MagicMock())
+    return SimpleNamespace(
+        logger=effective_logger,
+        metrics=MagicMock(),
+        tracer=NoOpTracing(),
+        audit=NoOpAudit(),
+        dq_monitor=None,
+    )
 
 
 def _runtime_config_stub() -> dict[str, object]:
@@ -782,6 +788,7 @@ def test_build_pipeline_runner_binds_manifest_id_into_observability_bundle(
         logger=base_logger,
         metrics=MagicMock(),
         tracer=NoOpTracing(),
+        audit=NoOpAudit(),
     )
 
     context = _build_context(limit=25)
@@ -1408,6 +1415,7 @@ def test_canonical_observability_builder_uses_noop_when_disabled() -> None:
                 metrics_enabled=False,
                 dq_monitor_enabled=False,
                 allow_noop_observability_in_prod=False,
+                audit_enabled=False,
             ),
         ),
         logger_factory=logger_factory,
@@ -1445,6 +1453,7 @@ def test_canonical_observability_builder_configures_dq_monitor_thresholds() -> N
             dq_error_rate_max=0.3,
             dq_quality_score_min=0.7,
             allow_noop_observability_in_prod=False,
+            audit_enabled=False,
         ),
     )
 

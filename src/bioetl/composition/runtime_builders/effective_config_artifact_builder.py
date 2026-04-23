@@ -82,8 +82,25 @@ def _build_runtime_overrides_snapshot(ctx: PipelineRunContext) -> dict[str, obje
         if isinstance(raw_execution_context, Enum)
         else str(raw_execution_context)
     )
+    cli_overrides = {
+        "run_type": run_type_value,
+        "resume": getattr(ctx, "resume", False),
+        "dry_run": getattr(ctx, "dry_run", False),
+        "limit": getattr(ctx, "limit", None),
+        "query": getattr(ctx, "query", None),
+        "start_offset": getattr(ctx, "start_offset", None),
+        "log_level": getattr(ctx, "log_level", "INFO"),
+        "ignore_yaml_filter": getattr(ctx, "ignore_yaml_filter", False),
+        "skip_gold": getattr(ctx, "skip_gold", False),
+        "exact_replay": getattr(ctx, "exact_replay", False),
+        "input_filter": _to_serializable_mapping(getattr(ctx, "input_filter", None)),
+        "cached_bronze": _to_serializable_mapping(getattr(ctx, "cached_bronze", None)),
+        "vacuum": _to_serializable_mapping(getattr(ctx, "vacuum", None)),
+        "replay_of_run_id": getattr(ctx, "replay_of_run_id", None),
+        "replay_of_manifest_id": getattr(ctx, "replay_of_manifest_id", None),
+    }
     return {
-        "cli": {},
+        "cli": cli_overrides,
         "env": {},
         "runtime": {
             "pipeline_name": str(getattr(ctx, "pipeline_name", "unknown")),
@@ -153,23 +170,34 @@ def _build_effective_config_source_refs(
 ) -> list[ConfigSourceRef]:
     """Build source references used to materialize effective config artifacts."""
     resolved_repo_root = repo_root or Path(__file__).resolve().parents[4]
-    return [
-        _build_config_source_ref(
-            relative_path="configs/base/pipeline.yaml",
-            priority=1,
-            repo_root=resolved_repo_root,
-        ),
-        _build_config_source_ref(
-            relative_path=f"configs/entities/{provider}/{entity}.yaml",
-            priority=2,
-            repo_root=resolved_repo_root,
-        ),
-        _build_config_source_ref(
-            relative_path="configs/base/contract_registry.yaml",
-            priority=3,
-            repo_root=resolved_repo_root,
-        ),
+    candidate_paths = [
+        "configs/base/pipeline.yaml",
+        "configs/base/quality.yaml",
+        f"configs/providers/{provider}.yaml",
+        f"configs/entities/{provider}/{entity}.yaml",
+        f"configs/quality/entities/{provider}/{entity}.yaml",
+        f"configs/contracts/{provider}/{entity}.yaml",
+        "configs/base/contract_registry.yaml",
     ]
+    if provider == "composite":
+        candidate_paths[2:2] = [
+            f"configs/composites/{entity}.yaml",
+            f"configs/quality/entities/composite/{entity}.yaml",
+        ]
+    refs: list[ConfigSourceRef] = []
+    priority = 1
+    for relative_path in candidate_paths:
+        if not (resolved_repo_root / relative_path).exists():
+            continue
+        refs.append(
+            _build_config_source_ref(
+                relative_path=relative_path,
+                priority=priority,
+                repo_root=resolved_repo_root,
+            )
+        )
+        priority += 1
+    return refs
 
 
 def _control_plane_root(settings: Settings, leaf: str) -> Path:

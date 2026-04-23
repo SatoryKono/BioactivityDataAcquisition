@@ -119,7 +119,12 @@ class SilverMetadataOperations:
         """Resolve DQ metrics via host override when present, otherwise compute them."""
         host_compute_dq_metrics = getattr(self._host, "_compute_dq_metrics", None)
         if getattr(host_compute_dq_metrics, "__name__", None) == "AsyncMock":
-            dq_metrics = await self._host._compute_dq_metrics(table_name, records)
+            dq_metrics = await self._host._compute_dq_metrics(
+                table_name,
+                records,
+                quarantined_count=quarantined_count or 0,
+                validation_errors=validation_errors,
+            )
             if dq_metrics is not None:
                 return dq_metrics
 
@@ -283,6 +288,8 @@ class SilverMetadataOperations:
         table_path: str,
         primary_keys: list[str],
         validated_mode: SilverWriteMode,
+        quarantined_count: int | None = None,
+        validation_errors: Sequence[str] | None = None,
         started_at: datetime,
         start_perf: float,
     ) -> _PreparedSilverWriteFinalizationContext:
@@ -298,6 +305,8 @@ class SilverMetadataOperations:
             table_path=table_path,
             primary_keys=primary_keys,
             validated_mode=validated_mode,
+            quarantined_count=quarantined_count,
+            validation_errors=validation_errors,
             started_at=started_at,
             start_perf=start_perf,
         )
@@ -313,6 +322,8 @@ class SilverMetadataOperations:
         bronze_refs: list[BronzeWriteResult] | None,
         partition_cols: list[str] | None,
         source_batch_id: BatchID | None,
+        quarantined_count: int | None = None,
+        validation_errors: Sequence[str] | None = None,
         started_at: datetime,
         start_perf: float,
     ) -> SilverWriteResult | None:
@@ -331,6 +342,8 @@ class SilverMetadataOperations:
             bronze_refs=bronze_refs,
             partition_cols=partition_cols,
             source_batch_id=source_batch_id,
+            quarantined_count=quarantined_count,
+            validation_errors=validation_errors,
             started_at=started_at,
             start_perf=start_perf,
         )
@@ -465,6 +478,8 @@ async def _prepare_silver_write_finalization_context(
     table_path: str,
     primary_keys: list[str],
     validated_mode: SilverWriteMode,
+    quarantined_count: int | None = None,
+    validation_errors: Sequence[str] | None = None,
     started_at: datetime,
     start_perf: float,
 ) -> _PreparedSilverWriteFinalizationContext:
@@ -476,6 +491,8 @@ async def _prepare_silver_write_finalization_context(
     dq_metrics = await metadata_ops._resolve_finalization_dq_metrics(
         table_name=table_name,
         records=records,
+        quarantined_count=quarantined_count,
+        validation_errors=validation_errors,
     )
     version_after = await metadata_ops._resolve_version_after(table_path)
     completed_at = started_at + timedelta(seconds=time.perf_counter() - start_perf)
@@ -497,6 +514,8 @@ async def _finalize_silver_write_result(
     bronze_refs: list[BronzeWriteResult] | None,
     partition_cols: list[str] | None,
     source_batch_id: BatchID | None,
+    quarantined_count: int | None = None,
+    validation_errors: Sequence[str] | None = None,
     started_at: datetime,
     start_perf: float,
 ) -> SilverWriteResult | None:
@@ -511,6 +530,8 @@ async def _finalize_silver_write_result(
         table_path=table_path,
         primary_keys=primary_keys,
         validated_mode=validated_mode,
+        quarantined_count=quarantined_count,
+        validation_errors=validation_errors,
         started_at=started_at,
         start_perf=start_perf,
     )

@@ -127,6 +127,7 @@ def build_factory_services(
         create_data_source_fn=factory_context.create_data_source_fn,
         settings=request.settings,
         logger=request.logger,
+        audit=request.audit,
         config=request.config,
         filter_config=request.filter_config,
         tracer=request.tracer,

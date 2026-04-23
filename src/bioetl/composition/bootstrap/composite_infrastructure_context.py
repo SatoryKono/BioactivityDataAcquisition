@@ -5,7 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort, TracingPort
+from bioetl.domain.ports import (
+    ClockPort,
+    LockPort,
+    LoggerPort,
+    MetricsPort,
+    TracingPort,
+)
 from bioetl.infrastructure.config import Settings
 
 
@@ -22,3 +28,4 @@ class CompositeInfrastructureContext:
         Any  # Any: storage adapter is concrete infra object implementing StoragePort
     )
     lock: LockPort
+    clock: ClockPort | None = None

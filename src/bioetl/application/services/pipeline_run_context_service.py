@@ -1,4 +1,4 @@
-"""Compatibility facade for the canonical execution seam."""
+"""Facade for the canonical execution seam."""
 
 from __future__ import annotations
 

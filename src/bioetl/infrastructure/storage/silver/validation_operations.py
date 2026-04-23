@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal, Protocol
+from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 import pyarrow as pa
 
@@ -37,7 +37,7 @@ from bioetl.infrastructure.storage.silver.schema_drift_operations import (
 if TYPE_CHECKING:
     from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.ports import LoggerPort, MetricsPort, SilverValidatorPort
-    from bioetl.domain.types import BronzeRecord
+
 
 __all__ = [
     "_PreparedSilverWritePayload",
@@ -63,14 +63,16 @@ _VERSIONED_TABLE_SUFFIX_RE = re.compile(r"__v\d+_\d+_\d+$")
 
 
 def _primary_key_tuple(
-    record: BronzeRecord,
+    record: dict[str, Any],  # Any: BronzeRecord is JsonDict (heterogeneous)
     primary_keys: list[str],
 ) -> tuple[object, ...]:
     """Return one stable primary-key tuple for a batch record."""
     return tuple(record.get(primary_key) for primary_key in primary_keys)
 
 
-def _content_identity(record: BronzeRecord) -> str:
+def _content_identity(
+    record: dict[str, Any],
+) -> str:  # Any: BronzeRecord is JsonDict (heterogeneous)
     """Return deterministic content identity for one batch record."""
     content_hash = record.get("content_hash")
     if content_hash is not None:
@@ -84,7 +86,7 @@ def _content_identity(record: BronzeRecord) -> str:
 class _PreparedSilverWritePayload:
     """Validated write payload produced before Delta write execution."""
 
-    records: list[BronzeRecord]
+    records: list[dict[str, Any]]  # Any: BronzeRecord is JsonDict (heterogeneous)
     validated_mode: SilverWriteMode
     table_path: str
     arrow_data: pa.Table
@@ -96,7 +98,7 @@ class _PreparedSilverWritePayload:
 class _ValidatedSilverWriteContext:
     """Validated pre-write state before path resolution and Delta dispatch."""
 
-    records: list[BronzeRecord]
+    records: list[dict[str, Any]]  # Any: BronzeRecord is JsonDict (heterogeneous)
     validated_mode: SilverWriteMode
     arrow_data: pa.Table
 
@@ -106,7 +108,7 @@ class _SilverSchemaPolicyRequest:
     """Schema drift policy input after synchronous validation completes."""
 
     table_name: str
-    records: list[BronzeRecord]
+    records: list[dict[str, Any]]  # Any: BronzeRecord is JsonDict (heterogeneous)
     on_schema_mismatch: Literal["error", "evolve", "ignore"]
     validated_mode: SilverWriteMode
     arrow_data: pa.Table
@@ -117,7 +119,7 @@ class _SilverWritePreparationRequest:
     """Normalized request payload for Silver validation and Arrow preparation."""
 
     table_name: str
-    records: list[BronzeRecord]
+    records: list[dict[str, Any]]  # Any: BronzeRecord is JsonDict (heterogeneous)
     primary_keys: list[str]
     schema: pa.Schema
     mode: str
@@ -138,13 +140,16 @@ class _SilverWriterValidationHostProtocol(Protocol):
     _prepare_arrow_data: Callable[..., pa.Table]
     _validate_write_mode: Callable[[str], SilverWriteMode]
     _deduplicate_by_primary_keys: Callable[
-        [list[BronzeRecord], list[str]],
-        list[BronzeRecord],
+        [
+            list[dict[str, Any]],
+            list[str],
+        ],  # Any: BronzeRecord is JsonDict (heterogeneous)
+        list[dict[str, Any]],  # Any: BronzeRecord is JsonDict (heterogeneous)
     ]
     _to_policy_write_mode: Callable[[SilverWriteMode], WriteMode]
     _validate_key_nullability: Callable[
         [
-            list[BronzeRecord],
+            list[dict[str, Any]],  # Any: BronzeRecord is JsonDict (heterogeneous)
             list[str],
             list[str] | None,
             list[KeyNullabilityRule] | None,
@@ -156,7 +161,7 @@ class _SilverWriterValidationHostProtocol(Protocol):
     async def _check_schema_drift(
         self,
         table_name: str,
-        records: list[BronzeRecord],
+        records: list[dict[str, Any]],  # Any: BronzeRecord is JsonDict (heterogeneous)
         on_schema_mismatch: Literal["error", "evolve", "ignore"],
     ) -> None: ...
 
@@ -179,9 +184,9 @@ def _validate_write_mode_impl(mode: str) -> SilverWriteMode:
 
 
 def _deduplicate_by_primary_keys_impl(
-    records: list[BronzeRecord],
+    records: list[dict[str, Any]],  # Any: BronzeRecord is JsonDict (heterogeneous)
     primary_keys: list[str],
-) -> list[BronzeRecord]:
+) -> list[dict[str, Any]]:  # Any: BronzeRecord is JsonDict (heterogeneous)
     """Deduplicate records by business key using deterministic content identity.
 
     The current-batch contract mirrors Silver retention compaction:
@@ -209,7 +214,9 @@ def _deduplicate_by_primary_keys_impl(
 
     seen_exact_keys: set[tuple[tuple[object, ...], str]] = set()
     seen_primary_keys: set[tuple[object, ...]] = set()
-    deduplicated: list[BronzeRecord] = []
+    deduplicated: list[
+        dict[str, Any]
+    ] = []  # Any: BronzeRecord is JsonDict (heterogeneous)
     for primary_key, content_identity, record in ranked_records:
         exact_key = (primary_key, content_identity)
         if exact_key in seen_exact_keys:
@@ -319,7 +326,7 @@ def _enforce_write_policy(
 
 def _validate_records(
     host: _SilverWriterValidationHostProtocol,
-    records: list[BronzeRecord],
+    records: list[dict[str, Any]],  # Any: BronzeRecord is JsonDict (heterogeneous)
     table_name: str,
     schema: pa.Schema,
 ) -> None:
@@ -339,7 +346,7 @@ def _validate_records(
 
 def _validate_silver_pandera(
     host: _SilverWriterValidationHostProtocol,
-    records: list[BronzeRecord],
+    records: list[dict[str, Any]],  # Any: BronzeRecord is JsonDict (heterogeneous)
     table_name: str,
 ) -> None:
     """Validate records using Pandera schema before writing to Silver."""
