@@ -114,10 +114,10 @@ quality:
         -   field: publication_type
             type: enum
             allowed:
-                - PUBLICATION
-                - BOOK
-                - DATASET
-                - PATENT
+                - journal-article
+                - book
+                - dataset
+                - patent
             nullable: false
         -   field: publication_year
             type: range
@@ -198,7 +198,7 @@ quality:
                 -   field: title
                     type: not_null
                     nullable: false
-                    error_message: Publications of type PUBLICATION must have a title
+                    error_message: Publications of type journal-article must have a title
     key_nullability:
         -   field: publication_id
             key_type: merge
@@ -220,7 +220,7 @@ filters:
     silver_filters:
         columns:
             publication_type:
-                - PUBLICATION
+                - journal-article
         ranges:
             publication_year:
                 min: 1950
@@ -232,7 +232,7 @@ filters:
     gold_filters:
         columns:
             publication_type:
-                - PUBLICATION
+                - journal-article
         ranges:
             publication_year:
                 min: 1950

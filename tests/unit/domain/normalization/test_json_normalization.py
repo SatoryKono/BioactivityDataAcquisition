@@ -11,6 +11,7 @@ from bioetl.domain.normalization.json import (
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_json_string,
+    normalize_profile_json_string_strict,
 )
 
 
@@ -112,6 +113,17 @@ class TestProfileJsonNormalization:
 
         # Test invalid JSON (should be preserved)
         assert normalize_profile_json_string("not json") == "not json"
+
+    def test_profile_strict_json_normalizer_fails_closed(self) -> None:
+        """Strict JSON profile fields must collapse malformed payloads to None."""
+        input_json = '{"z":3,"a":1}'
+        result = normalize_profile_json_string_strict(input_json)
+        expected = '{"a":1,"z":3}'
+        assert result == expected
+
+        assert normalize_profile_json_string_strict(None) is None
+        assert normalize_profile_json_string_strict(123) == 123
+        assert normalize_profile_json_string_strict("not json") is None
 
 
 class TestJsonRoundtrip:

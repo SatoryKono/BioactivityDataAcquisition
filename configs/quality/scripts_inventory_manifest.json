@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-23T13:43:26.300537+00:00",
+  "generated_at": "2026-04-23T13:55:00.963866+00:00",
   "summary": {
-    "total_scripts": 432,
+    "total_scripts": 433,
     "status_counts": {
-      "active": 304,
+      "active": 305,
       "legacy": 15,
       "orphan": 101,
       "unknown": 12
@@ -14,7 +14,7 @@
       "build": 1,
       "ci": 51,
       "docs": 134,
-      "scripts": 286,
+      "scripts": 287,
       "skills": 8,
       "tests": 134
     }
@@ -9330,6 +9330,14 @@
       ]
     },
     {
+      "path": "scripts/generate_test_github_issues.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/memory/__main__.py",
       "type": "py",
       "status": "active",
@@ -11151,10 +11159,23 @@
     {
       "path": "scripts/optimized_test_runner.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/generate_test_github_issues.py",
+          "line": 330,
+          "source_group": "scripts",
+          "text": "- Test runner: `scripts/optimized_test_runner.py`"
+        },
+        {
+          "path": "scripts/generate_test_github_issues.py",
+          "line": 371,
+          "source_group": "scripts",
+          "text": "print(\"2. Implement the optimized test runner: python3 scripts/optimized_test_runner.py --list\")"
+        }
+      ]
     },
     {
       "path": "scripts/schema/__main__.py",
