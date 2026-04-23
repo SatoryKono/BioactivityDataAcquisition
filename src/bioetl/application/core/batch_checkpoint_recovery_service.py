@@ -9,10 +9,12 @@ import time
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
+from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
+    from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointManagerService,
     )
@@ -33,12 +35,14 @@ class BatchCheckpointRecoveryService:
         metrics: MetricsPort | None = None,
         tracer: TracingPort | None = None,
         pipeline_name: str,
+        memory_manager: BatchMemoryManagerService | None = None,
     ) -> None:
         self._checkpoint_manager = checkpoint_manager
         self._logger = logger
         self._metrics = metrics
         self._tracer = tracer
         self._pipeline_name = pipeline_name
+        self._memory_manager = memory_manager
 
     async def save_periodic_checkpoint(
         self,
@@ -198,7 +202,9 @@ class BatchCheckpointRecoveryService:
             records_processed=total,
         )
         try:
-            await self._checkpoint_manager.save_checkpoint(total)
+            await self._checkpoint_manager.save_checkpoint(
+                self._checkpoint_payload(total)
+            )
         except self._CHECKPOINT_SAVE_ERRORS as error:
             duration_seconds = time.monotonic() - started_at
             self._emit_checkpoint_save_event(
@@ -229,4 +235,16 @@ class BatchCheckpointRecoveryService:
         self._close_checkpoint_save_span(
             span,
             status="succeeded",
+        )
+
+    def _checkpoint_payload(self, total: int) -> CheckpointMetadata | int:
+        """Build checkpoint payload, including memory trace when available."""
+        if self._memory_manager is None:
+            return total
+        memory_trace = self._memory_manager.decision_trace_dicts()
+        if not memory_trace:
+            return total
+        return CheckpointMetadata(
+            records_processed=total,
+            memory_decision_trace=memory_trace,
         )

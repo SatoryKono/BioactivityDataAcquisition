@@ -169,6 +169,13 @@ class TestTargetSync:
             chembl_yaml["target"]["component_relationships"]
         )
 
+    def test_target_component_types(self, chembl_yaml: dict[str, Any]) -> None:
+        from bioetl.domain.schemas.constants import TARGET_COMPONENT_TYPES
+
+        assert TARGET_COMPONENT_TYPES == frozenset(
+            chembl_yaml["target"]["component_types"]
+        )
+
 
 class TestPublicationSync:
     """Publication enum constants must match YAML."""

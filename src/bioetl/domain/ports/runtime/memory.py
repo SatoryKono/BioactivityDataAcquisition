@@ -9,6 +9,37 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
+from bioetl.domain.types import JsonDict
+
+
+@dataclass(frozen=True, slots=True)
+class MemoryDecisionTraceEntry:
+    """Replay-visible adaptive memory sizing decision."""
+
+    decision_index: int
+    record_index: int | None
+    stage: str
+    old_batch_size: int
+    new_batch_size: int
+    adaptive_sizing_enabled: bool
+    monitor_available: bool
+    config_available: bool
+    reason: str
+
+    def to_dict(self) -> JsonDict:
+        """Return a JSON-serializable trace entry."""
+        return {
+            "decision_index": self.decision_index,
+            "record_index": self.record_index,
+            "stage": self.stage,
+            "old_batch_size": self.old_batch_size,
+            "new_batch_size": self.new_batch_size,
+            "adaptive_sizing_enabled": self.adaptive_sizing_enabled,
+            "monitor_available": self.monitor_available,
+            "config_available": self.config_available,
+            "reason": self.reason,
+        }
+
 
 @dataclass(frozen=True, slots=True)
 class MemoryStats:
@@ -31,8 +62,12 @@ class MemoryStats:
 
     @property
     def is_under_pressure(self) -> bool:
-        """Check if system is under memory pressure (>80% used)."""
-        return self.percent_used > 0.8
+        """Check pressure with the legacy coarse 80% threshold."""
+        return self.is_under_pressure_at(0.8)
+
+    def is_under_pressure_at(self, threshold: float) -> bool:
+        """Check if system usage is at or above a configured threshold."""
+        return self.percent_used >= threshold
 
 
 @runtime_checkable
@@ -115,4 +150,4 @@ class MemoryMonitorPort(Protocol):
         ...
 
 
-__all__ = ["MemoryMonitorPort", "MemoryStats"]
+__all__ = ["MemoryDecisionTraceEntry", "MemoryMonitorPort", "MemoryStats"]

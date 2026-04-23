@@ -60,6 +60,14 @@ observed_values:
       - "%"
       - ug.mL-1
   molecule:
+    max_phase:
+      - -1
+      - 0
+      - 0.5
+      - 1
+      - 2
+      - 3
+      - 4
     molecule_type:
       - Small molecule
       - Antibody
@@ -77,9 +85,20 @@ observed_values:
       - PROTEIN COMPLEX
       - CELL-LINE
       - UNKNOWN
+  target_component:
+    component_type:
+      - PROTEIN
+      - DNA
+      - RNA
   publication:
     publication_type:
       - PUBLICATION
       - PATENT
       - DATASET
       - BOOK
+  publication_term:
+    term_type:
+      - MESH_HEADING
+      - MESH_QUALIFIER
+      - KEYWORD
+      - CONCEPT

@@ -80,6 +80,52 @@ guardrails. The active implementation policy is:
   `JOIN_KEY_NORMALIZATION_POLICIES`; configuration coverage is enforced by unit
   tests over `configs/composites/*.yaml`.
 
+## 2026-04-23 Enum, Publication, and Observed-Value Governance Closure
+
+Issues `#3031`-`#3040` extend the normalization audit closure from
+`chembl_activity` and generic profile semantics into family-wide vocabulary,
+publication, and evidence governance.
+
+The active implementation policy is:
+
+- ChEMBL enum SSOT remains `configs/enums/chembl.yaml`; domain constants,
+  Pandera schemas, normalization profiles, DQ configs, and extraction/filter
+  subsets are checked by `test_constants_yaml.py` and
+  `test_chembl_enum_parity.py`.
+- `chembl_assay_parameters` owns parameter canonicalization in its shipped
+  profile for `type`, `relation`, `units`, `standard_type`,
+  `standard_relation`, and `standard_units`; the transformer maps provider
+  payloads without owning business canonicalization for those fields.
+- ChEMBL assay structured fields such as `assay_classifications`,
+  `assay_parameters`, and `variant_sequence_json` use explicit canonical JSON
+  profile semantics; `bao_format` and `bao_label` retain code/label semantics
+  instead of collapsing ontology provenance.
+- Publication pipelines preserve raw provider publication-type values and derive
+  `publication_type_unified`, `publication_subclass`, and `publication_class`
+  through the unified taxonomy in
+  `configs/enums/publication_type_classification.csv`.
+- ChEMBL observed-value governance is offline and deterministic:
+  `tests/fixtures/normalization/chembl_observed_values.yaml` contains
+  representative observed values, and
+  `test_chembl_observed_value_fixtures.py` checks them against SSOT or approved
+  derived vocabulary surfaces without live ChEMBL calls.
+- The generated normalization matrix under
+  `docs/reports/generated/pipeline_normalization_field_matrix/` is part of the
+  release evidence bundle and must be regenerated after profile, schema, DQ, or
+  publication-classification changes.
+
+Rollout notes:
+
+- Raw publication-type behavior is DQ-affecting: downstream consumers should
+  read `publication_type_unified`, `publication_subclass`, and
+  `publication_class` for canonical cross-provider semantics.
+- Changes to normalized field casing, units, operators, or derived publication
+  classification can affect `content_hash`; run dry-run/shadow comparison
+  before rebuilding persisted Silver/Gold outputs.
+- `#3040` documentation closure is complete only when ADR-038, this plan,
+  generated matrix artifacts, and `CHANGELOG.md` describe the same policy
+  state.
+
 ## Canonical Hash and Serialization Rules
 
 ### Canonical JSON

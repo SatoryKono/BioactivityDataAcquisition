@@ -24,6 +24,13 @@ _OPTIONAL_STR = str | None
 _OPTIONAL_BOOL = bool | None
 
 
+def _coerce_json_dict_sequence(value: object) -> tuple[JsonDict, ...]:
+    """Coerce persisted JSON objects into an immutable tuple."""
+    if not isinstance(value, list | tuple):
+        return ()
+    return tuple(item for item in value if isinstance(item, dict))
+
+
 @dataclass(frozen=True, slots=True)
 class CheckpointMetadata:
     """Extended checkpoint metadata with DQ contract compatibility information.
@@ -47,6 +54,8 @@ class CheckpointMetadata:
         contract_version: Canonical contract version for checkpoint compatibility.
         exact_replay: Whether the checkpoint was created under exact-replay mode.
         input_snapshot_ids: Snapshot identities required for replay-safe resume.
+        memory_decision_trace: Bounded adaptive-memory sizing decisions used as
+            replay-visible anchors for pressure/relief behavior.
         run_context: Additional run context information.
     """
 
@@ -67,6 +76,7 @@ class CheckpointMetadata:
     exact_replay: _OPTIONAL_BOOL = None
     input_snapshot_ids: tuple[str, ...] = ()
     input_snapshot_fingerprint: _OPTIONAL_STR = None
+    memory_decision_trace: tuple[JsonDict, ...] = ()
     run_context: JsonDict | None = None  # Any: run context has heterogeneous values
 
     @staticmethod
@@ -119,6 +129,9 @@ class CheckpointMetadata:
             input_snapshot_fingerprint=cast(
                 _OPTIONAL_STR, legacy_metadata.get("input_snapshot_fingerprint")
             ),
+            memory_decision_trace=_coerce_json_dict_sequence(
+                legacy_metadata.get("memory_decision_trace")
+            ),
             run_context=legacy_metadata.get("run_context"),
         )
 
@@ -146,6 +159,7 @@ class CheckpointMetadata:
             ("exact_replay", self.exact_replay),
             ("input_snapshot_ids", list(self.input_snapshot_ids)),
             ("input_snapshot_fingerprint", self.input_snapshot_fingerprint),
+            ("memory_decision_trace", list(self.memory_decision_trace)),
             ("run_context", self.run_context),
         )
         for key, value in optional_values:
@@ -191,6 +205,9 @@ class CheckpointMetadata:
             input_snapshot_ids=coerce_snapshot_ids(data.get("input_snapshot_ids")),
             input_snapshot_fingerprint=cast(
                 _OPTIONAL_STR, data.get("input_snapshot_fingerprint")
+            ),
+            memory_decision_trace=_coerce_json_dict_sequence(
+                data.get("memory_decision_trace")
             ),
             run_context=data.get("run_context"),
         )

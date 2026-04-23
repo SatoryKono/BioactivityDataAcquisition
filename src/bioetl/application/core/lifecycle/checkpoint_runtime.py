@@ -92,6 +92,14 @@ def enrich_metadata_with_execution_identity(
             metadata.dq_rule_bundle_version,
             identity.dq_rule_bundle_version,
         ),
+        pipeline_name=_prefer_identity_value(
+            metadata.pipeline_name,
+            identity.pipeline_name,
+        ),
+        run_type=_prefer_identity_value(
+            metadata.run_type,
+            identity.run_type,
+        ),
         pipeline_version=_prefer_identity_value(
             metadata.pipeline_version,
             identity.pipeline_version,
@@ -131,6 +139,13 @@ def enrich_metadata_with_execution_identity(
         input_snapshot_ids=_prefer_identity_sequence(
             metadata.input_snapshot_ids,
             identity.input_snapshot_ids,
+        ),
+        input_snapshot_fingerprint=_prefer_identity_value(
+            metadata.input_snapshot_fingerprint,
+            identity.input_snapshot_fingerprint,
+        ),
+        memory_decision_trace=(
+            metadata.memory_decision_trace or identity.memory_decision_trace
         ),
         run_context=metadata.run_context or identity.run_context,
     )

@@ -78,6 +78,12 @@ ENUM_POLICIES: tuple[EnumPolicy, ...] = (
         surfaces=frozenset({"extraction_params"}),
         extraction_param="doc_type",
     ),
+    EnumPolicy(
+        "target_component",
+        "component_type",
+        ("target", "component_types"),
+        surfaces=frozenset({"quality"}),
+    ),
 )
 
 REGISTRY_UNIONS: dict[tuple[str, ...], tuple[tuple[str, ...], ...]] = {

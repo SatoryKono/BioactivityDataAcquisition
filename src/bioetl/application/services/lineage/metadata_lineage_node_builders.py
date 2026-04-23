@@ -106,9 +106,7 @@ def run_node(run_context: RunContext) -> LineageNodeRef:
             "execution_fingerprint": run_context.execution_fingerprint,
             "config_hash": run_context.config_hash,
             "resolved_config_hash": run_context.resolved_config_hash,
-            "effective_config_hash": (
-                run_context.effective_config_hash or run_context.config_hash
-            ),
+            "effective_config_hash": run_context.effective_config_hash,
             "effective_config_artifact_id": run_context.effective_config_artifact_id,
             "contract_ref": run_context.contract_ref,
             "contract_version": run_context.contract_version,
@@ -138,9 +136,7 @@ def manifest_node(run_context: RunContext) -> LineageNodeRef | None:
             "execution_fingerprint": run_context.execution_fingerprint,
             "config_hash": run_context.config_hash,
             "resolved_config_hash": run_context.resolved_config_hash,
-            "effective_config_hash": (
-                run_context.effective_config_hash or run_context.config_hash
-            ),
+            "effective_config_hash": run_context.effective_config_hash,
             "effective_config_artifact_id": run_context.effective_config_artifact_id,
             "contract_ref": run_context.contract_ref,
             "contract_version": run_context.contract_version,

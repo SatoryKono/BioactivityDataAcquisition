@@ -10,6 +10,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import TARGET_COMPONENT_TYPES
 
 __all__ = [
     "TargetComponentSchema",
@@ -29,7 +30,9 @@ class TargetComponentSchema(ETLRecordSchema):
         nullable=True, description="UniProt accession."
     )
     component_type: Series[str] | None = pa.Field(
-        nullable=True, description="Component type (PROTEIN, DNA, RNA, etc.)."
+        nullable=True,
+        isin=list(TARGET_COMPONENT_TYPES),
+        description="Component type (PROTEIN, DNA, RNA).",
     )
     description: Series[str] | None = pa.Field(
         nullable=True, description="Component description."

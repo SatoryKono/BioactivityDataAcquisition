@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-30'
+Last verified: '2026-04-23'
 ---
 
 # ADR-038: ChEMBL Enum Values Externalization to YAML
@@ -31,9 +31,11 @@ manual edits in 3+ locations with no cross-validation.
 
 ## Decision
 
-Create `configs/enums/chembl.yaml` as the **single source of truth** (SSOT) for all
-ChEMBL DB enum values. Keep `domain/schemas/constants.py` as pure Python (no I/O) to
-preserve domain purity (ARCH-002). Enforce sync between YAML and Python via tests.
+Create `configs/enums/chembl.yaml` as the **single source of truth** (SSOT)
+for ChEMBL DB enum values used by schemas, normalization profiles, DQ
+configuration, filters, and observed-value governance. Keep
+`domain/schemas/constants.py` as pure Python (no I/O) to preserve domain purity
+(ARCH-002). Enforce sync between YAML and Python via tests.
 
 ### Structure
 
@@ -48,18 +50,26 @@ configs/enums/
 `tests/unit/domain/schemas/test_constants_yaml.py` verifies that every Python
 constant matches the corresponding YAML value exactly.
 
-**Workflow for ChEMBL version update:**
+**Workflow for ChEMBL version or governed-vocabulary update:**
 1. Update `configs/enums/chembl.yaml` (bump version, add/remove values)
 2. Run tests — sync tests fail, showing exactly which constants diverge
 3. Update `constants.py` to match
-4. Tests pass
+4. Update DQ/filter/profile surfaces that consume the vocabulary
+5. Regenerate normalization matrix artifacts when profile or DQ semantics change
+6. Tests pass
 
 ### What is NOT externalized
 
 - **Regex patterns** (`CHEMBL-ID-PATTERN`, `BAO-ID-PATTERN`, etc.) — format-dependent,
   not DB-version-dependent
 - **Domain StrEnums** (`RunType`, `HealthStatus`) — business logic, not external DB data
-- **Non-ChEMBL enums** (CrossRef, OpenAlex) — can follow same pattern later
+- **Cross-provider publication classification taxonomy** — governed by
+  `configs/enums/publication_type_classification.csv` and the
+  `publication_type_unified` / `publication_subclass` / `publication_class`
+  derived fields, not by raw provider publication-type fields
+- **Non-ChEMBL provider enums** (CrossRef, OpenAlex, PubMed, Semantic Scholar) —
+  can follow this YAML pattern only when the provider owns a stable finite
+  vocabulary; free-form raw values must remain raw sidecars
 
 ## Alternatives Considered
 
@@ -108,9 +118,13 @@ Generate `constants.py` from YAML via template. Rejected because:
 
 ### Neutral
 
-- Filter and DQ YAML configs continue to hardcode subsets — they select from the
-  canonical set for their specific use case. A future enhancement could add
-  cross-validation that filter values are subsets of YAML enums.
+- Filter and DQ YAML configs continue to declare subsets for their specific use
+  case, but subset governance is now enforced by
+  `tests/integration/config/test_chembl_enum_parity.py` for covered fields.
+- Representative observed-value fixtures under
+  `tests/fixtures/normalization/chembl_observed_values.yaml` verify that
+  sampled runtime-like values remain within the same SSOT or approved derived
+  vocabulary surfaces without requiring live ChEMBL network calls.
 
 ## Compliance
 
@@ -119,15 +133,21 @@ Generate `constants.py` from YAML via template. Rejected because:
 | Domain purity (ARCH-002) | PASS | No I/O in `constants.py` |
 | Public API unchanged | PASS | All `__all__` exports identical |
 | Types preserved | PASS | `frozenset[str]`, `tuple[float, ...]` |
-| Sync enforcement | PASS | 20 sync tests in `test_constants_yaml.py` |
+| Sync enforcement | PASS | Sync tests in `test_constants_yaml.py` |
+| DQ/filter subset governance | PASS | Covered by `test_chembl_enum_parity.py` |
+| Observed-value governance | PASS | Covered by `test_chembl_observed_value_fixtures.py` |
+| Derived publication taxonomy | PASS | Raw provider values preserved; derived fields validated through `publication_type_classification.csv` |
 
 ## References
 
 - ADR-027: DQ Rules Externalization
 - ADR-028: Filter Rules Externalization
 - `configs/enums/chembl.yaml` — SSOT file
+- `configs/enums/publication_type_classification.csv` — cross-provider publication classification taxonomy
 - `src/bioetl/domain/schemas/constants.py` — pure Python constants
 - `tests/unit/domain/schemas/test_constants_yaml.py` — sync tests
+- `tests/integration/config/test_chembl_enum_parity.py` — subset governance tests
+- `tests/integration/config/test_chembl_observed_value_fixtures.py` — offline observed-value governance tests
 
 ## Rollout
 

@@ -9,6 +9,9 @@ import pytest
 from bioetl.application.core.batch_checkpoint_recovery_service import (
     BatchCheckpointRecoveryService,
 )
+from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
+from bioetl.domain.config import MemoryConfig
+from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 
 @pytest.fixture
@@ -139,3 +142,36 @@ async def test_save_checkpoint_now_persists_total_processed(
     )
 
     checkpoint_manager.save_checkpoint.assert_awaited_once_with(20)
+
+
+@pytest.mark.asyncio
+async def test_save_checkpoint_persists_memory_decision_trace(
+    checkpoint_manager: AsyncMock,
+    logger: MagicMock,
+    metrics: MagicMock,
+) -> None:
+    memory_manager = BatchMemoryManagerService(
+        initial_batch_size=1000,
+        memory_config=MemoryConfig(max_batch_memory_mb=1, min_batch_size=50),
+    )
+    memory_manager.check_pressure(
+        current_size=2000,
+        check_interval=100,
+        records_fetched=100,
+    )
+    service = BatchCheckpointRecoveryService(
+        checkpoint_manager=checkpoint_manager,
+        logger=logger,
+        metrics=metrics,
+        pipeline_name="chembl_activity",
+        memory_manager=memory_manager,
+    )
+
+    await service.save_checkpoint_now(records_fetched=100, resume_offset=0)
+
+    checkpoint_manager.save_checkpoint.assert_awaited_once()
+    payload = checkpoint_manager.save_checkpoint.await_args.args[0]
+    assert isinstance(payload, CheckpointMetadata)
+    assert payload.records_processed == 100
+    assert payload.memory_decision_trace[0]["stage"] == "pressure_check"
+    assert payload.memory_decision_trace[0]["reason"] == "config_budget_exceeded"

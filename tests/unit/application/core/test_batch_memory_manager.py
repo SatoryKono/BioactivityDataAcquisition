@@ -239,6 +239,37 @@ class TestCheckPressure:
 
         assert manager.batch_size_reductions == 3
 
+    def test_records_pressure_decision_trace(self):
+        """Pressure decisions are retained as replay-visible trace entries."""
+        monitor = _make_monitor(recommended=250)
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_monitor=monitor,
+            memory_config=_make_config(check_interval_records=100),
+        )
+
+        result = manager.check_pressure(
+            current_size=500,
+            check_interval=100,
+            records_fetched=100,
+        )
+
+        assert result == 250
+        trace = manager.decision_trace_dicts()
+        assert trace == (
+            {
+                "decision_index": 1,
+                "record_index": 100,
+                "stage": "pressure_check",
+                "old_batch_size": 500,
+                "new_batch_size": 250,
+                "adaptive_sizing_enabled": True,
+                "monitor_available": True,
+                "config_available": True,
+                "reason": "monitor_recommended_reduction",
+            },
+        )
+
 
 # ---------------------------------------------------------------------------
 # maybe_recover
@@ -294,6 +325,21 @@ class TestMaybeRecover:
         result = manager.maybe_recover(current_size=500)
         assert result == 500
 
+    def test_records_recovery_decision_without_overshooting_initial_size(self):
+        """Recovery trace captures bounded relief decisions."""
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_config=_make_config(enable_adaptive_sizing=True),
+        )
+
+        result = manager.maybe_recover(current_size=490)
+
+        assert result == 500
+        assert manager.decision_trace_dicts()[-1]["reason"] == (
+            "config_recovery_toward_initial"
+        )
+        assert manager.decision_trace_dicts()[-1]["new_batch_size"] == 500
+
 
 # ---------------------------------------------------------------------------
 # _estimate_from_config
@@ -325,12 +371,12 @@ class TestEstimateFromConfig:
         manager = BatchMemoryManagerService(
             initial_batch_size=20000,
             memory_config=_make_config(
-                max_batch_memory_mb=0,  # 0 * 1000 = 0 records budget
-                min_batch_size=50,
+                max_batch_memory_mb=1,  # 1 * 1000 = 1000 records budget
+                min_batch_size=5000,
             ),
         )
         result = manager._estimate_from_config(20000)
-        assert result == 50
+        assert result == 5000
 
     def test_returns_current_size_when_within_budget(self):
         """Returns current_size unchanged when it fits within memory budget."""
