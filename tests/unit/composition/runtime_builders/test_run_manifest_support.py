@@ -61,14 +61,12 @@ def test_cached_bronze_snapshot_refs_keep_stable_identity_when_mtime_changes(
     first = build_cached_bronze_input_snapshot_refs(
         bronze_root=bronze_root,
         bronze_date="2026-04-12",
-        pipeline_name="chembl_activity",
     )
     original_mtime = batch_file.stat().st_mtime
     os.utime(batch_file, (original_mtime + 10, original_mtime + 10))
     second = build_cached_bronze_input_snapshot_refs(
         bronze_root=bronze_root,
         bronze_date="2026-04-12",
-        pipeline_name="chembl_activity",
     )
 
     assert len(first) == 1
@@ -96,12 +94,10 @@ def test_cached_bronze_snapshot_identity_is_content_addressed_not_locator(
     first = build_cached_bronze_input_snapshot_refs(
         bronze_root=bronze_root,
         bronze_date="2026-04-12",
-        pipeline_name="chembl_activity",
     )
     second = build_cached_bronze_input_snapshot_refs(
         bronze_root=bronze_root,
         bronze_date="2026-04-13",
-        pipeline_name="chembl_activity",
     )
 
     assert first[0].snapshot_id == second[0].snapshot_id
@@ -123,7 +119,6 @@ def test_cached_bronze_snapshot_refs_are_sorted_by_snapshot_identity(
     refs = build_cached_bronze_input_snapshot_refs(
         bronze_root=bronze_root,
         bronze_date="2026-04-12",
-        pipeline_name="chembl_activity",
     )
 
     snapshot_ids = [ref.snapshot_id for ref in refs]

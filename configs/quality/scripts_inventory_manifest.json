@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-23T14:05:58.080584+00:00",
+  "generated_at": "2026-04-23T14:36:42.816042+00:00",
   "summary": {
     "total_scripts": 434,
     "status_counts": {
@@ -8101,13 +8101,13 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 67,
+          "line": 68,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 68,
+          "line": 69,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         }
@@ -8122,37 +8122,37 @@
       "references": [
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 69,
+          "line": 70,
           "source_group": "docs",
           "text": "uv run python scripts/engineering/qa/generate_compatibility_facade_snapshot.py --check"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 70,
+          "line": 71,
           "source_group": "docs",
           "text": "uv run python scripts/engineering/qa/generate_compatibility_facade_snapshot.py --update"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 71,
+          "line": 72,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_compatibility_facade_snapshot.py --check"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 72,
+          "line": 73,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_compatibility_facade_snapshot.py --update"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 85,
+          "line": 86,
           "source_group": "docs",
           "text": "- compatibility snapshot markdown: generated only by `scripts/engineering/qa/generate_compatibility_facade_snapshot.py`"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 93,
+          "line": 94,
           "source_group": "docs",
           "text": "2. If compatibility snapshot drift fails, update `configs/quality/compatibility_facade_inventory.yaml` first when policy changed, then run `uv run python scripts/engineering/qa/generate_compatibility_"
         },
@@ -9271,17 +9271,17 @@
           "path": "docs/02-architecture/04-interfaces-layer.md",
           "line": 39,
           "source_group": "docs",
-          "text": "| `run`           | `run.py`                     | Retained public seam; canonical implementation lives in `domains/run/command.py` |"
+          "text": "| `run`           | `run.py`                     | Public CLI seam; canonical implementation lives in `domains/run/command.py` |"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 118,
+          "line": 119,
           "source_group": "docs",
-          "text": "| `src/bioetl/interfaces/cli/commands/run.py` | Retained public run command seam that shields the split internal owner module `bioetl.interfaces.cli.commands.domains.run.command`. | `bioetl.interfaces"
+          "text": "| `src/bioetl/interfaces/cli/commands/run.py` | Permanent public run command seam over the split internal owner module `bioetl.interfaces.cli.commands.domains.run.command`. | `bioetl.interfaces.cli.co"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 43,
+          "line": 45,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
@@ -11153,13 +11153,13 @@
       "references": [
         {
           "path": "scripts/generate_test_github_issues.py",
-          "line": 330,
+          "line": 322,
           "source_group": "scripts",
           "text": "- Test runner: `scripts/optimized_test_runner.py`"
         },
         {
           "path": "scripts/generate_test_github_issues.py",
-          "line": 371,
+          "line": 363,
           "source_group": "scripts",
           "text": "print(\"2. Implement the optimized test runner: python3 scripts/optimized_test_runner.py --list\")"
         }

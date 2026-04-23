@@ -158,7 +158,7 @@ stateDiagram-v2
 
 Дополнительно: activity/chemical/molecular/DQ/result value objects, а также объекты для field groups и run context.
 
-#### 2.4.1. Retained public entrypoints для domain фасадов
+#### 2.4.1. Sanctioned public entrypoints для domain фасадов
 
 Для текущего compatibility-governance цикла следующие domain entrypoints считаются
 санкционированными стабильными публичными import paths:

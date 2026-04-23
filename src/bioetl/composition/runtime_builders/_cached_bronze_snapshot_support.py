@@ -17,7 +17,6 @@ def build_cached_bronze_input_snapshot_refs(
     *,
     bronze_root: Path,
     bronze_date: str | None,
-    pipeline_name: str,
 ) -> tuple[RunInputSnapshotRef, ...]:
     """Return deterministic batch-level snapshot refs for cached-Bronze replay."""
     search_root = bronze_root / bronze_date if bronze_date else bronze_root

@@ -116,7 +116,6 @@ def _build_cached_bronze_snapshot_refs(
     snapshot_refs = build_cached_bronze_input_snapshot_refs(
         bronze_root=bronze_root,
         bronze_date=cast("str | None", bronze_date),
-        pipeline_name=pipeline_name,
     )
     if not snapshot_refs:
         raise RuntimeError(

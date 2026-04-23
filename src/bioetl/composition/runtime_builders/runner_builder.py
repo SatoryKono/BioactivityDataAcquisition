@@ -38,6 +38,10 @@ from bioetl.composition.runtime_builders.inputs_resolver import (
 from bioetl.composition.runtime_builders.inputs_resolver import (
     RunnerInputs as _RunnerInputs,
 )
+from bioetl.domain.ports.runtime.runner import (
+    PipelineControlPlaneArtifacts,
+    PipelineCreateRunnerRequest,
+)
 from bioetl.composition.runtime_builders.ledger_collaborator import (
     attach_control_plane_collaborators,
 )
@@ -99,27 +103,35 @@ def _create_runner_from_factory(
     return cast(
         "PipelineRunnerProtocol",
         factory.create_runner(
-            run_id=ctx.run_id,
-            runtime=inputs.runtime_config,
-            settings=cast("SettingsPort", inputs.settings),
-            observability=cast(
-                "ExecutionObservabilityPort",
-                inputs.observability,
-            ),
-            manifest_id=getattr(ctx, "manifest_id", None),
-            execution_fingerprint=getattr(ctx, "execution_fingerprint", None),
-            config_hash=getattr(ctx, "config_hash", None),
-            resolved_config_hash=getattr(ctx, "resolved_config_hash", None),
-            effective_config_hash=getattr(ctx, "effective_config_hash", None),
-            dq_contract_compatibility_hash=getattr(
-                ctx, "dq_contract_compatibility_hash", None
-            ),
-            effective_config_artifact_id=getattr(
-                ctx, "effective_config_artifact_id", None
-            ),
-            filter_config=inputs.filter_config,
-            config=inputs.yaml_config,
-            cached_bronze=inputs.cached_bronze,
+            PipelineCreateRunnerRequest(
+                run_id=ctx.run_id,
+                runtime=inputs.runtime_config,
+                settings=cast("SettingsPort", inputs.settings),
+                observability=cast(
+                    "ExecutionObservabilityPort",
+                    inputs.observability,
+                ),
+                control_plane=PipelineControlPlaneArtifacts(
+                    manifest_id=getattr(ctx, "manifest_id", None),
+                    execution_fingerprint=getattr(
+                        ctx, "execution_fingerprint", None
+                    ),
+                    config_hash=getattr(ctx, "config_hash", None),
+                    resolved_config_hash=getattr(ctx, "resolved_config_hash", None),
+                    effective_config_hash=getattr(
+                        ctx, "effective_config_hash", None
+                    ),
+                    dq_contract_compatibility_hash=getattr(
+                        ctx, "dq_contract_compatibility_hash", None
+                    ),
+                    effective_config_artifact_id=getattr(
+                        ctx, "effective_config_artifact_id", None
+                    ),
+                ),
+                filter_config=inputs.filter_config,
+                config=inputs.yaml_config,
+                cached_bronze=inputs.cached_bronze,
+            )
         ),
     )
 

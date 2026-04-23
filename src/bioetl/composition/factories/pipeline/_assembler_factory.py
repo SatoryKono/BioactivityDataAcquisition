@@ -35,10 +35,7 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     extract_entity_type as _extract_entity_type,
 )
-from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.provider_registry import ProviderRegistry
-from bioetl.domain.config import RuntimeConfig
-from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.filtering import (
     GoldFilterConfig,
     InputFilterConfig,
@@ -55,8 +52,9 @@ from bioetl.domain.ports import (
     PiiHasherPort,
     TracingPort,
 )
+from bioetl.domain.ports.runtime.runner import PipelineCreateRunnerRequest
 from bioetl.domain.services import IdentityService
-from bioetl.domain.types import GoldSchemaType, RunID
+from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -204,20 +202,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
 
     def create_runner(
         self,
-        run_id: RunID,
-        runtime: RuntimeConfig,
-        settings: Settings,
-        observability: ObservabilityBundle,
-        manifest_id: str | None = None,
-        execution_fingerprint: str | None = None,
-        config_hash: str | None = None,
-        resolved_config_hash: str | None = None,
-        effective_config_hash: str | None = None,
-        dq_contract_compatibility_hash: str | None = None,
-        effective_config_artifact_id: str | None = None,
-        filter_config: InputFilterConfig | None = None,
-        config: PipelineYamlConfig | None = None,
-        cached_bronze: CachedBronzeContext | None = None,
+        request: PipelineCreateRunnerRequest,
     ) -> PipelineRunner:
         return create_runner_from_factory(
             self,
@@ -225,20 +210,24 @@ class GenericPipelineFactory(Generic[TPipeline]):
                 pipeline_name=self.pipeline_name,
                 silver_schema=self.silver_schema,
                 gold_schema=self.gold_schema,
-                run_id=run_id,
-                runtime=runtime,
-                settings=settings,
-                observability=observability,
-                manifest_id=manifest_id,
-                execution_fingerprint=execution_fingerprint,
-                config_hash=config_hash,
-                resolved_config_hash=resolved_config_hash,
-                effective_config_hash=effective_config_hash,
-                dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-                effective_config_artifact_id=effective_config_artifact_id,
-                filter_config=filter_config,
-                config=config,
-                cached_bronze=cached_bronze,
+                run_id=request.run_id,
+                runtime=request.runtime,
+                settings=cast("Settings", request.settings),
+                observability=cast("ObservabilityBundle", request.observability),
+                manifest_id=request.control_plane.manifest_id,
+                execution_fingerprint=request.control_plane.execution_fingerprint,
+                config_hash=request.control_plane.config_hash,
+                resolved_config_hash=request.control_plane.resolved_config_hash,
+                effective_config_hash=request.control_plane.effective_config_hash,
+                dq_contract_compatibility_hash=(
+                    request.control_plane.dq_contract_compatibility_hash
+                ),
+                effective_config_artifact_id=(
+                    request.control_plane.effective_config_artifact_id
+                ),
+                filter_config=cast("InputFilterConfig | None", request.filter_config),
+                config=cast("PipelineYamlConfig | None", request.config),
+                cached_bronze=request.cached_bronze,
             ),
             assemble_runner_fn=_public_assembler_seam("assemble_runner"),
         )

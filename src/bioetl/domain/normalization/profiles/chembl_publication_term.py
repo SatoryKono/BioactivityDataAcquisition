@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from bioetl.domain.normalization.profiles._chembl_profile_helpers import (
+    ChemblProfileFieldGroups,
     build_chembl_profile,
     chembl_schema_fields,
 )
@@ -26,9 +27,11 @@ CHEMBL_PUBLICATION_TERM_PROFILE = build_chembl_profile(
     entity="publication_term",
     description="Canonical field-level normalization policy for the ChEMBL Publication Term Silver schema.",
     schema_fields=CHEMBL_PUBLICATION_TERM_SCHEMA_FIELDS,
-    title_fields=_TITLE_FIELDS,
-    enum_fields=_ENUM_FIELDS,
-    null_fields=_NULL_FIELDS,
+    field_groups=ChemblProfileFieldGroups(
+        title_fields=_TITLE_FIELDS,
+        enum_fields=_ENUM_FIELDS,
+        null_fields=_NULL_FIELDS,
+    ),
 )
 
 CHEMBL_PUBLICATION_TERM_PROFILE.assert_covers_schema(

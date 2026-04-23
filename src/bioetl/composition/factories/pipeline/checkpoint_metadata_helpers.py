@@ -91,7 +91,6 @@ def _resolve_input_snapshot_ids(pipeline: BasePipeline) -> tuple[str, ...]:
     snapshot_refs = build_cached_bronze_input_snapshot_refs(
         bronze_root=bronze_root,
         bronze_date=bronze_date,
-        pipeline_name=pipeline.config.pipeline_name,
     )
     return tuple(snapshot.snapshot_id for snapshot in snapshot_refs)
 

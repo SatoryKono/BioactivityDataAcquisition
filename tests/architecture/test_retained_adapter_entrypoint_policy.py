@@ -1,4 +1,4 @@
-"""Guardrails for retained adapter entrypoint policy."""
+"""Guardrails for sanctioned public adapter entrypoint policy."""
 
 from __future__ import annotations
 
@@ -104,7 +104,7 @@ def _iter_legacy_path_mentions(
     return violations
 
 
-def _iter_retained_entrypoint_mentions(
+def _iter_public_entrypoint_mentions(
     search_root: Path,
     *,
     allowed_files: frozenset[Path],
@@ -123,8 +123,8 @@ def _iter_retained_entrypoint_mentions(
 
 
 @pytest.mark.architecture
-def test_retained_adapter_entrypoints_keep_legacy_paths_out_of_src() -> None:
-    """First-party source must use retained canonical entrypoints, not legacy paths."""
+def test_public_adapter_entrypoints_keep_legacy_paths_out_of_src() -> None:
+    """First-party source must use sanctioned public entrypoints, not legacy paths."""
     violations = _iter_legacy_path_mentions(
         SRC_ROOT,
         allowed_files=ALLOWED_SRC_FILES,
@@ -149,9 +149,9 @@ def test_legacy_adapter_paths_are_confined_to_dedicated_compat_tests() -> None:
 
 
 @pytest.mark.architecture
-def test_retained_adapter_entrypoints_are_confined_to_package_roots_in_src() -> None:
-    """First-party src should import provider package roots, not retained client modules."""
-    violations = _iter_retained_entrypoint_mentions(
+def test_public_adapter_entrypoints_are_confined_to_package_roots_in_src() -> None:
+    """First-party src should import provider package roots, not public client modules."""
+    violations = _iter_public_entrypoint_mentions(
         SRC_ROOT,
         allowed_files=ALLOWED_RETAINED_ENTRYPOINT_SRC_FILES,
     )
@@ -162,9 +162,9 @@ def test_retained_adapter_entrypoints_are_confined_to_package_roots_in_src() -> 
 
 
 @pytest.mark.architecture
-def test_retained_adapter_entrypoints_are_confined_to_dedicated_tests() -> None:
-    """Ordinary tests should not use retained adapter client modules directly."""
-    violations = _iter_retained_entrypoint_mentions(
+def test_public_adapter_entrypoints_are_confined_to_dedicated_tests() -> None:
+    """Ordinary tests should not use public adapter client modules directly."""
+    violations = _iter_public_entrypoint_mentions(
         TESTS_ROOT,
         allowed_files=ALLOWED_TEST_FILES,
     )

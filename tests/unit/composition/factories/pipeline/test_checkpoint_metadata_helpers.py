@@ -149,7 +149,6 @@ def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
     snapshot_refs = build_cached_bronze_input_snapshot_refs(
         bronze_root=bronze_root,
         bronze_date=None,
-        pipeline_name="chembl_activity",
     )
     manifest = manifest_service.create_manifest(
         RunManifestCreateRequest(

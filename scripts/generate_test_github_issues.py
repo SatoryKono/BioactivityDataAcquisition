@@ -102,17 +102,9 @@ def create_github_issue(
 
 def analyze_test_timeout_issues() -> Dict[str, str]:
     """Analyze and identify test timeout issues."""
-    
+
     issues_found = {}
-    
-    # Check for known slow test patterns
-    slow_test_patterns = [
-        "tests/integration/",
-        "tests/e2e/",
-        "tests/performance/",
-        "hypothesis"
-    ]
-    
+
     issue_body = """# Test Timeout Issues Analysis
 
 ## Problem

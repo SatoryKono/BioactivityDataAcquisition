@@ -19,6 +19,7 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
 )
 from bioetl.domain.normalization.profiles._chembl_profile_helpers import (
     CHEMBL_META_FIELDS,
+    ChemblProfileFieldGroups,
     build_chembl_profile,
     chembl_schema_fields,
 )
@@ -110,6 +111,7 @@ def test_chembl_profile_helpers_preserve_standard_meta_semantics() -> None:
     profile = build_chembl_profile(
         entity="helper_probe",
         schema_fields=schema_fields,
+        field_groups=ChemblProfileFieldGroups(),
     )
 
     assert profile.meta_fields == CHEMBL_META_FIELDS

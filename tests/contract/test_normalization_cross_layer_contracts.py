@@ -365,6 +365,122 @@ def test_chembl_publication_set_like_structured_json_fields_keep_hash_invariant(
     )
 
 
+def test_chembl_publication_aliases_keep_hash_stable_across_runtime_contract_fields() -> (
+    None
+):
+    """publication_type and is_oa aliases must not create false content versions."""
+    processor = RecordNormalizationProcessor(
+        provider="chembl", entity_type="publication"
+    )
+
+    record_a = processor.normalize_business_data(
+        {
+            "publication_id": "CHEMBL123",
+            "title": "Example publication",
+            "publication_type": " PUBLICATION ",
+            "is_oa": "1",
+        }
+    )
+    record_b = processor.normalize_business_data(
+        {
+            "publication_id": "CHEMBL123",
+            "title": "Example publication",
+            "publication_type": "journal-article",
+            "is_oa": True,
+        }
+    )
+
+    assert record_a["publication_type"] == "journal-article"
+    assert record_a["is_oa"] is True
+    assert record_a == record_b
+    assert processor.compute_content_hash(record_a) == processor.compute_content_hash(
+        record_b
+    )
+
+
+def test_chembl_activity_units_and_target_organism_aliases_keep_hash_stable() -> None:
+    """Controlled units and organism aliases must collapse before hashing."""
+    processor = RecordNormalizationProcessor(provider="chembl", entity_type="activity")
+
+    record_a = processor.normalize_business_data(
+        {
+            "activity_id": "1",
+            "units": " μM ",
+            "target_organism": "  homo   sapiens  ",
+        }
+    )
+    record_b = processor.normalize_business_data(
+        {
+            "activity_id": "1",
+            "units": "µM",
+            "target_organism": "Homo sapiens",
+        }
+    )
+
+    assert record_a["units"] == "µM"
+    assert record_a["target_organism"] == "Homo sapiens"
+    assert record_a == record_b
+    assert processor.compute_content_hash(record_a) == processor.compute_content_hash(
+        record_b
+    )
+
+
+def test_chembl_target_component_organism_aliases_keep_hash_stable() -> None:
+    """Target-component organism aliases must collapse to the shared canonical name."""
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="target_component",
+    )
+
+    record_a = processor.normalize_business_data(
+        {
+            "component_id": "42",
+            "organism": "e. coli",
+        }
+    )
+    record_b = processor.normalize_business_data(
+        {
+            "component_id": "42",
+            "organism": "Escherichia coli",
+        }
+    )
+
+    assert record_a["organism"] == "Escherichia coli"
+    assert record_a == record_b
+    assert processor.compute_content_hash(record_a) == processor.compute_content_hash(
+        record_b
+    )
+
+
+def test_chembl_cell_line_cellosaurus_aliases_keep_hash_stable() -> None:
+    """Cellosaurus identifier formatting variants must hash identically."""
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="cell_line",
+    )
+
+    record_a = processor.normalize_business_data(
+        {
+            "cell_id": "CHEMBL1",
+            "cell_name": "HeLa",
+            "cellosaurus_id": " cvcl:0030 ",
+        }
+    )
+    record_b = processor.normalize_business_data(
+        {
+            "cell_id": "CHEMBL1",
+            "cell_name": "HeLa",
+            "cellosaurus_id": "CVCL_0030",
+        }
+    )
+
+    assert record_a["cellosaurus_id"] == "CVCL_0030"
+    assert record_a == record_b
+    assert processor.compute_content_hash(record_a) == processor.compute_content_hash(
+        record_b
+    )
+
+
 def test_profile_matrix_exposes_strict_json_semantics_for_chembl_structured_fields() -> (
     None
 ):

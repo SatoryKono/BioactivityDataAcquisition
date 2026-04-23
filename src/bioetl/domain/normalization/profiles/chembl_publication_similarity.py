@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from bioetl.domain.normalization.profiles._chembl_profile_helpers import (
+    ChemblProfileFieldGroups,
     build_chembl_profile,
     chembl_schema_fields,
 )
@@ -29,10 +30,12 @@ CHEMBL_PUBLICATION_SIMILARITY_PROFILE = build_chembl_profile(
     entity="publication_similarity",
     description="Canonical field-level normalization policy for the ChEMBL Publication Similarity Silver schema.",
     schema_fields=CHEMBL_PUBLICATION_SIMILARITY_SCHEMA_FIELDS,
-    pmid_fields=_PMID_FIELDS,
-    int_fields=_INT_FIELDS,
-    float_fields=_FLOAT_FIELDS,
-    null_fields=chembl_pseudo_null_fields("publication_similarity"),
+    field_groups=ChemblProfileFieldGroups(
+        pmid_fields=_PMID_FIELDS,
+        int_fields=_INT_FIELDS,
+        float_fields=_FLOAT_FIELDS,
+        null_fields=chembl_pseudo_null_fields("publication_similarity"),
+    ),
 )
 
 CHEMBL_PUBLICATION_SIMILARITY_PROFILE.assert_covers_schema(

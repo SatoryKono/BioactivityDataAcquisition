@@ -125,7 +125,7 @@ StorageFactory
 
 ## Retained Entrypoint Policy
 
-- `composition.entrypoints` is a retained public seam with execution-focused `__all__`.
+- `composition.entrypoints` is a sanctioned public seam with execution-focused `__all__`.
 - Runtime execution helpers should come from `composition.execution_api`.
 - Health and quarantine helpers should come from `composition.health_api`.
 - Maintenance helpers should come from `composition.maintenance_api`.

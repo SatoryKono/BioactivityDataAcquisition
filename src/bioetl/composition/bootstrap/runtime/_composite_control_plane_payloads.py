@@ -136,7 +136,6 @@ def _build_composite_input_snapshots(
     return build_cached_bronze_input_snapshot_refs(
         bronze_root=bronze_root,
         bronze_date=runtime.cached_bronze_date,
-        pipeline_name=pipeline_name,
     )
 
 
