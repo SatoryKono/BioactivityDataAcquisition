@@ -34,6 +34,44 @@ def _normalize_url(url: str) -> str:
     return url.rstrip("/")
 
 
+def _commit_property(
+    properties: dict[str, str],
+    *,
+    key: str,
+    value_parts: list[str],
+) -> None:
+    """Store one parsed property assembled from one or more logical lines."""
+    properties[key] = "".join(value_parts)
+
+
+def _parse_property_assignment(raw_line: str) -> tuple[str, str, bool] | None:
+    """Return the parsed property assignment for one raw line."""
+    if "=" not in raw_line:
+        return None
+    key, value = raw_line.split("=", 1)
+    normalized_value = value.strip()
+    continued = normalized_value.endswith("\\")
+    value_part = normalized_value[:-1] if continued else normalized_value
+    return key.strip(), value_part, continued
+
+
+def _consume_continued_property(
+    stripped_line: str,
+    *,
+    properties: dict[str, str],
+    current_key: str,
+    current_value_parts: list[str],
+) -> str | None:
+    """Consume one continuation line and return the next active property key."""
+    continued = stripped_line.endswith("\\")
+    value_part = stripped_line[:-1] if continued else stripped_line
+    current_value_parts.append(value_part)
+    if continued:
+        return current_key
+    _commit_property(properties, key=current_key, value_parts=current_value_parts)
+    return None
+
+
 def parse_java_properties(text: str) -> dict[str, str]:
     """Parse a Java-style properties file with line continuations."""
     properties: dict[str, str] = {}
@@ -46,24 +84,21 @@ def parse_java_properties(text: str) -> dict[str, str]:
             continue
 
         if current_key is not None:
-            continued = stripped.endswith("\\")
-            value_part = stripped[:-1] if continued else stripped
-            current_value_parts.append(value_part)
-            if continued:
+            current_key = _consume_continued_property(
+                stripped,
+                properties=properties,
+                current_key=current_key,
+                current_value_parts=current_value_parts,
+            )
+            if current_key is not None:
                 continue
-            properties[current_key] = "".join(current_value_parts)
-            current_key = None
             current_value_parts = []
             continue
 
-        if "=" not in raw_line:
+        assignment = _parse_property_assignment(raw_line)
+        if assignment is None:
             continue
-
-        key, value = raw_line.split("=", 1)
-        key = key.strip()
-        value = value.strip()
-        continued = value.endswith("\\")
-        value_part = value[:-1] if continued else value
+        key, value_part, continued = assignment
         if continued:
             current_key = key
             current_value_parts = [value_part]
@@ -71,7 +106,7 @@ def parse_java_properties(text: str) -> dict[str, str]:
         properties[key] = value_part
 
     if current_key is not None:
-        properties[current_key] = "".join(current_value_parts)
+        _commit_property(properties, key=current_key, value_parts=current_value_parts)
 
     return properties
 

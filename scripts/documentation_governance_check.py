@@ -97,7 +97,7 @@ class DocumentationGovernanceChecker:
         
         try:
             # Run the parity check script
-            result = subprocess.run(
+            subprocess.run(
                 ["python3", str(parity_script)],
                 capture_output=True,
                 text=True,
@@ -337,8 +337,8 @@ class DocumentationGovernanceChecker:
         report.append("")
         report.append("## 📊 Check Results")
         report.append("")
-        report.append(f"| Check Category | Status | Details |")
-        report.append(f"|----------------|--------|---------|")
+        report.append("| Check Category | Status | Details |")
+        report.append("|----------------|--------|---------|")
         
         # Individual check results would go here
         # For now, show summary
