@@ -33,7 +33,6 @@ def build_cached_bronze_input_snapshot_refs(
         _build_cached_bronze_snapshot_ref(
             bronze_root=bronze_root,
             batch_file=batch_file,
-            pipeline_name=pipeline_name,
         )
         for batch_file in batch_files
     ]
@@ -46,7 +45,6 @@ def _build_cached_bronze_snapshot_ref(
     *,
     bronze_root: Path,
     batch_file: Path,
-    pipeline_name: str,
 ) -> RunInputSnapshotRef:
     """Build one immutable snapshot ref for one cached Bronze batch file."""
     content_hash = _compute_cached_bronze_batch_content_hash(batch_file)

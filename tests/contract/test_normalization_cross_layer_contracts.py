@@ -307,6 +307,78 @@ def test_publication_set_like_json_fields_are_hash_order_invariant() -> None:
     )
 
 
+def test_chembl_publication_structured_json_fields_fail_closed_on_malformed_payloads() -> (
+    None
+):
+    """Malformed JSON must not survive into strict ChEMBL publication fields."""
+    processor = RecordNormalizationProcessor(
+        provider="chembl", entity_type="publication"
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "publication_id": "CHEMBL123",
+            "title": "Example publication",
+            "publication_type": "PUBLICATION",
+            "authors": "{not json}",
+            "affiliation_list": "{not json}",
+            "author_orcids": "{not json}",
+        }
+    )
+
+    assert normalized["publication_type"] == "journal-article"
+    assert normalized["authors"] is None
+    assert normalized["affiliation_list"] is None
+    assert normalized["author_orcids"] is None
+
+
+def test_chembl_publication_set_like_structured_json_fields_keep_hash_invariant() -> (
+    None
+):
+    """Strict set-like JSON fields must stay hash-invariant across array permutations."""
+    processor = RecordNormalizationProcessor(
+        provider="chembl", entity_type="publication"
+    )
+
+    record_a = processor.normalize_business_data(
+        {
+            "publication_id": "CHEMBL123",
+            "title": "Example publication",
+            "publication_type": "PUBLICATION",
+            "author_orcids": '["0000-0002", "0000-0001"]',
+        }
+    )
+    record_b = processor.normalize_business_data(
+        {
+            "publication_id": "CHEMBL123",
+            "title": "Example publication",
+            "publication_type": "PUBLICATION",
+            "author_orcids": '["0000-0001", "0000-0002"]',
+        }
+    )
+
+    assert record_a["author_orcids"] != record_b["author_orcids"]
+    assert processor.compute_content_hash(record_a) == processor.compute_content_hash(
+        record_b
+    )
+
+
+def test_profile_matrix_exposes_strict_json_semantics_for_chembl_structured_fields() -> (
+    None
+):
+    """Field-matrix output must surface strict JSON semantics without reading profile code."""
+    assay_parameters_row = _matrix_row("chembl_assay", "assay_parameters")
+    publication_authors_row = _matrix_row("chembl_publication", "authors")
+
+    assert assay_parameters_row["normalizer"] == "normalize_profile_json_string_strict"
+    assert assay_parameters_row["strictness"] == "strict_json"
+    assert (
+        publication_authors_row["normalizer"] == "normalize_profile_json_string_strict"
+    )
+    assert publication_authors_row["strictness"] == "strict_json"
+    assert publication_authors_row["hash_ordering"] == "order_sensitive"
+
+
 def test_chembl_activity_meta_passthrough_contract_is_aligned_across_profile_matrix_and_processor() -> (
     None
 ):

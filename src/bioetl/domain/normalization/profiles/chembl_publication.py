@@ -69,6 +69,14 @@ _SET_LIKE_FIELDS = frozenset({"affiliation_list", "author_orcids"})
 _STRICT_JSON_FIELDS = frozenset({"authors", "affiliation_list", "author_orcids"})
 _BOOLEAN_FIELDS = frozenset({"is_oa"})
 
+
+def normalize_profile_publication_type_field(value: object) -> object:
+    return normalize_profile_publication_type(
+        value,
+        allowed_values=PUBLICATION_TYPES,
+    )
+
+
 CHEMBL_PUBLICATION_PROFILE = build_standard_profile(
     profile_name="chembl.publication",
     description="Canonical field-level normalization policy for the ChEMBL Publication Silver schema.",
@@ -87,11 +95,8 @@ CHEMBL_PUBLICATION_PROFILE = build_standard_profile(
     special_rules={
         **publication_classification_rules(),
         "publication_type": (
-            lambda value: normalize_profile_publication_type(
-                value,
-                allowed_values=PUBLICATION_TYPES,
-            ),
-            "Normalize raw provider publication type to the canonical publication registry value.",
+            normalize_profile_publication_type_field,
+            "Normalize raw provider publication type to the canonical publication enum registry value.",
         ),
     },
     null_fields=chembl_pseudo_null_fields("publication"),

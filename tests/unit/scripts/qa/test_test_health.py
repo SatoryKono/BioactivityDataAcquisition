@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts.engineering.qa import test_health
 
 
@@ -303,7 +305,7 @@ def test_summarize_junit_uses_junit_suite_duration(tmp_path: Path) -> None:
         (tmp_path / "runs" / "unit-fast-ci.json").read_text(encoding="utf-8")
     )
     assert rc == 0
-    assert summary["duration_seconds"] == 2.346
+    assert summary["duration_seconds"] == pytest.approx(2.346)
 
 
 def test_repeated_run_id_preserves_test_health_history(tmp_path: Path, capsys) -> None:
@@ -427,6 +429,6 @@ def test_build_rollup_reports_flaky_candidates_and_pass_rate() -> None:
 
     rollup = test_health.build_rollup(runs)
 
-    assert rollup["suites"]["unit-fast"]["pass_rate"] == 0.5
+    assert rollup["suites"]["unit-fast"]["pass_rate"] == pytest.approx(0.5)
     assert rollup["suites"]["unit-fast"]["unique_failing_tests"] == 1
     assert rollup["flaky_candidates"] == ["tests/unit/test_sample.py::test_flaky"]

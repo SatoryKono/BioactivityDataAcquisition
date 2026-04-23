@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 
+from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization.chembl import (
     normalize_bao_identifier,
     normalize_cellosaurus_id,
@@ -17,7 +18,6 @@ from bioetl.domain.normalization.identifiers import (
     normalize_pmid,
 )
 from bioetl.domain.normalization.json import canonicalize_json_string
-from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization.rules import (
     normalize_binary_flag,
     normalize_boolean,
@@ -176,9 +176,12 @@ def normalize_profile_publication_type(
     allowed_values: frozenset[str],
 ) -> object:
     """Normalize publication type through the canonical mapping and enum gate."""
-    if value is None or not isinstance(value, str):
+    if not isinstance(value, str):
         return None
-    normalized = normalize_publication_type(value)
+    cleaned = normalize_string(value)
+    if cleaned is None:
+        return None
+    normalized = normalize_publication_type(cleaned)
     if normalized is None:
         return None
     return normalized if normalized in allowed_values else None

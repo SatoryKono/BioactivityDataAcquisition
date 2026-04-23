@@ -445,6 +445,7 @@ def test_profile_auto_resolves_for_chembl_target_component() -> None:
             "protein_classification_id": " 7 ",
             "target_component_synonyms": ' [{"name":"B"},{"name":"A"}] ',
             "protein_classification_ids": " [7, 3, 5] ",
+            "organism": "  homo   sapiens ",
         }
     )
 
@@ -454,6 +455,54 @@ def test_profile_auto_resolves_for_chembl_target_component() -> None:
     assert normalized["protein_classification_id"] == 7
     assert normalized["target_component_synonyms"] == '[{"name":"B"},{"name":"A"}]'
     assert normalized["protein_classification_ids"] == "[7,3,5]"
+    assert normalized["organism"] == "Homo sapiens"
+
+
+@pytest.mark.unit
+def test_profile_auto_resolves_for_chembl_cell_line() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="cell_line",
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "cell_id": "CHEMBL1",
+            "cell_name": "  HeLa ",
+            "cellosaurus_id": " cvcl:0030 ",
+        }
+    )
+
+    assert processor.profile is not None
+    assert normalized["cell_name"] == "HeLa"
+    assert normalized["cellosaurus_id"] == "CVCL_0030"
+
+
+@pytest.mark.unit
+def test_profile_auto_resolves_for_chembl_publication_runtime_mismatches_and_strict_json() -> (
+    None
+):
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="publication",
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "publication_id": "CHEMBL123",
+            "title": " Example publication ",
+            "publication_type": " PUBLICATION ",
+            "is_oa": "1",
+            "authors": ' {"b":2,"a":1} ',
+            "affiliation_list": "not-json",
+        }
+    )
+
+    assert processor.profile is not None
+    assert normalized["publication_type"] == "journal-article"
+    assert normalized["is_oa"] is True
+    assert normalized["authors"] == '{"a":1,"b":2}'
+    assert normalized["affiliation_list"] is None
 
 
 @pytest.mark.unit

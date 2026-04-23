@@ -122,6 +122,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a historical GitHub/Sonar reconciliation helper for manual issue review; do not expand it into a supported automation surface without fresh call-site evidence."
     },
+    "scripts/generate_test_github_issues.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded script for generating test GitHub issues; remove it once the associated testing workflow is retired or integrated into a canonical test setup."
+    },
     "scripts/ai/mcp/mcp_brave_search_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
@@ -444,7 +450,7 @@
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded WSL Codex setup helper while mixed Windows-WSL workflows remain operator-maintained; remove it once the bootstrap path is stable."
+      "next_step": "Retain only as a bounded WSL Codex setup helper while mixed Windows/WSL setup flows remain operator-maintained; remove it once the bootstrap path is stable."
     },
     "scripts/engineering/dev/bash/WSL_COMMANDS.sh": {
       "owner": "@bioetl-platform",

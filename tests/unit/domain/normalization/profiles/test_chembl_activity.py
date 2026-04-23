@@ -88,6 +88,7 @@ def test_chembl_activity_bao_identifier_rules_are_profile_visible() -> None:
 
 def test_chembl_activity_qudt_units_has_explicit_unit_normalization_rule() -> None:
     qudt_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("qudt_units")
+    units_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("units")
 
     assert qudt_rule is not None
     assert qudt_rule.normalizer(" uM ") == "µM"
@@ -95,3 +96,15 @@ def test_chembl_activity_qudt_units_has_explicit_unit_normalization_rule() -> No
         "http://qudt.org/vocab/unit/NanoM"
     )
     assert "Canonicalize units" in (qudt_rule.notes or "")
+    assert units_rule is not None
+    assert units_rule.normalizer(" μM ") == "µM"
+    assert "Canonicalize units" in (units_rule.notes or "")
+
+
+def test_chembl_activity_target_organism_uses_curated_organism_normalizer() -> None:
+    organism_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("target_organism")
+
+    assert organism_rule is not None
+    assert organism_rule.normalizer("  homo   sapiens ") == "Homo sapiens"
+    assert organism_rule.normalizer("e. coli") == "Escherichia coli"
+    assert "organism" in (organism_rule.notes or "").lower()

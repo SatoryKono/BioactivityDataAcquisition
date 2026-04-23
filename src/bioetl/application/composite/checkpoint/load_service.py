@@ -57,10 +57,7 @@ def _contract_version_mismatch(
     if not expected_contract_version:
         return None
     if state.contract_version:
-        if (
-            state.contract_version
-            and state.contract_version != expected_contract_version
-        ):
+        if state.contract_version != expected_contract_version:
             return (
                 f"contract_version {state.contract_version!r} "
                 f"!= {expected_contract_version!r}"
