@@ -868,15 +868,20 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
         "required_profile_missing_requirements"
     ] == [
         "strict_replay_execution_context_support",
+        "exact_replay_capability",
         "lineage_closure_boundary_support",
     ]
     assert result.diagnostics["persistence_profile"][
         "replay_ready_missing_requirements"
-    ] == ["strict_replay_execution_context_support"]
+    ] == [
+        "strict_replay_execution_context_support",
+        "exact_replay_capability",
+    ]
     assert result.diagnostics["persistence_profile"][
         "forensic_grade_missing_requirements"
     ] == [
         "strict_replay_execution_context_support",
+        "exact_replay_capability",
         "lineage_closure_boundary_support",
     ]
     assert result.diagnostics["alert_signals"]["strict_replay_boundary_gap"] is True
