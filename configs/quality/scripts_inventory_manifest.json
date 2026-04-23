@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-23T18:07:10.544929+00:00",
+  "generated_at": "2026-04-23T19:14:27.538201+00:00",
   "summary": {
     "total_scripts": 437,
     "status_counts": {
@@ -11250,7 +11250,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 48,
+      "reference_count": 49,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
