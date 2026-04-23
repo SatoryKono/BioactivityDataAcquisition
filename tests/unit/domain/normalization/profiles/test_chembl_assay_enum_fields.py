@@ -186,6 +186,13 @@ class TestAssayOntologyNormalization:
         rule = CHEMBL_ASSAY_PROFILE.field_rules["bao_label"]
 
         assert rule.normalizer("  CELL-BASED FORMAT  ") == "cell-based format"
+        assert (
+            rule.apply(
+                "  noisy label  ",
+                record={"bao_format": "BAO:0000357"},
+            )
+            == "single protein format"
+        )
         assert "BAO label" in (rule.notes or "")
 
 
@@ -215,4 +222,11 @@ class TestAssayStructuredFieldNormalization:
 
         assert format_rule.normalizer("bao:0000219") == "BAO_0000219"
         assert label_rule.normalizer("  CELL-BASED FORMAT ") == "cell-based format"
+        assert (
+            label_rule.apply(
+                "ignored label",
+                record={"bao_format": "BAO:0000219"},
+            )
+            == "cell-based format"
+        )
         assert format_rule.normalizer("cell-based format") == "cell-based format"

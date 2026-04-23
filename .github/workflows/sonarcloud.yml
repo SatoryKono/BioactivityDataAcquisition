@@ -32,6 +32,15 @@ jobs:
         with:
           uv-extras: "dev"
 
+      - name: Enforce Sonar baseline ratchet
+        env:
+          SONARQUBE_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          python3 scripts/ai/check_sonar_issues.py \
+            --token-env-var SONARQUBE_TOKEN \
+            --strict-live \
+            --max-quarantine-entries 184
+
       - name: Validate canonical Sonar config
         run: |
           test -f sonar-project.properties

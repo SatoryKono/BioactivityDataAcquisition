@@ -2,15 +2,26 @@
 
 from __future__ import annotations
 
+import inspect
 from collections.abc import Callable, Collection, Mapping
 from dataclasses import dataclass, field
+from functools import cache
 
 __all__ = [
     "FieldRule",
     "NormalizationProfile",
 ]
 
-FieldNormalizer = Callable[[object], object]
+FieldNormalizer = Callable[..., object]
+
+
+@cache
+def _normalizer_accepts_record_context(normalizer: FieldNormalizer) -> bool:
+    try:
+        parameter_count = len(inspect.signature(normalizer).parameters)
+    except (TypeError, ValueError):
+        return False
+    return parameter_count >= 2
 
 
 def _identity(value: object) -> object:
@@ -27,8 +38,15 @@ class FieldRule:
     set_like: bool = False
     notes: str | None = None
 
-    def apply(self, value: object) -> object:
+    def apply(
+        self,
+        value: object,
+        *,
+        record: Mapping[str, object] | None = None,
+    ) -> object:
         """Apply one pure field normalizer."""
+        if record is not None and _normalizer_accepts_record_context(self.normalizer):
+            return self.normalizer(value, record)
         return self.normalizer(value)
 
 

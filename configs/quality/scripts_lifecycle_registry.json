@@ -110,6 +110,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the top-level scripts.ai.vibe module router during the Vibe tooling consolidation window; either add stable external call-sites so it becomes active or remove it if the bash launcher remains the only supported entrypoint."
     },
+    "scripts/ai/sonar_issue_processor_demo.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical demo helper under scripts.ai.src for Sonar issue processing experiments; remove it once the exploratory workflow is fully retired."
+    },
     "scripts/ai/group_issues.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -118,7 +124,7 @@
     },
     "scripts/ai/check_sonar_issues.py": {
       "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
+      "decision": "active",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a historical GitHub/Sonar reconciliation helper for manual issue review; do not expand it into a supported automation surface without fresh call-site evidence."
     },

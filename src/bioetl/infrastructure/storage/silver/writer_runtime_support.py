@@ -14,6 +14,7 @@ from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import (
     AuditPort,
+    LoggerPort,
     MetadataCoordinatorPort,
     MetadataWriterPort,
     MetricsPort,
@@ -73,7 +74,7 @@ class _AwaitTrackingAsyncCallable:
 class _SilverWriterDispatchHost(Protocol):
     """Minimal SilverWriter surface required by runtime helpers."""
 
-    logger: object
+    logger: LoggerPort | None
     _pipeline_name: str | None
     _tracing: TracingPort | None
     _contract_rollout_policy: WriteModePolicy | None
