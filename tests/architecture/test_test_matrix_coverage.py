@@ -176,12 +176,15 @@ class TestCanonicalTestLanes:
     """Validate named test-health lanes stay stable and wrapper-ready."""
 
     EXPECTED_LANES = {
+        "smoke",
         "unit-fast",
         "integration-replay",
+        "security",
         "contracts",
         "architecture",
         "e2e",
         "memory",
+        "performance",
         "coverage-verify",
     }
 
@@ -265,14 +268,24 @@ class TestCanonicalTestLanes:
         lanes = matrix["test_lanes"]["lanes"]
 
         assert (
+            lanes["smoke"]["marker_expression"] == "not benchmark and not memory"
+        )
+        assert (
             lanes["unit-fast"]["marker_expression"]
             == "not slow and not benchmark and not memory"
         )
         assert lanes["integration-replay"]["replay_mode"] == "vcr_replay_only"
         assert "--vcr-record=none" in lanes["integration-replay"]["pytest_args"]
+        assert (
+            lanes["security"]["marker_expression"]
+            == "security and not benchmark and not memory"
+        )
         assert lanes["architecture"]["runner_backend"] == "run_pytest_sharded"
         assert "S7-crosscutting-architecture" in lanes["architecture"]["runner_options"]
         assert lanes["memory"]["marker_expression"] == "memory and not benchmark"
+        assert lanes["performance"]["marker_expression"] == "benchmark and performance"
+        assert "-p" in lanes["performance"]["pytest_args"]
+        assert "no:xdist" in lanes["performance"]["pytest_args"]
         assert lanes["coverage-verify"]["runner_backend"] == "run_pytest_sharded"
         assert "--keep-coverage-files" in lanes["coverage-verify"]["runner_options"]
         assert (

@@ -255,7 +255,7 @@ vcr_policy:
   - scripts/engineering/qa/vcr/check_vcr_secrets.py
   default_record_modes:
     ci: none
-    local: once
+    local: none
   supported_refresh_record_modes:
   - new_episodes
   legacy_compatibility_record_modes:

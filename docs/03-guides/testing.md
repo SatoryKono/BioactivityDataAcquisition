@@ -29,12 +29,15 @@ Canonical named pytest lanes are defined in
 `configs/quality/test_matrix.yaml` under `test_lanes.lanes`. Test-health tooling
 must use these `suite_name` values for comparable local and CI runs:
 
+- `smoke`: minimal dependency/import smoke lane;
 - `unit-fast`: `tests/unit/`, excluding `slow`, `benchmark`, and `memory`;
 - `integration-replay`: `tests/integration/` in VCR replay-only mode;
+- `security`: dedicated security and secret-hygiene lane;
 - `contracts`: schema, contract, and snapshot tests;
 - `architecture`: layer boundary, contract, and governance checks;
 - `e2e`: dedicated slow end-to-end lane;
 - `memory`: dedicated Neo4j project-memory and MCP lane, outside coverage;
+- `performance`: benchmark-backed hotspot/performance-budget lane;
 - `coverage-verify`: the only lane that enforces the repo-wide coverage gate.
 
 Large local runs should use the maintained sharded runner rather than invoking
@@ -73,9 +76,12 @@ Canonical local execution paths:
   `bash scripts/engineering/dev/setup_env_wsl.sh`,
   `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`.
 
-Wrappers `run_pytest.ps1|.sh` по умолчанию добавляют флаги
-`--cov=src/bioetl --cov-report=term -q --maxfail=1`, если запуск не был вызван
-с `--help` / `--version`. WSL-обёртка дополнительно вызывает
+Wrappers `run_pytest.ps1|.sh` по умолчанию добавляют только `-q --maxfail=1`,
+если запуск не был вызван с `--help` / `--version`. Локальное coverage
+instrumentation теперь opt-in: используйте `--with-coverage` или
+`BIOETL_PYTEST_WITH_COVERAGE=1`, когда нужен coverage-instrumented wrapper run.
+CI coverage semantics не меняются и остаются привязаны к lane
+`coverage-verify`. WSL-обёртка дополнительно вызывает
 `scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest.
 
 Supported policy slice for issue `#2598`:
@@ -98,9 +104,11 @@ Supported policy slice for issue `#2598`:
 - **E2E scenario families**: `advanced_scenarios`, `checkpoint`,
   `full_pipeline`, `full_pipeline_chain`, `run_types`.
 - **Default replay mode**: local development should prefer replay with
-  `--vcr-record=none` for stable feedback loops. Targeted refresh is supported
-  via `--vcr-record=new_episodes`; broad cassette rewrites are not the
-  supported default path.
+  `--vcr-record=none` for stable feedback loops, and `tests/conftest.py` now
+  defaults local runs to strict replay (`VCR_RECORD_MODE=none`) when no explicit
+  override is supplied. Targeted refresh is supported via
+  `--vcr-record=new_episodes`; broad cassette rewrites are not the supported
+  default path.
 
 Текущее состояние rollout по ADR-042:
 - mutation testing в CI блокирует только `domain/` с порогом `70%`
@@ -278,10 +286,10 @@ bash scripts/engineering/dev/run_pytest.sh tests/integration/ --vcr-record=none 
 uv run python -m pytest tests/integration/adapters/test_pubmed.py --vcr-record=new_episodes -v
 ```
 
-`--vcr-record=once` остаётся локальным compatibility default в `tests/conftest.py`
-для ad-hoc runs без явного режима, но policy-first execution path для supported
-integration replay должен задавать `--vcr-record=none`. Это уменьшает риск
-случайной перезаписи кассет во время обычного dev feedback loop.
+`tests/conftest.py` теперь задаёт `VCR_RECORD_MODE=none` как локальный default
+для ad-hoc runs без явного режима, а policy-first execution path для supported
+integration replay по-прежнему должен задавать `--vcr-record=none`. Это
+уменьшает риск случайной перезаписи кассет во время обычного dev feedback loop.
 
 ### 2.3. End-to-End (E2E) Tests (`tests/e2e/`)
 

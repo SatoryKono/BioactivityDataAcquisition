@@ -20,6 +20,7 @@ if (-not $env:PYTHONPYCACHEPREFIX) {
 $PytestArgs = @($args)
 $NeedsDefaultFlags = $true
 $PytestNarrow = $false
+$PytestWithCoverage = $env:BIOETL_PYTEST_WITH_COVERAGE -eq "1"
 $CollectOnly = $false
 $SkipPreflight = $false
 $FilteredArgs = @()
@@ -115,14 +116,10 @@ function Test-PreflightScope {
             $PathArg -eq "tests\" -or
             $PathArg -like "tests/architecture*" -or
             $PathArg -like "tests\architecture*" -or
-            $PathArg -like "tests/integration*" -or
-            $PathArg -like "tests\integration*" -or
-            $PathArg -like "tests/e2e*" -or
-            $PathArg -like "tests\e2e*" -or
-            $PathArg -like "tests/contract*" -or
-            $PathArg -like "tests\contract*" -or
-            $PathArg -like "tests/smoke*" -or
-            $PathArg -like "tests\smoke*"
+            $PathArg -like "tests/integration/config*" -or
+            $PathArg -like "tests\integration\config*" -or
+            $PathArg -like "tests/integration/ci*" -or
+            $PathArg -like "tests\integration\ci*"
         ) {
             return "full"
         }
@@ -134,6 +131,10 @@ function Test-PreflightScope {
 foreach ($Arg in $PytestArgs) {
     if ($Arg -eq "--narrow") {
         $PytestNarrow = $true
+        continue
+    }
+    if ($Arg -eq "--with-coverage") {
+        $PytestWithCoverage = $true
         continue
     }
     if ($Arg -eq "--skip-preflight") {
@@ -198,7 +199,10 @@ if ($NeedsDefaultFlags) {
     if ($PytestNarrow -or $CollectOnly) {
         $PytestArgs = @("-q", "--maxfail=1") + $PytestArgs
     } else {
-        $PytestArgs = @("--cov=src/bioetl", "--cov-report=term", "-q", "--maxfail=1") + $PytestArgs
+        $PytestArgs = @("-q", "--maxfail=1") + $PytestArgs
+        if ($PytestWithCoverage) {
+            $PytestArgs = @("--cov=src/bioetl", "--cov-report=term") + $PytestArgs
+        }
     }
 }
 

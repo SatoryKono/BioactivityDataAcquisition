@@ -70,11 +70,13 @@ coverage:
   probes do not walk the whole repository graph
 
 `run_pytest.ps1` and `run_pytest.sh` both add default pytest flags unless you ask
-for help/version. `--collect-only` automatically drops coverage defaults to keep
-startup lightweight:
+for help/version. Local wrappers now keep coverage opt-in so the default startup
+path stays lightweight; use `--with-coverage` or
+`BIOETL_PYTEST_WITH_COVERAGE=1` when you intentionally want local coverage
+instrumentation. `--collect-only` continues to avoid coverage instrumentation:
 
 ```text
---cov=src/bioetl --cov-report=term -q --maxfail=1
+-q --maxfail=1
 ```
 
 Behavior differs slightly by platform:
@@ -84,9 +86,11 @@ Behavior differs slightly by platform:
 - `.\scripts\engineering\dev\run_pytest.ps1` assumes `.venv-win` is already prepared via
   `.\scripts\engineering\dev\setup_env_windows.ps1` or `make setup-plugins`.
 
-For broad bash test runs, the shell runners also execute
-`bash scripts/engineering/dev/pretest_guardrails.sh --mode auto --scope full` before the
-real pytest process unless you pass `--skip-preflight`. The preflight cleans
+Auto-preflight is now limited to full-repo selections (`tests`, no explicit
+path) plus architecture/config-heavy slices such as `tests/architecture/`,
+`tests/integration/config/`, and `tests/integration/ci/`. For other local runs,
+invoke `bash scripts/engineering/dev/pretest_guardrails.sh --scope full`
+explicitly when you want the cleanup + governance pass. The preflight cleans
 common cache/build artifacts, refreshes the scripts inventory manifest, checks
 inventory/lifecycle/catalog governance, verifies docs, and runs a targeted
 fail-fast architecture slice for the recurring doc/governance regressions.

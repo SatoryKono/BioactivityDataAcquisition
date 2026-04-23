@@ -240,7 +240,7 @@ Ensure the `data/` directory is writable. On Linux/macOS: `chmod -R 755 data/`
 
 ### Tests Fail with "VCR cassette not found"
 
-Run tests with `--vcr-record=once` to record new cassettes, or ensure you're running against the existing fixtures.
+Run tests with `--vcr-record=new_episodes` to record missing cassette interactions intentionally, or ensure you're running against the existing fixtures in strict replay mode.
 
 ### Pipeline Fails with "Lock already held"
 

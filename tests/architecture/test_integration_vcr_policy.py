@@ -236,13 +236,10 @@ class TestIntegrationVcrPolicy:
         conftest = CONFTST_PATH.read_text(encoding="utf-8")
         vcr_policy = policy["vcr_policy"]
 
-        assert vcr_policy["default_record_modes"] == {"ci": "none", "local": "once"}
+        assert vcr_policy["default_record_modes"] == {"ci": "none", "local": "none"}
         assert vcr_policy["supported_refresh_record_modes"] == ["new_episodes"]
         assert vcr_policy["legacy_compatibility_record_modes"] == ["all"]
-        assert (
-            'os.environ["VCR_RECORD_MODE"] = "none" if os.getenv("CI") else "once"'
-            in conftest
-        )
+        assert 'os.environ["VCR_RECORD_MODE"] = "none"' in conftest
         assert "control-plane-e2e:" in tests_workflow
         assert policy["supported_scopes"]["e2e"]["ci_smoke_target"] in tests_workflow
         assert "VCR_RECORD_MODE=none uv run pytest" in tests_workflow

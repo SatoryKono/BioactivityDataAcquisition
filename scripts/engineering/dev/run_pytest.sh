@@ -18,11 +18,12 @@ case ":${PYTHONPATH:-}:" in
 esac
 PYTEST_RUNTIME_ENV_FILE="$REPO_ROOT/.pytest_cache/setup_plugins_runtime.sh"
 
-DEFAULT_FLAGS=(--cov=src/bioetl --cov-report=term -q --maxfail=1)
+DEFAULT_FLAGS=(-q --maxfail=1)
 DEFAULT_IGNORES=(--ignore=.cache --ignore=.pytest_cache --ignore=.hypothesis)
 PYTEST_ARGS=("$@")
 PYTEST_PLUGIN_ARGS=()
 PYTEST_NARROW="${BIOETL_PYTEST_NARROW:-0}"
+PYTEST_WITH_COVERAGE="${BIOETL_PYTEST_WITH_COVERAGE:-0}"
 FILTERED_PYTEST_ARGS=()
 SKIP_PREFLIGHT="${BIOETL_SKIP_PREFLIGHT:-0}"
 PREFLIGHT_SCOPE="${BIOETL_PREFLIGHT_SCOPE:-}"
@@ -32,12 +33,20 @@ for arg in "${PYTEST_ARGS[@]}"; do
         PYTEST_NARROW=1
         continue
     fi
+    if [[ "$arg" == "--with-coverage" ]]; then
+        PYTEST_WITH_COVERAGE=1
+        continue
+    fi
     if [[ "$arg" == "--skip-preflight" ]]; then
         SKIP_PREFLIGHT=1
         continue
     fi
     FILTERED_PYTEST_ARGS+=("$arg")
 done
+
+if [[ "$PYTEST_WITH_COVERAGE" == "1" && "${#DEFAULT_FLAGS[@]}" -gt 0 ]]; then
+    DEFAULT_FLAGS=(--cov=src/bioetl --cov-report=term "${DEFAULT_FLAGS[@]}")
+fi
 
 for arg in "${PYTEST_ARGS[@]}"; do
     case "$arg" in
@@ -334,7 +343,7 @@ should_run_preflight() {
         return 0
     fi
 
-    _paths_match_any tests/architecture tests/integration tests/e2e tests/contract tests/smoke
+    _paths_match_any tests/architecture tests/integration/config tests/integration/ci
 }
 
 determine_preflight_scope() {
