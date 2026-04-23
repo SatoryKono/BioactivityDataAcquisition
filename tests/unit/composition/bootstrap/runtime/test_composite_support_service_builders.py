@@ -128,7 +128,9 @@ def test_build_runtime_management_services_enables_quarantine_when_configured(
     mock_quarantine_port: MagicMock,
     mock_fsm_state_helper_cls: MagicMock,
 ) -> None:
-    infra_context = cast(Any, SimpleNamespace(metrics=MagicMock(name="metrics")))
+    infra_context = cast(
+        Any, SimpleNamespace(metrics=MagicMock(name="metrics"), clock=None)
+    )
     logger = MagicMock()
     settings = MagicMock()
     runtime = cast(Any, SimpleNamespace(resume=True))
@@ -198,7 +200,9 @@ def test_build_runtime_management_services_skips_quarantine_when_disabled(
     mock_quarantine_port: MagicMock,
     mock_fsm_state_helper_cls: MagicMock,
 ) -> None:
-    infra_context = cast(Any, SimpleNamespace(metrics=MagicMock(name="metrics")))
+    infra_context = cast(
+        Any, SimpleNamespace(metrics=MagicMock(name="metrics"), clock=None)
+    )
     checkpoint_manager_cls = cast(Any, MagicMock(return_value=MagicMock()))
     mock_checkpoint_port.return_value = MagicMock()
     mock_fsm_state_helper_cls.return_value = MagicMock()
@@ -233,7 +237,9 @@ def test_build_runtime_management_services_propagates_config_hash_when_available
     mock_quarantine_port: MagicMock,
     mock_fsm_state_helper_cls: MagicMock,
 ) -> None:
-    infra_context = cast(Any, SimpleNamespace(metrics=MagicMock(name="metrics")))
+    infra_context = cast(
+        Any, SimpleNamespace(metrics=MagicMock(name="metrics"), clock=None)
+    )
     logger = MagicMock()
     settings = MagicMock()
     runtime = cast(Any, SimpleNamespace(resume=False))
@@ -269,6 +275,56 @@ def test_build_runtime_management_services_propagates_config_hash_when_available
     config_hash = kwargs["expected_effective_config_hash"]
     assert isinstance(config_hash, str)
     assert len(config_hash) == 64
+
+
+@pytest.mark.unit
+@patch(
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.FSMStateHelperService"
+)
+@patch(
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_quarantine_port"
+)
+@patch(
+    "bioetl.composition.bootstrap.runtime.composite_runtime_management_builder.bootstrap_composite_checkpoint_port"
+)
+def test_build_runtime_management_services_prefers_control_plane_effective_hash(
+    mock_checkpoint_port: MagicMock,
+    mock_quarantine_port: MagicMock,
+    mock_fsm_state_helper_cls: MagicMock,
+) -> None:
+    infra_context = cast(
+        Any, SimpleNamespace(metrics=MagicMock(name="metrics"), clock=None)
+    )
+    logger = MagicMock()
+    settings = MagicMock()
+    runtime = cast(Any, SimpleNamespace(resume=False))
+    checkpoint_manager_cls = cast(Any, MagicMock(return_value=MagicMock()))
+
+    mock_checkpoint_port.return_value = MagicMock(name="checkpoint_storage")
+    mock_quarantine_port.return_value = MagicMock(name="quarantine_port")
+    mock_fsm_state_helper_cls.return_value = MagicMock(name="fsm_state_helper")
+
+    build_runtime_management_services(
+        config=_make_config(quarantine_enabled=False),
+        runtime=runtime,
+        infra_context=infra_context,
+        settings=settings,
+        logger=logger,
+        run_id="run-123",
+        checkpoint_manager_cls=checkpoint_manager_cls,
+        create_dq_report_service=MagicMock(return_value=MagicMock()),
+        control_plane_bundle=SimpleNamespace(
+            manifest_id="manifest-123",
+            execution_fingerprint="fingerprint-123",
+            dq_contract_compatibility_hash="dq-123",
+            effective_config_artifact_id="artifact-123",
+            effective_config_hash="f" * 64,
+            run_ledger_service=None,
+        ),
+    )
+
+    kwargs = cast(MagicMock, checkpoint_manager_cls).call_args.kwargs
+    assert kwargs["expected_effective_config_hash"] == ("f" * 64)
 
 
 @pytest.mark.unit

@@ -53,7 +53,10 @@ def build_runtime_management_services(
 ) -> RuntimeManagementServicesBundle:
     """Build checkpoint, FSM, DQ, and quarantine runtime services."""
 
-    expected_effective_config_hash = _resolve_expected_effective_config_hash(config)
+    expected_effective_config_hash = _resolve_expected_effective_config_hash(
+        config=config,
+        control_plane_bundle=control_plane_bundle,
+    )
     checkpoint_storage: CompositeCheckpointPort = bootstrap_composite_checkpoint_port()
     quarantine_port = (
         bootstrap_quarantine_port() if config.cross_validation.enabled else None
@@ -113,8 +116,19 @@ def build_runtime_management_services(
     )
 
 
-def _resolve_expected_effective_config_hash(config: CompositeConfig) -> str:
+def _resolve_expected_effective_config_hash(
+    *,
+    config: CompositeConfig,
+    control_plane_bundle: CompositeControlPlaneBundle | None,
+) -> str:
     """Best-effort hash for checkpoint compatibility anchors."""
+    bundle_effective_hash = (
+        None
+        if control_plane_bundle is None
+        else getattr(control_plane_bundle, "effective_config_hash", None)
+    )
+    if bundle_effective_hash:
+        return str(bundle_effective_hash)
     to_dict = getattr(config, "to_dict", None)
     if not callable(to_dict):
         return ""

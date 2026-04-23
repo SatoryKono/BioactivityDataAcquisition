@@ -28,6 +28,7 @@ if TYPE_CHECKING:
         RunnerInputs,
     )
     from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
 
 
@@ -125,6 +126,26 @@ def _build_runtime_overrides_snapshot(ctx: PipelineRunContext) -> dict[str, obje
     }
 
 
+def _build_composite_runtime_overrides_snapshot(
+    *,
+    pipeline_name: str,
+    runtime_config: object,
+    required_persistence_profile: str,
+) -> dict[str, object]:
+    """Convert composite runtime config into effective-config override shape."""
+    runtime_payload = _to_serializable_mapping(runtime_config)
+    runtime_payload.setdefault("pipeline_name", pipeline_name)
+    runtime_payload.setdefault("execution_context", "composite")
+    runtime_payload.setdefault(
+        "required_persistence_profile", required_persistence_profile
+    )
+    return {
+        "cli": dict(runtime_payload),
+        "env": {},
+        "runtime": runtime_payload,
+    }
+
+
 def _compute_file_hashes(
     *,
     relative_path: str,
@@ -200,9 +221,83 @@ def _build_effective_config_source_refs(
     return refs
 
 
+def _resolve_effective_config_entity(provider: str, entity: str) -> str:
+    """Map runtime entity labels to canonical effective-config source paths."""
+    if provider == "composite" and entity.startswith("composite_"):
+        return entity.removeprefix("composite_")
+    return entity
+
+
 def _control_plane_root(settings: Settings, leaf: str) -> Path:
     """Return the canonical control-plane output root for one leaf namespace."""
     return _shared_control_plane_root(settings, leaf)
+
+
+def _create_and_persist_effective_config_artifact_payload(
+    *,
+    pipeline_name: str,
+    pipeline_kind: str,
+    resolved_config: object,
+    runtime_overrides: dict[str, object],
+    provider: str,
+    entity: str,
+    settings: Settings,
+    logger: object,
+    run_id: RunID,
+) -> tuple[str, str, str, str]:
+    """Persist one effective-config artifact and return its provenance anchors."""
+    service = create_effective_config_service()
+    artifact = service.create_effective_config_artifact(
+        pipeline_name=pipeline_name,
+        pipeline_kind=pipeline_kind,
+        resolved_config=_to_serializable_mapping(resolved_config),
+        runtime_overrides=runtime_overrides,
+        source_refs=_build_effective_config_source_refs(
+            provider=provider,
+            entity=_resolve_effective_config_entity(provider, entity),
+        ),
+    )
+    serialized_payload = service.serialize_artifact(artifact)
+    loaded_payload = json.loads(serialized_payload)
+    if not isinstance(loaded_payload, dict):
+        raise ValueError("Effective-config artifact payload must be a JSON object")
+    artifact_payload = {str(key): value for key, value in loaded_payload.items()}
+    artifact_store = FileEffectiveConfigArtifactStore(
+        base_path=_control_plane_root(settings, "effective_config")
+    )
+    try:
+        artifact_store.save(
+            artifact_id=artifact.artifact_id,
+            run_id=run_id,
+            payload=artifact_payload,
+        )
+    except (OSError, RuntimeError, ValueError, TypeError) as exc:
+        log_error = getattr(logger, "error", None)
+        if callable(log_error):
+            log_error(
+                "effective_config_artifact_persist_failed",
+                artifact_id=artifact.artifact_id,
+                pipeline_name=pipeline_name,
+                error_type=type(exc).__name__,
+                error_message=str(exc),
+            )
+        raise
+    log_info = getattr(logger, "info", None)
+    if callable(log_info):
+        log_info(
+            "effective_config_artifact_persisted",
+            artifact_id=artifact.artifact_id,
+            pipeline_name=pipeline_name,
+            resolved_config_hash=artifact.resolved_config_hash,
+            effective_config_hash=artifact.effective_config_hash,
+            dq_contract_compatibility_hash=artifact.dq_contract_compatibility_hash,
+        )
+    return (
+        artifact.artifact_id,
+        artifact.resolved_config_hash,
+        artifact.effective_config_hash,
+        artifact.dq_contract_compatibility_hash,
+    )
 
 
 def create_and_persist_effective_config_artifact(
@@ -213,55 +308,42 @@ def create_and_persist_effective_config_artifact(
     entity: str,
 ) -> tuple[str, str, str, str]:
     """Create effective config artifact, persist it, and return provenance fields."""
-    logger = inputs.observability.logger
-    service = create_effective_config_service()
-    artifact = service.create_effective_config_artifact(
+    return _create_and_persist_effective_config_artifact_payload(
         pipeline_name=ctx.pipeline_name,
         pipeline_kind="standard",
-        resolved_config=_to_serializable_mapping(inputs.yaml_config),
+        resolved_config=inputs.yaml_config,
         runtime_overrides=_build_runtime_overrides_snapshot(ctx),
-        source_refs=_build_effective_config_source_refs(
-            provider=provider, entity=entity
+        provider=provider,
+        entity=entity,
+        settings=inputs.settings,
+        logger=inputs.observability.logger,
+        run_id=ctx.run_id,
+    )
+
+
+def create_and_persist_composite_effective_config_artifact(
+    *,
+    pipeline_name: str,
+    config: object,
+    runtime_config: object,
+    required_persistence_profile: str,
+    settings: Settings,
+    logger: object,
+    run_id: RunID,
+) -> tuple[str, str, str, str]:
+    """Persist the composite effective-config artifact using the shared path."""
+    return _create_and_persist_effective_config_artifact_payload(
+        pipeline_name=pipeline_name,
+        pipeline_kind="composite",
+        resolved_config=config,
+        runtime_overrides=_build_composite_runtime_overrides_snapshot(
+            pipeline_name=pipeline_name,
+            runtime_config=runtime_config,
+            required_persistence_profile=required_persistence_profile,
         ),
-    )
-    serialized_payload = service.serialize_artifact(artifact)
-    loaded_payload = json.loads(serialized_payload)
-    if not isinstance(loaded_payload, dict):
-        raise ValueError("Effective-config artifact payload must be a JSON object")
-    artifact_payload = {str(key): value for key, value in loaded_payload.items()}
-    artifact_store = FileEffectiveConfigArtifactStore(
-        base_path=_control_plane_root(inputs.settings, "effective_config")
-    )
-    try:
-        artifact_store.save(
-            artifact_id=artifact.artifact_id,
-            run_id=ctx.run_id,
-            payload=artifact_payload,
-        )
-    except (OSError, RuntimeError, ValueError, TypeError) as exc:
-        log_error = getattr(logger, "error", None)
-        if callable(log_error):
-            log_error(
-                "effective_config_artifact_persist_failed",
-                artifact_id=artifact.artifact_id,
-                pipeline_name=ctx.pipeline_name,
-                error_type=type(exc).__name__,
-                error_message=str(exc),
-            )
-        raise
-    log_info = getattr(logger, "info", None)
-    if callable(log_info):
-        log_info(
-            "effective_config_artifact_persisted",
-            artifact_id=artifact.artifact_id,
-            pipeline_name=ctx.pipeline_name,
-            resolved_config_hash=artifact.resolved_config_hash,
-            effective_config_hash=artifact.effective_config_hash,
-            dq_contract_compatibility_hash=artifact.dq_contract_compatibility_hash,
-        )
-    return (
-        artifact.artifact_id,
-        artifact.resolved_config_hash,
-        artifact.effective_config_hash,
-        artifact.dq_contract_compatibility_hash,
+        provider="composite",
+        entity=pipeline_name,
+        settings=settings,
+        logger=logger,
+        run_id=run_id,
     )
