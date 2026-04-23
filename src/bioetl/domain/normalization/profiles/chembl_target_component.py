@@ -9,6 +9,7 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
 from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
+from bioetl.domain.schemas.constants import TARGET_COMPONENT_TYPES
 
 __all__ = [
     "CHEMBL_TARGET_COMPONENT_PROFILE",
@@ -36,6 +37,7 @@ _INT_FIELDS = frozenset({"component_id", "taxonomy_id", "protein_classification_
 _JSON_STRING_FIELDS = frozenset(
     {"protein_classification_ids", "target_component_xrefs"}
 )
+_ENUM_FIELDS = {"component_type": TARGET_COMPONENT_TYPES}
 
 CHEMBL_TARGET_COMPONENT_PROFILE = build_standard_profile(
     profile_name="chembl.target_component",
@@ -44,6 +46,7 @@ CHEMBL_TARGET_COMPONENT_PROFILE = build_standard_profile(
     meta_fields=_META_FIELDS,
     int_fields=_INT_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
+    enum_fields=_ENUM_FIELDS,
     null_fields=chembl_pseudo_null_fields("target_component"),
 )
 

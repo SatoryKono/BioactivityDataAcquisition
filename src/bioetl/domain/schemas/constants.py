@@ -214,6 +214,8 @@ TARGET_COMPONENT_RELATIONSHIPS: frozenset[str] = frozenset(
     ]
 )
 
+TARGET_COMPONENT_TYPES: frozenset[str] = frozenset(["PROTEIN", "DNA", "RNA"])
+
 # =============================================================================
 # CHEMBL PUBLICATION ENUMS
 # =============================================================================
@@ -318,6 +320,7 @@ __all__ = [
     "STRUCTURE_TYPES",
     "SUBCELLULAR_FRACTIONS",
     "TARGET_COMPONENT_RELATIONSHIPS",
+    "TARGET_COMPONENT_TYPES",
     # Target enums
     "TARGET_TYPES",
     "UBERON_ID_PATTERN",

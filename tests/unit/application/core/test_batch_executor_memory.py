@@ -200,6 +200,7 @@ def _create_batch_executor(
         logger=services.logger,
         metrics=services.metrics,
         pipeline_name=config.pipeline_name,
+        memory_manager=mem_manager,
     )
     batch_id_factory = BatchExecutorUuidFactoryAdapter()
     batch_processing_service = BatchProcessingService(

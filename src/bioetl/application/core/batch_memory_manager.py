@@ -8,6 +8,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.domain.ports.runtime.memory import MemoryDecisionTraceEntry
+from bioetl.domain.types import JsonDict
+
 if TYPE_CHECKING:
     from bioetl.domain.config import MemoryConfig
     from bioetl.domain.ports import LoggerPort, MemoryMonitorPort
@@ -15,6 +18,8 @@ if TYPE_CHECKING:
 
 class BatchMemoryManagerService:
     """Manages adaptive batch sizing based on memory pressure."""
+
+    _MAX_DECISION_TRACE_ENTRIES = 128
 
     def __init__(
         self,
@@ -33,6 +38,17 @@ class BatchMemoryManagerService:
         )
         self.batch_size_reductions = 0
         self.min_batch_size_used = initial_batch_size
+        self._decision_index = 0
+        self._decision_trace: list[MemoryDecisionTraceEntry] = []
+
+    @property
+    def decision_trace(self) -> tuple[MemoryDecisionTraceEntry, ...]:
+        """Return bounded adaptive-memory decisions for replay diagnostics."""
+        return tuple(self._decision_trace)
+
+    def decision_trace_dicts(self) -> tuple[JsonDict, ...]:
+        """Return JSON-serializable adaptive-memory decisions."""
+        return tuple(entry.to_dict() for entry in self._decision_trace)
 
     def get_check_interval(self) -> int:
         """Get interval for memory pressure checks.
@@ -59,10 +75,17 @@ class BatchMemoryManagerService:
             Recommended batch size (may be smaller than current_size).
         """
         if not self.enabled:
+            self._record_decision(
+                stage="pressure_check",
+                old_size=current_size,
+                new_size=current_size,
+                record_index=records_fetched,
+                reason="adaptive_sizing_disabled",
+            )
             return current_size
         if records_fetched % check_interval != 0:
             return current_size
-        return self._adjust(current_size)
+        return self._adjust(current_size, record_index=records_fetched)
 
     def maybe_recover(self, current_size: int) -> int:
         """Try to recover batch size after processing.
@@ -74,15 +97,28 @@ class BatchMemoryManagerService:
             Recommended batch size (may be larger than current_size).
         """
         if not self.enabled:
+            self._record_decision(
+                stage="recovery",
+                old_size=current_size,
+                new_size=current_size,
+                record_index=None,
+                reason="adaptive_sizing_disabled",
+            )
             return current_size
-        return self._try_recover(current_size)
+        return self._try_recover(current_size, record_index=None)
 
-    def _adjust(self, current_size: int) -> int:
+    def _adjust(self, current_size: int, *, record_index: int | None) -> int:
         """Adjust batch size based on memory pressure."""
         if self._memory_monitor:
             new_size = self._memory_monitor.get_recommended_batch_size(current_size)
+            reason = _decision_reason(old_size=current_size, new_size=new_size)
         elif self._memory_config:
             new_size = self._estimate_from_config(current_size)
+            reason = (
+                "config_budget_exceeded"
+                if new_size < current_size
+                else "config_budget_ok"
+            )
         else:
             return current_size
 
@@ -98,6 +134,13 @@ class BatchMemoryManagerService:
                 )
 
         adjusted_size: int = new_size
+        self._record_decision(
+            stage="pressure_check",
+            old_size=current_size,
+            new_size=adjusted_size,
+            record_index=record_index,
+            reason=reason,
+        )
         return adjusted_size
 
     def _estimate_from_config(self, current_size: int) -> int:
@@ -114,11 +157,21 @@ class BatchMemoryManagerService:
 
         return current_size
 
-    def _try_recover(self, current_size: int) -> int:
+    def _try_recover(self, current_size: int, *, record_index: int | None) -> int:
         """Try to recover batch size after pressure is relieved."""
         if self._memory_monitor:
             recovered_size: int = self._memory_monitor.get_recommended_batch_size(
                 current_size
+            )
+            self._record_decision(
+                stage="recovery",
+                old_size=current_size,
+                new_size=recovered_size,
+                record_index=record_index,
+                reason=_decision_reason(
+                    old_size=current_size,
+                    new_size=recovered_size,
+                ),
             )
             return recovered_size
 
@@ -127,9 +180,59 @@ class BatchMemoryManagerService:
                 int(current_size * 1.1),
                 self._initial_batch_size,
             )
+            self._record_decision(
+                stage="recovery",
+                old_size=current_size,
+                new_size=recovery_size,
+                record_index=record_index,
+                reason="config_recovery_toward_initial",
+            )
             return recovery_size
 
+        self._record_decision(
+            stage="recovery",
+            old_size=current_size,
+            new_size=current_size,
+            record_index=record_index,
+            reason="already_at_initial_batch_size",
+        )
         return current_size
+
+    def _record_decision(
+        self,
+        *,
+        stage: str,
+        old_size: int,
+        new_size: int,
+        record_index: int | None,
+        reason: str,
+    ) -> None:
+        self._decision_index += 1
+        self._decision_trace.append(
+            MemoryDecisionTraceEntry(
+                decision_index=self._decision_index,
+                record_index=record_index,
+                stage=stage,
+                old_batch_size=old_size,
+                new_batch_size=new_size,
+                adaptive_sizing_enabled=self.enabled,
+                monitor_available=self._memory_monitor is not None,
+                config_available=self._memory_config is not None,
+                reason=reason,
+            )
+        )
+        if len(self._decision_trace) > self._MAX_DECISION_TRACE_ENTRIES:
+            del self._decision_trace[
+                : len(self._decision_trace) - self._MAX_DECISION_TRACE_ENTRIES
+            ]
+
+
+def _decision_reason(*, old_size: int, new_size: int) -> str:
+    if new_size < old_size:
+        return "monitor_recommended_reduction"
+    if new_size > old_size:
+        return "monitor_recommended_recovery"
+    return "monitor_recommended_no_change"
 
 
 __all__ = ["BatchMemoryManagerService"]

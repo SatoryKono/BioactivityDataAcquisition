@@ -136,7 +136,7 @@ class RunContextFactory:
             if resolved_config_hash is None
             else resolved_config_hash
         )
-        effective_hash = effective_config_hash or config_hash or resolved_hash
+        legacy_config_hash = config_hash if config_hash is not None else resolved_hash
         return RunContext.create(
             RunContextCreateInput(
                 run_id=run_id,
@@ -148,9 +148,9 @@ class RunContextFactory:
                 transform_steps=self.transform_steps_getter(yaml_config),
                 pipeline_version=self.pipeline_version_getter(yaml_config),
                 git_commit=self.git_commit_getter(),
-                config_hash=effective_hash,
+                config_hash=legacy_config_hash,
                 resolved_config_hash=resolved_hash,
-                effective_config_hash=effective_hash,
+                effective_config_hash=effective_config_hash,
                 manifest_id=manifest_id,
                 execution_fingerprint=execution_fingerprint,
                 contract_ref=contract_ref,

@@ -36,6 +36,19 @@ class TestCheckpointMetadata:
             exact_replay=True,
             input_snapshot_ids=("snap-a", "snap-b"),
             input_snapshot_fingerprint="snap-fingerprint",
+            memory_decision_trace=(
+                {
+                    "decision_index": 1,
+                    "record_index": 100,
+                    "stage": "pressure_check",
+                    "old_batch_size": 1000,
+                    "new_batch_size": 500,
+                    "adaptive_sizing_enabled": True,
+                    "monitor_available": True,
+                    "config_available": True,
+                    "reason": "monitor_recommended_reduction",
+                },
+            ),
             run_context={"test": "value"},
         )
 
@@ -56,6 +69,7 @@ class TestCheckpointMetadata:
         assert metadata.exact_replay is True
         assert metadata.input_snapshot_ids == ("snap-a", "snap-b")
         assert metadata.input_snapshot_fingerprint == "snap-fingerprint"
+        assert metadata.memory_decision_trace[0]["new_batch_size"] == 500
         assert metadata.run_context == {"test": "value"}
 
     def test_checkpoint_metadata_minimal(self) -> None:
@@ -78,6 +92,7 @@ class TestCheckpointMetadata:
         assert metadata.contract_version is None
         assert metadata.exact_replay is None
         assert metadata.input_snapshot_ids == ()
+        assert metadata.memory_decision_trace == ()
         assert metadata.run_context is None
 
     def test_checkpoint_metadata_from_legacy(self) -> None:
@@ -155,6 +170,19 @@ class TestCheckpointMetadata:
             "contract_version": "2.0.0",
             "exact_replay": True,
             "input_snapshot_ids": ["snap-1", "snap-2", "snap-1"],
+            "memory_decision_trace": [
+                {
+                    "decision_index": 1,
+                    "record_index": 10,
+                    "stage": "pressure_check",
+                    "old_batch_size": 100,
+                    "new_batch_size": 50,
+                    "adaptive_sizing_enabled": True,
+                    "monitor_available": False,
+                    "config_available": True,
+                    "reason": "config_budget_exceeded",
+                },
+            ],
             "run_context": {"source": "test"},
         }
 
@@ -174,6 +202,7 @@ class TestCheckpointMetadata:
         assert metadata.contract_version == "2.0.0"
         assert metadata.exact_replay is True
         assert metadata.input_snapshot_ids == ("snap-1", "snap-2")
+        assert metadata.memory_decision_trace[0]["reason"] == "config_budget_exceeded"
         assert metadata.run_context == {"source": "test"}
         assert metadata.dq_policy_hash is None
         assert metadata.pipeline_version is None

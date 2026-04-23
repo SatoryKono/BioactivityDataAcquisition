@@ -13,6 +13,8 @@ from bioetl.domain.normalization.profiles import (
     CHEMBL_ASSAY_PARAMETERS_PROFILE,
     CHEMBL_ASSAY_PROFILE,
     CHEMBL_MOLECULE_PROFILE,
+    CHEMBL_PUBLICATION_TERM_PROFILE,
+    CHEMBL_TARGET_COMPONENT_PROFILE,
     CHEMBL_TARGET_PROFILE,
 )
 
@@ -65,13 +67,24 @@ OBSERVED_VALUE_POLICIES: tuple[ObservedValuePolicy, ...] = (
         "standard_units",
         ("activity", "standard_units"),
     ),
+    ObservedValuePolicy("molecule", "max_phase", ("molecule", "max_phase_values")),
     ObservedValuePolicy("molecule", "molecule_type", ("molecule", "types")),
     ObservedValuePolicy("molecule", "structure_type", ("molecule", "structure_types")),
     ObservedValuePolicy("target", "target_type", ("target", "types")),
     ObservedValuePolicy(
+        "target_component",
+        "component_type",
+        ("target", "component_types"),
+    ),
+    ObservedValuePolicy(
         "publication",
         "publication_type",
         ("publication", "native_doc_types"),
+    ),
+    ObservedValuePolicy(
+        "publication_term",
+        "term_type",
+        ("publication_term", "term_types"),
     ),
 )
 
@@ -87,6 +100,8 @@ PROFILE_BY_ENTITY = {
     "assay_parameters": CHEMBL_ASSAY_PARAMETERS_PROFILE,
     "molecule": CHEMBL_MOLECULE_PROFILE,
     "target": CHEMBL_TARGET_PROFILE,
+    "target_component": CHEMBL_TARGET_COMPONENT_PROFILE,
+    "publication_term": CHEMBL_PUBLICATION_TERM_PROFILE,
 }
 
 
@@ -98,7 +113,7 @@ def chembl_enums() -> dict[str, Any]:
 
 
 @pytest.fixture(scope="module")
-def observed_values() -> dict[str, dict[str, list[str]]]:
+def observed_values() -> dict[str, dict[str, list[Any]]]:
     loaded = yaml.safe_load(FIXTURE_PATH.read_text(encoding="utf-8"))
     assert isinstance(loaded, dict)
     values = loaded["observed_values"]
@@ -130,10 +145,12 @@ def _registry_values(
 )
 def test_chembl_observed_values_are_ssot_subsets(
     chembl_enums: dict[str, Any],
-    observed_values: dict[str, dict[str, list[str]]],
+    observed_values: dict[str, dict[str, list[Any]]],
     policy: ObservedValuePolicy,
 ) -> None:
-    values = frozenset(observed_values[policy.entity][policy.field])
+    values = frozenset(
+        str(value) for value in observed_values[policy.entity][policy.field]
+    )
     registry_values = _registry_values(chembl_enums, policy.registry_path)
 
     assert values
@@ -154,7 +171,7 @@ def test_chembl_observed_values_are_ssot_subsets(
     ids=lambda policy: policy.label,
 )
 def test_chembl_observed_values_are_accepted_by_profiles(
-    observed_values: dict[str, dict[str, list[str]]],
+    observed_values: dict[str, dict[str, list[Any]]],
     policy: ObservedValuePolicy,
 ) -> None:
     profile = PROFILE_BY_ENTITY[policy.entity]

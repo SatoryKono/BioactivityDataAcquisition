@@ -306,14 +306,16 @@ def _classification_values(field_name: str) -> frozenset[str]:
 
 
 def _process_raw_types_list(raw_types_list: list[str] | None) -> str | None:
-    if raw_types_list is None:
+    if not raw_types_list:  # Handles None and empty list
         return None
+
     valid_parts = []
-    for raw in raw_types_list:
-        if raw is not None:
-            stripped = str(raw).strip()
-            if stripped:  # Only add non-empty stripped strings
-                valid_parts.append(stripped)
+    for item in raw_types_list:
+        if item is not None:
+            stripped_item = str(item).strip()
+            if stripped_item:
+                valid_parts.append(stripped_item)
+
     return "|".join(valid_parts) if valid_parts else None
 
 

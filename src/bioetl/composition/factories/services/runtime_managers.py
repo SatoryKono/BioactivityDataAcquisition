@@ -71,6 +71,7 @@ def build_runtime_managers(
         metrics=pipeline.services.metrics,
         tracer=resolved_tracer,
         pipeline_name=pipeline.pipeline_name,
+        memory_manager=memory_manager,
     )
     execution_lifecycle_service = BatchExecutionLifecycleService(
         progress_service=progress_service,
