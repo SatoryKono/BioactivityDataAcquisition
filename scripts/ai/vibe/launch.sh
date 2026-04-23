@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Canonical Vibe launcher for WSL/Linux.
+# Canonical Vibe launcher for WSL/Linux with timeout protection
 
 set -euo pipefail
 
@@ -42,30 +42,42 @@ log_info() {
     return 0
 }
 
+# Add timeout protection to PATH operations
 export PATH="${HOME}/.local/bin:${PATH}"
 
-if [[ -f "${HOME}/.local/bin/env" ]]; then
-    # shellcheck disable=SC1091
-    source "${HOME}/.local/bin/env" 2>/dev/null || true
+# Load local environment with timeout protection
+if timeout 5 test -f "${HOME}/.local/bin/env" 2>/dev/null; then
+    if timeout 5 bash -c "source '${HOME}/.local/bin/env'" 2>/dev/null; then
+        # shellcheck disable=SC1091
+        source "${HOME}/.local/bin/env" 2>/dev/null || true
+    fi
 fi
 
-if [[ -f "${REPO_ROOT}/.wsl_proxy_env.sh" ]]; then
-    # shellcheck disable=SC1091
-    source "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null || true
+# Load WSL proxy environment if available with timeout
+if timeout 5 test -f "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null; then
+    if timeout 5 bash -c "source '${REPO_ROOT}/.wsl_proxy_env.sh'" 2>/dev/null; then
+        # shellcheck disable=SC1091
+        source "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null || true
+    fi
 fi
 
-if [[ -f "${COMPAT_ENV_FILE}" ]]; then
+# Load Mistral Vibe configuration with timeout protection
+if timeout 5 test -f "${COMPAT_ENV_FILE}" 2>/dev/null; then
     set -a
     # shellcheck disable=SC1090
-    source "${COMPAT_ENV_FILE}" 2>/dev/null || true
+    if timeout 5 bash -c "source '${COMPAT_ENV_FILE}'" 2>/dev/null; then
+        source "${COMPAT_ENV_FILE}" 2>/dev/null || true
+    fi
     set +a
 fi
 
+# Handle legacy API key name
 if [[ -n "${VIBE_API_KEY:-}" && -z "${MISTRAL_API_KEY:-}" ]]; then
     export MISTRAL_API_KEY="${VIBE_API_KEY}"
 fi
 
-if ! command -v vibe >/dev/null 2>&1; then
+# Check if vibe is installed with timeout
+if ! timeout 10 bash -c "command -v vibe >/dev/null 2>&1"; then
     log_error "Mistral Vibe CLI not found in PATH"
     echo "[mistral] Install with one of:"
     echo "[mistral]   curl -LsSf https://mistral.ai/vibe/install.sh | bash"
@@ -74,7 +86,8 @@ if ! command -v vibe >/dev/null 2>&1; then
     exit 1
 fi
 
-VIBE_VERSION=$(vibe --version 2>/dev/null || echo "unknown")
+# Get Vibe version with timeout
+VIBE_VERSION=$(timeout 5 vibe --version 2>/dev/null || echo "unknown")
 log_info "Using Vibe ${VIBE_VERSION}"
 log_info "Working directory: ${REPO_ROOT}"
 
@@ -82,6 +95,7 @@ if [[ -n "${MISTRAL_API_KEY:-}" ]]; then
     log_info "MISTRAL_API_KEY loaded for current session"
 fi
 
+# Launch Vibe with proper working directory
 if [[ $# -eq 0 ]]; then
     log_info "Starting interactive mode..."
     exec vibe --workdir "${REPO_ROOT}"

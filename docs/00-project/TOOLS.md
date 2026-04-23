@@ -75,9 +75,9 @@ uv run python -m scripts.diagrams lint
 uv run python -m scripts.engineering.ci quality-gate
 ```
 
-`scripts.data` остаётся совместимым facade entrypoint для legacy вызовов, но
-канонические data/VCR команды теперь живут в `scripts.ops.data` и
-`scripts.engineering.qa.vcr`.
+Канонические data/VCR команды живут в `scripts.ops.data` и
+`scripts.engineering.qa.vcr`; новые вызовы не должны идти через legacy
+facade-пути.
 
 Каждый скрипт также можно запустить напрямую (см. `scripts/<group>/README.md`).
 

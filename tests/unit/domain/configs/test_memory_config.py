@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+from pydantic import ValidationError
 
 from bioetl.domain.config.memory import MemoryConfig
 
@@ -33,7 +34,7 @@ class TestMemoryConfig:
 
     def test_immutable(self) -> None:
         mc = MemoryConfig()
-        with pytest.raises((AttributeError, TypeError)):
+        with pytest.raises(ValidationError, match="frozen"):
             mc.max_batch_memory_mb = 256  # type: ignore[misc]
 
     def test_equality(self) -> None:
@@ -56,6 +57,12 @@ class TestMemoryConfig:
         mc = MemoryConfig(memory_pressure_threshold=1.0)
         assert mc.memory_pressure_threshold == pytest.approx(1.0)
 
+    def test_min_batch_size_can_exceed_memory_derived_capacity(self) -> None:
+        mc = MemoryConfig(max_batch_memory_mb=1, min_batch_size=5000)
+
+        assert mc.max_batch_memory_mb == 1
+        assert mc.min_batch_size == 5000
+
     @pytest.mark.parametrize(
         ("kwargs", "match"),
         [
@@ -64,6 +71,9 @@ class TestMemoryConfig:
             ({"memory_pressure_threshold": 1.1}, "memory_pressure_threshold"),
             ({"min_batch_size": 0}, "min_batch_size"),
             ({"check_interval_records": 0}, "check_interval_records"),
+            ({"max_batch_memory_mb": -1}, "max_batch_memory_mb"),
+            ({"min_batch_size": -1}, "min_batch_size"),
+            ({"check_interval_records": -1}, "check_interval_records"),
         ],
     )
     def test_invalid_memory_config_values_raise(

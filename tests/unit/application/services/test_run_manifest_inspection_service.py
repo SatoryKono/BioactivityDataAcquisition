@@ -43,6 +43,8 @@ from bioetl.domain.normalization import (
 )
 
 _VALID_CONFIG_HASH = "a" * 64
+_VALID_RESOLVED_CONFIG_HASH = "b" * 64
+_VALID_EFFECTIVE_CONFIG_HASH = "c" * 64
 _SNAPSHOT_IDENTITY_FINGERPRINT = (
     "f29f1a5c18e94a4fe614b59ae8e68c5c65afd078155b95d1e7c4aa32f6291dcd"
 )
@@ -63,7 +65,7 @@ def _expected_canonical_execution_identity(
         pipeline_name=manifest.pipeline_name,
         run_type=manifest.run_type.value,
         pipeline_version=manifest.code_provenance.pipeline_version,
-        effective_config_hash=manifest.code_provenance.config_hash,
+        effective_config_hash=manifest.code_provenance.effective_config_hash,
         dq_contract_compatibility_hash=(
             manifest.code_provenance.dq_contract_compatibility_hash
         ),
@@ -84,7 +86,7 @@ def _expected_canonical_execution_identity(
 def _expected_degraded_runtime_anchor(manifest: RunManifest) -> dict[str, object]:
     payload = {
         "manifest_id": manifest.manifest_id,
-        "effective_config_hash": manifest.code_provenance.config_hash,
+        "effective_config_hash": manifest.code_provenance.effective_config_hash,
         "contract_ref": manifest.code_provenance.contract_ref,
         "contract_version": manifest.code_provenance.contract_version,
         "effective_config_artifact_id": (
@@ -238,6 +240,8 @@ def _make_manifest(
     run_id: RunID,
     run_type: RunType = RunType.INCREMENTAL,
     config_hash: str = _VALID_CONFIG_HASH,
+    resolved_config_hash: str | None = _VALID_RESOLVED_CONFIG_HASH,
+    effective_config_hash: str | None = _VALID_EFFECTIVE_CONFIG_HASH,
     limit: int = 100,
     execution_fingerprint: str | None = None,
     created_at: datetime | None = None,
@@ -265,7 +269,8 @@ def _make_manifest(
             git_commit="abc1234",
             source_revision_state="clean",
             config_hash=config_hash,
-            effective_config_hash=config_hash,
+            resolved_config_hash=resolved_config_hash,
+            effective_config_hash=effective_config_hash,
             contract_ref="chembl.activity",
             contract_version="1.2.0",
             dq_policy_ref="chembl_activity.gold",
@@ -323,6 +328,8 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
     assert result.diagnostics["manifest_id"] == "manifest-1"
     assert result.diagnostics["run_id"] == str(run_id)
     assert result.diagnostics["config_hash"] == _VALID_CONFIG_HASH
+    assert result.diagnostics["resolved_config_hash"] == _VALID_RESOLVED_CONFIG_HASH
+    assert result.diagnostics["effective_config_hash"] == _VALID_EFFECTIVE_CONFIG_HASH
     assert result.diagnostics["contract_ref"] == "chembl.activity"
     assert result.diagnostics["contract_version"] == "1.2.0"
     assert result.identity_graph == {
@@ -330,8 +337,8 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "manifest_id": "manifest-1",
         "execution_fingerprint": "fingerprint-manifest-1",
         "config_hash": _VALID_CONFIG_HASH,
-        "resolved_config_hash": None,
-        "effective_config_hash": _VALID_CONFIG_HASH,
+        "resolved_config_hash": _VALID_RESOLVED_CONFIG_HASH,
+        "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
         "git_commit": "abc1234",
         "source_revision_state": "clean",
         "code_provenance_state": _expected_code_provenance_state(manifest),
@@ -426,8 +433,8 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "manifest_id": "manifest-no-ledger",
         "execution_fingerprint": manifest.execution_fingerprint,
         "config_hash": _VALID_CONFIG_HASH,
-        "resolved_config_hash": None,
-        "effective_config_hash": _VALID_CONFIG_HASH,
+        "resolved_config_hash": _VALID_RESOLVED_CONFIG_HASH,
+        "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
         "git_commit": "abc1234",
         "source_revision_state": "clean",
         "code_provenance_state": _expected_code_provenance_state(manifest),
@@ -492,8 +499,8 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "entity": "activity",
         "execution_fingerprint": manifest.execution_fingerprint,
         "config_hash": _VALID_CONFIG_HASH,
-        "resolved_config_hash": None,
-        "effective_config_hash": _VALID_CONFIG_HASH,
+        "resolved_config_hash": _VALID_RESOLVED_CONFIG_HASH,
+        "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
         "pipeline_version": "1.0.0",
         "git_commit": "abc1234",
         "source_revision_state": "clean",
@@ -1267,7 +1274,9 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
             ),
             pipeline_version="1.0.0",
             git_commit="abc1234",
-            config_hash=artifact.effective_config_hash,
+            config_hash=artifact.resolved_config_hash,
+            resolved_config_hash=artifact.resolved_config_hash,
+            effective_config_hash=artifact.effective_config_hash,
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             dq_policy_ref="chembl.activity.dq",
@@ -1300,9 +1309,15 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
     )
     result = service.show(manifest.manifest_id)
 
-    assert result.manifest.code_provenance.config_hash == artifact.effective_config_hash
+    assert result.manifest.code_provenance.config_hash == artifact.resolved_config_hash
+    assert (
+        result.manifest.code_provenance.effective_config_hash
+        == artifact.effective_config_hash
+    )
     assert result.identity_graph == result.diagnostics["identity_graph"]
-    assert result.diagnostics["config_hash"] == artifact.effective_config_hash
+    assert result.diagnostics["config_hash"] == artifact.resolved_config_hash
+    assert result.diagnostics["resolved_config_hash"] == artifact.resolved_config_hash
+    assert result.diagnostics["effective_config_hash"] == artifact.effective_config_hash
     assert result.diagnostics["effective_config_artifact_id"] == "eca-chain-1"
     assert result.diagnostics["artifact_refs"] == [
         {
@@ -1349,6 +1364,8 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
             pipeline_version="1.0.0",
             git_commit="abc1234",
             config_hash="a" * 64,
+            resolved_config_hash="b" * 64,
+            effective_config_hash="c" * 64,
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             dq_policy_ref="chembl.activity.dq",
@@ -1489,7 +1506,9 @@ def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
             ),
             pipeline_version="1.0.0",
             git_commit="abc1234",
-            config_hash=artifact.effective_config_hash,
+            config_hash=artifact.resolved_config_hash,
+            resolved_config_hash=artifact.resolved_config_hash,
+            effective_config_hash=artifact.effective_config_hash,
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             dq_policy_ref="chembl.activity.dq",
@@ -1517,7 +1536,11 @@ def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
     )
     result = service.show(manifest.manifest_id)
 
-    assert result.manifest.code_provenance.config_hash == artifact.effective_config_hash
+    assert result.manifest.code_provenance.config_hash == artifact.resolved_config_hash
+    assert (
+        result.manifest.code_provenance.effective_config_hash
+        == artifact.effective_config_hash
+    )
     assert result.diagnostics["contract_version"] == "1.0.0"
     assert result.diagnostics["dq_policy_ref"] == "chembl.activity.dq"
     assert result.diagnostics["rule_bundle_version"] == "dq-rules.v1"

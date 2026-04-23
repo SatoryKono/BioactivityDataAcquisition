@@ -13,7 +13,14 @@ from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.config import MemoryConfig
-    from bioetl.domain.ports import LoggerPort, MemoryMonitorPort
+    from bioetl.domain.ports import LoggerPort, MemoryMonitorPort, MetricsPort
+
+
+_MEMORY_PRESSURE_EVENTS_METRIC = "bioetl_memory_pressure_events_total"
+_MEMORY_BATCH_RESIZE_EVENTS_METRIC = "bioetl_memory_batch_resize_events_total"
+_MEMORY_MONITOR_FALLBACK_EVENTS_METRIC = "bioetl_memory_monitor_fallback_events_total"
+_MEMORY_PRESSURE_STATE_METRIC = "bioetl_memory_pressure_state"
+_FALLBACK_MONITOR_MODES = frozenset({"resource", "estimate", "unknown"})
 
 
 class BatchMemoryManagerService:
@@ -28,11 +35,15 @@ class BatchMemoryManagerService:
         memory_monitor: MemoryMonitorPort | None = None,
         memory_config: MemoryConfig | None = None,
         logger: LoggerPort | None = None,
+        metrics: MetricsPort | None = None,
+        pipeline_name: str | None = None,
     ) -> None:
         self._memory_monitor = memory_monitor
         self._memory_config = memory_config
         self._initial_batch_size = initial_batch_size
         self._logger = logger
+        self._metrics = metrics
+        self._pipeline_name = pipeline_name or "unknown"
         self.enabled = memory_monitor is not None or (
             memory_config is not None and memory_config.enable_adaptive_sizing
         )
@@ -80,6 +91,8 @@ class BatchMemoryManagerService:
                 old_size=current_size,
                 new_size=current_size,
                 record_index=records_fetched,
+                pressure_state=None,
+                monitor_mode="disabled",
                 reason="adaptive_sizing_disabled",
             )
             return current_size
@@ -102,6 +115,8 @@ class BatchMemoryManagerService:
                 old_size=current_size,
                 new_size=current_size,
                 record_index=None,
+                pressure_state=None,
+                monitor_mode="disabled",
                 reason="adaptive_sizing_disabled",
             )
             return current_size
@@ -112,13 +127,17 @@ class BatchMemoryManagerService:
         if self._memory_monitor:
             new_size = self._memory_monitor.get_recommended_batch_size(current_size)
             reason = _decision_reason(old_size=current_size, new_size=new_size)
+            pressure_state = _monitor_pressure_state(self._memory_monitor)
+            monitor_mode = _monitor_mode(self._memory_monitor)
         elif self._memory_config:
+            pressure_state = self._config_budget_exceeded(current_size)
             new_size = self._estimate_from_config(current_size)
             reason = (
                 "config_budget_exceeded"
                 if new_size < current_size
                 else "config_budget_ok"
             )
+            monitor_mode = "config_budget"
         else:
             return current_size
 
@@ -139,9 +158,19 @@ class BatchMemoryManagerService:
             old_size=current_size,
             new_size=adjusted_size,
             record_index=record_index,
+            pressure_state=pressure_state,
+            monitor_mode=monitor_mode,
             reason=reason,
         )
         return adjusted_size
+
+    def _config_budget_exceeded(self, current_size: int) -> bool:
+        """Return whether current size exceeds the configured memory budget."""
+        if not self._memory_config:
+            return False
+        records_per_mb = 1000
+        max_records = self._memory_config.max_batch_memory_mb * records_per_mb
+        return current_size > max_records
 
     def _estimate_from_config(self, current_size: int) -> int:
         """Estimate batch size without memory monitoring."""
@@ -151,7 +180,7 @@ class BatchMemoryManagerService:
         records_per_mb = 1000
         max_records = self._memory_config.max_batch_memory_mb * records_per_mb
 
-        if current_size > max_records:
+        if self._config_budget_exceeded(current_size):
             estimated_size: int = max(max_records, self._memory_config.min_batch_size)
             return estimated_size
 
@@ -168,6 +197,8 @@ class BatchMemoryManagerService:
                 old_size=current_size,
                 new_size=recovered_size,
                 record_index=record_index,
+                pressure_state=_monitor_pressure_state(self._memory_monitor),
+                monitor_mode=_monitor_mode(self._memory_monitor),
                 reason=_decision_reason(
                     old_size=current_size,
                     new_size=recovered_size,
@@ -185,6 +216,8 @@ class BatchMemoryManagerService:
                 old_size=current_size,
                 new_size=recovery_size,
                 record_index=record_index,
+                pressure_state=False,
+                monitor_mode="config_budget",
                 reason="config_recovery_toward_initial",
             )
             return recovery_size
@@ -194,6 +227,8 @@ class BatchMemoryManagerService:
             old_size=current_size,
             new_size=current_size,
             record_index=record_index,
+            pressure_state=False,
+            monitor_mode="config_budget",
             reason="already_at_initial_batch_size",
         )
         return current_size
@@ -205,9 +240,19 @@ class BatchMemoryManagerService:
         old_size: int,
         new_size: int,
         record_index: int | None,
+        pressure_state: bool | None,
+        monitor_mode: str,
         reason: str,
     ) -> None:
         self._decision_index += 1
+        self._emit_decision_metrics(
+            stage=stage,
+            old_size=old_size,
+            new_size=new_size,
+            pressure_state=pressure_state,
+            monitor_mode=monitor_mode,
+            reason=reason,
+        )
         self._decision_trace.append(
             MemoryDecisionTraceEntry(
                 decision_index=self._decision_index,
@@ -218,6 +263,8 @@ class BatchMemoryManagerService:
                 adaptive_sizing_enabled=self.enabled,
                 monitor_available=self._memory_monitor is not None,
                 config_available=self._memory_config is not None,
+                pressure_state=pressure_state,
+                monitor_mode=monitor_mode,
                 reason=reason,
             )
         )
@@ -226,6 +273,56 @@ class BatchMemoryManagerService:
                 : len(self._decision_trace) - self._MAX_DECISION_TRACE_ENTRIES
             ]
 
+    def _emit_decision_metrics(
+        self,
+        *,
+        stage: str,
+        old_size: int,
+        new_size: int,
+        pressure_state: bool | None,
+        monitor_mode: str,
+        reason: str,
+    ) -> None:
+        """Emit bounded adaptive-memory metrics for one decision."""
+        if self._metrics is None:
+            return
+
+        status = _decision_status(
+            old_size=old_size,
+            new_size=new_size,
+            pressure_state=pressure_state,
+        )
+        labels = {
+            "pipeline": self._pipeline_name,
+            "stage": stage,
+            "reason": reason,
+            "monitor_mode": monitor_mode,
+            "status": status,
+        }
+        self._metrics.set_gauge(
+            _MEMORY_PRESSURE_STATE_METRIC,
+            1.0 if pressure_state is True else 0.0,
+            labels,
+        )
+        if pressure_state is True:
+            self._metrics.increment_counter(
+                _MEMORY_PRESSURE_EVENTS_METRIC,
+                1,
+                labels,
+            )
+        if old_size != new_size:
+            self._metrics.increment_counter(
+                _MEMORY_BATCH_RESIZE_EVENTS_METRIC,
+                1,
+                labels,
+            )
+        if monitor_mode in _FALLBACK_MONITOR_MODES:
+            self._metrics.increment_counter(
+                _MEMORY_MONITOR_FALLBACK_EVENTS_METRIC,
+                1,
+                labels,
+            )
+
 
 def _decision_reason(*, old_size: int, new_size: int) -> str:
     if new_size < old_size:
@@ -233,6 +330,41 @@ def _decision_reason(*, old_size: int, new_size: int) -> str:
     if new_size > old_size:
         return "monitor_recommended_recovery"
     return "monitor_recommended_no_change"
+
+
+def _decision_status(
+    *,
+    old_size: int,
+    new_size: int,
+    pressure_state: bool | None,
+) -> str:
+    if new_size < old_size:
+        return "reduced"
+    if new_size > old_size:
+        return "recovered"
+    if pressure_state is True:
+        return "pressure"
+    if pressure_state is False:
+        return "stable"
+    return "disabled"
+
+
+def _monitor_mode(monitor: MemoryMonitorPort) -> str:
+    getter = getattr(monitor, "get_monitor_mode", None)
+    if callable(getter):
+        value = getter()
+        if isinstance(value, str):
+            return value
+    return "unknown"
+
+
+def _monitor_pressure_state(monitor: MemoryMonitorPort) -> bool | None:
+    getter = getattr(monitor, "get_last_pressure_state", None)
+    if callable(getter):
+        value = getter()
+        if isinstance(value, bool):
+            return value
+    return None
 
 
 __all__ = ["BatchMemoryManagerService"]

@@ -43,6 +43,7 @@ SCRIPT_EXTENSIONS: Final[tuple[str, ...]] = (
 SCRIPT_ROOTS: Final[tuple[str, ...]] = ("scripts", "src/tools")
 SEARCH_ROOTS: Final[tuple[str, ...]] = (
     "AGENTS.md",
+    ".pre-commit-config.yaml",
     ".codex/agents",
     ".codex/skills",
     ".github/workflows",
@@ -275,6 +276,8 @@ def _iter_search_files(root: Path) -> list[Path]:
 
 def _source_group(rel_path: str) -> str:
     if rel_path.startswith(".github/workflows/"):
+        return "ci"
+    if rel_path == ".pre-commit-config.yaml":
         return "ci"
     if rel_path.startswith(".codex/skills/"):
         return "skills"

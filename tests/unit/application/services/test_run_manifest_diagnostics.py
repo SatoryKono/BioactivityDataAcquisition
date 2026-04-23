@@ -32,6 +32,8 @@ from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID, RunType
 
 _VALID_CONFIG_HASH = "a" * 64
+_VALID_RESOLVED_CONFIG_HASH = "b" * 64
+_VALID_EFFECTIVE_CONFIG_HASH = "c" * 64
 
 
 class _InMemoryRunLedgerStore(RunLedgerPort):
@@ -81,8 +83,8 @@ def _make_manifest() -> RunManifest:
             git_commit="abc1234",
             source_revision_state="clean",
             config_hash=_VALID_CONFIG_HASH,
-            resolved_config_hash="b" * 64,
-            effective_config_hash=_VALID_CONFIG_HASH,
+            resolved_config_hash=_VALID_RESOLVED_CONFIG_HASH,
+            effective_config_hash=_VALID_EFFECTIVE_CONFIG_HASH,
             contract_ref="chembl.activity",
             contract_version="1.2.0",
             dq_policy_ref="chembl_activity.gold",
@@ -98,7 +100,7 @@ def _expected_canonical_execution_identity(manifest: RunManifest) -> dict[str, o
         pipeline_name=manifest.pipeline_name,
         run_type=manifest.run_type.value,
         pipeline_version=manifest.code_provenance.pipeline_version,
-        effective_config_hash=manifest.code_provenance.config_hash,
+        effective_config_hash=manifest.code_provenance.effective_config_hash,
         dq_contract_compatibility_hash=(
             manifest.code_provenance.dq_contract_compatibility_hash
         ),
@@ -119,7 +121,7 @@ def _expected_canonical_execution_identity(manifest: RunManifest) -> dict[str, o
 def _expected_degraded_runtime_anchor(manifest: RunManifest) -> dict[str, object]:
     payload = {
         "manifest_id": manifest.manifest_id,
-        "effective_config_hash": manifest.code_provenance.config_hash,
+        "effective_config_hash": manifest.code_provenance.effective_config_hash,
         "contract_ref": manifest.code_provenance.contract_ref,
         "contract_version": manifest.code_provenance.contract_version,
         "effective_config_artifact_id": (
@@ -270,7 +272,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
     assert score["schema_version"] == "1.0"
     assert score["contract_version"] == "1.2.0"
     assert score["scale"] == "0-10"
-    assert score["overall_score"] == 7.3
+    assert score["overall_score"] == 7.4
     assert score["scored_at"] == manifest.created_at.isoformat()
     assert score["source"] == "run_manifest_diagnostics"
     assert score["blockers"] == [
@@ -321,8 +323,8 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "entity": "activity",
         "execution_fingerprint": "fingerprint-diagnostics",
         "config_hash": _VALID_CONFIG_HASH,
-        "resolved_config_hash": "b" * 64,
-        "effective_config_hash": _VALID_CONFIG_HASH,
+        "resolved_config_hash": _VALID_RESOLVED_CONFIG_HASH,
+        "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
         "pipeline_version": "1.0.0",
         "git_commit": "abc1234",
         "source_revision_state": "clean",
@@ -662,8 +664,8 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "manifest_id": "manifest-diagnostics",
         "execution_fingerprint": "fingerprint-diagnostics",
         "config_hash": _VALID_CONFIG_HASH,
-        "resolved_config_hash": "b" * 64,
-        "effective_config_hash": _VALID_CONFIG_HASH,
+        "resolved_config_hash": _VALID_RESOLVED_CONFIG_HASH,
+        "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
         "git_commit": "abc1234",
         "source_revision_state": "clean",
         "code_provenance_state": {
@@ -915,7 +917,7 @@ def test_build_diagnostics_summary_accepts_legacy_data_contract_version_alias() 
         details={
             "_diagnostic": {
                 "diagnostic_contract_version": "v1",
-                "effective_config_hash": _VALID_CONFIG_HASH,
+                "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
                 "contract_ref": "chembl.activity",
                 "data_contract_version": "1.2.0",
             }

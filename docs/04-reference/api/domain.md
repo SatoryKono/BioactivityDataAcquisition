@@ -331,6 +331,37 @@ ______________________________________________________________________
 | `BaseProviderConfig` | Provider-level configuration                           |
 | `RateLimitConfig`    | Rate limiting settings                                 |
 
+### MemoryConfig Contract
+
+`MemoryConfig` is the domain value object for adaptive batch sizing policy.
+It is immutable, rejects unknown fields, and validates the memory policy at
+construction time:
+
+- `max_batch_memory_mb` must be greater than `0`.
+- `memory_pressure_threshold` must be greater than `0.0` and less than or equal
+  to `1.0`.
+- `min_batch_size` must be greater than `0`.
+- `check_interval_records` must be greater than `0`.
+
+Pressure checks are inclusive: memory usage equal to
+`memory_pressure_threshold` is considered pressure. The `MemoryStats`
+`is_under_pressure` property is only the coarse 80% convenience helper; runtime
+policy uses the configured threshold through `is_under_pressure_at(...)` and
+the infrastructure `MemoryMonitor`.
+
+`min_batch_size` is a forward-progress floor, not a derived memory ceiling. If
+the memory-derived maximum batch size would be smaller than `min_batch_size`,
+`calculate_max_batch_size(...)` still returns `min_batch_size`.
+
+Adaptive memory decisions are replay-visible through bounded
+`memory_decision_trace` checkpoint metadata. Each decision records the check
+stage, optional record index, old and new batch sizes, whether adaptive sizing
+was enabled, whether a monitor/config was available, the bounded
+`pressure_state`, the bounded `monitor_mode` (`psutil`, `resource`, `estimate`,
+`config_budget`, `disabled`, or `unknown`), and a stable reason code. Exact
+replay assembly disables adaptive memory sizing so host memory pressure cannot
+change the replay batch shape.
+
 ______________________________________________________________________
 
 ## Domain Services

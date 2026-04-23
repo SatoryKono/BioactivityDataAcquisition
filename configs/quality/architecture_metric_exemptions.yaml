@@ -23,14 +23,6 @@ registries:
       linked_rf: "RF-023"
       expires_on: "2026-06-30"
       removal_step: "Split Silver request coercion helpers from the public DQ report port surface until the module drops below the domain LOC cap."
-    src/bioetl/application/services/checkpoint_compatibility_service.py:
-      value: 635
-      owner: "@bioetl-platform"
-      reason: "Checkpoint compatibility orchestration still carries transitional branching scheduled for decomposition."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Split compatibility and replay decision paths into helper owners, then retire this exemption."
     src/bioetl/infrastructure/storage/silver_writer.py:
       value: 1450
       owner: "@bioetl-platform"
@@ -42,14 +34,6 @@ registries:
   function_complexity:
     {}
   function_length:
-    src/bioetl/application/services/checkpoint_compatibility_service.py::_validate_execution_identity_compatibility:
-      value: 116
-      owner: "@bioetl-platform"
-      reason: "Checkpoint compatibility orchestration still carries a transitional identity-validation path while helper extraction continues."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Continue splitting execution-identity validation branches into dedicated helpers until the function drops below the default limit."
     src/bioetl/application/services/checkpoint_compatibility_service_v2.py::check_compatibility:
       value: 150
       owner: "@bioetl-platform"
@@ -98,14 +82,6 @@ registries:
       linked_rf: "RF-023"
       expires_on: "2026-06-30"
       removal_step: "Extract identity-graph node and edge builders into dedicated helpers until the function returns under the default limit."
-    src/bioetl/infrastructure/storage/silver/operations/metadata_builders.py::_build_silver_metadata:
-      value: 109
-      owner: "@bioetl-platform"
-      reason: "Silver metadata assembly still combines multiple metadata derivation branches while storage helper extraction is in progress."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Split silver metadata derivation into smaller helpers until the function drops under the default limit."
     src/bioetl/infrastructure/storage/silver/runtime_helpers.py::build_silver_writer_runtime_services:
       value: 136
       owner: "@bioetl-platform"
@@ -179,14 +155,6 @@ registries:
       linked_rf: "RF-023"
       expires_on: "2026-06-30"
       removal_step: "Extract metric publication helpers until the service drops below the default limit."
-    src/bioetl/infrastructure/storage/silver/operations/metadata_operations.py::SilverMetadataOperations:
-      value: 567
-      owner: "@bioetl-platform"
-      reason: "Silver metadata operations remain a large infrastructure operation host while metadata and lineage helpers are still being extracted."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Continue peeling metadata and lineage subflows into dedicated operation helpers until the class returns under the default limit."
     src/bioetl/infrastructure/storage/silver_writer.py::SilverWriter:
       value: 1191
       owner: "@bioetl-platform"
@@ -229,4 +197,12 @@ registries:
       linked_rf: "RF-023"
       expires_on: "2026-06-30"
       removal_step: "Split manifest lifecycle responsibilities into dedicated collaborators until the class no longer triggers the god-object heuristic."
-  domain_complexity: {}
+  domain_complexity:
+    src/bioetl/domain/config/memory.py::MemoryConfig:
+      value: 6
+      owner: "@bioetl-platform"
+      reason: "MemoryConfig uses Pydantic BaseModel for validation, leading to an apparent cyclomatic complexity of 6 in static analysis, though its core logic is simple and delegated to Pydantic's internal mechanisms."
+      classification: "architectural_nuance"
+      linked_rf: "RF-000"
+      expires_on: "2026-09-30"
+      removal_step: "Re-evaluate when Pydantic BaseModel cyclomatic complexity is correctly measured or when a change in validation framework occurs."

@@ -29,6 +29,25 @@ from bioetl.domain.ports import (
 __all__ = ["build_runtime_managers"]
 
 
+def _resolve_memory_runtime_inputs(
+    *,
+    pipeline: BasePipeline,
+    memory_monitor: MemoryMonitorPort | None,
+    memory_config: MemoryConfig | None,
+) -> tuple[MemoryMonitorPort | None, MemoryConfig | None]:
+    """Return memory collaborators after exact-replay policy is applied."""
+    runtime = getattr(pipeline, "runtime", None)
+    if not bool(getattr(runtime, "exact_replay", False)):
+        return memory_monitor, memory_config
+
+    disabled_config = (
+        memory_config.model_copy(update={"enable_adaptive_sizing": False})
+        if memory_config is not None
+        else MemoryConfig(enable_adaptive_sizing=False)
+    )
+    return None, disabled_config
+
+
 def build_runtime_managers(
     *,
     pipeline: BasePipeline,
@@ -48,11 +67,18 @@ def build_runtime_managers(
 ]:
     """Build runtime manager instances for BatchExecutor."""
     initial_batch_size = pipeline.config.batch_size or BatchExecutor.DEFAULT_BATCH_SIZE
+    memory_monitor, memory_config = _resolve_memory_runtime_inputs(
+        pipeline=pipeline,
+        memory_monitor=memory_monitor,
+        memory_config=memory_config,
+    )
     memory_manager = BatchMemoryManagerService(
         initial_batch_size=initial_batch_size,
         memory_monitor=memory_monitor,
         memory_config=memory_config,
         logger=pipeline.services.logger,
+        metrics=pipeline.services.metrics,
+        pipeline_name=pipeline.pipeline_name,
     )
     resolved_tracer = resolve_tracer(tracer)
     tracing_manager = BatchTracingManagerService(

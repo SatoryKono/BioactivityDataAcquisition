@@ -268,14 +268,14 @@ vcr_policy:
   metadata_backfill_script: scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py
   refresh_protocol:
     pre_refresh_checks:
-    - python -m scripts.data check-vcr-placement
-    - python -m scripts.data check-vcr-naming
+    - python -m scripts.engineering.qa.vcr check-placement
+    - python -m scripts.engineering.qa.vcr check-naming
     targeted_recording_only: true
     preferred_refresh_mode: new_episodes
     post_refresh_checks:
-    - python -m scripts.data check-vcr-placement
-    - python -m scripts.data check-vcr-naming
-    - python -m scripts.data check-vcr-secrets
+    - python -m scripts.engineering.qa.vcr check-placement
+    - python -m scripts.engineering.qa.vcr check-naming
+    - python -m scripts.engineering.qa.vcr check-secrets
     - python -m scripts.engineering.qa report-vcr-metadata --check
 governance_rules:
   refresh_triggers:

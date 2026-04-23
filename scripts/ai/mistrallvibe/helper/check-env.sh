@@ -48,8 +48,8 @@ ALL_CHECKS=true
 
 # 1. Check Node.js
 log_info "Checking Node.js..."
-if command -v node >/dev/null 2>&1; then
-    NODE_VER=$(node --version)
+if timeout 10 bash -c "command -v node >/dev/null 2>&1"; then
+    NODE_VER=$(timeout 5 node --version 2>/dev/null || echo "unknown")
     log_success "Node.js installed: $NODE_VER"
 else
     log_warn "Node.js not found"
@@ -58,8 +58,8 @@ fi
 
 # 2. Check npm
 log_info "Checking npm..."
-if command -v npm >/dev/null 2>&1; then
-    NPM_VER=$(npm --version)
+if timeout 10 bash -c "command -v npm >/dev/null 2>&1"; then
+    NPM_VER=$(timeout 5 npm --version 2>/dev/null || echo "unknown")
     log_success "npm installed: $NPM_VER"
 else
     log_warn "npm not found"
@@ -88,8 +88,8 @@ fi
 
 # 4. Check if Vibe is installed
 log_info "Checking Mistral Vibe installation..."
-if command -v vibe >/dev/null 2>&1; then
-    VIBE_VER=$(vibe --version 2>/dev/null || echo "unknown")
+if timeout 10 bash -c "command -v vibe >/dev/null 2>&1"; then
+    VIBE_VER=$(timeout 5 vibe --version 2>/dev/null || echo "unknown")
     log_success "Mistral Vibe installed: $VIBE_VER"
 else
     log_warn "Mistral Vibe not found in PATH"

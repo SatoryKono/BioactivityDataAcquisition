@@ -93,6 +93,33 @@ def test_discover_refs_normalizes_windows_path_separators() -> None:
     )
 
 
+def test_discover_refs_counts_pre_commit_local_hook_entrypoints() -> None:
+    """Pre-commit local hook entries should mark wrappers and targets active."""
+    module = _load_inventory_module()
+    root = repo_root()
+    targets = [
+        root / "scripts" / "engineering" / "dev" / "run_project_python.py",
+        root / "scripts" / "engineering" / "qa" / "vcr" / "check_root_vcr_cassettes.py",
+        root
+        / "scripts"
+        / "engineering"
+        / "qa"
+        / "vcr"
+        / "check_vcr_filename_policy.py",
+    ]
+
+    refs = module._discover_refs(root, targets)
+
+    wrapper_refs = refs["scripts/engineering/dev/run_project_python.py"]
+    placement_refs = refs["scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"]
+    naming_refs = refs["scripts/engineering/qa/vcr/check_vcr_filename_policy.py"]
+
+    assert any(item.path == ".pre-commit-config.yaml" for item in wrapper_refs)
+    assert any(item.path == ".pre-commit-config.yaml" for item in placement_refs)
+    assert any(item.path == ".pre-commit-config.yaml" for item in naming_refs)
+    assert {item.source_group for item in wrapper_refs} >= {"ci"}
+
+
 def test_agent_usage_includes_codex_agents_and_skills() -> None:
     """Agent usage should detect both skill wrappers and logical agent specs."""
     module = _load_inventory_module()

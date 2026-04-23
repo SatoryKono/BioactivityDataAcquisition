@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
   - BioETL Team
-Last verified: "2026-04-22"
+Last verified: "2026-04-23"
 ---
 
 # Run Manifest and Run Ledger Contract
@@ -414,6 +414,8 @@ published effective-config baseline is:
 - `git_commit`
 - `source_revision_state`
 - `config_hash`
+- `resolved_config_hash`
+- `effective_config_hash`
 - `contract_ref`
 - `contract_version`
 - `contract_schema_hash`
@@ -421,6 +423,25 @@ published effective-config baseline is:
 - `rule_bundle_version`
 - `dq_contract_compatibility_hash`
 - `effective_config_artifact_id`
+
+Hash semantics are deliberately split:
+
+- `config_hash` is a legacy compatibility anchor retained for older manifest
+  and sidecar consumers. New code must not treat it as a synonym for
+  `effective_config_hash`.
+- `resolved_config_hash` is the hash of the resolved declarative configuration
+  before occurrence envelope fields and supported runtime overrides are folded
+  into the execution surface.
+- `effective_config_hash` is the hash of the final effective execution
+  configuration after supported runtime overrides and control-plane
+  normalization.
+
+New manifest creation, diagnostics, inspection output, metadata sidecars, and
+lineage nodes MUST preserve those fields separately. Backward-compatible
+manifest hydration MAY populate missing `resolved_config_hash` or
+`effective_config_hash` from legacy `config_hash` only when reading older
+payloads that did not carry the explicit fields; that compatibility behavior
+must not be used when creating new control-plane artifacts.
 
 Strict exact-replay, `replay_ready`, and `forensic_grade` manifests require
 `git_commit` to be present. Inspection diagnostics must expose both

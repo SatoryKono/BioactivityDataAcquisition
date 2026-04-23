@@ -338,13 +338,13 @@ If you do not want to activate the environment, call the interpreter directly:
 To configure the core MCP servers for both VS Code Copilot and Codex CLI:
 
 ```bash
-./scripts/engineering/dev/setup_copilot_codex_mcp.sh
+uv run python scripts/ai/codex/setup_mcp.py
 ```
 
 Windows PowerShell:
 
 ```powershell
-.\scripts\engineering\dev\setup_copilot_codex_mcp.ps1
+python scripts\ai\codex\setup_mcp.py
 ```
 
 What this script does:

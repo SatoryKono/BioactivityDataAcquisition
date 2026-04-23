@@ -7,7 +7,7 @@ Reviewers:
 - BioETL Team
 Priority: P1
 Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-04-02'
+Last verified: '2026-04-23'
 ---
 
 # Run Manifest Inspection
@@ -264,6 +264,10 @@ Focus on:
 - `cross_validation_rule_ids`, `cross_validation_config_paths`, `cross_validation_signal_present`;
 - `execution_fingerprint` as the canonical execution-identity fingerprint shared
   across manifest, checkpoint, and runtime compatibility surfaces;
+- `config_hash`, `resolved_config_hash`, and `effective_config_hash` as
+  separate config provenance fields; `config_hash` is a legacy compatibility
+  anchor, `resolved_config_hash` identifies the resolved declarative config,
+  and `effective_config_hash` identifies the final effective execution config;
 - `effective_config_hash`, `contract_ref`, `contract_version`, and `effective_config_artifact_id` as runtime-anchor compatibility fields;
 - stable `source_refs[*].source_hash` values in the effective-config artifact
   when canonical config files are available;
@@ -280,6 +284,10 @@ Interpretation examples:
 - `latest_status=success` with no `run_finished` is suspicious;
 - `artifact_published` with empty `artifact_refs` indicates traceability degradation;
 - `missing_artifact_links > 0` means artifact events are missing `dataset_ref` and/or `lineage_fragment_id` anchors;
+- if `resolved_config_hash` and `effective_config_hash` differ, treat that as
+  expected evidence that runtime overrides or control-plane normalization
+  changed the final execution surface; do not collapse either value into
+  legacy `config_hash`;
 
 ### 7a. Supported trace/debug path from output artifact to run context
 
@@ -388,7 +396,10 @@ than silently accepting the bundle as canonical.
 ## Verification
 
 - Manifest resolution works by `run_id` or `manifest_id`.
-- The returned manifest contains stable provenance anchors such as `config_hash`, `contract_ref`, `contract_version`, and `effective_config_artifact_id` when available.
+- The returned manifest exposes `config_hash`, `resolved_config_hash`, and
+  `effective_config_hash` separately when available; only older hydrated
+  manifests may show compatibility values copied from legacy `config_hash`.
+- The returned manifest contains stable provenance anchors such as `contract_ref`, `contract_version`, and `effective_config_artifact_id` when available.
 - Ledger history matches the observed run outcome and event baseline.
 - For composite resume, checkpoint watermark metadata and replayed ledger suffix
   align with the latest observed lifecycle state.

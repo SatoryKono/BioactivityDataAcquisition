@@ -71,7 +71,7 @@ class TestMemoryStats:
         assert stats.is_under_pressure is False
 
     def test_is_under_pressure_boundary(self) -> None:
-        """Test boundary condition at 80%."""
+        """The coarse helper treats usage equal to 80% as pressure."""
         stats_exactly_80 = MemoryStats(
             used_mb=6400.0,
             available_mb=1600.0,
@@ -80,7 +80,7 @@ class TestMemoryStats:
             process_mb=500.0,
         )
 
-        assert stats_exactly_80.is_under_pressure is False
+        assert stats_exactly_80.is_under_pressure is True
 
         stats_over_80 = MemoryStats(
             used_mb=6401.0,
@@ -91,6 +91,19 @@ class TestMemoryStats:
         )
 
         assert stats_over_80.is_under_pressure is True
+
+    def test_is_under_pressure_at_uses_configured_threshold(self) -> None:
+        """Policy-aware pressure checks use caller-provided thresholds."""
+        stats = MemoryStats(
+            used_mb=6400.0,
+            available_mb=1600.0,
+            total_mb=8000.0,
+            percent_used=0.8,
+            process_mb=500.0,
+        )
+
+        assert stats.is_under_pressure_at(0.9) is False
+        assert stats.is_under_pressure_at(0.8) is True
 
 
 @pytest.mark.unit

@@ -309,14 +309,13 @@ def _process_raw_types_list(raw_types_list: list[str] | None) -> str | None:
     if not raw_types_list:  # Handles None and empty list
         return None
 
-    valid_parts = []
+    processed_parts = []
     for item in raw_types_list:
-        if item is not None:
-            stripped_item = str(item).strip()
-            if stripped_item:
-                valid_parts.append(stripped_item)
+        stripped = str(item).strip() if item is not None else ""
+        if stripped:
+            processed_parts.append(stripped)
 
-    return "|".join(valid_parts) if valid_parts else None
+    return "|".join(processed_parts) if processed_parts else None
 
 
 def _raw_publication_type(

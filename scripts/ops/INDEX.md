@@ -9,7 +9,8 @@
 ## Support helpers
 
 - `script-codex/helper/ensure-codex-cli.sh`
-- `support/load_repo_env.sh`
+- `support/load_repo_env.sh` is the shared repository environment loader for ops
+  helpers and MCP wrapper compatibility paths.
 
 These helper assets are intentionally internal and should be referenced by
 wrappers rather than documented as primary user commands.

@@ -266,9 +266,82 @@ class TestCheckPressure:
                 "adaptive_sizing_enabled": True,
                 "monitor_available": True,
                 "config_available": True,
+                "pressure_state": None,
+                "monitor_mode": "unknown",
                 "reason": "monitor_recommended_reduction",
             },
         )
+
+    def test_emits_bounded_memory_metrics_for_pressure_resize(self):
+        """Pressure and resize decisions emit low-cardinality metrics."""
+        metrics = MagicMock()
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_config=_make_config(max_batch_memory_mb=1, min_batch_size=50),
+            metrics=metrics,
+            pipeline_name="chembl_activity",
+        )
+
+        manager.check_pressure(
+            current_size=2000,
+            check_interval=100,
+            records_fetched=100,
+        )
+
+        expected_labels = {
+            "pipeline": "chembl_activity",
+            "stage": "pressure_check",
+            "reason": "config_budget_exceeded",
+            "monitor_mode": "config_budget",
+            "status": "reduced",
+        }
+        metrics.set_gauge.assert_called_once_with(
+            "bioetl_memory_pressure_state",
+            1.0,
+            expected_labels,
+        )
+        metrics.increment_counter.assert_any_call(
+            "bioetl_memory_pressure_events_total",
+            1,
+            expected_labels,
+        )
+        metrics.increment_counter.assert_any_call(
+            "bioetl_memory_batch_resize_events_total",
+            1,
+            expected_labels,
+        )
+
+    def test_fallback_monitor_mode_metric_is_bounded(self):
+        """Fallback monitor modes are emitted without host-specific labels."""
+        metrics = MagicMock()
+        monitor = _make_monitor(recommended=250)
+        monitor.get_monitor_mode.return_value = "estimate"
+        monitor.get_last_pressure_state.return_value = True
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_monitor=monitor,
+            metrics=metrics,
+            pipeline_name="chembl_activity",
+        )
+
+        manager.check_pressure(
+            current_size=500,
+            check_interval=100,
+            records_fetched=100,
+        )
+
+        fallback_call = next(
+            call
+            for call in metrics.increment_counter.call_args_list
+            if call.args[0] == "bioetl_memory_monitor_fallback_events_total"
+        )
+        assert fallback_call.args[2] == {
+            "pipeline": "chembl_activity",
+            "stage": "pressure_check",
+            "reason": "monitor_recommended_reduction",
+            "monitor_mode": "estimate",
+            "status": "reduced",
+        }
 
 
 # ---------------------------------------------------------------------------

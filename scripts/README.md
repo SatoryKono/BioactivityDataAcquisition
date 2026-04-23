@@ -14,7 +14,6 @@ The `scripts/` root is intentionally compact.
 ## Root Directories
 
 - `scripts/ai` — AI launchers, MCP tooling, and agent support.
-- `scripts/data` — compatibility data facade.
 - `scripts/diagrams` — diagram generation, linting, and render quality gates.
 - `scripts/docs` — documentation build, drift checks, fixers, and matrix tooling.
 - `scripts/engineering` — CI, dev, QA, diagnostics, baselines, and repo governance.
@@ -26,7 +25,8 @@ The `scripts/` root is intentionally compact.
 
 - Active operational commands live under `scripts/ops` and its canonical grouped
   entry points such as `scripts.ops`, `scripts.ops.data`, and
-  `scripts.engineering.baselines`.
+  `scripts.engineering.baselines`; VCR governance lives under
+  `scripts.engineering.qa.vcr`.
 - Historical material under `scripts/ops/archive` is retained for traceability
   only. It is discoverable through `python scripts/run.py list` under the
   `archive` group, but it is not the target surface for new integrations.
