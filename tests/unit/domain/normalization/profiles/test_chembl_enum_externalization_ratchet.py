@@ -11,20 +11,35 @@ PROFILE_DIR = Path("src/bioetl/domain/normalization/profiles")
 def _enum_value_nodes(tree: ast.AST) -> list[ast.AST]:
     values: list[ast.AST] = []
     for node in ast.walk(tree):
-        if isinstance(node, ast.Assign) and any(
-            isinstance(target, ast.Name) and target.id == "_ENUM_FIELDS"
-            for target in node.targets
-        ):
-            if isinstance(node.value, ast.Dict):
-                values.extend(node.value.values)
-        if (
-            isinstance(node, ast.Call)
-            and isinstance(node.func, ast.Name)
-            and node.func.id == "build_standard_profile"
-        ):
-            for keyword in node.keywords:
-                if keyword.arg == "enum_fields" and isinstance(keyword.value, ast.Dict):
-                    values.extend(keyword.value.values)
+        values.extend(_assigned_enum_value_nodes(node))
+        values.extend(_profile_enum_value_nodes(node))
+    return values
+
+
+def _assigned_enum_value_nodes(node: ast.AST) -> list[ast.AST]:
+    """Return inline enum value nodes from module-level _ENUM_FIELDS assignments."""
+    if not isinstance(node, ast.Assign) or not any(
+        isinstance(target, ast.Name) and target.id == "_ENUM_FIELDS"
+        for target in node.targets
+    ):
+        return []
+    if not isinstance(node.value, ast.Dict):
+        return []
+    return list(node.value.values)
+
+
+def _profile_enum_value_nodes(node: ast.AST) -> list[ast.AST]:
+    """Return inline enum value nodes passed to build_standard_profile()."""
+    if not (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "build_standard_profile"
+    ):
+        return []
+    values: list[ast.AST] = []
+    for keyword in node.keywords:
+        if keyword.arg == "enum_fields" and isinstance(keyword.value, ast.Dict):
+            values.extend(keyword.value.values)
     return values
 
 

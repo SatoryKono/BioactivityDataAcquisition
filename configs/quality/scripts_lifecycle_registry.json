@@ -781,6 +781,12 @@
       "decision": "active",
       "next_step": "Retain as the canonical documentation governance checking script.",
       "review_by": "2026-07-15"
+    },
+    "scripts/generate_adr_registry.py": {
+      "owner": "@bioetl-platform",
+      "decision": "active",
+      "next_step": "Retain as the canonical ADR registry generation script for documentation automation.",
+      "review_by": "2026-07-15"
     }
   }
 }
