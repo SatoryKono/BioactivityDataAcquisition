@@ -5,9 +5,14 @@ from __future__ import annotations
 from typing import Any, cast
 
 
+from bioetl.domain.normalization.profiles.chembl_activity import CHEMBL_ACTIVITY_PROFILE
 from bioetl.domain.normalization.profiles.chembl_assay import CHEMBL_ASSAY_PROFILE
 from bioetl.domain.normalization.profiles.chembl_cell_line import (
     CHEMBL_CELL_LINE_PROFILE,
+)
+from bioetl.domain.normalization.profiles.chembl_target import CHEMBL_TARGET_PROFILE
+from bioetl.domain.normalization.profiles.chembl_target_component import (
+    CHEMBL_TARGET_COMPONENT_PROFILE,
 )
 from bioetl.domain.normalization.profiles.chembl_tissue import CHEMBL_TISSUE_PROFILE
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
@@ -192,3 +197,17 @@ class TestNormalizationFunctionIntegration:
 
         for input_id, expected in test_cases:
             assert normalize_ontology_id(input_id) == expected
+
+    def test_chembl_organism_normalization_consistency_across_profiles(self) -> None:
+        """Activity, target, and target-component should share one organism seam."""
+        activity_rule = CHEMBL_ACTIVITY_PROFILE.field_rules["target_organism"]
+        target_rule = CHEMBL_TARGET_PROFILE.field_rules["organism"]
+        component_rule = CHEMBL_TARGET_COMPONENT_PROFILE.field_rules["organism"]
+
+        dirty_inputs = ("  homo   sapiens  ", "e. coli")
+        expected = ("Homo sapiens", "Escherichia coli")
+
+        for raw_value, canonical in zip(dirty_inputs, expected, strict=True):
+            assert activity_rule.apply(raw_value) == canonical
+            assert target_rule.apply(raw_value) == canonical
+            assert component_rule.apply(raw_value) == canonical

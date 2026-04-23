@@ -6,13 +6,13 @@ Implements the test selection strategy from py-test-bot documentation
 to run appropriate tests based on changed files.
 """
 
-import os
-import sys
-import subprocess
 import argparse
-from pathlib import Path
-from typing import List, Dict, Optional, Set
 import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+from typing import Dict, List, Optional, Set
 
 # Test selection strategy based on file changes
 TEST_SELECTION_STRATEGY = {
@@ -100,70 +100,33 @@ def detect_changed_files(git_diff_target: str = "HEAD") -> Set[str]:
 
 def match_files_to_strategy(changed_files: Set[str]) -> List[str]:
     """Match changed files to test selection strategies."""
-    
-    matched_strategies = []
-    
-    for strategy_name, strategy in TEST_SELECTION_STRATEGY.items():
-        for trigger_pattern in strategy["trigger_files"]:
-            for changed_file in changed_files:
-                if changed_file.startswith(trigger_pattern) or trigger_pattern.endswith("*"):
-                    if strategy_name not in matched_strategies:
-                        matched_strategies.append(strategy_name)
-                    break
-    
-    # Always include python_files strategy if any .py files changed
-    if any(f.endswith('.py') for f in changed_files):
-        if "python_files" not in matched_strategies:
-            matched_strategies.append("python_files")
-    
+
+    matched_strategies = [
+        strategy_name
+        for strategy_name, strategy in TEST_SELECTION_STRATEGY.items()
+        if _strategy_matches_changed_files(strategy, changed_files)
+    ]
+    _append_python_strategy_if_needed(matched_strategies, changed_files)
     return matched_strategies
 
 
 def run_tests_for_strategy(strategy_name: str, coverage: bool = False) -> bool:
     """Run tests for a specific strategy."""
-    
+
     if strategy_name not in TEST_SELECTION_STRATEGY:
         print(f"❌ Unknown strategy: {strategy_name}")
         return False
-    
+
     strategy = TEST_SELECTION_STRATEGY[strategy_name]
     print(f"🚀 Running tests for strategy: {strategy_name}")
     print(f"Description: {strategy['description']}")
-    
-    # Run pre-check commands if specified
-    if "pre_check" in strategy:
-        print(f"🔍 Running pre-check commands...")
-        for cmd in strategy["pre_check"]:
-            print(f"  Running: {cmd}")
-            try:
-                result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=60)
-                if result.returncode != 0:
-                    print(f"❌ Pre-check failed: {cmd}")
-                    print(f"   {result.stderr}")
-                    return False
-                print(f"  ✅ {cmd} passed")
-            except Exception as e:
-                print(f"❌ Error running pre-check: {e}")
-                return False
-    
-    # Build pytest command
-    cmd = ["python3", "-m", "pytest"]
-    
-    # Add test paths
-    cmd.extend(strategy["test_paths"])
-    
-    # Add useful options
-    cmd.extend(["-v", "--tb=short", "-x"])  # verbose, short traceback, stop on first failure
-    
-    # Add coverage if requested
-    if coverage:
-        cmd.extend(["--cov=src/bioetl/", "--cov-report=term-missing"])
-    
-    # Add timeout
-    cmd.append("--timeout=300")
-    
+
+    if not _run_pre_checks(strategy):
+        return False
+
+    cmd = _build_pytest_command(strategy, coverage=coverage)
     print(f"Running: {' '.join(cmd)}")
-    
+
     try:
         result = subprocess.run(
             cmd,
@@ -191,6 +154,76 @@ def run_tests_for_strategy(strategy_name: str, coverage: bool = False) -> bool:
     except Exception as e:
         print(f"❌ Error running tests: {e}", file=sys.stderr)
         return False
+
+
+def _strategy_matches_changed_files(
+    strategy: Dict[str, object],
+    changed_files: Set[str],
+) -> bool:
+    trigger_files = strategy.get("trigger_files", [])
+    if not isinstance(trigger_files, list):
+        return False
+    for trigger_pattern in trigger_files:
+        if not isinstance(trigger_pattern, str):
+            continue
+        if any(
+            changed_file.startswith(trigger_pattern) or trigger_pattern.endswith("*")
+            for changed_file in changed_files
+        ):
+            return True
+    return False
+
+
+def _append_python_strategy_if_needed(
+    matched_strategies: List[str],
+    changed_files: Set[str],
+) -> None:
+    if any(path.endswith(".py") for path in changed_files):
+        if "python_files" not in matched_strategies:
+            matched_strategies.append("python_files")
+
+
+def _run_pre_checks(strategy: Dict[str, object]) -> bool:
+    pre_checks = strategy.get("pre_check")
+    if not isinstance(pre_checks, list):
+        return True
+    print("🔍 Running pre-check commands...")
+    for cmd in pre_checks:
+        if not isinstance(cmd, str):
+            continue
+        print(f"  Running: {cmd}")
+        try:
+            result = subprocess.run(
+                cmd,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+        except Exception as exc:
+            print(f"❌ Error running pre-check: {exc}")
+            return False
+        if result.returncode != 0:
+            print(f"❌ Pre-check failed: {cmd}")
+            print(f"   {result.stderr}")
+            return False
+        print(f"  ✅ {cmd} passed")
+    return True
+
+
+def _build_pytest_command(
+    strategy: Dict[str, object],
+    *,
+    coverage: bool,
+) -> list[str]:
+    cmd = ["python3", "-m", "pytest"]
+    test_paths = strategy.get("test_paths", [])
+    if isinstance(test_paths, list):
+        cmd.extend(str(path) for path in test_paths)
+    cmd.extend(["-v", "--tb=short", "-x", "--timeout=300"])
+    if coverage:
+        cmd.extend(["--cov=src/bioetl/", "--cov-report=term-missing"])
+    return cmd
 
 
 def run_all_matched_strategies(changed_files: Set[str], coverage: bool = False) -> bool:

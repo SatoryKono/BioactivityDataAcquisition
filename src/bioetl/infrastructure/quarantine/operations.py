@@ -27,11 +27,8 @@ from deltalake.exceptions import TableNotFoundError
 from bioetl.domain.serialization import deserialize_from_json
 from bioetl.domain.types import JsonDict, QuarantineRecordStatus
 from bioetl.infrastructure.quarantine.filtered_reads import (
-    _build_reason_field_signature,
-    _build_reason_signature,
     _increment_counter,
     _load_filtered_rows,
-    _normalize_error_details,
     _normalize_filter_values,
     _single_filter_value,
     get_filtered_filter_options,
@@ -39,70 +36,17 @@ from bioetl.infrastructure.quarantine.filtered_reads import (
     list_filtered_records,
 )
 from bioetl.infrastructure.quarantine.record_encoding import quote_literal
+from bioetl.infrastructure.quarantine.statistics_support import (
+    _build_reason_signature_from_row,
+    _build_statistics_response,
+    _count_bronze_records,
+    _get_time_statistics,
+    _process_quarantine_records,
+    _sorted_counter_items,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
-
-
-def _build_reason_signature_from_row(row: JsonDict) -> str:
-    """Build a stable reason signature from one filtered row."""
-    return " | ".join(
-        str(row.get(key, "")).strip()
-        for key in ("reason_code", "rule_type", "field", "operator")
-        if isinstance(row.get(key), str) and str(row.get(key)).strip()
-    )
-
-
-def _scoped_pipeline_names(
-    rows: list[JsonDict],
-    pipeline: str | None,
-) -> set[str]:
-    """Resolve the pipeline scope used for bronze totals."""
-    pipeline_filter = _normalize_filter_values(pipeline)
-    if pipeline_filter is not None:
-        return set(pipeline_filter)
-    return {
-        row.get("pipeline", "").strip()
-        for row in rows
-        if isinstance(row.get("pipeline"), str) and row.get("pipeline", "").strip()
-    }
-
-
-def _count_bronze_records(
-    rows: list[JsonDict],
-    *,
-    base_path: str,
-    storage_options: dict[str, str] | None,
-    pipeline: str | None,
-    run_id: str | None,
-) -> int:
-    """Sum bronze totals for the currently scoped pipelines."""
-    bronze_records = 0
-    run_id_single = _single_filter_value(run_id)
-    for pipeline_name in sorted(_scoped_pipeline_names(rows, pipeline)):
-        stats = get_statistics(
-            base_path,
-            storage_options,
-            pipeline_name,
-            error_code=None,
-            run_id=run_id_single,
-        )
-        pipeline_total = stats.get("total_count")
-        if isinstance(pipeline_total, int):
-            bronze_records += pipeline_total
-    return bronze_records
-
-
-def _sorted_counter_items(counter: dict[str, int]) -> list[JsonDict]:
-    """Return counter items sorted by descending frequency for API responses."""
-    return [
-        {"key": key, "count": value}
-        for key, value in sorted(
-            counter.items(),
-            key=lambda item: item[1],
-            reverse=True,
-        )
-    ]
 
 
 def inspect_records(
@@ -197,12 +141,19 @@ def get_filtered_stats(
         if signature:
             by_reason_signature[signature] = by_reason_signature.get(signature, 0) + 1
 
+    pipeline_filter = _normalize_filter_values(pipeline)
+    run_id_single = _single_filter_value(run_id)
     bronze_records = _count_bronze_records(
         rows,
-        base_path=base_path,
-        storage_options=storage_options,
-        pipeline=pipeline,
-        run_id=run_id,
+        pipeline_filter=pipeline_filter,
+        run_id_single=run_id_single,
+        pipeline_stats_loader=lambda pipeline_name, scoped_run_id: get_statistics(
+            base_path,
+            storage_options,
+            pipeline_name,
+            error_code=None,
+            run_id=scoped_run_id,
+        ),
     )
     total = len(rows)
     reject_ratio = float(total / bronze_records) if bronze_records > 0 else 0.0
@@ -265,109 +216,6 @@ def replay_records(
         record["metadata"] = deserialize_from_json(record.get("metadata", "{}"))
         record["error_details"] = deserialize_from_json(record["error_details"])
         yield record
-
-
-def _process_quarantine_records(
-    df: list[dict],
-) -> tuple[
-    dict[str, int],
-    dict[str, int],
-    dict[str, int],
-    dict[str, int],
-    dict[str, int],
-    dict[str, int],
-    dict[str, int],
-    int,
-]:
-    """Process quarantine records and extract statistics."""
-    by_error_code: dict[str, int] = {}
-    by_status: dict[str, int] = {}
-    by_reason_code: dict[str, int] = {}
-    by_field: dict[str, int] = {}
-    by_rule_type: dict[str, int] = {}
-    by_operator: dict[str, int] = {}
-    by_reason_code_field: dict[str, int] = {}
-    by_reason_signature: dict[str, int] = {}
-    silver_filter_total = 0
-
-    for record in df:
-        record_error_code = record["error_code"]
-        status = record["dq_status"]
-        by_error_code[record_error_code] = by_error_code.get(record_error_code, 0) + 1
-        by_status[status] = by_status.get(status, 0) + 1
-        if record_error_code != "FILTERED_OUT_SILVER":
-            continue
-        silver_filter_total += 1
-        error_details = _normalize_error_details(record)
-        _increment_counter(by_reason_code, error_details.get("reason_code"))
-        _increment_counter(by_field, error_details.get("field"))
-        _increment_counter(by_rule_type, error_details.get("rule_type"))
-        _increment_counter(by_operator, error_details.get("operator"))
-        reason_field_signature = _build_reason_field_signature(error_details)
-        if reason_field_signature:
-            by_reason_code_field[reason_field_signature] = (
-                by_reason_code_field.get(reason_field_signature, 0) + 1
-            )
-        reason_signature = _build_reason_signature(error_details)
-        if reason_signature:
-            by_reason_signature[reason_signature] = (
-                by_reason_signature.get(reason_signature, 0) + 1
-            )
-
-    return (
-        by_error_code,
-        by_status,
-        by_reason_code,
-        by_field,
-        by_rule_type,
-        by_operator,
-        by_reason_code_field,
-        by_reason_signature,
-        silver_filter_total,
-    )
-
-
-def _get_time_statistics(
-    arrow_table: object,
-) -> tuple[object, object]:
-    """Get oldest and newest record timestamps."""
-    df_pandas = arrow_table.to_pandas()
-    return df_pandas["ingestion_ts"].min(), df_pandas["ingestion_ts"].max()
-
-
-def _build_statistics_response(
-    total_records: int,
-    by_error_code: dict[str, int],
-    by_status: dict[str, int],
-    oldest_record: object,
-    newest_record: object,
-    silver_filter_total: int,
-    by_reason_code: dict[str, int],
-    by_field: dict[str, int],
-    by_rule_type: dict[str, int],
-    by_operator: dict[str, int],
-    by_reason_code_field: dict[str, int],
-    by_reason_signature: dict[str, int],
-) -> JsonDict:
-    """Build the final statistics response."""
-    return {
-        "total_count": total_records,
-        "total_records": total_records,
-        "by_error_code": by_error_code,
-        "by_status": by_status,
-        "oldest_record": oldest_record,
-        "newest_record": newest_record,
-        "silver_filter_rejects": {
-            "total_count": silver_filter_total,
-            "by_reason_code": by_reason_code,
-            "by_field": by_field,
-            "by_rule_type": by_rule_type,
-            "by_operator": by_operator,
-            "by_reason_code_field": by_reason_code_field,
-            "by_reason_signature": by_reason_signature,
-        },
-    }
-
 
 def get_statistics(
     base_path: str,

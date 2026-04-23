@@ -22,6 +22,7 @@ from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.config import Settings
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.ports.noop import NoOpTracing
+from bioetl.domain.ports.runtime.runner import PipelineCreateRunnerRequest
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -191,11 +192,13 @@ class IntegrationPipelineTestCase:
         # Note: GenericPipelineFactory.create_runner uses BaseServicesFactory,
         # which calls StorageFactory.create, which we patched.
         runner = factory.create_runner(
-            run_id=run_id,
-            runtime=runtime_config,
-            settings=settings,
-            observability=observability,
-            config=pipeline_config,
+            PipelineCreateRunnerRequest(
+                run_id=run_id,
+                runtime=runtime_config,
+                settings=settings,
+                observability=observability,
+                config=pipeline_config,
+            )
         )
 
         return runner

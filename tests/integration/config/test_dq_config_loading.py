@@ -152,7 +152,9 @@ class TestPipelineConfigLoaderWithDQResolution:
         required_fields = set(domain_config.silver_filters.required_fields)
 
         assert "canonical_smiles" in required_fields
+        assert "units" in required_fields
         assert "standard_units" in required_fields
+        assert "target_organism" in required_fields
         assert "uo_units" in required_fields
 
     def test_chembl_assay_required_fields_include_nonnullable_contract_fields(
@@ -182,6 +184,34 @@ class TestPipelineConfigLoaderWithDQResolution:
         assert "publication_id" in required_fields
         assert "publication_type" in required_fields
         assert "title" in required_fields
+
+    def test_chembl_target_component_required_fields_include_runtime_organism(
+        self, config_loader: PipelineConfigLoader
+    ) -> None:
+        """chembl_target_component should gate Silver rows on normalized organism."""
+        yaml_config = config_loader.load_pipeline_config("chembl_target_component")
+        domain_config = resolve_domain_pipeline_config(yaml_config)
+
+        required_fields = set(domain_config.silver_filters.required_fields)
+
+        assert "component_id" in required_fields
+        assert "organism" in required_fields
+
+    def test_chembl_cell_line_cellosaurus_pattern_matches_runtime_identifier_contract(
+        self, dq_loader: DQConfigLoader
+    ) -> None:
+        """cellosaurus_id DQ validation should match the canonical runtime identifier."""
+        config = dq_loader.load("chembl", "cell_line")
+
+        cellosaurus_rules = [
+            rule
+            for rule in config.field_validations
+            if rule.field == "cellosaurus_id" and rule.validation_type == "pattern"
+        ]
+
+        assert cellosaurus_rules, "Missing cellosaurus_id pattern rule"
+        assert cellosaurus_rules[0].pattern == r"^CVCL_[A-Z0-9]+$"
+        assert cellosaurus_rules[0].nullable is True
 
     def test_clear_cache_works(self, config_loader: PipelineConfigLoader) -> None:
         """clear_cache() should work without errors."""

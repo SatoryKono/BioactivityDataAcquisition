@@ -58,7 +58,7 @@ ______________________________________________________________________
 - Для нового first-party кода предпочтителен import provider package root
   (например, `bioetl.infrastructure.adapters.pubmed`,
   `bioetl.infrastructure.adapters.semanticscholar`).
-- `pubmed/client.py` и `semanticscholar/client.py` остаются retained public seams
+- `pubmed/client.py` и `semanticscholar/client.py` остаются sanctioned public seams
   для import stability.
 - Старые implementation-module paths (`pubmed.pubmed_client`,
   `semanticscholar.adapter`) не являются sanctioned import path для нового кода.
@@ -105,9 +105,9 @@ Package contract для `infrastructure/adapters/{provider}/` строится �
 - Рост должен идти по устойчивым темам, а не через случайное накопление helpers на
   одном уровне каталога.
 
-**Retained compatibility seams в текущем цикле:**
+**Sanctioned public adapter seams в текущем цикле:**
 
-- `pubmed/client.py` и `semanticscholar/client.py` остаются retained public seams
+- `pubmed/client.py` и `semanticscholar/client.py` остаются sanctioned public seams
   для import stability.
 - `pubmed/pubmed_client.py` и `semanticscholar/adapter.py` считаются legacy
   implementation-module paths и не являются sanctioned import path для нового

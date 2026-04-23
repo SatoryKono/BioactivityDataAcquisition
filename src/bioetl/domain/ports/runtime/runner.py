@@ -28,7 +28,9 @@ __all__ = [
     "ExecutionMetricsRunnerPort",
     "ExecutionObservabilityPort",
     "MetricsExtractorPort",
+    "PipelineControlPlaneArtifacts",
     "PipelineCreateWithServicesRequest",
+    "PipelineCreateRunnerRequest",
     "PipelineFactoryPort",
     "RunnablePort",
     "RunnerFactoryPort",
@@ -101,6 +103,19 @@ class ExecutionObservabilityPort(Protocol):
     tracer: TracingPort | None
     audit: AuditPort
     dq_monitor: DQMonitorPort | None
+
+
+@dataclass(frozen=True, slots=True)
+class PipelineControlPlaneArtifacts:
+    """Immutable control-plane identities used while wiring pipeline runners."""
+
+    manifest_id: str | None = None
+    execution_fingerprint: str | None = None
+    config_hash: str | None = None
+    resolved_config_hash: str | None = None
+    effective_config_hash: str | None = None
+    dq_contract_compatibility_hash: str | None = None
+    effective_config_artifact_id: str | None = None
 
 
 @runtime_checkable
@@ -200,6 +215,20 @@ class PipelineCreateWithServicesRequest:
     cached_bronze: CachedBronzeContext | None = None
 
 
+@dataclass(frozen=True, slots=True)
+class PipelineCreateRunnerRequest:
+    """Canonical runner-factory request bundling runtime and control-plane inputs."""
+
+    run_id: RunID
+    runtime: RuntimeConfig
+    settings: SettingsPort
+    observability: ExecutionObservabilityPort
+    control_plane: PipelineControlPlaneArtifacts = PipelineControlPlaneArtifacts()
+    filter_config: InputFilterConfig | None = None
+    config: PipelineYamlConfigPort | None = None
+    cached_bronze: CachedBronzeContext | None = None
+
+
 @runtime_checkable
 class PipelineFactoryPort(Protocol):
     """Protocol for constructing pipelines and execution runners."""
@@ -224,38 +253,13 @@ class PipelineFactoryPort(Protocol):
 
     def create_runner(
         self,
-        run_id: RunID,
-        runtime: RuntimeConfig,
-        settings: SettingsPort,
-        observability: ExecutionObservabilityPort,
-        manifest_id: str | None = None,
-        execution_fingerprint: str | None = None,
-        config_hash: str | None = None,
-        resolved_config_hash: str | None = None,
-        effective_config_hash: str | None = None,
-        dq_contract_compatibility_hash: str | None = None,
-        effective_config_artifact_id: str | None = None,
-        filter_config: InputFilterConfig | None = None,
-        config: PipelineYamlConfigPort | None = None,
-        cached_bronze: CachedBronzeContext | None = None,
+        request: PipelineCreateRunnerRequest,
     ) -> ExecutionMetricsRunnerPort:
         """Create pipeline runner.
 
         Args:
-            run_id: Pipeline run identifier.
-            runtime: Runtime configuration.
-            settings: Domain-facing execution settings contract.
-            observability: Domain-facing observability context for runner wiring.
-            manifest_id: Optional immutable run-manifest identifier.
-            execution_fingerprint: Optional canonical execution identity fingerprint.
-            config_hash: Optional legacy alias for canonical execution config hash.
-            resolved_config_hash: Optional resolved declarative config hash.
-            effective_config_hash: Optional final effective execution config hash.
-            dq_contract_compatibility_hash: Optional DQ compatibility hash.
-            effective_config_artifact_id: Optional effective-config artifact reference.
-            filter_config: Optional input-filter contract for record selection.
-            config: Optional pipeline-definition contract for explicit wiring.
-            cached_bronze: Optional cached Bronze execution context.
+            request: Canonical request with runtime, observability, and optional
+                control-plane identities for runner construction.
 
         Returns:
             Runnable execution object exposing the metrics runner contract.

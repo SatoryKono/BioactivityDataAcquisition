@@ -24,7 +24,7 @@ graph TB
     CALLERS["Entry callers<br/>CLI + tests/scripts<br/>+ programmatic integrations"]:::size-md
 
     subgraph Public["Public composition seams"]
-        ENTRY["composition.entrypoints<br/>broad retained facade"]:::size-md
+        ENTRY["composition.entrypoints<br/>broad public facade"]:::size-md
         APIS["execution_api / services_api / resources_api<br/>narrow command-facing seams"]:::size-md
         BOOT["composition.bootstrap<br/>lower-level runtime / cli seam"]:::size-md
     end

@@ -91,7 +91,7 @@ Import the symbols below from their defining submodules rather than from the
 Config-loading note: `load_pipeline_config()` is re-exported from
 `bioetl.infrastructure.config.pipeline_config_api`, while composite config
 loading is owned by `bioetl.infrastructure.config.composite_config_api` and is
-exposed through retained public bootstrap/entrypoint seams for stable runtime
+exposed through sanctioned public bootstrap/entrypoint seams for stable runtime
 access.
 
 | Module | Description |
@@ -211,7 +211,7 @@ Current sanctioned public surfaces in `composition/`:
 
 | Module | Policy Role | New Code Guidance |
 |---|---|---|
-| `entrypoints` | `retained-entrypoint` stable public seam | Treat as execution-focused seam. For service/resource operations, import `services_api` / `resources_api` directly. |
+| `entrypoints` | `public-entrypoint` stable public seam | Treat as execution-focused seam. For service/resource operations, import `services_api` / `resources_api` directly. |
 | `execution_api` | Narrow execution-focused public API | Prefer for new CLI/orchestration execution call sites. |
 | `services_api` | Narrow services-focused public API | Prefer for new service/bootstrap retrieval call sites. |
 | `resources_api` | Narrow resource-management public API | Prefer for new quarantine/checkpoint/lifecycle call sites. |
@@ -227,7 +227,7 @@ Governance status model and exit criteria for compatibility surfaces are tracked
 
 ## Entrypoints (`composition.entrypoints`)
 
-`composition.entrypoints` is a retained, stable public composition seam.
+`composition.entrypoints` is a sanctioned, stable public composition seam.
 Its explicit public surface (`__all__`) is intentionally execution-focused:
 
 - `ArchiveOptions`, `PipelineRunResult`, `RunOptions`, `RunResult`, `VacuumOptions`

@@ -153,7 +153,7 @@ import paths.
 
 Политика использования root-level composition seams:
 
-- `entrypoints.py` — `retained-entrypoint` и стабильный публичный composition seam.
+- `entrypoints.py` — `public-entrypoint` и стабильный публичный composition seam.
 - `execution_api.py`, `services_api.py`, `resources_api.py` — узкие sanctioned public APIs
   для новых internal call sites в `interfaces`.
 - `composite_api.py`, `observability_api.py` — узкие façade-модули для composite runtime

@@ -20,7 +20,7 @@ __all__ = [
 _BAO_IDENTIFIER_RE = re.compile(r"^bao[_:](\d+)$", re.IGNORECASE)
 _UO_IDENTIFIER_RE = re.compile(r"^uo[_:](\d+)$", re.IGNORECASE)
 _CELLOSAURUS_IDENTIFIER_RE = re.compile(
-    r"^cvcl(?:[_:\-\s]?)([a-z0-9]+)$",
+    r"^cvcl[_:\-\s]?([a-z0-9]+)$",
     re.IGNORECASE,
 )
 _ORGANISM_WHITESPACE_RE = re.compile(r"\s+")

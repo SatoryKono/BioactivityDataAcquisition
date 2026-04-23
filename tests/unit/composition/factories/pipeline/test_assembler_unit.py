@@ -21,6 +21,7 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.types import RunType
+from bioetl.domain.ports.runtime.runner import PipelineCreateRunnerRequest
 from bioetl.infrastructure.config import Settings
 
 
@@ -289,12 +290,14 @@ class TestGenericPipelineFactory:
         cached_bronze = MagicMock()
 
         result = factory.create_runner(
-            run_id="run-load-path",
-            runtime=runtime,
-            settings=settings,
-            observability=observability,
-            filter_config=filter_config,
-            cached_bronze=cached_bronze,
+            PipelineCreateRunnerRequest(
+                run_id="run-load-path",
+                runtime=runtime,
+                settings=settings,
+                observability=observability,
+                filter_config=filter_config,
+                cached_bronze=cached_bronze,
+            )
         )
 
         assert result is runner
@@ -350,13 +353,15 @@ class TestGenericPipelineFactory:
         cached_bronze = MagicMock()
 
         result = factory.create_runner(
-            run_id="run-1",
-            runtime=runtime,
-            settings=settings,
-            observability=observability,
-            filter_config=filter_config,
-            config=config,
-            cached_bronze=cached_bronze,
+            PipelineCreateRunnerRequest(
+                run_id="run-1",
+                runtime=runtime,
+                settings=settings,
+                observability=observability,
+                filter_config=filter_config,
+                config=config,
+                cached_bronze=cached_bronze,
+            )
         )
 
         assert result is runner
@@ -410,10 +415,12 @@ class TestGenericPipelineFactory:
         observability = _make_observability()
 
         factory.create_runner(
-            run_id="run-2",
-            runtime=runtime,
-            settings=settings,
-            observability=observability,
+            PipelineCreateRunnerRequest(
+                run_id="run-2",
+                runtime=runtime,
+                settings=settings,
+                observability=observability,
+            )
         )
 
         mock_load_pipeline_config.assert_called_once_with("chembl_activity")

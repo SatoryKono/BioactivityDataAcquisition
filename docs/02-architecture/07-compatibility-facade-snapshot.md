@@ -8,8 +8,8 @@
 - Curated inventory rows: `16`
 - Transition debt rows: `0`
 - Sanctioned public entrypoint rows: `16`
-- Retained review entrypoints: `7`
-- Permanent public entrypoints: `9`
+- Retained review entrypoints: `0`
+- Permanent public entrypoints: `16`
 - Measured tracked modules: `16`
 - Measured-only modules outside curated inventory: `0`
 - Discovered docstring-tracked modules: `0`
