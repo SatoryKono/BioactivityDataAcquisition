@@ -52,6 +52,7 @@ from bioetl.domain.normalization.profiles import (
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_json_string,
+    normalize_profile_json_string_strict,
     normalize_profile_passthrough,
 )
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
@@ -368,6 +369,8 @@ def _strictness(
         return "canonical_identifier"
     if normalizer_name == "normalize_profile_json_string":
         return "canonical_json"
+    if normalizer_name == "normalize_profile_json_string_strict":
+        return "strict_json"
     if normalizer_name == "normalize_profile_boolean":
         return "strict_boolean"
     return "normalization_only"
@@ -1371,6 +1374,9 @@ def _is_json_string_normalizer(rule: Any) -> bool:
     return (
         rule.normalizer is normalize_profile_json_string
         or getattr(rule.normalizer, "__name__", "") == "normalize_profile_json_string"
+        or rule.normalizer is normalize_profile_json_string_strict
+        or getattr(rule.normalizer, "__name__", "")
+        == "normalize_profile_json_string_strict"
     )
 
 
