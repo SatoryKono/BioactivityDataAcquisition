@@ -46,19 +46,17 @@ log_info() {
 export PATH="${HOME}/.local/bin:${PATH}"
 
 # Load local environment with timeout protection
-if timeout 5 test -f "${HOME}/.local/bin/env" 2>/dev/null; then
-    if timeout 5 bash -c "source '${HOME}/.local/bin/env'" 2>/dev/null; then
-        # shellcheck disable=SC1091
-        source "${HOME}/.local/bin/env" 2>/dev/null || true
-    fi
+if timeout 5 test -f "${HOME}/.local/bin/env" 2>/dev/null \
+    && timeout 5 bash -c "source '${HOME}/.local/bin/env'" 2>/dev/null; then
+    # shellcheck disable=SC1091
+    source "${HOME}/.local/bin/env" 2>/dev/null || true
 fi
 
 # Load WSL proxy environment if available with timeout
-if timeout 5 test -f "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null; then
-    if timeout 5 bash -c "source '${REPO_ROOT}/.wsl_proxy_env.sh'" 2>/dev/null; then
-        # shellcheck disable=SC1091
-        source "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null || true
-    fi
+if timeout 5 test -f "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null \
+    && timeout 5 bash -c "source '${REPO_ROOT}/.wsl_proxy_env.sh'" 2>/dev/null; then
+    # shellcheck disable=SC1091
+    source "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null || true
 fi
 
 # Load Mistral Vibe configuration with timeout protection

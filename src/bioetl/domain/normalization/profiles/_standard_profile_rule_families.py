@@ -105,6 +105,11 @@ def _rule_family_specs(
             "Coerce stable float semantics and remove NaN/Inf noise.",
         ),
         (
+            strict_json_fields,
+            normalize_profile_json_string_strict,
+            "Canonicalize JSON-bearing string payloads and collapse malformed JSON to None.",
+        ),
+        (
             set_like_fields,
             normalize_profile_json_string,
             "Canonicalize JSON; when represented as an array, treat item order as set-like for content_hash.",
@@ -113,10 +118,5 @@ def _rule_family_specs(
             json_string_fields,
             normalize_profile_json_string,
             "Canonicalize JSON-bearing string payloads after textual cleanup.",
-        ),
-        (
-            strict_json_fields,
-            normalize_profile_json_string_strict,
-            "Canonicalize JSON-bearing string payloads and collapse malformed JSON to None.",
         ),
     )

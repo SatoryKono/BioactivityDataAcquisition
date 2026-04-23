@@ -834,10 +834,10 @@ main() {
         wave_shards+=("$shard")
     done
 
-    if [[ "$stop_after_wave" != "1" ]] && ((${#wave_shards[@]} > 0)); then
-        if ! run_wave "$current_wave" "${wave_shards[@]}"; then
-            exit_code=1
-        fi
+    if [[ "$stop_after_wave" != "1" ]] \
+        && ((${#wave_shards[@]} > 0)) \
+        && ! run_wave "$current_wave" "${wave_shards[@]}"; then
+        exit_code=1
     fi
 
     if [[ "$exit_code" == "0" ]]; then

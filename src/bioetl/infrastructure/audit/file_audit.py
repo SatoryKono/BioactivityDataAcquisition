@@ -37,6 +37,7 @@ if TYPE_CHECKING:
 from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
 
 _AUDIT_STATUS_ATTRIBUTE = "bioetl.audit.status"
+_AUDIT_ADAPTER_CLOSED_MESSAGE = "FileAuditAdapter has been closed"
 
 
 class FileAuditAdapter:
@@ -186,7 +187,7 @@ class FileAuditAdapter:
             OSError: If the file write fails.
         """
         if self._closed:
-            raise RuntimeError("FileAuditAdapter has been closed")
+            raise RuntimeError(_AUDIT_ADAPTER_CLOSED_MESSAGE)
         started = time.perf_counter()
         with self._tracer.start_as_current_span("audit.log_write") as span:
             span.set_attribute("bioetl.audit.layer", entry.layer.value)
@@ -232,7 +233,7 @@ class FileAuditAdapter:
     ) -> None:
         """Log a non-write lifecycle event to the audit trail."""
         if self._closed:
-            raise RuntimeError("FileAuditAdapter has been closed")
+            raise RuntimeError(_AUDIT_ADAPTER_CLOSED_MESSAGE)
         timestamp = timestamp or datetime.now(UTC)
         with self._tracer.start_as_current_span("audit.log_event") as span:
             span.set_attribute("bioetl.audit.event_name", event_name)
@@ -323,7 +324,7 @@ class FileAuditAdapter:
             RuntimeError: If the adapter has been closed.
         """
         if self._closed:
-            raise RuntimeError("FileAuditAdapter has been closed")
+            raise RuntimeError(_AUDIT_ADAPTER_CLOSED_MESSAGE)
         started = time.perf_counter()
         layer_filter = layer.value if layer is not None else "all"
         with self._tracer.start_as_current_span("audit.get_entries") as span:

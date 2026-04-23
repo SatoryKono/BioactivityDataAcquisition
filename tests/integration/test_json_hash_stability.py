@@ -27,7 +27,7 @@ class TestJsonHashStability:
         # Test that each JSON field uses the canonical normalizer
         for field_name in json_fields:
             rule = CHEMBL_ASSAY_PROFILE.field_rules[field_name]
-            assert rule.normalizer.__name__ == "normalize_profile_json_string"
+            assert rule.normalizer.__name__ == "normalize_profile_json_string_strict"
 
     def test_hash_stability_with_different_key_orders(self) -> None:
         """Test that different JSON key orders produce same normalized result."""
@@ -77,15 +77,14 @@ class TestJsonHashStability:
         assert result1 != result2
         assert hash(result1) != hash(result2)
 
-    def test_invalid_json_preservation(self) -> None:
-        """Test that invalid JSON is preserved as-is."""
+    def test_invalid_json_collapses_to_none_for_strict_chembl_fields(self) -> None:
+        """Strict ChEMBL JSON fields must fail closed on malformed payloads."""
         invalid_json = "not a valid json string"
 
         rule = CHEMBL_ASSAY_PROFILE.field_rules["assay_classifications"]
         result = rule.normalizer(invalid_json)
 
-        # Invalid JSON should be preserved
-        assert result == invalid_json
+        assert result is None
 
 
 class TestCrossPipelineJsonConsistency:
@@ -112,11 +111,8 @@ class TestCrossPipelineJsonConsistency:
         ]
 
         for profile in profiles:
-            for field_name, rule in profile.field_rules.items():
+            for _field_name, rule in profile.field_rules.items():
                 if "JSON" in rule.notes:
-                    # All JSON fields should use the same normalizer
-                    assert rule.normalizer.__name__ == "normalize_profile_json_string"
-
                     # Test with sample data
                     test_json = '{"key": "value"}'
                     result = rule.normalizer(test_json)

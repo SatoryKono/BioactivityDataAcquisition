@@ -272,7 +272,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
     assert score["schema_version"] == "1.0"
     assert score["contract_version"] == "1.2.0"
     assert score["scale"] == "0-10"
-    assert score["overall_score"] == 7.4
+    assert score["overall_score"] == pytest.approx(7.4)
     assert score["scored_at"] == manifest.created_at.isoformat()
     assert score["source"] == "run_manifest_diagnostics"
     assert score["blockers"] == [

@@ -9,6 +9,8 @@ from typing import Any
 
 import yaml
 
+_JSON_GLOB = "*.json"
+
 
 def validate_control_plane_artifacts(root: Path) -> list[str]:
     """Return contract violations for committed control-plane artifacts."""
@@ -27,78 +29,94 @@ def _validate_effective_config_artifacts(
     violations: list[str],
 ) -> None:
     effective_root = control_root / "effective_config"
-    for path in sorted(effective_root.glob("*.json")):
-        payload = _load_json_object(path, violations)
-        if payload is None:
-            continue
-        if "occurrence_envelope" in payload:
-            violations.append(
-                f"{path}: semantic effective-config artifact contains occurrence_envelope"
-            )
-        semantic = payload.get("semantic_artifact")
-        if not isinstance(semantic, dict):
-            violations.append(f"{path}: missing semantic_artifact object")
-            continue
-        if "occurrence_envelope" in semantic:
-            violations.append(
-                f"{path}: nested semantic_artifact contains occurrence_envelope"
-            )
-        _require_fields(
-            path,
-            semantic,
-            violations,
-            ("artifact_id", "resolved_config_hash", "effective_config_hash"),
-        )
-        if semantic.get("artifact_id") != payload.get("artifact_id"):
-            violations.append(f"{path}: top-level artifact_id differs from semantic id")
+    for path in sorted(effective_root.glob(_JSON_GLOB)):
+        _validate_semantic_effective_config_file(path, violations)
 
     occurrence_root = effective_root / "_occurrences"
-    for path in sorted(occurrence_root.glob("*.json")):
-        payload = _load_json_object(path, violations)
-        if payload is None:
-            continue
-        _require_fields(path, payload, violations, ("artifact_id", "run_id"))
-        if not isinstance(payload.get("occurrence_envelope"), dict):
-            violations.append(f"{path}: occurrence file lacks occurrence_envelope")
+    for path in sorted(occurrence_root.glob(_JSON_GLOB)):
+        _validate_effective_config_occurrence_file(path, violations)
+
+
+def _validate_semantic_effective_config_file(
+    path: Path,
+    violations: list[str],
+) -> None:
+    payload = _load_json_object(path, violations)
+    if payload is None:
+        return
+    if "occurrence_envelope" in payload:
+        violations.append(
+            f"{path}: semantic effective-config artifact contains occurrence_envelope"
+        )
+    semantic = payload.get("semantic_artifact")
+    if not isinstance(semantic, dict):
+        violations.append(f"{path}: missing semantic_artifact object")
+        return
+    if "occurrence_envelope" in semantic:
+        violations.append(
+            f"{path}: nested semantic_artifact contains occurrence_envelope"
+        )
+    _require_fields(
+        path,
+        semantic,
+        violations,
+        ("artifact_id", "resolved_config_hash", "effective_config_hash"),
+    )
+    if semantic.get("artifact_id") != payload.get("artifact_id"):
+        violations.append(f"{path}: top-level artifact_id differs from semantic id")
+
+
+def _validate_effective_config_occurrence_file(
+    path: Path,
+    violations: list[str],
+) -> None:
+    payload = _load_json_object(path, violations)
+    if payload is None:
+        return
+    _require_fields(path, payload, violations, ("artifact_id", "run_id"))
+    if not isinstance(payload.get("occurrence_envelope"), dict):
+        violations.append(f"{path}: occurrence file lacks occurrence_envelope")
 
 
 def _validate_run_manifests(control_root: Path, violations: list[str]) -> None:
-    for path in sorted((control_root / "run_manifest").glob("*.json")):
-        payload = _load_json_object(path, violations)
-        if payload is None:
-            continue
-        _require_fields(
-            path,
-            payload,
-            violations,
-            (
-                "manifest_id",
-                "run_id",
-                "execution_fingerprint",
-                "code_provenance",
-                "source_refs",
-                "replay_capability",
-            ),
+    for path in sorted((control_root / "run_manifest").glob(_JSON_GLOB)):
+        _validate_run_manifest_file(path, violations)
+
+
+def _validate_run_manifest_file(path: Path, violations: list[str]) -> None:
+    payload = _load_json_object(path, violations)
+    if payload is None:
+        return
+    _require_fields(
+        path,
+        payload,
+        violations,
+        (
+            "manifest_id",
+            "run_id",
+            "execution_fingerprint",
+            "code_provenance",
+            "source_refs",
+            "replay_capability",
+        ),
+    )
+    code_provenance = payload.get("code_provenance")
+    if not isinstance(code_provenance, dict):
+        return
+    _require_fields(
+        path,
+        code_provenance,
+        violations,
+        ("config_hash", "effective_config_artifact_id"),
+    )
+    if _is_strict_replay_manifest(payload) and not code_provenance.get("git_commit"):
+        violations.append(f"{path}: strict replay manifest lacks git_commit")
+    if payload.get(
+        "replay_capability"
+    ) == "exact_replay_supported" and not _manifest_has_input_snapshots(payload):
+        violations.append(
+            f"{path}: exact replay manifest lacks immutable input snapshots"
         )
-        code_provenance = payload.get("code_provenance")
-        if not isinstance(code_provenance, dict):
-            continue
-        _require_fields(
-            path,
-            code_provenance,
-            violations,
-            ("config_hash", "effective_config_artifact_id"),
-        )
-        if _is_strict_replay_manifest(payload) and not code_provenance.get(
-            "git_commit"
-        ):
-            violations.append(f"{path}: strict replay manifest lacks git_commit")
-        if payload.get(
-            "replay_capability"
-        ) == "exact_replay_supported" and not _manifest_has_input_snapshots(payload):
-            violations.append(
-                f"{path}: exact replay manifest lacks immutable input snapshots"
-            )
 
 
 def _validate_run_ledgers(control_root: Path, violations: list[str]) -> None:

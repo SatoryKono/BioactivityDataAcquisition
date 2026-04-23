@@ -46,8 +46,8 @@ python3 -m scripts.engineering.qa test-health \
 COUNT=$(grep -m 1 "Runs analyzed:" reports/quality/test-runs/rollup.md | grep -oE "[0-9]+")
 echo "[stability] Runs analyzed in rollup: $COUNT"
 
-if [ "$COUNT" -lt 100 ]; then
-    echo "[stability] ERROR: Only $COUNT runs collected. Expected at least 100."
+if [[ "$COUNT" -lt 100 ]]; then
+    echo "[stability] ERROR: Only $COUNT runs collected. Expected at least 100." >&2
     exit 1
 fi
 

@@ -166,8 +166,34 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
     assert chembl_activity_index["include_in_content_hash"] == "false"
 
     chembl_assay_parameters_json = _row(rows, "chembl_assay", "assay_parameters")
-    assert chembl_assay_parameters_json["normalizer"] == "normalize_profile_json_string"
-    assert chembl_assay_parameters_json["strictness"] == "canonical_json"
+    assert (
+        chembl_assay_parameters_json["normalizer"]
+        == "normalize_profile_json_string_strict"
+    )
+    assert chembl_assay_parameters_json["strictness"] == "strict_json"
+
+    chembl_publication_type = _row(rows, "chembl_publication", "publication_type")
+    assert (
+        chembl_publication_type["normalizer"]
+        == "normalize_profile_publication_type_field"
+    )
+    assert chembl_publication_type["strictness"] == "strict_enum"
+
+    chembl_publication_is_oa = _row(rows, "chembl_publication", "is_oa")
+    assert chembl_publication_is_oa["normalizer"] == "normalize_profile_boolean"
+    assert chembl_publication_is_oa["strictness"] == "strict_boolean"
+
+    chembl_target_component_organism = _row(rows, "chembl_target_component", "organism")
+    assert (
+        chembl_target_component_organism["normalizer"]
+        == "normalize_profile_chembl_organism_name"
+    )
+
+    chembl_cell_line_cellosaurus = _row(rows, "chembl_cell_line", "cellosaurus_id")
+    assert (
+        chembl_cell_line_cellosaurus["normalizer"] == "normalize_profile_cellosaurus_id"
+    )
+    assert chembl_cell_line_cellosaurus["strictness"] == "canonical_identifier"
 
     chembl_assay_description = _row(rows, "chembl_assay", "description")
     assert chembl_assay_description["normalizer"] == "normalize_profile_null"
@@ -234,6 +260,10 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     assert activity_properties["normalizer"] == "normalize_profile_json_string"
     assert activity_properties["hash_ordering"] == "set_like"
     assert activity_properties["strictness"] == "canonical_json"
+
+    activity_units = _row(rows, "chembl_activity", "units")
+    assert activity_units["normalizer"] == "normalize_profile_unit"
+    assert activity_units["strictness"] == "controlled_unit"
 
     bao_format = _row(rows, "chembl_activity", "bao_format")
     assert bao_format["controlled_vocabulary_source"] == (

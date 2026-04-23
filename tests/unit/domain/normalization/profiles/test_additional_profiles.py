@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from bioetl.domain.normalization.profiles import (
     CHEMBL_TARGET_PROFILE,
+    CHEMBL_CELL_LINE_PROFILE,
+    CHEMBL_PUBLICATION_PROFILE,
+    CHEMBL_TARGET_COMPONENT_PROFILE,
     CROSSREF_PUBLICATION_PROFILE,
     CROSSREF_PUBLICATION_SCHEMA_FIELDS,
     PUBCHEM_COMPOUND_PROFILE,
@@ -62,6 +65,44 @@ def test_chembl_target_organism_display_normalization_is_profile_visible() -> No
     assert organism_rule.apply("  homo   sapiens  ") == "Homo sapiens"
     assert organism_rule.apply("e. coli") == "Escherichia coli"
     assert "organism" in (organism_rule.notes or "").lower()
+
+
+def test_chembl_target_component_organism_display_normalization_is_profile_visible() -> (
+    None
+):
+    organism_rule = CHEMBL_TARGET_COMPONENT_PROFILE.rule_for("organism")
+
+    assert organism_rule is not None
+    assert organism_rule.apply("  homo   sapiens  ") == "Homo sapiens"
+    assert organism_rule.apply("e. coli") == "Escherichia coli"
+    assert "organism" in (organism_rule.notes or "").lower()
+
+
+def test_chembl_cell_line_cellosaurus_id_uses_canonical_identifier_rule() -> None:
+    cellosaurus_rule = CHEMBL_CELL_LINE_PROFILE.rule_for("cellosaurus_id")
+
+    assert cellosaurus_rule is not None
+    assert cellosaurus_rule.apply(" cvcl:0030 ") == "CVCL_0030"
+    assert cellosaurus_rule.apply("CVCL-0031") == "CVCL_0031"
+    assert "Cellosaurus" in (cellosaurus_rule.notes or "")
+
+
+def test_chembl_publication_profile_normalizes_publication_type_and_open_access() -> (
+    None
+):
+    publication_type_rule = CHEMBL_PUBLICATION_PROFILE.rule_for("publication_type")
+    is_oa_rule = CHEMBL_PUBLICATION_PROFILE.rule_for("is_oa")
+    authors_rule = CHEMBL_PUBLICATION_PROFILE.rule_for("authors")
+
+    assert publication_type_rule is not None
+    assert publication_type_rule.apply(" PUBLICATION ") == "journal-article"
+    assert publication_type_rule.apply("BOOK") == "book"
+    assert is_oa_rule is not None
+    assert is_oa_rule.apply("1") is True
+    assert is_oa_rule.apply("false") is False
+    assert authors_rule is not None
+    assert authors_rule.apply(' {"b":2,"a":1} ') == '{"a":1,"b":2}'
+    assert authors_rule.apply("not-json") is None
 
 
 def test_chembl_profile_helpers_preserve_standard_meta_semantics() -> None:
@@ -125,3 +166,20 @@ def test_standard_profile_builder_applies_boolean_flag_and_operator_families() -
     assert bto_rule is not None
     assert bto_rule.apply("bto:0000089") == "BTO_0000089"
     assert "ontology ID" in (bto_rule.notes or "")
+
+
+def test_standard_profile_builder_applies_strict_json_family() -> None:
+    profile = build_standard_profile(
+        profile_name="test.strict_json_rule_family",
+        description="Regression profile for strict JSON normalization fields.",
+        schema_fields=("payload",),
+        meta_fields=(),
+        strict_json_fields=("payload",),
+    )
+
+    payload_rule = profile.rule_for("payload")
+
+    assert payload_rule is not None
+    assert payload_rule.apply(' {"b":2,"a":1} ') == '{"a":1,"b":2}'
+    assert payload_rule.apply("not-json") is None
+    assert "malformed JSON" in (payload_rule.notes or "")
