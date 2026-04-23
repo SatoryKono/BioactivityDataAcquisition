@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from bioetl.domain.normalization.profiles import (
-    CHEMBL_TARGET_PROFILE,
     CHEMBL_CELL_LINE_PROFILE,
+    CHEMBL_MOLECULE_PROFILE,
     CHEMBL_PUBLICATION_PROFILE,
+    CHEMBL_TARGET_PROFILE,
     CHEMBL_TARGET_COMPONENT_PROFILE,
     CROSSREF_PUBLICATION_PROFILE,
     CROSSREF_PUBLICATION_SCHEMA_FIELDS,
@@ -86,6 +87,15 @@ def test_chembl_cell_line_cellosaurus_id_uses_canonical_identifier_rule() -> Non
     assert cellosaurus_rule.apply(" cvcl:0030 ") == "CVCL_0030"
     assert cellosaurus_rule.apply("CVCL-0031") == "CVCL_0031"
     assert "Cellosaurus" in (cellosaurus_rule.notes or "")
+
+
+def test_chembl_molecule_ro3_pass_is_registry_governed_strict_enum() -> None:
+    ro3_pass_rule = CHEMBL_MOLECULE_PROFILE.rule_for("ro3_pass")
+
+    assert ro3_pass_rule is not None
+    assert ro3_pass_rule.apply(" y ") == "Y"
+    assert ro3_pass_rule.apply("n") == "N"
+    assert ro3_pass_rule.apply("maybe") is None
 
 
 def test_chembl_publication_profile_normalizes_publication_type_and_open_access() -> (

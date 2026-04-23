@@ -10,6 +10,8 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
 )
 from bioetl.domain.schemas.chembl.tissue import TissueSchema
 
+from ._chembl_policy_registry import chembl_ontology_family_fields
+
 __all__ = [
     "CHEMBL_TISSUE_PROFILE",
     "CHEMBL_TISSUE_SCHEMA_FIELDS",
@@ -31,7 +33,12 @@ _META_FIELDS = frozenset(
     }
 )
 _TITLE_FIELDS = frozenset({"pref_name"})
-_ONTOLOGY_ID_FIELDS = frozenset({"bto_id", "caloha_id", "efo_id", "uberon_id"})
+_ONTOLOGY_ID_FIELDS = (
+    chembl_ontology_family_fields("bto", entity="tissue")
+    | chembl_ontology_family_fields("caloha", entity="tissue")
+    | chembl_ontology_family_fields("efo", entity="tissue")
+    | chembl_ontology_family_fields("uberon", entity="tissue")
+)
 
 CHEMBL_TISSUE_PROFILE = build_standard_profile(
     profile_name="chembl.tissue",

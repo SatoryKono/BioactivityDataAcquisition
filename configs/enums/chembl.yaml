@@ -161,6 +161,10 @@ molecule:
         - BOTH
         - NONE
 
+    ro3_pass_values:
+        - Y
+        - N
+
     # Uses float for 0.5; loaded as tuple[float, ...] in Python
     max_phase_values:
         - -1

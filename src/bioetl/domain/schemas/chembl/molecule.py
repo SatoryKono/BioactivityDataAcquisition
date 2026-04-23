@@ -15,6 +15,7 @@ from bioetl.domain.schemas.constants import (
     CHEMBL_ID_PATTERN,
     MAX_PHASE_VALUES,
     MOLECULE_TYPES,
+    RO3_PASS_VALUES,
     STRUCTURE_TYPES,
 )
 from bioetl.domain.validation import (
@@ -198,7 +199,9 @@ class MoleculeSchema(ETLRecordSchema):
         nullable=True, description="Full molecular formula."
     )
     ro3_pass: Series[str] | None = pa.Field(
-        nullable=True, isin=["Y", "N"], description="Rule-of-3 compliance (Y/N)."
+        nullable=True,
+        isin=list(RO3_PASS_VALUES),
+        description="Rule-of-3 compliance (Y/N).",
     )
 
     # === Structure Fields (flattened from molecule_structures) ===

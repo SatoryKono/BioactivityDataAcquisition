@@ -1,0 +1,23 @@
+version: 1
+description: Shared ChEMBL controlled-vocabulary registry for non-strict canonicalization families.
+
+controlled_vocabularies:
+  units:
+    canonicalizer: normalize_unit
+    invalid_value_mode: preserve_unknown_lexeme
+    fields:
+      - chembl_activity.units
+      - chembl_activity.qudt_units
+      - chembl_assay_parameters.units
+      - chembl_assay_parameters.standard_units
+  operators:
+    canonicalizer: normalize_operator
+    invalid_value_mode: preserve_unknown_lexeme
+    fields:
+      - chembl_activity.relation
+      - chembl_assay_parameters.relation
+  assay_parameter_types:
+    canonicalizer: normalize_cross_pipeline_case(strategy=uppercase)
+    invalid_value_mode: preserve_unknown_uppercase_lexeme
+    fields:
+      - chembl_assay_parameters.type

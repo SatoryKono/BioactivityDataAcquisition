@@ -50,6 +50,9 @@ from bioetl.domain.normalization.profiles import (
     NORMALIZATION_PROFILE_REGISTRY,
     resolve_normalization_profile,
 )
+from bioetl.domain.normalization.profiles._chembl_policy_registry import (
+    chembl_policy_surface,
+)
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_json_string,
     normalize_profile_json_string_strict,
@@ -127,6 +130,7 @@ CSV_COLUMNS = (
     "normalizer",
     "normalization_summary",
     "controlled_vocabulary_source",
+    "semantic_category",
     "include_in_content_hash",
     "set_like",
     "hash_ordering",
@@ -235,10 +239,15 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("chembl", "assay", "assay_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay", "confidence_description"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay", "relationship_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "assay_parameters", "standard_relation"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "assay_parameters", "standard_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "assay_parameters", "standard_units"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "molecule", "ro3_pass"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "molecule", "molecule_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "molecule", "structure_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "publication_term", "term_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "target", "target_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "target_component", "component_type"): _CHEMBL_ENUM_CONFIG,
     ("uniprot", "protein", "entry_type"): _UNIPROT_ENUM_CONFIG,
     ("uniprot", "protein", "flag"): _UNIPROT_ENUM_CONFIG,
     ("uniprot", "protein", "protein_existence"): _UNIPROT_ENUM_CONFIG,
@@ -312,6 +321,11 @@ def _controlled_vocabulary_source(
     normalizer_name: str,
     notes: str,
 ) -> str:
+    if provider == "chembl":
+        policy_surface = chembl_policy_surface(entity, field_name)
+        if policy_surface is not None:
+            return policy_surface.registry_source
+
     configured_source = ENUM_CONFIG_SOURCES.get((provider, entity, field_name))
     if configured_source is not None:
         return configured_source
@@ -328,6 +342,31 @@ def _controlled_vocabulary_source(
     if "ontology id" in normalized_notes or "ontology_id" in normalizer_name:
         return "domain.normalization.ontology_id_prefixes"
     return ""
+
+
+def _semantic_category(
+    *,
+    provider: str,
+    entity: str,
+    field_name: str,
+    strictness: str,
+) -> str:
+    if provider == "chembl":
+        policy_surface = chembl_policy_surface(entity, field_name)
+        if policy_surface is not None:
+            return policy_surface.category
+
+    if strictness in {"strict_enum", "strict_operator", "strict_boolean", "strict_flag"}:
+        return "strict_enum"
+    if strictness == "strict_json":
+        return "structured_json"
+    if strictness == "canonical_ontology_id":
+        return "ontology_reference_identifier"
+    if strictness == "controlled_unit":
+        return "controlled_vocabulary"
+    if strictness == "normalization_only":
+        return "free_text"
+    return strictness
 
 
 def _hash_ordering(*, include_in_hash: bool | None, set_like: bool) -> str:
@@ -675,6 +714,19 @@ def _entity_profile_row(
         field_name=field_name,
         notes=profile_rule.notes,
     )
+    controlled_vocabulary_source = _controlled_vocabulary_source(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+        normalizer_name=normalizer_name,
+        notes=notes,
+    )
+    strictness = _strictness(
+        field_name=field_name,
+        normalization_source=PROFILE_NORMALIZATION_SOURCE,
+        normalizer_name=normalizer_name,
+        notes=notes,
+    )
     return {
         "provider": provider,
         "pipeline_name": pipeline_name,
@@ -685,12 +737,12 @@ def _entity_profile_row(
         "normalization_source": PROFILE_NORMALIZATION_SOURCE,
         "normalizer": normalizer_name,
         "normalization_summary": notes,
-        "controlled_vocabulary_source": _controlled_vocabulary_source(
+        "controlled_vocabulary_source": controlled_vocabulary_source,
+        "semantic_category": _semantic_category(
             provider=provider,
             entity=entity,
             field_name=field_name,
-            normalizer_name=normalizer_name,
-            notes=notes,
+            strictness=strictness,
         ),
         "include_in_content_hash": _render_bool(profile_rule.include_in_hash),
         "set_like": _render_bool(profile_rule.set_like),
@@ -698,12 +750,7 @@ def _entity_profile_row(
             include_in_hash=profile_rule.include_in_hash,
             set_like=profile_rule.set_like,
         ),
-        "strictness": _strictness(
-            field_name=field_name,
-            normalization_source=PROFILE_NORMALIZATION_SOURCE,
-            normalizer_name=normalizer_name,
-            notes=notes,
-        ),
+        "strictness": strictness,
         "schema_coverage": _schema_coverage(
             pipeline_name=pipeline_name,
             field_name=field_name,
@@ -731,6 +778,19 @@ def _entity_fallback_row(
     summary: str,
 ) -> dict[str, str]:
     """Build one entity matrix row sourced from fallback normalization policy."""
+    controlled_vocabulary_source = _controlled_vocabulary_source(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+        normalizer_name=normalizer,
+        notes=summary,
+    )
+    strictness = _strictness(
+        field_name=field_name,
+        normalization_source=source,
+        normalizer_name=normalizer,
+        notes=summary,
+    )
     return {
         "provider": provider,
         "pipeline_name": pipeline_name,
@@ -741,22 +801,17 @@ def _entity_fallback_row(
         "normalization_source": source,
         "normalizer": normalizer,
         "normalization_summary": summary,
-        "controlled_vocabulary_source": _controlled_vocabulary_source(
+        "controlled_vocabulary_source": controlled_vocabulary_source,
+        "semantic_category": _semantic_category(
             provider=provider,
             entity=entity,
             field_name=field_name,
-            normalizer_name=normalizer,
-            notes=summary,
+            strictness=strictness,
         ),
         "include_in_content_hash": "",
         "set_like": FALSE_TEXT,
         "hash_ordering": "fallback_policy",
-        "strictness": _strictness(
-            field_name=field_name,
-            normalization_source=source,
-            normalizer_name=normalizer,
-            notes=summary,
-        ),
+        "strictness": strictness,
         "schema_coverage": _schema_coverage(
             pipeline_name=pipeline_name,
             field_name=field_name,
@@ -855,6 +910,12 @@ def _composite_row(
 ) -> dict[str, str]:
     """Build one composite matrix row."""
     source, normalizer, summary, notes = _composite_field_policy(field_name, join_keys)
+    strictness = _strictness(
+        field_name=field_name,
+        normalization_source=source,
+        normalizer_name=normalizer,
+        notes=summary,
+    )
     return {
         "provider": "composite",
         "pipeline_name": pipeline_name,
@@ -866,15 +927,16 @@ def _composite_row(
         "normalizer": normalizer,
         "normalization_summary": summary,
         "controlled_vocabulary_source": "",
+        "semantic_category": _semantic_category(
+            provider="composite",
+            entity=pipeline_name.removeprefix("composite_"),
+            field_name=field_name,
+            strictness=strictness,
+        ),
         "include_in_content_hash": "",
         "set_like": FALSE_TEXT,
         "hash_ordering": "not_applicable",
-        "strictness": _strictness(
-            field_name=field_name,
-            normalization_source=source,
-            normalizer_name=normalizer,
-            notes=summary,
-        ),
+        "strictness": strictness,
         "schema_coverage": "gold_contract:inherited",
         "dq_coverage": "not_applicable",
         "notes": notes,
@@ -1479,7 +1541,7 @@ def _markdown_intro_lines() -> list[str]:
         "",
         (
             "Governance columns expose controlled-vocabulary sources, content_hash "
-            "inclusion, hash ordering, strictness, domain/Silver schema visibility, "
+            "inclusion, hash ordering, semantic category, strictness, domain/Silver schema visibility, "
             "and DQ rule visibility for each field."
         ),
         "",

@@ -14,12 +14,15 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
 from bioetl.domain.schemas.constants import MOLECULE_TYPES, STRUCTURE_TYPES
 
+from ._chembl_vocab import chembl_enum
+
 __all__ = [
     "CHEMBL_MOLECULE_PROFILE",
     "CHEMBL_MOLECULE_SCHEMA_FIELDS",
 ]
 
 CHEMBL_MOLECULE_SCHEMA_FIELDS = tuple(MoleculeSchema.to_schema().columns.keys())
+RO3_PASS_VALUES = chembl_enum("molecule", "ro3_pass")
 
 _META_FIELDS = frozenset(
     {
@@ -105,7 +108,7 @@ _SPECIAL_RULES = {
 _ENUM_FIELDS = {
     "molecule_type": MOLECULE_TYPES,
     "structure_type": STRUCTURE_TYPES,
-    "ro3_pass": frozenset({"Y", "N"}),
+    "ro3_pass": RO3_PASS_VALUES,
 }
 
 CHEMBL_MOLECULE_PROFILE = build_standard_profile(

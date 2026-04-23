@@ -1,8 +1,7 @@
-"""Validation operations extracted from ``SilverWriterValidationMixin``."""
+"""Validation orchestration extracted from ``SilverWriterValidationMixin``."""
 
 from __future__ import annotations
 
-import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal, Protocol
@@ -11,13 +10,8 @@ import pyarrow as pa
 
 from bioetl.domain.exceptions import (
     PolicyViolationError,
-    SchemaViolationError,
 )
 from bioetl.domain.medallion import Layer, SilverWriteMode, WriteMode, WriteModePolicy
-from bioetl.domain.normalization import (
-    normalize_hash_identity_record,
-    serialize_hash_identity_canonical_json,
-)
 from bioetl.infrastructure.storage.silver.key_nullability_operations import (
     _collect_key_violations as _collect_key_violations,
 )
@@ -33,6 +27,12 @@ from bioetl.infrastructure.storage.silver.schema_drift_operations import (
     _check_schema_drift,
     _detect_schema_drift,
 )
+from bioetl.infrastructure.storage.silver.validation_record_support import (
+    _content_identity,
+    _deduplicate_by_primary_keys_impl,
+    _validate_records,
+    _validate_silver_pandera,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.config import KeyNullabilityRule
@@ -47,6 +47,7 @@ __all__ = [
     "_build_schema_drift_info",
     "_build_silver_schema_drift_diff",
     "_check_schema_drift",
+    "_content_identity",
     "_deduplicate_by_primary_keys_impl",
     "_detect_schema_drift",
     "_enforce_write_policy",
@@ -58,29 +59,6 @@ __all__ = [
     "_validate_silver_pandera",
     "_validate_write_mode_impl",
 ]  # NOTE: _check_schema_drift, _detect_schema_drift, _build_* re-exported from schema_drift_operations
-
-_VERSIONED_TABLE_SUFFIX_RE = re.compile(r"__v\d+_\d+_\d+$")
-
-
-def _primary_key_tuple(
-    record: dict[str, Any],  # Any: BronzeRecord is JsonDict (heterogeneous)
-    primary_keys: list[str],
-) -> tuple[object, ...]:
-    """Return one stable primary-key tuple for a batch record."""
-    return tuple(record.get(primary_key) for primary_key in primary_keys)
-
-
-def _content_identity(
-    record: dict[str, Any],
-) -> str:  # Any: BronzeRecord is JsonDict (heterogeneous)
-    """Return deterministic content identity for one batch record."""
-    content_hash = record.get("content_hash")
-    if content_hash is not None:
-        return str(content_hash)
-    return str(
-        serialize_hash_identity_canonical_json(normalize_hash_identity_record(record))
-    )
-
 
 @dataclass(frozen=True, slots=True)
 class _PreparedSilverWritePayload:
@@ -166,12 +144,6 @@ class _SilverWriterValidationHostProtocol(Protocol):
     ) -> None: ...
 
 
-def _pipeline_name_from_table_name(table_name: str) -> str:
-    """Derive the canonical pipeline label from a logical or versioned table name."""
-    normalized_table = _VERSIONED_TABLE_SUFFIX_RE.sub("", table_name.strip())
-    return normalized_table.replace(".", "_").replace("/", "_")
-
-
 def _validate_write_mode_impl(mode: str) -> SilverWriteMode:
     """Validate and convert write mode string to enum."""
     try:
@@ -181,52 +153,6 @@ def _validate_write_mode_impl(mode: str) -> SilverWriteMode:
         raise ValueError(
             f"Invalid Silver write mode '{mode}'. Allowed: {valid_modes}"
         ) from None
-
-
-def _deduplicate_by_primary_keys_impl(
-    records: list[dict[str, Any]],  # Any: BronzeRecord is JsonDict (heterogeneous)
-    primary_keys: list[str],
-) -> list[dict[str, Any]]:  # Any: BronzeRecord is JsonDict (heterogeneous)
-    """Deduplicate records by business key using deterministic content identity.
-
-    The current-batch contract mirrors Silver retention compaction:
-    - exact duplicate rows for one business key collapse by
-      ``(primary_keys, content identity)``
-    - conflicting rows for one business key choose the lexicographically
-      smallest content identity
-
-    This makes winner selection independent of incoming row order.
-    """
-    if not primary_keys or not records:
-        return records
-
-    ranked_records = sorted(
-        (
-            (
-                _primary_key_tuple(record, primary_keys),
-                _content_identity(record),
-                record,
-            )
-            for record in records
-        ),
-        key=lambda item: (item[0], item[1]),
-    )
-
-    seen_exact_keys: set[tuple[tuple[object, ...], str]] = set()
-    seen_primary_keys: set[tuple[object, ...]] = set()
-    deduplicated: list[
-        dict[str, Any]
-    ] = []  # Any: BronzeRecord is JsonDict (heterogeneous)
-    for primary_key, content_identity, record in ranked_records:
-        exact_key = (primary_key, content_identity)
-        if exact_key in seen_exact_keys:
-            continue
-        seen_exact_keys.add(exact_key)
-        if primary_key in seen_primary_keys:
-            continue
-        seen_primary_keys.add(primary_key)
-        deduplicated.append(record)
-    return deduplicated
 
 
 def _to_policy_write_mode_impl(mode: SilverWriteMode) -> WriteMode:
@@ -322,63 +248,6 @@ def _enforce_write_policy(
                 {"layer": "silver", "mode": policy_mode.value},
             )
         raise
-
-
-def _validate_records(
-    host: _SilverWriterValidationHostProtocol,
-    records: list[dict[str, Any]],  # Any: BronzeRecord is JsonDict (heterogeneous)
-    table_name: str,
-    schema: pa.Schema,
-) -> None:
-    """Validate core Silver write payload shape before persistence."""
-    if not records:
-        raise ValueError("No records to write")
-
-    keys = set(records[0].keys())
-    optional_missing = [key for key in schema.names if key not in keys]
-    if optional_missing:
-        host.logger.debug(
-            "Optional fields missing in batch",
-            table=table_name,
-            missing=optional_missing,
-        )
-
-
-def _validate_silver_pandera(
-    host: _SilverWriterValidationHostProtocol,
-    records: list[dict[str, Any]],  # Any: BronzeRecord is JsonDict (heterogeneous)
-    table_name: str,
-) -> None:
-    """Validate records using Pandera schema before writing to Silver."""
-    schema = getattr(host._silver_validator, "_schema", None)
-    schema_columns = getattr(schema, "columns", {})
-    preserve_state = "_state" in schema_columns
-    cleaned_records = (
-        records
-        if preserve_state
-        else [
-            {key: value for key, value in record.items() if key != "_state"}
-            for record in records
-        ]
-    )
-
-    result = host._silver_validator.validate(cleaned_records)
-    if not result.valid:
-        host.logger.error(
-            "Silver Pandera validation failed",
-            table=table_name,
-            errors=result.errors,
-        )
-        if host._metrics:
-            host._metrics.increment_counter(
-                "bioetl_silver_validation_failures_total",
-                1,
-                {
-                    "table": table_name,
-                    "pipeline": _pipeline_name_from_table_name(table_name),
-                },
-            )
-        raise SchemaViolationError(table_name, result.errors)
 
 
 async def _finalize_silver_write_payload(

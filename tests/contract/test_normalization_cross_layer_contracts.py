@@ -425,6 +425,35 @@ def test_chembl_activity_units_and_target_organism_aliases_keep_hash_stable() ->
     )
 
 
+def test_chembl_assay_bao_identifier_and_label_aliases_keep_hash_stable() -> None:
+    """BAO labels must resolve inside the profile from sibling BAO identifiers."""
+    processor = RecordNormalizationProcessor(provider="chembl", entity_type="assay")
+
+    record_a = processor.normalize_business_data(
+        {
+            "assay_id": "CHEMBL123",
+            "bao_format": " bao:0000357 ",
+            "bao_label": "  noisy label  ",
+            "assay_type": "B",
+        }
+    )
+    record_b = processor.normalize_business_data(
+        {
+            "assay_id": "CHEMBL123",
+            "bao_format": "BAO_0000357",
+            "bao_label": "single protein format",
+            "assay_type": "B",
+        }
+    )
+
+    assert record_a["bao_format"] == "BAO_0000357"
+    assert record_a["bao_label"] == "single protein format"
+    assert record_a == record_b
+    assert processor.compute_content_hash(record_a) == processor.compute_content_hash(
+        record_b
+    )
+
+
 def test_chembl_target_component_organism_aliases_keep_hash_stable() -> None:
     """Target-component organism aliases must collapse to the shared canonical name."""
     processor = RecordNormalizationProcessor(
@@ -495,6 +524,31 @@ def test_profile_matrix_exposes_strict_json_semantics_for_chembl_structured_fiel
     )
     assert publication_authors_row["strictness"] == "strict_json"
     assert publication_authors_row["hash_ordering"] == "order_sensitive"
+
+
+def test_profile_matrix_exposes_shared_chembl_policy_surfaces() -> None:
+    """Field-matrix output must expose governed non-strict ChEMBL policy surfaces."""
+    activity_units_row = _matrix_row("chembl_activity", "units")
+    bao_format_row = _matrix_row("chembl_activity", "bao_format")
+    publication_class_row = _matrix_row("chembl_publication", "publication_class")
+
+    assert activity_units_row["semantic_category"] == "controlled_vocabulary"
+    assert (
+        activity_units_row["controlled_vocabulary_source"]
+        == "configs/vocab/chembl_controlled.yaml"
+    )
+
+    assert bao_format_row["semantic_category"] == "ontology_reference_identifier"
+    assert (
+        bao_format_row["controlled_vocabulary_source"]
+        == "configs/vocab/chembl_ontology.yaml"
+    )
+
+    assert publication_class_row["semantic_category"] == "derived_vocabulary"
+    assert (
+        publication_class_row["controlled_vocabulary_source"]
+        == "configs/enums/publication_type_classification.csv"
+    )
 
 
 def test_chembl_activity_meta_passthrough_contract_is_aligned_across_profile_matrix_and_processor() -> (

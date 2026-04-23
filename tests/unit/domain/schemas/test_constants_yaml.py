@@ -147,6 +147,11 @@ class TestMoleculeSync:
 
         assert STRUCTURE_TYPES == frozenset(chembl_yaml["molecule"]["structure_types"])
 
+    def test_ro3_pass_values(self, chembl_yaml: dict[str, Any]) -> None:
+        from bioetl.domain.schemas.constants import RO3_PASS_VALUES
+
+        assert RO3_PASS_VALUES == frozenset(chembl_yaml["molecule"]["ro3_pass_values"])
+
     def test_max_phase_values(self, chembl_yaml: dict[str, Any]) -> None:
         from bioetl.domain.schemas.constants import MAX_PHASE_VALUES
 
@@ -238,6 +243,7 @@ class TestConstantInvariants:
             MOLECULE_TYPES,
             PUBLICATION_TERM_TYPES,
             PUBLICATION_TYPES,
+            RO3_PASS_VALUES,
             STANDARD_RELATIONS,
             TARGET_TYPES,
         )
@@ -249,6 +255,7 @@ class TestConstantInvariants:
             ASSAY_TYPES,
             ASSAY_CATEGORIES,
             MOLECULE_TYPES,
+            RO3_PASS_VALUES,
             TARGET_TYPES,
             PUBLICATION_TYPES,
             PUBLICATION_TERM_TYPES,

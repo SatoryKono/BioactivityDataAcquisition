@@ -13,6 +13,8 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 )
 from bioetl.domain.schemas.chembl.cell_line import CellLineSchema
 
+from ._chembl_policy_registry import chembl_ontology_family_fields
+
 __all__ = [
     "CHEMBL_CELL_LINE_PROFILE",
     "CHEMBL_CELL_LINE_SCHEMA_FIELDS",
@@ -35,7 +37,9 @@ _META_FIELDS = frozenset(
 )
 _TITLE_FIELDS = frozenset({"cell_name", "cell_source_tissue"})
 _INT_FIELDS = frozenset({"cell_source_taxonomy_id"})
-_ONTOLOGY_ID_FIELDS = frozenset({"clo_id", "efo_id"})
+_ONTOLOGY_ID_FIELDS = chembl_ontology_family_fields(
+    "clo", entity="cell_line"
+) | chembl_ontology_family_fields("efo", entity="cell_line")
 _SPECIAL_RULES = {
     "cellosaurus_id": (
         normalize_profile_cellosaurus_id,

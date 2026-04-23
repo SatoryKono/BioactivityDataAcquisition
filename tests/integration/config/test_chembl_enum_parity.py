@@ -70,7 +70,13 @@ ENUM_POLICIES: tuple[EnumPolicy, ...] = (
         ("activity", "standard_units"),
         surfaces=frozenset({"quality"}),
     ),
-    EnumPolicy("publication", "publication_type", ("publication", "native_doc_types")),
+    EnumPolicy(
+        "molecule",
+        "ro3_pass",
+        ("molecule", "ro3_pass_values"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy("publication", "publication_type", ("publication", "types")),
     EnumPolicy(
         "publication",
         "doc_type",
