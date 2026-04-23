@@ -11,10 +11,10 @@ tracked_docstring_prefixes:
 transition_debt: []
 retained_entrypoints:
 - path: src/bioetl/interfaces/cli/commands/run.py
-  compatibility_role: Retained public run command seam that shields the split internal
-    owner module `bioetl.interfaces.cli.commands.domains.run.command`.
+  compatibility_role: Permanent public run command seam over the split internal owner
+    module `bioetl.interfaces.cli.commands.domains.run.command`.
   canonical_target: bioetl.interfaces.cli.commands.run
-  status: retained-entrypoint
+  status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
@@ -26,14 +26,14 @@ retained_entrypoints:
   migration_path: Use `bioetl.interfaces.cli.commands.run` for public CLI wiring and
     patch targets; do not import `bioetl.interfaces.cli.commands.domains.run.command`
     directly outside the owning package or dedicated boundary tests.
-  exit_criteria: First-party src reaches the run command only through the retained
-    public seam, and direct internal-owner imports remain confined to the owning package
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import
+    seam, and direct internal-owner imports remain confined to the owning package
     plus dedicated boundary tests.
 - path: src/bioetl/interfaces/cli/commands/run_all.py
-  compatibility_role: Retained public run-all command seam that shields the internal
+  compatibility_role: Permanent public run-all command seam over the split internal
     owner module `bioetl.interfaces.cli.commands.domains.run_all.command`.
   canonical_target: bioetl.interfaces.cli.commands.run_all
-  status: retained-entrypoint
+  status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
@@ -45,14 +45,14 @@ retained_entrypoints:
   migration_path: Use `bioetl.interfaces.cli.commands.run_all` for public CLI wiring
     and patch targets; do not import `bioetl.interfaces.cli.commands.domains.run_all.command`
     directly outside the owning package or dedicated boundary tests.
-  exit_criteria: First-party src reaches the run-all command only through the retained
-    public seam, and direct internal-owner imports remain confined to the owning package
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import
+    seam, and direct internal-owner imports remain confined to the owning package
     plus dedicated boundary tests.
 - path: src/bioetl/interfaces/cli/commands/run_composite.py
-  compatibility_role: Retained public run-composite command seam that shields the
-    internal owner module `bioetl.interfaces.cli.commands.domains.composite.command`.
+  compatibility_role: Permanent public run-composite command seam over the internal
+    owner module `bioetl.interfaces.cli.commands.domains.composite.command`.
   canonical_target: bioetl.interfaces.cli.commands.run_composite
-  status: retained-entrypoint
+  status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
@@ -64,14 +64,14 @@ retained_entrypoints:
   migration_path: Use `bioetl.interfaces.cli.commands.run_composite` for public CLI
     wiring and patch targets; do not import `bioetl.interfaces.cli.commands.domains.composite.command`
     directly outside the owning package or dedicated boundary tests.
-  exit_criteria: First-party src reaches the run-composite command only through the
-    retained public seam, and direct internal-owner imports remain confined to the
-    owning package plus dedicated boundary tests.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import
+    seam, and direct internal-owner imports remain confined to the owning package
+    plus dedicated boundary tests.
 - path: src/bioetl/interfaces/cli/commands/health.py
-  compatibility_role: Retained public health command seam that shields the internal
-    owner module `bioetl.interfaces.cli.commands.domains.health.command`.
+  compatibility_role: Permanent public health command seam over the internal owner
+    module `bioetl.interfaces.cli.commands.domains.health.command`.
   canonical_target: bioetl.interfaces.cli.commands.health
-  status: retained-entrypoint
+  status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
@@ -83,14 +83,14 @@ retained_entrypoints:
   migration_path: Use `bioetl.interfaces.cli.commands.health` for public CLI wiring
     and patch targets; do not import `bioetl.interfaces.cli.commands.domains.health.command`
     directly outside the owning package or dedicated boundary tests.
-  exit_criteria: First-party src reaches the health command only through the retained
-    public seam, and direct internal-owner imports remain confined to the owning package
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import
+    seam, and direct internal-owner imports remain confined to the owning package
     plus dedicated boundary tests.
 - path: src/bioetl/interfaces/cli/commands/quarantine.py
-  compatibility_role: Retained public quarantine command seam that shields the internal
-    owner module `bioetl.interfaces.cli.commands.domains.quarantine.command`.
+  compatibility_role: Permanent public quarantine command seam over the internal owner
+    module `bioetl.interfaces.cli.commands.domains.quarantine.command`.
   canonical_target: bioetl.interfaces.cli.commands.quarantine
-  status: retained-entrypoint
+  status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
@@ -102,14 +102,14 @@ retained_entrypoints:
   migration_path: Use `bioetl.interfaces.cli.commands.quarantine` for public CLI wiring
     and patch targets; do not import `bioetl.interfaces.cli.commands.domains.quarantine.command`
     directly outside the owning package or dedicated boundary tests.
-  exit_criteria: First-party src reaches the quarantine command only through the retained
-    public seam, and direct internal-owner imports remain confined to the owning package
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import
+    seam, and direct internal-owner imports remain confined to the owning package
     plus dedicated boundary tests.
 - path: src/bioetl/interfaces/cli/commands/maintenance.py
-  compatibility_role: Retained public maintenance command seam that shields the internal
+  compatibility_role: Permanent public maintenance command seam over the internal
     owner module `bioetl.interfaces.cli.commands.domains.maintenance.command`.
   canonical_target: bioetl.interfaces.cli.commands.maintenance
-  status: retained-entrypoint
+  status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
@@ -121,14 +121,14 @@ retained_entrypoints:
   migration_path: Use `bioetl.interfaces.cli.commands.maintenance` for public CLI
     wiring; do not import `bioetl.interfaces.cli.commands.domains.maintenance.command`
     directly outside the owning package or dedicated boundary tests.
-  exit_criteria: First-party src reaches the maintenance command only through the
-    retained public seam, and direct internal-owner imports remain confined to the
-    owning package plus dedicated boundary tests.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import
+    seam, and direct internal-owner imports remain confined to the owning package
+    plus dedicated boundary tests.
 - path: src/bioetl/interfaces/cli/commands/archive.py
-  compatibility_role: Retained public archive command seam that shields the internal
-    owner module `bioetl.interfaces.cli.commands.domains.maintenance.archive`.
+  compatibility_role: Permanent public archive command seam over the internal owner
+    module `bioetl.interfaces.cli.commands.domains.maintenance.archive`.
   canonical_target: bioetl.interfaces.cli.commands.archive
-  status: retained-entrypoint
+  status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
@@ -141,14 +141,14 @@ retained_entrypoints:
   migration_path: Use `bioetl.interfaces.cli.commands.archive` for public patch targets;
     do not import `bioetl.interfaces.cli.commands.domains.maintenance.archive` directly
     outside the owning maintenance package or dedicated boundary tests.
-  exit_criteria: First-party src keeps direct archive-owner imports confined to the
-    owning maintenance package, and public patch/import coverage remains on the retained
-    top-level seam.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import
+    seam, and direct internal-owner imports remain confined to the owning maintenance
+    package plus dedicated boundary tests.
 - path: src/bioetl/interfaces/cli/commands/cleanup.py
-  compatibility_role: Retained public cleanup command seam that shields the internal
-    owner module `bioetl.interfaces.cli.commands.domains.maintenance.cleanup`.
+  compatibility_role: Permanent public cleanup command seam over the internal owner
+    module `bioetl.interfaces.cli.commands.domains.maintenance.cleanup`.
   canonical_target: bioetl.interfaces.cli.commands.cleanup
-  status: retained-entrypoint
+  status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
@@ -161,14 +161,14 @@ retained_entrypoints:
   migration_path: Use `bioetl.interfaces.cli.commands.cleanup` for public patch targets;
     do not import `bioetl.interfaces.cli.commands.domains.maintenance.cleanup` directly
     outside the owning maintenance package or dedicated boundary tests.
-  exit_criteria: First-party src keeps direct cleanup-owner imports confined to the
-    owning maintenance package, and public patch/import coverage remains on the retained
-    top-level seam.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import
+    seam, and direct internal-owner imports remain confined to the owning maintenance
+    package plus dedicated boundary tests.
 - path: src/bioetl/interfaces/cli/commands/vacuum.py
-  compatibility_role: Retained public vacuum command seam that shields the internal
-    owner module `bioetl.interfaces.cli.commands.domains.maintenance.vacuum`.
+  compatibility_role: Permanent public vacuum command seam over the internal owner
+    module `bioetl.interfaces.cli.commands.domains.maintenance.vacuum`.
   canonical_target: bioetl.interfaces.cli.commands.vacuum
-  status: retained-entrypoint
+  status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
@@ -181,9 +181,9 @@ retained_entrypoints:
   migration_path: Use `bioetl.interfaces.cli.commands.vacuum` for public patch targets;
     do not import `bioetl.interfaces.cli.commands.domains.maintenance.vacuum` directly
     outside the owning maintenance package or dedicated boundary tests.
-  exit_criteria: First-party src keeps direct vacuum-owner imports confined to the
-    owning maintenance package, and public patch/import coverage remains on the retained
-    top-level seam.
+  exit_criteria: The top-level module remains the sanctioned public CLI patch/import
+    seam, and direct internal-owner imports remain confined to the owning maintenance
+    package plus dedicated boundary tests.
 - path: src/bioetl/composition/entrypoints.py
   compatibility_role: Canonical composition entrypoint that intentionally shields
     internal `_pipeline_execution`, `_resource_management`, and `_services` module

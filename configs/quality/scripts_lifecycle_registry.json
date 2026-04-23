@@ -128,6 +128,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded script for generating test GitHub issues; remove it once the associated testing workflow is retired or integrated into a canonical test setup."
     },
+    "scripts/test_selection_strategy.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded local changed-file test selection helper for historical manual workflows; prefer the canonical sharded pytest and test-selection tooling, and remove it once no operator workflow depends on this orphan utility."
+    },
     "scripts/ai/mcp/mcp_brave_search_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",

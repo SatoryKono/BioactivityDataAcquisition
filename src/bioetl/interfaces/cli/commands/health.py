@@ -1,4 +1,4 @@
-"""Retained public health command seam over the canonical domain module."""
+"""Public health command seam over the canonical domain module."""
 
 from __future__ import annotations
 

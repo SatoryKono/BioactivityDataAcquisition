@@ -1,4 +1,4 @@
-"""Retained public run command seam over the canonical domain module."""
+"""Public run command seam over the canonical domain module."""
 
 from __future__ import annotations
 

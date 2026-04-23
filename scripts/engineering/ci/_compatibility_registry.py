@@ -19,6 +19,7 @@ ALLOWED_COMPATIBILITY_STATUSES = frozenset(
         "compat-shim",
         "mixed-module",
         "retained-entrypoint",
+        "public-entrypoint",
     }
 )
 

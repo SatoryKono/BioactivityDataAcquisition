@@ -1,4 +1,4 @@
-"""Retained public archive command seam over the canonical maintenance module."""
+"""Public archive command seam over the canonical maintenance module."""
 
 from __future__ import annotations
 
