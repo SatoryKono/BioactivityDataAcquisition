@@ -97,23 +97,34 @@ def compute_config_source_hashes(
     )
 
 
+def _normalize_mapping(value: Mapping) -> dict[str, object]:
+    normalized: dict[str, object] = {}
+    for raw_key, raw_value in value.items():
+        key = str(raw_key)
+        if key in normalized:
+            raise ValueError(
+                f"Canonical YAML key collision after string coercion: {key!r}"
+            )
+        normalized[key] = _to_canonical_jsonable(raw_value)
+    return {key: normalized[key] for key in sorted(normalized)}
+
+
+def _normalize_sequence(value: list | tuple) -> list[object]:
+    return [_to_canonical_jsonable(item) for item in value]
+
+
+_NORMALIZATION_DISPATCH = {
+    datetime: lambda value: value.isoformat(),
+    date: lambda value: value.isoformat(),
+    Enum: lambda value: value.value,
+    Mapping: lambda value: _normalize_mapping(value),
+    list: lambda value: _normalize_sequence(value),
+    tuple: lambda value: _normalize_sequence(value),
+}
+
+
 def _to_canonical_jsonable(value: object) -> object:
-    if isinstance(value, datetime):
-        return value.isoformat()
-    if isinstance(value, date):
-        return value.isoformat()
-    if isinstance(value, Enum):
-        return value.value
-    if isinstance(value, Mapping):
-        normalized: dict[str, object] = {}
-        for raw_key, raw_value in value.items():
-            key = str(raw_key)
-            if key in normalized:
-                raise ValueError(
-                    f"Canonical YAML key collision after string coercion: {key!r}"
-                )
-            normalized[key] = _to_canonical_jsonable(raw_value)
-        return {key: normalized[key] for key in sorted(normalized)}
-    if isinstance(value, (list, tuple)):
-        return [_to_canonical_jsonable(item) for item in value]
+    for type_, normalizer in _NORMALIZATION_DISPATCH.items():
+        if isinstance(value, type_):
+            return normalizer(value)
     return value

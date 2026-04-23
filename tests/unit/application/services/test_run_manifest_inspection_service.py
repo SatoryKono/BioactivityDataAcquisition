@@ -105,6 +105,14 @@ def _expected_degraded_runtime_anchor(manifest: RunManifest) -> dict[str, object
     }
 
 
+def _expected_code_provenance_state(manifest: RunManifest) -> dict[str, object]:
+    return {
+        "git_commit": manifest.code_provenance.git_commit,
+        "source_revision_state": manifest.code_provenance.source_revision_state,
+        "strict_code_provenance_ready": bool(manifest.code_provenance.git_commit),
+    }
+
+
 def _expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
     requested_exact_replay = bool(manifest.launch_context.get("exact_replay"))
     is_composite = (
@@ -255,7 +263,9 @@ def _make_manifest(
         code_provenance=RunCodeProvenance(
             pipeline_version="1.0.0",
             git_commit="abc1234",
+            source_revision_state="clean",
             config_hash=config_hash,
+            effective_config_hash=config_hash,
             contract_ref="chembl.activity",
             contract_version="1.2.0",
             dq_policy_ref="chembl_activity.gold",
@@ -319,7 +329,12 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "run_id": str(run_id),
         "manifest_id": "manifest-1",
         "execution_fingerprint": "fingerprint-manifest-1",
+        "config_hash": _VALID_CONFIG_HASH,
+        "resolved_config_hash": None,
         "effective_config_hash": _VALID_CONFIG_HASH,
+        "git_commit": "abc1234",
+        "source_revision_state": "clean",
+        "code_provenance_state": _expected_code_provenance_state(manifest),
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
         "replay_of_run_id": None,
@@ -338,6 +353,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
+        "append_mode_semantic_sinks": [],
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
         "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
@@ -376,6 +392,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
         "lineage_closure_boundary_gap": False,
+        "reproducible_semantic_output_mode_gap": False,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
@@ -408,7 +425,12 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "run_id": str(run_id),
         "manifest_id": "manifest-no-ledger",
         "execution_fingerprint": manifest.execution_fingerprint,
+        "config_hash": _VALID_CONFIG_HASH,
+        "resolved_config_hash": None,
         "effective_config_hash": _VALID_CONFIG_HASH,
+        "git_commit": "abc1234",
+        "source_revision_state": "clean",
+        "code_provenance_state": _expected_code_provenance_state(manifest),
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
         "replay_of_run_id": None,
@@ -427,6 +449,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
+        "append_mode_semantic_sinks": [],
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
         "input_snapshot_ids": ["snapshot-1"],
@@ -462,14 +485,19 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
     ] == ["run_ledger_history"]
     assert result.diagnostics == {
         "manifest_id": "manifest-no-ledger",
+        "manifest_created_at": manifest.created_at.isoformat(),
         "run_id": str(run_id),
         "pipeline_name": "chembl_activity",
         "provider": "chembl",
         "entity": "activity",
         "execution_fingerprint": manifest.execution_fingerprint,
         "config_hash": _VALID_CONFIG_HASH,
+        "resolved_config_hash": None,
         "effective_config_hash": _VALID_CONFIG_HASH,
         "pipeline_version": "1.0.0",
+        "git_commit": "abc1234",
+        "source_revision_state": "clean",
+        "code_provenance_state": _expected_code_provenance_state(manifest),
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
         "replay_of_run_id": None,
@@ -483,6 +511,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
+        "append_mode_semantic_sinks": [],
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
         "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
@@ -528,6 +557,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
                 "strict_replay_execution_context_support": True,
                 "immutable_input_snapshots": True,
                 "exact_replay_capability": True,
+                "reproducible_semantic_output_mode": True,
                 "run_ledger_history": False,
                 "artifact_lineage_links": True,
                 "lineage_closure_boundary_support": True,
@@ -560,6 +590,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
             "immutable_input_snapshot_gap": False,
             "strict_replay_boundary_gap": False,
             "lineage_closure_boundary_gap": False,
+            "reproducible_semantic_output_mode_gap": False,
             "composite_resume_reconstructability_gap": False,
             "required_persistence_profile_gap": False,
             "replay_ready_gap": False,
@@ -569,6 +600,9 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         },
         "next_steps": [
             "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
+        ],
+        "reproducibility_audit_score": result.diagnostics[
+            "reproducibility_audit_score"
         ],
     }
 
@@ -882,6 +916,7 @@ def test_show_collects_artifact_diagnostic_links() -> None:
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
         "lineage_closure_boundary_gap": False,
+        "reproducible_semantic_output_mode_gap": False,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
@@ -1048,6 +1083,7 @@ def test_show_collects_dq_trace_anchors() -> None:
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
         "lineage_closure_boundary_gap": False,
+        "reproducible_semantic_output_mode_gap": False,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
@@ -1281,6 +1317,7 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
     ]
     assert result.diagnostics["correlation_anchor_gaps"] == {
         "effective_config_hash": 0,
+        "resolved_config_hash": 0,
         "contract_ref": 0,
         "contract_version": 0,
         "composite_run_id": 0,
@@ -1377,6 +1414,7 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
         "immutable_input_snapshot_gap": True,
         "strict_replay_boundary_gap": False,
         "lineage_closure_boundary_gap": False,
+        "reproducible_semantic_output_mode_gap": False,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": True,
@@ -1391,6 +1429,7 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
     ]
     assert result.diagnostics["correlation_anchor_gaps"] == {
         "effective_config_hash": 0,
+        "resolved_config_hash": 0,
         "contract_ref": 0,
         "contract_version": 0,
         "composite_run_id": 0,
@@ -1499,6 +1538,7 @@ def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
         "immutable_input_snapshot_gap": True,
         "strict_replay_boundary_gap": False,
         "lineage_closure_boundary_gap": False,
+        "reproducible_semantic_output_mode_gap": False,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": True,
@@ -1579,6 +1619,7 @@ def test_show_surfaces_supported_gold_trace_path_in_diagnostics() -> None:
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
         "lineage_closure_boundary_gap": False,
+        "reproducible_semantic_output_mode_gap": False,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
@@ -1655,6 +1696,7 @@ def test_show_surfaces_cross_validation_traceability_in_diagnostics() -> None:
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
         "lineage_closure_boundary_gap": False,
+        "reproducible_semantic_output_mode_gap": False,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": False,

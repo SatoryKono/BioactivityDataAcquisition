@@ -129,18 +129,28 @@ def _normalize_colon_format(value: str) -> str | None:
     return None
 
 
+def _get_underscore_suffix(
+    value: str, prefix: str, canonical_prefix: str, upper_value: str
+) -> str | None:
+    upper_canonical = canonical_prefix.upper()
+    if upper_value.startswith(upper_canonical):
+        return value[len(upper_canonical) :]
+
+    underscore_prefix = f"{prefix}_"
+    if upper_value.startswith(underscore_prefix):
+        suffix = value[len(underscore_prefix) :]
+        if prefix == "CALOHA" and suffix.upper().startswith("TS-"):
+            return suffix.upper()
+        return suffix
+    return None
+
+
 def _normalize_underscore_format(value: str) -> str | None:
     """Handle underscore format ontology IDs (already correct format)."""
     upper_value = value.upper()
     for prefix, canonical_prefix in ONTOLOGY_PREFIXES.items():
-        upper_canonical = canonical_prefix.upper()
-        if upper_value.startswith(upper_canonical):
-            return f"{canonical_prefix}{value[len(canonical_prefix) :]}"
-        underscore_prefix = f"{prefix}_"
-        if upper_value.startswith(underscore_prefix):
-            suffix = value[len(underscore_prefix) :]
-            if prefix == "CALOHA" and suffix.upper().startswith("TS-"):
-                return suffix.upper()
+        suffix = _get_underscore_suffix(value, prefix, canonical_prefix, upper_value)
+        if suffix is not None:
             return f"{canonical_prefix}{suffix}"
     return None
 

@@ -136,6 +136,29 @@ def initialize_classification(data: ClassificationData) -> None:
     )
 
 
+def _classify_chembl_type(
+    raw_type: str | None,
+    raw_types_list: list[str] | None,
+) -> PublicationTypeEntry | None:
+    if raw_type is not None:
+        return _classify_chembl_publication_type(raw_type)
+    if raw_types_list is not None:
+        return _best_chembl_match(raw_types_list)
+    return None
+
+
+def _classify_non_chembl_type(
+    lookup: dict[str, PublicationTypeEntry],
+    raw_type: str | None,
+    raw_types_list: list[str] | None,
+) -> PublicationTypeEntry | None:
+    if raw_type is not None:
+        return lookup.get(raw_type.strip().lower() if raw_type else None)
+    if raw_types_list is not None:
+        return _best_match(lookup, raw_types_list)
+    return None
+
+
 def classify_publication_type(
     provider: str,
     raw_type: str | None = None,
@@ -166,21 +189,15 @@ def classify_publication_type(
         )
         raise RuntimeError(msg)
 
+    provider_lower = provider.lower()
+    if provider_lower == "chembl":
+        return _classify_chembl_type(raw_type, raw_types_list)
+
     lookup = _get_lookup(provider)
     if lookup is None:
         return None
 
-    if raw_type is not None:
-        if provider.lower() == "chembl":
-            return _classify_chembl_publication_type(raw_type)
-        return lookup.get(raw_type.strip().lower())
-
-    if raw_types_list is not None:
-        if provider.lower() == "chembl":
-            return _best_chembl_match(raw_types_list)
-        return _best_match(lookup, raw_types_list)
-
-    return None
+    return _classify_non_chembl_type(lookup, raw_type, raw_types_list)
 
 
 def build_publication_type_classification_payload(
@@ -219,6 +236,16 @@ def build_publication_type_classification_payload(
     return payload
 
 
+def _find_matching_classification_value(
+    normalized: str,
+    allowed: frozenset[str],
+) -> str | None:
+    for allowed_value in allowed:
+        if normalized.lower() == allowed_value.lower():
+            return allowed_value
+    return None
+
+
 def normalize_publication_classification_field(
     field_name: str,
     value: object,
@@ -234,10 +261,7 @@ def normalize_publication_classification_field(
     allowed = _classification_values(field_name)
     if not allowed:
         return normalized
-    for allowed_value in allowed:
-        if normalized.lower() == allowed_value.lower():
-            return allowed_value
-    return None
+    return _find_matching_classification_value(normalized, allowed)
 
 
 def _best_match(
@@ -261,14 +285,36 @@ def _get_lookup(provider: str) -> dict[str, PublicationTypeEntry] | None:
     return _PROVIDER_LOOKUPS.get(provider_key)
 
 
+_CLASSIFICATION_FIELD_DISPATCH = {
+    "publication_type_unified": lambda: frozenset(
+        entry.unified_type for entry in _ENTRY_BY_SPECIFICITY
+    ),
+    "publication_subclass": lambda: frozenset(
+        entry.subclass for entry in _ENTRY_BY_SPECIFICITY
+    ),
+    "publication_class": lambda: frozenset(
+        entry.class_code for entry in _ENTRY_BY_SPECIFICITY
+    ),
+}
+
+
 def _classification_values(field_name: str) -> frozenset[str]:
-    if field_name == "publication_type_unified":
-        return frozenset(entry.unified_type for entry in _ENTRY_BY_SPECIFICITY)
-    if field_name == "publication_subclass":
-        return frozenset(entry.subclass for entry in _ENTRY_BY_SPECIFICITY)
-    if field_name == "publication_class":
-        return frozenset(entry.class_code for entry in _ENTRY_BY_SPECIFICITY)
+    getter = _CLASSIFICATION_FIELD_DISPATCH.get(field_name)
+    if getter:
+        return getter()
     raise ValueError(f"Unknown publication classification field: {field_name}")
+
+
+def _process_raw_types_list(raw_types_list: list[str] | None) -> str | None:
+    if raw_types_list is None:
+        return None
+    valid_parts = []
+    for raw in raw_types_list:
+        if raw is not None:
+            stripped = str(raw).strip()
+            if stripped:  # Only add non-empty stripped strings
+                valid_parts.append(stripped)
+    return "|".join(valid_parts) if valid_parts else None
 
 
 def _raw_publication_type(
@@ -279,10 +325,7 @@ def _raw_publication_type(
     if raw_type is not None:
         raw = raw_type.strip()
         return raw or None
-    if raw_types_list is None:
-        return None
-    parts = [raw.strip() for raw in raw_types_list if raw and raw.strip()]
-    return "|".join(parts) if parts else None
+    return _process_raw_types_list(raw_types_list)
 
 
 def _canonical_publication_type_key(value: str) -> str:
