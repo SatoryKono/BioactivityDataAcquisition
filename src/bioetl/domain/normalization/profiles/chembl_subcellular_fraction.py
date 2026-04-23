@@ -8,9 +8,13 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
 from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_governed_vocabulary,
+)
 from bioetl.domain.schemas.chembl.subcellular_fraction import (
     SubcellularFractionSchema,
 )
+from bioetl.domain.schemas.constants import SUBCELLULAR_FRACTIONS
 
 __all__ = [
     "CHEMBL_SUBCELLULAR_FRACTION_PROFILE",
@@ -44,6 +48,16 @@ CHEMBL_SUBCELLULAR_FRACTION_PROFILE = build_standard_profile(
     meta_fields=_META_FIELDS,
     title_fields=_TITLE_FIELDS,
     int_fields=_INT_FIELDS,
+    special_rules={
+        "subcellular_fraction": (
+            lambda value: normalize_profile_governed_vocabulary(
+                value,
+                allowed_values=SUBCELLULAR_FRACTIONS,
+                preserve_unknown=True,
+            ),
+            "Normalize subcellular_fraction against the shared ChEMBL subcellular-fraction vocabulary while preserving unknown observed lexemes for review.",
+        ),
+    },
     null_fields=chembl_pseudo_null_fields("subcellular_fraction"),
 )
 

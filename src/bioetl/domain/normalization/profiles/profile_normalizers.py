@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization.chembl import (
@@ -18,6 +19,8 @@ from bioetl.domain.normalization.identifiers import (
     normalize_pmid,
 )
 from bioetl.domain.normalization.json import canonicalize_json_string
+from bioetl.domain.normalization.json import deserialize_json_value
+from bioetl.domain.normalization.json import serialize_json_canonical
 from bioetl.domain.normalization.rules import (
     normalize_binary_flag,
     normalize_boolean,
@@ -44,7 +47,10 @@ __all__ = [
     "normalize_profile_doi",
     "normalize_profile_enum",
     "normalize_profile_float",
+    "normalize_profile_governed_uppercase_vocabulary",
+    "normalize_profile_governed_vocabulary",
     "normalize_profile_int",
+    "normalize_profile_json_string_list_vocabulary_strict",
     "normalize_profile_isomeric_smiles",
     "normalize_profile_json_string",
     "normalize_profile_json_string_strict",
@@ -62,6 +68,89 @@ __all__ = [
 ]
 
 _UNHANDLED = object()
+
+
+def _normalize_governed_vocabulary_value(
+    value: object,
+    *,
+    allowed_values: frozenset[str],
+    fallback: Callable[[str], str | None] | None = None,
+) -> object:
+    if not isinstance(value, str):
+        return value
+    normalized = normalize_string(value)
+    if normalized is None:
+        return None
+    canonical = normalize_case(normalized, allowed_values)
+    if canonical is not None:
+        return canonical
+    if fallback is None:
+        return None
+    return fallback(normalized)
+
+
+def normalize_profile_governed_vocabulary(
+    value: object,
+    *,
+    allowed_values: frozenset[str],
+    preserve_unknown: bool = False,
+) -> object:
+    """Normalize one governed text vocabulary against a canonical registry."""
+    return _normalize_governed_vocabulary_value(
+        value,
+        allowed_values=allowed_values,
+        fallback=(lambda normalized: normalized) if preserve_unknown else None,
+    )
+
+
+def normalize_profile_governed_uppercase_vocabulary(
+    value: object,
+    *,
+    allowed_values: frozenset[str],
+    preserve_unknown: bool = False,
+) -> object:
+    """Normalize one governed vocabulary and uppercase unknown lexemes when kept."""
+    return _normalize_governed_vocabulary_value(
+        value,
+        allowed_values=allowed_values,
+        fallback=(
+            lambda normalized: normalize_cross_pipeline_case(normalized, "uppercase")
+            if preserve_unknown
+            else None
+        ),
+    )
+
+
+def normalize_profile_json_string_list_vocabulary_strict(
+    value: object,
+    *,
+    allowed_values: frozenset[str],
+) -> object:
+    """Normalize one JSON-array string element-wise against a governed registry."""
+    if not isinstance(value, str):
+        return value
+    normalized = normalize_string(value)
+    if normalized is None:
+        return None
+    try:
+        parsed = deserialize_json_value(normalized)
+    except ValueError:
+        return None
+    if not isinstance(parsed, list):
+        return None
+
+    normalized_values: list[str] = []
+    for item in parsed:
+        canonical = normalize_profile_governed_vocabulary(
+            item,
+            allowed_values=allowed_values,
+            preserve_unknown=False,
+        )
+        if not isinstance(canonical, str):
+            return None
+        normalized_values.append(canonical)
+
+    return serialize_json_canonical(normalized_values)
 
 
 def normalize_profile_null(value: object) -> object:

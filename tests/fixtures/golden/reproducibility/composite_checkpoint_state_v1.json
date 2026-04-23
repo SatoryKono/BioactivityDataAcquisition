@@ -1,0 +1,59 @@
+{
+  "checkpoint_schema_version": "1.0.0",
+  "completed_dependencies": [
+    "pubmed_publication"
+  ],
+  "completed_enrichers": [
+    "mesh"
+  ],
+  "composite_name": "publication_analytics",
+  "composite_run_identity": "composite-publication-golden-001",
+  "contract_ref": "composite.publication",
+  "contract_version": "1.0.0",
+  "created_at": "2025-01-01T12:00:00+00:00",
+  "dependency_results": {
+    "pubmed_publication": {
+      "duration_seconds": 4.0,
+      "error_message": null,
+      "pipeline_name": "pubmed_publication",
+      "records_extracted": 120,
+      "records_silver": 118,
+      "resumed": false,
+      "status": "success"
+    }
+  },
+  "dq_contract_compatibility_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "effective_config_artifact_id": "eca-golden-001",
+  "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "enrichment_results": {
+    "mesh": {
+      "dq_error_rate": 0.02,
+      "duration_seconds": 2.0,
+      "enricher_name": "mesh",
+      "error_message": null,
+      "records_enriched": 110,
+      "records_errored": 0,
+      "records_input": 118,
+      "records_not_found": 8,
+      "status": "partial"
+    }
+  },
+  "execution_fingerprint": "fp-golden-001",
+  "last_event_id": "entry-003",
+  "last_event_occurred_at": "2025-01-01T12:00:06+00:00",
+  "manifest_id": "manifest-golden-001",
+  "merge_completed": false,
+  "merge_result": null,
+  "run_id": "00000000-0000-0000-0000-000000000907",
+  "seed_completed": true,
+  "seed_result": {
+    "duration_seconds": 3.5,
+    "keys_generated": 120,
+    "pipeline_name": "chembl_publication",
+    "records_extracted": 120,
+    "records_silver": 120,
+    "resumed": false
+  },
+  "state": "enriching",
+  "updated_at": "2025-01-01T12:00:06+00:00"
+}

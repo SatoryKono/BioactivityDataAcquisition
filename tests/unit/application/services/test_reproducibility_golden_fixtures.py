@@ -6,7 +6,6 @@ from datetime import UTC, datetime
 import json
 import os
 from pathlib import Path
-from unittest.mock import patch
 from uuid import UUID
 
 import pytest
@@ -201,32 +200,34 @@ def _make_run_context(*, run_id: str) -> RunContext:
 
 def _make_effective_config_artifact_payload() -> dict[str, object]:
     service = EffectiveConfigService()
-    with patch(
-        "bioetl.domain.control_plane.effective_config_artifact._current_utc_time",
-        return_value=_FIXED_TIME,
-    ):
-        artifact = service.create_effective_config_artifact(
-            pipeline_name="chembl_activity",
-            pipeline_kind="standard",
-            resolved_config={
-                "pipeline": {"name": "chembl_activity", "version": "1.0.0"},
-                "settings": {"limit": 25, "exact_replay": True},
-            },
-            runtime_overrides={
-                "cli": {"limit": 25},
-                "runtime": {"exact_replay": True},
-            },
-            source_refs=[
-                ConfigSourceRef(
-                    source_type="file",
-                    source_path="configs/entities/chembl/activity.yaml",
-                    source_hash="1" * 64,
-                    raw_source_hash="2" * 64,
-                    priority=10,
-                )
-            ],
-        )
-    return json.loads(service.serialize_artifact(artifact))
+    artifact = service.create_effective_config_artifact(
+        pipeline_name="chembl_activity",
+        pipeline_kind="standard",
+        resolved_config={
+            "pipeline": {"name": "chembl_activity", "version": "1.0.0"},
+            "settings": {"limit": 25, "exact_replay": True},
+        },
+        runtime_overrides={
+            "cli": {"limit": 25},
+            "runtime": {"exact_replay": True},
+        },
+        source_refs=[
+            ConfigSourceRef(
+                source_type="file",
+                source_path="configs/entities/chembl/activity.yaml",
+                source_hash="1" * 64,
+                raw_source_hash="2" * 64,
+                priority=10,
+            )
+        ],
+    )
+    payload = json.loads(service.serialize_artifact(artifact))
+    payload["occurrence_envelope"] = {
+        "created_at": _FIXED_TIME.isoformat(),
+        "resolved_config_timestamp": _FIXED_TIME.isoformat(),
+        "effective_execution_timestamp": _FIXED_TIME.isoformat(),
+    }
+    return payload
 
 
 def _make_bronze_sidecar_payload() -> dict[str, object]:

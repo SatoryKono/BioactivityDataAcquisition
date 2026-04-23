@@ -86,7 +86,7 @@ quality:
     pattern: ^[A-Z0-9]{6,10}$
     nullable: true
     error_message: accession should be UniProt format (6-10 alphanumeric chars)
-  - field: tax_id
+  - field: taxonomy_id
     type: range
     min: 1
     max: 10000000
@@ -133,3 +133,50 @@ contracts:
   merge_keys:
   - component_id
   hash_include: []
+hash_policy:
+  provider: chembl
+  entity: target_component
+  contract:
+    version: 1.0.0
+    migration_note: 'Explicit config-level hash contract for the normalized ChEMBL target-component Silver surface.'
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - component_id
+    - accession
+    - component_type
+    - description
+    - organism
+    - taxonomy_id
+    - target_component_synonyms
+    - target_component_xrefs
+    - protein_classifications
+    - protein_classification_id
+    - protein_classification_ids
+    exclude_fields:
+    - _ingestion_ts
+    - _run_id
+    - _run_type
+    - _dq_warn
+    - _dq_error
+    - _source_batch_id
+    - _index
+    exclude_patterns:
+    - ^_dq_
+    field_ordering:
+      target_component_synonyms: order_sensitive_json
+      target_component_xrefs: order_sensitive_json
+      protein_classifications: order_sensitive_json
+      protein_classification_ids: order_sensitive_json
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

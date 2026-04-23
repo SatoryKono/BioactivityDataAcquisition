@@ -154,6 +154,12 @@ def resolve_reproducibility_family_profile(
         )
     supported = family in _PUBLISHED_SUPPORTED_SOURCE_FAMILIES
     published = family in _PUBLISHED_SOURCE_FAMILIES
+    if supported:
+        reason = "family_within_supported_boundary"
+    elif published:
+        reason = "family_within_published_inventory_but_outside_supported_boundary"
+    else:
+        reason = "family_outside_published_inventory"
     return ReproducibilityFamilyProfile(
         family=family,
         execution_context=execution_context,
@@ -164,15 +170,7 @@ def resolve_reproducibility_family_profile(
             "snapshot_backed_exact_replay" if supported else "rebuild_only"
         ),
         support_scope="operator_grade_trace_debug",
-        reason=(
-            "family_within_supported_boundary"
-            if supported
-            else (
-                "family_within_published_inventory_but_outside_supported_boundary"
-                if published
-                else "family_outside_published_inventory"
-            )
-        ),
+        reason=reason,
     )
 
 

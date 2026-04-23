@@ -172,6 +172,7 @@ CHEMBL_PSEUDO_NULL_FIELDS = MappingProxyType(
                 "publication_pmid",
                 "publication_subclass",
                 "publication_type",
+                "publication_type_raw",
                 "publication_type_unified",
                 "title",
                 "volume",

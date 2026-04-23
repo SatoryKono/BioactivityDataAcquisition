@@ -55,7 +55,7 @@ jobs:
             --token-env-var SONARQUBE_TOKEN \
             --strict-live \
             --require-authoritative-scope \
-            --max-quarantine-entries 164
+            --max-quarantine-entries 159
 
       - name: Validate canonical Sonar config
         if: steps.sonar-token.outputs.available == 'true'

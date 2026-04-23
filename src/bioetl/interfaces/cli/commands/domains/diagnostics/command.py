@@ -52,6 +52,8 @@ __all__ = [
     "get_quarantine_manager",
 ]
 
+_UNAVAILABLE_LINE = "  - unavailable"
+
 
 def get_observability_diagnostics_bundle() -> ObservabilityDiagnosticsBundle:
     """Load the canonical operator diagnostics bundle on demand."""
@@ -203,121 +205,130 @@ def _render_run_dossier_payload(payload: dict[str, object]) -> str:
         f"  pipeline_name: {payload.get('pipeline_name')}",
     ]
     if isinstance(status, dict):
-        lines.extend(
-            [
-                f"  forensic_profile: {status.get('forensic_profile')}",
-                f"  latest_status: {status.get('latest_status')}",
-                f"  latest_event_type: {status.get('latest_event_type')}",
-                f"  checkpoint_status: {status.get('checkpoint_status')}",
-                f"  lineage_status: {status.get('lineage_status')}",
-                f"  quarantine_status: {status.get('quarantine_status')}",
-                f"  missing_evidence_count: {status.get('missing_evidence_count')}",
-                f"  degraded_evidence_count: {status.get('degraded_evidence_count')}",
-            ]
-        )
+        lines.extend(_render_dossier_status_lines(status))
 
-    lines.extend(["", "Run Manifest"])
-    if isinstance(run_manifest, dict):
-        manifest = run_manifest.get("manifest")
-        diagnostics = run_manifest.get("diagnostics")
-        if isinstance(manifest, dict):
-            lines.extend(
-                [
-                    f"  manifest_id: {manifest.get('manifest_id')}",
-                    f"  provider: {manifest.get('provider')}",
-                    f"  entity: {manifest.get('entity')}",
-                    f"  run_type: {manifest.get('run_type')}",
-                ]
-            )
-        if isinstance(diagnostics, dict):
-            lines.extend(
-                [
-                    f"  replay_capability: {diagnostics.get('replay_capability')}",
-                    f"  persistence_profile: {diagnostics.get('persistence_profile')}",
-                    f"  alert_signals: {diagnostics.get('alert_signals')}",
-                ]
-            )
-    else:
-        lines.append("  - unavailable")
-
-    lines.extend(["", "Checkpoint"])
-    if isinstance(checkpoint, dict):
-        lines.extend(
-            [
-                f"  checkpoint_run_id: {checkpoint.get('run_id')}",
-                f"  checkpoint_metadata: {checkpoint.get('metadata')}",
-            ]
-        )
-    else:
-        lines.append("  - unavailable")
-
-    lines.extend(["", "Quarantine"])
-    if isinstance(quarantine_summary, dict):
-        lines.append(f"  total: {quarantine_summary.get('total')}")
-        lines.append(
-            f"  silver_filter_rejects: {quarantine_summary.get('silver_filter_rejects')}"
-        )
-        lines.append(f"  run_scope: {quarantine_summary.get('run_scope')}")
-    else:
-        lines.append("  - unavailable")
-
-    lines.extend(["", "Lineage"])
-    if isinstance(lineage, dict):
-        lines.extend(
-            [
-                f"  manifest_id: {lineage.get('manifest_id')}",
-                f"  fragment_ids: {lineage.get('fragment_ids')}",
-                f"  produced_datasets: {lineage.get('produced_datasets')}",
-            ]
-        )
-    else:
-        lines.append("  - unavailable")
-
-    lines.extend(["", "Traceability"])
-    if isinstance(traceability, dict):
-        lines.extend(
-            [
-                f"  audit_entries_count: {traceability.get('audit_entries_count')}",
-                f"  lineage_fragment_ids: {traceability.get('lineage_fragment_ids')}",
-                f"  artifact_refs: {traceability.get('artifact_refs')}",
-                f"  trace_links_available: {traceability.get('trace_links_available')}",
-                f"  correlation_anchor_gaps: {traceability.get('correlation_anchor_gaps')}",
-            ]
-        )
-    else:
-        lines.append("  - unavailable")
-
-    lines.extend(
-        [
-            "",
-            "Evidence Status",
-            f"  missing: {missing}",
-            f"  degraded: {degraded}",
-        ]
-    )
-    lines.extend(["", "Audit Entries"])
-    if isinstance(audit_entries, list) and audit_entries:
-        for entry in audit_entries:
-            if not isinstance(entry, dict):
-                lines.append(f"  - {entry}")
-                continue
-            lines.append(
-                "  - "
-                f"{entry.get('timestamp', '?')} "
-                f"{entry.get('layer', '?')}/{entry.get('table_name', '?')} "
-                f"{entry.get('operation', '?')} "
-                f"records={entry.get('records_count', '?')}"
-            )
-    else:
-        lines.append("  - none")
-
-    lines.extend(["", "Next Steps"])
-    if isinstance(next_steps, list) and next_steps:
-        lines.extend(f"  - {step}" for step in next_steps)
-    else:
-        lines.append("  - none")
+    lines.extend(["", "Run Manifest", *_render_run_manifest_lines(run_manifest)])
+    lines.extend(["", "Checkpoint", *_render_checkpoint_lines(checkpoint)])
+    lines.extend(["", "Quarantine", *_render_quarantine_lines(quarantine_summary)])
+    lines.extend(["", "Lineage", *_render_lineage_lines(lineage)])
+    lines.extend(["", "Traceability", *_render_traceability_lines(traceability)])
+    lines.extend(["", "Evidence Status", f"  missing: {missing}", f"  degraded: {degraded}"])
+    lines.extend(["", "Audit Entries", *_render_audit_entry_lines(audit_entries)])
+    lines.extend(["", "Next Steps", *_render_next_step_lines(next_steps)])
 
     return "\n".join(lines)
+
+
+def _render_dossier_status_lines(status: dict[str, object]) -> list[str]:
+    """Render the high-level dossier status block."""
+    return [
+        f"  forensic_profile: {status.get('forensic_profile')}",
+        f"  latest_status: {status.get('latest_status')}",
+        f"  latest_event_type: {status.get('latest_event_type')}",
+        f"  checkpoint_status: {status.get('checkpoint_status')}",
+        f"  lineage_status: {status.get('lineage_status')}",
+        f"  quarantine_status: {status.get('quarantine_status')}",
+        f"  missing_evidence_count: {status.get('missing_evidence_count')}",
+        f"  degraded_evidence_count: {status.get('degraded_evidence_count')}",
+    ]
+
+
+def _render_run_manifest_lines(run_manifest: object) -> list[str]:
+    """Render the run-manifest section for dossier text output."""
+    if not isinstance(run_manifest, dict):
+        return [_UNAVAILABLE_LINE]
+    lines: list[str] = []
+    manifest = run_manifest.get("manifest")
+    diagnostics = run_manifest.get("diagnostics")
+    if isinstance(manifest, dict):
+        lines.extend(
+            [
+                f"  manifest_id: {manifest.get('manifest_id')}",
+                f"  provider: {manifest.get('provider')}",
+                f"  entity: {manifest.get('entity')}",
+                f"  run_type: {manifest.get('run_type')}",
+            ]
+        )
+    if isinstance(diagnostics, dict):
+        lines.extend(
+            [
+                f"  replay_capability: {diagnostics.get('replay_capability')}",
+                f"  persistence_profile: {diagnostics.get('persistence_profile')}",
+                f"  alert_signals: {diagnostics.get('alert_signals')}",
+            ]
+        )
+    return lines or [_UNAVAILABLE_LINE]
+
+
+def _render_checkpoint_lines(checkpoint: object) -> list[str]:
+    """Render the checkpoint section for dossier text output."""
+    if not isinstance(checkpoint, dict):
+        return [_UNAVAILABLE_LINE]
+    return [
+        f"  checkpoint_run_id: {checkpoint.get('run_id')}",
+        f"  checkpoint_metadata: {checkpoint.get('metadata')}",
+    ]
+
+
+def _render_quarantine_lines(quarantine_summary: object) -> list[str]:
+    """Render the quarantine summary section for dossier text output."""
+    if not isinstance(quarantine_summary, dict):
+        return [_UNAVAILABLE_LINE]
+    return [
+        f"  total: {quarantine_summary.get('total')}",
+        f"  silver_filter_rejects: {quarantine_summary.get('silver_filter_rejects')}",
+        f"  run_scope: {quarantine_summary.get('run_scope')}",
+    ]
+
+
+def _render_lineage_lines(lineage: object) -> list[str]:
+    """Render the lineage section for dossier text output."""
+    if not isinstance(lineage, dict):
+        return [_UNAVAILABLE_LINE]
+    return [
+        f"  manifest_id: {lineage.get('manifest_id')}",
+        f"  fragment_ids: {lineage.get('fragment_ids')}",
+        f"  produced_datasets: {lineage.get('produced_datasets')}",
+    ]
+
+
+def _render_traceability_lines(traceability: object) -> list[str]:
+    """Render the traceability section for dossier text output."""
+    if not isinstance(traceability, dict):
+        return [_UNAVAILABLE_LINE]
+    return [
+        f"  audit_entries_count: {traceability.get('audit_entries_count')}",
+        f"  lineage_fragment_ids: {traceability.get('lineage_fragment_ids')}",
+        f"  artifact_refs: {traceability.get('artifact_refs')}",
+        f"  trace_links_available: {traceability.get('trace_links_available')}",
+        f"  correlation_anchor_gaps: {traceability.get('correlation_anchor_gaps')}",
+    ]
+
+
+def _render_audit_entry_lines(audit_entries: object) -> list[str]:
+    """Render the audit-entry section for dossier text output."""
+    if not isinstance(audit_entries, list) or not audit_entries:
+        return ["  - none"]
+    lines: list[str] = []
+    for entry in audit_entries:
+        if not isinstance(entry, dict):
+            lines.append(f"  - {entry}")
+            continue
+        lines.append(
+            "  - "
+            f"{entry.get('timestamp', '?')} "
+            f"{entry.get('layer', '?')}/{entry.get('table_name', '?')} "
+            f"{entry.get('operation', '?')} "
+            f"records={entry.get('records_count', '?')}"
+        )
+    return lines
+
+
+def _render_next_step_lines(next_steps: object) -> list[str]:
+    """Render the next-steps section for dossier text output."""
+    if not isinstance(next_steps, list) or not next_steps:
+        return ["  - none"]
+    return [f"  - {step}" for step in next_steps]
 
 
 @click.group()  # type: ignore[untyped-decorator]

@@ -9,9 +9,12 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_json_string_list_vocabulary_strict,
     normalize_profile_chembl_organism_name,
 )
 from bioetl.domain.schemas.chembl.target import TargetSchema
+from bioetl.domain.schemas.constants import TARGET_COMPONENT_RELATIONSHIPS
+from bioetl.domain.schemas.constants import TARGET_COMPONENT_TYPES
 from bioetl.domain.schemas.constants import TARGET_TYPES
 
 __all__ = [
@@ -46,8 +49,6 @@ _STRICT_JSON_FIELDS = frozenset(
         "component_accessions",
         "component_descriptions",
         "component_ids",
-        "component_types",
-        "component_relationships",
     }
 )
 _NULL_FIELDS = chembl_pseudo_null_fields("target")
@@ -60,6 +61,20 @@ _SPECIAL_RULE_COMPONENTS = {
     "organism": (
         normalize_profile_chembl_organism_name,
         "Normalize ChEMBL target organism display name using curated organism aliases.",
+    ),
+    "component_types": (
+        lambda value: normalize_profile_json_string_list_vocabulary_strict(
+            value,
+            allowed_values=TARGET_COMPONENT_TYPES,
+        ),
+        "Normalize target component_types as a canonical JSON array with element-wise validation against the shared ChEMBL target-component type registry.",
+    ),
+    "component_relationships": (
+        lambda value: normalize_profile_json_string_list_vocabulary_strict(
+            value,
+            allowed_values=TARGET_COMPONENT_RELATIONSHIPS,
+        ),
+        "Normalize target component_relationships as a canonical JSON array with element-wise validation against the shared ChEMBL target-component relationship registry.",
     ),
 }
 

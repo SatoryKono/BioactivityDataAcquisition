@@ -106,7 +106,7 @@ quality:
             pattern: ^[A-Z][a-z]+ [a-z]+.*$
             nullable: true
             error_message: organism should be in binomial nomenclature
-        -   field: tax_id
+        -   field: taxonomy_id
             type: range
             min: 1
             max: 10000000
@@ -173,3 +173,63 @@ contracts:
     merge_keys:
         - target_id
     hash_include: []
+hash_policy:
+    provider: chembl
+    entity: target
+    contract:
+        version: 1.0.0
+        migration_note: 'Explicit config-level hash contract for the normalized ChEMBL target Silver surface.'
+    hash_policy:
+        algorithm: sha256
+        canonicalization: provider + canonical_json_dumps(normalized_record)
+        include_fields:
+            - target_id
+            - target_type
+            - pref_name
+            - taxonomy_id
+            - organism
+            - organism_class
+            - species_group_flag
+            - description
+            - downgraded
+            - target_components
+            - cross_references
+            - pipeline_stages
+            - target_component_synonyms
+            - component_accessions
+            - component_descriptions
+            - primary_component_id
+            - component_ids
+            - component_types
+            - component_relationships
+        exclude_fields:
+            - _ingestion_ts
+            - _run_id
+            - _run_type
+            - _dq_warn
+            - _dq_error
+            - _source_batch_id
+            - _index
+        exclude_patterns:
+            - ^_dq_
+        field_ordering:
+            target_components: order_sensitive_json
+            cross_references: order_sensitive_json
+            pipeline_stages: order_sensitive_json
+            target_component_synonyms: order_sensitive_json
+            component_accessions: order_sensitive_json
+            component_descriptions: order_sensitive_json
+            component_ids: order_sensitive_json
+            component_types: order_sensitive_json
+            component_relationships: order_sensitive_json
+        normalization:
+            trim_strings: true
+            round_floats:
+                enabled: true
+                precision: 10
+            dates:
+                enabled: true
+                format: YYYY-MM-DD
+            null_handling:
+                nan_to_null: true
+                inf_to_null: true

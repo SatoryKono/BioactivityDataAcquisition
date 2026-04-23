@@ -9,10 +9,10 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_governed_uppercase_vocabulary,
     normalize_profile_operator,
     normalize_profile_text,
 )
-from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
 
 from ._chembl_policy_registry import chembl_controlled_family_fields
@@ -64,10 +64,15 @@ _SPECIAL_RULE_COMPONENTS = {
     ),
     **{
         field_name: (
-            lambda value: normalize_cross_pipeline_case(value, "uppercase"),
+            lambda value: normalize_profile_governed_uppercase_vocabulary(
+                value,
+                allowed_values=ASSAY_PARAMETER_STANDARD_TYPES,
+                preserve_unknown=True,
+            ),
             (
-                "Normalize controlled-vocabulary assay parameter type to uppercase "
-                "without rejecting unknown observed values."
+                "Normalize governed assay-parameter type values against the shared "
+                "registry, while preserving unknown provider lexemes as uppercase "
+                "for explicit raw-vs-canonical review."
             ),
         )
         for field_name in sorted(_TYPE_FIELDS)
