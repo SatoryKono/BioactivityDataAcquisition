@@ -185,7 +185,7 @@ class TestGenericPipelineFactory:
             data_source_creator=custom_creator,
         )
 
-        result = factory.build_services(mock_settings, mock_logger)
+        result = factory.build_services(mock_settings, mock_logger, audit=MagicMock())
 
         mock_services_factory.create_common_services.assert_called_once()
         assert result is mock_services

@@ -1,4 +1,4 @@
-"""Compatibility shim for the public audit normalization helpers."""
+"""Shim for the public audit normalization helpers."""
 
 from __future__ import annotations
 

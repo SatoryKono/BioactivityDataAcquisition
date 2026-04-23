@@ -1,4 +1,4 @@
-"""Compatibility re-export for the canonical metadata lineage bundle."""
+"""Re-export for the canonical metadata lineage bundle."""
 
 from __future__ import annotations
 

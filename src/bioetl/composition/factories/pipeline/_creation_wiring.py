@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.config import DQConfig, PipelineConfig, RuntimeConfig
     from bioetl.domain.ports import (
+        AuditPort,
         DQMonitorPort,
         LoggerPort,
         MetricsPort,
@@ -80,6 +81,7 @@ class _BuildPipelineServicesFn(Protocol):
         create_data_source_fn: DataSourceCreatorProtocol,
         settings: Settings,
         logger: LoggerPort,
+        audit: AuditPort,
         config: PipelineYamlConfig | None = None,
         filter_config: object | None = None,
         tracer: TracingPort | None = None,
@@ -99,6 +101,7 @@ class _PipelineCreationRequest:
     runtime: RuntimeConfig
     settings: Settings
     logger: LoggerPort
+    audit: AuditPort
     manifest_id: str | None = None
     execution_fingerprint: str | None = None
     config_hash: str | None = None
@@ -175,6 +178,7 @@ def _create_pipeline_with_services_impl(
         create_data_source_fn=inputs.create_data_source_fn,
         settings=request.settings,
         logger=request.logger,
+        audit=request.audit,
         config=yaml_config,
         filter_config=request.filter_config,
         tracer=request.tracer,

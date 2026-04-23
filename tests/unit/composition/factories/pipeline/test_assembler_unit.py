@@ -14,6 +14,7 @@ from bioetl.composition.factories.pipeline.assembler import (
     assemble_runner,
     create_pipeline_factory,
 )
+from bioetl.domain.ports.noop import NoOpAudit
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     build_create_pipeline_with_services_request,
 )
@@ -41,6 +42,7 @@ def _make_observability() -> ObservabilityBundle:
         logger=MagicMock(),
         tracer=MagicMock(),
         metrics=MagicMock(),
+        audit=NoOpAudit(),
         dq_monitor=MagicMock(),
     )
 
@@ -166,6 +168,7 @@ class TestGenericPipelineFactory:
             filter_config=filter_config,
             tracer=tracer,
             dq_monitor=dq_monitor,
+            audit=MagicMock(),
         )
 
         assert result is expected_services
@@ -217,6 +220,7 @@ class TestGenericPipelineFactory:
                 runtime=runtime,
                 settings=settings,
                 logger=logger,
+                audit=observability.audit,
                 config=config,
                 filter_config=filter_config,
                 tracer=tracer,

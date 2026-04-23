@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from collections.abc import Awaitable, Callable, Mapping
+from collections.abc import Awaitable, Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Protocol, cast
@@ -258,6 +258,7 @@ class _SilverWriteFinalizationHostProtocol(Protocol):
         table_name: str,
         records: list[BronzeRecord],
         quarantined_count: int = 0,
+        validation_errors: Sequence[str] | None = None,
     ) -> BatchDQMetrics: ...
 
     async def _get_delta_version(self, table_path: str) -> int | None: ...
@@ -463,12 +464,19 @@ async def _prepare_silver_write_finalization_context(
     table_name: str,
     records: list[BronzeRecord],
     table_path: str,
+    quarantined_count: int | None = None,
+    validation_errors: Sequence[str] | None = None,
     started_at: datetime,
     start_perf: float,
     perf_counter: Callable[[], float] = time.perf_counter,
 ) -> _PreparedSilverWriteFinalizationContext:
     """Prepare DQ/version/timing context before Silver metadata persistence."""
-    dq_metrics = await host._compute_dq_metrics(table_name, records)
+    dq_metrics = await host._compute_dq_metrics(
+        table_name,
+        records,
+        quarantined_count=quarantined_count or 0,
+        validation_errors=validation_errors,
+    )
     version_after = await host._get_delta_version(table_path)
     completed_at = started_at + timedelta(seconds=perf_counter() - start_perf)
     return _PreparedSilverWriteFinalizationContext(

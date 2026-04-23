@@ -76,7 +76,10 @@ class CompositeRunnerStageMixin(
         )
         if state.state != CompositePipelineState.SEED_COMPLETED:
             previous_state = state.state
-            state = state.with_state(CompositePipelineState.SEED_COMPLETED)
+            state = state.with_state(
+                CompositePipelineState.SEED_COMPLETED,
+                clock=getattr(self, "_clock", None),
+            )
             self._fsm.log_fsm_transition(
                 from_state=previous_state,
                 to_state=CompositePipelineState.SEED_COMPLETED,
@@ -216,7 +219,7 @@ class CompositeRunnerStageMixin(
         dependency_results: dict[str, DependencyResult],
     ) -> CompositeCheckpointState:
         """Mark each successful dependency as completed on checkpoint state."""
-        return collect_successful_dependencies(state, dependency_results)
+        return collect_successful_dependencies(self, state, dependency_results)
 
     async def _finalize_dependencies_phase(
         self: _CompositeRunnerStageHostProtocol,

@@ -108,6 +108,7 @@ def build_execution_identity_payload(
     pipeline_name: str | None,
     run_type: str | None,
     pipeline_version: str | None,
+    git_commit: str | None,
     effective_config_hash: str | None,
     dq_contract_compatibility_hash: str | None,
     contract_ref: str | None,
@@ -122,6 +123,7 @@ def build_execution_identity_payload(
             "pipeline_name": pipeline_name,
             "run_type": run_type,
             "pipeline_version": pipeline_version,
+            "git_commit": git_commit,
             "effective_config_hash": effective_config_hash,
             "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
             "contract_ref": contract_ref,
@@ -190,6 +192,7 @@ _EXECUTION_IDENTITY_FIELD_NORMALIZERS: dict[
     str,
     Callable[[object | None], str | None],
 ] = {
+    "git_commit": _normalize_optional_lower_text,
     "effective_config_hash": normalize_runtime_anchor_effective_config_hash,
     "contract_ref": normalize_contract_ref,
     "contract_version": normalize_contract_version,

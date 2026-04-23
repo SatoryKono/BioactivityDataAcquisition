@@ -92,7 +92,6 @@ def test_registry_yaml_has_expected_shape() -> None:
     assert registry.tracked_docstring_prefixes
     assert not registry.transition_debt
     assert registry.retained_entrypoints
-    assert registry.measured_only_modules
 
     for row in registry.curated_rows:
         assert row.status in mod.ALLOWED_COMPATIBILITY_STATUSES
@@ -114,6 +113,12 @@ def test_registry_yaml_has_expected_shape() -> None:
     assert registry.measured_only_ratchet.max_total_modules >= len(
         registry.measured_only_modules
     )
+    if not registry.measured_only_modules:
+        assert registry.measured_only_ratchet.max_total_modules == 0
+        assert all(
+            scope.max_modules == 0
+            for scope in registry.measured_only_ratchet.scoped_limits
+        )
     assert registry.measured_only_ratchet.scoped_limits
     assert registry.measured_only_review_workflow.required_checks
     assert registry.measured_only_review_workflow.allowed_outcomes

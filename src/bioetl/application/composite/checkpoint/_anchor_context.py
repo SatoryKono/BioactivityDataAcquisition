@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from datetime import UTC, datetime
-from typing import cast
+from datetime import datetime
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
+from bioetl.domain.context import current_utc_time
 from bioetl.domain.normalization import normalize_runtime_anchor_payload
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import ClockPort
 
 
 @dataclass(frozen=True, slots=True)
@@ -140,8 +144,13 @@ def fresh_checkpoint_state(
     composite_name: str,
     run_id: str,
     anchors: ExpectedCheckpointContext,
+    clock: ClockPort | None = None,
+    created_at: datetime | None = None,
 ) -> CompositeCheckpointState:
     """Create a fresh checkpoint state for a new composite execution."""
+    resolved_created_at = created_at
+    if resolved_created_at is None:
+        resolved_created_at = clock.now() if clock is not None else current_utc_time()
     return CompositeCheckpointState(
         composite_name=composite_name,
         run_id=run_id,
@@ -155,5 +164,5 @@ def fresh_checkpoint_state(
         composite_run_identity=anchors.composite_run_identity,
         last_event_id=None,
         last_event_occurred_at=None,
-        created_at=datetime.now(tz=UTC),
+        created_at=resolved_created_at,
     )

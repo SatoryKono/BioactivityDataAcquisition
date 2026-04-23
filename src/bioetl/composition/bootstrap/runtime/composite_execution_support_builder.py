@@ -21,7 +21,7 @@ from bioetl.composition.bootstrap.runtime.composite_support_service_bundles impo
 
 if TYPE_CHECKING:
     from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import ClockPort, LoggerPort
     from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
 
@@ -30,6 +30,7 @@ def build_execution_support_services(
     config: CompositeConfig,
     logger: LoggerPort,
     delta_reader: DeltaReader,
+    clock: ClockPort | None = None,
 ) -> ExecutionSupportServicesBundle:
     """Build execution-facing support services shared across runtime stages."""
     validate_join_key_normalization_policies(config)
@@ -52,11 +53,13 @@ def build_execution_support_services(
             progress_service=DependencyProgressService(logger),
             result_service=DependencyResultService(logger),
             delta_reader=delta_reader,
+            clock=clock,
         ),
         coordinator=EnrichmentCoordinatorService(
             logger=logger,
             dq_config=config.dq,
             max_concurrency=config.execution.max_concurrency,
+            clock=clock,
         ),
     )
 

@@ -38,6 +38,7 @@ class StandardProfileSpec:
     float_fields: Collection[str] = field(default_factory=tuple)
     set_like_fields: Collection[str] = field(default_factory=tuple)
     json_string_fields: Collection[str] = field(default_factory=tuple)
+    strict_json_fields: Collection[str] = field(default_factory=tuple)
     boolean_fields: Collection[str] = field(default_factory=tuple)
     flag_fields: Collection[str] = field(default_factory=tuple)
     operator_fields: Collection[str] = field(default_factory=tuple)
@@ -66,6 +67,7 @@ _STANDARD_PROFILE_OPTIONAL_DEFAULTS: dict[str, object] = {
     "float_fields": (),
     "set_like_fields": (),
     "json_string_fields": (),
+    "strict_json_fields": (),
     "boolean_fields": (),
     "flag_fields": (),
     "operator_fields": (),
@@ -181,6 +183,7 @@ def build_standard_profile(
         normalized_float_fields,
         normalized_set_like_fields,
         normalized_json_string_fields,
+        normalized_strict_json_fields,
         normalized_boolean_fields,
         normalized_flag_fields,
         normalized_operator_fields,
@@ -197,6 +200,7 @@ def build_standard_profile(
         profile_spec.float_fields,
         profile_spec.set_like_fields,
         profile_spec.json_string_fields,
+        profile_spec.strict_json_fields,
         profile_spec.boolean_fields,
         profile_spec.flag_fields,
         profile_spec.operator_fields,
@@ -223,6 +227,7 @@ def build_standard_profile(
         float_fields=normalized_float_fields,
         set_like_fields=normalized_set_like_fields,
         json_string_fields=normalized_json_string_fields,
+        strict_json_fields=normalized_strict_json_fields,
         boolean_fields=normalized_boolean_fields,
         flag_fields=normalized_flag_fields,
         operator_fields=normalized_operator_fields,

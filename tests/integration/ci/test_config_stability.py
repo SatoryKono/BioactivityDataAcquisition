@@ -703,6 +703,56 @@ class TestCheckpointResumeCompatibilityPolicy:
             await manager.load_checkpoint()
 
     @pytest.mark.asyncio
+    async def test_hard_fail_policy_allows_exact_replay_resume_with_memory_trace(
+        self,
+    ) -> None:
+        checkpoint_port = _InMemoryCheckpointPort()
+        logger = MagicMock()
+        run_id = uuid4()
+        decision_trace = [
+            {
+                "decision_index": 1,
+                "stage": "pressure_check",
+                "old_batch_size": 100,
+                "new_batch_size": 50,
+                "reason": "monitor_recommended_reduction",
+                "pressure_state": True,
+                "monitor_mode": "psutil",
+            }
+        ]
+
+        await self._save_checkpoint_metadata(
+            checkpoint_port,
+            run_id=run_id,
+            records_processed=125,
+            execution_fingerprint="fingerprint-stable",
+            exact_replay=True,
+            input_snapshot_ids=["bronze:chembl.activity:2025-01-01"],
+            memory_decision_trace=decision_trace,
+        )
+
+        manager = self._build_manager(
+            checkpoint_port=checkpoint_port,
+            logger=logger,
+            run_id=run_id,
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                execution_fingerprint="fingerprint-stable",
+                exact_replay=True,
+                input_snapshot_ids=("bronze:chembl.activity:2025-01-01",),
+            ),
+            compatibility_policy="hard_fail",
+        )
+
+        result = await manager.load_checkpoint()
+
+        assert result is not None
+        assert result.records_processed == 125
+        assert result.exact_replay is True
+        assert result.input_snapshot_ids == ("bronze:chembl.activity:2025-01-01",)
+        assert result.memory_decision_trace == (decision_trace[0],)
+
+    @pytest.mark.asyncio
     async def test_hard_fail_policy_raises_on_composite_run_identity_mismatch(
         self,
     ) -> None:

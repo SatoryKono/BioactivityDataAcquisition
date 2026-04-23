@@ -44,7 +44,12 @@ if TYPE_CHECKING:
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
-    from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort
+    from bioetl.domain.ports import (
+        ClockPort,
+        LoggerPort,
+        MetricsPort,
+        QuarantinePort,
+    )
     from bioetl.infrastructure.config import Settings
 
 
@@ -130,6 +135,7 @@ class CompositeSupportServicesFactory:
             config=self._config,
             logger=logger,
             delta_reader=delta_reader,
+            clock=self._infra.clock,
         )
         field_group_registry = self._load_field_group_registry(
             self._config.name,
@@ -141,6 +147,7 @@ class CompositeSupportServicesFactory:
             field_group_registry=field_group_registry,
             cross_validator=cross_validator,
             logger=logger,
+            clock=self._infra.clock,
         )
         runtime_management_services = build_runtime_management_services(
             config=self._config,
@@ -193,6 +200,7 @@ class CompositeSupportServicesFactory:
         field_group_registry: FieldGroupRegistry | None,
         cross_validator: EnrichmentCrossValidator | None,
         logger: LoggerPort,
+        clock: ClockPort | None = None,
     ) -> MergeService:
         merge_dependencies = build_merge_dependencies(
             config=self._config,
@@ -210,6 +218,7 @@ class CompositeSupportServicesFactory:
             field_group_registry=field_group_registry,
             cross_validator=cross_validator,
             gold_schema=self._resolve_gold_schema(self._config.name),
+            clock=clock,
             collaborators=MergeCollaboratorGroup(
                 deduplicator=merge_dependencies.deduplicator,
                 aggregator=merge_dependencies.aggregator,

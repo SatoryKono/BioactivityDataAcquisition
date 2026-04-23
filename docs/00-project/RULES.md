@@ -1237,6 +1237,7 @@ async with services:  # --aenter-- инициализирует ресурсы
 | `test-no-random-choice-calls-in-storage`   | REQ-ARCH-030 | Запрет `random.choice()`                    | `test_no_random_in_writers.py`              |
 | `test-no-datetime-now-in-infrastructure`   | REQ-ARCH-031 | Запрет `datetime.now()`                     | `test_no_datetime_now_in_infrastructure.py` |
 | `test-no-datetime-now-in-domain`           | REQ-ARCH-031 | Запрет `datetime.now()` вне sanctioned seam | `test_no_datetime_now_in_domain.py`         |
+| `test-replay-critical-time-seams`          | REQ-ARCH-031 | Запрет скрытого wall-clock в replay-critical runtime/checkpoint paths | `test_replay_critical_time_seams.py` |
 | `test-allowed-files-still-exist`           | REQ-ARCH-031 | Валидация исключений                        | `test_no_datetime_now_in_infrastructure.py` |
 
 #### Детерминистичный Retry Jitter

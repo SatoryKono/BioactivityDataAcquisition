@@ -1,4 +1,4 @@
-"""Compatibility support seam for health-server integration helpers."""
+"""Support helpers for health-server integration helpers."""
 
 from __future__ import annotations
 

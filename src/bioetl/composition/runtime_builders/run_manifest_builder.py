@@ -53,7 +53,11 @@ from bioetl.composition.services.versioning import (
     get_pipeline_version,
 )
 from bioetl.domain.control_plane import ReplayCapability
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    resolve_reproducibility_family_profile,
+)
 from bioetl.infrastructure.control_plane import FileRunManifestStore
+from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.inputs_resolver import (
@@ -138,6 +142,12 @@ def _build_manifest_create_request(
         strict_replay_requested=bool(getattr(ctx, "exact_replay", False))
         or required_persistence_profile in _STRICT_PERSISTENCE_PROFILES,
     )
+    reproducibility_profile = resolve_reproducibility_family_profile(
+        provider=provider,
+        entity=entity,
+        contract_ref=request_inputs.contract_ref,
+        execution_context="source",
+    )
     code_revision = get_code_revision_provenance()
     request = RunManifestCreateSpec(
         run_id=ctx.run_id,
@@ -164,7 +174,7 @@ def _build_manifest_create_request(
         pipeline_version=get_pipeline_version(yaml_config),
         git_commit=code_revision.git_commit,
         source_revision_state=code_revision.source_revision_state,
-        config_hash=request_inputs.effective_config_hash,
+        config_hash=request_inputs.resolved_config_hash,
         resolved_config_hash=request_inputs.resolved_config_hash,
         effective_config_hash=request_inputs.effective_config_hash,
         contract_ref=request_inputs.contract_ref,
@@ -182,6 +192,9 @@ def _build_manifest_create_request(
     _validate_required_runtime_persistence_profile(
         request=request,
         required_persistence_profile=required_persistence_profile,
+        strict_exact_replay_supported=(
+            reproducibility_profile.strict_exact_replay_supported
+        ),
     )
     return request
 
@@ -233,9 +246,19 @@ def _validate_required_runtime_persistence_profile(
     *,
     request: RunManifestCreateSpec,
     required_persistence_profile: str,
+    strict_exact_replay_supported: bool,
 ) -> None:
-    if required_persistence_profile not in {"replay_ready", "forensic_grade"}:
+    strict_replay_requested = bool(request.launch_context.get("exact_replay"))
+    if (
+        required_persistence_profile not in {"replay_ready", "forensic_grade"}
+        and not strict_replay_requested
+    ):
         return
+    if not strict_exact_replay_supported:
+        raise RuntimeError(
+            "Pipeline execution is outside the published strict exact-replay "
+            "support boundary for this run family"
+        )
     if request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
         raise RuntimeError(
             "Pipeline execution cannot satisfy required persistence profile "
@@ -294,9 +317,10 @@ def create_run_manifest(
         )
     )
 
-    manifest = RunManifestService(manifest_port=manifest_store).create_manifest(
-        manifest_create_request
-    )
+    manifest = RunManifestService(
+        manifest_port=manifest_store,
+        clock=SystemClock(),
+    ).create_manifest(manifest_create_request)
     if ledger_service is not None:
         ledger_service.manifest_id = manifest.manifest_id
         ledger_service.record_manifest_created(manifest)

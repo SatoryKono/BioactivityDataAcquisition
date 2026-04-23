@@ -35,7 +35,10 @@ def transition_to_merging_state(
         previous_state,
         CompositePipelineState.MERGING,
     )
-    merging_state = state.with_state(CompositePipelineState.MERGING)
+    merging_state = state.with_state(
+        CompositePipelineState.MERGING,
+        clock=getattr(host, "_clock", None),
+    )
     host._fsm.log_fsm_transition(
         from_state=previous_state,
         to_state=CompositePipelineState.MERGING,
@@ -85,7 +88,10 @@ async def handle_merge_phase_exception(
         stage="merge_failed",
         error=str(error),
     )
-    failed_state = state.with_state(CompositePipelineState.FAILED)
+    failed_state = state.with_state(
+        CompositePipelineState.FAILED,
+        clock=getattr(host, "_clock", None),
+    )
     await host._call_save_checkpoint_safe(failed_state, "merge_failed")
 
 
@@ -146,7 +152,10 @@ def transition_to_completed_state(
         previous_state,
         CompositePipelineState.COMPLETED,
     )
-    completed_state = state.with_state(CompositePipelineState.COMPLETED)
+    completed_state = state.with_state(
+        CompositePipelineState.COMPLETED,
+        clock=getattr(host, "_clock", None),
+    )
     host._fsm.log_fsm_transition(
         from_state=previous_state,
         to_state=CompositePipelineState.COMPLETED,

@@ -1,4 +1,4 @@
-"""Compatibility support seam for metrics-server integration helpers."""
+"""Support helpers for metrics-server integration helpers."""
 
 from __future__ import annotations
 

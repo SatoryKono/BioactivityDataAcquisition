@@ -163,6 +163,8 @@ operational; do not copy generated snapshot counters back into it by hand.
 Measured-only modules are tracked by docstring-prefix measurement and the YAML allowlist, but they
 are not curated ledger rows by default.
 
+Current cycle status: the measured-only allowlist is empty, so any new measured-only module is an immediate ratchet regression until it is explicitly reviewed.
+
 - A module may remain measured-only while it is still an unsanctioned compatibility helper and new
   first-party imports are not being added.
 - Measured-only modules do not count as transition-debt rows and do not require the full curated

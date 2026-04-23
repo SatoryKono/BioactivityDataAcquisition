@@ -8,6 +8,9 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
 from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_chembl_organism_name,
+)
 from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
 from bioetl.domain.schemas.constants import TARGET_COMPONENT_TYPES
 
@@ -38,6 +41,12 @@ _JSON_STRING_FIELDS = frozenset(
     {"protein_classification_ids", "target_component_xrefs"}
 )
 _ENUM_FIELDS = {"component_type": TARGET_COMPONENT_TYPES}
+_SPECIAL_RULES = {
+    "organism": (
+        normalize_profile_chembl_organism_name,
+        "Normalize target-component organism display name using the shared curated ChEMBL organism aliases.",
+    )
+}
 
 CHEMBL_TARGET_COMPONENT_PROFILE = build_standard_profile(
     profile_name="chembl.target_component",
@@ -47,6 +56,7 @@ CHEMBL_TARGET_COMPONENT_PROFILE = build_standard_profile(
     int_fields=_INT_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
     enum_fields=_ENUM_FIELDS,
+    special_rules=_SPECIAL_RULES,
     null_fields=chembl_pseudo_null_fields("target_component"),
 )
 

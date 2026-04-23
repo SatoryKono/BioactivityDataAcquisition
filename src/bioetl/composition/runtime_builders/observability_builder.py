@@ -17,12 +17,19 @@ from bioetl.composition.bootstrap.runtime.observability_bundle import (
 from bioetl.composition.bootstrap.runtime.tracing_bootstrap import (
     bootstrap_tracer_port as _bootstrap_tracer_port_impl,
 )
+from bioetl.composition.factories.storage.audit import create_audit_port
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.observability_resolution import (
     resolve_metrics_port,
     resolve_tracing_port,
 )
-from bioetl.domain.ports import DQMonitorPort, LoggerPort, MetricsPort, TracingPort
+from bioetl.domain.ports import (
+    AuditPort,
+    DQMonitorPort,
+    LoggerPort,
+    MetricsPort,
+    TracingPort,
+)
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
@@ -144,12 +151,35 @@ def _build_dq_monitor_bootstrapper(
     return bootstrap_dq_monitor
 
 
+def _build_audit_bootstrapper() -> Callable[
+    [Settings, LoggerPort, MetricsPort, TracingPort], AuditPort
+]:
+    """Build audit bootstrapper closure for observability preflight wiring."""
+
+    def bootstrap_audit(
+        audit_settings: Settings,
+        audit_logger: LoggerPort,
+        audit_metrics: MetricsPort,
+        audit_tracer: TracingPort,
+    ) -> AuditPort:
+        return create_audit_port(
+            settings=audit_settings,
+            logger=audit_logger,
+            metrics=audit_metrics,
+            tracing=audit_tracer,
+        )
+
+    return bootstrap_audit
+
+
 def build_observability_bundle(
     *,
     pipeline: str,
     run_id: RunID,
     settings: Settings,
     log_level: str = "INFO",
+    yaml_config: object | None = None,
+    skip_gold: bool = False,
     logger_factory: Callable[..., LoggerPort] = UnifiedLogger,
     tracer_factory: Callable[[str], TracingPort] | None = None,
     metrics_factory: Callable[[], MetricsPort] | None = None,
@@ -174,9 +204,12 @@ def build_observability_bundle(
             metrics_factory=metrics_factory,
             noop_metrics_factory=noop_metrics_factory,
         ),
+        audit_bootstrapper=_build_audit_bootstrapper(),
         dq_monitor_bootstrapper=_build_dq_monitor_bootstrapper(
             dq_monitor_factory=dq_monitor_factory,
             noop_logger_factory=noop_logger_factory,
         ),
         preflight_validator=validate_observability_preflight_impl,
+        yaml_config=yaml_config,
+        skip_gold=skip_gold,
     )

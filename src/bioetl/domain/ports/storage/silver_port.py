@@ -41,6 +41,8 @@ class SilverWriteRequest:
     run_type: RunType | None = None
     source_batch_id: BatchID | None = None
     ingestion_ts: datetime | None = None
+    quarantined_count: int | None = None
+    validation_errors: tuple[str, ...] | None = None
 
 
 _SILVER_WRITE_POSITIONAL_FIELDS = (
@@ -72,6 +74,8 @@ _SILVER_WRITE_DEFAULTS: dict[str, object] = {
     "run_type": None,
     "source_batch_id": None,
     "ingestion_ts": None,
+    "quarantined_count": None,
+    "validation_errors": None,
 }
 _SILVER_WRITE_ALLOWED_FIELDS = frozenset(
     {*_SILVER_WRITE_POSITIONAL_FIELDS, *tuple(_SILVER_WRITE_DEFAULTS)}

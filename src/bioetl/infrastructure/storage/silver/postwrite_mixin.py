@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
@@ -95,6 +96,8 @@ class _SilverWriterPostwriteSelf(Protocol):
         bronze_refs: list[BronzeWriteResult] | None,
         partition_cols: list[str] | None,
         source_batch_id: BatchID | None,
+        quarantined_count: int | None,
+        validation_errors: Sequence[str] | None,
         started_at: datetime,
         start_perf: float,
     ) -> SilverWriteResult | None: ...
@@ -172,6 +175,8 @@ class SilverWriterPostwriteMixin:
             bronze_refs=ctx.bronze_refs,
             partition_cols=ctx.partition_cols,
             source_batch_id=ctx.source_batch_id,
+            quarantined_count=ctx.quarantined_count,
+            validation_errors=ctx.validation_errors,
             started_at=ctx.started_at,
             start_perf=ctx.start_perf,
         )

@@ -214,7 +214,7 @@ async def run_seed(host: _CompositeRunnerSupportHostProtocol) -> SeedResult:
         ),
     )
 
-    started_at, started_monotonic = capture_runtime_timing_anchor()
+    started_at, started_monotonic = capture_runtime_timing_anchor(clock=host._clock)
     runner = host._seed_runner_factory()
     await runner.run()
     completed_at, duration_seconds = derive_completion_timestamp(

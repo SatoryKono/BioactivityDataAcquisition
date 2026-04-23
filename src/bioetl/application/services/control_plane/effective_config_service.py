@@ -216,10 +216,14 @@ def _build_source_class_provenance() -> tuple[SourceClassProvenance, ...]:
         ),
         SourceClassProvenance(
             source_class="env_override",
-            provenance_status="identity_anchored",
+            provenance_status="unsupported",
             artifact_surface="semantic_artifact.runtime_overrides.env_overrides",
-            anchor_field="override_hash",
-            notes="Explicit environment overrides are collapsed into the runtime override hash.",
+            notes=(
+                "Ambient process environment is not currently resolved into "
+                "explicit env-overrides for semantic identity; empty "
+                "env_overrides payloads must not be interpreted as complete "
+                "environment provenance."
+            ),
         ),
         SourceClassProvenance(
             source_class="runtime_adjustment",
@@ -286,7 +290,7 @@ def _semantic_artifact_payload(artifact: EffectiveConfigArtifact) -> JsonDict:
             "config_data": _to_jsonable(artifact.resolved_config.config_data),
             "config_hash": artifact.resolved_config.config_hash,
         },
-        "runtime_overrides": _to_jsonable(artifact.runtime_overrides),
+        "runtime_overrides": _runtime_overrides_payload(artifact.runtime_overrides),
         "effective_execution_config": {
             "config_data": _to_jsonable(
                 artifact.effective_execution_config.config_data
@@ -304,6 +308,20 @@ def _semantic_artifact_payload(artifact: EffectiveConfigArtifact) -> JsonDict:
             _to_jsonable(snapshot) for snapshot in artifact.dq_policy_snapshots
         ],
     }
+
+
+def _runtime_overrides_payload(overrides: RuntimeOverrideSnapshot) -> JsonDict:
+    """Serialize explicit runtime overrides without implying absent provenance."""
+    payload: JsonDict = {}
+    if overrides.cli_overrides:
+        payload["cli_overrides"] = _to_jsonable(overrides.cli_overrides)
+    if overrides.env_overrides:
+        payload["env_overrides"] = _to_jsonable(overrides.env_overrides)
+    if overrides.runtime_adjustments:
+        payload["runtime_adjustments"] = _to_jsonable(overrides.runtime_adjustments)
+    if payload and overrides.override_hash:
+        payload["override_hash"] = overrides.override_hash
+    return payload
 
 
 def _occurrence_envelope_payload(artifact: EffectiveConfigArtifact) -> JsonDict:

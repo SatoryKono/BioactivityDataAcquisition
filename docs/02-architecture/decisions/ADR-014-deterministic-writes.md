@@ -101,6 +101,7 @@ Domain business paths не должны создавать текущее вре
 - aggregate lifecycle transitions получают `started_at/completed_at/failed_at/...` явно
 - read-model расчёты используют либо сохранённый terminal timestamp, либо explicit `reference_time`
 - operational/reporting structures получают `checked_at` / `execution_timestamp` из application/runtime seam
+- replay-critical application/composition surfaces (runtime timing helper, composite checkpoint state transitions, manifest creation, and composition entrypoints) MUST принимать `ClockPort` или explicit timestamp/reference time, а не читать локальный wall-clock внутри helper'ов
 
 ### 4. Архитектурные Тесты
 
@@ -109,6 +110,7 @@ Domain business paths не должны создавать текущее вре
 | `test-no-random-in-writers` | Блокирует `import random` в `infrastructure/storage/` |
 | `test-no-datetime-now-in-infrastructure` | Блокирует `datetime.now()` в `infrastructure/` |
 | `test-no-datetime-now-in-domain` | Блокирует `datetime.now()` в `domain/` вне `domain/context.py` |
+| `test-replay-critical-time-seams` | Блокирует `datetime.now()` в replay-critical `application/` и `composition/` runtime/checkpoint/control-plane seams |
 | `test-no-structlog-in-application-interfaces` | Блокирует прямой импорт `structlog` в `application/` и `interfaces/` |
 
 ### 5. Изоляция логирования
@@ -131,7 +133,7 @@ Application и interfaces слои **MUST NOT** импортировать `stru
 
 1. **API усложнение**: Дополнительные параметры (`ingestion_ts`, `deterministic`)
 2. **Миграция**: Требуется обновление всех вызовов infrastructure компонентов
-3. **Backward compatibility**: Fallback на `datetime.now()` при отсутствии параметра
+3. **API discipline**: replay-critical seams больше нельзя quietly переводить на локальный wall-clock fallback; время должно приходить из `ClockPort` или explicit timestamp parameter
 
 ## Implementation
 
@@ -152,6 +154,7 @@ Application и interfaces слои **MUST NOT** импортировать `stru
 
 - `tests/architecture/test_no_random_in_writers.py`
 - `tests/architecture/test_no_datetime_now_in_infrastructure.py`
+- `tests/architecture/test_replay_critical_time_seams.py`
 - `tests/architecture/test_no_structlog_in_application_interfaces.py`
 
 ## Compliance

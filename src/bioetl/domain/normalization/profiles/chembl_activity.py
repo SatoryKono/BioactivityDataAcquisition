@@ -21,6 +21,7 @@ from .chembl_pseudo_nulls import chembl_pseudo_null_fields
 from .profile_normalizers import (
     normalize_profile_bao_identifier,
     normalize_profile_canonical_smiles,
+    normalize_profile_chembl_organism_name,
     normalize_profile_enum,
     normalize_profile_operator,
 )
@@ -60,7 +61,7 @@ _ENUM_FIELDS = {
     "assay_type": ASSAY_TYPES,
 }
 _ONTOLOGY_ID_FIELDS = frozenset({"uo_units"})
-_UNIT_FIELDS = frozenset({"standard_units", "qudt_units"})
+_UNIT_FIELDS = frozenset({"units", "standard_units", "qudt_units"})
 
 _SPECIAL_RULE_COMPONENTS = {
     "canonical_smiles": (
@@ -85,6 +86,10 @@ _SPECIAL_RULE_COMPONENTS = {
     "bao_format": (
         normalize_profile_bao_identifier,
         "Normalize BAO format identifier to canonical BAO underscore form.",
+    ),
+    "target_organism": (
+        normalize_profile_chembl_organism_name,
+        "Normalize target organism display name using the shared curated ChEMBL organism aliases.",
     ),
 }
 

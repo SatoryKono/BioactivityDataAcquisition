@@ -36,11 +36,13 @@ from bioetl.infrastructure.storage.delta.resilience import (
     SilverMergeResiliencePolicy,
 )
 from bioetl.infrastructure.storage.silver.compatibility_mixins import (
-    SilverWriterAuditMetadataCompatibilityMixin,
     SilverWriterDQCompatibilityMixin,
-    SilverWriterFinalizationCompatibilityMixin,
     SilverWriterMergedCompatibilityMixin,
     SilverWriterWriteCompatibilityMixin,
+)
+from bioetl.infrastructure.storage.silver.finalization_compatibility_mixins import (
+    SilverWriterAuditMetadataCompatibilityMixin,
+    SilverWriterFinalizationCompatibilityMixin,
 )
 from bioetl.infrastructure.storage.silver.maintenance_mixin import (
     SilverWriterMaintenanceMixin,
@@ -349,6 +351,8 @@ async def _write_dual_targets(
                 run_type=invocation.run_type,
                 source_batch_id=invocation.source_batch_id,
                 ingestion_ts=invocation.ingestion_ts,
+                quarantined_count=invocation.quarantined_count,
+                validation_errors=invocation.validation_errors,
             )
         except (BioETLError, OSError, RuntimeError, ValueError) as exc:
             writer.logger.error(

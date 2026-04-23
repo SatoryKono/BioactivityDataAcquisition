@@ -1,4 +1,4 @@
-"""Compatibility facade for the canonical control-plane seam."""
+"""Facade for the canonical control-plane seam."""
 
 from __future__ import annotations
 

@@ -44,7 +44,7 @@ Mandatory enforcement points:
 1. `owner` is mapped to the correct subsystem in scorecard governance.
 1. `removal_step` references concrete follow-up action (refactor/task/RF).
 1. `scripts/engineering/qa/check_quality_exemptions.py --mode warn` passes.
-1. Active owner count in registry remains >= 3.
+1. If active `technical_debt` remains in the registry after the change, active owner count stays >= 2 once Q2 diversification policy is in force.
 
 ## Dashboard
 

@@ -22,6 +22,7 @@ from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
+        AuditPort,
         CheckpointPort,
         DataSourcePort,
         DQMonitorPort,
@@ -61,6 +62,7 @@ class CommonServicePortsRequest:
         [Settings, PipelineYamlConfig, LoggerPort, MetricsPort | None],
         JsonDict,
     ]
+    audit: AuditPort
     metrics: MetricsPort | None = None
     tracer: TracingPort | None = None
     metadata_coordinator: MetadataCoordinator | None = None
@@ -91,6 +93,8 @@ def build_common_service_ports(
         request.pipeline_config,
         request.logger,
         metrics=metrics_port,
+        audit=request.audit,
+        tracing=request.tracer,
         metadata_coordinator=request.metadata_coordinator,
         silver_validator=request.silver_validator,
         pipeline_name=request.pipeline_name,

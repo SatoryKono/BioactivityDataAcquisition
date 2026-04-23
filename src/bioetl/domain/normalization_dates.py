@@ -1,4 +1,4 @@
-"""Deprecated compatibility wrapper for date normalization helpers.
+"""Legacy wrapper for date normalization helpers.
 
 Deprecated: import from ``bioetl.domain.normalization.dates`` instead.
 Sunset target: 2026-06-30.

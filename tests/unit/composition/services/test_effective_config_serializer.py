@@ -580,6 +580,33 @@ class TestEffectiveConfigSerializer:
             artifact1
         ) == self.serializer.serialize_semantic_artifact(artifact2)
 
+    def test_runtime_override_serialization_omits_empty_override_sections(self) -> None:
+        """Empty runtime-override sections must not imply captured provenance."""
+        artifact = EffectiveConfigArtifact(
+            artifact_id="test_artifact",
+            pipeline_name="test_pipeline",
+            pipeline_kind="standard",
+            source_refs=[],
+            resolution_policy=ConfigResolutionPolicy(),
+            resolved_config=ResolvedConfigSnapshot(
+                config_type="standard",
+                config_data={"pipeline": {"name": "test"}},
+                config_hash="resolved_hash",
+            ),
+            runtime_overrides=RuntimeOverrideSnapshot(),
+            effective_execution_config=EffectiveExecutionConfig(
+                config_data={"pipeline": {"name": "test"}},
+                effective_hash="effective_hash",
+            ),
+            resolved_config_hash="resolved_hash",
+            effective_config_hash="effective_hash",
+            source_fingerprint="source_fingerprint",
+        )
+
+        parsed = json.loads(self.serializer.serialize_artifact(artifact))
+
+        assert parsed["semantic_artifact"]["runtime_overrides"] == {}
+
 
 class TestHashDeterminism:
     """Tests for hash determinism and stability."""

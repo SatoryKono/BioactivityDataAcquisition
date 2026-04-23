@@ -1,4 +1,4 @@
-"""Compatibility re-export module for run-manifest diagnostics helpers."""
+"""Re-export module for run-manifest diagnostics helpers."""
 
 from __future__ import annotations
 

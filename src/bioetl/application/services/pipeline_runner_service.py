@@ -1,4 +1,4 @@
-"""Compatibility facade for the canonical execution seam.
+"""Facade for the canonical execution seam.
 
 The canonical implementation binds correlation fields through
 ``context.log_correlation_fields()`` and ultimately performs

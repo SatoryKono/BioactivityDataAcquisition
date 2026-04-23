@@ -6,7 +6,7 @@ __all__ = ["SilverWriterMetadataMixin"]
 
 import asyncio
 import time
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Sequence
 from datetime import datetime
 
 import pyarrow as pa
@@ -66,6 +66,7 @@ class SilverWriterMetadataMixin:
         table_name: str,
         records: list[BronzeRecord],
         quarantined_count: int = 0,
+        validation_errors: Sequence[str] | None = None,
     ) -> BatchDQMetrics:
         """Compute DQ metrics using injected calculator."""
         from bioetl.domain.services.dq_metrics_calculator import DQMetricsInput
@@ -79,6 +80,7 @@ class SilverWriterMetadataMixin:
             records=records,
             existing_schema_fields=existing_fields,
             quarantined_count=quarantined_count,
+            validation_errors=list(validation_errors) if validation_errors else None,
         )
         return self._dq_calculator.calculate(input_data)
 
@@ -246,6 +248,8 @@ class SilverWriterMetadataMixin:
         bronze_refs: list[BronzeWriteResult] | None,
         partition_cols: list[str] | None,
         source_batch_id: BatchID | None,
+        quarantined_count: int | None = None,
+        validation_errors: Sequence[str] | None = None,
         started_at: datetime,
         start_perf: float,
     ) -> SilverWriteResult | None:
@@ -254,6 +258,8 @@ class SilverWriterMetadataMixin:
             table_name=table_name,
             records=records,
             table_path=table_path,
+            quarantined_count=quarantined_count,
+            validation_errors=validation_errors,
             started_at=started_at,
             start_perf=start_perf,
         )
@@ -287,6 +293,8 @@ class SilverWriterMetadataMixin:
         table_name: str,
         records: list[BronzeRecord],
         table_path: str,
+        quarantined_count: int | None = None,
+        validation_errors: Sequence[str] | None = None,
         started_at: datetime,
         start_perf: float,
     ) -> _PreparedSilverWriteFinalizationContext:
@@ -296,6 +304,8 @@ class SilverWriterMetadataMixin:
             table_name=table_name,
             records=records,
             table_path=table_path,
+            quarantined_count=quarantined_count,
+            validation_errors=validation_errors,
             started_at=started_at,
             start_perf=start_perf,
             perf_counter=time.perf_counter,

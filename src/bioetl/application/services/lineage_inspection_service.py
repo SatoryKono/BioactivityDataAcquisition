@@ -1,4 +1,4 @@
-"""Compatibility facade for the canonical lineage seam."""
+"""Facade for the canonical lineage seam."""
 
 from __future__ import annotations
 

@@ -38,6 +38,10 @@ This checklist validates that operators can:
 - navigate the shipped dashboards and alert-backed signal panels
 - correlate logs to the active run
 - route from alerts to run-manifest diagnostics and the correct runbook
+- confirm production runtime bootstrap did not fall back to NoOp logger,
+  metrics, tracing, or audit without an explicit override
+- confirm the required control-plane persistence profile is satisfied before the
+  runtime is treated as production-ready
 
 For observability design rules, metric naming policy, and adapter implementation
 requirements, use:
@@ -56,6 +60,10 @@ Compatibility note for operators:
   `bioetl.composition.observability_api`
 - runtime logs emit canonical `timestamp`; downstream tooling may still accept
   `ts`, but `ts` is not the canonical emitted field name
+- runtime bootstrap emits `observability_initialized` with
+  `logger_type`, `metrics_type`, `tracer_type`, `audit_type`,
+  `required_persistence_profile`, and `preflight_status=passed` when production
+  observability preflight succeeds
 
 Unified diagnostics discovery now starts here:
 

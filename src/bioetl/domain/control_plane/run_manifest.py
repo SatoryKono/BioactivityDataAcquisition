@@ -169,22 +169,13 @@ def _load_optional_str(payload: dict[str, object], key: str) -> str | None:
 def _load_code_provenance(raw_code: object) -> RunCodeProvenance:
     """Deserialize code provenance payload safely."""
     payload = _load_object_mapping(raw_code)
-    legacy_config_hash = _load_optional_str(payload, "config_hash")
     return RunCodeProvenance(
         pipeline_version=_load_optional_str(payload, "pipeline_version"),
         git_commit=_load_optional_str(payload, "git_commit"),
         source_revision_state=_load_optional_str(payload, "source_revision_state"),
-        config_hash=legacy_config_hash,
-        resolved_config_hash=(
-            _load_optional_str(payload, "resolved_config_hash")
-            if "resolved_config_hash" in payload
-            else legacy_config_hash
-        ),
-        effective_config_hash=(
-            _load_optional_str(payload, "effective_config_hash")
-            if "effective_config_hash" in payload
-            else legacy_config_hash
-        ),
+        config_hash=_load_optional_str(payload, "config_hash"),
+        resolved_config_hash=_load_optional_str(payload, "resolved_config_hash"),
+        effective_config_hash=_load_optional_str(payload, "effective_config_hash"),
         contract_ref=_load_optional_str(payload, "contract_ref"),
         contract_version=_load_optional_str(payload, "contract_version"),
         contract_schema_hash=_load_optional_str(payload, "contract_schema_hash"),

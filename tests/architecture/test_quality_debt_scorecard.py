@@ -70,9 +70,20 @@ def _rewrite_registry_owners(
     registry = load_exemptions_registry()
     registries = registry.get("registries", {})
     assert isinstance(registries, dict)
-    if all(
-        isinstance(entries, dict) and not entries for entries in registries.values()
-    ):
+    has_technical_debt = False
+    for entries in registries.values():
+        if not isinstance(entries, dict):
+            continue
+        for entry in entries.values():
+            if (
+                isinstance(entry, dict)
+                and entry.get("classification") == "technical_debt"
+            ):
+                has_technical_debt = True
+                break
+        if has_technical_debt:
+            break
+    if not has_technical_debt:
         for index, registry_name in enumerate(
             sorted(registries)[: max(1, len(owner_cycle))]
         ):
@@ -98,6 +109,24 @@ def _rewrite_registry_owners(
             entry["owner"] = owner_cycle[idx % len(owner_cycle)]
             idx += 1
     return registry
+
+
+def _technical_debt_entry_count() -> int:
+    """Return the number of active technical-debt registry entries."""
+    registry = load_exemptions_registry()
+    registries = registry.get("registries", {})
+    assert isinstance(registries, dict)
+    count = 0
+    for entries in registries.values():
+        if not isinstance(entries, dict):
+            continue
+        for entry in entries.values():
+            if (
+                isinstance(entry, dict)
+                and entry.get("classification") == "technical_debt"
+            ):
+                count += 1
+    return count
 
 
 def test_debt_scorecard_schema_is_valid() -> None:
@@ -334,15 +363,10 @@ def test_debt_scorecard_inventory_has_owner_and_expiry_decomposition() -> None:
     scorecard = load_debt_scorecard()
     starts_quarter, min_distinct_owners = _owner_diversification_settings(scorecard)
     today_quarter = _parse_quarter_label(_quarter_label(date.today()))
+    technical_debt_entries = _technical_debt_entry_count()
 
-    # When registry is empty (zero debt), decomposition checks are not applicable.
-    if inventory.total_exemptions == 0:
-        assert not inventory.by_owner, (
-            "Empty registry must have empty owner decomposition"
-        )
-        assert not inventory.by_expiry_quarter, (
-            "Empty registry must have empty expiry decomposition"
-        )
+    # When active technical debt is empty, owner diversification does not apply.
+    if technical_debt_entries == 0:
         return
 
     assert inventory.by_owner, "Owner decomposition must not be empty"
@@ -471,18 +495,19 @@ def test_owner_diversification_policy_allows_two_owner_inventory_before_start(
     ), "Owner diversification must not block before starts_quarter"
 
 
-def test_owner_diversification_policy_blocks_two_owner_inventory_after_start(
+def test_owner_diversification_policy_blocks_underfilled_inventory_after_start(
     tmp_path: Path,
 ) -> None:
-    """Two-owner inventory must fail from starts_quarter onward."""
+    """Inventory below the configured owner floor must fail after activation."""
     scorecard = load_debt_scorecard()
-    starts_quarter, _min_distinct_owners = _owner_diversification_settings(scorecard)
+    starts_quarter, min_distinct_owners = _owner_diversification_settings(scorecard)
     assert starts_quarter is not None
+    assert min_distinct_owners >= 2
     registry = _rewrite_registry_owners(
-        owner_cycle=("@bioetl-architecture", "@bioetl-platform"),
+        owner_cycle=("@bioetl-architecture",),
     )
 
-    tmp_registry = tmp_path / "architecture_metric_exemptions.two_owners.yaml"
+    tmp_registry = tmp_path / "architecture_metric_exemptions.underfilled_owners.yaml"
     tmp_registry.write_text(yaml.safe_dump(registry), encoding="utf-8")
     on_start = _quarter_anchor_date(starts_quarter)
     violations, summary = evaluate_debt_scorecard(

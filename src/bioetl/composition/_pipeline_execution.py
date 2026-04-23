@@ -33,6 +33,7 @@ from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.types import ExecutionContext, RunID, RunType
 from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import ExecutionMetricsRunnerPort
@@ -277,7 +278,11 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     settings = get_settings()
     maybe_start_metrics_server(settings)
 
-    started_at, started_monotonic = capture_runtime_timing_anchor()
+    clock = SystemClock()
+    started_at, started_monotonic = capture_runtime_timing_anchor(
+        started_at=clock.now(),
+        clock=clock,
+    )
     runner = _require_execution_metrics_runner(create_pipeline_runner(name, options))
 
     # Extract run context for result

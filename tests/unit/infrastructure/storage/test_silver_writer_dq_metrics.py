@@ -527,6 +527,43 @@ class TestSilverWriterDQMetrics:
         assert context.version_after == 11
         assert context.completed_at == started_at + timedelta(seconds=1.5)
 
+    @pytest.mark.asyncio
+    async def test_prepare_silver_write_finalization_context_forwards_validation_context(
+        self, noop_logger, valid_records
+    ):
+        """Writer finalization prep should forward explicit validation context."""
+        from datetime import UTC, datetime
+
+        from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+        dq_metrics = BatchDQMetrics(
+            total_records=3,
+            valid_records=2,
+            error_records=1,
+            warning_records=0,
+        )
+        writer._compute_dq_metrics = AsyncMock(return_value=dq_metrics)
+        writer._get_delta_version = AsyncMock(return_value=11)
+
+        await writer._prepare_silver_write_finalization_context(
+            table_name="test.table",
+            records=valid_records,
+            table_path=_silver_table_path("test.table"),
+            quarantined_count=1,
+            validation_errors=("missing required activity_id",),
+            started_at=datetime(2026, 3, 11, 12, 0, tzinfo=UTC),
+            start_perf=0.0,
+        )
+
+        writer._compute_dq_metrics.assert_awaited_once_with(
+            "test.table",
+            valid_records,
+            quarantined_count=1,
+            validation_errors=("missing required activity_id",),
+        )
+
     def test_build_silver_write_result_uses_version_after(self):
         """Final result helper should return None or a SilverWriteResult by version."""
         from bioetl.infrastructure.storage.silver.metadata_mixin import (

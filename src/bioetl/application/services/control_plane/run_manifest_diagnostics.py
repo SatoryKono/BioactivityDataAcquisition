@@ -95,6 +95,11 @@ def _build_base_summary_payload(
 ) -> dict[str, object]:
     """Return the manifest-derived payload before persistence overlays."""
     code_provenance = manifest.code_provenance
+    strict_code_provenance_blockers: list[str] = []
+    if not code_provenance.git_commit:
+        strict_code_provenance_blockers.append("git_commit_missing")
+    if str(code_provenance.source_revision_state or "").strip().lower() != "clean":
+        strict_code_provenance_blockers.append("source_revision_state_not_clean")
     return {
         "manifest_id": manifest.manifest_id,
         "manifest_created_at": manifest.created_at.isoformat(),
@@ -112,7 +117,8 @@ def _build_base_summary_payload(
         "code_provenance_state": {
             "git_commit": code_provenance.git_commit,
             "source_revision_state": code_provenance.source_revision_state,
-            "strict_code_provenance_ready": bool(code_provenance.git_commit),
+            "strict_code_provenance_ready": not strict_code_provenance_blockers,
+            "strict_code_provenance_blockers": strict_code_provenance_blockers,
         },
         "contract_ref": code_provenance.contract_ref,
         "contract_version": code_provenance.contract_version,

@@ -11,7 +11,11 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
 from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_publication_type,
+)
 from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
+from bioetl.domain.schemas.constants import PUBLICATION_TYPES
 
 __all__ = [
     "CHEMBL_PUBLICATION_PROFILE",
@@ -62,7 +66,8 @@ _INT_FIELDS = frozenset(
     {"publication_year", "src_id", "citations_received", "citations_made"}
 )
 _SET_LIKE_FIELDS = frozenset({"affiliation_list", "author_orcids"})
-_JSON_STRING_FIELDS = frozenset({"authors", "affiliation_list", "author_orcids"})
+_STRICT_JSON_FIELDS = frozenset({"authors", "affiliation_list", "author_orcids"})
+_BOOLEAN_FIELDS = frozenset({"is_oa"})
 
 CHEMBL_PUBLICATION_PROFILE = build_standard_profile(
     profile_name="chembl.publication",
@@ -77,8 +82,18 @@ CHEMBL_PUBLICATION_PROFILE = build_standard_profile(
     date_fields=_DATE_FIELDS,
     int_fields=_INT_FIELDS,
     set_like_fields=_SET_LIKE_FIELDS,
-    json_string_fields=_JSON_STRING_FIELDS,
-    special_rules=publication_classification_rules(),
+    strict_json_fields=_STRICT_JSON_FIELDS,
+    boolean_fields=_BOOLEAN_FIELDS,
+    special_rules={
+        **publication_classification_rules(),
+        "publication_type": (
+            lambda value: normalize_profile_publication_type(
+                value,
+                allowed_values=PUBLICATION_TYPES,
+            ),
+            "Normalize raw provider publication type to the canonical publication registry value.",
+        ),
+    },
     null_fields=chembl_pseudo_null_fields("publication"),
 )
 

@@ -10,6 +10,7 @@ from bioetl.domain.normalization.text import normalize_string
 __all__ = [
     "normalize_bao_identifier",
     "normalize_bao_label",
+    "normalize_cellosaurus_id",
     "normalize_chembl_organism_name",
     "normalize_qudt_unit",
     "normalize_standard_unit",
@@ -18,6 +19,10 @@ __all__ = [
 
 _BAO_IDENTIFIER_RE = re.compile(r"^bao[_:](\d+)$", re.IGNORECASE)
 _UO_IDENTIFIER_RE = re.compile(r"^uo[_:](\d+)$", re.IGNORECASE)
+_CELLOSAURUS_IDENTIFIER_RE = re.compile(
+    r"^cvcl(?:[_:\-\s]?)([a-z0-9]+)$",
+    re.IGNORECASE,
+)
 _ORGANISM_WHITESPACE_RE = re.compile(r"\s+")
 
 _UNIT_ALIASES: dict[str, str] = {
@@ -164,6 +169,18 @@ def normalize_uo_identifier(value: str | None) -> str | None:
         prefix="UO",
         pattern=_UO_IDENTIFIER_RE,
     )
+
+
+def normalize_cellosaurus_id(value: str | None) -> str | None:
+    """Normalize Cellosaurus identifiers to canonical ``CVCL_XXXX`` form."""
+    normalized = normalize_string(value)
+    if normalized is None:
+        return None
+
+    match = _CELLOSAURUS_IDENTIFIER_RE.fullmatch(normalized)
+    if match is None:
+        return normalized
+    return f"CVCL_{match.group(1).upper()}"
 
 
 def normalize_standard_unit(value: str | None) -> str | None:

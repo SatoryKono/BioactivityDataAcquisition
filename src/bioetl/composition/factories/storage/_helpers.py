@@ -9,7 +9,6 @@ from bioetl.infrastructure.config.contract_policy_loader import (
     load_pipeline_contract_policy as _load_pipeline_contract_policy,
 )
 
-from ._audit import create_audit_port
 from ._bronze import create_bronze_writer
 from ._context_resolution import (
     StorageCreationContext,
@@ -40,6 +39,7 @@ if TYPE_CHECKING:
         MetadataCoordinator,
     )
     from bioetl.domain.ports import (
+        AuditPort,
         LoggerPort,
         MetricsPort,
         SilverValidatorPort,
@@ -159,16 +159,11 @@ def create_storage_adapter(
     logger: LoggerPort,
     metrics: MetricsPort,
     tracing: TracingPort,
+    audit: AuditPort,
     metadata_coordinator: MetadataCoordinator | None,
     silver_validator: SilverValidatorPort | None,
 ) -> StorageAdapter:
     """Create StorageAdapter with Bronze/Silver/Gold writers."""
-    audit = create_audit_port(
-        settings=settings,
-        logger=logger,
-        metrics=metrics,
-        tracing=tracing,
-    )
     metadata_atomic_retry_policy = create_silver_atomic_retry_policy(settings)
     merge_resilience_policy = create_silver_merge_resilience_policy(settings)
     silver_writer = create_silver_layer_writer_impl(

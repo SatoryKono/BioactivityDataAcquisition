@@ -17,12 +17,14 @@ from bioetl.application.services.execution.pipeline_run_execution_service import
     PipelineRunExecutionService,
 )
 from bioetl.composition import PipelineRegistry
-from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
+from bioetl.composition.bootstrap.runtime.observability import (
+    bootstrap_observability_bundle,
+)
 from bioetl.composition.factories.pipeline.runner import (
     create_metrics_extractor,
     create_runner_factory,
 )
-from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics
+from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.time import SystemClock
 
 __all__ = ["bootstrap_pipeline_runner_service"]
@@ -48,10 +50,12 @@ def bootstrap_pipeline_runner_service(
         >>> options = RunOptions(run_type="incremental", limit=100)
         >>> result = await service.run("chembl_activity", options=options)
     """
-    # Bootstrap logger for the service (using a unique ID for service-level logging)
-    logger = bootstrap_logger_port(
+    settings = get_settings()
+    service_run_id = uuid4()
+    observability = bootstrap_observability_bundle(
         pipeline="pipeline_runner_service",
-        run_id=uuid4(),
+        run_id=service_run_id,
+        settings=settings,
         log_level="INFO",
     )
 
@@ -62,9 +66,9 @@ def bootstrap_pipeline_runner_service(
     return PipelineRunnerService(
         runner_factory=runner_factory,
         metrics_extractor=metrics_extractor,
-        logger=logger,
-        metrics=NoOpMetrics(warn_on_use=False),
-        audit=NoOpAudit(),
+        logger=observability.logger,
+        metrics=observability.metrics,
+        audit=observability.audit,
         clock=SystemClock(),
         _context_service=PipelineRunContextService(),
         _execution_service=PipelineRunExecutionService(),

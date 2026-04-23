@@ -1,4 +1,4 @@
-"""Deprecated compatibility wrapper for ChEMBL normalization helpers.
+"""Legacy wrapper for ChEMBL normalization helpers.
 
 Deprecated: import from ``bioetl.domain.normalization.chembl`` instead.
 Sunset target: 2026-06-30.

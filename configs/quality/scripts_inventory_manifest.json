@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-23T11:15:19.454197+00:00",
+  "generated_at": "2026-04-23T13:43:26.300537+00:00",
   "summary": {
-    "total_scripts": 431,
+    "total_scripts": 432,
     "status_counts": {
       "active": 304,
       "legacy": 15,
-      "orphan": 100,
+      "orphan": 101,
       "unknown": 12
     },
     "reference_group_coverage": {
@@ -8095,7 +8095,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1425,
+          "line": 1426,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -9293,7 +9293,7 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 79,
+          "line": 43,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
@@ -11147,6 +11147,14 @@
           "text": "bash scripts/check_skills_mirror.sh --sync"
         }
       ]
+    },
+    {
+      "path": "scripts/optimized_test_runner.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/schema/__main__.py",

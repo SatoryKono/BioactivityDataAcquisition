@@ -45,6 +45,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import (
+        ClockPort,
         DeltaReaderPort,
         LoggerPort,
         MergedStoragePort,
@@ -80,6 +81,7 @@ class MergeService(
         field_group_registry: FieldGroupRegistry | None = None,
         cross_validator: EnrichmentCrossValidator | None = None,
         gold_schema: Any | None = None,  # Any: Pandera DataFrameModel class or instance
+        clock: ClockPort | None = None,
         *,
         collaborators: MergeCollaboratorGroup,
     ) -> None:
@@ -117,6 +119,7 @@ class MergeService(
         self._field_group_registry = field_group_registry
         self._cross_validator = cross_validator
         self._gold_schema = gold_schema
+        self._clock = clock
 
         self._deduplicator = collaborators.deduplicator
         self._aggregator = collaborators.aggregator

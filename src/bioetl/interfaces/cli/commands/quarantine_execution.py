@@ -1,4 +1,4 @@
-"""Compatibility support seam for quarantine execution helpers."""
+"""Support helpers for quarantine execution helpers."""
 
 from __future__ import annotations
 

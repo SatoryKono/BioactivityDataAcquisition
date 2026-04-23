@@ -75,11 +75,20 @@ def validate_dependency_preconditions(
 
 
 def collect_successful_dependencies(
+    host: _CompositeRunnerStageHostProtocol,
     state: CompositeCheckpointState,
     dependency_results: dict[str, DependencyResult],
 ) -> CompositeCheckpointState:
     """Mark each successful dependency as completed on checkpoint state."""
+    clock = getattr(host, "_clock", None)
     for dep_name, dep_result in dependency_results.items():
         if dep_result.is_success:
-            state = state.with_dependency_completed(dep_name, dep_result)
+            if clock is None:
+                state = state.with_dependency_completed(dep_name, dep_result)
+            else:
+                state = state.with_dependency_completed(
+                    dep_name,
+                    dep_result,
+                    clock=clock,
+                )
     return state

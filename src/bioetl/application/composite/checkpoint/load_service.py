@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
 from bioetl.application.composite.checkpoint._anchor_context import (
     ExpectedCheckpointContext,
@@ -17,16 +17,15 @@ from bioetl.application.composite.checkpoint._checkpoint_runtime import (
     warn_if_checkpoint_stale,
 )
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
+from bioetl.application.composite.port_types import (
+    ClockPort,
+    CompositeCheckpointPort,
+    LoggerPort,
+    MetricsPort,
+    RunLedgerPort,
+)
 from bioetl.domain.control_plane.run_ledger import project_run_ledger_replay
 from bioetl.domain.exceptions import CheckpointConflictError
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import (
-        CompositeCheckpointPort,
-        LoggerPort,
-        MetricsPort,
-        RunLedgerPort,
-    )
 
 
 def _contract_ref_mismatch(
@@ -247,6 +246,7 @@ class CompositeCheckpointLoadService:
         glob_pattern: str,
         run_ledger_port: RunLedgerPort | None = None,
         metrics: MetricsPort | None = None,
+        clock: ClockPort | None = None,
     ) -> None:
         self._composite_name = composite_name
         self._run_id = run_id
@@ -259,6 +259,7 @@ class CompositeCheckpointLoadService:
         self._glob_pattern = glob_pattern
         self._run_ledger_port = run_ledger_port
         self._metrics = metrics
+        self._clock = clock
 
     def _emit_checkpoint_load_status(self, status: str) -> None:
         """Emit bounded composite checkpoint load outcome."""
@@ -286,6 +287,7 @@ class CompositeCheckpointLoadService:
             composite_name=self._composite_name,
             run_id=self._run_id,
             anchors=self._expected_context,
+            clock=self._clock,
         )
 
     def _load_resume_state(self) -> CompositeCheckpointState | None:
@@ -325,6 +327,7 @@ class CompositeCheckpointLoadService:
             composite_name=self._composite_name,
             stale_threshold_hours=self._stale_threshold_hours,
             state=replayed_state,
+            clock=self._clock,
         )
         return replayed_state
 

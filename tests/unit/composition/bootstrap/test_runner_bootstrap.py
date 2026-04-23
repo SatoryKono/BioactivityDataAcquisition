@@ -5,6 +5,7 @@ Tests bootstrap functions for PipelineRunnerService assembly.
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -25,7 +26,6 @@ from bioetl.composition.factories.pipeline.runner import (
     RunnerFactory,
 )
 from bioetl.domain.ports import ClockPort
-from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics
 from bioetl.infrastructure.time import SystemClock
 
 
@@ -84,23 +84,35 @@ class TestBootstrapPipelineRunnerService:
         assert isinstance(result._execution_service, PipelineRunExecutionService)
         assert isinstance(result.clock, ClockPort)
         assert isinstance(result.clock, SystemClock)
-        assert isinstance(result.metrics, NoOpMetrics)
-        assert isinstance(result.audit, NoOpAudit)
+        assert result.metrics is not None
+        assert result.audit is not None
 
     def test_bootstrap_logger_has_correct_pipeline_name(self):
         """Test that the logger is configured with correct pipeline name."""
-        with patch(
-            "bioetl.composition.bootstrap.runtime.runner.bootstrap_logger_port"
-        ) as mock_bootstrap_logger:
-            mock_logger = MagicMock()
-            mock_bootstrap_logger.return_value = mock_logger
+        with (
+            patch(
+                "bioetl.composition.bootstrap.runtime.runner.get_settings"
+            ) as mock_get_settings,
+            patch(
+                "bioetl.composition.bootstrap.runtime.runner.bootstrap_observability_bundle"
+            ) as mock_bootstrap_observability,
+        ):
+            mock_settings = MagicMock()
+            mock_get_settings.return_value = mock_settings
+            mock_bundle = SimpleNamespace(
+                logger=MagicMock(),
+                metrics=MagicMock(),
+                audit=MagicMock(),
+            )
+            mock_bootstrap_observability.return_value = mock_bundle
 
             bootstrap_pipeline_runner_service()
 
-            mock_bootstrap_logger.assert_called_once()
-            call_kwargs = mock_bootstrap_logger.call_args[1]
+            mock_bootstrap_observability.assert_called_once()
+            call_kwargs = mock_bootstrap_observability.call_args[1]
             assert call_kwargs["pipeline"] == "pipeline_runner_service"
             assert call_kwargs["log_level"] == "INFO"
+            assert call_kwargs["settings"] is mock_settings
 
 
 @pytest.mark.unit

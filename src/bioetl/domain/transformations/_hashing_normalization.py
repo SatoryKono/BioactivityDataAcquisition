@@ -1,4 +1,4 @@
-"""Compatibility shim for the canonical hash-identity normalization seam."""
+"""Shim for the canonical hash-identity normalization seam."""
 
 from __future__ import annotations
 

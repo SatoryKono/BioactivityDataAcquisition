@@ -18,6 +18,7 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.filtering import InputFilterConfig
 from bioetl.domain.ports import (
+    AuditPort,
     DQMonitorPort,
     LoggerPort,
     MetricsPort,
@@ -48,6 +49,7 @@ class _PipelineFactoryContext:
 class _BuildFactoryServicesRequest:
     settings: Settings
     logger: LoggerPort
+    audit: AuditPort
     config: PipelineYamlConfig | None = None
     filter_config: InputFilterConfig | None = None
     tracer: TracingPort | None = None
@@ -132,6 +134,7 @@ def build_create_pipeline_with_services_request(
     runtime: object,
     settings: Settings,
     logger: LoggerPort,
+    audit: AuditPort,
     control_plane_artifacts: _ControlPlaneArtifacts | None = None,
     config: PipelineYamlConfig | None = None,
     filter_config: InputFilterConfig | None = None,
@@ -147,6 +150,7 @@ def build_create_pipeline_with_services_request(
         runtime=runtime,
         settings=settings,
         logger=logger,
+        audit=audit,
         manifest_id=artifacts.manifest_id,
         execution_fingerprint=artifacts.execution_fingerprint,
         config_hash=artifacts.config_hash,

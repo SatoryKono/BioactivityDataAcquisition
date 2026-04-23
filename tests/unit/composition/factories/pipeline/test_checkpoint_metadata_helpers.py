@@ -73,6 +73,7 @@ def test_build_current_checkpoint_metadata_includes_resume_anchors(tmp_path) -> 
         entity="activity",
         pipeline_version="1.2.3",
         config_hash="a" * 64,
+        effective_config_hash="a" * 64,
         manifest_id="manifest-1",
         contract_ref="chembl.activity",
         contract_version="1.0.0",
@@ -120,7 +121,9 @@ def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
         provider="chembl",
         entity="activity",
         pipeline_version="1.2.3",
+        git_commit="test-commit-hash",
         config_hash="a" * 64,
+        effective_config_hash="a" * 64,
         manifest_id="manifest-1",
         contract_ref="chembl.activity",
         contract_version="1.0.0",
@@ -167,13 +170,14 @@ def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
                 ),
             ),
             pipeline_version="1.2.3",
-            effective_config_hash=run_context.config_hash,
+            effective_config_hash=run_context.effective_config_hash,
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             dq_contract_compatibility_hash="dq-hash",
             effective_config_artifact_id="artifact-1",
             replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
             git_commit="test-commit-hash",
+            source_revision_state="clean",
         )
     )
 

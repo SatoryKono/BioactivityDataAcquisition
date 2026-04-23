@@ -8,11 +8,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from bioetl.composition.factories.storage.audit import create_audit_port
 from bioetl.composition.factories.storage.storage_factory import BronzeWriter
 from bioetl.composition.factories.storage.storage_factory import GoldWriter
 from bioetl.composition.factories.storage.storage_factory import SilverWriter
 from bioetl.composition.factories.storage.storage_factory import StorageContext
 from bioetl.composition.factories.storage.storage_factory import StorageFactory
+from bioetl.domain.ports.noop import NoOpAudit
 
 
 def _make_csv_config(path: str, *, enabled: bool) -> SimpleNamespace:
@@ -119,6 +121,7 @@ def test_create_uses_canonical_yaml_paths_and_returns_storage_context(
         config=config,
         logger=logger,
         metrics=metrics,
+        audit=MagicMock(),
     )
 
     assert isinstance(result, StorageContext)
@@ -170,6 +173,7 @@ def test_create_uses_test_mode_paths_and_overrides_csv_export_targets(
         config=config,
         logger=MagicMock(),
         metrics=MagicMock(),
+        audit=MagicMock(),
     )
 
     assert result.bronze_path == settings.bronze_path
@@ -210,6 +214,7 @@ def test_create_normalizes_delta_writer_base_paths_for_entity_scoped_yaml_paths(
         config=config,
         logger=MagicMock(),
         metrics=MagicMock(),
+        audit=MagicMock(),
     )
 
     assert result.silver_path == tmp_path / "custom" / "silver" / "chembl" / "activity"
@@ -257,6 +262,7 @@ def test_create_normalizes_windows_style_entity_scoped_delta_paths() -> None:
         config=config,
         logger=MagicMock(),
         metrics=MagicMock(),
+        audit=MagicMock(),
     )
 
     assert Path(result.adapter.silver.base_path) == Path("data/output/silver")
@@ -301,6 +307,7 @@ def test_create_forwards_optional_runtime_collaborators_to_adapter_builder(
     logger = MagicMock()
     metrics = MagicMock()
     tracing = MagicMock()
+    audit = MagicMock()
     metadata_coordinator = MagicMock()
     silver_validator = MagicMock()
 
@@ -309,6 +316,7 @@ def test_create_forwards_optional_runtime_collaborators_to_adapter_builder(
         config=config,
         logger=logger,
         metrics=metrics,
+        audit=audit,
         tracing=tracing,
         metadata_coordinator=metadata_coordinator,
         silver_validator=silver_validator,
@@ -335,6 +343,7 @@ def test_create_forwards_optional_runtime_collaborators_to_adapter_builder(
         config=config,
         logger=logger,
         metrics=metrics,
+        audit=audit,
         tracing=tracing,
         metadata_coordinator=metadata_coordinator,
         silver_validator=silver_validator,
@@ -362,11 +371,12 @@ def test_create_uses_explicit_noop_audit_by_default(tmp_path: Path) -> None:
         config=config,
         logger=MagicMock(),
         metrics=MagicMock(),
+        audit=NoOpAudit(),
     )
 
-    assert result.adapter.bronze._audit is not None
-    assert result.adapter.silver._audit is not None
-    assert result.adapter.gold._audit is not None
+    assert isinstance(result.adapter.bronze._audit, NoOpAudit)
+    assert result.adapter.bronze._audit is result.adapter.silver._audit
+    assert result.adapter.bronze._audit is result.adapter.gold._audit
 
 
 @pytest.mark.unit
@@ -388,11 +398,19 @@ def test_create_uses_file_audit_adapter_when_enabled(tmp_path: Path) -> None:
         gold_layer=_make_sink_layer(tmp_path / "yaml" / "gold"),
     )
 
+    audit = create_audit_port(
+        settings=settings,
+        logger=MagicMock(),
+        metrics=MagicMock(),
+        tracing=MagicMock(),
+    )
+
     result = StorageFactory.create(
         settings=settings,
         config=config,
         logger=MagicMock(),
         metrics=MagicMock(),
+        audit=audit,
     )
 
     bronze_audit = result.adapter.bronze._audit
@@ -462,6 +480,7 @@ def test_create_resolves_tracing_once_at_storage_factory_boundary(
             config=config,
             logger=logger,
             metrics=metrics,
+            audit=MagicMock(),
             tracing=None,
         )
 

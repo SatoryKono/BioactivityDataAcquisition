@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
+from bioetl.domain.ports.audit import AuditPort
 from bioetl.domain.ports.config import PipelineYamlConfigPort, SettingsPort
 from bioetl.domain.ports.observability import (
     DQMonitorPort,
@@ -98,6 +99,7 @@ class ExecutionObservabilityPort(Protocol):
     logger: LoggerPort
     metrics: MetricsPort
     tracer: TracingPort | None
+    audit: AuditPort
     dq_monitor: DQMonitorPort | None
 
 
@@ -182,6 +184,7 @@ class PipelineCreateWithServicesRequest:
     runtime: RuntimeConfig
     settings: SettingsPort
     logger: LoggerPort
+    audit: AuditPort
     manifest_id: str | None = None
     execution_fingerprint: str | None = None
     config_hash: str | None = None

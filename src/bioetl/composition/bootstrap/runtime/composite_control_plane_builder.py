@@ -42,6 +42,7 @@ from bioetl.composition.services.versioning import (
 from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
+from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
@@ -119,7 +120,10 @@ def build_composite_control_plane_bundle(
         base_path=_control_plane_root(infra_context.settings, "run_manifest"),
         metrics=infra_context.metrics,
     )
-    manifest = RunManifestService(manifest_port=manifest_store).create_manifest(
+    manifest = RunManifestService(
+        manifest_port=manifest_store,
+        clock=SystemClock(),
+    ).create_manifest(
         _build_composite_manifest_create_request(
             config=config,
             runtime=runtime,

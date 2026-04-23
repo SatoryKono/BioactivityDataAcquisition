@@ -3,7 +3,13 @@
 from __future__ import annotations
 
 import time
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
+from typing import TYPE_CHECKING
+
+from bioetl.domain.context import current_utc_time
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import ClockPort
 
 __all__ = [
     "capture_runtime_timing_anchor",
@@ -14,9 +20,13 @@ __all__ = [
 def capture_runtime_timing_anchor(
     *,
     started_at: datetime | None = None,
+    clock: ClockPort | None = None,
 ) -> tuple[datetime, float]:
     """Capture the wall-clock anchor and monotonic start for one execution."""
-    return (started_at or datetime.now(tz=UTC), time.monotonic())
+    wall_clock_anchor = started_at
+    if wall_clock_anchor is None:
+        wall_clock_anchor = clock.now() if clock is not None else current_utc_time()
+    return wall_clock_anchor, time.monotonic()
 
 
 def derive_completion_timestamp(

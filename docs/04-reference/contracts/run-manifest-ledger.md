@@ -438,10 +438,9 @@ Hash semantics are deliberately split:
 
 New manifest creation, diagnostics, inspection output, metadata sidecars, and
 lineage nodes MUST preserve those fields separately. Backward-compatible
-manifest hydration MAY populate missing `resolved_config_hash` or
-`effective_config_hash` from legacy `config_hash` only when reading older
-payloads that did not carry the explicit fields; that compatibility behavior
-must not be used when creating new control-plane artifacts.
+consumers MAY still read legacy `config_hash`, but manifest hydration and new
+control-plane write paths MUST NOT synthesize missing `resolved_config_hash` or
+`effective_config_hash` values from it.
 
 Strict exact-replay, `replay_ready`, and `forensic_grade` manifests require
 `git_commit` to be present. Inspection diagnostics must expose both
