@@ -19,6 +19,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 SRC_ROOT = Path("src/bioetl")
+CANONICAL_NAMING_AUDIT_PATH = Path("scripts/engineering/qa/naming_audit.py")
 FORBIDDEN_FACTORY_LAYERS = (
     SRC_ROOT / "application",
     SRC_ROOT / "infrastructure",
@@ -46,14 +47,14 @@ class Violation:
 
 
 def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
-    script = repo_root / "scripts" / "engineering" / "qa" / "naming_audit.py"
+    script = repo_root / CANONICAL_NAMING_AUDIT_PATH
     docs_skip_path = repo_root / "docs" / "__naming_gate_skip__"
     if not script.exists():
         return [
             Violation(
                 rule="suffix-policy",
-                location="scripts/engineering/qa/naming_audit.py",
-                details="scripts/engineering/qa/naming_audit.py not found",
+                location=CANONICAL_NAMING_AUDIT_PATH.as_posix(),
+                details=f"{CANONICAL_NAMING_AUDIT_PATH.as_posix()} not found",
             )
         ]
     result = subprocess.run(

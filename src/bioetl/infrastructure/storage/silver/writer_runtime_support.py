@@ -14,6 +14,7 @@ from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import (
     AuditPort,
+    LineageStorePort,
     LoggerPort,
     MetadataCoordinatorPort,
     MetadataWriterPort,
@@ -108,7 +109,10 @@ def _pop_legacy_runtime_kwargs(
         "MetadataCoordinatorPort | None",
         legacy_kwargs.pop("metadata_coordinator", None),
     )
-    lineage_store = cast("object | None", legacy_kwargs.pop("lineage_store", None))
+    lineage_store = cast(
+        "LineageStorePort | None",
+        legacy_kwargs.pop("lineage_store", None),
+    )
     dq_calculator = cast(
         "DQMetricsCalculator | None",
         legacy_kwargs.pop("dq_calculator", None),

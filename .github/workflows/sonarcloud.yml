@@ -19,34 +19,52 @@ jobs:
     name: SonarCloud Scan
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: ${{ secrets.SONAR_TOKEN != '' }}
 
     steps:
+      - name: Detect Sonar token availability
+        id: sonar-token
+        shell: bash
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if [ -n "${SONAR_TOKEN}" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "SONAR_TOKEN is not configured; skipping SonarCloud scan." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Checkout
+        if: steps.sonar-token.outputs.available == 'true'
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Setup Python + uv
+        if: steps.sonar-token.outputs.available == 'true'
         uses: ./.github/actions/setup-python-uv
         with:
           uv-extras: "dev"
 
       - name: Enforce Sonar baseline ratchet
+        if: steps.sonar-token.outputs.available == 'true'
         env:
           SONARQUBE_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           python3 scripts/ai/check_sonar_issues.py \
             --token-env-var SONARQUBE_TOKEN \
             --strict-live \
-            --max-quarantine-entries 184
+            --require-authoritative-scope \
+            --max-quarantine-entries 183
 
       - name: Validate canonical Sonar config
+        if: steps.sonar-token.outputs.available == 'true'
         run: |
           test -f sonar-project.properties
           grep -q '^sonar.sources=src/bioetl$' sonar-project.properties
 
       - name: Run SonarCloud scan
+        if: steps.sonar-token.outputs.available == 'true'
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

@@ -27,6 +27,25 @@ def _load_registry_payload() -> dict[str, object]:
     return payload
 
 
+def _forbidden_aliases_by_export_surface(
+    payload: dict[str, object],
+) -> dict[str, set[str]]:
+    forbidden_aliases = payload.get("forbidden_domain_entity_aliases")
+    assert isinstance(forbidden_aliases, list), (
+        "forbidden_domain_entity_aliases must be declared as a list"
+    )
+
+    by_surface: dict[str, set[str]] = {}
+    for entry in forbidden_aliases:
+        assert isinstance(entry, dict), "forbidden alias entries must be mappings"
+        legacy_name = entry.get("legacy_name")
+        export_surface = entry.get("export_surface")
+        assert isinstance(legacy_name, str) and legacy_name
+        assert isinstance(export_surface, str) and export_surface
+        by_surface.setdefault(export_surface, set()).add(legacy_name)
+    return by_surface
+
+
 def _load_naming_audit_module() -> ModuleType:
     script = REPO_ROOT / "scripts" / "engineering" / "qa" / "naming_audit.py"
     spec = importlib.util.spec_from_file_location("naming_audit_runtime", str(script))
@@ -174,6 +193,49 @@ def test_naming_audit_registry_loader_matches_policy_registry() -> None:
     assert {"pubchem_compound", "uniprot_protein"} <= stable_ids
 
 
+def test_adr_024_registry_has_no_contradictory_domain_alias_compatibility_exports() -> (
+    None
+):
+    payload = _load_registry_payload()
+    forbidden_by_surface = _forbidden_aliases_by_export_surface(payload)
+
+    known_exceptions = payload.get("adr_024_known_exceptions", {})
+    assert isinstance(known_exceptions, dict), "adr_024_known_exceptions must be a mapping"
+    backward_compatibility = known_exceptions.get("backward_compatibility", [])
+    assert isinstance(backward_compatibility, list), (
+        "adr_024_known_exceptions.backward_compatibility must be a list"
+    )
+
+    for entry in backward_compatibility:
+        assert isinstance(entry, dict), (
+            "adr_024 backward_compatibility entries must be mappings"
+        )
+        module = entry.get("module")
+        assert isinstance(module, str) and module, (
+            "adr_024 backward_compatibility entries must declare module"
+        )
+
+        aliases = entry.get("aliases", [])
+        assert isinstance(aliases, list), (
+            "adr_024 backward_compatibility aliases must be a list when present"
+        )
+        alias_names = {alias for alias in aliases if isinstance(alias, str) and alias}
+
+        forbidden_aliases = forbidden_by_surface.get(module)
+        if not forbidden_aliases:
+            continue
+
+        assert alias_names, (
+            f"{module} is the forbidden alias export surface; backward compatibility "
+            "entries there must either be removed or list exact retained aliases"
+        )
+        overlap = forbidden_aliases & alias_names
+        assert not overlap, (
+            f"{module} backward compatibility entry reintroduces forbidden aliases: "
+            f"{', '.join(sorted(overlap))}"
+        )
+
+
 def test_naming_audit_uses_registry_for_doc_exceptions(tmp_path: Path) -> None:
     mod = _load_naming_audit_module()
     registry = mod.load_naming_registry()
@@ -211,3 +273,11 @@ def test_naming_policy_and_glossary_distinguish_canonical_and_stable_public_name
     assert "PubChemCompoundTransformer" in glossary
     assert "PubchemMolecule" in glossary
     assert "UniprotTarget" in glossary
+
+
+def test_naming_policy_forbids_unregistered_adr_024_domain_alias_exports() -> None:
+    naming_policy = NAMING_POLICY_PATH.read_text(encoding="utf-8")
+
+    assert "`Document`, `Compound`, and `Protein`" in naming_policy
+    assert "MUST NOT" in naming_policy
+    assert "compatibility export surface" in naming_policy

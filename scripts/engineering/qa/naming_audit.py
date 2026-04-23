@@ -84,6 +84,15 @@ class ForbiddenAlias:
 
 
 @dataclass(frozen=True)
+class BackwardCompatibilitySurface:
+    """Structured ADR-024 compatibility surface entry."""
+
+    module: str
+    aliases: tuple[str, ...]
+    note: str
+
+
+@dataclass(frozen=True)
 class NamingRegistry:
     """Parsed naming exception registry."""
 
@@ -96,6 +105,7 @@ class NamingRegistry:
     stable_transformers: tuple[StablePublicName, ...]
     stable_gold_schemas: tuple[StablePublicName, ...]
     forbidden_domain_entity_aliases: tuple[ForbiddenAlias, ...]
+    adr_024_backward_compatibility: tuple[BackwardCompatibilitySurface, ...]
 
 
 # Суффиксы для классов по ролям
@@ -208,6 +218,33 @@ def _load_forbidden_aliases(raw: object) -> tuple[ForbiddenAlias, ...]:
     return tuple(entries)
 
 
+def _load_backward_compatibility_surfaces(
+    raw: object,
+) -> tuple[BackwardCompatibilitySurface, ...]:
+    """Parse structured ADR-024 backward compatibility surfaces."""
+    if not isinstance(raw, list):
+        return ()
+
+    entries: list[BackwardCompatibilitySurface] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        module = str(item.get("module", "")).strip()
+        aliases = tuple(
+            value for value in _flatten_string_values(item.get("aliases", [])) if value
+        )
+        note = str(item.get("note", item.get("reason", ""))).strip()
+        if module and (aliases or note):
+            entries.append(
+                BackwardCompatibilitySurface(
+                    module=module,
+                    aliases=aliases,
+                    note=note,
+                )
+            )
+    return tuple(entries)
+
+
 def load_naming_registry(
     registry_path: Path = NAMING_EXCEPTIONS_PATH,
 ) -> NamingRegistry:
@@ -224,6 +261,9 @@ def load_naming_registry(
     stable_public_surface = payload.get("stable_public_surface", {})
     if not isinstance(stable_public_surface, dict):
         raise ValueError("stable_public_surface must be a mapping")
+    adr_024_known_exceptions = payload.get("adr_024_known_exceptions", {})
+    if not isinstance(adr_024_known_exceptions, dict):
+        raise ValueError("adr_024_known_exceptions must be a mapping")
 
     return NamingRegistry(
         documentation_exceptions=frozenset(
@@ -253,6 +293,9 @@ def load_naming_registry(
         forbidden_domain_entity_aliases=_load_forbidden_aliases(
             payload.get("forbidden_domain_entity_aliases", [])
         ),
+        adr_024_backward_compatibility=_load_backward_compatibility_surfaces(
+            adr_024_known_exceptions.get("backward_compatibility", [])
+        ),
     )
 
 
@@ -280,6 +323,33 @@ def validate_naming_registry(registry: NamingRegistry) -> list[str]:
         if required not in stable_id_names:
             errors.append(
                 f"stable_public_surface.pipeline_ids is missing required entry: {required}"
+            )
+
+    forbidden_aliases_by_surface: dict[str, set[str]] = {}
+    for alias in registry.forbidden_domain_entity_aliases:
+        forbidden_aliases_by_surface.setdefault(alias.export_surface, set()).add(
+            alias.legacy_name
+        )
+
+    for surface in registry.adr_024_backward_compatibility:
+        forbidden_aliases = forbidden_aliases_by_surface.get(surface.module)
+        if not forbidden_aliases:
+            continue
+        if not surface.aliases:
+            errors.append(
+                "ADR-024 backward compatibility entry for "
+                f"{surface.module} must list exact aliases or be removed because "
+                "that module is also declared as the forbidden legacy alias "
+                "export surface"
+            )
+            continue
+
+        overlap = sorted(forbidden_aliases & set(surface.aliases))
+        if overlap:
+            joined = ", ".join(overlap)
+            errors.append(
+                "ADR-024 backward compatibility entry for "
+                f"{surface.module} reintroduces forbidden legacy aliases: {joined}"
             )
 
     return errors
