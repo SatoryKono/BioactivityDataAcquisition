@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.0.1
+Version: 1.0.2
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-12'
+  Last verified: '2026-04-23'
 
 ______________________________________________________________________
 
 # BioETL Observability Specification (DD)
 
-Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-04-12**.
+Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-04-23**.
 
 - Статус: `active`
 - Версия: `3.5.0`
@@ -149,7 +149,7 @@ Cross-links for canonical observability governance:
 Полный каталог метрик задаётся в `src/bioetl/infrastructure/observability/_metrics_defs_*.py`
 и собирается через `prometheus_metric_registries.py`.
 
-Текущий размер каталога: **101** метрики
+Текущий размер каталога: **110** метрик
 (`src/bioetl/infrastructure/observability/prometheus_metric_registries.py`).
 
 Ниже обязательное ядро (MUST для мониторинга запусков):
@@ -165,6 +165,10 @@ Cross-links for canonical observability governance:
 | `bioetl_checkpoint_load_events_total`          | Counter   | `pipeline,status`                        | Bounded checkpoint load decisions (`loaded`, `missing`, `blocked`, `incompatible`, `observe_blocked_identity`, `observe_loaded_degraded`, `incompatible_hard_fail`, `failed`) |
 | `bioetl_checkpoint_save_events_total`          | Counter   | `pipeline,operation,status`              | Bounded checkpoint save outcomes across ordinary and composite persistence paths    |
 | `bioetl_checkpoint_save_duration_seconds`      | Histogram | `pipeline,operation,status`              | Latency of checkpoint save attempts and failures                                   |
+| `bioetl_memory_pressure_events_total`          | Counter   | `pipeline,stage,reason,monitor_mode,status` | Adaptive-memory decisions that observed active pressure; labels stay bounded to stage, bounded monitor mode, bounded reason, and bounded decision status |
+| `bioetl_memory_batch_resize_events_total`      | Counter   | `pipeline,stage,reason,monitor_mode,status` | Adaptive-memory decisions that changed batch size during pressure handling or recovery |
+| `bioetl_memory_monitor_fallback_events_total`  | Counter   | `pipeline,stage,reason,monitor_mode,status` | Adaptive-memory decisions emitted while monitor mode used bounded fallback paths (`resource`, `estimate`, `unknown`) |
+| `bioetl_memory_pressure_state`                 | Gauge     | `pipeline,stage,reason,monitor_mode,status` | Latest bounded adaptive-memory pressure state for the emitted decision (`1` under pressure, `0` otherwise) |
 | `bioetl_lineage_fragments_emitted_total`       | Counter   | `pipeline,layer,status`                  | Попытки публикации lineage fragments                                               |
 | `bioetl_lineage_refs_missing_total`            | Counter   | `pipeline,layer,ref_type`                | Missing upstream lineage references detected during persistence                    |
 | `bioetl_composite_source_selection_total`      | Counter   | `pipeline,decision_type,selected_source` | Low-cardinality composite source-selection decisions recorded during persistence   |
@@ -205,6 +209,10 @@ Guardrail для новых метрик control-plane/traceability:
 - агрегировать по `pipeline`, `run_type`, `event_type`, `layer`, `status`,
   `disposition`, а детализацию по конкретному запуску получать через
   `run-manifest show` и sidecar/control-plane артефакты.
+- adaptive-memory metric families must stay bounded as well; `decision_index`,
+  `record_index`, old/new batch sizes, host memory totals, RSS, and checkpoint
+  payload details belong in checkpoint metadata, run ledger diagnostics, or
+  trace events/attributes, not in Prometheus labels.
 - provider health-check latency MUST use `_seconds` families only; `_ms`
   latency families для provider health-check path считаются legacy и не должны
   добавляться в новые dashboards, alerts или runtime emission paths

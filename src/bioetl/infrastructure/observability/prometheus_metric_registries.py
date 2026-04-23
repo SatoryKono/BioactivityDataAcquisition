@@ -48,9 +48,14 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_checkpoint_compatibility_events_total": _metrics.CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL,
         "bioetl_checkpoint_load_events_total": _metrics.CHECKPOINT_LOAD_EVENTS_TOTAL,
         "bioetl_checkpoint_save_events_total": _metrics.CHECKPOINT_SAVE_EVENTS_TOTAL,
+        "bioetl_memory_pressure_events_total": _metrics.MEMORY_PRESSURE_EVENTS_TOTAL,
+        "bioetl_memory_batch_resize_events_total": _metrics.MEMORY_BATCH_RESIZE_EVENTS_TOTAL,
+        "bioetl_memory_monitor_fallback_events_total": _metrics.MEMORY_MONITOR_FALLBACK_EVENTS_TOTAL,
         "bioetl_traced_runs_total": _metrics.TRACED_RUNS_TOTAL,
     },
-    gauges={},
+    gauges={
+        "bioetl_memory_pressure_state": _metrics.MEMORY_PRESSURE_STATE,
+    },
     histograms={
         "bioetl_pipeline_duration_seconds": _metrics.PIPELINE_DURATION_SECONDS,
         "bioetl_batch_size_records": _metrics.BATCH_SIZE_RECORDS,

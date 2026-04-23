@@ -197,7 +197,9 @@ def _resolve_persistence_inputs(
         effective_config_artifact_present=bool(
             str(base_summary.get("effective_config_artifact_id") or "").strip()
         ),
-        immutable_input_snapshots_present=bool(base_summary.get("input_snapshot_ids", [])),
+        immutable_input_snapshots_present=bool(
+            base_summary.get("input_snapshot_ids", [])
+        ),
         reproducible_semantic_output_mode=not bool(
             base_summary.get("append_mode_semantic_sinks", [])
         ),

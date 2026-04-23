@@ -16,7 +16,7 @@ Last verified: '2026-04-13'
 ## Актуальные документы
 
 - `monitoring-index.md` — canonical reading order по monitoring docs.
-- `dashboard-v2-usage.md` — как использовать дашборды в операционной работе.
+- `dashboard-v2-usage.md` — как использовать дашборды в операционной работе, включая runtime adaptive-memory triage.
 - `dashboard-extension-human.md` — краткое руководство для инженера по расширению shipped dashboards.
 - `dashboard-extension-llm.md` — краткий playbook для LLM/AI-агента по безопасной правке dashboard JSON и docs cascade.
 - `variables-guide.md` — фактические Grafana variables и их PromQL.

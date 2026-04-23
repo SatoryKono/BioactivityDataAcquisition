@@ -9,8 +9,8 @@ from bioetl.application.core._batch_tracing_support import (
     build_batch_span_attributes,
     build_execution_span_attributes,
     build_layer_span_attributes,
-    set_memory_decision_trace_attributes,
     set_execution_stats_attributes,
+    set_memory_decision_trace_attributes,
     set_record_result_attributes,
 )
 from bioetl.application.core._span_helpers import close_span, close_span_with_shutdown

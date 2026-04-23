@@ -54,16 +54,11 @@ class _FinalSummaryRequest:
     resume_diagnostics: dict[str, object] | None
 
 
-def _build_final_summary(
+def _build_canonical_execution_identity(
     request: _FinalSummaryRequest,
 ) -> dict[str, object]:
-    """Build final summary with all processed data."""
-    latest_entry = request.ledger_entries[-1]
-    planned_artifacts = cast(
-        list[dict[str, object]],
-        request.base_summary.get("planned_artifacts", []),
-    )
-    canonical_execution_identity_payload = build_execution_identity_payload(
+    """Return the canonical execution identity payload for the summary graph."""
+    return build_execution_identity_payload(
         pipeline_name=request.manifest.pipeline_name,
         run_type=request.manifest.run_type.value,
         pipeline_version=cast(str | None, request.base_summary.get("pipeline_version")),
@@ -88,7 +83,13 @@ def _build_final_summary(
             request.base_summary.get("input_snapshot_identity_fingerprint"),
         ),
     )
-    degraded_runtime_anchor_payload = {
+
+
+def _build_degraded_runtime_anchor_payload(
+    request: _FinalSummaryRequest,
+) -> dict[str, object]:
+    """Return the degraded runtime anchor payload used for fallback identity."""
+    return {
         key: value
         for key, value in {
             "manifest_id": request.manifest.manifest_id,
@@ -101,6 +102,18 @@ def _build_final_summary(
         }.items()
         if value is not None
     }
+
+
+def _build_identity_graph(
+    request: _FinalSummaryRequest,
+) -> dict[str, object]:
+    """Assemble the operator-facing run identity graph for final summary."""
+    planned_artifacts = cast(
+        list[dict[str, object]],
+        request.base_summary.get("planned_artifacts", []),
+    )
+    canonical_execution_identity_payload = _build_canonical_execution_identity(request)
+    degraded_runtime_anchor_payload = _build_degraded_runtime_anchor_payload(request)
     identity_graph = {
         "run_id": str(request.manifest.run_id),
         "manifest_id": request.manifest.manifest_id,
@@ -172,14 +185,16 @@ def _build_final_summary(
             "input_snapshot_count"
         ]
         identity_graph["input_snapshots"] = request.base_summary["input_snapshots"]
+    return identity_graph
 
-    persistence_profile = build_persistence_profile(
-        base_summary=request.base_summary,
-        ledger_entries_present=bool(request.ledger_entries),
-        artifact_refs=request.artifact_refs,
-        lineage_fragment_ids=request.lineage_fragment_ids,
-        missing_link_count=request.missing_link_count,
-    )
+
+def _build_alert_bundle(
+    request: _FinalSummaryRequest,
+    *,
+    persistence_profile: dict[str, object],
+) -> tuple[dict[str, bool], list[str]]:
+    """Return alert signals and operator next steps for final summary."""
+    latest_entry = request.ledger_entries[-1]
     alert_signals = build_alert_signals(
         latest_status=latest_entry.status,
         artifact_refs=request.artifact_refs,
@@ -203,51 +218,84 @@ def _build_final_summary(
             persistence_profile.get("forensic_grade_missing_requirements", []),
         ),
     )
-    next_steps = build_next_steps(alert_signals)
+    return alert_signals, build_next_steps(alert_signals)
+
+
+def _build_final_summary_updates(
+    request: _FinalSummaryRequest,
+    *,
+    identity_graph: dict[str, object],
+    persistence_profile: dict[str, object],
+    alert_signals: dict[str, bool],
+    next_steps: list[str],
+) -> dict[str, object]:
+    """Return the summary update payload layered onto the base summary."""
+    latest_entry = request.ledger_entries[-1]
+    return {
+        "total_events": len(request.ledger_entries),
+        "latest_event_type": latest_entry.event_type,
+        "latest_status": latest_entry.status,
+        "event_family_counts": dict(sorted(request.family_counter.items())),
+        "event_type_counts": dict(sorted(request.type_counter.items())),
+        "artifact_refs": request.artifact_refs,
+        "planned_artifact_count": len(request.manifest.planned_artifacts),
+        "published_artifact_count": len(request.artifact_refs),
+        "lineage_fragment_ids": sorted(request.lineage_fragment_ids),
+        "missing_artifact_links": request.missing_link_count,
+        "dq_rule_ids": sorted(request.dq_rule_ids),
+        "dq_dispositions": sorted(request.dq_dispositions),
+        "dq_report_paths": sorted(request.dq_report_paths),
+        "dq_violation_kinds": sorted(request.dq_violation_kinds),
+        "cross_validation_rule_ids": sorted(request.cross_validation_rule_ids),
+        "cross_validation_config_paths": sorted(request.cross_validation_config_paths),
+        "cross_validation_quarantine_policy": _resolve_policy_value(
+            request.cross_validation_quarantine_policies
+        ),
+        "cross_validation_quarantine_replay_contract": _resolve_policy_value(
+            request.cross_validation_replay_contracts
+        ),
+        "occurrence_only_diagnostics": sorted(
+            request.occurrence_only_diagnostic_scopes
+        ),
+        "resume_diagnostics": request.resume_diagnostics,
+        "cross_validation_signal_present": request.cross_validation_signal_present,
+        "correlation_anchor_gaps": request.correlation_anchor_gaps,
+        "identity_graph_complete": (
+            request.missing_link_count == 0
+            and not any(request.correlation_anchor_gaps.values())
+        ),
+        "identity_graph": identity_graph,
+        "persistence_profile": persistence_profile,
+        "alert_signals": alert_signals,
+        "next_steps": next_steps,
+    }
+
+
+def _build_final_summary(
+    request: _FinalSummaryRequest,
+) -> dict[str, object]:
+    """Build final summary with all processed data."""
+    identity_graph = _build_identity_graph(request)
+    persistence_profile = build_persistence_profile(
+        base_summary=request.base_summary,
+        ledger_entries_present=bool(request.ledger_entries),
+        artifact_refs=request.artifact_refs,
+        lineage_fragment_ids=request.lineage_fragment_ids,
+        missing_link_count=request.missing_link_count,
+    )
+    alert_signals, next_steps = _build_alert_bundle(
+        request,
+        persistence_profile=persistence_profile,
+    )
     summary = request.base_summary.copy()
     summary.update(
-        {
-            "total_events": len(request.ledger_entries),
-            "latest_event_type": latest_entry.event_type,
-            "latest_status": latest_entry.status,
-            "event_family_counts": dict(sorted(request.family_counter.items())),
-            "event_type_counts": dict(sorted(request.type_counter.items())),
-            "artifact_refs": request.artifact_refs,
-            "planned_artifact_count": len(request.manifest.planned_artifacts),
-            "published_artifact_count": len(request.artifact_refs),
-            "lineage_fragment_ids": sorted(request.lineage_fragment_ids),
-            "missing_artifact_links": request.missing_link_count,
-            "dq_rule_ids": sorted(request.dq_rule_ids),
-            "dq_dispositions": sorted(request.dq_dispositions),
-            "dq_report_paths": sorted(request.dq_report_paths),
-            "dq_violation_kinds": sorted(request.dq_violation_kinds),
-            "cross_validation_rule_ids": sorted(request.cross_validation_rule_ids),
-            "cross_validation_config_paths": sorted(
-                request.cross_validation_config_paths
-            ),
-            "cross_validation_quarantine_policy": _resolve_policy_value(
-                request.cross_validation_quarantine_policies
-            ),
-            "cross_validation_quarantine_replay_contract": _resolve_policy_value(
-                request.cross_validation_replay_contracts
-            ),
-            "occurrence_only_diagnostics": sorted(
-                request.occurrence_only_diagnostic_scopes
-            ),
-            "resume_diagnostics": request.resume_diagnostics,
-            "cross_validation_signal_present": (
-                request.cross_validation_signal_present
-            ),
-            "correlation_anchor_gaps": request.correlation_anchor_gaps,
-            "identity_graph_complete": (
-                request.missing_link_count == 0
-                and not any(request.correlation_anchor_gaps.values())
-            ),
-            "identity_graph": identity_graph,
-            "persistence_profile": persistence_profile,
-            "alert_signals": alert_signals,
-            "next_steps": next_steps,
-        }
+        _build_final_summary_updates(
+            request,
+            identity_graph=identity_graph,
+            persistence_profile=persistence_profile,
+            alert_signals=alert_signals,
+            next_steps=next_steps,
+        )
     )
     summary["reproducibility_audit_score"] = build_reproducibility_audit_scoring(
         summary

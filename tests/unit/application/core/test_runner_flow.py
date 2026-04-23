@@ -34,6 +34,17 @@ def test_record_run_finished_includes_execution_diagnostics() -> None:
             "adaptive_memory": {
                 "decision_count": 2,
                 "min_batch_size_used": 50,
+                "decision_trace": [
+                    {
+                        "decision_index": 1,
+                        "stage": "pressure_check",
+                        "old_batch_size": 1000,
+                        "new_batch_size": 500,
+                        "pressure_state": True,
+                        "monitor_mode": "psutil",
+                        "reason": "monitor_recommended_reduction",
+                    }
+                ],
             }
         }
     )
@@ -46,6 +57,17 @@ def test_record_run_finished_includes_execution_diagnostics() -> None:
             "adaptive_memory": {
                 "decision_count": 2,
                 "min_batch_size_used": 50,
+                "decision_trace": [
+                    {
+                        "decision_index": 1,
+                        "stage": "pressure_check",
+                        "old_batch_size": 1000,
+                        "new_batch_size": 500,
+                        "pressure_state": True,
+                        "monitor_mode": "psutil",
+                        "reason": "monitor_recommended_reduction",
+                    }
+                ],
             }
         },
     )
