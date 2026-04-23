@@ -12,7 +12,6 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Set
 
 # Test selection strategy based on file changes
 TEST_SELECTION_STRATEGY = {
@@ -73,9 +72,9 @@ TEST_SELECTION_STRATEGY = {
 }
 
 
-def detect_changed_files(git_diff_target: str = "HEAD") -> Set[str]:
+def detect_changed_files(git_diff_target: str = "HEAD") -> set[str]:
     """Detect changed files using git diff."""
-    
+
     try:
         result = subprocess.run(
             ["git", "diff", "--name-only", git_diff_target],
@@ -83,22 +82,22 @@ def detect_changed_files(git_diff_target: str = "HEAD") -> Set[str]:
             text=True,
             timeout=30
         )
-        
+
         if result.returncode != 0:
             print(f"⚠️  Git diff failed: {result.stderr}")
             return set()
-            
+
         changed_files = set(result.stdout.strip().split('\n'))
         changed_files.discard('')  # Remove empty entries
-        
+
         return changed_files
-        
+
     except (subprocess.TimeoutExpired, FileNotFoundError, Exception) as e:
         print(f"❌ Error detecting changed files: {e}")
         return set()
 
 
-def match_files_to_strategy(changed_files: Set[str]) -> List[str]:
+def match_files_to_strategy(changed_files: set[str]) -> list[str]:
     """Match changed files to test selection strategies."""
 
     matched_strategies = [
@@ -156,8 +155,8 @@ def _execute_strategy_command(strategy_name: str, cmd: list[str]) -> bool:
 
 
 def _strategy_matches_changed_files(
-    strategy: Dict[str, object],
-    changed_files: Set[str],
+    strategy: dict[str, object],
+    changed_files: set[str],
 ) -> bool:
     trigger_files = strategy.get("trigger_files", [])
     if not isinstance(trigger_files, list):
@@ -177,14 +176,14 @@ def _matches_trigger_pattern(trigger_pattern: str, changed_file: str) -> bool:
 
 
 def _append_python_strategy_if_needed(
-    matched_strategies: List[str],
-    changed_files: Set[str],
+    matched_strategies: list[str],
+    changed_files: set[str],
 ) -> None:
     if any(path.endswith(".py") for path in changed_files) and "python_files" not in matched_strategies:
         matched_strategies.append("python_files")
 
 
-def _run_pre_checks(strategy: Dict[str, object]) -> bool:
+def _run_pre_checks(strategy: dict[str, object]) -> bool:
     pre_checks = strategy.get("pre_check")
     if not isinstance(pre_checks, list):
         return True
@@ -213,7 +212,7 @@ def _run_pre_checks(strategy: Dict[str, object]) -> bool:
 
 
 def _build_pytest_command(
-    strategy: Dict[str, object],
+    strategy: dict[str, object],
     *,
     coverage: bool,
 ) -> list[str]:
@@ -227,46 +226,46 @@ def _build_pytest_command(
     return cmd
 
 
-def run_all_matched_strategies(changed_files: Set[str], coverage: bool = False) -> bool:
+def run_all_matched_strategies(changed_files: set[str], coverage: bool = False) -> bool:
     """Run all test strategies matched to changed files."""
-    
+
     if not changed_files:
         print("⚠️  No changed files detected. Running default test suite.")
         # Run a reasonable default set
         return run_tests_for_strategy("python_files", coverage)
-    
+
     print(f"🔍 Detected {len(changed_files)} changed files:")
     for f in sorted(changed_files):
         print(f"  • {f}")
-    
+
     matched_strategies = match_files_to_strategy(changed_files)
-    
+
     if not matched_strategies:
         print("⚠️  No specific test strategies matched. Running default tests.")
         return run_tests_for_strategy("python_files", coverage)
-    
+
     print(f"🎯 Matched {len(matched_strategies)} test strategies:")
     for strategy_name in matched_strategies:
         strategy = TEST_SELECTION_STRATEGY[strategy_name]
         print(f"  • {strategy_name}: {strategy['description']}")
-    
+
     all_passed = True
-    
+
     for strategy_name in matched_strategies:
         success = run_tests_for_strategy(strategy_name, coverage)
         if not success:
             all_passed = False
             # Don't stop on failure - run all matched strategies
-    
+
     return all_passed
 
 
 def list_available_strategies():
     """List all available test selection strategies."""
-    
+
     print("Available Test Selection Strategies:")
     print("=" * 60)
-    
+
     for name, strategy in TEST_SELECTION_STRATEGY.items():
         print(f"\n📋 {name}")
         print(f"   Description: {strategy['description']}")
@@ -278,56 +277,56 @@ def list_available_strategies():
 
 def main():
     """Main entry point."""
-    
+
     parser = argparse.ArgumentParser(
         description="Test Selection Strategy - Run appropriate tests based on file changes"
     )
-    
+
     parser.add_argument(
         "--git-target",
         default="HEAD",
         help="Git target for diff (default: HEAD)"
     )
-    
+
     parser.add_argument(
         "--coverage",
         action="store_true",
         help="Run with coverage analysis"
     )
-    
+
     parser.add_argument(
         "--list",
         action="store_true",
         help="List available test selection strategies"
     )
-    
+
     parser.add_argument(
         "--manual-files",
         nargs="+",
         help="Manually specify changed files instead of git diff"
     )
-    
+
     args = parser.parse_args()
-    
+
     if args.list:
         list_available_strategies()
         return
-    
+
     # Get changed files
     if args.manual_files:
         changed_files = set(args.manual_files)
     else:
         changed_files = detect_changed_files(args.git_target)
-    
+
     # Run appropriate tests
     success = run_all_matched_strategies(changed_files, args.coverage)
-    
+
     print("\n" + "=" * 60)
     if success:
         print("✅ All matched test strategies passed!")
     else:
         print("❌ Some test strategies failed!")
-    
+
     print("\n🎯 NEXT STEPS:")
     if not success:
         print("1. Review test failures and fix issues")
@@ -337,7 +336,7 @@ def main():
         print("1. Commit changes with confidence")
         print("2. Consider running broader test suites")
         print("3. Update test documentation if needed")
-    
+
     sys.exit(0 if success else 1)
 
 

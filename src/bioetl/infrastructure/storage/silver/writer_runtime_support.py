@@ -29,10 +29,7 @@ from bioetl.infrastructure.storage.delta.resilience import (
 from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
     SilverPostwriteOperations,
 )
-from bioetl.infrastructure.storage.silver.pipeline_helpers import (
-    _SilverWriteInvocation,
-    execute_silver_write_with_tracing,
-)
+from bioetl.infrastructure.storage.silver.pipeline_helpers import _SilverWriteInvocation
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
     SilverWriterRuntimeServices,
     SilverWriterRuntimeServicesRequest,
@@ -246,16 +243,18 @@ def _coerce_silver_write_invocation(
     return _SilverWriteInvocation(**payload)  # type: ignore[arg-type]
 
 
-async def _write_single_target(
+async def _write_single_target_impl(
     writer: _SilverWriterDispatchHost,
     *,
     invocation: _SilverWriteInvocation,
+    execute_with_tracing,
+    module_name: str,
 ):
     """Execute one physical Silver write target with tracing."""
     started_at, start_perf = datetime.now(UTC), time.perf_counter()
-    return await execute_silver_write_with_tracing(
+    return await execute_with_tracing(
         tracing=writer._tracing,
-        module_name="bioetl.infrastructure.storage.silver_writer",
+        module_name=module_name,
         invocation=invocation,
         started_at=started_at,
         start_perf=start_perf,

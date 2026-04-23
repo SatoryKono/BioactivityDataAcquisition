@@ -49,6 +49,7 @@ from bioetl.infrastructure.storage.silver.operations.validation_operations impor
 from bioetl.infrastructure.storage.silver.pipeline_helpers import (
     _SilverWriteExecutionContext,
     _SilverWriteInvocation,
+    execute_silver_write_with_tracing,
 )
 
 # SilverWriterPostwriteMixin removed from inheritance (composition pattern)
@@ -64,7 +65,7 @@ from bioetl.infrastructure.storage.silver.writer_runtime_support import (
     _resolve_runtime_services_for_writer,
     _rewire_runtime_services,
     _write_dual_targets,
-    _write_single_target,
+    _write_single_target_impl,
 )
 
 # Backward-compatible module aliases for tests patching historical symbols.
@@ -77,6 +78,20 @@ write_deltalake = _write_deltalake
 if TYPE_CHECKING:
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 __all__ = ["SilverWriteMode", "SilverWriter", "_SilverWriteExecutionContext"]
+
+
+async def _write_single_target(
+    writer: SilverWriter,
+    *,
+    invocation: _SilverWriteInvocation,
+) -> SilverWriteResult | None:
+    """Execute one physical Silver write target with root-module tracing seam."""
+    return await _write_single_target_impl(
+        writer,
+        invocation=invocation,
+        execute_with_tracing=execute_silver_write_with_tracing,
+        module_name=__name__,
+    )
 
 
 class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
