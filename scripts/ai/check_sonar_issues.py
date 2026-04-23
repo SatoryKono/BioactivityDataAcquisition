@@ -1,167 +1,112 @@
 #!/usr/bin/env python3
-"""Check whether historical Sonar remediation GitHub issues still look relevant."""
+"""Check whether the repository has a trustworthy current Sonar baseline."""
 
 from __future__ import annotations
 
-import json
-import os
-from datetime import UTC, datetime
-from typing import Final
+import argparse
+import sys
+from pathlib import Path
 
-import requests
-from dotenv import load_dotenv
+if __package__ in {None, ""}:
+    repo_root = Path(__file__).resolve().parents[2]
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
 
-load_dotenv()
-
-DEFAULT_REPO: Final[str] = "SatoryKono/BioactivityDataAcquisition"
-DEFAULT_ISSUES_TO_CHECK: Final[tuple[int, ...]] = (2988, 2987, 2986, 2985)
-EXPECTED_ISSUE_ERRORS: Final[tuple[type[Exception], ...]] = (
-    requests.exceptions.RequestException,
-    json.JSONDecodeError,
-    KeyError,
-    ValueError,
-    IndexError,
-)
-ERROR_LABELS: Final[tuple[tuple[type[Exception], str], ...]] = (
-    (requests.exceptions.RequestException, "Network error"),
-    (json.JSONDecodeError, "JSON decode error"),
-    (KeyError, "Missing expected field"),
-    (ValueError, "Expected error"),
-    (IndexError, "Expected error"),
+from scripts.ai.sonar_issue_processor import (
+    DEFAULT_CONFIG_PATH,
+    DEFAULT_SONAR_URL,
+    DEFAULT_TOKEN_ENV_VAR,
+    build_baseline_report,
 )
 
 
-def _github_headers(token: str | None, *, include_accept: bool = True) -> dict[str, str]:
-    headers: dict[str, str] = {}
-    if token:
-        headers["Authorization"] = f"token {token}"
-    if include_accept:
-        headers["Accept"] = "application/vnd.github.v3+json"
-    return headers
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Audit whether the current Sonar baseline is trustworthy.",
+    )
+    parser.add_argument(
+        "--config",
+        type=Path,
+        default=DEFAULT_CONFIG_PATH,
+        help="Path to sonar-project.properties.",
+    )
+    parser.add_argument(
+        "--sonar-url",
+        default=DEFAULT_SONAR_URL,
+        help="SonarQube / SonarCloud base URL.",
+    )
+    parser.add_argument(
+        "--token-env-var",
+        default=DEFAULT_TOKEN_ENV_VAR,
+        help="Environment variable that stores the Sonar token.",
+    )
+    parser.add_argument(
+        "--strict-live",
+        action="store_true",
+        help="Exit non-zero if a live Sonar measurement cannot be obtained.",
+    )
+    parser.add_argument(
+        "--max-quarantine-entries",
+        type=int,
+        help="Fail if sonar.exclusions grows above this file-count threshold.",
+    )
+    return parser
 
 
-def _issue_status_label(*, state: str, age_days: int, comments_count: int) -> str:
-    if age_days > 30 and comments_count == 0:
-        return "⚠️  STALE - No recent activity"
-    if state == "closed":
-        return "✅ COMPLETED"
-    return "🔄 ACTIVE"
+def main(argv: list[str] | None = None) -> int:
+    parser = _build_parser()
+    args = parser.parse_args(argv)
 
+    from os import getenv
 
-def _print_issue_summary(
-    issue_number: int,
-    issue: dict[str, object],
-    *,
-    comments_count: int,
-) -> None:
-    created_at = datetime.fromisoformat(str(issue["created_at"]).replace("Z", "+00:00"))
-    age_days = (datetime.now(UTC) - created_at).days
-    state = str(issue["state"])
-
-    print(f'\n📋 Issue #{issue_number}: {issue["title"]}')
-    print(f'Status: {"OPEN" if state == "open" else "CLOSED"}')
-    print(f"Age: {age_days} days old")
-    print(f"Comments: {comments_count}")
-    print(f'Updated: {issue["updated_at"]}')
-    print(f"Relevance: {_issue_status_label(state=state, age_days=age_days, comments_count=comments_count)}")
-
-    body = str(issue.get("body", "") or "")
-    if body:
-        first_line = body.split("\n", 1)[0][:80]
-        print(f"Content: {first_line}...")
-
-    print(f'URL: {issue["html_url"]}')
-
-
-def _fetch_issue(
-    repo: str,
-    github_token: str | None,
-    issue_number: int,
-) -> requests.Response:
-    return requests.get(
-        f"https://api.github.com/repos/{repo}/issues/{issue_number}",
-        headers=_github_headers(github_token),
-        timeout=30,
+    report = build_baseline_report(
+        config_path=args.config,
+        sonar_url=args.sonar_url,
+        token=getenv(args.token_env_var),
     )
 
+    quarantine = report["quarantine"]
+    live_issues = report["live_issues"]
+    assessment = report["assessment"]
 
-def _fetch_comments_count(
-    repo: str,
-    github_token: str | None,
-    issue_number: int,
-) -> int:
-    comments_response = requests.get(
-        f"https://api.github.com/repos/{repo}/issues/{issue_number}/comments",
-        headers=_github_headers(github_token, include_accept=False),
-        timeout=30,
+    print("Sonar baseline audit")
+    print("===================")
+    print(f"Config: {quarantine['config_path']}")
+    print(f"Quarantined files: {quarantine['entry_count']}")
+    print(
+        "Historical near-zero Sonar status stale: "
+        f"{'yes' if assessment['historical_near_zero_status_is_stale'] else 'no'}"
     )
-    if comments_response.status_code != 200:
-        return 0
-    return len(comments_response.json())
+    print("Top quarantine buckets:")
+    for bucket in quarantine["top_buckets"]:
+        print(f"  - {bucket['path_prefix']}: {bucket['count']}")
 
+    ratchet_failed = False
+    if args.max_quarantine_entries is not None:
+        ratchet_failed = quarantine["entry_count"] > args.max_quarantine_entries
+        print(
+            "Quarantine ratchet: "
+            f"{quarantine['entry_count']} / {args.max_quarantine_entries}"
+        )
+        if ratchet_failed:
+            print("Quarantine ratchet status: exceeded")
+        else:
+            print("Quarantine ratchet status: within limit")
 
-def _load_issue_details(
-    repo: str,
-    github_token: str | None,
-    issue_number: int,
-) -> tuple[dict[str, object] | None, int]:
-    response = _fetch_issue(repo, github_token, issue_number)
-    if response.status_code != 200:
-        return None, 0
-    issue = response.json()
-    comments_count = _fetch_comments_count(repo, github_token, issue_number)
-    return issue, comments_count
+    if live_issues["status"] == "ok":
+        print(f"Live unresolved issues: {live_issues['total']}")
+        print("Live baseline status: ready")
+        return 1 if ratchet_failed else 0
 
-
-def _report_issue_error(issue_number: int, exc: Exception) -> None:
-    for error_type, label in ERROR_LABELS:
-        if isinstance(exc, error_type):
-            print(f"\n❌ {label} checking issue #{issue_number}: {exc}")
-            return
-    print(f"\n❌ Unexpected error checking issue #{issue_number}: {exc}")
-
-
-def _is_expected_issue_error(exc: Exception) -> bool:
-    return isinstance(exc, EXPECTED_ISSUE_ERRORS)
-
-
-def _print_report_header() -> None:
-    print("🔍 Analyzing Sonar Remediation Issues Relevance")
-    print("=" * 60)
-
-
-def _print_report_footer() -> None:
-    print("\n" + "=" * 60)
-    print("📊 SUMMARY ANALYSIS")
-    print("=" * 60)
-    print("These issues appear to be part of a structured Sonar remediation program.")
-    print("The numbering suggests a wave-based approach to code quality improvement.")
-    print("\nRecommendation: Check if these issues are still relevant given current Sonar status.")
-
-
-def _process_issue(repo: str, github_token: str | None, issue_number: int) -> None:
-    try:
-        issue, comments_count = _load_issue_details(repo, github_token, issue_number)
-        if issue is None:
-            print(f"\n❌ Issue #{issue_number}: Not found or inaccessible")
-            return
-        _print_issue_summary(issue_number, issue, comments_count=comments_count)
-    except Exception as exc:
-        _report_issue_error(issue_number, exc)
-        if not _is_expected_issue_error(exc):
-            raise
-
-
-def main() -> None:
-    github_token = os.getenv("GITHUB_TOKEN")
-    repo = os.getenv("GITHUB_REPO", DEFAULT_REPO)
-    _print_report_header()
-
-    for issue_number in DEFAULT_ISSUES_TO_CHECK:
-        _process_issue(repo, github_token, issue_number)
-
-    _print_report_footer()
+    print("Live baseline status: not ready")
+    print(f"Reason: {live_issues.get('reason', 'unknown')}")
+    message = live_issues.get("message")
+    if message:
+        print(f"Message: {message}")
+    if ratchet_failed:
+        return 1
+    return 1 if args.strict_live else 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

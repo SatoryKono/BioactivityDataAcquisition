@@ -12,6 +12,7 @@ import shlex
 import subprocess
 import sys
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from functools import lru_cache
@@ -798,7 +799,26 @@ def _maybe_ingest_rollup_junit(
 
 def _print_rollup_console_summary(rollup: dict[str, Any]) -> None:
     print(f"Test health rollup: last {rollup['run_count']} runs")
-    for suite, stats in sorted(rollup["suites"].items()):
+    _print_rollup_suite_stats(rollup["suites"])
+    _print_named_count_section(
+        heading="Failure classifications:",
+        counts=rollup["classification_counts"],
+        formatter=lambda classification, count: f"- {classification}: {count}",
+    )
+    _print_named_list_section(
+        heading="Flaky candidates:",
+        items=rollup["flaky_candidates"][:10],
+    )
+    _print_new_failures_section(rollup["new_failures"])
+    _print_named_count_section(
+        heading="Top failing nodeids:",
+        counts=rollup["top_failing_nodeids"],
+        formatter=lambda nodeid, count: f"- {count}x {nodeid}",
+    )
+
+
+def _print_rollup_suite_stats(suites: dict[str, dict[str, Any]]) -> None:
+    for suite, stats in sorted(suites.items()):
         print(
             f"- {suite}: runs={stats['run_count']} "
             f"non_green={stats['failure_count']} "
@@ -807,23 +827,36 @@ def _print_rollup_console_summary(rollup: dict[str, Any]) -> None:
             f"unique_failing_tests={stats['unique_failing_tests']} "
             f"skipped={stats['skipped']}"
         )
-    if rollup["classification_counts"]:
-        print("Failure classifications:")
-        for classification, count in rollup["classification_counts"].items():
-            print(f"- {classification}: {count}")
-    if rollup["flaky_candidates"]:
-        print("Flaky candidates:")
-        for nodeid in rollup["flaky_candidates"][:10]:
-            print(f"- {nodeid}")
-    if rollup["new_failures"]:
-        print("New failures:")
-        for suite, nodeids in sorted(rollup["new_failures"].items()):
-            for nodeid in nodeids[:10]:
-                print(f"- {suite}: {nodeid}")
-    if rollup["top_failing_nodeids"]:
-        print("Top failing nodeids:")
-        for nodeid, count in rollup["top_failing_nodeids"].items():
-            print(f"- {count}x {nodeid}")
+
+
+def _print_named_count_section(
+    *,
+    heading: str,
+    counts: dict[str, int],
+    formatter: Callable[[str, int], str],
+) -> None:
+    if not counts:
+        return
+    print(heading)
+    for name, count in counts.items():
+        print(formatter(name, count))
+
+
+def _print_named_list_section(*, heading: str, items: list[str]) -> None:
+    if not items:
+        return
+    print(heading)
+    for item in items:
+        print(f"- {item}")
+
+
+def _print_new_failures_section(new_failures: dict[str, list[str]]) -> None:
+    if not new_failures:
+        return
+    print("New failures:")
+    for suite, nodeids in sorted(new_failures.items()):
+        for nodeid in nodeids[:10]:
+            print(f"- {suite}: {nodeid}")
 
 
 def _write_rollup_markdown_outputs(

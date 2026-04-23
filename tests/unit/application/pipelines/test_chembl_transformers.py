@@ -109,6 +109,29 @@ class TestAssayTransformer:
         assert result["assay_organism"] == "Homo sapiens"
 
     @pytest.mark.asyncio
+    async def test_transform_pre_silver_keeps_raw_bao_label_until_profile_normalization(
+        self, transformer, mock_context
+    ):
+        """Transformer should stage raw bao_label and let the profile resolve it."""
+        record = {
+            "assay_id": "CHEMBL1234567",
+            "target_id": "CHEMBL123",
+            "publication_id": "CHEMBL456",
+            "bao_format": " bao:0000357 ",
+            "bao_label": "  noisy label  ",
+        }
+
+        staged = await transformer.transform_pre_silver(mock_context, record, index=0)
+        assert staged is not None
+        assert staged.business_data["bao_label"] == "  noisy label  "
+        assert staged.business_data["bao_format"] == " bao:0000357 "
+
+        finalized = await transformer.transform(mock_context, record, index=0)
+        assert finalized is not None
+        assert finalized["bao_format"] == "BAO_0000357"
+        assert finalized["bao_label"] == "single protein format"
+
+    @pytest.mark.asyncio
     async def test_transform_missing_assay_id(self, transformer, mock_context):
         """Test transformation returns None when assay_id is missing."""
         record = {

@@ -1,215 +1,123 @@
-# SonarQube Issue Processor
+# Sonar Baseline Tooling
 
-## Overview
+## Purpose
 
-This solution automates the process of extracting SonarQube issues, grouping them by architectural layers, and creating GitHub issues for each layer. It helps teams efficiently track and resolve code quality issues.
+The Sonar tooling under `scripts/ai/` is used to make the repository's Sonar
+status reproducible from local evidence instead of relying on stale GitHub issue
+notes or manual screenshots.
 
-## Files Created
+The canonical workflow now has two parts:
 
-### 1. `sonar_issue_processor.py`
-**Main script** that performs the complete workflow:
-- Fetches SonarQube issues via API
-- Groups issues by project layers
-- Creates GitHub issues automatically
-- Provides detailed reporting
+1. `scripts/ai/sonar_issue_processor.py`
+   - parses `sonar-project.properties`
+   - measures the active `sonar.exclusions` quarantine
+   - attempts a live SonarCloud / SonarQube unresolved-issues query
+   - emits a JSON baseline report
 
-### 2. `sonar_issue_processor_demo.py`
-**Demo version** that simulates the workflow without requiring real API credentials. Perfect for testing and understanding how the system works.
+2. `scripts/ai/check_sonar_issues.py`
+   - prints a concise audit summary
+   - highlights whether the historical near-zero Sonar status should be treated
+     as stale
+   - optionally fails if a live Sonar baseline cannot be fetched
 
-### 3. `improved_sonar_prompt.md`
-**Enhanced prompt** documenting the complete workflow and requirements.
+## Current BioETL assumptions
 
-## How It Works
+- canonical Sonar config lives in `sonar-project.properties`
+- supported analysis scope is `src/bioetl`
+- broad `sonar.exclusions` means the live issue count alone is not enough to
+  describe the real debt surface
+- the top-level Sonar remediation program should track both:
+  - live unresolved issue counts
+  - quarantine burn-down over time
 
-### Step-by-Step Process
+## Usage
 
-1. **Fetch SonarQube Issues**
-   - Connects to SonarQube/SonarCloud API
-   - Retrieves all unresolved issues
-   - Includes full issue details (severity, type, location, message)
-
-2. **Group by Architectural Layers**
-   - **Frontend**: `src/frontend`, `src/ui`, `src/components`
-   - **Backend**: `src/backend`, `src/api`, `src/services`
-   - **Database**: `src/database`, `src/models`, `src/repositories`
-   - **Tests**: `src/tests`, `test`, `tests`
-   - **Configuration**: `config`, `src/config`
-   - **Utilities**: `src/utils`, `src/helpers`, `src/common`
-   - **Unclassified**: Files not matching any pattern
-
-3. **Create GitHub Issues**
-   - One issue per layer with problems
-   - Detailed issue information in markdown format
-   - Appropriate labels (`sonarqube`, `quality`, `{layer}`)
-   - Clear action items for resolution
-
-4. **Generate Summary Report**
-   - Total issues processed
-   - Issues per layer breakdown
-   - GitHub issue URLs created
-   - Error reporting
-
-## Demo Execution
-
-The demo shows exactly how the system would work with real data:
+### Build a JSON baseline report
 
 ```bash
-python3 sonar_issue_processor_demo.py
+python3 scripts/ai/sonar_issue_processor.py --write
 ```
 
-**Demo Output Example:**
-```
-🚀 Starting SonarQube Issue Processor Demo
-==================================================
-🔍 Simulating SonarQube API call for project: bioactivitydataacquisition2
-✅ Found 5 simulated SonarQube issues
+This writes the report to:
 
-📊 Issue Distribution by Layer:
-----------------------------------------
-  frontend    :  1 issues
-  backend     :  2 issues
-  database    :  1 issues
-  utils       :  1 issues
-
-🎯 Creating GitHub Issues:
-----------------------------------------
-📝 Simulating GitHub issue creation for frontend layer...
-    Title: SonarQube Issues: frontend layer (1 issues)
-    Issues: [MINOR] Unused variable 'temp' (src/frontend/components/UserProfile.jsx:15)
+```text
+reports/quality/sonar_baseline_report.json
 ```
 
-## Real Execution
-
-To run with real SonarQube and GitHub data:
-
-### Option 1: Using .env file (recommended)
-
-1. Create/edit `.env` file in your project root:
-```bash
-# SonarCloud Configuration
-SONARQUBE_TOKEN="your-sonarcloud-token"
-GITHUB_TOKEN="your-github-token"
-```
-
-2. Run the processor:
-```bash
-python3 sonar_issue_processor.py
-```
-
-### Option 2: Using environment variables
+### Print a human-readable Sonar baseline audit
 
 ```bash
-# Set required environment variables
-export SONARQUBE_TOKEN="your-sonarcloud-token"
-export GITHUB_TOKEN="your-github-token"
-
-# Run the processor
-python3 sonar_issue_processor.py
+python3 scripts/ai/check_sonar_issues.py
 ```
 
-## Customization
+### Require live Sonar measurement
 
-### Layer Mapping
-Modify the `LAYER_MAPPING` dictionary in `sonar_issue_processor.py` to match your project structure:
-
-```python
-LAYER_MAPPING = {
-    "frontend": ["src/frontend", "src/ui", "src/components"],
-    "backend": ["src/backend", "src/api", "src/services"],
-    # Add your custom layers here
-}
+```bash
+python3 scripts/ai/check_sonar_issues.py --strict-live
 ```
 
-### Issue Filtering
-Adjust the API parameters to filter by specific severities or types:
+This exits non-zero if the script cannot fetch a live unresolved-issues summary.
 
-```python
-params = {
-    "componentKeys": project_key,
-    "severities": "CRITICAL,MAJOR",  # Only critical and major issues
-    "types": "BUG,VULNERABILITY",     # Only bugs and vulnerabilities
-    "resolved": "false"
-}
+### Enforce quarantine ratchet
+
+```bash
+python3 scripts/ai/check_sonar_issues.py --max-quarantine-entries 184
 ```
 
-### GitHub Configuration
-Change the repository and issue template:
+This exits non-zero if `sonar.exclusions` grows above the configured threshold.
+Lower the threshold only when a remediation wave actually removes entries from the
+quarantine.
 
-```python
-GITHUB_REPO = os.getenv("GITHUB_REPO", "your-repo-name")
+## Environment variables
+
+The scripts read Sonar credentials from:
+
+```bash
+SONARQUBE_TOKEN
+SONARQUBE_URL   # optional, defaults to https://sonarcloud.io
+SONARQUBE_ORG   # optional metadata only
 ```
 
-## Requirements
+If your repo environment normalizes `SONAR_TOKEN` into `SONARQUBE_TOKEN`, that
+also works as long as the final process environment contains `SONARQUBE_TOKEN`.
 
-- Python 3.7+
-- `requests` library (usually pre-installed)
-- SonarQube/SonarCloud account with API access
-- GitHub account with repository access
+## Example report fields
 
-## Benefits
+The JSON report includes:
 
-1. **Automated Workflow**: No manual issue tracking
-2. **Architectural Focus**: Issues grouped by logical layers
-3. **Detailed Documentation**: Full issue context in GitHub tickets
-4. **Traceability**: Direct link between SonarQube and GitHub
-5. **Prioritization**: Clear severity indicators
-6. **Team Efficiency**: Developers can focus on specific layers
+- `project.project_key`
+- `project.sonar_url`
+- `quarantine.entry_count`
+- `quarantine.entries`
+- `quarantine.buckets`
+- `quarantine.top_buckets`
+- `live_issues.status`
+- `live_issues.total`
+- `assessment.historical_near_zero_status_is_stale`
 
-## Example GitHub Issue Format
+## Interpreting results
 
-```markdown
-# SonarQube Issues in Backend Layer
+### `live_issues.status = "ok"`
 
-**Total Issues:** 2
+The tool fetched a current unresolved-issues summary from Sonar.
 
-## Issues Detail
+### `live_issues.status = "skipped"`
 
-### Issue 1
-- **Severity:** MAJOR
-- **Type:** BUG
-- **Location:** `src/backend/services/UserService.java:42`
-- **Message:** Potential null pointer dereference
+No Sonar token was available in the environment.
 
-### Issue 2
-- **Severity:** CRITICAL
-- **Type:** VULNERABILITY
-- **Location:** `src/backend/api/UserController.java:87`
-- **Message:** SQL injection vulnerability
+### `live_issues.status = "error"`
 
-## Action Required
-- Review and fix the identified issues
-- Update code to comply with quality standards
-- Run SonarQube analysis after fixes to verify resolution
-```
+The tool could not fetch a live baseline. Common reasons:
 
-## Troubleshooting
+- invalid token
+- insufficient token permissions
+- wrong SonarCloud / SonarQube URL
+- network failure
 
-### Missing Environment Variables
-```
-❌ SonarQube configuration missing. Please set SONARQUBE_ORG and SONARQUBE_TOKEN.
-```
-**Solution**: Set the required environment variables before running.
+## Non-goals
 
-### API Connection Issues
-```
-Error fetching SonarQube issues: 401 Unauthorized
-```
-**Solution**: Verify your SonarQube token has proper permissions.
+This tooling does not create GitHub issues automatically anymore.
 
-### GitHub API Errors
-```
-Error creating GitHub issue: 404 Not Found
-```
-**Solution**: Check your GitHub token and repository name.
-
-## Future Enhancements
-
-- Add JIRA integration option
-- Support for multiple projects
-- Issue assignment based on layer ownership
-- Automatic issue updates when SonarQube issues are resolved
-- Slack/Teams notifications for new issues
-
-## License
-
-This solution is provided as-is and can be freely used and modified for your projects.
+The previous generic layer-based issue creator (`frontend/backend/database`) was
+not aligned with the BioETL architecture and should not be treated as the active
+workflow for the repository.

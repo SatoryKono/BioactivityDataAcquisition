@@ -127,7 +127,11 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
             if self._is_passthrough_field(field_name):
                 normalized[field_name] = value
                 continue
-            normalized[field_name] = self._normalize_field_value(field_name, value)
+            normalized[field_name] = self._normalize_field_value(
+                field_name,
+                value,
+                record,
+            )
         return normalized
 
     def _is_passthrough_field(self, field_name: str) -> bool:
@@ -137,10 +141,15 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
             return self._profile_rule(field_name) is None
         return False
 
-    def _normalize_field_value(self, field_name: str, value: object) -> object:
+    def _normalize_field_value(
+        self,
+        field_name: str,
+        value: object,
+        record: JsonDict,
+    ) -> object:
         profile_rule = self._profile_rule(field_name)
         if profile_rule is not None:
-            return self._normalize_profile_field_value(profile_rule, value)
+            return self._normalize_profile_field_value(profile_rule, value, record)
         if self._should_forbid_fallback(field_name):
             self._raise_profile_gap(field_name)
         normalized_special = self._normalize_special_field(field_name, value)
@@ -176,8 +185,13 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
             return None
         return self.profile.rule_for(field_name)
 
-    def _normalize_profile_field_value(self, rule: FieldRule, value: object) -> object:
-        normalized = rule.apply(value)
+    def _normalize_profile_field_value(
+        self,
+        rule: FieldRule,
+        value: object,
+        record: JsonDict,
+    ) -> object:
+        normalized = rule.apply(value, record=record)
         if isinstance(normalized, dict | list):
             return serialize_json_canonical(normalized)
         return normalized

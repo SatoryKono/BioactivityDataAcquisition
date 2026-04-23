@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import inspect
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from functools import cache
 
 from bioetl.domain.normalization.profiles._standard_profile_rule_families import (
     RuleFamilyFieldSets,
@@ -17,7 +19,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_unit,
 )
 
-FieldNormalizer = Callable[[object], object]
+FieldNormalizer = Callable[..., object]
 RuleComponent = tuple[FieldNormalizer, str]
 RuleComponentSpec = RuleComponent | tuple[FieldNormalizer] | FieldNormalizer
 
@@ -25,6 +27,15 @@ _DEFAULT_RULE_COMPONENT: RuleComponent = (
     normalize_profile_text,
     "Trim and collapse blank textual values to None where applicable.",
 )
+
+
+@cache
+def _normalizer_accepts_record_context(normalizer: FieldNormalizer) -> bool:
+    try:
+        parameter_count = len(inspect.signature(normalizer).parameters)
+    except (TypeError, ValueError):
+        return False
+    return parameter_count >= 2
 
 
 @dataclass(frozen=True, slots=True)
@@ -181,10 +192,15 @@ def _compose_null_aware_rule(
 ) -> RuleComponent:
     base_normalizer, base_notes = base_rule
 
-    def _normalize(value: object) -> object:
+    def _normalize(
+        value: object,
+        record: Mapping[str, object] | None = None,
+    ) -> object:
         null_normalized = normalize_profile_null(value)
         if null_normalized is None:
             return None
+        if record is not None and _normalizer_accepts_record_context(base_normalizer):
+            return base_normalizer(null_normalized, record)
         return base_normalizer(null_normalized)
 
     _normalize.__name__ = getattr(base_normalizer, "__name__", "_normalize")

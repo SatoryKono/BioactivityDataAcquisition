@@ -25,7 +25,6 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import Assay
-from bioetl.domain.normalization.chembl import normalize_bao_label
 from bioetl.domain.transformations import (
     safe_float,
     safe_str,
@@ -34,9 +33,6 @@ from bioetl.domain.value_objects import validate_taxonomy_id
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId
-
-OptionalString = str | None
-
 
 # Mapping for variant sequence fields extraction (from ChEMBL nested structure)
 # Source field is 'tax_id' from API, will be renamed to 'taxonomy_id' via renames
@@ -211,9 +207,5 @@ class AssayTransformer(BaseChemblTransformer):
         business_data["cell_id"] = business_data.get("cell_id") or record.get("cell_id")
         business_data["tissue_id"] = business_data.get("tissue_id") or record.get(
             "tissue_id"
-        )
-        business_data["bao_label"] = normalize_bao_label(
-            cast(OptionalString, business_data.get("bao_label")),
-            bao_identifier=cast(OptionalString, business_data.get("bao_format")),
         )
         return business_data

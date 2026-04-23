@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-23T16:05:10.455002+00:00",
+  "generated_at": "2026-04-23T16:12:35.486080+00:00",
   "summary": {
     "total_scripts": 436,
     "status_counts": {
@@ -12,7 +12,7 @@
     "reference_group_coverage": {
       "agents": 4,
       "build": 1,
-      "ci": 51,
+      "ci": 52,
       "docs": 136,
       "scripts": 287,
       "skills": 8,
@@ -58,8 +58,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
+        {
+          "path": ".github/workflows/sonarcloud.yml",
+          "line": 39,
+          "source_group": "ci",
+          "text": "python3 scripts/ai/check_sonar_issues.py \\"
+        },
         {
           "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
           "line": 17,

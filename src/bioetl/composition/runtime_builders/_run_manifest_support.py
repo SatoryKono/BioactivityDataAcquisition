@@ -63,7 +63,6 @@ def build_run_source_refs(
     input_snapshots = _build_cached_bronze_snapshot_refs(
         cached_bronze=cached_bronze,
         settings=settings,
-        pipeline_name=ctx.pipeline_name,
         provider=provider,
         entity=entity,
     )
@@ -99,7 +98,6 @@ def _build_cached_bronze_snapshot_refs(
     *,
     cached_bronze: object | None,
     settings: Settings,
-    pipeline_name: str,
     provider: str,
     entity: str,
 ) -> tuple[RunInputSnapshotRef, ...]:
