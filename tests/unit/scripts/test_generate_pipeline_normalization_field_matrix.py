@@ -257,13 +257,21 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     assert standard_flag["dq_coverage"] == "range:error"
 
     activity_properties = _row(rows, "chembl_activity", "activity_properties")
-    assert activity_properties["normalizer"] == "normalize_profile_json_string"
+    assert activity_properties["normalizer"] == "normalize_profile_json_string_strict"
     assert activity_properties["hash_ordering"] == "set_like"
-    assert activity_properties["strictness"] == "canonical_json"
+    assert activity_properties["strictness"] == "strict_json"
 
     activity_units = _row(rows, "chembl_activity", "units")
     assert activity_units["normalizer"] == "normalize_profile_unit"
     assert activity_units["strictness"] == "controlled_unit"
+
+    target_cross_references = _row(rows, "chembl_target", "cross_references")
+    assert target_cross_references["normalizer"] == "normalize_profile_json_string_strict"
+    assert target_cross_references["strictness"] == "strict_json"
+
+    molecule_properties = _row(rows, "chembl_molecule", "molecule_properties")
+    assert molecule_properties["normalizer"] == "normalize_profile_json_string_strict"
+    assert molecule_properties["strictness"] == "strict_json"
 
     bao_format = _row(rows, "chembl_activity", "bao_format")
     assert bao_format["controlled_vocabulary_source"] == (

@@ -6,6 +6,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 
 from bioetl.domain.normalization.profiles._standard_profile_rule_families import (
+    RuleFamilyFieldSets,
     _rule_family_specs,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
@@ -195,39 +196,9 @@ def _compose_null_aware_rule(
 
 def _handle_field_families(
     field_name: str,
-    title_fields: frozenset[str],
-    abstract_fields: frozenset[str],
-    doi_fields: frozenset[str],
-    pmid_fields: frozenset[str],
-    pmc_id_fields: frozenset[str],
-    date_fields: frozenset[str],
-    int_fields: frozenset[str],
-    float_fields: frozenset[str],
-    set_like_fields: frozenset[str],
-    json_string_fields: frozenset[str],
-    strict_json_fields: frozenset[str],
-    boolean_fields: frozenset[str],
-    flag_fields: frozenset[str],
-    operator_fields: frozenset[str],
-    ontology_id_fields: frozenset[str],
+    field_sets: RuleFamilyFieldSets,
 ) -> RuleComponent | None:
-    for fields, normalizer, notes in _rule_family_specs(
-        title_fields=title_fields,
-        abstract_fields=abstract_fields,
-        doi_fields=doi_fields,
-        pmid_fields=pmid_fields,
-        pmc_id_fields=pmc_id_fields,
-        date_fields=date_fields,
-        int_fields=int_fields,
-        float_fields=float_fields,
-        set_like_fields=set_like_fields,
-        json_string_fields=json_string_fields,
-        strict_json_fields=strict_json_fields,
-        boolean_fields=boolean_fields,
-        flag_fields=flag_fields,
-        operator_fields=operator_fields,
-        ontology_id_fields=ontology_id_fields,
-    ):
+    for fields, normalizer, notes in _rule_family_specs(field_sets=field_sets):
         if field_name in fields:
             return normalizer, notes
     return None
@@ -261,21 +232,23 @@ def _resolve_base_rule(
         lambda: _handle_unit_fields(field_name, context.unit_fields),
         lambda: _handle_field_families(
             field_name=field_name,
-            title_fields=context.title_fields,
-            abstract_fields=context.abstract_fields,
-            doi_fields=context.doi_fields,
-            pmid_fields=context.pmid_fields,
-            pmc_id_fields=context.pmc_id_fields,
-            date_fields=context.date_fields,
-            int_fields=context.int_fields,
-            float_fields=context.float_fields,
-            set_like_fields=context.set_like_fields,
-            json_string_fields=context.json_string_fields,
-            strict_json_fields=context.strict_json_fields,
-            boolean_fields=context.boolean_fields,
-            flag_fields=context.flag_fields,
-            operator_fields=context.operator_fields,
-            ontology_id_fields=context.ontology_id_fields,
+            field_sets=(
+                context.title_fields,
+                context.abstract_fields,
+                context.doi_fields,
+                context.pmid_fields,
+                context.pmc_id_fields,
+                context.date_fields,
+                context.int_fields,
+                context.float_fields,
+                context.set_like_fields,
+                context.json_string_fields,
+                context.strict_json_fields,
+                context.boolean_fields,
+                context.flag_fields,
+                context.operator_fields,
+                context.ontology_id_fields,
+            ),
         ),
     )
     for handler in handlers:

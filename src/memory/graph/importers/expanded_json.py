@@ -30,10 +30,12 @@ PATH_REF_PATTERN = re.compile(
 )
 ADR_REF_PATTERN = re.compile(r"\bADR-(\d{3})\b", re.IGNORECASE)
 ADR_LIFECYCLE_FIELD_PATTERN = re.compile(
-    r"^\s*(?:[*_`#>\-\s]*)(supersedes|superseded by|amends|amended by)\s*:",
+    r"^\s*[*_`#>\-\s]*(supersedes|superseded by|amends|amended by)\s*:",
     re.IGNORECASE,
 )
 RUNBOOK_EXCLUDED_STEMS = frozenset({"index"})
+CONFIGS_DIR_PREFIX = "configs/"
+ADR_DOC_GLOB = "ADR-*.md"
 
 
 def default_expanded_graph_path(root: Path) -> Path:
@@ -360,7 +362,7 @@ def iter_config_test_relation_records(
         if source_node is None:
             continue
         config_path = _node_source_path(source_node)
-        if not config_path.startswith("configs/"):
+        if not config_path.startswith(CONFIGS_DIR_PREFIX):
             continue
         for test_path in sorted(
             str(path) for path in test_paths if isinstance(path, str)
@@ -429,44 +431,15 @@ def iter_pipeline_artifact_relation_records(
     snapshot_generated_at = str(meta.get("generated_at") or "unknown")
     records: list[dict[str, Any]] = []
     for edge_id, edge in edges.items():
-        if edge.get("edge_type") != "writes_to":
-            continue
-        source_id = str(edge.get("source") or "")
-        target_id = str(edge.get("target") or "")
-        source_node = nodes.get(source_id) or {}
-        target_node = nodes.get(target_id) or {}
-        if str(source_node.get("node_type") or "") not in PIPELINE_NODE_TYPES:
-            continue
-        source_ref = _entity_ref(source_node, source_id)
-        target_ref = _entity_ref(target_node, target_id)
-        target_entity_id = (
-            target_ref
-            if target_ref.startswith("artifact:")
-            else f"artifact:{target_ref}"
+        record = _pipeline_artifact_relation_record(
+            edge_id=edge_id,
+            edge=edge,
+            nodes=nodes,
+            source_snapshot=source_snapshot,
+            snapshot_generated_at=snapshot_generated_at,
         )
-        records.append(
-            {
-                "id": f"{source_ref}|emits_artifact|{target_entity_id}",
-                "source_id": source_ref,
-                "source_name": _node_display_name(source_node, source_id),
-                "source_kind": str(source_node.get("node_type") or "Unknown"),
-                "source_path": _node_source_path(source_node),
-                "target_id": target_entity_id,
-                "target_name": _node_display_name(target_node, target_id),
-                "target_kind": "Artifact",
-                "target_path": _node_source_path(target_node),
-                "relation": "emits_artifact",
-                "confidence": "derived",
-                "provenance": "bioetl_knowledge_graph_expanded.writes_to",
-                "source_snapshot": source_snapshot,
-                "source_generated_at": snapshot_generated_at,
-                "edge_id": str(edge_id),
-                "description": str(edge.get("description") or ""),
-                "evidence": edge.get("meta")
-                if isinstance(edge.get("meta"), dict)
-                else {},
-            }
-        )
+        if record is not None:
+            records.append(record)
     return records
 
 
@@ -480,7 +453,7 @@ def iter_adr_constraint_relation_records(
     if not decisions_dir.is_dir():
         return []
     records: list[dict[str, Any]] = []
-    for adr_path in sorted(decisions_dir.glob("ADR-*.md")):
+    for adr_path in sorted(decisions_dir.glob(ADR_DOC_GLOB)):
         relative_adr_path = adr_path.relative_to(repo_root).as_posix()
         text = adr_path.read_text(encoding="utf-8")
         for target_path in sorted(_explicit_path_refs(text)):
@@ -557,50 +530,26 @@ def iter_adr_lifecycle_relation_records(
     decisions_dir = repo_root / "docs" / "02-architecture" / "decisions"
     if not decisions_dir.is_dir():
         return []
-    adr_paths = {
-        _adr_number(path): path
-        for path in sorted(decisions_dir.glob("ADR-*.md"))
-        if _adr_number(path) is not None
-    }
+    adr_paths = _adr_paths_by_number(decisions_dir)
     records: list[dict[str, Any]] = []
-    for adr_path in sorted(decisions_dir.glob("ADR-*.md")):
+    for adr_path in sorted(decisions_dir.glob(ADR_DOC_GLOB)):
         source_number = _adr_number(adr_path)
         if source_number is None:
             continue
         source_relative_path = adr_path.relative_to(repo_root).as_posix()
         text = adr_path.read_text(encoding="utf-8")
         for field, target_number in _iter_adr_lifecycle_refs(text):
-            target_path = adr_paths.get(target_number)
-            if target_path is None:
-                continue
-            relation = "amends" if "amend" in field else "supersedes"
-            if field in {"superseded by", "amended by"}:
-                source_path = target_path
-                target_relative_path = source_relative_path
-            else:
-                source_path = adr_path
-                target_relative_path = target_path.relative_to(repo_root).as_posix()
-            source_relative = source_path.relative_to(repo_root).as_posix()
-            records.append(
-                _path_relation_record(
-                    source_path=source_relative,
-                    source_kind="ADR",
-                    source_id=f"adr:{source_relative}",
-                    source_name=source_path.stem,
-                    target_path=target_relative_path,
-                    target_kind="ADR",
-                    target_id=f"adr:{target_relative_path}",
-                    target_name=Path(target_relative_path).stem,
-                    relation=relation,
-                    confidence="derived",
-                    provenance="docs/02-architecture/decisions.lifecycle_metadata",
-                    source_snapshot=source_snapshot,
-                    evidence={
-                        "declaring_adr_path": source_relative_path,
-                        "field": field,
-                    },
-                )
+            record = _adr_lifecycle_relation_record(
+                adr_path=adr_path,
+                adr_paths=adr_paths,
+                declaring_path=source_relative_path,
+                field=field,
+                target_number=target_number,
+                repo_root=repo_root,
+                source_snapshot=source_snapshot,
             )
+            if record is not None:
+                records.append(record)
     return records
 
 
@@ -831,7 +780,7 @@ def _explicit_config_path_refs(text: str) -> set[str]:
     return {
         path
         for path in _explicit_path_refs(text)
-        if path.startswith("configs/")
+        if path.startswith(CONFIGS_DIR_PREFIX)
         and Path(path).suffix in {".yaml", ".yml", ".json"}
     }
 
@@ -843,7 +792,7 @@ def _path_entity_id(path: str) -> str:
 def _path_entity_kind(path: str) -> str:
     if path.startswith("src/"):
         return "File"
-    if path.startswith("configs/"):
+    if path.startswith(CONFIGS_DIR_PREFIX):
         return "Config"
     if path.startswith("tests/"):
         return "Test"
@@ -1375,20 +1324,138 @@ def _bounded_relation_neighborhood(
         current, current_depth = queue.popleft()
         if current_depth >= depth:
             continue
-        for relation in relations_for_entry(entries.get(current, {})):
-            relation_id = str(relation.get("id") or "")
-            if relation_id in seen_edge_ids:
-                continue
-            seen_edge_ids.add(relation_id)
-            edges.append(relation)
-            neighbor = neighbor_for_relation(relation, current)
-            if neighbor not in visited:
-                visited.add(neighbor)
-                queue.append((neighbor, current_depth + 1))
-            if len(edges) >= limit:
-                break
+        _append_bounded_relations(
+            current=current,
+            current_depth=current_depth,
+            entries=entries,
+            relations_for_entry=relations_for_entry,
+            neighbor_for_relation=neighbor_for_relation,
+            seen_edge_ids=seen_edge_ids,
+            visited=visited,
+            queue=queue,
+            edges=edges,
+            limit=limit,
+        )
 
     return sorted(visited), edges
+
+
+def _pipeline_artifact_relation_record(
+    *,
+    edge_id: object,
+    edge: dict[str, Any],
+    nodes: dict[str, dict[str, Any]],
+    source_snapshot: str,
+    snapshot_generated_at: str,
+) -> dict[str, Any] | None:
+    if edge.get("edge_type") != "writes_to":
+        return None
+    source_id = str(edge.get("source") or "")
+    target_id = str(edge.get("target") or "")
+    source_node = nodes.get(source_id) or {}
+    if str(source_node.get("node_type") or "") not in PIPELINE_NODE_TYPES:
+        return None
+    target_node = nodes.get(target_id) or {}
+    source_ref = _entity_ref(source_node, source_id)
+    target_ref = _entity_ref(target_node, target_id)
+    target_entity_id = (
+        target_ref if target_ref.startswith("artifact:") else f"artifact:{target_ref}"
+    )
+    return {
+        "id": f"{source_ref}|emits_artifact|{target_entity_id}",
+        "source_id": source_ref,
+        "source_name": _node_display_name(source_node, source_id),
+        "source_kind": str(source_node.get("node_type") or "Unknown"),
+        "source_path": _node_source_path(source_node),
+        "target_id": target_entity_id,
+        "target_name": _node_display_name(target_node, target_id),
+        "target_kind": "Artifact",
+        "target_path": _node_source_path(target_node),
+        "relation": "emits_artifact",
+        "confidence": "derived",
+        "provenance": "bioetl_knowledge_graph_expanded.writes_to",
+        "source_snapshot": source_snapshot,
+        "source_generated_at": snapshot_generated_at,
+        "edge_id": str(edge_id),
+        "description": str(edge.get("description") or ""),
+        "evidence": edge.get("meta") if isinstance(edge.get("meta"), dict) else {},
+    }
+
+
+def _adr_paths_by_number(decisions_dir: Path) -> dict[int, Path]:
+    return {
+        adr_number: path
+        for path in sorted(decisions_dir.glob(ADR_DOC_GLOB))
+        if (adr_number := _adr_number(path)) is not None
+    }
+
+
+def _adr_lifecycle_relation_record(
+    *,
+    adr_path: Path,
+    adr_paths: dict[int, Path],
+    declaring_path: str,
+    field: str,
+    target_number: int,
+    repo_root: Path,
+    source_snapshot: str,
+) -> dict[str, Any] | None:
+    target_path = adr_paths.get(target_number)
+    if target_path is None:
+        return None
+    relation = "amends" if "amend" in field else "supersedes"
+    if field in {"superseded by", "amended by"}:
+        source_path = target_path
+        target_relative_path = declaring_path
+    else:
+        source_path = adr_path
+        target_relative_path = target_path.relative_to(repo_root).as_posix()
+    source_relative = source_path.relative_to(repo_root).as_posix()
+    return _path_relation_record(
+        source_path=source_relative,
+        source_kind="ADR",
+        source_id=f"adr:{source_relative}",
+        source_name=source_path.stem,
+        target_path=target_relative_path,
+        target_kind="ADR",
+        target_id=f"adr:{target_relative_path}",
+        target_name=Path(target_relative_path).stem,
+        relation=relation,
+        confidence="derived",
+        provenance="docs/02-architecture/decisions.lifecycle_metadata",
+        source_snapshot=source_snapshot,
+        evidence={
+            "declaring_adr_path": declaring_path,
+            "field": field,
+        },
+    )
+
+
+def _append_bounded_relations(
+    *,
+    current: str,
+    current_depth: int,
+    entries: dict[str, dict[str, Any]],
+    relations_for_entry: Callable[[dict[str, Any]], list[dict[str, Any]]],
+    neighbor_for_relation: Callable[[dict[str, Any], str], str],
+    seen_edge_ids: set[str],
+    visited: set[str],
+    queue: deque[tuple[str, int]],
+    edges: list[dict[str, Any]],
+    limit: int,
+) -> None:
+    for relation in relations_for_entry(entries.get(current, {})):
+        relation_id = str(relation.get("id") or "")
+        if relation_id in seen_edge_ids:
+            continue
+        seen_edge_ids.add(relation_id)
+        edges.append(relation)
+        neighbor = neighbor_for_relation(relation, current)
+        if neighbor not in visited:
+            visited.add(neighbor)
+            queue.append((neighbor, current_depth + 1))
+        if len(edges) >= limit:
+            return
 
 
 def query_file_neighborhood(

@@ -37,8 +37,13 @@ _META_FIELDS = frozenset(
     }
 )
 _INT_FIELDS = frozenset({"component_id", "taxonomy_id", "protein_classification_id"})
-_JSON_STRING_FIELDS = frozenset(
-    {"protein_classification_ids", "target_component_xrefs"}
+_STRICT_JSON_FIELDS = frozenset(
+    {
+        "protein_classification_ids",
+        "protein_classifications",
+        "target_component_synonyms",
+        "target_component_xrefs",
+    }
 )
 _ENUM_FIELDS = {"component_type": TARGET_COMPONENT_TYPES}
 _SPECIAL_RULES = {
@@ -54,7 +59,7 @@ CHEMBL_TARGET_COMPONENT_PROFILE = build_standard_profile(
     schema_fields=CHEMBL_TARGET_COMPONENT_SCHEMA_FIELDS,
     meta_fields=_META_FIELDS,
     int_fields=_INT_FIELDS,
-    json_string_fields=_JSON_STRING_FIELDS,
+    strict_json_fields=_STRICT_JSON_FIELDS,
     enum_fields=_ENUM_FIELDS,
     special_rules=_SPECIAL_RULES,
     null_fields=chembl_pseudo_null_fields("target_component"),

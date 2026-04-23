@@ -26,12 +26,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Create non-root user for security
-RUN groupadd -r bioetl && useradd -r -g bioetl bioetl
-
-# Install only runtime dependencies
+# Install runtime dependencies and create non-root user for security
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
+    && groupadd -r bioetl \
+    && useradd -r -g bioetl bioetl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy virtual environment from builder

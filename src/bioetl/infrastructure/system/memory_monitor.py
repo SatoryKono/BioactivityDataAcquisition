@@ -252,31 +252,10 @@ class MemoryMonitor:
         self._last_pressure_state = is_pressure
 
         if is_pressure:
-            self._consecutive_pressure_count += 1
-            reduction_factor = self._get_reduction_factor()
-            new_size = max(
-                int(current_batch_size * reduction_factor),
-                self.config.min_batch_size,
+            return self._reduce_batch_size_under_pressure(
+                current_batch_size=current_batch_size,
+                stats=stats,
             )
-
-            if new_size < current_batch_size:
-                if (
-                    self._recovery_target_batch_size is None
-                    or current_batch_size > self._recovery_target_batch_size
-                ):
-                    self._recovery_target_batch_size = current_batch_size
-                self._last_batch_size = self._recovery_target_batch_size
-
-            if self.logger and new_size < current_batch_size:
-                self.logger.warning(
-                    "Memory pressure detected, reducing batch size",
-                    current_batch_size=current_batch_size,
-                    new_batch_size=new_size,
-                    memory_percent_used=round(stats.percent_used * 100, 1),
-                    consecutive_pressure_count=self._consecutive_pressure_count,
-                )
-
-            return new_size
 
         # Pressure relieved - consider gradual recovery
         self._consecutive_pressure_count = 0
@@ -284,25 +263,84 @@ class MemoryMonitor:
         # If we previously reduced, try to recover gradually
         recovery_target = self._recovery_target_batch_size or self._last_batch_size
         if current_batch_size < recovery_target:
-            recovery_size = min(
-                max(current_batch_size + 1, int(current_batch_size * 1.25)),
-                recovery_target,
+            return self._recover_batch_size(
+                current_batch_size=current_batch_size,
+                recovery_target=recovery_target,
+                stats=stats,
             )
-            if self.logger:
-                self.logger.debug(
-                    "Memory pressure relieved, increasing batch size",
-                    current_batch_size=current_batch_size,
-                    new_batch_size=recovery_size,
-                    memory_percent_used=round(stats.percent_used * 100, 1),
-                )
-            if recovery_size >= recovery_target:
-                self._recovery_target_batch_size = None
-                self._last_batch_size = recovery_target
-            return recovery_size
 
         self._recovery_target_batch_size = None
         self._last_batch_size = current_batch_size
         return current_batch_size
+
+    def _reduce_batch_size_under_pressure(
+        self,
+        *,
+        current_batch_size: int,
+        stats: MemoryStats,
+    ) -> int:
+        self._consecutive_pressure_count += 1
+        reduction_factor = self._get_reduction_factor()
+        new_size = max(
+            int(current_batch_size * reduction_factor),
+            self.config.min_batch_size,
+        )
+        if new_size < current_batch_size:
+            self._update_recovery_tracking(current_batch_size)
+            self._log_batch_size_reduction(
+                current_batch_size=current_batch_size,
+                new_size=new_size,
+                stats=stats,
+            )
+        return new_size
+
+    def _recover_batch_size(
+        self,
+        *,
+        current_batch_size: int,
+        recovery_target: int,
+        stats: MemoryStats,
+    ) -> int:
+        recovery_size = min(
+            max(current_batch_size + 1, int(current_batch_size * 1.25)),
+            recovery_target,
+        )
+        if self.logger:
+            self.logger.debug(
+                "Memory pressure relieved, increasing batch size",
+                current_batch_size=current_batch_size,
+                new_batch_size=recovery_size,
+                memory_percent_used=round(stats.percent_used * 100, 1),
+            )
+        if recovery_size >= recovery_target:
+            self._recovery_target_batch_size = None
+            self._last_batch_size = recovery_target
+        return recovery_size
+
+    def _update_recovery_tracking(self, current_batch_size: int) -> None:
+        if (
+            self._recovery_target_batch_size is None
+            or current_batch_size > self._recovery_target_batch_size
+        ):
+            self._recovery_target_batch_size = current_batch_size
+        self._last_batch_size = self._recovery_target_batch_size
+
+    def _log_batch_size_reduction(
+        self,
+        *,
+        current_batch_size: int,
+        new_size: int,
+        stats: MemoryStats,
+    ) -> None:
+        if self.logger is None:
+            return
+        self.logger.warning(
+            "Memory pressure detected, reducing batch size",
+            current_batch_size=current_batch_size,
+            new_batch_size=new_size,
+            memory_percent_used=round(stats.percent_used * 100, 1),
+            consecutive_pressure_count=self._consecutive_pressure_count,
+        )
 
     def _get_reduction_factor(self) -> float:
         """Get batch size reduction factor based on pressure duration.

@@ -40,6 +40,7 @@ import sys
 from pathlib import Path
 
 CommandTarget = str | tuple[str, str]
+_TEST_HEALTH_SCRIPT = "test_health.py"
 
 COMMANDS: dict[str, CommandTarget] = {
     "check-naming": "naming_audit.py",
@@ -64,9 +65,9 @@ COMMANDS: dict[str, CommandTarget] = {
     "report-observability-metric-inventory": "report_observability_metric_inventory.py",
     "analyze-duplicate-functions": "analyze_duplicate_functions.py",
     "calibrate-hotspots": "calibrate_hotspot_budgets.py",
-    "run-tests": ("test_health.py", "run-tests"),
-    "summarize-junit": ("test_health.py", "summarize-junit"),
-    "test-health": ("test_health.py", "test-health"),
+    "run-tests": (_TEST_HEALTH_SCRIPT, "run-tests"),
+    "summarize-junit": (_TEST_HEALTH_SCRIPT, "summarize-junit"),
+    "test-health": (_TEST_HEALTH_SCRIPT, "test-health"),
 }
 
 _DIR = Path(__file__).parent

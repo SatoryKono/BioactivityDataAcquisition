@@ -62,6 +62,7 @@ _ENUM_FIELDS = {
 }
 _ONTOLOGY_ID_FIELDS = frozenset({"uo_units"})
 _UNIT_FIELDS = frozenset({"units", "standard_units", "qudt_units"})
+_STRICT_JSON_FIELDS = SET_LIKE_FIELDS
 
 _SPECIAL_RULE_COMPONENTS = {
     "canonical_smiles": (
@@ -111,6 +112,7 @@ CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
     flag_fields={"standard_flag", "potential_duplicate", "manual_curation_flag"},
     operator_fields={"relation"},
     set_like_fields=SET_LIKE_FIELDS,
+    strict_json_fields=_STRICT_JSON_FIELDS,
     ontology_id_fields=_ONTOLOGY_ID_FIELDS,
     enum_fields={
         "standard_relation": STANDARD_RELATIONS,

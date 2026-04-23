@@ -34,7 +34,7 @@ from bioetl.domain.normalization.json import canonicalize_json_string
 from bioetl.domain.normalization.profiles import CHEMBL_ACTIVITY_PROFILE
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_doi,
-    normalize_profile_json_string,
+    normalize_profile_json_string_strict,
     normalize_profile_passthrough,
     normalize_profile_pmc_id,
     normalize_profile_pmid,
@@ -157,6 +157,7 @@ def test_checkpoint_execution_identity_payload_matches_domain_contract() -> None
         "pipeline_name": " chembl_activity ",
         "run_type": " INCREMENTAL ",
         "pipeline_version": " 1.2.3 ",
+        "git_commit": " ABCDEF123 ",
         "effective_config_hash": f" SHA256:{_HASH_A.upper()} ",
         "dq_contract_compatibility_hash": " DEADBEEF ",
         "contract_ref": " ChemBL.Activity ",
@@ -172,6 +173,7 @@ def test_checkpoint_execution_identity_payload_matches_domain_contract() -> None
         pipeline_name=raw_inputs["pipeline_name"],
         run_type=raw_inputs["run_type"],
         pipeline_version=raw_inputs["pipeline_version"],
+        git_commit=raw_inputs["git_commit"],
         effective_config_hash=raw_inputs["effective_config_hash"],
         dq_contract_compatibility_hash=raw_inputs["dq_contract_compatibility_hash"],
         contract_ref=raw_inputs["contract_ref"],
@@ -422,14 +424,15 @@ def test_chembl_activity_business_and_set_like_fields_follow_profile_family_cont
     )
     assert (
         CHEMBL_ACTIVITY_PROFILE.rule_for("activity_properties").normalizer
-        is normalize_profile_json_string
+        is normalize_profile_json_string_strict
     )
 
     activity_id_row = _matrix_row("chembl_activity", "activity_id")
     activity_properties_row = _matrix_row("chembl_activity", "activity_properties")
     assert activity_id_row["normalizer"] == "normalize_profile_text"
-    assert activity_properties_row["normalizer"] == "normalize_profile_json_string"
+    assert activity_properties_row["normalizer"] == "normalize_profile_json_string_strict"
     assert activity_properties_row["set_like"] == "true"
+    assert activity_properties_row["strictness"] == "strict_json"
 
     normalized = processor.normalize_business_data(
         {
@@ -441,3 +444,17 @@ def test_chembl_activity_business_and_set_like_fields_follow_profile_family_cont
     assert normalized["activity_properties"] == canonicalize_json_string(
         ' [ "beta" , "alpha" ] '
     )
+
+
+def test_chembl_activity_set_like_json_fails_closed_on_malformed_payloads() -> None:
+    """Malformed set-like JSON must still fail closed in strict ChEMBL activity fields."""
+    processor = RecordNormalizationProcessor(provider="chembl", entity_type="activity")
+
+    normalized = processor.normalize_business_data(
+        {
+            "activity_id": "ACT-001",
+            "activity_properties": "{not json}",
+        }
+    )
+
+    assert normalized["activity_properties"] is None

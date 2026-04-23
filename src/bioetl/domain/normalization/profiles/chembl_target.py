@@ -37,7 +37,7 @@ _META_FIELDS = frozenset(
 _TITLE_FIELDS = frozenset({"pref_name"})
 _FLOAT_FIELDS = frozenset({"primary_component_id", "taxonomy_id"})
 _BOOLEAN_FIELDS = frozenset({"species_group_flag", "downgraded"})
-_JSON_STRING_FIELDS = frozenset(
+_STRICT_JSON_FIELDS = frozenset(
     {
         "target_components",
         "cross_references",
@@ -71,7 +71,7 @@ CHEMBL_TARGET_PROFILE = build_standard_profile(
     title_fields=_TITLE_FIELDS,
     float_fields=_FLOAT_FIELDS,
     boolean_fields=_BOOLEAN_FIELDS,
-    json_string_fields=_JSON_STRING_FIELDS,
+    strict_json_fields=_STRICT_JSON_FIELDS,
     enum_fields=_ENUM_FIELDS,
     special_rules=_SPECIAL_RULE_COMPONENTS,
     null_fields=_NULL_FIELDS,
