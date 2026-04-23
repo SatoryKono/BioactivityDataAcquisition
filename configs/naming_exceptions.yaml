@@ -42,9 +42,9 @@ class_suffix_exceptions:
         - ChemblPublication  # Replaces Document (no alias - direct migration)
         - PubchemMolecule    # Replaces Compound (no alias - direct migration)
         - UniprotTarget      # Replaces Protein (no alias - direct migration)
-        # NOTE: Deprecated aliases (Document, Compound, Protein) were NEVER implemented.
-        # Per ADR-024 update (2026-01-21), the codebase was migrated directly to
-        # canonical names without backward compatibility shims.
+        # NOTE: Deprecated aliases (Document, Compound, Protein) have no active
+        # domain export shim. Per ADR-024 update (2026-01-21), the codebase was
+        # migrated directly to canonical names without backward compatibility shims.
         # Other publication entities
         - Publication
 
@@ -269,6 +269,4 @@ adr_024_known_exceptions:
             reason: foreign-key compatibility with ChEMBL API source model
         -   field: document_chembl_id
             reason: foreign-key compatibility with ChEMBL API source model
-    backward_compatibility:
-        -   module: src/bioetl/domain/entities/__init__.py
-            note: compatibility export surface retained until alias removal window (v3.0).
+    backward_compatibility: []  # No Document/Compound/Protein domain export aliases are retained.
