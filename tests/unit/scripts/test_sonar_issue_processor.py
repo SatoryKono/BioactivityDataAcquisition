@@ -5,6 +5,21 @@ from pathlib import Path
 from scripts.ai import check_sonar_issues as sonar_check
 from scripts.ai import sonar_issue_processor as processor
 
+SONAR_CONFIG_FILE = "sonar-project.properties"
+SONAR_URL = "https://sonarcloud.io"
+SONAR_PROJECT_KEY = "SatoryKono_BioactivityDataAcquisition"
+SONAR_TOKEN_ENV = "SONARQUBE_TOKEN"
+SUPPORTED_SCOPE_PATH = "src/bioetl/domain/file.py"
+SUPPORTED_SCOPE_COMPONENT = f"repo:{SUPPORTED_SCOPE_PATH}"
+SUPPORTED_SCOPE_TOTAL = "supported_scope_total"
+SUPPORTED_NON_QUARANTINED_TOTAL = "supported_non_quarantined_total"
+SUPPORTED_QUARANTINED_TOTAL = "supported_quarantined_total"
+OUT_OF_SCOPE_TOTAL = "out_of_scope_total"
+MATCHES_CURRENT_QUARANTINE = "matches_current_quarantine"
+HISTORICAL_NEAR_ZERO_STATUS_IS_STALE = "historical_near_zero_status_is_stale"
+LIVE_SCOPE_DRIFT_DETECTED = "live_scope_drift_detected"
+LIVE_QUARANTINE_DRIFT_DETECTED = "live_quarantine_drift_detected"
+
 
 def test_parse_java_properties_handles_multiline_exclusions() -> None:
     text = """
@@ -17,7 +32,7 @@ sonar.exclusions=\\
 
     properties = processor.parse_java_properties(text)
 
-    assert properties["sonar.projectKey"] == "SatoryKono_BioactivityDataAcquisition"
+    assert properties["sonar.projectKey"] == SONAR_PROJECT_KEY
     assert properties["sonar.sources"] == "src/bioetl"
     assert properties["sonar.exclusions"] == (
         "src/bioetl/application/services/foo.py,src/bioetl/application/core/bar.py"
@@ -94,7 +109,7 @@ def test_matches_current_quarantine_supports_exact_and_glob_patterns() -> None:
 def test_build_baseline_report_marks_historical_status_stale_when_quarantine_exists(
     tmp_path: Path,
 ) -> None:
-    config = tmp_path / "sonar-project.properties"
+    config = tmp_path / SONAR_CONFIG_FILE
     config.write_text(
         """
 sonar.projectKey=SatoryKono_BioactivityDataAcquisition
@@ -110,7 +125,7 @@ sonar.exclusions=\\
 
     report = processor.build_baseline_report(
         config_path=config,
-        sonar_url="https://sonarcloud.io",
+        sonar_url=SONAR_URL,
         token=None,
     )
 
@@ -130,7 +145,7 @@ sonar.exclusions=\\
         },
     ]
     assert report["live_issues"]["status"] == "skipped"
-    assert report["assessment"]["historical_near_zero_status_is_stale"] is True
+    assert report["assessment"][HISTORICAL_NEAR_ZERO_STATUS_IS_STALE] is True
     assert report["assessment"]["live_measurement_ready"] is False
 
 
@@ -148,8 +163,8 @@ def test_fetch_live_issue_summary_reports_http_errors(monkeypatch) -> None:
     monkeypatch.setattr(processor.requests, "get", _fake_get)
 
     summary = processor.fetch_live_issue_summary(
-        sonar_url="https://sonarcloud.io",
-        project_key="SatoryKono_BioactivityDataAcquisition",
+        sonar_url=SONAR_URL,
+        project_key=SONAR_PROJECT_KEY,
         token="bad-token",
         supported_sources=["src/bioetl"],
         quarantine_patterns=[],
@@ -171,7 +186,7 @@ def test_fetch_live_issue_summary_tracks_scope_drift(monkeypatch) -> None:
                 "issues": [
                     {
                         "key": "one",
-                        "component": "repo:src/bioetl/domain/file.py",
+                        "component": SUPPORTED_SCOPE_COMPONENT,
                         "rule": "python:S1",
                         "severity": "MAJOR",
                         "message": "supported",
@@ -194,31 +209,31 @@ def test_fetch_live_issue_summary_tracks_scope_drift(monkeypatch) -> None:
     monkeypatch.setattr(processor.requests, "get", _fake_get)
 
     summary = processor.fetch_live_issue_summary(
-        sonar_url="https://sonarcloud.io",
-        project_key="SatoryKono_BioactivityDataAcquisition",
+        sonar_url=SONAR_URL,
+        project_key=SONAR_PROJECT_KEY,
         token="good-token",
         supported_sources=["src/bioetl"],
-        quarantine_patterns=["src/bioetl/domain/file.py"],
+        quarantine_patterns=[SUPPORTED_SCOPE_PATH],
     )
 
     assert summary["status"] == "ok"
-    assert summary["supported_scope_total"] == 1
-    assert summary["supported_non_quarantined_total"] == 0
-    assert summary["supported_quarantined_total"] == 1
-    assert summary["out_of_scope_total"] == 1
+    assert summary[SUPPORTED_SCOPE_TOTAL] == 1
+    assert summary[SUPPORTED_NON_QUARANTINED_TOTAL] == 0
+    assert summary[SUPPORTED_QUARANTINED_TOTAL] == 1
+    assert summary[OUT_OF_SCOPE_TOTAL] == 1
     assert summary["supported_scope_buckets"] == [
-        {"path_prefix": "src/bioetl/domain/file.py", "count": 1}
+        {"path_prefix": SUPPORTED_SCOPE_PATH, "count": 1}
     ]
     assert summary["supported_quarantined_buckets"] == [
-        {"path_prefix": "src/bioetl/domain/file.py", "count": 1}
+        {"path_prefix": SUPPORTED_SCOPE_PATH, "count": 1}
     ]
     assert summary["out_of_scope_buckets"] == [
         {"path_prefix": "scripts/check.py", "count": 1}
     ]
     assert summary["issues"][0]["in_supported_scope"] is True
-    assert summary["issues"][0]["matches_current_quarantine"] is True
+    assert summary["issues"][0][MATCHES_CURRENT_QUARANTINE] is True
     assert summary["issues"][1]["in_supported_scope"] is False
-    assert summary["issues"][1]["matches_current_quarantine"] is False
+    assert summary["issues"][1][MATCHES_CURRENT_QUARANTINE] is False
 
 
 def test_fetch_live_issue_summary_counts_active_supported_issues(monkeypatch) -> None:
@@ -232,7 +247,7 @@ def test_fetch_live_issue_summary_counts_active_supported_issues(monkeypatch) ->
                 "issues": [
                     {
                         "key": "one",
-                        "component": "repo:src/bioetl/domain/file.py",
+                        "component": SUPPORTED_SCOPE_COMPONENT,
                         "rule": "python:S1",
                         "severity": "MAJOR",
                         "message": "supported",
@@ -247,31 +262,31 @@ def test_fetch_live_issue_summary_counts_active_supported_issues(monkeypatch) ->
     monkeypatch.setattr(processor.requests, "get", _fake_get)
 
     summary = processor.fetch_live_issue_summary(
-        sonar_url="https://sonarcloud.io",
-        project_key="SatoryKono_BioactivityDataAcquisition",
+        sonar_url=SONAR_URL,
+        project_key=SONAR_PROJECT_KEY,
         token="good-token",
         supported_sources=["src/bioetl"],
         quarantine_patterns=["src/bioetl/other.py"],
     )
 
     assert summary["status"] == "ok"
-    assert summary["supported_scope_total"] == 1
-    assert summary["supported_non_quarantined_total"] == 1
-    assert summary["supported_quarantined_total"] == 0
+    assert summary[SUPPORTED_SCOPE_TOTAL] == 1
+    assert summary[SUPPORTED_NON_QUARANTINED_TOTAL] == 1
+    assert summary[SUPPORTED_QUARANTINED_TOTAL] == 0
     assert summary["supported_scope_buckets"] == [
-        {"path_prefix": "src/bioetl/domain/file.py", "count": 1}
+        {"path_prefix": SUPPORTED_SCOPE_PATH, "count": 1}
     ]
     assert summary["supported_non_quarantined_buckets"] == [
-        {"path_prefix": "src/bioetl/domain/file.py", "count": 1}
+        {"path_prefix": SUPPORTED_SCOPE_PATH, "count": 1}
     ]
     assert summary["out_of_scope_buckets"] == []
-    assert summary["issues"][0]["matches_current_quarantine"] is False
+    assert summary["issues"][0][MATCHES_CURRENT_QUARANTINE] is False
 
 
 def test_build_baseline_report_marks_quarantine_drift_when_live_issue_hits_exclusion(
     monkeypatch, tmp_path: Path
 ) -> None:
-    config = tmp_path / "sonar-project.properties"
+    config = tmp_path / SONAR_CONFIG_FILE
     config.write_text(
         """
 sonar.projectKey=SatoryKono_BioactivityDataAcquisition
@@ -293,7 +308,7 @@ sonar.exclusions=src/bioetl/domain/file.py
                 "issues": [
                     {
                         "key": "one",
-                        "component": "repo:src/bioetl/domain/file.py",
+                        "component": SUPPORTED_SCOPE_COMPONENT,
                         "rule": "python:S1",
                         "severity": "MAJOR",
                         "message": "quarantined",
@@ -309,13 +324,13 @@ sonar.exclusions=src/bioetl/domain/file.py
 
     report = processor.build_baseline_report(
         config_path=config,
-        sonar_url="https://sonarcloud.io",
+        sonar_url=SONAR_URL,
         token="good-token",
     )
 
     assert report["assessment"]["live_measurement_ready"] is True
-    assert report["assessment"]["live_scope_drift_detected"] is False
-    assert report["assessment"]["live_quarantine_drift_detected"] is True
+    assert report["assessment"][LIVE_SCOPE_DRIFT_DETECTED] is False
+    assert report["assessment"][LIVE_QUARANTINE_DRIFT_DETECTED] is True
     assert report["assessment"]["live_authoritative_scope_ready"] is False
     assert report["assessment"]["live_supported_scope_issue_count"] == 1
     assert report["assessment"]["live_supported_non_quarantined_issue_count"] == 0
@@ -325,7 +340,7 @@ sonar.exclusions=src/bioetl/domain/file.py
 def test_check_sonar_issues_strict_live_fails_when_live_measurement_missing(
     monkeypatch, tmp_path: Path
 ) -> None:
-    config = tmp_path / "sonar-project.properties"
+    config = tmp_path / SONAR_CONFIG_FILE
     config.write_text(
         """
 sonar.projectKey=SatoryKono_BioactivityDataAcquisition
@@ -335,7 +350,7 @@ sonar.exclusions=src/bioetl/application/services/a.py
         + "\n",
         encoding="utf-8",
     )
-    monkeypatch.delenv("SONARQUBE_TOKEN", raising=False)
+    monkeypatch.delenv(SONAR_TOKEN_ENV, raising=False)
 
     exit_code = sonar_check.main(
         [
@@ -351,7 +366,7 @@ sonar.exclusions=src/bioetl/application/services/a.py
 def test_check_sonar_issues_ratchet_fails_when_quarantine_grows(
     monkeypatch, tmp_path: Path
 ) -> None:
-    config = tmp_path / "sonar-project.properties"
+    config = tmp_path / SONAR_CONFIG_FILE
     config.write_text(
         """
 sonar.projectKey=SatoryKono_BioactivityDataAcquisition
@@ -363,7 +378,7 @@ sonar.exclusions=\\
         + "\n",
         encoding="utf-8",
     )
-    monkeypatch.delenv("SONARQUBE_TOKEN", raising=False)
+    monkeypatch.delenv(SONAR_TOKEN_ENV, raising=False)
 
     exit_code = sonar_check.main(
         [
@@ -380,7 +395,7 @@ sonar.exclusions=\\
 def test_check_sonar_issues_ratchet_passes_within_quarantine_limit(
     monkeypatch, tmp_path: Path
 ) -> None:
-    config = tmp_path / "sonar-project.properties"
+    config = tmp_path / SONAR_CONFIG_FILE
     config.write_text(
         """
 sonar.projectKey=SatoryKono_BioactivityDataAcquisition
@@ -390,7 +405,7 @@ sonar.exclusions=src/bioetl/application/services/a.py
         + "\n",
         encoding="utf-8",
     )
-    monkeypatch.delenv("SONARQUBE_TOKEN", raising=False)
+    monkeypatch.delenv(SONAR_TOKEN_ENV, raising=False)
 
     exit_code = sonar_check.main(
         [
@@ -408,10 +423,7 @@ def test_check_sonar_issues_authoritative_scope_flag_fails_on_drift(
     monkeypatch, tmp_path: Path
 ) -> None:
     config = tmp_path / "sonar-project.properties"
-    config.write_text(
-        "sonar.projectKey=SatoryKono_BioactivityDataAcquisition\n",
-        encoding="utf-8",
-    )
+    config.write_text(f"sonar.projectKey={SONAR_PROJECT_KEY}\n", encoding="utf-8")
 
     monkeypatch.setattr(
         sonar_check,
@@ -425,15 +437,15 @@ def test_check_sonar_issues_authoritative_scope_flag_fails_on_drift(
             "live_issues": {
                 "status": "ok",
                 "total": 1,
-                "supported_scope_total": 1,
-                "supported_non_quarantined_total": 0,
-                "supported_quarantined_total": 1,
-                "out_of_scope_total": 0,
+                SUPPORTED_SCOPE_TOTAL: 1,
+                SUPPORTED_NON_QUARANTINED_TOTAL: 0,
+                SUPPORTED_QUARANTINED_TOTAL: 1,
+                OUT_OF_SCOPE_TOTAL: 0,
             },
             "assessment": {
-                "historical_near_zero_status_is_stale": False,
-                "live_scope_drift_detected": False,
-                "live_quarantine_drift_detected": True,
+                HISTORICAL_NEAR_ZERO_STATUS_IS_STALE: False,
+                LIVE_SCOPE_DRIFT_DETECTED: False,
+                LIVE_QUARANTINE_DRIFT_DETECTED: True,
             },
         },
     )
@@ -454,10 +466,7 @@ def test_check_sonar_issues_authoritative_scope_flag_passes_without_drift(
     monkeypatch, tmp_path: Path
 ) -> None:
     config = tmp_path / "sonar-project.properties"
-    config.write_text(
-        "sonar.projectKey=SatoryKono_BioactivityDataAcquisition\n",
-        encoding="utf-8",
-    )
+    config.write_text(f"sonar.projectKey={SONAR_PROJECT_KEY}\n", encoding="utf-8")
 
     monkeypatch.setattr(
         sonar_check,
@@ -471,15 +480,15 @@ def test_check_sonar_issues_authoritative_scope_flag_passes_without_drift(
             "live_issues": {
                 "status": "ok",
                 "total": 0,
-                "supported_scope_total": 0,
-                "supported_non_quarantined_total": 0,
-                "supported_quarantined_total": 0,
-                "out_of_scope_total": 0,
+                SUPPORTED_SCOPE_TOTAL: 0,
+                SUPPORTED_NON_QUARANTINED_TOTAL: 0,
+                SUPPORTED_QUARANTINED_TOTAL: 0,
+                OUT_OF_SCOPE_TOTAL: 0,
             },
             "assessment": {
-                "historical_near_zero_status_is_stale": False,
-                "live_scope_drift_detected": False,
-                "live_quarantine_drift_detected": False,
+                HISTORICAL_NEAR_ZERO_STATUS_IS_STALE: False,
+                LIVE_SCOPE_DRIFT_DETECTED: False,
+                LIVE_QUARANTINE_DRIFT_DETECTED: False,
             },
         },
     )

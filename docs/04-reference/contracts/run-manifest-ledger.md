@@ -132,7 +132,7 @@ The control-plane runtime is governed by the runtime object path
 | `required_persistence_profile`    | `degraded_observable` | Minimum control-plane persistence contract required for this runtime (`degraded_observable`, `replay_ready`, `forensic_grade`) |
 | `run_manifest_enabled`            |      `true` | Create immutable manifest before runner assembly / execution starts                               |
 | `run_ledger_enabled`              |      `true` | Append lifecycle and inspection events keyed by `manifest_id`                                     |
-| `checkpoint_compatibility_policy` | `soft_fail` | Resume behavior when checkpoint identity mismatches runtime (`observe`, `soft_fail`, `hard_fail`) |
+| `checkpoint_compatibility_policy` | `soft_fail` | Resume behavior when checkpoint identity mismatches runtime (`observe`, `soft_fail`, `hard_fail`, `legacy_observe`) |
 
 Current rollout semantics:
 
@@ -144,7 +144,8 @@ Current rollout semantics:
 1. `checkpoint_compatibility_policy` governs resume disposition on checkpoint incompatibility:
    `observe` remains a degraded operator mode for non-identity signals, but canonical
    execution-identity mismatches still block resume; `soft_fail` blocks resume;
-   `hard_fail` raises an error.
+   `hard_fail` raises an error; `legacy_observe` enables backward compatibility
+   for v1.x checkpoint formats during migration periods.
 1. `exact_replay=true` is stricter than the requested compatibility policy:
    runtime coerces checkpoint compatibility handling to `hard_fail` so an
    exact replay attempt cannot continue after any compatibility mismatch.
