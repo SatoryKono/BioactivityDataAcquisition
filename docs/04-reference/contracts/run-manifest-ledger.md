@@ -150,6 +150,81 @@ Current rollout semantics:
    runtime coerces checkpoint compatibility handling to `hard_fail` so an
    exact replay attempt cannot continue after any compatibility mismatch.
 
+## Checkpoint Compatibility Policy
+
+The BioETL control-plane supports four checkpoint compatibility modes that govern
+resume behavior when checkpoint identity mismatches occur:
+
+### Policy Enum
+
+```python
+# src/bioetl/application/core/lifecycle/checkpoint_runtime.py
+CheckpointCompatibilityPolicy = Literal[
+    "observe", "legacy_observe", "soft_fail", "hard_fail"
+]
+```
+
+### Policy Semantics
+
+| Policy | Behavior | Use Case | Default |
+|--------|----------|----------|---------|
+| `observe` | Validate but proceed | Non-critical validation | ✅ Non-critical |
+| `soft_fail` | Log error but continue | Recovery scenarios | ❌ Manual |
+| `hard_fail` | Halt pipeline | Critical integrity | ✅ Critical |
+| `legacy_observe` | v1.x backward compatibility | Migration periods | ❌ Manual |
+
+### Decision Flow
+
+```mermaid
+graph TD
+    A[Checkpoint Mismatch Detected] --> B{Compatibility Policy}
+    B -->|observe| C[Log Warning\nContinue Execution]
+    B -->|soft_fail| D[Log Error\nContinue Execution]
+    B -->|hard_fail| E[Halt Pipeline\nRaise Error]
+    B -->|legacy_observe| F[Legacy Validation\nContinue Execution]
+```
+
+### Configuration
+
+```yaml
+# configs/entities/provider/entity.yaml
+runtime:
+  checkpoint_compatibility:
+    critical: hard_fail      # Default for critical operations
+    non_critical: observe    # Default for non-critical operations
+    migration_mode: legacy_observe  # Temporary during version upgrades
+```
+
+### Policy Selection Guide
+
+**Use `observe` when:**
+- Non-critical validation scenarios
+- Development/testing environments
+- Graceful degradation is acceptable
+
+**Use `soft_fail` when:**
+- Recovery scenarios with logging
+- Temporary workaround periods
+- Operator-aware degradation
+
+**Use `hard_fail` when:**
+- Critical integrity requirements
+- Production steady-state
+- Exact replay requirements
+
+**Use `legacy_observe` when:**
+- Mixed-version clusters during upgrade
+- v1.x checkpoint format compatibility
+- Temporary migration periods only
+
+### Migration Procedure
+
+1. **Prepare**: Set `legacy_observe` in configuration
+2. **Upgrade**: Roll out new version nodes incrementally
+3. **Validate**: Monitor validation warnings in logs
+4. **Remove**: Switch to standard modes after full upgrade
+5. **Cleanup**: Remove legacy mode from configurations
+
 ## Supported Resume Modes
 
 The current control-plane contract intentionally supports two different resume

@@ -62,6 +62,16 @@ runbook остаются supported.
 - после изменения кодовых контрактов необходимо перегенерировать exported JSON;
 - parity-check между кодом и exported JSON не должен допускать расхождений по `name/type/nullable/description`.
 
+Для test-facing drift baselines Gold layer теперь использует отдельный bounded
+snapshot registry:
+
+- `tests/fixtures/golden/gold/schema_registry.v1.json`
+- `tests/contract/test_gold_schema_snapshot_registry.py`
+- `tests/contract/test_gold_dq_golden_snapshots.py`
+
+Этот registry не заменяет published JSON exports; он фиксирует canonical local
+baseline для schema drift и bounded DQ-sensitive output bundles.
+
 Обновление выполняется через unified script entry point:
 
 ```bash

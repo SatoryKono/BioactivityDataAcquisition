@@ -77,6 +77,7 @@ bioetl run --pipeline <NAME> [OPTIONS]
 | `--vacuum-after-run`                     | flag   | None          | Запустить VACUUM после успешного выполнения       |
 | `--vacuum-retention-days`                | int    | None          | Retention для VACUUM (дней, override YAML config) |
 | `--debug`                                | flag   | False         | Включить DEBUG логирование                        |
+| `--checkpoint-compatibility`             | choice | None          | Политика совместимости checkpoint (`observe`, `soft_fail`, `hard_fail`, `legacy_observe`) |
 | `--health-server/--no-health-server`     | flag   | True          | Включить HTTP health server                       |
 | `--health-port`                          | int    | 8081          | Порт для health server                            |
 | `--use-cached-bronze/--no-cached-bronze` | flag   | False         | Читать Bronze cache вместо API                    |
@@ -91,6 +92,12 @@ bioetl run --pipeline <NAME> [OPTIONS]
 ```bash
 # Инкрементальный запуск (по умолчанию)
 bioetl run --pipeline chembl_activity
+
+# Запуск с политикой совместимости checkpoint
+bioetl run --pipeline chembl_activity --checkpoint-compatibility observe
+
+# Использование legacy mode во время миграции
+bioetl run --pipeline chembl_activity --checkpoint-compatibility legacy_observe
 
 # С ограничением записей (для тестирования)
 bioetl run --pipeline chembl_activity --limit 100

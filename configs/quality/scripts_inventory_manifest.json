@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-24T05:42:48.538766+00:00",
+  "generated_at": "2026-04-24T05:50:46.793764+00:00",
   "summary": {
     "total_scripts": 439,
     "status_counts": {
@@ -92,13 +92,13 @@
         },
         {
           "path": "tests/unit/scripts/test_sonar_issue_processor.py",
-          "line": 51,
+          "line": 66,
           "source_group": "tests",
           "text": "{\"path\": \"scripts/ai/check_sonar_issues.py\"},"
         },
         {
           "path": "tests/unit/scripts/test_sonar_issue_processor.py",
-          "line": 60,
+          "line": 75,
           "source_group": "tests",
           "text": "\"path_prefix\": \"scripts/ai/check_sonar_issues.py\","
         }
@@ -8847,7 +8847,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 446,
+          "line": 452,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         }
