@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, cast
+
+from bioetl.application.core._span_helpers import _ClosableSpan
 
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer.errors import TransformationError
@@ -39,7 +41,7 @@ def start_transform_span(
     owner: TransformerExecutionOwner,
     context: PipelineContext,
     index: int,
-) -> object:  # Any: OpenTelemetry span type is dynamic
+) -> _ClosableSpan:
     """Create and enter an OpenTelemetry span for record transformation."""
     otel_tracer = owner._tracer.get_tracer("bioetl.transformer")
     span = otel_tracer.start_as_current_span(
@@ -51,15 +53,16 @@ def start_transform_span(
             "bioetl.record_index": index,
         },
     )
-    span.__enter__()
-    return span
+    closable_span = cast(_ClosableSpan, span)
+    closable_span.__enter__()
+    return closable_span
 
 
 def handle_transformation_error(
     owner: TransformerExecutionOwner,
     error: TransformationError,
     context: PipelineContext,
-    span: object,  # Any: OpenTelemetry span type is dynamic
+    span: _ClosableSpan,
 ) -> str:
     """Log and annotate span for transformation errors."""
     error_type = "transformation_error"
@@ -78,7 +81,7 @@ def handle_validation_error(
     owner: TransformerExecutionOwner,
     error: ValueError,
     context: PipelineContext,
-    span: object,  # Any: OpenTelemetry span type is dynamic
+    span: _ClosableSpan,
 ) -> str:
     """Log and annotate span for validation errors."""
     error_type = "validation_error"
@@ -96,7 +99,7 @@ def record_metrics_and_close_span(
     owner: TransformerExecutionOwner,
     start_time: float,
     error_type: str | None,
-    span: object,  # Any: OpenTelemetry span type is dynamic
+    span: _ClosableSpan,
 ) -> None:
     """Record transform duration/error metrics and close the OTEL span."""
     duration = time.perf_counter() - start_time

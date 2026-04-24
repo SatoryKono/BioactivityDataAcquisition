@@ -96,7 +96,7 @@ def coerce_silver_dq_analyze_request(
         kwargs=kwargs,
     )
     return SilverDQAnalyzeRequest(
-        data=resolved_kwargs["data"],  # type: ignore[arg-type]
+        data=resolved_kwargs["data"],
         run_id=resolved_kwargs["run_id"],  # type: ignore[arg-type]
         pipeline=resolved_kwargs["pipeline"],  # type: ignore[arg-type]
         target_table=resolved_kwargs["target_table"],  # type: ignore[arg-type]

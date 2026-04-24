@@ -186,6 +186,7 @@ def _build_checkpoint_execution_identity_payload(
         pipeline_name=pipeline_name,
         run_type=run_type,
         pipeline_version=pipeline_version,
+        git_commit=None,
         effective_config_hash=effective_config_hash,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         contract_ref=contract_ref,
@@ -219,7 +220,7 @@ def _compute_checkpoint_execution_identity_fallback_fingerprint(
         field in payload for field in _CANONICAL_ONLY_IDENTITY_FIELDS
     ):
         return None
-    return cast(str, compute_execution_identity_fingerprint(payload))
+    return compute_execution_identity_fingerprint(payload)
 
 
 def _check_checkpoint_execution_identity_fallback(

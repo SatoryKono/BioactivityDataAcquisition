@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.checkpoint._anchor_context import (
     ExpectedCheckpointContext,
@@ -105,95 +105,149 @@ def _coerce_checkpoint_service_context(
             overrides=overrides,
         )
     return CompositeCheckpointServiceContext(
-        composite_name=_resolve_checkpoint_init_value(
-            field_name="composite_name",
-            init=init,
-            overrides=overrides,
+        composite_name=cast(
+            str,
+            _resolve_checkpoint_init_value(
+                field_name="composite_name",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        run_id=_resolve_checkpoint_init_value(
-            field_name="run_id",
-            init=init,
-            overrides=overrides,
+        run_id=cast(
+            str,
+            _resolve_checkpoint_init_value(
+                field_name="run_id",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        storage=_resolve_checkpoint_init_value(
-            field_name="storage",
-            init=init,
-            overrides=overrides,
+        storage=cast(
+            CompositeCheckpointPort,
+            _resolve_checkpoint_init_value(
+                field_name="storage",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        logger=_resolve_checkpoint_init_value(
-            field_name="logger",
-            init=init,
-            overrides=overrides,
+        logger=cast(
+            LoggerPort,
+            _resolve_checkpoint_init_value(
+                field_name="logger",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        resume=_resolve_checkpoint_init_value(
-            field_name="resume",
-            init=init,
-            overrides=overrides,
+        resume=cast(
+            bool,
+            _resolve_checkpoint_init_value(
+                field_name="resume",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        stale_checkpoint_threshold_hours=_resolve_checkpoint_init_value(
-            field_name="stale_checkpoint_threshold_hours",
-            init=init,
-            overrides=overrides,
+        stale_checkpoint_threshold_hours=cast(
+            float | None,
+            _resolve_checkpoint_init_value(
+                field_name="stale_checkpoint_threshold_hours",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        expected_effective_config_hash=_resolve_checkpoint_init_value(
-            field_name="expected_effective_config_hash",
-            init=init,
-            overrides=overrides,
+        expected_effective_config_hash=cast(
+            str | None,
+            _resolve_checkpoint_init_value(
+                field_name="expected_effective_config_hash",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        expected_effective_config_artifact_id=_resolve_checkpoint_init_value(
-            field_name="expected_effective_config_artifact_id",
-            init=init,
-            overrides=overrides,
+        expected_effective_config_artifact_id=cast(
+            str | None,
+            _resolve_checkpoint_init_value(
+                field_name="expected_effective_config_artifact_id",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        expected_execution_fingerprint=_resolve_checkpoint_init_value(
-            field_name="expected_execution_fingerprint",
-            init=init,
-            overrides=overrides,
+        expected_execution_fingerprint=cast(
+            str | None,
+            _resolve_checkpoint_init_value(
+                field_name="expected_execution_fingerprint",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        expected_dq_contract_compatibility_hash=_resolve_checkpoint_init_value(
-            field_name="expected_dq_contract_compatibility_hash",
-            init=init,
-            overrides=overrides,
+        expected_dq_contract_compatibility_hash=cast(
+            str | None,
+            _resolve_checkpoint_init_value(
+                field_name="expected_dq_contract_compatibility_hash",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        expected_contract_ref=_resolve_checkpoint_init_value(
-            field_name="expected_contract_ref",
-            init=init,
-            overrides=overrides,
+        expected_contract_ref=cast(
+            str | None,
+            _resolve_checkpoint_init_value(
+                field_name="expected_contract_ref",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        expected_contract_version=_resolve_checkpoint_init_value(
-            field_name="expected_contract_version",
-            init=init,
-            overrides=overrides,
+        expected_contract_version=cast(
+            str | None,
+            _resolve_checkpoint_init_value(
+                field_name="expected_contract_version",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        expected_manifest_id=_resolve_checkpoint_init_value(
-            field_name="expected_manifest_id",
-            init=init,
-            overrides=overrides,
+        expected_manifest_id=cast(
+            str | None,
+            _resolve_checkpoint_init_value(
+                field_name="expected_manifest_id",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        run_ledger_port=_resolve_checkpoint_init_value(
-            field_name="run_ledger_port",
-            init=init,
-            overrides=overrides,
+        run_ledger_port=cast(
+            RunLedgerPort | None,
+            _resolve_checkpoint_init_value(
+                field_name="run_ledger_port",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        metrics=_resolve_checkpoint_init_value(
-            field_name="metrics",
-            init=init,
-            overrides=overrides,
+        metrics=cast(
+            MetricsPort | None,
+            _resolve_checkpoint_init_value(
+                field_name="metrics",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        clock=_resolve_checkpoint_init_value(
-            field_name="clock",
-            init=init,
-            overrides=overrides,
+        clock=cast(
+            ClockPort | None,
+            _resolve_checkpoint_init_value(
+                field_name="clock",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        load_service_factory=_resolve_checkpoint_init_value(
-            field_name="load_service_factory",
-            init=init,
-            overrides=overrides,
+        load_service_factory=cast(
+            Callable[..., CompositeCheckpointLoadService],
+            _resolve_checkpoint_init_value(
+                field_name="load_service_factory",
+                init=init,
+                overrides=overrides,
+            ),
         ),
-        persistence_service_factory=_resolve_checkpoint_init_value(
-            field_name="persistence_service_factory",
-            init=init,
-            overrides=overrides,
+        persistence_service_factory=cast(
+            Callable[..., CompositeCheckpointPersistenceService],
+            _resolve_checkpoint_init_value(
+                field_name="persistence_service_factory",
+                init=init,
+                overrides=overrides,
+            ),
         ),
     )
 
@@ -203,6 +257,8 @@ class CompositeCheckpointService:
 
     _DEFAULT_STALE_THRESHOLD_HOURS: float = 24.0
     _expected_checkpoint_context: ExpectedCheckpointContext
+    _load_service: CompositeCheckpointLoadService
+    _persistence_service: CompositeCheckpointPersistenceService
 
     def __init__(
         self,
@@ -265,37 +321,40 @@ class CompositeCheckpointService:
     @property
     def expected_effective_config_hash(self) -> str:
         """Expose the configured effective-config anchor for dependent helpers."""
-        return self._expected_checkpoint_context.effective_config_hash
+        return cast(str, self._expected_checkpoint_context.effective_config_hash)
 
     @property
     def expected_effective_config_artifact_id(self) -> str:
         """Expose the configured effective-config artifact anchor."""
-        return self._expected_checkpoint_context.effective_config_artifact_id
+        return cast(str, self._expected_checkpoint_context.effective_config_artifact_id)
 
     @property
     def expected_execution_fingerprint(self) -> str:
         """Expose the configured execution-fingerprint anchor."""
-        return self._expected_checkpoint_context.execution_fingerprint
+        return cast(str, self._expected_checkpoint_context.execution_fingerprint)
 
     @property
     def expected_dq_contract_compatibility_hash(self) -> str:
         """Expose the configured DQ compatibility anchor."""
-        return self._expected_checkpoint_context.dq_contract_compatibility_hash
+        return cast(
+            str,
+            self._expected_checkpoint_context.dq_contract_compatibility_hash,
+        )
 
     @property
     def expected_contract_ref(self) -> str:
         """Expose the configured contract-ref anchor for dependent helpers."""
-        return self._expected_checkpoint_context.contract_ref
+        return cast(str, self._expected_checkpoint_context.contract_ref)
 
     @property
     def expected_contract_version(self) -> str:
         """Expose the configured contract-version anchor for dependent helpers."""
-        return self._expected_checkpoint_context.contract_version
+        return cast(str, self._expected_checkpoint_context.contract_version)
 
     @property
     def expected_manifest_id(self) -> str:
         """Expose the configured manifest anchor for checkpoint correlation."""
-        return self._expected_checkpoint_context.manifest_id
+        return cast(str, self._expected_checkpoint_context.manifest_id)
 
     async def load(self) -> CompositeCheckpointState:
         """Load checkpoint state or create a fresh one."""
@@ -315,19 +374,23 @@ class CompositeCheckpointService:
     async def delete_orphaned(self) -> int:
         """Delete orphaned checkpoint files from previous runs."""
         await asyncio.sleep(0)
-        return self._persistence_service.delete_orphaned()
+        return cast(int, self._persistence_service.delete_orphaned())
 
     async def list_all(self) -> list[str]:
         """List all checkpoints for this composite pipeline."""
         await asyncio.sleep(0)
-        return self._persistence_service.list_all()
+        return cast(list[str], self._persistence_service.list_all())
 
 
 class CompositeCheckpointManager(CompositeCheckpointService):
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        init: CompositeCheckpointServiceContext | None = None,
+        **kwargs: object,
+    ) -> None:
         message = (
             "CompositeCheckpointManager is deprecated and will be removed in v2.0. "
             "Use CompositeCheckpointService instead."
         )
         warnings.warn(message, DeprecationWarning, stacklevel=3)
-        super().__init__(*args, **kwargs)
+        super().__init__(init=init, **kwargs)

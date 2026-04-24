@@ -2,13 +2,24 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeAlias
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BatchID, JsonDict
+
+SpanAttributeValue: TypeAlias = (
+    str
+    | bool
+    | int
+    | float
+    | tuple[str, ...]
+    | tuple[bool, ...]
+    | tuple[int, ...]
+    | tuple[float, ...]
+)
 
 
 def build_execution_span_attributes(
@@ -121,7 +132,7 @@ def add_memory_decision_trace_events(
 ) -> None:
     """Attach bounded adaptive-memory decisions as root-span events."""
     for entry in memory_decision_trace:
-        attributes = {
+        attributes: dict[str, SpanAttributeValue] = {
             "bioetl.memory.decision_index": int(entry["decision_index"]),
             "bioetl.memory.stage": str(entry["stage"]),
             "bioetl.memory.old_batch_size": int(entry["old_batch_size"]),

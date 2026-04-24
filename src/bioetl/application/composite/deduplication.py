@@ -226,7 +226,7 @@ class EnricherDeduplicatorService:
 
 
 class EnricherDeduplicator(EnricherDeduplicatorService):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: object, **kwargs: object) -> None:
         warnings.warn(
             "EnricherDeduplicator is deprecated and will be removed in v2.0. "
             "Use EnricherDeduplicatorService instead.",

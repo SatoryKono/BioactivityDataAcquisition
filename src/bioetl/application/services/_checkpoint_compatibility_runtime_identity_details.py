@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import cast
 
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
@@ -78,6 +77,7 @@ def _canonical_execution_identity_payload(
             pipeline_name=pipeline_name,
             run_type=run_type,
             pipeline_version=pipeline_version,
+            git_commit=None,
             effective_config_hash=effective_config_hash,
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             contract_ref=contract_ref,
@@ -94,7 +94,7 @@ def _checkpoint_execution_identity_fallback_detail(payload: JsonDict) -> str:
     """Return canonical checkpoint fallback fingerprint for diagnostics."""
     if not payload:
         return ""
-    return cast(str, compute_execution_identity_fingerprint(payload))
+    return compute_execution_identity_fingerprint(payload)
 
 
 def _degraded_runtime_anchor_detail(
@@ -120,11 +120,8 @@ def _degraded_runtime_anchor_detail(
         return ""
     if manifest_id is not None:
         raw_payload["manifest_id"] = manifest_id
-    return cast(
-        str,
-        compute_degraded_runtime_anchor_fingerprint(
-            normalize_runtime_anchor_payload(raw_payload)
-        ),
+    return compute_degraded_runtime_anchor_fingerprint(
+        normalize_runtime_anchor_payload(raw_payload)
     )
 
 

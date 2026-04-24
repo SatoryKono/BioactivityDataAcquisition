@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Protocol, cast
+from typing import Protocol
 from uuid import uuid4
 
 from bioetl.application.services.control_plane._run_manifest_service_mixins import (
@@ -147,7 +147,7 @@ class RunManifestService(
             return self.clock.now()
         if self.created_at_factory is not None:
             return self.created_at_factory()
-        return cast(datetime, MISSING_RUNTIME_TIMESTAMP)
+        return MISSING_RUNTIME_TIMESTAMP
 
     def create_manifest(self, request: RunManifestCreateSpec) -> RunManifest:
         """Build fingerprinted manifest and persist it through the port."""
@@ -202,4 +202,4 @@ class RunManifestService(
 
     def _compute_execution_fingerprint(self, *, payload: dict[str, object]) -> str:
         """Compute the canonical execution-identity fingerprint contract."""
-        return cast(str, compute_execution_identity_fingerprint(payload))
+        return compute_execution_identity_fingerprint(payload)

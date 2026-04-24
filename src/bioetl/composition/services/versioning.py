@@ -163,6 +163,8 @@ def compute_config_hash(
 
     # Normalize for deterministic serialization
     normalized = _normalize_for_hash(config_dict)
+    if not isinstance(normalized, dict | list):
+        raise TypeError("Pipeline config normalization must produce JSON-like data")
 
     # Reuse the same canonical JSON contract as the run-manifest fingerprint.
     json_str = serialize_json_canonical(normalized)

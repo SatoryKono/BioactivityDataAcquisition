@@ -124,7 +124,6 @@ class SilverDQAnalyzerPort(Protocol):
         Returns:
             SilverDQReport: Complete DQ report for Silver layer.
         """
-        del request, args, kwargs
         ...
 
 

@@ -117,6 +117,7 @@ class BronzeWriterMetadataMixin:
             entity=entity,
             output_path=output_path,
         )
+        raise AssertionError("unreachable")
 
     def _build_bronze_metadata_payload(
         self,
@@ -166,6 +167,7 @@ class BronzeWriterMetadataMixin:
             entity=entity,
             output_path=output_path,
         )
+        raise AssertionError("unreachable")
 
 
 __all__ = ["BronzeWriterMetadataMixin"]
