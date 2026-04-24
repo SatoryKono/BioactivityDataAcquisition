@@ -49,6 +49,11 @@ It SHOULD NOT absorb raw review dumps or act as a second working-output tree.
 - [`great-expectations-spike-2026-04-01.md`](great-expectations-spike-2026-04-01.md)
   — recommendation memo for issue `#2595` on whether Great Expectations should
   be adopted alongside the existing `Pandera` and DQ stack
+- `docs-link-check-report.json` — generated repo-only docs link-quality report
+  produced by `scripts/docs/check_doc_links.py --report-json ...` and uploaded
+  in CI as the `docs-link-check-report` artifact
+- `docs-parity-report.json` — generated repo-only config/spec parity report
+  produced by `scripts/docs_parity_check.py`
 
 ## Reading Pattern
 

@@ -333,6 +333,12 @@ owner: team/individual
 3. `scripts/generate_adr_registry.py` - ADR metadata generation
 4. `scripts/docs_quality_report.py` - Quality metrics reporting
 
+`check_doc_links.py` is the active published-docs integrity gate. When invoked
+with `--report-json docs/reports/docs-link-check-report.json`, it emits the
+stable repo-only link-quality report used for local reproduction and CI
+artifacts. Exit code `0` means the selected checks passed; exit code `1` means
+violations were found and the docs change must not be treated as clean.
+
 ## 📋 Compliance and Enforcement
 
 ### Documentation Requirements by PR Type
