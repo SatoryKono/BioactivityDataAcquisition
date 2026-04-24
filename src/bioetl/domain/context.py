@@ -111,7 +111,7 @@ class PipelineContext:
         run_id: RunID,
         run_type: RunType,
         logger: LoggerPort,
-        started_at: datetime,
+        started_at: datetime | None = None,
         source_batch_id: BatchID | None = None,
         replay_timestamp_anchor: datetime | None = None,
         pipeline_name: str | None = None,
@@ -122,7 +122,8 @@ class PipelineContext:
             run_id: Unique identifier for the pipeline run.
             run_type: Type of run (incremental, backfill, rebuild).
             logger: Structured logger port for pipeline-level logging.
-            started_at: UTC start timestamp captured by the caller.
+            started_at: UTC start timestamp captured by the caller. When omitted,
+                the compatibility constructor carries a deterministic sentinel.
             replay_timestamp_anchor: Optional deterministic timestamp used for
                 replay-facing artifacts that must not drift between exact replays.
             pipeline_name: Optional pipeline name for context identification.
@@ -134,7 +135,11 @@ class PipelineContext:
             run_id=run_id,
             run_type=run_type,
             logger=logger,
-            started_at=started_at,
+            started_at=(
+                started_at
+                if started_at is not None
+                else MISSING_RUNTIME_TIMESTAMP
+            ),
             source_batch_id=source_batch_id,
             replay_timestamp_anchor=replay_timestamp_anchor,
             pipeline_name=pipeline_name,
