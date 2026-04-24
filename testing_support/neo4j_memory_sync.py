@@ -287,7 +287,10 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert any(label == "workflow_output_surface" for label, _ in node_keys)
     assert ("workflow_action_surface", "actions/upload-artifact") in node_keys
     assert ("workflow_action_surface", "./.github/actions/setup-python-uv") in node_keys
-    assert ("workflow_artifact_surface", "tests::coverage-data-smoke") in node_keys
+    assert (
+        "workflow_artifact_surface",
+        "tests::coverage-data-${{ matrix.test-group.name }}",
+    ) in node_keys
     assert ("workflow_secret_surface", "GITHUB_TOKEN") in node_keys
     assert ("cli_command_surface", "bioetl run") in node_keys
     assert ("cli_command_surface", "scripts.memory sync") in node_keys
@@ -1351,17 +1354,17 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ),
     (
         "workflow_job_surface",
-        "tests::smoke-check",
+        "tests::test-matrix",
         "USES_ACTION",
         "workflow_action_surface",
         "actions/upload-artifact",
     ),
     (
         "workflow_job_surface",
-        "tests::smoke-check",
+        "tests::test-matrix",
         "PUBLISHES_ARTIFACT",
         "workflow_artifact_surface",
-        "tests::coverage-data-smoke",
+        "tests::coverage-data-${{ matrix.test-group.name }}",
     ),
     (
         "workflow_job_surface",
@@ -2054,7 +2057,10 @@ def test_filtered_snapshot_workflow_graph_preserves_job_gate_and_run_targets() -
     assert ("workflow_action_surface", "actions/upload-artifact") in {
         (key.label, key.name) for key in filtered.nodes
     }
-    assert ("workflow_artifact_surface", "tests::coverage-data-smoke") in {
+    assert (
+        "workflow_artifact_surface",
+        "tests::coverage-data-${{ matrix.test-group.name }}",
+    ) in {
         (key.label, key.name) for key in filtered.nodes
     }
     assert (
@@ -2073,17 +2079,17 @@ def test_filtered_snapshot_workflow_graph_preserves_job_gate_and_run_targets() -
     ) in relation_keys
     assert (
         "workflow_job_surface",
-        "tests::smoke-check",
+        "tests::test-matrix",
         "USES_ACTION",
         "workflow_action_surface",
         "actions/upload-artifact",
     ) in relation_keys
     assert (
         "workflow_job_surface",
-        "tests::smoke-check",
+        "tests::test-matrix",
         "PUBLISHES_ARTIFACT",
         "workflow_artifact_surface",
-        "tests::coverage-data-smoke",
+        "tests::coverage-data-${{ matrix.test-group.name }}",
     ) in relation_keys
     assert any(
         relation_key[2] == "CALLS_WORKFLOW"

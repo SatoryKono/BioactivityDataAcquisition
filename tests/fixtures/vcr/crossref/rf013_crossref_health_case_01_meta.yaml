@@ -1,7 +1,8 @@
 schema_version: 1
 provider: crossref
 cassette_rel_path: tests/fixtures/vcr/crossref/rf013_crossref_health_case_01.yaml
-metadata_status: seeded_partial_backfill
+metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: c0e77ba25d3023709fd308ab633148f5731846dfe856023d77b9f79e04abc499
-staleness_ready: false
+recorded_at: '2026-04-24'
+staleness_ready: true

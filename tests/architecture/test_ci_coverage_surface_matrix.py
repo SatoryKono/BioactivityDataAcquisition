@@ -58,12 +58,11 @@ class TestCiCoverageSurfaceMatrix:
         for job in entries:
             assert f"{job}:" in workflow, f"workflow is missing mapped job '{job}'"
 
-        for job in ("smoke-check", "test-fast", "test-matrix"):
-            entry = entries[job]
-            assert entry["lane_type"] == "coverage_shard"
-            assert entry["emits_coverage_artifact"] is True
-            assert entry["participates_in_hard_threshold"] is True
-            assert entry["threshold_enforced_in_job"] is False
+        matrix_entry = entries["test-matrix"]
+        assert matrix_entry["lane_type"] == "coverage_shard"
+        assert matrix_entry["emits_coverage_artifact"] is True
+        assert matrix_entry["participates_in_hard_threshold"] is True
+        assert matrix_entry["threshold_enforced_in_job"] is False
 
         coverage_verify = entries["coverage-verify"]
         assert coverage_verify["lane_type"] == "hard_threshold_gate"
@@ -71,7 +70,13 @@ class TestCiCoverageSurfaceMatrix:
         assert coverage_verify["threshold_enforced_in_job"] is True
         assert coverage_verify["participates_in_hard_threshold"] is True
 
-        execution_only_jobs = {"control-plane-e2e", "track-d-gates", "memory-tests"}
+        execution_only_jobs = {
+            "smoke-check",
+            "control-plane-e2e",
+            "track-d-gates",
+            "memory-tests",
+            "test-fast",
+        }
         for job in execution_only_jobs:
             entry = entries[job]
             assert entry["lane_type"] == "execution_only"
@@ -90,8 +95,8 @@ class TestCiCoverageSurfaceMatrix:
         workflow = _read_workflow(ROOT / matrix["workflow_path"])
         entries = {entry["job"]: entry for entry in matrix.get("lanes", [])}
 
-        assert "name: coverage-data-smoke" in workflow
-        assert "name: coverage-data-fast" in workflow
+        assert "name: coverage-data-smoke" not in workflow
+        assert "name: coverage-data-fast" not in workflow
         assert "name: coverage-data-${{ matrix.test-group.name }}" in workflow
         assert "pattern: coverage-data-*" in workflow
         assert "coverage report --show-missing --fail-under=85" in workflow

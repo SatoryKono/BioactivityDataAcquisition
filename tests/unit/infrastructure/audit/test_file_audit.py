@@ -184,6 +184,7 @@ class TestFileAuditAdapter:
         adapter.log_event(
             "PipelineRunCompleted",
             {"pipeline": "test_pipeline", "status": "success"},
+            timestamp=datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC),
         )
 
         event_files = list((tmp_path / "audit").glob("events_*.jsonl"))

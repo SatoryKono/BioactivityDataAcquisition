@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from bioetl.domain.context import current_utc_time
 from bioetl.domain.ports import AuditPort, MetricsPort
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
@@ -81,6 +82,7 @@ class SilverMaintenanceOperations:
                 self._audit.log_event(
                     "SilverCsvExport",
                     {"table": table_name, "rows": len(arrow_data), "status": "success"},
+                    timestamp=current_utc_time(),
                 )
         except Exception as e:
             if self._metrics:
@@ -97,6 +99,7 @@ class SilverMaintenanceOperations:
                 self._audit.log_event(
                     "SilverCsvExport",
                     {"table": table_name, "status": "failed", "error": str(e)},
+                    timestamp=current_utc_time(),
                 )
             raise
 
@@ -133,6 +136,7 @@ class SilverMaintenanceOperations:
             self._audit.log_event(
                 "SilverVacuum",
                 {"table": table_name, "retention_hours": retention_hours, **result},
+                timestamp=current_utc_time(),
             )
 
         return result
@@ -167,6 +171,10 @@ class SilverMaintenanceOperations:
             self._metrics.increment_counter("bioetl_silver_optimize_success_total", 1)
 
         if self._audit:
-            self._audit.log_event("SilverOptimize", result)
+            self._audit.log_event(
+                "SilverOptimize",
+                result,
+                timestamp=current_utc_time(),
+            )
 
         return result

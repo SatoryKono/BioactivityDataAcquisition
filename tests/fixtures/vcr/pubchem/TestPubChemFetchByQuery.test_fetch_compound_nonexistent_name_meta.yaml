@@ -1,0 +1,8 @@
+schema_version: 1
+provider: pubchem
+cassette_rel_path: tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_nonexistent_name.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: 16635cf790faf53433d2fcc975ee442692b2a55c1821e1aa53a2b96642abef70
+recorded_at: '2026-04-24'
+staleness_ready: true

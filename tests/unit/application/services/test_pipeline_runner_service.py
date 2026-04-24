@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import ANY, AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
@@ -387,6 +387,7 @@ class TestPipelineRunnerServiceRun:
                 "run_type": "incremental",
                 "status": "started",
             },
+            timestamp=ANY,
         )
         mock_audit_port.log_event.assert_any_call(
             "PipelineRunCompleted",
@@ -397,6 +398,7 @@ class TestPipelineRunnerServiceRun:
                 "status": "success",
                 "manifest_id": "manifest-123",
             },
+            timestamp=result.completed_at,
         )
 
     @pytest.mark.asyncio
@@ -461,6 +463,7 @@ class TestPipelineRunnerServiceRun:
                 "run_type": "incremental",
                 "status": "dry_run",
             },
+            timestamp=result.completed_at,
         )
 
     @pytest.mark.asyncio
@@ -535,6 +538,7 @@ class TestPipelineRunnerServiceRun:
                 "manifest_id": "manifest-123",
                 "error_type": "ValueError",
             },
+            timestamp=result.completed_at,
         )
 
     @pytest.mark.asyncio

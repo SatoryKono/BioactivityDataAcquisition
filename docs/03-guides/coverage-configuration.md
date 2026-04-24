@@ -297,6 +297,10 @@ coverage-verify:
     - run: uv run python -m coverage xml -o reports/coverage/coverage.xml
 ```
 
+Only `test-matrix` publishes coverage shard artifacts into this combine step.
+`smoke-check` and `test-fast` remain execution-feedback lanes and no longer emit
+duplicate coverage files.
+
 **Status Check**: Required for PR merge. If coverage drops below 85%, merge is blocked.
 
 ______________________________________________________________________

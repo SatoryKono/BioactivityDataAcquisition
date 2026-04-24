@@ -10,15 +10,14 @@ threshold_policy:
     directly enforcing the threshold.
 lanes:
   - job: smoke-check
-    lane_type: coverage_shard
-    emits_coverage_artifact: true
-    coverage_artifact: coverage-data-smoke
-    participates_in_hard_threshold: true
+    lane_type: execution_only
+    emits_coverage_artifact: false
+    participates_in_hard_threshold: false
     threshold_enforced_in_job: false
     execution_confidence_role: dependency_smoke
     notes: >-
-      Smoke check contributes a coverage shard and minimal dependency/import
-      confidence before heavier lanes start.
+      Smoke check provides minimal dependency/import confidence before heavier
+      lanes start, but it no longer emits coverage data into the hard gate.
   - job: control-plane-e2e
     lane_type: execution_only
     emits_coverage_artifact: false
@@ -48,15 +47,14 @@ lanes:
       the main coverage-enforced path excludes environment-sensitive memory
       tooling without losing regression visibility.
   - job: test-fast
-    lane_type: coverage_shard
-    emits_coverage_artifact: true
-    coverage_artifact: coverage-data-fast
-    participates_in_hard_threshold: true
+    lane_type: execution_only
+    emits_coverage_artifact: false
+    participates_in_hard_threshold: false
     threshold_enforced_in_job: false
     execution_confidence_role: fast_parallel_feedback
     notes: >-
-      Fast unit and architecture execution contributes a coverage shard and
-      quick execution feedback, but threshold enforcement remains centralized.
+      Fast unit and architecture execution stays as quick feedback only; the
+      authoritative hard coverage path no longer depends on this duplicate lane.
   - job: test-matrix
     lane_type: coverage_shard
     emits_coverage_artifact: true

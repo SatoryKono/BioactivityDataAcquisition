@@ -57,6 +57,8 @@ class NoOpAudit:
         self,
         _event_name: str,
         _event_data: dict | None = None,
+        *,
+        timestamp: datetime,
     ) -> None:
         """No-op implementation of log_event — discards the event.
 
@@ -64,6 +66,7 @@ class NoOpAudit:
             _event_name: Name of the event to log (ignored).
             _event_data: Event data dictionary (ignored).
         """
+        del timestamp
         return None
 
 

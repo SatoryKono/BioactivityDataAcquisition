@@ -110,6 +110,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the top-level scripts.ai.vibe module router during the Vibe tooling consolidation window; either add stable external call-sites so it becomes active or remove it if the bash launcher remains the only supported entrypoint."
     },
+    "scripts/check_cli_parity.py": {
+      "owner": "@bioetl-platform",
+      "decision": "active",
+      "review_by": "2026-07-15",
+      "next_step": "Validate active usage and integrate into canonical CLI validation workflows."
+    },
     "scripts/check_dq_dsl_parity.py": {
       "owner": "@bioetl-platform",
       "decision": "active",

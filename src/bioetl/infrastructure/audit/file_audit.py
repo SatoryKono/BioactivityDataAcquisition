@@ -20,11 +20,10 @@ __all__ = ["FileAuditAdapter"]
 
 import asyncio
 import time
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.context import current_utc_time
 from bioetl.domain.ports import AuditEntry, AuditLayer
 from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.types import JsonDict
@@ -230,12 +229,12 @@ class FileAuditAdapter:
         self,
         event_name: str,
         event_data: JsonDict | None = None,
-        timestamp: datetime | None = None,
+        *,
+        timestamp: datetime,
     ) -> None:
         """Log a non-write lifecycle event to the audit trail."""
         if self._closed:
             raise RuntimeError(_AUDIT_ADAPTER_CLOSED_MESSAGE)
-        timestamp = timestamp or current_utc_time()
         with self._tracer.start_as_current_span("audit.log_event") as span:
             span.set_attribute("bioetl.audit.event_name", event_name)
             try:

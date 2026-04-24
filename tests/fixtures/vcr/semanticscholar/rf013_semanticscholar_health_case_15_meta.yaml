@@ -1,0 +1,8 @@
+schema_version: 1
+provider: semanticscholar
+cassette_rel_path: tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_15.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: bc8aa69bffb62acbf45cbe1e3633399245c3062cd87d20a0530e8bac652a7795
+recorded_at: '2026-04-24'
+staleness_ready: true

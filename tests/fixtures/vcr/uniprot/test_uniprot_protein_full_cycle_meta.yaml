@@ -1,7 +1,8 @@
 schema_version: 1
 provider: uniprot
 cassette_rel_path: tests/fixtures/vcr/uniprot/test_uniprot_protein_full_cycle.yaml
-metadata_status: seeded_partial_backfill
+metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: aa757b1e849c26be6b8cd577e75d127e5fab50adff53d2df174553f4b734168c
-staleness_ready: false
+recorded_at: '2026-04-24'
+staleness_ready: true

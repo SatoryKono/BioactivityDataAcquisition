@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from unittest import mock
 from types import SimpleNamespace
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
@@ -36,7 +38,12 @@ def _make_manifest_result(
 ) -> SimpleNamespace:
     """Create a lightweight run-manifest result stub for workflow tests."""
     return SimpleNamespace(
-        manifest=SimpleNamespace(pipeline_name=pipeline_name),
+        manifest=SimpleNamespace(
+            pipeline_name=pipeline_name,
+            provider="chembl",
+            run_type="incremental",
+            created_at=datetime(2026, 4, 10, 10, 0, tzinfo=UTC),
+        ),
         ledger_entries=(
             SimpleNamespace(metrics_snapshot={"records_bronze": bronze_records}),
         ),
@@ -207,7 +214,7 @@ async def test_inspect_run_dossier_aggregates_forensic_sections() -> None:
         "lineage_status": "present",
         "quarantine_status": "present",
         "missing_evidence_count": 0,
-        "degraded_evidence_count": 1,
+        "degraded_evidence_count": 0,
     }
     assert result.traceability == {
         "audit_entries_count": 0,
@@ -216,11 +223,28 @@ async def test_inspect_run_dossier_aggregates_forensic_sections() -> None:
         "lineage_fragment_ids": ["fragment-1"],
         "artifact_refs": ["manifest://manifest-1", "ledger://manifest-1"],
         "trace_ids": [],
-        "trace_urls": [],
-        "trace_links_available": False,
+        "trace_urls": mock.ANY,
+        "trace_links_available": True,
         "persistence_profile": {"attained_profile": "forensic_grade"},
         "replay_capability": "exact_replay_supported",
     }
+    trace_url = result.traceability["trace_urls"][0]
+    parsed_query = parse_qs(urlsplit(trace_url).query)
+    assert trace_url.startswith("/a/grafana-exploretraces-app/?")
+    assert parsed_query["datasource"] == ["tempo"]
+    assert parsed_query["queryType"] == ["traceqlSearch"]
+    expected_from = datetime(2026, 4, 10, 9, 55, tzinfo=UTC)
+    expected_to = datetime(2026, 4, 10, 10, 5, tzinfo=UTC)
+    assert parsed_query["from"] == [str(int(expected_from.timestamp() * 1000))]
+    assert parsed_query["to"] == [str(int(expected_to.timestamp() * 1000))]
+    assert parsed_query["query"] == [
+        (
+            '{ span."bioetl.run_id" = "abc" && '
+            'span."bioetl.pipeline" = "chembl_activity" && '
+            'span."bioetl.run_type" = "incremental" && '
+            'span."bioetl.provider" = "chembl" }'
+        )
+    ]
     assert result.quarantine_summary == {
         "total": 3,
         "silver_filter_rejects": {
@@ -232,11 +256,8 @@ async def test_inspect_run_dossier_aggregates_forensic_sections() -> None:
         "run_scope": {"run_id": "abc"},
     }
     assert result.missing_evidence == ()
-    assert result.degraded_evidence == ("trace_links_unavailable",)
-    assert result.next_steps == (
-        "review dossier output",
-        "Use audit, manifest, and lineage sections as the current traceability fallback.",
-    )
+    assert result.degraded_evidence == ()
+    assert result.next_steps == ("review dossier output",)
     assert result.to_dict()["checkpoint"] == {
         "pipeline_name": "chembl_activity",
         "run_id": "abc",

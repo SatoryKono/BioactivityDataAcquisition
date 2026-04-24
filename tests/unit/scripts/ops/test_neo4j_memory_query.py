@@ -149,10 +149,7 @@ def test_query_profiles_cover_operator_shortcuts() -> None:
         QUERY_PROFILES[OVERENGINEERED_CANDIDATES_MODE]["target_label"]
         == "complexity_candidate"
     )
-    assert (
-        QUERY_PROFILES[REMOVABLE_COMPLEXITY_MODE]["mode"]
-        == "removable_complexity"
-    )
+    assert QUERY_PROFILES[REMOVABLE_COMPLEXITY_MODE]["mode"] == "removable_complexity"
     assert (
         QUERY_PROFILES[SIMPLIFICATION_BLOCKERS_MODE]["mode"]
         == "simplification_blockers"
@@ -539,17 +536,20 @@ def test_format_rows_renders_workflow_artifacts_summary() -> None:
         [
             {
                 "workflow_name": "tests",
-                "job_name": "tests::smoke-check",
+                "job_name": "tests::test-matrix",
                 "actions": [
                     "actions/upload-artifact",
                     "./.github/actions/setup-python-uv",
                 ],
                 "artifacts": [
                     {
-                        "name": "tests::coverage-data-smoke",
+                        "name": "tests::coverage-data-${{ matrix.test-group.name }}",
                         "relation": "PUBLISHES_ARTIFACT",
                     },
-                    {"name": "tests::coverage-data-fast", "relation": "DEPENDS_ON"},
+                    {
+                        "name": "tests::test-telemetry-${{ matrix.test-group.name }}",
+                        "relation": "PUBLISHES_ARTIFACT",
+                    },
                 ],
                 "secrets": ["GITHUB_TOKEN"],
             }
@@ -557,10 +557,11 @@ def test_format_rows_renders_workflow_artifacts_summary() -> None:
     )
 
     assert "Workflow actions, artifacts, and secrets: `tests`" in formatted
-    assert "workflow=tests | job=tests::smoke-check" in formatted
+    assert "workflow=tests | job=tests::test-matrix" in formatted
     assert "action=actions/upload-artifact" in formatted
     assert (
-        "artifact=tests::coverage-data-smoke | relation=PUBLISHES_ARTIFACT" in formatted
+        "artifact=tests::coverage-data-${{ matrix.test-group.name }} | relation=PUBLISHES_ARTIFACT"
+        in formatted
     )
     assert "secret=GITHUB_TOKEN" in formatted
 
@@ -671,7 +672,9 @@ def test_format_rows_renders_storage_lineage_summary() -> None:
         "sort_by=entity_id,activity_id | versioning_mode=scd2 | version_column=_version"
         in formatted
     )
-    assert f"producer={CHEMBL_ACTIVITY_PIPELINE} | labels={PIPELINE_SURFACE}" in formatted
+    assert (
+        f"producer={CHEMBL_ACTIVITY_PIPELINE} | labels={PIPELINE_SURFACE}" in formatted
+    )
     assert "upstream=bronze/chembl/activity" in formatted
     assert "downstream=gold/chembl/activity" in formatted
     assert f"defined_by={CHEMBL_ACTIVITY_CONFIG_PATH}" in formatted
@@ -784,7 +787,10 @@ def test_format_rows_renders_run_artifacts_summary() -> None:
         "artifact=run_ledger::jsonl | labels=control_plane_artifact_surface | artifact_family=run_ledger"
         in formatted
     )
-    assert f"depends_on={CHEMBL_ACTIVITY_PIPELINE} | labels={PIPELINE_SURFACE}" in formatted
+    assert (
+        f"depends_on={CHEMBL_ACTIVITY_PIPELINE} | labels={PIPELINE_SURFACE}"
+        in formatted
+    )
     assert (
         "support=tests/unit/application/services/test_run_manifest_inspection_service.py | labels=test_artifact"
         in formatted
@@ -826,7 +832,10 @@ def test_format_rows_renders_runtime_state_summary() -> None:
         in formatted
     )
     assert "owner=manifest-chain-2 | labels=run_instance_surface" in formatted
-    assert f"dependency={CHEMBL_ACTIVITY_PIPELINE} | labels={PIPELINE_SURFACE}" in formatted
+    assert (
+        f"dependency={CHEMBL_ACTIVITY_PIPELINE} | labels={PIPELINE_SURFACE}"
+        in formatted
+    )
     assert (
         "artifact=run_ledger::jsonl | labels=control_plane_artifact_surface | artifact_family=run_ledger"
         in formatted
@@ -862,10 +871,7 @@ def test_format_rows_renders_claim_trace_summary() -> None:
         in formatted
     )
     assert "text=activity_id is required" in formatted
-    assert (
-        f"target={RUN_MANIFEST_MODULE_PATH} | labels={MODULE_SURFACE}"
-        in formatted
-    )
+    assert f"target={RUN_MANIFEST_MODULE_PATH} | labels={MODULE_SURFACE}" in formatted
 
 
 def test_format_rows_renders_cli_semantics_summary() -> None:
@@ -922,7 +928,8 @@ def test_format_rows_renders_duplication_cluster_summary() -> None:
     )
 
     assert (
-        f"Duplication cluster: `{ADAPTER_LAYER}:method_surface:de487f71c608`" in formatted
+        f"Duplication cluster: `{ADAPTER_LAYER}:method_surface:de487f71c608`"
+        in formatted
     )
     assert (
         f"family={ADAPTER_LAYER} | surface_kind=method_surface | duplicates=4 | promotion_score=0.99"

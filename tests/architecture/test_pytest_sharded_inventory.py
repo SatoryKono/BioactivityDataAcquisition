@@ -91,7 +91,13 @@ def test_sharded_runner_list_matches_inventory_order() -> None:
 @pytest.mark.architecture
 def test_sharded_runner_dry_run_expands_architecture_alias_from_inventory() -> None:
     result = subprocess.run(
-        ["bash", str(RUNNER_PATH), "--dry-run", "--shard", "S7-crosscutting-architecture"],
+        [
+            "bash",
+            str(RUNNER_PATH),
+            "--dry-run",
+            "--shard",
+            "S7-crosscutting-architecture",
+        ],
         cwd=ROOT,
         check=True,
         capture_output=True,

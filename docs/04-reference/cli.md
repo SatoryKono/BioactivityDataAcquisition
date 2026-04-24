@@ -16,8 +16,9 @@ ______________________________________________________________________
 BioETL command-line interface (CLI) - основной способ взаимодействия с системой.
 Построен на фреймворке **Click** для стабильности и расширяемости.
 
-**Версия:** 6.1.1
-**Дата обновления:** 2026-04-04
+**Версия:** 6.1.2
+**Дата обновления:** 2026-04-24
+**Статус парадита:** ✅ Все команды документированы
 
 ______________________________________________________________________
 
@@ -538,6 +539,195 @@ bioetl export chembl.activity --layer gold
 # В указанную директорию
 bioetl export chembl.activity -o ./my-exports
 ```
+
+______________________________________________________________________
+
+### `debug` — Отладка пайплайнов
+
+Запускает пайплайн с точками останова для отладки. Полезно для пошагового выполнения и инспекции промежуточных состояний.
+
+**Синтаксис:**
+
+```bash
+bioetl debug --pipeline <NAME> [OPTIONS]
+```
+
+**Обязательные параметры:**
+
+| Параметр            | Описание                                                 |
+| ------------------- | -------------------------------------------------------- |
+| `--pipeline <NAME>` | Имя пайплайна (соответствует YAML в `configs/entities/`) |
+
+**Опции:**
+
+| Опция                                    | Тип    | По умолчанию  | Описание                                          |
+| ---------------------------------------- | ------ | ------------- | ------------------------------------------------- |
+| `--breakpoint <STEP>`                     | choice | None          | Точка останова: `preflight`, `bronze`, `silver`, `gold`, `postrun` |
+| `--step-into`                            | flag   | False         | Пошаговое выполнение внутри этапа                |
+| `--inspect-state`                        | flag   | False         | Показать полное состояние перед каждым шагом     |
+| `--debugger-port`                         | int    | 5678          | Порт для удалённого отладчика                    |
+| `--limit`                                | int    | 100           | Максимальное количество записей для отладки      |
+| `--dry-run`                              | flag   | True          | Не записывать данные (только чтение)              |
+
+**Примеры:**
+
+```bash
+# Отладка с точкой останова на этапе Silver
+bioetl debug --pipeline chembl_activity --breakpoint silver
+
+# Пошаговое выполнение с инспекцией состояния
+bioetl debug --pipeline chembl_activity --step-into --inspect-state
+
+# Отладка с удалённым отладчиком
+bioetl debug --pipeline chembl_activity --debugger-port 5678
+```
+
+**См. также:**
+- `bioetl run` — для обычного выполнения
+- [Debugging Guide](../03-guides/development/debugging.md)
+
+______________________________________________________________________
+
+### `diagnostics` — Диагностика системы
+
+Унифицированные диагностические инструменты для операторов. Объединяет метрики, health checks, checkpoints, manifests и quarantine в единый отчёт.
+
+**Синтаксис:**
+
+```bash
+bioetl diagnostics [OPTIONS]
+```
+
+**Опции:**
+
+| Опция                                    | Тип    | По умолчанию  | Описание                                          |
+| ---------------------------------------- | ------ | ------------- | ------------------------------------------------- |
+| `--metrics`                              | flag   | True          | Включить метрики производительности              |
+| `--health`                               | flag   | True          | Включить health checks провайдеров                |
+| `--checkpoints`                          | flag   | True          | Включить информацию о checkpoints                 |
+| `--manifests`                            | flag   | True          | Включить данные о manifests и ledgers             |
+| `--quarantine`                           | flag   | True          | Включить статистику quarantine                     |
+| `--json`                                 | flag   | False         | Вывод в формате JSON                              |
+| `--output`, `-o`                         | path   | None          | Сохранить отчёт в файл                            |
+| `--since`                                | str    | `1h`          | Период для метрик (например, `1h`, `24h`, `7d`)   |
+| `--pipeline`                             | str    | None          | Фильтр по конкретному пайплайну                 |
+
+**Примеры:**
+
+```bash
+# Быстрая диагностика (все включено)
+bioetl diagnostics
+
+# Только метрики и health checks
+bioetl diagnostics --checkpoints=false --manifests=false --quarantine=false
+
+# Сохранить отчёт в JSON
+bioetl diagnostics --json --output system-diagnostics.json
+
+# Диагностика за последние 24 часа
+bioetl diagnostics --since 24h
+```
+
+**См. также:**
+- `bioetl health` — для health checks
+- `bioetl run-manifest` — для inspection manifests
+
+______________________________________________________________________
+
+### `dq` — Конфигурация Data Quality
+
+Управление конфигурацией Data Quality: валидация, просмотр и тестирование DQ правил.
+
+**Синтаксис:**
+
+```bash
+bioetl dq [COMMAND] [OPTIONS]
+```
+
+**Команды:**
+
+#### `dq validate` — Валидация DQ конфигурации
+
+```bash
+bioetl dq validate --entity <PROVIDER.ENTITY> [OPTIONS]
+```
+
+**Опции:**
+
+| Опция                                    | Тип    | По умолчанию  | Описание                                          |
+| ---------------------------------------- | ------ | ------------- | ------------------------------------------------- |
+| `--entity <PROVIDER.ENTITY>`              | str    | None          | Сущность в формате `provider.entity`              |
+| `--strict`                               | flag   | False         | Strict validation (fail на warnings)             |
+| `--show-rules`                           | flag   | False         | Показать все DQ правила                           |
+| `--test-data`                           | path   | None          | Тестировать с пользовательскими данными           |
+
+**Примеры:**
+
+```bash
+# Валидация DQ конфигурации для сущности
+bioetl dq validate --entity chembl.activity
+
+# Показать все DQ правила
+bioetl dq validate --entity chembl.activity --show-rules
+
+# Strict validation
+bioetl dq validate --entity chembl.activity --strict
+```
+
+**См. также:**
+- [DQ Contracts](../../04-reference/contracts/dq-contracts.md)
+- `bioetl config validate` — для общей валидации конфигурации
+
+______________________________________________________________________
+
+### `lineage` — Инспекция lineage
+
+Инструменты для анализа и визуализации lineage (происхождения данных) в пайплайнах.
+
+**Синтаксис:**
+
+```bash
+bioetl lineage [COMMAND] [OPTIONS]
+```
+
+**Команды:**
+
+#### `lineage show` — Показать lineage для записи
+
+```bash
+bioetl lineage show --entity <PROVIDER.ENTITY> --record-id <ID> [OPTIONS]
+```
+
+**Опции:**
+
+| Опция                                    | Тип    | По умолчанию  | Описание                                          |
+| ---------------------------------------- | ------ | ------------- | ------------------------------------------------- |
+| `--entity <PROVIDER.ENTITY>`              | str    | None          | Сущность в формате `provider.entity`              |
+| `--record-id <ID>`                        | str    | None          | Идентификатор записи                               |
+| `--format`, `-f`                          | choice | `text`        | Формат вывода: `text`, `json`, `dot`              |
+| `--depth`, `-d`                           | int    | 3             | Глубина lineage графа                             |
+| `--include-fields`                       | flag   | False         | Включить field-level lineage                      |
+| `--output`, `-o`                         | path   | None          | Сохранить в файл                                  |
+
+**Примеры:**
+
+```bash
+# Показать lineage для записи
+bioetl lineage show --entity chembl.activity --record-id ACT12345
+
+# Вывод в формате JSON
+bioetl lineage show --entity chembl.activity --record-id ACT12345 --format json
+
+# Визуализация в формате DOT (для Graphviz)
+bioetl lineage show --entity chembl.activity --record-id ACT12345 --format dot --output lineage.dot
+
+# Полный lineage с field-level деталями
+bioetl lineage show --entity chembl.activity --record-id ACT12345 --depth 5 --include-fields
+```
+
+**См. также:**
+- [Lineage Architecture](../contracts/run-manifest-ledger.md)
+- `bioetl run --tracing` — для включения tracing
 
 ______________________________________________________________________
 

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
+from urllib.parse import urlencode
 
 from bioetl.application.observability.span_helpers import traced_async_operation
 from bioetl.application.services.audit_inspection_service import (
@@ -39,6 +41,10 @@ _TRACE_ATTR_COMPONENT = "bioetl.component"
 _TRACE_ATTR_HAS_RUN_MANIFEST_SERVICE = "bioetl.has_run_manifest_service"
 _TRACE_ATTR_OPERATION = "bioetl.operation"
 _TRACE_ATTR_SUCCESS = "bioetl.success"
+_TRACE_DRILLDOWN_PATH = "/a/grafana-exploretraces-app/"
+_TRACE_DRILLDOWN_DEFAULT_FROM = "now-24h"
+_TRACE_DRILLDOWN_DEFAULT_TO = "now"
+_TRACE_WINDOW_PADDING = timedelta(minutes=5)
 
 
 @dataclass(frozen=True, slots=True)
@@ -255,6 +261,7 @@ class ObservabilityWorkflowService:
             run_manifest=run_manifest,
         )
         traceability = self._build_traceability_section(
+            run_id=run_id,
             run_manifest=run_manifest,
             lineage=lineage,
             audit=audit,
@@ -489,6 +496,7 @@ class ObservabilityWorkflowService:
     @staticmethod
     def _build_traceability_section(
         *,
+        run_id: str,
         run_manifest: RunManifestInspectionResult | None,
         lineage: LineageRunExplanationResult | None,
         audit: AuditInspectionResult,
@@ -496,6 +504,18 @@ class ObservabilityWorkflowService:
         """Build a stable traceability summary for one run dossier."""
         diagnostics = run_manifest.diagnostics if run_manifest is not None else {}
         identity_graph = run_manifest.identity_graph if run_manifest is not None else {}
+        provider = ObservabilityWorkflowService._resolve_manifest_provider(run_manifest)
+        run_type = ObservabilityWorkflowService._resolve_manifest_run_type(run_manifest)
+        trace_urls = ObservabilityWorkflowService._build_trace_urls(
+            run_id=run_id,
+            pipeline_name=ObservabilityWorkflowService._resolve_pipeline_name(
+                run_manifest
+            ),
+            provider=provider,
+            run_type=run_type,
+            run_manifest=run_manifest,
+            audit=audit,
+        )
         return {
             "audit_entries_count": len(audit.entries),
             "identity_graph_complete": diagnostics.get("identity_graph_complete"),
@@ -504,12 +524,130 @@ class ObservabilityWorkflowService:
             or (list(lineage.fragment_ids) if lineage is not None else []),
             "artifact_refs": diagnostics.get("artifact_refs", []),
             "trace_ids": [],
-            "trace_urls": [],
-            "trace_links_available": False,
+            "trace_urls": trace_urls,
+            "trace_links_available": bool(trace_urls),
             "persistence_profile": diagnostics.get("persistence_profile"),
             "replay_capability": identity_graph.get("replay_capability")
             or diagnostics.get("replay_capability"),
         }
+
+    @staticmethod
+    def _resolve_manifest_provider(
+        run_manifest: RunManifestInspectionResult | None,
+    ) -> str | None:
+        """Resolve provider from manifest context when available."""
+        if run_manifest is None:
+            return None
+        provider = getattr(run_manifest.manifest, "provider", None)
+        return str(provider) if provider not in {None, ""} else None
+
+    @staticmethod
+    def _resolve_manifest_run_type(
+        run_manifest: RunManifestInspectionResult | None,
+    ) -> str | None:
+        """Resolve run type from manifest context when available."""
+        if run_manifest is None:
+            return None
+        run_type = getattr(run_manifest.manifest, "run_type", None)
+        if hasattr(run_type, "value"):
+            run_type = run_type.value
+        return str(run_type) if run_type not in {None, ""} else None
+
+    @staticmethod
+    def _build_trace_urls(
+        *,
+        run_id: str,
+        pipeline_name: str | None,
+        provider: str | None,
+        run_type: str | None,
+        run_manifest: RunManifestInspectionResult | None,
+        audit: AuditInspectionResult,
+    ) -> list[str]:
+        """Build best-effort operator trace drilldown links for one run."""
+        query = ObservabilityWorkflowService._build_traceql_query(
+            run_id=run_id,
+            pipeline_name=pipeline_name,
+            provider=provider,
+            run_type=run_type,
+        )
+        if query is None:
+            return []
+        from_value, to_value = ObservabilityWorkflowService._build_trace_time_window(
+            run_manifest=run_manifest,
+            audit=audit,
+        )
+        params = urlencode(
+            {
+                "from": from_value,
+                "to": to_value,
+                "datasource": "tempo",
+                "queryType": "traceqlSearch",
+                "query": query,
+            }
+        )
+        return [f"{_TRACE_DRILLDOWN_PATH}?{params}"]
+
+    @staticmethod
+    def _build_traceql_query(
+        *,
+        run_id: str,
+        pipeline_name: str | None,
+        provider: str | None,
+        run_type: str | None,
+    ) -> str | None:
+        """Build a low-cardinality TraceQL filter for dossier drilldown."""
+        if not run_id:
+            return None
+        filters = [f'span."bioetl.run_id" = "{run_id}"']
+        if pipeline_name:
+            filters.append(f'span."bioetl.pipeline" = "{pipeline_name}"')
+        if run_type:
+            filters.append(f'span."bioetl.run_type" = "{run_type}"')
+        if provider:
+            filters.append(f'span."bioetl.provider" = "{provider}"')
+        return "{ " + " && ".join(filters) + " }"
+
+    @staticmethod
+    def _build_trace_time_window(
+        *,
+        run_manifest: RunManifestInspectionResult | None,
+        audit: AuditInspectionResult,
+    ) -> tuple[str, str]:
+        """Build a best-effort Grafana time window around the run evidence."""
+        timestamps: list[datetime] = []
+        manifest_created_at = (
+            getattr(run_manifest.manifest, "created_at", None)
+            if run_manifest is not None
+            else None
+        )
+        normalized_manifest_time = ObservabilityWorkflowService._normalize_datetime(
+            manifest_created_at
+        )
+        if normalized_manifest_time is not None:
+            timestamps.append(normalized_manifest_time)
+        for entry in audit.entries:
+            normalized_entry_time = ObservabilityWorkflowService._normalize_datetime(
+                entry.timestamp
+            )
+            if normalized_entry_time is not None:
+                timestamps.append(normalized_entry_time)
+        if not timestamps:
+            return (_TRACE_DRILLDOWN_DEFAULT_FROM, _TRACE_DRILLDOWN_DEFAULT_TO)
+        start = min(timestamps) - _TRACE_WINDOW_PADDING
+        end = max(timestamps) + _TRACE_WINDOW_PADDING
+        return (
+            str(int(start.timestamp() * 1000)),
+            str(int(end.timestamp() * 1000)),
+        )
+
+    @staticmethod
+    def _normalize_datetime(value: object) -> datetime | None:
+        """Normalize datetimes used for operator drilldown windows."""
+        if not isinstance(value, datetime):
+            return None
+        if value.tzinfo is None:
+            return value.replace(tzinfo=UTC)
+        return value.astimezone(UTC)
 
     def _classify_evidence_status(
         self,

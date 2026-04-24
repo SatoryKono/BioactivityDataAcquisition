@@ -1,0 +1,8 @@
+schema_version: 1
+provider: crossref
+cassette_rel_path: tests/fixtures/vcr/crossref/test_crossref_batch_fetch.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: ce99d9660e34af53dfe3a4e4914b343667c2123aacecf281742e0005cae72147
+recorded_at: '2026-04-24'
+staleness_ready: true

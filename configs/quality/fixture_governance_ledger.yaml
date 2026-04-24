@@ -6,91 +6,60 @@ source_of_truth:
 backlog_reference: docs/reports/evidence/residual-test-ci-debt/06-backlog/BACKLOG-residual-test-ci-debt-implementation-2026-04-01.md
 entries:
   - field: cassette_metadata
-    status: partial
+    status: enforced
     owner: "@bioetl-platform"
-    blocking_classification: missing_metadata_backfill
     current_evidence_paths:
       - configs/quality/test_matrix.yaml
-      - tests/architecture/test_test_matrix_coverage.py
-      - tests/architecture/test_vcr_metadata_seed_registry.py
+      - tests/architecture/test_fixture_governance_rollout.py
+      - tests/architecture/test_vcr_metadata_inventory.py
       - reports/quality/vcr-metadata-catalog.json
     artifact_paths:
       - tests/fixtures/vcr
       - reports/quality/vcr-metadata-catalog.json
       - scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py
-    next_step: >-
-      Expand *_meta.yaml coverage from the matrix-declared seeded sidecar slice
-      into the managed VCR inventory and ratchet cassette_metadata_required only
-      after repo-wide metadata coverage is stable.
-    promotion_criteria: >-
-      Canonical cassette metadata sidecars exist for the managed VCR inventory
-      and architecture coverage can require metadata without introducing an
-      allowlist-only exception path.
   - field: cassette_staleness_age
-    status: partial
+    status: enforced
     owner: "@bioetl-platform"
-    blocking_classification: missing_metadata_backfill
     current_evidence_paths:
       - configs/quality/test_matrix.yaml
-      - tests/architecture/test_test_matrix_coverage.py
-      - tests/fixtures/vcr/chembl/test_all_chembl_pipelines_chain_meta.yaml
+      - tests/architecture/test_fixture_governance_rollout.py
+      - tests/architecture/test_vcr_metadata_inventory.py
+      - scripts/engineering/qa/vcr/check_vcr_metadata_age.py
     artifact_paths:
       - tests/fixtures/vcr
+      - scripts/engineering/qa/vcr/check_vcr_metadata_age.py
       - scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py
       - .github/workflows/tests.yml
-    next_step: >-
-      Move stale-age checking from seeded metadata proof to canonical managed
-      inventory coverage so the max-age policy can be enforced consistently.
-    promotion_criteria: >-
-      Staleness checks run against canonical cassette metadata for the managed
-      inventory and the rollout can switch from partial evidence to enforced
-      policy.
   - field: cassette_metadata_catalog
-    status: partial
+    status: enforced
     owner: "@bioetl-platform"
-    blocking_classification: missing_policy_test_ratchet
     current_evidence_paths:
       - reports/quality/vcr-metadata-catalog.json
       - scripts/engineering/qa/report_vcr_metadata_catalog.py
       - tests/architecture/test_vcr_metadata_catalog_drift.py
-      - tests/architecture/test_test_matrix_coverage.py
+      - tests/architecture/test_fixture_governance_rollout.py
     artifact_paths:
       - reports/quality/vcr-metadata-catalog.json
       - scripts/engineering/qa/report_vcr_metadata_catalog.py
       - tests/fixtures/vcr
-    next_step: >-
-      Treat the metadata catalog as the canonical inventory artifact in repeatable
-      checks instead of only as a present-on-disk proof point.
-    promotion_criteria: >-
-      The metadata catalog is regenerated and validated in a repeatable check
-      path, and rollout status can be justified by an enforced inventory ratchet.
   - field: cassette_metadata_backfill
-    status: partial
+    status: enforced
     owner: "@bioetl-platform"
-    blocking_classification: missing_metadata_backfill
     current_evidence_paths:
       - scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py
-      - tests/architecture/test_vcr_metadata_seed_registry.py
-      - tests/fixtures/vcr/chembl/test_all_chembl_pipelines_chain_meta.yaml
-      - tests/architecture/test_test_matrix_coverage.py
+      - tests/architecture/test_vcr_metadata_inventory.py
+      - tests/architecture/test_fixture_governance_rollout.py
     artifact_paths:
       - scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py
       - tests/fixtures/vcr
       - .github/workflows/tests.yml
-    next_step: >-
-      Promote the sidecar backfill path from a seeded script plus
-      matrix-declared partial inventory into an explicit managed migration
-      workflow for the remaining cassette set.
-    promotion_criteria: >-
-      The repo has a canonical backfill path for the managed cassette inventory
-      and rollout status no longer depends on a seeded subset of metadata files.
   - field: contract_snapshots
     status: partial
     owner: "@bioetl-data-model"
     blocking_classification: representative_scope_gap
     current_evidence_paths:
       - configs/quality/test_matrix.yaml
-      - tests/architecture/test_test_matrix_coverage.py
+      - tests/architecture/test_contract_snapshot_governance.py
       - tests/contract/test_chembl_contract.py
       - tests/contract/test_provider_contract_snapshot_registry.py
       - tests/contract/test_crossref_contract.py
@@ -137,7 +106,7 @@ entries:
     current_evidence_paths:
       - tests/fixtures/golden
       - tests/architecture/test_config_golden_master.py
-      - tests/architecture/test_test_matrix_coverage.py
+      - tests/architecture/test_test_matrix_entity_ownership.py
     artifact_paths:
       - tests/fixtures/golden
       - tests/architecture/test_config_golden_master.py
@@ -155,7 +124,7 @@ entries:
     blocking_classification: legacy_filename_inventory
     current_evidence_paths:
       - .github/vcr-noext-allowlist.txt
-      - tests/architecture/test_test_matrix_coverage.py
+      - tests/architecture/test_fixture_governance_rollout.py
       - .github/workflows/tests.yml
     artifact_paths:
       - .github/vcr-noext-allowlist.txt

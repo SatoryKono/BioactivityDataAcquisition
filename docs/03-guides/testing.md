@@ -115,10 +115,10 @@ Supported policy slice for issue `#2598`:
 Текущее состояние rollout по ADR-042:
 - mutation testing в CI блокирует только `domain/` с порогом `70%`
 - `application/` mutation target (`60%`) задокументирован, но пока staged и не является blocking gate
-- VCR cassette metadata (`*_meta.yaml`) перешли в `partial` rollout: в `configs/quality/test_matrix.yaml` теперь явно объявлен current seeded sidecar slice, минимальный provider-coverage rule (`at least one sidecar per VCR-managed provider`) и текущие expected sidecar counts per provider, а canonical backfill tool уже зафиксирован как supported path, но metadata coverage пока не repo-wide и потому enforcement остаётся неполным
-- `vcr_cassette_max_age_days: 90` уже является нормативным stale-age threshold, а repo-wide age rollout теперь `partial`: архитектурные тесты требуют наличие `_meta.yaml` inventory, но CI пока не делает stale-age blocking gate для всего дерева
+- VCR cassette metadata (`*_meta.yaml`) перешли в `enforced` rollout: `configs/quality/test_matrix.yaml` теперь объявляет managed inventory contract для всего canonical VCR estate, а repo-wide metadata coverage больше не держится на seeded subset
+- `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`
 - canonical VCR metadata catalog теперь существует как tracked artifact в `reports/quality/vcr-metadata-catalog.json`
-- canonical tooling paths активированы для partial rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py` служит canonical backfill entry point; при этом workflow-level automated backfill всё ещё не включён
+- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py` служит canonical repo-wide backfill entry point и check-path для managed inventory drift
 - descriptive test-health taxonomy теперь canonical-фиксируется в `configs/quality/test_health_reporting.yaml`; статусы `fully_exercised_green`, `staged_green`, `environment_limited_green` остаются informational и не заменяют merge-blocking CI status
 - monthly `contract-tests.yml` остаётся активным live-network workflow и должен запускать `tests/contract/` с `BIOETL_LIVE_API_TESTS=true`, `BIOETL_NETWORK_TESTS=true` и `--network`
 - monthly `contract-tests.yml` выполняется только в canonical repository `SatoryKono/BioactivityDataAcquisition`, а failure issue внутри workflow ссылается на этот guide как на поддерживаемый policy/runbook entry point
@@ -247,8 +247,8 @@ bash scripts/engineering/dev/run_pytest.sh tests/architecture/test_domain_unit_t
 - **Storage**: Проверка записи в Delta Lake и Bronze хранилище (используются локальные временные пути).
 - **VCR Policy**: canonical machine-readable policy живёт в `configs/quality/integration_vcr_policy.yaml`. Кассеты хранятся в `tests/fixtures/vcr/`, а стандартный CI path использует `--vcr-record=none`.
 - **Compatibility Policy**: `pytest-vcr` должен импортироваться против locked `wrapt` dependency из активного окружения. Repo-root workaround'ы вроде `wrapt/` или `sitecustomize.py` не считаются поддерживаемым fix path; если импорт ломается, нужно чинить environment/lock, а не shadowing dependency.
-- **Fixture Governance**: `_meta.yaml` sidecars и stale-age policy находятся в `partial` rollout. Репозиторий уже держит matrix-declared seeded sidecar inventory и canonical catalog, но глобальный enforcement ещё не repo-wide.
-- **Catalog / Backfill Policy**: canonical VCR metadata catalog и canonical backfill script уже существуют, но automated workflow rollout всё ещё остаётся неполным; это состояние фиксируется matrix и architecture guard'ами.
+- **Fixture Governance**: `_meta.yaml` sidecars и stale-age policy находятся в `enforced` rollout. Managed VCR inventory покрывается repo-wide sidecars, canonical catalog, и CI stale-age checks.
+- **Catalog / Backfill Policy**: canonical VCR metadata catalog и canonical backfill script являются обязательным governance path; drift по missing sidecars, age, или catalog sync теперь считается blocking.
 - **Live Contract Baseline**: live-network enforcement обязателен для `chembl`, `pubchem`, `uniprot`, `pubmed`, `crossref`, `openalex`, `semanticscholar`; richer pilot-soak coverage for Semantic Scholar remains opt-in and does not redefine the enforced baseline.
 
 #### 2.2.1. Supported integration families
@@ -606,7 +606,7 @@ provider-contract-drift.yml
 
 - `test-fast` даёт быстрый feedback для unit + architecture;
 - `test-matrix` шардирует unit/integration/security по test groups и Python versions;
-- `coverage-verify` не rerun-ит весь suite, а объединяет shard coverage и отдельно догоняет только `serial` subset;
+- `coverage-verify` не rerun-ит весь suite, а объединяет только matrix-generated coverage shards и отдельно догоняет `serial` subset;
 - live contract tests вынесены в отдельный workflow и не являются частью обычного PR path;
 - replay drift gate работает отдельно от live path и использует существующие
   `tests/fixtures/contracts/{provider}/v{version}.json` + curated VCR cassettes

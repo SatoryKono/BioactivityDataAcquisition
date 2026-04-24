@@ -1,0 +1,8 @@
+schema_version: 1
+provider: chembl
+cassette_rel_path: tests/fixtures/vcr/chembl/test_rebuild_clears_existing_data.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: 7d32d0df251c7c78261835ca77ba4126bfb2c798ffb5fb165440bfdee717e3a3
+recorded_at: '2026-04-24'
+staleness_ready: true

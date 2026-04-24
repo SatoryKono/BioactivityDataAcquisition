@@ -349,7 +349,8 @@ violation, а drift в generated governance artifacts.
 
   - tests/architecture/test_fixture_governance_ledger.py
   - tests/architecture/test_ci_coverage_surface_matrix.py
-  - tests/architecture/test_test_matrix_coverage.py
+  - tests/architecture/test_test_matrix_lane_policy.py
+  - tests/architecture/test_fixture_governance_rollout.py
 
   DoD:
 

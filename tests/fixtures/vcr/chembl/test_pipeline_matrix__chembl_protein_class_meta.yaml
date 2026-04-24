@@ -1,0 +1,8 @@
+schema_version: 1
+provider: chembl
+cassette_rel_path: tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_protein_class.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: 17730da9d599b4d3c750b27505556f2b10946038be39a3228096bed96dabf315
+recorded_at: '2026-04-24'
+staleness_ready: true

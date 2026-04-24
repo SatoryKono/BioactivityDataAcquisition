@@ -13,12 +13,12 @@ Note:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.application.observability.span_helpers import traced_operation
 from bioetl.domain.exceptions import BioETLError, MetricsServerError
-from bioetl.domain.ports import MetricsPublisherPort, MetricsServerPort
+from bioetl.domain.ports import ClockPort, MetricsPublisherPort, MetricsServerPort
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -264,7 +264,7 @@ class _MetricsStartMixin(_MetricsTracingMixin):
             )
             if success:
                 object.__setattr__(self, "_port", port)
-                object.__setattr__(self, "_started_at", datetime.now(tz=UTC))
+                object.__setattr__(self, "_started_at", self.clock.now())
                 self.logger.info("Metrics server started", port=port, addr=addr)
                 return StartResult(success=True, port=port, addr=addr)
 
@@ -464,6 +464,7 @@ class MetricsService(
 
     logger: LoggerPort
     _server: MetricsServerPort
+    clock: ClockPort
     tracer: TracingPort | None = None
     _publisher: MetricsPublisherPort | None = field(default=None, repr=False)
     _port: int | None = field(default=None, repr=False)

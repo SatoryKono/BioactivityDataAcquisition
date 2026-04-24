@@ -81,4 +81,11 @@ class TestNoOpAudit:
         """log_event uses the sync no-op shape expected by storage helpers."""
         audit = NoOpAudit()
 
-        assert audit.log_event("SilverWrite", {"status": "ok"}) is None
+        assert (
+            audit.log_event(
+                "SilverWrite",
+                {"status": "ok"},
+                timestamp=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
+            )
+            is None
+        )

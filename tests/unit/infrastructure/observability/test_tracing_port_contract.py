@@ -54,7 +54,9 @@ class TestTracingPortContract:
         try:
             assert isinstance(tracer_port, TracingPort)
 
-            span_handle = tracer_port.get_tracer("bioetl.contracts").start_as_current_span(
+            span_handle = tracer_port.get_tracer(
+                "bioetl.contracts"
+            ).start_as_current_span(
                 "pipeline.run",
                 attributes={"bioetl.run_id": "run-123"},
             )

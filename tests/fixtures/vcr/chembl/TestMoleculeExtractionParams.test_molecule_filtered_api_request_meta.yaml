@@ -1,0 +1,8 @@
+schema_version: 1
+provider: chembl
+cassette_rel_path: tests/fixtures/vcr/chembl/TestMoleculeExtractionParams.test_molecule_filtered_api_request.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: db81b8c14a0ff914ed3e048a972f2200eac323897fd91df0682b88e06c7c53c8
+recorded_at: '2026-04-24'
+staleness_ready: true

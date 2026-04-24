@@ -32,9 +32,7 @@ _SUCCESS_STAGE_PLAN = st.lists(
 
 
 def _ts(offset_seconds: int = 0) -> datetime:
-    return datetime(2026, 4, 24, 12, 0, tzinfo=UTC) + timedelta(
-        seconds=offset_seconds
-    )
+    return datetime(2026, 4, 24, 12, 0, tzinfo=UTC) + timedelta(seconds=offset_seconds)
 
 
 def _run_id() -> RunID:
@@ -112,7 +110,9 @@ class TestPipelineRunInvariantProperties:
         run = _make_run()
         run.start(_ts(0))
 
-        for index, (stage_name, records_processed) in enumerate(success_prefix, start=1):
+        for index, (stage_name, records_processed) in enumerate(
+            success_prefix, start=1
+        ):
             run.record_stage_success(
                 stage_name,
                 records_processed=records_processed,

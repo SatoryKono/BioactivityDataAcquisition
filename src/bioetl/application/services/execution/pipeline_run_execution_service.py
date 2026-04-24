@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.application.runtime_timestamps import (
@@ -41,10 +41,10 @@ class PipelineExecutionResult:
     """Execution result normalized for PipelineRunnerService result assembly."""
 
     status: str
+    completed_at: datetime
     error_message: str | None = None
     error_type: str | None = None
     metrics: JsonDict = field(default_factory=dict)
-    completed_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
 
 
 class PipelineRunExecutionService:

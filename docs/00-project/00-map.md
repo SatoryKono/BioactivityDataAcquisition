@@ -215,8 +215,8 @@ ______________________________________________________________________
 | -------- | -------- | ------------------------------------------------------------------------------ | -------- |
 | ChEMBL   | Activity | [activity-schema.md](../04-reference/schemas/domain/chembl/activity-schema.md) | §2.8     |
 | ChEMBL   | Molecule | [molecule-schema.md](../04-reference/schemas/domain/chembl/molecule-schema.md) | §2.8     |
-| ChEMBL   | Target   | [target-schema.md](../04-reference/schemas/domain/chembl/target-schema.md)     | §2.8     |
-| ChEMBL   | Assay    | [assay-schema.md](../04-reference/schemas/domain/chembl/assay-schema.md)       | §2.8     |
+| ChEMBL   | Target   | [target-schema.md](../04-reference/schemas/domain/chembl/target-schema.md) | §2.8     |
+| ChEMBL   | Assay    | [assay-schema.md](../04-reference/schemas/domain/chembl/assay-schema.md) | §2.8     |
 
 ### Operations
 
@@ -262,7 +262,11 @@ src/bioetl/
 │   │   ├── locking.py           # LockPort
 │   │   ├── checkpoint.py        # CheckpointPort
 │   │   ├── quarantine.py        # QuarantinePort
-│   │   ├── observability.py     # MetricsPort, TracingPort, LoggerPort
+│   │   ├── observability/       # Observability port package
+│   │   │   ├── __init__.py      # Facade — single import point for observability ports
+│   │   │   ├── logging.py       # LoggerPort
+│   │   │   ├── metrics.py       # MetricsPort, MetricsServerPort, MetricsPublisherPort
+│   │   │   └── tracing.py       # TracingPort
 │   │   ├── validation.py        # GoldValidatorPort
 │   │   ├── filtering.py         # InputFilterPort
 │   │   ├── health_check.py      # HealthCheckPort

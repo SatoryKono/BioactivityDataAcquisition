@@ -1,0 +1,8 @@
+schema_version: 1
+provider: chembl
+cassette_rel_path: tests/fixtures/vcr/chembl/TestChemblTargetComponentPipeline.test_chembl_target_component_happy_path.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: 9445f9d9a73dfcf55ed5c007a2022aa1d5378e5fe4e35acf1b10053a47549012
+recorded_at: '2026-04-24'
+staleness_ready: true

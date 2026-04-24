@@ -1,0 +1,8 @@
+schema_version: 1
+provider: crossref
+cassette_rel_path: tests/fixtures/vcr/crossref/rf013_crossref_health_case_02.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: 77d9573dfbb8507213bc11a3863345ee1e222246da1847830761f8b485fc369d
+recorded_at: '2026-04-24'
+staleness_ready: true
