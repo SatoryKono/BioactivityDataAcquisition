@@ -31,6 +31,17 @@ _GROUP_BY_KEYS = {
 }
 
 
+def _coerce_total_count(value: object) -> int:
+    """Normalize stats totals into an integer count for rendering helpers."""
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    return 0
+
+
 def _append_group_lines(
     lines: list[str],
     *,
@@ -186,7 +197,9 @@ def build_quarantine_grouped_lines(
         if isinstance(run_id, str) and run_id.strip():
             lines.append(f"\n  Run ID Scope: {run_id}")
 
-    total = stats.get("total_count", stats.get("total_records", 0))
+    total = _coerce_total_count(
+        stats.get("total_count", stats.get("total_records", 0))
+    )
     lines.append(f"\n  Total Records: {total}")
     _append_error_code_lines(
         lines, by_error=stats.get("by_error_code", {}), total=total

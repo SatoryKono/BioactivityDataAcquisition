@@ -205,8 +205,6 @@ def build_run_click_command(
 ) -> click.Command:
     """Build the canonical Click command object for ``bioetl run``."""
 
-    @click.command()
-    @click.pass_context
     def run_command(ctx: click.Context, /, **kwargs: object) -> None:
         """Run an ETL pipeline."""
         run_callback(ctx, **kwargs)
@@ -221,7 +219,7 @@ def build_run_click_command(
     run_command = _add_cache_options()(run_command)
     run_command = _add_replay_parentage_options()(run_command)
 
-    return run_command
+    return click.command()(click.pass_context(run_command))
 
 
 __all__ = ["build_run_click_command"]
