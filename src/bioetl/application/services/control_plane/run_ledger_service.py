@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import uuid4
 
 from bioetl.application.services.control_plane._run_ledger_diagnostic_support import (
@@ -13,6 +13,7 @@ from bioetl.application.services.control_plane._run_ledger_diagnostic_support im
     sync_manifest_contract_defaults,
     sync_manifest_runtime_defaults,
 )
+from bioetl.domain.context import current_utc_time
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import (
     ARTIFACT_PUBLISHED_EVENT,
@@ -58,6 +59,7 @@ class RunLedgerService:
     _entry_id_factory: Callable[[], str] = field(
         default_factory=lambda: lambda: str(uuid4())
     )
+    _occurred_at_factory: Callable[[], datetime] = current_utc_time
 
     def record_manifest_created(self, manifest: RunManifest) -> RunLedgerEntry:
         """Record manifest creation as the first control-plane event."""
@@ -256,7 +258,7 @@ class RunLedgerService:
                 "run_id": self.run_id,
                 "event_type": event_type,
                 "event_family": event_family,
-                "occurred_at": datetime.now(UTC),
+                "occurred_at": self._occurred_at_factory(),
                 "status": status,
                 "stage": stage,
                 "message": message,

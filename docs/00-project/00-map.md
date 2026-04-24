@@ -53,6 +53,7 @@ ______________________________________________________________________
 | Understand architecture           | [00-overview.md](../02-architecture/00-overview.md)                                    |
 | Check data contracts              | [chembl_activity-v1.0.json](../04-reference/contracts/gold/chembl_activity_v1.0.json)  |
 | Check DQ contracts                | [dq-contracts.md](../04-reference/contracts/dq-contracts.md)                                |
+| Browse ADR registry               | [adr-registry.md](../02-architecture/adr-registry.md)                                  |
 | Need historical context           | Repository path `docs/99-archive/README.md` *(non-canonical)*                          |
 
 ______________________________________________________________________

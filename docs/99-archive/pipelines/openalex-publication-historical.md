@@ -8,10 +8,11 @@ Reviewers:
 Last verified: '2026-03-29'
 ---
 
-# openalex_publication
+# openalex_publication (Historical)
 
-> **Status**: Historical legacy guide. This page is retained only as a
-> compatibility stub to avoid publishing stale contract details.
+> **Status**: This is a historical document. The current active specification is available at [openalex_publication pipeline](../../04-reference/pipelines/openalex/publication.md).
+
+> **Redirect Notice**: This page has been moved to the archive section. For current information, please refer to the active pipeline documentation.
 
 ## Current Canonical Sources
 

@@ -5,15 +5,21 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+import pytest
 import yaml
 
 from bioetl.domain.normalization.profiles._chembl_policy_registry import (
     CHEMBL_CONTROLLED_VOCAB_CONFIG,
     CHEMBL_ONTOLOGY_POLICY_CONFIG,
+    DEFAULT_CHEMBL_POLICY_REGISTRY_DATA,
     PUBLICATION_CLASSIFICATION_CONFIG,
+    ChemblControlledVocabularyFamily,
+    ChemblOntologyPolicyFamily,
+    ChemblPolicyRegistryData,
     chembl_controlled_family_fields,
     chembl_ontology_family_fields,
     chembl_policy_surface,
+    initialize_chembl_policy_registry,
 )
 
 
@@ -21,6 +27,13 @@ def _load_yaml(path: str) -> dict[str, Any]:
     payload = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
+
+
+@pytest.fixture(autouse=True)
+def reset_chembl_policy_registry() -> None:
+    initialize_chembl_policy_registry(DEFAULT_CHEMBL_POLICY_REGISTRY_DATA)
+    yield
+    initialize_chembl_policy_registry(DEFAULT_CHEMBL_POLICY_REGISTRY_DATA)
 
 
 def test_chembl_policy_surface_points_to_externalized_registry_sources() -> None:
@@ -81,3 +94,38 @@ def test_chembl_policy_registry_exposes_profile_authoring_field_sets() -> None:
 
 def test_chembl_policy_surface_returns_none_for_ungoverned_free_text_fields() -> None:
     assert chembl_policy_surface("target", "organism") is None
+
+
+def test_chembl_policy_registry_can_be_reinitialized_from_in_memory_data() -> None:
+    initialize_chembl_policy_registry(
+        ChemblPolicyRegistryData(
+            controlled_vocabularies=(
+                ChemblControlledVocabularyFamily(
+                    family_name="mini_units",
+                    invalid_value_mode="preserve_unknown_lexeme",
+                    fields=("chembl_activity.units",),
+                ),
+            ),
+            ontology_families=(
+                ChemblOntologyPolicyFamily(
+                    family_name="mini_ontology",
+                    fields=("chembl_cell_line.cellosaurus_id",),
+                    code_label_fields=("chembl_assay.bao_label",),
+                ),
+            ),
+            publication_classification_fields=("publication_class",),
+        )
+    )
+
+    assert chembl_controlled_family_fields("mini_units", entity="activity") == (
+        frozenset({"units"})
+    )
+    assert chembl_ontology_family_fields(
+        "mini_ontology",
+        entity="assay",
+        include_code_label_fields=True,
+    ) == frozenset({"bao_label"})
+    publication_class = chembl_policy_surface("publication", "publication_class")
+    assert publication_class is not None
+    assert publication_class.registry_source == PUBLICATION_CLASSIFICATION_CONFIG
+    assert chembl_policy_surface("activity", "relation") is None

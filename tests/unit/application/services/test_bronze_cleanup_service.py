@@ -5,7 +5,7 @@ Tests the bronze cleanup administrative service.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -14,6 +14,7 @@ from bioetl.application.services.bronze_cleanup_service import (
     BronzeCleanupResult,
     BronzeCleanupService,
 )
+from tests.helpers.clock import FixedClock
 
 
 @pytest.fixture
@@ -44,9 +45,11 @@ def mock_storage():
 @pytest.fixture
 def bronze_cleanup_service(mock_storage, mock_logger):
     """Create a BronzeCleanupService instance."""
+    now = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
     return BronzeCleanupService(
         storage=mock_storage,
         logger=mock_logger,
+        clock=FixedClock(now),
     )
 
 
@@ -109,9 +112,8 @@ class TestBronzeCleanupServiceCleanup:
         mock_storage.cleanup_bronze.assert_called_once()
         call_args = mock_storage.cleanup_bronze.call_args
         cutoff_date = call_args.kwargs["cutoff_date"]
-        expected_cutoff = datetime.now(UTC) - timedelta(days=90)
-        # Allow 1 minute tolerance
-        assert abs((cutoff_date - expected_cutoff).total_seconds()) < 60
+        expected_cutoff = datetime(2026, 1, 24, 12, 0, tzinfo=UTC)
+        assert cutoff_date == expected_cutoff
 
     @pytest.mark.asyncio
     async def test_cleanup_with_custom_retention(
@@ -131,8 +133,8 @@ class TestBronzeCleanupServiceCleanup:
         # Verify correct retention was used
         call_args = mock_storage.cleanup_bronze.call_args
         cutoff_date = call_args.kwargs["cutoff_date"]
-        expected_cutoff = datetime.now(UTC) - timedelta(days=30)
-        assert abs((cutoff_date - expected_cutoff).total_seconds()) < 60
+        expected_cutoff = datetime(2026, 3, 25, 12, 0, tzinfo=UTC)
+        assert cutoff_date == expected_cutoff
 
     @pytest.mark.asyncio
     async def test_cleanup_dry_run(self, bronze_cleanup_service, mock_storage):

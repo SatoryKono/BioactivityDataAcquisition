@@ -1,4 +1,4 @@
-"""Unit tests for atomic write utilities."""
+"""Integration tests for atomic write utilities."""
 
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ class _WindowsLockViolationError(OSError):
     winerror = 33
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestAtomicWrite:
     """Tests for atomic_write context manager."""
 
@@ -197,7 +197,7 @@ class TestAtomicWrite:
         assert hook_events == [(1, 0.01)]
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestAtomicRetryableErrors:
     """Tests for platform-specific retryable replace error classification."""
 
@@ -256,7 +256,7 @@ class TestAtomicRetryableErrors:
         assert atomic_module._is_retryable_replace_error(error) is True
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestAtomicWriteWindowsLockStress:
     """Windows-only stress tests for atomic replace lock handling."""
 
@@ -356,7 +356,7 @@ class TestAtomicWriteWindowsLockStress:
             assert target.read_text() == f"value-{idx}"
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestAtomicWriteHelpers:
     """Tests for atomic_write_bytes and atomic_write_text."""
 
@@ -388,7 +388,7 @@ class TestAtomicWriteHelpers:
         assert target.read_text(encoding="utf-8") == text
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestAtomicWriteGroup:
     """Tests for AtomicWriteGroup."""
 
@@ -522,7 +522,7 @@ class TestAtomicWriteGroup:
         assert file2.read_bytes() == b"content2"
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestAtomicWriteEdgeCases:
     """Edge case tests for atomic write utilities."""
 

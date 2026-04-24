@@ -84,7 +84,7 @@ bioetl run --pipeline <NAME> [OPTIONS]
 | `--use-cached-bronze/--no-cached-bronze` | flag   | False         | Читать Bronze cache вместо API                    |
 | `--cached-bronze-date`                   | str    | None          | Фильтровать Bronze cache по дате `YYYY-MM-DD`     |
 | `--cached-bronze-path`                   | path   | None          | Явный путь к каталогу Bronze cache                |
-| `--exact-replay/--no-exact-replay`       | flag   | False         | Включить strict exact replay с fail-closed policy |
+| `--exact-replay/--no-exact-replay`       | flag   | False         | Включить strict exact replay внутри опубликованной support boundary с fail-closed policy |
 | `--replay-of-run-id`                     | str    | None          | Явный parent `run_id` для exact replay            |
 | `--replay-of-manifest-id`                | str    | None          | Явный parent `manifest_id` для exact replay       |
 
@@ -141,7 +141,7 @@ bioetl run --pipeline chembl_activity \
 | ------- | -------------------------------- | ---------------------------------- |
 | `--resume` | Checkpoint continuation of the current pipeline execution | Strict exact replay of a prior run |
 | `--run-type rebuild` | Fresh recomputation of downstream data from available sources/Bronze | Checkpoint continuation or replay proof |
-| `--exact-replay` | Fail-closed request for strict exact replay on snapshot-backed inputs | Ordinary rerun, rebuild, or degraded resume |
+| `--exact-replay` | Fail-closed request for strict exact replay on snapshot-backed inputs внутри опубликованной support boundary | Ordinary rerun, rebuild, or degraded resume |
 | `replay_mode=same_data_state_recovery` in inspection | A manifested run that can recover the same data state from immutable inputs | A separate CLI mode |
 | `replay_mode=rebuild` in inspection | Ordinary rebuild/rerun path outside strict exact replay | Snapshot-backed same-data-state recovery |
 
@@ -154,6 +154,13 @@ bioetl run --pipeline chembl_activity \
   (по умолчанию) Заблокировать resume при несовместимости.
 - `settings.pipeline.control_plane.checkpoint_compatibility_policy=hard_fail`
   Прервать запуск ошибкой при несовместимости.
+- `settings.pipeline.control_plane.checkpoint_compatibility_policy=legacy_observe`
+  Legacy degraded mode для migration-only периодов: non-identity degradation
+  ещё может быть диагностирована, но недоказанная identity continuity всё равно
+  блокирует resume.
+- `required_persistence_profile=replay_ready` и `forensic_grade` не
+  используют effective `observe` / `legacy_observe`; runtime повышает policy
+  как минимум до `soft_fail`.
 - если текущий запуск выполняется как `exact_replay`, runtime принудительно
   применяет `hard_fail`, даже если в settings запрошен более мягкий policy;
   для published contract это режим strict `exact replay`, а не degraded resume.
@@ -177,9 +184,9 @@ Checkpoint load telemetry uses bounded statuses. In particular:
   canonical execution identity mismatched.
 - `observe_loaded_degraded` means `observe` mode allowed resume only after a
   non-identity compatibility warning.
-- `legacy_observe_loaded_degraded` is the explicit legacy override for
-  degraded resume when identity continuity is unproven; canonical `observe`
-  does not continue in that case.
+- `legacy_observe_loaded_degraded` means the legacy migration path allowed
+  resume only after a non-identity degraded signal while identity continuity
+  was already proven; it is not an override for unproven identity continuity.
 
 **Типы запуска:**
 
@@ -331,14 +338,20 @@ Operational semantics:
   вернёт manifest payload, но без ledger history;
 - `run_ledger_enabled=true` допустим только при `run_manifest_enabled=true`;
 - `required_persistence_profile=replay_ready` требует
-  `run_manifest_enabled=true`;
+  `run_manifest_enabled=true` и execution context внутри опубликованной strict
+  exact-replay support boundary;
 - `required_persistence_profile=forensic_grade` требует и
-  `run_manifest_enabled=true`, и `run_ledger_enabled=true`;
+  `run_manifest_enabled=true`, и `run_ledger_enabled=true`, плюс replay-ready /
+  lineage-closure surfaces внутри той же опубликованной boundary;
 - `checkpoint_compatibility_policy` принимает значения `observe`, `soft_fail`,
   `hard_fail` и управляет resume-поведением при checkpoint identity mismatch.
 - `observe` не является strict reproducibility mode: canonical
   execution-identity mismatch всё равно блокирует resume, даже если другие
   degraded signals могут быть только зафиксированы warning-ом.
+- `legacy_observe` остаётся migration-only degraded mode и также не
+  разрешает resume, если identity continuity не доказана.
+- strict persistence profiles (`replay_ready`, `forensic_grade`) поднимают
+  effective resume policy минимум до `soft_fail`.
 - при `run_manifest_enabled=false` runtime builder также эффективно отключает
   ledger attachment для новых запусков.
 

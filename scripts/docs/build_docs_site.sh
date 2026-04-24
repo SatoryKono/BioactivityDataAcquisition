@@ -4,7 +4,7 @@ set -euo pipefail
 TMP_SITE_DIR=".mkdocs-site-tmp"
 OUT_SITE_DIR="docs/site"
 LEGACY_SITE_DIR="site"
-BUILD_MODULE="scripts.docs.build.mkdocs_build"
+BUILD_MODULE="scripts.docs.run_mkdocs_build"
 
 STRICT_FLAG=""
 if [[ "${1:-}" == "--strict" ]]; then

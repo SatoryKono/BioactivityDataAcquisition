@@ -39,6 +39,7 @@ from bioetl.infrastructure.config.contract_policy_validation import (
 from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 from bioetl.infrastructure.export import ExportCatalogAdapter, ExportWriterAdapter
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
+from bioetl.infrastructure.time import SystemClock
 
 __all__ = [
     "bootstrap_bronze_cleanup_service",
@@ -97,7 +98,11 @@ def bootstrap_bronze_cleanup_service() -> BronzeCleanupService:
     storage = bootstrap_storage_adapter()
     noop_logger = create_noop_logger()
 
-    return BronzeCleanupService(storage=storage, logger=noop_logger)
+    return BronzeCleanupService(
+        storage=storage,
+        logger=noop_logger,
+        clock=SystemClock(),
+    )
 
 
 def bootstrap_contract_migration_service(

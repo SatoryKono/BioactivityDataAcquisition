@@ -20,7 +20,7 @@ from bioetl.infrastructure.storage.support.atomic_ops import (
 from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestReplaceWithRetryLine96:
     """Test the on_retry callback path in _replace_with_retry (line 98-99)."""
 
@@ -92,7 +92,7 @@ class TestReplaceWithRetryLine96:
         assert target.exists()
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestAtomicWriteErrorHandling:
     """Tests for error paths in atomic_write (lines 146-147, 150)."""
 
@@ -157,7 +157,7 @@ class TestAtomicWriteErrorHandling:
         assert unlink_call_count["count"] >= 1
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestAtomicWriteGroupAddFailure:
     """Tests for AtomicWriteGroup.add write failure (lines 255-259)."""
 
@@ -226,7 +226,7 @@ class TestAtomicWriteGroupAddFailure:
                 group.add(target, b"data")
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestAtomicWriteGroupRollback:
     """Tests for AtomicWriteGroup.rollback (line 298)."""
 
@@ -260,7 +260,7 @@ class TestAtomicWriteGroupRollback:
         assert len(group._pending) == 0
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestAtomicWriteGroupExitWithException:
     """Tests for AtomicWriteGroup.__exit__ (line 310)."""
 

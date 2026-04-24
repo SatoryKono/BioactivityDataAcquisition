@@ -240,7 +240,7 @@ class TestEffectiveConfigService:
         }
         assert "occurrence_envelope" in parsed
 
-    def test_source_class_provenance_marks_external_and_unsupported_classes(
+    def test_source_class_provenance_marks_anchored_external_and_unsupported_classes(
         self,
     ) -> None:
         """Source-class provenance should distinguish anchored, external, and unsupported inputs."""
@@ -255,6 +255,14 @@ class TestEffectiveConfigService:
         provenance_by_class = {
             item.source_class: item for item in artifact.source_class_provenance
         }
+
+        env_override = provenance_by_class["env_override"]
+        assert env_override.provenance_status == "identity_anchored"
+        assert (
+            env_override.artifact_surface
+            == "semantic_artifact.runtime_overrides.env_overrides"
+        )
+        assert env_override.anchor_field == "override_hash"
 
         immutable_snapshot = provenance_by_class["immutable_input_snapshot"]
         assert immutable_snapshot.provenance_status == "external_anchor"

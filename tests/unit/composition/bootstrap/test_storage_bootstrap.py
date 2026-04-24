@@ -25,6 +25,7 @@ from bioetl.composition.factories.storage import StorageAdapter
 from bioetl.composition import PipelineRegistry
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.time import SystemClock
 
 TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-storage-bootstrap-"))
 BRONZE_PATH = TEST_ROOT / "bronze"
@@ -173,6 +174,20 @@ class TestBootstrapBronzeCleanupService:
         from bioetl.application.services import BronzeCleanupService
 
         assert isinstance(result, BronzeCleanupService)
+
+    @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
+    def test_wires_system_clock(
+        self,
+        mock_settings: MagicMock,
+    ) -> None:
+        """Bronze cleanup bootstrap must wire the canonical clock adapter."""
+        mock_settings.return_value.bronze_path = str(BRONZE_PATH)
+        mock_settings.return_value.silver_path = str(SILVER_PATH)
+        mock_settings.return_value.gold_path = str(GOLD_PATH)
+
+        result = bootstrap_bronze_cleanup_service()
+
+        assert isinstance(result.clock, SystemClock)
 
 
 @pytest.mark.unit

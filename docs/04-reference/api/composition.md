@@ -153,7 +153,7 @@ access.
 | Module | Description |
 |---|---|
 | `registration` | Provider registration orchestration over internal config builders |
-| `registration_*` | Internal provider config builders; not a canonical application-facing surface |
+| `registration_*` | Internal provider config builders; not a canonical application-facing surface (see [Internal/Extended Material](#internalextended-material)) |
 | `decorators` | Provider adapter decorators (circuit breaker, retry) |
 | `loader` | Canonical provider loading lifecycle (`ensure_providers_loaded`) for the shared runtime/bootstrap registry |
 | `_loading` | Leaf loading helpers behind the public `loader` lifecycle |
@@ -218,10 +218,53 @@ Current sanctioned public surfaces in `composition/`:
 
 Internal modules `_pipeline_execution`, `_resource_management`, `_services` remain
 implementation seams behind the public modules above and are not sanctioned import paths
-outside the owning `composition` package and dedicated boundary tests.
+outside the owning `composition` package and dedicated boundary tests. For details, see
+[Internal/Extended Material](#internalextended-material).
 
 Governance status model and exit criteria for compatibility surfaces are tracked in
 [`docs/02-architecture/07-compatibility-facade-inventory.md`](../../02-architecture/07-compatibility-facade-inventory.md).
+
+## Internal/Extended Material
+
+This section contains references to internal implementation details and extended surfaces that are not part of the primary published API.
+
+### Internal Modules
+
+- **`_pipeline_execution`**: Internal implementation behind `entrypoints`/`execution_api`
+- **`_resource_management`**: Internal implementation behind `entrypoints`/`resources_api`  
+- **`_services`**: Internal implementation behind `entrypoints`/`services_api`
+
+For comprehensive documentation on internal modules, see:
+
+- [Composition Layer Internal Modules](../internalextended/composition-internal.md)
+- [Provider Registration Internals](../internalextended/provider-registration-internal.md)
+
+### Extended Ports
+
+- **`FilterableDataSourcePort`**: Extended port with server-side filtering capabilities
+
+For details on extended ports, see:
+
+- [Extended Ports](../internalextended/extended-ports.md)
+
+### Internal Type Mappings
+
+- **CrossRef Type Mappings**: Standardization of CrossRef types to internal representation
+- **OpenAlex Type Mappings**: Standardization of OpenAlex types to internal representation
+
+For complete type mapping documentation, see:
+
+- [Internal Type Mappings](../internalextended/internal-type-mappings.md)
+
+### Usage Guidelines
+
+1. **Primary vs Secondary**: Use the main API documentation for published surfaces. Consult internal/extended material only when you need implementation details.
+
+2. **Stability**: Internal material may change without notice and is not subject to the same compatibility guarantees as published surfaces.
+
+3. **Audience**: Intended for maintainers, contributors, and advanced users who need to understand or modify internal implementation.
+
+See the [Internal/Extended Material Index](../internalextended/index.md) for complete documentation.
 
 ---
 
@@ -267,6 +310,9 @@ expanding `entrypoints`.
 | `composite_api` | Public composite-runtime composition API |
 | `observability_api` | Public observability composition API |
 | `types` | Type definitions for composition layer |
-| `_pipeline_execution` | Internal implementation module behind `entrypoints`/`execution_api` |
-| `_resource_management` | Internal implementation module behind `entrypoints`/`resources_api` |
-| `_services` | Internal implementation module behind `entrypoints`/`services_api` |
+| `_pipeline_execution` | Internal implementation module behind `entrypoints`/`execution_api` (see [Internal/Extended Material](#internalextended-material)) |
+| `_resource_management` | Internal implementation module behind `entrypoints`/`resources_api` (see [Internal/Extended Material](#internalextended-material)) |
+| `_services` | Internal implementation module behind `entrypoints`/`services_api` (see [Internal/Extended Material](#internalextended-material)) |
+| `_pipeline_execution` | Internal implementation module behind `entrypoints`/`execution_api` (see [Internal/Extended Material](#internalextended-material)) |
+| `_resource_management` | Internal implementation module behind `entrypoints`/`resources_api` (see [Internal/Extended Material](#internalextended-material)) |
+| `_services` | Internal implementation module behind `entrypoints`/`services_api` (see [Internal/Extended Material](#internalextended-material)) |

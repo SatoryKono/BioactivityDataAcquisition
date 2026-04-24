@@ -1,23 +1,37 @@
-"""Shared ChEMBL semantic policy surfaces beyond strict enums."""
+"""Shared ChEMBL semantic policy surfaces beyond strict enums.
+
+The domain module consumes immutable policy payloads and stays free from
+filesystem/config parsing. Runtime bootstrap may optionally inject a policy
+payload loaded from published config files, while tests can provide in-memory
+data directly.
+"""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from functools import cache
-from pathlib import Path
-from typing import Any
+from types import MappingProxyType
 
-import yaml
+from bioetl.domain.normalization.profiles._chembl_policy_registry_data import (
+    DEFAULT_CHEMBL_POLICY_REGISTRY_DATA,
+    ChemblControlledVocabularyFamily,
+    ChemblOntologyPolicyFamily,
+    ChemblPolicyRegistryData,
+)
 
 __all__ = [
     "CHEMBL_CONTROLLED_VOCAB_CONFIG",
     "CHEMBL_ONTOLOGY_POLICY_CONFIG",
+    "DEFAULT_CHEMBL_POLICY_REGISTRY_DATA",
     "PUBLICATION_CLASSIFICATION_CONFIG",
+    "ChemblControlledVocabularyFamily",
+    "ChemblOntologyPolicyFamily",
+    "ChemblPolicyRegistryData",
     "ChemblPolicySurface",
     "chembl_controlled_family_fields",
     "chembl_ontology_family_fields",
     "chembl_policy_surface",
+    "initialize_chembl_policy_registry",
 ]
 
 CHEMBL_CONTROLLED_VOCAB_CONFIG = "configs/vocab/chembl_controlled.yaml"
@@ -34,19 +48,11 @@ class ChemblPolicySurface:
     invalid_value_mode: str
 
 
-def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[5]
-
-
-def _load_yaml_config(
-    relative_path: str,
-) -> Mapping[str, Any]:  # Any: YAML policy payloads are heterogeneous nested mappings.
-    payload = yaml.safe_load((_repo_root() / relative_path).read_text(encoding="utf-8"))
-    if not isinstance(payload, dict):
-        raise TypeError(
-            f"{relative_path} must decode to a mapping; got {type(payload)!r}"
-        )
-    return payload
+_CONTROLLED_VOCABULARIES: Mapping[str, ChemblControlledVocabularyFamily] = (
+    MappingProxyType({})
+)
+_ONTOLOGY_FAMILIES: Mapping[str, ChemblOntologyPolicyFamily] = MappingProxyType({})
+_POLICY_SURFACES: Mapping[tuple[str, str], ChemblPolicySurface] = MappingProxyType({})
 
 
 def _parse_chembl_field_ref(field_ref: str) -> tuple[str, str]:
@@ -59,41 +65,29 @@ def _parse_chembl_field_ref(field_ref: str) -> tuple[str, str]:
     return pipeline_name.removeprefix("chembl_"), field_name
 
 
-@cache
-def _controlled_vocab_registry() -> Mapping[str, object]:
-    return _load_yaml_config(CHEMBL_CONTROLLED_VOCAB_CONFIG)
-
-
-@cache
-def _ontology_registry() -> Mapping[str, object]:
-    return _load_yaml_config(CHEMBL_ONTOLOGY_POLICY_CONFIG)
-
-
-@cache
-def _chembl_policy_surfaces() -> Mapping[tuple[str, str], ChemblPolicySurface]:
+def _build_policy_surfaces(
+    data: ChemblPolicyRegistryData,
+) -> Mapping[tuple[str, str], ChemblPolicySurface]:
     surfaces: dict[tuple[str, str], ChemblPolicySurface] = {}
 
-    controlled_vocabularies = _controlled_vocab_registry()["controlled_vocabularies"]
-    for payload in controlled_vocabularies.values():
-        invalid_value_mode = str(payload["invalid_value_mode"])
-        for field_ref in payload["fields"]:
+    for family in data.controlled_vocabularies:
+        for field_ref in family.fields:
             entity, field_name = _parse_chembl_field_ref(str(field_ref))
             surfaces[(entity, field_name)] = ChemblPolicySurface(
                 category="controlled_vocabulary",
                 registry_source=CHEMBL_CONTROLLED_VOCAB_CONFIG,
-                invalid_value_mode=invalid_value_mode,
+                invalid_value_mode=family.invalid_value_mode,
             )
 
-    ontology_families = _ontology_registry()["families"]
-    for payload in ontology_families.values():
-        for field_ref in payload["fields"]:
+    for family in data.ontology_families:
+        for field_ref in family.fields:
             entity, field_name = _parse_chembl_field_ref(str(field_ref))
             surfaces[(entity, field_name)] = ChemblPolicySurface(
                 category="ontology_reference_identifier",
                 registry_source=CHEMBL_ONTOLOGY_POLICY_CONFIG,
                 invalid_value_mode="preserve_unknown_lexeme",
             )
-        for field_ref in payload.get("code_label_fields", ()):
+        for field_ref in family.code_label_fields:
             entity, field_name = _parse_chembl_field_ref(str(field_ref))
             surfaces[(entity, field_name)] = ChemblPolicySurface(
                 category="derived_vocabulary",
@@ -101,18 +95,27 @@ def _chembl_policy_surfaces() -> Mapping[tuple[str, str], ChemblPolicySurface]:
                 invalid_value_mode="resolve_identifier_backed_label",
             )
 
-    for field_name in (
-        "publication_type_unified",
-        "publication_subclass",
-        "publication_class",
-    ):
+    for field_name in data.publication_classification_fields:
         surfaces[("publication", field_name)] = ChemblPolicySurface(
             category="derived_vocabulary",
             registry_source=PUBLICATION_CLASSIFICATION_CONFIG,
             invalid_value_mode="reject_unknown_taxonomy_value",
         )
 
-    return surfaces
+    return MappingProxyType(surfaces)
+
+
+def initialize_chembl_policy_registry(data: ChemblPolicyRegistryData) -> None:
+    """Inject immutable policy data into the domain registry runtime state."""
+    global _CONTROLLED_VOCABULARIES, _ONTOLOGY_FAMILIES, _POLICY_SURFACES
+
+    _CONTROLLED_VOCABULARIES = MappingProxyType(
+        {family.family_name: family for family in data.controlled_vocabularies}
+    )
+    _ONTOLOGY_FAMILIES = MappingProxyType(
+        {family.family_name: family for family in data.ontology_families}
+    )
+    _POLICY_SURFACES = _build_policy_surfaces(data)
 
 
 def _family_fields(
@@ -131,22 +134,19 @@ def _family_fields(
 
 def chembl_policy_surface(entity: str, field: str) -> ChemblPolicySurface | None:
     """Return the shared ChEMBL policy surface for one field when defined."""
-    return _chembl_policy_surfaces().get((entity, field))
+    return _POLICY_SURFACES.get((entity, field))
 
 
-@cache
 def chembl_controlled_family_fields(
     family: str,
     *,
     entity: str | None = None,
 ) -> frozenset[str]:
     """Return field names governed by one shared controlled-vocabulary family."""
-    controlled_vocabularies = _controlled_vocab_registry()["controlled_vocabularies"]
-    payload = controlled_vocabularies[family]
-    return _family_fields(fields=list(payload["fields"]), entity=entity)
+    payload = _CONTROLLED_VOCABULARIES[family]
+    return _family_fields(fields=list(payload.fields), entity=entity)
 
 
-@cache
 def chembl_ontology_family_fields(
     family: str,
     *,
@@ -154,9 +154,11 @@ def chembl_ontology_family_fields(
     include_code_label_fields: bool = False,
 ) -> frozenset[str]:
     """Return field names governed by one shared ontology/reference-ID family."""
-    families = _ontology_registry()["families"]
-    payload = families[family]
-    fields = list(payload["fields"])
+    payload = _ONTOLOGY_FAMILIES[family]
+    fields = list(payload.fields)
     if include_code_label_fields:
-        fields.extend(payload.get("code_label_fields", ()))
+        fields.extend(payload.code_label_fields)
     return _family_fields(fields=fields, entity=entity)
+
+
+initialize_chembl_policy_registry(DEFAULT_CHEMBL_POLICY_REGISTRY_DATA)

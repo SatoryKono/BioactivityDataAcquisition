@@ -68,47 +68,15 @@ Interpretation:
 - if resume is enabled, `checkpoint_compatibility_policy` controls checkpoint mismatch handling:
   `observe` may continue only for degraded non-identity signals, while canonical
   execution-identity mismatches still block resume.
+- if `checkpoint_compatibility_policy=legacy_observe`, treat it as a temporary
+  migration-only degraded mode: it may still surface legacy validation signals,
+  but identity continuity must already be proven or resume remains blocked.
+- if `required_persistence_profile` is `replay_ready` or `forensic_grade`,
+  runtime does not allow `observe` / `legacy_observe` to remain effective; the
+  applied policy is coerced to at least `soft_fail`.
 - if the current run is `exact_replay=true`, runtime coerces checkpoint
   compatibility handling to `hard_fail`; exact replay is not allowed to
   continue after any compatibility mismatch.
-
-### Legacy Observe Mode
-
-**When to Use:**
-- Mixed-version clusters during version upgrade
-- Temporary backward compatibility with v1.x checkpoint formats
-- Migration periods only
-
-**Configuration:**
-```bash
-# Enable legacy mode in configuration
-bioetl run --pipeline chembl_activity --checkpoint-compatibility legacy_observe
-
-# Or set in YAML config
-runtime:
-  checkpoint_compatibility:
-    migration_mode: legacy_observe
-```
-
-**Troubleshooting:**
-
-**Symptoms:**
-- Checkpoint validation warnings during migration
-- "legacy_observe" mode activated in logs
-- Mixed-version cluster operations
-
-**Resolution:**
-1. Verify all nodes running compatible versions
-2. Check `checkpoint_compatibility_policy` setting
-3. Monitor validation warnings in logs
-4. Plan full migration to remove legacy mode dependency
-
-**Migration Procedure:**
-1. **Prepare**: Set `legacy_observe` in configuration
-2. **Upgrade**: Roll out new version nodes incrementally
-3. **Validate**: Monitor validation warnings
-4. **Remove**: Switch to standard modes after full upgrade
-5. **Cleanup**: Remove legacy mode from configurations
 
 ### 2. Resolve one run
 

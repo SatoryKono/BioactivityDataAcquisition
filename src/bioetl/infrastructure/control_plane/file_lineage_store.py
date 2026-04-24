@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+from contextlib import suppress
 from dataclasses import dataclass, replace
 from pathlib import Path
 from time import perf_counter
@@ -15,11 +17,19 @@ from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane._read_metrics import (
     emit_control_plane_read_metrics,
 )
+from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 __all__ = ["FileLineageStore"]
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
+
+
+_LINEAGE_APPEND_OPEN_FLAGS = os.O_APPEND | os.O_CREAT | os.O_WRONLY
+
+
+class _LineageIndexCorruptionError(ValueError):
+    """Raised when a lineage index JSONL file is truncated or malformed."""
 
 
 def _stable_key_filename(key: str) -> str:
@@ -44,20 +54,81 @@ def _load_fragment_ids(index_path: Path, *, key: str) -> list[str]:
     """Load fragment identifiers from one JSONL index file."""
     if not index_path.exists():
         return []
+    raw_text = index_path.read_text(encoding="utf-8")
+    if not raw_text.strip():
+        return []
+    if not raw_text.endswith(("\n", "\r")):
+        raise _LineageIndexCorruptionError(
+            f"Lineage index '{index_path}' is corrupted: truncated tail line"
+        )
     fragment_ids: dict[str, None] = {}
-    for line in index_path.read_text(encoding="utf-8").splitlines():
+    for line_number, line in enumerate(raw_text.splitlines(), start=1):
         if not line.strip():
             continue
-        payload = json.loads(line)
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError as error:
+            raise _LineageIndexCorruptionError(
+                f"Lineage index '{index_path}' is corrupted at line "
+                f"{line_number}: {error.msg}"
+            ) from error
         if not isinstance(payload, dict):
-            continue
+            raise _LineageIndexCorruptionError(
+                f"Lineage index '{index_path}' is corrupted at line "
+                f"{line_number}: payload must be a JSON object"
+            )
         if str(payload.get("key")) != key:
-            continue
+            raise _LineageIndexCorruptionError(
+                f"Lineage index '{index_path}' is corrupted at line "
+                f"{line_number}: unexpected key"
+            )
         fragment_id = payload.get("fragment_id")
-        if fragment_id is None:
-            continue
+        if fragment_id is None or not str(fragment_id).strip():
+            raise _LineageIndexCorruptionError(
+                f"Lineage index '{index_path}' is corrupted at line "
+                f"{line_number}: missing fragment_id"
+            )
         fragment_ids[str(fragment_id)] = None
     return list(fragment_ids)
+
+
+def _truncate_index_to_offset(path: Path, *, offset: int) -> None:
+    """Best-effort rollback of one lineage index file to a known-good offset."""
+    if not path.exists():
+        return
+    file_descriptor = os.open(path, os.O_RDWR)
+    try:
+        os.ftruncate(file_descriptor, offset)
+        os.fsync(file_descriptor)
+    finally:
+        os.close(file_descriptor)
+
+
+def _append_jsonl_payload(path: Path, payload: bytes) -> int:
+    """Append one full JSONL payload with rollback on partial writes."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    file_descriptor = os.open(path, _LINEAGE_APPEND_OPEN_FLAGS, 0o666)
+    bytes_written = 0
+    checkpoint_size = 0
+    try:
+        checkpoint_size = os.fstat(file_descriptor).st_size
+        while bytes_written < len(payload):
+            written = os.write(file_descriptor, payload[bytes_written:])
+            if written <= 0:
+                raise OSError("Lineage index append produced an empty write")
+            bytes_written += written
+        os.fsync(file_descriptor)
+        return checkpoint_size
+    except OSError:
+        if bytes_written > 0:
+            try:
+                os.ftruncate(file_descriptor, checkpoint_size)
+                os.fsync(file_descriptor)
+            except OSError:
+                pass
+        raise
+    finally:
+        os.close(file_descriptor)
 
 
 @dataclass(slots=True)
@@ -79,34 +150,59 @@ class FileLineageStore(LineageStorePort):
             stored_fragment_id=stored_fragment_id,
         )
         fragment_path = self._fragment_path(stored_fragment_id)
-        fragment_path.write_text(
-            json.dumps(persisted_fragment.to_dict(), indent=2, sort_keys=True),
-            encoding="utf-8",
+        existing_fragment_payload = (
+            fragment_path.read_text(encoding="utf-8") if fragment_path.exists() else None
         )
-        self._append_index(
-            self._semantic_fragment_index_path(fragment.fragment_id),
-            key=fragment.fragment_id,
-            fragment_id=stored_fragment_id,
-        )
+        index_rollbacks: list[tuple[Path, int]] = []
+        try:
+            atomic_write_text(
+                fragment_path,
+                json.dumps(persisted_fragment.to_dict(), indent=2, sort_keys=True),
+            )
+            index_rollbacks.append(
+                self._append_index(
+                    self._semantic_fragment_index_path(fragment.fragment_id),
+                    key=fragment.fragment_id,
+                    fragment_id=stored_fragment_id,
+                )
+            )
 
-        if fragment.run_id is not None:
-            self._append_index(
-                self._run_index_path(fragment.run_id),
-                key=fragment.run_id,
-                fragment_id=stored_fragment_id,
-            )
-        if fragment.manifest_id is not None:
-            self._append_index(
-                self._manifest_index_path(fragment.manifest_id),
-                key=fragment.manifest_id,
-                fragment_id=stored_fragment_id,
-            )
-        for node in fragment.nodes:
-            self._append_index(
-                self._node_index_path(node.node_id),
-                key=node.node_id,
-                fragment_id=stored_fragment_id,
-            )
+            if fragment.run_id is not None:
+                index_rollbacks.append(
+                    self._append_index(
+                        self._run_index_path(fragment.run_id),
+                        key=fragment.run_id,
+                        fragment_id=stored_fragment_id,
+                    )
+                )
+            if fragment.manifest_id is not None:
+                index_rollbacks.append(
+                    self._append_index(
+                        self._manifest_index_path(fragment.manifest_id),
+                        key=fragment.manifest_id,
+                        fragment_id=stored_fragment_id,
+                    )
+                )
+            for node in fragment.nodes:
+                index_rollbacks.append(
+                    self._append_index(
+                        self._node_index_path(node.node_id),
+                        key=node.node_id,
+                        fragment_id=stored_fragment_id,
+                    )
+                )
+        except (OSError, TypeError, ValueError):
+            for index_path, checkpoint_offset in reversed(index_rollbacks):
+                with suppress(OSError):
+                    _truncate_index_to_offset(index_path, offset=checkpoint_offset)
+            if existing_fragment_payload is None:
+                with suppress(OSError):
+                    if fragment_path.exists():
+                        fragment_path.unlink()
+            else:
+                with suppress(OSError):
+                    atomic_write_text(fragment_path, existing_fragment_payload)
+            raise
 
     def get(self, fragment_id: str) -> LineageGraphFragment | None:
         """Load one fragment by identifier if present."""
@@ -248,17 +344,19 @@ class FileLineageStore(LineageStorePort):
         """Resolve the node-id index path."""
         return self.base_path / "_by_node_id" / f"{_stable_key_filename(node_id)}.jsonl"
 
-    def _append_index(self, index_path: Path, *, key: str, fragment_id: str) -> None:
+    def _append_index(self, index_path: Path, *, key: str, fragment_id: str) -> tuple[Path, int]:
         """Append one fragment identifier to a JSONL lookup index."""
-        index_path.parent.mkdir(parents=True, exist_ok=True)
-        with index_path.open("a", encoding="utf-8") as handle:
-            handle.write(
+        checkpoint_offset = _append_jsonl_payload(
+            index_path,
+            (
                 json.dumps(
                     {"key": key, "fragment_id": fragment_id},
                     sort_keys=True,
                 )
-            )
-            handle.write("\n")
+                + "\n"
+            ).encode("utf-8"),
+        )
+        return index_path, checkpoint_offset
 
     def _load_from_index(
         self,

@@ -256,3 +256,77 @@ def test_file_store_hides_orphan_manifest_without_run_index(tmp_path) -> None:
 
     assert store.get(manifest.manifest_id) is None
     assert store.get_by_run_id(run_id) is None
+
+
+def test_file_store_fails_closed_on_run_id_manifest_collision(tmp_path) -> None:
+    store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
+    run_id = RunID(uuid4())
+    original = RunManifest(
+        manifest_id="manifest-original",
+        execution_fingerprint="fingerprint-original",
+        schema_version="1.0",
+        created_at=datetime.now(UTC),
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        launch_context={},
+        runtime_config={},
+        resolved_config={},
+        code_provenance=RunCodeProvenance(),
+    )
+    conflicting = RunManifest(
+        manifest_id="manifest-conflicting",
+        execution_fingerprint="fingerprint-conflicting",
+        schema_version="1.0",
+        created_at=datetime.now(UTC),
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        launch_context={},
+        runtime_config={},
+        resolved_config={},
+        code_provenance=RunCodeProvenance(),
+    )
+
+    store.save(original)
+
+    with pytest.raises(StorageError) as exc_info:
+        store.save(conflicting)
+
+    assert "Run manifest save failed" in str(exc_info.value)
+    assert "already mapped to a different manifest_id" in str(exc_info.value)
+    assert store.get(original.manifest_id) == original
+    assert store.get_by_run_id(run_id) == original
+    assert store.get(conflicting.manifest_id) is None
+    assert not (store.base_path / f"{conflicting.manifest_id}.json").exists()
+    run_index_path = store.base_path / "_by_run_id" / f"{run_id}.txt"
+    assert run_index_path.read_text(encoding="utf-8").strip() == original.manifest_id
+
+
+def test_file_store_allows_idempotent_retry_for_same_run_id_mapping(tmp_path) -> None:
+    store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
+    manifest = RunManifest(
+        manifest_id="manifest-retry",
+        execution_fingerprint="fingerprint-retry",
+        schema_version="1.0",
+        created_at=datetime.now(UTC),
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        launch_context={},
+        runtime_config={},
+        resolved_config={},
+        code_provenance=RunCodeProvenance(),
+    )
+
+    store.save(manifest)
+    store.save(manifest)
+
+    assert store.get(manifest.manifest_id) == manifest
+    assert store.get_by_run_id(manifest.run_id) == manifest

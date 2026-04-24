@@ -101,9 +101,11 @@ lifecycle и artifact publication events, связанную через `manifes
 `settings.pipeline.control_plane.required_persistence_profile`:
 
 - `degraded_observable` — достаточно manifest/ledger rollout по текущим флагам;
-- `replay_ready` — runtime требует `run_manifest_enabled=true`;
+- `replay_ready` — runtime требует `run_manifest_enabled=true` и execution
+  context внутри опубликованной strict exact-replay support boundary;
 - `forensic_grade` — runtime требует и `run_manifest_enabled=true`, и
-  `run_ledger_enabled=true`.
+  `run_ledger_enabled=true`, и replay-ready / lineage-closure surfaces внутри
+  той же опубликованной boundary.
 
 Для inspection используются команды:
 
@@ -197,7 +199,7 @@ bioetl run --pipeline chembl_activity --resume
 | ------- | ------------ | --------------- |
 | `--resume` | Продолжить прерванный запуск из checkpoint state с compatibility checks | Не публикует новый run как exact replay родительского run |
 | `--run-type rebuild` | Пересчитать производные слои заново из доступного source-of-truth/Bronze | Не использует checkpoint continuation и не доказывает exact replay |
-| `--exact-replay` | Запросить strict exact replay на snapshot-backed inputs с fail-closed policy | Не является обычным resume или обычным rebuild |
+| `--exact-replay` | Запросить strict exact replay на snapshot-backed inputs внутри опубликованной support boundary с fail-closed policy | Не является обычным resume или обычным rebuild |
 | `replay_mode=same_data_state_recovery` | Inspection-классификация run, у которого есть immutable snapshots и same-data-state recovery anchors | Не отдельный CLI flag |
 
 Resume-совместимость checkpoint управляется через

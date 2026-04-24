@@ -17,6 +17,9 @@ from bioetl.composition.bootstrap.runtime.assembly import assemble_filter_config
 from bioetl.composition.bootstrap.runtime.classification_init import (
     initialize_publication_type_classification,
 )
+from bioetl.composition.bootstrap.runtime.normalization_policy_init import (
+    initialize_chembl_policy_registry,
+)
 from bioetl.composition.bootstrap.runtime.observability import (
     bootstrap_observability_bundle,
 )
@@ -56,7 +59,8 @@ def bootstrap_pipeline_runner(
     Returns:
         Fully configured PipelineRunner ready for execution.
     """
-    # Classification data must be available before transformers run.
+    # Normalization policy data must be available before profiles/transformers run.
+    initialize_chembl_policy_registry(Path("configs"))
     initialize_publication_type_classification(Path("configs"))
     effective_registry = registry if registry is not None else create_registry()
 
