@@ -79,6 +79,6 @@ graph TD
 
 ## Related Documentation
 
-- [Composition Layer API Reference](../../api/composition.md)
-- [Composition Layer Architecture](../../../02-architecture/05-composition-layer.md)
+- [Composition Layer API Reference](../api/composition.md)
+- [Composition Layer Architecture](../../02-architecture/05-composition-layer.md)
 - [Internal/Extended Index](index.md)

@@ -14,6 +14,8 @@ Exit Codes:
     2: Error during execution
 """
 
+# Compatibility wrapper
+
 import os
 import sys
 import yaml

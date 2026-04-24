@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-24T10:29:00.913502+00:00",
+  "generated_at": "2026-04-24T10:47:24.673820+00:00",
   "summary": {
     "total_scripts": 443,
     "status_counts": {
@@ -8826,9 +8826,9 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 385,
+          "line": 386,
           "source_group": "tests",
-          "text": "assert \"python scripts/engineering/qa/report_vcr_metadata_catalog.py --check\" in qa_readme"
+          "text": "\"python scripts/engineering/qa/report_vcr_metadata_catalog.py --check\""
         }
       ]
     },
@@ -9099,7 +9099,7 @@
         },
         {
           "path": "tests/architecture/test_vcr_metadata_inventory.py",
-          "line": 70,
+          "line": 72,
           "source_group": "tests",
           "text": "== \"scripts/engineering/qa/vcr/check_vcr_metadata_age.py\""
         }
@@ -10930,7 +10930,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 386,
+          "line": 389,
           "source_group": "tests",
           "text": "assert \"backfill_vcr_metadata_sidecars.py\" in migrations_readme"
         }

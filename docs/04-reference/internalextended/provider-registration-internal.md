@@ -77,6 +77,6 @@ class ProviderRegistrationContext:
 
 ## Related Documentation
 
-- [Provider Registration API Reference](../../api/composition.md#providers)
-- [Adding New Providers](../../../03-guides/add-new-source.md)
+- [Provider Registration API Reference](../api/composition.md#providers)
+- [Adding New Providers](../../03-guides/add-new-source.md)
 - [Internal/Extended Index](index.md)

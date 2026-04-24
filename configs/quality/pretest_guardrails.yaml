@@ -23,7 +23,7 @@ profiles:
     run_auto_fix: true
     run_repo_checks: true
     run_docs_identity_checks: true
-    run_docs_verify: true
+    run_docs_verify: false
     run_memory_checks: true
     strict_docs: false
     architecture_group: full

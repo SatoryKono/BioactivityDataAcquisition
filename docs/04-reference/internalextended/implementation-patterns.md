@@ -60,7 +60,7 @@ registry.register('chembl', ChemblAdapterFactory, ChemblConfig, aliases=['ch', '
 
 # Lookup
 chembl_registry = registry.get('chembl')
-adapter = chembl_registry['factory'](config)
+adapter = chembl_registry.get("factory")(config)
 ```
 
 ## Factory Pattern
@@ -86,7 +86,7 @@ class PipelineFactory:
         
         # Create data source
         data_source_config = self.config_resolver.resolve_data_source_config(config)
-        data_source = provider_registry['factory'](data_source_config)
+        data_source = provider_registry.get("factory")(data_source_config)
         
         # Create transformer
         transformer = self._create_transformer(provider, entity_type, config)
@@ -210,6 +210,6 @@ pipeline_config = resolver.resolve('pipeline', raw_pipeline_config)
 
 ## Related Documentation
 
-- [Composition Layer Architecture](../../../02-architecture/05-composition-layer.md)
-- [Design Patterns in BioETL](../../../02-architecture/design-patterns.md)
+- [Composition Layer Architecture](../../02-architecture/05-composition-layer.md)
+- [Architecture Overview](../../02-architecture/00-overview.md)
 - [Internal/Extended Index](index.md)

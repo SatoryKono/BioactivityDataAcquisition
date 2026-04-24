@@ -292,7 +292,7 @@ This plugin is licensed under the MIT License. See the [LICENSE](../../../LICENS
 For issues or questions:
 
 - **GitHub Issues**: Report bugs and feature requests
-- **Documentation**: Check the [BioETL Docs](../../../04-reference/index.md)
+- **Documentation**: Check the [BioETL Docs](../../04-reference/index.md)
 - **Community**: Join the discussion in our community forums
 
 ## Changelog

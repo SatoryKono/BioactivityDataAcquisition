@@ -172,9 +172,9 @@ When updating existing entities:
 
 ## Related Documentation
 
-- [Entity Configuration Guide](entity-configuration-guide.md)
-- [Pipeline Specification Template](../../04-reference/templates/pipeline-spec-template.md)
-- [Documentation Governance Policy](../../00-project/governance/01-documentation-governance-style-guide.md)
+- [Pipeline Configuration](pipeline-configuration.md)
+- [Pipeline Specification Template](../04-reference/templates/pipeline-spec-template.md)
+- [Documentation Governance Policy](../00-project/governance/01-documentation-governance-style-guide.md)
 
 ## Support
 
