@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-24T10:47:24.673820+00:00",
+  "generated_at": "2026-04-24T11:02:23.722592+00:00",
   "summary": {
     "total_scripts": 443,
     "status_counts": {
@@ -12,7 +12,7 @@
     "reference_group_coverage": {
       "agents": 4,
       "build": 1,
-      "ci": 54,
+      "ci": 55,
       "docs": 141,
       "scripts": 295,
       "skills": 8,
@@ -3089,19 +3089,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
-          "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 70,
-          "source_group": "docs",
-          "text": "python3 scripts/check_entity_config_parity.py"
+          "path": ".github/workflows/docs.yml",
+          "line": 87,
+          "source_group": "ci",
+          "text": "run: uv run python scripts/check_entity_config_parity.py"
         },
         {
           "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 78,
+          "line": 73,
           "source_group": "docs",
-          "text": "The main parity check script is located at `scripts/check_entity_config_parity.py`. It performs the following checks:"
+          "text": "uv run python scripts/check_entity_config_parity.py"
+        },
+        {
+          "path": "docs/03-guides/docs-parity-gate.md",
+          "line": 81,
+          "source_group": "docs",
+          "text": "The active config/spec gate is located at `scripts/check_entity_config_parity.py`. It performs the following checks:"
         },
         {
           "path": "scripts/ci_check_docs_parity.sh",
@@ -3116,25 +3122,19 @@
       "type": "sh",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 41,
+          "line": 44,
           "source_group": "docs",
           "text": "run: bash scripts/ci_check_docs_parity.sh"
         },
         {
           "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 56,
+          "line": 59,
           "source_group": "docs",
           "text": "- bash scripts/ci_check_docs_parity.sh"
-        },
-        {
-          "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 73,
-          "source_group": "docs",
-          "text": "bash scripts/ci_check_docs_parity.sh"
         }
       ]
     },
@@ -3324,7 +3324,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 192,
+          "line": 195,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_artifacts.py \\"
         },
@@ -3381,7 +3381,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 212,
+          "line": 215,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_quality_gates.py \\"
         },
@@ -3446,7 +3446,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 202,
+          "line": 205,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
         },
@@ -3536,7 +3536,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 197,
+          "line": 200,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_svg_text_visibility.py \\"
         },
@@ -4114,7 +4114,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 160,
+          "line": 163,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json || true"
         },
@@ -4480,7 +4480,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 161,
+          "line": 164,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -4617,7 +4617,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 155,
+          "line": 158,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -4662,7 +4662,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 87,
+          "line": 90,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs verify"
         },
@@ -5642,7 +5642,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/00-project/DOCUMENTATION_GOVERNANCE.md",
@@ -5655,6 +5655,18 @@
           "line": 332,
           "source_group": "docs",
           "text": "2. `scripts/docs_parity_check.py` - Configuration parity"
+        },
+        {
+          "path": "docs/03-guides/docs-parity-gate.md",
+          "line": 76,
+          "source_group": "docs",
+          "text": "python3 scripts/docs_parity_check.py"
+        },
+        {
+          "path": "docs/03-guides/docs-parity-gate.md",
+          "line": 94,
+          "source_group": "docs",
+          "text": "The broader governance report path is implemented by `scripts/docs_parity_check.py`,"
         },
         {
           "path": "scripts/documentation_governance_check.py",
@@ -8305,13 +8317,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 90,
+          "line": 93,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 94,
+          "line": 97,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         },
@@ -9634,13 +9646,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/DOCUMENTATION_GOVERNANCE.md",
           "line": 333,
           "source_group": "docs",
           "text": "3. `scripts/generate_adr_registry.py` - ADR metadata generation"
+        },
+        {
+          "path": "docs/02-architecture/adr-registry/README.md",
+          "line": 70,
+          "source_group": "docs",
+          "text": "This registry is automatically generated by `scripts/generate_adr_registry.py`."
+        },
+        {
+          "path": "docs/02-architecture/adr-registry/README.md",
+          "line": 75,
+          "source_group": "docs",
+          "text": "python3 scripts/generate_adr_registry.py"
         },
         {
           "path": "scripts/engineering/repo/catalog.yaml",
@@ -12432,7 +12456,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 207,
+          "line": 210,
           "source_group": "ci",
           "text": "python3 src/tools/harmonize_link_styles.py --dry-run --fail-on-errors"
         }

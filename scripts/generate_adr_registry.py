@@ -55,6 +55,7 @@ class ADRRegistryGenerator:
     def __init__(self):
         self.adr_dir = Path("docs/02-architecture/decisions")
         self.output_dir = Path("docs/02-architecture/adr-registry")
+        self.navigator_registry_file = Path("docs/02-architecture/adr-registry.md")
         self.adrs = []
 
     def find_adr_files(self) -> list[Path]:
@@ -129,33 +130,29 @@ class ADRRegistryGenerator:
 
     def extract_adr_relationships(self, content: str) -> dict[str, list[str]]:
         """Extract relationships (supersedes, related) from ADR content."""
+        return {
+            "supersedes": self._extract_relationship_ids(content, ("supersedes:",)),
+            "superseded_by": self._extract_relationship_ids(
+                content,
+                ("superseded by:", "superseded_by:"),
+            ),
+            "related": self._extract_relationship_ids(content, ("related:",)),
+        }
 
-        relationships = {"supersedes": [], "superseded_by": [], "related": []}
-
-        # Look for relationship markers
-        supersedes_match = re.search(
-            r"supersedes:\s*([ADR-\d+,\s]+)", content, re.IGNORECASE
-        )
-        if supersedes_match:
-            relationships["supersedes"] = [
-                adr.strip() for adr in supersedes_match.group(1).split(",")
-            ]
-
-        superseded_match = re.search(
-            r"superseded\s+by:\s*([ADR-\d+,\s]+)", content, re.IGNORECASE
-        )
-        if superseded_match:
-            relationships["superseded_by"] = [
-                adr.strip() for adr in superseded_match.group(1).split(",")
-            ]
-
-        related_match = re.search(r"related:\s*([ADR-\d+,\s]+)", content, re.IGNORECASE)
-        if related_match:
-            relationships["related"] = [
-                adr.strip() for adr in related_match.group(1).split(",")
-            ]
-
-        return relationships
+    @staticmethod
+    def _extract_relationship_ids(
+        content: str,
+        markers: tuple[str, ...],
+    ) -> list[str]:
+        """Extract ADR identifiers from relationship-marked lines."""
+        relationship_ids: set[str] = set()
+        for line in content.splitlines():
+            lowered = line.lower()
+            if not any(marker in lowered for marker in markers):
+                continue
+            for adr_id in re.findall(r"ADR-\d+", line, flags=re.IGNORECASE):
+                relationship_ids.add(adr_id.upper())
+        return sorted(relationship_ids)
 
     def determine_adr_status(self, content: str, metadata: dict) -> str:
         """Determine the status of an ADR."""
@@ -535,6 +532,11 @@ class ADRRegistryGenerator:
         with open(index_file, "w", encoding="utf-8") as f:
             f.write(index_content)
         print(f"✅ Written ADR registry index: {index_file}")
+
+        # Write navigator-facing single-file registry used from Project Map.
+        with open(self.navigator_registry_file, "w", encoding="utf-8") as f:
+            f.write(index_content)
+        print(f"✅ Written navigator ADR registry: {self.navigator_registry_file}")
 
         # Write status dashboard
         dashboard_content = self.generate_status_dashboard()

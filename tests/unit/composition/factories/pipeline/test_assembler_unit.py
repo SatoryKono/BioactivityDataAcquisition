@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from types import SimpleNamespace
 from typing import cast
 from unittest.mock import MagicMock, patch
@@ -23,6 +24,8 @@ from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.types import RunType
 from bioetl.domain.ports.runtime.runner import PipelineCreateRunnerRequest
 from bioetl.infrastructure.config import Settings
+
+_STARTED_AT = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
 
 
 def _make_runtime(*, strict_gold_validation: bool = False) -> RuntimeConfig:
@@ -220,6 +223,7 @@ class TestGenericPipelineFactory:
             build_create_pipeline_with_services_request(
                 run_id=run_id,
                 runtime=runtime,
+                started_at=_STARTED_AT,
                 settings=settings,
                 logger=logger,
                 audit=audit,
