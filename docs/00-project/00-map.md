@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-04'
+  Last verified: '2026-04-24'
 
 ______________________________________________________________________
 
@@ -15,8 +15,10 @@ ______________________________________________________________________
 
 *Synced with RULES.md v6.1.2 | Last updated: 2026-04-09*
 
-> **Documentation Update:** 2026-03-24
+> **Documentation Update:** 2026-04-24
 >
+> - **Issue #3091 Resolution**: Fixed ADR status contradiction (ADR-001..043 → ADR-001..045)
+> - **Source-code map updated**: Added missing directories (`domain/lineage/`, `domain/control_plane/`, `domain/config/control_plane.py`, `domain/composite/checkpoint/`, `application/services/control_plane/`, `application/services/dq/`, `application/services/execution/`, `application/services/lineage/`, `composition/monitoring/`, `infrastructure/adr/`, `infrastructure/audit/`, `infrastructure/compat/`, `infrastructure/control_plane/`, `infrastructure/system/`)
 > - Compatibility inventory synced with the current measured CLI shim registry
 > - Source-code map updated for the storage subpackage decomposition (`bronze/`, `silver/`, `gold/`, `metadata/`, `delta/`, `support/`)
 > - Snapshot-style file/test counts removed from active navigation blocks to reduce drift
@@ -286,7 +288,8 @@ src/bioetl/
 │   │   ├── dq.py                # DQ config models
 │   │   ├── table.py             # TableConfig
 │   │   ├── memory.py            # MemoryConfig
-│   │   └── validation.py        # ValidationConfig
+│   │   ├── validation.py        # ValidationConfig
+│   │   └── control_plane.py     # Control plane config models
 │   ├── exceptions/              # Domain exceptions hierarchy (package)
 │   │   ├── base.py              # BioETLError base
 │   │   ├── validation.py        # ValidationError
@@ -307,7 +310,8 @@ src/bioetl/
 │   │   ├── cross_validation.py  # Pre-merge validation
 │   │   ├── field_groups.py      # Column ordering
 │   │   ├── config.py            # Composite config models
-│   │   └── aggregation.py       # Enricher aggregation
+│   │   ├── aggregation.py       # Enricher aggregation
+│   │   └── checkpoint/           # Composite checkpoint models
 │   ├── contracts/gold/          # Gold contract modules
 │   │   ├── chembl.py            # ChEMBL Gold contract exports
 │   │   ├── composite.py         # Composite Gold contract exports
@@ -320,6 +324,14 @@ src/bioetl/
 │   │   ├── silver_config.py     # SilverFilterConfig
 │   │   ├── gold_config.py       # GoldFilterConfig
 │   │   └── ...                  # column_filter, range_filter, list_filters
+│   ├── lineage/                 # Data lineage tracking
+│   │   ├── field_lineage.py     # Field-level lineage tracking
+│   │   ├── pipeline_lineage.py  # Pipeline-level lineage
+│   │   └── ...                  # Lineage utilities
+│   ├── control_plane/           # Control plane domain models
+│   │   ├── run_manifest.py      # Run manifest models
+│   │   ├── run_ledger.py       # Run ledger models
+│   │   └── ...                  # Control plane contracts
 │   ├── mapping/                 # Field mapping definitions
 │   │   ├── publication_fields.py        # Publication field mappings
 │   │   ├── publication_type_mapping.py  # Type classification
@@ -391,6 +403,10 @@ src/bioetl/
 │   │   ├── openalex/            # OpenAlex transformers
 │   │   └── semanticscholar/     # SemanticScholar transformers
 │   ├── services/                # Application services
+│   │   ├── control_plane/       # Control plane services
+│   │   ├── dq/                 # Data quality services
+│   │   ├── execution/          # Execution services
+│   │   └── lineage/            # Lineage services
 │   └── observability/           # Application-level observability
 │
 ├── composition/                 # Composition Root (DI container)
@@ -402,11 +418,12 @@ src/bioetl/
 │   ├── bootstrap_logger.py      # Bootstrap logging setup
 │   ├── builders.py              # Composition builders
 │   ├── entrypoints.py           # CLI/runner entrypoints
+│   ├── monitoring/              # Monitoring and health checks
 │   ├── observability.py         # Observability wiring
-│   ├── registry.py              # Pipeline discovery
 │   ├── providers/               # Provider registration
-│   ├── services/                # Composition services
+│   ├── registry.py              # Pipeline discovery
 │   ├── runtime_builders/        # Runtime builder helpers
+│   ├── services/                # Composition services
 │   └── factories/               # Consolidated factories
 │       ├── pipeline_factory.py  # Pipeline factory
 │       ├── runner_factory.py    # Runner factory
@@ -444,17 +461,24 @@ src/bioetl/
 │   │   ├── metadata_builder.py  # Metadata builder seam
 │   │   ├── metadata_writer.py   # Metadata writer seam
 │   │   └── atomic.py            # Atomic file-write facade
+│   ├── adr/                     # ADR utilities
+│   ├── audit/                   # Audit utilities
 │   ├── config/                  # Config loaders (package)
+│   ├── control_plane/           # Control plane infrastructure
+│   ├── errors/                  # Error handling
+│   ├── export/                  # Export utilities
 │   ├── locking/                 # Local in-process locking
 │   │   └── memory_lock.py       # In-memory single-instance lock (ADR-010)
 │   ├── checkpoint/              # Checkpoint persistence
+│   ├── compat/                  # Compatibility utilities
 │   ├── quarantine/              # DQ failure handling
 │   ├── observability/           # Metrics, logging, tracing adapters
 │   ├── schemas/                 # Pydantic config schemas
 │   ├── security/                # PII hashing
 │   ├── serialization/           # JSON encoders
 │   ├── validation/              # Pandera validator
-│   └── config_merge.py          # Config merge utility
+│   ├── config_merge.py          # Config merge utility
+│   └── system/                  # System utilities
 │
 └── interfaces/                  # External interfaces
     ├── cli/                     # CLI package (bioetl run/quarantine/checkpoint)
@@ -547,7 +571,7 @@ ______________________________________________________________________
 | TOOLS.md                  | 2026-03-13   | v3.0 Active tools hub          |
 | 03-guides/                | 2026-03-19   | Active guides index            |
 | 03-guides/development/    | 2026-01-26   | Config schema guidelines       |
-| ADR-001..043              | 2026-03-09   | Current ADR set documented     |
+| ADR-001..045              | 2026-04-24   | Current ADR set documented     |
 | 05-operations/runbooks/   | 2026-03-19   | Active Local-Only runbooks     |
 | 04-reference/schemas/     | 2026-03-19   | Active schema references       |
 | docs/reports/             | 2026-03-19   | Historical evidence and audits |

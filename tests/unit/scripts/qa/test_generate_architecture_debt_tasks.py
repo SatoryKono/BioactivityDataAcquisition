@@ -7,6 +7,8 @@ import yaml
 
 from scripts.engineering.qa.generate_architecture_debt_tasks import main
 
+SAMPLE_DOMAIN_MODULE = "src/bioetl/domain/sample.py"
+
 
 def test_generate_architecture_debt_tasks_script_writes_payload(tmp_path: Path) -> None:
     module_path = tmp_path / "src" / "bioetl" / "domain" / "sample.py"
@@ -20,7 +22,7 @@ def test_generate_architecture_debt_tasks_script_writes_payload(tmp_path: Path) 
                 "schema_version": 1,
                 "registries": {
                     "file_size_limits": {
-                        "src/bioetl/domain/sample.py": {
+                        SAMPLE_DOMAIN_MODULE: {
                             "value": 1,
                             "owner": "@bioetl-architecture",
                             "reason": "demo",
@@ -56,7 +58,7 @@ def test_generate_architecture_debt_tasks_script_writes_payload(tmp_path: Path) 
     assert rc == 0
     payload = json.loads(output_path.read_text(encoding="utf-8"))
     assert payload["registry_summary"]["total_tasks"] == 1
-    assert payload["tasks"][0]["target_file"] == "src/bioetl/domain/sample.py"
+    assert payload["tasks"][0]["target_file"] == SAMPLE_DOMAIN_MODULE
 
 
 def test_generate_architecture_debt_tasks_default_output_routes_to_reports_quality(
@@ -73,7 +75,7 @@ def test_generate_architecture_debt_tasks_default_output_routes_to_reports_quali
                 "schema_version": 1,
                 "registries": {
                     "file_size_limits": {
-                        "src/bioetl/domain/sample.py": {
+                        SAMPLE_DOMAIN_MODULE: {
                             "value": 1,
                             "owner": "@bioetl-architecture",
                             "reason": "demo",

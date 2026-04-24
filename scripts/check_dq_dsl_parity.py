@@ -12,6 +12,7 @@ Exit Codes:
     0: All checks passed
     1: Parity issues found
 """
+# Compatibility wrapper
 
 import yaml
 import glob
