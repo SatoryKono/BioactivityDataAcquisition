@@ -153,7 +153,7 @@ def _classify_non_chembl_type(
     raw_types_list: list[str] | None,
 ) -> PublicationTypeEntry | None:
     if raw_type is not None:
-        return lookup.get(raw_type.strip().lower() if raw_type else None)
+        return lookup.get(raw_type.strip().lower())
     if raw_types_list is not None:
         return _best_match(lookup, raw_types_list)
     return None

@@ -26,10 +26,10 @@ class SilverWriteResult:
 
     table_name: str
     records_written: int
-    records_updated: int | None = None
-    records_deleted: int | None = None
     write_duration_seconds: float
     metadata_written: bool
+    records_updated: int | None = None
+    records_deleted: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
