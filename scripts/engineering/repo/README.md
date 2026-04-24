@@ -28,11 +28,17 @@ bash scripts/engineering/repo/split_testing_roadmap_issue.sh --help
 GITHUB_PERSONAL_ACCESS_TOKEN=... bash scripts/engineering/repo/split_testing_roadmap_issue.sh --apply --comment-parent
 bash scripts/engineering/repo/sync_docs_issues.sh --help
 GITHUB_PERSONAL_ACCESS_TOKEN=... bash scripts/engineering/repo/sync_docs_issues.sh --apply --skip-milestone
+bash scripts/engineering/repo/cleanup_branch_candidates.sh
+bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply
+bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply --with-remote
 ```
 
 Use the shell wrapper when you want a copy-pasteable bash entrypoint for the
 testing-roadmap issue split workflow or the docs-sync issue metadata workflow.
 Both wrappers forward all arguments to their Python implementations.
+Use `cleanup_branch_candidates.sh` when you want the agreed branch cleanup plan
+executed with a safe dry-run default and archive tags for the risky local
+branches.
 
 ## When to Use
 
@@ -44,6 +50,7 @@ Both wrappers forward all arguments to their Python implementations.
 | `check-cleanliness`     | After adding files to repository root                                   | Pre-commit hook              |
 | `split-testing-roadmap` | When converting a roadmap issue into executable GitHub child issues     | Manual maintenance workflow  |
 | `sync-docs-issues`      | When applying the documentation-sync issue package metadata and execution-order comments | Manual maintenance workflow  |
+| `cleanup-branch-candidates` | When applying the agreed local-branch cleanup set with optional remote deletion | Manual maintenance workflow  |
 | `all`                   | Quick local sanity check before PR                                      | Manual                       |
 
 ## Other Files
@@ -51,3 +58,4 @@ Both wrappers forward all arguments to their Python implementations.
 | File                   | Description               |
 | ---------------------- | ------------------------- |
 | `preflight_cleanup.sh` | Pre-commit cleanup helper |
+| `cleanup_branch_candidates.sh` | Dry-run/apply cleanup for the curated branch deletion set |

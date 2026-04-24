@@ -48,6 +48,12 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 - `src/bioetl/application/observability/observer.py`
 - `src/bioetl/infrastructure/adapters/http/client_context_mixin.py`
 
+Канонические contract suites для explicit port verification:
+
+- `tests/unit/infrastructure/observability/test_logger_port_contract.py`
+- `tests/unit/infrastructure/observability/test_metrics_port_contract.py`
+- `tests/unit/infrastructure/observability/test_tracing_port_contract.py`
+
 ## 2. Canonical Conventions
 
 Cross-links for canonical observability governance:

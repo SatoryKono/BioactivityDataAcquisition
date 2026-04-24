@@ -99,6 +99,11 @@ artifact via `python -m scripts.engineering.qa report-family-baseline --active-o
 It now also validates the `src/memory/` subsystem, runs a refresh smoke on a
 temporary output root, and performs a dry-run episodic prune check.
 
+The canonical shard membership and ignore/deselect rules for
+`run_pytest_sharded.sh` are now externalized in
+`configs/quality/pytest_shards.yaml`. Update that inventory rather than editing
+the shard plan inline in the shell runner.
+
 ## Integration And E2E Quick Paths
 
 For the tracked integration/VCR execution policy, prefer explicit replay for

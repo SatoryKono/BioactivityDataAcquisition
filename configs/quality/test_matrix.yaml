@@ -396,6 +396,7 @@ provider_regression_suites:
 
 property_test_boundaries:
   allowed:
+    - domain/aggregates
     - domain/entities
     - domain/policies
     - domain/value_objects

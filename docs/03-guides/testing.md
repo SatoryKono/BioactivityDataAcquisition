@@ -50,7 +50,9 @@ bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-file
 
 The same execution contract is represented in `test_lanes.execution_defaults`;
 future test-health tooling should preserve the logical `suite_name` while
-recording sharded runner details separately.
+recording sharded runner details separately. The canonical shard membership and
+ignore/deselect inventory for `run_pytest_sharded.sh` lives in
+`configs/quality/pytest_shards.yaml`.
 
 The QA entrypoint can record named lane runs as JUnit XML plus JSON summaries:
 

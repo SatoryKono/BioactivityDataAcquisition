@@ -31,6 +31,14 @@ from scripts.memory.query import (
 
 pytestmark = pytest.mark.memory
 
+RUN_MANIFEST_LEDGER_DOC_PATH = "docs/04-reference/contracts/run-manifest-ledger.md"
+RUN_MANIFEST_MODULE_PATH = "src/bioetl/domain/control_plane/run_manifest.py"
+RUN_MANIFEST_LEDGER_DOC_CLAIM = f"{RUN_MANIFEST_LEDGER_DOC_PATH}#L24"
+CHEMBL_ACTIVITY_CONFIG_PATH = "configs/entities/chembl/activity.yaml"
+RECORD_NORMALIZATION_PROCESSOR_PATH = (
+    "src/bioetl/application/core/record_normalization_processor.py"
+)
+
 
 def test_query_profiles_cover_operator_shortcuts() -> None:
     assert QUERY_PROFILES["owner-contract"]["target_label"] == "contract_surface"
@@ -445,11 +453,11 @@ def test_format_rows_renders_docs_drift_summary() -> None:
             {
                 "doc_name": "run manifest contract",
                 "doc_labels": ["doc_source_surface"],
-                "doc_source_path": "docs/04-reference/contracts/run-manifest-ledger.md",
-                "target_name": "src/bioetl/domain/control_plane/run_manifest.py",
+                "doc_source_path": RUN_MANIFEST_LEDGER_DOC_PATH,
+                "target_name": RUN_MANIFEST_MODULE_PATH,
                 "target_labels": ["module_surface"],
-                "target_source_path": "src/bioetl/domain/control_plane/run_manifest.py",
-                "doc_reference": "src/bioetl/domain/control_plane/run_manifest.py",
+                "target_source_path": RUN_MANIFEST_MODULE_PATH,
+                "doc_reference": RUN_MANIFEST_MODULE_PATH,
                 "evidence_kind": "direct_path",
                 "confidence": "high",
                 "section_title": "Purpose",
@@ -462,11 +470,11 @@ def test_format_rows_renders_docs_drift_summary() -> None:
     assert "Docs-to-code drift edges: `all`" in formatted
     assert "doc=run manifest contract | doc_labels=doc_source_surface" in formatted
     assert (
-        "target=src/bioetl/domain/control_plane/run_manifest.py | target_labels=module_surface"
+        f"target={RUN_MANIFEST_MODULE_PATH} | target_labels=module_surface"
         in formatted
     )
     assert (
-        "ref=src/bioetl/domain/control_plane/run_manifest.py | evidence_kind=direct_path | confidence=high"
+        f"ref={RUN_MANIFEST_MODULE_PATH} | evidence_kind=direct_path | confidence=high"
         in formatted
     )
     assert "section=Purpose | anchor=purpose | line=24" in formatted
@@ -616,7 +624,7 @@ def test_format_rows_renders_storage_lineage_summary() -> None:
                 ],
                 "upstream_surfaces": ["bronze/chembl/activity"],
                 "downstream_surfaces": ["gold/chembl/activity"],
-                "defining_configs": ["configs/entities/chembl/activity.yaml"],
+                "defining_configs": [CHEMBL_ACTIVITY_CONFIG_PATH],
             }
         ],
     )
@@ -637,7 +645,7 @@ def test_format_rows_renders_storage_lineage_summary() -> None:
     assert "producer=chembl_activity | labels=pipeline_surface" in formatted
     assert "upstream=bronze/chembl/activity" in formatted
     assert "downstream=gold/chembl/activity" in formatted
-    assert "defined_by=configs/entities/chembl/activity.yaml" in formatted
+    assert f"defined_by={CHEMBL_ACTIVITY_CONFIG_PATH}" in formatted
 
 
 def test_format_rows_renders_field_lineage_summary() -> None:
@@ -803,7 +811,7 @@ def test_format_rows_renders_claim_trace_summary() -> None:
         [
             {
                 "doc_name": "run manifest contract",
-                "claim_name": "docs/04-reference/contracts/run-manifest-ledger.md#L24",
+                "claim_name": RUN_MANIFEST_LEDGER_DOC_CLAIM,
                 "claim_text": "activity_id is required",
                 "modality": "required",
                 "section_title": "Field Requirements",
@@ -811,7 +819,7 @@ def test_format_rows_renders_claim_trace_summary() -> None:
                 "line_number": 24,
                 "targets": [
                     {
-                        "name": "src/bioetl/domain/control_plane/run_manifest.py",
+                        "name": RUN_MANIFEST_MODULE_PATH,
                         "labels": ["module_surface"],
                     }
                 ],
@@ -821,12 +829,12 @@ def test_format_rows_renders_claim_trace_summary() -> None:
 
     assert "Claim-level documentation traceability: `all`" in formatted
     assert (
-        "doc=run manifest contract | claim=docs/04-reference/contracts/run-manifest-ledger.md#L24 | modality=required"
+        f"doc=run manifest contract | claim={RUN_MANIFEST_LEDGER_DOC_CLAIM} | modality=required"
         in formatted
     )
     assert "text=activity_id is required" in formatted
     assert (
-        "target=src/bioetl/domain/control_plane/run_manifest.py | labels=module_surface"
+        f"target={RUN_MANIFEST_MODULE_PATH} | labels=module_surface"
         in formatted
     )
 
@@ -919,7 +927,7 @@ def test_format_rows_renders_pipeline_normalization_evidence() -> None:
                 "fallback_business_field_count": 1,
                 "fallback_technical_passthrough_field_count": 0,
                 "normalization_modules": [
-                    "src/bioetl/application/core/record_normalization_processor.py",
+                    RECORD_NORMALIZATION_PROCESSOR_PATH,
                     "src/bioetl/domain/normalization/profiles/chembl_activity.py",
                 ],
             }
