@@ -270,6 +270,39 @@ class TestCheckpointMetadata:
         with pytest.raises(ValueError, match="Invalid effective_config_hash format"):
             metadata.checkpoint_execution_identity_fingerprint()
 
+    def test_checkpoint_execution_identity_payload_includes_git_commit_and_drifts(
+        self,
+    ) -> None:
+        """git_commit must be part of the canonical checkpoint execution identity."""
+        metadata = CheckpointMetadata(
+            records_processed=100,
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+            pipeline_version="1.0.0",
+            git_commit="ABC1234",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            effective_config_hash="a" * 64,
+        )
+        drifted = CheckpointMetadata(
+            records_processed=100,
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+            pipeline_version="1.0.0",
+            git_commit="def5678",
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+            effective_config_hash="a" * 64,
+        )
+
+        payload = metadata.checkpoint_execution_identity_payload()
+
+        assert payload["git_commit"] == "abc1234"
+        assert (
+            metadata.checkpoint_execution_identity_fingerprint()
+            != drifted.checkpoint_execution_identity_fingerprint()
+        )
+
 
 class TestCheckpointCompatibilityResult:
     """Test CheckpointCompatibilityResult domain type."""

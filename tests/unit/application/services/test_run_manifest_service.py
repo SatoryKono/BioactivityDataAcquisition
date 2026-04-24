@@ -367,6 +367,22 @@ def test_execution_fingerprint_matches_golden_value() -> None:
     )
 
 
+def test_execution_fingerprint_changes_when_git_commit_changes() -> None:
+    service = RunManifestService(
+        manifest_port=_InMemoryRunManifestStore(),
+        _manifest_id_factory=lambda: "manifest-git-commit",
+    )
+
+    manifest = service.create_manifest(_make_request())
+    manifest_git_drifted = service.create_manifest(
+        replace(_make_request(), git_commit="def5678")
+    )
+
+    assert manifest.code_provenance.git_commit == "abc1234"
+    assert manifest_git_drifted.code_provenance.git_commit == "def5678"
+    assert manifest.execution_fingerprint != manifest_git_drifted.execution_fingerprint
+
+
 def test_execution_fingerprint_rejects_non_finite_numeric_payloads() -> None:
     service = RunManifestService(
         manifest_port=_InMemoryRunManifestStore(),
@@ -487,3 +503,43 @@ def test_execution_fingerprint_ignores_nested_input_snapshot_order() -> None:
     manifest_reordered = service.create_manifest(reordered)
 
     assert manifest.execution_fingerprint == manifest_reordered.execution_fingerprint
+
+
+def test_create_manifest_requires_clean_source_revision_state_for_strict_replay() -> (
+    None
+):
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-dirty-source",
+    )
+
+    with pytest.raises(RuntimeError, match="requires clean source_revision_state"):
+        service.create_manifest(
+            replace(
+                _make_request(),
+                source_revision_state="dirty",
+            )
+        )
+
+    assert store.get("manifest-dirty-source") is None
+
+
+def test_create_manifest_allows_dirty_source_revision_state_for_degraded_context() -> (
+    None
+):
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-dirty-degraded",
+    )
+
+    manifest = service.create_manifest(
+        replace(
+            _make_request(),
+            source_revision_state="dirty",
+            replay_capability=ReplayCapability.REBUILD_ONLY,
+        )
+    )
+
+    assert manifest.code_provenance.source_revision_state == "dirty"
