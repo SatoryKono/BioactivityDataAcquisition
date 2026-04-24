@@ -386,7 +386,9 @@ run_auto_fix() {
     # Refresh the hotspot-family baseline after inventory sync because the
     # baseline report consumes inventory-derived metadata.
     run_step hotspot-family-baseline-sync \
-
+        "$PYTHON_BIN" -m scripts.engineering.qa report-family-baseline \
+        --active-only \
+        --update
 }
 
 run_repo_checks() {
@@ -397,25 +399,34 @@ run_repo_checks() {
     run_step inventory-sync-final "$PYTHON_BIN" -m scripts.engineering.repo sync-inventory --write
 
     # The inventory-check MUST be the final check for inventory consistency related to auto-fixes
-    run_step inventory-check \
+    if ! run_step inventory-check \
         "$PYTHON_BIN" -m scripts.engineering.repo check-inventory \
         --check \
         --manifest configs/quality/scripts_inventory_manifest.json \
         --check-lifecycle \
         --forbid-evaluate-active \
         --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
+    then
+        if [[ "$MODE" != "auto" ]]; then
+            return 1
+        fi
+
+        echo "[pretest-guardrails] inventory drift persisted after sync; retrying once" >&2
+        run_step inventory-sync-retry \
+            "$PYTHON_BIN" -m scripts.engineering.repo sync-inventory --write || return 1
+        run_step inventory-check-retry \
+            "$PYTHON_BIN" -m scripts.engineering.repo check-inventory \
+            --check \
+            --manifest configs/quality/scripts_inventory_manifest.json \
+            --check-lifecycle \
+            --forbid-evaluate-active \
+            --lifecycle-registry configs/quality/scripts_lifecycle_registry.json || return 1
+    fi
 
     # Remaining checks can follow
     run_step catalog-check \
         "$PYTHON_BIN" -m scripts.engineering.repo check-catalog \
         --catalog scripts/engineering/repo/catalog.yaml
-
-    if [[ "$MODE" == "auto" ]]; then
-        run_step hotspot-family-baseline-resync \
-            "$PYTHON_BIN" -m scripts.engineering.qa report-family-baseline \
-            --active-only \
-            --update
-    fi
 
     run_step hotspot-family-baseline-check \
         "$PYTHON_BIN" -m scripts.engineering.qa report-family-baseline \
