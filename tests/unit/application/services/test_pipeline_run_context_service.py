@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -11,6 +12,8 @@ from bioetl.application.services.pipeline_run_context_service import (
 )
 from bioetl.application.services.pipeline_runner_models import RunOptions
 from bioetl.domain.types import RunID
+
+FIXED_STARTED_AT = datetime(2026, 4, 24, 12, 0, 0, tzinfo=UTC)
 
 
 @pytest.mark.unit
@@ -71,6 +74,7 @@ class TestBuildContext:
                 fallback_column="pmid",
                 vacuum_after_run=True,
             ),
+            started_at=FIXED_STARTED_AT,
         )
 
         assert context.pipeline_name == "chembl_publication"
@@ -96,6 +100,7 @@ class TestBuildContext:
                 cached_bronze_path="bronze/cache",
                 cached_bronze_date="2026-03-18",
             ),
+            started_at=FIXED_STARTED_AT,
         )
 
         assert context.has_input_filter is True
@@ -113,6 +118,7 @@ class TestBuildContext:
             pipeline_name="pubmed_publication",
             run_id=RunID(uuid4()),
             options=RunOptions(),
+            started_at=FIXED_STARTED_AT,
         )
 
         assert context.has_input_filter is False
@@ -128,6 +134,7 @@ class TestBuildContext:
             pipeline_name="chembl_activity",
             run_id=RunID(uuid4()),
             options=RunOptions(enable_tracing=True),
+            started_at=FIXED_STARTED_AT,
         )
 
         assert context.tracing_enabled_override is True
@@ -144,6 +151,7 @@ class TestBuildContext:
                 cached_bronze_date="2026-03-18",
                 exact_replay=True,
             ),
+            started_at=FIXED_STARTED_AT,
         )
 
         assert context.exact_replay is True
@@ -163,6 +171,7 @@ class TestBuildContext:
                 replay_of_manifest_id="manifest-parent",
                 exact_replay=True,
             ),
+            started_at=FIXED_STARTED_AT,
         )
 
         assert context.replay_of_run_id == "run-parent"
@@ -179,4 +188,5 @@ class TestBuildContext:
                 pipeline_name="chembl_activity",
                 run_id=RunID(uuid4()),
                 options=RunOptions(exact_replay=True),
+                started_at=FIXED_STARTED_AT,
             )

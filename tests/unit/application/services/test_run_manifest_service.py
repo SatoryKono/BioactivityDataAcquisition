@@ -14,6 +14,7 @@ from bioetl.application.services.run_manifest_service import (
     RunManifestCreateRequest,
     RunManifestService,
 )
+from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
 from bioetl.domain.control_plane import (
     ReplayCapability,
     RunArtifactRef,
@@ -149,6 +150,18 @@ def test_create_manifest_uses_created_at_factory_when_clock_not_provided() -> No
     manifest = service.create_manifest(_make_request())
 
     assert manifest.created_at == fixed_time
+
+
+def test_create_manifest_without_time_seam_uses_deterministic_sentinel() -> None:
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-sentinel",
+    )
+
+    manifest = service.create_manifest(_make_request())
+
+    assert manifest.created_at == MISSING_RUNTIME_TIMESTAMP
 
 
 def test_create_manifest_preserves_distinct_config_hash_surfaces() -> None:

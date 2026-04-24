@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.application.core.preflight.health_aggregator import _HealthAggregator
-from bioetl.domain.context import current_utc_time
+from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP, current_utc_time
 from bioetl.domain.exceptions import InfrastructureError
 from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
@@ -308,6 +308,18 @@ class TestHealthAggregatorCheckAll:
         report = await aggregator.check_all(mock_services)
 
         assert report.checked_at == fixed_now
+
+    @pytest.mark.asyncio
+    async def test_check_all_without_clock_uses_deterministic_sentinel(
+        self,
+        mock_logger: MagicMock,
+        mock_services: MagicMock,
+    ) -> None:
+        aggregator = _HealthAggregator(logger=mock_logger)
+
+        report = await aggregator.check_all(mock_services)
+
+        assert report.checked_at == MISSING_RUNTIME_TIMESTAMP
 
 
 # ---------------------------------------------------------------------------
