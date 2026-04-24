@@ -15,12 +15,16 @@ from bioetl.domain.types import JsonDict
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
+    from bioetl.domain.ports import LoggerPort, MetricsPort
+
 
 class BronzeWriterReadCleanupMixin:
     """Filesystem read/list/cleanup helpers for Bronze storage."""
 
     base_path: Path
     _flat_structure: bool
+    _logger: LoggerPort
+    _metrics: MetricsPort
 
     async def read_bronze(
         self, path: str
