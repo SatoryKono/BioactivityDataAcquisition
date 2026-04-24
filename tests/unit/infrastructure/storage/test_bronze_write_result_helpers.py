@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
@@ -28,11 +29,14 @@ def _make_result(path: Path) -> BronzeWriteResult:
     )
 
 
-def test_is_bronze_write_result_persisted_reports_file_state(tmp_path: Path) -> None:
-    file_path = tmp_path / "batch_abc.jsonl.zst"
+def test_is_bronze_write_result_persisted_reports_file_state() -> None:
+    file_path = Path("/virtual/batch_abc.jsonl.zst")
     result = _make_result(file_path)
 
-    assert not is_bronze_write_result_persisted(result)
+    with patch("pathlib.Path.exists", return_value=False) as exists:
+        assert not is_bronze_write_result_persisted(result)
+        exists.assert_called_once()
 
-    file_path.write_bytes(b"payload")
-    assert is_bronze_write_result_persisted(result)
+    with patch("pathlib.Path.exists", return_value=True) as exists:
+        assert is_bronze_write_result_persisted(result)
+        exists.assert_called_once()

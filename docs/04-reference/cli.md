@@ -584,7 +584,7 @@ bioetl debug --pipeline chembl_activity --debugger-port 5678
 
 **См. также:**
 - `bioetl run` — для обычного выполнения
-- [Debugging Guide](../03-guides/development/debugging.md)
+- [Debugging Guide](../03-guides/troubleshooting.md)
 
 ______________________________________________________________________
 

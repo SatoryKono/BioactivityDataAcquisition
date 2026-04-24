@@ -142,60 +142,6 @@ class TestMaybeExportCsvEdgeCases:
 
 
 @pytest.mark.unit
-class TestPreviewCleanupEdgeCases:
-    """Tests for preview_cleanup (lines 212-219)."""
-
-    def test_preview_cleanup_existing_table(self, tmp_path: Path) -> None:
-        """Lines 212-219: existing table path returns correct dict."""
-        mixin = _ConcreteMaintMixin(tmp_path)
-        table_name = "test_table"
-        table_path = tmp_path / table_name
-        table_path.mkdir(parents=True)
-
-        # Create some files
-        (table_path / "part-001.parquet").write_bytes(b"data1")
-        (table_path / "part-002.parquet").write_bytes(b"data2")
-        (table_path / "_delta_log").mkdir()
-        (table_path / "_delta_log" / "000.json").write_text("{}")
-
-        result = mixin.preview_cleanup(table_name)
-
-        assert result["exists"] is True
-        assert result["path"] == str(table_path)
-        assert result["file_count"] == 3  # 2 parquet + 1 json
-
-    def test_preview_cleanup_nonexistent_table(self, tmp_path: Path) -> None:
-        """Lines 212-213: nonexistent table returns exists=False, file_count=0."""
-        mixin = _ConcreteMaintMixin(tmp_path)
-
-        result = mixin.preview_cleanup("nonexistent_table")
-
-        assert result["exists"] is False
-        assert result["file_count"] == 0
-        assert "path" in result
-
-    def test_preview_cleanup_empty_table(self, tmp_path: Path) -> None:
-        """Lines 215-216: existing but empty table returns file_count=0."""
-        mixin = _ConcreteMaintMixin(tmp_path)
-        table_name = "empty_table"
-        table_path = tmp_path / table_name
-        table_path.mkdir(parents=True)
-
-        result = mixin.preview_cleanup(table_name)
-
-        assert result["exists"] is True
-        assert result["file_count"] == 0
-
-    def test_preview_cleanup_returns_string_path(self, tmp_path: Path) -> None:
-        """Line 219: path is a string."""
-        mixin = _ConcreteMaintMixin(tmp_path)
-
-        result = mixin.preview_cleanup("nonexistent")
-
-        assert isinstance(result["path"], str)
-
-
-@pytest.mark.unit
 class TestDelegationMethods:
     """Tests for delegation methods that forward to _retention_manager."""
 

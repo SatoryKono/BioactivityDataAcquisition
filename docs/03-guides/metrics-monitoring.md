@@ -233,6 +233,9 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_control_plane_manifest_writes_total`   | Counter | pipeline, run_type, status               | Попытки записи immutable run manifest                                             |
 | `bioetl_control_plane_ledger_appends_total`    | Counter | pipeline, event_type, status             | Попытки append в run ledger                                                       |
 | `bioetl_checkpoint_compatibility_events_total` | Counter | pipeline, disposition                    | Исходы compatibility policy при resume                                            |
+| `bioetl_checkpoint_load_events_total`          | Counter | pipeline, status                         | Bounded runtime/composite checkpoint load decisions during resume paths           |
+| `bioetl_checkpoint_operator_operations_total`  | Counter | operation, status                        | Bounded checkpoint admin actions for `list` / `get` / `delete` workflows         |
+| `bioetl_checkpoint_operator_duration_seconds`  | Histogram | operation, status                      | Latency of checkpoint admin/operator workflows                                    |
 | `bioetl_checkpoint_save_events_total`          | Counter | pipeline, operation, status              | Исходы checkpoint save paths (`periodic`, `exception`, `shutdown`, `manual`, composite stage transitions) |
 | `bioetl_checkpoint_save_duration_seconds`      | Histogram | pipeline, operation, status            | Длительность checkpoint save operations                                           |
 | `bioetl_lineage_fragments_emitted_total`       | Counter | pipeline, layer, status                  | Попытки публикации lineage fragments                                              |

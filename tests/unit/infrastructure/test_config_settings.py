@@ -72,7 +72,7 @@ class TestPipelineSettings:
             control_plane={
                 "run_manifest_enabled": True,
                 "run_ledger_enabled": False,
-                "checkpoint_compatibility_policy": "observe",
+                "checkpoint_compatibility_policy": "soft_fail",
                 "required_persistence_profile": "replay_ready",
             },
         )
@@ -96,7 +96,7 @@ class TestPipelineSettings:
         assert settings.silver_merge_timeout.max_retries == 0
         assert settings.control_plane.run_manifest_enabled is True
         assert settings.control_plane.run_ledger_enabled is False
-        assert settings.control_plane.checkpoint_compatibility_policy == "observe"
+        assert settings.control_plane.checkpoint_compatibility_policy == "soft_fail"
         assert settings.control_plane.required_persistence_profile == "replay_ready"
 
     def test_control_plane_validation_requires_manifest_for_ledger(self) -> None:
@@ -148,6 +148,31 @@ class TestPipelineSettings:
                     "run_manifest_enabled": True,
                     "run_ledger_enabled": False,
                     "required_persistence_profile": "forensic_grade",
+                }
+            )
+
+    @pytest.mark.parametrize(
+        ("required_profile", "policy"),
+        [
+            ("replay_ready", "observe"),
+            ("replay_ready", "legacy_observe"),
+            ("forensic_grade", "observe"),
+            ("forensic_grade", "legacy_observe"),
+        ],
+    )
+    def test_control_plane_strict_profiles_require_non_observe_checkpoint_policy(
+        self,
+        required_profile: str,
+        policy: str,
+    ) -> None:
+        """Strict persistence profiles reject observe-style checkpoint policies."""
+        with pytest.raises(ValidationError):
+            PipelineSettings(
+                control_plane={
+                    "run_manifest_enabled": True,
+                    "run_ledger_enabled": required_profile == "forensic_grade",
+                    "required_persistence_profile": required_profile,
+                    "checkpoint_compatibility_policy": policy,
                 }
             )
 

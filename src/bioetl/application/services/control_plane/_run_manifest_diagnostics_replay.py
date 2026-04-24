@@ -182,10 +182,18 @@ def _build_resume_contract(
     resume_requested: bool,
 ) -> dict[str, object]:
     """Return the published checkpoint/resume contract for one manifested run."""
+    profile = _resolve_reproducibility_profile(manifest)
     requested_policy = _resolve_requested_checkpoint_compatibility_policy(manifest)
-    applied_policy = (
-        "hard_fail" if requested_exact_replay else requested_policy or "observe"
+    required_persistence_profile = _resolve_required_persistence_profile(manifest)
+    applied_policy = _resolve_applied_checkpoint_compatibility_policy(
+        requested_exact_replay=requested_exact_replay,
+        requested_policy=requested_policy,
+        required_persistence_profile=required_persistence_profile,
     )
+    strict_replay_requested = requested_exact_replay or required_persistence_profile in {
+        "replay_ready",
+        "forensic_grade",
+    }
     is_composite = _is_composite_execution_context(manifest)
     execution_context = "composite" if is_composite else "ordinary"
     return {
@@ -193,7 +201,12 @@ def _build_resume_contract(
         "requested_exact_replay": requested_exact_replay,
         "requested_checkpoint_compatibility_policy": requested_policy,
         "applied_checkpoint_compatibility_policy": applied_policy,
-        "strict_replay_safe": applied_policy == "hard_fail",
+        "strict_replay_safe": (
+            strict_replay_requested
+            and applied_policy == "hard_fail"
+            and profile.strict_exact_replay_supported
+            and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+        ),
         "execution_context": execution_context,
         "resume_mode": (
             "checkpoint_snapshot_plus_ledger_suffix"
@@ -205,6 +218,50 @@ def _build_resume_contract(
             "composite_run_identity" if is_composite else None
         ),
     }
+
+
+def _resolve_required_persistence_profile(manifest: RunManifest) -> str:
+    """Resolve the declared minimum persistence profile from manifest context."""
+    candidates = (
+        manifest.launch_context.get("required_persistence_profile"),
+        _lookup_mapping_path(
+            manifest.runtime_config,
+            "pipeline",
+            "control_plane",
+            "required_persistence_profile",
+        ),
+        _lookup_mapping_path(
+            manifest.runtime_config,
+            "control_plane",
+            "required_persistence_profile",
+        ),
+        _lookup_mapping_path(
+            manifest.runtime_config,
+            "required_persistence_profile",
+        ),
+    )
+    for candidate in candidates:
+        if isinstance(candidate, str):
+            normalized = candidate.strip().lower()
+            if normalized in {"degraded_observable", "replay_ready", "forensic_grade"}:
+                return normalized
+    return "degraded_observable"
+
+
+def _resolve_applied_checkpoint_compatibility_policy(
+    *,
+    requested_exact_replay: bool,
+    requested_policy: str | None,
+    required_persistence_profile: str,
+) -> str:
+    """Resolve the effective checkpoint policy shown in diagnostics."""
+    if requested_exact_replay:
+        return "hard_fail"
+    if required_persistence_profile in {"replay_ready", "forensic_grade"}:
+        if requested_policy in {"observe", "legacy_observe"}:
+            return "soft_fail"
+        return requested_policy or "soft_fail"
+    return requested_policy or "observe"
 
 
 def _resolve_requested_checkpoint_compatibility_policy(

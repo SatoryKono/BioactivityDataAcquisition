@@ -222,6 +222,16 @@ CLI and bootstrap-backed quarantine operations now emit bounded operator metrics
 Use them when investigating replay/purge/update/inspect regressions that do not
 surface clearly through record-level reject exploration.
 
+#### Checkpoint operator metrics
+
+Checkpoint admin workflows emit a separate bounded operator surface:
+
+- `bioetl_checkpoint_operator_operations_total`
+- `bioetl_checkpoint_operator_duration_seconds`
+
+Use them when investigating `bioetl checkpoint list|get|delete` regressions or
+operator-facing checkpoint store latency outside ordinary runtime resume paths.
+
 #### Silver Filter Rejects Handoff
 
 - Используйте `1. Overview` или `2. Runtime` как summary surface, чтобы

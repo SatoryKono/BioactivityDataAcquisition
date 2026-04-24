@@ -195,6 +195,17 @@ class PipelineSettings(BaseSettings):
                     "forensic_grade requires "
                     "pipeline.control_plane.run_ledger_enabled"
                 )
+            if (
+                self.required_persistence_profile in {"replay_ready", "forensic_grade"}
+                and self.checkpoint_compatibility_policy
+                in {"observe", "legacy_observe"}
+            ):
+                raise ValueError(
+                    "pipeline.control_plane.required_persistence_profile="
+                    f"{self.required_persistence_profile} requires "
+                    "pipeline.control_plane.checkpoint_compatibility_policy "
+                    "to be soft_fail or hard_fail"
+                )
             return self
 
     class AtomicReplaceRetrySettings(BaseSettings):
