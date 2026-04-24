@@ -64,7 +64,7 @@ class ResolverHelper:
     def log_info(
         self,
         message: str,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         """Log informational message with context."""
         self._logger.info(message, **kwargs)
@@ -72,7 +72,7 @@ class ResolverHelper:
     def log_warning(
         self,
         message: str,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         """Log warning message with context."""
         self._logger.warning(message, **kwargs)
@@ -80,7 +80,7 @@ class ResolverHelper:
     def log_debug(
         self,
         message: str,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         """Log debug message with context."""
         self._logger.debug(message, **kwargs)
@@ -88,15 +88,15 @@ class ResolverHelper:
     def log_error(
         self,
         message: str,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         """Log error message with context."""
         self._logger.error(message, **kwargs)
 
     def create_resolver_service(
         self,
-        service_class: type[TResolver],
-        **init_kwargs,
+        service_class: Callable[..., TResolver],
+        **init_kwargs: object,
     ) -> TResolver:
         """Create a resolver service instance with shared helper configuration.
 

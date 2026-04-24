@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import cast
-
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
 from bioetl.domain.normalization.dates import normalize_partial_date
 from bioetl.domain.normalization.profiles.profile_normalizers import (
@@ -105,11 +103,11 @@ def normalize_named_text_field(
 ) -> str | None:
     """Normalize one configured named text field."""
     if field_name in rule_set.title_fields:
-        return cast(str | None, normalize_title(value))
+        return normalize_title(value)
     if field_name in rule_set.abstract_fields:
-        return cast(str | None, normalize_abstract(value))
+        return normalize_abstract(value)
     if field_name in rule_set.oa_status_fields:
-        return cast(str | None, normalize_oa_status(value))
+        return normalize_oa_status(value)
     return None
 
 
@@ -117,10 +115,10 @@ def canonicalize_json_like_string(value: str) -> str:
     """Canonicalize JSON-like text while preserving invalid JSON as trimmed text."""
     if not is_json_like_string(value):
         return value
-    canonical_json = cast(str | None, normalize_profile_json_string(value))
-    return canonical_json if canonical_json is not None else value
+    canonical_json = normalize_profile_json_string(value)
+    return canonical_json if isinstance(canonical_json, str) else value
 
 
 def normalize_plain_text(value: str) -> str | None:
     """Normalize plain text outside named field buckets."""
-    return cast(str | None, normalize_string(value))
+    return normalize_string(value)

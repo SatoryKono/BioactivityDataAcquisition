@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, replace
 from datetime import datetime
-from typing import TypedDict, cast
+from typing import TypedDict
 from uuid import UUID
 
 from bioetl.domain.composite.state import CompositePipelineState
@@ -162,33 +162,24 @@ def _project_stage_completed(
     update = _STAGE_COMPLETION_UPDATES.get(stage)
     if update is None:
         return projection
-    return cast(RunLedgerReplayProjection, replace(projection, **update))
+    return replace(projection, **update)
 
 
 def _apply_replay_entry(
     projection: RunLedgerReplayProjection,
     entry: RunLedgerEntry,
 ) -> RunLedgerReplayProjection:
-    replayed = cast(
-        RunLedgerReplayProjection,
-        replace(
-            projection,
-            last_event_id=entry.entry_id,
-            last_event_occurred_at=entry.occurred_at,
-        ),
+    replayed = replace(
+        projection,
+        last_event_id=entry.entry_id,
+        last_event_occurred_at=entry.occurred_at,
     )
     if entry.event_type == STAGE_COMPLETED_EVENT:
         return _project_stage_completed(replayed, entry)
     if entry.event_type == RUN_FINISHED_EVENT:
-        return cast(
-            RunLedgerReplayProjection,
-            replace(replayed, state=CompositePipelineState.COMPLETED),
-        )
+        return replace(replayed, state=CompositePipelineState.COMPLETED)
     if entry.event_type == RUN_FAILED_EVENT:
-        return cast(
-            RunLedgerReplayProjection,
-            replace(replayed, state=CompositePipelineState.FAILED),
-        )
+        return replace(replayed, state=CompositePipelineState.FAILED)
     return replayed
 
 

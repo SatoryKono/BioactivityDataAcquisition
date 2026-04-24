@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import math
 from collections.abc import Callable
-from typing import cast
 
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization.chembl import (
@@ -36,7 +35,7 @@ from bioetl.domain.normalization.rules import (
 from bioetl.domain.normalization.text import normalize_abstract as _normalize_abstract
 from bioetl.domain.normalization.text import normalize_string
 from bioetl.domain.normalization.text import normalize_title as _normalize_title
-from bioetl.domain.value_objects import SMILES
+from bioetl.domain.value_objects.chemical import SMILES
 
 __all__ = [
     "normalize_profile_abstract",
@@ -193,12 +192,12 @@ def normalize_profile_case(
 
 def normalize_profile_boolean(value: object) -> bool | None:
     """Normalize common boolean-like profile fields to canonical bool."""
-    return cast(bool | None, normalize_boolean(value))
+    return normalize_boolean(value)
 
 
 def normalize_profile_binary_flag(value: object) -> int | None:
     """Normalize common boolean-like profile fields to canonical 0/1."""
-    return cast(int | None, normalize_binary_flag(value))
+    return normalize_binary_flag(value)
 
 
 def normalize_profile_bao_identifier(value: object) -> object:
@@ -219,7 +218,7 @@ def normalize_profile_operator(
     value: object, *, allowed_values: frozenset[str] | None = None
 ) -> str | None:
     """Normalize operator-like profile fields to canonical ASCII forms."""
-    return cast(str | None, normalize_operator(value, allowed_values=allowed_values))
+    return normalize_operator(value, allowed_values=allowed_values)
 
 
 def normalize_profile_ontology_id(value: object) -> object:
@@ -399,7 +398,7 @@ def _coerce_profile_float(value: object) -> float | str | None | object:
     try:
         return float(normalized)
     except ValueError:
-        return cast(str, normalized)
+        return normalized
 
 
 def _finalize_profile_float(
@@ -439,8 +438,8 @@ def _normalize_profile_pmid_text(value: str) -> str | None:
     if normalized is None:
         return None
     if normalized.lower().startswith("pmid:"):
-        return cast(str | None, normalize_pmid(normalized[5:]))
-    return cast(str | None, normalize_pmid(normalized))
+        return normalize_pmid(normalized[5:])
+    return normalize_pmid(normalized)
 
 
 def normalize_profile_pmc_id(value: object) -> object:

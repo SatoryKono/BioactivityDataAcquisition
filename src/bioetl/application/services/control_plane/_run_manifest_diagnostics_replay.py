@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 from collections.abc import Mapping
-from typing import cast
+from typing import Literal
 
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.reproducibility_profiles import (
@@ -129,25 +129,19 @@ def _sink_layer_mode(layer_config: Mapping[str, object]) -> str:
 
 def _resolve_exact_replay_support_boundary(manifest: RunManifest) -> str:
     """Return the supported exact-replay boundary for one manifested run."""
-    return cast(
-        str,
-        _resolve_reproducibility_profile(manifest).exact_replay_support_boundary,
-    )
+    return _resolve_reproducibility_profile(manifest).exact_replay_support_boundary
 
 
 def _resolve_replay_family_contract(manifest: RunManifest) -> dict[str, object]:
     """Return the canonical per-family replay contract for one manifested run."""
-    execution_context = (
+    execution_context: Literal["source", "composite"] = (
         "composite" if _is_composite_execution_context(manifest) else "source"
     )
-    return cast(
-        dict[str, object],
-        build_replay_family_contract(
-            provider=manifest.provider,
-            entity=manifest.entity,
-            contract_ref=manifest.code_provenance.contract_ref,
-            execution_context=execution_context,
-        ),
+    return build_replay_family_contract(
+        provider=manifest.provider,
+        entity=manifest.entity,
+        contract_ref=manifest.code_provenance.contract_ref,
+        execution_context=execution_context,
     )
 
 
@@ -161,17 +155,14 @@ def _resolve_reproducibility_profile(
     manifest: RunManifest,
 ) -> ReproducibilityFamilyProfile:
     """Resolve the canonical reproducibility profile for one manifested run."""
-    execution_context = (
+    execution_context: Literal["source", "composite"] = (
         "composite" if _is_composite_execution_context(manifest) else "source"
     )
-    return cast(
-        ReproducibilityFamilyProfile,
-        resolve_reproducibility_family_profile(
-            provider=manifest.provider,
-            entity=manifest.entity,
-            contract_ref=manifest.code_provenance.contract_ref,
-            execution_context=execution_context,
-        ),
+    return resolve_reproducibility_family_profile(
+        provider=manifest.provider,
+        entity=manifest.entity,
+        contract_ref=manifest.code_provenance.contract_ref,
+        execution_context=execution_context,
     )
 
 

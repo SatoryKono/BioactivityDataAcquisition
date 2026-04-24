@@ -34,6 +34,11 @@ class _PublicationIdentifierResolver(Protocol):
 class _PublicationMetadataStrategy(Protocol):
     def get_entity_class(self) -> type[BaseEntity]: ...
 
+    def post_process_silver_record(
+        self,
+        silver_record: SilverRecord,
+    ) -> SilverRecord: ...
+
 
 class _PublicationRecordNormalizer(Protocol):
     def normalize_business_data(self, business_data: JsonDict) -> JsonDict: ...

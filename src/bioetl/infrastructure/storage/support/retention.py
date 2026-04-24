@@ -19,7 +19,7 @@ __all__ = ["RetentionPolicy"]
 
 import asyncio
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
@@ -49,10 +49,7 @@ def _content_identity(row: JsonDict) -> str:
     content_hash = row.get("content_hash")
     if content_hash is not None:
         return str(content_hash)
-    return cast(
-        str,
-        serialize_hash_identity_canonical_json(normalize_hash_identity_record(row)),
-    )
+    return serialize_hash_identity_canonical_json(normalize_hash_identity_record(row))
 
 
 class RetentionPolicy:

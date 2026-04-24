@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import cast
 
 from bioetl.domain.normalization.chembl import normalize_bao_label
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
@@ -79,14 +78,19 @@ def _normalize_bao_label_with_profile_context(
     value: object,
     record: dict[str, object] | None = None,
 ) -> str | None:
-    bao_identifier = (
+    if value is not None and not isinstance(value, str):
+        return None
+    normalized_bao_identifier = (
         None
         if record is None
-        else cast(
-            str | None, normalize_profile_bao_identifier(record.get("bao_format"))
-        )
+        else normalize_profile_bao_identifier(record.get("bao_format"))
     )
-    return cast(str | None, normalize_bao_label(value, bao_identifier=bao_identifier))
+    bao_identifier = (
+        normalized_bao_identifier
+        if isinstance(normalized_bao_identifier, str)
+        else None
+    )
+    return normalize_bao_label(value, bao_identifier=bao_identifier)
 
 
 def create_case_normalizer(strategy: str = "uppercase") -> Callable[[str], str | None]:
@@ -100,7 +104,7 @@ def create_case_normalizer(strategy: str = "uppercase") -> Callable[[str], str |
     """
 
     def normalizer(value: str) -> str | None:
-        return cast(str | None, normalize_cross_pipeline_case(value, strategy))
+        return normalize_cross_pipeline_case(value, strategy)
 
     return normalizer
 

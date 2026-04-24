@@ -327,6 +327,8 @@ providers:
 # ── Entity-level test ownership ──────────────────────────────
 
 entity_test_ownership:
+  composite.activity:
+    - tests/unit/application/composite/test_composite_activity.py
   chembl.activity:
     - tests/integration/pipelines/test_chembl_activity.py
   chembl.assay:

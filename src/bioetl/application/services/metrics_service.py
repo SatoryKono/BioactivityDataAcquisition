@@ -132,6 +132,7 @@ class _MetricsStartMixin(_MetricsTracingMixin):
     logger: LoggerPort
     _server: MetricsServerPort
     tracer: TracingPort | None
+    clock: ClockPort
     _port: int | None
     _started_at: datetime | None
 

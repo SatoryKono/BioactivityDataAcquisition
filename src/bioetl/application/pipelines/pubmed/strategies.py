@@ -5,22 +5,32 @@ from __future__ import annotations
 import xml.etree.ElementTree as ET
 from typing import TYPE_CHECKING, ClassVar
 
-import defusedxml.ElementTree as defused_ET
+import defusedxml.ElementTree as defused_ET  # type: ignore[import-untyped]
 
 from bioetl.application.pipelines.pubmed.extractors import (
     AuthorExtractor,
     DateExtractor,
 )
-from bioetl.domain.ports import DataExtractorStrategy
-
 if TYPE_CHECKING:
     import re
 
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord, JsonDict
 
+    class _DataExtractorStrategyBase:
+        def pre_extract_validation(
+            self,
+            context: PipelineContext,
+            record: BronzeRecord,
+            index: int,
+        ) -> None: ...
 
-class PubMedDataExtractor(DataExtractorStrategy):
+        def extract_business_data(self, record: BronzeRecord) -> JsonDict: ...
+else:
+    from bioetl.domain.ports import DataExtractorStrategy as _DataExtractorStrategyBase
+
+
+class PubMedDataExtractor(_DataExtractorStrategyBase):
     """Strategy for extracting business data from PubMed XML."""
 
     _VALID_DATE_PATTERNS: ClassVar[tuple[re.Pattern[str], ...]] = (
@@ -81,7 +91,7 @@ class PubMedDataExtractor(DataExtractorStrategy):
         # This implementation will be used when we move PubMed to pure composition.
         # It needs to provide all the logic that was previously in PubMedPublicationTransformer.
         # For the sake of this migration step, we'll keep it compatible.
-        pass
+        raise NotImplementedError("PubMedDataExtractor.extract_business_data")
 
 
 # We will refine this after we see how to handle the shared methods.

@@ -131,9 +131,10 @@ class ErrorHandlerService:
         error_type = self._get_error_type(exception)
 
         # Increment error counter
-        self._metrics.increment(
+        self._metrics.increment_counter(
             "errors.total",
-            tags={
+            1,
+            labels={
                 "error_type": error_type,
                 "service": self._service_name,
             },
@@ -141,17 +142,19 @@ class ErrorHandlerService:
 
         # Record specific error types
         if isinstance(exception, BioETLIntegrationError):
-            self._metrics.increment(
+            self._metrics.increment_counter(
                 "errors.integration",
-                tags={
+                1,
+                labels={
                     "service": exception.service_name or "unknown",
                     "operation": exception.operation or "unknown",
                 },
             )
         elif isinstance(exception, BioETLDomainError):
-            self._metrics.increment(
+            self._metrics.increment_counter(
                 "errors.domain",
-                tags={"service": self._service_name},
+                1,
+                labels={"service": self._service_name},
             )
 
     def _prepare_log_context(
@@ -214,7 +217,7 @@ class ErrorHandlerService:
             message=message,
             field_name=field_name,
             invalid_value=invalid_value,
-            context=context,
+            context=context or {},
         )
         self.handle_error(error, context, reraise=True)
 
@@ -234,7 +237,7 @@ class ErrorHandlerService:
         error = BioETLConfigurationError(
             message=message,
             config_key=config_key,
-            context=context,
+            context=context or {},
         )
         self.handle_error(error, context, reraise=True)
 
@@ -256,7 +259,7 @@ class ErrorHandlerService:
             message=message,
             record_id=record_id,
             severity=severity,
-            context=context,
+            context=context or {},
         )
         self.handle_error(error, context, reraise=True)
 
@@ -278,7 +281,7 @@ class ErrorHandlerService:
             service_name=service_name,
             operation=operation,
             is_retryable=is_retryable,
-            context=context,
+            context=context or {},
         )
         self.handle_error(error, context, reraise=True)
 

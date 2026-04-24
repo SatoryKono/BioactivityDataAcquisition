@@ -36,6 +36,7 @@ FULL_SCAN_ENTITY_TYPES = PUBLICATION_ENTITY_TYPES | DERIVED_ENTITY_TYPES
 # All publication pipeline configs that MUST have loading_strategy: full_scan_only
 PUBLICATION_PIPELINE_CONFIGS = [
     "configs/entities/chembl/publication.yaml",
+    "configs/entities/composite/publication.yaml",
     "configs/entities/chembl/publication_term.yaml",
     "configs/entities/chembl/publication_similarity.yaml",
     "configs/entities/pubmed/publication.yaml",
