@@ -61,7 +61,7 @@ This exits non-zero if the script cannot fetch a live unresolved-issues summary.
 ### Enforce quarantine ratchet
 
 ```bash
-python3 scripts/ai/check_sonar_issues.py --max-quarantine-entries 184
+python3 scripts/ai/check_sonar_issues.py --max-quarantine-entries 159
 ```
 
 This exits non-zero if `sonar.exclusions` grows above the configured threshold.
