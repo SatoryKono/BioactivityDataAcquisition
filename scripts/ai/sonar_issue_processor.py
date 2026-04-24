@@ -28,6 +28,59 @@ DEFAULT_CONFIG_PATH: Final[Path] = Path("sonar-project.properties")
 DEFAULT_OUTPUT_PATH: Final[Path] = Path("reports/quality/sonar_baseline_report.json")
 DEFAULT_TOP_BUCKET_DEPTH: Final[int] = 4
 DEFAULT_TOP_BUCKET_LIMIT: Final[int] = 20
+DEFAULT_QUARANTINE_RATCHET_LIMIT: Final[int] = 159
+SONAR_WAVE_DEFINITIONS: Final[tuple[dict[str, Any], ...]] = (
+    {
+        "issue_number": 3106,
+        "title": "Wave 1: application orchestration hotspots",
+        "path_prefixes": (
+            "src/bioetl/application/services",
+            "src/bioetl/application/composite",
+            "src/bioetl/application/core",
+            "src/bioetl/application/pipelines",
+        ),
+    },
+    {
+        "issue_number": 3107,
+        "title": "Wave 2: composition and interface seams",
+        "path_prefixes": (
+            "src/bioetl/composition/factories",
+            "src/bioetl/composition/bootstrap",
+            "src/bioetl/composition/runtime_builders",
+            "src/bioetl/composition/entrypoints.py",
+            "src/bioetl/composition/execution_api.py",
+            "src/bioetl/interfaces/cli",
+            "src/bioetl/interfaces/http",
+        ),
+    },
+    {
+        "issue_number": 3108,
+        "title": "Wave 3: infrastructure and runtime hotspots",
+        "path_prefixes": (
+            "src/bioetl/infrastructure/adapters",
+            "src/bioetl/infrastructure/storage",
+            "src/bioetl/infrastructure/observability",
+            "src/bioetl/infrastructure/quarantine",
+            "src/bioetl/infrastructure/schemas",
+            "src/bioetl/infrastructure/config",
+        ),
+    },
+    {
+        "issue_number": 3109,
+        "title": "Wave 4: domain, schema, and contract cleanup",
+        "path_prefixes": (
+            "src/bioetl/domain/schemas",
+            "src/bioetl/domain/services",
+            "src/bioetl/domain/value_objects",
+            "src/bioetl/domain/exceptions",
+            "src/bioetl/domain/ports",
+            "src/bioetl/domain/normalization",
+            "src/bioetl/domain/control_plane",
+            "src/bioetl/domain/types",
+            "src/bioetl/domain/filtering",
+        ),
+    },
+)
 
 
 def _normalize_url(url: str) -> str:
@@ -158,6 +211,57 @@ def bucket_issue_paths(
         [str(issue["path"]) for issue in issues if issue.get("path")],
         top_depth=top_depth,
     )
+
+
+def _matches_prefix(path: str, prefix: str) -> bool:
+    normalized_path = path.strip().rstrip("/")
+    normalized_prefix = prefix.strip().rstrip("/")
+    return normalized_path == normalized_prefix or normalized_path.startswith(
+        f"{normalized_prefix}/"
+    )
+
+
+def build_wave_breakdown(
+    exclusions: list[str],
+    *,
+    top_depth: int = DEFAULT_TOP_BUCKET_DEPTH,
+) -> dict[str, Any]:
+    """Map the current quarantine to the active Sonar remediation waves."""
+    wave_reports: list[dict[str, Any]] = []
+    matched_entries: set[str] = set()
+
+    for definition in SONAR_WAVE_DEFINITIONS:
+        prefixes = tuple(str(prefix) for prefix in definition["path_prefixes"])
+        entries = [
+            entry
+            for entry in exclusions
+            if any(_matches_prefix(entry, prefix) for prefix in prefixes)
+        ]
+        matched_entries.update(entries)
+        wave_reports.append(
+            {
+                "issue_number": definition["issue_number"],
+                "title": definition["title"],
+                "path_prefixes": list(prefixes),
+                "entry_count": len(entries),
+                "entries": entries,
+                "buckets": bucket_exclusions(entries, top_depth=top_depth),
+            }
+        )
+
+    residual_entries = [entry for entry in exclusions if entry not in matched_entries]
+    residual_report = {
+        "entry_count": len(residual_entries),
+        "entries": residual_entries,
+        "buckets": bucket_exclusions(residual_entries, top_depth=top_depth),
+    }
+
+    return {
+        "waves": wave_reports,
+        "residual": residual_report,
+        "mapped_entry_count": len(matched_entries),
+        "unmapped_entry_count": len(residual_entries),
+    }
 
 
 def load_quarantine_from_properties(config_path: Path) -> dict[str, Any]:
@@ -367,11 +471,18 @@ def build_baseline_report(
         quarantine_patterns=quarantine["entries"],
     )
     top_buckets = quarantine["buckets"][:bucket_limit]
+    wave_breakdown = build_wave_breakdown(quarantine["entries"])
 
     assessment: dict[str, Any] = {
         "historical_near_zero_status_is_stale": quarantine["entry_count"] > 0,
         "quarantine_entry_count": quarantine["entry_count"],
         "top_quarantine_buckets": top_buckets,
+        "wave_entry_count_total": wave_breakdown["mapped_entry_count"],
+        "wave_residual_entry_count": wave_breakdown["unmapped_entry_count"],
+        "quarantine_ratchet_limit": DEFAULT_QUARANTINE_RATCHET_LIMIT,
+        "quarantine_ratchet_remaining": (
+            DEFAULT_QUARANTINE_RATCHET_LIMIT - quarantine["entry_count"]
+        ),
     }
     if live["status"] != "ok":
         assessment["live_measurement_ready"] = False
@@ -410,6 +521,12 @@ def build_baseline_report(
             "entries": quarantine["entries"],
             "buckets": quarantine["buckets"],
             "top_buckets": top_buckets,
+        },
+        "program": {
+            "umbrella_issue_number": 3104,
+            "ratchet_issue_number": 3110,
+            "quarantine_ratchet_limit": DEFAULT_QUARANTINE_RATCHET_LIMIT,
+            "wave_breakdown": wave_breakdown,
         },
         "live_issues": live,
         "assessment": assessment,

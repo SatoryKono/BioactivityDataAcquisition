@@ -48,9 +48,16 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 def _entity_configs() -> list[Path]:
-    return sorted(
-        path for path in ENTITIES_DIR.rglob("*.yaml") if not path.name.startswith("_")
-    )
+    result: list[Path] = []
+    for path in ENTITIES_DIR.rglob("*.yaml"):
+        if path.name.startswith("_"):
+            continue
+        data = _load_yaml(path)
+        provider = str(data.get("provider", path.parent.name))
+        if provider == "composite":
+            continue
+        result.append(path)
+    return sorted(result)
 
 
 def _rel(path: Path) -> str:

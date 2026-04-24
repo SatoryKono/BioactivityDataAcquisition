@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-24T11:05:44.934961+00:00",
+  "generated_at": "2026-04-24T12:22:09.068235+00:00",
   "summary": {
     "total_scripts": 443,
     "status_counts": {
@@ -92,13 +92,13 @@
         },
         {
           "path": "tests/unit/scripts/test_sonar_issue_processor.py",
-          "line": 66,
+          "line": 67,
           "source_group": "tests",
           "text": "{\"path\": \"scripts/ai/check_sonar_issues.py\"},"
         },
         {
           "path": "tests/unit/scripts/test_sonar_issue_processor.py",
-          "line": 75,
+          "line": 76,
           "source_group": "tests",
           "text": "\"path_prefix\": \"scripts/ai/check_sonar_issues.py\","
         }

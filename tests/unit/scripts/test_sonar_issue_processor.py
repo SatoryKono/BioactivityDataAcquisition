@@ -19,6 +19,7 @@ MATCHES_CURRENT_QUARANTINE = "matches_current_quarantine"
 HISTORICAL_NEAR_ZERO_STATUS_IS_STALE = "historical_near_zero_status_is_stale"
 LIVE_SCOPE_DRIFT_DETECTED = "live_scope_drift_detected"
 LIVE_QUARANTINE_DRIFT_DETECTED = "live_quarantine_drift_detected"
+DEFAULT_QUARANTINE_RATCHET_LIMIT = 159
 
 
 def test_parse_java_properties_handles_multiline_exclusions() -> None:
@@ -75,6 +76,29 @@ def test_bucket_issue_paths_groups_live_issues_by_family() -> None:
         "path_prefix": "scripts/ai/check_sonar_issues.py",
         "count": 1,
     }
+
+
+def test_build_wave_breakdown_maps_quarantine_entries_to_program_waves() -> None:
+    breakdown = processor.build_wave_breakdown(
+        [
+            "src/bioetl/application/services/a.py",
+            "src/bioetl/interfaces/cli/command.py",
+            "src/bioetl/infrastructure/config/runtime.py",
+            "src/bioetl/domain/filtering/input_config.py",
+        ]
+    )
+
+    wave_counts = {
+        wave["issue_number"]: wave["entry_count"] for wave in breakdown["waves"]
+    }
+
+    assert wave_counts[3106] == 1
+    assert wave_counts[3107] == 1
+    assert wave_counts[3108] == 1
+    assert wave_counts[3109] == 1
+    assert breakdown["mapped_entry_count"] == 4
+    assert breakdown["unmapped_entry_count"] == 0
+    assert breakdown["residual"]["entries"] == []
 
 
 def test_parse_sources_splits_and_normalizes_roots() -> None:
@@ -147,6 +171,20 @@ sonar.exclusions=\\
     assert report["live_issues"]["status"] == "skipped"
     assert report["assessment"][HISTORICAL_NEAR_ZERO_STATUS_IS_STALE] is True
     assert report["assessment"]["live_measurement_ready"] is False
+    assert report["assessment"]["quarantine_ratchet_limit"] == (
+        DEFAULT_QUARANTINE_RATCHET_LIMIT
+    )
+    assert report["assessment"]["quarantine_ratchet_remaining"] == (
+        DEFAULT_QUARANTINE_RATCHET_LIMIT - 2
+    )
+    assert report["program"]["umbrella_issue_number"] == 3104
+    assert report["program"]["ratchet_issue_number"] == 3110
+    wave_counts = {
+        wave["issue_number"]: wave["entry_count"]
+        for wave in report["program"]["wave_breakdown"]["waves"]
+    }
+    assert wave_counts[3106] == 2
+    assert report["program"]["wave_breakdown"]["unmapped_entry_count"] == 0
 
 
 def test_fetch_live_issue_summary_reports_http_errors(monkeypatch) -> None:

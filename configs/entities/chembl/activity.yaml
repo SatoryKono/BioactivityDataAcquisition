@@ -14,15 +14,6 @@ pipeline:
             mode: merge
         gold:
             enabled: false
-governance:
-    gold_path_posture:
-        status: formally_postponed
-        rationale: 'chembl_activity remains Silver-only until the high-volume fact-table Gold merge contract is explicitly versioned and validated.'
-        exit_criteria:
-            - Publish the target Gold write semantics (merge vs overwrite) as an auditable contract.
-            - Add config/docs/tests proving the chosen Gold path for chembl_activity.
-            - Track any rollout work as explicit child issues instead of implicit future intent.
-        tracking_issue: '#3120'
 schema:
     content_hash:
         include: []

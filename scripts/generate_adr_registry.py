@@ -250,7 +250,7 @@ class ADRRegistryGenerator:
 
         return self.adrs
 
-    def generate_registry_index(self) -> str:
+    def generate_registry_index(self, *, decision_link_prefix: str) -> str:
         """Generate the main ADR registry index page."""
 
         if not self.adrs:
@@ -269,7 +269,11 @@ class ADRRegistryGenerator:
         lines.append(f"**Last Updated**: {datetime.now().strftime('%Y-%m-%d')}")
         lines.append("")
         self._append_status_summary(lines, status_groups)
-        self._append_status_sections(lines, status_groups)
+        self._append_status_sections(
+            lines,
+            status_groups,
+            decision_link_prefix=decision_link_prefix,
+        )
         self._append_registry_footer(lines)
         return "\n".join(lines)
 
@@ -300,6 +304,8 @@ class ADRRegistryGenerator:
         self,
         lines: list[str],
         status_groups: dict[str, list[ADRMetadata]],
+        *,
+        decision_link_prefix: str,
     ) -> None:
         status_order = ["active", "draft", "deprecated", "superseded", "archived"]
         status_icons = {
@@ -320,9 +326,19 @@ class ADRRegistryGenerator:
             lines.append(f"### {len(adrs)} decisions")
             lines.append("")
             for adr in adrs:
-                self._append_adr_entry(lines, adr)
+                self._append_adr_entry(
+                    lines,
+                    adr,
+                    decision_link_prefix=decision_link_prefix,
+                )
 
-    def _append_adr_entry(self, lines: list[str], adr: ADRMetadata) -> None:
+    def _append_adr_entry(
+        self,
+        lines: list[str],
+        adr: ADRMetadata,
+        *,
+        decision_link_prefix: str,
+    ) -> None:
         lines.append(f"### ADR-{adr.adr_number}: {adr.title}")
         lines.append("")
         lines.append(
@@ -337,7 +353,7 @@ class ADRRegistryGenerator:
         if adr.context:
             lines.append(f"**Context**: {adr.context[:150]}...")
             lines.append("")
-        doc_path = f"../decisions/{adr.file_path}"
+        doc_path = f"{decision_link_prefix}/{adr.file_path}"
         lines.append(
             f"[📄 View Full ADR]({doc_path}) | [🔗 Permalink](#adr-{adr.adr_number})"
         )
@@ -527,15 +543,18 @@ class ADRRegistryGenerator:
             return
 
         # Write main registry index
-        index_content = self.generate_registry_index()
+        index_content = self.generate_registry_index(decision_link_prefix="../decisions")
         index_file = self.output_dir / "index.md"
         with open(index_file, "w", encoding="utf-8") as f:
             f.write(index_content)
         print(f"✅ Written ADR registry index: {index_file}")
 
         # Write navigator-facing single-file registry used from Project Map.
+        navigator_content = self.generate_registry_index(
+            decision_link_prefix="decisions"
+        )
         with open(self.navigator_registry_file, "w", encoding="utf-8") as f:
-            f.write(index_content)
+            f.write(navigator_content)
         print(f"✅ Written navigator ADR registry: {self.navigator_registry_file}")
 
         # Write status dashboard
@@ -656,9 +675,9 @@ The ADR registry integrates with:
 
 ## Related
 
-- [ADR Template](ADR-template.md)
-- [Architecture Overview](../../00-overview.md)
-- [Documentation Governance](../../../00-project/DOCUMENTATION_GOVERNANCE.md)
+- [ADR Decisions Directory](../decisions/)
+- [Architecture Overview](../00-overview.md)
+- [Documentation Governance](../../00-project/DOCUMENTATION_GOVERNANCE.md)
 """
 
 

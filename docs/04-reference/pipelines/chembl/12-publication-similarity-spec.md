@@ -10,7 +10,7 @@ Last verified: '2026-04-23'
 
 # ChEMBL Publication Similarity Pipeline Specification
 
-> **Notice**: This document contains historical references. For the most current information, always refer to the active entity configuration at `configs/entities/chembl/publication_similarity.yaml` and the [ChEMBL provider reference](../../providers/chembl/publication-similarity.md).
+> **Notice**: This document is a canonical compact summary. For the most current information, always refer to the active entity configuration at `configs/entities/chembl/publication_similarity.yaml` and the [ChEMBL provider reference](../../providers/chembl/publication-similarity.md).
 
 This document describes the current active ChEMBL Publication Similarity pipeline specification.
 
@@ -21,7 +21,7 @@ Canonical sources:
 Current canonical summary:
 - Current config keys use snake_case, including `loading_strategy`.
 - Canonical publication identifiers and downstream field mappings are owned by the live entity config and application pipeline code.
-- Treat this file as historical evidence, not as the current publication similarity contract.
+- Treat this file as a canonical compact summary, not as a replacement for the linked detailed publication similarity contract.
 
 ## Contract References
 
@@ -39,4 +39,4 @@ Current canonical summary:
 | Metadata | Pass | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
 | Canonical source traceability | Pass | Page delegates current contract to the linked canonical source and active config surface |
 | Contract linkage | Pass | [chembl_publication_similarity_v1.0.json](../../contracts/gold/chembl_publication_similarity_v1.0.json) |
-| Published-page role | Pass | Historical deep spec or summary is explicitly bounded by current canonical sources |
+| Published-page role | Pass | Canonical compact summary is explicitly bounded by current canonical sources |

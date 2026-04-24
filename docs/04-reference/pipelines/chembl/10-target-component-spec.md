@@ -42,4 +42,4 @@ Current canonical summary:
 | Metadata                      | Pass   | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`    |
 | Canonical source traceability | Pass   | Page delegates current contract to the linked canonical source and active config surface    |
 | Contract linkage              | Pass   | [chembl_target_component_v1.0.json](../../contracts/gold/chembl_target_component_v1.0.json) |
-| Published-page role           | Pass   | Historical deep spec or summary is explicitly bounded by current canonical sources          |
+| Published-page role           | Pass   | Canonical compact summary is explicitly bounded by current canonical sources                |

@@ -1215,6 +1215,9 @@ def _write_json_report(
     checks_run: list[dict[str, object]],
     total_violations: int,
 ) -> None:
+    resolved_report_path = (
+        report_path if report_path.is_absolute() else PROJECT_ROOT / report_path
+    )
     report = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "status": "pass" if total_violations == 0 else "fail",
@@ -1225,9 +1228,9 @@ def _write_json_report(
             "exit_code_1": "One or more selected checks reported violations",
         },
     }
-    report_path.parent.mkdir(parents=True, exist_ok=True)
-    report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    rel = report_path.relative_to(PROJECT_ROOT)
+    resolved_report_path.parent.mkdir(parents=True, exist_ok=True)
+    resolved_report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    rel = resolved_report_path.relative_to(PROJECT_ROOT)
     print(f"JSON report written to: {rel}")
 
 

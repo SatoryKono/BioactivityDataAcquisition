@@ -19,8 +19,8 @@ including composite pipelines.
 > - canonical current contract: provider reference pages, unified entity configs
 >   in `configs/entities/`, composite configs in `configs/composites/`, and
 >   in-page status banners on individual pipeline pages;
-> - historical deep specs / compatibility stubs: retained here when they still
->   help navigation, but they are labeled explicitly in nav and on the page.
+> - canonical compact summaries: retained here when a shorter published page is
+>   clearer than duplicating the full provider reference and config contract.
 
 ----------------------------------------------------------------------
 
@@ -29,8 +29,8 @@ including composite pipelines.
 ### Provider Pipelines (21)
 
 The table below lists all currently configured provider pipelines. Some linked
-pages are deep current specs, while others are historical deep specs or compact
-compatibility stubs that redirect readers to the current canonical contract.
+pages are deep current specs, while others are canonical compact summaries that
+delegate detailed behavior to the linked provider reference and active config.
 
 | #   | Pipeline ID                     | Provider         | Entity                 | Spec                                             |
 | --- | ------------------------------- | ---------------- | ---------------------- | ------------------------------------------------ |
@@ -99,8 +99,8 @@ Current deep specs usually include:
 1. **Configuration** - YAML pipeline config
 1. **Testing** - Required test coverage
 
-Historical stubs may intentionally provide only a compact summary plus links to
-their current canonical provider reference and config files.
+Compact published summaries may intentionally provide only a short active-state
+overview plus links to the current provider reference and config files.
 
 ----------------------------------------------------------------------
 

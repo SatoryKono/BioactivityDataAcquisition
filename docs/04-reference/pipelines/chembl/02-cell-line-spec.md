@@ -10,7 +10,7 @@ Last verified: '2026-04-03'
 
 # ChEMBL Cell Line Pipeline Specification
 
-> **Status**: Historical deep spec. Current canonical contract lives in
+> **Status**: Canonical compact spec summary. Current detailed contract lives in
 > [../../providers/chembl/cell-line.md](../../providers/chembl/cell-line.md)
 > and
 > `configs/entities/chembl/cell_line.yaml`.
@@ -57,4 +57,4 @@ Last verified: '2026-04-03'
 | Metadata | Pass | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
 | Canonical source traceability | Pass | Page delegates current contract to the linked canonical source and active config surface |
 | Contract linkage | Pass | [chembl_cell_line_v1.0.json](../../contracts/gold/chembl_cell_line_v1.0.json) |
-| Published-page role | Pass | Historical deep spec or summary is explicitly bounded by current canonical sources |
+| Published-page role | Pass | Canonical compact summary is explicitly bounded by current canonical sources |

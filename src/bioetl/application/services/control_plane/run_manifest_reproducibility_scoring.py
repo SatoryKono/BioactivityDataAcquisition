@@ -194,10 +194,10 @@ def _score_checkpoint_safety(summary: JsonDict) -> _ScoreCard:
             score -= 2
             evidence.append("legacy_observe_checkpoint_policy")
             blockers.append("legacy_observe_checkpoint_policy")
-        if (
-            required_profile in {"replay_ready", "forensic_grade"}
-            and requested_policy in {"observe", "legacy_observe"}
-        ):
+        if required_profile in {
+            "replay_ready",
+            "forensic_grade",
+        } and requested_policy in {"observe", "legacy_observe"}:
             score -= 1
             evidence.append("checkpoint_policy_below_profile_minimum")
             blockers.append("checkpoint_policy_below_profile_minimum")

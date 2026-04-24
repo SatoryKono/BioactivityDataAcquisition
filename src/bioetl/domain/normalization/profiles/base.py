@@ -18,10 +18,14 @@ FieldNormalizer = Callable[..., object]
 @cache
 def _normalizer_accepts_record_context(normalizer: FieldNormalizer) -> bool:
     try:
-        parameter_count = len(inspect.signature(normalizer).parameters)
+        parameters = tuple(inspect.signature(normalizer).parameters.values())
     except (TypeError, ValueError):
         return False
-    return parameter_count >= 2
+    return any(
+        parameter.name == "record"
+        or parameter.kind == inspect.Parameter.VAR_KEYWORD
+        for parameter in parameters
+    )
 
 
 def _identity(value: object) -> object:
@@ -46,7 +50,7 @@ class FieldRule:
     ) -> object:
         """Apply one pure field normalizer."""
         if record is not None and _normalizer_accepts_record_context(self.normalizer):
-            return self.normalizer(value, record)
+            return self.normalizer(value, record=record)
         return self.normalizer(value)
 
 

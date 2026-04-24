@@ -310,7 +310,9 @@ def create_and_persist_effective_config_artifact(
     entity: str,
 ) -> tuple[str, str, str, str]:
     """Create effective config artifact, persist it, and return provenance fields."""
-    control_plane = getattr(getattr(inputs.settings, "pipeline", None), "control_plane", None)
+    control_plane = getattr(
+        getattr(inputs.settings, "pipeline", None), "control_plane", None
+    )
     required_persistence_profile = str(
         getattr(control_plane, "required_persistence_profile", "degraded_observable")
     )

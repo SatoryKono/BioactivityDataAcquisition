@@ -6,6 +6,22 @@ version: 1.0.0
 provider: composite
 entity: molecule
 
+# Compatibility shim for generic unified-config validators.
+# Active composite runtime uses configs/composites/*.yaml instead.
+pipeline:
+  provider: composite
+  entity: molecule
+  pipeline_name: composite_molecule
+
+schema:
+  compatibility_mode: legacy_composite_entity_stub
+
+filters:
+  compatibility_mode: legacy_composite_entity_stub
+
+contracts:
+  compatibility_mode: legacy_composite_entity_stub
+
 # Composite molecule entity configuration
 # This config defines how molecule data from multiple sources are combined
 

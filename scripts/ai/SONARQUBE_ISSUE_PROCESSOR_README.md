@@ -99,6 +99,26 @@ The JSON report includes:
 - `live_issues.out_of_scope_total`
 - `live_issues.issues`
 - `assessment.historical_near_zero_status_is_stale`
+- `assessment.quarantine_ratchet_limit`
+- `assessment.quarantine_ratchet_remaining`
+- `program.umbrella_issue_number`
+- `program.ratchet_issue_number`
+- `program.wave_breakdown.waves`
+- `program.wave_breakdown.residual`
+
+## Program mapping
+
+The report also maps the active quarantine into the current Sonar burn-down
+program:
+
+- `#3106` — application orchestration hotspots
+- `#3107` — composition and interface seams
+- `#3108` — infrastructure and runtime hotspots
+- `#3109` — domain, schema, and contract cleanup
+- `#3110` — quarantine ratchet / gate restoration
+
+This gives the program a deterministic repo-backed baseline even before a live
+token-backed Sonar query succeeds.
 
 ## Interpreting results
 

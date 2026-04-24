@@ -124,8 +124,22 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 @cache
 def _collect_pipeline_configs() -> list[Path]:
-    """Collect all unified entity YAML configs."""
-    return sorted(p for p in ENTITIES_DIR.rglob("*.yaml") if not p.name.startswith("_"))
+    """Collect unified provider/entity pipeline configs from configs/entities.
+
+    Composite runtime uses configs/composites/*.yaml and composite-specific
+    bootstrap contracts, so legacy configs/entities/composite/*.yaml are not
+    part of the unified entity invariant surface enforced in this module.
+    """
+    result: list[Path] = []
+    for path in ENTITIES_DIR.rglob("*.yaml"):
+        if path.name.startswith("_"):
+            continue
+        data = _load_yaml(path)
+        provider = str(data.get("provider", path.parent.name))
+        if provider == "composite":
+            continue
+        result.append(path)
+    return sorted(result)
 
 
 @cache
@@ -498,6 +512,12 @@ class TestConfigFilesExist:
             data = _load_yaml(path)
             provider = str(data.get("provider", path.parent.name))
             entity = str(data.get("entity", path.stem))
+            if provider == "composite":
+                # Composite runtime is governed by configs/composites/*.yaml and
+                # composite-specific bootstrap contracts, not the unified entity
+                # schema/filters/contracts layout enforced for provider/entity
+                # pipeline configs under configs/entities/**.
+                continue
             result.append((provider, entity, path, data))
         return result
 

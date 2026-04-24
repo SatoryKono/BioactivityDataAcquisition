@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # ChEMBL Publication Term Pipeline Specification
 
-> **Notice**: This document contains historical references. For the most current information, always refer to the active entity configuration at `configs/entities/chembl/publication_term.yaml` and the [ChEMBL provider reference](../../providers/chembl/publication-term.md).
+> **Notice**: This document is a canonical compact summary. For the most current information, always refer to the active entity configuration at `configs/entities/chembl/publication_term.yaml` and the [ChEMBL provider reference](../../providers/chembl/publication-term.md).
 
 This document describes the current active ChEMBL Publication Term pipeline specification.
 
@@ -26,7 +26,7 @@ Current canonical summary:
 
 - The active config surface uses snake_case keys such as `loading_strategy`.
 - Publication identifiers and alias mappings are defined in the entity config and current provider pipeline implementation.
-- Use the entity config and provider reference for current behavior; do not copy field names or loading examples from this legacy page.
+- Use the entity config and provider reference for current behavior; do not copy field names or loading examples from outdated examples here.
 
 ## Contract References
 
@@ -44,4 +44,4 @@ Current canonical summary:
 | Metadata                      | Pass   | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`    |
 | Canonical source traceability | Pass   | Page delegates current contract to the linked canonical source and active config surface    |
 | Contract linkage              | Pass   | [chembl_publication_term_v1.0.json](../../contracts/gold/chembl_publication_term_v1.0.json) |
-| Published-page role           | Pass   | Historical deep spec or summary is explicitly bounded by current canonical sources          |
+| Published-page role           | Pass   | Canonical compact summary is explicitly bounded by current canonical sources                |

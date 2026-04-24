@@ -6,6 +6,22 @@ version: 1.0.0
 provider: composite
 entity: assay
 
+# Compatibility shim for generic unified-config validators.
+# Active composite runtime uses configs/composites/*.yaml instead.
+pipeline:
+  provider: composite
+  entity: assay
+  pipeline_name: composite_assay
+
+schema:
+  compatibility_mode: legacy_composite_entity_stub
+
+filters:
+  compatibility_mode: legacy_composite_entity_stub
+
+contracts:
+  compatibility_mode: legacy_composite_entity_stub
+
 # Composite assay entity configuration
 # This config defines how assay data from multiple sources are combined
 
