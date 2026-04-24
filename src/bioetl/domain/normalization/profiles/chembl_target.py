@@ -70,14 +70,18 @@ _SPECIAL_RULE_COMPONENTS = {
             value,
             allowed_values=TARGET_COMPONENT_TYPES,
         ),
-        "Normalize target component_types as a canonical JSON array with element-wise validation against the shared ChEMBL target-component type registry.",
+        "Normalize target component_types as a canonical JSON array with "
+        "element-wise validation against the shared ChEMBL "
+        "target-component type registry.",
     ),
     "component_relationships": (
         lambda value: normalize_profile_json_string_list_vocabulary_strict(
             value,
             allowed_values=TARGET_COMPONENT_RELATIONSHIPS,
         ),
-        "Normalize target component_relationships as a canonical JSON array with element-wise validation against the shared ChEMBL target-component relationship registry.",
+        "Normalize target component_relationships as a canonical JSON array "
+        "with element-wise validation against the shared ChEMBL "
+        "target-component relationship registry.",
     ),
 }
 

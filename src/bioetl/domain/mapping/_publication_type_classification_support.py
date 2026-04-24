@@ -1,0 +1,171 @@
+"""Private helpers for unified publication type classification."""
+
+from __future__ import annotations
+
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
+
+from bioetl.domain.normalization.text import normalize_string
+
+if TYPE_CHECKING:
+    from bioetl.domain.mapping.publication_type_classification import (
+        PublicationTypeEntry,
+    )
+
+
+def classify_provider_type(
+    *,
+    lookup: dict[str, PublicationTypeEntry] | None,
+    raw_type: str | None,
+    raw_types_list: list[str] | None,
+) -> PublicationTypeEntry | None:
+    """Resolve a provider-specific publication type from scalar/list inputs."""
+    if lookup is None:
+        return classify_chembl_type(
+            raw_type=raw_type,
+            raw_types_list=raw_types_list,
+        )
+    if raw_type is not None:
+        return lookup.get(raw_type.strip().lower())
+    if raw_types_list is not None:
+        return best_match(lookup, raw_types_list)
+    return None
+
+
+def classify_chembl_type(
+    *,
+    raw_type: str | None,
+    raw_types_list: list[str] | None,
+    entry_by_unified_type: dict[str, PublicationTypeEntry],
+) -> PublicationTypeEntry | None:
+    """Resolve a ChEMBL publication type using unified-type lookup keys."""
+    if raw_type is not None:
+        return classify_chembl_publication_type(entry_by_unified_type, raw_type)
+    if raw_types_list is not None:
+        return best_chembl_match(entry_by_unified_type, raw_types_list)
+    return None
+
+
+def normalize_publication_classification_value(
+    *,
+    field_name: str,
+    value: object,
+    entries: Sequence[PublicationTypeEntry],
+) -> object:
+    """Normalize a derived publication classification value against loaded entries."""
+    if value is None or not isinstance(value, str):
+        return None
+    normalized = normalize_string(value)
+    if normalized is None:
+        return None
+    allowed = classification_values(field_name, entries)
+    if not allowed:
+        return normalized
+    return find_matching_classification_value(normalized, allowed)
+
+
+def find_matching_classification_value(
+    normalized: str,
+    allowed: frozenset[str],
+) -> str | None:
+    for allowed_value in allowed:
+        if normalized.lower() == allowed_value.lower():
+            return allowed_value
+    return None
+
+
+def best_match(
+    lookup: dict[str, PublicationTypeEntry],
+    raw_types: list[str],
+) -> PublicationTypeEntry | None:
+    """Return the most specific entry among matching raw types."""
+    matches = [
+        entry
+        for raw in raw_types
+        if raw and (entry := lookup.get(raw.strip().lower())) is not None
+    ]
+    return max(matches, key=lambda entry: entry.specificity, default=None)
+
+
+_CLASSIFICATION_FIELD_GETTERS = {
+    "publication_type_unified": lambda entries: frozenset(
+        entry.unified_type for entry in entries
+    ),
+    "publication_subclass": lambda entries: frozenset(
+        entry.subclass for entry in entries
+    ),
+    "publication_class": lambda entries: frozenset(
+        entry.class_code for entry in entries
+    ),
+}
+
+
+def classification_values(
+    field_name: str,
+    entries: Sequence[PublicationTypeEntry],
+) -> frozenset[str]:
+    getter = _CLASSIFICATION_FIELD_GETTERS.get(field_name)
+    if getter is None:
+        raise ValueError(f"Unknown publication classification field: {field_name}")
+    return getter(entries)
+
+
+def raw_publication_type(
+    *,
+    raw_type: str | None,
+    raw_types_list: list[str] | None,
+) -> str | None:
+    if raw_type is not None:
+        stripped = raw_type.strip()
+        return stripped or None
+    return process_raw_types_list(raw_types_list)
+
+
+def process_raw_types_list(raw_types_list: list[str] | None) -> str | None:
+    if not raw_types_list:
+        return None
+    processed_parts = [
+        part for part in map(_normalized_raw_type_part, raw_types_list) if part
+    ]
+    return "|".join(processed_parts) if processed_parts else None
+
+
+def _normalized_raw_type_part(item: object) -> str | None:
+    if item is None:
+        return None
+    stripped = str(item).strip()
+    return stripped or None
+
+
+def canonical_publication_type_key(value: str) -> str:
+    from bioetl.domain.mapping.publication_type_mapping import (
+        normalize_publication_type,
+    )
+
+    return normalize_publication_type(value) or value.strip().lower()
+
+
+def classify_chembl_publication_type(
+    entry_by_unified_type: dict[str, PublicationTypeEntry],
+    raw_type: str,
+) -> PublicationTypeEntry | None:
+    return entry_by_unified_type.get(canonical_publication_type_key(raw_type))
+
+
+def best_chembl_match(
+    entry_by_unified_type: dict[str, PublicationTypeEntry],
+    raw_types: list[str],
+) -> PublicationTypeEntry | None:
+    matches = [
+        entry
+        for raw in raw_types
+        if raw
+        and (
+            entry := classify_chembl_publication_type(
+                entry_by_unified_type,
+                raw.strip(),
+            )
+        )
+        is not None
+    ]
+    return max(matches, key=lambda entry: entry.specificity, default=None)

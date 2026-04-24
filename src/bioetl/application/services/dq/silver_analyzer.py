@@ -11,7 +11,6 @@ Implements SilverDQAnalyzerPort. Follows RULES.md §3.1 DQ strategy.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import cast
 
 import polars as pl
 import pyarrow as pa
@@ -22,7 +21,6 @@ from bioetl.application.services.dq.silver_statistics import SilverStatisticsCal
 from bioetl.application.services.dq.silver_threshold import SilverThresholdChecker
 from bioetl.domain.ports import (
     SilverDQAnalyzeRequest,
-    SilverDQConfigPort,
     coerce_silver_dq_analyze_request,
 )
 from bioetl.domain.types import JsonDict
@@ -56,7 +54,8 @@ class SilverDQAnalyzer:
     def _to_polars_dataframe(self, data: pl.DataFrame | pa.Table) -> pl.DataFrame:
         """Normalize input to Polars DataFrame."""
         if isinstance(data, pa.Table):
-            return cast("pl.DataFrame", pl.from_arrow(data))
+            frame = pl.from_arrow(data)
+            return frame.to_frame() if isinstance(frame, pl.Series) else frame
         return data
 
     def _build_report(
@@ -148,8 +147,7 @@ class SilverDQAnalyzer:
             kwargs=kwargs,
         )
         df = self._to_polars_dataframe(analyze_request.data)
-        config = cast("SilverDQConfigPort", analyze_request.config)
-        enabled_checks = set(config.get_checks_enums())
+        enabled_checks = set(analyze_request.config.get_checks_enums())
         checks, passed, failed, warnings = self._check_executor.execute_checks(
             df=df,
             enabled_checks=enabled_checks,
@@ -157,10 +155,7 @@ class SilverDQAnalyzer:
             input_record_count=analyze_request.input_record_count,
             quarantined_count=analyze_request.quarantined_count,
             previous_schema=analyze_request.previous_schema,
-            key_nullability_rules=cast(
-                "list[JsonDict] | None",
-                analyze_request.key_nullability_rules,
-            ),
+            key_nullability_rules=analyze_request.key_nullability_rules,
         )
         thresholds, summary = self._calculate_thresholds_and_summary(
             df=df,

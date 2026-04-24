@@ -9,6 +9,7 @@ from bioetl.domain.transformations import generate_content_hash
 
 if TYPE_CHECKING:
     from bioetl.application.core.config import ContentHashPolicyByVersion
+    from bioetl.domain.normalization.profiles import FieldRule
     from bioetl.domain.types import JsonDict
 
 
@@ -19,6 +20,8 @@ class _NormalizationProfileLike(Protocol):
     hash_included_fields: frozenset[str]
     hash_excluded_fields: frozenset[str]
     fields: frozenset[str]
+
+    def rule_for(self, field_name: str) -> FieldRule | None: ...
 
 
 class RecordNormalizationHashSupportMixin:

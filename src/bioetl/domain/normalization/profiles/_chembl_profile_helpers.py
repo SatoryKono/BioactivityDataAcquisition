@@ -7,11 +7,13 @@ from dataclasses import dataclass
 from typing import Any
 
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
-    StandardProfileSpec,
     build_standard_profile,
 )
 from bioetl.domain.normalization.profiles._standard_profile_rule_components import (
     RuleComponentSpec,
+)
+from bioetl.domain.normalization.profiles._standard_profile_spec import (
+    StandardProfileSpec,
 )
 from bioetl.domain.normalization.profiles.base import NormalizationProfile
 
@@ -63,7 +65,7 @@ class ChemblProfileFieldGroups:
 
 
 def chembl_schema_fields(
-    schema_cls: Any,  # Any: schema factories come from multiple Pandera-compatible classes with only a shared runtime protocol.
+    schema_cls: Any,  # Any: schema factories share only a runtime `.to_schema()` protocol.
 ) -> tuple[
     str, ...
 ]:  # Any: schema_cls is a class with a .to_schema().columns.keys() protocol

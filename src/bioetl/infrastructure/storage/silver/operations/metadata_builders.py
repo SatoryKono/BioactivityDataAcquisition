@@ -4,18 +4,21 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import cast
+from typing import Literal
 
 import orjson
 
 from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
+    ColumnMetrics,
     DeltaMetrics,
     DQSummary,
     EnvironmentMetadata,
     LineageMetadata,
     PipelineMetadata,
     RuntimeMetadata,
+    RunTypeEnum,
+    SchemaDrift,
     SilverMetadata,
     SilverOutputExt,
 )
@@ -64,7 +67,7 @@ def _placeholder_table_path(table_name: str) -> str:
 
 def _build_column_metrics_dict(
     dq_metrics: BatchDQMetrics | None,
-) -> dict[str, object]:
+) -> dict[str, ColumnMetrics]:
     """Convert DQ column stats into metadata-ready column metrics."""
     if not dq_metrics or not dq_metrics.column_stats:
         return {}
@@ -74,11 +77,37 @@ def _build_column_metrics_dict(
     }
 
 
-def _build_schema_drift_object(dq_metrics: BatchDQMetrics | None) -> object | None:
+def _build_schema_drift_object(
+    dq_metrics: BatchDQMetrics | None,
+) -> SchemaDrift | None:
     """Convert DQ schema drift info into metadata-ready representation."""
     if not dq_metrics or not dq_metrics.schema_drift:
         return None
-    return cast(object | None, dq_metrics.schema_drift.to_schema_drift())
+    return dq_metrics.schema_drift.to_schema_drift()
+
+
+def _coerce_run_type(run_type: RunType | object | None) -> RunTypeEnum:
+    """Normalize heterogeneous runtime run-type values to metadata enum."""
+    if isinstance(run_type, RunTypeEnum):
+        return run_type
+    normalized = str(run_type or RunTypeEnum.INCREMENTAL).strip().lower()
+    if normalized == RunTypeEnum.BACKFILL.value:
+        return RunTypeEnum.BACKFILL
+    if normalized == RunTypeEnum.REBUILD.value:
+        return RunTypeEnum.REBUILD
+    return RunTypeEnum.INCREMENTAL
+
+
+def _coerce_delta_operation(
+    mode: str,
+) -> Literal["merge", "overwrite", "append"]:
+    """Normalize write mode strings to the allowed Delta metadata literals."""
+    normalized = mode.strip().lower()
+    if normalized == "merge":
+        return "merge"
+    if normalized == "overwrite":
+        return "overwrite"
+    return "append"
 
 
 def _resolve_dq_summary_values(
@@ -137,7 +166,7 @@ def _build_runtime_metadata(
     return RuntimeMetadata(
         run_id=str(request.run_id or "unknown"),
         manifest_id=request.manifest_id,
-        run_type=request.run_type or "incremental",
+        run_type=_coerce_run_type(request.run_type),
         started_at_utc=request.runtime_started_at,
         completed_at_utc=request.runtime_completed_at,
         duration_seconds=max(
@@ -183,7 +212,7 @@ def _build_delta_metadata(request: _SilverMetadataBuildRequest) -> DeltaMetrics:
     """Build Delta operation metadata for a Silver sidecar."""
     return DeltaMetrics(
         table_path=request.table_path,
-        operation=str(request.mode),
+        operation=_coerce_delta_operation(request.mode),
         primary_key=request.primary_keys or [],
         partition_by=[],
         version_before=None,
@@ -248,7 +277,6 @@ def _build_silver_metadata(
     """Build a complete SilverMetadata payload from write/finalization inputs."""
     provider_name, entity_name = _split_table_name(request.table_name)
     return SilverMetadata(
-        table_name=request.table_name,
         runtime=_build_runtime_metadata(request),
         pipeline=_build_pipeline_metadata(provider_name, entity_name),
         lineage=_build_lineage_metadata(request),

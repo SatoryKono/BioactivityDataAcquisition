@@ -31,6 +31,7 @@ _CHEMBL_PUBLICATION_COMPAT_IDENTIFIER_FIELDS = tuple(
         "publication_doi",
         "publication_pmid",
         "publication_pmc_id",
+        "publication_type_raw",
         "oa_status",
         "_source",
     )

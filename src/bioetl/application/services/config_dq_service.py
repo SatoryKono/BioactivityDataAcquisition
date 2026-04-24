@@ -67,6 +67,16 @@ def _parse_snapshot_strictness_mode(value: object) -> DQSnapshotStrictnessMode:
     raise ValueError(f"Invalid DQ snapshot strictness mode: {value!r}")
 
 
+def _parse_source_hash_strategy(
+    value: object,
+) -> ConfigSourceHashStrategy | None:
+    if value is None:
+        return None
+    if value in {"canonical_yaml", "raw_bytes"}:
+        return cast("ConfigSourceHashStrategy", value)
+    raise ValueError(f"Invalid config source hash strategy: {value!r}")
+
+
 def _parse_disposition_overrides(overrides: object) -> dict[str, DQDisposition]:
     if isinstance(overrides, dict):
         return {str(key): _parse_disposition(value) for key, value in overrides.items()}
@@ -104,7 +114,7 @@ def _compute_file_hashes(
     *,
     relative_path: str,
     path: Path,
-) -> tuple[str | None, str | None, str | None]:
+) -> tuple[str | None, str | None, ConfigSourceHashStrategy | None]:
     """Return semantic and raw hashes for one config source file when available."""
     if not path.exists() or not path.is_file():
         return None, None, None
@@ -147,10 +157,8 @@ def _build_source_refs(artifact_dict: JsonDict) -> list[ConfigSourceRef]:
             raw_source_hash=(
                 str(src["raw_source_hash"]) if src.get("raw_source_hash") else None
             ),
-            source_hash_strategy=(
-                cast("ConfigSourceHashStrategy", str(src["source_hash_strategy"]))
-                if src.get("source_hash_strategy")
-                else None
+            source_hash_strategy=_parse_source_hash_strategy(
+                src.get("source_hash_strategy")
             ),
             priority=int(src["priority"]),
         )

@@ -8,7 +8,7 @@ Split from entrypoints.py per audit-package-structure-2026-02-07.
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, ParamSpec, Protocol, TypeVar
+from typing import TYPE_CHECKING, ParamSpec, Protocol, TypeVar, cast
 
 from bioetl.composition._pipeline_execution import (
     ArchiveOptions,
@@ -115,7 +115,10 @@ def get_quarantine_manager(pipeline: str) -> QuarantineManagerProtocol:
         >>> manager = get_quarantine_manager("chembl_activity")
         >>> records = await manager.inspect(limit=100)
     """
-    return _bootstrap_registered_resource(bootstrap_quarantine_manager, pipeline)
+    return cast(
+        QuarantineManagerProtocol,
+        _bootstrap_registered_resource(bootstrap_quarantine_manager, pipeline),
+    )
 
 
 def get_checkpoint_manager(pipeline: str) -> CheckpointManagerProtocol:
@@ -133,7 +136,10 @@ def get_checkpoint_manager(pipeline: str) -> CheckpointManagerProtocol:
         >>> manager = get_checkpoint_manager("chembl_activity")
         >>> checkpoints = await manager.list_all()
     """
-    return _bootstrap_registered_resource(bootstrap_checkpoint_manager, pipeline)
+    return cast(
+        CheckpointManagerProtocol,
+        _bootstrap_registered_resource(bootstrap_checkpoint_manager, pipeline),
+    )
 
 
 def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
@@ -148,7 +154,10 @@ def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
         >>> service = get_lifecycle_service()
         >>> removed = await service.vacuum("chembl.activity", retention_days=7)
     """
-    return _bootstrap_registered_resource(bootstrap_lifecycle_service)
+    return cast(
+        MedallionLifecycleServiceProtocol,
+        _bootstrap_registered_resource(bootstrap_lifecycle_service),
+    )
 
 
 async def vacuum_table(table: str, options: VacuumOptions) -> int:
@@ -223,9 +232,12 @@ async def preview_cleanup(pipeline: str) -> CleanupPreviewProtocol:
     gold_table = (
         pipeline_cfg.gold_table or f"{pipeline_cfg.provider}.{pipeline_cfg.entity_type}"
     )
-    return await cleanup_service.preview(
-        silver_table=silver_table,
-        gold_table=gold_table,
+    return cast(
+        CleanupPreviewProtocol,
+        await cleanup_service.preview(
+            silver_table=silver_table,
+            gold_table=gold_table,
+        ),
     )
 
 
@@ -274,5 +286,5 @@ async def list_checkpoints(pipeline: str) -> list[str]:
         ['checkpoint_2024_01_15', 'checkpoint_2024_01_16']
     """
     manager = get_checkpoint_manager(pipeline)
-    checkpoints: list[str] = await manager.list_all()
+    checkpoints = cast(list[str], await manager.list_all())
     return checkpoints

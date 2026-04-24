@@ -7,15 +7,15 @@ from pathlib import Path
 
 import click
 
-from bioetl.composition.bootstrap.cli.noop import create_noop_logger
-from bioetl.composition.factories.services.port_factories import create_metrics
 from bioetl.domain.context import current_utc_time
 from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecyclePlan,
     ControlPlaneArtifactLifecyclePolicy,
 )
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.control_plane import FileControlPlaneArtifactLifecycleStore
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.interfaces.cli.formatters import echo_dry_run_prefix, echo_info
 
 __all__ = [
@@ -30,8 +30,8 @@ def bootstrap_control_plane_lifecycle_store() -> FileControlPlaneArtifactLifecyc
     output_root = Path(settings.data_dir) / "output"
     return FileControlPlaneArtifactLifecycleStore(
         base_path=output_root / "control",
-        logger=create_noop_logger(),
-        metrics=create_metrics(settings),
+        logger=NoOpLogger(),
+        metrics=NoOpMetrics(),
     )
 
 

@@ -226,11 +226,11 @@ class EnricherDeduplicatorService:
 
 
 class EnricherDeduplicator(EnricherDeduplicatorService):
-    def __init__(self, *args: object, **kwargs: object) -> None:
+    def __init__(self, logger: LoggerPort) -> None:
         warnings.warn(
             "EnricherDeduplicator is deprecated and will be removed in v2.0. "
             "Use EnricherDeduplicatorService instead.",
             DeprecationWarning,
             stacklevel=2,
         )
-        super().__init__(*args, **kwargs)
+        super().__init__(logger)

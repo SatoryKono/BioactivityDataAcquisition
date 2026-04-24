@@ -5,10 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 __all__ = [
+    "DEFAULT_CHEMBL_POLICY_REGISTRY_DATA",
     "ChemblControlledVocabularyFamily",
     "ChemblOntologyPolicyFamily",
     "ChemblPolicyRegistryData",
-    "DEFAULT_CHEMBL_POLICY_REGISTRY_DATA",
 ]
 
 

@@ -162,7 +162,14 @@ class SilverWriterDQCompatibilityMixin:
             return dt.schema().to_arrow()
         except DeltaTableNotFoundError:
             return None
-        except Exception:
+        except (
+            AttributeError,
+            ImportError,
+            OSError,
+            RuntimeError,
+            TypeError,
+            ValueError,
+        ):
             return await super()._get_table_schema(table_name)
 
 

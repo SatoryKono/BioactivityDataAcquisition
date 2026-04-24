@@ -5,12 +5,12 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
-from bioetl.domain.schemas.uniprot._core import (
+from bioetl.domain.schemas.uniprot import (
     ENTRY_TYPES,
     PROTEIN_EXISTENCE_LEVELS,
     PROTEIN_FLAGS,
+    UniprotTargetSchema,
 )
-from bioetl.domain.schemas.uniprot.protein import UniprotTargetSchema
 
 __all__ = [
     "UNIPROT_PROTEIN_PROFILE",

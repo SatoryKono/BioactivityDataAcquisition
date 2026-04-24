@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import datetime
 from typing import Generic, TypeVar, cast
 
 import pyarrow as pa
@@ -51,11 +52,9 @@ from bioetl.domain.ports import (
     LoggerPort,
     MetricsPort,
     PiiHasherPort,
-    TracingPort,
-)
-from bioetl.domain.ports.runtime.runner import (
     PipelineControlPlaneArtifacts,
     PipelineCreateRunnerRequest,
+    TracingPort,
 )
 from bioetl.domain.services import IdentityService
 from bioetl.domain.types import GoldSchemaType

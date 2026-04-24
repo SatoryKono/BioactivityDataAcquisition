@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import cast
 
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 
@@ -56,7 +55,7 @@ def create_case_normalizer(strategy: str = "uppercase") -> Callable[[str], str |
     """
 
     def normalizer(value: str) -> str | None:
-        return cast(str | None, normalize_cross_pipeline_case(value, strategy))
+        return normalize_cross_pipeline_case(value, strategy)
 
     return normalizer
 

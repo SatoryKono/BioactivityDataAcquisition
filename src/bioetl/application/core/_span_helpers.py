@@ -38,6 +38,8 @@ class _ClosableSpan(Protocol):
 
     def record_exception(self, error: BaseException) -> None: ...
 
+    def __enter__(self) -> _ClosableSpan: ...
+
     def __exit__(
         self,
         exc_type: type[BaseException] | None,

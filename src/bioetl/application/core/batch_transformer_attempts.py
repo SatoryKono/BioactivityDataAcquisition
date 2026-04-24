@@ -96,6 +96,38 @@ def _build_gold_record(
     return gold_record
 
 
+def _transform_failure_entity_id(raw_record: BronzeRecord) -> object:
+    """Resolve the best-effort entity identifier for transform failure logs."""
+    return (
+        raw_record.get("publication_id")
+        or raw_record.get("document_chembl_id")
+        or raw_record.get("activity_id")
+    )
+
+
+def _log_transform_record_failure(
+    *,
+    context: PipelineContext,
+    batch_id: BatchID,
+    raw_record: BronzeRecord,
+    index: int,
+    error: Exception,
+) -> None:
+    """Emit a structured transform-failure log with record context."""
+    context.logger.exception(
+        "transform_record_failed",
+        pipeline=context.pipeline_name,
+        batch_id=str(batch_id),
+        record_index=index,
+        source_batch_id=str(context.source_batch_id)
+        if context.source_batch_id is not None
+        else None,
+        error_type=type(error).__name__,
+        error=str(error),
+        entity_id=_transform_failure_entity_id(raw_record),
+    )
+
+
 async def transform_record_attempt(
     *,
     context: PipelineContext,
@@ -156,6 +188,13 @@ async def transform_record_attempt(
             ),
         )
     except TRANSFORM_PROCESSING_ERRORS as error:
+        _log_transform_record_failure(
+            context=record_context,
+            batch_id=batch_id,
+            raw_record=raw_record,
+            index=index,
+            error=error,
+        )
         error_type = error_classifier.classify(error)
         if error_type.is_data_quality():
             batch_metrics.track_error("transform", error_type)

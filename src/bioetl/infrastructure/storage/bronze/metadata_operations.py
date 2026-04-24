@@ -22,11 +22,13 @@ if TYPE_CHECKING:
     from bioetl.domain.lineage import LineageGraphFragment, MetadataLineageBundle
     from bioetl.domain.models.metadata import (
         BronzeMetadata,
-        BronzeMetadataInput,
         InputSnapshotRef,
         SourceMetadata,
     )
-    from bioetl.domain.ports import MetadataCoordinatorPort
+    from bioetl.domain.ports.metadata.coordinator import (
+        BronzeMetadataInput,
+        MetadataCoordinatorPort,
+    )
 
 __all__ = [
     "BronzeMetadataWriteRequest",

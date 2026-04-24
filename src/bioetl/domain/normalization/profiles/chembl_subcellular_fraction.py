@@ -55,7 +55,9 @@ CHEMBL_SUBCELLULAR_FRACTION_PROFILE = build_standard_profile(
                 allowed_values=SUBCELLULAR_FRACTIONS,
                 preserve_unknown=True,
             ),
-            "Normalize subcellular_fraction against the shared ChEMBL subcellular-fraction vocabulary while preserving unknown observed lexemes for review.",
+            "Normalize subcellular_fraction against the shared ChEMBL "
+            "subcellular-fraction vocabulary while preserving unknown observed "
+            "lexemes for review.",
         ),
     },
     null_fields=chembl_pseudo_null_fields("subcellular_fraction"),

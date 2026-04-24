@@ -117,13 +117,13 @@ def coerce_silver_write_request(
             resolved_kwargs["bronze_refs"],
         ),
         key_nullability_rules=cast(
-            list[KeyNullabilityRule] | None,
+            "list[KeyNullabilityRule] | None",
             resolved_kwargs["key_nullability_rules"],
         ),
-        run_id=cast(RunID | None, resolved_kwargs["run_id"]),
-        run_type=cast(RunType | None, resolved_kwargs["run_type"]),
-        source_batch_id=cast(BatchID | None, resolved_kwargs["source_batch_id"]),
-        ingestion_ts=cast(datetime | None, resolved_kwargs["ingestion_ts"]),
+        run_id=cast("RunID | None", resolved_kwargs["run_id"]),
+        run_type=cast("RunType | None", resolved_kwargs["run_type"]),
+        source_batch_id=cast("BatchID | None", resolved_kwargs["source_batch_id"]),
+        ingestion_ts=cast("datetime | None", resolved_kwargs["ingestion_ts"]),
         quarantined_count=cast(
             int | None,
             resolved_kwargs["quarantined_count"],

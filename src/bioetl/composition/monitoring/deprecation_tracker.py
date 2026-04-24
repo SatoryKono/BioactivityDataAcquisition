@@ -47,7 +47,7 @@ def track_deprecated_class(
             original_init(self, *args, **kwargs)
 
         # Replace init method
-        setattr(cls, "__init__", new_init)
+        cls.__init__ = new_init
 
         return cls
 

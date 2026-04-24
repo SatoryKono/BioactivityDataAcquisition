@@ -42,6 +42,42 @@ See also:
 from __future__ import annotations
 
 from importlib import import_module as _import_module
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bioetl.domain.value_objects.academic_ids import ISSN, ORCID, OpenAlexId, SemanticScholarId
+    from bioetl.domain.value_objects.activity import (
+        ActivityValue,
+        ConfidenceScore,
+        RelationOperator,
+    )
+    from bioetl.domain.value_objects.activity_values import (
+        ActivityType,
+        Concentration,
+        ConcentrationUnit,
+        PChemblValue,
+    )
+    from bioetl.domain.value_objects.base import ValueObject
+    from bioetl.domain.value_objects.chemical import MolecularWeight, PublicationYear
+    from bioetl.domain.value_objects.compound_ids import AssayId, CompoundId, CompoundSource
+    from bioetl.domain.value_objects.dq_anomaly import (
+        DQAnomaly,
+        DQAnomalySeverity,
+        DQAnomalyType,
+    )
+    from bioetl.domain.value_objects.dq_result import DQEvaluationStatus
+    from bioetl.domain.value_objects.identifiers import ChemblId, PubChemCid, UniProtId
+    from bioetl.domain.value_objects.inchi import InChI
+    from bioetl.domain.value_objects.molecular_descriptors import (
+        HeavyAtomCount,
+        HydrogenBondCount,
+        LogP,
+        PolarSurfaceArea,
+        RotatableBondCount,
+    )
+    from bioetl.domain.value_objects.publications import DOI, PubMedId
+    from bioetl.domain.value_objects.taxonomy_id import TaxonomyId, validate_taxonomy_id
+    from bioetl.domain.value_objects._chemical_identifiers import InChIKey, SMILES
 
 _MODULE_ACADEMIC_IDS = "bioetl.domain.value_objects.academic_ids"
 _MODULE_ACTIVITY = "bioetl.domain.value_objects.activity"

@@ -9,8 +9,8 @@ from datetime import datetime, timedelta
 from typing import Protocol
 
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.models import SilverMetadata
 from bioetl.domain.models.metadata import RunTypeEnum
-from bioetl.domain.models._metadata_silver import SilverMetadata
 from bioetl.domain.types import BatchID, BronzeRecord
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics

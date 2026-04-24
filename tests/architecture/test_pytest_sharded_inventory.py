@@ -14,6 +14,19 @@ INVENTORY_PATH = ROOT / "configs/quality/pytest_shards.yaml"
 RUNNER_PATH = ROOT / "scripts/engineering/dev/run_pytest_sharded.sh"
 
 
+def _bash_runner_path(path: Path) -> str:
+    """Render a bash-friendly script path across Linux and Windows hosts."""
+    try:
+        return path.relative_to(ROOT).as_posix()
+    except ValueError:
+        pass
+
+    path_str = path.as_posix()
+    if len(path_str) >= 3 and path_str[1:3] == ":/":
+        return f"/{path_str[0].lower()}{path_str[2:]}"
+    return path_str
+
+
 def _load_inventory() -> dict[str, object]:
     return yaml.safe_load(INVENTORY_PATH.read_text(encoding="utf-8"))
 
@@ -74,7 +87,7 @@ def test_sharded_runner_list_matches_inventory_order() -> None:
     expected_names = [entry["name"] for entry in inventory["shards"]]
 
     result = subprocess.run(
-        ["bash", str(RUNNER_PATH), "--list"],
+        ["bash", _bash_runner_path(RUNNER_PATH), "--list"],
         cwd=ROOT,
         check=True,
         capture_output=True,
@@ -93,7 +106,7 @@ def test_sharded_runner_dry_run_expands_architecture_alias_from_inventory() -> N
     result = subprocess.run(
         [
             "bash",
-            str(RUNNER_PATH),
+            _bash_runner_path(RUNNER_PATH),
             "--dry-run",
             "--shard",
             "S7-crosscutting-architecture",

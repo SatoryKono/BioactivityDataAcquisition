@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 def _current_utc_now(clock: ClockPort | None = None) -> datetime:
     """Return current UTC timestamp from an injected clock when available."""
-    return clock.now() if clock is not None else current_utc_time()
+    return clock.now() if clock is not None else cast(datetime, current_utc_time())
 
 
 def with_seed_completed(

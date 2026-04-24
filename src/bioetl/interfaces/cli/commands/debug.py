@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -41,21 +41,21 @@ def _load_stage_breakpoint() -> type[StageBreakpoint]:
     """Resolve StageBreakpoint lazily to avoid command import fan-out."""
     from bioetl.domain.ports import StageBreakpoint
 
-    return StageBreakpoint
+    return cast(type[StageBreakpoint], StageBreakpoint)
 
 
 def _load_run_options_type() -> type[RunOptions]:
     """Resolve RunOptions lazily to keep CLI imports lightweight."""
     from bioetl.application.services import RunOptions
 
-    return RunOptions
+    return cast(type[RunOptions], RunOptions)
 
 
 def _load_debug_abort_error_type() -> type[DebugAbortError]:
     """Resolve DebugAbortError lazily to keep CLI imports lightweight."""
     from bioetl.application.services.pipeline_debug_service import DebugAbortError
 
-    return DebugAbortError
+    return cast(type[DebugAbortError], DebugAbortError)
 
 
 def _resolve_context_registry(
@@ -79,7 +79,7 @@ def _validate_pipeline_name(
         validate_pipeline_name,
     )
 
-    return validate_pipeline_name(click_context, param, value)
+    return cast(str, validate_pipeline_name(click_context, param, value))
 
 
 def get_pipeline_runner_service(
@@ -88,7 +88,7 @@ def get_pipeline_runner_service(
     """Load the pipeline runner service through composition on demand."""
     from bioetl.composition.execution_api import get_pipeline_runner_service as _impl
 
-    return _impl(registry=registry)
+    return cast(PipelineRunnerService, _impl(registry=registry))
 
 
 @click.command()  # type: ignore[untyped-decorator]

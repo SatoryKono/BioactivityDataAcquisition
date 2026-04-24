@@ -11,6 +11,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
     AuthorExtractor,
     DateExtractor,
 )
+
 if TYPE_CHECKING:
     import re
 

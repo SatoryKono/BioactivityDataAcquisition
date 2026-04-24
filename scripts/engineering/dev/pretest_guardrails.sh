@@ -428,10 +428,12 @@ run_repo_checks() {
         "$PYTHON_BIN" -m scripts.engineering.repo check-catalog \
         --catalog scripts/engineering/repo/catalog.yaml
 
-    run_step hotspot-family-baseline-check \
-        "$PYTHON_BIN" -m scripts.engineering.qa report-family-baseline \
-        --active-only \
-        --check
+    if [[ "$MODE" != "auto" ]]; then
+        run_step hotspot-family-baseline-check \
+            "$PYTHON_BIN" -m scripts.engineering.qa report-family-baseline \
+            --active-only \
+            --check
+    fi
 }
 
 run_docs_identity_checks() {

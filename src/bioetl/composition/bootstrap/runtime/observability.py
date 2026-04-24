@@ -65,7 +65,7 @@ def _create_runtime_audit_port(
     time can pull in unrelated assembly surfaces. Keep the audit factory import
     at bootstrap time so runtime observability stays a thin entrypoint.
     """
-    from bioetl.composition.factories.storage._audit import (
+    from bioetl.composition.factories.storage.audit import (
         create_audit_port as create_audit_port_impl,
     )
 

@@ -2,7 +2,14 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from bioetl.application.composite.join_execution import JoinExecutorService
+
+if TYPE_CHECKING:
+    import polars as pl
+
+    from bioetl.application.composite.join_execution import JoinHow
 
 
 class PolarsJoinAdapter:
@@ -20,13 +27,43 @@ class PolarsJoinAdapter:
         """
         self._join_service = join_service
 
-    def get_polars_join_type(self):
+    def get_polars_join_type(self) -> JoinHow:
         """Get current join type from adapted service."""
         return self._join_service.get_polars_join_type()
 
-    def execute_polars_join(self, *args, **kwargs):
+    def execute_polars_join(
+        self,
+        left_df: pl.DataFrame,
+        right_df: pl.DataFrame,
+        left_key: str,
+        right_key: str,
+        pipeline_name: str,
+    ) -> pl.DataFrame:
         """Execute join through adapted service."""
-        return self._join_service.execute_polars_join(*args, **kwargs)
+        return self._join_service.execute_polars_join(
+            left_df,
+            right_df,
+            left_key,
+            right_key,
+            pipeline_name,
+        )
+
+    def execute_composite_key_join(
+        self,
+        left_df: pl.DataFrame,
+        right_df: pl.DataFrame,
+        left_keys: list[str],
+        right_keys: list[str],
+        pipeline_name: str,
+    ) -> pl.DataFrame:
+        """Execute composite-key join through adapted service."""
+        return self._join_service.execute_composite_key_join(
+            left_df,
+            right_df,
+            left_keys,
+            right_keys,
+            pipeline_name,
+        )
 
 
 __all__ = ["PolarsJoinAdapter"]

@@ -69,7 +69,16 @@ def _build_policy_surfaces(
     data: ChemblPolicyRegistryData,
 ) -> Mapping[tuple[str, str], ChemblPolicySurface]:
     surfaces: dict[tuple[str, str], ChemblPolicySurface] = {}
+    _add_controlled_vocabulary_surfaces(surfaces, data)
+    _add_ontology_surfaces(surfaces, data)
+    _add_publication_classification_surfaces(surfaces, data)
+    return MappingProxyType(surfaces)
 
+
+def _add_controlled_vocabulary_surfaces(
+    surfaces: dict[tuple[str, str], ChemblPolicySurface],
+    data: ChemblPolicyRegistryData,
+) -> None:
     for controlled_family in data.controlled_vocabularies:
         for field_ref in controlled_family.fields:
             entity, field_name = _parse_chembl_field_ref(str(field_ref))
@@ -79,6 +88,11 @@ def _build_policy_surfaces(
                 invalid_value_mode=controlled_family.invalid_value_mode,
             )
 
+
+def _add_ontology_surfaces(
+    surfaces: dict[tuple[str, str], ChemblPolicySurface],
+    data: ChemblPolicyRegistryData,
+) -> None:
     for ontology_family in data.ontology_families:
         for field_ref in ontology_family.fields:
             entity, field_name = _parse_chembl_field_ref(str(field_ref))
@@ -95,14 +109,17 @@ def _build_policy_surfaces(
                 invalid_value_mode="resolve_identifier_backed_label",
             )
 
+
+def _add_publication_classification_surfaces(
+    surfaces: dict[tuple[str, str], ChemblPolicySurface],
+    data: ChemblPolicyRegistryData,
+) -> None:
     for field_name in data.publication_classification_fields:
         surfaces[("publication", field_name)] = ChemblPolicySurface(
             category="derived_vocabulary",
             registry_source=PUBLICATION_CLASSIFICATION_CONFIG,
             invalid_value_mode="reject_unknown_taxonomy_value",
         )
-
-    return MappingProxyType(surfaces)
 
 
 def initialize_chembl_policy_registry(data: ChemblPolicyRegistryData) -> None:

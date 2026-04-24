@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import datetime
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 import pandas as pd
 import pandera.pandas as pa
@@ -45,7 +45,7 @@ _CheckMethod = TypeVar("_CheckMethod", bound=Callable[..., object])
 
 def _typed_check(
     *fields: str,
-    **kwargs: object,
+    **kwargs: Any,  # Any: Pandera decorator kwargs are intentionally open-ended
 ) -> Callable[[_CheckMethod], _CheckMethod]:
     """Typed shim around ``pa.check`` until Pandera exposes a typed decorator."""
     return cast(Callable[[_CheckMethod], _CheckMethod], pa.check(*fields, **kwargs))

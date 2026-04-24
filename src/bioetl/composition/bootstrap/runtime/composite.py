@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pydantic import ValidationError as _ValidationError
 
-from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime._composite_plan_support import (
     CompositeBootstrapPlan as _CompositeBootstrapPlan,
 )
@@ -28,16 +27,6 @@ from bioetl.composition.bootstrap.runtime._composite_plan_support import (
 )
 from bioetl.composition.bootstrap.runtime._composite_plan_support import (
     load_composite_config_impl as _load_runtime_composite_config_impl,
-)
-from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
-    _create_dq_report_service,
-    _load_field_group_registry,
-)
-from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
-    CompositeSupportServices,
-)
-from bioetl.composition.bootstrap.runtime.runner_assembly import (
-    create_composite_runner_service,
 )
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.infrastructure.config.composite_config_api import (
@@ -60,9 +49,13 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.runner_pkg import CompositePipelineRunner
+    from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
     from bioetl.composition.bootstrap.composite_infrastructure_context import (
         CompositeInfrastructureContext,
+    )
+    from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
+        CompositeSupportServices,
     )
     from bioetl.domain.ports import LoggerPort
 
@@ -75,19 +68,33 @@ __all__ = [
 ValidationError = _ValidationError
 
 
+def __getattr__(name: str) -> object:
+    if name == "CompositeRuntimeConfig":
+        from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+
+        return CompositeRuntimeConfig
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
 def _resolve_composite_gold_schema(composite_name: str) -> type | None:
     """Resolve composite Gold contract by composite pipeline name."""
-    return _resolve_composite_gold_schema_impl(
-        composite_name,
-        schema_registry=DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY,
+    return cast(
+        type | None,
+        _resolve_composite_gold_schema_impl(
+            composite_name,
+            schema_registry=DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY,
+        ),
     )
 
 
 def _resolve_composite_config_path(name: str) -> Path:
     """Resolve composite config path from canonical composites directory."""
-    return _resolve_composite_config_path_impl(
-        name,
-        config_dir=DEFAULT_COMPOSITE_CONFIG_DIR,
+    return cast(
+        Path,
+        _resolve_composite_config_path_impl(
+            name,
+            config_dir=DEFAULT_COMPOSITE_CONFIG_DIR,
+        ),
     )
 
 
@@ -158,7 +165,11 @@ def _build_runner_factories(
         resolve_bronze_opts,
     )
 
-    return _build_runner_factories_impl(
+    factories: tuple[
+        Callable[[], PipelineRunner],
+        Callable[[str, pl.DataFrame], PipelineRunner],
+        Callable[[str, pl.DataFrame], PipelineRunner],
+    ] = _build_runner_factories_impl(
         config=config,
         runtime=runtime,
         logger=logger,
@@ -167,6 +178,7 @@ def _build_runner_factories(
         pipeline_runner_builder=bootstrap_pipeline_runner_impl,
         resolve_bronze_opts_fn=resolve_bronze_opts,
     )
+    return factories
 
 
 def _build_support_services(
@@ -176,6 +188,10 @@ def _build_support_services(
     infra_context: CompositeInfrastructureContext,
 ) -> CompositeSupportServices:
     """Build composite support service bundle consumed by runner facade."""
+    from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
+        _create_dq_report_service,
+        _load_field_group_registry,
+    )
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServicesFactory,
     )
@@ -215,6 +231,10 @@ def _create_composite_runner_from_plan(
     plan: _CompositeBootstrapPlan,
 ) -> CompositePipelineRunner:
     """Create the final composite runner from the resolved bootstrap plan."""
+    from bioetl.composition.bootstrap.runtime.runner_assembly import (
+        create_composite_runner_service,
+    )
+
     return _create_composite_runner_from_plan_impl(
         config=config,
         runtime=runtime,

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from bioetl.domain.normalization.profiles._publication_classification_rules import (
     publication_classification_rules,
 )
@@ -15,8 +17,9 @@ __all__ = [
     "PUBMED_PUBLICATION_SCHEMA_FIELDS",
 ]
 
+_pubmed_publication_schema_cls: Any = PubMedPublicationSchema
 _PUBMED_PUBLICATION_BASE_FIELDS = tuple(
-    PubMedPublicationSchema.to_schema().columns.keys()
+    _pubmed_publication_schema_cls.to_schema().columns.keys()
 )
 _PUBMED_PUBLICATION_COMPAT_IDENTIFIER_FIELDS = tuple(
     field

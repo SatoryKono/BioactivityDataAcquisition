@@ -46,7 +46,7 @@ from bioetl.composition.runtime_builders.observability_builder import (
     build_observability_bundle,
 )
 from bioetl.domain.config import RuntimeConfig
-from bioetl.domain.ports.runtime.runner import (
+from bioetl.domain.ports import (
     PipelineControlPlaneArtifacts,
     PipelineCreateRunnerRequest,
 )
@@ -134,10 +134,14 @@ def _create_runner_from_factory(
     )
     accepts_request = "request" in signature(create_runner).parameters
     if not accepts_request and accepts_kwargs:
+        compatibility_create_runner = cast(
+            "Callable[..., PipelineRunnerProtocol]",
+            create_runner,
+        )
         control_plane = request.control_plane
         return cast(
             "PipelineRunnerProtocol",
-            create_runner(
+            compatibility_create_runner(
                 run_id=request.run_id,
                 runtime=request.runtime,
                 started_at=request.started_at,

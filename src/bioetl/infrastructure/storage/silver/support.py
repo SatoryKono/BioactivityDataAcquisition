@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import cast
 
 import pyarrow as pa
 from deltalake import DeltaTable
@@ -41,13 +40,10 @@ def resolve_table_path(
     Returns:
         String path to the table directory.
     """
-    return cast(
-        str,
-        resolve_delta_table_path(
-            base_path=str(base_path),
-            table_name=table_name,
-            flat_structure=flat_structure,
-        ),
+    return resolve_delta_table_path(
+        base_path=str(base_path),
+        table_name=table_name,
+        flat_structure=flat_structure,
     )
 
 
@@ -70,7 +66,7 @@ async def get_table_schema(base_path: str | Path, table_name: str) -> pa.Schema 
         try:
             # Load the Delta table
             dt = DeltaTable(table_path)
-            return cast(pa.Schema, dt.schema().to_arrow())
+            return dt.schema().to_arrow()
         except TableNotFoundError:
             return None
         except Exception:

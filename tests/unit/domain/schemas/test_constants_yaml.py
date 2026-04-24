@@ -17,7 +17,7 @@ import yaml
 def chembl_yaml() -> dict[str, Any]:
     """Load YAML enum config for comparison."""
     yaml_path = Path("configs/enums/chembl.yaml")
-    with yaml_path.open() as f:
+    with yaml_path.open(encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
@@ -25,7 +25,7 @@ def chembl_yaml() -> dict[str, Any]:
 def uniprot_yaml() -> dict[str, Any]:
     """Load UniProt enum config for comparison."""
     yaml_path = Path("configs/enums/uniprot.yaml")
-    with yaml_path.open() as f:
+    with yaml_path.open(encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 

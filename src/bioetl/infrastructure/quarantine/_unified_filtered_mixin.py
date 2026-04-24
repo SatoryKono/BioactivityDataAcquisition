@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from typing import Protocol
 
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.quarantine.filtered_reads import (
@@ -13,15 +13,18 @@ from bioetl.infrastructure.quarantine.filtered_reads import (
 )
 from bioetl.infrastructure.quarantine.operations import get_filtered_stats
 
-if TYPE_CHECKING:
-    from bioetl.infrastructure.quarantine.unified import UnifiedQuarantineAdapter
+
+class _UnifiedQuarantineFilteredHost(Protocol):
+    """Minimal host contract required by filtered quarantine helpers."""
+
+    base_path: str
 
 
 class UnifiedQuarantineFilteredMixin:
     """Filtered-record explorer operations for UnifiedQuarantineAdapter."""
 
     async def list_filtered_records(
-        self: UnifiedQuarantineAdapter,
+        self: _UnifiedQuarantineFilteredHost,
         *,
         pipeline: str | None = None,
         run_type: str | None = None,
@@ -54,7 +57,7 @@ class UnifiedQuarantineFilteredMixin:
         )
 
     async def get_filtered_record(
-        self: UnifiedQuarantineAdapter,
+        self: _UnifiedQuarantineFilteredHost,
         *,
         payload_hash: str,
         pipeline: str | None = None,
@@ -69,7 +72,7 @@ class UnifiedQuarantineFilteredMixin:
         )
 
     async def get_filtered_stats(
-        self: UnifiedQuarantineAdapter,
+        self: _UnifiedQuarantineFilteredHost,
         *,
         pipeline: str | None = None,
         run_type: str | None = None,
@@ -96,7 +99,7 @@ class UnifiedQuarantineFilteredMixin:
         )
 
     async def get_filtered_filter_options(
-        self: UnifiedQuarantineAdapter,
+        self: _UnifiedQuarantineFilteredHost,
         *,
         pipeline: str | None = None,
         run_type: str | None = None,

@@ -341,6 +341,34 @@ class TestPublicationTransformer:
         assert result["_source"] == "chembl"  # System field
 
     @pytest.mark.asyncio
+    async def test_transform_survives_uninitialized_publication_classification(
+        self, transformer, mock_context, monkeypatch
+    ):
+        """Classification bootstrap drift must not fail the whole publication batch."""
+        record = {
+            "publication_id": "CHEMBL1234567",
+            "doc_type": "PUBLICATION",
+            "title": "Fallback classification",
+        }
+
+        def _raise_runtime_error(*args: object, **kwargs: object) -> dict[str, str]:
+            raise RuntimeError("classification data not initialized")
+
+        monkeypatch.setattr(
+            "bioetl.application.pipelines.chembl.publication_transformer.build_publication_type_classification_payload",
+            _raise_runtime_error,
+        )
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["publication_type_raw"] == "PUBLICATION"
+        assert result["publication_type"] == "journal-article"
+        assert result["publication_type_unified"] is None
+        assert result["publication_subclass"] is None
+        assert result["publication_class"] is None
+
+    @pytest.mark.asyncio
     async def test_transform_release_metadata_and_invalid_citations(
         self, transformer, mock_context
     ):

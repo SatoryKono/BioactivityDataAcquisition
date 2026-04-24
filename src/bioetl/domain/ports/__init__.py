@@ -128,7 +128,12 @@ from bioetl.domain.ports.runtime import (
     ShutdownPort,
     StageBreakpoint,
 )
-from bioetl.domain.ports.runtime.runner import PipelineCreateWithServicesRequest
+from bioetl.domain.ports.runtime.memory import MemoryDecisionTraceEntry
+from bioetl.domain.ports.runtime.runner import (
+    PipelineControlPlaneArtifacts,
+    PipelineCreateRunnerRequest,
+    PipelineCreateWithServicesRequest,
+)
 from bioetl.domain.ports.serialization import JsonEncoderPort
 from bioetl.domain.ports.storage import (
     BronzeStoragePort,
@@ -200,6 +205,7 @@ __all__ = [
     "LineageStorePort",
     "LockPort",
     "LoggerPort",
+    "MemoryDecisionTraceEntry",
     "MemoryMonitorPort",
     "MemoryStats",
     "MergedStoragePort",
@@ -212,6 +218,8 @@ __all__ = [
     "MetricsServerPort",
     "PiiHasherPort",
     "PipelineConfigLoaderPort",
+    "PipelineControlPlaneArtifacts",
+    "PipelineCreateRunnerRequest",
     "PipelineCreateWithServicesRequest",
     "PipelineDebugPort",
     "PipelineFactoryPort",
