@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
 from pathlib import Path
 
 import click
 
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.factories.services.port_factories import create_metrics
+from bioetl.domain.context import current_utc_time
 from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecyclePlan,
     ControlPlaneArtifactLifecyclePolicy,
@@ -97,7 +97,7 @@ def control_plane_lifecycle_command(
     dry_run = not apply_mode
     policy = ControlPlaneArtifactLifecyclePolicy(
         retention_days=retention_days,
-        now=datetime.now(UTC),
+        now=current_utc_time(),
         protected_manifest_ids=frozenset(protected_manifest_id),
         protected_run_ids=frozenset(protected_run_id),
         protected_effective_config_artifact_ids=frozenset(

@@ -11,7 +11,6 @@ Note:
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import uuid4
@@ -23,6 +22,7 @@ from bioetl.composition.factories.storage.resilience import (
     create_silver_atomic_retry_policy,
     create_silver_merge_resilience_policy,
 )
+from bioetl.domain.context import current_utc_time
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import Settings, get_settings
@@ -66,7 +66,7 @@ def _create_composite_metadata_services(
     run_context = RunContext(
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
-        started_at=datetime.now(UTC),
+        started_at=current_utc_time(),
         pipeline_name="composite",
         provider="composite",
         entity="merged",
