@@ -6,6 +6,7 @@ Source: ChEMBL REST API, table cell_dictionary.
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -56,9 +57,9 @@ class CellLineSchema(ETLRecordSchema):
         nullable=True,
         description="Source organism (e.g., Homo sapiens).",
     )
-    cell_source_taxonomy_id: Series[float] | None = pa.Field(
+    cell_source_taxonomy_id: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
-        description="NCBI Taxonomy ID for source organism (nullable int).",
+        description="NCBI Taxonomy ID for source organism.",
     )
 
     # === Cell Type Classification ===

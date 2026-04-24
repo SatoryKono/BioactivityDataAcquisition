@@ -273,6 +273,13 @@ The same rule applies to replay-facing composite/admin/public execution
 results: `completed_at` must be derived from the captured `started_at` anchor
 plus monotonic duration, rather than sampled again from a later wall clock.
 
+For runtime/admin helper services that must mint point-in-time metadata
+(`RunManifestService`, preflight health aggregation, postrun metadata writes,
+checkpoint seed state), composition is expected to inject a `ClockPort`
+implementation. Compatibility-only call paths may carry the deterministic
+`MISSING_RUNTIME_TIMESTAMP` sentinel, but targeted observability flows must not
+fall back to a fresh local wall-clock sample.
+
 ## Interaction Diagram
 
 ```mermaid

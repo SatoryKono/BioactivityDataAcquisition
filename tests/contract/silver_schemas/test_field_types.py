@@ -250,7 +250,13 @@ class TestFieldTypes:
         "schema_name,guard_fields",
         [
             ("chembl_activity", {"manual_curation_flag"}),
+            (
+                "chembl_assay",
+                {"assay_taxonomy_id", "src_id", "variant_taxonomy_id"},
+            ),
+            ("chembl_cell_line", {"cell_source_taxonomy_id"}),
             ("chembl_publication", {"src_id"}),
+            ("chembl_target", {"taxonomy_id"}),
             ("pubmed_publication", {"pub_month", "pub_day", "author_count"}),
             (
                 "semanticscholar_publication",

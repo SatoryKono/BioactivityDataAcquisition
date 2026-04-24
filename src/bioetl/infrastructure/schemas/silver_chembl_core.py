@@ -138,7 +138,7 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("target_id", pa.string(), nullable=False),
         pa.field("target_organism", pa.string(), nullable=False),
         pa.field("target_pref_name", pa.string()),
-        pa.field("target_taxonomy_id", pa.float64(), nullable=False),
+        pa.field("target_taxonomy_id", pa.int64(), nullable=False),
         pa.field("text_value", pa.string()),
         pa.field("toid", pa.float64()),  # Float for nullable int (Pandas convention)
         pa.field("type", pa.string()),
@@ -178,7 +178,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("assay_pref_name", pa.string()),
         pa.field("assay_strain", pa.string()),
         pa.field("assay_subcellular_fraction", pa.string()),
-        pa.field("assay_taxonomy_id", pa.float64()),
+        pa.field("assay_taxonomy_id", pa.int64()),
         pa.field("assay_test_type", pa.string()),
         pa.field("assay_tissue", pa.string()),
         pa.field("assay_type", pa.string(), nullable=False),
@@ -204,7 +204,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("variant_organism", pa.string()),
         pa.field("variant_sequence", pa.string()),
         pa.field("variant_sequence_json", pa.string()),  # Forensic: original JSON
-        pa.field("variant_taxonomy_id", pa.float64()),
+        pa.field("variant_taxonomy_id", pa.int64()),
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),
         pa.field("_dq_warn", pa.bool_()),
@@ -242,7 +242,7 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("target_components", pa.string()),
         pa.field("target_id", pa.string(), nullable=False),
         pa.field("target_type", pa.string()),
-        pa.field("taxonomy_id", pa.float64()),
+        pa.field("taxonomy_id", pa.int64()),
         # Note: protein_classifications not available in /target endpoint
         # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
         # === DQ_FIELDS_SUFFIX ===
@@ -302,8 +302,10 @@ CHEMBL_CELL_LINE_SCHEMA = pa.schema(
             "cell_source_taxonomy_id", pa.int64()
         ),  # Standardized name (was cell_source_tax_id)
         pa.field("cell_source_tissue", pa.string()),
+        pa.field("cell_type", pa.string()),
         # External identifiers
         pa.field("cellosaurus_id", pa.string()),
+        pa.field("clo_id", pa.string()),
         pa.field("cl_lincs_id", pa.string()),
         pa.field("efo_id", pa.string()),
         pa.field("_dq_error", pa.bool_()),

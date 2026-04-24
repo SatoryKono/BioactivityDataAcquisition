@@ -23,6 +23,7 @@ INT_FIELDS = frozenset(
         "src_id",
         "record_id",
         "publication_year",
+        "target_taxonomy_id",
     }
 )
 FLOAT_FIELDS = frozenset(
@@ -38,7 +39,6 @@ FLOAT_FIELDS = frozenset(
         "ligand_efficiency_le",
         "ligand_efficiency_lle",
         "ligand_efficiency_sei",
-        "target_taxonomy_id",
     }
 )
 META_FIELDS = frozenset(
