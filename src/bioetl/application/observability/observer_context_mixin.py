@@ -5,6 +5,7 @@ from __future__ import annotations
 import time
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, Self
+from uuid import UUID
 
 from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
 from bioetl.domain.aggregates.events import (
@@ -14,6 +15,7 @@ from bioetl.domain.aggregates.events import (
 )
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
+from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -33,10 +35,12 @@ if TYPE_CHECKING:
             event_name: str,
             *,
             severity: str,
-            **context: Any,
+            **context: Any,  # Any: event payload keys vary across lifecycle/domain emissions
         ) -> None: ...
 
-        def emit_domain_event(self, event: object, *, phase: object | None = None) -> None: ...
+        def emit_domain_event(
+            self, event: object, *, phase: object | None = None
+        ) -> None: ...
 
 else:
     from bioetl.application.observability.observer_event_mixin import (
@@ -62,6 +66,10 @@ class _ObserverContextManagerMixin(_ObserverEventMixinBase):
     _terminal_records_processed: int
     _metrics: MetricsPort
     _tracer: TracingPort | None
+
+    def _domain_run_id(self) -> RunID:
+        """Coerce the observer's string run id into the domain RunID type."""
+        return RunID(UUID(self.run_id))
 
     def __enter__(self) -> Self:
         """Start observation (Span + Log + Metric)."""
@@ -186,7 +194,7 @@ class _ObserverContextManagerMixin(_ObserverEventMixinBase):
                         self.wall_start_time,
                         duration,
                     ),
-                    run_id=self.run_id,
+                    run_id=self._domain_run_id(),
                     pipeline_name=self.pipeline_name,
                     failed_stage="unknown",
                     error=str(exc_val),
@@ -202,7 +210,7 @@ class _ObserverContextManagerMixin(_ObserverEventMixinBase):
                         self.wall_start_time,
                         duration,
                     ),
-                    run_id=self.run_id,
+                    run_id=self._domain_run_id(),
                     pipeline_name=self.pipeline_name,
                     records_processed=self._terminal_records_processed,
                 ),
@@ -215,7 +223,7 @@ class _ObserverContextManagerMixin(_ObserverEventMixinBase):
                     self.wall_start_time,
                     duration,
                 ),
-                run_id=self.run_id,
+                run_id=self._domain_run_id(),
                 pipeline_name=self.pipeline_name,
                 records_processed=self._terminal_records_processed,
                 duration_seconds=duration,

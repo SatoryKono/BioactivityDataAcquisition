@@ -24,13 +24,6 @@ from __future__ import annotations
 from importlib import import_module
 from types import ModuleType
 
-from bioetl.composition.registry import (
-    PipelineDefinition,
-    PipelineRegistry,
-    create_registry,
-)
-from bioetl.composition.registry_default import get_default_registry
-
 _LAZY_MODULE_EXPORTS: dict[str, str] = {
     "bootstrap": "bioetl.composition.bootstrap",
     "composite_api": "bioetl.composition.composite_api",
@@ -45,6 +38,15 @@ _LAZY_MODULE_EXPORTS: dict[str, str] = {
     "resource_management_api": "bioetl.composition.resource_management_api",
     "services_api": "bioetl.composition.services_api",
     "types": "bioetl.composition.types",
+}
+_LAZY_ATTR_EXPORTS: dict[str, tuple[str, str]] = {
+    "PipelineDefinition": ("bioetl.composition.registry", "PipelineDefinition"),
+    "PipelineRegistry": ("bioetl.composition.registry", "PipelineRegistry"),
+    "create_registry": ("bioetl.composition.registry", "create_registry"),
+    "get_default_registry": (
+        "bioetl.composition.registry_default",
+        "get_default_registry",
+    ),
 }
 
 __all__ = [
@@ -68,16 +70,22 @@ __all__ = [
 ]
 
 
-def __getattr__(name: str) -> ModuleType:
-    """Lazily expose composition public submodules for patch/import stability."""
-    try:
-        module_name = _LAZY_MODULE_EXPORTS[name]
-    except KeyError as exc:  # pragma: no cover - standard attribute path
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from exc
+def __getattr__(name: str) -> object:
+    """Lazily expose composition modules and registry helpers."""
+    module_name = _LAZY_MODULE_EXPORTS.get(name)
+    if module_name is not None:
+        module: ModuleType = import_module(module_name)
+        globals()[name] = module
+        return module
 
-    module = import_module(module_name)
-    globals()[name] = module
-    return module
+    attr_target = _LAZY_ATTR_EXPORTS.get(name)
+    if attr_target is not None:
+        target_module_name, attr_name = attr_target
+        value = getattr(import_module(target_module_name), attr_name)
+        globals()[name] = value
+        return value
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def __dir__() -> list[str]:

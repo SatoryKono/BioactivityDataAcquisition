@@ -55,14 +55,14 @@ def resolve_required_artifact_lineage_layers(
 ) -> tuple[tuple[str, ...], tuple[str, ...]]:
     """Return active layers and layers missing metadata-sidecar persistence."""
     if yaml_config is None:
-        active_layers = tuple(
+        default_active_layers = tuple(
             layer
             for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS
             if not (layer == "gold" and skip_gold)
         )
-        return active_layers, active_layers
+        return default_active_layers, default_active_layers
     sink_mapping = _coerce_sink_layer_mapping(yaml_config)
-    active_layers: list[str] = []
+    active_layer_names: list[str] = []
     missing_lineage_layers: list[str] = []
     for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS:
         if layer == "gold" and skip_gold:
@@ -70,10 +70,10 @@ def resolve_required_artifact_lineage_layers(
         layer_config = sink_mapping.get(layer)
         if not _is_sink_layer_enabled(layer_config):
             continue
-        active_layers.append(layer)
+        active_layer_names.append(layer)
         if not _has_lineage_sidecar_persistence(layer_config):
             missing_lineage_layers.append(layer)
-    return tuple(active_layers), tuple(missing_lineage_layers)
+    return tuple(active_layer_names), tuple(missing_lineage_layers)
 
 
 def validate_required_persistence_profile(
@@ -168,12 +168,9 @@ def bind_manifest_logger_context(
     if rebound_observability is observability:
         return inputs
     if isinstance(inputs, _RunnerInputs):
-        return cast(
-            _RunnerInputs,
-            replace(
-                inputs,
-                observability=cast("ObservabilityBundle", rebound_observability),
-            ),
+        return replace(
+            inputs,
+            observability=cast(ObservabilityBundle, rebound_observability),
         )
     return inputs
 

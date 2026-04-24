@@ -219,6 +219,7 @@ class SilverWriterFinalizationCompatibilityMixin:
         """Preserve legacy mocked behavior expected by older unit tests."""
         from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
+        start_perf = time.perf_counter()
         delta_version = await self._get_delta_version(table_path)
         dq_metrics = await self._compute_dq_metrics(table_name, records)
         await self._write_silver_metadata(

@@ -2,6 +2,9 @@
 set -euo pipefail
 
 SCRIPT_PATH="${BASH_SOURCE[0]}"
+if command -v cygpath >/dev/null 2>&1 && [[ "$SCRIPT_PATH" =~ ^[A-Za-z]:\\ ]]; then
+    SCRIPT_PATH="$(cygpath -u "$SCRIPT_PATH")"
+fi
 if command -v readlink >/dev/null 2>&1; then
     RESOLVED_SCRIPT_PATH="$(readlink -f "$SCRIPT_PATH" 2>/dev/null || true)"
     if [[ -n "$RESOLVED_SCRIPT_PATH" ]]; then

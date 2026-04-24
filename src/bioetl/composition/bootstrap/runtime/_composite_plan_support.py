@@ -4,25 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pydantic import ValidationError
 
-from bioetl.application.composite.runner_pkg import CompositePipelineRunner
 from bioetl.composition.bootstrap.runtime._composite_config_runtime_compat import (
     load_runtime_composite_config as _load_runtime_composite_config_impl,
-)
-from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-    bootstrap_runtime_basics as _bootstrap_runtime_basics_builder_impl,
-)
-from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-    build_runner_factories as _build_runner_factories_builder_impl,
-)
-from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-    build_support_services as _build_support_services_builder_impl,
-)
-from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-    create_composite_runner as _create_composite_runner_builder_impl,
 )
 from bioetl.infrastructure.config.composite_config_api import (
     load_composite_config as _load_composite_config_impl,
@@ -33,6 +20,7 @@ if TYPE_CHECKING:
 
     import polars as pl
 
+    from bioetl.application.composite.runner_pkg import CompositePipelineRunner
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
     from bioetl.composition.bootstrap.composite_infrastructure_context import (
@@ -65,12 +53,15 @@ def load_composite_config_impl(
     resolve_config_path_fn: Callable[[str], Path],
     validate_payload: Callable[[object], object],
 ) -> CompositeConfig:
-    return _load_runtime_composite_config_impl(
-        name,
-        resolve_config_path_fn=resolve_config_path_fn,
-        load_config_fn=_load_composite_config_impl,
-        validate_payload=validate_payload,
-        validation_error_cls=ValidationError,
+    return cast(
+        "CompositeConfig",
+        _load_runtime_composite_config_impl(
+            name,
+            resolve_config_path_fn=resolve_config_path_fn,
+            load_config_fn=_load_composite_config_impl,
+            validate_payload=validate_payload,
+            validation_error_cls=ValidationError,
+        ),
     )
 
 
@@ -85,15 +76,22 @@ def bootstrap_runtime_basics_impl(
     lock_factory: type[object],
     uuid_factory: Callable[[], object],
 ) -> CompositeInfrastructureContext:
-    return _bootstrap_runtime_basics_builder_impl(
-        config=config,
-        run_id=run_id,
-        settings_provider=settings_provider,
-        logger_bootstrapper=logger_bootstrapper,
-        tracer_bootstrapper=tracer_bootstrapper,
-        storage_bootstrapper=storage_bootstrapper,
-        lock_factory=lock_factory,
-        uuid_factory=uuid_factory,
+    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
+        bootstrap_runtime_basics as _bootstrap_runtime_basics_builder_impl,
+    )
+
+    return cast(
+        "CompositeInfrastructureContext",
+        _bootstrap_runtime_basics_builder_impl(
+            config=config,
+            run_id=run_id,
+            settings_provider=settings_provider,
+            logger_bootstrapper=logger_bootstrapper,
+            tracer_bootstrapper=tracer_bootstrapper,
+            storage_bootstrapper=storage_bootstrapper,
+            lock_factory=lock_factory,
+            uuid_factory=uuid_factory,
+        ),
     )
 
 
@@ -111,14 +109,25 @@ def build_runner_factories_impl(
     Callable[[str, pl.DataFrame], PipelineRunner],
     Callable[[str, pl.DataFrame], PipelineRunner],
 ]:
-    return _build_runner_factories_builder_impl(
-        config=config,
-        runtime=runtime,
-        logger=logger,
-        runner_factory_builder_cls=runner_factory_builder_cls,
-        filter_extraction_service_cls=filter_extraction_service_cls,
-        pipeline_runner_builder=pipeline_runner_builder,
-        resolve_bronze_opts_fn=resolve_bronze_opts_fn,
+    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
+        build_runner_factories as _build_runner_factories_builder_impl,
+    )
+
+    return cast(
+        tuple[
+            Callable[[], PipelineRunner],
+            Callable[[str, pl.DataFrame], PipelineRunner],
+            Callable[[str, pl.DataFrame], PipelineRunner],
+        ],
+        _build_runner_factories_builder_impl(
+            config=config,
+            runtime=runtime,
+            logger=logger,
+            runner_factory_builder_cls=runner_factory_builder_cls,
+            filter_extraction_service_cls=filter_extraction_service_cls,
+            pipeline_runner_builder=pipeline_runner_builder,
+            resolve_bronze_opts_fn=resolve_bronze_opts_fn,
+        ),
     )
 
 
@@ -132,14 +141,21 @@ def build_support_services_impl(
     load_field_group_registry_fn: Callable[..., object],
     create_dq_report_service_fn: Callable[..., object],
 ) -> CompositeSupportServices:
-    return _build_support_services_builder_impl(
-        config=config,
-        runtime=runtime,
-        infra_context=infra_context,
-        support_services_factory_cls=support_services_factory_cls,
-        resolve_gold_schema_fn=resolve_gold_schema_fn,
-        load_field_group_registry_fn=load_field_group_registry_fn,
-        create_dq_report_service_fn=create_dq_report_service_fn,
+    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
+        build_support_services as _build_support_services_builder_impl,
+    )
+
+    return cast(
+        "CompositeSupportServices",
+        _build_support_services_builder_impl(
+            config=config,
+            runtime=runtime,
+            infra_context=infra_context,
+            support_services_factory_cls=support_services_factory_cls,
+            resolve_gold_schema_fn=resolve_gold_schema_fn,
+            load_field_group_registry_fn=load_field_group_registry_fn,
+            create_dq_report_service_fn=create_dq_report_service_fn,
+        ),
     )
 
 
@@ -192,17 +208,24 @@ def create_composite_runner_from_plan_impl(
     plan: CompositeBootstrapPlan,
     runner_factory: Callable[..., CompositePipelineRunner],
 ) -> CompositePipelineRunner:
-    return _create_composite_runner_builder_impl(
-        config=config,
-        runtime=runtime,
-        run_id=plan.run_id,
-        logger=plan.logger,
-        metrics=plan.metrics,
-        tracer=plan.tracer,
-        lock=plan.lock,
-        seed_runner_factory=plan.seed_runner_factory,
-        dependencies_runner_factory=plan.dependencies_runner_factory,
-        enricher_runner_factory=plan.enricher_runner_factory,
-        support_services=plan.support_services,
-        runner_factory=runner_factory,
+    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
+        create_composite_runner as _create_composite_runner_builder_impl,
+    )
+
+    return cast(
+        "CompositePipelineRunner",
+        _create_composite_runner_builder_impl(
+            config=config,
+            runtime=runtime,
+            run_id=plan.run_id,
+            logger=plan.logger,
+            metrics=plan.metrics,
+            tracer=plan.tracer,
+            lock=plan.lock,
+            seed_runner_factory=plan.seed_runner_factory,
+            dependencies_runner_factory=plan.dependencies_runner_factory,
+            enricher_runner_factory=plan.enricher_runner_factory,
+            support_services=plan.support_services,
+            runner_factory=runner_factory,
+        ),
     )

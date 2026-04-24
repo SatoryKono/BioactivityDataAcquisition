@@ -52,7 +52,8 @@ class PublicationEntityBase(BaseEntity):
         publication_date: Publication date (ISO format: YYYY-MM-DD).
         citations_received: Number of citations TO this publication (unified field name).
         citations_made: Number of references FROM this publication (unified field name).
-        publication_type: Raw provider type string (preserved for forensic/debug).
+        publication_type: Canonical publication type used by Silver/Gold contracts.
+        publication_type_raw: Raw provider type string retained for forensic/debug.
         publication_type_unified: Unified type Level 3 (e.g. "Journal Article").
         publication_subclass: Unified type Level 2 (e.g. "Original Experimental Data").
         publication_class: Unified type Level 1 ("EXP", "REV", or "PEER").
@@ -107,7 +108,8 @@ class PublicationEntityBase(BaseEntity):
     citations_made: int | None = None  # Number of references FROM this publication
 
     # Classification
-    publication_type: str | None = None  # Raw provider type (forensic/debug)
+    publication_type: str | None = None  # Canonical publication type enum
+    publication_type_raw: str | None = None  # Raw provider type (forensic/debug)
     publication_type_unified: str | None = None  # Level 3: "Journal Article", etc.
     publication_subclass: str | None = (
         None  # Level 2: "Original Experimental Data", etc.

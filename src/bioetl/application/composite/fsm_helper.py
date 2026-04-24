@@ -60,22 +60,7 @@ def _resolve_resume_phase(
 
 
 class FSMStateHelperService:
-    """Helper for FSM state transitions and logging.
-
-    Provides methods for:
-    - Validating FSM state transitions
-    - Logging state transitions
-    - Handling resume from failed state
-    - Logging resume context
-
-    This class extracts the FSM-related logic from CompositePipelineRunner
-    to reduce file size and improve testability.
-
-    Attributes:
-        config: Composite pipeline configuration.
-        logger: Structured logger.
-        run_id: Run identifier.
-    """
+    """FSM transition, resume, and logging helper for composite execution."""
 
     def __init__(
         self,
@@ -83,13 +68,7 @@ class FSMStateHelperService:
         logger: LoggerPort,
         run_id: str,
     ) -> None:
-        """Initialize FSM helper.
-
-        Args:
-            config: Composite pipeline configuration.
-            logger: Structured logger for observability.
-            run_id: Run identifier for correlation.
-        """
+        """Initialize the FSM helper."""
         self._config = config
         self._logger = logger
         self._run_id = run_id
@@ -125,24 +104,7 @@ class FSMStateHelperService:
         to_state: CompositePipelineState,
         allow_resume: bool = False,
     ) -> bool:
-        """Validate FSM state transition and log warning if invalid.
-
-        This method validates transitions according to FSM rules. Invalid transitions
-        are logged as warnings rather than raising exceptions to avoid breaking
-        pipeline execution. This is primarily a debug/development safety net.
-
-        Args:
-            from_state: Current FSM state.
-            to_state: Target FSM state.
-            allow_resume: If True, allows transitions from FAILED state (for resume).
-
-        Returns:
-            True if transition is valid, False otherwise.
-
-        Note:
-            When allow_resume=True, transitions from FAILED to any resumable state
-            are permitted. This is needed for resume-from-failed functionality.
-        """
+        """Validate an FSM state transition and warn instead of failing hard."""
         from bioetl.domain.composite.state import CompositePipelineState
 
         if allow_resume and from_state == CompositePipelineState.FAILED:
@@ -175,15 +137,7 @@ class FSMStateHelperService:
         *,
         clock: ClockPort | None = None,
     ) -> CompositeCheckpointState:
-        """Map FAILED checkpoint state to the correct resume FSM phase.
-
-        Args:
-            state: Current checkpoint state loaded from the previous failed run.
-
-        Returns:
-            Updated CompositeCheckpointState with the appropriate resume FSM phase
-            (NOT_STARTED, ENRICHING, or ENRICHMENT_COMPLETED) based on prior progress.
-        """
+        """Map FAILED checkpoint state to the correct resume FSM phase."""
         total_enrichers = len(self._config.enrichers)
         completed_count = len(state.completed_enrichers)
         resume_plan = _resolve_resume_phase(
@@ -219,14 +173,7 @@ class FSMStateHelperService:
         return state.with_state(resume_phase, clock=clock)
 
     def log_resume_context(self, state: CompositeCheckpointState) -> None:
-        """Log detailed resume context when resuming from checkpoint.
-
-        Provides visibility into what was completed previously and what
-        will be executed in this run.
-
-        Args:
-            state: Current checkpoint state being resumed from.
-        """
+        """Log the detailed resume context for a checkpoint-backed restart."""
         total_enrichers = len(self._config.enrichers)
         completed_count = len(state.completed_enrichers)
         remaining_count = total_enrichers - completed_count

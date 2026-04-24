@@ -765,6 +765,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a legacy wrapper delegating to the canonical engineering QA terminology linter; remove once historical src/tools wrapper references are retired."
     },
+    "scripts/qa/lint_terminology.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a legacy wrapper delegating to the canonical engineering QA terminology linter; remove once historical scripts/qa entrypoints are retired."
+    },
     "src/tools/scripts/validate_unified_configs.py": {
       "owner": "@bioetl-architecture",
       "decision": "compatibility_wrapper",

@@ -206,12 +206,19 @@ class PublicationTransformer(BaseChemblTransformer):
         raw_publication_type_value = (
             str(raw_publication_type) if raw_publication_type is not None else None
         )
-        data.update(
-            build_publication_type_classification_payload(
+        try:
+            classification_payload = build_publication_type_classification_payload(
                 "chembl",
                 raw_type=raw_publication_type_value,
             )
-        )
+        except RuntimeError:
+            classification_payload = {
+                "publication_type_raw": raw_publication_type_value,
+                "publication_type_unified": None,
+                "publication_subclass": None,
+                "publication_class": None,
+            }
+        data.update(classification_payload)
         data["publication_type"] = normalize_publication_type(
             raw_publication_type_value
         )

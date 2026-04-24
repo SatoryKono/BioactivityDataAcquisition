@@ -329,6 +329,14 @@ providers:
 entity_test_ownership:
   composite.activity:
     - tests/unit/application/composite/test_composite_activity.py
+  composite.assay:
+    - tests/e2e/test_chembl_assay_e2e.py
+  composite.molecule:
+    - tests/integration/composite/test_molecule_pipeline.py
+  composite.publication:
+    - tests/unit/application/composite/test_publication_schema_columns.py
+  composite.target:
+    - tests/unit/composition/bootstrap/runtime/test_composite_helpers.py
   chembl.activity:
     - tests/integration/pipelines/test_chembl_activity.py
   chembl.assay:

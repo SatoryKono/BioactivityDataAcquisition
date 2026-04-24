@@ -140,26 +140,32 @@ if (( ${#DIR_TARGETS[@]} > 0 )); then
   mapfile -t DIR_TARGETS < <(printf '%s\n' "${DIR_TARGETS[@]}" | sort -u)
 fi
 
-dir_size_bytes=0
-for path in "${DIR_TARGETS[@]}"; do
-  size="$(safe_dir_size_bytes "$path")"
-  dir_size_bytes=$((dir_size_bytes + size))
-done
-
-file_size_bytes=0
-for path in "${FILE_TARGETS[@]}"; do
-  size="$(safe_file_size_bytes "$path")"
-  file_size_bytes=$((file_size_bytes + size))
-done
-
 total_targets=$(( ${#DIR_TARGETS[@]} + ${#FILE_TARGETS[@]} ))
-total_size_bytes=$(( dir_size_bytes + file_size_bytes ))
+total_size_bytes=0
+size_summary="skipped (non-dry-run)"
+
+if [[ "$DRY_RUN" == "true" ]]; then
+  dir_size_bytes=0
+  for path in "${DIR_TARGETS[@]}"; do
+    size="$(safe_dir_size_bytes "$path")"
+    dir_size_bytes=$((dir_size_bytes + size))
+  done
+
+  file_size_bytes=0
+  for path in "${FILE_TARGETS[@]}"; do
+    size="$(safe_file_size_bytes "$path")"
+    file_size_bytes=$((file_size_bytes + size))
+  done
+
+  total_size_bytes=$(( dir_size_bytes + file_size_bytes ))
+  size_summary="$(format_bytes "$total_size_bytes") (${total_size_bytes} bytes)"
+fi
 
 echo "Preflight cleanup targets:"
 echo "  Directories: ${#DIR_TARGETS[@]}"
 echo "  Files:       ${#FILE_TARGETS[@]}"
 echo "  Total:       ${total_targets}"
-echo "  Size:        $(format_bytes "$total_size_bytes") (${total_size_bytes} bytes)"
+echo "  Size:        ${size_summary}"
 
 if [[ "$DRY_RUN" == "true" ]]; then
   echo
@@ -176,19 +182,23 @@ if [[ "$DRY_RUN" == "true" ]]; then
 fi
 
 if (( ${#DIR_TARGETS[@]} > 0 )); then
-  for path in "${DIR_TARGETS[@]}"; do
-    if ! rm -rf -- "$path" 2>/dev/null; then
-      echo "[preflight_cleanup][warn] Could not remove directory: $path" >&2
-    fi
-  done
+  if ! rm -rf -- "${DIR_TARGETS[@]}" 2>/dev/null; then
+    for path in "${DIR_TARGETS[@]}"; do
+      if ! rm -rf -- "$path" 2>/dev/null; then
+        echo "[preflight_cleanup][warn] Could not remove directory: $path" >&2
+      fi
+    done
+  fi
 fi
 
 if (( ${#FILE_TARGETS[@]} > 0 )); then
-  for path in "${FILE_TARGETS[@]}"; do
-    if ! rm -f -- "$path" 2>/dev/null; then
-      echo "[preflight_cleanup][warn] Could not remove file: $path" >&2
-    fi
-  done
+  if ! rm -f -- "${FILE_TARGETS[@]}" 2>/dev/null; then
+    for path in "${FILE_TARGETS[@]}"; do
+      if ! rm -f -- "$path" 2>/dev/null; then
+        echo "[preflight_cleanup][warn] Could not remove file: $path" >&2
+      fi
+    done
+  fi
 fi
 
 echo "Cleanup complete. Removed ${total_targets} targets."

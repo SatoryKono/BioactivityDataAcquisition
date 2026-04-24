@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core._record_normalization_hash_support import (
     RecordNormalizationHashSupportMixin,
+    _NormalizationProfileLike,
 )
 from bioetl.application.core.config import ContentHashPolicyByVersion
 from bioetl.application.core.normalization_fallbacks import (
@@ -23,7 +24,6 @@ from bioetl.domain.normalization.json import (
 )
 from bioetl.domain.normalization.profiles import (
     FieldRule,
-    NormalizationProfile,
     resolve_normalization_profile,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
@@ -61,7 +61,7 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
 
     provider: str
     entity_type: str | None = None
-    profile: NormalizationProfile | None = None
+    profile: _NormalizationProfileLike | None = None
     rule_set: NormalizationRulesPolicy = field(default_factory=NormalizationRulesPolicy)
     allow_compatibility_fallback: bool = False
     content_hash_include_fields: frozenset[str] = frozenset()
@@ -82,7 +82,11 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
             self.entity_type,
         )
         if resolved_profile is not None:
-            object.__setattr__(self, "profile", resolved_profile)
+            object.__setattr__(
+                self,
+                "profile",
+                cast(_NormalizationProfileLike, resolved_profile),
+            )
 
     def normalize_record(self, record: JsonDict) -> JsonDict:
         """Apply deterministic normalization to one transformed Silver record."""

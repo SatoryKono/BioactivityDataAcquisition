@@ -114,16 +114,12 @@ def _normalize_sequence(value: list[object] | tuple[object, ...]) -> list[object
 
 
 def _to_canonical_jsonable(value: object) -> object:
-    if isinstance(value, datetime):
-        return value.isoformat()
-    if isinstance(value, date):
+    if isinstance(value, (datetime, date)):
         return value.isoformat()
     if isinstance(value, Enum):
         return value.value
     if isinstance(value, Mapping):
         return _normalize_mapping(value)
-    if isinstance(value, list):
-        return _normalize_sequence(value)
-    if isinstance(value, tuple):
+    if isinstance(value, (list, tuple)):
         return _normalize_sequence(value)
     return value

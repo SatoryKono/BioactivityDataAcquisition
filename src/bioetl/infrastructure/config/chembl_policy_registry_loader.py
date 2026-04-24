@@ -7,7 +7,7 @@ from typing import Any
 
 import yaml
 
-from bioetl.domain.normalization.profiles._chembl_policy_registry_data import (
+from bioetl.domain.normalization.profiles.chembl_policy_registry_data import (
     ChemblControlledVocabularyFamily,
     ChemblOntologyPolicyFamily,
     ChemblPolicyRegistryData,
@@ -56,7 +56,9 @@ class ChemblPolicyRegistryLoader:
         )
 
     @staticmethod
-    def _load_yaml(path: Path) -> dict[str, Any]:
+    def _load_yaml(
+        path: Path,
+    ) -> dict[str, Any]:  # Any: YAML scalar/sequence leaf types remain heterogeneous
         payload = yaml.safe_load(path.read_text(encoding="utf-8"))
         if not isinstance(payload, dict):
             raise TypeError(f"{path} must decode to a mapping; got {type(payload)!r}")

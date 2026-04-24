@@ -233,24 +233,22 @@ def _normalize_str_boolean(value: str) -> bool | None:
     return BINARY_FLAG_MAPPING.get(normalized.lower())
 
 
+_BOOLEAN_NORMALIZERS = {
+    bool: lambda value: value,
+    int: _normalize_int_boolean,
+    float: _normalize_float_boolean,
+    str: _normalize_str_boolean,
+}
+
+
 def normalize_boolean(
     value: Any,  # Any: Accepts various input types for boolean conversion
 ) -> bool | None:
     """Coerce common source-system boolean encodings to canonical bool."""
     if value is None:
         return None
-
-    if isinstance(value, bool):
-        return value
-    if isinstance(value, int):
-        return _normalize_int_boolean(value)
-    if isinstance(value, float):
-        return _normalize_float_boolean(value)
-
-    if isinstance(value, str):
-        return _normalize_str_boolean(value)
-
-    return None
+    normalizer = _BOOLEAN_NORMALIZERS.get(type(value))
+    return normalizer(value) if normalizer is not None else None
 
 
 def normalize_binary_flag(

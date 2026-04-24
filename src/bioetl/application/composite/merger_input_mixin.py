@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol
 
 import polars as pl
 
@@ -18,7 +18,18 @@ from bioetl.domain.composite.result import (
 from bioetl.domain.exceptions import BioETLError, StorageError
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import DeltaReaderPort, LoggerPort, MergedStoragePort
+    from bioetl.domain.ports import DeltaReaderPort, LoggerPort
+    from bioetl.domain.types import BronzeRecord
+
+
+class _MergeInputStoragePort(Protocol):
+    """Minimal storage contract required for merge-input loading."""
+
+    async def read_silver(
+        self,
+        table_name: str,
+        columns: list[str] | None = None,
+    ) -> list[BronzeRecord]: ...
 
 
 @dataclass(frozen=True)
@@ -35,7 +46,7 @@ class _MergeInputLoaderMixin:
 
     # Host-class attributes (set by MergeService.__init__)
     _logger: LoggerPort
-    _storage: MergedStoragePort
+    _storage: _MergeInputStoragePort
     _delta_reader: DeltaReaderPort | None
     _renamer: Any  # Any: Host MergeService injects runtime collaborator without importing infra implementation here.
     _config: Any  # Any: Host MergeService provides config object with richer surface than this mixin needs to declare.
@@ -143,7 +154,8 @@ class _MergeInputLoaderMixin:
         if self._delta_reader is not None:
             # Read using Delta Lake
             arrow_table = await self._delta_reader.read_table(table)
-            return pl.from_arrow(arrow_table)
+            frame = pl.from_arrow(arrow_table)
+            return frame.to_frame() if isinstance(frame, pl.Series) else frame
 
         # Check if storage fallback is disabled (for test compatibility)
         # If _silver_reader is explicitly set to None, disable storage fallback

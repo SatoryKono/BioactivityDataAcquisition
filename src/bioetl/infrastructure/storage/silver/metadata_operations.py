@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 from collections.abc import Awaitable, Callable, Sequence
 from datetime import datetime, timedelta
-from typing import Protocol, cast
+from typing import Protocol
 
 from deltalake import DeltaTable
 
@@ -128,7 +128,7 @@ def _build_silver_write_result(
 
 def _read_delta_version(table_path: str) -> int:
     """Read the current Delta table version synchronously."""
-    return cast(int, DeltaTable(table_path).version())
+    return DeltaTable(table_path).version()
 
 
 async def _resolve_silver_metadata_context(

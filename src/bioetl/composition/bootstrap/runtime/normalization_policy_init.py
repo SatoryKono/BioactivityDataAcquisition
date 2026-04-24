@@ -7,7 +7,7 @@ from pathlib import Path
 
 def initialize_chembl_policy_registry(configs_root: Path) -> None:
     """Load ChEMBL policy registries from configs and inject them into domain state."""
-    from bioetl.domain.normalization.profiles._chembl_policy_registry import (
+    from bioetl.domain.normalization.profiles.chembl_policy_registry import (
         initialize_chembl_policy_registry as initialize_domain_chembl_policy_registry,
     )
     from bioetl.infrastructure.config.chembl_policy_registry_loader import (

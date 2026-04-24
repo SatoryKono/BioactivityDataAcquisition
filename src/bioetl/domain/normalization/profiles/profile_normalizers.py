@@ -53,9 +53,9 @@ __all__ = [
     "normalize_profile_governed_uppercase_vocabulary",
     "normalize_profile_governed_vocabulary",
     "normalize_profile_int",
-    "normalize_profile_json_string_list_vocabulary_strict",
     "normalize_profile_isomeric_smiles",
     "normalize_profile_json_string",
+    "normalize_profile_json_string_list_vocabulary_strict",
     "normalize_profile_json_string_strict",
     "normalize_profile_null",
     "normalize_profile_ontology_id",
@@ -132,8 +132,24 @@ def normalize_profile_json_string_list_vocabulary_strict(
     allowed_values: frozenset[str],
 ) -> object:
     """Normalize one JSON-array string element-wise against a governed registry."""
+    parsed = _parse_json_string_list(value)
+    if parsed is None:
+        return None
+    normalized_values = [
+        _normalize_json_string_list_vocabulary_item(
+            item,
+            allowed_values=allowed_values,
+        )
+        for item in parsed
+    ]
+    if any(item is None for item in normalized_values):
+        return None
+    return serialize_json_canonical(normalized_values)
+
+
+def _parse_json_string_list(value: object) -> list[object] | None:
     if not isinstance(value, str):
-        return value
+        return None
     normalized = normalize_string(value)
     if normalized is None:
         return None
@@ -141,21 +157,20 @@ def normalize_profile_json_string_list_vocabulary_strict(
         parsed = deserialize_json_value(normalized)
     except ValueError:
         return None
-    if not isinstance(parsed, list):
-        return None
+    return parsed if isinstance(parsed, list) else None
 
-    normalized_values: list[str] = []
-    for item in parsed:
-        canonical = normalize_profile_governed_vocabulary(
-            item,
-            allowed_values=allowed_values,
-            preserve_unknown=False,
-        )
-        if not isinstance(canonical, str):
-            return None
-        normalized_values.append(canonical)
 
-    return serialize_json_canonical(normalized_values)
+def _normalize_json_string_list_vocabulary_item(
+    item: object,
+    *,
+    allowed_values: frozenset[str],
+) -> str | None:
+    canonical = normalize_profile_governed_vocabulary(
+        item,
+        allowed_values=allowed_values,
+        preserve_unknown=False,
+    )
+    return canonical if isinstance(canonical, str) else None
 
 
 def normalize_profile_null(value: object) -> object:

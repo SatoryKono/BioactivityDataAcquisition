@@ -1,16 +1,9 @@
-"""Bootstrap function for main pipeline execution.
-
-Contains the primary Composition Root entry point for creating
-a fully configured PipelineRunner ready for execution.
-
-This is the main entry point for runtime pipeline execution.
-CLI commands should use this via composition/entrypoints.py.
-"""
+"""Main composition-root bootstrap for runtime pipeline execution."""
 
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition import PipelineRegistry, create_registry
 from bioetl.composition.bootstrap.runtime.assembly import assemble_filter_config
@@ -64,19 +57,21 @@ def bootstrap_pipeline_runner(
     initialize_publication_type_classification(Path("configs"))
     effective_registry = registry if registry is not None else create_registry()
 
-    # Keep runtime bootstrap behind the registry facade while preserving
-    # deterministic explicit registration in this composition root.
+    # Keep runtime bootstrap behind the registry facade with deterministic registration.
     ensure_providers_loaded()
     if not effective_registry.list_pipelines():
         register_all_pipelines(registry=effective_registry)
 
-    return build_pipeline_runner(
-        ctx=ctx,
-        registry=effective_registry,
-        ensure_providers_loaded_fn=lambda: None,
-        register_all_pipelines_fn=lambda registry=None: None,
-        get_settings_fn=get_settings,
-        load_pipeline_config_fn=load_pipeline_config,
-        build_observability_bundle_fn=bootstrap_observability_bundle,
-        assemble_filter_config_fn=assemble_filter_config,
+    return cast(
+        "PipelineRunner",
+        build_pipeline_runner(
+            ctx=ctx,
+            registry=effective_registry,
+            ensure_providers_loaded_fn=lambda: None,
+            register_all_pipelines_fn=lambda registry=None: None,
+            get_settings_fn=get_settings,
+            load_pipeline_config_fn=load_pipeline_config,
+            build_observability_bundle_fn=bootstrap_observability_bundle,
+            assemble_filter_config_fn=assemble_filter_config,
+        ),
     )

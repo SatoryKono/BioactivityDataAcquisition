@@ -605,6 +605,26 @@ def test_chembl_publication_identifier_sidecars_stay_aligned_with_canonical_fiel
     assert normalized["publication_pmid"] == "12345"
 
 
+def test_chembl_publication_raw_type_sidecar_is_explicitly_profiled() -> None:
+    """Raw publication type must be an explicit chembl compatibility field."""
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="publication",
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "publication_id": "CHEMBL123",
+            "title": "Example publication",
+            "publication_type": "journal-article",
+            "publication_type_raw": "PUBLICATION",
+        }
+    )
+
+    assert normalized["publication_type"] == "journal-article"
+    assert normalized["publication_type_raw"] == "PUBLICATION"
+
+
 def test_chembl_activity_meta_passthrough_contract_is_aligned_across_profile_matrix_and_processor() -> (
     None
 ):

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal, cast
+from typing import TYPE_CHECKING, Literal
 
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.observability import ObservabilityBundle
@@ -105,13 +105,13 @@ def assemble_vacuum_settings(
     cli_vacuum: CliVacuumSettings,
     yaml_maintenance: MaintenanceConfig,
 ) -> ResolvedVacuumSettings:
-    return cast(
-        ResolvedVacuumSettings,
-        _assemble_vacuum_settings_impl(
-            cli_vacuum=cli_vacuum,
-            yaml_maintenance=yaml_maintenance,
-            result_cls=ResolvedVacuumSettings,
-        ),
+    enabled, retention_days = _assemble_vacuum_settings_impl(
+        cli_vacuum=cli_vacuum,
+        yaml_maintenance=yaml_maintenance,
+    )
+    return ResolvedVacuumSettings(
+        enabled=enabled,
+        retention_days=retention_days,
     )
 
 
@@ -157,12 +157,9 @@ def validate_pk_contract(config: PipelineYamlConfig) -> None:
 
 
 def resolve_health_check_mode(*, settings: Settings) -> Literal["strict", "probe"]:
-    return cast(
-        Literal["strict", "probe"],
-        _resolve_health_check_mode_policy(
-            settings=settings,
-            default_health_check_mode=_DEFAULT_HEALTH_CHECK_MODE,
-        ),
+    return _resolve_health_check_mode_policy(
+        settings=settings,
+        default_health_check_mode=_DEFAULT_HEALTH_CHECK_MODE,
     )
 
 

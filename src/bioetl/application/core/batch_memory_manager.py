@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports.runtime.memory import MemoryDecisionTraceEntry
+from bioetl.domain.ports import MemoryDecisionTraceEntry
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.normalization import (
@@ -14,6 +14,19 @@ if TYPE_CHECKING:
     from .run_manifest_inspection_service import RunManifestDiffEntry
 
 _OCCURRENCE_ONLY_DIFF_FIELDS = frozenset({"manifest_id", "run_id", "created_at"})
+
+
+class _CodeProvenanceLike(Protocol):
+    pipeline_version: str | None
+    config_hash: str | None
+    resolved_config_hash: str | None
+    effective_config_hash: str | None
+    dq_contract_compatibility_hash: str | None
+    git_commit: str | None
+    source_revision_state: str | None
+    contract_ref: str | None
+    contract_version: str | None
+    effective_config_artifact_id: str | None
 
 
 class RunManifestInspectionIdentityGraphMixin:
@@ -54,8 +67,10 @@ class RunManifestInspectionIdentityGraphMixin:
                 diagnostics,
             )
         )
-        degraded_runtime_anchor_payload = RunManifestInspectionIdentityGraphMixin._build_degraded_runtime_anchor_payload(
-            manifest
+        degraded_runtime_anchor_payload = (
+            RunManifestInspectionIdentityGraphMixin._build_degraded_runtime_anchor_payload(
+                manifest
+            )
         )
         return {
             **RunManifestInspectionIdentityGraphMixin._build_identity_graph_core(
@@ -97,23 +112,28 @@ class RunManifestInspectionIdentityGraphMixin:
         diagnostics: dict[str, object],
     ) -> dict[str, object]:
         """Return the canonical execution identity payload for inspection output."""
-        code_provenance = manifest.code_provenance
-        return build_execution_identity_payload(
-            pipeline_name=manifest.pipeline_name,
-            run_type=manifest.run_type.value,
-            pipeline_version=code_provenance.pipeline_version,
-            git_commit=code_provenance.git_commit,
-            effective_config_hash=code_provenance.effective_config_hash,
-            dq_contract_compatibility_hash=(
-                code_provenance.dq_contract_compatibility_hash
-            ),
-            contract_ref=code_provenance.contract_ref,
-            contract_version=code_provenance.contract_version,
-            effective_config_artifact_id=code_provenance.effective_config_artifact_id,
-            exact_replay=bool(manifest.launch_context.get("exact_replay")),
-            input_snapshot_fingerprint=cast(
-                "str | None",
-                diagnostics.get("input_snapshot_identity_fingerprint"),
+        code_provenance = cast(_CodeProvenanceLike, manifest.code_provenance)
+        return cast(
+            dict[str, object],
+            build_execution_identity_payload(
+                pipeline_name=manifest.pipeline_name,
+                run_type=manifest.run_type.value,
+                pipeline_version=code_provenance.pipeline_version,
+                git_commit=code_provenance.git_commit,
+                effective_config_hash=code_provenance.effective_config_hash,
+                dq_contract_compatibility_hash=(
+                    code_provenance.dq_contract_compatibility_hash
+                ),
+                contract_ref=code_provenance.contract_ref,
+                contract_version=code_provenance.contract_version,
+                effective_config_artifact_id=(
+                    code_provenance.effective_config_artifact_id
+                ),
+                exact_replay=bool(manifest.launch_context.get("exact_replay")),
+                input_snapshot_fingerprint=cast(
+                    "str | None",
+                    diagnostics.get("input_snapshot_identity_fingerprint"),
+                ),
             ),
         )
 
@@ -122,7 +142,7 @@ class RunManifestInspectionIdentityGraphMixin:
         manifest: RunManifest,
     ) -> dict[str, object]:
         """Return the fallback runtime anchor payload for inspection output."""
-        code_provenance = manifest.code_provenance
+        code_provenance = cast(_CodeProvenanceLike, manifest.code_provenance)
         return {
             key: value
             for key, value in {
@@ -142,7 +162,7 @@ class RunManifestInspectionIdentityGraphMixin:
         manifest: RunManifest,
         diagnostics: dict[str, object],
         *,
-        code_provenance: object,
+        code_provenance: _CodeProvenanceLike,
     ) -> dict[str, object]:
         """Return the provenance and contract section of the identity graph."""
         return {

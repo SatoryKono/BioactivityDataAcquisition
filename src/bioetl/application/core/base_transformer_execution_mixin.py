@@ -18,6 +18,7 @@ from bioetl.application.core._base_transformer_structural_support import (
     evaluate_semantic_shadow_decision,
     record_structural_policy_metrics,
 )
+from bioetl.application.core._span_helpers import _ClosableSpan
 from bioetl.application.core.base_transformer.errors import (
     TransformationError,
 )
@@ -35,7 +36,7 @@ class _BaseTransformerExecutionMixin:
         self,
         context: PipelineContext,
         index: int,
-    ) -> object:  # Any: OpenTelemetry span type is dynamic
+    ) -> _ClosableSpan:
         """Create and enter an OpenTelemetry span for record transformation."""
         return start_transform_span(
             cast("TransformerExecutionOwner", self), context, index
@@ -93,7 +94,7 @@ class _BaseTransformerExecutionMixin:
         self,
         error: TransformationError,
         context: PipelineContext,
-        span: object,  # Any: OpenTelemetry span type is dynamic
+        span: _ClosableSpan,
     ) -> str:
         """Log and annotate span for transformation errors."""
         return handle_transformation_error(
@@ -107,7 +108,7 @@ class _BaseTransformerExecutionMixin:
         self,
         error: ValueError,
         context: PipelineContext,
-        span: object,  # Any: OpenTelemetry span type is dynamic
+        span: _ClosableSpan,
     ) -> str:
         """Log and annotate span for validation errors."""
         return handle_validation_error(
@@ -121,7 +122,7 @@ class _BaseTransformerExecutionMixin:
         self,
         start_time: float,
         error_type: str | None,
-        span: object,  # Any: OpenTelemetry span type is dynamic
+        span: _ClosableSpan,
     ) -> None:
         """Record transform duration/error metrics and close the OTEL span."""
         record_metrics_and_close_span(

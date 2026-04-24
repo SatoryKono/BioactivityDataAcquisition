@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-24T15:54:25.551071+00:00",
+  "generated_at": "2026-04-24T16:45:00.895165+00:00",
   "summary": {
-    "total_scripts": 444,
+    "total_scripts": 445,
     "status_counts": {
       "active": 313,
       "legacy": 15,
-      "orphan": 103,
+      "orphan": 104,
       "unknown": 13
     },
     "reference_group_coverage": {
@@ -6587,13 +6587,13 @@
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 394,
+          "line": 398,
           "source_group": "scripts",
           "text": "if should_run_preflight && [[ -f \"scripts/engineering/dev/pretest_guardrails.sh\" ]]; then"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 397,
+          "line": 401,
           "source_group": "scripts",
           "text": "preflight_cmd=(bash scripts/engineering/dev/pretest_guardrails.sh --mode \"$preflight_mode\" --scope \"$preflight_scope\")"
         }
@@ -10223,19 +10223,19 @@
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 454,
+          "line": 458,
           "source_group": "scripts",
           "text": "if [[ -f \"scripts/ops/launchers/codex/setup_plugins.sh\" ]]; then"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 455,
+          "line": 459,
           "source_group": "scripts",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 459,
+          "line": 463,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
         },
@@ -11231,6 +11231,14 @@
           "text": "print(\"2. Implement the optimized test runner: python3 scripts/optimized_test_runner.py --list\")"
         }
       ]
+    },
+    {
+      "path": "scripts/qa/lint_terminology.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/schema/__main__.py",

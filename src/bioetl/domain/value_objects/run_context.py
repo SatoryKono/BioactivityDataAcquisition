@@ -9,7 +9,7 @@ Implements RULES.md §1 - Domain Layer value objects (frozen dataclass).
 
 from __future__ import annotations
 
-from dataclasses import dataclass, fields
+from dataclasses import dataclass
 from datetime import datetime
 from typing import cast
 

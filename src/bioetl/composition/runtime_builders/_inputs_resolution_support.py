@@ -8,6 +8,9 @@ from typing import TYPE_CHECKING, Literal, Protocol, cast
 
 from bioetl.domain.config import RuntimeConfig
 
+# Keep typing protocols imported at runtime because these helpers define them
+# in module scope and the Windows shared-drive bytecode cache can otherwise lag.
+
 if TYPE_CHECKING:
     from bioetl.composition.builders import FilterConfigBuilder
     from bioetl.composition.observability import ObservabilityBundle
@@ -64,8 +67,7 @@ def assemble_vacuum_settings_impl(
     *,
     cli_vacuum: CliVacuumSettings,
     yaml_maintenance: MaintenanceConfig,
-    result_cls: type[object],
-) -> object:
+) -> tuple[bool, int]:
     enabled = (
         cli_vacuum.enabled
         if cli_vacuum.enabled is not None
@@ -76,7 +78,7 @@ def assemble_vacuum_settings_impl(
         if cli_vacuum.enabled is not None
         else yaml_maintenance.vacuum_retention_days
     )
-    return result_cls(enabled=enabled, retention_days=retention)
+    return enabled, retention
 
 
 def assemble_runtime_config_impl(

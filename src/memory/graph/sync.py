@@ -9513,7 +9513,8 @@ def _claim_exact_candidates(normalized_token: str) -> tuple[NodeKey, ...]:
 def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
     path_pattern = _docs_path_pattern()
     command_pattern = _docs_command_pattern()
-    for source_node, source_path, text in _docs_drift_sources(snapshot, root):
+    config = _file_structure_config(_load_memory_mapping(root))
+    for source_node, source_path, text in _docs_drift_sources(snapshot, root, config):
         _add_doc_path_reference_edges(snapshot, source_node, text, path_pattern)
         _add_doc_command_reference_edges(snapshot, source_node, text, command_pattern)
         _add_doc_claim_edges(snapshot, source_node, source_path, text, path_pattern)
@@ -9695,17 +9696,25 @@ def _docs_command_pattern() -> re.Pattern[str]:
 def _docs_drift_sources(
     snapshot: GraphSnapshot,
     root: Path,
+    config: dict[str, object],
 ) -> Iterator[tuple[NodeKey, str, str]]:
+    cached_text: dict[str, str] = {}
     for node in tuple(snapshot.nodes.values()):
         if node.key.label not in _DOC_LIKE_LABELS:
             continue
         source_path = node.properties.get("source_path")
         if not isinstance(source_path, str):
             continue
+        if _is_excluded_file_structure_path(source_path, config):
+            continue
         doc_path = root / source_path
         if not doc_path.is_file():
             continue
-        yield node.key, source_path, _read_text(doc_path)
+        text = cached_text.get(source_path)
+        if text is None:
+            text = _read_text(doc_path)
+            cached_text[source_path] = text
+        yield node.key, source_path, text
 
 
 def _doc_reference_context(

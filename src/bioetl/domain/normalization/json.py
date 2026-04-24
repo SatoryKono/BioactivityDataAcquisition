@@ -6,7 +6,6 @@ import json
 import math
 import re
 from collections.abc import Sequence
-from typing import cast
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:

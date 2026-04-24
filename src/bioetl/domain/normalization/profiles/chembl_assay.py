@@ -134,7 +134,9 @@ _SPECIAL_RULE_COMPONENTS = {
             allowed_values=SUBCELLULAR_FRACTIONS,
             preserve_unknown=True,
         ),
-        "Normalize assay_subcellular_fraction against the shared ChEMBL subcellular-fraction vocabulary while preserving unknown observed lexemes for review.",
+        "Normalize assay_subcellular_fraction against the shared ChEMBL "
+        "subcellular-fraction vocabulary while preserving unknown observed "
+        "lexemes for review.",
     ),
     **{
         field_name: (

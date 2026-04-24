@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from contextlib import AbstractAsyncContextManager
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.services.execution.cli_run_orchestration_models import (
     RunExecutionRequest,
@@ -23,22 +23,22 @@ from bioetl.interfaces.cli.commands.domains.run.command_policy import RunCommand
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
-    from typing import Protocol
 
     from bioetl.application.services.execution.cli_run_orchestration_contracts import (
         RunPreparedPipelineCallable,
     )
     from bioetl.composition.registry_api import PipelineRegistry
 
-    class PipelineRunnerService(Protocol):
-        """Protocol for pipeline runner services used by CLI runtime helpers."""
 
-        async def run(
-            self,
-            pipeline: str,
-            *,
-            options: RunOptions,
-        ) -> RunResult: ...
+class PipelineRunnerService(Protocol):
+    """Protocol for pipeline runner services used by CLI runtime helpers."""
+
+    async def run(
+        self,
+        pipeline: str,
+        *,
+        options: RunOptions,
+    ) -> RunResult: ...
 
 
 def get_pipeline_runner_service(

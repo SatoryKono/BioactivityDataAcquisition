@@ -120,7 +120,7 @@ def _is_tracked_generated_memory_artifact(relative_path: str) -> bool:
     path = Path(relative_path)
     if "__pycache__" in path.parts or path.suffix == ".pyc":
         return True
-    if path.name == "README.md":
+    if path.name in {"README.md", ".gitignore"}:
         return False
     return any(relative_path.startswith(f"{prefix}/") for prefix in REBUILD_ONLY_DIRS)
 

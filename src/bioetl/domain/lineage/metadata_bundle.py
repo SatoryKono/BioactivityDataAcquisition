@@ -3,9 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Generic, Protocol, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
 
-from bioetl.domain.lineage.models import LineageEdgeType, LineageNodeType
+from bioetl.domain.lineage.models import (
+    LineageEdge,
+    LineageEdgeType,
+    LineageNodeRef,
+    LineageNodeType,
+)
 from bioetl.domain.models.metadata import BronzeMetadata, GoldMetadata, SilverMetadata
 
 if TYPE_CHECKING:
@@ -14,25 +19,6 @@ if TYPE_CHECKING:
 __all__ = ["MetadataLineageBundle", "MetadataLineageBundleResult", "MetadataT"]
 
 MetadataT = TypeVar("MetadataT", BronzeMetadata, SilverMetadata, GoldMetadata)
-
-
-class _LineageNodeRefLike(Protocol):
-    """Minimal node reference contract required by metadata bundle helpers."""
-
-    node_id: str
-
-
-class _LineageNodeLike(_LineageNodeRefLike, Protocol):
-    """Minimal lineage node contract required by metadata bundle helpers."""
-
-    node_type: LineageNodeType
-
-
-class _LineageEdgeLike(Protocol):
-    """Minimal lineage edge contract required by metadata bundle helpers."""
-
-    edge_type: LineageEdgeType
-    source: _LineageNodeRefLike
 
 
 def _resolve_primary_artifact_id(fragment: LineageGraphFragment) -> str:
@@ -60,8 +46,8 @@ def _produced_artifact_ids(fragment: LineageGraphFragment) -> tuple[str, ...]:
 
 
 def _produced_artifact_id_for_edge(
-    edge: _LineageEdgeLike,
-    node_index: dict[str, _LineageNodeLike],
+    edge: LineageEdge,
+    node_index: dict[str, LineageNodeRef],
 ) -> str | None:
     if edge.edge_type is not LineageEdgeType.PRODUCED_BY:
         return None

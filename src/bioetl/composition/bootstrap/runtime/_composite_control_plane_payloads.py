@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import (
+from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
 )
 from bioetl.composition.runtime_builders.run_manifest_support import (

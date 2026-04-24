@@ -8,7 +8,7 @@ from bioetl.composition.observability import (
     ObservabilityBundle,
     ObservabilityContractError,
 )
-from bioetl.composition.runtime_builders._runner_builder_support import (
+from bioetl.composition.runtime_builders.runner_builder_support import (
     resolve_required_artifact_lineage_layers,
     validate_required_persistence_profile,
 )

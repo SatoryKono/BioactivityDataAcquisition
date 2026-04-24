@@ -16,9 +16,6 @@ from __future__ import annotations
 
 __all__ = ["LifecyclePhase", "PipelineObserver"]
 
-PROBE_MODE_FALLBACK_COUNTER = "bioetl_probe_mode_fallback_total"
-
-
 import time
 from contextlib import AbstractContextManager
 from enum import StrEnum
@@ -60,13 +57,15 @@ if TYPE_CHECKING:
             event_name: str,
             *,
             severity: str,
-            **context: Any,
+            **context: Any,  # Any: event payload keys vary across lifecycle/domain emissions
         ) -> None: ...
 
 else:
     from bioetl.application.observability.observer_event_mixin import (
         _ObserverEventMixin as _ObserverEventMixinBase,
     )
+
+PROBE_MODE_FALLBACK_COUNTER = "bioetl_probe_mode_fallback_total"
 
 # Exposed as module attribute for compatibility with legacy patch points in tests.
 build_observability_contract_payload = _build_observability_contract_payload
@@ -305,5 +304,3 @@ class PipelineObserver(
             metrics_snapshot.get("records_bronze", 0),
             metrics_snapshot.get("records_fetched", 0),
         )
-
-setattr(_ObserverLifecycleEmissionMixin, "LifecyclePhase", LifecyclePhase)
