@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 from bioetl.domain.normalization.profiles import (
+    CHEMBL_ASSAY_PARAMETERS_PROFILE,
+    CHEMBL_ASSAY_PROFILE,
     CHEMBL_CELL_LINE_PROFILE,
     CHEMBL_MOLECULE_PROFILE,
     CHEMBL_PUBLICATION_PROFILE,
+    CHEMBL_SUBCELLULAR_FRACTION_PROFILE,
     CHEMBL_TARGET_PROFILE,
     CHEMBL_TARGET_COMPONENT_PROFILE,
     CROSSREF_PUBLICATION_PROFILE,
@@ -114,6 +117,53 @@ def test_chembl_publication_profile_normalizes_publication_type_and_open_access(
     assert authors_rule is not None
     assert authors_rule.apply(' {"b":2,"a":1} ') == '{"a":1,"b":2}'
     assert authors_rule.apply("not-json") is None
+
+
+def test_chembl_assay_parameter_type_preserves_unknown_for_raw_review() -> None:
+    assay_parameter_type_rule = CHEMBL_ASSAY_PARAMETERS_PROFILE.rule_for("type")
+
+    assert assay_parameter_type_rule is not None
+    assert assay_parameter_type_rule.apply(" conc ") == "CONC"
+    assert assay_parameter_type_rule.apply("novel assay tag") == "NOVEL ASSAY TAG"
+    assert assay_parameter_type_rule.apply("   ") is None
+    assert "raw-vs-canonical review" in (assay_parameter_type_rule.notes or "")
+
+
+def test_chembl_subcellular_fraction_profiles_preserve_unknown_but_not_blank() -> None:
+    assay_fraction_rule = CHEMBL_ASSAY_PROFILE.rule_for("assay_subcellular_fraction")
+    aggregate_fraction_rule = CHEMBL_SUBCELLULAR_FRACTION_PROFILE.rule_for(
+        "subcellular_fraction"
+    )
+
+    assert assay_fraction_rule is not None
+    assert assay_fraction_rule.apply(" membrane ") == "Membrane"
+    assert assay_fraction_rule.apply("microsome fraction") == "microsome fraction"
+    assert assay_fraction_rule.apply("   ") is None
+
+    assert aggregate_fraction_rule is not None
+    assert aggregate_fraction_rule.apply(" nucleus ") == "Nucleus"
+    assert (
+        aggregate_fraction_rule.apply("custom fraction label")
+        == "custom fraction label"
+    )
+    assert aggregate_fraction_rule.apply("   ") is None
+
+
+def test_chembl_target_component_vocab_lists_fail_closed_on_unknown_members() -> None:
+    component_types_rule = CHEMBL_TARGET_PROFILE.rule_for("component_types")
+    component_relationships_rule = CHEMBL_TARGET_PROFILE.rule_for(
+        "component_relationships"
+    )
+
+    assert component_types_rule is not None
+    assert component_types_rule.apply('["protein","RNA"]') == '["PROTEIN","RNA"]'
+    assert component_types_rule.apply('["protein","mystery"]') is None
+
+    assert component_relationships_rule is not None
+    assert component_relationships_rule.apply('["SUBSET OF","EQUIVALENT TO"]') == (
+        '["SUBSET OF","EQUIVALENT TO"]'
+    )
+    assert component_relationships_rule.apply('["SUBSET OF","UNKNOWN"]') is None
 
 
 def test_chembl_profile_helpers_preserve_standard_meta_semantics() -> None:

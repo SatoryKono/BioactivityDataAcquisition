@@ -5,7 +5,7 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-30'
+Last verified: '2026-04-24'
 ---
 
 # ADR-026: Composite Pipeline Pattern
@@ -47,6 +47,11 @@ A common use case requires combining data from multiple sources:
 
 Implement **Composite Pipeline Pattern** with the following architecture:
 
+**Decision Boundary Change (2026-04-24)**:
+The original ADR specified CrossRef as a required enricher (`required: true`). However, actual composite configurations show `required: false`. This change reflects the evolution of the composite pattern to prioritize resilience and graceful degradation over strict completeness requirements.
+
+**Superseded Section**: The "CrossRef (required)" specification in the architecture diagram and configuration has been updated to "CrossRef (optional)" to match current implementation reality.
+
 ### 1. Orchestration Model: Hybrid (Sequential + Fan-Out)
 
 ```
@@ -64,7 +69,7 @@ Implement **Composite Pipeline Pattern** with the following architecture:
            │                 │                 │
     ┌──────▼──────┐   ┌──────▼──────┐   ┌──────▼──────┐
     │  CrossRef   │   │  OpenAlex   │   │   PubMed    │
-    │  (required) │   │  (optional) │   │  (optional) │
+    │  (optional) │   │  (optional) │   │  (optional) │
     └──────┬──────┘   └──────┬──────┘   └──────┬──────┘
            │                 │                 │
            └─────────────────┼─────────────────┘
@@ -110,6 +115,8 @@ Implement **Composite Pipeline Pattern** with the following architecture:
 | Optional | LEFT | Null fields, continue |
 
 **Default**: LEFT JOIN (optional enrichers)
+
+**Note**: The original ADR specified CrossRef as a required enricher, but actual composite configurations show `required: false`. This reflects the evolution of the composite pattern to prioritize resilience over completeness.
 
 ### 4. Failure Handling
 
@@ -964,11 +971,11 @@ composite:
   # Enricher Pipelines
   # ---------------------------------------------------------------------------
   enrichers:
-    # CrossRef: Required enricher for citation data
+    # CrossRef: Optional enricher for citation data
     - pipeline: crossref_publication
       join-keys:
         - doi            # Primary join key
-      required: true     # Failure = composite failure
+      required: false    # Changed from required to optional
       timeout-seconds: 900
 
     # OpenAlex: Optional enricher for academic metadata
@@ -1347,6 +1354,11 @@ def run_composite_command(composite: str, enrich_only: str | None, required_only
 - ADR-020: BasePipeline Decomposition
 - RULES.md v6.1 §2.4 (Backfill/Replay)
 - RULES.md v6.1 §3.3 (Concurrency & Locks)
+
+**Current Composite Configurations**:
+- `configs/composites/publication.yaml` (shows `required: false` for CrossRef)
+- `configs/composites/target.yaml` (reference for dependency chaining)
+- `configs/composites/field_groups/publication.yaml` (field group registry)
 
 ## Compliance
 
