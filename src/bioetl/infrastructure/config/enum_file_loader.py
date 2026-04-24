@@ -48,9 +48,7 @@ def load_provider_enums_from_file(
     if payload is None:
         return {}
     if not isinstance(payload, dict):
-        raise ValueError(
-            f"Enum config must be a YAML mapping: {yaml_path}"
-        )
+        raise ValueError(f"Enum config must be a YAML mapping: {yaml_path}")
     return {str(key): value for key, value in payload.items()}
 
 

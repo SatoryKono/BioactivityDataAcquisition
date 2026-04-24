@@ -21,6 +21,8 @@ from bioetl.domain.schemas.base import ETLRecordSchema
 
 # === Fixed Value Constants ===
 MAPPING_STATUSES = ["found", "not_found", "error", "multiple"]
+
+
 class IDMappingSchema(ETLRecordSchema):
     """UniProt ID Mapping validation schema for Silver layer.
 
