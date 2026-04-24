@@ -254,8 +254,10 @@ def test_file_store_rolls_back_fragment_and_indexes_when_index_append_fails(
         store.save(fragment)
 
     stored_fragment_id = lineage_store_module._build_stored_fragment_id(fragment)
-    fragment_path = store.base_path / "fragments" / (
-        f"{lineage_store_module._stable_key_filename(stored_fragment_id)}.json"
+    fragment_path = (
+        store.base_path
+        / "fragments"
+        / (f"{lineage_store_module._stable_key_filename(stored_fragment_id)}.json")
     )
     assert not fragment_path.exists()
     assert store.list_by_run_id(run_id) == []

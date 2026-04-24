@@ -81,6 +81,16 @@ quality:
     pattern: ^CVCL_[A-Z0-9]+$
     nullable: true
     error_message: cellosaurus_id must match CVCL format
+  - field: clo_id
+    type: pattern
+    pattern: ^CLO:\d{7}$
+    nullable: true
+    error_message: clo_id must match CLO format (CLO:0000000)
+  - field: efo_id
+    type: pattern
+    pattern: ^EFO:\d{7}$
+    nullable: true
+    error_message: efo_id must match EFO format (EFO:0000000)
   - field: cell_source_taxonomy_id
     type: range
     min: 1

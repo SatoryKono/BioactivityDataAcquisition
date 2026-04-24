@@ -9,7 +9,9 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-OBSERVABILITY_MAP_BLOCK = "│   │   ├── observability/       # Observability port package"
+OBSERVABILITY_MAP_BLOCK = (
+    "│   │   ├── observability/       # Observability port package"
+)
 LEGACY_OBSERVABILITY_MAP_BLOCK = (
     "│   │   ├── observability.py     # MetricsPort, TracingPort, LoggerPort"
 )
@@ -24,9 +26,7 @@ INVENTORY_REPORT_COMMAND = (
 
 
 def test_project_navigator_tracks_package_based_observability_ports() -> None:
-    navigator = (PROJECT_ROOT / "docs/00-project/00-map.md").read_text(
-        encoding="utf-8"
-    )
+    navigator = (PROJECT_ROOT / "docs/00-project/00-map.md").read_text(encoding="utf-8")
     assert OBSERVABILITY_MAP_BLOCK in navigator, (
         "Project Navigator must describe package-based observability ports."
     )

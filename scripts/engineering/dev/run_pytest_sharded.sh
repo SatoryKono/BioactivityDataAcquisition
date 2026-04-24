@@ -18,7 +18,11 @@ DEFAULT_WORKERS_PER_SHARD=2
 DEFAULT_DIST_MODE="loadfile"
 DEFAULT_COVERAGE_DIR="$REPO_ROOT/.coverage-sharded"
 DEFAULT_PYTEST_CACHE_DIR="$REPO_ROOT/.pytest_cache"
-DEFAULT_JUNIT_DIR="$REPO_ROOT/reports/quality/test-runs/junit/run-$(date +%Y%m%dT%H%M%S)"
+if [[ -n "${BIOETL_JUNIT_RUN_ID:-}" ]]; then
+    DEFAULT_JUNIT_DIR="$REPO_ROOT/reports/quality/test-runs/junit/$BIOETL_JUNIT_RUN_ID"
+else
+    DEFAULT_JUNIT_DIR="$REPO_ROOT/reports/quality/test-runs/junit/run-$(date +%Y%m%dT%H%M%S)"
+fi
 DEFAULT_TEST_HEALTH_REPORTS_DIR="$REPO_ROOT/reports/quality/test-runs"
 
 WORKERS_PER_SHARD="$DEFAULT_WORKERS_PER_SHARD"

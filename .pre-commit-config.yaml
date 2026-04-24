@@ -154,19 +154,19 @@ repos:
 
       - id: docs-check-links
         name: Check documentation links
-        entry: python scripts/docs.checks.check_links --links --specs --configs
+        entry: python scripts/docs check-links --links --specs --configs
         language: python
         pass_filenames: false
 
       - id: docs-check-drift
         name: Check documentation drift
-        entry: python scripts/docs.checks.check_drift --ports --classes
+        entry: python scripts/docs check-drift --ports --classes
         language: python
         pass_filenames: false
 
       - id: docs-check-docstrings
         name: Check docstring inventory
-        entry: python scripts/docs.checks.check_docstrings --summary
+        entry: python scripts/docs check-docstrings --summary
         language: python
         pass_filenames: false
 

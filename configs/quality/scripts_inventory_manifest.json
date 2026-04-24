@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-24T09:52:02.329788+00:00",
+  "generated_at": "2026-04-24T10:29:00.913502+00:00",
   "summary": {
     "total_scripts": 443,
     "status_counts": {
@@ -7143,13 +7143,13 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 138,
+          "line": 175,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 144,
+          "line": 181,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
         },
@@ -8323,7 +8323,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 150,
+          "line": 187,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -8979,7 +8979,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 138,
+          "line": 175,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"
         },
@@ -9030,7 +9030,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 144,
+          "line": 181,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
         },

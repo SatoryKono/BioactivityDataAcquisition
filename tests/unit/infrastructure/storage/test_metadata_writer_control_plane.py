@@ -242,8 +242,7 @@ async def test_write_bronze_metadata_records_input_snapshot_refs() -> None:
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_write_silver_metadata_records_dataset_ref_and_fragment_id(
-) -> None:
+async def test_write_silver_metadata_records_dataset_ref_and_fragment_id() -> None:
     writer = MetadataWriter(logger=NoOpLogger())
     captured: list[tuple[str, str, dict[str, object] | None]] = []
     metadata = _make_silver_metadata()
@@ -280,8 +279,7 @@ async def test_write_silver_metadata_records_dataset_ref_and_fragment_id(
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_write_gold_metadata_records_dataset_ref_and_fragment_id(
-) -> None:
+async def test_write_gold_metadata_records_dataset_ref_and_fragment_id() -> None:
     writer = MetadataWriter(logger=NoOpLogger())
     captured: list[tuple[str, str, dict[str, object] | None]] = []
     metadata = _make_gold_metadata()
@@ -317,8 +315,7 @@ async def test_write_gold_metadata_records_dataset_ref_and_fragment_id(
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_write_metadata_fails_when_control_plane_manifest_id_is_missing(
-) -> None:
+async def test_write_metadata_fails_when_control_plane_manifest_id_is_missing() -> None:
     writer = MetadataWriter(logger=NoOpLogger())
     writer.attach_artifact_recorder(lambda *_args, **_kwargs: None)
     metadata = _make_bronze_metadata()
@@ -342,8 +339,7 @@ async def test_write_metadata_fails_when_control_plane_manifest_id_is_missing(
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_write_metadata_fails_when_control_plane_artifact_id_is_missing(
-) -> None:
+async def test_write_metadata_fails_when_control_plane_artifact_id_is_missing() -> None:
     writer = MetadataWriter(logger=NoOpLogger())
     writer.attach_artifact_recorder(lambda *_args, **_kwargs: None)
     metadata = _make_bronze_metadata()
