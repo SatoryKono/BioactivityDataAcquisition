@@ -277,3 +277,5 @@ docs/reports/evidence/documentation-internal-surface-governance/02-evidence/inte
 /script-mistrallvibe
 .env.local
 .env.local
+
+!scripts/docs/build/mkdocs_build.py

@@ -106,6 +106,6 @@ records = await data_source.fetch_filtered_with_fallback([
 
 ## Related Documentation
 
-- [Data Source Ports API Reference](../../api/domain.md#data-source-ports)
-- [Provider-Specific Implementations](../../providers/)
+- [Data Source Ports API Reference](../api/domain.md#data-source-ports)
+- [Provider-Specific Implementations](../providers/README.md)
 - [Internal/Extended Index](index.md)

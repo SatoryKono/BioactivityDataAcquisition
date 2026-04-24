@@ -882,6 +882,12 @@ def check_config_existence() -> list[tuple[str, str]]:
         provider = yaml_file.parent.name
         entity = yaml_file.stem
 
+        # Composite pipelines are governed by configs/composites/*.yaml rather than
+        # the provider/entity and provider-default convention used for source-backed
+        # entity configs.
+        if provider == "composite":
+            continue
+
         payload = yaml.safe_load(yaml_file.read_text(encoding="utf-8")) or {}
 
         for section in ("pipeline", "schema", "quality", "filters", "contracts"):

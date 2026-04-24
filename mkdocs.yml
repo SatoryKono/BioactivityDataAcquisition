@@ -439,8 +439,8 @@ nav:
                     -   "Pipeline Review Checklist": 04-reference/templates/pipeline-review-checklist.md
                     -   "Pipeline Legacy: ChEMBL Activity": 04-reference/pipelines/chembl-activity.md
                     -   "Pipeline Legacy: ChEMBL Assay": 04-reference/pipelines/chembl-assay.md
-                    -   "Pipeline Legacy: OpenAlex Publication": 04-reference/pipelines/openalex-publication.md
-                    -   "Pipeline Legacy: SemanticScholar Publication": 04-reference/pipelines/semanticscholar-publication.md
+                    -   "Pipeline Legacy: OpenAlex Publication": 04-reference/pipelines/openalex/01-publication-spec.md
+                    -   "Pipeline Legacy: SemanticScholar Publication": 04-reference/pipelines/semanticscholar/01-publication-spec.md
             -   "Operations Extras":
                     -   "Monitoring Guide": 05-operations/01-monitoring-guide.md
                     -   "Deployment & Tooling Extras":

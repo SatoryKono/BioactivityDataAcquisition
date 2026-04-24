@@ -688,7 +688,7 @@ bioetl dq validate --entity chembl.activity --strict
 ```
 
 **См. также:**
-- [DQ Contracts](../../04-reference/contracts/dq-contracts.md)
+- [DQ Contracts](contracts/dq-contracts.md)
 - `bioetl config validate` — для общей валидации конфигурации
 
 ______________________________________________________________________
@@ -739,7 +739,7 @@ bioetl lineage show --entity chembl.activity --record-id ACT12345 --depth 5 --in
 ```
 
 **См. также:**
-- [Lineage Architecture](../contracts/run-manifest-ledger.md)
+- [Lineage Architecture](contracts/run-manifest-ledger.md)
 - `bioetl run --tracing` — для включения tracing
 
 ______________________________________________________________________
