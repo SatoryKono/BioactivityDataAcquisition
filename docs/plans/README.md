@@ -1,7 +1,7 @@
 # Plans Directory
 
 *Status: Working planning artifacts (non-normative)*
-*Last updated: 2026-03-26*
+*Last updated: 2026-04-24*
 
 This directory contains implementation plans, corrective roadmaps, migration
 plans, and supporting architecture assessment snapshots.
@@ -29,12 +29,16 @@ Plans in this folder must not override normative documents.
 - When a plan conflicts with active docs under `docs/00-05`, active docs win.
 - Historical or completed plans should move to `docs/99-archive/` rather than
   accumulate as competing active surfaces.
+- The tracked plan set and lifecycle classes are cataloged in
+  `configs/quality/repo_structure_catalog.yaml`.
 
 ## Maintenance Rules
 
 - Keep file names explicit and date-stamped when possible.
 - Prefer updating an existing active plan over creating near-duplicates.
 - Move obsolete or historical planning artifacts to `docs/99-archive/` when no longer active.
+- Every tracked plan file MUST be present in `configs/quality/repo_structure_catalog.yaml`.
+- Only one tracked plan file may hold lifecycle `active_backlog`.
 
 ## Freshness Triggers
 

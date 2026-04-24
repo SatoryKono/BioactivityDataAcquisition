@@ -39,6 +39,7 @@ ______________________________________________________________________
 | Find tool commands                | [TOOLS.md](TOOLS.md)                                                                   |
 | Verify docs quality gates         | [docs-verification.md](../03-guides/docs-verification.md)                              |
 | Check entity config parity        | [docs-parity-gate.md](../03-guides/docs-parity-gate.md)                                |
+| Review structure / retention rules | [03-file-policy.md](governance/03-file-policy.md)                                      |
 | Govern documentation              | [D-01](governance/01-documentation-governance-style-guide.md)                          |
 | Create a new pipeline             | [governance/04-extending-bioetl.md](governance/04-extending-bioetl.md)                 |
 | Review a pipeline                 | [pipeline-review-checklist.md](../04-reference/templates/pipeline-review-checklist.md) |

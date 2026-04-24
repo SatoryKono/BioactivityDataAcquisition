@@ -1,0 +1,90 @@
+version: 1.0.0
+status: active
+
+docs_drafts:
+  path_glob: docs/D-*.md
+  policy: repo_only_sync_notes
+  allowed_files:
+    - path: docs/D-01 Governance & Style Guide.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/00-project/governance/01-documentation-governance-style-guide.md
+    - path: docs/D-02 Provider Integration Handbook.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/03-guides/add-new-source.md
+    - path: docs/D-03 Data Contracts & Schema Specification.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/04-reference/contracts/README.md
+    - path: docs/D-04 Data Model, IDs & Lineage Specification.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/03-guides/hash-policy.md
+    - path: docs/D-05 Pipelines & Config Specification.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/03-guides/pipeline-configuration.md
+    - path: docs/D-06 Data Quality и Quarantine Handbook.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/03-guides/dq-configuration.md
+    - path: docs/D-07 Observability Specification.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/02-architecture/observability-layers.md
+    - path: docs/D-08 Security & Compliance dossier.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/03-guides/development/security/compliance-audit-guidelines.md
+    - path: docs/D-09 Requirements Traceability.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/01-requirements/REQUIREMENTS.md
+
+plans:
+  path_prefix: docs/plans/
+  max_active_backlog: 1
+  readme: docs/plans/README.md
+  allowed_files:
+    - path: docs/plans/consolidated-open-tasks-plan-2026-03-21.md
+      lifecycle: active_backlog
+    - path: docs/plans/architecture-review-and-refactor-plan-2026-03-21.md
+      lifecycle: supporting_context
+    - path: docs/plans/curated-memory-density-governance-plan-2026-04-21.md
+      lifecycle: supporting_context
+    - path: docs/plans/monitoring-observability-expansion-plan-2026-03-26.md
+      lifecycle: supporting_context
+    - path: docs/plans/project-memory-layer-implementation-plan-2026-04-20.md
+      lifecycle: supporting_context
+    - path: docs/plans/project-memory-layer-issue-pack-2026-04-20.md
+      lifecycle: supporting_context
+    - path: docs/plans/repository-file-structure-cleanup-plan-2026-04-20.md
+      lifecycle: supporting_context
+    - path: docs/plans/silver-filter-rejects-observability-plan.md
+      lifecycle: supporting_context
+    - path: docs/plans/test-health-observability-plan-2026-04-22.md
+      lifecycle: supporting_context
+    - path: docs/plans/наблюдаемость.md
+      lifecycle: supporting_context
+
+src_sidecars:
+  path_prefix: src/
+  approved_roots:
+    - path: src/bioetl
+      role: canonical_runtime_tree
+    - path: src/tools
+      role: approved_sidecar_tooling
+    - path: src/memory
+      role: approved_sidecar_memory_subsystem
+
+blocked_cleanup_zones:
+  - path: docs/99-archive
+    class: archive_history
+    cleanup_policy: retain_for_traceability
+  - path: tests/fixtures
+    class: test_fixture_surface
+    cleanup_policy: retain_under_fixture_governance
+  - path: tests/fixtures/vcr
+    class: recorded_http_fixture_surface
+    cleanup_policy: retain_under_vcr_governance
+  - path: docs/reports
+    class: curated_repo_only_reports
+    cleanup_policy: curated_cleanup_only
+  - path: reports
+    class: generated_working_outputs
+    cleanup_policy: bounded_cleanup_only
+  - path: data
+    class: runtime_and_local_data_surface
+    cleanup_policy: separate_runtime_retention_procedure

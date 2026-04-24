@@ -7,8 +7,12 @@ import argparse
 import subprocess  # nosec B404
 import sys
 from pathlib import Path
+from typing import Any
+
+import yaml
 
 ALLOWLIST_FILE = Path(".github/root-allowlist.txt")
+STRUCTURE_CATALOG_FILE = Path("configs/quality/repo_structure_catalog.yaml")
 CANONICAL_ROOT_TEXT_FILES: frozenset[str] = frozenset(
     {
         "CHANGELOG.md",
@@ -74,6 +78,25 @@ ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
         "tests",
     }
 )
+
+
+def _load_structure_catalog(repo_root: Path) -> dict[str, Any]:
+    """Load machine-readable structure governance catalog."""
+    catalog_path = repo_root / STRUCTURE_CATALOG_FILE
+    if not catalog_path.exists():
+        raise RuntimeError(f"Structure catalog does not exist: {catalog_path}")
+
+    with catalog_path.open("r", encoding="utf-8") as handle:
+        payload = yaml.safe_load(handle) or {}
+
+    required_sections = {"docs_drafts", "plans", "src_sidecars", "blocked_cleanup_zones"}
+    missing_sections = sorted(
+        section for section in required_sections if section not in payload
+    )
+    if missing_sections:
+        missing = ", ".join(missing_sections)
+        raise RuntimeError(f"Structure catalog missing required sections: {missing}")
+    return payload
 
 
 def _load_allowed_root_files(repo_root: Path) -> frozenset[str]:
@@ -276,6 +299,107 @@ def _report_missing_allowed_files(missing_allowed_files: list[str]) -> None:
         sys.stdout.write(f"  - {entry}\n")
 
 
+def _collect_cataloged_paths(
+    entries: list[dict[str, Any]], *, field_name: str = "path"
+) -> set[str]:
+    """Return normalized path set from catalog entries."""
+    cataloged: set[str] = set()
+    for entry in entries:
+        path = entry.get(field_name)
+        if not isinstance(path, str) or not path:
+            raise RuntimeError(
+                f"Structure catalog entry must contain non-empty '{field_name}'"
+            )
+        cataloged.add(path)
+    return cataloged
+
+
+def _collect_structure_policy_violations(
+    repo_root: Path,
+    tracked_paths: list[str],
+    catalog: dict[str, Any],
+) -> list[str]:
+    """Return policy violations beyond the root allowlist."""
+    tracked_set = set(tracked_paths)
+    violations: list[str] = []
+
+    docs_drafts = _collect_cataloged_paths(catalog["docs_drafts"]["allowed_files"])
+    actual_docs_drafts = {
+        path
+        for path in tracked_paths
+        if path.startswith("docs/D-") and path.endswith(".md")
+    }
+    for path in sorted(actual_docs_drafts - docs_drafts):
+        violations.append(
+            f"{path}: legacy flat doc must be cataloged in {STRUCTURE_CATALOG_FILE}"
+        )
+    for path in sorted(docs_drafts - tracked_set):
+        violations.append(f"{path}: cataloged legacy doc is missing from tracked tree")
+
+    plans_readme = catalog["plans"].get("readme")
+    if not isinstance(plans_readme, str) or not plans_readme:
+        raise RuntimeError("Structure catalog plans.readme must be a non-empty path")
+    if plans_readme not in tracked_set:
+        violations.append(f"{plans_readme}: plans readme required by structure catalog")
+
+    cataloged_plan_paths = _collect_cataloged_paths(catalog["plans"]["allowed_files"])
+    actual_plan_paths = {
+        path
+        for path in tracked_paths
+        if path.startswith("docs/plans/")
+        and path.endswith(".md")
+        and path != plans_readme
+    }
+    for path in sorted(actual_plan_paths - cataloged_plan_paths):
+        violations.append(
+            f"{path}: plan file must be cataloged in {STRUCTURE_CATALOG_FILE}"
+        )
+    for path in sorted(cataloged_plan_paths - tracked_set):
+        violations.append(f"{path}: cataloged plan file is missing from tracked tree")
+
+    plan_entries = catalog["plans"]["allowed_files"]
+    active_backlog_count = sum(
+        1 for entry in plan_entries if entry.get("lifecycle") == "active_backlog"
+    )
+    max_active_backlog = catalog["plans"].get("max_active_backlog")
+    if not isinstance(max_active_backlog, int) or max_active_backlog < 1:
+        raise RuntimeError("Structure catalog plans.max_active_backlog must be >= 1")
+    if active_backlog_count != max_active_backlog:
+        violations.append(
+            "docs/plans lifecycle policy expects exactly "
+            f"{max_active_backlog} active_backlog file(s), found {active_backlog_count}"
+        )
+
+    approved_src_roots = _collect_cataloged_paths(catalog["src_sidecars"]["approved_roots"])
+    actual_src_roots = {
+        "/".join(path.split("/", maxsplit=2)[:2])
+        for path in tracked_paths
+        if path.startswith("src/") and len(path.split("/", maxsplit=2)) >= 2
+    }
+    for path in sorted(actual_src_roots - approved_src_roots):
+        violations.append(
+            f"{path}: new src top-level family requires explicit structure catalog approval"
+        )
+
+    blocked_cleanup_entries = catalog["blocked_cleanup_zones"]
+    blocked_cleanup_paths = _collect_cataloged_paths(blocked_cleanup_entries)
+    for path in sorted(blocked_cleanup_paths):
+        if not (repo_root / path).exists():
+            violations.append(f"{path}: blocked cleanup zone declared in catalog but missing")
+
+    return violations
+
+
+def _report_structure_policy_violations(violations: list[str]) -> int:
+    if not violations:
+        return 0
+
+    sys.stderr.write("ERROR: structure governance policy violation detected.\n")
+    for violation in violations:
+        sys.stderr.write(f"  - {violation}\n")
+    return 1
+
+
 def _unexpected_untracked_root_dirs(
     untracked_paths: list[str], tracked_root_dirs: set[str]
 ) -> list[str]:
@@ -334,6 +458,11 @@ def main() -> int:
     except (OSError, RuntimeError) as exc:
         sys.stderr.write(f"ERROR: failed to load root allowlist: {exc}\n")
         return 2
+    try:
+        structure_catalog = _load_structure_catalog(repo_root)
+    except (OSError, RuntimeError, yaml.YAMLError) as exc:
+        sys.stderr.write(f"ERROR: failed to load structure catalog: {exc}\n")
+        return 2
 
     try:
         tracked_paths = _get_tracked_paths(repo_root)
@@ -359,6 +488,12 @@ def main() -> int:
     )
     if tracked_policy_exit:
         return tracked_policy_exit
+
+    structure_policy_exit = _report_structure_policy_violations(
+        _collect_structure_policy_violations(repo_root, tracked_paths, structure_catalog)
+    )
+    if structure_policy_exit:
+        return structure_policy_exit
 
     _report_missing_allowed_files(missing_allowed_files)
 

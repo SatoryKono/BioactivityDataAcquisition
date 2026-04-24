@@ -6,7 +6,7 @@ repo_name: SatoryKono/BioactivityDataAcquisition
 edit_uri: "edit/main/docs/"
 site_dir: site
 exclude_docs: |
-    D-01 Governance & Style Guide документации BioETL.md
+    D-*.md
     00-project/ai/README.md
     00-project/ai/agents/CLAUDE.md
     00-project/ai/agents/agents/py-*.md

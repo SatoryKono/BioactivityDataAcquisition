@@ -63,6 +63,7 @@ from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
+_OPTIONAL_STRING_TYPE = "str | None"
 
 
 def _public_assembler_seam(name: str) -> object:
@@ -74,6 +75,11 @@ def _public_assembler_seam(name: str) -> object:
 def _public_assembler_callable(name: str) -> Callable[..., object]:
     """Resolve a callable from the public assembler façade with explicit typing."""
     return cast(Callable[..., object], _public_assembler_seam(name))
+
+
+def _optional_string_kwarg(kwargs: dict[str, object], key: str) -> str | None:
+    """Return one optional string kwarg with explicit typing for runner shims."""
+    return cast(_OPTIONAL_STRING_TYPE, kwargs.get(key))
 
 
 class GenericPipelineFactory(Generic[TPipeline]):
@@ -235,27 +241,27 @@ class GenericPipelineFactory(Generic[TPipeline]):
                     settings=request.settings,
                     observability=request.observability,
                     control_plane=PipelineControlPlaneArtifacts(
-                        manifest_id=cast("str | None", kwargs.get("manifest_id")),
-                        execution_fingerprint=cast(
-                            "str | None",
-                            kwargs.get("execution_fingerprint"),
+                        manifest_id=_optional_string_kwarg(kwargs, "manifest_id"),
+                        execution_fingerprint=_optional_string_kwarg(
+                            kwargs,
+                            "execution_fingerprint",
                         ),
-                        config_hash=cast("str | None", kwargs.get("config_hash")),
-                        resolved_config_hash=cast(
-                            "str | None",
-                            kwargs.get("resolved_config_hash"),
+                        config_hash=_optional_string_kwarg(kwargs, "config_hash"),
+                        resolved_config_hash=_optional_string_kwarg(
+                            kwargs,
+                            "resolved_config_hash",
                         ),
-                        effective_config_hash=cast(
-                            "str | None",
-                            kwargs.get("effective_config_hash"),
+                        effective_config_hash=_optional_string_kwarg(
+                            kwargs,
+                            "effective_config_hash",
                         ),
-                        dq_contract_compatibility_hash=cast(
-                            "str | None",
-                            kwargs.get("dq_contract_compatibility_hash"),
+                        dq_contract_compatibility_hash=_optional_string_kwarg(
+                            kwargs,
+                            "dq_contract_compatibility_hash",
                         ),
-                        effective_config_artifact_id=cast(
-                            "str | None",
-                            kwargs.get("effective_config_artifact_id"),
+                        effective_config_artifact_id=_optional_string_kwarg(
+                            kwargs,
+                            "effective_config_artifact_id",
                         ),
                     ),
                     filter_config=request.filter_config,

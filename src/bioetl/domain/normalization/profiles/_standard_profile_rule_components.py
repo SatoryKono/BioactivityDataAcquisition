@@ -36,8 +36,7 @@ def _normalizer_accepts_record_context(normalizer: FieldNormalizer) -> bool:
     except (TypeError, ValueError):
         return False
     return any(
-        parameter.name == "record"
-        or parameter.kind == inspect.Parameter.VAR_KEYWORD
+        parameter.name == "record" or parameter.kind == inspect.Parameter.VAR_KEYWORD
         for parameter in parameters
     )
 

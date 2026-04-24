@@ -33,7 +33,9 @@ def load_schema(schema_path: Path) -> dict[str, Any]:
 
 def _find_entity_files(entities_dir: Path) -> list[Path]:
     return [
-        p for p in sorted(entities_dir.rglob("*.yaml")) if not p.name.startswith("_")
+        p
+        for p in sorted(entities_dir.rglob("*.yaml"))
+        if not p.name.startswith("_") and not _is_legacy_composite_entity_stub(p)
     ]
 
 
@@ -41,6 +43,24 @@ def _find_composite_files(composites_dir: Path) -> list[Path]:
     return [
         p for p in sorted(composites_dir.glob("*.yaml")) if not p.name.startswith("_")
     ]
+
+
+def _is_legacy_composite_entity_stub(config_path: Path) -> bool:
+    """Return True for compatibility stubs under configs/entities/composite/.
+
+    Composite runtime is sourced from ``configs/composites/*.yaml``. The legacy
+    ``configs/entities/composite/*.yaml`` files exist only as lightweight
+    compatibility shims and intentionally do not satisfy the unified entity
+    schema/invariants enforced by this validator.
+    """
+    try:
+        payload = _load_yaml_payload(config_path)
+    except yaml.YAMLError:
+        return False
+    if payload is None:
+        return False
+    provider = str(payload.get("provider") or config_path.parent.name).strip().lower()
+    return provider == "composite"
 
 
 def _validate_yaml_schema(payload: Any, schema: dict[str, Any]) -> tuple[bool, str]:
