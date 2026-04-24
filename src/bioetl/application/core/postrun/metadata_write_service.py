@@ -10,6 +10,7 @@ from bioetl.application.core.postrun._metadata_writes import (
     build_final_metadata_write_coroutines,
     get_run_statistics,
 )
+from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
 if TYPE_CHECKING:
     from bioetl.application.core.postrun.metadata_version_resolver import (
         PostrunMetadataVersionResolver,
@@ -78,8 +79,6 @@ class PostrunMetadataWriteService:
         dq_reports: DQReportResult | None,
     ) -> list[Awaitable[object]]:
         """Build final metadata write coroutines for the current postrun flow."""
-        if self._clock is None:
-            raise RuntimeError("PostrunMetadataWriteService requires an injected clock")
         return cast(
             list[Awaitable[object]],
             build_final_metadata_write_coroutines(
@@ -91,7 +90,11 @@ class PostrunMetadataWriteService:
                 context=self._context,
                 stats=get_run_statistics(executor),
                 dq_reports=dq_reports,
-                completed_at=self._clock.now(),
+                completed_at=(
+                    self._clock.now()
+                    if self._clock is not None
+                    else MISSING_RUNTIME_TIMESTAMP
+                ),
                 resolve_delta_version=self._resolve_delta_version,
             ),
         )
