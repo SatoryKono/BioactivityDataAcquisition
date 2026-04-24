@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
+from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
@@ -29,6 +31,16 @@ from bioetl.domain.models.metadata import (
 )
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
+
+
+def _fake_atomic_write_text(
+    path: object,
+    content: object,
+    *,
+    retry_policy: object,
+    on_retry: object,
+) -> None:
+    del path, content, retry_policy, on_retry
 
 
 def _make_bronze_metadata() -> BronzeMetadata:
@@ -151,7 +163,7 @@ def _make_gold_metadata() -> GoldMetadata:
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_write_bronze_metadata_records_artifact_publication(tmp_path) -> None:
+async def test_write_bronze_metadata_records_artifact_publication() -> None:
     writer = MetadataWriter(logger=NoOpLogger())
     captured: list[tuple[str, str, dict[str, object] | None]] = []
     metadata = _make_bronze_metadata()
@@ -161,19 +173,23 @@ async def test_write_bronze_metadata_records_artifact_publication(tmp_path) -> N
         )
     )
 
-    base_path = tmp_path / "output" / "bronze" / "chembl" / "activity"
-    result = await writer.write_bronze_metadata(
-        base_path=base_path,
-        metadata=metadata,
-        provider="chembl",
-        entity="activity",
-    )
+    base_path = "/virtual/output/bronze/chembl/activity"
+    with patch(
+        "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+        side_effect=_fake_atomic_write_text,
+    ):
+        result = await writer.write_bronze_metadata(
+            base_path=base_path,
+            metadata=metadata,
+            provider="chembl",
+            entity="activity",
+        )
 
     assert result.endswith("chembl_activity_metadata.yaml")
     assert len(captured) == 1
     layer, artifact_path, details = captured[0]
     assert layer == "bronze"
-    assert artifact_path == str(base_path.resolve())
+    assert artifact_path == str(Path(base_path).resolve())
     assert details is not None
     assert details["artifact_id"] == "bronze_batch:batch-1"
     assert details["metadata_path"].endswith("chembl_activity_metadata.yaml")
@@ -187,7 +203,7 @@ async def test_write_bronze_metadata_records_artifact_publication(tmp_path) -> N
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_write_bronze_metadata_records_input_snapshot_refs(tmp_path) -> None:
+async def test_write_bronze_metadata_records_input_snapshot_refs() -> None:
     writer = MetadataWriter(logger=NoOpLogger())
     captured: list[tuple[str, str, dict[str, object] | None]] = []
     metadata = _make_bronze_metadata()
@@ -205,12 +221,16 @@ async def test_write_bronze_metadata_records_input_snapshot_refs(tmp_path) -> No
         )
     )
 
-    await writer.write_bronze_metadata(
-        base_path=tmp_path / "output" / "bronze" / "chembl" / "activity",
-        metadata=metadata,
-        provider="chembl",
-        entity="activity",
-    )
+    with patch(
+        "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+        side_effect=_fake_atomic_write_text,
+    ):
+        await writer.write_bronze_metadata(
+            base_path="/virtual/output/bronze/chembl/activity",
+            metadata=metadata,
+            provider="chembl",
+            entity="activity",
+        )
 
     assert len(captured) == 1
     details = captured[0][2]
@@ -223,7 +243,6 @@ async def test_write_bronze_metadata_records_input_snapshot_refs(tmp_path) -> No
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_write_silver_metadata_records_dataset_ref_and_fragment_id(
-    tmp_path,
 ) -> None:
     writer = MetadataWriter(logger=NoOpLogger())
     captured: list[tuple[str, str, dict[str, object] | None]] = []
@@ -234,19 +253,23 @@ async def test_write_silver_metadata_records_dataset_ref_and_fragment_id(
         )
     )
 
-    base_path = tmp_path / "output" / "silver" / "chembl" / "activity"
-    result = await writer.write_silver_metadata(
-        base_path=base_path,
-        metadata=metadata,
-        provider="chembl",
-        entity="activity",
-    )
+    base_path = "/virtual/output/silver/chembl/activity"
+    with patch(
+        "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+        side_effect=_fake_atomic_write_text,
+    ):
+        result = await writer.write_silver_metadata(
+            base_path=base_path,
+            metadata=metadata,
+            provider="chembl",
+            entity="activity",
+        )
 
     assert result.endswith("chembl_activity_metadata.yaml")
     assert len(captured) == 1
     layer, artifact_path, details = captured[0]
     assert layer == "silver"
-    assert artifact_path == str(base_path.resolve())
+    assert artifact_path == str(Path(base_path).resolve())
     assert details is not None
     assert details["run_id"] == str(metadata.runtime.run_id)
     assert details["manifest_id"] == "manifest-1"
@@ -258,7 +281,6 @@ async def test_write_silver_metadata_records_dataset_ref_and_fragment_id(
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_write_gold_metadata_records_dataset_ref_and_fragment_id(
-    tmp_path,
 ) -> None:
     writer = MetadataWriter(logger=NoOpLogger())
     captured: list[tuple[str, str, dict[str, object] | None]] = []
@@ -269,18 +291,22 @@ async def test_write_gold_metadata_records_dataset_ref_and_fragment_id(
         )
     )
 
-    base_path = tmp_path / "output" / "gold" / "chembl" / "activity"
-    result = await writer.write_gold_metadata(
-        base_path=base_path,
-        metadata=metadata,
-        table_name="chembl.activity",
-    )
+    base_path = "/virtual/output/gold/chembl/activity"
+    with patch(
+        "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+        side_effect=_fake_atomic_write_text,
+    ):
+        result = await writer.write_gold_metadata(
+            base_path=base_path,
+            metadata=metadata,
+            table_name="chembl.activity",
+        )
 
     assert result.endswith("_metadata.yaml")
     assert len(captured) == 1
     layer, artifact_path, details = captured[0]
     assert layer == "gold"
-    assert artifact_path == str(base_path.resolve())
+    assert artifact_path == str(Path(base_path).resolve())
     assert details is not None
     assert details["run_id"] == str(metadata.runtime.run_id)
     assert details["manifest_id"] == "manifest-1"
@@ -292,7 +318,6 @@ async def test_write_gold_metadata_records_dataset_ref_and_fragment_id(
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_write_metadata_fails_when_control_plane_manifest_id_is_missing(
-    tmp_path,
 ) -> None:
     writer = MetadataWriter(logger=NoOpLogger())
     writer.attach_artifact_recorder(lambda *_args, **_kwargs: None)
@@ -301,20 +326,23 @@ async def test_write_metadata_fails_when_control_plane_manifest_id_is_missing(
 
     with pytest.raises(
         RuntimeError,
-        match="Control-plane artifact publication requires metadata.runtime.manifest_id",
+        match=r"Control-plane artifact publication requires metadata\.runtime\.manifest_id",
     ):
-        await writer.write_bronze_metadata(
-            base_path=tmp_path / "output" / "bronze" / "chembl" / "activity",
-            metadata=metadata,
-            provider="chembl",
-            entity="activity",
-        )
+        with patch(
+            "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+            side_effect=_fake_atomic_write_text,
+        ):
+            await writer.write_bronze_metadata(
+                base_path="/virtual/output/bronze/chembl/activity",
+                metadata=metadata,
+                provider="chembl",
+                entity="activity",
+            )
 
 
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_write_metadata_fails_when_control_plane_artifact_id_is_missing(
-    tmp_path,
 ) -> None:
     writer = MetadataWriter(logger=NoOpLogger())
     writer.attach_artifact_recorder(lambda *_args, **_kwargs: None)
@@ -323,11 +351,15 @@ async def test_write_metadata_fails_when_control_plane_artifact_id_is_missing(
 
     with pytest.raises(
         RuntimeError,
-        match="Control-plane artifact publication requires metadata.output.artifact_id",
+        match=r"Control-plane artifact publication requires metadata\.output\.artifact_id",
     ):
-        await writer.write_bronze_metadata(
-            base_path=tmp_path / "output" / "bronze" / "chembl" / "activity",
-            metadata=metadata,
-            provider="chembl",
-            entity="activity",
-        )
+        with patch(
+            "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+            side_effect=_fake_atomic_write_text,
+        ):
+            await writer.write_bronze_metadata(
+                base_path="/virtual/output/bronze/chembl/activity",
+                metadata=metadata,
+                provider="chembl",
+                entity="activity",
+            )

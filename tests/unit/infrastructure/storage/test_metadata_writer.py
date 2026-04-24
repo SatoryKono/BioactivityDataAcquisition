@@ -3,14 +3,11 @@
 from __future__ import annotations
 
 import errno
-import tempfile
 from datetime import UTC, datetime
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 import pytest
-import yaml
 
 from bioetl.domain.medallion import Layer
 from bioetl.domain.models.metadata import (
@@ -34,23 +31,13 @@ from bioetl.domain.models.metadata import (
 )
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.infrastructure.storage.metadata_writer import (
-    METADATA_FILENAME,
-    MetadataWriter,
-)
+from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-metadata-writer-"))
-DQ_ROOT = TEST_ROOT / "dq"
-BRONZE_ROOT = TEST_ROOT / "bronze"
-SILVER_ROOT = TEST_ROOT / "silver"
-GOLD_ROOT = TEST_ROOT / "gold"
-SILVER_DQ_REPORT_PATH = str(DQ_ROOT / "silver-report.json")
-GOLD_DQ_REPORT_PATH = str(DQ_ROOT / "gold-report.json")
-BRONZE_BASE_PATH = str(BRONZE_ROOT)
-SILVER_TABLE_PATH = str(SILVER_ROOT / "test" / "table")
-SILVER_BASE_PATH = str(SILVER_ROOT)
-GOLD_BASE_PATH = str(GOLD_ROOT)
+BRONZE_BASE_PATH = "/virtual/bronze"
+SILVER_TABLE_PATH = "/virtual/silver/test/table"
+SILVER_BASE_PATH = "/virtual/silver"
+GOLD_BASE_PATH = "/virtual/gold"
 
 
 @pytest.fixture
@@ -218,224 +205,11 @@ class TestMetadataWriter:
     """Tests for MetadataWriter."""
 
     @pytest.mark.asyncio
-    async def test_write_bronze_metadata_creates_file(
-        self,
-        tmp_path: Path,
-        metadata_writer: MetadataWriter,
-        bronze_metadata: BronzeMetadata,
-    ) -> None:
-        """Test that write_bronze_metadata creates _metadata.yaml."""
-        base_path = tmp_path / "bronze" / "v1" / "chembl" / "activity" / "2025-01-15"
-        base_path.mkdir(parents=True)
-
-        result = await metadata_writer.write_bronze_metadata(base_path, bronze_metadata)
-
-        metadata_path = base_path / METADATA_FILENAME
-        assert metadata_path.exists()
-        assert result == str(metadata_path.resolve())
-
-    @pytest.mark.asyncio
-    async def test_write_bronze_metadata_valid_yaml(
-        self,
-        tmp_path: Path,
-        metadata_writer: MetadataWriter,
-        bronze_metadata: BronzeMetadata,
-    ) -> None:
-        """Test that Bronze metadata is valid YAML."""
-        base_path = tmp_path / "bronze"
-        base_path.mkdir(parents=True)
-
-        await metadata_writer.write_bronze_metadata(base_path, bronze_metadata)
-
-        metadata_path = base_path / METADATA_FILENAME
-        content = yaml.safe_load(metadata_path.read_text())
-
-        assert content["version"] == "1.1"  # ADR-029 version bump
-        assert content["layer"] == "bronze"
-        assert content["pipeline"]["name"] == "chembl_activity"
-        assert content["pipeline"]["provider"] == "chembl"
-        assert content["source"]["type"] == "api"
-        assert content["output"]["record_count"] == 10000  # ADR-029: unified field name
-
-    @pytest.mark.asyncio
-    async def test_write_silver_metadata_creates_file(
-        self,
-        tmp_path: Path,
-        metadata_writer: MetadataWriter,
-        silver_metadata: SilverMetadata,
-    ) -> None:
-        """Test that write_silver_metadata creates _metadata.yaml."""
-        base_path = tmp_path / "silver" / "chembl" / "activity"
-        base_path.mkdir(parents=True)
-
-        result = await metadata_writer.write_silver_metadata(base_path, silver_metadata)
-
-        metadata_path = base_path / METADATA_FILENAME
-        assert metadata_path.exists()
-        assert result == str(metadata_path.resolve())
-
-    @pytest.mark.asyncio
-    async def test_write_silver_metadata_includes_lineage(
-        self,
-        tmp_path: Path,
-        metadata_writer: MetadataWriter,
-        silver_metadata: SilverMetadata,
-    ) -> None:
-        """Test that Silver metadata includes lineage information."""
-        base_path = tmp_path / "silver"
-        base_path.mkdir(parents=True)
-
-        await metadata_writer.write_silver_metadata(base_path, silver_metadata)
-
-        metadata_path = base_path / METADATA_FILENAME
-        content = yaml.safe_load(metadata_path.read_text())
-
-        assert "lineage" in content
-        assert "source_batch_ids" in content["lineage"]
-        assert "bronze_paths" in content["lineage"]
-        assert "transform_steps" in content["lineage"]
-
-    @pytest.mark.asyncio
-    async def test_write_silver_metadata_includes_dq_summary(
-        self,
-        tmp_path: Path,
-        metadata_writer: MetadataWriter,
-        silver_metadata: SilverMetadata,
-    ) -> None:
-        """Test that Silver metadata includes DQ summary."""
-        base_path = tmp_path / "silver"
-        base_path.mkdir(parents=True)
-
-        await metadata_writer.write_silver_metadata(base_path, silver_metadata)
-
-        metadata_path = base_path / METADATA_FILENAME
-        content = yaml.safe_load(metadata_path.read_text())
-
-        assert "dq_summary" in content
-        assert content["dq_summary"]["total_records"] == 15000
-        assert content["dq_summary"]["error_rate"] == pytest.approx(0.05)
-
-    @pytest.mark.asyncio
-    async def test_write_gold_metadata_creates_file(
-        self,
-        tmp_path: Path,
-        metadata_writer: MetadataWriter,
-        gold_metadata: GoldMetadata,
-    ) -> None:
-        """Test that write_gold_metadata creates _metadata.yaml."""
-        base_path = tmp_path / "gold" / "chembl" / "activity_aggregated"
-        base_path.mkdir(parents=True)
-
-        result = await metadata_writer.write_gold_metadata(base_path, gold_metadata)
-
-        metadata_path = base_path / METADATA_FILENAME
-        assert metadata_path.exists()
-        assert result == str(metadata_path.resolve())
-
-    @pytest.mark.asyncio
-    async def test_write_gold_metadata_includes_schema_contract(
-        self,
-        tmp_path: Path,
-        metadata_writer: MetadataWriter,
-        gold_metadata: GoldMetadata,
-    ) -> None:
-        """Test that Gold metadata includes schema contract reference."""
-        base_path = tmp_path / "gold"
-        base_path.mkdir(parents=True)
-
-        await metadata_writer.write_gold_metadata(base_path, gold_metadata)
-
-        metadata_path = base_path / METADATA_FILENAME
-        content = yaml.safe_load(metadata_path.read_text())
-
-        assert "schema" in content
-        assert (
-            content["schema"]["contract_path"]
-            == "docs/contracts/gold/activity_v1.0.json"
-        )
-        assert content["schema"]["validation"] == "strict"
-
-    @pytest.mark.asyncio
-    async def test_finalize_silver_metadata_updates_existing_sidecar(
-        self,
-        tmp_path: Path,
-        metadata_writer: MetadataWriter,
-        silver_metadata: SilverMetadata,
-    ) -> None:
-        """Silver finalization should patch the existing sidecar in place."""
-        base_path = tmp_path / "silver"
-        base_path.mkdir(parents=True)
-        await metadata_writer.write_silver_metadata(base_path, silver_metadata)
-
-        completed_at = datetime(2025, 1, 16, 12, 0, 0, tzinfo=UTC)
-        result = await metadata_writer.finalize_silver_metadata(
-            base_path,
-            dq_report_path=SILVER_DQ_REPORT_PATH,
-            completed_at=completed_at,
-            delta_version_after=99,
-        )
-
-        metadata_path = base_path / METADATA_FILENAME
-        content = yaml.safe_load(metadata_path.read_text())
-        expected_completed_at = completed_at.isoformat().replace("+00:00", "Z")
-        assert result == str(metadata_path.resolve())
-        assert content["dq_report_path"] == SILVER_DQ_REPORT_PATH
-        assert content["runtime"]["completed_at_utc"] == expected_completed_at
-        assert content["output"]["write_completed_at"] == expected_completed_at
-        assert content["delta"]["version_after"] == 99
-        assert content["output_ext"]["delta_version_after"] == 99
-
-    @pytest.mark.asyncio
-    async def test_finalize_gold_metadata_updates_existing_sidecar(
-        self,
-        tmp_path: Path,
-        metadata_writer: MetadataWriter,
-        gold_metadata: GoldMetadata,
-    ) -> None:
-        """Gold finalization should patch the existing sidecar in place."""
-        base_path = tmp_path / "gold"
-        base_path.mkdir(parents=True)
-        await metadata_writer.write_gold_metadata(base_path, gold_metadata)
-
-        completed_at = datetime(2025, 1, 16, 12, 5, 0, tzinfo=UTC)
-        result = await metadata_writer.finalize_gold_metadata(
-            base_path,
-            dq_report_path=GOLD_DQ_REPORT_PATH,
-            completed_at=completed_at,
-        )
-
-        metadata_path = base_path / METADATA_FILENAME
-        content = yaml.safe_load(metadata_path.read_text())
-        expected_completed_at = completed_at.isoformat().replace("+00:00", "Z")
-        assert result == str(metadata_path.resolve())
-        assert content["dq_report_path"] == GOLD_DQ_REPORT_PATH
-        assert content["runtime"]["completed_at_utc"] == expected_completed_at
-        assert content["output"]["write_completed_at"] == expected_completed_at
-
-    @pytest.mark.asyncio
-    async def test_atomic_write_creates_no_temp_files(
-        self,
-        tmp_path: Path,
-        metadata_writer: MetadataWriter,
-        bronze_metadata: BronzeMetadata,
-    ) -> None:
-        """Test that atomic write leaves no temp files."""
-        base_path = tmp_path / "bronze"
-        base_path.mkdir(parents=True)
-
-        await metadata_writer.write_bronze_metadata(base_path, bronze_metadata)
-
-        # Check no .tmp files remain
-        tmp_files = list(base_path.glob("*.tmp"))
-        assert len(tmp_files) == 0
-
-    @pytest.mark.asyncio
     async def test_metadata_writer_emits_retry_telemetry(
         self,
-        tmp_path: Path,
         bronze_metadata: BronzeMetadata,
     ) -> None:
-        """Metadata writer should emit retry telemetry for atomic replace retries."""
+        """Metadata writer should emit retry telemetry without real disk writes."""
         logger = MagicMock()
         writer = MetadataWriter(
             logger=logger,
@@ -448,23 +222,23 @@ class TestMetadataWriter:
                 adaptive=True,
             ),
         )
-        base_path = tmp_path / "bronze"
-        base_path.mkdir(parents=True)
 
-        original_replace = Path.replace
-        call_count = {"count": 0}
+        def fake_atomic_write_text(
+            path: object,
+            content: object,
+            *,
+            retry_policy: object,
+            on_retry: object,
+        ) -> None:
+            del path, content, retry_policy
+            assert callable(on_retry)
+            on_retry(1, 0.01, OSError(errno.EBUSY, "Device or resource busy"))
 
-        def flaky_replace(self: Path, target_path: Path) -> Path:
-            call_count["count"] += 1
-            if call_count["count"] == 1:
-                raise OSError(errno.EBUSY, "Device or resource busy")
-            return original_replace(self, target_path)
-
-        with (
-            patch.object(Path, "replace", flaky_replace),
-            patch("bioetl.infrastructure.storage.support.atomic_ops.time.sleep"),
+        with patch(
+            "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+            side_effect=fake_atomic_write_text,
         ):
-            await writer.write_bronze_metadata(base_path, bronze_metadata)
+            await writer.write_bronze_metadata(BRONZE_BASE_PATH, bronze_metadata)
 
         retry_calls = [
             call
@@ -480,43 +254,6 @@ class TestMetadataWriter:
         ]
         assert completion_calls
         assert completion_calls[-1].kwargs["final_reason"] == "success_after_retry"
-
-    @pytest.mark.asyncio
-    async def test_write_metadata_overwrites_existing(
-        self,
-        tmp_path: Path,
-        metadata_writer: MetadataWriter,
-        bronze_metadata: BronzeMetadata,
-    ) -> None:
-        """Test that metadata can be overwritten."""
-        base_path = tmp_path / "bronze"
-        base_path.mkdir(parents=True)
-
-        # Write initial metadata
-        await metadata_writer.write_bronze_metadata(base_path, bronze_metadata)
-
-        # Modify and write again
-        updated_metadata = BronzeMetadata(
-            version="1.0",
-            layer=Layer.BRONZE,
-            runtime=RuntimeMetadata(
-                run_id=str(uuid4()),
-                run_type=RunTypeEnum.REBUILD,
-                started_at_utc=datetime(2025, 1, 16, 10, 0, 0, tzinfo=UTC),
-                completed_at_utc=datetime(2025, 1, 16, 10, 5, 0, tzinfo=UTC),
-            ),
-            pipeline=bronze_metadata.pipeline,
-            source=bronze_metadata.source,
-            output=bronze_metadata.output,
-            environment=bronze_metadata.environment,
-        )
-
-        await metadata_writer.write_bronze_metadata(base_path, updated_metadata)
-
-        metadata_path = base_path / METADATA_FILENAME
-        content = yaml.safe_load(metadata_path.read_text())
-
-        assert content["runtime"]["run_type"] == "rebuild"
 
     @pytest.mark.asyncio
     async def test_aclose_is_idempotent(

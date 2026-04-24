@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Awaitable
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.application.core.postrun._metadata_writes import (
     build_final_metadata_write_coroutines,
     get_run_statistics,
 )
+from bioetl.domain.context import current_utc_time
 
 if TYPE_CHECKING:
     from bioetl.application.core.postrun.metadata_version_resolver import (
@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
+        ClockPort,
         ExecutorMetricsPort,
         MetadataCoordinatorPort,
         MetadataWriterPort,
@@ -40,6 +41,7 @@ class PostrunMetadataWriteService:
         metadata_coordinator: MetadataCoordinatorPort | None,
         metadata_writer: MetadataWriterPort | None,
         metadata_version_resolver: PostrunMetadataVersionResolver,
+        clock: ClockPort | None = None,
     ) -> None:
         self._config = config
         self._runtime = runtime
@@ -48,6 +50,7 @@ class PostrunMetadataWriteService:
         self._metadata_coordinator = metadata_coordinator
         self._metadata_writer = metadata_writer
         self._metadata_version_resolver = metadata_version_resolver
+        self._clock = clock
 
     async def write_final_metadata_if_available(
         self,
@@ -88,7 +91,7 @@ class PostrunMetadataWriteService:
                 context=self._context,
                 stats=get_run_statistics(executor),
                 dq_reports=dq_reports,
-                completed_at=datetime.now(UTC),
+                completed_at=self._clock.now() if self._clock is not None else current_utc_time(),
                 resolve_delta_version=self._resolve_delta_version,
             ),
         )

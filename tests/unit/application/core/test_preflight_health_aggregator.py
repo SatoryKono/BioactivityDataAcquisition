@@ -12,9 +12,11 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.application.core.preflight.health_aggregator import _HealthAggregator
+from bioetl.domain.context import current_utc_time
 from bioetl.domain.exceptions import InfrastructureError
 from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
+from tests.helpers.clock import FixedClock
 
 
 # ---------------------------------------------------------------------------
@@ -289,6 +291,23 @@ class TestHealthAggregatorCheckAll:
         report = await health_aggregator.check_all(mock_services)
         for result in report.results:
             assert result.duration_seconds >= 0.0
+
+    @pytest.mark.asyncio
+    async def test_check_all_uses_injected_clock_for_report_timestamp(
+        self,
+        mock_logger: MagicMock,
+        mock_services: MagicMock,
+    ) -> None:
+        """Report timestamp should come from the injected clock seam."""
+        fixed_now = current_utc_time()
+        aggregator = _HealthAggregator(
+            logger=mock_logger,
+            clock=FixedClock(fixed_now),
+        )
+
+        report = await aggregator.check_all(mock_services)
+
+        assert report.checked_at == fixed_now
 
 
 # ---------------------------------------------------------------------------

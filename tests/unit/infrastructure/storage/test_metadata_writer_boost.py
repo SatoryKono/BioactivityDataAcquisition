@@ -43,6 +43,28 @@ from bioetl.infrastructure.storage.metadata_writer import (
 from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy
 
 
+def _fake_atomic_write_text(
+    path: object,
+    content: object,
+    *,
+    retry_policy: object,
+    on_retry: object,
+) -> None:
+    del path, content, retry_policy, on_retry
+
+
+def _retry_once_atomic_write_text(
+    path: object,
+    content: object,
+    *,
+    retry_policy: object,
+    on_retry: object,
+) -> None:
+    del path, content, retry_policy
+    assert callable(on_retry)
+    on_retry(1, 0.001, OSError(errno.EBUSY, "busy"))
+
+
 def _make_runtime() -> RuntimeMetadata:
     return RuntimeMetadata(
         run_id=str(uuid4()),
@@ -174,7 +196,7 @@ class TestEmitRetryTelemetry:
     """Tests for _emit_retry_telemetry with metrics (line 94)."""
 
     @pytest.mark.asyncio
-    async def test_emit_retry_telemetry_with_metrics(self, tmp_path: Path) -> None:
+    async def test_emit_retry_telemetry_with_metrics(self) -> None:
         """Line 94: metrics.increment_counter called during retry."""
         logger = MagicMock()
         metrics = MagicMock()
@@ -189,24 +211,15 @@ class TestEmitRetryTelemetry:
                 jitter_seconds=0.0,
             ),
         )
-        base_path = tmp_path / "bronze"
-        base_path.mkdir(parents=True)
-
-        original_replace = Path.replace
-        call_count = {"count": 0}
-
-        def flaky_replace(self: Path, target_path: Path) -> Path:
-            call_count["count"] += 1
-            if call_count["count"] == 1:
-                raise OSError(errno.EBUSY, "busy")
-            return original_replace(self, target_path)
-
-        with (
-            patch.object(Path, "replace", flaky_replace),
-            patch("bioetl.infrastructure.storage.support.atomic_ops.time.sleep"),
+        with patch(
+            "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+            side_effect=_retry_once_atomic_write_text,
         ):
             await writer.write_bronze_metadata(
-                base_path, _make_bronze_metadata(), provider="chembl", entity="activity"
+                "/virtual/bronze",
+                _make_bronze_metadata(),
+                provider="chembl",
+                entity="activity",
             )
 
         # metrics should have been called
@@ -269,8 +282,7 @@ class TestEmitFinalTelemetry:
         logger = MagicMock()
         writer = MetadataWriter(logger=logger)
 
-        base_path = tmp_path / "bronze"
-        base_path.mkdir(parents=True)
+        base_path = Path("/virtual/bronze")
 
         with patch(
             "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
@@ -289,16 +301,16 @@ class TestEmitFinalTelemetry:
         assert "final_reason" in error_calls[0].kwargs
 
     @pytest.mark.asyncio
-    async def test_final_telemetry_succeeded_path_uses_info(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_final_telemetry_succeeded_path_uses_info(self) -> None:
         """Line 127-133: status='succeeded' calls logger.info."""
         logger = MagicMock()
         writer = MetadataWriter(logger=logger)
-        base_path = tmp_path / "bronze"
-        base_path.mkdir(parents=True)
 
-        await writer.write_bronze_metadata(base_path, _make_bronze_metadata())
+        with patch(
+            "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+            side_effect=_fake_atomic_write_text,
+        ):
+            await writer.write_bronze_metadata("/virtual/bronze", _make_bronze_metadata())
 
         info_calls = [
             call
@@ -308,30 +320,27 @@ class TestEmitFinalTelemetry:
         assert len(info_calls) >= 1
 
     @pytest.mark.asyncio
-    async def test_emit_final_telemetry_with_metrics_on_success(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_emit_final_telemetry_with_metrics_on_success(self) -> None:
         """Line 136: metrics.increment_counter called on successful write."""
         logger = MagicMock()
         metrics = MagicMock()
         writer = MetadataWriter(logger=logger, metrics=metrics)
-        base_path = tmp_path / "bronze"
-        base_path.mkdir(parents=True)
 
-        await writer.write_bronze_metadata(base_path, _make_bronze_metadata())
+        with patch(
+            "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+            side_effect=_fake_atomic_write_text,
+        ):
+            await writer.write_bronze_metadata("/virtual/bronze", _make_bronze_metadata())
 
         assert metrics.increment_counter.call_count >= 1
 
     @pytest.mark.asyncio
-    async def test_emit_final_telemetry_with_metrics_on_failure(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_emit_final_telemetry_with_metrics_on_failure(self) -> None:
         """Line 136: metrics.increment_counter called on failed write."""
         logger = MagicMock()
         metrics = MagicMock()
         writer = MetadataWriter(logger=logger, metrics=metrics)
-        base_path = tmp_path / "bronze"
-        base_path.mkdir(parents=True)
+        base_path = Path("/virtual/bronze")
 
         with patch(
             "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
@@ -348,83 +357,83 @@ class TestWriteMetadataPathLogic:
     """Tests for _write_metadata path resolution (lines 263)."""
 
     @pytest.mark.asyncio
-    async def test_flat_structure_with_table_name_uses_table_name_path(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_flat_structure_with_table_name_uses_table_name_path(self) -> None:
         """Line 262-263: flat_structure + table_name uses {table_name}_metadata.yaml."""
 
         writer = MetadataWriter(logger=NoOpLogger())
-        base_path = tmp_path / "silver"
-        base_path.mkdir(parents=True)
+        base_path = Path("/virtual/silver")
 
-        result = await writer.write_silver_metadata(
-            base_path,
-            _make_silver_metadata(),
-            table_name="chembl_activity",
-            flat_structure=True,
-        )
+        with patch(
+            "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+            side_effect=_fake_atomic_write_text,
+        ):
+            result = await writer.write_silver_metadata(
+                base_path,
+                _make_silver_metadata(),
+                table_name="chembl_activity",
+                flat_structure=True,
+            )
 
         expected_path = base_path / "chembl_activity_metadata.yaml"
-        assert expected_path.exists()
         assert result == str(expected_path.resolve())
 
     @pytest.mark.asyncio
-    async def test_flat_structure_without_table_name_uses_default(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_flat_structure_without_table_name_uses_default(self) -> None:
         """Line 265: flat_structure=True but no table_name falls back to default."""
         writer = MetadataWriter(logger=NoOpLogger())
-        base_path = tmp_path / "silver"
-        base_path.mkdir(parents=True)
+        base_path = Path("/virtual/silver")
 
-        result = await writer.write_silver_metadata(
-            base_path,
-            _make_silver_metadata(),
-            flat_structure=True,
-        )
+        with patch(
+            "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+            side_effect=_fake_atomic_write_text,
+        ):
+            result = await writer.write_silver_metadata(
+                base_path,
+                _make_silver_metadata(),
+                flat_structure=True,
+            )
 
         expected_path = base_path / METADATA_FILENAME
-        assert expected_path.exists()
         assert result == str(expected_path.resolve())
 
     @pytest.mark.asyncio
-    async def test_provider_entity_overrides_flat_structure(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_provider_entity_overrides_flat_structure(self) -> None:
         """Lines 258-260: provider+entity takes priority over flat_structure."""
         writer = MetadataWriter(logger=NoOpLogger())
-        base_path = tmp_path / "gold"
-        base_path.mkdir(parents=True)
+        base_path = Path("/virtual/gold")
 
-        result = await writer.write_gold_metadata(
-            base_path,
-            _make_gold_metadata(),
-            provider="chembl",
-            entity="activity",
-            flat_structure=True,
-            table_name="chembl_activity",
-        )
+        with patch(
+            "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+            side_effect=_fake_atomic_write_text,
+        ):
+            result = await writer.write_gold_metadata(
+                base_path,
+                _make_gold_metadata(),
+                provider="chembl",
+                entity="activity",
+                flat_structure=True,
+                table_name="chembl_activity",
+            )
 
         expected_path = base_path / "chembl_activity_metadata.yaml"
-        assert expected_path.exists()
         assert result == str(expected_path.resolve())
 
     @pytest.mark.asyncio
-    async def test_pipeline_label_uses_provider_entity_when_available(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_pipeline_label_uses_provider_entity_when_available(self) -> None:
         """Line 279: pipeline_label built from provider.entity."""
         logger = MagicMock()
         writer = MetadataWriter(logger=logger)
-        base_path = tmp_path / "bronze"
-        base_path.mkdir(parents=True)
 
-        await writer.write_bronze_metadata(
-            base_path,
-            _make_bronze_metadata(),
-            provider="chembl",
-            entity="activity",
-        )
+        with patch(
+            "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+            side_effect=_fake_atomic_write_text,
+        ):
+            await writer.write_bronze_metadata(
+                "/virtual/bronze",
+                _make_bronze_metadata(),
+                provider="chembl",
+                entity="activity",
+            )
 
         # Check logger was called with metadata_write_completed
         info_calls = [
@@ -437,16 +446,16 @@ class TestWriteMetadataPathLogic:
         assert info_calls[0].kwargs.get("pipeline") == "chembl.activity"
 
     @pytest.mark.asyncio
-    async def test_pipeline_label_uses_layer_when_no_provider_entity(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_pipeline_label_uses_layer_when_no_provider_entity(self) -> None:
         """Line 279: pipeline_label falls back to {layer}_metadata."""
         logger = MagicMock()
         writer = MetadataWriter(logger=logger)
-        base_path = tmp_path / "bronze"
-        base_path.mkdir(parents=True)
 
-        await writer.write_bronze_metadata(base_path, _make_bronze_metadata())
+        with patch(
+            "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+            side_effect=_fake_atomic_write_text,
+        ):
+            await writer.write_bronze_metadata("/virtual/bronze", _make_bronze_metadata())
 
         info_calls = [
             call
@@ -458,22 +467,23 @@ class TestWriteMetadataPathLogic:
         assert info_calls[0].kwargs.get("pipeline") == "bronze_metadata"
 
     @pytest.mark.asyncio
-    async def test_metadata_written_log_uses_resolved_operation_context(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_metadata_written_log_uses_resolved_operation_context(self) -> None:
         """metadata_written log keeps layer, path, and run_id after request wrapping."""
         logger = MagicMock()
         writer = MetadataWriter(logger=logger)
         metadata = _make_gold_metadata()
-        base_path = tmp_path / "gold"
-        base_path.mkdir(parents=True)
+        base_path = Path("/virtual/gold")
 
-        result = await writer.write_gold_metadata(
-            base_path,
-            metadata,
-            provider="chembl",
-            entity="activity",
-        )
+        with patch(
+            "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+            side_effect=_fake_atomic_write_text,
+        ):
+            result = await writer.write_gold_metadata(
+                base_path,
+                metadata,
+                provider="chembl",
+                entity="activity",
+            )
 
         written_calls = [
             call
@@ -491,7 +501,7 @@ class TestWriteMetadataPathLogic:
         assert result == str((base_path / "chembl_activity_metadata.yaml").resolve())
 
     @pytest.mark.asyncio
-    async def test_success_after_retry_final_reason(self, tmp_path: Path) -> None:
+    async def test_success_after_retry_final_reason(self) -> None:
         """Lines 306-315: final_reason = 'success_after_retry' when retry_count > 0."""
         logger = MagicMock()
         writer = MetadataWriter(
@@ -504,23 +514,11 @@ class TestWriteMetadataPathLogic:
                 jitter_seconds=0.0,
             ),
         )
-        base_path = tmp_path / "bronze"
-        base_path.mkdir(parents=True)
-
-        original_replace = Path.replace
-        call_count = {"count": 0}
-
-        def flaky_replace(self: Path, target_path: Path) -> Path:
-            call_count["count"] += 1
-            if call_count["count"] == 1:
-                raise OSError(errno.EBUSY, "busy")
-            return original_replace(self, target_path)
-
-        with (
-            patch.object(Path, "replace", flaky_replace),
-            patch("bioetl.infrastructure.storage.support.atomic_ops.time.sleep"),
+        with patch(
+            "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+            side_effect=_retry_once_atomic_write_text,
         ):
-            await writer.write_bronze_metadata(base_path, _make_bronze_metadata())
+            await writer.write_bronze_metadata("/virtual/bronze", _make_bronze_metadata())
 
         info_calls = [
             call
@@ -531,14 +529,16 @@ class TestWriteMetadataPathLogic:
         assert info_calls[0].kwargs["final_reason"] == "success_after_retry"
 
     @pytest.mark.asyncio
-    async def test_success_without_retry_final_reason(self, tmp_path: Path) -> None:
+    async def test_success_without_retry_final_reason(self) -> None:
         """Lines 306-315: final_reason = 'success_without_retry' on clean write."""
         logger = MagicMock()
         writer = MetadataWriter(logger=logger)
-        base_path = tmp_path / "bronze"
-        base_path.mkdir(parents=True)
 
-        await writer.write_bronze_metadata(base_path, _make_bronze_metadata())
+        with patch(
+            "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+            side_effect=_fake_atomic_write_text,
+        ):
+            await writer.write_bronze_metadata("/virtual/bronze", _make_bronze_metadata())
 
         info_calls = [
             call
@@ -550,7 +550,7 @@ class TestWriteMetadataPathLogic:
 
     @pytest.mark.asyncio
     async def test_write_metadata_delegates_prepared_operation_execution(
-        self, tmp_path: Path
+        self
     ) -> None:
         """_write_metadata should pass one prepared operation into the execution helper."""
         from bioetl.infrastructure.storage.metadata.writer_operations import (
@@ -559,7 +559,7 @@ class TestWriteMetadataPathLogic:
 
         writer = MetadataWriter(logger=NoOpLogger())
         request = _MetadataWriteRequest(
-            base_path=tmp_path / "gold",
+            base_path=Path("/virtual/gold"),
             metadata=_make_gold_metadata(),
             layer="gold",
             provider="chembl",

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import time
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
@@ -16,12 +15,14 @@ from bioetl.application.core.preflight.health_aggregator_runtime import (
     normalize_data_source_status,
     resolve_probe_fallback_reason,
 )
+from bioetl.domain.context import current_utc_time
 from bioetl.domain.exceptions import InfrastructureError
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
 
 if TYPE_CHECKING:
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.domain.ports import (
+        ClockPort,
         HealthCheckResult,
         HealthMonitorPort,
         LoggerPort,
@@ -38,6 +39,7 @@ class HealthAggregator:
         logger: LoggerPort | None = None,
         health_monitor: HealthMonitorPort | None = None,
         health_check_mode: Literal["strict", "probe"] = "strict",
+        clock: ClockPort | None = None,
     ) -> None:
         if health_check_mode not in {"strict", "probe"}:
             raise ValueError(
@@ -47,6 +49,7 @@ class HealthAggregator:
         self._logger = logger
         self._health_monitor = health_monitor
         self._health_check_mode = health_check_mode
+        self._clock = clock
 
     async def check_all(self, services: PipelineService) -> HealthReport:
         """Check storage and data source health in parallel.
@@ -72,7 +75,7 @@ class HealthAggregator:
 
         report = HealthReport(
             results=component_results,
-            checked_at=datetime.now(tz=UTC),
+            checked_at=self._clock.now() if self._clock is not None else current_utc_time(),
         )
         return report
 
