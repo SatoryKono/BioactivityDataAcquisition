@@ -23,6 +23,7 @@ import ast
 import logging
 import re
 import sys
+from collections import defaultdict
 from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import StrEnum
@@ -105,7 +106,39 @@ class NamingRegistry:
     stable_transformers: tuple[StablePublicName, ...]
     stable_gold_schemas: tuple[StablePublicName, ...]
     forbidden_domain_entity_aliases: tuple[ForbiddenAlias, ...]
+    adr_024_derived_entities: tuple[StablePublicName, ...]
+    adr_024_legacy_fields: tuple[StablePublicName, ...]
     adr_024_backward_compatibility: tuple[BackwardCompatibilitySurface, ...]
+
+
+class AmbiguityClassification(StrEnum):
+    """Classification for naming-family overlap."""
+
+    OK = "OK"
+    COMPAT = "COMPAT"
+    CONFLICT = "CONFLICT"
+    DUPLICATE = "DUPLICATE"
+
+
+@dataclass(frozen=True)
+class SymbolSurface:
+    """Discovered symbol participating in a naming ambiguity family."""
+
+    name: str
+    kind: str
+    location: str
+    semantic_family: str
+    source: str
+
+
+@dataclass(frozen=True)
+class AmbiguityGroup:
+    """Deterministic ambiguity-group snapshot."""
+
+    normalized_stem: str
+    symbols: tuple[SymbolSurface, ...]
+    classification: AmbiguityClassification
+    rationale: str
 
 
 # Суффиксы для классов по ролям
@@ -154,6 +187,81 @@ _DOC_EXCLUDED_SUBPATHS = {
     "reports/evidence",
 }
 
+_GENERIC_FAMILY_TOKENS = frozenset(
+    {
+        "pipeline",
+        "transformer",
+        "gold",
+        "schema",
+        "entity",
+        "base",
+        "model",
+        "record",
+    }
+)
+_EXPLICIT_NAME_FAMILIES = {
+    "pubchemmolecule": "pubchem:molecule",
+    "pubchemcompound": "pubchem:molecule",
+    "pubchemcompoundpipeline": "pubchem:molecule",
+    "pubchemcompoundtransformer": "pubchem:molecule",
+    "pubchemcompoundgoldschema": "pubchem:molecule",
+    "pubchem_compound": "pubchem:molecule",
+    "uniprottarget": "uniprot:target",
+    "uniprotprotein": "uniprot:target",
+    "uniprotproteinpipeline": "uniprot:target",
+    "uniprotproteintransformer": "uniprot:target",
+    "uniprotproteingoldschema": "uniprot:target",
+    "uniprot_protein": "uniprot:target",
+    "chemblpublication": "chembl:publication",
+    "chemblpublicationsimilarity": "chembl:publication",
+    "chemblpublicationterm": "chembl:publication",
+    "chembl_publication": "chembl:publication",
+    "chembl_publication_similarity": "chembl:publication",
+    "chembl_publication_term": "chembl:publication",
+    "document": "chembl:publication",
+    "documentsimilarity": "chembl:publication",
+    "documentterm": "chembl:publication",
+    "document_id": "chembl:publication",
+    "documentchemblid": "chembl:publication",
+    "document_chembl_id": "chembl:publication",
+    "compound": "pubchem:molecule",
+    "protein": "uniprot:target",
+}
+_EXPLICIT_OK_FAMILY_MEMBERS = {
+    "pubchem:molecule": frozenset(
+        {
+            "PubchemMolecule",
+            "pubchem_compound",
+            "PubChemCompoundPipeline",
+            "PubChemCompoundTransformer",
+            "PubChemCompoundGoldSchema",
+        }
+    ),
+    "uniprot:target": frozenset(
+        {
+            "UniprotTarget",
+            "uniprot_protein",
+            "UniProtProteinPipeline",
+            "UniProtProteinTransformer",
+            "UniProtProteinGoldSchema",
+        }
+    ),
+    "chembl:publication": frozenset(
+        {
+            "ChemblPublication",
+            "ChemblPublicationSimilarity",
+            "ChemblPublicationTerm",
+            "chembl_publication",
+            "chembl_publication_similarity",
+            "chembl_publication_term",
+            "DocumentSimilarity",
+            "DocumentTerm",
+            "document_id",
+            "document_chembl_id",
+        }
+    ),
+}
+
 
 def _normalize_doc_excluded_subpath(subpath: str) -> str:
     """Normalize configured docs exclusion prefixes to docs-root-relative paths."""
@@ -188,6 +296,30 @@ def _load_stable_names(raw: object) -> tuple[StablePublicName, ...]:
         location = str(item.get("location", "")).strip()
         reason = str(item.get("reason", "")).strip()
         if name and location and reason:
+            entries.append(
+                StablePublicName(name=name, location=location, reason=reason)
+            )
+    return tuple(entries)
+
+
+def _load_named_registry_entries(
+    raw: object,
+    *,
+    key: str,
+    registry_location: str,
+) -> tuple[StablePublicName, ...]:
+    """Parse simple ADR-024 exception entries into named registry records."""
+    if not isinstance(raw, list):
+        return ()
+
+    entries: list[StablePublicName] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get(key, "")).strip()
+        location = str(item.get("location", "")).strip() or registry_location
+        reason = str(item.get("reason", "")).strip()
+        if name and reason:
             entries.append(
                 StablePublicName(name=name, location=location, reason=reason)
             )
@@ -293,6 +425,16 @@ def load_naming_registry(
         forbidden_domain_entity_aliases=_load_forbidden_aliases(
             payload.get("forbidden_domain_entity_aliases", [])
         ),
+        adr_024_derived_entities=_load_named_registry_entries(
+            adr_024_known_exceptions.get("derived_entities", []),
+            key="entity",
+            registry_location=str(registry_path),
+        ),
+        adr_024_legacy_fields=_load_named_registry_entries(
+            adr_024_known_exceptions.get("legacy_fields", []),
+            key="field",
+            registry_location=str(registry_path),
+        ),
         adr_024_backward_compatibility=_load_backward_compatibility_surfaces(
             adr_024_known_exceptions.get("backward_compatibility", [])
         ),
@@ -395,6 +537,16 @@ def _iter_python_files(base_path: Path) -> Iterator[Path]:
         yield py_file
 
 
+def _iter_python_modules_with_trees(base_path: Path) -> Iterator[tuple[Path, ast.Module]]:
+    """Yield parsed AST modules under the requested base path."""
+    for py_file in _iter_python_files(base_path):
+        try:
+            tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
+        except (OSError, SyntaxError, UnicodeDecodeError):
+            continue
+        yield py_file, tree
+
+
 def _class_naming_violation(py_file: Path, node: ast.ClassDef) -> Violation | None:
     class_name = node.name
 
@@ -412,6 +564,312 @@ def _class_naming_violation(py_file: Path, node: ast.ClassDef) -> Violation | No
         issue=ViolationType.CAMELCASE,
         recommendation=class_name[0].upper() + class_name[1:],
     )
+
+
+def _exported_names_from_all_assign(node: ast.Assign) -> set[str]:
+    """Return exported string names from a __all__ assignment."""
+    if not isinstance(node.value, (ast.List, ast.Tuple)):
+        return set()
+    return {
+        elt.value
+        for elt in node.value.elts
+        if isinstance(elt, ast.Constant) and isinstance(elt.value, str)
+    }
+
+
+def _is_all_assignment(node: ast.AST) -> bool:
+    """Check whether a node assigns to __all__."""
+    if not isinstance(node, ast.Assign):
+        return False
+    return any(
+        isinstance(target, ast.Name) and target.id == "__all__"
+        for target in node.targets
+    )
+
+
+def _extract_all_exports(path: Path) -> set[str]:
+    """Extract string exports from a module __all__ assignment."""
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    except (OSError, SyntaxError, UnicodeDecodeError):
+        return set()
+    for node in tree.body:
+        if _is_all_assignment(node):
+            return _exported_names_from_all_assign(node)
+    return set()
+
+
+def _tokenize_symbol_name(name: str) -> list[str]:
+    """Tokenize snake_case and PascalCase names into lowercase semantic parts."""
+    snake = re.sub(r"(?<!^)(?=[A-Z])", "_", name).replace("-", "_")
+    return [part for part in snake.lower().split("_") if part]
+
+
+def _lexical_semantic_family(name: str) -> str | None:
+    """Conservative fallback family for synthetic duplicate detection."""
+    tokens = [
+        token
+        for token in _tokenize_symbol_name(name)
+        if token not in _GENERIC_FAMILY_TOKENS
+    ]
+    if not tokens:
+        return None
+    return "candidate:" + "_".join(tokens)
+
+
+def _resolve_semantic_family(name: str) -> str | None:
+    """Resolve a semantic family using explicit mappings before lexical fallback."""
+    return _EXPLICIT_NAME_FAMILIES.get(name) or _EXPLICIT_NAME_FAMILIES.get(
+        name.replace("_", "").lower()
+    )
+
+
+def _class_surface_kind(py_file: Path, class_name: str) -> str | None:
+    """Classify active code surfaces relevant to ambiguity detection."""
+    normalized = py_file.as_posix()
+    if normalized.endswith("/domain/entities/__init__.py"):
+        return None
+    if "/application/pipelines/" in normalized and class_name.endswith("Pipeline"):
+        return "pipeline_class"
+    if "/application/pipelines/" in normalized and class_name.endswith("Transformer"):
+        return "transformer"
+    if "/domain/contracts/gold/" in normalized and class_name.endswith("Schema"):
+        return "gold_schema"
+    if "/domain/entities/" in normalized and not class_name.endswith("Record"):
+        return "domain_entity"
+    return None
+
+
+def _iter_class_symbol_surfaces(src_path: Path) -> Iterator[SymbolSurface]:
+    """Discover relevant class surfaces from code."""
+    for py_file, tree in _iter_python_modules_with_trees(src_path):
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.ClassDef):
+                continue
+            if node.name.startswith("_"):
+                continue
+            kind = _class_surface_kind(py_file, node.name)
+            if kind is None:
+                continue
+            semantic_family = _resolve_semantic_family(node.name) or _lexical_semantic_family(
+                node.name
+            )
+            if semantic_family is None:
+                continue
+            yield SymbolSurface(
+                name=node.name,
+                kind=kind,
+                location=str(py_file),
+                semantic_family=semantic_family,
+                source="code",
+            )
+
+
+def _iter_domain_export_surfaces(
+    src_path: Path,
+    registry: NamingRegistry,
+) -> Iterator[SymbolSurface]:
+    """Discover exported domain entity facade symbols."""
+    exports_path = src_path / "domain" / "entities" / "__init__.py"
+    exports = _extract_all_exports(exports_path)
+    forbidden_alias_names = {
+        alias.legacy_name for alias in registry.forbidden_domain_entity_aliases
+    }
+
+    for name in sorted(exports):
+        semantic_family = _resolve_semantic_family(name) or _lexical_semantic_family(name)
+        if semantic_family is None:
+            continue
+        kind = "forbidden_alias" if name in forbidden_alias_names else "domain_export"
+        yield SymbolSurface(
+            name=name,
+            kind=kind,
+            location=str(exports_path),
+            semantic_family=semantic_family,
+            source="code",
+        )
+
+
+def _iter_pipeline_id_surfaces(configs_path: Path) -> Iterator[SymbolSurface]:
+    """Discover active pipeline IDs from entity configs."""
+    entities_root = configs_path / "entities"
+    if not entities_root.exists():
+        return
+
+    for yaml_file in sorted(entities_root.rglob("*.yaml")):
+        try:
+            payload = yaml.safe_load(yaml_file.read_text(encoding="utf-8")) or {}
+        except (OSError, yaml.YAMLError):
+            continue
+        if not isinstance(payload, dict):
+            continue
+        pipeline = payload.get("pipeline")
+        if not isinstance(pipeline, dict):
+            continue
+        pipeline_name = str(pipeline.get("pipeline_name", "")).strip()
+        if not pipeline_name:
+            continue
+        semantic_family = _resolve_semantic_family(pipeline_name) or _lexical_semantic_family(
+            pipeline_name
+        )
+        if semantic_family is None:
+            continue
+        yield SymbolSurface(
+            name=pipeline_name,
+            kind="pipeline_id",
+            location=str(yaml_file),
+            semantic_family=semantic_family,
+            source="config",
+        )
+
+
+def _iter_registry_symbol_surfaces(registry: NamingRegistry) -> Iterator[SymbolSurface]:
+    """Materialize registry-backed ambiguity surfaces not otherwise visible in code."""
+    for entry in registry.adr_024_derived_entities:
+        semantic_family = _resolve_semantic_family(entry.name) or _lexical_semantic_family(
+            entry.name
+        )
+        if semantic_family is None:
+            continue
+        yield SymbolSurface(
+            name=entry.name,
+            kind="derived_entity",
+            location=entry.location,
+            semantic_family=semantic_family,
+            source="registry",
+        )
+
+    for entry in registry.adr_024_legacy_fields:
+        semantic_family = _resolve_semantic_family(entry.name) or _lexical_semantic_family(
+            entry.name
+        )
+        if semantic_family is None:
+            continue
+        yield SymbolSurface(
+            name=entry.name,
+            kind="legacy_field",
+            location=entry.location,
+            semantic_family=semantic_family,
+            source="registry",
+        )
+
+
+def _iter_all_symbol_surfaces(
+    src_path: Path,
+    configs_path: Path,
+    registry: NamingRegistry,
+) -> Iterator[SymbolSurface]:
+    """Enumerate all naming surfaces participating in ambiguity detection."""
+    yield from _iter_class_symbol_surfaces(src_path)
+    yield from _iter_domain_export_surfaces(src_path, registry)
+    yield from _iter_pipeline_id_surfaces(configs_path)
+    yield from _iter_registry_symbol_surfaces(registry)
+
+
+def _stable_registry_name_index(registry: NamingRegistry) -> set[str]:
+    """Return all explicitly registered stable or exceptional names."""
+    return {
+        entry.name
+        for entry in (
+            *registry.stable_pipeline_ids,
+            *registry.stable_pipeline_classes,
+            *registry.stable_transformers,
+            *registry.stable_gold_schemas,
+            *registry.adr_024_derived_entities,
+            *registry.adr_024_legacy_fields,
+        )
+    }
+
+
+def _compatibility_alias_index(registry: NamingRegistry) -> set[str]:
+    """Return exact compatibility aliases declared in the registry."""
+    aliases: set[str] = set()
+    for entry in registry.adr_024_backward_compatibility:
+        aliases.update(entry.aliases)
+    return aliases
+
+
+def classify_ambiguity_group(
+    normalized_stem: str,
+    symbols: tuple[SymbolSurface, ...],
+    registry: NamingRegistry,
+) -> AmbiguityGroup:
+    """Classify one ambiguity group using registry-backed policy rules."""
+    ordered_symbols = tuple(
+        sorted(symbols, key=lambda symbol: (symbol.name, symbol.kind, symbol.location))
+    )
+    if any(symbol.kind == "forbidden_alias" for symbol in ordered_symbols):
+        return AmbiguityGroup(
+            normalized_stem=normalized_stem,
+            symbols=ordered_symbols,
+            classification=AmbiguityClassification.CONFLICT,
+            rationale=(
+                "Forbidden ADR-024 alias surfaced on an active export without an "
+                "explicit compatibility decision."
+            ),
+        )
+
+    exact_compat_aliases = _compatibility_alias_index(registry)
+    if any(symbol.name in exact_compat_aliases for symbol in ordered_symbols):
+        return AmbiguityGroup(
+            normalized_stem=normalized_stem,
+            symbols=ordered_symbols,
+            classification=AmbiguityClassification.COMPAT,
+            rationale=(
+                "Exact compatibility alias is registered in ADR-024 backward "
+                "compatibility metadata."
+            ),
+        )
+
+    allowlisted_names = _stable_registry_name_index(registry) | set(
+        _EXPLICIT_OK_FAMILY_MEMBERS.get(normalized_stem, frozenset())
+    )
+    unresolved = [
+        symbol for symbol in ordered_symbols if symbol.name not in allowlisted_names
+    ]
+    if unresolved:
+        unresolved_summary = ", ".join(
+            sorted(f"{symbol.name}:{symbol.kind}" for symbol in unresolved)
+        )
+        return AmbiguityGroup(
+            normalized_stem=normalized_stem,
+            symbols=ordered_symbols,
+            classification=AmbiguityClassification.DUPLICATE,
+            rationale=(
+                "Overlap family has active surfaces without registry-backed "
+                f"distinction: {unresolved_summary}"
+            ),
+        )
+
+    return AmbiguityGroup(
+        normalized_stem=normalized_stem,
+        symbols=ordered_symbols,
+        classification=AmbiguityClassification.OK,
+        rationale="All non-canonical overlap surfaces are explicitly registered.",
+    )
+
+
+def build_ambiguity_groups(
+    src_path: Path,
+    configs_path: Path,
+    registry: NamingRegistry,
+) -> list[AmbiguityGroup]:
+    """Build a deterministic ambiguity map for naming-family overlap."""
+    grouped: dict[str, dict[tuple[str, str, str], SymbolSurface]] = defaultdict(dict)
+    for symbol in _iter_all_symbol_surfaces(src_path, configs_path, registry):
+        grouped[symbol.semantic_family][
+            (symbol.name, symbol.kind, symbol.location)
+        ] = symbol
+
+    groups: list[AmbiguityGroup] = []
+    for semantic_family in sorted(grouped):
+        symbols = tuple(grouped[semantic_family].values())
+        if len(symbols) < 2 and not any(
+            symbol.kind == "forbidden_alias" for symbol in symbols
+        ):
+            continue
+        groups.append(classify_ambiguity_group(semantic_family, symbols, registry))
+    return groups
 
 
 def _doc_relative_parts(docs_path: Path, md_file: Path) -> tuple[Path | None, tuple[str, ...]]:
@@ -623,6 +1081,49 @@ def format_report(results: dict[str, list[Violation]]) -> str:
     return "\n".join(lines)
 
 
+def _format_symbol_list(symbols: tuple[SymbolSurface, ...]) -> str:
+    """Render ambiguity-group symbols deterministically."""
+    return ", ".join(f"{symbol.name} ({symbol.kind})" for symbol in symbols)
+
+
+def _format_path_list(symbols: tuple[SymbolSurface, ...]) -> str:
+    """Render unique source paths for one ambiguity group."""
+    unique_paths = sorted({symbol.location for symbol in symbols})
+    return ", ".join(f"`{path}`" for path in unique_paths)
+
+
+def format_ambiguity_section(ambiguity_groups: list[AmbiguityGroup]) -> str:
+    """Format ambiguity groups as a markdown report section."""
+    lines = [
+        "## Ambiguity Groups",
+        "",
+        "| Family | Symbols | Classification | Paths | Rationale |",
+        "|--------|---------|----------------|-------|-----------|",
+    ]
+    if not ambiguity_groups:
+        lines.append("| - | - | - | - | No ambiguity groups detected. |")
+        lines.append("")
+        return "\n".join(lines)
+
+    for group in ambiguity_groups:
+        lines.append(
+            "| "
+            f"`{group.normalized_stem}` | {_format_symbol_list(group.symbols)} | "
+            f"{group.classification.value} | {_format_path_list(group.symbols)} | "
+            f"{group.rationale} |"
+        )
+    lines.append("")
+    return "\n".join(lines)
+
+
+def format_full_report(
+    results: dict[str, list[Violation]],
+    ambiguity_groups: list[AmbiguityGroup],
+) -> str:
+    """Format the standard report plus ambiguity-classifier output."""
+    return format_report(results) + "\n\n" + format_ambiguity_section(ambiguity_groups)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Naming Convention Audit Tool for BioETL"
@@ -698,13 +1199,26 @@ def main() -> int:
         return 1
 
     results = run_audit(src_path, docs_path, configs_path, registry)
-    report = format_report(results)
+    ambiguity_groups = build_ambiguity_groups(src_path, configs_path, registry)
+    report = format_full_report(results, ambiguity_groups)
     _emit_report(report, args.output)
 
     # CI mode
     total_violations = sum(len(v) for v in results.values())
-    if args.check and total_violations > 0:
-        logger.error("Found %d naming violations", total_violations)
+    blocking_ambiguity_groups = [
+        group
+        for group in ambiguity_groups
+        if group.classification
+        in {AmbiguityClassification.CONFLICT, AmbiguityClassification.DUPLICATE}
+    ]
+    if args.check and (total_violations > 0 or blocking_ambiguity_groups):
+        if total_violations > 0:
+            logger.error("Found %d naming violations", total_violations)
+        if blocking_ambiguity_groups:
+            logger.error(
+                "Found %d blocking ambiguity groups",
+                len(blocking_ambiguity_groups),
+            )
         return 1
 
     return 0

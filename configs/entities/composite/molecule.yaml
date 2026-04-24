@@ -10,11 +10,36 @@ entity: molecule
 # Active composite runtime uses configs/composites/*.yaml instead.
 pipeline:
   provider: composite
-  entity: molecule
+  entity_type: molecule
   pipeline_name: composite_molecule
 
 schema:
   compatibility_mode: legacy_composite_entity_stub
+  column_groups:
+    - name: system
+      fields:
+        - entity_id
+        - content_hash
+        - _run_id
+        - _run_type
+        - _source_batch_id
+        - _source
+        - _ingestion_ts
+        - _index
+        - _lookup_method
+        - _original_id
+    - name: business
+      fields:
+        - composite_molecule_id
+        - source_priority
+  silver:
+    include_groups:
+      - system
+      - business
+  gold:
+    include_groups:
+      - system
+      - business
 
 filters:
   compatibility_mode: legacy_composite_entity_stub
