@@ -256,6 +256,46 @@ def test_naming_audit_uses_registry_for_doc_exceptions(tmp_path: Path) -> None:
     )
 
 
+def test_naming_audit_uses_registry_for_path_level_doc_exceptions(tmp_path: Path) -> None:
+    mod = _load_naming_audit_module()
+    registry = mod.load_naming_registry()
+
+    docs_path = tmp_path / "docs"
+    (docs_path / "legacy").mkdir(parents=True)
+    (docs_path / "legacy" / "UPPER_CASE_GUIDE.md").write_text(
+        "# ok\n",
+        encoding="utf-8",
+    )
+
+    augmented_registry = registry.__class__(
+        documentation_exceptions=frozenset(
+            {*registry.documentation_exceptions, "docs/legacy/UPPER_CASE_GUIDE.md"}
+        ),
+        class_suffix_exceptions=registry.class_suffix_exceptions,
+        function_prefix_exceptions=registry.function_prefix_exceptions,
+        stable_pipeline_ids=registry.stable_pipeline_ids,
+        stable_pipeline_classes=registry.stable_pipeline_classes,
+        stable_transformers=registry.stable_transformers,
+        stable_gold_schemas=registry.stable_gold_schemas,
+        forbidden_domain_entity_aliases=registry.forbidden_domain_entity_aliases,
+        adr_024_derived_entities=registry.adr_024_derived_entities,
+        adr_024_legacy_fields=registry.adr_024_legacy_fields,
+        adr_024_backward_compatibility=registry.adr_024_backward_compatibility,
+    )
+
+    results = mod.run_audit(
+        tmp_path / "src",
+        docs_path,
+        tmp_path / "configs",
+        augmented_registry,
+    )
+
+    assert all(
+        violation.current_name != "UPPER_CASE_GUIDE.md"
+        for violation in results["docs"]
+    )
+
+
 def test_naming_policy_and_glossary_distinguish_canonical_and_stable_public_names() -> (
     None
 ):

@@ -5,6 +5,8 @@ Aligned with RULES.md v5.24 and ChEMBL 34 schema.
 
 from __future__ import annotations
 
+from typing import cast
+
 import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
@@ -195,4 +197,4 @@ class AssaySchema(ETLRecordSchema):
     @pa.check("confidence_score", name="confidence_score_integer")
     def confidence_score_integer(cls, series: Series[float]) -> Series[bool]:
         """Require confidence scores to remain integer-valued after coercion."""
-        return series.mod(1).eq(0)
+        return cast(Series[bool], series.mod(1).eq(0))

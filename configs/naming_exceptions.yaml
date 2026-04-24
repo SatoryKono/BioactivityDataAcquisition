@@ -21,6 +21,34 @@ documentation_exceptions:
     - TOOLS.md            # Tool reference docs
     - CODEX.md            # Codex runtime docs
     - GEMINI.md           # Gemini runtime docs
+    # Governance-approved legacy docs retained without bulk rename churn.
+    - docs/00-project/DOCUMENTATION_GOVERNANCE.md
+    - docs/05-architecture/COMPLEX_COMPONENTS_DOCUMENTATION.md
+    - docs/05-architecture/EXECUTION_LOG_2024-08-21.md
+    - docs/05-architecture/IMPLEMENTATION_PLAN.md
+    - docs/05-architecture/NEXT_STEPS.md
+    - docs/05-architecture/TECHNICAL_DEBT_REDUCTION_SUMMARY.md
+    - docs/05-architecture/TECHNICAL_DEBT_TRACKING.md
+    - docs/05-engineering/normalization_plan_P0_P6.md
+    - docs/fixes/cross_platform_test_setup.md
+    - docs/fixes/test_dependency_fixes.md
+    - docs/refactoring_plans/runtime_metadata_factory_refactoring_plan.md
+    - docs/05-architecture/analysis/COORDINATOR_COMPLEXITY_ANALYSIS.md
+    - docs/05-architecture/analysis/GOD_OBJECTS_DECOMPOSITION_ANALYSIS.md
+    - docs/05-architecture/analysis/NEO4J_MEMORY_TECHNICAL_DEBT_ANALYSIS.md
+    - docs/05-architecture/analysis/RUNNER_MIXIN_ARCHITECTURE_ANALYSIS.md
+    - docs/05-operations/tooling/scripts-ops/00_START_HERE.md
+    - docs/05-operations/tooling/scripts-ops/CODEX_QUICK_REF.md
+    - docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md
+    - docs/05-operations/tooling/scripts-ops/CODEX_WSL_QUICK_REF.md
+    - docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md
+    - docs/05-operations/tooling/scripts-ops/HOW_TO_RUN.md
+    - docs/05-operations/tooling/scripts-ops/INSTALLATION_COMPLETE.md
+    - docs/05-operations/tooling/scripts-ops/QUICK_START.md
+    - docs/05-operations/tooling/scripts-ops/SETUP_CHECKLIST.md
+    - docs/05-operations/tooling/scripts-ops/SMOKE_TEST_README.md
+    - docs/05-operations/tooling/scripts-ops/WSL_SETUP_SUMMARY.md
+    - docs/plugins/link_checker/INTEGRATION_GUIDE.md
 
 # Root-level files that may use non-standard naming
 root_file_exceptions:

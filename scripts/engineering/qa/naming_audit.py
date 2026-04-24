@@ -917,6 +917,34 @@ def _doc_relative_parts(docs_path: Path, md_file: Path) -> tuple[Path | None, tu
         return None, ()
 
 
+def _normalize_doc_exception_path(value: str) -> str:
+    """Normalize docs exception paths to docs-root-relative slash form."""
+    normalized = value.replace("\\", "/").strip("/")
+    if normalized.startswith("docs/"):
+        normalized = normalized.removeprefix("docs/")
+    return normalized
+
+
+def _is_documentation_exception(
+    docs_path: Path,
+    md_file: Path,
+    documentation_exceptions: frozenset[str],
+) -> bool:
+    """Match documentation exceptions by filename or docs-relative path."""
+    if md_file.name in documentation_exceptions:
+        return True
+    rel, _ = _doc_relative_parts(docs_path, md_file)
+    if rel is None:
+        return False
+    normalized_rel = _normalize_doc_exception_path(str(rel))
+    normalized_exceptions = {
+        _normalize_doc_exception_path(value)
+        for value in documentation_exceptions
+        if "/" in value or "\\" in value
+    }
+    return normalized_rel in normalized_exceptions
+
+
 def _is_excluded_doc_path(docs_path: Path, md_file: Path) -> bool:
     rel, rel_parts = _doc_relative_parts(docs_path, md_file)
     if rel_parts and rel_parts[0] in _DOC_EXCLUDED_DIRS:
@@ -984,7 +1012,7 @@ def check_documentation(
         filename = md_file.name
 
         # Исключения для конвенционных файлов
-        if filename in documentation_exceptions:
+        if _is_documentation_exception(docs_path, md_file, documentation_exceptions):
             continue
 
         if _is_excluded_doc_path(docs_path, md_file):
