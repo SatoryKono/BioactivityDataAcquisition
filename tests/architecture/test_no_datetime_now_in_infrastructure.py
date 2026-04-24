@@ -29,9 +29,6 @@ INFRASTRUCTURE_DIR = Path("src/bioetl/infrastructure")
 # Path-based allowlist only. Basename matching can silently widen exemptions
 # when the same filename exists in multiple infrastructure subpackages.
 ALLOWED_PATHS: set[str] = {
-    # infrastructure/storage/silver_writer.py
-    # Uses datetime.now(UTC) for audit logging timestamps.
-    "storage/silver_writer.py",
     # infrastructure/adapters/common/api_request_collector.py
     # Uses datetime.now(UTC) for request timestamp when caller doesn't provide one.
     # This is for audit/debugging metadata, not Bronze/Silver/Gold data determinism.

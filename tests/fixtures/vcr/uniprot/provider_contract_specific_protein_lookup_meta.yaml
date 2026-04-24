@@ -1,0 +1,8 @@
+schema_version: 1
+provider: uniprot
+cassette_rel_path: tests/fixtures/vcr/uniprot/provider_contract_specific_protein_lookup.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: d855260354572cc4e56f382cabcbc9cce4d5589d0e52afab5c1dda4b39e8cd14
+recorded_at: '2026-04-24'
+staleness_ready: true

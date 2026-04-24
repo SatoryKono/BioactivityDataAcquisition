@@ -63,7 +63,9 @@ class TestMetricsPortContract:
                 },
             )
 
-            HISTOGRAMS["bioetl_pipeline_duration_seconds"].labels.assert_called_once_with(
+            HISTOGRAMS[
+                "bioetl_pipeline_duration_seconds"
+            ].labels.assert_called_once_with(
                 pipeline="chembl_activity",
                 stage="extract",
                 status="success",

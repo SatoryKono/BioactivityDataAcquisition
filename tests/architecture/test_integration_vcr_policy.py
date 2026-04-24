@@ -14,7 +14,8 @@ MATRIX_PATH = ROOT / "configs" / "quality" / "test_matrix.yaml"
 CONFTST_PATH = ROOT / "tests" / "conftest.py"
 TESTING_GUIDE_PATH = ROOT / "docs" / "03-guides" / "testing.md"
 DEV_README_PATH = ROOT / "scripts" / "engineering" / "dev" / "README.md"
-DATA_README_PATH = ROOT / "scripts" / "data" / "README.md"
+QA_README_PATH = ROOT / "scripts" / "engineering" / "qa" / "README.md"
+MIGRATIONS_README_PATH = ROOT / "scripts" / "ops" / "migrations" / "README.md"
 CONTRIBUTING_PATH = ROOT / ".github" / "CONTRIBUTING.md"
 VCR_TASKS_PATH = ROOT / "docs" / "05-operations" / "verification" / "vcr-test-tasks.md"
 CURATED_INTEGRATION_MARKER_FILES = (
@@ -145,6 +146,10 @@ class TestIntegrationVcrPolicy:
         assert refresh_protocol["preferred_refresh_mode"] == "new_episodes"
         assert (
             "python -m scripts.engineering.qa.vcr check-secrets"
+            in refresh_protocol["post_refresh_checks"]
+        )
+        assert (
+            "python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
             in refresh_protocol["post_refresh_checks"]
         )
         assert (
@@ -328,7 +333,7 @@ class TestIntegrationVcrPolicy:
         live_contract = policy["execution_paths"]["live_contract"]
 
         required_guide_anchors = (
-            "`partial` rollout",
+            "`enforced` rollout",
             "reports/quality/vcr-metadata-catalog.json",
             "scripts/engineering/qa/report_vcr_metadata_catalog.py",
             "scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py",
@@ -358,7 +363,8 @@ class TestIntegrationVcrPolicy:
     def test_dev_and_data_readmes_publish_policy_backed_execution_paths(self) -> None:
         policy = _load_yaml(POLICY_PATH)
         dev_readme = DEV_README_PATH.read_text(encoding="utf-8")
-        data_readme = DATA_README_PATH.read_text(encoding="utf-8")
+        qa_readme = QA_README_PATH.read_text(encoding="utf-8")
+        migrations_readme = MIGRATIONS_README_PATH.read_text(encoding="utf-8")
         contributing = CONTRIBUTING_PATH.read_text(encoding="utf-8")
 
         assert "configs/quality/integration_vcr_policy.yaml" in dev_readme
@@ -375,12 +381,12 @@ class TestIntegrationVcrPolicy:
         )
         assert "--vcr-record=new_episodes" in dev_readme
 
-        assert "configs/quality/integration_vcr_policy.yaml" in data_readme
-        assert "python -m scripts.engineering.qa.vcr check-placement" in data_readme
-        assert "python -m scripts.engineering.qa.vcr check-secrets" in data_readme
+        assert "report-vcr-metadata" in qa_readme
+        assert "python scripts/engineering/qa/report_vcr_metadata_catalog.py --check" in qa_readme
+        assert "backfill_vcr_metadata_sidecars.py" in migrations_readme
         assert (
-            "python -m scripts.engineering.qa report-vcr-metadata --check"
-            in data_readme
+            "scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py"
+            in migrations_readme
         )
 
         assert "docs/03-guides/testing.md" in contributing

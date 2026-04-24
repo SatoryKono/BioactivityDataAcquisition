@@ -146,6 +146,7 @@ class PipelineRunnerService:
             run_id=effective_run_id,
             run_type=effective_options.run_type,
             status="started",
+            timestamp=started_at,
         )
         dry_run_result = self._maybe_dry_run_result(
             pipeline_name=pipeline_name,
@@ -161,6 +162,7 @@ class PipelineRunnerService:
                 run_id=effective_run_id,
                 run_type=effective_options.run_type,
                 status=dry_run_result.status.value,
+                timestamp=dry_run_result.completed_at,
             )
             return dry_run_result
 
@@ -297,6 +299,7 @@ class PipelineRunnerService:
             run_id=run_id,
             run_type=run_type,
             status=result.status.value,
+            timestamp=result.completed_at,
             manifest_id=result.manifest_id,
             error_type=result.error_type,
         )
@@ -328,6 +331,7 @@ class PipelineRunnerService:
         run_id: RunID,
         run_type: str,
         status: str,
+        timestamp: datetime,
         manifest_id: str | None = None,
         error_type: str | None = None,
     ) -> None:
@@ -342,7 +346,7 @@ class PipelineRunnerService:
             event_data["manifest_id"] = manifest_id
         if error_type is not None:
             event_data["error_type"] = error_type
-        self.audit.log_event(event_name, event_data)
+        self.audit.log_event(event_name, event_data, timestamp=timestamp)
 
     def _build_run_result(
         self,

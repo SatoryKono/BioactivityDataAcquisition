@@ -21,8 +21,7 @@ _DQ_SENSITIVE_OUTPUTS: dict[str, dict[str, Any]] = {
     "chembl_activity_dq_bundle": {
         "entity": "chembl_activity",
         "snapshot_path": (
-            "tests/fixtures/golden/gold/"
-            "chembl_activity_dq_bundle_v1.json"
+            "tests/fixtures/golden/gold/chembl_activity_dq_bundle_v1.json"
         ),
         "required_columns": [
             "entity_id",
@@ -42,8 +41,7 @@ _DQ_SENSITIVE_OUTPUTS: dict[str, dict[str, Any]] = {
     "composite_molecule_dq_bundle": {
         "entity": "composite_molecule",
         "snapshot_path": (
-            "tests/fixtures/golden/gold/"
-            "composite_molecule_dq_bundle_v1.json"
+            "tests/fixtures/golden/gold/composite_molecule_dq_bundle_v1.json"
         ),
         "required_columns": [
             "entity_id",
@@ -61,8 +59,7 @@ _DQ_SENSITIVE_OUTPUTS: dict[str, dict[str, Any]] = {
     "composite_publication_dq_bundle": {
         "entity": "composite_publication",
         "snapshot_path": (
-            "tests/fixtures/golden/gold/"
-            "composite_publication_dq_bundle_v1.json"
+            "tests/fixtures/golden/gold/composite_publication_dq_bundle_v1.json"
         ),
         "required_columns": [
             "entity_id",
@@ -83,8 +80,7 @@ _DQ_SENSITIVE_OUTPUTS: dict[str, dict[str, Any]] = {
     "pubmed_publication_dq_bundle": {
         "entity": "pubmed_publication",
         "snapshot_path": (
-            "tests/fixtures/golden/gold/"
-            "pubmed_publication_dq_bundle_v1.json"
+            "tests/fixtures/golden/gold/pubmed_publication_dq_bundle_v1.json"
         ),
         "required_columns": [
             "entity_id",
@@ -245,7 +241,9 @@ def assert_gold_schema_entity_matches_snapshot(
         updated_entities = dict(stored_entities)
         updated_entities[entity] = actual_entity
         updated_registry["entities"] = updated_entities
-        updated_registry["dq_sensitive_outputs"] = actual_registry["dq_sensitive_outputs"]
+        updated_registry["dq_sensitive_outputs"] = actual_registry[
+            "dq_sensitive_outputs"
+        ]
         save_gold_schema_snapshot_registry(updated_registry)
         pytest.skip(f"Updated Gold schema snapshot for {entity}")
 
@@ -286,4 +284,3 @@ def assert_gold_schema_entity_matches_snapshot(
         "pytest tests/contract/test_gold_schema_snapshot_registry.py"
     )
     pytest.fail("\n".join(lines))
-

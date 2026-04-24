@@ -1,7 +1,8 @@
 schema_version: 1
 provider: chembl
 cassette_rel_path: tests/fixtures/vcr/chembl/test_all_chembl_pipelines_chain.yaml
-metadata_status: seeded_partial_backfill
+metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: 29ab47d227caa23138fae2f0f01ed78bcb0b15b18f41af228e6055a586908ba5
-staleness_ready: false
+recorded_at: '2026-04-24'
+staleness_ready: true

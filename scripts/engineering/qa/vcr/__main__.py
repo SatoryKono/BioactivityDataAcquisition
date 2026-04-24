@@ -9,6 +9,7 @@ Commands:
     check-placement    Block VCR cassette anti-patterns
     check-naming       Enforce VCR filename policy
     check-secrets      Detect potential secret leaks in VCR cassettes
+    check-metadata-age Enforce managed VCR metadata freshness
 """
 
 from __future__ import annotations
@@ -21,6 +22,7 @@ COMMANDS: dict[str, str] = {
     "check-placement": "check_root_vcr_cassettes.py",
     "check-naming": "check_vcr_filename_policy.py",
     "check-secrets": "check_vcr_secrets.py",
+    "check-metadata-age": "check_vcr_metadata_age.py",
 }
 
 _DIR = Path(__file__).parent

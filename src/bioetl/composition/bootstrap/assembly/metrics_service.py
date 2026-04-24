@@ -12,6 +12,7 @@ from bioetl.infrastructure.observability.metrics_server_adapter import (
     MetricsServerAdapter,
 )
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, TracingPort
@@ -28,6 +29,7 @@ def create_metrics_service(
     resolved_logger = logger if logger is not None else NoOpLogger()
     return MetricsService(
         logger=resolved_logger,
+        clock=SystemClock(),
         tracer=tracer,
         _server=MetricsServerAdapter(logger=resolved_logger),
         _publisher=MetricsPublisherAdapter(logger=resolved_logger),

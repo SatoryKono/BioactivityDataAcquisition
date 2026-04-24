@@ -160,9 +160,10 @@ def test_chembl_target_component_vocab_lists_fail_closed_on_unknown_members() ->
     assert component_types_rule.apply('["protein","mystery"]') is None
 
     assert component_relationships_rule is not None
-    assert component_relationships_rule.apply(
-        '["single protein","INTERACTING PROTEIN"]'
-    ) == '["SINGLE PROTEIN","INTERACTING PROTEIN"]'
+    assert (
+        component_relationships_rule.apply('["single protein","INTERACTING PROTEIN"]')
+        == '["SINGLE PROTEIN","INTERACTING PROTEIN"]'
+    )
     assert component_relationships_rule.apply('["SINGLE PROTEIN","UNKNOWN"]') is None
 
 

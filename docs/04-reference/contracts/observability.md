@@ -167,8 +167,11 @@ Cross-links for canonical observability governance:
 Полный каталог метрик задаётся в `src/bioetl/infrastructure/observability/_metrics_defs_*.py`
 и собирается через `prometheus_metric_registries.py`.
 
-Текущий размер каталога: **110** метрик
-(`src/bioetl/infrastructure/observability/prometheus_metric_registries.py`).
+Канонический inventory metric families выводится из
+`REGISTERED_PROMETHEUS_METRIC_NAMES` в
+`src/bioetl/infrastructure/observability/prometheus_metric_registries.py`.
+Для repo-local reconciliation docs/runtime/rules drift используйте:
+`python -m scripts.engineering.qa report-observability-metric-inventory --json`.
 
 Ниже обязательное ядро (MUST для мониторинга запусков):
 

@@ -140,7 +140,11 @@ The infrastructure layer provides concrete adapters for the domain ports.
 - `PrometheusMetrics` implements `MetricsPort`
 - metric export names are defined centrally in
   `src/bioetl/infrastructure/observability/prometheus_metric_registries.py`
-- the current exported catalog size is **101 metrics**
+- the public metric inventory is derived from
+  `REGISTERED_PROMETHEUS_METRIC_NAMES` in
+  `src/bioetl/infrastructure/observability/prometheus_metric_registries.py`
+- docs/rules/dashboard drift must be reconciled with
+  `python -m scripts.engineering.qa report-observability-metric-inventory --json`
 - provider health-check latency is standardized on seconds-based metric families
   (`bioetl_health_check_latency_seconds`,
   `bioetl_health_check_mode_latency_seconds`)

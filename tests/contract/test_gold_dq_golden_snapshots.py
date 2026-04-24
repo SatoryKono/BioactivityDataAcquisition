@@ -78,4 +78,3 @@ def test_gold_dq_snapshot_bundle_matches_registry(snapshot_name: str) -> None:
                 f"{snapshot_name}: column {column!r} expects {field_meta['dtype']!r}, "
                 f"got value {value!r}"
             )
-

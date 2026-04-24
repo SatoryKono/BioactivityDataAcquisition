@@ -150,12 +150,15 @@ class AuditPort(Protocol):
         self,
         event_name: str,
         event_data: JsonDict | None = None,
+        *,
+        timestamp: datetime,
     ) -> None:
         """Log a non-write audit event to the audit trail.
 
         Args:
             event_name: Stable event name for the audited lifecycle event.
             event_data: Optional structured event context.
+            timestamp: Canonical event timestamp supplied by the caller.
         """
         ...
 

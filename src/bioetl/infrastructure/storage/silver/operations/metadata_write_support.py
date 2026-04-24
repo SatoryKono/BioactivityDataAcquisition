@@ -86,7 +86,13 @@ async def _write_silver_metadata(
         table_name=table_name,
         table_path=table_path_placeholder,
     )
-    _emit_silver_metadata_write_success(metadata_ops, table_name, records, dq_metrics)
+    _emit_silver_metadata_write_success(
+        metadata_ops,
+        table_name,
+        records,
+        dq_metrics,
+        timestamp=runtime_anchor,
+    )
     return result
 
 
@@ -95,6 +101,8 @@ def _emit_silver_metadata_write_success(
     table_name: str,
     records: list[BronzeRecord],
     dq_metrics: BatchDQMetrics,
+    *,
+    timestamp: object | None,
 ) -> None:
     """Emit success metrics and audit for one Silver metadata write."""
     if metadata_ops._metrics:
@@ -111,6 +119,7 @@ def _emit_silver_metadata_write_success(
                 else str(dq_metrics),
                 "status": "success",
             },
+            timestamp=_resolve_metadata_timestamp(explicit=timestamp, records=records),
         )
 
 

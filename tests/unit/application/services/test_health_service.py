@@ -19,6 +19,7 @@ from bioetl.application.services.health_service import (
 )
 from bioetl.domain.ports.health_check import HealthCheckResult
 from bioetl.domain.types import HealthStatus
+from tests.helpers.clock import FixedClock
 
 
 class TestHealthResult:
@@ -43,7 +44,7 @@ class TestHealthResult:
         assert result.latency_ms is None
         assert result.endpoint is None
         assert result.error is None
-        assert result.checked_at is not None
+        assert result.checked_at is None
 
     def test_is_healthy(self) -> None:
         """Test is_healthy property."""
@@ -204,7 +205,11 @@ class TestHealthService:
     @pytest.fixture
     def service(self, mock_logger: MagicMock, mock_factory: MagicMock) -> HealthService:
         """Create HealthService with mocked dependencies."""
-        return HealthService(logger=mock_logger, _factory=mock_factory)
+        return HealthService(
+            logger=mock_logger,
+            _factory=mock_factory,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+        )
 
     @pytest.mark.asyncio
     async def test_check_providers_all_healthy(
@@ -326,7 +331,11 @@ class TestHealthServiceEdgeCases:
         """Test check_providers with empty available providers."""
         mock_factory = MagicMock()
         mock_factory.list_providers.return_value = []
-        service = HealthService(logger=mock_logger, _factory=mock_factory)
+        service = HealthService(
+            logger=mock_logger,
+            _factory=mock_factory,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+        )
 
         summary = await service.check_providers()
 
@@ -351,7 +360,11 @@ class TestHealthServiceEdgeCases:
         )
         mock_factory.create.return_value = mock_adapter
 
-        service = HealthService(logger=mock_logger, _factory=mock_factory)
+        service = HealthService(
+            logger=mock_logger,
+            _factory=mock_factory,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+        )
         await service.check_providers()
 
         # Verify logging calls
@@ -379,7 +392,11 @@ class TestHealthServiceEdgeCases:
         )
         mock_factory.create.return_value = mock_adapter
 
-        service = HealthService(logger=mock_logger, _factory=mock_factory)
+        service = HealthService(
+            logger=mock_logger,
+            _factory=mock_factory,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+        )
         summary = await service.check_providers()
 
         assert summary.results["test"].status == "degraded"

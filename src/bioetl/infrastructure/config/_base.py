@@ -164,9 +164,9 @@ class PipelineSettings(BaseSettings):
         """Resume behavior when checkpoint compatibility validation fails.
 
         `observe` remains a degraded operator mode only when identity continuity
-        is proven and non-identity signals drift. `legacy_observe` keeps the
-        old degraded continuation behavior for migrations that cannot yet prove
-        identity continuity.
+        is proven and non-identity signals drift. `legacy_observe` preserves
+        the legacy degraded telemetry contract for that same non-identity drift
+        path, but no longer allows resume when identity continuity is unproven.
         """
 
         @model_validator(mode="after")

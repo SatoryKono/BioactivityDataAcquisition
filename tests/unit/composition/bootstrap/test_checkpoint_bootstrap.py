@@ -274,6 +274,36 @@ class TestBootstrapCheckpointService:
         # CheckpointService uses checkpoint_port attribute (dataclass)
         assert isinstance(result.checkpoint_port, LocalCheckpointAdapter)
 
+    def test_bootstrap_checkpoint_service_resolves_metrics_and_tracing(self):
+        """CLI checkpoint service should resolve operator observability ports."""
+        resolved_metrics = MagicMock()
+        resolved_tracer = MagicMock(spec=TracingPort)
+        with (
+            patch(
+                "bioetl.composition.bootstrap.cli.checkpoint.get_settings"
+            ) as mock_settings,
+            patch(
+                "bioetl.composition.bootstrap.cli.checkpoint.resolve_metrics_port",
+                return_value=resolved_metrics,
+            ) as mock_resolve_metrics,
+            patch(
+                "bioetl.composition.bootstrap.cli.checkpoint.resolve_tracing_port",
+                return_value=resolved_tracer,
+            ) as mock_resolve_tracing,
+        ):
+            settings = MagicMock(checkpoint_path=CHECKPOINT_PATH)
+            mock_settings.return_value = settings
+            result = bootstrap_checkpoint_service()
+
+        assert result.metrics is resolved_metrics
+        assert result.tracer is resolved_tracer
+        mock_resolve_metrics.assert_called_once_with(metrics=None, settings=settings)
+        mock_resolve_tracing.assert_called_once_with(
+            tracer=None,
+            settings=settings,
+            service_name="bioetl.checkpoint_admin",
+        )
+
 
 @pytest.mark.unit
 class TestBootstrapQuarantineService:

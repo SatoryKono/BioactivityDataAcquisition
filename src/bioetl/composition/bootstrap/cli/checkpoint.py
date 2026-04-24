@@ -127,6 +127,12 @@ def bootstrap_checkpoint_service() -> CheckpointService:
     return CheckpointService(
         checkpoint_port=checkpoint_port,
         logger=noop_logger,
+        metrics=resolve_metrics_port(metrics=None, settings=settings),
+        tracer=resolve_tracing_port(
+            tracer=None,
+            settings=settings,
+            service_name="bioetl.checkpoint_admin",
+        ),
     )
 
 

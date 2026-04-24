@@ -1,0 +1,8 @@
+schema_version: 1
+provider: chembl
+cassette_rel_path: tests/fixtures/vcr/chembl/test_chembl_molecule_structural_fields.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: 020033989f4d1113db55937bc12dfc747f19092ead0667cb6e54f7eb8c80d0fe
+recorded_at: '2026-04-24'
+staleness_ready: true

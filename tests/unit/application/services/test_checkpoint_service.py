@@ -41,9 +41,24 @@ def mock_checkpoint_port():
 @pytest.fixture
 def checkpoint_service(mock_checkpoint_port, mock_logger):
     """Create a CheckpointService instance."""
+    metrics = MagicMock()
+    metrics.increment_counter = MagicMock()
+    metrics.observe_histogram = MagicMock()
+    mock_span = MagicMock()
+    mock_span.__enter__ = MagicMock(return_value=mock_span)
+    mock_span.__exit__ = MagicMock(return_value=None)
+    mock_span.set_attribute = MagicMock()
+    mock_span.record_exception = MagicMock()
+    otel_tracer = MagicMock()
+    otel_tracer.start_as_current_span = MagicMock(return_value=mock_span)
+    tracer = MagicMock()
+    tracer.get_tracer = MagicMock(return_value=otel_tracer)
+    tracer.flush = MagicMock()
     return CheckpointService(
         checkpoint_port=mock_checkpoint_port,
         logger=mock_logger,
+        metrics=metrics,
+        tracer=tracer,
     )
 
 
@@ -89,6 +104,16 @@ class TestCheckpointServiceListCheckpoints:
 
         assert result == []
         mock_checkpoint_port.list_all.assert_called_once()
+        checkpoint_service.metrics.increment_counter.assert_called_with(
+            "bioetl_checkpoint_operator_operations_total",
+            1,
+            labels={"operation": "list", "status": "success"},
+        )
+        checkpoint_service.metrics.observe_histogram.assert_called_with(
+            "bioetl_checkpoint_operator_duration_seconds",
+            pytest.approx(0.0, abs=1.0),
+            labels={"operation": "list", "status": "success"},
+        )
 
     @pytest.mark.asyncio
     async def test_list_checkpoints_with_data(
@@ -159,6 +184,24 @@ class TestCheckpointServiceGetCheckpoint:
         assert result.run_id == str(run_id)
         assert result.metadata == {"records_processed": 100}
 
+    @pytest.mark.asyncio
+    async def test_get_checkpoint_creates_trace_span(
+        self, checkpoint_service, mock_checkpoint_port
+    ):
+        """Checkpoint get should create a bounded admin trace span."""
+        run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (run_id, {"records_processed": 100})
+
+        await checkpoint_service.get_checkpoint("pipeline1")
+
+        checkpoint_service.tracer.get_tracer.assert_called_once_with(
+            "bioetl.checkpoint_admin"
+        )
+        args = (
+            checkpoint_service.tracer.get_tracer.return_value.start_as_current_span.call_args
+        )
+        assert args[0][0] == "checkpoint.get"
+
 
 @pytest.mark.unit
 class TestCheckpointServiceDeleteCheckpoint:
@@ -188,6 +231,22 @@ class TestCheckpointServiceDeleteCheckpoint:
 
         assert result is True
         mock_checkpoint_port.delete.assert_called_once_with("pipeline1")
+
+    @pytest.mark.asyncio
+    async def test_delete_checkpoint_missing_records_missing_metric(
+        self, checkpoint_service, mock_checkpoint_port
+    ):
+        """Missing checkpoint delete attempts should emit bounded missing metrics."""
+        mock_checkpoint_port.load.return_value = None
+
+        result = await checkpoint_service.delete_checkpoint("pipeline1")
+
+        assert result is False
+        checkpoint_service.metrics.increment_counter.assert_called_with(
+            "bioetl_checkpoint_operator_operations_total",
+            1,
+            labels={"operation": "delete", "status": "missing"},
+        )
 
 
 @pytest.mark.unit

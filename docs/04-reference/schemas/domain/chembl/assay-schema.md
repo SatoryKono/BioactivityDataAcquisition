@@ -1,22 +1,5 @@
----
-Version: 1.0.0
-Status: Historical deep schema.
-Class: published
-Owner: BioETL Team
-Reviewers:
-- BioETL Team
-Last verified: '2026-03-29'
----
+# ChEMBL Assay Schema
 
-# ChEMBL Assay Domain Schema
+This document describes the schema for ChEMBL Assay data.
 
-This page is kept as an archived schema note. It reflects a pre-normalization contract and should not be used as the source of truth for current assay fields.
-
-Canonical sources:
-- [ChEMBL assay provider reference](../../../providers/chembl/assay.md)
-- `configs/entities/chembl/assay.yaml`
-
-Current canonical summary:
-- Active configs and schema checks use snake_case names.
-- Publication and target relationships are represented through the current entity config and provider implementation, not through the legacy dashed names shown in older material.
-- Use the provider reference and live config for current assay contract details.
+(Placeholder content - to be filled in with actual schema details)

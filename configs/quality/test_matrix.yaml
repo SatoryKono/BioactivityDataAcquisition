@@ -438,37 +438,31 @@ fixture_governance:
   contract_snapshot_location: tests/fixtures/contracts/{provider}/v{version}.json
   cassette_metadata_catalog_location: reports/quality/vcr-metadata-catalog.json
   cassette_metadata_catalog_script: scripts/engineering/qa/report_vcr_metadata_catalog.py
-  cassette_metadata_required: false
+  cassette_metadata_required: true
   cassette_staleness_requires_metadata: true
   canonical_vcr_location: tests/fixtures/vcr/{provider}/
   extensionless_allowlist: .github/vcr-noext-allowlist.txt
   root_vcr_policy_enforced: true
   cassette_metadata_backfill_workflow_present: false
   cassette_metadata_backfill_script: scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py
-  cassette_metadata_seed_registry:
-    scope: bounded_provider_seed_slice
-    provider_coverage_mode: at_least_one_per_vcr_provider
+  cassette_metadata_inventory_contract:
+    scope: managed_vcr_inventory
+    metadata_catalog_location: reports/quality/vcr-metadata-catalog.json
+    stale_age_checker: scripts/engineering/qa/vcr/check_vcr_metadata_age.py
     provider_expected_sidecar_counts:
-      chembl: 1
-      crossref: 1
-      openalex: 1
-      pubchem: 1
-      pubmed: 1
-      semanticscholar: 1
-      uniprot: 1
-    tracked_sidecars:
-      - tests/fixtures/vcr/chembl/test_all_chembl_pipelines_chain_meta.yaml
-      - tests/fixtures/vcr/crossref/rf013_crossref_health_case_01_meta.yaml
-      - tests/fixtures/vcr/openalex/rf013_openalex_health_case_01_meta.yaml
-      - tests/fixtures/vcr/pubchem/test_pubchem_compound_full_cycle_meta.yaml
-      - tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_01_meta.yaml
-      - tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_01_meta.yaml
-      - tests/fixtures/vcr/uniprot/test_uniprot_protein_full_cycle_meta.yaml
+      chembl: 58
+      crossref: 24
+      multi_provider: 1
+      openalex: 25
+      pubchem: 32
+      pubmed: 24
+      semanticscholar: 24
+      uniprot: 15
   rollout:
-    cassette_metadata: partial
-    cassette_staleness_age: partial
-    cassette_metadata_catalog: partial
-    cassette_metadata_backfill: partial
+    cassette_metadata: enforced
+    cassette_staleness_age: enforced
+    cassette_metadata_catalog: enforced
+    cassette_metadata_backfill: enforced
     contract_snapshots: partial
     golden_masters: partial
     extensionless_filenames: enforced

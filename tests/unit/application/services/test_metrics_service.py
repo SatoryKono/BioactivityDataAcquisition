@@ -19,6 +19,7 @@ from bioetl.application.services.metrics_service import (
     PushResult,
     StartResult,
 )
+from tests.helpers.clock import FixedClock
 
 
 def _make_mock_tracer() -> MagicMock:
@@ -166,8 +167,10 @@ class TestMetricsService:
         mock_tracer: MagicMock,
     ) -> MetricsService:
         """Create MetricsService with mocked dependencies."""
+        clock = FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC))
         return MetricsService(
             logger=mock_logger,
+            clock=clock,
             tracer=mock_tracer,
             _server=mock_server,
         )
@@ -313,6 +316,7 @@ class TestMetricsService:
         mock_publisher.push_to_gateway.return_value = True
         service = MetricsService(
             logger=mock_logger,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
             _server=mock_server,
             _publisher=mock_publisher,
         )
@@ -339,7 +343,11 @@ class TestMetricsService:
         self, mock_logger: MagicMock, mock_server: MagicMock
     ) -> None:
         """Unconfigured publisher must fail explicitly instead of silently succeeding."""
-        service = MetricsService(logger=mock_logger, _server=mock_server)
+        service = MetricsService(
+            logger=mock_logger,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+            _server=mock_server,
+        )
 
         result = service.push_to_gateway(
             gateway="localhost:9091",
@@ -374,7 +382,11 @@ class TestMetricsServiceEdgeCases:
         mock_server.is_running.return_value = False
         mock_server.start.return_value = True
 
-        service = MetricsService(logger=mock_logger, _server=mock_server)
+        service = MetricsService(
+            logger=mock_logger,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+            _server=mock_server,
+        )
         service.start(port=8000)
 
         mock_logger.debug.assert_called()
@@ -385,7 +397,11 @@ class TestMetricsServiceEdgeCases:
         mock_server = MagicMock()
         mock_server.is_running.return_value = True
 
-        service = MetricsService(logger=mock_logger, _server=mock_server)
+        service = MetricsService(
+            logger=mock_logger,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+            _server=mock_server,
+        )
         service.start(port=8000)
 
         # Debug should be called for "Starting metrics server" and "already running"
@@ -396,7 +412,11 @@ class TestMetricsServiceEdgeCases:
         mock_server = MagicMock()
         mock_server.is_running.return_value = False
 
-        service = MetricsService(logger=mock_logger, _server=mock_server)
+        service = MetricsService(
+            logger=mock_logger,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+            _server=mock_server,
+        )
 
         exception = RuntimeError("Test error")
         result = service._handle_start_error(
@@ -416,7 +436,11 @@ class TestMetricsServiceEdgeCases:
         mock_server = MagicMock()
         mock_server.is_running.return_value = False
 
-        service = MetricsService(logger=mock_logger, _server=mock_server)
+        service = MetricsService(
+            logger=mock_logger,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+            _server=mock_server,
+        )
 
         exception = ValueError("Test error")
         with pytest.raises(MetricsServerError) as exc_info:
@@ -436,7 +460,11 @@ class TestMetricsServiceEdgeCases:
         mock_server.is_running.return_value = False
         mock_server.start.return_value = True
 
-        service = MetricsService(logger=mock_logger, _server=mock_server)
+        service = MetricsService(
+            logger=mock_logger,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+            _server=mock_server,
+        )
         result = service.start()
 
         assert result.port == 8000
@@ -454,7 +482,11 @@ class TestMetricsServiceEdgeCases:
         mock_server.is_running.return_value = False
         mock_server.start.return_value = False
 
-        service = MetricsService(logger=mock_logger, _server=mock_server)
+        service = MetricsService(
+            logger=mock_logger,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+            _server=mock_server,
+        )
         service.start(port=8000)
 
         mock_logger.warning.assert_called()
@@ -465,7 +497,11 @@ class TestMetricsServiceEdgeCases:
         mock_server.is_running.return_value = False
         mock_server.start.return_value = True
 
-        service = MetricsService(logger=mock_logger, _server=mock_server)
+        service = MetricsService(
+            logger=mock_logger,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+            _server=mock_server,
+        )
         service.start(port=9999)
 
         mock_server.is_running.return_value = True

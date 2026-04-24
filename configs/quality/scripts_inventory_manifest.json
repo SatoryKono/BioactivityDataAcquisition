@@ -1,19 +1,19 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-24T06:05:43.923421+00:00",
+  "generated_at": "2026-04-24T07:09:59.455381+00:00",
   "summary": {
-    "total_scripts": 439,
+    "total_scripts": 440,
     "status_counts": {
       "active": 311,
       "legacy": 15,
       "orphan": 100,
-      "unknown": 13
+      "unknown": 14
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 1,
       "ci": 52,
-      "docs": 137,
+      "docs": 138,
       "scripts": 293,
       "skills": 8,
       "tests": 134
@@ -2995,6 +2995,63 @@
       ]
     },
     {
+      "path": "scripts/check_cli_parity.py",
+      "type": "py",
+      "status": "unknown",
+      "agent_usage": [],
+      "reference_count": 9,
+      "references": [
+        {
+          "path": "docs/reports/audit-issues/implementation-plans.md",
+          "line": 475,
+          "source_group": "docs",
+          "text": "1. **Create Parity Check Script**: `scripts/check_cli_parity.py`"
+        },
+        {
+          "path": "docs/reports/audit-issues/issue-005-progress.md",
+          "line": 49,
+          "source_group": "docs",
+          "text": "**Script**: `scripts/check_cli_parity.py`"
+        },
+        {
+          "path": "docs/reports/audit-issues/issue-005-progress.md",
+          "line": 97,
+          "source_group": "docs",
+          "text": "- `scripts/check_cli_parity.py` - CLI parity verification script"
+        },
+        {
+          "path": "docs/reports/audit-issues/issue-005-progress.md",
+          "line": 228,
+          "source_group": "docs",
+          "text": "- **Parity Script**: scripts/check_cli_parity.py"
+        },
+        {
+          "path": "docs/reports/audit-issues/issue-005-progress.md",
+          "line": 246,
+          "source_group": "docs",
+          "text": "- `scripts/check_cli_parity.py` - CLI parity verification script (150 lines)"
+        },
+        {
+          "path": "docs/reports/audit-issues/issue-005-progress.md",
+          "line": 272,
+          "source_group": "docs",
+          "text": "python3 scripts/check_cli_parity.py"
+        },
+        {
+          "path": "docs/reports/audit-issues/issue-005-progress.md",
+          "line": 275,
+          "source_group": "docs",
+          "text": "python3 scripts/check_cli_parity.py && echo \"✅ Parity check passed\" || echo \"❌ Parity check failed\""
+        },
+        {
+          "path": "docs/reports/audit-issues/issue-005-progress.md",
+          "line": 278,
+          "source_group": "docs",
+          "text": "python3 scripts/check_cli_parity.py | grep \"Missing commands\""
+        }
+      ]
+    },
+    {
       "path": "scripts/check_dq_dsl_parity.py",
       "type": "py",
       "status": "unknown",
@@ -4557,13 +4614,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 263,
+          "line": 250,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs export-matrix-structural-contract --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 272,
+          "line": 259,
           "source_group": "ci",
           "text": "uv run python -m scripts.docs sync-matrix-structural-policy --check --input \"$workbook\" --output \"$workbook\""
         },
@@ -5661,13 +5718,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 166,
+          "line": 153,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.ci neo4j-memory"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 229,
+          "line": 216,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -6093,7 +6150,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 654,
+          "line": 629,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -7839,7 +7896,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 91,
+      "reference_count": 94,
       "references": [
         {
           "path": ".github/workflows/duplication-complexity.yml",
@@ -7867,25 +7924,25 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 169,
+          "line": 156,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.qa report-family-baseline --active-only --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 721,
+          "line": 696,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 730,
+          "line": 705,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 739,
+          "line": 714,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         }
@@ -8038,7 +8095,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 281,
+          "line": 268,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/check_docs_drift.py"
         }
@@ -8053,7 +8110,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 172,
+          "line": 159,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/check_naming_package_consistency.py --check"
         },
@@ -8110,7 +8167,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 144,
+          "line": 131,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/check_quality_exemptions.py \\"
         },
@@ -8206,7 +8263,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 278,
+          "line": 265,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -8308,7 +8365,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 574,
+          "line": 549,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -8784,13 +8841,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 175,
+          "line": 162,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/validate_dq_consistency.py"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 345,
+          "line": 332,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/validate_dq_consistency.py"
         }
@@ -8879,6 +8936,12 @@
           "text": "\"check-placement\": \"check_root_vcr_cassettes.py\","
         },
         {
+          "path": "tests/architecture/test_fixture_governance_rollout.py",
+          "line": 89,
+          "source_group": "tests",
+          "text": "\"python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\" in workflow"
+        },
+        {
           "path": "tests/architecture/test_integration_vcr_policy.py",
           "line": 248,
           "source_group": "tests",
@@ -8895,12 +8958,6 @@
           "line": 114,
           "source_group": "tests",
           "text": "placement_refs = refs[\"scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\"]"
-        },
-        {
-          "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 441,
-          "source_group": "tests",
-          "text": "\"python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\" in workflow"
         }
       ]
     },
@@ -8930,6 +8987,12 @@
           "text": "\"check-naming\": \"check_vcr_filename_policy.py\","
         },
         {
+          "path": "tests/architecture/test_fixture_governance_rollout.py",
+          "line": 92,
+          "source_group": "tests",
+          "text": "\"python scripts/engineering/qa/vcr/check_vcr_filename_policy.py\" in workflow"
+        },
+        {
           "path": "tests/architecture/test_integration_vcr_policy.py",
           "line": 252,
           "source_group": "tests",
@@ -8946,12 +9009,6 @@
           "line": 115,
           "source_group": "tests",
           "text": "naming_refs = refs[\"scripts/engineering/qa/vcr/check_vcr_filename_policy.py\"]"
-        },
-        {
-          "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 444,
-          "source_group": "tests",
-          "text": "\"python scripts/engineering/qa/vcr/check_vcr_filename_policy.py\" in workflow"
         }
       ]
     },
@@ -9093,7 +9150,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 163,
+          "line": 150,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/repo/check_scripts_catalog.py --catalog scripts/engineering/repo/catalog.yaml"
         },
@@ -9132,7 +9189,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 155,
+          "line": 142,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/repo/check_scripts_inventory.py \\"
         },
@@ -11370,13 +11427,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 257,
+          "line": 244,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema check-required-fields --verbose"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 260,
+          "line": 247,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema audit-optionality --check"
         },
@@ -11448,7 +11505,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 254,
+          "line": 241,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/check_config_invariants.py"
         },
@@ -11691,7 +11748,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 275,
+          "line": 262,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/generate_pipeline_schema.py --check"
         },
@@ -11856,7 +11913,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 251,
+          "line": 238,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/validate_pipeline_configs.py"
         },

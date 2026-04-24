@@ -5,10 +5,12 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+from datetime import UTC, datetime
 from pathlib import Path
 
 import yaml
 
+ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_VCR_ROOT = Path("tests/fixtures/vcr")
 
 
@@ -37,6 +39,16 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help="Fail if any selected cassette is missing a sidecar.",
     )
+    parser.add_argument(
+        "--recorded-at",
+        default=datetime.now(UTC).date().isoformat(),
+        help="ISO date to stamp into sidecars (default: today in UTC).",
+    )
+    parser.add_argument(
+        "--rewrite-existing",
+        action="store_true",
+        help="Rewrite existing sidecars to the canonical managed-inventory payload.",
+    )
     return parser.parse_args()
 
 
@@ -51,21 +63,27 @@ def _selected_cassettes(vcr_root: Path, provider: str) -> list[Path]:
     return sorted(
         path
         for path in search_root.rglob("*")
-        if path.is_file() and path.suffix.lower() in {".yaml", ".yml"}
+        if path.is_file()
+        and path.suffix.lower() in {".yaml", ".yml"}
+        and not path.name.endswith(("_meta.yaml", "_meta.yml"))
     )
 
 
-def _build_sidecar_payload(vcr_root: Path, cassette_path: Path) -> dict[str, object]:
+def _build_sidecar_payload(
+    vcr_root: Path, cassette_path: Path, *, recorded_at: str
+) -> dict[str, object]:
     provider = cassette_path.relative_to(vcr_root).parts[0]
     cassette_bytes = cassette_path.read_bytes()
+    cassette_rel_path = cassette_path.relative_to(ROOT).as_posix()
     return {
         "schema_version": 1,
         "provider": provider,
-        "cassette_rel_path": cassette_path.as_posix(),
-        "metadata_status": "seeded_partial_backfill",
+        "cassette_rel_path": cassette_rel_path,
+        "metadata_status": "managed_inventory",
         "source": "backfill_vcr_metadata_sidecars.py",
         "cassette_sha256": hashlib.sha256(cassette_bytes).hexdigest(),
-        "staleness_ready": False,
+        "recorded_at": recorded_at,
+        "staleness_ready": True,
     }
 
 
@@ -94,9 +112,11 @@ def main() -> int:
     written = 0
     for cassette_path in cassettes:
         metadata_path = _metadata_path_for(cassette_path)
-        if metadata_path.exists():
+        if metadata_path.exists() and not args.rewrite_existing:
             continue
-        payload = _build_sidecar_payload(vcr_root, cassette_path)
+        payload = _build_sidecar_payload(
+            vcr_root, cassette_path, recorded_at=args.recorded_at
+        )
         metadata_path.write_text(
             yaml.safe_dump(payload, sort_keys=False, allow_unicode=False),
             encoding="utf-8",

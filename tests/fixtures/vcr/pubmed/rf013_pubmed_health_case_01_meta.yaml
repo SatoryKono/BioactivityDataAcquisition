@@ -1,7 +1,8 @@
 schema_version: 1
 provider: pubmed
 cassette_rel_path: tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_01.yaml
-metadata_status: seeded_partial_backfill
+metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: bc5f7981f125256fccf4d497262a21cfdc35d50334e6157ae715b1e604a94580
-staleness_ready: false
+recorded_at: '2026-04-24'
+staleness_ready: true

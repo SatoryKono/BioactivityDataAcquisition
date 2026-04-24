@@ -83,8 +83,8 @@ def _build_diagnostics_guide_lines() -> list[str]:
     return [
         "BioETL Diagnostics Guide",
         "  start_here: bioetl diagnostics guide",
-        ("  metrics/admin: bioetl diagnostics metrics [--json]",),
-        ("  health: bioetl diagnostics health [--provider <provider>] [--json]"),
+        "  metrics/admin: bioetl diagnostics metrics [--json]",
+        "  health: bioetl diagnostics health [--provider <provider>] [--json]",
         (
             "  run: bioetl diagnostics run --run-id <run-id> "
             "[--limit 100] [--format text|json|yaml]"
@@ -302,6 +302,8 @@ def _render_traceability_lines(traceability: object) -> list[str]:
         f"  audit_entries_count: {traceability.get('audit_entries_count')}",
         f"  lineage_fragment_ids: {traceability.get('lineage_fragment_ids')}",
         f"  artifact_refs: {traceability.get('artifact_refs')}",
+        f"  trace_ids: {traceability.get('trace_ids')}",
+        f"  trace_urls: {traceability.get('trace_urls')}",
         f"  trace_links_available: {traceability.get('trace_links_available')}",
         f"  correlation_anchor_gaps: {traceability.get('correlation_anchor_gaps')}",
     ]

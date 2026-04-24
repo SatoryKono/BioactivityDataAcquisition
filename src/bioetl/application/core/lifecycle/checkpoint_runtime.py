@@ -189,7 +189,7 @@ def handle_incompatible_checkpoint(
     if disposition == "observe_blocked_identity":
         logger.warning(
             "Checkpoint execution identity mismatch observed; resume blocked "
-            "despite observe policy.",
+            "despite degraded observe policy.",
             **payload,
         )
         return None
@@ -256,7 +256,9 @@ def resolve_incompatible_checkpoint_disposition(
             return "observe_blocked_identity"
         return "observe_loaded_degraded"
     if compatibility_policy == "legacy_observe":
-        if execution_identity_compatible or not identity_continuity_proven:
+        if not identity_continuity_proven:
+            return "observe_blocked_identity"
+        if execution_identity_compatible:
             return "legacy_observe_loaded_degraded"
         return "observe_blocked_identity"
     if compatibility_policy == "soft_fail":

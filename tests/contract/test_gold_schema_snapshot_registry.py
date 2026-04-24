@@ -39,4 +39,3 @@ def test_gold_schema_registry_published_contract_path_exists(entity: str) -> Non
     snapshot = load_gold_schema_snapshot_registry()
     contract_path = ROOT / snapshot["entities"][entity]["published_contract_path"]
     assert contract_path.exists(), f"Missing published Gold contract: {contract_path}"
-

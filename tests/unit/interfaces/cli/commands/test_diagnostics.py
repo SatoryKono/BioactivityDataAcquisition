@@ -107,14 +107,16 @@ class _FakeWorkflowService:
                     "audit_entries_count": 1,
                     "lineage_fragment_ids": ["fragment-1"],
                     "artifact_refs": ["manifest://manifest-1"],
-                    "trace_links_available": False,
+                    "trace_ids": [],
+                    "trace_urls": [
+                        "/a/grafana-exploretraces-app/?from=1712742900000&to=1712743500000&datasource=tempo&queryType=traceqlSearch&query=%7B+span.%22bioetl.run_id%22+%3D+%2200000000-0000-0000-0000-000000000001%22+%7D"
+                    ],
+                    "trace_links_available": True,
                     "correlation_anchor_gaps": {"run_id": 0},
                 },
                 "missing_evidence": [],
-                "degraded_evidence": ["trace_links_unavailable"],
-                "next_steps": [
-                    "Use audit, manifest, and lineage sections as the current traceability fallback."
-                ],
+                "degraded_evidence": [],
+                "next_steps": ["review dossier output"],
             }
         )
 
@@ -229,6 +231,17 @@ def test_diagnostics_guide_displays_canonical_routes(cli_runner: CliRunner) -> N
     assert "auto-managed during pipeline runs" in result.output
     assert "report-observability-metric-inventory" in result.output
     assert "grafana/prometheus-rules/bioetl_observability.yml" in result.output
+
+
+@pytest.mark.unit
+def test_diagnostics_guide_lines_are_plain_strings() -> None:
+    from bioetl.interfaces.cli.commands.domains.diagnostics.command import (
+        _build_diagnostics_guide_lines,
+    )
+
+    lines = _build_diagnostics_guide_lines()
+
+    assert all(isinstance(line, str) for line in lines)
 
 
 @pytest.mark.unit
@@ -367,7 +380,8 @@ def test_diagnostics_run_text_outputs_correlated_summary(
     assert "manifest_id: manifest-1" in result.output
     assert "checkpoint_run_id: 00000000-0000-0000-0000-000000000001" in result.output
     assert "lineage_fragment_ids: ['fragment-1']" in result.output
-    assert "trace_links_available: False" in result.output
+    assert "trace_links_available: True" in result.output
+    assert "trace_urls: ['/a/grafana-exploretraces-app/" in result.output
     assert workflow_service.run_dossier_calls == [
         ("00000000-0000-0000-0000-000000000001", 100)
     ]

@@ -892,8 +892,8 @@ def test_observability_ports_have_close_method(src_dir: Path) -> None:
 
     REQ-ARCH-021: Proper lifecycle management for observability resources.
     """
-    observability_file = src_dir / "bioetl" / "domain" / "ports" / "observability.py"
     observability_pkg = src_dir / "bioetl" / "domain" / "ports" / "observability"
+    observability_file = src_dir / "bioetl" / "domain" / "ports" / "observability.py"
     if observability_pkg.is_dir():
         # Read all .py files in the package
         parts = [

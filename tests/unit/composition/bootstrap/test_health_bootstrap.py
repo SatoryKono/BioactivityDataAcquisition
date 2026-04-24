@@ -20,6 +20,7 @@ from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+from bioetl.infrastructure.time import SystemClock
 
 
 @pytest.mark.unit
@@ -80,6 +81,12 @@ class TestBootstrapHealthService:
 
         # HealthService uses _factory attribute (private)
         assert result._factory is DataSourceFactory
+
+    def test_bootstrap_health_service_wires_system_clock(self):
+        """Test that bootstrap_health_service wires SystemClock."""
+        result = bootstrap_health_service()
+
+        assert isinstance(result.clock, SystemClock)
 
 
 @pytest.mark.unit

@@ -1,0 +1,8 @@
+schema_version: 1
+provider: chembl
+cassette_rel_path: tests/fixtures/vcr/chembl/test_pipeline_isolation.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: 1e5bf2ca470be842c1fc2c0778dcda5b0bd5fd59e689baed5791ca1d195ad692
+recorded_at: '2026-04-24'
+staleness_ready: true

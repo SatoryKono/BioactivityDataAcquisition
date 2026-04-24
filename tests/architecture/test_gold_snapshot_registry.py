@@ -33,7 +33,9 @@ class TestGoldSnapshotRegistry:
         registry_meta = _gold_registry_from_matrix()
         registry_path = ROOT / cast(str, registry_meta["registry_path"])
 
-        assert registry_meta["scope"] == "bounded_contract_and_dq_sensitive_gold_baseline"
+        assert (
+            registry_meta["scope"] == "bounded_contract_and_dq_sensitive_gold_baseline"
+        )
         assert registry_path.exists()
         assert (ROOT / cast(str, registry_meta["helper_module"])).exists()
         assert (ROOT / cast(str, registry_meta["registry_test_module"])).exists()
@@ -46,7 +48,9 @@ class TestGoldSnapshotRegistry:
         registry_payload = cast(
             YamlMap, json.loads(registry_path.read_text(encoding="utf-8"))
         )
-        tracked_snapshot_paths = cast(list[str], registry_meta["tracked_snapshot_paths"])
+        tracked_snapshot_paths = cast(
+            list[str], registry_meta["tracked_snapshot_paths"]
+        )
         actual_snapshot_paths = sorted(
             cast(str, output["snapshot_path"])
             for output in cast(
@@ -59,4 +63,3 @@ class TestGoldSnapshotRegistry:
             assert (ROOT / relative_path).exists(), (
                 f"Gold DQ snapshot is missing: {relative_path}"
             )
-

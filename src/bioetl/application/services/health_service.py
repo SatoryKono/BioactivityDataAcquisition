@@ -16,12 +16,13 @@ __all__ = [
 ]
 
 
-from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from dataclasses import dataclass
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.ports import (
+    ClockPort,
     DataSourceFactoryPort,
     HealthCheckPort,
     HealthCheckResult,
@@ -59,7 +60,7 @@ class HealthResult:
     latency_ms: float | None = None
     endpoint: str | None = None
     error: str | None = None
-    checked_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
+    checked_at: datetime | None = None
 
     @property
     def is_healthy(self) -> bool:
@@ -106,7 +107,7 @@ class HealthCheckSummary:
 
     results: dict[str, HealthResult]
     all_healthy: bool
-    checked_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
+    checked_at: datetime | None = None
 
     @property
     def healthy_count(self) -> int:
@@ -148,6 +149,7 @@ class HealthService:
 
     logger: LoggerPort
     _factory: DataSourceFactoryPort
+    clock: ClockPort
 
     async def check_providers(
         self,
@@ -178,6 +180,7 @@ class HealthService:
         summary = HealthCheckSummary(
             results=results,
             all_healthy=all_healthy,
+            checked_at=self.clock.now(),
         )
 
         self.logger.info(
@@ -213,7 +216,7 @@ class HealthService:
                     latency_ms=result.latency_ms,
                     endpoint=result.endpoint,
                     error=result.last_error,
-                    checked_at=result.checked_at or datetime.now(tz=UTC),
+                    checked_at=result.checked_at or self.clock.now(),
                 )
 
             # Adapter doesn't implement HealthCheckPort
@@ -225,6 +228,7 @@ class HealthService:
                 provider=provider,
                 status="unknown",
                 error="Adapter does not implement HealthCheckPort",
+                checked_at=self.clock.now(),
             )
 
         except _HEALTH_SERVICE_ERRORS as e:
@@ -237,6 +241,7 @@ class HealthService:
                 provider=provider,
                 status="unhealthy",
                 error=str(e),
+                checked_at=self.clock.now(),
             )
 
     def list_available_providers(self) -> list[str]:

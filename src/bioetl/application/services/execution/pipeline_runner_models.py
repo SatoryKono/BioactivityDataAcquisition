@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime
 from enum import StrEnum
+
+from bioetl.domain.context import current_utc_time
 
 
 class PipelineRunResult(StrEnum):
@@ -31,8 +33,8 @@ class RunResult:
     records_gold: int = 0
     records_quarantined: int = 0
     records_filtered_out: int = 0
-    started_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
-    completed_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
+    started_at: datetime = field(default_factory=current_utc_time)
+    completed_at: datetime = field(default_factory=current_utc_time)
     error_message: str | None = None
     error_type: str | None = None
 

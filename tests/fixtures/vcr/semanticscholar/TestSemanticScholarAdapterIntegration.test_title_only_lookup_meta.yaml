@@ -1,0 +1,8 @@
+schema_version: 1
+provider: semanticscholar
+cassette_rel_path: tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_title_only_lookup.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: de3840f04bdca1b711102b12f78326c6e6ab718ae7a6594bc6099ac055e97279
+recorded_at: '2026-04-24'
+staleness_ready: true

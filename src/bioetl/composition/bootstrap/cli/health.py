@@ -16,6 +16,7 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+from bioetl.infrastructure.time import SystemClock
 
 __all__ = [
     "HealthServerDependencies",
@@ -60,6 +61,7 @@ def bootstrap_health_service() -> HealthService:
     return HealthService(
         logger=noop_logger,
         _factory=DataSourceFactory,
+        clock=SystemClock(),
     )
 
 
