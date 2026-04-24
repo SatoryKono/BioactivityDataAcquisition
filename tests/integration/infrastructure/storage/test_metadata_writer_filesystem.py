@@ -324,7 +324,9 @@ async def test_write_gold_metadata_includes_schema_contract(
 
     content = yaml.safe_load((base_path / METADATA_FILENAME).read_text())
     assert "schema" in content
-    assert content["schema"]["contract_path"] == "docs/contracts/gold/activity_v1.0.json"
+    assert (
+        content["schema"]["contract_path"] == "docs/contracts/gold/activity_v1.0.json"
+    )
     assert content["schema"]["validation"] == "strict"
 
 

@@ -37,8 +37,12 @@ def test_targeted_runtime_admin_paths_do_not_reintroduce_wall_clock_fallbacks() 
 
 
 @pytest.mark.architecture
-def test_context_module_no_longer_uses_wall_clock_defaults_for_runtime_contexts() -> None:
+def test_context_module_no_longer_uses_wall_clock_defaults_for_runtime_contexts() -> (
+    None
+):
     contents = _read("src/bioetl/domain/context.py")
 
-    assert "started_at: datetime = field(default_factory=current_utc_time)" not in contents
+    assert (
+        "started_at: datetime = field(default_factory=current_utc_time)" not in contents
+    )
     assert "started_at or current_utc_time()" not in contents

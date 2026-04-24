@@ -16,7 +16,9 @@ ALLOWED_IMPORTERS = {
 
 
 @pytest.mark.architecture
-def test_runtime_code_does_not_import_legacy_bronze_metadata_builders_directly() -> None:
+def test_runtime_code_does_not_import_legacy_bronze_metadata_builders_directly() -> (
+    None
+):
     violations: list[str] = []
     for path in SRC_ROOT.rglob("*.py"):
         relative_path = path.relative_to(ROOT).as_posix()

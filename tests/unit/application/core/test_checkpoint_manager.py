@@ -922,10 +922,7 @@ class TestCheckpointManagerCompatibilityPolicy:
         warning_extra = mock_logger.warning.call_args.kwargs
         assert warning_extra["resume_rejected"] is True
         assert warning_extra["identity_continuity_proven"] is False
-        assert (
-            warning_extra["compatibility_disposition"]
-            == "observe_blocked_identity"
-        )
+        assert warning_extra["compatibility_disposition"] == "observe_blocked_identity"
         mock_metrics.increment_counter.assert_called_once_with(
             "bioetl_checkpoint_load_events_total",
             1,

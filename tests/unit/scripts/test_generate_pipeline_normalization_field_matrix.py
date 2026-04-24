@@ -376,12 +376,22 @@ def test_build_field_matrix_rows_keeps_chembl_cell_line_policy_fields_visible() 
     cell_type = _row(rows, "chembl_cell_line", "cell_type")
     assert cell_type["normalization_source"] == "profile"
     assert cell_type["normalizer"] == "normalize_profile_null"
-    assert cell_type["dq_coverage"] == "null:pseudo_null_to_null"
+    assert cell_type["dq_coverage"] == "not_configured"
 
     clo_id = _row(rows, "chembl_cell_line", "clo_id")
     assert clo_id["semantic_category"] == "ontology_reference_identifier"
-    assert clo_id["controlled_vocabulary_source"] == "configs/vocab/chembl_ontology.yaml"
+    assert (
+        clo_id["controlled_vocabulary_source"] == "configs/vocab/chembl_ontology.yaml"
+    )
     assert clo_id["strictness"] == "canonical_ontology_id"
+    assert clo_id["dq_coverage"] == "pattern:error"
+
+    efo_id = _row(rows, "chembl_cell_line", "efo_id")
+    assert efo_id["semantic_category"] == "ontology_reference_identifier"
+    assert (
+        efo_id["controlled_vocabulary_source"] == "configs/vocab/chembl_ontology.yaml"
+    )
+    assert efo_id["dq_coverage"] == "pattern:error"
 
 
 def test_build_field_matrix_rows_aligns_chembl_taxonomy_fields_to_integer_contract() -> (

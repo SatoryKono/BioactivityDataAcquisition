@@ -310,7 +310,9 @@ class TestEmitFinalTelemetry:
             "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
             side_effect=_fake_atomic_write_text,
         ):
-            await writer.write_bronze_metadata("/virtual/bronze", _make_bronze_metadata())
+            await writer.write_bronze_metadata(
+                "/virtual/bronze", _make_bronze_metadata()
+            )
 
         info_calls = [
             call
@@ -330,7 +332,9 @@ class TestEmitFinalTelemetry:
             "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
             side_effect=_fake_atomic_write_text,
         ):
-            await writer.write_bronze_metadata("/virtual/bronze", _make_bronze_metadata())
+            await writer.write_bronze_metadata(
+                "/virtual/bronze", _make_bronze_metadata()
+            )
 
         assert metrics.increment_counter.call_count >= 1
 
@@ -455,7 +459,9 @@ class TestWriteMetadataPathLogic:
             "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
             side_effect=_fake_atomic_write_text,
         ):
-            await writer.write_bronze_metadata("/virtual/bronze", _make_bronze_metadata())
+            await writer.write_bronze_metadata(
+                "/virtual/bronze", _make_bronze_metadata()
+            )
 
         info_calls = [
             call
@@ -518,7 +524,9 @@ class TestWriteMetadataPathLogic:
             "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
             side_effect=_retry_once_atomic_write_text,
         ):
-            await writer.write_bronze_metadata("/virtual/bronze", _make_bronze_metadata())
+            await writer.write_bronze_metadata(
+                "/virtual/bronze", _make_bronze_metadata()
+            )
 
         info_calls = [
             call
@@ -538,7 +546,9 @@ class TestWriteMetadataPathLogic:
             "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
             side_effect=_fake_atomic_write_text,
         ):
-            await writer.write_bronze_metadata("/virtual/bronze", _make_bronze_metadata())
+            await writer.write_bronze_metadata(
+                "/virtual/bronze", _make_bronze_metadata()
+            )
 
         info_calls = [
             call
@@ -549,9 +559,7 @@ class TestWriteMetadataPathLogic:
         assert info_calls[0].kwargs["final_reason"] == "success_without_retry"
 
     @pytest.mark.asyncio
-    async def test_write_metadata_delegates_prepared_operation_execution(
-        self
-    ) -> None:
+    async def test_write_metadata_delegates_prepared_operation_execution(self) -> None:
         """_write_metadata should pass one prepared operation into the execution helper."""
         from bioetl.infrastructure.storage.metadata.writer_operations import (
             _MetadataWriteRequest,

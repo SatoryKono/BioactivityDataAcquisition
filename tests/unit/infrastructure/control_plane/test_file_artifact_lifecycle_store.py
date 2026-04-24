@@ -248,7 +248,9 @@ def test_lifecycle_apply_deletes_only_expired_unprotected_files(tmp_path: Path) 
     )
 
 
-def test_lifecycle_dry_run_emits_summary_metrics_without_deletions(tmp_path: Path) -> None:
+def test_lifecycle_dry_run_emits_summary_metrics_without_deletions(
+    tmp_path: Path,
+) -> None:
     control_root = tmp_path / "control"
     now = datetime(2026, 4, 22, tzinfo=UTC)
     old = datetime(2026, 1, 1, tzinfo=UTC)

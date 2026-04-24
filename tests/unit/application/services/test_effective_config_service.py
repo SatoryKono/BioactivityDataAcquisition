@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from typing import Any
 
 import pytest
@@ -202,6 +203,44 @@ class TestEffectiveConfigService:
         artifact2 = self.service.create_effective_config_artifact(**kwargs)
 
         assert artifact1.artifact_id == artifact2.artifact_id
+
+    def test_artifact_id_differs_from_legacy_hash_bundle_identifier(self) -> None:
+        """Artifact identity must track full semantic payload, not only hash bundles."""
+        artifact = self.service.create_effective_config_artifact(
+            pipeline_name="test_pipeline",
+            pipeline_kind="standard",
+            resolved_config={"pipeline": {"name": "test_pipeline"}},
+            runtime_overrides={"runtime": {"limit": 5}},
+            source_refs=[
+                ConfigSourceRef(
+                    source_type="file",
+                    source_path="configs/entities/test/pipeline.yaml",
+                    source_hash="abc123",
+                    priority=1,
+                )
+            ],
+        )
+
+        legacy_semantic_payload = {
+            "pipeline_name": artifact.pipeline_name,
+            "pipeline_kind": artifact.pipeline_kind,
+            "resolved_config_hash": artifact.resolved_config_hash,
+            "effective_config_hash": artifact.effective_config_hash,
+            "source_fingerprint": artifact.source_fingerprint,
+            "dq_contract_compatibility_hash": artifact.dq_contract_compatibility_hash,
+        }
+        legacy_artifact_id = (
+            "effective-config-"
+            + hashlib.sha256(
+                json.dumps(
+                    legacy_semantic_payload,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ).encode("utf-8")
+            ).hexdigest()[:16]
+        )
+
+        assert artifact.artifact_id != legacy_artifact_id
 
     def test_custom_artifact_id(self) -> None:
         """Test custom artifact ID usage."""

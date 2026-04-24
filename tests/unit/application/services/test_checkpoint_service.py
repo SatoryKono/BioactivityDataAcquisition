@@ -243,9 +243,7 @@ class TestCheckpointServiceGetCheckpoint:
         checkpoint_service.tracer.get_tracer.assert_called_once_with(
             "bioetl.checkpoint_admin"
         )
-        args = (
-            checkpoint_service.tracer.get_tracer.return_value.start_as_current_span.call_args
-        )
+        args = checkpoint_service.tracer.get_tracer.return_value.start_as_current_span.call_args
         assert args[0][0] == "checkpoint.get"
 
     @pytest.mark.asyncio

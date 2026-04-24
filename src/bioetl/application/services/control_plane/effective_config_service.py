@@ -28,6 +28,7 @@ from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 _DEFAULT_REQUIRED_PERSISTENCE_PROFILE = "degraded_observable"
 _STRICT_PERSISTENCE_PROFILES = frozenset({"replay_ready", "forensic_grade"})
 _ALLOWLISTED_SEMANTIC_ENV_OVERRIDE_KEYS: frozenset[str] = frozenset()
+_EFFECTIVE_CONFIG_SCHEMA_VERSION = "1.0"
 
 
 def _dataclass_to_dict(value: object) -> JsonDict | None:
@@ -135,24 +136,26 @@ def _compute_source_fingerprint(source_refs: list[ConfigSourceRef]) -> str:
     return _stable_hash(normalized)
 
 
+def _semantic_source_refs_payload(
+    source_refs: list[ConfigSourceRef],
+) -> list[JsonDict]:
+    """Return source refs reduced to identity-anchored semantic fields only."""
+    return [
+        {
+            "source_type": src.source_type,
+            "source_path": src.source_path,
+            "source_hash": src.source_hash,
+            "source_hash_strategy": src.source_hash_strategy,
+            "priority": src.priority,
+        }
+        for src in source_refs
+    ]
+
+
 def _build_effective_config_artifact_id(
-    *,
-    pipeline_name: str,
-    pipeline_kind: str,
-    resolved_config_hash: str,
-    effective_config_hash: str,
-    source_fingerprint: str,
-    dq_contract_compatibility_hash: str,
+    semantic_payload: JsonDict,
 ) -> str:
-    """Build one deterministic semantic artifact identifier."""
-    semantic_payload = {
-        "pipeline_name": pipeline_name,
-        "pipeline_kind": pipeline_kind,
-        "resolved_config_hash": resolved_config_hash,
-        "effective_config_hash": effective_config_hash,
-        "source_fingerprint": source_fingerprint,
-        "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
-    }
+    """Build one deterministic semantic artifact identifier from full semantics."""
     return f"effective-config-{_stable_hash(semantic_payload)[:16]}"
 
 
@@ -315,6 +318,58 @@ def _build_source_class_provenance() -> tuple[SourceClassProvenance, ...]:
     )
 
 
+def _build_semantic_identity_payload(
+    *,
+    pipeline_name: str,
+    pipeline_kind: str,
+    source_refs: list[ConfigSourceRef],
+    source_class_provenance: tuple[SourceClassProvenance, ...],
+    resolution_policy: ConfigResolutionPolicy,
+    resolved_config: ResolvedConfigSnapshot,
+    runtime_overrides: RuntimeOverrideSnapshot,
+    effective_execution_config: EffectiveExecutionConfig,
+    resolved_config_hash: str,
+    effective_config_hash: str,
+    source_fingerprint: str,
+    contract_refs: list[str],
+    dq_policy_refs: list[DQPolicyRef],
+    dq_rule_bundle_versions: dict[str, str],
+    dq_contract_compatibility_hash: str,
+    dq_policy_snapshots: list[DQPolicySnapshot],
+) -> JsonDict:
+    """Return the full semantic payload used for stable artifact identity."""
+    return {
+        "schema_version": _EFFECTIVE_CONFIG_SCHEMA_VERSION,
+        "pipeline_name": pipeline_name,
+        "pipeline_kind": pipeline_kind,
+        "source_refs": _semantic_source_refs_payload(source_refs),
+        "source_class_provenance": [
+            _to_jsonable(item) for item in source_class_provenance
+        ],
+        "resolution_policy": _to_jsonable(resolution_policy),
+        "resolved_config": {
+            "config_type": resolved_config.config_type,
+            "config_data": _to_jsonable(resolved_config.config_data),
+            "config_hash": resolved_config.config_hash,
+        },
+        "runtime_overrides": _runtime_overrides_payload(runtime_overrides),
+        "effective_execution_config": {
+            "config_data": _to_jsonable(effective_execution_config.config_data),
+            "effective_hash": effective_execution_config.effective_hash,
+        },
+        "resolved_config_hash": resolved_config_hash,
+        "effective_config_hash": effective_config_hash,
+        "source_fingerprint": source_fingerprint,
+        "contract_refs": contract_refs,
+        "dq_policy_refs": [_to_jsonable(ref) for ref in dq_policy_refs],
+        "dq_rule_bundle_versions": dq_rule_bundle_versions,
+        "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
+        "dq_policy_snapshots": [
+            _to_jsonable(snapshot) for snapshot in dq_policy_snapshots
+        ],
+    }
+
+
 def _serialize_artifact(artifact: EffectiveConfigArtifact) -> str:
     payload = {
         "artifact_id": artifact.artifact_id,
@@ -431,28 +486,44 @@ class EffectiveConfigService:
             )
             or "no_dq_policy_hashes"
         )
-        resolved_artifact_id = artifact_id or _build_effective_config_artifact_id(
-            pipeline_name=pipeline_name,
-            pipeline_kind=pipeline_kind,
-            resolved_config_hash=resolved_snapshot.config_hash,
-            effective_config_hash=effective_snapshot.effective_hash,
-            source_fingerprint=_compute_source_fingerprint(source_refs),
-            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        )
-        return EffectiveConfigArtifact(
-            artifact_id=resolved_artifact_id,
+        resolved_source_fingerprint = _compute_source_fingerprint(source_refs)
+        resolved_contract_refs = _extract_contract_refs(dq_config)
+        source_class_provenance = _build_source_class_provenance()
+        semantic_identity_payload = _build_semantic_identity_payload(
             pipeline_name=pipeline_name,
             pipeline_kind=pipeline_kind,
             source_refs=source_refs,
-            source_class_provenance=_build_source_class_provenance(),
+            source_class_provenance=source_class_provenance,
             resolution_policy=resolved_policy,
             resolved_config=resolved_snapshot,
             runtime_overrides=overrides_snapshot,
             effective_execution_config=effective_snapshot,
             resolved_config_hash=resolved_snapshot.config_hash,
             effective_config_hash=effective_snapshot.effective_hash,
-            source_fingerprint=_compute_source_fingerprint(source_refs),
-            contract_refs=_extract_contract_refs(dq_config),
+            source_fingerprint=resolved_source_fingerprint,
+            contract_refs=resolved_contract_refs,
+            dq_policy_refs=dq_policy_refs,
+            dq_rule_bundle_versions=dq_rule_bundle_versions,
+            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+            dq_policy_snapshots=dq_policy_snapshots,
+        )
+        resolved_artifact_id = artifact_id or _build_effective_config_artifact_id(
+            semantic_identity_payload
+        )
+        return EffectiveConfigArtifact(
+            artifact_id=resolved_artifact_id,
+            pipeline_name=pipeline_name,
+            pipeline_kind=pipeline_kind,
+            source_refs=source_refs,
+            source_class_provenance=source_class_provenance,
+            resolution_policy=resolved_policy,
+            resolved_config=resolved_snapshot,
+            runtime_overrides=overrides_snapshot,
+            effective_execution_config=effective_snapshot,
+            resolved_config_hash=resolved_snapshot.config_hash,
+            effective_config_hash=effective_snapshot.effective_hash,
+            source_fingerprint=resolved_source_fingerprint,
+            contract_refs=resolved_contract_refs,
             dq_policy_refs=dq_policy_refs,
             dq_rule_bundle_versions=dq_rule_bundle_versions,
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,

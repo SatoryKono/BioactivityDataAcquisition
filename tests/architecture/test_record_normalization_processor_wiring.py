@@ -12,7 +12,9 @@ from pathlib import Path
 
 _CONFIG_DRIVEN_BUILDER_PATHS = {
     Path("bioetl/application/core/_batch_transformer_support.py"),
-    Path("bioetl/composition/factories/services/pipeline_processing_components_builder.py"),
+    Path(
+        "bioetl/composition/factories/services/pipeline_processing_components_builder.py"
+    ),
 }
 
 
@@ -32,7 +34,8 @@ def _has_entity_type_argument(node: ast.Call) -> bool:
     entity_type_value = _keyword_value(node, "entity_type")
     if entity_type_value is not None:
         return not (
-            isinstance(entity_type_value, ast.Constant) and entity_type_value.value is None
+            isinstance(entity_type_value, ast.Constant)
+            and entity_type_value.value is None
         )
     return len(node.args) >= 2
 
@@ -55,7 +58,9 @@ def test_record_normalization_processor_runtime_paths_keep_entity_coordinates(
             continue
 
         for node in ast.walk(tree):
-            if not isinstance(node, ast.Call) or not _is_record_normalization_processor_call(node):
+            if not isinstance(
+                node, ast.Call
+            ) or not _is_record_normalization_processor_call(node):
                 continue
             if not _has_entity_type_argument(node):
                 violations.append(
@@ -65,8 +70,7 @@ def test_record_normalization_processor_runtime_paths_keep_entity_coordinates(
     assert not violations, (
         "RecordNormalizationProcessor must receive provider/entity coordinates on "
         "non-builder runtime paths so shipped profile resolution cannot silently "
-        "fall back.\n"
-        + "\n".join(f"  - {violation}" for violation in violations)
+        "fall back.\n" + "\n".join(f"  - {violation}" for violation in violations)
     )
 
 
@@ -80,7 +84,9 @@ def test_record_normalization_processor_never_enables_hardcoded_compatibility_fa
     for path, tree in sorted(source_ast_cache.items()):
         relative = path.relative_to(src_dir)
         for node in ast.walk(tree):
-            if not isinstance(node, ast.Call) or not _is_record_normalization_processor_call(node):
+            if not isinstance(
+                node, ast.Call
+            ) or not _is_record_normalization_processor_call(node):
                 continue
             if _has_hardcoded_true_fallback(node):
                 violations.append(

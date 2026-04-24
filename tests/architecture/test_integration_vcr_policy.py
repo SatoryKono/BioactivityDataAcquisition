@@ -382,7 +382,10 @@ class TestIntegrationVcrPolicy:
         assert "--vcr-record=new_episodes" in dev_readme
 
         assert "report-vcr-metadata" in qa_readme
-        assert "python scripts/engineering/qa/report_vcr_metadata_catalog.py --check" in qa_readme
+        assert (
+            "python scripts/engineering/qa/report_vcr_metadata_catalog.py --check"
+            in qa_readme
+        )
         assert "backfill_vcr_metadata_sidecars.py" in migrations_readme
         assert (
             "scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py"

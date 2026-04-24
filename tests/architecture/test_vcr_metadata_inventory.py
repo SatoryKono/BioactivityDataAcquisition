@@ -58,7 +58,9 @@ class TestVcrMetadataInventory:
     def test_matrix_declares_managed_inventory_contract(self) -> None:
         matrix = _load_matrix()
         contract = _inventory_contract(matrix)
-        actual_metadata = [path.relative_to(ROOT).as_posix() for path in _metadata_files()]
+        actual_metadata = [
+            path.relative_to(ROOT).as_posix() for path in _metadata_files()
+        ]
 
         assert contract.get("scope") == "managed_vcr_inventory"
         assert (
