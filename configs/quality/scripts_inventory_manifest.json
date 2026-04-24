@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-24T13:34:54.793999+00:00",
+  "generated_at": "2026-04-24T13:57:11.212581+00:00",
   "summary": {
     "total_scripts": 444,
     "status_counts": {
@@ -100,7 +100,7 @@
           "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
           "line": 64,
           "source_group": "scripts",
-          "text": "python3 scripts/ai/check_sonar_issues.py --max-quarantine-entries 184"
+          "text": "python3 scripts/ai/check_sonar_issues.py --max-quarantine-entries 159"
         },
         {
           "path": "tests/unit/scripts/test_sonar_issue_processor.py",

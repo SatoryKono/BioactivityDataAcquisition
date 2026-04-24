@@ -118,9 +118,6 @@ def collect_explicit_group_columns(
     resolve_aliases_fn: Callable[[str], set[str]],
 ) -> tuple[list[str], set[str]]:
     """Collect explicit field matches for a YAML group in declared field order."""
-    ordered: list[str] = []
-    used: set[str] = set()
-
     available_list = list(available)
     col_order = {col: i for i, col in enumerate(available_list)}
     field_to_cols = _index_columns_by_field(
