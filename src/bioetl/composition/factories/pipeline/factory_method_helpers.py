@@ -160,6 +160,7 @@ def create_factory_runner(
         gold_schema=request.gold_schema,
         run_id=request.run_id,
         runtime=request.runtime,
+        started_at=request.started_at,
         settings=request.settings,
         observability=request.observability,
         yaml_config=yaml_config,

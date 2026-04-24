@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -19,6 +20,8 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     create_transformer_instance,
 )
 from bioetl.domain.ports.noop import NoOpAudit
+
+_STARTED_AT = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
 
 
 @pytest.mark.unit
@@ -193,6 +196,7 @@ class TestCreatePipelineInstanceWithServices:
         request = _CreatePipelineWithServicesRequest(
             run_id="run-1",
             runtime=runtime,
+            started_at=_STARTED_AT,
             settings=settings,
             logger=logger,
             audit=NoOpAudit(),
@@ -248,6 +252,7 @@ class TestCreatePipelineInstanceWithServices:
         request = _CreatePipelineWithServicesRequest(
             run_id="run-1",
             runtime=MagicMock(),
+            started_at=_STARTED_AT,
             settings=MagicMock(),
             logger=MagicMock(),
             audit=NoOpAudit(),
@@ -296,6 +301,7 @@ class TestCreateFactoryRunner:
                 gold_schema=MagicMock(),
                 run_id="r1",
                 runtime=runtime,
+                started_at=_STARTED_AT,
                 settings=settings,
                 observability=MagicMock(
                     logger=MagicMock(),
@@ -326,6 +332,7 @@ class TestCreateFactoryRunner:
                 gold_schema=MagicMock(),
                 run_id="r1",
                 runtime=runtime,
+                started_at=_STARTED_AT,
                 settings=settings,
                 observability=MagicMock(
                     logger=MagicMock(),
@@ -359,6 +366,7 @@ class TestCreateFactoryRunner:
                 gold_schema=MagicMock(),
                 run_id="r1",
                 runtime=runtime,
+                started_at=_STARTED_AT,
                 settings=settings,
                 observability=MagicMock(
                     logger=MagicMock(),
@@ -373,3 +381,41 @@ class TestCreateFactoryRunner:
         )
 
         assert assemble_fn.call_args.kwargs["strict_gold_validation"] is True
+
+    @patch(
+        "bioetl.composition.factories.pipeline.factory_method_helpers.create_factory_runner_from_request"
+    )
+    def test_forwards_started_at_anchor_to_runtime_support(
+        self, mock_create_factory_runner_from_request: MagicMock
+    ) -> None:
+        """Factory wrapper must preserve the explicit runtime anchor."""
+        yaml_config = MagicMock()
+        settings = SimpleNamespace(env="dev", test_mode=False)
+        runtime = SimpleNamespace(strict_gold_validation=True)
+        observability = MagicMock(
+            logger=MagicMock(),
+            tracer=MagicMock(),
+            metrics=MagicMock(),
+            dq_monitor=None,
+        )
+
+        create_factory_runner(
+            request=_CreateFactoryRunnerRequest(
+                pipeline_name="test",
+                silver_schema=None,
+                gold_schema=MagicMock(),
+                run_id="r1",
+                runtime=runtime,
+                started_at=_STARTED_AT,
+                settings=settings,
+                observability=observability,
+                config=yaml_config,
+            ),
+            create_with_services_fn=MagicMock(),
+            assemble_runner_fn=MagicMock(),
+        )
+
+        assert (
+            mock_create_factory_runner_from_request.call_args.kwargs["started_at"]
+            == _STARTED_AT
+        )

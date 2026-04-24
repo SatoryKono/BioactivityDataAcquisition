@@ -3,11 +3,6 @@
 
 from __future__ import annotations
 
-#!/usr/bin/env python3
-"""Compatibility shim for the packaged MkDocs build entrypoint."""
-
-from __future__ import annotations
-
 if __package__ in {None, ""}:
     import sys
     from pathlib import Path

@@ -12,6 +12,7 @@ from bioetl.application.services.pipeline_runner_models import (
     RunOptions,
     RunResult,
 )
+from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
 
 
 @pytest.mark.unit
@@ -74,6 +75,17 @@ class TestRunOptionsModel:
 @pytest.mark.unit
 class TestRunResultModel:
     """Direct tests for result property behavior."""
+
+    def test_default_timestamps_use_deterministic_sentinel(self) -> None:
+        result = RunResult(
+            status=PipelineRunResult.SUCCESS,
+            pipeline_name="chembl_activity",
+            run_id="run-001",
+            run_type="incremental",
+        )
+
+        assert result.started_at == MISSING_RUNTIME_TIMESTAMP
+        assert result.completed_at == MISSING_RUNTIME_TIMESTAMP
 
     def test_success_rate_can_drop_to_zero(self) -> None:
         result = RunResult(

@@ -11,6 +11,7 @@ import pytest
 from bioetl.domain.context import (
     CachedBronzeContext,
     InputFilterContext,
+    MISSING_RUNTIME_TIMESTAMP,
     PipelineContext,
     PipelineRunContext,
     VacuumSettings,
@@ -43,6 +44,7 @@ class TestPipelineContext:
             run_id=run_id,
             run_type=RunType.INCREMENTAL,
             logger=mock_logger,
+            started_at=datetime(2026, 4, 24, 12, 0, 0, tzinfo=UTC),
         )
 
     def test_context_creation(self, context: PipelineContext, run_id: RunID) -> None:
@@ -111,10 +113,9 @@ class TestPipelineContextStartedAt:
     """Tests for PipelineContext.started_at field."""
 
     def test_context_started_at_has_default(self) -> None:
-        """Context should have started_at with automatic default."""
+        """Direct construction uses deterministic sentinel when omitted."""
         run_id = uuid4()
         logger = MagicMock()
-        before = datetime.now(UTC)
 
         ctx = PipelineContext(
             run_id=run_id,
@@ -122,10 +123,7 @@ class TestPipelineContextStartedAt:
             logger=logger,
         )
 
-        after = datetime.now(UTC)
-        assert ctx.started_at is not None
-        assert before <= ctx.started_at <= after
-        assert ctx.started_at.tzinfo == UTC
+        assert ctx.started_at == MISSING_RUNTIME_TIMESTAMP
 
     def test_context_started_at_explicit(self) -> None:
         """Context should accept explicit started_at value."""
@@ -158,10 +156,9 @@ class TestPipelineContextStartedAt:
         assert ctx.replay_timestamp_anchor == replay_anchor
 
     def test_context_create_factory_auto_timestamp(self) -> None:
-        """create() factory should auto-generate started_at when not provided."""
+        """create() carries deterministic sentinel when caller omits started_at."""
         run_id = uuid4()
         logger = MagicMock()
-        before = datetime.now(UTC)
 
         ctx = PipelineContext.create(
             run_id=run_id,
@@ -169,8 +166,7 @@ class TestPipelineContextStartedAt:
             logger=logger,
         )
 
-        after = datetime.now(UTC)
-        assert before <= ctx.started_at <= after
+        assert ctx.started_at == MISSING_RUNTIME_TIMESTAMP
 
     def test_context_create_factory_explicit_timestamp(self) -> None:
         """create() factory should use provided started_at."""

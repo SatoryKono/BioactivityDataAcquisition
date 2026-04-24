@@ -10,8 +10,10 @@ import pytest
 from bioetl.application.core.postrun.metadata_write_service import (
     PostrunMetadataWriteService,
 )
+from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.types import RunType
+from tests.helpers.clock import FixedClock
 
 
 def _make_config() -> PipelineConfig:
@@ -35,6 +37,9 @@ def _make_context() -> MagicMock:
     context = MagicMock()
     context.started_at = datetime.now(UTC)
     return context
+
+
+FIXED_COMPLETED_AT = datetime(2026, 4, 24, 12, 0, 0, tzinfo=UTC)
 
 
 @pytest.mark.unit
@@ -91,6 +96,7 @@ class TestPostrunMetadataWriteService:
             metadata_coordinator=metadata_coordinator,
             metadata_writer=metadata_writer,
             metadata_version_resolver=metadata_version_resolver,
+            clock=FixedClock(FIXED_COMPLETED_AT),
         )
         executor = MagicMock()
         executor.get_run_statistics = MagicMock(
@@ -107,3 +113,36 @@ class TestPostrunMetadataWriteService:
         metadata_writer.finalize_gold_metadata.assert_not_awaited()
         metadata_version_resolver.resolve_delta_version.assert_called_once()
         assert wrote_metadata is True
+
+    @pytest.mark.asyncio
+    async def test_write_final_metadata_without_clock_uses_deterministic_sentinel(
+        self,
+    ) -> None:
+        storage = MagicMock()
+        storage.get_table_path = MagicMock(return_value="test-output/test_silver")
+        storage.is_table_initialized = MagicMock(return_value=False)
+
+        metadata_coordinator = MagicMock()
+        metadata_writer = MagicMock()
+        metadata_writer.finalize_silver_metadata = AsyncMock(return_value="silver.yaml")
+        metadata_version_resolver = MagicMock()
+        metadata_version_resolver.resolve_delta_version = MagicMock(return_value=7)
+
+        service = PostrunMetadataWriteService(
+            config=_make_config(),
+            runtime=_make_runtime(),
+            context=_make_context(),
+            storage=storage,
+            metadata_coordinator=metadata_coordinator,
+            metadata_writer=metadata_writer,
+            metadata_version_resolver=metadata_version_resolver,
+        )
+        executor = MagicMock()
+        executor.get_run_statistics = MagicMock(
+            return_value={"records_silver": 5, "source_batch_ids": ["batch-1"]}
+        )
+
+        await service.write_final_metadata_if_available(executor, dq_reports=None)
+
+        silver_call = metadata_writer.finalize_silver_metadata.await_args
+        assert silver_call.kwargs["completed_at"] == MISSING_RUNTIME_TIMESTAMP
