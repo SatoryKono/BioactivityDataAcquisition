@@ -16,6 +16,7 @@ Content here is **non-normative**; authoritative guidance remains in:
 
 Primary retained surface:
 - [`evidence/`](evidence/)
+- `audits/`
 
 Planning material that is still active should live in:
 - [`docs/plans/`](../plans/)

@@ -1,4 +1,4 @@
-"""Import high-signal relations from ``bioetl_knowledge_graph_expanded.json``."""
+"""Import high-signal relations from the expanded knowledge-graph snapshot."""
 
 from __future__ import annotations
 
@@ -40,7 +40,14 @@ ADR_DOC_GLOB = "ADR-*.md"
 
 def default_expanded_graph_path(root: Path) -> Path:
     """Return the conventional expanded graph snapshot input path."""
-    return root / "src" / "bioetl_knowledge_graph_expanded.json"
+    return (
+        root
+        / "src"
+        / "memory"
+        / "graph"
+        / "projections"
+        / "bioetl_knowledge_graph_expanded.json"
+    )
 
 
 def load_expanded_graph(path: Path) -> dict[str, Any]:
@@ -1694,7 +1701,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--snapshot-path",
         type=Path,
         required=True,
-        help="Path to bioetl_knowledge_graph_expanded.json.",
+        help="Path to the expanded knowledge-graph snapshot JSON.",
     )
     parser.add_argument(
         "--output-root",

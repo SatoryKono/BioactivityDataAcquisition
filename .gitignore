@@ -93,6 +93,7 @@ log_test.txt
 # IDE / Editors
 .idea/
 .vscode/
+.agentbridge/
 .cursor/
 .sonarlint/
 .trae/
@@ -252,7 +253,6 @@ docs/reports/branch-full-diff-matrix-2026-03-01.csv
 /data/миграция
 /docs/02-architecture/diagrams/mermaid/png
 *.png
-/docs/reports
 /g-drive05_AIgithubBioactivityDataAcquisition2.pytest-tmpinfra-integ/test_list_all_multiple0/checkpoints/alpha.json
 /g-drive05_AIgithubBioactivityDataAcquisition2.pytest-tmpinfra-integ
 /site_strict_check3
@@ -279,3 +279,5 @@ docs/reports/evidence/documentation-internal-surface-governance/02-evidence/inte
 .env.local
 
 !scripts/docs/build/mkdocs_build.py
+/docs/99-archive
+/docs/reports

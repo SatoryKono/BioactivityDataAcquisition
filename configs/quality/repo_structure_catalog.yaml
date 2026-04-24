@@ -69,6 +69,11 @@ src_sidecars:
     - path: src/memory
       role: approved_sidecar_memory_subsystem
 
+test_support_roots:
+  approved_roots:
+    - path: testing_support
+      role: approved_test_support_modules
+
 blocked_cleanup_zones:
   - path: docs/99-archive
     class: archive_history

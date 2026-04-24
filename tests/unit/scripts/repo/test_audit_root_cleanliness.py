@@ -172,6 +172,19 @@ def test_collect_structure_policy_violations_rejects_unapproved_src_root(
     ]
 
 
+def test_approved_root_directories_include_cataloged_test_support_root() -> None:
+    catalog = {
+        "test_support_roots": {
+            "approved_roots": [{"path": "testing_support"}],
+        }
+    }
+
+    approved = module._approved_root_directories(catalog)
+
+    assert "testing_support" in approved
+    assert "tests" in approved
+
+
 def test_load_structure_catalog_requires_sections(
     tmp_path: Path, monkeypatch
 ) -> None:

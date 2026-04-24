@@ -51,6 +51,20 @@ class _NoOpSpan:
         """
         return None
 
+    def add_event(
+        self,
+        _name: str,
+        attributes: object | None = None,
+    ) -> None:
+        """No-op implementation — discards span events.
+
+        Args:
+            _name: Event name (ignored).
+            attributes: Optional event attributes (ignored).
+        """
+        _ = attributes
+        return None
+
     def record_exception(self, _exception: Exception) -> None:
         """No-op implementation — discards the recorded exception.
 

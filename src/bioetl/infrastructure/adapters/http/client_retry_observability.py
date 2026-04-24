@@ -51,6 +51,9 @@ class _NoOpSpan:
     def set_attribute(self, key: str, value: object) -> None:
         _ = (key, value)
 
+    def add_event(self, name: str, attributes: object | None = None) -> None:
+        _ = (name, attributes)
+
     def record_exception(self, exception: Exception) -> None:
         _ = exception
 

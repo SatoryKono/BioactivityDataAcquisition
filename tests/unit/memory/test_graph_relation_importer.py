@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 from memory.graph.importers.expanded_json import (
+    default_expanded_graph_path,
     load_entity_relation_index,
     load_file_relation_index,
     load_module_relation_index,
@@ -118,6 +119,19 @@ def _write_expanded_graph(path: Path) -> None:
         },
     }
     path.write_text(json.dumps(payload), encoding="utf-8")
+
+
+def test_default_expanded_graph_path_points_to_memory_projection_surface(
+    tmp_path: Path,
+) -> None:
+    assert default_expanded_graph_path(tmp_path) == (
+        tmp_path
+        / "src"
+        / "memory"
+        / "graph"
+        / "projections"
+        / "bioetl_knowledge_graph_expanded.json"
+    )
 
 
 def test_expanded_graph_import_writes_file_relation_projection_and_index(

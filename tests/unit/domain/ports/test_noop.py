@@ -47,6 +47,11 @@ class TestNoOpSpan:
         span = _NoOpSpan()
         span.record_exception(ValueError("test"))  # Should not raise
 
+    def test_add_event_no_error(self) -> None:
+        """Test add_event is a no-op."""
+        span = _NoOpSpan()
+        span.add_event("bioetl.memory.decision", {"index": 1})  # Should not raise
+
 
 @pytest.mark.unit
 class TestNoOpOtelTracer:

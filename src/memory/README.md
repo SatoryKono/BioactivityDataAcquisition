@@ -132,7 +132,7 @@ python -m memory.tooling.refresh_all \
   --skip-rag \
   --skip-timeline \
   --include-graph-relations \
-  --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
+  --expanded-graph-path src/memory/graph/projections/bioetl_knowledge_graph_expanded.json
 ```
 
 This generates rebuild-only artifacts under `graph/projections/` and
@@ -185,16 +185,16 @@ python -m memory.query rag --query chembl_activity --source-type code --profile 
 python -m memory.query rag --query runner --file-context src/bioetl/application/core/runner.py --file-relation-index /tmp/memory/graph/indexes/file_relations.json
 python -m memory.query timeline --event-family run --query manifest --profile operations
 python -m memory.query all chembl_activity --profile architecture
-python -m memory.query all runner --file-context src/bioetl/application/core/runner.py --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
-python -m memory.query refs src/bioetl/application/core/runner.py --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
-python -m memory.query impact src/bioetl/application/core/runner.py --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
-python -m memory.query neighborhood src/bioetl/application/core/runner.py --depth 2 --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
-python -m memory.query module-refs bioetl.application.core.runner --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
-python -m memory.query module-impact bioetl.application.core.runner --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
-python -m memory.query module-neighborhood bioetl.application.core.runner --depth 2 --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
-python -m memory.query entity-refs chembl_activity --relation defined_by --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
-python -m memory.query entity-impact configs/entities/chembl/activity.yaml --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
-python -m memory.query entity-neighborhood chembl_activity --depth 2 --auto-refresh --expanded-graph-path src/bioetl_knowledge_graph_expanded.json
+python -m memory.query all runner --file-context src/bioetl/application/core/runner.py --auto-refresh --expanded-graph-path src/memory/graph/projections/bioetl_knowledge_graph_expanded.json
+python -m memory.query refs src/bioetl/application/core/runner.py --auto-refresh --expanded-graph-path src/memory/graph/projections/bioetl_knowledge_graph_expanded.json
+python -m memory.query impact src/bioetl/application/core/runner.py --auto-refresh --expanded-graph-path src/memory/graph/projections/bioetl_knowledge_graph_expanded.json
+python -m memory.query neighborhood src/bioetl/application/core/runner.py --depth 2 --auto-refresh --expanded-graph-path src/memory/graph/projections/bioetl_knowledge_graph_expanded.json
+python -m memory.query module-refs bioetl.application.core.runner --auto-refresh --expanded-graph-path src/memory/graph/projections/bioetl_knowledge_graph_expanded.json
+python -m memory.query module-impact bioetl.application.core.runner --auto-refresh --expanded-graph-path src/memory/graph/projections/bioetl_knowledge_graph_expanded.json
+python -m memory.query module-neighborhood bioetl.application.core.runner --depth 2 --auto-refresh --expanded-graph-path src/memory/graph/projections/bioetl_knowledge_graph_expanded.json
+python -m memory.query entity-refs chembl_activity --relation defined_by --auto-refresh --expanded-graph-path src/memory/graph/projections/bioetl_knowledge_graph_expanded.json
+python -m memory.query entity-impact configs/entities/chembl/activity.yaml --auto-refresh --expanded-graph-path src/memory/graph/projections/bioetl_knowledge_graph_expanded.json
+python -m memory.query entity-neighborhood chembl_activity --depth 2 --auto-refresh --expanded-graph-path src/memory/graph/projections/bioetl_knowledge_graph_expanded.json
 python -m memory.query graph owner-pipeline chembl_activity
 ```
 

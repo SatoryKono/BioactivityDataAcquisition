@@ -144,8 +144,8 @@ Canonical serialization is the shared lexical contract before hashing.
 
 Current main seams:
 
-- [json.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/json.py)
-- [serialization.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/serialization.py)
+- [json.py](../../src/bioetl/domain/normalization/json.py)
+- [serialization.py](../../src/bioetl/domain/serialization.py)
 
 ### Datetime
 
@@ -158,7 +158,7 @@ Example:
 
 Current main seam:
 
-- [control_plane.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/control_plane.py)
+- [control_plane.py](../../src/bioetl/domain/normalization/control_plane.py)
 
 ### SHA-256
 
@@ -183,17 +183,17 @@ UUID-like values normalize through canonical string conversion.
 
 | Concern | Current seam | Current behavior on `main` |
 | --- | --- | --- |
-| Control-plane domain normalization | [control_plane.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/control_plane.py) | Pure helpers for manifest specs, ledger payloads, UUIDs, datetimes, set-like collections, canonical execution identity, and degraded runtime anchors |
-| Hash-identity domain normalization | [hash_identity.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/hash_identity.py) | Pure helpers for `content_hash` and content-aware dedup identity, including the current date-only datetime contract |
-| Manifest fingerprint | [run_manifest_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/control_plane/run_manifest_service.py) | Calls `normalize_run_manifest_spec()`, then canonical JSON, then SHA-256 |
-| Ledger persist payload | [run_ledger_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/control_plane/run_ledger_service.py) | Calls `normalize_run_ledger_payload()` before append |
-| Record-level normalization | [record_normalization_processor.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/core/record_normalization_processor.py) | Uses `NormalizationProfile` when available, otherwise falls back to legacy heuristics |
-| Profile framework | [base.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/base.py) | Defines `FieldRule` and `NormalizationProfile` with `include_in_hash` and `set_like` |
-| Shipped profile registry | [registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/registry.py) | Registers shipped profiles for `chembl.activity`, `chembl.assay`, `chembl.assay_parameters`, `chembl.cell_line`, `chembl.compound_record`, `chembl.molecule`, `chembl.protein_class`, `chembl.publication`, `chembl.publication_similarity`, `chembl.publication_term`, `chembl.subcellular_fraction`, `chembl.target`, `chembl.target_component`, `chembl.tissue`, `crossref.publication`, `openalex.publication`, `pubchem.compound`, `pubmed.publication`, `semanticscholar.publication`, `uniprot.idmapping`, and `uniprot.protein` |
-| Join-key domain policies | [join_keys.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/join_keys.py) | Pure scalar join-key policies for canonical trim/casing behavior |
-| Join-key application adapters | [join_key_normalization.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/composite/join_key_normalization.py) | Applies canonical join-key policies to composite runtime/config and DataFrame-oriented flows |
-| Matrix generation | [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) | Deterministically emits multi-pipeline CSV and MD artifacts from schemas, profiles, fallback rules, and join-key seams |
-| Fallback inventory | [report_normalization_fallback_inventory.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/engineering/qa/report_normalization_fallback_inventory.py) | Reports `fallback_business` vs `fallback_technical_passthrough` debt from the published matrix for governance and ratchets |
+| Control-plane domain normalization | [control_plane.py](../../src/bioetl/domain/normalization/control_plane.py) | Pure helpers for manifest specs, ledger payloads, UUIDs, datetimes, set-like collections, canonical execution identity, and degraded runtime anchors |
+| Hash-identity domain normalization | [hash_identity.py](../../src/bioetl/domain/normalization/hash_identity.py) | Pure helpers for `content_hash` and content-aware dedup identity, including the current date-only datetime contract |
+| Manifest fingerprint | [run_manifest_service.py](../../src/bioetl/application/services/control_plane/run_manifest_service.py) | Calls `normalize_run_manifest_spec()`, then canonical JSON, then SHA-256 |
+| Ledger persist payload | [run_ledger_service.py](../../src/bioetl/application/services/control_plane/run_ledger_service.py) | Calls `normalize_run_ledger_payload()` before append |
+| Record-level normalization | [record_normalization_processor.py](../../src/bioetl/application/core/record_normalization_processor.py) | Uses `NormalizationProfile` when available, otherwise falls back to legacy heuristics |
+| Profile framework | [base.py](../../src/bioetl/domain/normalization/profiles/base.py) | Defines `FieldRule` and `NormalizationProfile` with `include_in_hash` and `set_like` |
+| Shipped profile registry | [registry.py](../../src/bioetl/domain/normalization/profiles/registry.py) | Registers shipped profiles for `chembl.activity`, `chembl.assay`, `chembl.assay_parameters`, `chembl.cell_line`, `chembl.compound_record`, `chembl.molecule`, `chembl.protein_class`, `chembl.publication`, `chembl.publication_similarity`, `chembl.publication_term`, `chembl.subcellular_fraction`, `chembl.target`, `chembl.target_component`, `chembl.tissue`, `crossref.publication`, `openalex.publication`, `pubchem.compound`, `pubmed.publication`, `semanticscholar.publication`, `uniprot.idmapping`, and `uniprot.protein` |
+| Join-key domain policies | [join_keys.py](../../src/bioetl/domain/normalization/join_keys.py) | Pure scalar join-key policies for canonical trim/casing behavior |
+| Join-key application adapters | [join_key_normalization.py](../../src/bioetl/application/composite/join_key_normalization.py) | Applies canonical join-key policies to composite runtime/config and DataFrame-oriented flows |
+| Matrix generation | [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py) | Deterministically emits multi-pipeline CSV and MD artifacts from schemas, profiles, fallback rules, and join-key seams |
+| Fallback inventory | [report_normalization_fallback_inventory.py](../../scripts/engineering/qa/report_normalization_fallback_inventory.py) | Reports `fallback_business` vs `fallback_technical_passthrough` debt from the published matrix for governance and ratchets |
 
 ## Hash Boundaries
 
@@ -201,7 +201,7 @@ UUID-like values normalize through canonical string conversion.
 
 Canonical manifest path:
 
-- [run_manifest_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/control_plane/run_manifest_service.py)
+- [run_manifest_service.py](../../src/bioetl/application/services/control_plane/run_manifest_service.py)
 
 Current algorithm on `main`:
 
@@ -242,11 +242,11 @@ Important note:
 
 Canonical record path:
 
-- [hash_identity.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/hash_identity.py)
-- [record_normalization_processor.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/core/record_normalization_processor.py)
-- [hashing.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/transformations/hashing.py)
-- [retention.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/storage/support/retention.py)
-- [validation_operations.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/infrastructure/storage/silver/validation_operations.py)
+- [hash_identity.py](../../src/bioetl/domain/normalization/hash_identity.py)
+- [record_normalization_processor.py](../../src/bioetl/application/core/record_normalization_processor.py)
+- [hashing.py](../../src/bioetl/domain/transformations/hashing.py)
+- [retention.py](../../src/bioetl/infrastructure/storage/support/retention.py)
+- [validation_operations.py](../../src/bioetl/infrastructure/storage/silver/validation_operations.py)
 
 Current algorithm on `main`:
 
@@ -288,14 +288,14 @@ The field matrix must be generated from code, not from spreadsheets.
 
 Current deterministic generator on `main`:
 
-- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py)
+- [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py)
 
 Current inputs:
 
 - silver schema registry for shipped entity pipelines
-- canonical profile registry in [registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/registry.py)
-- canonical fallback field families from [normalization_fallbacks.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/core/normalization_fallbacks.py)
-- composite join-key policy seams from [join_keys.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/join_keys.py) and [join_key_normalization.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/composite/join_key_normalization.py)
+- canonical profile registry in [registry.py](../../src/bioetl/domain/normalization/profiles/registry.py)
+- canonical fallback field families from [normalization_fallbacks.py](../../src/bioetl/application/core/normalization_fallbacks.py)
+- composite join-key policy seams from [join_keys.py](../../src/bioetl/domain/normalization/join_keys.py) and [join_key_normalization.py](../../src/bioetl/application/composite/join_key_normalization.py)
 
 Current deterministic outputs:
 
@@ -313,10 +313,10 @@ docs.
 
 Current evidence bundle on `main`:
 
-- canonical plan: [normalization_plan_P0_P6.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/05-engineering/normalization_plan_P0_P6.md)
-- shipped multi-pipeline matrix: [pipeline_normalization_field_matrix.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md)
-- fallback inventory report: [report_normalization_fallback_inventory.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/engineering/qa/report_normalization_fallback_inventory.py)
-- join-key policy seams: [join_keys.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/join_keys.py) and [join_key_normalization.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/composite/join_key_normalization.py)
+- canonical plan: [normalization_plan_P0_P6.md](normalization_plan_P0_P6.md)
+- shipped multi-pipeline matrix: [pipeline_normalization_field_matrix.md](../reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md)
+- fallback inventory report: [report_normalization_fallback_inventory.py](../../scripts/engineering/qa/report_normalization_fallback_inventory.py)
+- join-key policy seams: [join_keys.py](../../src/bioetl/domain/normalization/join_keys.py) and [join_key_normalization.py](../../src/bioetl/application/composite/join_key_normalization.py)
 
 Governance rules:
 
@@ -412,7 +412,7 @@ Keep `RunManifest` and `RunLedger` normalization pure and deterministic.
 
 ### Current state on `main`
 
-- [control_plane.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/control_plane.py) already exists
+- [control_plane.py](../../src/bioetl/domain/normalization/control_plane.py) already exists
 - it normalizes UUIDs, datetimes, set-like collections, manifest payloads, and ledger payloads
 
 ### Requirements
@@ -437,7 +437,7 @@ Keep `RunManifest` and `RunLedger` normalization pure and deterministic.
 
 ### Current state on `main`
 
-- [run_manifest_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/control_plane/run_manifest_service.py) already normalizes payloads before hashing
+- [run_manifest_service.py](../../src/bioetl/application/services/control_plane/run_manifest_service.py) already normalizes payloads before hashing
 
 ### Requirements
 
@@ -458,7 +458,7 @@ Persist a deterministic ledger payload for equivalent lifecycle events.
 
 ### Current state on `main`
 
-- [run_ledger_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/control_plane/run_ledger_service.py) already calls `normalize_run_ledger_payload()`
+- [run_ledger_service.py](../../src/bioetl/application/services/control_plane/run_ledger_service.py) already calls `normalize_run_ledger_payload()`
 
 ### Requirements
 
@@ -508,7 +508,7 @@ Replace heuristic drift with explicit field contracts.
 
 ### Current state on `main`
 
-- [base.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/base.py) already defines:
+- [base.py](../../src/bioetl/domain/normalization/profiles/base.py) already defines:
   - `FieldRule`
   - `NormalizationProfile`
   - `include_in_hash`
@@ -536,7 +536,7 @@ Use explicit profiles as canonical contracts for covered pipeline schemas.
 
 ### Current state on `main`
 
-- [registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/registry.py) already ships a canonical registry derived from one declarative shipped-profile table
+- [registry.py](../../src/bioetl/domain/normalization/profiles/registry.py) already ships a canonical registry derived from one declarative shipped-profile table
 - shipped profiles currently include:
   - `chembl.activity`
   - `chembl.assay`
@@ -583,7 +583,7 @@ fallback explicit and bounded.
 
 ### Current state on `main`
 
-- [record_normalization_processor.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/core/record_normalization_processor.py) prefers a `NormalizationProfile`
+- [record_normalization_processor.py](../../src/bioetl/application/core/record_normalization_processor.py) prefers a `NormalizationProfile`
 - shipped profile-backed pipelines must fail loudly on unprofiled business fields by default
 - compatibility fallback remains available only through explicit opt-in for bounded non-shipped or transitional paths
 
@@ -608,8 +608,8 @@ purity or import boundaries.
 
 ### Current state on `main`
 
-- [join_keys.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/join_keys.py) already ships pure scalar normalization policies
-- [join_key_normalization.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/composite/join_key_normalization.py) already applies those policies in application/composite flows
+- [join_keys.py](../../src/bioetl/domain/normalization/join_keys.py) already ships pure scalar normalization policies
+- [join_key_normalization.py](../../src/bioetl/application/composite/join_key_normalization.py) already applies those policies in application/composite flows
 
 ### Requirements
 
@@ -659,7 +659,7 @@ profiles, fallback seams, and composite join-key policies.
 
 ### Current state on `main`
 
-- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministic multi-pipeline artifacts
+- [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministic multi-pipeline artifacts
 
 ### Requirements
 
@@ -759,8 +759,8 @@ python3 -m scripts.docs generate-pipeline-normalization-matrix --check
 
 ## Related Documents
 
-- [RULES.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/00-project/RULES.md)
-- [Content Hash Identity Policy](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/policies/content-hash-identity-policy.md)
-- [ADR-014 Deterministic Writes](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/decisions/ADR-014-deterministic-writes.md)
-- [ADR-044 Run Manifest and Run Ledger](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
-- [Run Manifest Inspection](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/05-operations/runbooks/run-manifest-inspection.md)
+- [RULES.md](../00-project/RULES.md)
+- [Content Hash Identity Policy](../02-architecture/policies/content-hash-identity-policy.md)
+- [ADR-014 Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md)
+- [ADR-044 Run Manifest and Run Ledger](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
+- [Run Manifest Inspection](../05-operations/runbooks/run-manifest-inspection.md)

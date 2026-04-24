@@ -5,6 +5,9 @@ import pytest
 
 from bioetl.application.composite.column_service import (
     ColumnOrderService as ColumnOrderer,
+    collect_explicit_group_columns,
+    extract_field_from_qualified_name,
+    sort_columns_by_provider,
 )
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.value_objects.column_order import (
@@ -227,6 +230,46 @@ class TestColumnOrderer:
         ]
 
         assert result.columns == expected_order
+
+    def test_collect_explicit_group_columns_preserves_field_order(
+        self,
+    ) -> None:
+        """Explicit group collection keeps declared field order and de-duplicates."""
+        group = ColumnGroupConfig(
+            name="publication_fields",
+            fields=("title", "journal"),
+            provider_order=("chembl", "crossref", "pubmed"),
+        )
+        available = {
+            "chembl.publication.title",
+            "crossref.publication.title",
+            "title",
+            "journal",
+            "crossref.publication.journal",
+        }
+
+        ordered, used = collect_explicit_group_columns(
+            available=available,
+            group=group,
+            sort_fn=sort_columns_by_provider,
+            extract_field_fn=extract_field_from_qualified_name,
+            resolve_aliases_fn=lambda field_name: {field_name},
+        )
+
+        assert ordered == [
+            "title",
+            "chembl.publication.title",
+            "crossref.publication.title",
+            "journal",
+            "crossref.publication.journal",
+        ]
+        assert used == {
+            "title",
+            "chembl.publication.title",
+            "crossref.publication.title",
+            "journal",
+            "crossref.publication.journal",
+        }
 
 
 class TestColumnOrdererYAMLGroups:

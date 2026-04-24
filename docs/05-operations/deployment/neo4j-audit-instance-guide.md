@@ -63,7 +63,7 @@ live --report-fast
 When `LIVE_AUDIT_MODE=1` is set:
 
 ```python
-# In src/utils/neo4j_audit.py
+# In src/tools/neo4j_audit.py
 uri = get_neo4j_uri()
 # Returns: bolt://localhost:7688 (audit instance)
 
@@ -93,7 +93,7 @@ cpus: "2.0"                                      # 2 CPU cores
 - Audit instance: 1024m heap (aggressive, for heavy graph operations)
 - Separate instances prevent resource contention
 
-### src/utils/neo4j_audit.py
+### src/tools/neo4j_audit.py
 
 Helper functions:
 ```python
@@ -119,7 +119,7 @@ driver = neo4j.driver('bolt://localhost:7687', auth=...)
 
 ### After (context-aware)
 ```python
-from src.utils.neo4j_audit import get_neo4j_uri, get_neo4j_auth
+from src.tools.neo4j_audit import get_neo4j_uri, get_neo4j_auth
 
 driver = neo4j.driver(
     get_neo4j_uri(),

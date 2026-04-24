@@ -16,6 +16,11 @@ summary markdown artifacts that no longer belong in the repository root.
 It also stores fixed-state setup notes that were previously committed as
 one-off root deployment memos.
 
+The `ai-runtime-setup/` subfolder stores historical Codex / Mistral Vibe setup,
+diagnostics, and completion notes that were removed from the repository root
+once canonical launch guidance moved into the maintained script and docs
+surfaces.
+
 ## Purpose
 
 - preserve historical context for setup waves and bounded cleanup work;
