@@ -36,7 +36,7 @@ class _ConcreteBronzeMixin(BronzeWriterIOMixin):
         return f"{provider}/{entity}/{date_str}/{filename}"
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestWriteAtomicStreamEdgeCases:
     """Tests for _write_atomic_stream (lines 78-79)."""
 
@@ -95,7 +95,7 @@ class TestWriteAtomicStreamEdgeCases:
         assert len(tmp_files) == 0
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestListBatches:
     """Tests for list_batches (lines 160-182)."""
 
@@ -166,7 +166,7 @@ class TestListBatches:
         assert result == sorted(result)
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestFindOldDateDirs:
     """Tests for _find_old_date_dirs (line 192)."""
 
@@ -232,7 +232,7 @@ class TestFindOldDateDirs:
         assert mixin._is_old_date_dir(non_date, "2025-01-01") is False
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestCleanupOldFiles:
     """Tests for cleanup_old_files (lines 266-274)."""
 
@@ -300,7 +300,7 @@ class TestCleanupOldFiles:
         metrics.increment_counter.assert_not_called()
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestPreviewCleanupBronze:
     """Tests for preview_cleanup (lines 286-292)."""
 

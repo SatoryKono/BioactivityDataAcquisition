@@ -1,4 +1,4 @@
-"""Unit tests for Bronze metadata preparation helpers."""
+"""Integration tests for Bronze metadata preparation helpers."""
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ class _BundleCoordinator:
         return MagicMock(metadata=self.metadata, lineage_fragment=self.fragment)
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestPrepareBronzeMetadataWrite:
     def test_raises_when_coordinator_missing(self, tmp_path: Path) -> None:
         host = _Host(tmp_path)

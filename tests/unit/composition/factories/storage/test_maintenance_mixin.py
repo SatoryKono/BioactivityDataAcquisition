@@ -139,6 +139,32 @@ async def test_optimize_delegates_to_vacuum_and_bronze(tmp_path: Path) -> None:
 
 @pytest.mark.unit
 @pytest.mark.asyncio
+async def test_optimize_uses_sanctioned_time_for_cutoff(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """optimize should derive Bronze cutoff from the sanctioned time helper."""
+    silver_path = tmp_path / "silver"
+    silver_path.mkdir()
+    delta_log = silver_path / "_delta_log"
+    delta_log.mkdir()
+    (delta_log / "commit.json").touch()
+
+    fixed_now = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
+    monkeypatch.setattr(
+        "bioetl.composition.factories.storage.maintenance_mixin.current_utc_time",
+        lambda: fixed_now,
+    )
+
+    mixin = _make_mixin(silver_get_table_path=silver_path)
+    await mixin.optimize("chembl.activity", retention_hours=48, dry_run=True)
+
+    call_kwargs = mixin.bronze.cleanup_old_files.call_args[1]
+    assert call_kwargs["cutoff_date"] == datetime(2026, 4, 22, 12, 0, tzinfo=UTC)
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
 async def test_optimize_no_dot_in_table_name(tmp_path: Path) -> None:
     """optimize skips bronze cleanup when table_name has no dot."""
     mixin = _make_mixin()

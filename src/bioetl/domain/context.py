@@ -176,6 +176,7 @@ class PipelineRunContext:
     pipeline_name: str
     run_id: RunID
     run_type: RunType
+    started_at: datetime = field(default_factory=current_utc_time)
     replay_of_run_id: str | None = None
     replay_of_manifest_id: str | None = None
     manifest_id: str | None = None

@@ -21,3 +21,6 @@ quarantine-purge:
 
 release-lock:
 	$(RUN) bioetl lock release --pipeline $(PIPELINE) --run-id $(RUN_ID)
+
+antigravity:
+	@export BROWSER='/mnt/c/Windows/System32/cmd.exe /c start' && $(RUN) antigravity

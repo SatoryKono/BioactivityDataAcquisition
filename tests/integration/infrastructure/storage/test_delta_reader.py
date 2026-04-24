@@ -1,4 +1,4 @@
-"""Unit tests for DeltaReader.
+"""Integration tests for DeltaReader.
 
 Tests the read-only Delta Lake table accessor with column projection,
 row limiting, schema retrieval, and existence checks.
@@ -52,7 +52,7 @@ def sample_delta_table(tmp_path: Path) -> Path:
     return table_path
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestDeltaReaderInit:
     """Test DeltaReader initialization."""
 
@@ -68,7 +68,7 @@ class TestDeltaReaderInit:
         assert reader._base_path == tmp_path
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestResolvePath:
     """Test _resolve_path method."""
 
@@ -103,7 +103,7 @@ class TestResolvePath:
         assert result == tmp_path / "chembl" / "activity__v2_0_0"
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.asyncio
 class TestReadTable:
     """Test read_table method."""
@@ -255,7 +255,7 @@ class TestReadTable:
         assert result == expected
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.asyncio
 class TestGetSchema:
     """Test get_schema method."""
@@ -286,7 +286,7 @@ class TestGetSchema:
         assert "Delta table not found" in str(exc_info.value)
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.asyncio
 class TestGetRowCount:
     """Test get_row_count method."""
@@ -359,7 +359,7 @@ class TestGetRowCount:
             await reader.get_row_count("provider/entity")
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.asyncio
 class TestTableExists:
     """Test table_exists method."""
@@ -416,7 +416,7 @@ class TestTableExists:
         assert result is False
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.asyncio
 class TestAclose:
     """Test aclose method."""
@@ -427,7 +427,7 @@ class TestAclose:
         await reader.aclose()
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.asyncio
 class TestAbsolutePath:
     """Test reading with absolute paths."""
@@ -472,7 +472,7 @@ class TestAbsolutePath:
         assert result is True
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.asyncio
 class TestEmptyTable:
     """Test reading empty Delta tables."""
@@ -521,7 +521,7 @@ class TestEmptyTable:
         assert result == 0
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.asyncio
 class TestLimitEdgeCases:
     """Test edge cases for limit parameter."""

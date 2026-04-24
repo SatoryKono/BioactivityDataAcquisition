@@ -520,9 +520,17 @@ def test_profile_matrix_exposes_strict_json_semantics_for_chembl_structured_fiel
     assert assay_parameters_row["normalizer"] == "normalize_profile_json_string_strict"
     assert assay_parameters_row["strictness"] == "strict_json"
     assert (
+        assay_parameters_row["dq_coverage"]
+        == "runtime_warning:malformed_json_normalized_to_null"
+    )
+    assert (
         publication_authors_row["normalizer"] == "normalize_profile_json_string_strict"
     )
     assert publication_authors_row["strictness"] == "strict_json"
+    assert (
+        publication_authors_row["dq_coverage"]
+        == "runtime_warning:malformed_json_normalized_to_null"
+    )
     assert publication_authors_row["hash_ordering"] == "order_sensitive"
 
 

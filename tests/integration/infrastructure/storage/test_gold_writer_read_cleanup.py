@@ -1,4 +1,4 @@
-"""Unit tests for GoldWriterReadCleanupMixin."""
+"""Integration tests for GoldWriterReadCleanupMixin."""
 
 from __future__ import annotations
 
@@ -13,6 +13,8 @@ from bioetl.infrastructure.storage.gold.read_cleanup_mixin import (
     _build_read_projection,
     _load_gold_writer_module,
 )
+
+pytestmark = pytest.mark.integration
 
 
 class ConcreteGoldReaderForTest(GoldWriterReadCleanupMixin):

@@ -213,6 +213,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             request = PipelineCreateRunnerRequest(
                 run_id=kwargs["run_id"],
                 runtime=kwargs["runtime"],
+                started_at=cast("datetime", kwargs["started_at"]),
                 settings=cast("Settings", kwargs["settings"]),
                 observability=cast("ObservabilityBundle", kwargs["observability"]),
                 control_plane=cast(
@@ -230,6 +231,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
                 request = PipelineCreateRunnerRequest(
                     run_id=request.run_id,
                     runtime=request.runtime,
+                    started_at=request.started_at,
                     settings=request.settings,
                     observability=request.observability,
                     control_plane=PipelineControlPlaneArtifacts(
@@ -268,6 +270,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
                 gold_schema=self.gold_schema,
                 run_id=request.run_id,
                 runtime=request.runtime,
+                started_at=request.started_at,
                 settings=cast("Settings", request.settings),
                 observability=cast("ObservabilityBundle", request.observability),
                 manifest_id=request.control_plane.manifest_id,

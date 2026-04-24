@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.base import BasePipeline
@@ -77,6 +78,7 @@ class _CreateFactoryRunnerRequest:
     gold_schema: GoldSchemaType
     run_id: RunID
     runtime: RuntimeConfig
+    started_at: datetime
     settings: Settings
     observability: ObservabilityBundle
     manifest_id: str | None = None
@@ -132,6 +134,7 @@ def build_pipeline_factory_context(
 def build_create_pipeline_with_services_request(
     run_id: RunID,
     runtime: object,
+    started_at: datetime,
     settings: Settings,
     logger: LoggerPort,
     audit: AuditPort | None = None,
@@ -148,6 +151,7 @@ def build_create_pipeline_with_services_request(
     return _CreatePipelineWithServicesRequest(
         run_id=run_id,
         runtime=runtime,
+        started_at=started_at,
         settings=settings,
         logger=logger,
         audit=audit,

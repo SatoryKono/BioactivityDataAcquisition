@@ -1,0 +1,74 @@
+# Composite Activity Entity Configuration
+# Generated: 2026-04-24
+# Status: active
+
+version: 1.0.0
+provider: composite
+entity: activity
+
+# Composite activity entity configuration
+# This config defines how activity data from multiple sources are combined
+
+status: active
+
+# Source entities that contribute to this composite
+source_entities:
+  - provider: chembl
+    entity: activity
+
+# Composite-specific fields
+composite_fields:
+  - name: composite_activity_id
+    type: string
+    description: Unique identifier for the composite activity
+    primary_key: true
+  - name: source_priority
+    type: list
+    description: Priority order of source providers
+    default: [chembl]
+
+# Quality control settings
+quality:
+  validation_level: strict
+  required_fields:
+    - composite_activity_id
+    - assay_id
+    - molecule_id
+    - standard_value
+  
+# Loading strategy
+loading:
+  strategy: incremental
+  batch_size: 1000
+  
+# Field mapping and resolution rules
+field_resolution:
+  standard_value:
+    strategy: priority
+    sources: [chembl]
+    
+  standard_units:
+    strategy: priority
+    sources: [chembl]
+    
+  activity_type:
+    strategy: priority
+    sources: [chembl]
+
+# DQ rules for composite entity
+dq_rules:
+  - field: composite_activity_id
+    rule: not_null
+    severity: critical
+  
+  - field: assay_id
+    rule: not_null
+    severity: high
+    
+  - field: molecule_id
+    rule: not_null
+    severity: high
+    
+  - field: standard_value
+    rule: numeric
+    severity: medium

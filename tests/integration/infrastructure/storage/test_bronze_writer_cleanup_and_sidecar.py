@@ -1,4 +1,4 @@
-"""Unit tests for BronzeWriter cleanup and sidecar metadata behavior."""
+"""Integration tests for BronzeWriter cleanup and sidecar metadata behavior."""
 
 from __future__ import annotations
 
@@ -55,7 +55,7 @@ class _BundleCoordinator:
         )
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestBronzeWriterMetadataSidecar:
     """Tests for BronzeWriter rich metadata sidecar integration."""
 
@@ -291,7 +291,7 @@ class TestBronzeWriterMetadataSidecar:
             assert metadata.runtime.run_type.value == expected_value
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestBronzeWriterQueryString:
     """Tests for BronzeWriter query_string extraction for metadata."""
 
@@ -482,7 +482,7 @@ class TestBronzeWriterQueryString:
         assert bronze_input.query_string is None
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestBronzeWriteResult:
     """Tests for BronzeWriteResult value object (REQ-LINEAGE-001)."""
 
@@ -607,7 +607,7 @@ class TestBronzeWriteResult:
             )
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestBronzeWriterCleanupFiltered:
     """Tests for BronzeWriter filtered cleanup operations."""
 

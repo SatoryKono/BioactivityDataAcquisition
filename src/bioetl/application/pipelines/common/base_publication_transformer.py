@@ -246,13 +246,18 @@ def _assemble_publication_silver_record(
         prepared.primary_id,
         normalized_business_data,
     )
-    return build_publication_silver_record(
+    silver_record = build_publication_silver_record(
         transformer,
         context,
         entity_id,
         content_hash,
         index,
         normalized_business_data,
+    )
+    return transformer._record_normalizer.project_normalization_findings(
+        silver_record,
+        context=context,
+        index=index,
     )
 
 
