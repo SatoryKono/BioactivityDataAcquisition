@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core.wiring.factory import ShutdownSignal
@@ -99,6 +100,7 @@ class _PipelineCreationRequest:
 
     run_id: RunID
     runtime: RuntimeConfig
+    started_at: datetime
     settings: Settings
     logger: LoggerPort
     audit: AuditPort | None = None
@@ -162,6 +164,7 @@ def _create_pipeline_with_services_impl(
         run_context_factory.create(
             run_id=request.run_id,
             runtime=request.runtime,
+            started_at=request.started_at,
             yaml_config=yaml_config,
             manifest_id=request.manifest_id,
             execution_fingerprint=request.execution_fingerprint,

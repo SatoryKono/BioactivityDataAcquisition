@@ -228,3 +228,70 @@ def test_lifecycle_apply_deletes_only_expired_unprotected_files(tmp_path: Path) 
         1,
         labels={"surface": "run_manifest"},
     )
+    metrics.set_gauge.assert_called_once_with(
+        "bioetl_control_plane_lifecycle_delete_candidates",
+        1.0,
+    )
+    metrics.increment_counter.assert_any_call(
+        "bioetl_control_plane_lifecycle_apply_total",
+        1,
+        labels={"dry_run": "false"},
+    )
+    logger.info.assert_any_call(
+        "control_plane_lifecycle_apply_summary",
+        dry_run=False,
+        cutoff=plan.cutoff.isoformat(),
+        delete_count=1,
+        retain_count=1,
+        deleted_count=1,
+        missing_count=0,
+    )
+
+
+def test_lifecycle_dry_run_emits_summary_metrics_without_deletions(tmp_path: Path) -> None:
+    control_root = tmp_path / "control"
+    now = datetime(2026, 4, 22, tzinfo=UTC)
+    old = datetime(2026, 1, 1, tzinfo=UTC)
+    stale_manifest = _write_json(
+        control_root / "run_manifest" / "manifest-stale.json",
+        {
+            "created_at": old.isoformat(),
+            "manifest_id": "manifest-stale",
+            "run_id": "run-stale",
+        },
+    )
+
+    logger = MagicMock()
+    metrics = MagicMock()
+    store = FileControlPlaneArtifactLifecycleStore(
+        base_path=control_root,
+        logger=logger,
+        metrics=metrics,
+    )
+    plan = store.plan(
+        ControlPlaneArtifactLifecyclePolicy(retention_days=30, now=now),
+        dry_run=True,
+    )
+
+    result = store.apply(plan)
+
+    assert result.deleted_paths == ()
+    assert stale_manifest.exists()
+    metrics.set_gauge.assert_called_once_with(
+        "bioetl_control_plane_lifecycle_delete_candidates",
+        1.0,
+    )
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_control_plane_lifecycle_apply_total",
+        1,
+        labels={"dry_run": "true"},
+    )
+    logger.info.assert_called_once_with(
+        "control_plane_lifecycle_apply_summary",
+        dry_run=True,
+        cutoff=plan.cutoff.isoformat(),
+        delete_count=1,
+        retain_count=0,
+        deleted_count=0,
+        missing_count=0,
+    )

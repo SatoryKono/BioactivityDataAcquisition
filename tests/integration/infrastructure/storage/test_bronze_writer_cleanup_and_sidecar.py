@@ -203,53 +203,30 @@ class TestBronzeWriterMetadataSidecar:
         run_id: RunID,
         ingestion_ts: datetime,
     ) -> None:
-        """Test _build_full_bronze_metadata creates correct structure."""
+        """Legacy Bronze sidecar builder should be blocked outside coordinator flow."""
         writer = BronzeWriter(
             base_path=tmp_path,
             logger=noop_logger,
             metrics=noop_metrics,
         )
 
-        metadata = writer._build_full_bronze_metadata(
-            run_id=run_id,
-            run_type=RunType.INCREMENTAL,
-            provider="chembl",
-            entity="activity",
-            batch_id=batch_id,
-            record_count=100,
-            compressed_size=5000,
-            output_path="v1/chembl/activity/2024-01-15/batch_abc.jsonl.zst",
-            started_at=ingestion_ts,
-            completed_at=ingestion_ts,
-            duration_seconds=1.5,
-        )
-
-        # Verify runtime metadata
-        assert metadata.runtime.run_id == str(run_id)
-        assert metadata.runtime.run_type.value == "incremental"
-        assert metadata.runtime.started_at_utc == ingestion_ts
-        assert metadata.runtime.duration_seconds == pytest.approx(1.5)
-
-        # Verify pipeline metadata
-        assert metadata.pipeline.name == "chembl_activity"
-        assert metadata.pipeline.provider == "chembl"
-        assert metadata.pipeline.entity == "activity"
-
-        # Verify output metadata (ADR-029 unified structure)
-        assert metadata.output.record_count == 100
-        assert metadata.output.total_bytes == 5000
-        assert metadata.output.write_started_at == ingestion_ts
-        assert metadata.output.write_completed_at == ingestion_ts
-
-        # Verify Bronze-specific output extension
-        assert len(metadata.output_ext.files) == 1
-        assert metadata.output_ext.files[0].record_count == 100
-        assert metadata.output_ext.files[0].size_bytes == 5000
-
-        # Verify environment metadata exists
-        assert metadata.environment.hostname is not None
-        assert metadata.environment.python_version is not None
-        assert metadata.environment.bioetl_version is not None
+        with pytest.raises(
+            RuntimeError,
+            match="MetadataCoordinator with create_bronze_metadata_bundle is required",
+        ):
+            writer._build_full_bronze_metadata(
+                run_id=run_id,
+                run_type=RunType.INCREMENTAL,
+                provider="chembl",
+                entity="activity",
+                batch_id=batch_id,
+                record_count=100,
+                compressed_size=5000,
+                output_path="v1/chembl/activity/2024-01-15/batch_abc.jsonl.zst",
+                started_at=ingestion_ts,
+                completed_at=ingestion_ts,
+                duration_seconds=1.5,
+            )
 
     @pytest.mark.asyncio
     async def test_metadata_run_type_mapping(
@@ -261,7 +238,7 @@ class TestBronzeWriterMetadataSidecar:
         run_id: RunID,
         ingestion_ts: datetime,
     ) -> None:
-        """Test that all RunType values are correctly mapped in metadata."""
+        """Legacy Bronze sidecar builder should be blocked for every run type."""
         writer = BronzeWriter(
             base_path=tmp_path,
             logger=noop_logger,
@@ -275,20 +252,24 @@ class TestBronzeWriterMetadataSidecar:
         ]
 
         for run_type_value, expected_value in run_type_mappings:
-            metadata = writer._build_full_bronze_metadata(
-                run_id=run_id,
-                run_type=run_type_value,
-                provider="chembl",
-                entity="activity",
-                batch_id=batch_id,
-                record_count=10,
-                compressed_size=100,
-                output_path="test.jsonl.zst",
-                started_at=ingestion_ts,
-                completed_at=ingestion_ts,
-                duration_seconds=0.1,
-            )
-            assert metadata.runtime.run_type.value == expected_value
+            del expected_value
+            with pytest.raises(
+                RuntimeError,
+                match="MetadataCoordinator with create_bronze_metadata_bundle is required",
+            ):
+                writer._build_full_bronze_metadata(
+                    run_id=run_id,
+                    run_type=run_type_value,
+                    provider="chembl",
+                    entity="activity",
+                    batch_id=batch_id,
+                    record_count=10,
+                    compressed_size=100,
+                    output_path="test.jsonl.zst",
+                    started_at=ingestion_ts,
+                    completed_at=ingestion_ts,
+                    duration_seconds=0.1,
+                )
 
 
 @pytest.mark.integration

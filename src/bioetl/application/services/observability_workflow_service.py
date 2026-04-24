@@ -265,6 +265,7 @@ class ObservabilityWorkflowService:
             run_manifest=run_manifest,
             lineage=lineage,
             audit=audit,
+            trace_links_enabled=self._trace_links_enabled(),
         )
         missing_evidence, degraded_evidence = self._classify_evidence_status(
             run_manifest=run_manifest,
@@ -500,21 +501,31 @@ class ObservabilityWorkflowService:
         run_manifest: RunManifestInspectionResult | None,
         lineage: LineageRunExplanationResult | None,
         audit: AuditInspectionResult,
+        trace_links_enabled: bool,
     ) -> dict[str, object]:
         """Build a stable traceability summary for one run dossier."""
         diagnostics = run_manifest.diagnostics if run_manifest is not None else {}
         identity_graph = run_manifest.identity_graph if run_manifest is not None else {}
         provider = ObservabilityWorkflowService._resolve_manifest_provider(run_manifest)
         run_type = ObservabilityWorkflowService._resolve_manifest_run_type(run_manifest)
-        trace_urls = ObservabilityWorkflowService._build_trace_urls(
+        trace_urls = (
+            ObservabilityWorkflowService._build_trace_urls(
+                run_id=run_id,
+                pipeline_name=ObservabilityWorkflowService._resolve_pipeline_name(
+                    run_manifest
+                ),
+                provider=provider,
+                run_type=run_type,
+                run_manifest=run_manifest,
+                audit=audit,
+            )
+            if trace_links_enabled
+            else []
+        )
+        trace_ids = ObservabilityWorkflowService._build_trace_ids(
             run_id=run_id,
-            pipeline_name=ObservabilityWorkflowService._resolve_pipeline_name(
-                run_manifest
-            ),
-            provider=provider,
-            run_type=run_type,
-            run_manifest=run_manifest,
-            audit=audit,
+            diagnostics=diagnostics,
+            trace_links_available=bool(trace_urls),
         )
         return {
             "audit_entries_count": len(audit.entries),
@@ -523,13 +534,40 @@ class ObservabilityWorkflowService:
             "lineage_fragment_ids": diagnostics.get("lineage_fragment_ids")
             or (list(lineage.fragment_ids) if lineage is not None else []),
             "artifact_refs": diagnostics.get("artifact_refs", []),
-            "trace_ids": [],
+            "trace_ids": trace_ids,
             "trace_urls": trace_urls,
             "trace_links_available": bool(trace_urls),
             "persistence_profile": diagnostics.get("persistence_profile"),
             "replay_capability": identity_graph.get("replay_capability")
             or diagnostics.get("replay_capability"),
         }
+
+    def _trace_links_enabled(self) -> bool:
+        """Return whether operator-facing trace drilldowns should be exposed."""
+        if self.tracer is None:
+            return False
+        return getattr(self.tracer, "is_noop", False) is not True
+
+    @staticmethod
+    def _build_trace_ids(
+        *,
+        run_id: str,
+        diagnostics: dict[str, object],
+        trace_links_available: bool,
+    ) -> list[str]:
+        """Return bounded operator-facing trace correlation identifiers."""
+        explicit_trace_ids = diagnostics.get("trace_ids")
+        if isinstance(explicit_trace_ids, list):
+            normalized = [
+                value.strip()
+                for value in explicit_trace_ids
+                if isinstance(value, str) and value.strip()
+            ]
+            if normalized:
+                return list(dict.fromkeys(normalized))
+        if trace_links_available and run_id:
+            return [run_id]
+        return []
 
     @staticmethod
     def _resolve_manifest_provider(

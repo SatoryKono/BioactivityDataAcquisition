@@ -143,6 +143,21 @@ class TestEffectiveConfigService:
         assert effective_config["log_level"] == "DEBUG"  # Added by override
         assert effective_config["auto_adjust"] is True  # Added by override
 
+    def test_create_artifact_rejects_non_allowlisted_env_overrides(self) -> None:
+        """Semantic env overrides must stay inside the explicit allowlist."""
+        with pytest.raises(
+            ValueError,
+            match="runtime_overrides.env contains non-allowlisted semantic environment overrides",
+        ):
+            self.service.create_effective_config_artifact(
+                pipeline_name="test_pipeline",
+                pipeline_kind="standard",
+                resolved_config={"pipeline": {"name": "test_pipeline"}},
+                runtime_overrides={"env": {"BIOETL_PUBMED_API_KEY": "secret"}},
+                source_refs=[],
+                required_persistence_profile="replay_ready",
+            )
+
     def test_artifact_id_generation(self) -> None:
         """Automatic artifact IDs should be deterministic semantic anchors."""
         artifact1 = self.service.create_effective_config_artifact(

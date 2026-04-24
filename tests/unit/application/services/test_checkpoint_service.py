@@ -1,7 +1,4 @@
-"""Unit tests for CheckpointService.
-
-Tests the checkpoint administrative service.
-"""
+"""Unit tests for CheckpointService."""
 
 from __future__ import annotations
 
@@ -14,6 +11,29 @@ from bioetl.application.services.checkpoint_service import (
     CheckpointInfo,
     CheckpointService,
 )
+
+
+def _assert_metric_labels(
+    checkpoint_service: CheckpointService,
+    *,
+    operation: str,
+    status: str,
+) -> None:
+    """Assert the latest checkpoint admin metric pair uses bounded labels."""
+    assert checkpoint_service.metrics.increment_counter.call_args_list[-1].args == (
+        "bioetl_checkpoint_operator_operations_total",
+        1,
+    )
+    assert checkpoint_service.metrics.increment_counter.call_args_list[-1].kwargs == {
+        "labels": {"operation": operation, "status": status}
+    }
+    assert (
+        checkpoint_service.metrics.observe_histogram.call_args_list[-1].args[0]
+        == "bioetl_checkpoint_operator_duration_seconds"
+    )
+    assert checkpoint_service.metrics.observe_histogram.call_args_list[-1].kwargs == {
+        "labels": {"operation": operation, "status": status}
+    }
 
 
 @pytest.fixture
@@ -154,6 +174,22 @@ class TestCheckpointServiceListCheckpoints:
         assert result[1].run_id is None
         assert result[1].metadata == {}
 
+    @pytest.mark.asyncio
+    async def test_list_checkpoints_failure_records_failed_metrics(
+        self, checkpoint_service, mock_checkpoint_port
+    ):
+        """List failures should emit a bounded failed milestone outcome."""
+        mock_checkpoint_port.list_all.side_effect = RuntimeError("boom")
+
+        with pytest.raises(RuntimeError, match="boom"):
+            await checkpoint_service.list_checkpoints()
+
+        _assert_metric_labels(
+            checkpoint_service,
+            operation="list",
+            status="failed",
+        )
+
 
 @pytest.mark.unit
 class TestCheckpointServiceGetCheckpoint:
@@ -170,6 +206,11 @@ class TestCheckpointServiceGetCheckpoint:
 
         assert result is None
         mock_checkpoint_port.load.assert_called_once_with("nonexistent")
+        _assert_metric_labels(
+            checkpoint_service,
+            operation="get",
+            status="missing",
+        )
 
     @pytest.mark.asyncio
     async def test_get_checkpoint_found(self, checkpoint_service, mock_checkpoint_port):
@@ -183,6 +224,11 @@ class TestCheckpointServiceGetCheckpoint:
         assert result.pipeline_name == "pipeline1"
         assert result.run_id == str(run_id)
         assert result.metadata == {"records_processed": 100}
+        _assert_metric_labels(
+            checkpoint_service,
+            operation="get",
+            status="success",
+        )
 
     @pytest.mark.asyncio
     async def test_get_checkpoint_creates_trace_span(
@@ -201,6 +247,22 @@ class TestCheckpointServiceGetCheckpoint:
             checkpoint_service.tracer.get_tracer.return_value.start_as_current_span.call_args
         )
         assert args[0][0] == "checkpoint.get"
+
+    @pytest.mark.asyncio
+    async def test_get_checkpoint_failure_records_failed_metrics(
+        self, checkpoint_service, mock_checkpoint_port
+    ):
+        """Get failures should emit a bounded failed milestone outcome."""
+        mock_checkpoint_port.load.side_effect = RuntimeError("boom")
+
+        with pytest.raises(RuntimeError, match="boom"):
+            await checkpoint_service.get_checkpoint("pipeline1")
+
+        _assert_metric_labels(
+            checkpoint_service,
+            operation="get",
+            status="failed",
+        )
 
 
 @pytest.mark.unit
@@ -231,6 +293,11 @@ class TestCheckpointServiceDeleteCheckpoint:
 
         assert result is True
         mock_checkpoint_port.delete.assert_called_once_with("pipeline1")
+        _assert_metric_labels(
+            checkpoint_service,
+            operation="delete",
+            status="success",
+        )
 
     @pytest.mark.asyncio
     async def test_delete_checkpoint_missing_records_missing_metric(
@@ -242,10 +309,28 @@ class TestCheckpointServiceDeleteCheckpoint:
         result = await checkpoint_service.delete_checkpoint("pipeline1")
 
         assert result is False
-        checkpoint_service.metrics.increment_counter.assert_called_with(
-            "bioetl_checkpoint_operator_operations_total",
-            1,
-            labels={"operation": "delete", "status": "missing"},
+        _assert_metric_labels(
+            checkpoint_service,
+            operation="delete",
+            status="missing",
+        )
+
+    @pytest.mark.asyncio
+    async def test_delete_checkpoint_failure_records_failed_metrics(
+        self, checkpoint_service, mock_checkpoint_port
+    ):
+        """Delete failures should emit a bounded failed milestone outcome."""
+        run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (run_id, {"records_processed": 100})
+        mock_checkpoint_port.delete.side_effect = RuntimeError("boom")
+
+        with pytest.raises(RuntimeError, match="boom"):
+            await checkpoint_service.delete_checkpoint("pipeline1")
+
+        _assert_metric_labels(
+            checkpoint_service,
+            operation="delete",
+            status="failed",
         )
 
 

@@ -241,6 +241,7 @@ def _create_and_persist_effective_config_artifact_payload(
     runtime_overrides: dict[str, object],
     provider: str,
     entity: str,
+    required_persistence_profile: str,
     settings: Settings,
     logger: object,
     run_id: RunID,
@@ -256,6 +257,7 @@ def _create_and_persist_effective_config_artifact_payload(
             provider=provider,
             entity=_resolve_effective_config_entity(provider, entity),
         ),
+        required_persistence_profile=required_persistence_profile,
     )
     serialized_payload = service.serialize_artifact(artifact)
     loaded_payload = json.loads(serialized_payload)
@@ -308,6 +310,10 @@ def create_and_persist_effective_config_artifact(
     entity: str,
 ) -> tuple[str, str, str, str]:
     """Create effective config artifact, persist it, and return provenance fields."""
+    control_plane = getattr(getattr(inputs.settings, "pipeline", None), "control_plane", None)
+    required_persistence_profile = str(
+        getattr(control_plane, "required_persistence_profile", "degraded_observable")
+    )
     return _create_and_persist_effective_config_artifact_payload(
         pipeline_name=ctx.pipeline_name,
         pipeline_kind="standard",
@@ -315,6 +321,7 @@ def create_and_persist_effective_config_artifact(
         runtime_overrides=_build_runtime_overrides_snapshot(ctx),
         provider=provider,
         entity=entity,
+        required_persistence_profile=required_persistence_profile,
         settings=inputs.settings,
         logger=inputs.observability.logger,
         run_id=ctx.run_id,
@@ -343,6 +350,7 @@ def create_and_persist_composite_effective_config_artifact(
         ),
         provider="composite",
         entity=pipeline_name,
+        required_persistence_profile=required_persistence_profile,
         settings=settings,
         logger=logger,
         run_id=run_id,

@@ -61,50 +61,48 @@ class TestBronzeWriterMetadataMixin:
         assert result["provider"] == "pubmed"
 
     def test_build_bronze_metadata_payload_returns_dict_with_runtime_key(self) -> None:
-        """_build_bronze_metadata_payload should produce a dict with 'runtime' key."""
+        """Legacy Bronze sidecar payload builder should fail closed."""
         host = _Host()
         started = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
         completed = datetime(2025, 1, 15, 12, 0, 5, tzinfo=UTC)
-        payload = host._build_bronze_metadata_payload(
-            run_id=RunID("run-789"),
-            run_type=RunType.REBUILD,
-            provider="chembl",
-            entity="compound",
-            record_count=100,
-            compressed_size=2048,
-            output_path="chembl/compound/2025-01-15/data.jsonl.zst",
-            started_at=started,
-            completed_at=completed,
-            duration_seconds=5.0,
-            source_metadata=None,
-        )
-        assert "runtime" in payload
-        assert "pipeline" in payload
-        assert "source" in payload
-        assert "output" in payload
-        assert "environment" in payload
+        with pytest.raises(
+            RuntimeError,
+            match="MetadataCoordinator with create_bronze_metadata_bundle is required",
+        ):
+            host._build_bronze_metadata_payload(
+                run_id=RunID("run-789"),
+                run_type=RunType.REBUILD,
+                provider="chembl",
+                entity="compound",
+                record_count=100,
+                compressed_size=2048,
+                output_path="chembl/compound/2025-01-15/data.jsonl.zst",
+                started_at=started,
+                completed_at=completed,
+                duration_seconds=5.0,
+                source_metadata=None,
+            )
 
     def test_build_full_bronze_metadata_returns_bronze_metadata_instance(self) -> None:
-        """_build_full_bronze_metadata should return a BronzeMetadata model."""
-        from bioetl.domain.models.metadata import BronzeMetadata
-
+        """Legacy Bronze sidecar model builder should fail closed."""
         host = _Host()
         started = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
         completed = datetime(2025, 1, 15, 12, 0, 5, tzinfo=UTC)
-        result = host._build_full_bronze_metadata(
-            run_id=RunID("run-full"),
-            run_type=RunType.INCREMENTAL,
-            provider="chembl",
-            entity="mechanism",
-            batch_id=BatchID("batch-full"),
-            record_count=50,
-            compressed_size=1024,
-            output_path="chembl/mechanism/2025-01-15/data.jsonl.zst",
-            started_at=started,
-            completed_at=completed,
-            duration_seconds=5.0,
-            source_metadata=None,
-        )
-        assert isinstance(result, BronzeMetadata)
-        assert result.pipeline.provider == "chembl"
-        assert result.pipeline.entity == "mechanism"
+        with pytest.raises(
+            RuntimeError,
+            match="MetadataCoordinator with create_bronze_metadata_bundle is required",
+        ):
+            host._build_full_bronze_metadata(
+                run_id=RunID("run-full"),
+                run_type=RunType.INCREMENTAL,
+                provider="chembl",
+                entity="mechanism",
+                batch_id=BatchID("batch-full"),
+                record_count=50,
+                compressed_size=1024,
+                output_path="chembl/mechanism/2025-01-15/data.jsonl.zst",
+                started_at=started,
+                completed_at=completed,
+                duration_seconds=5.0,
+                source_metadata=None,
+            )

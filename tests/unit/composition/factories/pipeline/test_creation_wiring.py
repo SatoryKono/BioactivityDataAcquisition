@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -13,6 +14,8 @@ from bioetl.composition.factories.pipeline._creation_wiring import (
     _create_pipeline_with_services_impl,
     _create_silver_validator,
 )
+
+_STARTED_AT = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
 
 
 @pytest.mark.unit
@@ -30,6 +33,7 @@ class TestPipelineCreationInputs:
             request=_PipelineCreationRequest(
                 run_id="run-1",
                 runtime=SimpleNamespace(),
+                started_at=_STARTED_AT,
                 settings=SimpleNamespace(),
                 logger=MagicMock(),
                 audit=MagicMock(),
@@ -51,6 +55,7 @@ class TestPipelineCreationInputs:
             request=_PipelineCreationRequest(
                 run_id="r",
                 runtime=SimpleNamespace(),
+                started_at=_STARTED_AT,
                 settings=SimpleNamespace(),
                 logger=MagicMock(),
                 audit=MagicMock(),
@@ -147,6 +152,7 @@ class TestCreatePipelineWithServicesImpl:
             request=_PipelineCreationRequest(
                 run_id="run-1",
                 runtime=MagicMock(),
+                started_at=_STARTED_AT,
                 settings=settings,
                 logger=MagicMock(),
                 audit=MagicMock(),
@@ -219,6 +225,7 @@ class TestCreatePipelineWithServicesImpl:
             request=_PipelineCreationRequest(
                 run_id="run-42",
                 runtime=runtime,
+                started_at=_STARTED_AT,
                 settings=settings,
                 logger=logger,
                 config=explicit_config,
@@ -312,6 +319,7 @@ class TestCreatePipelineWithServicesImpl:
             request=_PipelineCreationRequest(
                 run_id="run-7",
                 runtime=MagicMock(),
+                started_at=_STARTED_AT,
                 settings=settings,
                 logger=MagicMock(),
                 audit=MagicMock(),

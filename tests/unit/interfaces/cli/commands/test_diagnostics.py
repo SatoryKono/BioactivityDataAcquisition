@@ -107,7 +107,7 @@ class _FakeWorkflowService:
                     "audit_entries_count": 1,
                     "lineage_fragment_ids": ["fragment-1"],
                     "artifact_refs": ["manifest://manifest-1"],
-                    "trace_ids": [],
+                    "trace_ids": [run_id],
                     "trace_urls": [
                         "/a/grafana-exploretraces-app/?from=1712742900000&to=1712743500000&datasource=tempo&queryType=traceqlSearch&query=%7B+span.%22bioetl.run_id%22+%3D+%2200000000-0000-0000-0000-000000000001%22+%7D"
                     ],
@@ -415,11 +415,102 @@ def test_diagnostics_run_text_outputs_correlated_summary(
     assert "manifest_id: manifest-1" in result.output
     assert "checkpoint_run_id: 00000000-0000-0000-0000-000000000001" in result.output
     assert "lineage_fragment_ids: ['fragment-1']" in result.output
+    assert "trace_ids: ['00000000-0000-0000-0000-000000000001']" in result.output
     assert "trace_links_available: True" in result.output
     assert "trace_urls: ['/a/grafana-exploretraces-app/" in result.output
     assert workflow_service.run_dossier_calls == [
         ("00000000-0000-0000-0000-000000000001", 100)
     ]
+
+
+@pytest.mark.unit
+def test_diagnostics_run_text_renders_stable_traceability_fallback(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    workflow_service = SimpleNamespace(
+        run_dossier_calls=[],
+        inspect_run_dossier=AsyncMock(
+            return_value=_FakeInspectionResult(
+                {
+                    "run_id": "00000000-0000-0000-0000-000000000001",
+                    "pipeline_name": "chembl_activity",
+                    "status": {
+                        "forensic_profile": "forensic_grade",
+                        "latest_status": "success",
+                        "latest_event_type": "run_finished",
+                        "checkpoint_status": "present",
+                        "lineage_status": "present",
+                        "quarantine_status": "missing",
+                        "missing_evidence_count": 0,
+                        "degraded_evidence_count": 1,
+                    },
+                    "audit": {
+                        "query": {
+                            "run_id": "00000000-0000-0000-0000-000000000001",
+                            "limit": 100,
+                        },
+                        "entries": [],
+                    },
+                    "run_manifest": {
+                        "manifest": {
+                            "manifest_id": "manifest-1",
+                            "pipeline_name": "chembl_activity",
+                        },
+                        "diagnostics": {},
+                    },
+                    "checkpoint": {
+                        "pipeline_name": "chembl_activity",
+                        "run_id": "00000000-0000-0000-0000-000000000001",
+                        "metadata": {"records_processed": 42},
+                    },
+                    "lineage": {
+                        "manifest_id": "manifest-1",
+                        "fragment_ids": ["fragment-1"],
+                        "produced_datasets": ["silver://chembl.activity"],
+                    },
+                    "quarantine_summary": None,
+                    "traceability": {
+                        "audit_entries_count": 0,
+                        "lineage_fragment_ids": ["fragment-1"],
+                        "artifact_refs": ["manifest://manifest-1"],
+                        "trace_ids": [],
+                        "trace_urls": [],
+                        "trace_links_available": False,
+                        "correlation_anchor_gaps": {"run_id": 0},
+                    },
+                    "missing_evidence": [],
+                    "degraded_evidence": ["trace_links_unavailable"],
+                    "next_steps": [
+                        "Use audit, manifest, and lineage sections as the current traceability fallback."
+                    ],
+                }
+            )
+        ),
+    )
+    bundle = _build_bundle(workflow_service=workflow_service)
+    import bioetl.interfaces.cli.commands.diagnostics as diagnostics_module
+
+    monkeypatch.setattr(
+        diagnostics_module,
+        "get_observability_diagnostics_bundle",
+        lambda: bundle,
+        raising=True,
+    )
+
+    result = cli_runner.invoke(
+        cli,
+        ["diagnostics", "run", "--run-id", "00000000-0000-0000-0000-000000000001"],
+    )
+
+    assert result.exit_code == 0
+    assert "trace_ids: []" in result.output
+    assert "trace_urls: []" in result.output
+    assert "trace_links_available: False" in result.output
+    assert (
+        "Use audit, manifest, and lineage sections as the current traceability fallback."
+        in result.output
+    )
 
 
 @pytest.mark.unit

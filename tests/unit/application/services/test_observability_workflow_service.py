@@ -12,6 +12,7 @@ from bioetl.application.services.checkpoint_service import CheckpointInfo
 from bioetl.application.services.observability_workflow_service import (
     ObservabilityWorkflowService,
 )
+from bioetl.domain.ports.noop import NoOpTracing
 
 
 def _make_mock_tracer() -> mock.MagicMock:
@@ -222,7 +223,7 @@ async def test_inspect_run_dossier_aggregates_forensic_sections() -> None:
         "correlation_anchor_gaps": {"run_id": 0, "manifest_id": 0},
         "lineage_fragment_ids": ["fragment-1"],
         "artifact_refs": ["manifest://manifest-1", "ledger://manifest-1"],
-        "trace_ids": [],
+        "trace_ids": ["abc"],
         "trace_urls": mock.ANY,
         "trace_links_available": True,
         "persistence_profile": {"attained_profile": "forensic_grade"},
@@ -270,4 +271,53 @@ async def test_inspect_run_dossier_aggregates_forensic_sections() -> None:
     quarantine_service.get_filtered_stats.assert_awaited_once_with(
         pipeline="chembl_activity",
         run_id="abc",
+    )
+
+
+@pytest.mark.asyncio
+async def test_inspect_run_dossier_degrades_traceability_when_tracing_is_noop() -> None:
+    audit_result = AuditInspectionResult(query={"run_id": "abc"}, entries=())
+    audit_service = mock.AsyncMock()
+    audit_service.inspect_run.return_value = audit_result
+
+    checkpoint_service = mock.AsyncMock()
+    checkpoint_service.get_checkpoint.return_value = CheckpointInfo(
+        pipeline_name="chembl_activity",
+        run_id="abc",
+        metadata={"records_processed": 5},
+    )
+
+    run_manifest_service = mock.Mock()
+    run_manifest_service.show.return_value = _make_manifest_result()
+
+    lineage_result = mock.Mock()
+    lineage_result.fragment_ids = ("fragment-1",)
+    lineage_result.to_dict.return_value = {"fragment_ids": ["fragment-1"]}
+    lineage_service = mock.Mock()
+    lineage_service.explain_run.return_value = lineage_result
+
+    quarantine_service = mock.AsyncMock()
+    quarantine_service.get_filtered_stats.return_value = {
+        "total": 3,
+        "silver_filter_rejects": {"total_count": 2},
+    }
+
+    service = ObservabilityWorkflowService(
+        audit_service=audit_service,
+        checkpoint_service=checkpoint_service,
+        run_manifest_service=run_manifest_service,
+        lineage_service=lineage_service,
+        quarantine_service=quarantine_service,
+        tracer=NoOpTracing(),
+    )
+
+    result = await service.inspect_run_dossier("abc", audit_limit=7)
+
+    assert result.traceability["trace_ids"] == []
+    assert result.traceability["trace_urls"] == []
+    assert result.traceability["trace_links_available"] is False
+    assert "trace_links_unavailable" in result.degraded_evidence
+    assert (
+        "Use audit, manifest, and lineage sections as the current traceability fallback."
+        in result.next_steps
     )

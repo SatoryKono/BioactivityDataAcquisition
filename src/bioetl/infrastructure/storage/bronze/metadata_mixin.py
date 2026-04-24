@@ -8,10 +8,7 @@ from typing import TYPE_CHECKING
 from bioetl.domain.types import BatchID, JsonDict, RunID, RunType
 from bioetl.infrastructure.storage.bronze.metadata_builders import (
     BronzeLineageMetadataRequest,
-    BronzeMetadataPayloadRequest,
     build_bronze_lineage_metadata,
-    build_bronze_metadata_payload,
-    build_full_bronze_metadata,
 )
 
 if TYPE_CHECKING:
@@ -20,6 +17,19 @@ if TYPE_CHECKING:
 
 class BronzeWriterMetadataMixin:
     """Mixin with bronze metadata construction helpers."""
+
+    @staticmethod
+    def _raise_legacy_bronze_metadata_builder_error(
+        *,
+        provider: str,
+        entity: str,
+        output_path: str,
+    ) -> None:
+        raise RuntimeError(
+            "MetadataCoordinator with create_bronze_metadata_bundle is required "
+            "for Bronze metadata publication: "
+            f"provider={provider}, entity={entity}, relative_path={output_path}"
+        )
 
     def _build_bronze_metadata(
         self,
@@ -88,21 +98,21 @@ class BronzeWriterMetadataMixin:
         Returns:
             BronzeMetadata instance populated with runtime, pipeline, source, and output fields.
         """
-        del batch_id
-        return build_full_bronze_metadata(
-            BronzeMetadataPayloadRequest(
-                run_id=run_id,
-                run_type=run_type,
-                provider=provider,
-                entity=entity,
-                record_count=record_count,
-                compressed_size=compressed_size,
-                output_path=output_path,
-                started_at=started_at,
-                completed_at=completed_at,
-                duration_seconds=duration_seconds,
-                source_metadata=source_metadata,
-            )
+        del (
+            batch_id,
+            run_id,
+            run_type,
+            record_count,
+            compressed_size,
+            started_at,
+            completed_at,
+            duration_seconds,
+            source_metadata,
+        )
+        self._raise_legacy_bronze_metadata_builder_error(
+            provider=provider,
+            entity=entity,
+            output_path=output_path,
         )
 
     def _build_bronze_metadata_payload(
@@ -138,20 +148,20 @@ class BronzeWriterMetadataMixin:
         Returns:
             Dictionary of constructor keyword arguments for BronzeMetadata.
         """
-        return build_bronze_metadata_payload(
-            BronzeMetadataPayloadRequest(
-                run_id=run_id,
-                run_type=run_type,
-                provider=provider,
-                entity=entity,
-                record_count=record_count,
-                compressed_size=compressed_size,
-                output_path=output_path,
-                started_at=started_at,
-                completed_at=completed_at,
-                duration_seconds=duration_seconds,
-                source_metadata=source_metadata,
-            )
+        del (
+            run_id,
+            run_type,
+            record_count,
+            compressed_size,
+            started_at,
+            completed_at,
+            duration_seconds,
+            source_metadata,
+        )
+        self._raise_legacy_bronze_metadata_builder_error(
+            provider=provider,
+            entity=entity,
+            output_path=output_path,
         )
 
 
