@@ -1,19 +1,19 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-24T05:32:00.511708+00:00",
+  "generated_at": "2026-04-24T05:42:48.538766+00:00",
   "summary": {
-    "total_scripts": 438,
+    "total_scripts": 439,
     "status_counts": {
       "active": 311,
       "legacy": 15,
       "orphan": 100,
-      "unknown": 12
+      "unknown": 13
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 1,
       "ci": 52,
-      "docs": 136,
+      "docs": 137,
       "scripts": 293,
       "skills": 8,
       "tests": 134
@@ -2991,6 +2991,39 @@
           "line": 36,
           "source_group": "scripts",
           "text": "All other arguments are forwarded to scripts/ai/vibe/launch.sh."
+        }
+      ]
+    },
+    {
+      "path": "scripts/check_dq_dsl_parity.py",
+      "type": "py",
+      "status": "unknown",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "docs/reports/audit-issues/implementation-plans.md",
+          "line": 98,
+          "source_group": "docs",
+          "text": "1. **Create Parity Check Script**: `scripts/check_dq_dsl_parity.py`"
+        },
+        {
+          "path": "docs/reports/audit-issues/issue-001-analysis.md",
+          "line": 180,
+          "source_group": "docs",
+          "text": "# scripts/check_dq_dsl_parity.py"
+        },
+        {
+          "path": "docs/reports/audit-issues/issue-001-progress.md",
+          "line": 59,
+          "source_group": "docs",
+          "text": "- `scripts/check_dq_dsl_parity.py` - Parity verification script"
+        },
+        {
+          "path": "docs/reports/audit-issues/issue-001-progress.md",
+          "line": 121,
+          "source_group": "docs",
+          "text": "- `scripts/check_dq_dsl_parity.py` (New file)"
         }
       ]
     },
