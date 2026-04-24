@@ -37,7 +37,9 @@ def test_normalization_profile_detects_schema_coverage_gaps() -> None:
         profile.assert_covers_schema({"title", "missing"})
 
 
-def test_field_rule_apply_does_not_treat_keyword_only_params_as_record_context() -> None:
+def test_field_rule_apply_does_not_treat_keyword_only_params_as_record_context() -> (
+    None
+):
     rule = FieldRule(
         "standard_relation",
         normalizer=lambda value: normalize_profile_operator(

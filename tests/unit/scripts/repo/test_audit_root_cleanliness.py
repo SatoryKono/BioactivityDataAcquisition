@@ -185,9 +185,7 @@ def test_approved_root_directories_include_cataloged_test_support_root() -> None
     assert "tests" in approved
 
 
-def test_load_structure_catalog_requires_sections(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_load_structure_catalog_requires_sections(tmp_path: Path, monkeypatch) -> None:
     catalog_path = tmp_path / ".github" / "root-allowlist.txt"
     catalog_path.parent.mkdir(parents=True)
     catalog_path.write_text("README.md\n", encoding="utf-8")
@@ -200,7 +198,9 @@ def test_load_structure_catalog_requires_sections(
     )
 
     monkeypatch.setattr(
-        module, "STRUCTURE_CATALOG_FILE", Path("configs/quality/repo_structure_catalog.yaml")
+        module,
+        "STRUCTURE_CATALOG_FILE",
+        Path("configs/quality/repo_structure_catalog.yaml"),
     )
 
     try:
