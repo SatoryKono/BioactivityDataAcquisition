@@ -12,6 +12,8 @@ pipeline:
   provider: composite
   entity_type: assay
   pipeline_name: composite_assay
+  business_primary_keys:
+    - composite_assay_id
 
 schema:
   compatibility_mode: legacy_composite_entity_stub

@@ -12,6 +12,8 @@ pipeline:
   provider: composite
   entity_type: molecule
   pipeline_name: composite_molecule
+  business_primary_keys:
+    - composite_molecule_id
 
 schema:
   compatibility_mode: legacy_composite_entity_stub

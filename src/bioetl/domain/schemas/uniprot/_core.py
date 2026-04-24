@@ -22,9 +22,6 @@ __all__ = [
     "UniprotCoreSchema",
 ]
 
-_SERIES_BOOL = "Series[bool]"
-
-
 # === Fixed Value Constants ===
 PROTEIN_EXISTENCE_LEVELS = [
     "Evidence at protein level",
@@ -57,7 +54,7 @@ class UniprotCoreSchema(ETLRecordSchema):
         pattern = (
             r"^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$"
         )
-        return cast(_SERIES_BOOL, series.str.match(pattern))
+        return cast(Series[bool], series.str.match(pattern))
 
     entry_name: Series[str] = pa.Field(
         nullable=False,
@@ -67,7 +64,7 @@ class UniprotCoreSchema(ETLRecordSchema):
     @pa.check("entry_name", name="entry_name_format")
     def _check_entry_name(cls, series: Series[str]) -> Series[bool]:
         """Validate entry name format."""
-        return cast(_SERIES_BOOL, series.str.match(r"^\w+_\w+$"))
+        return cast(Series[bool], series.str.match(r"^\w+_\w+$"))
 
     entry_type: Series[str] | None = pa.Field(
         nullable=True,
@@ -77,7 +74,7 @@ class UniprotCoreSchema(ETLRecordSchema):
     @pa.check("entry_type", name="entry_type_values")
     def _check_entry_type(cls, series: Series[str]) -> Series[bool]:
         """Validate entry type values."""
-        return cast(_SERIES_BOOL, series.isna() | series.isin(ENTRY_TYPES))
+        return cast(Series[bool], series.isna() | series.isin(ENTRY_TYPES))
 
     secondary_accessions: Series[str] | None = pa.Field(
         nullable=True, description="JSON array of secondary accessions"
@@ -104,7 +101,7 @@ class UniprotCoreSchema(ETLRecordSchema):
     @pa.check("flag", name="flag_values")
     def _check_flag(cls, series: Series[str]) -> Series[bool]:
         """Validate flag values."""
-        return cast(_SERIES_BOOL, series.isna() | series.isin(PROTEIN_FLAGS))
+        return cast(Series[bool], series.isna() | series.isin(PROTEIN_FLAGS))
 
     # === Gene Names ===
     gene_primary: Series[str] | None = pa.Field(
@@ -131,7 +128,7 @@ class UniprotCoreSchema(ETLRecordSchema):
     @pa.check("taxonomy_id", name="taxonomy_id_positive")
     def _check_taxonomy_id(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate taxonomy ID is positive."""
-        return cast(_SERIES_BOOL, series.isna() | (series >= 1))
+        return cast(Series[bool], series.isna() | (series >= 1))
 
     lineage: Series[str] | None = pa.Field(
         nullable=True, description="JSON array of taxonomic lineage"
@@ -152,7 +149,7 @@ class UniprotCoreSchema(ETLRecordSchema):
         - U (Selenocysteine), O (Pyrrolysine)
         - B, J, X, Z (ambiguity codes used in UniProt)
         """
-        return cast(_SERIES_BOOL, series.str.match(r"^[ACDEFGHIKLMNOPQRSTUVWXYZ]+$"))
+        return cast(Series[bool], series.str.match(r"^[ACDEFGHIKLMNOPQRSTUVWXYZ]+$"))
 
     sequence_length: Series[pd.Int64Dtype] = pa.Field(
         nullable=False, description="Sequence length"
@@ -161,7 +158,7 @@ class UniprotCoreSchema(ETLRecordSchema):
     @pa.check("sequence_length", name="sequence_length_positive")
     def _check_sequence_length(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate sequence length is positive."""
-        return cast(_SERIES_BOOL, series >= 1)
+        return cast(Series[bool], series >= 1)
 
     sequence_mass: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Molecular mass (Da)"
@@ -170,7 +167,7 @@ class UniprotCoreSchema(ETLRecordSchema):
     @pa.check("sequence_mass", name="sequence_mass_positive")
     def _check_sequence_mass(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate sequence mass is positive."""
-        return cast(_SERIES_BOOL, series.isna() | (series >= 1))
+        return cast(Series[bool], series.isna() | (series >= 1))
 
     sequence_checksum: Series[str] | None = pa.Field(
         nullable=True, description="CRC64 checksum"
@@ -187,7 +184,7 @@ class UniprotCoreSchema(ETLRecordSchema):
     @pa.check("entry_version", name="entry_version_positive")
     def _check_entry_version(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate entry version is positive."""
-        return cast(_SERIES_BOOL, series.isna() | (series >= 1))
+        return cast(Series[bool], series.isna() | (series >= 1))
 
     entry_created: Series[datetime] | None = pa.Field(
         nullable=True, description="Entry creation date"
@@ -208,7 +205,7 @@ class UniprotCoreSchema(ETLRecordSchema):
     @pa.check("protein_existence", name="protein_existence_values")
     def _check_protein_existence(cls, series: Series[str]) -> Series[bool]:
         """Validate protein existence values."""
-        return cast(_SERIES_BOOL, series.isna() | series.isin(PROTEIN_EXISTENCE_LEVELS))
+        return cast(Series[bool], series.isna() | series.isin(PROTEIN_EXISTENCE_LEVELS))
 
     annotation_score: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Annotation quality (1-5 stars)"
@@ -217,4 +214,4 @@ class UniprotCoreSchema(ETLRecordSchema):
     @pa.check("annotation_score", name="annotation_score_range")
     def _check_annotation_score(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate annotation score range."""
-        return cast(_SERIES_BOOL, series.isna() | ((series >= 1) & (series <= 5)))
+        return cast(Series[bool], series.isna() | ((series >= 1) & (series <= 5)))
