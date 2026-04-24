@@ -222,6 +222,10 @@ archive_then_delete() {
 
 delete_remote_branch() {
   local branch="$1"
+  local output
+  local askpass="${GIT_ASKPASS:-}"
+  local -a git_cmd=(git push origin --delete "${branch}")
+  local -a env_cmd=()
 
   if ! remote_branch_exists "${branch}"; then
     log_action "SKIP" "origin/${branch} (missing)"
@@ -236,7 +240,28 @@ delete_remote_branch() {
     return 0
   fi
 
-  git push origin --delete "${branch}"
+  if [[ -n "${askpass}" && ! -e "${askpass}" ]]; then
+    log_action "INFO" "unsetting stale GIT_ASKPASS=${askpass}"
+    env_cmd=(env -u GIT_ASKPASS)
+  fi
+
+  if ! output="$("${env_cmd[@]}" "${git_cmd[@]}" 2>&1)"; then
+    if [[ "${output}" == *"github-askpass.sh"* || "${output}" == *"No such file or directory"* ]]; then
+      log_action "FAIL" "origin/${branch} (stale askpass helper; run 'unset GIT_ASKPASS' and retry)"
+      printf '%s\n' "${output}" >&2
+      return 0
+    fi
+    if [[ "${output}" == *"Authentication failed"* || "${output}" == *"could not read Username"* || "${output}" == *"Password for"* ]]; then
+      log_action "FAIL" "origin/${branch} (authentication required; retry after gh auth or PAT setup)"
+      printf '%s\n' "${output}" >&2
+      return 0
+    fi
+    printf '%s\n' "${output}" >&2
+    return 1
+  fi
+  if [[ -n "${output}" ]]; then
+    printf '%s\n' "${output}"
+  fi
   log_action "DONE" "deleted origin/${branch}"
 }
 

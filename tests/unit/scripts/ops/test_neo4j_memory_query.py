@@ -35,16 +35,39 @@ RUN_MANIFEST_LEDGER_DOC_PATH = "docs/04-reference/contracts/run-manifest-ledger.
 RUN_MANIFEST_MODULE_PATH = "src/bioetl/domain/control_plane/run_manifest.py"
 RUN_MANIFEST_LEDGER_DOC_CLAIM = f"{RUN_MANIFEST_LEDGER_DOC_PATH}#L24"
 CHEMBL_ACTIVITY_CONFIG_PATH = "configs/entities/chembl/activity.yaml"
+CHEMBL_ACTIVITY_PIPELINE = "chembl_activity"
+PIPELINE_SURFACE = "pipeline_surface"
+MODULE_SURFACE = "module_surface"
+SILVER_CHEMBL_ACTIVITY = "silver/chembl/activity"
+ADAPTER_LAYER = "adapter_layer"
+MISSING_FAMILY = "missing-family"
 RECORD_NORMALIZATION_PROCESSOR_PATH = (
     "src/bioetl/application/core/record_normalization_processor.py"
 )
+CHEMBL_ACTIVITY_CONTRACT = "chembl.activity"
+CONTRACT_SURFACE = "contract_surface"
+SILVER_CHEMBL_ASSAY = "silver/chembl/assay"
+MANIFEST_CHAIN_SMOKE = "manifest-chain-smoke"
+COMPOSITE_LAYER = "composite_layer"
+RUNTIME_ANCHOR_COUNT = "runtime_anchor_count"
+CONFIG_ANCHOR_COUNT = "config_anchor_count"
+DOC_ANCHOR_COUNT = "doc_anchor_count"
+TEST_ANCHOR_COUNT = "test_anchor_count"
+STORAGE_LINEAGE_MODE = "storage-lineage"
+DUPLICATION_CLUSTER_MODE = "duplication-cluster"
+PROMOTION_CANDIDATES_MODE = "promotion-candidates"
+DEAD_CODE_CANDIDATES_MODE = "dead-code-candidates"
+CURRENT_CYCLE_CODE_MODE = "current-cycle-code"
+OVERENGINEERED_CANDIDATES_MODE = "overengineered-candidates"
+REMOVABLE_COMPLEXITY_MODE = "removable-complexity"
+SIMPLIFICATION_BLOCKERS_MODE = "simplification-blockers"
 
 
 def test_query_profiles_cover_operator_shortcuts() -> None:
-    assert QUERY_PROFILES["owner-contract"]["target_label"] == "contract_surface"
+    assert QUERY_PROFILES["owner-contract"]["target_label"] == CONTRACT_SURFACE
     assert QUERY_PROFILES["owner-doc"]["target_label"] == "doc_source_surface"
     assert QUERY_PROFILES["owner-doc-artifact"]["target_label"] == "doc_artifact"
-    assert QUERY_PROFILES["owner-pipeline"]["target_label"] == "pipeline_surface"
+    assert QUERY_PROFILES["owner-pipeline"]["target_label"] == PIPELINE_SURFACE
     assert QUERY_PROFILES["owner-alert"]["target_label"] == "alert_surface"
     assert QUERY_PROFILES["owner-storage"]["target_label"] == "storage_surface"
     assert (
@@ -102,7 +125,7 @@ def test_query_profiles_cover_operator_shortcuts() -> None:
     assert QUERY_PROFILES["workflow-gates"]["mode"] == "workflow_gates"
     assert QUERY_PROFILES["workflow-artifacts"]["mode"] == "workflow_artifacts"
     assert QUERY_PROFILES["workflow-execution"]["mode"] == "workflow_execution"
-    assert QUERY_PROFILES["storage-lineage"]["mode"] == "storage_lineage"
+    assert QUERY_PROFILES[STORAGE_LINEAGE_MODE]["mode"] == "storage_lineage"
     assert QUERY_PROFILES["field-lineage"]["mode"] == "field_lineage"
     assert QUERY_PROFILES["schema-drift"]["mode"] == "schema_drift"
     assert QUERY_PROFILES["run-artifacts"]["mode"] == "run_artifacts"
@@ -113,20 +136,26 @@ def test_query_profiles_cover_operator_shortcuts() -> None:
     assert QUERY_PROFILES["normalization-pipeline"]["mode"] == "normalization_pipeline"
     assert QUERY_PROFILES["fallback-pipelines"]["mode"] == "fallback_pipelines"
     assert (
-        QUERY_PROFILES["duplication-cluster"]["target_label"] == "duplication_cluster"
+        QUERY_PROFILES[DUPLICATION_CLUSTER_MODE]["target_label"]
+        == "duplication_cluster"
     )
-    assert QUERY_PROFILES["promotion-candidates"]["mode"] == "promotion_candidates"
+    assert QUERY_PROFILES[PROMOTION_CANDIDATES_MODE]["mode"] == "promotion_candidates"
     assert (
-        QUERY_PROFILES["dead-code-candidates"]["target_label"] == "retirement_candidate"
+        QUERY_PROFILES[DEAD_CODE_CANDIDATES_MODE]["target_label"]
+        == "retirement_candidate"
     )
-    assert QUERY_PROFILES["current-cycle-code"]["mode"] == "current_cycle_code"
+    assert QUERY_PROFILES[CURRENT_CYCLE_CODE_MODE]["mode"] == "current_cycle_code"
     assert (
-        QUERY_PROFILES["overengineered-candidates"]["target_label"]
+        QUERY_PROFILES[OVERENGINEERED_CANDIDATES_MODE]["target_label"]
         == "complexity_candidate"
     )
-    assert QUERY_PROFILES["removable-complexity"]["mode"] == "removable_complexity"
     assert (
-        QUERY_PROFILES["simplification-blockers"]["mode"] == "simplification_blockers"
+        QUERY_PROFILES[REMOVABLE_COMPLEXITY_MODE]["mode"]
+        == "removable_complexity"
+    )
+    assert (
+        QUERY_PROFILES[SIMPLIFICATION_BLOCKERS_MODE]["mode"]
+        == "simplification_blockers"
     )
 
 
@@ -404,11 +433,11 @@ def test_simplification_blockers_statement_collects_cycles_and_blockers() -> Non
 def test_format_rows_renders_operator_summary() -> None:
     formatted = _format_rows(
         "owner-contract",
-        "chembl.activity",
+        CHEMBL_ACTIVITY_CONTRACT,
         [
             {
-                "target_name": "chembl.activity",
-                "target_label": "contract_surface",
+                "target_name": CHEMBL_ACTIVITY_CONTRACT,
+                "target_label": CONTRACT_SURFACE,
                 "owner_directory": "configs/contracts/chembl",
                 "repo_zone": "configs",
                 "provenance": "file_structure_inferred",
@@ -416,7 +445,7 @@ def test_format_rows_renders_operator_summary() -> None:
         ],
     )
 
-    assert "Contract ownership path: `chembl.activity`" in formatted
+    assert f"Contract ownership path: `{CHEMBL_ACTIVITY_CONTRACT}`" in formatted
     assert "zone=configs | owner=configs/contracts/chembl" in formatted
     assert "provenance=file_structure_inferred" in formatted
 
@@ -424,25 +453,25 @@ def test_format_rows_renders_operator_summary() -> None:
 def test_format_rows_renders_neighbors_summary() -> None:
     formatted = _format_rows(
         "neighbors-pipeline",
-        "chembl_activity",
+        CHEMBL_ACTIVITY_PIPELINE,
         [
             {
-                "target_name": "chembl_activity",
-                "target_label": "pipeline_surface",
+                "target_name": CHEMBL_ACTIVITY_PIPELINE,
+                "target_label": PIPELINE_SURFACE,
                 "direction": "outgoing",
                 "relation_type": "DEPENDS_ON",
-                "neighbor_name": "chembl.activity",
-                "neighbor_labels": ["contract_surface"],
+                "neighbor_name": CHEMBL_ACTIVITY_CONTRACT,
+                "neighbor_labels": [CONTRACT_SURFACE],
             }
         ],
     )
 
-    assert "Pipeline semantic neighborhood: `chembl_activity`" in formatted
+    assert f"Pipeline semantic neighborhood: `{CHEMBL_ACTIVITY_PIPELINE}`" in formatted
     assert (
-        "direction=outgoing | relation=DEPENDS_ON | neighbor=chembl.activity"
+        f"direction=outgoing | relation=DEPENDS_ON | neighbor={CHEMBL_ACTIVITY_CONTRACT}"
         in formatted
     )
-    assert "labels=contract_surface" in formatted
+    assert f"labels={CONTRACT_SURFACE}" in formatted
 
 
 def test_format_rows_renders_docs_drift_summary() -> None:
@@ -455,7 +484,7 @@ def test_format_rows_renders_docs_drift_summary() -> None:
                 "doc_labels": ["doc_source_surface"],
                 "doc_source_path": RUN_MANIFEST_LEDGER_DOC_PATH,
                 "target_name": RUN_MANIFEST_MODULE_PATH,
-                "target_labels": ["module_surface"],
+                "target_labels": [MODULE_SURFACE],
                 "target_source_path": RUN_MANIFEST_MODULE_PATH,
                 "doc_reference": RUN_MANIFEST_MODULE_PATH,
                 "evidence_kind": "direct_path",
@@ -470,7 +499,7 @@ def test_format_rows_renders_docs_drift_summary() -> None:
     assert "Docs-to-code drift edges: `all`" in formatted
     assert "doc=run manifest contract | doc_labels=doc_source_surface" in formatted
     assert (
-        f"target={RUN_MANIFEST_MODULE_PATH} | target_labels=module_surface"
+        f"target={RUN_MANIFEST_MODULE_PATH} | target_labels={MODULE_SURFACE}"
         in formatted
     )
     assert (
@@ -602,11 +631,11 @@ def test_format_rows_renders_workflow_execution_summary() -> None:
 
 def test_format_rows_renders_storage_lineage_summary() -> None:
     formatted = _format_rows(
-        "storage-lineage",
-        "silver/chembl/activity",
+        STORAGE_LINEAGE_MODE,
+        SILVER_CHEMBL_ACTIVITY,
         [
             {
-                "storage_name": "silver/chembl/activity",
+                "storage_name": SILVER_CHEMBL_ACTIVITY,
                 "layer": "silver",
                 "storage_kind": "entity_layer_output",
                 "storage_roles": ["composite_seed_input", "entity_layer_output"],
@@ -619,8 +648,8 @@ def test_format_rows_renders_storage_lineage_summary() -> None:
                 "versioning_mode": "scd2",
                 "version_column": "_version",
                 "producers": [
-                    {"name": "chembl_activity", "labels": ["pipeline_surface"]},
-                    {"name": "chembl_activity", "labels": ["entity_config"]},
+                    {"name": CHEMBL_ACTIVITY_PIPELINE, "labels": [PIPELINE_SURFACE]},
+                    {"name": CHEMBL_ACTIVITY_PIPELINE, "labels": ["entity_config"]},
                 ],
                 "upstream_surfaces": ["bronze/chembl/activity"],
                 "downstream_surfaces": ["gold/chembl/activity"],
@@ -629,9 +658,9 @@ def test_format_rows_renders_storage_lineage_summary() -> None:
         ],
     )
 
-    assert "Storage lineage path: `silver/chembl/activity`" in formatted
+    assert f"Storage lineage path: `{SILVER_CHEMBL_ACTIVITY}`" in formatted
     assert (
-        "storage=silver/chembl/activity | layer=silver | storage_kind=entity_layer_output | format=delta "
+        f"storage={SILVER_CHEMBL_ACTIVITY} | layer=silver | storage_kind=entity_layer_output | format=delta "
         "| roles=composite_seed_input,entity_layer_output | schema_present=True"
     ) in formatted
     assert (
@@ -642,7 +671,7 @@ def test_format_rows_renders_storage_lineage_summary() -> None:
         "sort_by=entity_id,activity_id | versioning_mode=scd2 | version_column=_version"
         in formatted
     )
-    assert "producer=chembl_activity | labels=pipeline_surface" in formatted
+    assert f"producer={CHEMBL_ACTIVITY_PIPELINE} | labels={PIPELINE_SURFACE}" in formatted
     assert "upstream=bronze/chembl/activity" in formatted
     assert "downstream=gold/chembl/activity" in formatted
     assert f"defined_by={CHEMBL_ACTIVITY_CONFIG_PATH}" in formatted
@@ -651,58 +680,58 @@ def test_format_rows_renders_storage_lineage_summary() -> None:
 def test_format_rows_renders_field_lineage_summary() -> None:
     formatted = _format_rows(
         "field-lineage",
-        "silver/chembl/activity",
+        SILVER_CHEMBL_ACTIVITY,
         [
             {
-                "field_surface_name": "silver/chembl/activity::activity_id",
+                "field_surface_name": f"{SILVER_CHEMBL_ACTIVITY}::activity_id",
                 "field_name": "activity_id",
                 "field_group": "business",
-                "storage_ref": "silver/chembl/activity",
-                "contract_ref": "chembl.activity",
+                "storage_ref": SILVER_CHEMBL_ACTIVITY,
+                "contract_ref": CHEMBL_ACTIVITY_CONTRACT,
                 "required_in_quality": True,
                 "validation_types": ["required"],
                 "drift_classification": "projected_to_gold",
-                "storage_surfaces": ["silver/chembl/activity"],
-                "contracts": ["chembl.activity"],
+                "storage_surfaces": [SILVER_CHEMBL_ACTIVITY],
+                "contracts": [CHEMBL_ACTIVITY_CONTRACT],
                 "upstream_fields": ["bronze/chembl/activity::activity_id"],
                 "downstream_fields": ["gold/chembl/activity::activity_id"],
             }
         ],
     )
 
-    assert "Field lineage path: `silver/chembl/activity`" in formatted
+    assert f"Field lineage path: `{SILVER_CHEMBL_ACTIVITY}`" in formatted
     assert (
-        "storage=silver/chembl/activity | field=activity_id | group=business | drift=projected_to_gold | required=True"
+        f"storage={SILVER_CHEMBL_ACTIVITY} | field=activity_id | group=business | drift=projected_to_gold | required=True"
         in formatted
     )
     assert "validations=required" in formatted
     assert "upstream=bronze/chembl/activity::activity_id" in formatted
     assert "downstream=gold/chembl/activity::activity_id" in formatted
-    assert "contract=chembl.activity" in formatted
+    assert f"contract={CHEMBL_ACTIVITY_CONTRACT}" in formatted
 
 
 def test_format_rows_renders_schema_drift_summary() -> None:
     formatted = _format_rows(
         "schema-drift",
-        "silver/chembl/assay",
+        SILVER_CHEMBL_ASSAY,
         [
             {
-                "field_surface_name": "silver/chembl/assay::_dq_failed",
+                "field_surface_name": f"{SILVER_CHEMBL_ASSAY}::_dq_failed",
                 "field_name": "_dq_failed",
                 "field_group": "dq",
-                "storage_ref": "silver/chembl/assay",
+                "storage_ref": SILVER_CHEMBL_ASSAY,
                 "contract_ref": "chembl.assay",
                 "drift_classification": "silver_only",
                 "required_in_quality": False,
                 "validation_types": [],
-                "storage_surfaces": ["silver/chembl/assay"],
+                "storage_surfaces": [SILVER_CHEMBL_ASSAY],
             }
         ],
     )
 
-    assert "Schema drift evidence: `silver/chembl/assay`" in formatted
+    assert f"Schema drift evidence: `{SILVER_CHEMBL_ASSAY}`" in formatted
     assert (
-        "storage=silver/chembl/assay | field=_dq_failed | drift=silver_only | required=False"
+        f"storage={SILVER_CHEMBL_ASSAY} | field=_dq_failed | drift=silver_only | required=False"
         in formatted
     )
 
@@ -710,12 +739,12 @@ def test_format_rows_renders_schema_drift_summary() -> None:
 def test_format_rows_renders_run_artifacts_summary() -> None:
     formatted = _format_rows(
         "run-artifacts",
-        "manifest-chain-smoke",
+        MANIFEST_CHAIN_SMOKE,
         [
             {
-                "run_instance_name": "manifest-chain-smoke",
+                "run_instance_name": MANIFEST_CHAIN_SMOKE,
                 "lifecycle_status": "success",
-                "manifest_id": "manifest-chain-smoke",
+                "manifest_id": MANIFEST_CHAIN_SMOKE,
                 "run_id": "00000000-0000-0000-0000-000000000302",
                 "contract_ref": "run-manifest",
                 "contract_version": "1.0.0",
@@ -729,7 +758,7 @@ def test_format_rows_renders_run_artifacts_summary() -> None:
                     }
                 ],
                 "dependencies": [
-                    {"name": "chembl_activity", "labels": ["pipeline_surface"]}
+                    {"name": CHEMBL_ACTIVITY_PIPELINE, "labels": [PIPELINE_SURFACE]}
                 ],
                 "support_links": [
                     {
@@ -741,9 +770,9 @@ def test_format_rows_renders_run_artifacts_summary() -> None:
         ],
     )
 
-    assert "Run instance artifact chain: `manifest-chain-smoke`" in formatted
+    assert f"Run instance artifact chain: `{MANIFEST_CHAIN_SMOKE}`" in formatted
     assert (
-        "run_instance=manifest-chain-smoke | lifecycle_status=success | manifest_id=manifest-chain-smoke "
+        f"run_instance={MANIFEST_CHAIN_SMOKE} | lifecycle_status=success | manifest_id={MANIFEST_CHAIN_SMOKE} "
         "| run_id=00000000-0000-0000-0000-000000000302"
     ) in formatted
     assert "contract_ref=run-manifest | contract_version=1.0.0" in formatted
@@ -755,7 +784,7 @@ def test_format_rows_renders_run_artifacts_summary() -> None:
         "artifact=run_ledger::jsonl | labels=control_plane_artifact_surface | artifact_family=run_ledger"
         in formatted
     )
-    assert "depends_on=chembl_activity | labels=pipeline_surface" in formatted
+    assert f"depends_on={CHEMBL_ACTIVITY_PIPELINE} | labels={PIPELINE_SURFACE}" in formatted
     assert (
         "support=tests/unit/application/services/test_run_manifest_inspection_service.py | labels=test_artifact"
         in formatted
@@ -778,7 +807,7 @@ def test_format_rows_renders_runtime_state_summary() -> None:
                     {"name": "manifest-chain-2", "labels": ["run_instance_surface"]}
                 ],
                 "dependencies": [
-                    {"name": "chembl_activity", "labels": ["pipeline_surface"]}
+                    {"name": CHEMBL_ACTIVITY_PIPELINE, "labels": [PIPELINE_SURFACE]}
                 ],
                 "artifacts": [
                     {
@@ -797,7 +826,7 @@ def test_format_rows_renders_runtime_state_summary() -> None:
         in formatted
     )
     assert "owner=manifest-chain-2 | labels=run_instance_surface" in formatted
-    assert "dependency=chembl_activity | labels=pipeline_surface" in formatted
+    assert f"dependency={CHEMBL_ACTIVITY_PIPELINE} | labels={PIPELINE_SURFACE}" in formatted
     assert (
         "artifact=run_ledger::jsonl | labels=control_plane_artifact_surface | artifact_family=run_ledger"
         in formatted
@@ -820,7 +849,7 @@ def test_format_rows_renders_claim_trace_summary() -> None:
                 "targets": [
                     {
                         "name": RUN_MANIFEST_MODULE_PATH,
-                        "labels": ["module_surface"],
+                        "labels": [MODULE_SURFACE],
                     }
                 ],
             }
@@ -834,7 +863,7 @@ def test_format_rows_renders_claim_trace_summary() -> None:
     )
     assert "text=activity_id is required" in formatted
     assert (
-        f"target={RUN_MANIFEST_MODULE_PATH} | labels=module_surface"
+        f"target={RUN_MANIFEST_MODULE_PATH} | labels={MODULE_SURFACE}"
         in formatted
     )
 
@@ -850,7 +879,7 @@ def test_format_rows_renders_cli_semantics_summary() -> None:
                 "options": ["--limit", "--pipeline"],
                 "gates": ["pytest"],
                 "side_effect_targets": [
-                    {"name": "silver/chembl/activity", "labels": ["storage_surface"]}
+                    {"name": SILVER_CHEMBL_ACTIVITY, "labels": ["storage_surface"]}
                 ],
             }
         ],
@@ -861,7 +890,7 @@ def test_format_rows_renders_cli_semantics_summary() -> None:
     assert "option=--limit" in formatted
     assert "gate=pytest" in formatted
     assert (
-        "side_effect_target=silver/chembl/activity | labels=storage_surface"
+        f"side_effect_target={SILVER_CHEMBL_ACTIVITY} | labels=storage_surface"
         in formatted
     )
 
@@ -869,16 +898,16 @@ def test_format_rows_renders_cli_semantics_summary() -> None:
 def test_format_rows_renders_duplication_cluster_summary() -> None:
     formatted = _format_rows(
         "duplication-cluster",
-        "adapter_layer:method_surface:de487f71c608",
+        f"{ADAPTER_LAYER}:method_surface:de487f71c608",
         [
             {
-                "cluster_name": "adapter_layer:method_surface:de487f71c608",
-                "family_name": "adapter_layer",
+                "cluster_name": f"{ADAPTER_LAYER}:method_surface:de487f71c608",
+                "family_name": ADAPTER_LAYER,
                 "surface_kind": "method_surface",
                 "duplicate_count": 4,
                 "promotion_score": 0.99,
                 "promotion_target": "src/bioetl/infrastructure/adapters/base.py",
-                "promotion_target_labels": ["module_surface"],
+                "promotion_target_labels": [MODULE_SURFACE],
                 "members": [
                     {
                         "name": "src.bioetl.infrastructure.adapters.pubmed._health.PubMedHealthMixin.request_count",
@@ -893,14 +922,14 @@ def test_format_rows_renders_duplication_cluster_summary() -> None:
     )
 
     assert (
-        "Duplication cluster: `adapter_layer:method_surface:de487f71c608`" in formatted
+        f"Duplication cluster: `{ADAPTER_LAYER}:method_surface:de487f71c608`" in formatted
     )
     assert (
-        "family=adapter_layer | surface_kind=method_surface | duplicates=4 | promotion_score=0.99"
+        f"family={ADAPTER_LAYER} | surface_kind=method_surface | duplicates=4 | promotion_score=0.99"
         in formatted
     )
     assert (
-        "promotion_target=src/bioetl/infrastructure/adapters/base.py | labels=module_surface"
+        f"promotion_target=src/bioetl/infrastructure/adapters/base.py | labels={MODULE_SURFACE}"
         in formatted
     )
     assert (
@@ -916,10 +945,10 @@ def test_format_rows_renders_duplication_cluster_summary() -> None:
 def test_format_rows_renders_pipeline_normalization_evidence() -> None:
     formatted = _format_rows(
         "normalization-pipeline",
-        "chembl_activity",
+        CHEMBL_ACTIVITY_PIPELINE,
         [
             {
-                "pipeline_name": "chembl_activity",
+                "pipeline_name": CHEMBL_ACTIVITY_PIPELINE,
                 "normalization_profile_registered": True,
                 "normalization_profile_module_path": "src/bioetl/domain/normalization/profiles/chembl_activity.py",
                 "profile_field_count": 12,
@@ -934,7 +963,7 @@ def test_format_rows_renders_pipeline_normalization_evidence() -> None:
         ],
     )
 
-    assert "Pipeline normalization evidence: `chembl_activity`" in formatted
+    assert f"Pipeline normalization evidence: `{CHEMBL_ACTIVITY_PIPELINE}`" in formatted
     assert (
         "profile_registered=True | profile_fields=12 | fallback_fields=1 | fallback_business=1 | fallback_technical=0"
         in formatted
@@ -974,11 +1003,11 @@ def test_format_rows_renders_fallback_pipeline_summary() -> None:
 def test_format_rows_renders_promotion_candidates_summary() -> None:
     formatted = _format_rows(
         "promotion-candidates",
-        "adapter_layer",
+        ADAPTER_LAYER,
         [
             {
-                "cluster_name": "adapter_layer:method_surface:d1c4b44398a1",
-                "family_name": "adapter_layer",
+                "cluster_name": f"{ADAPTER_LAYER}:method_surface:d1c4b44398a1",
+                "family_name": ADAPTER_LAYER,
                 "surface_kind": "method_surface",
                 "duplicate_count": 27,
                 "promotion_score": 0.99,
@@ -989,9 +1018,9 @@ def test_format_rows_renders_promotion_candidates_summary() -> None:
         ],
     )
 
-    assert "Promotion candidates: `adapter_layer`" in formatted
+    assert f"Promotion candidates: `{ADAPTER_LAYER}`" in formatted
     assert (
-        "cluster=adapter_layer:method_surface:d1c4b44398a1 | family=adapter_layer"
+        f"cluster={ADAPTER_LAYER}:method_surface:d1c4b44398a1 | family={ADAPTER_LAYER}"
         in formatted
     )
     assert "duplicates=27 | members=27 | tests=80 | promotion_score=0.99" in formatted
@@ -1001,12 +1030,12 @@ def test_format_rows_renders_promotion_candidates_summary() -> None:
 def test_format_rows_renders_dead_code_candidates_summary() -> None:
     formatted = _format_rows(
         "dead-code-candidates",
-        "adapter_layer",
+        ADAPTER_LAYER,
         [
             {
                 "candidate_name": "module_surface:src/bioetl/infrastructure/adapters/pubchem/client.py",
-                "family_name": "adapter_layer",
-                "target_label": "module_surface",
+                "family_name": ADAPTER_LAYER,
+                "target_label": MODULE_SURFACE,
                 "target_name": "src/bioetl/infrastructure/adapters/pubchem/client.py",
                 "deletion_score": 8,
                 "deletion_confidence": "high",
@@ -1022,9 +1051,9 @@ def test_format_rows_renders_dead_code_candidates_summary() -> None:
         ],
     )
 
-    assert "Dead code candidates: `adapter_layer`" in formatted
+    assert f"Dead code candidates: `{ADAPTER_LAYER}`" in formatted
     assert (
-        "target=src/bioetl/infrastructure/adapters/pubchem/client.py | label=module_surface | family=adapter_layer"
+        f"target=src/bioetl/infrastructure/adapters/pubchem/client.py | label={MODULE_SURFACE} | family={ADAPTER_LAYER}"
         in formatted
     )
     assert "deletion_score=8 | confidence=high | recent_age_days=420" in formatted
@@ -1034,12 +1063,12 @@ def test_format_rows_renders_dead_code_candidates_summary() -> None:
 def test_format_rows_renders_current_cycle_code_summary() -> None:
     formatted = _format_rows(
         "current-cycle-code",
-        "adapter_layer",
+        ADAPTER_LAYER,
         [
             {
                 "cycle_name": "module_surface:src/bioetl/infrastructure/adapters/common/new_runtime.py",
-                "family_name": "adapter_layer",
-                "target_label": "module_surface",
+                "family_name": ADAPTER_LAYER,
+                "target_label": MODULE_SURFACE,
                 "target_name": "src/bioetl/infrastructure/adapters/common/new_runtime.py",
                 "cycle_status": "current_cycle",
                 "cycle_score": 5,
@@ -1053,9 +1082,9 @@ def test_format_rows_renders_current_cycle_code_summary() -> None:
         ],
     )
 
-    assert "Current-cycle code surfaces: `adapter_layer`" in formatted
+    assert f"Current-cycle code surfaces: `{ADAPTER_LAYER}`" in formatted
     assert (
-        "target=src/bioetl/infrastructure/adapters/common/new_runtime.py | label=module_surface | family=adapter_layer"
+        f"target=src/bioetl/infrastructure/adapters/common/new_runtime.py | label={MODULE_SURFACE} | family={ADAPTER_LAYER}"
         in formatted
     )
     assert "cycle_status=current_cycle | cycle_score=5 | recent_age_days=3" in formatted
@@ -1064,13 +1093,13 @@ def test_format_rows_renders_current_cycle_code_summary() -> None:
 
 def test_format_rows_renders_overengineered_candidates_summary() -> None:
     formatted = _format_rows(
-        "overengineered-candidates",
-        "composite_layer",
+        OVERENGINEERED_CANDIDATES_MODE,
+        COMPOSITE_LAYER,
         [
             {
                 "candidate_name": "module_surface:src/bioetl/application/composite/runner_pkg/runner.py",
-                "family_name": "composite_layer",
-                "target_label": "module_surface",
+                "family_name": COMPOSITE_LAYER,
+                "target_label": MODULE_SURFACE,
                 "target_name": "src/bioetl/application/composite/runner_pkg/runner.py",
                 "classification": "overengineered_stale",
                 "complexity_score": 6,
@@ -1081,18 +1110,18 @@ def test_format_rows_renders_overengineered_candidates_summary() -> None:
                 "helper_call_count": 3,
                 "indirection_markers": ["compat", "runner"],
                 "stateful_markers": ["runner"],
-                "runtime_anchor_count": 0,
-                "config_anchor_count": 0,
-                "doc_anchor_count": 0,
-                "test_anchor_count": 0,
+                RUNTIME_ANCHOR_COUNT: 0,
+                CONFIG_ANCHOR_COUNT: 0,
+                DOC_ANCHOR_COUNT: 0,
+                TEST_ANCHOR_COUNT: 0,
                 "blocked_by_cycle": "",
             }
         ],
     )
 
-    assert "Overengineered candidates: `composite_layer`" in formatted
+    assert f"Overengineered candidates: `{COMPOSITE_LAYER}`" in formatted
     assert (
-        "target=src/bioetl/application/composite/runner_pkg/runner.py | label=module_surface | family=composite_layer"
+        f"target=src/bioetl/application/composite/runner_pkg/runner.py | label={MODULE_SURFACE} | family={COMPOSITE_LAYER}"
         in formatted
     )
     assert (
@@ -1104,28 +1133,28 @@ def test_format_rows_renders_overengineered_candidates_summary() -> None:
 
 def test_format_rows_renders_removable_complexity_summary() -> None:
     formatted = _format_rows(
-        "removable-complexity",
-        "composite_layer",
+        REMOVABLE_COMPLEXITY_MODE,
+        COMPOSITE_LAYER,
         [
             {
                 "candidate_name": "module_surface:src/bioetl/application/composite/merger.py",
-                "family_name": "composite_layer",
-                "target_label": "module_surface",
+                "family_name": COMPOSITE_LAYER,
+                "target_label": MODULE_SURFACE,
                 "target_name": "src/bioetl/application/composite/merger.py",
                 "removable_score": 9,
                 "removal_confidence": "high",
                 "deprecation_markers": ["compat", "legacy"],
-                "runtime_anchor_count": 0,
-                "config_anchor_count": 0,
-                "doc_anchor_count": 0,
-                "test_anchor_count": 0,
+                RUNTIME_ANCHOR_COUNT: 0,
+                CONFIG_ANCHOR_COUNT: 0,
+                DOC_ANCHOR_COUNT: 0,
+                TEST_ANCHOR_COUNT: 0,
             }
         ],
     )
 
-    assert "Removable complexity candidates: `composite_layer`" in formatted
+    assert f"Removable complexity candidates: `{COMPOSITE_LAYER}`" in formatted
     assert (
-        "target=src/bioetl/application/composite/merger.py | label=module_surface | family=composite_layer"
+        f"target=src/bioetl/application/composite/merger.py | label={MODULE_SURFACE} | family={COMPOSITE_LAYER}"
         in formatted
     )
     assert "removable_score=9 | removal_confidence=high" in formatted
@@ -1134,19 +1163,19 @@ def test_format_rows_renders_removable_complexity_summary() -> None:
 
 def test_format_rows_renders_simplification_blockers_summary() -> None:
     formatted = _format_rows(
-        "simplification-blockers",
-        "adapter_layer",
+        SIMPLIFICATION_BLOCKERS_MODE,
+        ADAPTER_LAYER,
         [
             {
                 "candidate_name": "method_surface:src.bioetl.infrastructure.adapters.pubmed._health.PubMedHealthMixin.request_count",
-                "family_name": "adapter_layer",
+                "family_name": ADAPTER_LAYER,
                 "target_label": "method_surface",
                 "target_name": "src.bioetl.infrastructure.adapters.pubmed._health.PubMedHealthMixin.request_count",
                 "classification": "overengineered_active",
-                "runtime_anchor_count": 2,
-                "config_anchor_count": 1,
-                "doc_anchor_count": 0,
-                "test_anchor_count": 3,
+                RUNTIME_ANCHOR_COUNT: 2,
+                CONFIG_ANCHOR_COUNT: 1,
+                DOC_ANCHOR_COUNT: 0,
+                TEST_ANCHOR_COUNT: 3,
                 "cycle_blockers": [
                     "method_surface:src.bioetl.infrastructure.adapters.pubmed._health.PubMedHealthMixin.request_count"
                 ],
@@ -1161,9 +1190,9 @@ def test_format_rows_renders_simplification_blockers_summary() -> None:
         ],
     )
 
-    assert "Simplification blockers: `adapter_layer`" in formatted
+    assert f"Simplification blockers: `{ADAPTER_LAYER}`" in formatted
     assert (
-        "target=src.bioetl.infrastructure.adapters.pubmed._health.PubMedHealthMixin.request_count | label=method_surface | family=adapter_layer"
+        f"target=src.bioetl.infrastructure.adapters.pubmed._health.PubMedHealthMixin.request_count | label=method_surface | family={ADAPTER_LAYER}"
         in formatted
     )
     assert (
@@ -1213,7 +1242,7 @@ def test_format_rows_handles_missing_workflow_gates() -> None:
 
 
 def test_format_rows_handles_missing_storage_lineage() -> None:
-    formatted = _format_rows("storage-lineage", "missing-storage", [])
+    formatted = _format_rows(STORAGE_LINEAGE_MODE, "missing-storage", [])
 
     assert (
         formatted
@@ -1222,7 +1251,7 @@ def test_format_rows_handles_missing_storage_lineage() -> None:
 
 
 def test_format_rows_handles_missing_duplication_cluster() -> None:
-    formatted = _format_rows("duplication-cluster", "missing-cluster", [])
+    formatted = _format_rows(DUPLICATION_CLUSTER_MODE, "missing-cluster", [])
 
     assert (
         formatted
@@ -1231,54 +1260,54 @@ def test_format_rows_handles_missing_duplication_cluster() -> None:
 
 
 def test_format_rows_handles_missing_promotion_candidates() -> None:
-    formatted = _format_rows("promotion-candidates", "missing-family", [])
+    formatted = _format_rows(PROMOTION_CANDIDATES_MODE, MISSING_FAMILY, [])
 
     assert (
         formatted
-        == "Promotion candidates: no promotion candidates found for `missing-family`."
+        == f"Promotion candidates: no promotion candidates found for `{MISSING_FAMILY}`."
     )
 
 
 def test_format_rows_handles_missing_dead_code_candidates() -> None:
-    formatted = _format_rows("dead-code-candidates", "missing-family", [])
+    formatted = _format_rows(DEAD_CODE_CANDIDATES_MODE, MISSING_FAMILY, [])
 
     assert (
         formatted
-        == "Dead code candidates: no dead code candidates found for `missing-family`."
+        == f"Dead code candidates: no dead code candidates found for `{MISSING_FAMILY}`."
     )
 
 
 def test_format_rows_handles_missing_current_cycle_code() -> None:
-    formatted = _format_rows("current-cycle-code", "missing-family", [])
+    formatted = _format_rows(CURRENT_CYCLE_CODE_MODE, MISSING_FAMILY, [])
 
     assert (
         formatted
-        == "Current-cycle code surfaces: no current-cycle code surfaces found for `missing-family`."
+        == f"Current-cycle code surfaces: no current-cycle code surfaces found for `{MISSING_FAMILY}`."
     )
 
 
 def test_format_rows_handles_missing_overengineered_candidates() -> None:
-    formatted = _format_rows("overengineered-candidates", "missing-family", [])
+    formatted = _format_rows(OVERENGINEERED_CANDIDATES_MODE, MISSING_FAMILY, [])
 
     assert (
         formatted
-        == "Overengineered candidates: no overengineered candidates found for `missing-family`."
+        == f"Overengineered candidates: no overengineered candidates found for `{MISSING_FAMILY}`."
     )
 
 
 def test_format_rows_handles_missing_removable_complexity() -> None:
-    formatted = _format_rows("removable-complexity", "missing-family", [])
+    formatted = _format_rows("removable-complexity", MISSING_FAMILY, [])
 
     assert (
         formatted
-        == "Removable complexity candidates: no removable complexity candidates found for `missing-family`."
+        == f"Removable complexity candidates: no removable complexity candidates found for `{MISSING_FAMILY}`."
     )
 
 
 def test_format_rows_handles_missing_simplification_blockers() -> None:
-    formatted = _format_rows("simplification-blockers", "missing-family", [])
+    formatted = _format_rows("simplification-blockers", MISSING_FAMILY, [])
 
     assert (
         formatted
-        == "Simplification blockers: no simplification blockers found for `missing-family`."
+        == f"Simplification blockers: no simplification blockers found for `{MISSING_FAMILY}`."
     )

@@ -16,7 +16,7 @@ This page serves as the first-class canonical contract surface for Data Quality 
 
 ## Contract Registry
 
-The BioETL DQ Contract System defines three primary contract types that govern data quality across all pipelines:
+The BioETL DQ Contract System defines four primary contract types that govern data quality across all pipelines:
 
 ### 1. Schema Contracts
 
@@ -35,60 +35,154 @@ The BioETL DQ Contract System defines three primary contract types that govern d
 
 **Example**: `chembl_activity_v1.0.json`
 
-### 2. Content Contracts
+### 2. Entity Field Validations
 
-**Purpose**: Enforce business rule compliance and value-domain integrity.
+**Purpose**: Enforce business rule compliance and value-domain integrity at the field level.
 
 **Canonical Sources**:
-- Entity configs: `configs/entities/{provider}/{entity}.yaml` (section: `quality.content`)
-- Composite configs: `configs/composites/{entity}.yaml` (section: `quality.content`)
+- Entity configs: `configs/entities/{provider}/{entity}.yaml` (section: `entity_field_validations`)
+- Composite configs: `configs/composites/{entity}.yaml` (section: `entity_field_validations`)
 
 **Contract Fields**:
-- `field`: Target field name
-- `rule`: Validation rule type (`not_null`, `unique`, `regex`, `enum`, `range`, etc.)
-- `params`: Rule-specific parameters
-- `severity`: `ERROR`, `WARN`, or `INFO`
-- `disposition`: `quarantine`, `transform`, `allow`, or `escalate`
+- `field`: Target field name (snake_case)
+- `type`: Validation rule type (`required`, `range`, `enum`, `pattern`, `length`)
+- `nullable`: Boolean nullability constraint
+- `error_message`: Human-readable error message
+- Rule-specific parameters (`min`, `max`, `pattern`, `allowed`, etc.)
 
 **Example**:
 ```yaml
 quality:
-  content:
+  entity_field_validations:
     - field: activity_id
-      rule: not_null
-      severity: ERROR
-      disposition: quarantine
+      type: required
+      nullable: false
+      error_message: "Activity ID is required for all records"
+    
+    - field: standard_value
+      type: range
+      nullable: true
+      min: 0
+      max: 1000000000
+      error_message: "standard_value must be non-negative and below 1B"
+    
     - field: assay_type
-      rule: enum
-      params: ["B", "F", "A", "P", "C"]
-      severity: WARN
-      disposition: transform
+      type: enum
+      nullable: false
+      allowed: ["B", "F", "A", "T", "P", "U"]
+      error_message: "assay_type must be one of B, F, A, T, P, U"
+    
+    - field: inchi_key
+      type: pattern
+      nullable: true
+      pattern: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
+      error_message: "InChI key must match standard format"
+    
+    - field: comment
+      type: max_length
+      nullable: true
+      max_length: 500
+      error_message: "Comment must not exceed 500 characters"
+    
+    - field: tags
+      type: not_empty_list
+      nullable: true
+      min_items: 1
+      error_message: "At least one tag is required if tags field is present"
+    
+    - field: custom_validation_field
+      type: custom
+      nullable: true
+      validation: "custom_validation_function"
+      error_message: "Field failed custom validation"
+    
+    - field: required_field
+      type: not_null
+      nullable: false
+      error_message: "This field cannot be null"
 ```
 
-### 3. Consistency Contracts
+### 3. Entity Cross-Field Validations
 
-**Purpose**: Ensure cross-field and cross-entity consistency.
+**Purpose**: Ensure consistency and logical relationships between multiple fields.
 
 **Canonical Sources**:
-- Entity configs: `configs/entities/{provider}/{entity}.yaml` (section: `quality.consistency`)
-- Cross-provider mappings: `src/bioetl/domain/mapping/`
+- Entity configs: `configs/entities/{provider}/{entity}.yaml` (section: `entity_cross_field_validations`)
+- Composite configs: `configs/composites/{entity}.yaml` (section: `entity_cross_field_validations`)
 
 **Contract Fields**:
-- `fields`: Array of field names involved in the consistency check
-- `rule`: Consistency rule type (`cross_field`, `cross_entity`, `temporal`, `conditional`)
-- `expression`: Validation expression (Jinja2 or Python lambda)
-- `severity`: `ERROR`, `WARN`, or `INFO`
-- `disposition`: `quarantine`, `transform`, `allow`, or `escalate`
+- `field`: Primary field name
+- `related_field`: Related field name
+- `condition`: Jinja2 validation expression
+- `error_message`: Human-readable error message for violation
 
 **Example**:
 ```yaml
 quality:
-  consistency:
-    - fields: [standard_value, standard_units]
-      rule: cross_field
-      expression: "{{ standard_value is not none and standard_units is not none }}"
-      severity: ERROR
-      disposition: quarantine
+  entity_cross_field_validations:
+    - field: standard_value
+      related_field: standard_units
+      condition: "{{ standard_value is not none and standard_units is not none }}"
+      error_message: "Both standard_value and standard_units must be present together"
+    
+    - field: min_value
+      related_field: max_value
+      condition: "{{ min_value is not none and max_value is not none and min_value <= max_value }}"
+      error_message: "min_value must be less than or equal to max_value"
+```
+
+### 4. Entity Conditional Validations
+
+**Purpose**: Apply context-dependent validation rules based on field values.
+
+**Canonical Sources**:
+- Entity configs: `configs/entities/{provider}/{entity}.yaml` (section: `entity_conditional_validations`)
+- Composite configs: `configs/composites/{entity}.yaml` (section: `entity_conditional_validations`)
+
+**Contract Fields**:
+- `condition`: Jinja2 expression defining when validation applies
+- `then`: Validation rules to apply when condition is true
+- `else`: Validation rules to apply when condition is false (optional)
+
+**Example**:
+```yaml
+quality:
+  entity_conditional_validations:
+    - condition: "{{ assay_type == 'B' }}"
+      then:
+        field: standard_type
+        type: enum
+        allowed: ["IC50", "EC50", "Ki"]
+        error_message: "Binding assays require IC50, EC50, or Ki standard types"
+      else:
+        field: standard_type
+        type: enum
+        allowed: ["IC50", "EC50", "Ki", "Potency"]
+        error_message: "Non-binding assays allow additional standard types"
+```
+
+### 5. Key Nullability Constraints
+
+**Purpose**: Explicit nullability constraints for critical business keys.
+
+**Canonical Sources**:
+- Entity configs: `configs/entities/{provider}/{entity}.yaml` (section: `key_nullability`)
+- Composite configs: `configs/composites/{entity}.yaml` (section: `key_nullability`)
+
+**Contract Fields**:
+- `field`: Field name
+- `nullable`: Boolean nullability constraint
+
+**Example**:
+```yaml
+quality:
+  key_nullability:
+    - field: activity_id
+      nullable: false
+    - field: assay_id
+      nullable: true
+    - field: molecule_id
+      nullable: false
 ```
 
 ## Disposition Policy
@@ -157,8 +251,10 @@ graph TD
 | Contract Type | Entry Point | Governance ADR |
 |---------------|-------------|----------------|
 | **Schema Contracts** | [`gold-schemas.md`](gold-schemas.md) | ADR-018, ADR-036 |
-| **Content Contracts** | Entity configs in `configs/entities/` | ADR-027 |
-| **Consistency Contracts** | Entity configs + mapping modules | ADR-027 |
+| **Entity Field Validations** | Entity configs in `configs/entities/` | ADR-027 |
+| **Entity Cross-Field Validations** | Entity configs in `configs/entities/` | ADR-027 |
+| **Entity Conditional Validations** | Entity configs in `configs/entities/` | ADR-027 |
+| **Key Nullability Constraints** | Entity configs in `configs/entities/` | ADR-027 |
 | **Disposition Policy** | This document | ADR-045 |
 | **Quarantine Contract** | This document | ADR-045 |
 | **Rollout Contract** | This document | ADR-036, ADR-045 |
@@ -199,37 +295,126 @@ graph TD
 
 ## Examples & Templates
 
-### Minimal Entity Config with DQ Contracts
+### Complete Entity Config with Current DQ DSL
 
 ```yaml
 # configs/entities/chembl/activity.yaml
+# Complete example showing all validation types
+
 entity: activity
 provider: chembl
+version: 2.1.0
+
 schema:
   fields:
     - name: activity_id
       type: string
       nullable: false
+      description: Unique activity identifier
     - name: assay_id
       type: string
       nullable: true
+      description: Reference to assay
+    - name: standard_value
+      type: float
+      nullable: true
+      description: Measured activity value
+    - name: standard_units
+      type: string
+      nullable: true
+      description: Units of measurement
+
 quality:
-  content:
+  # Field-level validations
+  entity_field_validations:
     - field: activity_id
-      rule: not_null
-      severity: ERROR
-      disposition: quarantine
+      type: required
+      nullable: false
+      error_message: "Activity ID is required for all records"
+    
     - field: standard_value
-      rule: range
-      params: {min: 0, max: 1000000}
-      severity: WARN
-      disposition: transform
-  consistency:
-    - fields: [assay_id, activity_id]
-      rule: cross_entity
-      expression: "{{ assay_id is not none or activity_id is not none }}"
-      severity: ERROR
-      disposition: quarantine
+      type: range
+      nullable: true
+      min: 0
+      max: 1000000000
+      error_message: "standard_value must be non-negative and below 1B"
+    
+    - field: assay_type
+      type: enum
+      nullable: false
+      allowed: ["B", "F", "A", "T", "P", "U"]
+      error_message: "assay_type must be one of B, F, A, T, P, U"
+
+  # Cross-field validations
+  entity_cross_field_validations:
+    - field: standard_value
+      related_field: standard_units
+      condition: "{{ standard_value is not none and standard_units is not none }}"
+      error_message: "Both standard_value and standard_units must be present together"
+    
+    - field: min_value
+      related_field: max_value
+      condition: "{{ min_value is not none and max_value is not none and min_value <= max_value }}"
+      error_message: "min_value must be less than or equal to max_value"
+
+  # Conditional validations
+  entity_conditional_validations:
+    - condition: "{{ assay_type == 'B' }}"
+      then:
+        field: standard_type
+        type: enum
+        allowed: ["IC50", "EC50", "Ki"]
+        error_message: "Binding assays require IC50, EC50, or Ki standard types"
+      else:
+        field: standard_type
+        type: enum
+        allowed: ["IC50", "EC50", "Ki", "Potency"]
+        error_message: "Non-binding assays allow additional standard types"
+
+  # Nullability constraints
+  key_nullability:
+    - field: activity_id
+      nullable: false
+    - field: assay_id
+      nullable: true
+    - field: molecule_id
+      nullable: false
+```
+
+### Validation Rule Reference
+
+#### Field Validation Types
+
+| Rule Type | Parameters | Example | Use Case |
+|-----------|------------|---------|----------|
+| `required` | `nullable: false` | `type: required` | Mandatory fields |
+| `not_null` | `nullable: false` | `type: not_null` | Field must not be null |
+| `range` | `min`, `max` | `min: 0, max: 1000` | Numeric boundaries |
+| `enum` | `allowed: [...]` | `allowed: ["A", "B"]` | Enumerated values |
+| `pattern` | `pattern: "regex"` | `pattern: "^CHEMBL\\d+$"` | Regex validation |
+| `max_length` | `max_length: N` | `max_length: 100` | Maximum string length |
+| `not_empty_list` | `min_items: N` | `min_items: 1` | Non-empty list/array |
+| `custom` | Custom validation | `validation: custom` | Custom validation logic |
+
+#### Cross-Field Validation Patterns
+
+| Pattern | Example | Use Case |
+|---------|---------|----------|
+| Presence | `field is not none and related_field is not none` | Both fields required |
+| Comparison | `field <= related_field` | Min/max relationships |
+| Conditional | `field == 'value' implies related_field is not none` | Dependent fields |
+
+### Contract Export Command
+
+```bash
+# Generate JSON contract exports
+python -m scripts.schema generate-contracts
+
+# Validate contract parity
+python -m scripts.check_dq_dsl_parity
+
+# Run architecture tests
+pytest tests/architecture/test_dq_contracts.py
 ```
 
 ### Contract Export Command
@@ -257,7 +442,22 @@ pytest tests/architecture/test_dq_contracts.py
 
 ## Related Materials
 
+### Current Documentation
 - [DQ Contract System Architecture](../../04-reference/components/dq-contract-system.md)
 - [Observability Metrics Contract](observability.md)
 - [Run Manifest & Ledger Contract](run-manifest-ledger.md)
 - [Gold Schema Contracts](gold-schemas.md)
+
+### Configuration References
+- **ChEMBL Activity**: [`configs/entities/chembl/activity.yaml`](../../../configs/entities/chembl/activity.yaml)
+- **PubMed Publication**: [`configs/entities/pubmed/publication.yaml`](../../../configs/entities/pubmed/publication.yaml)
+- **Composite Publication**: [`configs/composites/publication.yaml`](../../../configs/composites/publication.yaml)
+
+### Governance
+- [ADR-027: DQ Rules Externalization](../../02-architecture/decisions/ADR-027-dq-rules-externalization.md)
+- [ADR-045: Data Quality Contract System](../../02-architecture/decisions/ADR-045-dq-contract-system.md)
+- [DQ Configuration Guide](../../03-guides/dq-configuration.md)
+
+### Validation
+- [DQ Failure Investigation Runbook](../../05-operations/runbooks/dq-failure-investigation.md)
+- [Pipeline Failure (DQ) Runbook](../../05-operations/runbooks/pipeline-failure-dq.md)

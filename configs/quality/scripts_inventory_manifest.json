@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-24T05:02:13.847435+00:00",
+  "generated_at": "2026-04-24T05:32:00.511708+00:00",
   "summary": {
-    "total_scripts": 437,
+    "total_scripts": 438,
     "status_counts": {
-      "active": 310,
+      "active": 311,
       "legacy": 15,
       "orphan": 100,
       "unknown": 12
@@ -14,7 +14,7 @@
       "build": 1,
       "ci": 52,
       "docs": 136,
-      "scripts": 292,
+      "scripts": 293,
       "skills": 8,
       "tests": 134
     }
@@ -6322,7 +6322,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 197,
+          "line": 202,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/.wsl-vpn-fix.ps1`            | Recover Windows-side VPN proxy settings for WSL interoperability                          |"
         }
@@ -6548,7 +6548,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 153,
+          "line": 158,
           "source_group": "scripts",
           "text": "| `install-deps`   | `scripts/engineering/dev/install_deps.py`            | Auxiliary helper script, not a full project bootstrap            |"
         },
@@ -6569,7 +6569,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 158,
+          "line": 163,
           "source_group": "scripts",
           "text": "| `mock-metrics`   | `scripts/engineering/dev/metrics_mock_server.py`     | Start mock metrics server                                        |"
         },
@@ -6625,13 +6625,13 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 155,
+          "line": 160,
           "source_group": "scripts",
           "text": "| `pretest-guardrails` | `scripts/engineering/dev/pretest_guardrails.sh`  | Run cleanup + repo/docs/memory/architecture preflight            |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 187,
+          "line": 192,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/pretest_guardrails.sh`       | Run cleanup + repo/docs/memory/architecture preflight before broad bash pytest runs       |"
         },
@@ -6805,13 +6805,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 154,
+          "line": 159,
           "source_group": "scripts",
           "text": "| `probe-quality`  | `scripts/engineering/dev/quality_gate_probe.py`      | Measure narrow pytest/mypy startup latency and timeout behavior  |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 191,
+          "line": 196,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quality_gate_probe.py`       | Diagnose narrow pytest/mypy startup latency and timeout behavior                          |"
         },
@@ -6832,13 +6832,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 159,
+          "line": 164,
           "source_group": "scripts",
           "text": "| `mock-quarantine`| `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock quarantine explorer API server                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 192,
+          "line": 197,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock `/ops/quarantine/*` endpoints for Silver Reject Explorer smoke checks |"
         },
@@ -7154,13 +7154,19 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 26,
       "references": [
         {
           "path": "docs/03-guides/testing.md",
           "line": 48,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=html"
+        },
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 54,
+          "source_group": "docs",
+          "text": "ignore/deselect inventory for `run_pytest_sharded.sh` lives in"
         },
         {
           "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
@@ -7197,12 +7203,6 @@
           "line": 69,
           "source_group": "docs",
           "text": "summary, чтобы прямые `run_pytest_sharded.sh --junit-dir ...` запуски сразу"
-        },
-        {
-          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
-          "line": 158,
-          "source_group": "docs",
-          "text": "- несколько JUnit XML файлов для `run_pytest_sharded.sh`, объединенных в один"
         }
       ]
     },
@@ -7231,7 +7231,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 184,
+          "line": 189,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.ps1`               | Run tests (PowerShell variant)                                                            |"
         },
@@ -7258,13 +7258,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 156,
+          "line": 161,
           "source_group": "scripts",
           "text": "| `run-tests`      | `scripts/engineering/dev/run_tests.py`               | Run tests                                                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 160,
+          "line": 165,
           "source_group": "scripts",
           "text": "| `test-changed`   | `scripts/engineering/dev/run_tests.py changed`       | Run tests for changed files only                                 |"
         },
@@ -7315,7 +7315,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 183,
+          "line": 188,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.sh`                | Run tests (shell variant)                                                                 |"
         },
@@ -7342,7 +7342,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 194,
+          "line": 199,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/setup_copilot_codex_mcp.ps1` | Setup MCP compatibility facade (PowerShell variant)                                       |"
         },
@@ -7405,7 +7405,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 161,
+          "line": 166,
           "source_group": "scripts",
           "text": "| `setup-mcp`      | `scripts/engineering/dev/setup_copilot_codex_mcp.py` | Compatibility facade for canonical Codex MCP setup               |"
         }
@@ -7420,7 +7420,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 193,
+          "line": 198,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/setup_copilot_codex_mcp.sh`  | Setup MCP compatibility facade (shell variant)                                            |"
         },
@@ -8646,7 +8646,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 119,
+          "line": 121,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для partial rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadata"
         },
@@ -8814,7 +8814,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 444,
+          "line": 446,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         }
@@ -9187,6 +9187,45 @@
       ]
     },
     {
+      "path": "scripts/engineering/repo/cleanup_branch_candidates.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/README.md",
+          "line": 31,
+          "source_group": "scripts",
+          "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh"
+        },
+        {
+          "path": "scripts/engineering/repo/README.md",
+          "line": 32,
+          "source_group": "scripts",
+          "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply"
+        },
+        {
+          "path": "scripts/engineering/repo/README.md",
+          "line": 33,
+          "source_group": "scripts",
+          "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply --with-remote"
+        },
+        {
+          "path": "scripts/engineering/repo/README.md",
+          "line": 39,
+          "source_group": "scripts",
+          "text": "Use `cleanup_branch_candidates.sh` when you want the agreed branch cleanup plan"
+        },
+        {
+          "path": "scripts/engineering/repo/README.md",
+          "line": 61,
+          "source_group": "scripts",
+          "text": "| `cleanup_branch_candidates.sh` | Dry-run/apply cleanup for the curated branch deletion set |"
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/repo/finalize_docs_issues_2638_2643.sh",
       "type": "sh",
       "status": "orphan",
@@ -9221,7 +9260,7 @@
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 53,
+          "line": 60,
           "source_group": "scripts",
           "text": "| `preflight_cleanup.sh` | Pre-commit cleanup helper |"
         }
@@ -10268,7 +10307,7 @@
       "references": [
         {
           "path": "docs/03-guides/testing.md",
-          "line": 85,
+          "line": 87,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
         },
@@ -10672,7 +10711,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 119,
+          "line": 121,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для partial rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadata"
         },
@@ -11294,7 +11333,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 43,
+      "reference_count": 45,
       "references": [
         {
           "path": ".github/workflows/tests.yml",

@@ -125,6 +125,12 @@ quality/governance assets и composite helpers, поэтому active guide фи
 - pipeline считается покрытым, если есть `tracked_ci_sample` в manifest;
 - если tracked fixture отсутствует, должен быть explicit entry в `gaps`;
 - для ключей, покрытых `tracked_ci_sample`, gap-запись должна быть закрыта/удалена.
+- `tracked_ci_sample` продвигается только из factual Bronze rows:
+  local runtime snapshots или replay-backed VCR payload extraction, не synthetic hand-made records.
+- bounded CI sample должен оставаться малым и deterministic:
+  current floor — не меньше `20` JSONL records на fixture.
+- для replay-critical family promotion нужен хотя бы один зафиксированный consumer path:
+  integration, replay, или e2e test, который использует эту pipeline family в CI-visible surface.
 
 ______________________________________________________________________
 

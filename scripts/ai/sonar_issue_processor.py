@@ -219,6 +219,76 @@ def _matches_current_quarantine(path: str, exclusion_patterns: list[str]) -> boo
     return False
 
 
+def _render_live_issue(
+    issue: dict[str, Any],
+    *,
+    path: str,
+    in_supported_scope: bool,
+    matches_current_quarantine: bool,
+) -> dict[str, Any]:
+    return {
+        "key": issue.get("key"),
+        "path": path,
+        "rule": issue.get("rule"),
+        "severity": issue.get("severity"),
+        "message": issue.get("message"),
+        "line": issue.get("line"),
+        "in_supported_scope": in_supported_scope,
+        "matches_current_quarantine": matches_current_quarantine,
+    }
+
+
+def _classify_live_issues(
+    *,
+    issues: list[dict[str, Any]],
+    supported_sources: list[str],
+    quarantine_patterns: list[str],
+) -> dict[str, Any]:
+    rendered_issues: list[dict[str, Any]] = []
+    supported_scope_issues: list[dict[str, Any]] = []
+    supported_non_quarantined_issues: list[dict[str, Any]] = []
+    supported_quarantined_issues: list[dict[str, Any]] = []
+    out_of_scope_issues: list[dict[str, Any]] = []
+
+    for issue in issues:
+        path = _issue_path(issue)
+        in_supported_scope = _is_in_supported_scope(path, supported_sources)
+        matches_current_quarantine = _matches_current_quarantine(
+            path, quarantine_patterns
+        )
+        rendered_issue = _render_live_issue(
+            issue,
+            path=path,
+            in_supported_scope=in_supported_scope,
+            matches_current_quarantine=matches_current_quarantine,
+        )
+        rendered_issues.append(rendered_issue)
+        if not in_supported_scope:
+            out_of_scope_issues.append(rendered_issue)
+            continue
+        supported_scope_issues.append(rendered_issue)
+        if matches_current_quarantine:
+            supported_quarantined_issues.append(rendered_issue)
+            continue
+        supported_non_quarantined_issues.append(rendered_issue)
+
+    return {
+        "issues": rendered_issues,
+        "supported_scope_total": len(supported_scope_issues),
+        "supported_non_quarantined_total": len(supported_non_quarantined_issues),
+        "supported_quarantined_total": len(supported_quarantined_issues),
+        "out_of_scope_total": len(out_of_scope_issues),
+        "supported_scope_buckets": bucket_issue_paths(supported_scope_issues),
+        "supported_non_quarantined_buckets": bucket_issue_paths(
+            supported_non_quarantined_issues
+        ),
+        "supported_quarantined_buckets": bucket_issue_paths(
+            supported_quarantined_issues
+        ),
+        "out_of_scope_buckets": bucket_issue_paths(out_of_scope_issues),
+    }
+
+
 def fetch_live_issue_summary(
     *,
     sonar_url: str,
@@ -264,70 +334,18 @@ def fetch_live_issue_summary(
 
     payload = response.json()
     paging = payload.get("paging", {})
-    issues = payload.get("issues", [])
-    rendered_issues: list[dict[str, Any]] = []
-    supported_scope_total = 0
-    supported_non_quarantined_total = 0
-    supported_quarantined_total = 0
-    out_of_scope_total = 0
-    supported_scope_issues: list[dict[str, Any]] = []
-    supported_non_quarantined_issues: list[dict[str, Any]] = []
-    supported_quarantined_issues: list[dict[str, Any]] = []
-    out_of_scope_issues: list[dict[str, Any]] = []
-    for issue in issues:
-        path = _issue_path(issue)
-        in_supported_scope = _is_in_supported_scope(path, supported_sources)
-        matches_current_quarantine = _matches_current_quarantine(
-            path, quarantine_patterns
-        )
-        if in_supported_scope:
-            supported_scope_total += 1
-            if matches_current_quarantine:
-                supported_quarantined_total += 1
-            else:
-                supported_non_quarantined_total += 1
-        else:
-            out_of_scope_total += 1
-        rendered_issues.append(
-            {
-                "key": issue.get("key"),
-                "path": path,
-                "rule": issue.get("rule"),
-                "severity": issue.get("severity"),
-                "message": issue.get("message"),
-                "line": issue.get("line"),
-                "in_supported_scope": in_supported_scope,
-                "matches_current_quarantine": matches_current_quarantine,
-            }
-        )
-        rendered_issue = rendered_issues[-1]
-        if in_supported_scope:
-            supported_scope_issues.append(rendered_issue)
-            if matches_current_quarantine:
-                supported_quarantined_issues.append(rendered_issue)
-            else:
-                supported_non_quarantined_issues.append(rendered_issue)
-        else:
-            out_of_scope_issues.append(rendered_issue)
+    classification = _classify_live_issues(
+        issues=payload.get("issues", []),
+        supported_sources=supported_sources,
+        quarantine_patterns=quarantine_patterns,
+    )
     return {
         "status": "ok",
         "total": int(paging.get("total", 0)),
         "page_size": int(paging.get("pageSize", 0) or 0),
         "severity_counts": _facet_counts(payload, "severities"),
         "type_counts": _facet_counts(payload, "types"),
-        "supported_scope_total": supported_scope_total,
-        "supported_non_quarantined_total": supported_non_quarantined_total,
-        "supported_quarantined_total": supported_quarantined_total,
-        "out_of_scope_total": out_of_scope_total,
-        "supported_scope_buckets": bucket_issue_paths(supported_scope_issues),
-        "supported_non_quarantined_buckets": bucket_issue_paths(
-            supported_non_quarantined_issues
-        ),
-        "supported_quarantined_buckets": bucket_issue_paths(
-            supported_quarantined_issues
-        ),
-        "out_of_scope_buckets": bucket_issue_paths(out_of_scope_issues),
-        "issues": rendered_issues,
+        **classification,
     }
 
 
