@@ -83,6 +83,9 @@ jobs:
       - name: Run documentation integrity guardrails
         run: uv run python scripts/docs/check_doc_links.py --links --specs --configs
 
+      - name: Run docs-config parity gate
+        run: uv run python scripts/check_entity_config_parity.py
+
       - name: Run canonical docs verification chain
         run: uv run python -m scripts.docs verify
 

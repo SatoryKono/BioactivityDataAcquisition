@@ -14,8 +14,12 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-import toml
 import yaml
+
+try:
+    import tomllib as toml
+except ModuleNotFoundError:  # pragma: no cover - Python <3.11 fallback
+    import toml  # type: ignore[no-redef]
 
 
 @dataclass
@@ -59,7 +63,7 @@ class DocumentationParityChecker:
     def __init__(self):
         self.configs_dir = Path("configs")
         self.docs_dir = Path("docs")
-        self.pipeline_specs_dir = self.docs_dir / "04-reference" / "pipeline-specs"
+        self.pipeline_specs_dir = self.docs_dir / "04-reference" / "pipelines"
         self.entity_configs_dir = self.configs_dir / "entities"
         self.composite_configs_dir = self.configs_dir / "composites"
 
@@ -70,15 +74,20 @@ class DocumentationParityChecker:
 
         # Entity configs
         if self.entity_configs_dir.exists():
-            for config_file in self.entity_configs_dir.glob("*.yaml"):
-                entity_name = config_file.stem
-                config_entities.append(
-                    ConfigEntity(
-                        name=entity_name,
-                        type="entity",
-                        path=str(config_file.relative_to(self.configs_dir)),
+            for provider_dir in sorted(self.entity_configs_dir.iterdir()):
+                if not provider_dir.is_dir():
+                    continue
+                for config_file in sorted(provider_dir.glob("*.yaml")):
+                    if config_file.name.startswith("_"):
+                        continue
+                    entity_name = config_file.stem
+                    config_entities.append(
+                        ConfigEntity(
+                            name=entity_name,
+                            type="entity",
+                            path=str(config_file.relative_to(self.configs_dir)),
+                        )
                     )
-                )
 
         # Composite configs
         if self.composite_configs_dir.exists():
@@ -100,7 +109,7 @@ class DocumentationParityChecker:
         doc_files = []
 
         if self.pipeline_specs_dir.exists():
-            doc_files.extend(self.pipeline_specs_dir.glob("*.md"))
+            doc_files.extend(self.pipeline_specs_dir.glob("*/*spec.md"))
 
         # Also check for entity docs in reference section
         entity_docs_dir = self.docs_dir / "04-reference" / "entity-specs"
@@ -180,12 +189,18 @@ class DocumentationParityChecker:
             return {}
 
     def _infer_entity_name(self, title: str, doc_path: Path) -> str:
+        path_stem = doc_path.stem.replace("-spec", "")
+        path_parts = path_stem.split("-")
+        if path_parts and path_parts[0].isdigit():
+            path_parts = path_parts[1:]
+        if path_parts:
+            return "_".join(path_parts)
         title_lower = title.lower()
         if "entity" in title_lower or "pipeline" in title_lower:
             parts = title_lower.split(":", 1)
             if len(parts) > 1:
                 return parts[1].strip()
-        return doc_path.stem.replace("-spec", "").replace("pipeline-", "")
+        return path_stem.replace("pipeline-", "")
 
     def match_configs_to_docs(self, configs: list[ConfigEntity]) -> list[ConfigEntity]:
         """Match configuration entities to their documentation."""

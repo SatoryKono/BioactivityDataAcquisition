@@ -8,6 +8,9 @@ The Documentation Parity Gate ensures that all active entity configurations have
 
 ## CI/CD Integration
 
+The active repository gate runs in [`.github/workflows/docs.yml`](../../.github/workflows/docs.yml)
+via the docs job step `Run docs-config parity gate`.
+
 ### GitHub Actions Example
 
 ```yaml
@@ -66,16 +69,16 @@ docs_parity_check:
 To run the parity check manually:
 
 ```bash
-# Run the parity check
-python3 scripts/check_entity_config_parity.py
+# Run the active config-to-spec parity gate
+uv run python scripts/check_entity_config_parity.py
 
-# Or use the CI script
-bash scripts/ci_check_docs_parity.sh
+# Generate the broader parity report JSON used by governance tooling
+python3 scripts/docs_parity_check.py
 ```
 
 ## Parity Check Script
 
-The main parity check script is located at `scripts/check_entity_config_parity.py`. It performs the following checks:
+The active config/spec gate is located at `scripts/check_entity_config_parity.py`. It performs the following checks:
 
 1. **Config-to-Spec Parity**: Ensures all active entity configs have corresponding pipeline specs
 2. **Spec-to-Config Parity**: Ensures all pipeline specs have corresponding entity configs
@@ -87,6 +90,9 @@ The main parity check script is located at `scripts/check_entity_config_parity.p
 - **Parity Scoring**: Calculates a parity score (0-100%) based on coverage
 - **Detailed Reporting**: Provides clear output with specific issues found
 - **Exit Codes**: Returns appropriate exit codes for CI/CD integration
+
+The broader governance report path is implemented by `scripts/docs_parity_check.py`,
+which writes `docs/reports/docs-parity-report.json` for local or CI consumption.
 
 ### Exit Codes
 

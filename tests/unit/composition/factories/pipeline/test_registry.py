@@ -26,6 +26,11 @@ def _pipeline_config_name(path: Path, *, config_dir: Path) -> str | None:
     provider = parts[0]
     if provider.startswith("_"):
         return None
+    if provider == "composite":
+        # Composite pipelines are bootstrapped from configs/composites/*.yaml
+        # rather than the registry-backed configs/entities/{provider}/{entity}.yaml
+        # convention that this test verifies.
+        return None
     entity = os.path.splitext(parts[1])[0]
     return f"{provider}_{entity}"
 

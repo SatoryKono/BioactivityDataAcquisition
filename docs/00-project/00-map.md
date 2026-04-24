@@ -95,7 +95,7 @@ docs/
 │
 ├── 02-architecture/             # Architecture & Decisions
 │   ├── 00-overview.md           # Architecture overview
-│   ├── decisions/               # ADRs (ADR-001..045)
+│   ├── decisions/               # ADR decision files (see generated adr-registry.md)
 │   ├── diagrams/            # Canonical Mermaid source files and rendered views
 │   └── ... (Layer docs: 01-domain, 02-application, etc.)
 │
@@ -577,7 +577,7 @@ ______________________________________________________________________
 | TOOLS.md                  | 2026-03-13   | v3.0 Active tools hub          |
 | 03-guides/                | 2026-03-19   | Active guides index            |
 | 03-guides/development/    | 2026-01-26   | Config schema guidelines       |
-| ADR-001..045              | 2026-04-24   | Current ADR set documented     |
+| adr-registry.md           | 2026-04-24   | Generated ADR status registry  |
 | 05-operations/runbooks/   | 2026-03-19   | Active Local-Only runbooks     |
 | 04-reference/schemas/     | 2026-03-19   | Active schema references       |
 | docs/reports/             | 2026-03-19   | Historical evidence and audits |
