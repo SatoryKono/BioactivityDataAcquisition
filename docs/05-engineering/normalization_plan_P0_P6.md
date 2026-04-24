@@ -346,12 +346,15 @@ Generated inventory contract:
   schemas, active normalization profiles, DQ configs, and composite join-key
   configs
 - each field row publishes `provider`, `pipeline_name`, `entity`, `field_name`,
-  `normalizer`, `controlled_vocabulary_source`, `include_in_content_hash`,
-  `set_like`, `hash_ordering`, `strictness`, `schema_coverage`, and
-  `dq_coverage`
+  `normalizer`, `controlled_vocabulary_source`, `policy_scope`,
+  `include_in_content_hash`, `set_like`, `hash_ordering`, `strictness`,
+  `schema_coverage`, and `dq_coverage`
 - `controlled_vocabulary_source` points to `configs/enums/chembl.yaml`,
   `configs/enums/uniprot.yaml`, or the explicit profile/domain vocabulary seam
   when a field is not backed by a provider YAML enum file
+- `policy_scope` distinguishes the full provider enum universe from narrower
+  project subsets or canonical projections when DQ and operational filters do
+  not ship the whole upstream vocabulary surface
 - `schema_coverage` reports both Silver Arrow presence and domain schema
   presence/nullability/check visibility
 - `dq_coverage` reports configured DQ validation type and effective severity,

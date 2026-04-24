@@ -36,6 +36,7 @@ from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRe
 from bioetl.domain.control_plane.reproducibility_profiles import (
     build_lineage_closure_boundary,
     build_replay_family_contract,
+    resolve_reproducibility_family_profile,
 )
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
@@ -123,17 +124,43 @@ def _expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
         str(manifest.launch_context.get("execution_context") or "") == "composite"
         or manifest.provider == "composite"
     )
+    required_profile = str(
+        manifest.launch_context.get("required_persistence_profile")
+        or "degraded_observable"
+    )
     requested_policy = manifest.launch_context.get("checkpoint_compatibility_policy")
     if not isinstance(requested_policy, str):
         requested_policy = None
+    if requested_exact_replay:
+        applied_policy = "hard_fail"
+    elif required_profile in {"replay_ready", "forensic_grade"}:
+        if requested_policy in {"observe", "legacy_observe"}:
+            applied_policy = "soft_fail"
+        else:
+            applied_policy = requested_policy or "soft_fail"
+    else:
+        applied_policy = requested_policy or "observe"
+    profile = resolve_reproducibility_family_profile(
+        provider=manifest.provider,
+        entity=manifest.entity,
+        contract_ref=manifest.code_provenance.contract_ref,
+        execution_context="composite" if is_composite else "source",
+    )
+    strict_replay_requested = requested_exact_replay or required_profile in {
+        "replay_ready",
+        "forensic_grade",
+    }
     return {
         "resume_requested": bool(manifest.launch_context.get("resume")),
         "requested_exact_replay": requested_exact_replay,
         "requested_checkpoint_compatibility_policy": requested_policy,
-        "applied_checkpoint_compatibility_policy": (
-            "hard_fail" if requested_exact_replay else requested_policy or "observe"
+        "applied_checkpoint_compatibility_policy": applied_policy,
+        "strict_replay_safe": (
+            strict_replay_requested
+            and applied_policy == "hard_fail"
+            and profile.strict_exact_replay_supported
+            and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
         ),
-        "strict_replay_safe": requested_exact_replay,
         "execution_context": "composite" if is_composite else "ordinary",
         "resume_mode": (
             "checkpoint_snapshot_plus_ledger_suffix"

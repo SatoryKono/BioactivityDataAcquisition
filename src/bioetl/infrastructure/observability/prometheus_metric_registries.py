@@ -47,6 +47,7 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_control_plane_reads_total": _metrics.CONTROL_PLANE_READS_TOTAL,
         "bioetl_checkpoint_compatibility_events_total": _metrics.CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL,
         "bioetl_checkpoint_load_events_total": _metrics.CHECKPOINT_LOAD_EVENTS_TOTAL,
+        "bioetl_checkpoint_operator_operations_total": _metrics.CHECKPOINT_OPERATOR_OPERATIONS_TOTAL,
         "bioetl_checkpoint_save_events_total": _metrics.CHECKPOINT_SAVE_EVENTS_TOTAL,
         "bioetl_memory_pressure_events_total": _metrics.MEMORY_PRESSURE_EVENTS_TOTAL,
         "bioetl_memory_batch_resize_events_total": _metrics.MEMORY_BATCH_RESIZE_EVENTS_TOTAL,
@@ -63,6 +64,7 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_postrun_phase_duration_seconds": _metrics.POSTRUN_PHASE_DURATION_SECONDS,
         "bioetl_transform_duration_seconds": _metrics.TRANSFORM_DURATION_SECONDS,
         "bioetl_control_plane_read_duration_seconds": _metrics.CONTROL_PLANE_READ_DURATION_SECONDS,
+        "bioetl_checkpoint_operator_duration_seconds": _metrics.CHECKPOINT_OPERATOR_DURATION_SECONDS,
         "bioetl_checkpoint_save_duration_seconds": _metrics.CHECKPOINT_SAVE_DURATION_SECONDS,
     },
 )

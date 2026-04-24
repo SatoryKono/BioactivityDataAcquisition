@@ -130,6 +130,7 @@ CSV_COLUMNS = (
     "normalizer",
     "normalization_summary",
     "controlled_vocabulary_source",
+    "policy_scope",
     "semantic_category",
     "include_in_content_hash",
     "set_like",
@@ -253,6 +254,62 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("uniprot", "protein", "protein_existence"): _UNIPROT_ENUM_CONFIG,
 }
 
+ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
+    ("chembl", "activity", "assay_type"): ("assay", "types"),
+    ("chembl", "activity", "data_validity_comment"): (
+        "activity",
+        "data_validity_comments",
+    ),
+    ("chembl", "activity", "standard_relation"): ("activity", "standard_relations"),
+    ("chembl", "activity", "standard_type"): ("activity", "standard_types"),
+    ("chembl", "activity", "standard_units"): ("activity", "standard_units"),
+    ("chembl", "assay", "assay_category"): ("assay", "categories"),
+    ("chembl", "assay", "assay_group"): ("assay", "assay_groups"),
+    ("chembl", "assay", "assay_test_type"): ("assay", "test_types"),
+    ("chembl", "assay", "assay_type"): ("assay", "types"),
+    ("chembl", "assay", "confidence_description"): (
+        "assay",
+        "confidence_descriptions",
+    ),
+    ("chembl", "assay", "relationship_type"): ("assay", "relationship_types"),
+    ("chembl", "assay_parameters", "standard_relation"): (
+        "activity",
+        "standard_relations",
+    ),
+    ("chembl", "assay_parameters", "standard_type"): (
+        "assay",
+        "parameter_standard_type_universe",
+    ),
+    ("chembl", "assay_parameters", "standard_units"): (
+        "activity",
+        "standard_units",
+    ),
+    ("chembl", "molecule", "molecule_type"): ("molecule", "types"),
+    ("chembl", "molecule", "ro3_pass"): ("molecule", "ro3_pass_values"),
+    ("chembl", "molecule", "structure_type"): ("molecule", "structure_types"),
+    ("chembl", "publication", "doc_type"): ("publication", "native_doc_types"),
+    ("chembl", "publication", "publication_type"): (
+        "publication",
+        "native_doc_types",
+    ),
+    ("chembl", "publication_term", "term_type"): ("publication", "native_doc_types"),
+    ("chembl", "target", "target_type"): ("target", "types"),
+    ("chembl", "target_component", "component_type"): (
+        "target",
+        "component_types",
+    ),
+}
+
+ENUM_REGISTRY_UNIONS: dict[tuple[str, tuple[str, ...]], tuple[tuple[str, ...], ...]] = {
+    (
+        _CHEMBL_ENUM_CONFIG,
+        ("assay", "parameter_standard_type_universe"),
+    ): (
+        ("activity", "standard_types"),
+        ("assay", "parameter_standard_types"),
+    ),
+}
+
 COMPOSITE_GOLD_SCHEMA_TYPE_REGISTRY: dict[str, str] = {
     "composite_activity": "unknown",
     "composite_assay": "unknown",
@@ -344,6 +401,139 @@ def _controlled_vocabulary_source(
     return ""
 
 
+@cache
+def _load_enum_registry(config_path: str) -> dict[str, object]:
+    payload = yaml.safe_load(Path(config_path).read_text(encoding="utf-8"))
+    return payload if isinstance(payload, dict) else {}
+
+
+def _registry_values(
+    *,
+    config_path: str,
+    registry_path: tuple[str, ...],
+) -> frozenset[str]:
+    union_paths = ENUM_REGISTRY_UNIONS.get((config_path, registry_path))
+    if union_paths is not None:
+        return frozenset().union(
+            *(
+                _registry_values(config_path=config_path, registry_path=union_path)
+                for union_path in union_paths
+            )
+        )
+
+    current: object = _load_enum_registry(config_path)
+    for part in registry_path:
+        if not isinstance(current, dict):
+            return frozenset()
+        current = current.get(part)
+    if not isinstance(current, list):
+        return frozenset()
+    return frozenset(str(value) for value in current)
+
+
+@cache
+def _load_entity_config(provider: str, entity: str) -> dict[str, object]:
+    path = Path("configs") / "entities" / provider / f"{entity}.yaml"
+    if not path.exists():
+        return {}
+    return _load_yaml(path)
+
+
+def _dq_allowed_values(
+    *,
+    provider: str,
+    entity: str,
+    field_name: str,
+) -> frozenset[str]:
+    dq_config = _load_dq_config(provider, entity)
+    if dq_config is None:
+        return frozenset()
+    matches = [
+        rule
+        for rule in dq_config.field_validations
+        if rule.field == field_name and rule.validation_type == "enum"
+    ]
+    if len(matches) != 1:
+        return frozenset()
+    return frozenset(str(value) for value in matches[0].allowed)
+
+
+def _filter_value_set(raw_values: object) -> frozenset[str]:
+    if raw_values is None:
+        return frozenset()
+    if isinstance(raw_values, str):
+        return frozenset(
+            value for value in (v.strip() for v in raw_values.split(",")) if value
+        )
+    if isinstance(raw_values, (list, tuple, set)):
+        return frozenset(
+            value for value in (str(v).strip() for v in raw_values) if value
+        )
+    return frozenset({str(raw_values).strip()})
+
+
+def _filter_values(
+    *,
+    provider: str,
+    entity: str,
+    field_name: str,
+) -> frozenset[str]:
+    config = _load_entity_config(provider, entity)
+    if not config:
+        return frozenset()
+    filters = config.get("filters") or {}
+    if not isinstance(filters, dict):
+        return frozenset()
+
+    values: set[str] = set()
+    extraction_params = filters.get("extraction_params") or {}
+    if isinstance(extraction_params, dict):
+        values.update(_filter_value_set(extraction_params.get(field_name)))
+        values.update(_filter_value_set(extraction_params.get(f"{field_name}__in")))
+
+    for filter_key in ("silver_filters", "gold_filters"):
+        filter_config = filters.get(filter_key) or {}
+        if not isinstance(filter_config, dict):
+            continue
+        columns = filter_config.get("columns") or {}
+        if not isinstance(columns, dict):
+            continue
+        values.update(_filter_value_set(columns.get(field_name)))
+
+    return frozenset(values)
+
+
+def _policy_scope(
+    *,
+    provider: str,
+    entity: str,
+    field_name: str,
+    controlled_vocabulary_source: str,
+) -> str:
+    registry_path = ENUM_REGISTRY_PATHS.get((provider, entity, field_name))
+    if registry_path is None or not controlled_vocabulary_source.endswith(".yaml"):
+        return "not_applicable"
+
+    registry_values = _registry_values(
+        config_path=controlled_vocabulary_source,
+        registry_path=registry_path,
+    )
+    if not registry_values:
+        return "not_applicable"
+
+    for project_values in (
+        _dq_allowed_values(provider=provider, entity=entity, field_name=field_name),
+        _filter_values(provider=provider, entity=entity, field_name=field_name),
+    ):
+        if not project_values:
+            continue
+        if project_values < registry_values:
+            return "project_subset_of_provider_universe"
+        if not project_values <= registry_values:
+            return "project_projection_of_provider_universe"
+    return "provider_full_universe"
+
+
 def _semantic_category(
     *,
     provider: str,
@@ -356,7 +546,12 @@ def _semantic_category(
         if policy_surface is not None:
             return policy_surface.category
 
-    if strictness in {"strict_enum", "strict_operator", "strict_boolean", "strict_flag"}:
+    if strictness in {
+        "strict_enum",
+        "strict_operator",
+        "strict_boolean",
+        "strict_flag",
+    }:
         return "strict_enum"
     if strictness == "strict_json":
         return "structured_json"
@@ -391,7 +586,10 @@ def _strictness(
         return "upstream_inherited"
     if normalizer_name == "normalize_profile_passthrough":
         return "technical_passthrough"
-    if field_name.endswith("_flag") or normalizer_name == "normalize_profile_binary_flag":
+    if (
+        field_name.endswith("_flag")
+        or normalizer_name == "normalize_profile_binary_flag"
+    ):
         return "strict_flag"
     category_match = _strictness_category_match(
         normalizer_name=normalizer_name,
@@ -738,6 +936,12 @@ def _entity_profile_row(
         "normalizer": normalizer_name,
         "normalization_summary": notes,
         "controlled_vocabulary_source": controlled_vocabulary_source,
+        "policy_scope": _policy_scope(
+            provider=provider,
+            entity=entity,
+            field_name=field_name,
+            controlled_vocabulary_source=controlled_vocabulary_source,
+        ),
         "semantic_category": _semantic_category(
             provider=provider,
             entity=entity,
@@ -802,6 +1006,12 @@ def _entity_fallback_row(
         "normalizer": normalizer,
         "normalization_summary": summary,
         "controlled_vocabulary_source": controlled_vocabulary_source,
+        "policy_scope": _policy_scope(
+            provider=provider,
+            entity=entity,
+            field_name=field_name,
+            controlled_vocabulary_source=controlled_vocabulary_source,
+        ),
         "semantic_category": _semantic_category(
             provider=provider,
             entity=entity,
@@ -927,6 +1137,7 @@ def _composite_row(
         "normalizer": normalizer,
         "normalization_summary": summary,
         "controlled_vocabulary_source": "",
+        "policy_scope": "not_applicable",
         "semantic_category": _semantic_category(
             provider="composite",
             entity=pipeline_name.removeprefix("composite_"),
@@ -1106,9 +1317,7 @@ def build_composite_join_key_policy_coverage_kpi() -> dict[str, object]:
     }
 
 
-def _iter_composite_sensitive_source_field_requirements() -> list[
-    tuple[str, str, str]
-]:
+def _iter_composite_sensitive_source_field_requirements() -> list[tuple[str, str, str]]:
     composite_fields = {
         row["field_name"]
         for row in _composite_field_matrix_rows()
@@ -1541,8 +1750,9 @@ def _markdown_intro_lines() -> list[str]:
         "",
         (
             "Governance columns expose controlled-vocabulary sources, content_hash "
-            "inclusion, hash ordering, semantic category, strictness, domain/Silver schema visibility, "
-            "and DQ rule visibility for each field."
+            "scope, content_hash inclusion, hash ordering, semantic category, "
+            "strictness, domain/Silver schema visibility, and DQ rule visibility "
+            "for each field."
         ),
         "",
         "## Surface Coverage Summary",

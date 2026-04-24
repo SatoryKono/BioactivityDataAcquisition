@@ -551,6 +551,52 @@ def test_profile_matrix_exposes_shared_chembl_policy_surfaces() -> None:
     )
 
 
+def test_profile_matrix_distinguishes_provider_universe_from_project_policy_scope() -> (
+    None
+):
+    """Generated semantics must separate provider universes from project subsets."""
+    assay_type_row = _matrix_row("chembl_activity", "assay_type")
+    publication_term_type_row = _matrix_row("chembl_publication_term", "term_type")
+    confidence_description_row = _matrix_row(
+        "chembl_assay",
+        "confidence_description",
+    )
+
+    assert assay_type_row["policy_scope"] == "project_subset_of_provider_universe"
+    assert (
+        publication_term_type_row["policy_scope"]
+        == "project_projection_of_provider_universe"
+    )
+    assert confidence_description_row["policy_scope"] == "provider_full_universe"
+
+
+def test_chembl_publication_identifier_sidecars_stay_aligned_with_canonical_fields() -> (
+    None
+):
+    """Duplicate publication identifier fields must normalize to one canonical value."""
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="publication",
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "publication_id": "CHEMBL123",
+            "title": "Example publication",
+            "publication_type": "PUBLICATION",
+            "doi": " https://doi.org/10.1000/XYZ ",
+            "publication_doi": "10.1000/xyz",
+            "pmid": " 00012345 ",
+            "publication_pmid": "12345",
+        }
+    )
+
+    assert normalized["doi"] == "10.1000/xyz"
+    assert normalized["publication_doi"] == "10.1000/xyz"
+    assert normalized["pmid"] == "12345"
+    assert normalized["publication_pmid"] == "12345"
+
+
 def test_chembl_activity_meta_passthrough_contract_is_aligned_across_profile_matrix_and_processor() -> (
     None
 ):

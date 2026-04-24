@@ -89,6 +89,9 @@ specific operator-facing subcommand:
   - `bioetl_postrun_phase_events_total`
   - `bioetl_postrun_phase_duration_seconds`
 - For checkpoint/resume incidents, confirm the scrape surface includes:
+  - `bioetl_checkpoint_load_events_total`
+  - `bioetl_checkpoint_operator_operations_total`
+  - `bioetl_checkpoint_operator_duration_seconds`
   - `bioetl_checkpoint_save_events_total`
   - `bioetl_checkpoint_save_duration_seconds`
 

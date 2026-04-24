@@ -326,7 +326,7 @@ For issues or questions:
 
 For more information about this plugin or the BioETL project:
 
-- **Documentation**: [BioETL Docs](../../../04-reference/index.md)
+- **Documentation**: [BioETL Docs](../../04-reference/index.md)
 - **Source Code**: [GitHub Repository](https://github.com/SatoryKono/BioactivityDataAcquisition)
 - **Issue Tracker**: [GitHub Issues](https://github.com/SatoryKono/BioactivityDataAcquisition/issues)
 

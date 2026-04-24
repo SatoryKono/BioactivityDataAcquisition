@@ -143,9 +143,12 @@ tracked_suite_inventory:
     - tests/integration/config/test_chembl_enum_parity.py
     - tests/integration/config/test_chembl_observed_value_fixtures.py
     - tests/integration/config/test_dq_config_loading.py
+    - tests/integration/infrastructure/storage/test_base_delta_writer_filesystem.py
+    - tests/integration/infrastructure/storage/test_bronze_writer_cleanup.py
     - tests/integration/infrastructure/storage/test_export_reader_version_fallback.py
     - tests/integration/infrastructure/storage/test_gold_writer_versioning.py
     - tests/integration/infrastructure/storage/test_silver_writer.py
+    - tests/integration/infrastructure/storage/test_silver_writer_filesystem.py
     - tests/integration/infrastructure/storage/test_storage_factory_audit.py
     interface_cli_surfaces:
     - tests/integration/interfaces/test_cli_checkpoint_list.py

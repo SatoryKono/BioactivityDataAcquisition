@@ -38,6 +38,7 @@ def test_normalization_plan_references_final_dq_schema_reconciliation() -> None:
 
     for matrix_column in (
         "controlled_vocabulary_source",
+        "policy_scope",
         "hash_ordering",
         "strictness",
         "schema_coverage",

@@ -184,6 +184,8 @@ Cross-links for canonical observability governance:
 | `bioetl_control_plane_ledger_appends_total`    | Counter   | `pipeline,event_type,status`             | Попытки append в run ledger                                                        |
 | `bioetl_checkpoint_compatibility_events_total` | Counter   | `pipeline,disposition`                   | Итоги resume/checkpoint compatibility policy                                       |
 | `bioetl_checkpoint_load_events_total`          | Counter   | `pipeline,status`                        | Bounded checkpoint load decisions (`loaded`, `missing`, `blocked`, `incompatible`, `observe_blocked_identity`, `observe_loaded_degraded`, `incompatible_hard_fail`, `failed`) |
+| `bioetl_checkpoint_operator_operations_total`  | Counter   | `operation,status`                       | Bounded checkpoint admin actions for `list`, `get`, and `delete` workflows        |
+| `bioetl_checkpoint_operator_duration_seconds`  | Histogram | `operation,status`                       | Latency of checkpoint admin/operator workflows                                     |
 | `bioetl_checkpoint_save_events_total`          | Counter   | `pipeline,operation,status`              | Bounded checkpoint save outcomes across ordinary and composite persistence paths    |
 | `bioetl_checkpoint_save_duration_seconds`      | Histogram | `pipeline,operation,status`              | Latency of checkpoint save attempts and failures                                   |
 | `bioetl_memory_pressure_events_total`          | Counter   | `pipeline,stage,reason,monitor_mode,status` | Adaptive-memory decisions that observed active pressure; labels stay bounded to stage, bounded monitor mode, bounded reason, and bounded decision status |

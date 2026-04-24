@@ -163,9 +163,11 @@ quarantine actions:
 
 - `bioetl_quarantine_operator_operations_total`
 - `bioetl_quarantine_operator_duration_seconds`
+- `bioetl_checkpoint_operator_operations_total`
+- `bioetl_checkpoint_operator_duration_seconds`
 
 These metrics are intended for operational diagnosis of inspect/replay/purge and
-related workflows, not for per-record drill-down.
+checkpoint list/get/delete workflows, not for per-record drill-down.
 
 ### Operator tracing
 

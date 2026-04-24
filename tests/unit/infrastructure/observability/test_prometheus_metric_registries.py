@@ -72,7 +72,7 @@ def test_metric_definition_exports_remain_stable() -> None:
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
     # This ratchet intentionally changes only when we add/remove public metrics.
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 110
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 112
 
 
 @pytest.mark.unit
@@ -109,9 +109,11 @@ def test_control_plane_and_lineage_metrics_are_registered() -> None:
     assert "bioetl_traced_runs_total" in COUNTERS
     assert "bioetl_checkpoint_compatibility_events_total" in COUNTERS
     assert "bioetl_checkpoint_load_events_total" in COUNTERS
+    assert "bioetl_checkpoint_operator_operations_total" in COUNTERS
     assert "bioetl_structural_policy_events_total" in COUNTERS
     assert "bioetl_structural_policy_shadow_comparisons_total" in COUNTERS
     assert "bioetl_control_plane_read_duration_seconds" in HISTOGRAMS
+    assert "bioetl_checkpoint_operator_duration_seconds" in HISTOGRAMS
     assert "bioetl_lineage_fragments_emitted_total" in COUNTERS
     assert "bioetl_lineage_refs_missing_total" in COUNTERS
     assert "bioetl_composite_source_selection_total" in COUNTERS
@@ -196,6 +198,7 @@ def test_control_plane_and_lineage_metrics_avoid_high_cardinality_labels() -> No
             "disposition",
         },
         "bioetl_checkpoint_load_events_total": {"pipeline", "status"},
+        "bioetl_checkpoint_operator_operations_total": {"operation", "status"},
         "bioetl_lineage_fragments_emitted_total": {"pipeline", "layer", "status"},
         "bioetl_lineage_refs_missing_total": {"pipeline", "layer", "ref_type"},
         "bioetl_composite_source_selection_total": {
@@ -213,6 +216,12 @@ def test_control_plane_and_lineage_metrics_avoid_high_cardinality_labels() -> No
             f"{metric_name} must not use forbidden high-cardinality labels: "
             f"{sorted(_FORBIDDEN_LABELS.intersection(actual_labels))}"
         )
+
+    checkpoint_operator_histogram_labels = set(
+        HISTOGRAMS["bioetl_checkpoint_operator_duration_seconds"]._labelnames
+    )
+    assert checkpoint_operator_histogram_labels == {"operation", "status"}
+    assert _FORBIDDEN_LABELS.isdisjoint(checkpoint_operator_histogram_labels)
 
 
 @pytest.mark.unit

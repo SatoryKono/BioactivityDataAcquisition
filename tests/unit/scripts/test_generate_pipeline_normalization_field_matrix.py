@@ -250,11 +250,13 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     assert assay_type["controlled_vocabulary_source"] == "configs/enums/chembl.yaml"
     assert assay_type["strictness"] == "strict_enum"
     assert assay_type["dq_coverage"] == "enum:error"
+    assert assay_type["policy_scope"] == "project_subset_of_provider_universe"
 
     standard_flag = _row(rows, "chembl_activity", "standard_flag")
     assert standard_flag["strictness"] == "strict_flag"
     assert "checks=isin" in standard_flag["schema_coverage"]
     assert standard_flag["dq_coverage"] == "range:error"
+    assert standard_flag["policy_scope"] == "not_applicable"
 
     activity_properties = _row(rows, "chembl_activity", "activity_properties")
     assert activity_properties["normalizer"] == "normalize_profile_json_string_strict"
@@ -323,6 +325,16 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     )
     assert assay_parameter_standard_type["controlled_vocabulary_source"] == (
         "configs/enums/chembl.yaml"
+    )
+    assert assay_parameter_standard_type["policy_scope"] == "provider_full_universe"
+
+    molecule_type = _row(rows, "chembl_molecule", "molecule_type")
+    assert molecule_type["policy_scope"] == "project_subset_of_provider_universe"
+
+    publication_term_type = _row(rows, "chembl_publication_term", "term_type")
+    assert (
+        publication_term_type["policy_scope"]
+        == "project_projection_of_provider_universe"
     )
 
     publication_class = _row(rows, "chembl_publication", "publication_class")
@@ -484,6 +496,7 @@ def test_render_markdown_mentions_surface_scoped_coverage_kpis() -> None:
     assert "## Semantic Invariant Summary" in markdown
     assert "Entity coverage is entity-scoped only" in markdown
     assert "controlled_vocabulary_source" in markdown
+    assert "policy_scope" in markdown
     assert "semantic_category" in markdown
     assert "schema_coverage" in markdown
     assert "dq_coverage" in markdown

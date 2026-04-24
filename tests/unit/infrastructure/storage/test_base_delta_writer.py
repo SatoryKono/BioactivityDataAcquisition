@@ -265,52 +265,6 @@ class TestBaseDeltaWriter:
         result = writer.clear()
         assert result == 0
 
-    def test_clear_specific_table(
-        self,
-        tmp_path: Path,
-        mock_logger: MagicMock,
-    ) -> None:
-        """Test clear specific table."""
-        # Create a table directory with delta log
-        table_dir = tmp_path / "test_table"
-        delta_log = table_dir / "_delta_log"
-        delta_log.mkdir(parents=True)
-        (delta_log / "00000.json").touch()
-
-        writer = BaseDeltaWriter(base_path=tmp_path, logger=mock_logger)
-
-        # Dry run should not delete
-        result = writer.clear(table_name="test_table", dry_run=True)
-        assert result == 1
-        assert table_dir.exists()
-
-        # Actual clear should delete
-        result = writer.clear(table_name="test_table", dry_run=False)
-        assert result == 1
-        assert not table_dir.exists()
-
-    def test_clear_all_tables(
-        self,
-        tmp_path: Path,
-        mock_logger: MagicMock,
-    ) -> None:
-        """Test clear all tables in base path."""
-        # Create multiple table directories with delta logs
-        for name in ["table1", "table2", "not_a_table"]:
-            table_dir = tmp_path / name
-            table_dir.mkdir()
-            if name != "not_a_table":
-                (table_dir / "_delta_log").mkdir()
-
-        writer = BaseDeltaWriter(base_path=tmp_path, logger=mock_logger)
-
-        # Should clear only directories with _delta_log
-        result = writer.clear(dry_run=False)
-        assert result == 2
-        assert not (tmp_path / "table1").exists()
-        assert not (tmp_path / "table2").exists()
-        assert (tmp_path / "not_a_table").exists()
-
     def test_clear_nonexistent_table(
         self,
         tmp_path: Path,
