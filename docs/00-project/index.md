@@ -45,6 +45,7 @@ Useful entry points for non-normative surfaces:
 
 - Repository path `docs/plans/README.md` — indexed retained planning artifacts (repo-only working surface, not published in MkDocs)
 - Repository path `docs/reports/index.md` — curated repo-only evidence and bounded internal reports
+- [File Policy](governance/03-file-policy.md) — structure hygiene, retention boundaries, and sidecar topology
 - Repository path `reports/README.md` — generated or working analysis outputs before curation
 - Repository path `docs/00-project/ai/README.md` — top-level AI docs map for agents, memory, prompts, and skills
 - Repository path `.codex/agents/ORCHESTRATION.md` — Codex source-of-truth orchestration

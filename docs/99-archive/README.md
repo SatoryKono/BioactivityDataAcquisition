@@ -41,3 +41,6 @@ current documentation.
   contracts, and architecture statements.
 - When an archive page is still linked from an active document, the link should
   explain why that historical context remains relevant.
+- `docs/99-archive/**` is a blocked cleanup zone in
+  `configs/quality/repo_structure_catalog.yaml`; archive material must not be
+  swept up by broad structure-cleanup passes.

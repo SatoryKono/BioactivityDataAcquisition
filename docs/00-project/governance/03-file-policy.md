@@ -76,6 +76,70 @@ python3 scripts/engineering/diagnostics/audit_structure.py --path .
 - generated helper exports and merged snapshots MUST NOT live under `src/`;
   they belong in `reports/` or another non-source artifact surface
 
+### 0.1. Структурный каталог и retention-sensitive зоны
+
+Machine-readable каталог для structure hygiene хранится в
+`configs/quality/repo_structure_catalog.yaml`.
+
+Он фиксирует:
+
+- допустимую D-серию `docs/D-*.md` как `repo-only sync notes` с каноническими
+  successor pages;
+- разрешённый живой состав `docs/plans/**` и правило `max_active_backlog = 1`;
+- допустимые sidecar roots под `src/`: `src/bioetl`, `src/tools`,
+  `src/memory`;
+- blocked cleanup zones, которые не должны попадать под broad cleanup.
+
+`scripts/engineering/repo/audit_root_cleanliness.py` MUST использовать этот
+каталог как источник правды для structure drift beyond root allowlist.
+
+### 0.2. Legacy flat docs (`docs/D-*.md`)
+
+- `docs/D-*.md` MUST оставаться `repo-only` и MUST NOT публиковаться в MkDocs.
+- Каждый такой файл MUST иметь явный `canonical_successor` в
+  `configs/quality/repo_structure_catalog.yaml`.
+- Новые `docs/D-*.md` MUST NOT добавляться без явного обновления каталога и
+  review structure governance.
+- D-серия не является normative surface; при конфликте приоритет всегда у
+  `docs/00-05/**`.
+
+### 0.3. Plans surface (`docs/plans/**`)
+
+- `docs/plans/**` является repo-only planning surface.
+- Только один файл MAY иметь lifecycle `active_backlog`; остальные файлы в
+  этом каталоге должны быть `supporting_context` или должны переезжать в
+  archive/report surfaces.
+- Каждый tracked plan file MUST быть зарегистрирован в
+  `configs/quality/repo_structure_catalog.yaml`.
+- Закрытые или purely historical plan artifacts SHOULD переезжать в
+  `docs/99-archive/**` или закрепляться в evidence/report surfaces, а не
+  накапливаться как competing active docs.
+
+### 0.4. Sidecar code under `src/`
+
+- `src/bioetl/` остаётся canonical runtime tree.
+- `src/tools/` разрешён как approved sidecar tooling surface для project
+  utilities, которые могут импортировать `bioetl`, но не являются primary
+  contributor entrypoint.
+- `src/memory/` разрешён как approved sidecar memory subsystem с собственной
+  policy/schema/tooling поверхностью.
+- Новые top-level пакеты под `src/` вне этих трёх roots MUST FAIL structure
+  governance until they are explicitly ratified.
+
+### 0.5. Retention boundary
+
+Следующие зоны являются blocked cleanup zones и MUST NOT рассматриваться как
+обычный structural мусор:
+
+- `docs/99-archive/**` — traceability/history archive
+- `tests/fixtures/**`, `tests/fixtures/vcr/**` — reproducibility fixtures
+- `docs/reports/**` — curated repo-only reports
+- `reports/**` — generated/working outputs с отдельной cleanup policy
+- `data/**` — runtime/control-plane/data retention surface
+
+Для этих зон допустим только bounded cleanup по специализированным процедурам.
+Blanket cleanup команды и broad deletion waves для них запрещены.
+
 ----------------------------------------------------------------------
 
 ## 1. Структура Конфигураций Pipeline

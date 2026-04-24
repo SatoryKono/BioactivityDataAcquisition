@@ -123,29 +123,53 @@ def collect_explicit_group_columns(
 
     available_list = list(available)
     col_order = {col: i for i, col in enumerate(available_list)}
+    field_to_cols = _index_columns_by_field(
+        available_list=available_list,
+        extract_field_fn=extract_field_fn,
+    )
 
+    for field_name in group.fields:
+        field_matches = _collect_alias_matches(
+            field_to_cols=field_to_cols,
+            aliases=resolve_aliases_fn(field_name),
+            used=used,
+        )
+        field_matches.sort(key=lambda c: col_order[c])
+        ordered.extend(sort_fn(field_matches, group.provider_order))
+
+    return ordered, used
+
+
+def _index_columns_by_field(
+    *,
+    available_list: list[str],
+    extract_field_fn: Callable[[str], str],
+) -> dict[str, list[str]]:
+    """Index available columns by extracted field name and exact fallback."""
     field_to_cols: dict[str, list[str]] = {}
     for col in available_list:
         extracted = extract_field_fn(col)
         field_to_cols.setdefault(extracted, []).append(col)
         if extracted != col:
             field_to_cols.setdefault(col, []).append(col)
+    return field_to_cols
 
-    for field_name in group.fields:
-        field_matches: list[str] = []
-        aliases = resolve_aliases_fn(field_name)
 
-        for alias in aliases:
-            if alias in field_to_cols:
-                for col in field_to_cols[alias]:
-                    if col not in used:
-                        field_matches.append(col)
-                        used.add(col)
-
-        field_matches.sort(key=lambda c: col_order[c])
-        ordered.extend(sort_fn(field_matches, group.provider_order))
-
-    return ordered, used
+def _collect_alias_matches(
+    *,
+    field_to_cols: dict[str, list[str]],
+    aliases: set[str],
+    used: set[str],
+) -> list[str]:
+    """Collect unused columns matching any alias in declared field order."""
+    matches: list[str] = []
+    for alias in aliases:
+        for col in field_to_cols.get(alias, []):
+            if col in used:
+                continue
+            matches.append(col)
+            used.add(col)
+    return matches
 
 
 class _ColumnPriorityOrderingAdapter:

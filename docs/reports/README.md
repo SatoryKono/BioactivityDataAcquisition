@@ -29,3 +29,7 @@ Difference from top-level [`reports/`](../../reports/README.md):
   automatically become part of the retained documentation surface.
 
 Use reports for situational evidence, decisions, and curated internal analysis.
+
+`docs/reports/**` is a blocked cleanup zone in
+`configs/quality/repo_structure_catalog.yaml`. Cleanup here must stay bounded
+and curated; do not treat this directory as disposable generated output.
