@@ -729,6 +729,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded MistrallVibe setup helper while environment bootstrap still depends on helper scripts; fold into the canonical setup path when the surface is simplified."
     },
+    "src/tools/neo4j_audit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded Neo4j audit connection helper while deployment and audit runbooks still import src/tools/neo4j_audit.py directly; migrate to a canonical scripts/ops or package facade when that audit workflow is consolidated."
+    },
     "src/tools/scripts/check_application_deps.py": {
       "owner": "@bioetl-architecture",
       "decision": "compatibility_wrapper",
