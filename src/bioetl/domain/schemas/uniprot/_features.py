@@ -16,6 +16,7 @@ __all__ = [
     "UniprotFeatureSchema",
 ]
 
+
 class UniprotFeatureSchema(pa.DataFrameModel):  # Pandera typing limitation
     """Sequence features, keywords, PTMs, isoforms and counts."""
 

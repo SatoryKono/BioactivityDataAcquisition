@@ -13,6 +13,7 @@ __all__ = [
     "PubchemStereoSchema",
 ]
 
+
 class PubchemStereoSchema(pa.DataFrameModel):  # Pandera typing limitation
     """Stereochemistry and isotopic/covalent unit count fields."""
 

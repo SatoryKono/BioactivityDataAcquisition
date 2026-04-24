@@ -13,6 +13,7 @@ __all__ = [
     "PubchemPhysChemSchema",
 ]
 
+
 class PubchemPhysChemSchema(pa.DataFrameModel):  # Pandera typing limitation
     """Physicochemical descriptors and atom/bond count fields."""
 

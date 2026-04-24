@@ -15,6 +15,7 @@ __all__ = [
     "PubchemIdentitySchema",
 ]
 
+
 class PubchemIdentitySchema(ETLRecordSchema):
     """Primary key and core structure identifier fields for PubChem compounds."""
 

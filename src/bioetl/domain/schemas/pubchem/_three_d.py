@@ -12,6 +12,7 @@ __all__ = [
     "PubchemThreeDSchema",
 ]
 
+
 class PubchemThreeDSchema(pa.DataFrameModel):  # Pandera typing limitation
     """3D structural and pharmacophore descriptor fields."""
 
