@@ -42,7 +42,7 @@ Verify the active rollout semantics:
 - `run_ledger_enabled`
 - `required_persistence_profile` with allowed values
   `degraded_observable | replay_ready | forensic_grade`
-- `checkpoint_compatibility_policy` with allowed values `observe | soft_fail | hard_fail`
+- `checkpoint_compatibility_policy` with allowed values `observe | soft_fail | hard_fail | legacy_observe`
 
 Fast source-of-truth checks:
 
@@ -71,6 +71,44 @@ Interpretation:
 - if the current run is `exact_replay=true`, runtime coerces checkpoint
   compatibility handling to `hard_fail`; exact replay is not allowed to
   continue after any compatibility mismatch.
+
+### Legacy Observe Mode
+
+**When to Use:**
+- Mixed-version clusters during version upgrade
+- Temporary backward compatibility with v1.x checkpoint formats
+- Migration periods only
+
+**Configuration:**
+```bash
+# Enable legacy mode in configuration
+bioetl run --pipeline chembl_activity --checkpoint-compatibility legacy_observe
+
+# Or set in YAML config
+runtime:
+  checkpoint_compatibility:
+    migration_mode: legacy_observe
+```
+
+**Troubleshooting:**
+
+**Symptoms:**
+- Checkpoint validation warnings during migration
+- "legacy_observe" mode activated in logs
+- Mixed-version cluster operations
+
+**Resolution:**
+1. Verify all nodes running compatible versions
+2. Check `checkpoint_compatibility_policy` setting
+3. Monitor validation warnings in logs
+4. Plan full migration to remove legacy mode dependency
+
+**Migration Procedure:**
+1. **Prepare**: Set `legacy_observe` in configuration
+2. **Upgrade**: Roll out new version nodes incrementally
+3. **Validate**: Monitor validation warnings
+4. **Remove**: Switch to standard modes after full upgrade
+5. **Cleanup**: Remove legacy mode from configurations
 
 ### 2. Resolve one run
 

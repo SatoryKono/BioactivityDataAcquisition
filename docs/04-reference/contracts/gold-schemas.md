@@ -72,6 +72,31 @@ Gold-слой содержит **бизнес-готовые данные** с:
 - Gold sidecars сохраняют `dq_report_path` и schema metadata (`contract_path`, `version`, `validation`);
 - единый contract-driven DQ provenance c глобальными `contract_version` и `rule_id` для всех DQ artefacts пока не является завершённым runtime contract и не должен предполагаться downstream tooling.
 
+### Snapshot governance
+
+Published JSON contracts в `docs/04-reference/contracts/gold/*.json` остаются
+review/export surface, но canonical test baselines для drift detection теперь
+живут отдельно:
+
+- full Gold schema snapshot registry:
+  `tests/fixtures/golden/gold/schema_registry.v1.json`
+- helper/update surface:
+  `tests/contract/_gold_schema_snapshot_registry.py`
+- contract drift suite:
+  `tests/contract/test_gold_schema_snapshot_registry.py`
+- bounded DQ-sensitive output bundles:
+  `tests/fixtures/golden/gold/*_dq_bundle_v1.json`
+
+Update path для intentional Gold schema change:
+
+```bash
+UPDATE_SNAPSHOTS=1 pytest tests/contract/test_gold_schema_snapshot_registry.py
+```
+
+Bounded DQ golden bundles обновляются вместе с изменением output contract и
+должны оставаться перечисленными в
+`configs/quality/test_matrix.yaml -> fixture_governance.gold_snapshot_registry`.
+
 ______________________________________________________________________
 
 ## Архитектура Gold-слоя

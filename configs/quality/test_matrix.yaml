@@ -530,6 +530,19 @@ fixture_governance:
           - uniprotkb_search_endpoint
           - specific_protein_lookup
           - taxonomy_endpoint
+  gold_snapshot_registry:
+    scope: bounded_contract_and_dq_sensitive_gold_baseline
+    documentation: docs/04-reference/contracts/gold-schemas.md
+    registry_path: tests/fixtures/golden/gold/schema_registry.v1.json
+    helper_module: tests/contract/_gold_schema_snapshot_registry.py
+    registry_test_module: tests/contract/test_gold_schema_snapshot_registry.py
+    dq_snapshot_test_module: tests/contract/test_gold_dq_golden_snapshots.py
+    update_env_var: UPDATE_SNAPSHOTS
+    tracked_snapshot_paths:
+      - tests/fixtures/golden/gold/chembl_activity_dq_bundle_v1.json
+      - tests/fixtures/golden/gold/composite_molecule_dq_bundle_v1.json
+      - tests/fixtures/golden/gold/composite_publication_dq_bundle_v1.json
+      - tests/fixtures/golden/gold/pubmed_publication_dq_bundle_v1.json
 
 contract_testing:
   workflow_present: true

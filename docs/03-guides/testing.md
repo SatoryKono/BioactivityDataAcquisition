@@ -127,6 +127,12 @@ Supported policy slice for issue `#2598`:
   - `tests/contract/test_semanticscholar_contract.py` содержит promotion-grade путь;
   - `tests/contract/test_semanticscholar_contract_pilot.py` содержит richer pilot-soak проверки и требует `BIOETL_PILOT_SOAK_TESTS=true` или `--pilot-soak`
 - текущие silver schema snapshots уже живут в `tests/contract/silver_schemas/snapshots/`; внешний provider-facing registry `tests/fixtures/contracts/{provider}/v{version}.json` тоже уже активирован как bounded live-provider baseline для `chembl`, `pubchem`, `uniprot`, `pubmed`, `crossref`, `openalex`, `semanticscholar` и не заменяет schema snapshots
+- Gold contract governance теперь тоже имеет явный machine-readable baseline:
+  `tests/fixtures/golden/gold/schema_registry.v1.json` хранит canonical Gold
+  schema snapshot registry, а bounded DQ-sensitive output bundles живут в
+  `tests/fixtures/golden/gold/*_dq_bundle_v1.json`; drift/update path идёт через
+  `tests/contract/test_gold_schema_snapshot_registry.py` и
+  `UPDATE_SNAPSHOTS=1`
 - canonical VCR placement уже enforced в CI: кассеты вне `tests/fixtures/vcr/{provider}/` блокируются
 - extensionless VCR files пока допустимы только через `.github/vcr-noext-allowlist.txt`; новые такие файлы добавлять нельзя
 
