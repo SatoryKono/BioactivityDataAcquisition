@@ -227,8 +227,9 @@ class WorkflowConfig:
     @property
     def topological_step_ids(self) -> tuple[str, ...]:
         """Return workflow step IDs in dependency order."""
-        return topologically_sorted_step_ids(
-            cast("Sequence[_WorkflowStepLike]", self.steps)
+        return cast(
+            tuple[str, ...],
+            topologically_sorted_step_ids(cast("Sequence[_WorkflowStepLike]", self.steps)),
         )
 
     def get_step(self, step_id: str) -> WorkflowStep | None:
