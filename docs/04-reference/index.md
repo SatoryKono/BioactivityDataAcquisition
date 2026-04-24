@@ -29,6 +29,7 @@ design rationale and layer structure.
 | Pipelines | Pipeline-specific published specs and historical pipeline artifacts | [pipelines/README.md](pipelines/README.md) |
 | API | Generated or curated package/module API reference | [api/index.md](api/index.md) |
 | Templates | Reusable templates for ADRs, contracts, specs, and runbooks | [templates/index.md](templates/index.md) |
+| Internal/Extended | Internal implementation details and extended surfaces | [internalextended/index.md](internalextended/index.md) |
 
 ## Current High-Signal References
 

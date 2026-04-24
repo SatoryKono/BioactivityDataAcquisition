@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -18,6 +18,7 @@ from bioetl.composition.services.versioning import (
     get_git_commit,
     get_pipeline_version,
 )
+from bioetl.domain.context import current_utc_time
 from bioetl.domain.value_objects.run_context import RunContext, RunContextCreateInput
 
 if TYPE_CHECKING:
@@ -104,6 +105,7 @@ class RunContextFactory:
     transform_steps_getter: Callable[[PipelineYamlConfig], tuple[str, ...]] = (
         _get_transform_steps
     )
+    started_at_factory: Callable[[], datetime] = current_utc_time
     contract_identity_resolver: Callable[
         [str, str], tuple[str, str | None, str | None, str | None, str | None]
     ] = _resolve_contract_identity_snapshot
@@ -141,7 +143,7 @@ class RunContextFactory:
             RunContextCreateInput(
                 run_id=run_id,
                 run_type=runtime.run_type,
-                started_at=datetime.now(UTC),
+                started_at=self.started_at_factory(),
                 provider=self.provider,
                 entity=entity,
                 transform_version=self.transform_version_getter(yaml_config),

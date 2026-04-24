@@ -11,10 +11,11 @@ Reviewers:
 
 ______________________________________________________________________
 
-# semanticscholar_publication
+# semanticscholar_publication (Historical)
 
-> **Status**: Historical legacy guide. This page is retained only as a
-> compatibility stub to avoid publishing stale contract details.
+> **Status**: This is a historical document. The current active specification is available at [semanticscholar_publication pipeline](../../04-reference/pipelines/semanticscholar/publication.md).
+
+> **Redirect Notice**: This page has been moved to the archive section. For current information, please refer to the active pipeline documentation.
 
 ## Current Canonical Sources
 

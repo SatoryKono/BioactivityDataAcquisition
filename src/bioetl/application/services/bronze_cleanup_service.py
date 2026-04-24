@@ -13,11 +13,13 @@ __all__ = ["BronzeCleanupResult", "BronzeCleanupService"]
 
 
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
+from bioetl.domain.context import current_utc_time
+
 if TYPE_CHECKING:
-    from bioetl.domain.ports import BronzeStoragePort, LoggerPort
+    from bioetl.domain.ports import BronzeStoragePort, ClockPort, LoggerPort
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,6 +66,7 @@ class BronzeCleanupService:
 
     storage: BronzeStoragePort
     logger: LoggerPort
+    clock: ClockPort | None = None
 
     async def cleanup(
         self,
@@ -82,7 +85,8 @@ class BronzeCleanupService:
         Returns:
             BronzeCleanupResult with cleanup statistics.
         """
-        cutoff_date = datetime.now(UTC) - timedelta(days=retention_days)
+        now = self.clock.now() if self.clock is not None else current_utc_time()
+        cutoff_date = now - timedelta(days=retention_days)
 
         self.logger.info(
             "Starting Bronze cleanup",

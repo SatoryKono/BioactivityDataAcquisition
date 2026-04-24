@@ -216,13 +216,14 @@ def _build_source_class_provenance() -> tuple[SourceClassProvenance, ...]:
         ),
         SourceClassProvenance(
             source_class="env_override",
-            provenance_status="unsupported",
+            provenance_status="identity_anchored",
             artifact_surface="semantic_artifact.runtime_overrides.env_overrides",
+            anchor_field="override_hash",
             notes=(
-                "Ambient process environment is not currently resolved into "
-                "explicit env-overrides for semantic identity; empty "
-                "env_overrides payloads must not be interpreted as complete "
-                "environment provenance."
+                "Explicit allowlisted environment overrides are materialized "
+                "into env_overrides and collapsed into the runtime override "
+                "hash; empty env_overrides payloads must not be interpreted "
+                "as complete ambient environment provenance."
             ),
         ),
         SourceClassProvenance(

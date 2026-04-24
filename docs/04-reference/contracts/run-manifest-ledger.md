@@ -139,13 +139,18 @@ Current rollout semantics:
 1. `run_manifest_enabled=false` disables both manifest creation and ledger attachment for new runs because runtime assembly coerces the effective flag set to `(False, False)`.
 1. `run_manifest_enabled=true`, `run_ledger_enabled=false` keeps manifest creation but suppresses ledger writes.
 1. `run_ledger_enabled=true` is only valid when `run_manifest_enabled=true`.
-1. `required_persistence_profile=replay_ready` requires `run_manifest_enabled=true`.
-1. `required_persistence_profile=forensic_grade` requires both `run_manifest_enabled=true` and `run_ledger_enabled=true`.
+1. `required_persistence_profile=replay_ready` requires
+   `run_manifest_enabled=true` and an execution context inside the published
+   strict exact-replay support boundary.
+1. `required_persistence_profile=forensic_grade` requires both
+   `run_manifest_enabled=true` and `run_ledger_enabled=true`, plus replay-ready
+   and lineage-closure surfaces inside the same published support boundary.
 1. `checkpoint_compatibility_policy` governs resume disposition on checkpoint incompatibility:
    `observe` remains a degraded operator mode for non-identity signals, but canonical
    execution-identity mismatches still block resume; `soft_fail` blocks resume;
-   `hard_fail` raises an error; `legacy_observe` enables backward compatibility
-   for v1.x checkpoint formats during migration periods.
+   `hard_fail` raises an error; `legacy_observe` remains a legacy degraded mode
+   for v1.x-era migration periods but does not permit resume when identity
+   continuity is unproven.
 1. `exact_replay=true` is stricter than the requested compatibility policy:
    runtime coerces checkpoint compatibility handling to `hard_fail` so an
    exact replay attempt cannot continue after any compatibility mismatch.
@@ -168,20 +173,24 @@ CheckpointCompatibilityPolicy = Literal[
 
 | Policy | Behavior | Use Case | Default |
 |--------|----------|----------|---------|
-| `observe` | Validate but proceed | Non-critical validation | ✅ Non-critical |
-| `soft_fail` | Log error but continue | Recovery scenarios | ❌ Manual |
-| `hard_fail` | Halt pipeline | Critical integrity | ✅ Critical |
-| `legacy_observe` | v1.x backward compatibility | Migration periods | ❌ Manual |
+| `observe` | Resume only after non-identity compatibility warnings; canonical execution-identity mismatch still blocks resume | Operator-aware degraded mode outside strict replay | ❌ Manual |
+| `soft_fail` | Block resume on incompatibility without aborting the whole process | Default fail-closed resume behavior | ✅ Default |
+| `hard_fail` | Halt pipeline by raising on incompatibility | Critical integrity and exact replay | ✅ Exact replay |
+| `legacy_observe` | Legacy degraded mode for migration periods; may tolerate non-identity degradation but still blocks when identity continuity is unproven | Temporary migration periods only | ❌ Manual |
 
 ### Decision Flow
 
 ```mermaid
 graph TD
     A[Checkpoint Mismatch Detected] --> B{Compatibility Policy}
-    B -->|observe| C[Log Warning\nContinue Execution]
-    B -->|soft_fail| D[Log Error\nContinue Execution]
-    B -->|hard_fail| E[Halt Pipeline\nRaise Error]
-    B -->|legacy_observe| F[Legacy Validation\nContinue Execution]
+    B -->|observe| C{Canonical execution identity mismatched?}
+    C -->|yes| D[Block Resume]
+    C -->|no| E[Log Warning\nResume Only After Non-identity Degradation]
+    B -->|soft_fail| D
+    B -->|hard_fail| H[Halt Pipeline\nRaise Error]
+    B -->|legacy_observe| F{Identity continuity proven?}
+    F -->|no| D
+    F -->|yes| G[Legacy Validation\nResume Only For Non-identity Degradation]
 ```
 
 ### Configuration
@@ -203,9 +212,10 @@ runtime:
 - Graceful degradation is acceptable
 
 **Use `soft_fail` when:**
-- Recovery scenarios with logging
-- Temporary workaround periods
-- Operator-aware degradation
+- Default operator-facing fail-closed resume behavior
+- Recovery scenarios where incompatibility should block resume without aborting
+  the whole process
+- Strict persistence profiles below `exact_replay` minimum coercion
 
 **Use `hard_fail` when:**
 - Critical integrity requirements
@@ -213,9 +223,10 @@ runtime:
 - Exact replay requirements
 
 **Use `legacy_observe` when:**
-- Mixed-version clusters during upgrade
-- v1.x checkpoint format compatibility
-- Temporary migration periods only
+- A temporary migration window still needs legacy checkpoint compatibility
+  diagnostics
+- Mixed-version or mixed-format recovery is being retired in a controlled way
+- You still want identity-continuity failures to block resume
 
 ### Migration Procedure
 

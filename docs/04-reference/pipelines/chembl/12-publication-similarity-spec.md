@@ -10,6 +10,8 @@ Last verified: '2026-04-23'
 
 # ChEMBL Publication Similarity Pipeline Specification
 
+> **Notice**: This document contains historical references. For the most current information, always refer to the active entity configuration at `configs/entities/chembl/publication_similarity.yaml` and the [ChEMBL provider reference](../../providers/chembl/publication-similarity.md).
+
 This document describes the current active ChEMBL Publication Similarity pipeline specification.
 
 Canonical sources:

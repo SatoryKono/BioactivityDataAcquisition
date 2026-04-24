@@ -24,6 +24,12 @@ else:
 
 ensure_repo_imports(include_src=True)
 
+from bioetl.composition.bootstrap.runtime.normalization_policy_init import (
+    initialize_chembl_policy_registry as initialize_bootstrap_chembl_policy_registry,
+)
+
+initialize_bootstrap_chembl_policy_registry(Path("configs"))
+
 from bioetl.application.composite.checkpoint import (
     create_expected_checkpoint_context,
     merge_expected_anchors,

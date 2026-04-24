@@ -61,6 +61,15 @@ class FileRunManifestStore(RunManifestPort):
         try:
             self.base_path.mkdir(parents=True, exist_ok=True)
             run_index_dir.mkdir(parents=True, exist_ok=True)
+            existing_manifest_id = self._load_manifest_id_for_run_id(manifest.run_id)
+            if (
+                existing_manifest_id is not None
+                and existing_manifest_id != manifest.manifest_id
+            ):
+                raise ValueError(
+                    "run_id is already mapped to a different manifest_id: "
+                    f"{existing_manifest_id}"
+                )
             atomic_write_text(
                 manifest_path,
                 json.dumps(manifest.to_dict(), indent=2, sort_keys=True),

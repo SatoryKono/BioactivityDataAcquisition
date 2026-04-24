@@ -31,6 +31,7 @@ current documentation.
 - [Root Status Artifacts](root-status-artifacts/README.md) — historical root
   completion notes, sync summaries, and one-off setup/recovery artifacts moved
   out of the repository root.
+- [Pipeline Specifications](pipelines/) — historical pipeline specifications and legacy contract details.
 
 ## Usage Rules
 

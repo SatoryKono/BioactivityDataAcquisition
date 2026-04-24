@@ -133,6 +133,8 @@ ______________________________________________________________________
 | `dataset`                    | `DATASET`     |
 | `other`                      | `OTHER`       |
 
+> **Note**: Internal type mapping is part of [Internal/Extended Material](#internalextended-material)
+
 ### Entity ID
 
 ```python

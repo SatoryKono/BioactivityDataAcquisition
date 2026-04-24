@@ -83,6 +83,8 @@ Representative fields:
 - `target_pref_name`
 - `assay_type`
 
+> **Notice**: This document contains historical references. For the most current information, always refer to the active entity configuration at `configs/entities/chembl/activity.yaml` and the [ChEMBL provider reference](../../providers/chembl/activity.md).
+
 The canonical naming policy is `snake_case`. Legacy hyphenated field names are
 historical only and should not be used in new configs or examples.
 

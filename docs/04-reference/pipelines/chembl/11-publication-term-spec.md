@@ -13,6 +13,8 @@ ______________________________________________________________________
 
 # ChEMBL Publication Term Pipeline Specification
 
+> **Notice**: This document contains historical references. For the most current information, always refer to the active entity configuration at `configs/entities/chembl/publication_term.yaml` and the [ChEMBL provider reference](../../providers/chembl/publication-term.md).
+
 This document describes the current active ChEMBL Publication Term pipeline specification.
 
 Canonical sources:

@@ -19,6 +19,7 @@ from bioetl.domain.control_plane import (
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.types.dq_contracts import DQDisposition
+from tests.helpers.clock import FixedClock
 
 TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-run-ledger-service-"))
 SILVER_ARTIFACT_PATH = str(TEST_ROOT / "output" / "silver" / "chembl" / "activity")
@@ -89,11 +90,13 @@ def _make_manifest(
 def test_record_manifest_created_appends_first_control_plane_event() -> None:
     run_id = RunID(uuid4())
     store = _InMemoryRunLedgerStore()
+    occurred_at = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
     service = RunLedgerService(
         ledger_port=store,
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-1",
+        _occurred_at_factory=FixedClock(occurred_at).now,
     )
 
     entry = service.record_manifest_created(_make_manifest(run_id))
@@ -102,6 +105,7 @@ def test_record_manifest_created_appends_first_control_plane_event() -> None:
     assert entry.event_type == "manifest_created"
     assert entry.event_family == "diagnostic"
     assert entry.status == "created"
+    assert entry.occurred_at == occurred_at
     assert entry.details == {
         "execution_fingerprint": "fingerprint-1",
         "pipeline_name": "chembl_activity",
@@ -117,7 +121,6 @@ def test_record_manifest_created_appends_first_control_plane_event() -> None:
             "provider": "chembl",
             "entity": "activity",
             "run_type": "incremental",
-            "effective_config_hash": "deadbeef",
             "status": "created",
         },
     }

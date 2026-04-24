@@ -8,6 +8,7 @@ from uuid import uuid4
 
 import pytest
 
+import bioetl.infrastructure.control_plane.file_lineage_store as lineage_store_module
 from bioetl.domain.lineage import (
     DatasetRef,
     LineageEdge,
@@ -194,3 +195,93 @@ def test_file_store_preserves_occurrence_specific_history_for_semantically_equiv
         match="Semantic lineage fragment id resolves to multiple stored occurrence records",
     ):
         store.get("silver:fragment-semantic")
+
+
+def test_file_store_rolls_back_fragment_and_indexes_when_index_append_fails(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = FileLineageStore(base_path=tmp_path / "lineage")
+    run_id = RunID(uuid4())
+    run_node = LineageNodeRef(
+        node_type=LineageNodeType.RUN,
+        node_id=f"run:{run_id}",
+        label="chembl_activity",
+    )
+    dataset_node = DatasetRef(
+        layer="silver",
+        logical_name="chembl.activity",
+        version=14,
+        provider="chembl",
+        entity="activity",
+        path="data/output/silver/chembl/activity",
+        manifest_id="manifest-rollback",
+        run_id=str(run_id),
+    ).to_node_ref()
+    fragment = LineageGraphFragment(
+        fragment_id="silver:fragment-rollback",
+        nodes=(run_node, dataset_node),
+        edges=(
+            LineageEdge(
+                edge_type=LineageEdgeType.PRODUCED_BY,
+                source=dataset_node,
+                target=run_node,
+                run_id=str(run_id),
+                manifest_id="manifest-rollback",
+                created_at=datetime.now(UTC),
+            ),
+        ),
+        run_id=str(run_id),
+        manifest_id="manifest-rollback",
+        created_at=datetime.now(UTC),
+    )
+    original_append = lineage_store_module._append_jsonl_payload
+    call_count = {"value": 0}
+
+    def _fail_on_second_append(path, payload) -> int:
+        call_count["value"] += 1
+        if call_count["value"] == 2:
+            raise OSError("simulated lineage index append failure")
+        return original_append(path, payload)
+
+    monkeypatch.setattr(
+        lineage_store_module,
+        "_append_jsonl_payload",
+        _fail_on_second_append,
+    )
+
+    with pytest.raises(OSError, match="simulated lineage index append failure"):
+        store.save(fragment)
+
+    stored_fragment_id = lineage_store_module._build_stored_fragment_id(fragment)
+    fragment_path = store.base_path / "fragments" / (
+        f"{lineage_store_module._stable_key_filename(stored_fragment_id)}.json"
+    )
+    assert not fragment_path.exists()
+    assert store.list_by_run_id(run_id) == []
+    assert store.list_by_manifest_id("manifest-rollback") == []
+    assert store.list_by_node_id(dataset_node.node_id) == []
+
+
+def test_file_store_get_fails_closed_on_truncated_semantic_index_tail(tmp_path) -> None:
+    store = FileLineageStore(base_path=tmp_path / "lineage")
+    semantic_index = store._semantic_fragment_index_path("silver:fragment-broken")
+    semantic_index.parent.mkdir(parents=True, exist_ok=True)
+    semantic_index.write_text('{"key":"broken"', encoding="utf-8")
+
+    with pytest.raises(ValueError, match="truncated tail line"):
+        store.get("silver:fragment-broken")
+
+
+def test_file_store_fails_closed_on_truncated_index_tail(tmp_path) -> None:
+    store = FileLineageStore(base_path=tmp_path / "lineage")
+    run_id = RunID(uuid4())
+    index_path = store._run_index_path(str(run_id))
+    index_path.parent.mkdir(parents=True, exist_ok=True)
+    index_path.write_text(
+        '{"fragment_id":"fragment-1","key":"%s"}' % run_id,
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="truncated tail line"):
+        store.list_by_run_id(run_id)

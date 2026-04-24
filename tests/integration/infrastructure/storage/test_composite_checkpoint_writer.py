@@ -1,4 +1,4 @@
-"""Unit tests for FileCompositeCheckpointWriter."""
+"""Integration tests for FileCompositeCheckpointWriter."""
 
 from __future__ import annotations
 
@@ -9,6 +9,8 @@ import pytest
 from bioetl.infrastructure.storage.support.checkpoint_writer import (
     FileCompositeCheckpointWriter,
 )
+
+pytestmark = pytest.mark.integration
 
 
 def test_write_atomic_persists_content(tmp_path: Path) -> None:
@@ -30,6 +32,7 @@ def test_write_atomic_cleans_temp_and_propagates_keyboard_interrupt(
     path_cls = type(tmp_path)
 
     def _raise_keyboard_interrupt(self: Path, target: Path) -> Path:
+        del self, target
         raise KeyboardInterrupt()
 
     monkeypatch.setattr(path_cls, "replace", _raise_keyboard_interrupt)
