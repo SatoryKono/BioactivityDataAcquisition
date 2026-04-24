@@ -13,6 +13,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 cd "$REPO_ROOT"
 
 RUNNER="$SCRIPT_DIR/run_pytest.sh"
+INVENTORY_PATH="$REPO_ROOT/configs/quality/pytest_shards.yaml"
 DEFAULT_WORKERS_PER_SHARD=2
 DEFAULT_DIST_MODE="loadfile"
 DEFAULT_COVERAGE_DIR="$REPO_ROOT/.coverage-sharded"
@@ -39,93 +40,12 @@ STRICT_DOCS_PREFLIGHT="${BIOETL_PREFLIGHT_STRICT_DOCS:-0}"
 SELECTED_WAVE=""
 SELECTED_SHARDS=()
 EXTRA_PYTEST_ARGS=()
-PATH_TESTS_ARCHITECTURE="tests/architecture"
-SHARD_S1_DOMAIN_CORE="S1-domain-core"
-SHARD_S1_DOMAIN_SERVICES="S1-domain-services"
-SHARD_S2_COMP_IFACE="S2-comp-iface"
-SHARD_S4_APP_SERVICES="S4-app-services"
-SHARD_S7_ARCH_A="S7-crosscutting-architecture-a"
-SHARD_S7_ARCH_B="S7-crosscutting-architecture-b"
-SHARD_S7_ARCH_C="S7-crosscutting-architecture-c"
-SHARD_S7_ARCH_D="S7-crosscutting-architecture-d"
-SHARD_S7_GUARDRAILS="S7-crosscutting-architecture-guardrails"
-SHARD_S8_GOVERNANCE="S8-crosscutting-governance"
-SHARD_S9_FAILURES="S9-failures"
-
-SHARD_ORDER=(
-    "$SHARD_S1_DOMAIN_CORE"
-    "$SHARD_S1_DOMAIN_SERVICES"
-    "$SHARD_S2_COMP_IFACE"
-    "$SHARD_S7_ARCH_A"
-    "S3-app-foundation"
-    "$SHARD_S4_APP_SERVICES"
-    "$SHARD_S7_ARCH_B"
-    "S5-infra-adapters"
-    "S6-crosscutting-unit"
-    "$SHARD_S7_ARCH_C"
-    "$SHARD_S7_GUARDRAILS"
-    "$SHARD_S8_GOVERNANCE"
-    "$SHARD_S7_ARCH_D"
-    "$SHARD_S9_FAILURES"
-)
-
-declare -A SHARD_WAVE=(
-    ["$SHARD_S1_DOMAIN_CORE"]="1"
-    ["$SHARD_S1_DOMAIN_SERVICES"]="1"
-    ["$SHARD_S2_COMP_IFACE"]="1"
-    ["$SHARD_S7_ARCH_A"]="1"
-    ["S3-app-foundation"]="2"
-    ["$SHARD_S4_APP_SERVICES"]="2"
-    ["$SHARD_S7_ARCH_B"]="2"
-    ["S5-infra-adapters"]="3"
-    ["S6-crosscutting-unit"]="3"
-    ["$SHARD_S7_ARCH_C"]="3"
-    ["$SHARD_S7_GUARDRAILS"]="2"
-    ["$SHARD_S8_GOVERNANCE"]="3"
-    ["$SHARD_S7_ARCH_D"]="4"
-    ["$SHARD_S9_FAILURES"]="4"
-)
-
-declare -A SHARD_PATHS=(
-    ["S1-domain-core"]="tests/unit/domain/value_objects tests/unit/domain/schemas tests/unit/domain/entities tests/unit/domain/composite tests/unit/domain/filtering tests/unit/domain/types tests/unit/domain/ports tests/unit/domain/aggregates tests/unit/domain/validation tests/unit/domain/mapping tests/unit/domain/models tests/unit/domain/exceptions tests/unit/domain/transformations tests/unit/domain/lineage tests/unit/domain/hash_policy"
-    ["S1-domain-services"]="tests/unit/domain/services tests/unit/domain/control_plane tests/unit/domain/config tests/unit/domain/configs tests/unit/domain/registry tests/unit/domain/test_*.py"
-    ["$SHARD_S2_COMP_IFACE"]="tests/unit/composition tests/unit/interfaces"
-    ["S3-app-foundation"]="tests/unit/application/composite tests/unit/application/core"
-    ["$SHARD_S4_APP_SERVICES"]="tests/unit/application/services tests/unit/application/pipelines"
-    ["S5-infra-adapters"]="tests/unit/infrastructure/adapters tests/unit/infrastructure/storage tests/integration/adapters tests/integration/interfaces"
-    ["S6-crosscutting-unit"]="tests/unit/infrastructure/config tests/unit/infrastructure/quality tests/unit/infrastructure/observability tests/unit/infrastructure/schemas"
-    ["$SHARD_S7_ARCH_A"]="$PATH_TESTS_ARCHITECTURE"
-    ["$SHARD_S7_ARCH_B"]="$PATH_TESTS_ARCHITECTURE"
-    ["$SHARD_S7_ARCH_C"]="$PATH_TESTS_ARCHITECTURE"
-    ["$SHARD_S7_ARCH_D"]="$PATH_TESTS_ARCHITECTURE"
-    ["$SHARD_S7_GUARDRAILS"]="tests/architecture/test_any_budget.py tests/architecture/test_scripts_catalog_governance.py tests/architecture/test_architecture_dependency_docs_drift.py tests/architecture/test_check_doc_links_guardrails.py tests/architecture/test_compatibility_facade_inventory.py tests/architecture/test_docs_version_sync.py tests/architecture/test_documentation_sync.py tests/architecture/test_code_metrics.py tests/architecture/test_legacy_schema_wrappers.py tests/architecture/test_diagram_regression_workflow.py tests/architecture/test_docs_governance_workflow.py tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_burndown_priorities.py"
-    ["$SHARD_S8_GOVERNANCE"]="tests/integration/pipelines tests/integration/chembl tests/contract tests/smoke"
-    ["$SHARD_S9_FAILURES"]="tests/unit/interfaces/cli/test_registry_consistency.py::TestListPipelinesCommandSnapshot::test_list_pipelines_command_output tests/unit/interfaces/cli/commands/test_quarantine_support.py::TestShowQuarantineStats::test_json_output_mode tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow tests/architecture/test_docs_governance_workflow.py::test_docs_workflow_runs_lightweight_docs_governance_profile tests/architecture/test_diagram_regression_workflow.py::test_docs_workflow_runs_doc_integrity_guardrails tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
-)
-
-declare -A SHARD_WORKERS_OVERRIDE=(
-    ["$SHARD_S1_DOMAIN_CORE"]="0"
-    ["$SHARD_S1_DOMAIN_SERVICES"]="0"
-    ["$SHARD_S4_APP_SERVICES"]="0"
-    ["$SHARD_S7_ARCH_A"]="0"
-    ["$SHARD_S7_ARCH_B"]="0"
-    ["$SHARD_S7_ARCH_C"]="0"
-    ["$SHARD_S7_ARCH_D"]="0"
-    ["$SHARD_S7_GUARDRAILS"]="2"
-    ["$SHARD_S8_GOVERNANCE"]="0"
-    ["$SHARD_S9_FAILURES"]="0"
-)
-
-declare -A SHARD_EXTRA_PYTEST_ARGS=(
-    ["$SHARD_S2_COMP_IFACE"]="--ignore=tests/unit/interfaces/cli/test_registry_consistency.py --deselect=tests/unit/interfaces/cli/commands/test_quarantine_support.py::TestShowQuarantineStats::test_json_output_mode --ignore=tests/unit/composition/runtime_builders/test_runner_builder.py --ignore=tests/unit/composition/runtime_builders/test_run_manifest_support.py"
-    ["$SHARD_S7_ARCH_A"]="--timeout=300 --ignore-glob=tests/architecture/test_[g-z]*.py --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py --ignore=tests/architecture/test_diagram_regression_workflow.py --ignore=tests/architecture/test_docs_governance_workflow.py --ignore=tests/architecture/test_quality_debt_scorecard.py --ignore=tests/architecture/test_quality_burndown_priorities.py --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
-    ["$SHARD_S7_ARCH_B"]="--timeout=300 --ignore-glob=tests/architecture/test_[a-f]*.py --ignore-glob=tests/architecture/test_[m-z]*.py --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py --ignore=tests/architecture/test_diagram_regression_workflow.py --ignore=tests/architecture/test_docs_governance_workflow.py --ignore=tests/architecture/test_quality_debt_scorecard.py --ignore=tests/architecture/test_quality_burndown_priorities.py --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
-    ["$SHARD_S7_ARCH_C"]="--timeout=300 --ignore-glob=tests/architecture/test_[a-l]*.py --ignore-glob=tests/architecture/test_[s-z]*.py --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py --ignore=tests/architecture/test_diagram_regression_workflow.py --ignore=tests/architecture/test_docs_governance_workflow.py --ignore=tests/architecture/test_quality_debt_scorecard.py --ignore=tests/architecture/test_quality_burndown_priorities.py --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
-    ["$SHARD_S7_ARCH_D"]="--timeout=300 --ignore-glob=tests/architecture/test_[a-r]*.py --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py --ignore=tests/architecture/test_diagram_regression_workflow.py --ignore=tests/architecture/test_docs_governance_workflow.py --ignore=tests/architecture/test_quality_debt_scorecard.py --ignore=tests/architecture/test_quality_burndown_priorities.py --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
-    ["$SHARD_S7_GUARDRAILS"]="--timeout=300 --deselect=tests/architecture/test_docs_governance_workflow.py::test_docs_workflow_runs_lightweight_docs_governance_profile --deselect=tests/architecture/test_diagram_regression_workflow.py::test_docs_workflow_runs_doc_integrity_guardrails"
-    ["$SHARD_S8_GOVERNANCE"]="--timeout=300"
-    ["$SHARD_S9_FAILURES"]="--timeout=300"
-)
+SHARD_ORDER=()
+declare -A SHARD_WAVE=()
+declare -A SHARD_PATHS=()
+declare -A SHARD_WORKERS_OVERRIDE=()
+declare -A SHARD_EXTRA_PYTEST_ARGS=()
+declare -A SHARD_ALIASES=()
 
 usage() {
     cat <<'EOF'
@@ -163,11 +83,150 @@ EOF
     return 0
 }
 
+selected_yaml_python() {
+    local python_bin
+    if [[ -n "${BIOETL_PYTEST_RUNTIME_PYTHON:-}" ]] && python_has_modules "$BIOETL_PYTEST_RUNTIME_PYTHON" yaml; then
+        printf '%s\n' "$BIOETL_PYTEST_RUNTIME_PYTHON"
+        return 0
+    fi
+    if [[ -x "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" ]]; then
+        python_bin="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"
+        if python_has_modules "$python_bin" yaml; then
+            printf '%s\n' "$python_bin"
+            return 0
+        fi
+    fi
+    if [[ -x ".venv/bin/python" ]]; then
+        python_bin="$REPO_ROOT/.venv/bin/python"
+        if python_has_modules "$python_bin" yaml; then
+            printf '%s\n' "$python_bin"
+            return 0
+        fi
+    fi
+    if command -v python3 >/dev/null 2>&1; then
+        python_bin="$(command -v python3)"
+        if python_has_modules "$python_bin" yaml; then
+            printf '%s\n' "$python_bin"
+            return 0
+        fi
+    fi
+    if command -v python >/dev/null 2>&1; then
+        python_bin="$(command -v python)"
+        if python_has_modules "$python_bin" yaml; then
+            printf '%s\n' "$python_bin"
+            return 0
+        fi
+    fi
+    return 1
+}
+
+load_shard_inventory() {
+    local python_bin
+    python_bin="$(selected_yaml_python)" || {
+        echo "[run_pytest_sharded][error] No Python with PyYAML available for shard inventory loading." >&2
+        exit 2
+    }
+    [[ -f "$INVENTORY_PATH" ]] || {
+        echo "[run_pytest_sharded][error] Missing shard inventory: $INVENTORY_PATH" >&2
+        exit 2
+    }
+
+    SHARD_ORDER=()
+    SHARD_WAVE=()
+    SHARD_PATHS=()
+    SHARD_WORKERS_OVERRIDE=()
+    SHARD_EXTRA_PYTEST_ARGS=()
+    SHARD_ALIASES=()
+
+    # shellcheck disable=SC2016
+    eval "$(
+        "$python_bin" - "$INVENTORY_PATH" <<'PY'
+from __future__ import annotations
+
+import shlex
+import sys
+from pathlib import Path
+
+import yaml
+
+
+def q(value: str) -> str:
+    return shlex.quote(value)
+
+
+inventory_path = Path(sys.argv[1])
+payload = yaml.safe_load(inventory_path.read_text(encoding="utf-8"))
+if not isinstance(payload, dict):
+    raise SystemExit("Shard inventory must be a mapping.")
+if payload.get("schema_version") != 1:
+    raise SystemExit("Shard inventory schema_version must be 1.")
+
+shards = payload.get("shards")
+if not isinstance(shards, list) or not shards:
+    raise SystemExit("Shard inventory must declare a non-empty shards list.")
+
+seen_names: set[str] = set()
+for shard in shards:
+    if not isinstance(shard, dict):
+        raise SystemExit("Each shard definition must be a mapping.")
+    name = shard.get("name")
+    wave = shard.get("wave")
+    paths = shard.get("paths")
+    if not isinstance(name, str) or not name:
+        raise SystemExit("Each shard must declare a non-empty name.")
+    if name in seen_names:
+        raise SystemExit(f"Duplicate shard name: {name}")
+    seen_names.add(name)
+    if not isinstance(wave, int):
+        raise SystemExit(f"Shard {name} must declare integer wave.")
+    if not isinstance(paths, list) or not all(isinstance(path, str) and path for path in paths):
+        raise SystemExit(f"Shard {name} must declare non-empty string paths.")
+    workers_override = shard.get("workers_override")
+    if workers_override is not None and not isinstance(workers_override, int):
+        raise SystemExit(f"Shard {name} workers_override must be an integer when present.")
+    extra_args = shard.get("extra_pytest_args", [])
+    if not isinstance(extra_args, list) or not all(
+        isinstance(arg, str) and arg for arg in extra_args
+    ):
+        raise SystemExit(
+            f"Shard {name} extra_pytest_args must be a list of non-empty strings."
+        )
+    print(f'SHARD_ORDER+=({q(name)})')
+    print(f'SHARD_WAVE[{q(name)}]={q(str(wave))}')
+    print(f'SHARD_PATHS[{q(name)}]={q(" ".join(paths))}')
+    if workers_override is not None:
+        print(f'SHARD_WORKERS_OVERRIDE[{q(name)}]={q(str(workers_override))}')
+    if extra_args:
+        print(f'SHARD_EXTRA_PYTEST_ARGS[{q(name)}]={q(" ".join(extra_args))}')
+
+aliases = payload.get("aliases", {})
+if aliases is None:
+    aliases = {}
+if not isinstance(aliases, dict):
+    raise SystemExit("Shard inventory aliases must be a mapping when present.")
+
+for alias, config in aliases.items():
+    if not isinstance(alias, str) or not alias:
+        raise SystemExit("Alias names must be non-empty strings.")
+    if not isinstance(config, dict):
+        raise SystemExit(f"Alias {alias} must be a mapping.")
+    expands_to = config.get("expands_to")
+    if not isinstance(expands_to, list) or not expands_to:
+        raise SystemExit(f"Alias {alias} must declare a non-empty expands_to list.")
+    if not all(isinstance(target, str) and target for target in expands_to):
+        raise SystemExit(f"Alias {alias} expands_to entries must be non-empty strings.")
+    missing = sorted(target for target in expands_to if target not in seen_names)
+    if missing:
+        raise SystemExit(f"Alias {alias} references unknown shards: {', '.join(missing)}")
+    print(f'SHARD_ALIASES[{q(alias)}]={q(" ".join(expands_to))}')
+PY
+    )"
+    return 0
+}
+
 is_valid_shard() {
     local wanted="$1"
-
-    # Backward-compatible alias for the pre-split S7 shard.
-    if [[ "$wanted" == "S7-crosscutting-architecture" ]]; then
+    if [[ -n "${SHARD_ALIASES[$wanted]:-}" ]]; then
         return 0
     fi
 
@@ -182,18 +241,13 @@ is_valid_shard() {
 
 expand_shard_alias() {
     local shard="$1"
-    case "$shard" in
-        S7-crosscutting-architecture)
-            printf '%s\n' \
-                "S7-crosscutting-architecture-a" \
-                "S7-crosscutting-architecture-b" \
-                "S7-crosscutting-architecture-c" \
-                "S7-crosscutting-architecture-d"
-            ;;
-        *)
-            printf '%s\n' "$shard"
-            ;;
-    esac
+    if [[ -n "${SHARD_ALIASES[$shard]:-}" ]]; then
+        # shellcheck disable=SC2206
+        local -a expanded=( ${SHARD_ALIASES[$shard]} )
+        printf '%s\n' "${expanded[@]}"
+        return 0
+    fi
+    printf '%s\n' "$shard"
     return 0
 }
 
@@ -416,40 +470,8 @@ selected_python() {
 }
 
 selected_test_health_python() {
-    local python_bin
-    if [[ -n "${BIOETL_PYTEST_RUNTIME_PYTHON:-}" ]] && python_has_modules "$BIOETL_PYTEST_RUNTIME_PYTHON" yaml; then
-        printf '%s\n' "$BIOETL_PYTEST_RUNTIME_PYTHON"
-        return 0
-    fi
-    if [[ -x "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" ]]; then
-        python_bin="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"
-        if python_has_modules "$python_bin" yaml; then
-            printf '%s\n' "$python_bin"
-            return 0
-        fi
-    fi
-    if [[ -x ".venv/bin/python" ]]; then
-        python_bin="$REPO_ROOT/.venv/bin/python"
-        if python_has_modules "$python_bin" yaml; then
-            printf '%s\n' "$python_bin"
-            return 0
-        fi
-    fi
-    if command -v python3 >/dev/null 2>&1; then
-        python_bin="$(command -v python3)"
-        if python_has_modules "$python_bin" yaml; then
-            printf '%s\n' "$python_bin"
-            return 0
-        fi
-    fi
-    if command -v python >/dev/null 2>&1; then
-        python_bin="$(command -v python)"
-        if python_has_modules "$python_bin" yaml; then
-            printf '%s\n' "$python_bin"
-            return 0
-        fi
-    fi
-    return 1
+    selected_yaml_python
+    return $?
 }
 
 shell_join() {
@@ -788,6 +810,7 @@ collect_test_health_summary() {
 
 main() {
     local -a original_args=("$@")
+    load_shard_inventory
     parse_args "$@"
     if [[ "$LIST_ONLY" == "1" ]]; then
         print_plan

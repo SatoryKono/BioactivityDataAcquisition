@@ -9,11 +9,17 @@ from pathlib import Path
 from urllib import error
 
 import pytest
-
 from scripts.memory.sync import (
+    DEFAULT_INGEST_WAVE,
+    DEFAULT_LEGACY_PRUNE_LABELS,
+    DEFAULT_MANAGED_BY,
+    GraphSnapshot,
+    Neo4jHttpClient,
+    NodeKey,
     _add_complexity_analysis_surfaces,
     _build_diff_entries,
     _critical_analysis_audit_issues,
+    _delete_managed_wave_nodes_statement,
     _duplication_analysis_config,
     _ensure_targeted_apply_prerequisites,
     _family_for_path,
@@ -25,35 +31,28 @@ from scripts.memory.sync import (
     _memory_mapping_path,
     _merge_storage_layer_config,
     _missing_managed_anchor_keys,
-    _normalize_docs_repo_reference,
-    _storage_ref_from_output_path,
-    _workflow_quality_gates,
-    main,
-    _normalization_evidence_statements,
-    apply_normalization_evidence_only,
-    build_audit_report,
-    build_fast_analysis_audit_report,
-    DEFAULT_INGEST_WAVE,
-    DEFAULT_LEGACY_PRUNE_LABELS,
-    DEFAULT_MANAGED_BY,
-    _delete_managed_wave_nodes_statement,
-    GraphSnapshot,
-    NodeKey,
-    build_snapshot,
-    derive_http_uri,
-    Neo4jHttpClient,
     _node_statement,
+    _normalization_evidence_statements,
+    _normalize_docs_repo_reference,
     _prune_legacy_unmanaged_nodes_statement,
     _prune_stale_nodes_statement,
     _prune_stale_relations_statement,
-    resolve_neo4j_connection,
     _relation_statement,
     _reset_managed_relations_statement,
-    sync_snapshot,
-    _verify_expected_group_counts,
-    snapshot_invariant_issues,
+    _storage_ref_from_output_path,
     _targeted_apply_external_anchor_keys,
     _targeted_apply_required_anchor_labels,
+    _verify_expected_group_counts,
+    _workflow_quality_gates,
+    apply_normalization_evidence_only,
+    build_audit_report,
+    build_fast_analysis_audit_report,
+    build_snapshot,
+    derive_http_uri,
+    main,
+    resolve_neo4j_connection,
+    snapshot_invariant_issues,
+    sync_snapshot,
 )
 
 pytestmark = pytest.mark.memory
@@ -526,7 +525,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ),
     (
         "directory_surface",
-        "configs/entities/chembl",
+        CHEMBL_CONFIG_DIR,
         "HOUSES",
         "entity_config",
         "chembl_activity",
@@ -925,7 +924,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "crossref_publication",
         "DEPENDS_ON",
         "module_surface",
-        "src/bioetl/application/core/record_normalization_processor.py",
+        RECORD_NORMALIZATION_PROCESSOR_PATH,
     ),
     (
         "entity_config",
@@ -1935,7 +1934,7 @@ def test_storage_surface_helpers_merge_base_and_pipeline_overrides() -> None:
 
 def test_storage_ref_from_output_path_normalizes_data_output_prefix() -> None:
     assert (
-        _storage_ref_from_output_path("data/output/silver/composite/activity")
+        _storage_ref_from_output_path(f"data/output/{SILVER_COMPOSITE_ACTIVITY}")
         == SILVER_COMPOSITE_ACTIVITY
     )
     assert _storage_ref_from_output_path(SILVER_CHEMBL_ACTIVITY) == SILVER_CHEMBL_ACTIVITY
@@ -2568,7 +2567,7 @@ def test_build_fast_analysis_audit_report_uses_bulk_count_queries(monkeypatch) -
     monkeypatch.setattr("scripts.memory.sync.Neo4jHttpClient", StubClient)
     root = _repo_root()
 
-    report = build_fast_analysis_audit_report(snapshot, root, "http://localhost:7474")  # type: ignore[arg-type]
+    report = build_fast_analysis_audit_report(snapshot, root, LOCALHOST_HTTP_URI)  # type: ignore[arg-type]
 
     assert query_calls == [
         "fast audit label summary",
@@ -2650,7 +2649,7 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
     monkeypatch.setattr("scripts.memory.sync.Neo4jHttpClient", StubClient)
     root = _repo_root()
 
-    report = build_audit_report(snapshot, root, "http://localhost:7474")
+    report = build_audit_report(snapshot, root, LOCALHOST_HTTP_URI)
 
     assert query_calls == [
         "full audit label summary",
@@ -2722,7 +2721,7 @@ def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(
 
     monkeypatch.setattr(
         "scripts.memory.sync.resolve_neo4j_connection",
-        lambda root, http_uri: ("http://localhost:7474", "neo4j", "password", "neo4j"),
+        lambda root, http_uri: (LOCALHOST_HTTP_URI, "neo4j", "password", "neo4j"),
     )
     monkeypatch.setattr(
         "scripts.memory.sync.Neo4jHttpClient", lambda *args, **kwargs: StubClient()
@@ -2875,7 +2874,7 @@ def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing
 def test_neo4j_http_client_distinguishes_query_runtime_http_errors(monkeypatch) -> None:
     def _raise_http_error(req: object, timeout: int = 60) -> object:
         raise error.HTTPError(
-            "http://localhost:7474/db/neo4j/tx/commit",
+            f"{LOCALHOST_HTTP_URI}/db/neo4j/tx/commit",
             400,
             "Bad Request",
             hdrs=None,
@@ -2883,7 +2882,7 @@ def test_neo4j_http_client_distinguishes_query_runtime_http_errors(monkeypatch) 
         )
 
     monkeypatch.setattr("scripts.memory.sync.request.urlopen", _raise_http_error)
-    client = Neo4jHttpClient("http://localhost:7474", "neo4j", "password", "neo4j")
+    client = Neo4jHttpClient(LOCALHOST_HTTP_URI, "neo4j", "password", "neo4j")
 
     try:
         client.execute([], context="fast audit label summary")
@@ -2927,7 +2926,7 @@ def test_neo4j_http_client_reports_all_transport_attempts(monkeypatch) -> None:
     )
     assert "attempts:" in message
     assert "http://host.docker.internal:7474/db/neo4j/tx/commit" in message
-    assert "http://localhost:7474/db/neo4j/tx/commit" in message
+    assert f"{LOCALHOST_HTTP_URI}/db/neo4j/tx/commit" in message
 
 
 def test_snapshot_invariants_are_clean() -> None:
