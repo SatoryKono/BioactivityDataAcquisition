@@ -37,6 +37,9 @@ from bioetl.domain.entities import ChemblPublication
 from bioetl.domain.mapping.publication_type_classification import (
     build_publication_type_classification_payload,
 )
+from bioetl.domain.mapping.publication_type_mapping import (
+    normalize_publication_type,
+)
 from bioetl.domain.types import BronzeRecord, GoldRecord
 from bioetl.domain.value_objects import DOI, PublicationYear
 
@@ -66,8 +69,8 @@ _CORE_METADATA = FieldGroup(
 _PUBLICATION_TYPE = FieldGroup(
     name="publication_type",
     fields=(
-        # Unified field: doc_type → publication_type
-        FieldSpec("doc_type", target="publication_type"),
+        # Keep provider-native type separate from the canonical schema field.
+        FieldSpec("doc_type", target="publication_type_raw"),
     ),
 )
 
@@ -197,15 +200,20 @@ class PublicationTransformer(BaseChemblTransformer):
         record: BronzeRecord,
     ) -> None:
         """Normalize publication identifiers and value-object backed fields."""
-        raw_publication_type = data.get("publication_type")
+        raw_publication_type = data.get("publication_type_raw") or data.get(
+            "publication_type"
+        )
+        raw_publication_type_value = (
+            str(raw_publication_type) if raw_publication_type is not None else None
+        )
         data.update(
             build_publication_type_classification_payload(
                 "chembl",
-                raw_type=str(raw_publication_type)
-                if raw_publication_type is not None
-                else None,
-                raw_field_name="publication_type",
+                raw_type=raw_publication_type_value,
             )
+        )
+        data["publication_type"] = normalize_publication_type(
+            raw_publication_type_value
         )
         data["publication_pmid"] = data.get("publication_pmid") or PMID(
             record.get("pmid")

@@ -58,30 +58,37 @@ def _build_canonical_execution_identity(
     request: _FinalSummaryRequest,
 ) -> dict[str, object]:
     """Return the canonical execution identity payload for the summary graph."""
-    return build_execution_identity_payload(
-        pipeline_name=request.manifest.pipeline_name,
-        run_type=request.manifest.run_type.value,
-        pipeline_version=cast(str | None, request.base_summary.get("pipeline_version")),
-        git_commit=cast(str | None, request.base_summary.get("git_commit")),
-        effective_config_hash=cast(
-            str | None, request.base_summary.get("effective_config_hash")
-        ),
-        dq_contract_compatibility_hash=cast(
-            str | None,
-            request.base_summary.get("dq_contract_compatibility_hash"),
-        ),
-        contract_ref=cast(str | None, request.base_summary.get("contract_ref")),
-        contract_version=cast(str | None, request.base_summary.get("contract_version")),
-        effective_config_artifact_id=cast(
-            str | None,
-            request.base_summary.get("effective_config_artifact_id"),
-        ),
-        exact_replay=cast(
-            bool | None, request.base_summary.get("requested_exact_replay")
-        ),
-        input_snapshot_fingerprint=cast(
-            str | None,
-            request.base_summary.get("input_snapshot_identity_fingerprint"),
+    return cast(
+        dict[str, object],
+        build_execution_identity_payload(
+            pipeline_name=request.manifest.pipeline_name,
+            run_type=request.manifest.run_type.value,
+            pipeline_version=cast(
+                str | None, request.base_summary.get("pipeline_version")
+            ),
+            git_commit=cast(str | None, request.base_summary.get("git_commit")),
+            effective_config_hash=cast(
+                str | None, request.base_summary.get("effective_config_hash")
+            ),
+            dq_contract_compatibility_hash=cast(
+                str | None,
+                request.base_summary.get("dq_contract_compatibility_hash"),
+            ),
+            contract_ref=cast(str | None, request.base_summary.get("contract_ref")),
+            contract_version=cast(
+                str | None, request.base_summary.get("contract_version")
+            ),
+            effective_config_artifact_id=cast(
+                str | None,
+                request.base_summary.get("effective_config_artifact_id"),
+            ),
+            exact_replay=cast(
+                bool | None, request.base_summary.get("requested_exact_replay")
+            ),
+            input_snapshot_fingerprint=cast(
+                str | None,
+                request.base_summary.get("input_snapshot_identity_fingerprint"),
+            ),
         ),
     )
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.events import PipelineEvent
@@ -16,6 +17,8 @@ class _ObserverHealthEmissionMixin:
 
     pipeline_name: str
     _metrics: MetricsPort
+    PROBE_MODE_FALLBACK_COUNTER = "bioetl_probe_mode_fallback_total"
+    emit_event: Callable[..., None]
 
     def emit_health_check_result(
         self,
@@ -31,13 +34,15 @@ class _ObserverHealthEmissionMixin:
         **extra: Any,  # Any: observer events forward arbitrary structured diagnostics to emit_event.
     ) -> None:
         """Emit health check result for a component."""
+        from bioetl.application.observability.observer import LifecyclePhase
+
         resolved_status = self._resolve_health_status(
             health_status=health_status,
             healthy=healthy,
         )
         self.emit_event(
             PipelineEvent.HEALTH_CHECK_COMPLETED,
-            self.LifecyclePhase.PREFLIGHT,
+            LifecyclePhase.PREFLIGHT,
             level="info" if healthy else "warning",
             component=component,
             healthy=healthy,
@@ -82,7 +87,7 @@ class _ObserverHealthEmissionMixin:
                 )
         if fallback_reason is not None:
             self._metrics.increment_counter(
-                "bioetl_probe_mode_fallback_total",
+                self.PROBE_MODE_FALLBACK_COUNTER,
                 1,
                 {
                     "pipeline": self.pipeline_name,
@@ -101,9 +106,11 @@ class _ObserverHealthEmissionMixin:
         **extra: Any,  # Any: summary emissions allow caller-defined observability payload fragments.
     ) -> None:
         """Emit summary preflight health observability through the observer contract."""
+        from bioetl.application.observability.observer import LifecyclePhase
+
         self.emit_event(
             PipelineEvent.HEALTH_CHECK_SUMMARY_RECORDED,
-            self.LifecyclePhase.PREFLIGHT,
+            LifecyclePhase.PREFLIGHT,
             level="info" if validated else "warning",
             validated=validated,
             overall_status=overall_status,

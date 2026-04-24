@@ -737,7 +737,11 @@ def _dq_coverage(
 
 
 def _entity_config_paths() -> list[Path]:
-    return sorted(Path("configs/entities").glob("*/*.yaml"))
+    return sorted(
+        path
+        for path in Path("configs/entities").glob("*/*.yaml")
+        if path.parent.name != "composite"
+    )
 
 
 def _composite_config_paths() -> list[Path]:

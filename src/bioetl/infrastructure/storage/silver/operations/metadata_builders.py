@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from typing import cast
 
 import orjson
 
@@ -77,7 +78,7 @@ def _build_schema_drift_object(dq_metrics: BatchDQMetrics | None) -> object | No
     """Convert DQ schema drift info into metadata-ready representation."""
     if not dq_metrics or not dq_metrics.schema_drift:
         return None
-    return dq_metrics.schema_drift.to_schema_drift()
+    return cast(object | None, dq_metrics.schema_drift.to_schema_drift())
 
 
 def _resolve_dq_summary_values(

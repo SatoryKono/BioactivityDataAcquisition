@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
+from typing import TypeGuard, cast
 
 from bioetl.domain.normalization._control_plane_identity import (
     normalize_contract_ref,
@@ -149,7 +150,7 @@ def _normalize_manifest_set_like_field(
     )
 
 
-def _is_non_string_sequence(value: object) -> bool:
+def _is_non_string_sequence(value: object) -> TypeGuard[Sequence[object]]:
     return isinstance(value, Sequence) and not isinstance(value, (str, bytes))
 
 
@@ -162,7 +163,7 @@ def _normalize_manifest_source_ref(item: object) -> object:
         raw_snapshots, (str, bytes)
     ):
         normalized["input_snapshots"] = canonicalize_container(
-            _normalize_manifest_input_snapshots(raw_snapshots)
+            _normalize_manifest_input_snapshots(cast(Sequence[object], raw_snapshots))
         )
     return normalized
 

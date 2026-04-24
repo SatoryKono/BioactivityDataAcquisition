@@ -88,11 +88,11 @@ def start_request_span(
 ) -> SpanLike:
     """Create and enter the request span for retry orchestration."""
     if tracer is None:
-        span = _NoOpSpan()
-        span.__enter__()
-        return span
+        noop_span = _NoOpSpan()
+        noop_span.__enter__()
+        return noop_span
     otel_tracer = cast(_OtelTracerLike, tracer.get_tracer("bioetl.http"))
-    span = otel_tracer.start_as_current_span(
+    span: SpanLike = otel_tracer.start_as_current_span(
         f"http.{method.lower()}",
         attributes={
             "http.method": method,

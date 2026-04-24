@@ -7,10 +7,22 @@ with format validation and normalization.
 from __future__ import annotations
 
 import re
-from typing import Literal
+from typing import TYPE_CHECKING, Generic, Literal, TypeVar
 
 from bioetl.domain.validation import validate_smiles
-from bioetl.domain.value_objects.base import ValueObject
+
+if TYPE_CHECKING:
+    _ValueT = TypeVar("_ValueT")
+
+    class _ValueObjectBase(Generic[_ValueT]):
+        """Typing-only stand-in for ValueObject under skipped imports."""
+
+        _value: _ValueT
+
+        def __init__(self, value: _ValueT) -> None: ...
+
+else:
+    from bioetl.domain.value_objects.base import ValueObject as _ValueObjectBase
 
 __all__ = [
     "SMILES",
@@ -20,7 +32,7 @@ __all__ = [
 SMILESNormalizationMode = Literal["soft", "strict"]
 
 
-class InChIKey(ValueObject[str]):
+class InChIKey(_ValueObjectBase[str]):
     """InChI Key value object.
 
     InChI Keys are 27-character strings in the format:
@@ -126,7 +138,7 @@ class InChIKey(ValueObject[str]):
             return None
 
 
-class SMILES(ValueObject[str]):
+class SMILES(_ValueObjectBase[str]):
     """SMILES notation value object.
 
     Simplified Molecular-Input Line-Entry System (SMILES) is a string
@@ -230,6 +242,7 @@ class SMILES(ValueObject[str]):
         _validate_smiles_normalization_mode(mode)
         if _is_blank_smiles(raw):
             return _handle_blank_smiles(mode)
+        assert raw is not None
         return _build_smiles_from_raw(
             cls,
             raw,
@@ -266,7 +279,7 @@ def _is_blank_smiles(raw: str | None) -> bool:
     return raw is None or not raw.strip()
 
 
-def _handle_blank_smiles(mode: SMILESNormalizationMode) -> None:
+def _handle_blank_smiles(mode: SMILESNormalizationMode) -> SMILES | None:
     """Handle an empty raw SMILES input according to normalization mode."""
     if mode == "soft":
         return None

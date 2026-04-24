@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from typing import cast
+
 from bioetl.domain.normalization.chembl import normalize_bao_label
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
@@ -79,12 +82,14 @@ def _normalize_bao_label_with_profile_context(
     bao_identifier = (
         None
         if record is None
-        else normalize_profile_bao_identifier(record.get("bao_format"))
+        else cast(
+            str | None, normalize_profile_bao_identifier(record.get("bao_format"))
+        )
     )
-    return normalize_bao_label(value, bao_identifier=bao_identifier)
+    return cast(str | None, normalize_bao_label(value, bao_identifier=bao_identifier))
 
 
-def create_case_normalizer(strategy: str = "uppercase"):
+def create_case_normalizer(strategy: str = "uppercase") -> Callable[[str], str | None]:
     """Create a case normalizer function with the specified strategy.
 
     Args:
@@ -95,7 +100,7 @@ def create_case_normalizer(strategy: str = "uppercase"):
     """
 
     def normalizer(value: str) -> str | None:
-        return normalize_cross_pipeline_case(value, strategy)
+        return cast(str | None, normalize_cross_pipeline_case(value, strategy))
 
     return normalizer
 

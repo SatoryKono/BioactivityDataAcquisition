@@ -158,3 +158,17 @@ def test_inventory_json_output_is_ascii_safe_for_windows_codepages() -> None:
     assert result.returncode == 0, result.stderr or result.stdout
     payload = json.loads(result.stdout)
     assert payload["summary"]["total_scripts"] >= 1
+
+
+def test_docs_generated_and_archive_surfaces_are_skipped_from_inventory_scan() -> None:
+    """Inventory scan should stay out of bulky generated/archive doc surfaces."""
+    module = _load_inventory_module()
+
+    assert module._is_skipped_rel_path("docs/reports/generated/inventory.md")
+    assert module._is_skipped_rel_path("docs/reports/evidence/pillar.yaml")
+    assert module._is_skipped_rel_path("docs/99-archive/root-status-artifacts/report.md")
+    assert module._is_skipped_rel_path("docs/02-architecture/generated/diagram.svg")
+    assert module._is_skipped_rel_path("docs/plans/wip.md")
+    assert not module._is_skipped_rel_path(
+        "docs/03-guides/script-management/README.md"
+    )

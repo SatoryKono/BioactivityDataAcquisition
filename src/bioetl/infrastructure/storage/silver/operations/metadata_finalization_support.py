@@ -8,7 +8,9 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Protocol
 
+from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import RunTypeEnum
+from bioetl.domain.models._metadata_silver import SilverMetadata
 from bioetl.domain.types import BatchID, BronzeRecord
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
@@ -45,7 +47,7 @@ class _MetadataFinalizationOps(Protocol):
     async def _persist_silver_metadata(
         self,
         *,
-        metadata,
+        metadata: SilverMetadata,
         table_name: str,
         table_path: str,
     ) -> SilverWriteResult | None: ...
@@ -59,7 +61,7 @@ class _MetadataFinalizationOps(Protocol):
         records: list[BronzeRecord],
         table_path: str,
         primary_keys: list[str],
-        validated_mode,
+        validated_mode: SilverWriteMode,
         quarantined_count: int | None = None,
         validation_errors: Sequence[str] | None = None,
         started_at: datetime,
@@ -74,7 +76,7 @@ async def _prepare_silver_write_finalization_context(
     records: list[BronzeRecord],
     table_path: str,
     primary_keys: list[str],
-    validated_mode,
+    validated_mode: SilverWriteMode,
     quarantined_count: int | None = None,
     validation_errors: Sequence[str] | None = None,
     started_at: datetime,
@@ -105,7 +107,7 @@ async def _finalize_silver_write_result(
     records: list[BronzeRecord],
     table_path: str,
     primary_keys: list[str],
-    validated_mode,
+    validated_mode: SilverWriteMode,
     bronze_refs: list[BronzeWriteResult] | None,
     partition_cols: list[str] | None,
     source_batch_id: BatchID | None,

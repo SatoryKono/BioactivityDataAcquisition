@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.events import PipelineEvent
@@ -15,6 +16,7 @@ class _ObserverPostrunEmissionMixin:
 
     pipeline_name: str
     _metrics: MetricsPort
+    emit_event: Callable[..., None]
 
     def emit_dq_anomaly(
         self,
@@ -26,10 +28,12 @@ class _ObserverPostrunEmissionMixin:
         **extra: Any,  # Any: anomaly events propagate arbitrary postrun context fields to the observer bus.
     ) -> None:
         """Emit data quality anomaly detection event."""
+        from bioetl.application.observability.observer import LifecyclePhase
+
         level = "error" if severity == "critical" else "warning"
         self.emit_event(
             PipelineEvent.DQ_ANOMALY_DETECTED,
-            self.LifecyclePhase.POSTRUN,
+            LifecyclePhase.POSTRUN,
             level=level,
             metric=metric_name,
             dq_severity=severity,
@@ -59,9 +63,11 @@ class _ObserverPostrunEmissionMixin:
         **extra: Any,  # Any: maintenance events expose optional provider-specific payload fields.
     ) -> None:
         """Emit VACUUM operation result."""
+        from bioetl.application.observability.observer import LifecyclePhase
+
         self.emit_event(
             PipelineEvent.VACUUM_COMPLETED,
-            self.LifecyclePhase.POSTRUN,
+            LifecyclePhase.POSTRUN,
             level="info" if success else "warning",
             layer=layer,
             table=table,

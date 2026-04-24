@@ -11,20 +11,27 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import datetime
-from typing import TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar, cast
 
 import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
-from bioetl.domain.schemas.common.publication_base import (
-    LOOKUP_METHODS,
-    PublicationBaseSchema,
-)
+from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS
 from bioetl.domain.schemas.constants import ISSN_PATTERN
 from bioetl.domain.validation import (
     DOI_REGEX_PATTERN,
 )
+
+if TYPE_CHECKING:
+
+    class _PublicationBaseSchema:
+        """Typing-only base to avoid skipped-import degradation to Any."""
+
+else:
+    from bioetl.domain.schemas.common.publication_base import (
+        PublicationBaseSchema as _PublicationBaseSchema,
+    )
 
 # Public exports
 __all__ = ["LOOKUP_METHODS", "PubMedPublicationSchema"]
@@ -44,7 +51,7 @@ def _typed_check(
     return cast(Callable[[_CheckMethod], _CheckMethod], pa.check(*fields, **kwargs))
 
 
-class PubMedPublicationSchema(PublicationBaseSchema):
+class PubMedPublicationSchema(_PublicationBaseSchema):
     """PubMed Publication validation schema for Silver layer.
 
     Represents a MEDLINE/PubMed citation record.

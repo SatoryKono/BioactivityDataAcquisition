@@ -69,8 +69,14 @@ SKIP_DIR_NAMES: Final[set[str]] = {
     "node_modules",
 }
 SKIP_PATH_PREFIXES: Final[tuple[str, ...]] = (
-    "tests/fixtures/",
+    "docs/02-architecture/generated/",
+    "docs/99-archive/",
     "docs/exports/",
+    "docs/fixes/",
+    "docs/plans/",
+    "docs/refactoring_plans/",
+    "docs/reports/",
+    "tests/fixtures/",
 )
 SKIP_FILE_EXTENSIONS: Final[set[str]] = {
     ".7z",

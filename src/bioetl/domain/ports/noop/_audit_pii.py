@@ -56,7 +56,7 @@ class NoOpAudit:
     def log_event(
         self,
         _event_name: str,
-        _event_data: dict | None = None,
+        _event_data: dict[str, object] | None = None,
         *,
         timestamp: datetime,
     ) -> None:

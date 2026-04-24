@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from typing import cast
+
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 
 from ._chembl_activity_fields import (
@@ -42,7 +45,7 @@ __all__ = [
 ]
 
 
-def create_case_normalizer(strategy: str = "uppercase"):
+def create_case_normalizer(strategy: str = "uppercase") -> Callable[[str], str | None]:
     """Create a case normalizer function for profile use.
 
     Args:
@@ -52,8 +55,8 @@ def create_case_normalizer(strategy: str = "uppercase"):
         Normalizer function suitable for profile special_rules
     """
 
-    def normalizer(value):
-        return normalize_cross_pipeline_case(value, strategy)
+    def normalizer(value: str) -> str | None:
+        return cast(str | None, normalize_cross_pipeline_case(value, strategy))
 
     return normalizer
 

@@ -1,4 +1,4 @@
-"""Compatibility mixin for Silver write finalization and postwrite helpers."""
+"""Silver write finalization and postwrite helper mixin."""
 
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ __all__ = ["SilverWriterFinalizationCompatibilityMixin"]
 
 
 class SilverWriterFinalizationCompatibilityMixin:
-    """Compatibility surface for Silver finalization and postwrite helpers."""
+    """Delegation surface for Silver finalization and postwrite helpers."""
 
     async def _dispatch_write_with_domain_errors(
         self,
@@ -40,7 +40,7 @@ class SilverWriterFinalizationCompatibilityMixin:
         table_name: str,
         request: _DeltaWriteRequest,
     ) -> None:
-        """Delegate Delta write dispatch through the compatibility surface."""
+        """Delegate Delta write dispatch through the helper surface."""
         if self._delta:
             await self._delta._dispatch_write_with_domain_errors(
                 table_name=table_name,
@@ -67,7 +67,7 @@ class SilverWriterFinalizationCompatibilityMixin:
         validated_mode: SilverWriteMode,
         primary_keys: list[str],
     ) -> None:
-        """Compatibility seam for CSV export across composition and mixin paths."""
+        """Delegation seam for CSV export across composition and mixin paths."""
         if self._maintenance is not None:
             export_path = str(self.base_path_obj / f"{table_name}.csv")
             await self._maintenance.maybe_export_csv(

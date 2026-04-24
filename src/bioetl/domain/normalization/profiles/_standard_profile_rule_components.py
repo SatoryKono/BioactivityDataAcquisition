@@ -6,6 +6,7 @@ import inspect
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from functools import cache
+from typing import cast
 
 from bioetl.domain.normalization.profiles._standard_profile_rule_families import (
     RuleFamilyFieldSets,
@@ -91,7 +92,7 @@ def _coerce_rule_component(
             field_name=field_name, normalizer=component
         )
     if _is_explicit_rule_component(component):
-        return component
+        return cast(RuleComponent, component)
     if _is_single_normalizer_rule_component(component):
         return _default_custom_rule_component(
             field_name=field_name,
@@ -244,7 +245,7 @@ def _resolve_base_rule(
     field_name: str,
     context: _RuleComponentContext,
 ) -> RuleComponent | None:
-    handlers = (
+    handlers: tuple[Callable[[], RuleComponent | None], ...] = (
         lambda: _handle_special_rules(field_name, context.special_rules),
         lambda: _handle_enum_fields(field_name, context.enum_fields),
         lambda: _handle_case_fields(field_name, context.case_fields),

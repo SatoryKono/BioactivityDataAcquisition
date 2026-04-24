@@ -256,7 +256,9 @@ def test_naming_audit_uses_registry_for_doc_exceptions(tmp_path: Path) -> None:
     )
 
 
-def test_naming_audit_uses_registry_for_path_level_doc_exceptions(tmp_path: Path) -> None:
+def test_naming_audit_uses_registry_for_path_level_doc_exceptions(
+    tmp_path: Path,
+) -> None:
     mod = _load_naming_audit_module()
     registry = mod.load_naming_registry()
 
@@ -271,6 +273,7 @@ def test_naming_audit_uses_registry_for_path_level_doc_exceptions(tmp_path: Path
         documentation_exceptions=frozenset(
             {*registry.documentation_exceptions, "docs/legacy/UPPER_CASE_GUIDE.md"}
         ),
+        root_file_exceptions=registry.root_file_exceptions,
         class_suffix_exceptions=registry.class_suffix_exceptions,
         function_prefix_exceptions=registry.function_prefix_exceptions,
         stable_pipeline_ids=registry.stable_pipeline_ids,
@@ -291,8 +294,7 @@ def test_naming_audit_uses_registry_for_path_level_doc_exceptions(tmp_path: Path
     )
 
     assert all(
-        violation.current_name != "UPPER_CASE_GUIDE.md"
-        for violation in results["docs"]
+        violation.current_name != "UPPER_CASE_GUIDE.md" for violation in results["docs"]
     )
 
 

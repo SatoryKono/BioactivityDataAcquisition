@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import BatchID, JsonDict, RunID, RunType
 from bioetl.infrastructure.storage.bronze.metadata_builders import (
@@ -53,7 +53,9 @@ class BronzeWriterMetadataMixin:
         Returns:
             Dictionary of string metadata fields for Bronze lineage tracking.
         """
-        return build_bronze_lineage_metadata(
+        return cast(
+            dict[str, str],
+            build_bronze_lineage_metadata(
             BronzeLineageMetadataRequest(
                 run_id=run_id,
                 run_type=run_type,
@@ -61,7 +63,8 @@ class BronzeWriterMetadataMixin:
                 provider=provider,
                 entity=entity,
                 batch_id=batch_id,
-            )
+            ),
+            ),
         )
 
     def _build_full_bronze_metadata(

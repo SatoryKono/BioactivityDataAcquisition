@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import time
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Any, Self
 
-from bioetl.application.observability.observer_event_mixin import _ObserverEventMixin
 from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
 from bioetl.domain.aggregates.events import (
     PipelineCompleted,
@@ -24,7 +23,28 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort, TracingPort
 
 
-class _ObserverContextManagerMixin(_ObserverEventMixin):
+if TYPE_CHECKING:
+
+    class _ObserverEventMixinBase:
+        """Typing-only stand-in for skipped observer event mixin imports."""
+
+        def _emit_contract_event(
+            self,
+            event_name: str,
+            *,
+            severity: str,
+            **context: Any,
+        ) -> None: ...
+
+        def emit_domain_event(self, event: object, *, phase: object | None = None) -> None: ...
+
+else:
+    from bioetl.application.observability.observer_event_mixin import (
+        _ObserverEventMixin as _ObserverEventMixinBase,
+    )
+
+
+class _ObserverContextManagerMixin(_ObserverEventMixinBase):
     """Context-manager lifecycle orchestration for pipeline observability."""
 
     pipeline_name: str

@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Collection, Mapping
 from dataclasses import dataclass, field, fields
+from typing import cast
 
 from bioetl.domain.normalization.profiles._standard_profile_rule_components import (
     RuleComponent,
     RuleComponentSpec,
+    _RuleComponentContext,
     _build_rule_component_context,
     _normalize_special_rules,
     _rule_components,
@@ -102,7 +104,200 @@ def _coerce_standard_profile_spec(
     overrides: dict[str, object],
 ) -> StandardProfileSpec:
     _ensure_required_standard_profile_fields(spec, overrides)
-    return StandardProfileSpec(**_build_standard_profile_payload(spec, overrides))
+    return StandardProfileSpec(
+        profile_name=cast(
+            str,
+            _resolve_standard_profile_value(
+                field_name="profile_name",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        description=cast(
+            str,
+            _resolve_standard_profile_value(
+                field_name="description",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        schema_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="schema_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        meta_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="meta_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        title_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="title_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        abstract_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="abstract_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        doi_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="doi_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        pmid_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="pmid_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        pmc_id_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="pmc_id_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        date_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="date_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        int_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="int_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        float_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="float_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        set_like_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="set_like_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        json_string_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="json_string_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        strict_json_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="strict_json_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        boolean_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="boolean_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        flag_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="flag_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        operator_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="operator_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        ontology_id_fields=cast(
+            Collection[str],
+            _resolve_standard_profile_value(
+                field_name="ontology_id_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        enum_fields=cast(
+            Mapping[str, frozenset[str]] | None,
+            _resolve_standard_profile_value(
+                field_name="enum_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        case_fields=cast(
+            Mapping[str, frozenset[str] | None] | None,
+            _resolve_standard_profile_value(
+                field_name="case_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        unit_fields=cast(
+            Collection[str] | None,
+            _resolve_standard_profile_value(
+                field_name="unit_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        null_fields=cast(
+            Collection[str] | None,
+            _resolve_standard_profile_value(
+                field_name="null_fields",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+        special_rules=cast(
+            Mapping[str, RuleComponentSpec] | None,
+            _resolve_standard_profile_value(
+                field_name="special_rules",
+                spec=spec,
+                overrides=overrides,
+            ),
+        ),
+    )
 
 
 def _ensure_required_standard_profile_fields(
@@ -150,7 +345,7 @@ def _build_field_rules(
     schema_fields: Collection[str],
     normalized_meta_fields: frozenset[str],
     normalized_set_like_fields: frozenset[str],
-    rule_context: object,
+    rule_context: _RuleComponentContext,
 ) -> Mapping[str, RuleComponent]:
     """Build field rules for all schema fields."""
     return {
@@ -260,7 +455,7 @@ def _build_field_rule(
     field_name: str,
     meta_fields: frozenset[str],
     set_like_fields: frozenset[str],
-    rule_context: object,
+    rule_context: _build_rule_component_context,
 ) -> FieldRule:
     include_in_hash = field_name not in meta_fields
     if field_name in meta_fields:

@@ -1,4 +1,4 @@
-"""Compatibility re-export facade for sync quarantine admin helpers."""
+"""Re-export facade for sync quarantine admin helpers."""
 
 from __future__ import annotations
 

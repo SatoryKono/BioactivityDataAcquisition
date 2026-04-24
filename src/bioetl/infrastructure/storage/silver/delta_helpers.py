@@ -239,14 +239,11 @@ async def _evolve_delta_schema_with_empty_append(
 ) -> _DeltaWriteRequest:
     """Pre-evolve an existing Delta table schema without writing extra rows."""
     loop = asyncio.get_running_loop()
-    empty_request = cast(
-        _DeltaWriteRequest,
-        replace(
-            request,
-            validated_mode=SilverWriteMode.APPEND,
-            arrow_data=request.arrow_data.slice(0, 0),
-            schema_mode="merge",
-        ),
+    empty_request = replace(
+        request,
+        validated_mode=SilverWriteMode.APPEND,
+        arrow_data=request.arrow_data.slice(0, 0),
+        schema_mode="merge",
     )
     await loop.run_in_executor(
         None,
@@ -258,7 +255,7 @@ async def _evolve_delta_schema_with_empty_append(
             )
         ),
     )
-    return cast(_DeltaWriteRequest, replace(request, merge_schema=False))
+    return replace(request, merge_schema=False)
 
 
 async def _load_delta_table(

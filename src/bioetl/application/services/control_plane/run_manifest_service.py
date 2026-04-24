@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import TYPE_CHECKING, cast
+from typing import Protocol, cast
 from uuid import uuid4
 
 from bioetl.application.services.control_plane._run_manifest_service_mixins import (
@@ -27,13 +27,18 @@ from bioetl.domain.normalization import (
 from bioetl.domain.ports import RunManifestPort
 from bioetl.domain.types import RunID, RunType
 
-if TYPE_CHECKING:
-    from bioetl.domain.ports import ClockPort
-
 __all__ = [
     "RunManifestCreateSpec",
     "RunManifestService",
 ]
+
+
+class _ClockLike(Protocol):
+    """Local clock seam to keep strict mypy stable under skipped imports."""
+
+    def now(self) -> datetime:
+        """Return the current timestamp."""
+        ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -104,7 +109,7 @@ class RunManifestService(
     """Create and persist immutable run manifests."""
 
     manifest_port: RunManifestPort
-    clock: ClockPort | None = None
+    clock: _ClockLike | None = None
     created_at_factory: Callable[[], datetime] | None = None
     schema_version: str = "1.0"
     _manifest_id_factory: Callable[[], str] = field(
@@ -142,7 +147,7 @@ class RunManifestService(
             return self.clock.now()
         if self.created_at_factory is not None:
             return self.created_at_factory()
-        return MISSING_RUNTIME_TIMESTAMP
+        return cast(datetime, MISSING_RUNTIME_TIMESTAMP)
 
     def create_manifest(self, request: RunManifestCreateSpec) -> RunManifest:
         """Build fingerprinted manifest and persist it through the port."""
