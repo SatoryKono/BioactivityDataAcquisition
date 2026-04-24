@@ -20,6 +20,7 @@ from bioetl.composition.factories.services.common_service_wiring import resolve_
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import MetadataCoordinatorPort, MetadataWriterPort
+from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
@@ -92,6 +93,7 @@ def build_postrun_dependency_context(
             metadata_coordinator=metadata_coordinator,
             metadata_writer=metadata_writer,
             metadata_version_resolver=metadata_version_resolver,
+            clock=SystemClock(),
         ),
         compact_orchestrator=PostrunCompactService(
             config=config,

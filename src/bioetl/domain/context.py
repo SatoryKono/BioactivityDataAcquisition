@@ -29,11 +29,16 @@ from bioetl.domain.types.contract_identity import (
 __all__ = [
     "CachedBronzeContext",
     "InputFilterContext",
+    "MISSING_RUNTIME_TIMESTAMP",
     "PipelineContext",
     "PipelineRunContext",
     "VacuumSettings",
     "current_utc_time",
 ]
+
+
+MISSING_RUNTIME_TIMESTAMP = datetime(1970, 1, 1, tzinfo=UTC)
+"""Deterministic sentinel for compatibility-only direct context construction."""
 
 
 def current_utc_time() -> datetime:
@@ -95,7 +100,7 @@ class PipelineContext:
     run_id: RunID
     run_type: RunType
     logger: LoggerPort
-    started_at: datetime = field(default_factory=current_utc_time)
+    started_at: datetime = field(default=MISSING_RUNTIME_TIMESTAMP)
     source_batch_id: BatchID | None = None
     replay_timestamp_anchor: datetime | None = None
     pipeline_name: str | None = None
@@ -106,18 +111,18 @@ class PipelineContext:
         run_id: RunID,
         run_type: RunType,
         logger: LoggerPort,
-        started_at: datetime | None = None,
+        started_at: datetime,
         source_batch_id: BatchID | None = None,
         replay_timestamp_anchor: datetime | None = None,
         pipeline_name: str | None = None,
     ) -> PipelineContext:
-        """Create a new PipelineContext with optional automatic timestamp.
+        """Create a new PipelineContext with explicit timestamp ownership.
 
         Args:
             run_id: Unique identifier for the pipeline run.
             run_type: Type of run (incremental, backfill, rebuild).
             logger: Structured logger port for pipeline-level logging.
-            started_at: Optional UTC start timestamp. Defaults to the current UTC time.
+            started_at: UTC start timestamp captured by the caller.
             replay_timestamp_anchor: Optional deterministic timestamp used for
                 replay-facing artifacts that must not drift between exact replays.
             pipeline_name: Optional pipeline name for context identification.
@@ -129,7 +134,7 @@ class PipelineContext:
             run_id=run_id,
             run_type=run_type,
             logger=logger,
-            started_at=started_at or current_utc_time(),
+            started_at=started_at,
             source_batch_id=source_batch_id,
             replay_timestamp_anchor=replay_timestamp_anchor,
             pipeline_name=pipeline_name,
@@ -176,7 +181,7 @@ class PipelineRunContext:
     pipeline_name: str
     run_id: RunID
     run_type: RunType
-    started_at: datetime = field(default_factory=current_utc_time)
+    started_at: datetime = field(default=MISSING_RUNTIME_TIMESTAMP)
     replay_of_run_id: str | None = None
     replay_of_manifest_id: str | None = None
     manifest_id: str | None = None

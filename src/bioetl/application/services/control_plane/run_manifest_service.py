@@ -12,7 +12,6 @@ from bioetl.application.services.control_plane._run_manifest_service_mixins impo
     RunManifestHydrationMixin,
     RunManifestPayloadMixin,
 )
-from bioetl.domain.context import current_utc_time
 from bioetl.domain.control_plane import (
     ReplayCapability,
     RunArtifactRef,
@@ -142,7 +141,9 @@ class RunManifestService(
             return self.clock.now()
         if self.created_at_factory is not None:
             return self.created_at_factory()
-        return current_utc_time()
+        raise RuntimeError(
+            "RunManifestService requires an explicit clock or created_at_factory"
+        )
 
     def create_manifest(self, request: RunManifestCreateSpec) -> RunManifest:
         """Build fingerprinted manifest and persist it through the port."""

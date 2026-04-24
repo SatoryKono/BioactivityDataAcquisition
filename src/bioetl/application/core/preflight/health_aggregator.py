@@ -15,7 +15,6 @@ from bioetl.application.core.preflight.health_aggregator_runtime import (
     normalize_data_source_status,
     resolve_probe_fallback_reason,
 )
-from bioetl.domain.context import current_utc_time
 from bioetl.domain.exceptions import InfrastructureError
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
 
@@ -72,10 +71,12 @@ class HealthAggregator:
                 component_results.append(build_parallel_exception_result(result))
             else:
                 component_results.append(result)
+        if self._clock is None:
+            raise RuntimeError("HealthAggregator requires an injected clock")
 
         report = HealthReport(
             results=component_results,
-            checked_at=self._clock.now() if self._clock is not None else current_utc_time(),
+            checked_at=self._clock.now(),
         )
         return report
 

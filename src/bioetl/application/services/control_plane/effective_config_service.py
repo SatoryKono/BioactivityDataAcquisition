@@ -196,6 +196,9 @@ def _validate_runtime_environment_provenance(
     required_persistence_profile: object,
 ) -> None:
     """Reject semantic env overrides outside the canonical allowlist."""
+    profile = _normalize_required_persistence_profile(required_persistence_profile)
+    if profile not in _STRICT_PERSISTENCE_PROFILES:
+        return
     env_overrides = _coerce_runtime_override_layer(runtime_overrides, "env")
     unsupported_keys = sorted(
         str(key)
@@ -204,15 +207,10 @@ def _validate_runtime_environment_provenance(
     )
     if not unsupported_keys:
         return
-    profile = _normalize_required_persistence_profile(required_persistence_profile)
-    profile_context = (
-        f" for required persistence profile '{profile}'"
-        if profile in _STRICT_PERSISTENCE_PROFILES
-        else ""
-    )
     raise ValueError(
         "runtime_overrides.env contains non-allowlisted semantic environment "
-        f"overrides{profile_context}: {', '.join(unsupported_keys)}"
+        f"overrides for required persistence profile '{profile}': "
+        f"{', '.join(unsupported_keys)}"
     )
 
 

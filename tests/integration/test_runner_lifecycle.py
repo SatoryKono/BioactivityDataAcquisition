@@ -31,6 +31,7 @@ from bioetl.application.services.medallion_lifecycle import (
 )
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.events import PipelineEvent
 from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.types import RunType
 
@@ -335,6 +336,108 @@ def mock_observer():
 @pytest.mark.integration
 class TestPipelineRunnerLifecycle:
     """Tests for PipelineRunner lifecycle invariants."""
+
+    @pytest.mark.asyncio
+    async def test_real_observer_emits_canonical_lifecycle_signals(
+        self,
+        mock_services_with_recorder,
+        mock_checkpoint_manager_with_recorder,
+        mock_executor_with_recorder,
+        mock_lifecycle_service,
+        mock_preflight_service,
+        mock_postrun_service,
+        mock_logger,
+    ):
+        """Runner lifecycle should publish canonical phase and terminal signals."""
+        config = PipelineConfig(
+            pipeline_name="test_observability",
+            provider="test",
+            entity_type="entity",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="test.silver",
+            ),
+        )
+        runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.REBUILD,
+            logger=mock_logger,
+        )
+        observer = PipelineObserver(
+            pipeline_name=config.pipeline_name,
+            run_id=context.run_id,
+            run_type=context.run_type,
+            metrics=mock_services_with_recorder.metrics,
+            logger=mock_logger,
+            tracer=_NOOP_TRACER,
+        )
+        lock_manager = MagicMock()
+        lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
+        lock_manager.__aexit__ = AsyncMock()
+
+        runner = PipelineRunner(
+            config=config,
+            runtime=runtime,
+            services=mock_services_with_recorder,
+            context=context,
+            executor=mock_executor_with_recorder,
+            checkpoint_manager=mock_checkpoint_manager_with_recorder,
+            shutdown_signal=MagicMock(),
+            logger=mock_logger,
+            lock_manager=lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_service=mock_lifecycle_service,
+            observer=observer,
+            tracer=_NOOP_TRACER,
+        )
+
+        await runner.run()
+
+        phase_metric_calls = [
+            call
+            for call in mock_services_with_recorder.metrics.observe_histogram.call_args_list
+            if call.args[0] == "bioetl_phase_duration_seconds"
+        ]
+        phase_statuses = {
+            (call.kwargs["labels"]["phase"], call.kwargs["labels"]["status"])
+            for call in phase_metric_calls
+        }
+        assert phase_statuses >= {
+            ("preflight", "success"),
+            ("lifecycle_clear", "success"),
+            ("execution", "success"),
+            ("postrun", "success"),
+            ("cleanup", "success"),
+        }
+
+        event_counter_calls = [
+            call
+            for call in mock_services_with_recorder.metrics.increment_counter.call_args_list
+            if call.args[0] == "bioetl_observability_events_total"
+        ]
+        emitted_events = {
+            call.kwargs["labels"]["event"] for call in event_counter_calls
+        }
+        assert {
+            PipelineEvent.START,
+            PipelineEvent.PREFLIGHT_STARTED,
+            PipelineEvent.PREFLIGHT_COMPLETED,
+            PipelineEvent.CLEANUP_COMPLETED,
+            PipelineEvent.COMPLETE,
+        } <= emitted_events
+
+        run_counter_call = next(
+            call
+            for call in mock_services_with_recorder.metrics.increment_counter.call_args_list
+            if call.args[0] == "bioetl_pipeline_runs_total"
+        )
+        assert run_counter_call.kwargs["labels"] == {
+            "pipeline": "test_observability",
+            "run_type": "rebuild",
+            "status": "success",
+        }
 
     @pytest.mark.asyncio
     async def test_rebuild_lifecycle_order(
