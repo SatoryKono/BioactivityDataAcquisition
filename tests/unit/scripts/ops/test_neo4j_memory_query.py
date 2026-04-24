@@ -1029,7 +1029,7 @@ def test_format_rows_renders_promotion_candidates_summary() -> None:
 
 def test_format_rows_renders_dead_code_candidates_summary() -> None:
     formatted = _format_rows(
-        "dead-code-candidates",
+        DEAD_CODE_CANDIDATES_MODE,
         ADAPTER_LAYER,
         [
             {
@@ -1042,10 +1042,10 @@ def test_format_rows_renders_dead_code_candidates_summary() -> None:
                 "recent_age_days": 420,
                 "only_test_referenced": True,
                 "deprecation_markers": ["deprecated", "legacy"],
-                "runtime_anchor_count": 0,
-                "config_anchor_count": 0,
-                "doc_anchor_count": 0,
-                "test_anchor_count": 3,
+                RUNTIME_ANCHOR_COUNT: 0,
+                CONFIG_ANCHOR_COUNT: 0,
+                DOC_ANCHOR_COUNT: 0,
+                TEST_ANCHOR_COUNT: 3,
                 "blocked_by_cycle": "",
             }
         ],
@@ -1062,7 +1062,7 @@ def test_format_rows_renders_dead_code_candidates_summary() -> None:
 
 def test_format_rows_renders_current_cycle_code_summary() -> None:
     formatted = _format_rows(
-        "current-cycle-code",
+        CURRENT_CYCLE_CODE_MODE,
         ADAPTER_LAYER,
         [
             {
@@ -1074,10 +1074,10 @@ def test_format_rows_renders_current_cycle_code_summary() -> None:
                 "cycle_score": 5,
                 "recent_age_days": 3,
                 "wip_markers": ["todo", "temporary"],
-                "runtime_anchor_count": 0,
-                "config_anchor_count": 0,
-                "doc_anchor_count": 1,
-                "test_anchor_count": 1,
+                RUNTIME_ANCHOR_COUNT: 0,
+                CONFIG_ANCHOR_COUNT: 0,
+                DOC_ANCHOR_COUNT: 1,
+                TEST_ANCHOR_COUNT: 1,
             }
         ],
     )

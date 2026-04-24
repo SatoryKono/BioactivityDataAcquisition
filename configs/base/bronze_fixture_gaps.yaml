@@ -1,11 +1,6 @@
-version: 1.1.0
-updated_at: "2026-03-25"
+version: 1.2.0
+updated_at: "2026-04-24"
 gaps:
-  chembl/assay:
-    status: in_progress
-    reason: "Bronze fixture snapshots are local runtime artifacts and are not versioned in Git."
-    owner: "data-platform"
-    resolution_plan: "Promote a bounded assay sample into tracked test fixtures and register it in bronze_fixture_manifest.yaml."
   chembl/assay_parameters:
     status: open
     reason: "No factual Bronze JSONL artifacts are currently available in data/input or data/output."
@@ -26,11 +21,6 @@ gaps:
     reason: "No factual Bronze JSONL artifacts are currently available in data/input or data/output."
     owner: "data-platform"
     resolution_plan: "Run pipeline or extract protein_classification records from VCR-backed requests."
-  chembl/publication:
-    status: in_progress
-    reason: "Bronze publication fixtures are local runtime artifacts and are not versioned in Git."
-    owner: "data-platform"
-    resolution_plan: "Move a bounded publication sample into tracked test fixtures or fixture manifest."
   chembl/publication_similarity:
     status: open
     reason: "No factual Bronze JSONL artifacts are currently available in data/input or data/output."
@@ -46,11 +36,6 @@ gaps:
     reason: "No factual Bronze JSONL artifacts are currently available in data/input or data/output."
     owner: "data-platform"
     resolution_plan: "Create fixture using subcellular-fraction datasource output from a controlled run."
-  chembl/target:
-    status: in_progress
-    reason: "Bronze fixture snapshots are local runtime artifacts and are not versioned in Git."
-    owner: "data-platform"
-    resolution_plan: "Introduce tracked lightweight fixture manifest or checked-in sample JSONL set for CI."
   chembl/target_component:
     status: open
     reason: "Bronze fixture snapshot was not materialized; only DQ report artifact existed."
@@ -66,11 +51,6 @@ gaps:
     reason: "Bronze publication fixtures are local runtime artifacts and are not versioned in Git."
     owner: "data-platform"
     resolution_plan: "Promote bounded OpenAlex publication sample into tracked fixture storage."
-  pubchem/compound:
-    status: open
-    reason: "Bronze fixture snapshot was not materialized; only DQ report artifact existed."
-    owner: "data-platform"
-    resolution_plan: "Materialize normalized PubChem adapter records into sample_*.jsonl from VCR-backed run."
   semanticscholar/publication:
     status: in_progress
     reason: "Bronze publication fixtures are local runtime artifacts and are not versioned in Git."
@@ -81,8 +61,3 @@ gaps:
     reason: "No Bronze input directory/JSONL fixture exists for idmapping pipeline."
     owner: "data-platform"
     resolution_plan: "Generate sample idmapping records from UniProt ID mapping VCR cassettes."
-  uniprot/protein:
-    status: open
-    reason: "Bronze fixture snapshot was not materialized; only DQ report artifact existed."
-    owner: "data-platform"
-    resolution_plan: "Extract representative UniProt protein records from VCR cassettes into sample_*.jsonl."
