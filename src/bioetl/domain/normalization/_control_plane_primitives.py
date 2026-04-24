@@ -7,7 +7,7 @@ from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import asdict, is_dataclass
 from datetime import UTC, date, datetime
 from enum import Enum
-from typing import cast
+from typing import TypeAlias, cast
 from uuid import UUID
 
 from bioetl.domain.normalization.json import (
@@ -15,7 +15,7 @@ from bioetl.domain.normalization.json import (
     serialize_json_canonical,
 )
 
-_MAPPING_STR_OBJECT = "Mapping[str, object]"
+_MAPPING_STR_OBJECT: TypeAlias = Mapping[str, object]
 
 
 def normalize_control_plane_uuid(value: UUID | str) -> str:

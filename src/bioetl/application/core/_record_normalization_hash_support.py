@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.config import ContentHashVersionPolicy
 from bioetl.domain.transformations import generate_content_hash
@@ -12,13 +12,22 @@ if TYPE_CHECKING:
     from bioetl.domain.types import JsonDict
 
 
+class _NormalizationProfileLike(Protocol):
+    """Minimal profile surface required for content-hash computation."""
+
+    set_like_fields: frozenset[str]
+    hash_included_fields: frozenset[str]
+    hash_excluded_fields: frozenset[str]
+    fields: frozenset[str]
+
+
 class RecordNormalizationHashSupportMixin:
     """Own rollout-aware content-hash policy resolution for normalized records."""
 
     content_hash_policy_by_version: ContentHashPolicyByVersion | None
     content_hash_include_fields: frozenset[str]
     content_hash_exclude_fields: frozenset[str]
-    profile: object
+    profile: _NormalizationProfileLike | None
     provider: str
 
     _TECHNICAL_HASH_POLICY_FIELDS = frozenset(

@@ -1,4 +1,4 @@
-"""Compatibility re-export facade for Silver finalization and metadata mixins."""
+"""Re-export facade for Silver finalization and metadata mixins."""
 
 from __future__ import annotations
 

@@ -9,6 +9,7 @@ from __future__ import annotations
 from importlib import import_module
 
 import click
+from click.core import Command, Context, Group, HelpFormatter
 
 from bioetl import __version__ as BIOETL_VERSION
 from bioetl.interfaces.cli.registry_helpers import (
@@ -103,7 +104,7 @@ _LAZY_COMMAND_SPECS: dict[str, tuple[str, str, str]] = {
 }
 
 
-def _load_cli_command(command_name: str) -> click.Command | click.Group | None:
+def _load_cli_command(command_name: str) -> Command | Group | None:
     """Import a CLI command module only when the command is requested."""
     spec = _LAZY_COMMAND_SPECS.get(command_name)
     if spec is None:
@@ -116,18 +117,18 @@ def _load_cli_command(command_name: str) -> click.Command | click.Group | None:
     return command
 
 
-class _LazyCliGroup(click.Group):
+class _LazyCliGroup(Group):  # type: ignore[misc]
     """Click group that resolves BioETL subcommands on demand."""
 
-    def list_commands(self, ctx: click.Context) -> list[str]:
+    def list_commands(self, ctx: Context) -> list[str]:
         del ctx
         return list(_LAZY_COMMAND_SPECS)
 
     def get_command(
         self,
-        ctx: click.Context,
+        ctx: Context,
         cmd_name: str,
-    ) -> click.Command | click.Group | None:
+    ) -> Command | Group | None:
         del ctx
         if cmd_name in self.commands:
             return self.commands[cmd_name]
@@ -139,8 +140,8 @@ class _LazyCliGroup(click.Group):
 
     def format_commands(
         self,
-        ctx: click.Context,
-        formatter: click.HelpFormatter,
+        ctx: Context,
+        formatter: HelpFormatter,
     ) -> None:
         del ctx
         rows = [
@@ -175,7 +176,7 @@ def build_cli_registry() -> object:
 @click.group(cls=_LazyCliGroup)  # type: ignore[untyped-decorator]
 @click.version_option(version=BIOETL_VERSION)  # type: ignore[untyped-decorator]
 @click.pass_context  # type: ignore[untyped-decorator]
-def cli(ctx: click.Context) -> None:
+def cli(ctx: Context) -> None:
     """BioETL - Bioactivity Data ETL Pipeline."""
     del ctx
 

@@ -32,6 +32,7 @@ for new imports.
 from __future__ import annotations
 
 from importlib import import_module
+from typing import TYPE_CHECKING
 
 _OBSERVABILITY_WORKFLOW_SERVICE_MODULE = (
     "bioetl.application.services.observability_workflow_service"
@@ -50,6 +51,71 @@ _RUN_MANIFEST_INSPECTION_SERVICE_MODULE = (
     "bioetl.application.services.control_plane.run_manifest_inspection_service"
 )
 _VACUUM_SERVICE_MODULE = "bioetl.application.services.vacuum_service"
+
+if TYPE_CHECKING:
+    from bioetl.application.services.audit_inspection_service import (
+        AuditInspectionResult,
+        AuditInspectionService,
+    )
+    from bioetl.application.services.bronze_cleanup_service import (
+        BronzeCleanupResult,
+        BronzeCleanupService,
+    )
+    from bioetl.application.services.checkpoint_service import CheckpointService
+    from bioetl.application.services.config_service import ConfigService
+    from bioetl.application.services.contract_migration_service import (
+        ContractMigrationAction,
+        ContractMigrationPlan,
+        ContractMigrationService,
+        ContractVersionTransition,
+    )
+    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+        RunManifestDiffEntry,
+        RunManifestDiffResult,
+        RunManifestInspectionResult,
+        RunManifestInspectionService,
+    )
+    from bioetl.application.services.execution.pipeline_run_lifecycle_service import (
+        PipelineRunLifecycleService,
+    )
+    from bioetl.application.services.execution.pipeline_runner_models import (
+        PipelineNotFoundError,
+        PipelineRunResult,
+        RunOptions,
+        RunResult,
+    )
+    from bioetl.application.services.execution.pipeline_runner_service import (
+        PipelineRunnerService,
+    )
+    from bioetl.application.services.export_models import (
+        ColumnInfo,
+        ExportOptions,
+        ExportResult,
+        TableInfo,
+        TablePreview,
+    )
+    from bioetl.application.services.export_service import ExportService
+    from bioetl.application.services.health_service import HealthService
+    from bioetl.application.services.lineage.lineage_inspection_service import (
+        LineageFragmentInspectionResult,
+        LineageInspectionService,
+        LineageNodeRelation,
+        LineageRunExplanationResult,
+        LineageTraceResult,
+    )
+    from bioetl.application.services.metrics_service import MetricsService
+    from bioetl.application.services.observability_workflow_service import (
+        AuditRunWorkflowResult,
+        CheckpointAuditWorkflowResult,
+        ObservabilityWorkflowService,
+        RunForensicDossierResult,
+    )
+    from bioetl.application.services.quarantine_service import QuarantineService
+    from bioetl.application.services.vacuum_service import (
+        TableVacuumResult,
+        VacuumAllResult,
+        VacuumService,
+    )
 
 _LAZY_EXPORT_MODULES: dict[str, str] = {
     "AuditInspectionResult": "bioetl.application.services.audit_inspection_service",

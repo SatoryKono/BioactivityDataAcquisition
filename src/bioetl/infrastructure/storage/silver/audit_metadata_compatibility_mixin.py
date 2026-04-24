@@ -1,4 +1,4 @@
-"""Compatibility mixin for Silver audit and metadata helpers."""
+"""Silver audit and metadata helper mixin."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ __all__ = ["SilverWriterAuditMetadataCompatibilityMixin"]
 
 
 class SilverWriterAuditMetadataCompatibilityMixin:
-    """Compatibility surface for Silver audit and metadata write helpers."""
+    """Delegation surface for Silver audit and metadata write helpers."""
 
     async def _log_silver_audit(
         self,
@@ -64,7 +64,7 @@ class SilverWriterAuditMetadataCompatibilityMixin:
         table_path: str,
         event_name: str,
     ) -> bool:
-        """Compatibility seam for metadata write short-circuit checks."""
+        """Delegation seam for metadata write short-circuit checks."""
         from bioetl.infrastructure.storage.silver.metadata_mixin import (
             SilverWriterMetadataMixin,
         )

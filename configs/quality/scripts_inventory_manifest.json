@@ -1,19 +1,19 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-24T14:05:25.983686+00:00",
+  "generated_at": "2026-04-24T15:03:46.202865+00:00",
   "summary": {
     "total_scripts": 444,
     "status_counts": {
       "active": 313,
       "legacy": 15,
-      "orphan": 98,
-      "unknown": 18
+      "orphan": 103,
+      "unknown": 13
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 1,
       "ci": 56,
-      "docs": 156,
+      "docs": 117,
       "scripts": 295,
       "skills": 8,
       "tests": 135
@@ -58,25 +58,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/sonarcloud.yml",
           "line": 64,
           "source_group": "ci",
           "text": "python3 scripts/ai/check_sonar_issues.py \\"
-        },
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 38,
-          "source_group": "docs",
-          "text": "| `scripts/ai/check_sonar_issues.py` | Python | SonarQube issue analysis | `python3 scripts/ai/check_sonar_issues.py` | CI, Developers | py-review-bot | active | .github/workflows/sonar.yml |"
-        },
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 76,
-          "source_group": "docs",
-          "text": "| **py-review-bot** | `scripts/ai/check_sonar_issues.py`, `scripts/engineering/qa/*` | Code review, PR analysis | High |"
         },
         {
           "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
@@ -107,6 +95,12 @@
           "line": 67,
           "source_group": "tests",
           "text": "{\"path\": \"scripts/ai/check_sonar_issues.py\"},"
+        },
+        {
+          "path": "tests/unit/scripts/test_sonar_issue_processor.py",
+          "line": 76,
+          "source_group": "tests",
+          "text": "\"path_prefix\": \"scripts/ai/check_sonar_issues.py\","
         }
       ]
     },
@@ -262,32 +256,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 14,
       "references": [
-        {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 17,
-          "source_group": "docs",
-          "text": "└── run-codex-impl.sh     └── run-gemini-impl.sh"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 131,
-          "source_group": "docs",
-          "text": "└── run-codex-impl.sh"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/TOOLS_COMPARISON.md",
-          "line": 18,
-          "source_group": "docs",
-          "text": "│   └── run-codex-impl.sh      │   └── run-gemini-impl.sh"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_SETUP_PLAN.md",
-          "line": 12,
-          "source_group": "docs",
-          "text": "│  └─ run-codex-impl.sh"
-        },
         {
           "path": "scripts/ai/codex/README.md",
           "line": 19,
@@ -311,6 +281,30 @@
           "line": 47,
           "source_group": "scripts",
           "text": "- `helper/run-codex-impl.sh` - Launch Codex"
+        },
+        {
+          "path": "scripts/ai/codex/md/CONSOLIDATION_COMPLETE.md",
+          "line": 78,
+          "source_group": "scripts",
+          "text": "4. **Launch** - helper/run-codex-impl.sh starts Codex"
+        },
+        {
+          "path": "scripts/ai/codex/md/CONSOLIDATION_COMPLETE.md",
+          "line": 115,
+          "source_group": "scripts",
+          "text": "Launch helper/run-codex-impl.sh"
+        },
+        {
+          "path": "scripts/ai/codex/md/CONSOLIDATION_COMPLETE.md",
+          "line": 136,
+          "source_group": "scripts",
+          "text": "### run-codex-impl.sh"
+        },
+        {
+          "path": "scripts/ai/codex/md/SETUP_COMPLETE.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "│   └── run-codex-impl.sh      # Codex launcher"
         }
       ]
     },
@@ -483,14 +477,8 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/HOW_TO_RUN_CODEX.md",
-          "line": 17,
-          "source_group": "docs",
-          "text": ".\\scripts\\ai\\codex\\launch-interactive.ps1"
-        },
         {
           "path": "scripts/ai/codex/run-codex.ps1",
           "line": 40,
@@ -516,55 +504,55 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 139,
+      "reference_count": 85,
       "references": [
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 11,
-          "source_group": "docs",
-          "text": "- run-codex.ps1           - run-gemini.ps1"
+          "path": "scripts/ai/codex/README.md",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "├── run-codex.ps1              ⭐ Main entry point (PowerShell) - Non-blocking!"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 27,
-          "source_group": "docs",
-          "text": ".\\run-codex.ps1                   # Start"
+          "path": "scripts/ai/codex/README.md",
+          "line": 33,
+          "source_group": "scripts",
+          "text": ".\\run-codex.ps1"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 28,
-          "source_group": "docs",
-          "text": ".\\run-codex.ps1 \"analyze code\"    # With prompt"
+          "path": "scripts/ai/codex/README.md",
+          "line": 34,
+          "source_group": "scripts",
+          "text": ".\\run-codex.ps1 \"analyze the code\""
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 56,
-          "source_group": "docs",
-          "text": ".\\run-codex.ps1 help              .\\run-codex.ps1"
+          "path": "scripts/ai/codex/README.md",
+          "line": 37,
+          "source_group": "scripts",
+          "text": ".\\run-codex.ps1 check"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
+          "path": "scripts/ai/codex/README.md",
+          "line": 38,
+          "source_group": "scripts",
+          "text": ".\\run-codex.ps1 setup"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
           "line": 57,
-          "source_group": "docs",
-          "text": ".\\run-codex.ps1 \"prompt\"          .\\run-codex.ps1 exec \"prompt\""
+          "source_group": "scripts",
+          "text": ".\\run-codex.ps1 help              # Show help"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
+          "path": "scripts/ai/codex/README.md",
           "line": 58,
-          "source_group": "docs",
-          "text": ".\\run-codex.ps1 check             .\\run-codex.ps1 setup"
+          "source_group": "scripts",
+          "text": ".\\run-codex.ps1                   # Interactive mode"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
+          "path": "scripts/ai/codex/README.md",
           "line": 59,
-          "source_group": "docs",
-          "text": ".\\run-codex.ps1 login             .\\run-codex.ps1 device-login"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 90,
-          "source_group": "docs",
-          "text": "| Entry | run-codex.ps1 | run-gemini.ps1 |"
+          "source_group": "scripts",
+          "text": ".\\run-codex.ps1 \"prompt\"          # With prompt"
         }
       ]
     },
@@ -573,55 +561,55 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 43,
+      "reference_count": 33,
       "references": [
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 12,
-          "source_group": "docs",
-          "text": "- run-codex.sh            - run-gemini.sh"
+          "path": "scripts/ai/codex/README.md",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "├── run-codex.sh               ⭐ Main entry point (WSL/Bash)"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 125,
-          "source_group": "docs",
-          "text": "├── run-codex.sh ⭐ Main (WSL)"
+          "path": "scripts/ai/codex/README.md",
+          "line": 48,
+          "source_group": "scripts",
+          "text": "bash run-codex.sh check"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/SYNC_COMPLETE.md",
-          "line": 99,
-          "source_group": "docs",
-          "text": "├── run-codex.sh ✨        ├── run-gemini.sh ✨"
+          "path": "scripts/ai/codex/README.md",
+          "line": 49,
+          "source_group": "scripts",
+          "text": "bash run-codex.sh setup"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/TOOLS_COMPARISON.md",
-          "line": 12,
-          "source_group": "docs",
-          "text": "├── run-codex.sh               ├── run-gemini.sh"
+          "path": "scripts/ai/codex/README.md",
+          "line": 50,
+          "source_group": "scripts",
+          "text": "bash run-codex.sh \"analyze the code\""
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/HOW_TO_RUN_CODEX.md",
-          "line": 30,
-          "source_group": "docs",
-          "text": "bash run-codex.sh start"
+          "path": "scripts/ai/codex/README.md",
+          "line": 71,
+          "source_group": "scripts",
+          "text": "bash run-codex.sh help            # Show help"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/HOW_TO_RUN_CODEX.md",
-          "line": 36,
-          "source_group": "docs",
-          "text": "wsl -d Ubuntu bash -i -c \"cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/codex && ./run-codex.sh start\""
+          "path": "scripts/ai/codex/README.md",
+          "line": 72,
+          "source_group": "scripts",
+          "text": "bash run-codex.sh                 # Interactive mode"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_SETUP_PLAN.md",
-          "line": 9,
-          "source_group": "docs",
-          "text": "├─ run-codex.sh (bash)"
+          "path": "scripts/ai/codex/README.md",
+          "line": 73,
+          "source_group": "scripts",
+          "text": "bash run-codex.sh \"prompt\"        # With prompt"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_SETUP_SUMMARY.md",
-          "line": 8,
-          "source_group": "docs",
-          "text": "- **Точка входа:** `scripts/ai/codex/run-codex.sh`"
+          "path": "scripts/ai/codex/README.md",
+          "line": 74,
+          "source_group": "scripts",
+          "text": "bash run-codex.sh exec \"prompt\"   # Auto-exec mode"
         }
       ]
     },
@@ -663,14 +651,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 50,
-          "source_group": "docs",
-          "text": "| `scripts/ai/codex/setup_agents.sh` | Bash | Codex agent setup | `bash scripts/ai/codex/setup_agents.sh` | Codex Agents | codex-setup-agent | active | .codex/settings.json |"
-        },
         {
           "path": "scripts/ops/launchers/codex/setup_agents.sh",
           "line": 8,
@@ -684,20 +666,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 51,
-          "source_group": "docs",
-          "text": "| `scripts/ai/codex/setup_mcp.py` | Python | MCP configuration | `python3 scripts/ai/codex/setup_mcp.py` | MCP Agents | mcp-config-agent | active | .codex/skills/*/agents/openai.yaml |"
-        },
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 83,
-          "source_group": "docs",
-          "text": "| **mcp-config-agent** | `scripts/ai/codex/setup_mcp.py` | MCP configuration | High |"
-        },
         {
           "path": "scripts/ai/gemini/helper/ensure-mcp.sh",
           "line": 9,
@@ -723,20 +693,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 52,
-          "source_group": "docs",
-          "text": "| `scripts/ai/codex/setup_skills.sh` | Bash | Skill setup | `bash scripts/ai/codex/setup_skills.sh` | Skill Agents | skill-manager-agent | active | .codex/skills/global/.system/skill-creator/agents |"
-        },
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 84,
-          "source_group": "docs",
-          "text": "| **skill-manager-agent** | `scripts/ai/codex/setup_skills.sh` | Skill management | High |"
-        },
         {
           "path": "scripts/ops/launchers/codex/setup_skills.sh",
           "line": 8,
@@ -857,38 +815,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 6,
       "references": [
-        {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 17,
-          "source_group": "docs",
-          "text": "└── run-codex-impl.sh     └── run-gemini-impl.sh"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 144,
-          "source_group": "docs",
-          "text": "└── run-gemini-impl.sh"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/GEMINI_UPDATED.md",
-          "line": 24,
-          "source_group": "docs",
-          "text": "#### 3. **run-gemini-impl.sh** (Enhanced Launcher)"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/GEMINI_UPDATED.md",
-          "line": 135,
-          "source_group": "docs",
-          "text": "└── run-gemini-impl.sh ✨ ENHANCED"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/TOOLS_COMPARISON.md",
-          "line": 18,
-          "source_group": "docs",
-          "text": "│   └── run-codex-impl.sh      │   └── run-gemini-impl.sh"
-        },
         {
           "path": "scripts/ai/gemini/README.md",
           "line": 20,
@@ -906,6 +834,24 @@
           "line": 138,
           "source_group": "scripts",
           "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" \"$@\""
+        },
+        {
+          "path": "scripts/ai/gemini/run-gemini.sh",
+          "line": 148,
+          "source_group": "scripts",
+          "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" --prompt \"$*\""
+        },
+        {
+          "path": "scripts/ai/gemini/run-gemini.sh",
+          "line": 158,
+          "source_group": "scripts",
+          "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" --prompt \"$*\" --approval-mode yolo"
+        },
+        {
+          "path": "scripts/ai/gemini/run-gemini.sh",
+          "line": 165,
+          "source_group": "scripts",
+          "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" --prompt \"$COMMAND $*\""
         }
       ]
     },
@@ -922,55 +868,55 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 55,
+      "reference_count": 9,
       "references": [
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
+          "path": "scripts/ai/gemini/README.md",
           "line": 11,
-          "source_group": "docs",
-          "text": "- run-codex.ps1           - run-gemini.ps1"
+          "source_group": "scripts",
+          "text": "├── run-gemini.ps1                 # PowerShell entrypoint, delegates to WSL"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 36,
-          "source_group": "docs",
-          "text": ".\\run-gemini.ps1                  # Start"
+          "path": "scripts/ai/gemini/README.md",
+          "line": 29,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1 check"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 37,
-          "source_group": "docs",
-          "text": ".\\run-gemini.ps1 \"what is AI?\"    # With prompt"
+          "path": "scripts/ai/gemini/README.md",
+          "line": 30,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1 setup"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 65,
-          "source_group": "docs",
-          "text": ".\\run-gemini.ps1 help             .\\run-gemini.ps1"
+          "path": "scripts/ai/gemini/README.md",
+          "line": 32,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 66,
-          "source_group": "docs",
-          "text": ".\\run-gemini.ps1 \"prompt\"         .\\run-gemini.ps1 check"
+          "path": "scripts/ai/gemini/SETUP_COMPLETE.md",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "├── run-gemini.ps1"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 67,
-          "source_group": "docs",
-          "text": ".\\run-gemini.ps1 setup"
+          "path": "scripts/ai/gemini/SETUP_COMPLETE.md",
+          "line": 42,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1 check"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 90,
-          "source_group": "docs",
-          "text": "| Entry | run-codex.ps1 | run-gemini.ps1 |"
+          "path": "scripts/ai/gemini/SETUP_COMPLETE.md",
+          "line": 43,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1 setup"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 137,
-          "source_group": "docs",
-          "text": "├── run-gemini.ps1 ⭐ Main (Windows)"
+          "path": "scripts/ai/gemini/SETUP_COMPLETE.md",
+          "line": 44,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\run-gemini.ps1 \"inspect the repository\""
         }
       ]
     },
@@ -979,44 +925,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 36,
+      "reference_count": 30,
       "references": [
-        {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 12,
-          "source_group": "docs",
-          "text": "- run-codex.sh            - run-gemini.sh"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/AI_TOOLS_COMPLETE.md",
-          "line": 138,
-          "source_group": "docs",
-          "text": "├── run-gemini.sh ⭐ Main (WSL)"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/GEMINI_UPDATED.md",
-          "line": 17,
-          "source_group": "docs",
-          "text": "#### 2. **run-gemini.sh** (Enhanced WSL Entry)"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/GEMINI_UPDATED.md",
-          "line": 130,
-          "source_group": "docs",
-          "text": "├── run-gemini.sh ✨ ENHANCED"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/SYNC_COMPLETE.md",
-          "line": 99,
-          "source_group": "docs",
-          "text": "├── run-codex.sh ✨        ├── run-gemini.sh ✨"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/TOOLS_COMPARISON.md",
-          "line": 12,
-          "source_group": "docs",
-          "text": "├── run-codex.sh               ├── run-gemini.sh"
-        },
         {
           "path": "scripts/ai/gemini/README.md",
           "line": 12,
@@ -1028,6 +938,42 @@
           "line": 38,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini/run-gemini.sh check"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 39,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/gemini/run-gemini.sh setup"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 41,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/gemini/run-gemini.sh"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 47,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/gemini/run-gemini.sh                # Interactive Gemini CLI"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 48,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/gemini/run-gemini.sh \"prompt\"      # Headless prompt mode"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 49,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/gemini/run-gemini.sh prompt \"...\"  # Explicit headless prompt"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 50,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/gemini/run-gemini.sh exec \"...\"    # Headless YOLO approvals"
         }
       ]
     },
@@ -2386,56 +2332,18 @@
     {
       "path": "scripts/ai/mistrallvibe/helper/check-env.ps1",
       "type": "ps1",
-      "status": "unknown",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_FINAL_REPORT.md",
-          "line": 148,
-          "source_group": "docs",
-          "text": "- `./scripts/ai/mistrallvibe/helper/check-env.ps1`"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_SETUP_PLAN.md",
-          "line": 160,
-          "source_group": "docs",
-          "text": "2. ✅ `./scripts/ai/mistrallvibe/helper/check-env.ps1` → добавить таймауты"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/mistrallvibe/helper/check-env.sh",
       "type": "sh",
-      "status": "unknown",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 4,
-      "references": [
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_FINAL_REPORT.md",
-          "line": 146,
-          "source_group": "docs",
-          "text": "- `./scripts/ai/mistrallvibe/helper/check-env.sh`"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_SETUP_PLAN.md",
-          "line": 64,
-          "source_group": "docs",
-          "text": "**Файл:** `./scripts/ai/mistrallvibe/helper/check-env.sh`"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_SETUP_PLAN.md",
-          "line": 159,
-          "source_group": "docs",
-          "text": "1. ✅ `./scripts/ai/mistrallvibe/helper/check-env.sh` → добавить таймауты"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_SETUP_SUMMARY.md",
-          "line": 26,
-          "source_group": "docs",
-          "text": "**Файл:** `./scripts/ai/mistrallvibe/helper/check-env.sh`"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/mistrallvibe/helper/run-mistrallvibe-impl.ps1",
@@ -2458,26 +2366,8 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_COMPLETION_REPORT.md",
-          "line": 21,
-          "source_group": "docs",
-          "text": "#### Фаза 4: Таймауты в `setup-env.ps1` ✅"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_FINAL_REPORT.md",
-          "line": 149,
-          "source_group": "docs",
-          "text": "- `./scripts/ai/mistrallvibe/helper/setup-env.ps1`"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_SETUP_PLAN.md",
-          "line": 162,
-          "source_group": "docs",
-          "text": "4. ✅ `./scripts/ai/mistrallvibe/helper/setup-env.ps1` → добавить таймауты"
-        },
         {
           "path": "scripts/ai/mistrallvibe/run-vibe.ps1",
           "line": 26,
@@ -2491,7 +2381,7 @@
       "type": "sh",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
@@ -2504,30 +2394,6 @@
           "line": 55,
           "source_group": "docs",
           "text": "bash scripts/ai/mistrallvibe/helper/setup-env.sh"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_FINAL_REPORT.md",
-          "line": 147,
-          "source_group": "docs",
-          "text": "- `./scripts/ai/mistrallvibe/helper/setup-env.sh`"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_SETUP_PLAN.md",
-          "line": 81,
-          "source_group": "docs",
-          "text": "**Файл:** `./scripts/ai/mistrallvibe/helper/setup-env.sh`"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_SETUP_PLAN.md",
-          "line": 161,
-          "source_group": "docs",
-          "text": "3. ✅ `./scripts/ai/mistrallvibe/helper/setup-env.sh` → добавить таймауты и retry"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_SETUP_SUMMARY.md",
-          "line": 44,
-          "source_group": "docs",
-          "text": "**Файл:** `./scripts/ai/mistrallvibe/helper/setup-env.sh`"
         }
       ]
     },
@@ -2536,50 +2402,8 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/HOW_TO_RUN_VIBE.md",
-          "line": 17,
-          "source_group": "docs",
-          "text": ".\\scripts\\ai\\mistrallvibe\\launch-interactive.ps1"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_COMPLETION_REPORT.md",
-          "line": 68,
-          "source_group": "docs",
-          "text": ".\\scripts\\ai\\mistrallvibe\\launch-interactive.ps1"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_FINAL_REPORT.md",
-          "line": 99,
-          "source_group": "docs",
-          "text": ".\\scripts\\ai\\mistrallvibe\\launch-interactive.ps1"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_FINAL_REPORT.md",
-          "line": 154,
-          "source_group": "docs",
-          "text": "- `./scripts/ai/mistrallvibe/launch-interactive.ps1`"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_SETUP_PLAN.md",
-          "line": 137,
-          "source_group": "docs",
-          "text": "**Новый файл:** `./scripts/ai/mistrallvibe/launch-interactive.ps1`"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_SETUP_PLAN.md",
-          "line": 167,
-          "source_group": "docs",
-          "text": "1. ✅ `./scripts/ai/mistrallvibe/launch-interactive.ps1` → интерактивный запуск"
-        },
-        {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_SETUP_SUMMARY.md",
-          "line": 118,
-          "source_group": "docs",
-          "text": "**Новый файл:** `./scripts/ai/mistrallvibe/launch-interactive.ps1`"
-        },
         {
           "path": "scripts/ai/mistrallvibe/helper/setup-env.ps1",
           "line": 178,
@@ -2593,7 +2417,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 33,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
@@ -2614,34 +2438,34 @@
           "text": ".\\scripts\\ai\\mistrallvibe\\run-vibe.ps1 \"inspect the failing architecture tests\""
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/HOW_TO_RUN_VIBE.md",
-          "line": 46,
-          "source_group": "docs",
-          "text": ".\\scripts\\ai\\mistrallvibe\\run-vibe.ps1 \"анализируй код в папке src\""
+          "path": "scripts/ai/mistrallvibe/README.md",
+          "line": 11,
+          "source_group": "scripts",
+          "text": ".\\run-vibe.ps1"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/HOW_TO_RUN_VIBE.md",
-          "line": 61,
-          "source_group": "docs",
-          "text": ".\\scripts\\ai\\mistrallvibe\\run-vibe.ps1 check"
+          "path": "scripts/ai/mistrallvibe/README.md",
+          "line": 69,
+          "source_group": "scripts",
+          "text": ".\\run-vibe.ps1"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/HOW_TO_RUN_VIBE.md",
-          "line": 73,
-          "source_group": "docs",
-          "text": ".\\scripts\\ai\\mistrallvibe\\run-vibe.ps1 setup"
+          "path": "scripts/ai/mistrallvibe/helper/check-env.ps1",
+          "line": 3,
+          "source_group": "scripts",
+          "text": "# Called by: run-vibe.ps1"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/HOW_TO_RUN_VIBE.md",
-          "line": 87,
-          "source_group": "docs",
-          "text": ".\\scripts\\ai\\mistrallvibe\\run-vibe.ps1 check"
+          "path": "scripts/ai/mistrallvibe/helper/check-env.ps1",
+          "line": 122,
+          "source_group": "scripts",
+          "text": "Write-Warn \"Some components need setup - run: .\\run-vibe.ps1 setup\""
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/HOW_TO_RUN_VIBE.md",
-          "line": 90,
-          "source_group": "docs",
-          "text": ".\\scripts\\ai\\mistrallvibe\\run-vibe.ps1 setup"
+          "path": "scripts/ai/mistrallvibe/helper/run-mistrallvibe-impl.ps1",
+          "line": 101,
+          "source_group": "scripts",
+          "text": "Write-Info \"Start with: .\\run-vibe.ps1\""
         }
       ]
     },
@@ -2650,7 +2474,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 24,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
@@ -2677,28 +2501,28 @@
           "text": "bash scripts/ai/mistrallvibe/run-vibe.sh --prompt \"fix the failing architecture test\" --max-turns 5"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/HOW_TO_RUN_VIBE.md",
-          "line": 32,
-          "source_group": "docs",
-          "text": "bash run-vibe.sh start"
+          "path": "scripts/ai/mistrallvibe/README.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "./run-vibe.sh"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/HOW_TO_RUN_VIBE.md",
-          "line": 38,
-          "source_group": "docs",
-          "text": "wsl -d Ubuntu bash -i -c \"cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mistrallvibe && bash run-vibe.sh start\""
+          "path": "scripts/ai/mistrallvibe/README.md",
+          "line": 24,
+          "source_group": "scripts",
+          "text": "./run-vibe.sh check                # Verify setup"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/HOW_TO_RUN_VIBE.md",
-          "line": 52,
-          "source_group": "docs",
-          "text": "./run-vibe.sh \"inspect the test failures\""
+          "path": "scripts/ai/mistrallvibe/README.md",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "./run-vibe.sh setup                # Install/configure Vibe"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/HOW_TO_RUN_VIBE.md",
-          "line": 114,
-          "source_group": "docs",
-          "text": "bash run-vibe.sh start"
+          "path": "scripts/ai/mistrallvibe/README.md",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "./run-vibe.sh                      # Interactive mode"
         }
       ]
     },
@@ -2910,7 +2734,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 39,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/02-architecture/05-composition-layer.md",
@@ -2955,10 +2779,10 @@
           "text": "<svg id=\"my-svg\" width=\"100%\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" style=\"max-width: 3921.5px; background-color: white;\" viewBox=\"-50 -16 3921.5 2806\" role=\"gr"
         },
         {
-          "path": "docs/plans/consolidated-open-tasks-plan-2026-03-21.md",
-          "line": 141,
-          "source_group": "docs",
-          "text": "- `src/bioetl/composition/bootstrap/runtime/runner_assembly.py`"
+          "path": "tests/architecture/test_composite_cli_runtime_config_boundaries.py",
+          "line": 30,
+          "source_group": "tests",
+          "text": "Path(\"bioetl/composition/bootstrap/runtime/runner_assembly.py\"),"
         }
       ]
     },
@@ -3055,7 +2879,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
@@ -3088,12 +2912,6 @@
           "text": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\ai\\vibe\\launch.ps1 \"inspect the failing architecture tests\""
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_SETUP_PLAN.md",
-          "line": 25,
-          "source_group": "docs",
-          "text": "├─ Делегирует → scripts/ai/vibe/launch.ps1"
-        },
-        {
           "path": "scripts/ai/mistrallvibe/README.md",
           "line": 45,
           "source_group": "scripts",
@@ -3104,6 +2922,12 @@
           "line": 50,
           "source_group": "scripts",
           "text": "path is delegated to `scripts/ai/vibe/launch.sh` and `scripts/ai/vibe/launch.ps1`."
+        },
+        {
+          "path": "scripts/ai/mistrallvibe/run-vibe.ps1",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "$CanonicalLauncher = (Join-Path $ScriptDir \"..\\vibe\\launch.ps1\")"
         }
       ]
     },
@@ -3112,7 +2936,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 10,
       "references": [
         {
           "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
@@ -3139,120 +2963,46 @@
           "text": "bash scripts/ai/vibe/launch.sh --prompt \"fix the failing architecture test\" --max-turns 5"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_COMPLETION_REPORT.md",
-          "line": 26,
-          "source_group": "docs",
-          "text": "#### Фаза 4+: Таймауты в `vibe/launch.sh` ✅"
+          "path": "scripts/ai/mistrallvibe/README.md",
+          "line": 44,
+          "source_group": "scripts",
+          "text": "- `scripts/ai/vibe/launch.sh` - canonical WSL/Linux entrypoint"
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_FINAL_REPORT.md",
-          "line": 30,
-          "source_group": "docs",
-          "text": "**Фаза 4: Таймауты в vibe/launch.sh** ✅"
+          "path": "scripts/ai/mistrallvibe/README.md",
+          "line": 50,
+          "source_group": "scripts",
+          "text": "path is delegated to `scripts/ai/vibe/launch.sh` and `scripts/ai/vibe/launch.ps1`."
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_FINAL_REPORT.md",
-          "line": 150,
-          "source_group": "docs",
-          "text": "- `./scripts/ai/vibe/launch.sh`"
+          "path": "scripts/ai/mistrallvibe/run-vibe.sh",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "CANONICAL_LAUNCHER=\"${REPO_ROOT}/scripts/ai/vibe/launch.sh\""
         },
         {
-          "path": "docs/99-archive/root-status-artifacts/ai-runtime-setup/MISTRAL_VIBE_SETUP_PLAN.md",
-          "line": 27,
-          "source_group": "docs",
-          "text": "│  ├─ Делегирует → scripts/ai/vibe/launch.sh (canonical)"
+          "path": "scripts/ai/mistrallvibe/run-vibe.sh",
+          "line": 36,
+          "source_group": "scripts",
+          "text": "All other arguments are forwarded to scripts/ai/vibe/launch.sh."
         }
       ]
     },
     {
       "path": "scripts/check_cli_parity.py",
       "type": "py",
-      "status": "unknown",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 9,
-      "references": [
-        {
-          "path": "docs/reports/audit-issues/implementation-plans.md",
-          "line": 475,
-          "source_group": "docs",
-          "text": "1. **Create Parity Check Script**: `scripts/check_cli_parity.py`"
-        },
-        {
-          "path": "docs/reports/audit-issues/issue-005-progress.md",
-          "line": 49,
-          "source_group": "docs",
-          "text": "**Script**: `scripts/check_cli_parity.py`"
-        },
-        {
-          "path": "docs/reports/audit-issues/issue-005-progress.md",
-          "line": 97,
-          "source_group": "docs",
-          "text": "- `scripts/check_cli_parity.py` - CLI parity verification script"
-        },
-        {
-          "path": "docs/reports/audit-issues/issue-005-progress.md",
-          "line": 228,
-          "source_group": "docs",
-          "text": "- **Parity Script**: scripts/check_cli_parity.py"
-        },
-        {
-          "path": "docs/reports/audit-issues/issue-005-progress.md",
-          "line": 246,
-          "source_group": "docs",
-          "text": "- `scripts/check_cli_parity.py` - CLI parity verification script (150 lines)"
-        },
-        {
-          "path": "docs/reports/audit-issues/issue-005-progress.md",
-          "line": 272,
-          "source_group": "docs",
-          "text": "python3 scripts/check_cli_parity.py"
-        },
-        {
-          "path": "docs/reports/audit-issues/issue-005-progress.md",
-          "line": 275,
-          "source_group": "docs",
-          "text": "python3 scripts/check_cli_parity.py && echo \"✅ Parity check passed\" || echo \"❌ Parity check failed\""
-        },
-        {
-          "path": "docs/reports/audit-issues/issue-005-progress.md",
-          "line": 278,
-          "source_group": "docs",
-          "text": "python3 scripts/check_cli_parity.py | grep \"Missing commands\""
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/check_dq_dsl_parity.py",
       "type": "py",
-      "status": "unknown",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 4,
-      "references": [
-        {
-          "path": "docs/reports/audit-issues/implementation-plans.md",
-          "line": 98,
-          "source_group": "docs",
-          "text": "1. **Create Parity Check Script**: `scripts/check_dq_dsl_parity.py`"
-        },
-        {
-          "path": "docs/reports/audit-issues/issue-001-analysis.md",
-          "line": 180,
-          "source_group": "docs",
-          "text": "# scripts/check_dq_dsl_parity.py"
-        },
-        {
-          "path": "docs/reports/audit-issues/issue-001-progress.md",
-          "line": 59,
-          "source_group": "docs",
-          "text": "- `scripts/check_dq_dsl_parity.py` - Parity verification script"
-        },
-        {
-          "path": "docs/reports/audit-issues/issue-001-progress.md",
-          "line": 121,
-          "source_group": "docs",
-          "text": "- `scripts/check_dq_dsl_parity.py` (New file)"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/check_entity_config_parity.py",
@@ -3313,7 +3063,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 34,
+      "reference_count": 30,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -3484,7 +3234,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 11,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -3523,16 +3273,16 @@
           "text": "- запуск `check_diagram_artifacts.py` (DIAG-T010/T011/T012);"
         },
         {
-          "path": "docs/reports/evidence/project-diagram-artifact-surface/artifact-surface-reduction-need/02-evidence/artifact-surface-reduction-need/EV-artifact-surface-reduction-need-svg-primary-contract-is-already-rationalized.yaml",
-          "line": 7,
-          "source_group": "docs",
-          "text": "- scripts/diagrams/check_diagram_artifacts.py"
+          "path": "scripts/diagrams/README.md",
+          "line": 27,
+          "source_group": "scripts",
+          "text": "| `check-artifacts` | `check_diagram_artifacts.py` | Check required SVG artifacts and optional PNG compatibility artifacts |"
         },
         {
-          "path": "docs/reports/evidence/project-diagram-artifact-surface/artifact-surface-reduction-need/02-evidence/artifact-surface-reduction-need/EV-artifact-surface-svg-primary-contract.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"scripts/diagrams/check_diagram_artifacts.py; scripts/diagrams/README.md; docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md; .github/workflows/docs.yml\""
+          "path": "scripts/diagrams/__main__.py",
+          "line": 57,
+          "source_group": "scripts",
+          "text": "\"check-artifacts\": \"check_diagram_artifacts.py\","
         }
       ]
     },
@@ -3747,20 +3497,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/EV-diagram-state-tooling-and-validator-scope.yaml",
-          "line": 9,
-          "source_group": "docs",
-          "text": "- scripts/diagrams/diagram_paths.py"
-        },
-        {
-          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
-          "line": 8,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/diagram_paths.py`"
-        },
         {
           "path": "scripts/diagrams/README.md",
           "line": 101,
@@ -3930,38 +3668,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 8,
       "references": [
-        {
-          "path": "docs/reports/evidence/project-diagram-artifact-surface/artifact-surface-reduction-need/02-evidence/artifact-surface-reduction-need/EV-artifact-surface-bundles-embed-svg-and-fall-back-to-png.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"scripts/diagrams/generate_all_bundles.py; docs/02-architecture/diagrams/bundles/architecture.bundle.md; docs/02-architecture/diagrams/bundles/class.bundle.md; scripts/diagrams/README.md\""
-        },
-        {
-          "path": "docs/reports/evidence/project-diagram-artifact-surface/artifact-surface-reduction-need/02-evidence/artifact-surface-reduction-need/EV-artifact-surface-reduction-need-bundles-now-render-svg-first.yaml",
-          "line": 6,
-          "source_group": "docs",
-          "text": "- scripts/diagrams/generate_all_bundles.py"
-        },
-        {
-          "path": "docs/reports/evidence/project-diagram-artifact-surface/diagram-publication-state/02-evidence/diagram-publication-state/EV-diagram-publication-state-svg-primary-bundle-contract.yaml",
-          "line": 6,
-          "source_group": "docs",
-          "text": "- scripts/diagrams/generate_all_bundles.py"
-        },
-        {
-          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
-          "line": 10,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/generate_all_bundles.py`"
-        },
-        {
-          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/RAW-diagram-state-tooling-tests.md",
-          "line": 26,
-          "source_group": "docs",
-          "text": "- `generate_all_bundles.py` builds bundle markdown for `foundation`, `architecture`, `views`, and `class-diagrams`."
-        },
         {
           "path": "scripts/diagrams/README.md",
           "line": 98,
@@ -3979,6 +3687,36 @@
           "line": 118,
           "source_group": "scripts",
           "text": "- When bundle drift is corrected, prefer regenerating the narrow affected collection via `generate_all_bundles.py --collection <name>` instead of broad refresh of every derived artifact."
+        },
+        {
+          "path": "scripts/diagrams/generate_architecture_bundle.py",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "- scripts/diagrams/generate_all_bundles.py --collection architecture"
+        },
+        {
+          "path": "scripts/diagrams/generate_views_bundle.py",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "- scripts/diagrams/generate_all_bundles.py --collection views"
+        },
+        {
+          "path": "tests/architecture/test_diagram_bundle_generator_contracts.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "module_path = repo_root / \"scripts\" / \"diagrams\" / \"generate_all_bundles.py\""
+        },
+        {
+          "path": "tests/architecture/test_diagram_bundle_generator_contracts.py",
+          "line": 79,
+          "source_group": "tests",
+          "text": "assert \"generate_all_bundles.py --collection architecture\" in content"
+        },
+        {
+          "path": "tests/architecture/test_diagram_bundle_generator_contracts.py",
+          "line": 89,
+          "source_group": "tests",
+          "text": "assert \"generate_all_bundles.py --collection views\" in content"
         }
       ]
     },
@@ -4268,7 +4006,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 42,
+      "reference_count": 41,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -4712,7 +4450,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
@@ -4745,12 +4483,6 @@
           "text": "`uniform_diagram_sizes.py` использовать только точечно и только после ручной проверки,"
         },
         {
-          "path": "docs/reports/evidence/project-diagrams-refactor/diagram-state/02-evidence/diagram-state/EV-diagram-state-uniform-sizing-supports-class-diagram-maintenance.yaml",
-          "line": 6,
-          "source_group": "docs",
-          "text": "- scripts/diagrams/uniform_diagram_sizes.py"
-        },
-        {
           "path": "scripts/diagrams/README.md",
           "line": 44,
           "source_group": "scripts",
@@ -4761,6 +4493,12 @@
           "line": 70,
           "source_group": "scripts",
           "text": "\"fix-sizes\": \"uniform_diagram_sizes.py\","
+        },
+        {
+          "path": "tests/architecture/test_uniform_diagram_group_width.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "\"\"\"Load scripts/diagrams/uniform_diagram_sizes.py as a module.\"\"\""
         }
       ]
     },
@@ -4771,7 +4509,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 19,
+      "reference_count": 16,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -4828,7 +4566,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 91,
+      "reference_count": 90,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -4914,7 +4652,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 13,
       "references": [
         {
           "path": "docs/00-project/governance/01-documentation-governance-style-guide.md",
@@ -4927,18 +4665,6 @@
           "line": 294,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/check_doc_drift.py --freshness"
-        },
-        {
-          "path": "docs/reports/evidence/documentation-cascade-decisions/02-evidence/documentation-cascade-decisions/EV-documentation-cascade-orchestration-runtime-mirror-drift.yaml",
-          "line": 10,
-          "source_group": "docs",
-          "text": "- \"Runtime mirror parity policy in `scripts/docs/check_doc_drift.py` reflects active governance.\""
-        },
-        {
-          "path": "docs/reports/evidence/project-test-health/06-backlog/BACKLOG-project-test-health-implementation-2026-03-20.md",
-          "line": 243,
-          "source_group": "docs",
-          "text": "- `uv run python scripts/docs/check_doc_drift.py --runtime-mirrors --freshness`"
         },
         {
           "path": "scripts/docs/checks/check_drift.py",
@@ -4963,6 +4689,18 @@
           "line": 18,
           "source_group": "scripts",
           "text": "python scripts/check_doc_drift.py --classes     # Only class drift"
+        },
+        {
+          "path": "scripts/docs/checks/check_drift.py",
+          "line": 19,
+          "source_group": "scripts",
+          "text": "python scripts/check_doc_drift.py --modules     # Only module path drift"
+        },
+        {
+          "path": "scripts/docs/checks/check_drift.py",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "python scripts/check_doc_drift.py --runtime-mirrors"
         }
       ]
     },
@@ -4971,7 +4709,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 35,
+      "reference_count": 25,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -5010,16 +4748,16 @@
           "text": "python scripts/docs/check_doc_links.py"
         },
         {
-          "path": "docs/reports/audits/documentation-remediation-plan.md",
-          "line": 237,
-          "source_group": "docs",
-          "text": "- Review `scripts/check_doc_links.py`"
+          "path": "scripts/docs/README.md",
+          "line": 37,
+          "source_group": "scripts",
+          "text": "The only notable special case is `scripts/docs/check_doc_links.py`: it remains an"
         },
         {
-          "path": "docs/reports/evidence/documentation-internal-surface-governance/02-evidence/internal-surface-governance/EV-documentation-internal-surface-governance-kpi-is-healthy-under-current-model.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"scripts/docs/report_docs_kpi.py output (2026-03-23); scripts/docs/check_doc_links.py output (2026-03-23); tests/architecture/test_documentation_sync.py\""
+          "path": "scripts/docs/README.md",
+          "line": 150,
+          "source_group": "scripts",
+          "text": "| `scripts/docs/check_doc_links.py` | Historical special-case shim that preserves the old monkeypatchable module surface for tests      |"
         }
       ]
     },
@@ -5680,31 +5418,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
           "line": 26,
           "source_group": "ci",
           "text": "uv run python scripts/docs/report_docs_kpi.py \\"
-        },
-        {
-          "path": "docs/reports/evidence/documentation-internal-surface-governance/02-evidence/internal-surface-governance/EV-documentation-internal-surface-governance-kpi-is-healthy-under-current-model.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"scripts/docs/report_docs_kpi.py output (2026-03-23); scripts/docs/check_doc_links.py output (2026-03-23); tests/architecture/test_documentation_sync.py\""
-        },
-        {
-          "path": "docs/reports/evidence/documentation-internal-surface-governance/02-evidence/internal-surface-governance/RAW-documentation-internal-surface-governance-2026-03-23.md",
-          "line": 15,
-          "source_group": "docs",
-          "text": "- `scripts/docs/report_docs_kpi.py`"
-        },
-        {
-          "path": "docs/reports/evidence/documentation-remediation-options/02-evidence/documentation-remediation-options/EV-documentation-remediation-strict-build-and-kpi-need-separate-follow-up.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"./.venv/Scripts/python.exe -m mkdocs build --strict + ./.venv/Scripts/python.exe scripts/docs/report_docs_kpi.py\""
         },
         {
           "path": "scripts/docs/README.md",
@@ -5812,7 +5532,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/00-project/DOCUMENTATION_GOVERNANCE.md",
@@ -5839,28 +5559,28 @@
           "text": "The broader governance report path is implemented by `scripts/docs_parity_check.py`,"
         },
         {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 43,
-          "source_group": "docs",
-          "text": "| `scripts/docs_parity_check.py` | Python | Documentation parity | `python3 scripts/docs_parity_check.py` | CI, Docs Team | doc-governance-bot | active | configs/quality/scripts_lifecycle_registry.jso"
-        },
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 79,
-          "source_group": "docs",
-          "text": "| **doc-governance-bot** | `scripts/docs_parity_check.py`, `scripts/generate_adr_registry.py` | Documentation governance | High |"
-        },
-        {
-          "path": "docs/reports/index.md",
-          "line": 56,
-          "source_group": "docs",
-          "text": "produced by `scripts/docs_parity_check.py`"
-        },
-        {
           "path": "scripts/documentation_governance_check.py",
           "line": 92,
           "source_group": "scripts",
           "text": "# Check if docs_parity_check.py exists and is executable"
+        },
+        {
+          "path": "scripts/documentation_governance_check.py",
+          "line": 93,
+          "source_group": "scripts",
+          "text": "parity_script = self.scripts_dir / \"docs_parity_check.py\""
+        },
+        {
+          "path": "scripts/documentation_governance_check.py",
+          "line": 95,
+          "source_group": "scripts",
+          "text": "checks_failed.append(\"docs_parity_check.py script not found\")"
+        },
+        {
+          "path": "scripts/engineering/repo/catalog.yaml",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "- docs_parity_check.py"
         }
       ]
     },
@@ -6007,20 +5727,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
-        {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/SUMMARY.md",
-          "line": 17,
-          "source_group": "docs",
-          "text": "- `scripts/engineering/ci/_compatibility_registry.py`"
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-refactor/SUMMARY.md",
-          "line": 37,
-          "source_group": "docs",
-          "text": "- `scripts/engineering/ci/_compatibility_registry.py` уже выступает shared loader contract."
-        },
         {
           "path": "scripts/engineering/ci/README.md",
           "line": 45,
@@ -6046,55 +5754,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 2,
       "references": [
         {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/EV-compatibility-registry-curated-ssot-drift-telemetry-reporting-test-replays-inventory-counts.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"tests/architecture/test_compatibility_telemetry_reporting.py; docs/02-architecture/07-compatibility-facade-inventory.md; scripts/ci/_compatibility_telemetry.py\""
+          "path": "scripts/engineering/ci/README.md",
+          "line": 46,
+          "source_group": "scripts",
+          "text": "| `scripts/engineering/ci/_compatibility_telemetry.py` | Compatibility inventory telemetry helper used by architecture reporting flows |"
         },
         {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/EV-compatibility-registry-curated-ssot-drift-telemetry-script-hardcodes-tracked-docstring-prefixes.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"scripts/ci/_compatibility_telemetry.py; docs/02-architecture/07-compatibility-facade-inventory.md\""
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/RAW-compatibility-registry-curated-ssot-drift-2026-03-21.md",
-          "line": 15,
-          "source_group": "docs",
-          "text": "- `scripts/ci/_compatibility_telemetry.py`"
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/RAW-compatibility-registry-curated-ssot-drift-2026-03-21.md",
-          "line": 23,
-          "source_group": "docs",
-          "text": "- `scripts/ci/_compatibility_telemetry.py` hardcodes `TRACKED_DOCSTRING_PREFIXES` and computes `measured_paths = inventory_paths | _iter_docstring_tracked_modules(...)`, so telemetry uses its own trac"
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/03-synthesis/SYN-compatibility-registry-curated-ssot-drift.md",
-          "line": 36,
-          "source_group": "docs",
-          "text": "`scripts/ci/_compatibility_telemetry.py` hardcodes `TRACKED_DOCSTRING_PREFIXES` and computes snapshot counts by combining inventory rows with an AST scan. The telemetry reporting test then re-parses t"
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-policy-history-mixing/02-evidence/compatibility-registry-policy-history-mixing/EV-compatibility-registry-policy-history-mixing-telemetry-prefix-gating.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"scripts/ci/_compatibility_telemetry.py:9-18,73-118\""
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-policy-history-mixing/RAW-compatibility-registry-policy-history-mixing-2026-03-21.md",
-          "line": 14,
-          "source_group": "docs",
-          "text": "- `scripts/ci/_compatibility_telemetry.py` defines the measured compatibility snapshot logic."
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-policy-history-mixing/RAW-compatibility-registry-policy-history-mixing-2026-03-21.md",
+          "path": "tests/architecture/test_compatibility_telemetry_reporting.py",
           "line": 28,
-          "source_group": "docs",
-          "text": "- `scripts/ci/_compatibility_telemetry.py` tracks modules when the first docstring line starts with a compatibility prefix."
+          "source_group": "tests",
+          "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_telemetry.py\","
         }
       ]
     },
@@ -6274,44 +5946,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 4,
       "references": [
-        {
-          "path": "docs/reports/evidence/project-test-health/coverage-governance/02-evidence/coverage-governance/EV-project-test-health-coverage-governance-skip-conditioned-confidence-now-uses-canonical-buckets.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"configs/quality/test_health_reporting.yaml:1-50; scripts/ci/quality_integral_gate.py:340-790; tests/unit/scripts/ci/test_quality_integral_gate.py:1-220\""
-        },
-        {
-          "path": "docs/reports/evidence/project-test-health/coverage-governance/02-evidence/coverage-governance/EV-project-test-health-coverage-governance-test-health-taxonomy-is-machine-readable-and-non-blocking.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"configs/quality/test_health_reporting.yaml:1-31; scripts/ci/quality_integral_gate.py:340-786; tests/unit/scripts/ci/test_quality_integral_gate.py:13-170\""
-        },
-        {
-          "path": "docs/reports/evidence/project-test-health/coverage-governance/02-evidence/coverage-governance/RAW-coverage-governance-2026-03-21.md",
-          "line": 10,
-          "source_group": "docs",
-          "text": "- `scripts/ci/quality_integral_gate.py`"
-        },
-        {
-          "path": "docs/reports/evidence/residual-test-ci-debt/02-evidence/residual-test-ci-debt/EV-residual-test-ci-debt-current-policy-keeps-green-status-environment-limited.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"configs/quality/test_matrix.yaml:231-246; scripts/ci/quality_integral_gate.py:432-582; configs/quality/test_health_reporting.yaml:1-39\""
-        },
-        {
-          "path": "docs/reports/evidence/residual-test-ci-debt/06-backlog/BACKLOG-residual-test-ci-debt-implementation-2026-04-01.md",
-          "line": 88,
-          "source_group": "docs",
-          "text": "- `scripts/ci/quality_integral_gate.py`"
-        },
-        {
-          "path": "docs/reports/evidence/residual-test-ci-debt/06-backlog/BACKLOG-residual-test-ci-debt-implementation-2026-04-01.md",
-          "line": 123,
-          "source_group": "docs",
-          "text": "- `scripts/ci/quality_integral_gate.py`"
-        },
         {
           "path": "scripts/engineering/ci/README.md",
           "line": 17,
@@ -6323,6 +5959,18 @@
           "line": 27,
           "source_group": "scripts",
           "text": "\"quality-gate\": \"quality_integral_gate.py\","
+        },
+        {
+          "path": "tests/architecture/test_environment_limited_green_policy.py",
+          "line": 35,
+          "source_group": "tests",
+          "text": "== \"scripts/engineering/ci/quality_integral_gate.py\""
+        },
+        {
+          "path": "tests/architecture/test_generated_artifact_routing.py",
+          "line": 122,
+          "source_group": "tests",
+          "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"quality_integral_gate.py\""
         }
       ]
     },
@@ -6331,31 +5979,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/quality-debt-weekly.yml",
           "line": 30,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/ci/report_quality_debt_weekly.py \\"
-        },
-        {
-          "path": "docs/reports/evidence/technical-debt/complexity-hotspots/02-evidence/complexity-hotspots/EV-technical-debt-complexity-hotspots-policy-implies-further-burndown-to-zero.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"configs/quality/debt_scorecard.yaml:80-85; configs/quality/debt_scorecard.yaml:153-167; configs/quality/debt_scorecard.yaml:182-186; scripts/ci/report_quality_debt_weekly.py:91-125; scripts/ci/r"
-        },
-        {
-          "path": "docs/reports/evidence/technical-debt/complexity-hotspots/02-evidence/complexity-hotspots/RAW-complexity-hotspots-2026-03-20.md",
-          "line": 11,
-          "source_group": "docs",
-          "text": "- `scripts/ci/report_quality_debt_weekly.py`"
-        },
-        {
-          "path": "docs/reports/evidence/technical-debt/complexity-hotspots/02-evidence/complexity-hotspots/RAW-complexity-hotspots-2026-03-20.md",
-          "line": 45,
-          "source_group": "docs",
-          "text": "- `report_quality_debt_weekly.py` makes the registry debt visible in CI by computing `new_debt`, `growth_violations`, and optionally failing on breach."
         },
         {
           "path": "scripts/engineering/ci/README.md",
@@ -6382,7 +6012,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 11,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -6439,25 +6069,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
           "line": 62,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/ci/validate_contract_identity.py"
-        },
-        {
-          "path": "docs/plans/repository-file-structure-cleanup-plan-2026-04-20.md",
-          "line": 245,
-          "source_group": "docs",
-          "text": "- Completed: move `validate_contract_identity.py`,"
-        },
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 58,
-          "source_group": "docs",
-          "text": "| `scripts/engineering/ci/validate_contract_identity.py` | Python | Contract validation | `python3 scripts/engineering/ci/validate_contract_identity.py` | CI Pipeline | contract-validator | active | ."
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
@@ -6472,19 +6090,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
           "line": 78,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/ci/validate_contract_registry.py"
-        },
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 59,
-          "source_group": "docs",
-          "text": "| `scripts/engineering/ci/validate_contract_registry.py` | Python | Registry validation | `python3 scripts/engineering/ci/validate_contract_registry.py` | CI Pipeline | registry-validator | active | ."
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
@@ -6507,7 +6119,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
@@ -6528,12 +6140,6 @@
           "text": "uv run python scripts/engineering/ci/validate_registry_dq_refs.py"
         },
         {
-          "path": "docs/plans/repository-file-structure-cleanup-plan-2026-04-20.md",
-          "line": 246,
-          "source_group": "docs",
-          "text": "`validate_schema_classifier_gate.py`, and `validate_registry_dq_refs.py`"
-        },
-        {
           "path": "tests/architecture/test_generated_artifact_routing.py",
           "line": 77,
           "source_group": "tests",
@@ -6546,7 +6152,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
@@ -6571,18 +6177,6 @@
           "line": 99,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/ci/validate_schema_classifier_gate.py --head-sha \"$HEAD_SHA\""
-        },
-        {
-          "path": "docs/plans/repository-file-structure-cleanup-plan-2026-04-20.md",
-          "line": 246,
-          "source_group": "docs",
-          "text": "`validate_schema_classifier_gate.py`, and `validate_registry_dq_refs.py`"
-        },
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 60,
-          "source_group": "docs",
-          "text": "| `scripts/engineering/ci/validate_schema_classifier_gate.py` | Python | Schema classification | `python3 scripts/engineering/ci/validate_schema_classifier_gate.py` | CI Pipeline | schema-validator | "
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
@@ -7276,7 +6870,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 32,
+      "reference_count": 31,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7374,7 +6968,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 51,
+      "reference_count": 49,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7433,7 +7027,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 64,
+      "reference_count": 60,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7498,7 +7092,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 28,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/03-guides/testing.md",
@@ -7513,40 +7107,40 @@
           "text": "ignore/deselect inventory for `run_pytest_sharded.sh` lives in"
         },
         {
-          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
-          "line": 29,
-          "source_group": "docs",
-          "text": "`scripts/engineering/dev/run_pytest_sharded.sh`."
-        },
-        {
-          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
-          "line": 39,
-          "source_group": "docs",
-          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=html"
-        },
-        {
-          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
-          "line": 45,
-          "source_group": "docs",
-          "text": "PYTHONPATH=src bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=html"
-        },
-        {
-          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
+          "path": "scripts/engineering/dev/README.md",
           "line": 49,
-          "source_group": "docs",
-          "text": "`run_pytest_sharded.sh` и его опций, а не заменять его новым независимым"
+          "source_group": "scripts",
+          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh"
         },
         {
-          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
-          "line": 62,
-          "source_group": "docs",
-          "text": "`run_pytest_sharded.sh`, добавляет JUnit artifacts и пишет JSON summary."
+          "path": "scripts/engineering/dev/README.md",
+          "line": 50,
+          "source_group": "scripts",
+          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --stream"
         },
         {
-          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
-          "line": 69,
-          "source_group": "docs",
-          "text": "summary, чтобы прямые `run_pytest_sharded.sh --junit-dir ...` запуски сразу"
+          "path": "scripts/engineering/dev/README.md",
+          "line": 51,
+          "source_group": "scripts",
+          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh --tail"
+        },
+        {
+          "path": "scripts/engineering/dev/README.md",
+          "line": 103,
+          "source_group": "scripts",
+          "text": "`run_pytest_sharded.sh` are now externalized in"
+        },
+        {
+          "path": "scripts/engineering/dev/README.md",
+          "line": 162,
+          "source_group": "scripts",
+          "text": "| `pytest-sharded` | `scripts/engineering/dev/run_pytest_sharded.sh`      | Run the recommended path-based pytest shards                     |"
+        },
+        {
+          "path": "scripts/engineering/dev/README.md",
+          "line": 195,
+          "source_group": "scripts",
+          "text": "| `scripts/engineering/dev/run_pytest_sharded.sh`       | Run the recommended path-based pytest shard plan (shell variant)                          |"
         }
       ]
     },
@@ -7781,7 +7375,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 29,
+      "reference_count": 26,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -7838,7 +7432,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 30,
+      "reference_count": 25,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -8150,7 +7744,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 96,
+      "reference_count": 91,
       "references": [
         {
           "path": ".github/workflows/duplication-complexity.yml",
@@ -8291,25 +7885,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
           "line": 140,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/check_c901_baseline.py \\"
-        },
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 41,
-          "source_group": "docs",
-          "text": "| `scripts/engineering/qa/check_c901_baseline.py` | Python | Architecture governance | `python3 scripts/engineering/qa/check_c901_baseline.py` | CI, Architects | governance-bot | active | tests/archit"
-        },
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 80,
-          "source_group": "docs",
-          "text": "| **governance-bot** | `scripts/engineering/qa/check_c901_baseline.py`, `scripts/engineering/repo/*` | Architecture governance | Critical |"
         },
         {
           "path": "scripts/engineering/qa/README.md",
@@ -8507,7 +8089,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 43,
+      "reference_count": 25,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -8564,7 +8146,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 10,
       "references": [
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
@@ -8609,10 +8191,10 @@
           "text": "> Generated by `scripts/engineering/qa/generate_compatibility_facade_snapshot.py`. Do not edit manually."
         },
         {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/SUMMARY.md",
-          "line": 18,
-          "source_group": "docs",
-          "text": "- `scripts/engineering/qa/generate_compatibility_facade_snapshot.py`"
+          "path": "tests/architecture/test_compatibility_facade_inventory.py",
+          "line": 32,
+          "source_group": "tests",
+          "text": "/ \"generate_compatibility_facade_snapshot.py\""
         }
       ]
     },
@@ -8658,35 +8240,10 @@
     {
       "path": "scripts/engineering/qa/hotspot_family_metrics.py",
       "type": "py",
-      "status": "unknown",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 4,
-      "references": [
-        {
-          "path": "docs/fixes/test_dependency_fixes.md",
-          "line": 26,
-          "source_group": "docs",
-          "text": "### 2. Missing `hotspot_family_metrics.py` Module"
-        },
-        {
-          "path": "docs/fixes/test_dependency_fixes.md",
-          "line": 33,
-          "source_group": "docs",
-          "text": "**Root Cause:** The file `scripts/engineering/qa/hotspot_family_metrics.py` was missing from the current branch but existed in git history."
-        },
-        {
-          "path": "docs/fixes/test_dependency_fixes.md",
-          "line": 37,
-          "source_group": "docs",
-          "text": "- Command used: `git show b4c2d5abb:scripts/engineering/qa/hotspot_family_metrics.py > scripts/engineering/qa/hotspot_family_metrics.py`"
-        },
-        {
-          "path": "docs/fixes/test_dependency_fixes.md",
-          "line": 86,
-          "source_group": "docs",
-          "text": "1. **Restored:** `scripts/engineering/qa/hotspot_family_metrics.py` (from git history)"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/engineering/qa/lint_terminology.py",
@@ -9064,14 +8621,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
-        {
-          "path": "docs/plans/test-health-observability-plan-2026-04-22.md",
-          "line": 57,
-          "source_group": "docs",
-          "text": "- Этап 2 начат: `scripts/engineering/qa/test_health.py` агрегирует один или"
-        },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 34,
@@ -9394,7 +8945,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 15,
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -9490,25 +9041,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 12,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
           "line": 151,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/repo/check_scripts_inventory.py \\"
-        },
-        {
-          "path": "docs/reports/evidence/scripts-layer-governance/SUMMARY.md",
-          "line": 20,
-          "source_group": "docs",
-          "text": "[`scripts/repo/check_scripts_inventory.py`](scripts/repo/check_scripts_inventory.py)"
-        },
-        {
-          "path": "docs/reports/evidence/scripts-layer-governance/SUMMARY.md",
-          "line": 60,
-          "source_group": "docs",
-          "text": "`python scripts/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json`"
         },
         {
           "path": "scripts/engineering/repo/README.md",
@@ -9537,6 +9076,18 @@
         {
           "path": "tests/architecture/test_scripts_deprecation_backlog.py",
           "line": 18,
+          "source_group": "tests",
+          "text": "\"scripts/engineering/repo/check_scripts_inventory.py\","
+        },
+        {
+          "path": "tests/architecture/test_scripts_inventory_discovery.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "root / \"scripts\" / \"engineering\" / \"repo\" / \"check_scripts_inventory.py\""
+        },
+        {
+          "path": "tests/architecture/test_scripts_inventory_discovery.py",
+          "line": 152,
           "source_group": "tests",
           "text": "\"scripts/engineering/repo/check_scripts_inventory.py\","
         }
@@ -9789,7 +9340,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 35,
+      "reference_count": 14,
       "references": [
         {
           "path": "docs/02-architecture/04-interfaces-layer.md",
@@ -9834,10 +9385,10 @@
           "text": "src/bioetl/interfaces/cli/commands/run.py"
         },
         {
-          "path": "docs/plans/consolidated-open-tasks-plan-2026-03-21.md",
-          "line": 498,
-          "source_group": "docs",
-          "text": "`run.py`, `run_all.py`, `run_composite.py`, `health.py`,"
+          "path": "scripts/engineering/README.md",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "python scripts/engineering/run.py --help"
         }
       ]
     },
@@ -9846,7 +9397,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/DOCUMENTATION_GOVERNANCE.md",
@@ -9865,18 +9416,6 @@
           "line": 75,
           "source_group": "docs",
           "text": "python3 scripts/generate_adr_registry.py"
-        },
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 44,
-          "source_group": "docs",
-          "text": "| `scripts/generate_adr_registry.py` | Python | ADR registry generation | `python3 scripts/generate_adr_registry.py` | CI, Architects | architecture-bot | active | configs/quality/scripts_lifecycle_re"
-        },
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 79,
-          "source_group": "docs",
-          "text": "| **doc-governance-bot** | `scripts/docs_parity_check.py`, `scripts/generate_adr_registry.py` | Documentation governance | High |"
         },
         {
           "path": "scripts/engineering/repo/catalog.yaml",
@@ -9906,7 +9445,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 116,
+      "reference_count": 115,
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
@@ -9986,38 +9525,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 4,
       "references": [
-        {
-          "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
-          "line": 203,
-          "source_group": "docs",
-          "text": "query.py"
-        },
-        {
-          "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
-          "line": 477,
-          "source_group": "docs",
-          "text": "- `src/memory/graph/query.py`"
-        },
-        {
-          "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
-          "line": 725,
-          "source_group": "docs",
-          "text": "- `src/memory/graph/query.py`"
-        },
-        {
-          "path": "docs/reports/audits/compatibility-surface-issue-pack-20260413.md",
-          "line": 205,
-          "source_group": "docs",
-          "text": "- `scripts/memory/query.py`"
-        },
-        {
-          "path": "docs/reports/evidence/project-package-topology-recursive/infrastructure/02-evidence/infrastructure-recursive-package-topology/EV-infrastructure-recursive-package-topology-adapters-crossref-is-a-client-and-fetch-pipeline-package.yaml",
-          "line": 8,
-          "source_group": "docs",
-          "text": "quote: \"client.py, query.py, fetch.py, response.py, batch.py, fallback.py, exceptions.py\""
-        },
         {
           "path": "scripts/memory/README.md",
           "line": 24,
@@ -10035,6 +9544,12 @@
           "line": 60,
           "source_group": "tests",
           "text": "assert infer_domain(Path(\"src/memory/query.py\")) == \"memory_subsystem\""
+        },
+        {
+          "path": "tests/unit/memory/test_review_curated.py",
+          "line": 105,
+          "source_group": "tests",
+          "text": "\"source_refs\": [\"src/memory/query.py\", \"src/memory/README.md\"],"
         }
       ]
     },
@@ -10100,38 +9615,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
-          "line": 105,
-          "source_group": "docs",
-          "text": "- `scripts/memory/sync.py`"
-        },
-        {
-          "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
-          "line": 202,
-          "source_group": "docs",
-          "text": "sync.py"
-        },
-        {
-          "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
-          "line": 476,
-          "source_group": "docs",
-          "text": "- `src/memory/graph/sync.py`"
-        },
-        {
-          "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
-          "line": 724,
-          "source_group": "docs",
-          "text": "- `src/memory/graph/sync.py`"
-        },
-        {
-          "path": "docs/reports/audits/compatibility-surface-issue-pack-20260413.md",
-          "line": 206,
-          "source_group": "docs",
-          "text": "- `scripts/memory/sync.py`"
-        },
         {
           "path": "scripts/memory/README.md",
           "line": 23,
@@ -10178,7 +9663,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 10,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -10884,23 +10369,11 @@
       "type": "sh",
       "status": "legacy",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
         {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 66,
-          "source_group": "docs",
-          "text": "| `scripts/ops/maintenance/github/close_duplicate_prs_wave2.sh` | Bash | PR cleanup | `bash scripts/ops/maintenance/github/close_duplicate_prs_wave2.sh` | Maintenance | github-maintenance-agent | lega"
-        },
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 197,
-          "source_group": "docs",
-          "text": "| `scripts/ops/maintenance/github/close_duplicate_prs_wave2.sh` | Legacy GitHub cleanup | 2024 Q1 | No references in current workflows |"
-        },
-        {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 138,
+          "line": 144,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_duplicate_prs_wave2.sh\","
         }
@@ -10915,7 +10388,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 139,
+          "line": 145,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_duplicate_prs_wave3.sh\","
         }
@@ -10930,7 +10403,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 148,
+          "line": 154,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_great_expectations_spike_issue.sh\","
         },
@@ -10951,7 +10424,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 145,
+          "line": 151,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_issue_2597.sh\","
         }
@@ -10966,7 +10439,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 149,
+          "line": 155,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_pandera_schema_drift_issue.sh\","
         },
@@ -10983,23 +10456,11 @@
       "type": "sh",
       "status": "legacy",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
         {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 67,
-          "source_group": "docs",
-          "text": "| `scripts/ops/maintenance/github/close_superseded_prs.sh` | Bash | PR cleanup | `bash scripts/ops/maintenance/github/close_superseded_prs.sh` | Maintenance | github-maintenance-agent | legacy | confi"
-        },
-        {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 198,
-          "source_group": "docs",
-          "text": "| `scripts/ops/maintenance/github/close_superseded_prs.sh` | Legacy GitHub cleanup | 2024 Q1 | No references in current workflows |"
-        },
-        {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 137,
+          "line": 143,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_superseded_prs.sh\","
         }
@@ -11018,17 +10479,11 @@
       "type": "sh",
       "status": "legacy",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
-          "path": "docs/reports/audits/script-inventory-analysis.md",
-          "line": 199,
-          "source_group": "docs",
-          "text": "| `scripts/ops/maintenance/github/post_issue_2597_progress.sh` | Issue-specific | 2024 Q2 | Issue resolved, no current usage |"
-        },
-        {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 144,
+          "line": 150,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/post_issue_2597_progress.sh\","
         }
@@ -11043,7 +10498,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 146,
+          "line": 152,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/post_issue_rescope_comments.sh\","
         }
@@ -11112,7 +10567,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 147,
+          "line": 153,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/update_issue_rescope_bodies.sh\","
         }
@@ -11252,14 +10707,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "docs/reports/evidence/scripts-layer-governance/SUMMARY.md",
-          "line": 37,
-          "source_group": "docs",
-          "text": "[`scripts/rerender_grafana_screenshots.py`](scripts/rerender_grafana_screenshots.py)"
-        },
         {
           "path": "scripts/ops/__main__.py",
           "line": 41,
@@ -11279,7 +10728,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/05-operations/deployment/deployment-guide.md",
@@ -11298,24 +10747,6 @@
           "line": 79,
           "source_group": "docs",
           "text": "1. Optionally use `scripts/ops/runtime/deploy/deploy-bioetl.sh`"
-        },
-        {
-          "path": "docs/reports/evidence/documentation-internal-surface-governance/02-evidence/internal-surface-governance/EV-documentation-internal-surface-governance-deployment-docs-match-helper-overrides.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"scripts/ops/deploy-bioetl.sh:11-21; scripts/ops/deploy-bioetl.sh:31-38; docs/05-operations/deployment/deployment-guide.md:46-67; docs/05-operations/deployment/k8s-summary.md:59-74\""
-        },
-        {
-          "path": "docs/reports/evidence/documentation-internal-surface-governance/02-evidence/internal-surface-governance/RAW-documentation-internal-surface-governance-2026-03-27.md",
-          "line": 14,
-          "source_group": "docs",
-          "text": "- `scripts/ops/deploy-bioetl.sh`"
-        },
-        {
-          "path": "docs/reports/evidence/documentation-internal-surface-governance/05-risks/RISKS.yaml",
-          "line": 47,
-          "source_group": "docs",
-          "text": "- \"Verify experimental deployment docs whenever `scripts/ops/deploy-bioetl.sh` changes.\""
         },
         {
           "path": "scripts/ops/__main__.py",
@@ -11806,7 +11237,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 45,
+      "reference_count": 44,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -12028,7 +11459,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 10,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -12055,14 +11486,8 @@
           "text": "> кодовых контрактов скриптом `scripts/schema/generate_contracts.py`."
         },
         {
-          "path": "docs/reports/evidence/scripts-layer-governance/SUMMARY.md",
-          "line": 50,
-          "source_group": "docs",
-          "text": "- `src/tools/scripts/generate_contracts.py`"
-        },
-        {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 168,
+          "line": 174,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/generate_contracts.py\","
         },
@@ -12077,6 +11502,12 @@
           "line": 40,
           "source_group": "scripts",
           "text": "\"generate-contracts\": \"generate_contracts.py\","
+        },
+        {
+          "path": "scripts/schema/generate_schema_artifacts.py",
+          "line": 172,
+          "source_group": "scripts",
+          "text": "[sys.executable, \"scripts/schema/generate_contracts.py\"],"
         }
       ]
     },
@@ -12770,7 +12201,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 177,
+          "line": 183,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_application_deps.py\","
         },
@@ -12791,7 +12222,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 176,
+          "line": 182,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_architecture.py\","
         },
@@ -12812,7 +12243,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 178,
+          "line": 184,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_constructor_args.py\","
         },
@@ -12833,7 +12264,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 167,
+          "line": 173,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/config_matrix_generator.py\","
         },
@@ -12868,17 +12299,11 @@
       "type": "py",
       "status": "legacy",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
-          "path": "docs/reports/evidence/scripts-layer-governance/SUMMARY.md",
-          "line": 51,
-          "source_group": "docs",
-          "text": "- `src/tools/scripts/lint_terminology.py`"
-        },
-        {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 169,
+          "line": 175,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/lint_terminology.py\","
         },
@@ -12899,7 +12324,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 170,
+          "line": 176,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/validate_unified_configs.py\","
         },

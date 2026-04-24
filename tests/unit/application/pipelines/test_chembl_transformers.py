@@ -333,6 +333,9 @@ class TestPublicationTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
+        assert result["publication_type_raw"] == "PUBLICATION"
+        assert result["publication_type"] == "journal-article"
+        assert result["publication_type_unified"] == "Journal Article"
         assert result["journal"] == "Journal Name"
         assert result["src_id"] == 1
         assert result["_source"] == "chembl"  # System field

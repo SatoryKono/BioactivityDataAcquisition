@@ -6,6 +6,7 @@ import json
 import math
 import re
 from collections.abc import Sequence
+from typing import cast
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
@@ -99,7 +100,7 @@ def _iter_nested_json_values(value: object) -> Sequence[object]:
     if isinstance(value, dict):
         return list(value.values())
     if _is_nested_json_sequence(value):
-        return value
+        return cast(Sequence[object], value)
     return ()
 
 

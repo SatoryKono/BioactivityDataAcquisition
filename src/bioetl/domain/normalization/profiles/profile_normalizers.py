@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Callable
+from typing import cast
 
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization.chembl import (
@@ -192,12 +193,12 @@ def normalize_profile_case(
 
 def normalize_profile_boolean(value: object) -> bool | None:
     """Normalize common boolean-like profile fields to canonical bool."""
-    return normalize_boolean(value)
+    return cast(bool | None, normalize_boolean(value))
 
 
 def normalize_profile_binary_flag(value: object) -> int | None:
     """Normalize common boolean-like profile fields to canonical 0/1."""
-    return normalize_binary_flag(value)
+    return cast(int | None, normalize_binary_flag(value))
 
 
 def normalize_profile_bao_identifier(value: object) -> object:
@@ -218,7 +219,7 @@ def normalize_profile_operator(
     value: object, *, allowed_values: frozenset[str] | None = None
 ) -> str | None:
     """Normalize operator-like profile fields to canonical ASCII forms."""
-    return normalize_operator(value, allowed_values=allowed_values)
+    return cast(str | None, normalize_operator(value, allowed_values=allowed_values))
 
 
 def normalize_profile_ontology_id(value: object) -> object:
@@ -398,7 +399,7 @@ def _coerce_profile_float(value: object) -> float | str | None | object:
     try:
         return float(normalized)
     except ValueError:
-        return normalized
+        return cast(str, normalized)
 
 
 def _finalize_profile_float(
@@ -438,8 +439,8 @@ def _normalize_profile_pmid_text(value: str) -> str | None:
     if normalized is None:
         return None
     if normalized.lower().startswith("pmid:"):
-        return normalize_pmid(normalized[5:])
-    return normalize_pmid(normalized)
+        return cast(str | None, normalize_pmid(normalized[5:]))
+    return cast(str | None, normalize_pmid(normalized))
 
 
 def normalize_profile_pmc_id(value: object) -> object:

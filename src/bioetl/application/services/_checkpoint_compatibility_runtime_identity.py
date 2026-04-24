@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Final
+from typing import Final, cast
 
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
@@ -219,7 +219,7 @@ def _compute_checkpoint_execution_identity_fallback_fingerprint(
         field in payload for field in _CANONICAL_ONLY_IDENTITY_FIELDS
     ):
         return None
-    return compute_execution_identity_fingerprint(payload)
+    return cast(str, compute_execution_identity_fingerprint(payload))
 
 
 def _check_checkpoint_execution_identity_fallback(
@@ -266,7 +266,10 @@ def _compute_degraded_runtime_anchor_fingerprint(
     if manifest_id is not None:
         raw_payload["manifest_id"] = manifest_id
     normalized_payload = normalize_runtime_anchor_payload(raw_payload)
-    return compute_degraded_runtime_anchor_fingerprint(normalized_payload)
+    return cast(
+        str | None,
+        compute_degraded_runtime_anchor_fingerprint(normalized_payload),
+    )
 
 
 def _check_degraded_runtime_anchor_compatibility(

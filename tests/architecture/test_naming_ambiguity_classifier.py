@@ -34,9 +34,13 @@ def test_build_ambiguity_groups_reports_expected_ok_families() -> None:
     )
     by_family = {group.normalized_stem: group for group in groups}
 
-    assert by_family["pubchem:molecule"].classification == mod.AmbiguityClassification.OK
+    assert (
+        by_family["pubchem:molecule"].classification == mod.AmbiguityClassification.OK
+    )
     assert by_family["uniprot:target"].classification == mod.AmbiguityClassification.OK
-    assert by_family["chembl:publication"].classification == mod.AmbiguityClassification.OK
+    assert (
+        by_family["chembl:publication"].classification == mod.AmbiguityClassification.OK
+    )
 
 
 def test_classify_ambiguity_group_marks_unregistered_overlap_as_duplicate() -> None:

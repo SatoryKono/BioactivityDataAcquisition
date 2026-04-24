@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from typing import Protocol
+
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.quarantine.filtered_reads import (
     _build_reason_field_signature,
@@ -18,6 +21,34 @@ __all__ = [
     "_scoped_pipeline_names",
     "_sorted_counter_items",
 ]
+
+
+class _ArrowTableLike(Protocol):
+    """Minimal Arrow table contract required for quarantine statistics."""
+
+    def to_pandas(self) -> _PandasFrameLike:
+        """Convert the table to a pandas-like object."""
+        ...
+
+
+class _PandasSeriesLike(Protocol):
+    """Minimal pandas Series contract required for timestamp aggregation."""
+
+    def min(self) -> object:
+        """Return the minimum value."""
+        ...
+
+    def max(self) -> object:
+        """Return the maximum value."""
+        ...
+
+
+class _PandasFrameLike(Protocol):
+    """Minimal pandas DataFrame contract required for timestamp aggregation."""
+
+    def __getitem__(self, key: str) -> _PandasSeriesLike:
+        """Return one column-like series."""
+        ...
 
 
 def _build_reason_signature_from_row(row: JsonDict) -> str:
@@ -47,7 +78,7 @@ def _count_bronze_records(
     rows: list[JsonDict],
     *,
     pipeline_filter: set[str] | None,
-    pipeline_stats_loader: callable,
+    pipeline_stats_loader: Callable[[str, str | None], JsonDict],
     run_id_single: str | None,
 ) -> int:
     """Sum bronze totals for the currently scoped pipelines."""
@@ -73,7 +104,7 @@ def _sorted_counter_items(counter: dict[str, int]) -> list[JsonDict]:
 
 
 def _process_quarantine_records(
-    records: list[dict],
+    records: list[JsonDict],
 ) -> tuple[
     dict[str, int],
     dict[str, int],
@@ -149,7 +180,7 @@ def _normalize_error_details(record: JsonDict) -> JsonDict:
 
 
 def _get_time_statistics(
-    arrow_table: object,
+    arrow_table: _ArrowTableLike,
 ) -> tuple[object, object]:
     """Get oldest and newest record timestamps."""
     df_pandas = arrow_table.to_pandas()

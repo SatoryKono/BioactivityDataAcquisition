@@ -16,6 +16,8 @@ from __future__ import annotations
 
 __all__ = ["LifecyclePhase", "PipelineObserver"]
 
+PROBE_MODE_FALLBACK_COUNTER = "bioetl_probe_mode_fallback_total"
+
 
 import time
 from contextlib import AbstractContextManager
@@ -25,7 +27,6 @@ from typing import TYPE_CHECKING, Any
 from bioetl.application.observability.observer_context_mixin import (
     _ObserverContextManagerMixin,
 )
-from bioetl.application.observability.observer_event_mixin import _ObserverEventMixin
 from bioetl.application.observability.observer_health_mixin import (
     _ObserverHealthEmissionMixin,
 )
@@ -47,6 +48,25 @@ if TYPE_CHECKING:
     from bioetl.domain.aggregates.events import DomainEvent
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID, RunType
+
+    class _ObserverEventMixinBase:
+        """Typing-only stand-in for skipped observer event mixin imports."""
+
+        @staticmethod
+        def _normalize_severity(level: str) -> str: ...
+
+        def _emit_contract_event(
+            self,
+            event_name: str,
+            *,
+            severity: str,
+            **context: Any,
+        ) -> None: ...
+
+else:
+    from bioetl.application.observability.observer_event_mixin import (
+        _ObserverEventMixin as _ObserverEventMixinBase,
+    )
 
 # Exposed as module attribute for compatibility with legacy patch points in tests.
 build_observability_contract_payload = _build_observability_contract_payload
@@ -70,17 +90,16 @@ class LifecyclePhase(StrEnum):
 class _ObserverLifecycleEmissionMixin(
     _ObserverHealthEmissionMixin,
     _ObserverPostrunEmissionMixin,
-    _ObserverEventMixin,
+    _ObserverEventMixinBase,
 ):
     """Structured lifecycle/domain event emission helpers."""
 
     CANONICAL_LIFECYCLE_EMITTER = CANONICAL_LIFECYCLE_EMITTER
     CANONICAL_DOMAIN_EVENT_EMITTER = CANONICAL_DOMAIN_EVENT_EMITTER
-    LifecyclePhase = LifecyclePhase
-
     span: Span | None
     pipeline_name: str
     _metrics: MetricsPort
+    _completed_stage_count: int
 
     @staticmethod
     def _resolve_domain_event_phase(
@@ -238,6 +257,8 @@ class PipelineObserver(
 ):
     """Observability wrapper for pipeline execution."""
 
+    PROBE_MODE_FALLBACK_COUNTER = PROBE_MODE_FALLBACK_COUNTER
+
     def __init__(
         self,
         pipeline_name: str,
@@ -284,3 +305,5 @@ class PipelineObserver(
             metrics_snapshot.get("records_bronze", 0),
             metrics_snapshot.get("records_fetched", 0),
         )
+
+setattr(_ObserverLifecycleEmissionMixin, "LifecyclePhase", LifecyclePhase)

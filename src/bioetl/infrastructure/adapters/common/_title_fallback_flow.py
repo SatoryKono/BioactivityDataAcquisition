@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass
+from typing import cast
 
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import JsonDict
@@ -78,31 +79,43 @@ def _coerce_missing_doi_title_fallback_request(
         "event_fallback_success",
         "event_fallback_not_found",
     }
-    unexpected = sorted(kwargs.keys() - expected_keys)
-    if unexpected:
-        unexpected_args = ", ".join(unexpected)
+    unexpected_keys = sorted(kwargs.keys() - expected_keys)
+    if unexpected_keys:
+        unexpected_args = ", ".join(unexpected_keys)
         raise TypeError(
             "iter_missing_doi_fallback_records received unexpected keyword "
             f"arguments: {unexpected_args}"
         )
 
     return MissingDoiTitleFallbackRequest(
-        dois=kwargs.pop("dois"),  # type: ignore[arg-type]
-        found_dois=kwargs.pop("found_dois"),  # type: ignore[arg-type]
-        fallback_mapping=kwargs.pop("fallback_mapping"),  # type: ignore[arg-type]
-        normalize_fn=kwargs.pop("normalize_fn"),  # type: ignore[arg-type]
-        limit=kwargs.pop("limit"),  # type: ignore[arg-type]
-        fetched=kwargs.pop("fetched"),  # type: ignore[arg-type]
-        get_fallback_title=kwargs.pop("get_fallback_title"),  # type: ignore[arg-type]
-        truncate_title=kwargs.pop("truncate_title"),  # type: ignore[arg-type]
-        search_by_title=kwargs.pop("search_by_title"),  # type: ignore[arg-type]
-        get_result_identifier=kwargs.pop("get_result_identifier"),  # type: ignore[arg-type]
-        process_found_result=kwargs.pop("process_found_result"),  # type: ignore[arg-type]
-        logger=kwargs.pop("logger"),  # type: ignore[arg-type]
-        event_no_fallback_title=kwargs.pop("event_no_fallback_title"),  # type: ignore[arg-type]
-        event_fallback_attempt=kwargs.pop("event_fallback_attempt"),  # type: ignore[arg-type]
-        event_fallback_success=kwargs.pop("event_fallback_success"),  # type: ignore[arg-type]
-        event_fallback_not_found=kwargs.pop("event_fallback_not_found"),  # type: ignore[arg-type]
+        dois=cast(list[str], kwargs.pop("dois")),
+        found_dois=cast(set[str], kwargs.pop("found_dois")),
+        fallback_mapping=cast(dict[str, str], kwargs.pop("fallback_mapping")),
+        normalize_fn=cast(Callable[[str], str | None], kwargs.pop("normalize_fn")),
+        limit=cast(int | None, kwargs.pop("limit")),
+        fetched=cast(int, kwargs.pop("fetched")),
+        get_fallback_title=cast(
+            Callable[[str, str | None, dict[str, str]], str | None],
+            kwargs.pop("get_fallback_title"),
+        ),
+        truncate_title=cast(Callable[[str, int], str], kwargs.pop("truncate_title")),
+        search_by_title=cast(
+            Callable[[str], Awaitable[JsonDict | None]],
+            kwargs.pop("search_by_title"),
+        ),
+        get_result_identifier=cast(
+            Callable[[JsonDict], tuple[str, str]],
+            kwargs.pop("get_result_identifier"),
+        ),
+        process_found_result=cast(
+            Callable[[JsonDict, str], JsonDict],
+            kwargs.pop("process_found_result"),
+        ),
+        logger=cast(LoggerPort, kwargs.pop("logger")),
+        event_no_fallback_title=cast(str, kwargs.pop("event_no_fallback_title")),
+        event_fallback_attempt=cast(str, kwargs.pop("event_fallback_attempt")),
+        event_fallback_success=cast(str, kwargs.pop("event_fallback_success")),
+        event_fallback_not_found=cast(str, kwargs.pop("event_fallback_not_found")),
     )
 
 

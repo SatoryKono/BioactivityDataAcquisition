@@ -13,12 +13,25 @@ from bioetl.application.core._quarantine_support import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.application.observability.domain_event_emitter import (
+        DomainEventEmitterPort,
+    )
+    from bioetl.application.observability.pipeline_metrics import (
+        PipelineMetricsRecorder,
+    )
+    from bioetl.domain.ports import MetricsPort, QuarantinePort
     from bioetl.application.core.quarantine_manager import FilteredQuarantineEntry
     from bioetl.domain.types import BatchID, JsonDict, RunID
 
 
 class QuarantineManagerSupportMixin:
     """Own filtered-record and inspection helpers outside the main service shell."""
+
+    _pipeline_name: str
+    _quarantine: QuarantinePort
+    _domain_event_emitter: DomainEventEmitterPort | None
+    _metrics: MetricsPort | None
+    _pipeline_metrics: PipelineMetricsRecorder
 
     async def quarantine_filtered_record(
         self,
@@ -105,11 +118,13 @@ class QuarantineManagerSupportMixin:
         error_code: str | None = None,
         run_id: str | None = None,
     ) -> list[JsonDict]:
-        return await self._quarantine.inspect(
-            pipeline=self._pipeline_name,
-            limit=limit,
-            error_code=error_code,
-            run_id=run_id,
+        return list(
+            await self._quarantine.inspect(
+                pipeline=self._pipeline_name,
+                limit=limit,
+                error_code=error_code,
+                run_id=run_id,
+            )
         )
 
     async def get_stats(
@@ -117,8 +132,10 @@ class QuarantineManagerSupportMixin:
         error_code: str | None = None,
         run_id: str | None = None,
     ) -> JsonDict:
-        return await self._quarantine.get_stats(
-            self._pipeline_name,
-            error_code,
-            run_id,
-        )
+        return {
+            **await self._quarantine.get_stats(
+                self._pipeline_name,
+                error_code,
+                run_id,
+            )
+        }

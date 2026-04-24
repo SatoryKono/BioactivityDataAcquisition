@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Literal, Protocol, cast, runtime_checkable
 
 from bioetl.domain.types import ArrowSchema, BronzeRecord
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
@@ -101,20 +101,37 @@ def coerce_silver_write_request(
         kwargs=kwargs,
     )
     return SilverWriteRequest(
-        table_name=resolved_kwargs["table_name"],  # type: ignore[arg-type]
-        records=resolved_kwargs["records"],  # type: ignore[arg-type]
-        primary_keys=resolved_kwargs["primary_keys"],  # type: ignore[arg-type]
-        schema=resolved_kwargs["schema"],  # type: ignore[arg-type]
-        mode=resolved_kwargs["mode"],  # type: ignore[arg-type]
-        partition_cols=resolved_kwargs["partition_cols"],  # type: ignore[arg-type]
-        on_schema_mismatch=resolved_kwargs["on_schema_mismatch"],  # type: ignore[arg-type]
-        column_order=resolved_kwargs["column_order"],  # type: ignore[arg-type]
-        bronze_refs=resolved_kwargs["bronze_refs"],  # type: ignore[arg-type]
-        key_nullability_rules=resolved_kwargs["key_nullability_rules"],  # type: ignore[arg-type]
-        run_id=resolved_kwargs["run_id"],  # type: ignore[arg-type]
-        run_type=resolved_kwargs["run_type"],  # type: ignore[arg-type]
-        source_batch_id=resolved_kwargs["source_batch_id"],  # type: ignore[arg-type]
-        ingestion_ts=resolved_kwargs["ingestion_ts"],  # type: ignore[arg-type]
+        table_name=cast(str, resolved_kwargs["table_name"]),
+        records=cast(list[BronzeRecord], resolved_kwargs["records"]),
+        primary_keys=cast(list[str], resolved_kwargs["primary_keys"]),
+        schema=cast(ArrowSchema, resolved_kwargs["schema"]),
+        mode=cast(Literal["merge", "append", "delete"], resolved_kwargs["mode"]),
+        partition_cols=cast(list[str] | None, resolved_kwargs["partition_cols"]),
+        on_schema_mismatch=cast(
+            Literal["error", "evolve", "ignore"],
+            resolved_kwargs["on_schema_mismatch"],
+        ),
+        column_order=cast(list[str] | None, resolved_kwargs["column_order"]),
+        bronze_refs=cast(
+            list[BronzeWriteResult] | None,
+            resolved_kwargs["bronze_refs"],
+        ),
+        key_nullability_rules=cast(
+            list[KeyNullabilityRule] | None,
+            resolved_kwargs["key_nullability_rules"],
+        ),
+        run_id=cast(RunID | None, resolved_kwargs["run_id"]),
+        run_type=cast(RunType | None, resolved_kwargs["run_type"]),
+        source_batch_id=cast(BatchID | None, resolved_kwargs["source_batch_id"]),
+        ingestion_ts=cast(datetime | None, resolved_kwargs["ingestion_ts"]),
+        quarantined_count=cast(
+            int | None,
+            resolved_kwargs["quarantined_count"],
+        ),
+        validation_errors=cast(
+            tuple[str, ...] | None,
+            resolved_kwargs["validation_errors"],
+        ),
     )
 
 
@@ -185,7 +202,6 @@ class SilverStoragePort(Protocol):
         **kwargs: object,
     ) -> SilverWriteResult | None:
         """Write transformed records to the Silver layer."""
-        del request, args, kwargs
         ...
 
     async def read_silver(

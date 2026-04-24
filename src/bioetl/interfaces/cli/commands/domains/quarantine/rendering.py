@@ -197,9 +197,7 @@ def build_quarantine_grouped_lines(
         if isinstance(run_id, str) and run_id.strip():
             lines.append(f"\n  Run ID Scope: {run_id}")
 
-    total = _coerce_total_count(
-        stats.get("total_count", stats.get("total_records", 0))
-    )
+    total = _coerce_total_count(stats.get("total_count", stats.get("total_records", 0)))
     lines.append(f"\n  Total Records: {total}")
     _append_error_code_lines(
         lines, by_error=stats.get("by_error_code", {}), total=total

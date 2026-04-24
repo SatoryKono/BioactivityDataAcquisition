@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
@@ -33,6 +34,9 @@ def _optional_payload_string(
 
 class RunManifestHydrationMixin:
     """Hydrate typed control-plane objects from normalized manifest payloads."""
+
+    _manifest_id_factory: Callable[[], str]
+    schema_version: str
 
     def _hydrate_code_provenance(
         self,
@@ -217,34 +221,39 @@ class RunManifestHydrationMixin:
 class RunManifestPayloadMixin:
     """Build normalized manifest payloads and canonical identity anchors."""
 
+    schema_version: str
+
     def _build_execution_identity_payload(
         self,
         *,
         request: RunManifestCreateSpec,
         code_provenance: RunCodeProvenance,
         run_type: RunType,
-    ) -> dict[str, str | None]:
+    ) -> dict[str, object]:
         """Build the canonical execution-identity payload shared across layers."""
         snapshot_ids = sorted(
             snapshot.snapshot_id
             for source_ref in request.source_refs
             for snapshot in source_ref.input_snapshots
         )
-        return build_execution_identity_payload(
-            pipeline_name=request.pipeline_name,
-            run_type=run_type.value,
-            pipeline_version=code_provenance.pipeline_version,
-            git_commit=code_provenance.git_commit,
-            effective_config_hash=code_provenance.effective_config_hash,
-            dq_contract_compatibility_hash=(
-                code_provenance.dq_contract_compatibility_hash
-            ),
-            contract_ref=code_provenance.contract_ref,
-            contract_version=code_provenance.contract_version,
-            effective_config_artifact_id=code_provenance.effective_config_artifact_id,
-            exact_replay=bool(request.launch_context.get("exact_replay")),
-            input_snapshot_fingerprint=(
-                compute_input_snapshot_identity_fingerprint(snapshot_ids)
+        return cast(
+            dict[str, object],
+            build_execution_identity_payload(
+                pipeline_name=request.pipeline_name,
+                run_type=run_type.value,
+                pipeline_version=code_provenance.pipeline_version,
+                git_commit=code_provenance.git_commit,
+                effective_config_hash=code_provenance.effective_config_hash,
+                dq_contract_compatibility_hash=(
+                    code_provenance.dq_contract_compatibility_hash
+                ),
+                contract_ref=code_provenance.contract_ref,
+                contract_version=code_provenance.contract_version,
+                effective_config_artifact_id=code_provenance.effective_config_artifact_id,
+                exact_replay=bool(request.launch_context.get("exact_replay")),
+                input_snapshot_fingerprint=(
+                    compute_input_snapshot_identity_fingerprint(snapshot_ids)
+                ),
             ),
         )
 

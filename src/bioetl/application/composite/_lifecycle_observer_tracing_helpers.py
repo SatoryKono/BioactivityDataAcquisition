@@ -43,6 +43,49 @@ class _CompositeLifecycleTracingHost(Protocol):
     _run_spans: dict[str, _CompositeSpanHandleProtocol]
     _phase_spans: dict[tuple[str, str], _CompositeSpanHandleProtocol]
 
+    @staticmethod
+    def _normalize_severity(level: str) -> str: ...
+
+    @staticmethod
+    def _pipeline_name(composite_name: str) -> str: ...
+
+    def _build_run_trace_attributes(
+        self,
+        *,
+        composite_name: str,
+        run_id: str,
+    ) -> dict[str, object]: ...
+
+    def _has_real_tracing(self) -> bool: ...
+
+    def _build_phase_trace_attributes(
+        self,
+        *,
+        composite_name: str,
+        run_id: str,
+        phase_name: str,
+    ) -> dict[str, object]: ...
+
+    def _close_span_safely(
+        self,
+        span: _CompositeSpanHandleProtocol | None,
+        *,
+        status: str,
+        duration_seconds: float | None,
+        error: Exception | None = None,
+        flush_tracer: bool = False,
+    ) -> None: ...
+
+    def _close_phase_span(
+        self,
+        *,
+        run_id: str,
+        phase_name: str,
+        status: str,
+        duration_seconds: float | None,
+        error: Exception | None = None,
+    ) -> None: ...
+
 
 class CompositeLifecycleEventMetricsMixin:
     """Event-emission and metric helpers for composite lifecycle flows."""
