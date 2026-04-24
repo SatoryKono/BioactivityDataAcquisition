@@ -209,17 +209,19 @@ def build_run_click_command(
         """Run an ETL pipeline."""
         run_callback(ctx, **kwargs)
 
-    # Apply all option groups
-    run_command = _add_core_options(validate_pipeline_name)(run_command)
-    run_command = _add_filter_options()(run_command)
-    run_command = _add_execution_options()(run_command)
-    run_command = _add_vacuum_options()(run_command)
-    run_command = _add_debug_options(default_health_server_port)(run_command)
-    run_command = _add_tracing_options()(run_command)
-    run_command = _add_cache_options()(run_command)
-    run_command = _add_replay_parentage_options()(run_command)
+    callback: CommandCallback = run_command
 
-    return click.command()(click.pass_context(run_command))
+    # Apply all option groups
+    callback = _add_core_options(validate_pipeline_name)(callback)
+    callback = _add_filter_options()(callback)
+    callback = _add_execution_options()(callback)
+    callback = _add_vacuum_options()(callback)
+    callback = _add_debug_options(default_health_server_port)(callback)
+    callback = _add_tracing_options()(callback)
+    callback = _add_cache_options()(callback)
+    callback = _add_replay_parentage_options()(callback)
+
+    return click.command()(click.pass_context(callback))
 
 
 __all__ = ["build_run_click_command"]
