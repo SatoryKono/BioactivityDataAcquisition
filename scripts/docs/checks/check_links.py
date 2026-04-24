@@ -49,9 +49,11 @@ References:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import sys
+from datetime import datetime, timezone
 from fnmatch import fnmatch
 from functools import cache
 from pathlib import Path
@@ -960,6 +962,14 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Only check doc drift guardrails in all mkdocs nav docs, including internal sections",
     )
+    parser.add_argument(
+        "--report-json",
+        type=Path,
+        help=(
+            "Write a machine-readable report to the given JSON path for local "
+            "reproducibility and CI artifact publication."
+        ),
+    )
     return parser
 
 
@@ -1199,6 +1209,28 @@ def _run_legacy_paths_check(include_internal: bool) -> int:
     return len(legacy_hits)
 
 
+def _write_json_report(
+    report_path: Path,
+    *,
+    checks_run: list[dict[str, object]],
+    total_violations: int,
+) -> None:
+    report = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "status": "pass" if total_violations == 0 else "fail",
+        "total_violations": total_violations,
+        "checks_run": checks_run,
+        "failure_policy": {
+            "exit_code_0": "All selected checks passed",
+            "exit_code_1": "One or more selected checks reported violations",
+        },
+    }
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    rel = report_path.relative_to(PROJECT_ROOT)
+    print(f"JSON report written to: {rel}")
+
+
 def main() -> int:
     parser = _build_parser()
     args = parser.parse_args()
@@ -1216,24 +1248,57 @@ def main() -> int:
     )
     run_all = not explicit_checks
     violations = 0
+    checks_run: list[dict[str, object]] = []
 
     check_runners = (
-        (run_all or args.links, lambda: _run_links_checks()),
-        (run_all or args.specs, lambda: _run_specs_check()),
-        (run_all or args.configs, lambda: _run_configs_check()),
-        (run_all or args.contracts_index, lambda: _run_contracts_index_check()),
-        (run_all or args.provider_overview, lambda: _run_provider_overview_check()),
-        (run_all or args.doc_governance, lambda: _run_doc_governance_check()),
-        (run_all or args.not_in_nav_growth, lambda: _run_not_in_nav_growth_check()),
+        ("links", run_all or args.links, lambda: _run_links_checks()),
+        ("specs", run_all or args.specs, lambda: _run_specs_check()),
+        ("configs", run_all or args.configs, lambda: _run_configs_check()),
         (
+            "contracts_index",
+            run_all or args.contracts_index,
+            lambda: _run_contracts_index_check(),
+        ),
+        (
+            "provider_overview",
+            run_all or args.provider_overview,
+            lambda: _run_provider_overview_check(),
+        ),
+        (
+            "doc_governance",
+            run_all or args.doc_governance,
+            lambda: _run_doc_governance_check(),
+        ),
+        (
+            "not_in_nav_growth",
+            run_all or args.not_in_nav_growth,
+            lambda: _run_not_in_nav_growth_check(),
+        ),
+        (
+            "legacy_paths",
             run_all or args.legacy_paths or args.legacy_paths_all,
             lambda: _run_legacy_paths_check(include_internal=args.legacy_paths_all),
         ),
     )
 
-    for should_run, runner in check_runners:
+    for check_name, should_run, runner in check_runners:
         if should_run:
-            violations += runner()
+            check_violations = runner()
+            violations += check_violations
+            checks_run.append(
+                {
+                    "check": check_name,
+                    "status": "pass" if check_violations == 0 else "fail",
+                    "violations": check_violations,
+                }
+            )
+
+    if args.report_json:
+        _write_json_report(
+            args.report_json,
+            checks_run=checks_run,
+            total_violations=violations,
+        )
 
     if violations:
         print(f"\nTotal violations: {violations}")
