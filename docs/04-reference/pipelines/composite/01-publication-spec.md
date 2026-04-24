@@ -10,7 +10,7 @@ Last verified: '2026-03-29'
 
 # Composite Publication Pipeline Specification
 
-> **Status**: Historical deep spec. Current canonical contract lives in
+> **Status**: Canonical compact spec summary. Current detailed contract lives in
 > [../../../03-guides/pipeline-configuration.md](../../../03-guides/pipeline-configuration.md)
 > and
 > `configs/composites/publication.yaml`.
@@ -57,4 +57,4 @@ Last verified: '2026-03-29'
 | Metadata | Pass | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
 | Canonical source traceability | Pass | Page delegates current contract to the linked canonical source and active config surface |
 | Contract linkage | Pass | [composite_publication_v1.0.json](../../contracts/gold/composite_publication_v1.0.json) |
-| Published-page role | Pass | Historical deep spec or summary is explicitly bounded by current canonical sources |
+| Published-page role | Pass | Canonical compact summary is explicitly bounded by current canonical sources |

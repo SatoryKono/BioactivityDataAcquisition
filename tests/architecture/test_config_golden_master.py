@@ -32,6 +32,7 @@ from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_do
 # Path to store snapshots
 SNAPSHOT_DIR = Path("tests/snapshots")
 SNAPSHOT_FILE = SNAPSHOT_DIR / "pipeline_configs.json"
+EXCLUDED_PROVIDER_SURFACES = frozenset({"chembl", "composite"})
 
 # List of all pipeline config names to test
 PIPELINES = [
@@ -140,13 +141,15 @@ def test_golden_master_pipeline_set_references_existing_configs() -> None:
 
 
 def test_golden_master_pipeline_set_covers_each_non_chembl_provider() -> None:
-    """Golden-master set must cover every non-ChEMBL provider at least once."""
+    """Golden-master set must cover every standalone entity-config provider."""
     represented = {
         yaml_config_to_domain(load_pipeline_config(pipeline_name)).provider
         for pipeline_name in PIPELINES
     }
     expected = {
-        provider for provider in _active_entity_pipelines() if provider != "chembl"
+        provider
+        for provider in _active_entity_pipelines()
+        if provider not in EXCLUDED_PROVIDER_SURFACES
     }
 
     assert expected <= represented

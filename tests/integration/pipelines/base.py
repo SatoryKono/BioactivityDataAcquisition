@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 import os
 from typing import Any
 from unittest.mock import patch
@@ -29,6 +30,7 @@ from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 logger = structlog.get_logger()
+_STARTED_AT = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
 
 
 class IntegrationPipelineTestCase:
@@ -195,6 +197,7 @@ class IntegrationPipelineTestCase:
             PipelineCreateRunnerRequest(
                 run_id=run_id,
                 runtime=runtime_config,
+                started_at=_STARTED_AT,
                 settings=settings,
                 observability=observability,
                 config=pipeline_config,

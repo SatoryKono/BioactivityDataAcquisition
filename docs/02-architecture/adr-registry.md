@@ -26,7 +26,7 @@ with metadata, status, and relationships.
 
 **Context**: The project requires a reliable, high-performance storage format for the Silver (normalized) and Gold (aggregated) layers of the data warehouse. The p...
 
-[📄 View Full ADR](../decisions/ADR-001-delta-lake-vs-parquet.md) | [🔗 Permalink](#adr-001)
+[📄 View Full ADR](decisions/ADR-001-delta-lake-vs-parquet.md) | [🔗 Permalink](#adr-001)
 
 ---
 
@@ -36,7 +36,7 @@ with metadata, status, and relationships.
 
 **Context**: The project needs a structured and scalable approach to manage data pipelines, from raw ingestion to analysis-ready aggregates....
 
-[📄 View Full ADR](../decisions/ADR-002-medallion-architecture.md) | [🔗 Permalink](#adr-002)
+[📄 View Full ADR](decisions/ADR-002-medallion-architecture.md) | [🔗 Permalink](#adr-002)
 
 ---
 
@@ -46,7 +46,7 @@ with metadata, status, and relationships.
 
 **Context**: The project requires a robust way to define and validate data schemas, especially for data contracts between layers (e.g., API responses, records in D...
 
-[📄 View Full ADR](../decisions/ADR-004-pydantic-vs-dataclasses.md) | [🔗 Permalink](#adr-004)
+[📄 View Full ADR](decisions/ADR-004-pydantic-vs-dataclasses.md) | [🔗 Permalink](#adr-004)
 
 ---
 
@@ -56,7 +56,7 @@ with metadata, status, and relationships.
 
 **Context**: During architecture review, the question arose whether the `composition/` module (Composition Root, DI wiring, factories) should be merged into `inter...
 
-[📄 View Full ADR](../decisions/ADR-005-composition-layer-separation.md) | [🔗 Permalink](#adr-005)
+[📄 View Full ADR](decisions/ADR-005-composition-layer-separation.md) | [🔗 Permalink](#adr-005)
 
 ---
 
@@ -66,7 +66,7 @@ with metadata, status, and relationships.
 
 **Context**: Logger and metrics dependencies were not consistently formalized as ports. The logger was typed as a concrete `structlog.BoundLogger` in `PipelineServ...
 
-[📄 View Full ADR](../decisions/ADR-006-logger-metrics-ports.md) | [🔗 Permalink](#adr-006)
+[📄 View Full ADR](decisions/ADR-006-logger-metrics-ports.md) | [🔗 Permalink](#adr-006)
 
 ---
 
@@ -76,7 +76,7 @@ with metadata, status, and relationships.
 
 **Context**: External API calls (ChEMBL, PubChem, UniProt) can experience temporary failures, slowdowns, or rate limiting. Without protection, the pipeline would r...
 
-[📄 View Full ADR](../decisions/ADR-007-circuit-breaker-implementation.md) | [🔗 Permalink](#adr-007)
+[📄 View Full ADR](decisions/ADR-007-circuit-breaker-implementation.md) | [🔗 Permalink](#adr-007)
 
 ---
 
@@ -86,7 +86,7 @@ with metadata, status, and relationships.
 
 **Context**: ETL pipelines process large datasets in batches, maintaining state via checkpoints and holding runtime locks. An abrupt shutdown (kill -9, OOM, etc.) ...
 
-[📄 View Full ADR](../decisions/ADR-008-graceful-shutdown-strategy.md) | [🔗 Permalink](#adr-008)
+[📄 View Full ADR](decisions/ADR-008-graceful-shutdown-strategy.md) | [🔗 Permalink](#adr-008)
 
 ---
 
@@ -96,7 +96,7 @@ with metadata, status, and relationships.
 
 **Context**: All data source adapters (ChEMBL, PubChem, UniProt) implement pagination, but each API uses different mechanisms (offset-based, cursor-based, page tok...
 
-[📄 View Full ADR](../decisions/ADR-009-paginated-fetcher-mixin.md) | [🔗 Permalink](#adr-009)
+[📄 View Full ADR](decisions/ADR-009-paginated-fetcher-mixin.md) | [🔗 Permalink](#adr-009)
 
 ---
 
@@ -110,7 +110,7 @@ with metadata, status, and relationships.
 - S3 для хранения Bronze/Silver/Gold слоёв
 - Redis для распределённых блокирово...
 
-[📄 View Full ADR](../decisions/ADR-010-local-only-deployment.md) | [🔗 Permalink](#adr-010)
+[📄 View Full ADR](decisions/ADR-010-local-only-deployment.md) | [🔗 Permalink](#adr-010)
 
 ---
 
@@ -121,7 +121,7 @@ with metadata, status, and relationships.
 **Context**: Механизм Watermark был реализован для поддержки инкрементальной загрузки данных:
 - `Watermark` value object в domain слое для хранения позиции (timest...
 
-[📄 View Full ADR](../decisions/ADR-011-remove-watermark-mechanism.md) | [🔗 Permalink](#adr-011)
+[📄 View Full ADR](decisions/ADR-011-remove-watermark-mechanism.md) | [🔗 Permalink](#adr-011)
 
 ---
 
@@ -133,7 +133,7 @@ with metadata, status, and relationships.
 ### Проблема 1: Дублирование run-id
 На момент принятия ADR `BasePipeline` создавал собственный `run_id` в...
 
-[📄 View Full ADR](../decisions/ADR-012-storage-clear-contract-and-run-id.md) | [🔗 Permalink](#adr-012)
+[📄 View Full ADR](decisions/ADR-012-storage-clear-contract-and-run-id.md) | [🔗 Permalink](#adr-012)
 
 ---
 
@@ -145,7 +145,7 @@ with metadata, status, and relationships.
 приватный метод `_clear_exports()`, который вызывал асинхронные методы
 `S...
 
-[📄 View Full ADR](../decisions/ADR-013-async-storage-cleanup.md) | [🔗 Permalink](#adr-013)
+[📄 View Full ADR](decisions/ADR-013-async-storage-cleanup.md) | [🔗 Permalink](#adr-013)
 
 ---
 
@@ -156,7 +156,7 @@ with metadata, status, and relationships.
 **Context**: Для обеспечения воспроизводимости и упрощения отладки пайплайнов необходим детерминизм:
 1. **Проблема отладки**: При расследовании инцидентов невозмож...
 
-[📄 View Full ADR](../decisions/ADR-014-deterministic-writes.md) | [🔗 Permalink](#adr-014)
+[📄 View Full ADR](decisions/ADR-014-deterministic-writes.md) | [🔗 Permalink](#adr-014)
 
 ---
 
@@ -166,7 +166,7 @@ with metadata, status, and relationships.
 
 **Context**: BioETL pipelines use multiple infrastructure components (data sources, storage, locks, checkpoints, metrics, tracing) that require proper initializati...
 
-[📄 View Full ADR](../decisions/ADR-015-pipeline-services-lifecycle.md) | [🔗 Permalink](#adr-015)
+[📄 View Full ADR](decisions/ADR-015-pipeline-services-lifecycle.md) | [🔗 Permalink](#adr-015)
 
 ---
 
@@ -176,7 +176,7 @@ with metadata, status, and relationships.
 
 **Context**: The BioETL pipeline needs a consistent strategy for handling errors across all adapters and processing stages. Without a unified approach, error handl...
 
-[📄 View Full ADR](../decisions/ADR-016-error-handling-strategy.md) | [🔗 Permalink](#adr-016)
+[📄 View Full ADR](decisions/ADR-016-error-handling-strategy.md) | [🔗 Permalink](#adr-016)
 
 ---
 
@@ -186,7 +186,7 @@ with metadata, status, and relationships.
 
 **Context**: BioETL pipelines require comprehensive observability for debugging, performance monitoring, and operational alerting. The observability stack must fol...
 
-[📄 View Full ADR](../decisions/ADR-017-observability-architecture.md) | [🔗 Permalink](#adr-017)
+[📄 View Full ADR](decisions/ADR-017-observability-architecture.md) | [🔗 Permalink](#adr-017)
 
 ---
 
@@ -198,7 +198,7 @@ with metadata, status, and relationships.
 
 **Context**: Gold-слой должен гарантировать качество данных для downstream consumers. Текущая реализация позволяет пайплайнам работать без определённой Gold-схемы,...
 
-[📄 View Full ADR](../decisions/ADR-018-gold-strict-validation.md) | [🔗 Permalink](#adr-018)
+[📄 View Full ADR](decisions/ADR-018-gold-strict-validation.md) | [🔗 Permalink](#adr-018)
 
 ---
 
@@ -211,7 +211,7 @@ with metadata, status, and relationships.
 **Context**: Following the adoption of `LoggerPort` abstraction (ADR-006), there was still direct usage of `structlog` in the `interfaces` layer:
 1. `src/bioetl/in...
 
-[📄 View Full ADR](../decisions/ADR-019-observability-port-enforcement.md) | [🔗 Permalink](#adr-019)
+[📄 View Full ADR](decisions/ADR-019-observability-port-enforcement.md) | [🔗 Permalink](#adr-019)
 
 ---
 
@@ -223,7 +223,7 @@ with metadata, status, and relationships.
 В рамках развития архитектуры BioETL возникла необходимость усилить защиту бизнес-инвариантов
 и улучшить модульность domain слоя. Ранее ...
 
-[📄 View Full ADR](../decisions/ADR-021-ddd-aggregates-adoption.md) | [🔗 Permalink](#adr-021)
+[📄 View Full ADR](decisions/ADR-021-ddd-aggregates-adoption.md) | [🔗 Permalink](#adr-021)
 
 ---
 
@@ -234,7 +234,7 @@ with metadata, status, and relationships.
 **Context**: BioETL uses Local-Only Deployment (ADR-010). Distributed tracing (Jaeger, Zipkin,
 OpenTelemetry Collector) is relevant for microservice architectures ...
 
-[📄 View Full ADR](../decisions/ADR-022-tracing-noop.md) | [🔗 Permalink](#adr-022)
+[📄 View Full ADR](decisions/ADR-022-tracing-noop.md) | [🔗 Permalink](#adr-022)
 
 ---
 
@@ -246,7 +246,7 @@ OpenTelemetry Collector) is relevant for microservice architectures ...
 ### Исходная Проблема
 `BaseTransformer.__init__()` принимает опциона...
 
-[📄 View Full ADR](../decisions/ADR-023-entity-type-patterns.md) | [🔗 Permalink](#adr-023)
+[📄 View Full ADR](decisions/ADR-023-entity-type-patterns.md) | [🔗 Permalink](#adr-023)
 
 ---
 
@@ -257,7 +257,7 @@ OpenTelemetry Collector) is relevant for microservice architectures ...
 **Context**: BioETL uses Hexagonal Architecture + Medallion (Bronze→Silver→Gold) for ETL biоактивных данных. Current pipelines operate independently:
 - `chembl_act...
 
-[📄 View Full ADR](../decisions/ADR-026-composite-pipeline-pattern.md) | [🔗 Permalink](#adr-026)
+[📄 View Full ADR](decisions/ADR-026-composite-pipeline-pattern.md) | [🔗 Permalink](#adr-026)
 
 ---
 
@@ -267,7 +267,7 @@ OpenTelemetry Collector) is relevant for microservice architectures ...
 
 **Context**: Data Quality (DQ) rules were embedded directly in pipeline YAML configuration files (`configs/entities/{provider}/{entity}.yaml`). This caused several...
 
-[📄 View Full ADR](../decisions/ADR-027-dq-rules-externalization.md) | [🔗 Permalink](#adr-027)
+[📄 View Full ADR](decisions/ADR-027-dq-rules-externalization.md) | [🔗 Permalink](#adr-027)
 
 ---
 
@@ -277,7 +277,7 @@ OpenTelemetry Collector) is relevant for microservice architectures ...
 
 **Context**: Filter configurations (`input-filter` and `gold-filters`) were embedded directly in pipeline YAML configuration files (`configs/entities/{provider}/{e...
 
-[📄 View Full ADR](../decisions/ADR-028-filter-rules-externalization.md) | [🔗 Permalink](#adr-028)
+[📄 View Full ADR](decisions/ADR-028-filter-rules-externalization.md) | [🔗 Permalink](#adr-028)
 
 ---
 
@@ -289,7 +289,7 @@ OpenTelemetry Collector) is relevant for microservice architectures ...
 ### Problem Statement
 1. **Of...
 
-[📄 View Full ADR](../decisions/ADR-030-publication-pagination-strategy.md) | [🔗 Permalink](#adr-030)
+[📄 View Full ADR](decisions/ADR-030-publication-pagination-strategy.md) | [🔗 Permalink](#adr-030)
 
 ---
 
@@ -301,7 +301,7 @@ OpenTelemetry Collector) is relevant for microservice architectures ...
 Publication pipelines currently have implicit loading behavior:
 1. They **look like** incremental pipelines (same config structu...
 
-[📄 View Full ADR](../decisions/ADR-031-loading-strategy-formalization.md) | [🔗 Permalink](#adr-031)
+[📄 View Full ADR](decisions/ADR-031-loading-strategy-formalization.md) | [🔗 Permalink](#adr-031)
 
 ---
 
@@ -311,7 +311,7 @@ Publication pipelines currently have implicit loading behavior:
 
 **Context**: All data source adapters require HTTP communication with external APIs (ChEMBL, PubChem, UniProt, CrossRef, OpenAlex, PubMed, Semantic Scholar). Each ...
 
-[📄 View Full ADR](../decisions/ADR-032-unified-http-client.md) | [🔗 Permalink](#adr-032)
+[📄 View Full ADR](decisions/ADR-032-unified-http-client.md) | [🔗 Permalink](#adr-032)
 
 ---
 
@@ -323,7 +323,7 @@ Publication pipelines currently have implicit loading behavior:
 Система BioETL интегрирует метаданные научных публикаций из **5 гетерогенных провайдеров**:
 | Провайдер            | Полей | Primary Key ...
 
-[📄 View Full ADR](../decisions/ADR-033-publication-validation-strategy.md) | [🔗 Permalink](#adr-033)
+[📄 View Full ADR](decisions/ADR-033-publication-validation-strategy.md) | [🔗 Permalink](#adr-033)
 
 ---
 
@@ -335,7 +335,7 @@ Publication pipelines currently have implicit loading behavior:
 value objects (frozen dataclasses) для конфигурации. Infrastructure слой
 оп...
 
-[📄 View Full ADR](../decisions/ADR-034-schema-domain-pairs.md) | [🔗 Permalink](#adr-034)
+[📄 View Full ADR](decisions/ADR-034-schema-domain-pairs.md) | [🔗 Permalink](#adr-034)
 
 ---
 
@@ -349,7 +349,7 @@ value objects (frozen dataclasses) для конфигурации. Infrastructu
 - `Series[str]` с JSON-serialized payload (`pa.string()`)
 - `Series[object...
 
-[📄 View Full ADR](../decisions/ADR-035-json-field-typing-policy.md) | [🔗 Permalink](#adr-035)
+[📄 View Full ADR](decisions/ADR-035-json-field-typing-policy.md) | [🔗 Permalink](#adr-035)
 
 ---
 
@@ -362,7 +362,7 @@ value objects (frozen dataclasses) для конфигурации. Infrastructu
 **Context**: Schema audits (2026-02-17) выявили множественные потенциальные breaking changes в Gold контрактах:
 - Переименование PK (`tissue-chembl-id` → `tissue-i...
 
-[📄 View Full ADR](../decisions/ADR-036-gold-contract-versioning-policy.md) | [🔗 Permalink](#adr-036)
+[📄 View Full ADR](decisions/ADR-036-gold-contract-versioning-policy.md) | [🔗 Permalink](#adr-036)
 
 ---
 
@@ -374,7 +374,7 @@ value objects (frozen dataclasses) для конфигурации. Infrastructu
 1. Pandera Silver schemas (`src/bioetl/domain/schemas/...`)
 1. PyArrow Silver schema...
 
-[📄 View Full ADR](../decisions/ADR-037-canonical-schema-generation.md) | [🔗 Permalink](#adr-037)
+[📄 View Full ADR](decisions/ADR-037-canonical-schema-generation.md) | [🔗 Permalink](#adr-037)
 
 ---
 
@@ -386,7 +386,7 @@ value objects (frozen dataclasses) для конфигурации. Infrastructu
 etc.) were defined in three places:
 1. **Python frozensets** in...
 
-[📄 View Full ADR](../decisions/ADR-038-enum-externalization.md) | [🔗 Permalink](#adr-038)
+[📄 View Full ADR](decisions/ADR-038-enum-externalization.md) | [🔗 Permalink](#adr-038)
 
 ---
 
@@ -399,7 +399,7 @@ etc.) were defined in three places:
 **Context**: Критический аудит historical runtime skills, agents, and command surfaces выявил
 **системные расхождения** в наименованиях, форматах файлов и языковой...
 
-[📄 View Full ADR](../decisions/ADR-041-naming-policy-skills-agents.md) | [🔗 Permalink](#adr-041)
+[📄 View Full ADR](decisions/ADR-041-naming-policy-skills-agents.md) | [🔗 Permalink](#adr-041)
 
 ---
 
@@ -413,7 +413,7 @@ etc.) were defined in three places:
 the 85% threshold, several gaps exist:
 1. **No formalized test matr...
 
-[📄 View Full ADR](../decisions/ADR-042-testing-strategy-matrix.md) | [🔗 Permalink](#adr-042)
+[📄 View Full ADR](decisions/ADR-042-testing-strategy-matrix.md) | [🔗 Permalink](#adr-042)
 
 ---
 
@@ -427,7 +427,7 @@ the 85% threshold, several gaps exist:
 inline documentation. However, several knowledge management gaps exist:
 1. ...
 
-[📄 View Full ADR](../decisions/ADR-043-documentation-knowledge-management.md) | [🔗 Permalink](#adr-043)
+[📄 View Full ADR](decisions/ADR-043-documentation-knowledge-management.md) | [🔗 Permalink](#adr-043)
 
 ---
 
@@ -441,7 +441,7 @@ inline documentation. However, several knowledge management gaps exist:
 - `RunContext` stored `pipeline_version`, `git_commit`, and `config_hash`;
 - Bro...
 
-[📄 View Full ADR](../decisions/ADR-044-run-manifest-ledger-control-plane.md) | [🔗 Permalink](#adr-044)
+[📄 View Full ADR](decisions/ADR-044-run-manifest-ledger-control-plane.md) | [🔗 Permalink](#adr-044)
 
 ---
 
@@ -456,7 +456,7 @@ inline documentation. However, several knowledge management gaps exist:
 **Context**: The BioETL pipeline required a comprehensive data quality framework to ensure:
 - Consistent data validation across multiple data providers (ChEMBL, Pu...
 
-[📄 View Full ADR](../decisions/ADR-045-dq-contract-system.md) | [🔗 Permalink](#adr-045)
+[📄 View Full ADR](decisions/ADR-045-dq-contract-system.md) | [🔗 Permalink](#adr-045)
 
 ---
 
@@ -476,7 +476,7 @@ def __init__(
     self,
     pip...
 
-[📄 View Full ADR](../decisions/ADR-020-basepipeline-decomposition.md) | [🔗 Permalink](#adr-020)
+[📄 View Full ADR](decisions/ADR-020-basepipeline-decomposition.md) | [🔗 Permalink](#adr-020)
 
 ---
 
@@ -487,7 +487,7 @@ def __init__(
 **Context**: Bronze/Silver/Gold Medallion layers использовали разные структуры для `output`-метаданных в sidecar-файлах:
 | Layer  | Класс                  | Поля  ...
 
-[📄 View Full ADR](../decisions/ADR-029-output-metadata-unification.md) | [🔗 Permalink](#adr-029)
+[📄 View Full ADR](decisions/ADR-029-output-metadata-unification.md) | [🔗 Permalink](#adr-029)
 
 ---
 
@@ -500,7 +500,7 @@ def __init__(
 **Context**: BioETL содержит два согласованных diagram subtrees с разными форматами и
 назначением. Текущий measured baseline ниже отражает состояние репозитория на...
 
-[📄 View Full ADR](../decisions/ADR-040-diagram-governance.md) | [🔗 Permalink](#adr-040)
+[📄 View Full ADR](decisions/ADR-040-diagram-governance.md) | [🔗 Permalink](#adr-040)
 
 ---
 
@@ -516,7 +516,7 @@ def __init__(
 
 **Context**: Система требует механизм блокировок для предотвращения одновременного запуска одного пайплайна (например, `chembl_activity`). Это защищает от race con...
 
-[📄 View Full ADR](../decisions/ADR-003-in-memory-locking-strategy.md) | [🔗 Permalink](#adr-003)
+[📄 View Full ADR](decisions/ADR-003-in-memory-locking-strategy.md) | [🔗 Permalink](#adr-003)
 
 ---
 
@@ -526,7 +526,7 @@ def __init__(
 
 **Context**: При работе с доменными сущностями из разных провайдеров выявлено несоответствие между терминологией провайдеров (API-специфичные имена) и каноническим...
 
-[📄 View Full ADR](../decisions/ADR-024-entity-naming-unification.md) | [🔗 Permalink](#adr-024)
+[📄 View Full ADR](decisions/ADR-024-entity-naming-unification.md) | [🔗 Permalink](#adr-024)
 
 ---
 
@@ -540,7 +540,7 @@ def __init__(
 1. Плоские пути без иерархии `{provider}/{entity}`
 1. Отсутствие `sort-by` у 78% entity configs (нарушение ...
 
-[📄 View Full ADR](../decisions/ADR-025-pipeline-config-unification.md) | [🔗 Permalink](#adr-025)
+[📄 View Full ADR](decisions/ADR-025-pipeline-config-unification.md) | [🔗 Permalink](#adr-025)
 
 ---
 
@@ -560,7 +560,7 @@ def __init__(
 configs/
 ├── pipelines/{provi...
 
-[📄 View Full ADR](../decisions/ADR-039-unified-entity-config-format.md) | [🔗 Permalink](#adr-039)
+[📄 View Full ADR](decisions/ADR-039-unified-entity-config-format.md) | [🔗 Permalink](#adr-039)
 
 ---
 

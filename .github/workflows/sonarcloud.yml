@@ -35,16 +35,26 @@ jobs:
           fi
 
       - name: Checkout
-        if: steps.sonar-token.outputs.available == 'true'
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Setup Python + uv
-        if: steps.sonar-token.outputs.available == 'true'
         uses: ./.github/actions/setup-python-uv
         with:
           uv-extras: "dev"
+
+      - name: Build Sonar baseline report
+        env:
+          SONARQUBE_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          python3 scripts/ai/sonar_issue_processor.py --write
+
+      - name: Upload Sonar baseline artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonar-baseline-report
+          path: reports/quality/sonar_baseline_report.json
 
       - name: Enforce Sonar baseline ratchet
         if: steps.sonar-token.outputs.available == 'true'

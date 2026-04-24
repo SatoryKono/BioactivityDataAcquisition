@@ -190,10 +190,14 @@ def _build_resume_contract(
         requested_policy=requested_policy,
         required_persistence_profile=required_persistence_profile,
     )
-    strict_replay_requested = requested_exact_replay or required_persistence_profile in {
-        "replay_ready",
-        "forensic_grade",
-    }
+    strict_replay_requested = (
+        requested_exact_replay
+        or required_persistence_profile
+        in {
+            "replay_ready",
+            "forensic_grade",
+        }
+    )
     is_composite = _is_composite_execution_context(manifest)
     execution_context = "composite" if is_composite else "ordinary"
     return {

@@ -54,6 +54,9 @@ It SHOULD NOT absorb raw review dumps or act as a second working-output tree.
   in CI as the `docs-link-check-report` artifact
 - `docs-parity-report.json` — generated repo-only config/spec parity report
   produced by `scripts/docs_parity_check.py`
+- `../../reports/quality/sonar_baseline_report.json` — generated Sonar baseline
+  report covering current quarantine size, wave mapping for `#3106-#3109`, and
+  live Sonar status when a token-backed CI run is available
 
 ## Reading Pattern
 

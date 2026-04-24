@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # Composite Assay Pipeline Specification
 
-> **Status**: Historical deep spec. Current canonical contract lives in
+> **Status**: Canonical compact spec summary. Current detailed contract lives in
 > [../../../03-guides/pipeline-configuration.md](../../../03-guides/pipeline-configuration.md)
 > and
 > `configs/composites/assay.yaml`.
@@ -65,4 +65,4 @@ ______________________________________________________________________
 | Metadata                      | Pass   | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
 | Canonical source traceability | Pass   | Page delegates current contract to the linked canonical source and active config surface |
 | Contract linkage              | Pass   | [composite_assay_v1.0.json](../../contracts/gold/composite_assay_v1.0.json)              |
-| Published-page role           | Pass   | Historical deep spec or summary is explicitly bounded by current canonical sources       |
+| Published-page role           | Pass   | Canonical compact summary is explicitly bounded by current canonical sources             |

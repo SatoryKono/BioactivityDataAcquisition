@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Generator
+from datetime import UTC, datetime
 from unittest.mock import ANY, MagicMock, patch
 from uuid import uuid4
 
@@ -12,6 +13,8 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     build_create_pipeline_with_services_request,
 )
 from bioetl.domain.types import RunType
+
+_STARTED_AT = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
 
 
 def _make_settings() -> MagicMock:
@@ -200,6 +203,7 @@ class TestChemblActivityFactory:
             build_create_pipeline_with_services_request(
                 run_id=run_id,
                 runtime=runtime,
+                started_at=_STARTED_AT,
                 settings=mock_settings,
                 logger=mock_logger,
             )

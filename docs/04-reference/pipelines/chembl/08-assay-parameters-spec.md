@@ -10,7 +10,7 @@ Last verified: '2026-04-03'
 
 # ChEMBL Assay Parameters Pipeline Specification
 
-> **Status**: Historical deep spec. Current canonical contract lives in
+> **Status**: Canonical compact spec summary. Current detailed contract lives in
 > [../../providers/chembl/assay-parameters.md](../../providers/chembl/assay-parameters.md)
 > and
 > `configs/entities/chembl/assay_parameters.yaml`.
@@ -55,4 +55,4 @@ Last verified: '2026-04-03'
 | Metadata | Pass | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
 | Canonical source traceability | Pass | Page delegates current contract to the linked canonical source and active config surface |
 | Contract linkage | Pass | [chembl_assay_parameters_v1.0.json](../../contracts/gold/chembl_assay_parameters_v1.0.json) |
-| Published-page role | Pass | Historical deep spec or summary is explicitly bounded by current canonical sources |
+| Published-page role | Pass | Canonical compact summary is explicitly bounded by current canonical sources |

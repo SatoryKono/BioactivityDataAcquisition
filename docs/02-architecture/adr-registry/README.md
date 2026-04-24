@@ -92,6 +92,6 @@ The ADR registry integrates with:
 
 ## Related
 
-- [ADR Template](ADR-template.md)
-- [Architecture Overview](../../00-overview.md)
-- [Documentation Governance](../../../00-project/DOCUMENTATION_GOVERNANCE.md)
+- [ADR Decisions Directory](../decisions/)
+- [Architecture Overview](../00-overview.md)
+- [Documentation Governance](../../00-project/DOCUMENTATION_GOVERNANCE.md)

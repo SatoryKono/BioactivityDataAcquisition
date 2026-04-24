@@ -11,6 +11,7 @@ from bioetl.application.core.postrun._metadata_writes import (
     get_run_statistics,
 )
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
+
 if TYPE_CHECKING:
     from bioetl.application.core.postrun.metadata_version_resolver import (
         PostrunMetadataVersionResolver,

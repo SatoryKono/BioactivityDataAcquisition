@@ -151,7 +151,9 @@ class FileLineageStore(LineageStorePort):
         )
         fragment_path = self._fragment_path(stored_fragment_id)
         existing_fragment_payload = (
-            fragment_path.read_text(encoding="utf-8") if fragment_path.exists() else None
+            fragment_path.read_text(encoding="utf-8")
+            if fragment_path.exists()
+            else None
         )
         index_rollbacks: list[tuple[Path, int]] = []
         try:
@@ -344,7 +346,9 @@ class FileLineageStore(LineageStorePort):
         """Resolve the node-id index path."""
         return self.base_path / "_by_node_id" / f"{_stable_key_filename(node_id)}.jsonl"
 
-    def _append_index(self, index_path: Path, *, key: str, fragment_id: str) -> tuple[Path, int]:
+    def _append_index(
+        self, index_path: Path, *, key: str, fragment_id: str
+    ) -> tuple[Path, int]:
         """Append one fragment identifier to a JSONL lookup index."""
         checkpoint_offset = _append_jsonl_payload(
             index_path,

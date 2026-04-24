@@ -224,7 +224,9 @@ def _build_runtime_override_snapshot(
     return RuntimeOverrideSnapshot(
         cli_overrides=_coerce_runtime_override_layer(runtime_overrides, "cli"),
         env_overrides=_coerce_runtime_override_layer(runtime_overrides, "env"),
-        runtime_adjustments=_coerce_runtime_override_layer(runtime_overrides, "runtime"),
+        runtime_adjustments=_coerce_runtime_override_layer(
+            runtime_overrides, "runtime"
+        ),
         override_hash=_stable_hash(runtime_overrides),
     )
 

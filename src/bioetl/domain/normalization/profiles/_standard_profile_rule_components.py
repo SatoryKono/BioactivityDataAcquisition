@@ -32,10 +32,14 @@ _DEFAULT_RULE_COMPONENT: RuleComponent = (
 @cache
 def _normalizer_accepts_record_context(normalizer: FieldNormalizer) -> bool:
     try:
-        parameter_count = len(inspect.signature(normalizer).parameters)
+        parameters = tuple(inspect.signature(normalizer).parameters.values())
     except (TypeError, ValueError):
         return False
-    return parameter_count >= 2
+    return any(
+        parameter.name == "record"
+        or parameter.kind == inspect.Parameter.VAR_KEYWORD
+        for parameter in parameters
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -200,7 +204,7 @@ def _compose_null_aware_rule(
         if null_normalized is None:
             return None
         if record is not None and _normalizer_accepts_record_context(base_normalizer):
-            return base_normalizer(null_normalized, record)
+            return base_normalizer(null_normalized, record=record)
         return base_normalizer(null_normalized)
 
     _normalize.__name__ = getattr(base_normalizer, "__name__", "_normalize")

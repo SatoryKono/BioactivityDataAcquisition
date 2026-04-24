@@ -87,10 +87,10 @@ def resolve_checkpoint_compatibility_policy(
             applied_policy="hard_fail",
         )
         return "hard_fail"
-    if (
-        required_persistence_profile in {"replay_ready", "forensic_grade"}
-        and requested_policy in {"observe", "legacy_observe"}
-    ):
+    if required_persistence_profile in {
+        "replay_ready",
+        "forensic_grade",
+    } and requested_policy in {"observe", "legacy_observe"}:
         logger_port.warning(
             "Required persistence profile enforces at least soft_fail "
             "checkpoint compatibility policy; coercing requested policy.",

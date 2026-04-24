@@ -16,7 +16,6 @@ Exit Codes:
 
 # Compatibility wrapper
 
-import os
 import sys
 import yaml
 from pathlib import Path
@@ -26,11 +25,24 @@ from typing import Dict, List, Set, Tuple
 ENTITIES_DIR = Path("configs/entities")
 PIPELINES_DIR = Path("docs/04-reference/pipelines")
 
+FORBIDDEN_ACTIVE_SPEC_MARKERS = (
+    "**status**: historical deep spec. current canonical contract lives in",
+    "published-page role | pass | historical deep spec or summary is explicitly bounded by current canonical sources",
+    "this document contains historical references. for the most current information",
+    "do not copy field names or loading examples from this legacy page.",
+    "treat this file as historical evidence, not as the current publication similarity contract.",
+)
+
 class ParityChecker:
     def __init__(self):
         self.entity_configs = self._load_entity_configs()
         self.pipeline_specs = self._load_pipeline_specs()
         self.issues = []
+
+    @staticmethod
+    def _normalize_text(content: str) -> str:
+        """Collapse whitespace so multiline markdown markers can be matched reliably."""
+        return " ".join(content.lower().split())
     
     def _load_entity_configs(self) -> Dict[Tuple[str, str], Path]:
         """Load all entity configuration files."""
@@ -130,32 +142,24 @@ class ParityChecker:
                 )
     
     def check_spec_status(self):
-        """Check that pipeline specs have appropriate status markers."""
-        print(f"Checking status markers in pipeline specs...")
-        
-        info_messages = []  # Non-critical informational messages
-        
+        """Fail when active pipeline specs still self-identify as historical stubs."""
+        print("Checking canonical status markers in pipeline specs...")
+
         for (provider, entity), spec_path in self.pipeline_specs.items():
             try:
                 with open(spec_path, 'r', encoding='utf-8') as f:
                     content = f.read()
-                
-                # Check for historical/legacy markers (informational only)
-                if any(marker in content.lower() for marker in ['historical', 'legacy', 'deprecated']):
-                    info_messages.append(
-                        f"Pipeline spec {provider}/{entity} contains historical/legacy markers: {spec_path}"
-                    )
-                    
+
+                normalized_content = self._normalize_text(content)
+                for marker in FORBIDDEN_ACTIVE_SPEC_MARKERS:
+                    if marker in normalized_content:
+                        self.issues.append(
+                            "Active pipeline spec still advertises itself as a historical/legacy "
+                            f"surface for {provider}/{entity}: {spec_path}"
+                        )
+                        break
             except Exception as e:
                 self.issues.append(f"Error reading {spec_path}: {e}")
-        
-        # Add informational messages to the report
-        if info_messages:
-            print(f"\nℹ️  Informational: {len(info_messages)} specs contain historical markers (expected)")
-            for msg in info_messages[:5]:  # Show first 5
-                print(f"  - {msg}")
-            if len(info_messages) > 5:
-                print(f"  ... and {len(info_messages) - 5} more")
     
     def generate_report(self):
         """Generate a summary report."""

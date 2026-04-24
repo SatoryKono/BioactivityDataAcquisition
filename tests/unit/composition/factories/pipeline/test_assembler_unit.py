@@ -298,6 +298,7 @@ class TestGenericPipelineFactory:
             PipelineCreateRunnerRequest(
                 run_id="run-load-path",
                 runtime=runtime,
+                started_at=_STARTED_AT,
                 settings=settings,
                 observability=observability,
                 filter_config=filter_config,
@@ -361,6 +362,7 @@ class TestGenericPipelineFactory:
             PipelineCreateRunnerRequest(
                 run_id="run-1",
                 runtime=runtime,
+                started_at=_STARTED_AT,
                 settings=settings,
                 observability=observability,
                 filter_config=filter_config,
@@ -423,6 +425,7 @@ class TestGenericPipelineFactory:
             PipelineCreateRunnerRequest(
                 run_id="run-2",
                 runtime=runtime,
+                started_at=_STARTED_AT,
                 settings=settings,
                 observability=observability,
             )

@@ -136,9 +136,7 @@ class PipelineContext:
             run_type=run_type,
             logger=logger,
             started_at=(
-                started_at
-                if started_at is not None
-                else MISSING_RUNTIME_TIMESTAMP
+                started_at if started_at is not None else MISSING_RUNTIME_TIMESTAMP
             ),
             source_batch_id=source_batch_id,
             replay_timestamp_anchor=replay_timestamp_anchor,
