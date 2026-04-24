@@ -18,7 +18,6 @@ from bioetl.composition.services.versioning import (
     get_git_commit,
     get_pipeline_version,
 )
-from bioetl.domain.context import current_utc_time
 from bioetl.domain.value_objects.run_context import RunContext, RunContextCreateInput
 
 if TYPE_CHECKING:
@@ -105,7 +104,6 @@ class RunContextFactory:
     transform_steps_getter: Callable[[PipelineYamlConfig], tuple[str, ...]] = (
         _get_transform_steps
     )
-    started_at_factory: Callable[[], datetime] = current_utc_time
     contract_identity_resolver: Callable[
         [str, str], tuple[str, str | None, str | None, str | None, str | None]
     ] = _resolve_contract_identity_snapshot
@@ -115,6 +113,7 @@ class RunContextFactory:
         *,
         run_id: RunID,
         runtime: RuntimeConfig,
+        started_at: datetime,
         yaml_config: PipelineYamlConfig,
         manifest_id: str | None = None,
         execution_fingerprint: str | None = None,
@@ -143,7 +142,7 @@ class RunContextFactory:
             RunContextCreateInput(
                 run_id=run_id,
                 run_type=runtime.run_type,
-                started_at=self.started_at_factory(),
+                started_at=started_at,
                 provider=self.provider,
                 entity=entity,
                 transform_version=self.transform_version_getter(yaml_config),

@@ -25,6 +25,10 @@ from bioetl.domain.services.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.dq_contracts import DQDisposition, DQPolicyRef
 
+_DEFAULT_REQUIRED_PERSISTENCE_PROFILE = "degraded_observable"
+_STRICT_PERSISTENCE_PROFILES = frozenset({"replay_ready", "forensic_grade"})
+_ALLOWLISTED_SEMANTIC_ENV_OVERRIDE_KEYS: frozenset[str] = frozenset()
+
 
 def _dataclass_to_dict(value: object) -> JsonDict | None:
     if not is_dataclass(value) or isinstance(value, type):
@@ -165,14 +169,61 @@ def _build_resolved_config_snapshot(
     )
 
 
+def _normalize_required_persistence_profile(required_profile: object) -> str:
+    profile = (
+        str(required_profile).strip()
+        if required_profile is not None
+        else _DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+    )
+    return profile or _DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+
+
+def _coerce_runtime_override_layer(
+    runtime_overrides: JsonDict,
+    layer_name: str,
+) -> JsonDict:
+    layer_overrides = runtime_overrides.get(layer_name, {})
+    if layer_overrides is None:
+        return {}
+    if not isinstance(layer_overrides, dict):
+        raise TypeError(f"runtime_overrides.{layer_name} must be a mapping")
+    return cast(JsonDict, layer_overrides)
+
+
+def _validate_runtime_environment_provenance(
+    *,
+    runtime_overrides: JsonDict,
+    required_persistence_profile: object,
+) -> None:
+    """Reject semantic env overrides outside the canonical allowlist."""
+    env_overrides = _coerce_runtime_override_layer(runtime_overrides, "env")
+    unsupported_keys = sorted(
+        str(key)
+        for key in env_overrides
+        if str(key) not in _ALLOWLISTED_SEMANTIC_ENV_OVERRIDE_KEYS
+    )
+    if not unsupported_keys:
+        return
+    profile = _normalize_required_persistence_profile(required_persistence_profile)
+    profile_context = (
+        f" for required persistence profile '{profile}'"
+        if profile in _STRICT_PERSISTENCE_PROFILES
+        else ""
+    )
+    raise ValueError(
+        "runtime_overrides.env contains non-allowlisted semantic environment "
+        f"overrides{profile_context}: {', '.join(unsupported_keys)}"
+    )
+
+
 def _build_runtime_override_snapshot(
     runtime_overrides: JsonDict,
 ) -> RuntimeOverrideSnapshot:
     """Build the runtime override snapshot and its stable hash."""
     return RuntimeOverrideSnapshot(
-        cli_overrides=runtime_overrides.get("cli", {}),
-        env_overrides=runtime_overrides.get("env", {}),
-        runtime_adjustments=runtime_overrides.get("runtime", {}),
+        cli_overrides=_coerce_runtime_override_layer(runtime_overrides, "cli"),
+        env_overrides=_coerce_runtime_override_layer(runtime_overrides, "env"),
+        runtime_adjustments=_coerce_runtime_override_layer(runtime_overrides, "runtime"),
         override_hash=_stable_hash(runtime_overrides),
     )
 
@@ -222,8 +273,8 @@ def _build_source_class_provenance() -> tuple[SourceClassProvenance, ...]:
             notes=(
                 "Explicit allowlisted environment overrides are materialized "
                 "into env_overrides and collapsed into the runtime override "
-                "hash; empty env_overrides payloads must not be interpreted "
-                "as complete ambient environment provenance."
+                "hash; non-allowlisted semantic env overrides are rejected "
+                "during artifact creation."
             ),
         ),
         SourceClassProvenance(
@@ -259,7 +310,8 @@ def _build_source_class_provenance() -> tuple[SourceClassProvenance, ...]:
             artifact_surface="not_persisted",
             notes=(
                 "Ambient process environment outside explicit overrides is "
-                "intentionally excluded from semantic identity."
+                "intentionally excluded from semantic identity; strict "
+                "reproducibility relies on an explicit semantic env allowlist."
             ),
         ),
     )
@@ -348,8 +400,13 @@ class EffectiveConfigService:
         dq_config: DQConfig | None = None,
         resolution_policy: ConfigResolutionPolicy | None = None,
         artifact_id: str | None = None,
+        required_persistence_profile: str = _DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     ) -> EffectiveConfigArtifact:
         """Create a reproducible effective-config artifact from resolved inputs."""
+        _validate_runtime_environment_provenance(
+            runtime_overrides=runtime_overrides,
+            required_persistence_profile=required_persistence_profile,
+        )
         resolved_policy = _resolve_resolution_policy(resolution_policy)
         resolved_snapshot = _build_resolved_config_snapshot(
             pipeline_kind=pipeline_kind,

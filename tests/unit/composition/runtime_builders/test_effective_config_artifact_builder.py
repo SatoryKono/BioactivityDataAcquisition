@@ -4,16 +4,23 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
+from types import SimpleNamespace
+from uuid import uuid4
+
+import pytest
 
 from bioetl.application.services.effective_config_service import (
     create_effective_config_service,
 )
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     _build_effective_config_source_refs,
+    create_and_persist_composite_effective_config_artifact,
+    create_and_persist_effective_config_artifact,
 )
 from bioetl.domain.control_plane.config_source_hashing import (
     compute_canonical_yaml_sha256,
 )
+from bioetl.domain.types import RunID
 
 
 def test_build_effective_config_source_refs_persists_semantic_and_raw_source_hashes(
@@ -231,3 +238,85 @@ def test_effective_config_source_fingerprint_changes_when_provider_config_change
     )
 
     assert artifact_left.source_fingerprint != artifact_right.source_fingerprint
+
+
+def test_create_and_persist_effective_config_artifact_forwards_required_profile(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def _fake_payload(**kwargs: object) -> tuple[str, str, str, str]:
+        captured.update(kwargs)
+        return ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
+
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders.effective_config_artifact_builder._create_and_persist_effective_config_artifact_payload",
+        _fake_payload,
+    )
+
+    result = create_and_persist_effective_config_artifact(
+        ctx=SimpleNamespace(
+            pipeline_name="chembl_activity",
+            run_id=RunID(uuid4()),
+            run_type="incremental",
+            resume=False,
+            dry_run=False,
+            limit=None,
+            query=None,
+            start_offset=None,
+            log_level="INFO",
+            ignore_yaml_filter=False,
+            skip_gold=False,
+            exact_replay=False,
+            input_filter=None,
+            cached_bronze=None,
+            vacuum=None,
+            replay_of_run_id=None,
+            replay_of_manifest_id=None,
+            execution_context="isolated",
+        ),
+        inputs=SimpleNamespace(
+            yaml_config=SimpleNamespace(),
+            settings=SimpleNamespace(
+                pipeline=SimpleNamespace(
+                    control_plane=SimpleNamespace(
+                        required_persistence_profile="replay_ready"
+                    )
+                )
+            ),
+            observability=SimpleNamespace(logger=SimpleNamespace()),
+        ),
+        provider="chembl",
+        entity="activity",
+    )
+
+    assert result == ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
+    assert captured["required_persistence_profile"] == "replay_ready"
+
+
+def test_create_and_persist_composite_effective_config_artifact_forwards_required_profile(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def _fake_payload(**kwargs: object) -> tuple[str, str, str, str]:
+        captured.update(kwargs)
+        return ("artifact-2", "resolved-hash", "effective-hash", "dq-hash")
+
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders.effective_config_artifact_builder._create_and_persist_effective_config_artifact_payload",
+        _fake_payload,
+    )
+
+    result = create_and_persist_composite_effective_config_artifact(
+        pipeline_name="composite_publication",
+        config=SimpleNamespace(),
+        runtime_config=SimpleNamespace(),
+        required_persistence_profile="forensic_grade",
+        settings=SimpleNamespace(),
+        logger=SimpleNamespace(),
+        run_id=RunID(uuid4()),
+    )
+
+    assert result == ("artifact-2", "resolved-hash", "effective-hash", "dq-hash")
+    assert captured["required_persistence_profile"] == "forensic_grade"

@@ -60,6 +60,11 @@ BioETL предоставляет комплексную систему observab
 - Pushgateway publication остаётся best-effort on run completion;
 - `bioetl diagnostics metrics` — canonical operator summary для этих
   auto-managed behaviors.
+- `bioetl diagnostics run --run-id <run-id>` показывает bounded trace
+  correlation identifiers и contextual Grafana trace links, когда tracing
+  backend включён; при `NoOpTracing` / tracing-disabled окружении команда
+  сохраняет стабильный no-link fallback (`trace_ids: []`, `trace_urls: []`,
+  `trace_links_available: False`).
 
 #### Observability verification QA
 

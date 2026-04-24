@@ -133,6 +133,43 @@ repos:
         files: ^docs/02-architecture/(mmd-diagrams/.*\.mmd|diagrams/mermaid/.*\.mermaid)$
         pass_filenames: false
 
+      # CI-like local pre-commit checks
+      - id: repo-identity-check
+        name: Check repository identity synchronization
+        entry: python scripts/docs sync-repo-identity --check
+        language: python
+        pass_filenames: false
+
+      - id: inventory-check
+        name: Validate scripts inventory and lifecycle registry
+        entry: python scripts/engineering/repo check-inventory --check --manifest configs/quality/scripts_inventory_manifest.json --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
+        language: python
+        pass_filenames: false
+
+      - id: catalog-check
+        name: Validate scripts catalog governance
+        entry: python scripts/engineering/repo check-catalog --catalog scripts/engineering/repo/catalog.yaml
+        language: python
+        pass_filenames: false
+
+      - id: docs-check-links
+        name: Check documentation links
+        entry: python scripts/docs.checks.check_links --links --specs --configs
+        language: python
+        pass_filenames: false
+
+      - id: docs-check-drift
+        name: Check documentation drift
+        entry: python scripts/docs.checks.check_drift --ports --classes
+        language: python
+        pass_filenames: false
+
+      - id: docs-check-docstrings
+        name: Check docstring inventory
+        entry: python scripts/docs.checks.check_docstrings --summary
+        language: python
+        pass_filenames: false
+
       - id: check-root-vcr-cassettes
         name: Block VCR cassette anti-patterns
         entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_root_vcr_cassettes.py

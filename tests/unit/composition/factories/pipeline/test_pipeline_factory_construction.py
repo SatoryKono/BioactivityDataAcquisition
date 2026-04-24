@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from typing import cast
@@ -72,6 +73,7 @@ def test_run_context_factory_creates_expected_context() -> None:
     context = factory.create(
         run_id=RunID(uuid4()),
         runtime=runtime,
+        started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
         yaml_config=yaml_config,
     )
 

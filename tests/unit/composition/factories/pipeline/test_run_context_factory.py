@@ -8,7 +8,6 @@ from uuid import uuid4
 
 from bioetl.composition.factories.pipeline.run_context_factory import RunContextFactory
 from bioetl.domain.types import RunID, RunType
-from tests.helpers.clock import FixedClock
 
 
 def _factory() -> RunContextFactory:
@@ -36,6 +35,7 @@ def test_run_context_factory_preserves_distinct_config_hash_surfaces() -> None:
     context = _factory().create(
         run_id=RunID(uuid4()),
         runtime=SimpleNamespace(run_type=RunType.INCREMENTAL),
+        started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
         yaml_config=SimpleNamespace(),
         config_hash="legacy-config-hash",
         resolved_config_hash="resolved-config-hash",
@@ -52,6 +52,7 @@ def test_run_context_factory_does_not_alias_missing_effective_hash() -> None:
     context = _factory().create(
         run_id=RunID(uuid4()),
         runtime=SimpleNamespace(run_type=RunType.INCREMENTAL),
+        started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
         yaml_config=SimpleNamespace(),
         config_hash="legacy-config-hash",
         resolved_config_hash="resolved-config-hash",
@@ -63,20 +64,20 @@ def test_run_context_factory_does_not_alias_missing_effective_hash() -> None:
     assert context.effective_config_hash is None
 
 
-def test_run_context_factory_uses_started_at_factory() -> None:
-    """RunContext timestamps must come from the sanctioned time seam."""
+def test_run_context_factory_uses_explicit_started_at_anchor() -> None:
+    """RunContext timestamps must come from the caller-provided runtime anchor."""
     started_at = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
     factory = RunContextFactory(
         pipeline_name="chembl_activity",
         provider="chembl",
         entity_type_extractor=lambda _pipeline_name: "activity",
         config_hash_getter=lambda _yaml_config: "resolved-hash",
-        started_at_factory=FixedClock(started_at).now,
     )
 
     context = factory.create(
         run_id=RunID(uuid4()),
         runtime=SimpleNamespace(run_type=RunType.INCREMENTAL),
+        started_at=started_at,
         yaml_config=SimpleNamespace(),
     )
 

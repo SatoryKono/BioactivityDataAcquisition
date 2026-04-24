@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-24T09:31:08.336197+00:00",
+  "generated_at": "2026-04-24T09:52:02.329788+00:00",
   "summary": {
     "total_scripts": 443,
     "status_counts": {
@@ -7950,7 +7950,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 95,
+      "reference_count": 96,
       "references": [
         {
           "path": ".github/workflows/duplication-complexity.yml",
