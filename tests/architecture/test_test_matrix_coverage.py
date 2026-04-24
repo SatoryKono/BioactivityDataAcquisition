@@ -267,9 +267,7 @@ class TestCanonicalTestLanes:
         matrix = _load_matrix()
         lanes = matrix["test_lanes"]["lanes"]
 
-        assert (
-            lanes["smoke"]["marker_expression"] == "not benchmark and not memory"
-        )
+        assert lanes["smoke"]["marker_expression"] == "not benchmark and not memory"
         assert (
             lanes["unit-fast"]["marker_expression"]
             == "not slow and not benchmark and not memory"

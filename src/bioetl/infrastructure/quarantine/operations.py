@@ -217,6 +217,7 @@ def replay_records(
         record["error_details"] = deserialize_from_json(record["error_details"])
         yield record
 
+
 def get_statistics(
     base_path: str,
     storage_options: dict[str, str] | None,

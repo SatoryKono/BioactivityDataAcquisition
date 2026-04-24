@@ -49,7 +49,7 @@ class _PipelineFactoryContext:
 class _BuildFactoryServicesRequest:
     settings: Settings
     logger: LoggerPort
-    audit: AuditPort
+    audit: AuditPort | None = None
     config: PipelineYamlConfig | None = None
     filter_config: InputFilterConfig | None = None
     tracer: TracingPort | None = None
@@ -134,7 +134,7 @@ def build_create_pipeline_with_services_request(
     runtime: object,
     settings: Settings,
     logger: LoggerPort,
-    audit: AuditPort,
+    audit: AuditPort | None = None,
     control_plane_artifacts: _ControlPlaneArtifacts | None = None,
     config: PipelineYamlConfig | None = None,
     filter_config: InputFilterConfig | None = None,

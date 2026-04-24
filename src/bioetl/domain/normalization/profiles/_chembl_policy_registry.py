@@ -38,10 +38,14 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[5]
 
 
-def _load_yaml_config(relative_path: str) -> Mapping[str, Any]:
+def _load_yaml_config(
+    relative_path: str,
+) -> Mapping[str, Any]:  # Any: YAML policy payloads are heterogeneous nested mappings.
     payload = yaml.safe_load((_repo_root() / relative_path).read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
-        raise TypeError(f"{relative_path} must decode to a mapping; got {type(payload)!r}")
+        raise TypeError(
+            f"{relative_path} must decode to a mapping; got {type(payload)!r}"
+        )
     return payload
 
 
@@ -56,12 +60,12 @@ def _parse_chembl_field_ref(field_ref: str) -> tuple[str, str]:
 
 
 @cache
-def _controlled_vocab_registry() -> Mapping[str, Any]:
+def _controlled_vocab_registry() -> Mapping[str, object]:
     return _load_yaml_config(CHEMBL_CONTROLLED_VOCAB_CONFIG)
 
 
 @cache
-def _ontology_registry() -> Mapping[str, Any]:
+def _ontology_registry() -> Mapping[str, object]:
     return _load_yaml_config(CHEMBL_ONTOLOGY_POLICY_CONFIG)
 
 

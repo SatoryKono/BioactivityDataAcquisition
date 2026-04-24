@@ -81,7 +81,7 @@ class _BuildPipelineServicesFn(Protocol):
         create_data_source_fn: DataSourceCreatorProtocol,
         settings: Settings,
         logger: LoggerPort,
-        audit: AuditPort,
+        audit: AuditPort | None,
         config: PipelineYamlConfig | None = None,
         filter_config: object | None = None,
         tracer: TracingPort | None = None,
@@ -101,7 +101,7 @@ class _PipelineCreationRequest:
     runtime: RuntimeConfig
     settings: Settings
     logger: LoggerPort
-    audit: AuditPort
+    audit: AuditPort | None = None
     manifest_id: str | None = None
     execution_fingerprint: str | None = None
     config_hash: str | None = None

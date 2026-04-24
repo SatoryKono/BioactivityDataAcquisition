@@ -39,7 +39,11 @@ from bioetl.domain.control_plane import (
 )
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
-from bioetl.domain.models.metadata import EnvironmentMetadata, InputSnapshotRef, SourceMetadata
+from bioetl.domain.models.metadata import (
+    EnvironmentMetadata,
+    InputSnapshotRef,
+    SourceMetadata,
+)
 from bioetl.domain.ports import (
     BronzeMetadataInput,
     GoldMetadataInput,
@@ -353,9 +357,11 @@ def _make_run_manifest_inspection_payload() -> dict[str, object]:
     store = _InMemoryRunManifestStore()
     manifest = _make_manifest()
     store.save(manifest)
-    return RunManifestInspectionService(manifest_port=store).show(
-        manifest.manifest_id
-    ).to_dict()
+    return (
+        RunManifestInspectionService(manifest_port=store)
+        .show(manifest.manifest_id)
+        .to_dict()
+    )
 
 
 def _make_composite_checkpoint_state_payload() -> dict[str, object]:

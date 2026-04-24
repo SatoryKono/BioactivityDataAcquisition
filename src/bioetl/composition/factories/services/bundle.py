@@ -144,7 +144,7 @@ def build_pipeline_services(
     create_data_source_fn: DataSourceCreatorProtocol,
     settings: Settings,
     logger: LoggerPort,
-    audit: AuditPort,
+    audit: AuditPort | None = None,
     config: PipelineYamlConfig | None = None,
     filter_config: InputFilterConfig | None = None,
     tracer: TracingPort | None = None,

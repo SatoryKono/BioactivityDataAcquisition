@@ -29,11 +29,13 @@ class QuarantineServiceStatusSyncMixin:
             span_name="quarantine.mark_reprocessed",
             operation="mark_reprocessed",
             pipeline=None,
-            trace_extra={"bioetl.input_record_count": len(records)},
-            execute=lambda started_at, started_monotonic: self._mark_as_reprocessed_impl(
-                records=records,
-                started_at=started_at,
-                started_monotonic=started_monotonic,
+            trace_attributes={"bioetl.input_record_count": len(records)},
+            execute=lambda started_at, started_monotonic: (
+                self._mark_as_reprocessed_impl(
+                    records=records,
+                    started_at=started_at,
+                    started_monotonic=started_monotonic,
+                )
             ),
             success_of=lambda count: count == len(records),
             result_extra_of=lambda count: {"bioetl.updated_count": count},
@@ -85,7 +87,7 @@ class QuarantineServiceStatusSyncMixin:
             span_name="quarantine.update_status",
             operation="update_status",
             pipeline=None,
-            trace_extra={"bioetl.new_status": new_status.value},
+            trace_attributes={"bioetl.new_status": new_status.value},
             execute=lambda started_at, started_monotonic: self._update_status_impl(
                 payload_hash=payload_hash,
                 new_status=new_status,

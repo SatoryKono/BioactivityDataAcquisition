@@ -13,8 +13,9 @@ UNIT_CONFTST = ROOT / "tests" / "unit" / "conftest.py"
 def test_session_level_bootstrap_no_longer_targets_unit_publication_suites() -> None:
     content = TESTS_CONFTST.read_text(encoding="utf-8")
     prefix_block = content[
-        content.index("_PUBLICATION_CLASSIFICATION_TEST_PREFIXES")
-        : content.index("_HYPOTHESIS_TEST_PREFIXES")
+        content.index("_PUBLICATION_CLASSIFICATION_TEST_PREFIXES") : content.index(
+            "_HYPOTHESIS_TEST_PREFIXES"
+        )
     ]
 
     assert "tests/unit/" not in prefix_block

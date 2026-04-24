@@ -63,7 +63,7 @@ class ChemblProfileFieldGroups:
 
 
 def chembl_schema_fields(
-    schema_cls: Any,
+    schema_cls: Any,  # Any: schema factories come from multiple Pandera-compatible classes with only a shared runtime protocol.
 ) -> tuple[
     str, ...
 ]:  # Any: schema_cls is a class with a .to_schema().columns.keys() protocol

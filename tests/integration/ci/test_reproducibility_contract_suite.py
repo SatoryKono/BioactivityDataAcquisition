@@ -64,9 +64,7 @@ pytestmark = pytest.mark.integration
 
 _VALID_CONFIG_HASH = "a" * 64
 _PUBLISHED_SUPPORTED_FAMILIES = tuple(published_supported_reproducibility_families())
-_PUBLISHED_PRODUCTION_FAMILIES = tuple(
-    published_production_reproducibility_families()
-)
+_PUBLISHED_PRODUCTION_FAMILIES = tuple(published_production_reproducibility_families())
 
 
 @dataclass(frozen=True)

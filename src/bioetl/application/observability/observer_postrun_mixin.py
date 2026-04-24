@@ -23,7 +23,7 @@ class _ObserverPostrunEmissionMixin:
         anomaly_type: str,
         current_value: float,
         baseline_mean: float | None = None,
-        **extra: Any,
+        **extra: Any,  # Any: anomaly events propagate arbitrary postrun context fields to the observer bus.
     ) -> None:
         """Emit data quality anomaly detection event."""
         level = "error" if severity == "critical" else "warning"
@@ -56,7 +56,7 @@ class _ObserverPostrunEmissionMixin:
         table: str,
         files_removed: int,
         success: bool = True,
-        **extra: Any,
+        **extra: Any,  # Any: maintenance events expose optional provider-specific payload fields.
     ) -> None:
         """Emit VACUUM operation result."""
         self.emit_event(

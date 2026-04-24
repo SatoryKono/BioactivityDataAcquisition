@@ -51,9 +51,7 @@ def test_chembl_policy_registry_configs_cover_declared_policy_fields() -> None:
         for field in policy["fields"]
     }
     ontology_fields = {
-        field
-        for policy in ontology["families"].values()
-        for field in policy["fields"]
+        field for policy in ontology["families"].values() for field in policy["fields"]
     }
 
     assert "chembl_activity.units" in controlled_fields

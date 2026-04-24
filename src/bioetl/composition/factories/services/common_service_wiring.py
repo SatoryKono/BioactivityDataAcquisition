@@ -62,7 +62,7 @@ class CommonServicePortsRequest:
         [Settings, PipelineYamlConfig, LoggerPort, MetricsPort | None],
         JsonDict,
     ]
-    audit: AuditPort
+    audit: AuditPort | None = None
     metrics: MetricsPort | None = None
     tracer: TracingPort | None = None
     metadata_coordinator: MetadataCoordinator | None = None

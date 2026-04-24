@@ -266,7 +266,9 @@ def test_policy_values_can_extend_beyond_observed_samples(
         observed_entity = observed_values.get(entity, {})
         for field, values in fields.items():
             policy_set = frozenset(str(value) for value in values)
-            observed_set = frozenset(str(value) for value in observed_entity.get(field, []))
+            observed_set = frozenset(
+                str(value) for value in observed_entity.get(field, [])
+            )
             if policy_set - observed_set:
                 differences.append((entity, field))
 

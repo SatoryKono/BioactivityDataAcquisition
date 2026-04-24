@@ -44,7 +44,9 @@ _META_FIELDS = frozenset(
 )
 _INT_FIELDS = frozenset({"assay_param_id"})
 _FLOAT_FIELDS = frozenset({"standard_value", "value"})
-_OPERATOR_FIELDS = chembl_controlled_family_fields("operators", entity="assay_parameters")
+_OPERATOR_FIELDS = chembl_controlled_family_fields(
+    "operators", entity="assay_parameters"
+)
 _UNIT_FIELDS = chembl_controlled_family_fields("units", entity="assay_parameters")
 _TYPE_FIELDS = chembl_controlled_family_fields(
     "assay_parameter_types",

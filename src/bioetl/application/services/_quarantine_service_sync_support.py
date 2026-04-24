@@ -66,7 +66,7 @@ def _run_traced_sync_operation(
     span_name: str,
     operation: str,
     pipeline: str | None,
-    trace_extra: dict[str, object],
+    trace_attributes: dict[str, object],
     execute: Callable[[datetime, float], _T],
     success_of: Callable[[_T], bool],
     result_extra_of: Callable[[_T], dict[str, object]],
@@ -82,7 +82,7 @@ def _run_traced_sync_operation(
         host._trace_attributes(
             operation=operation,
             pipeline=pipeline,
-            **trace_extra,
+            **trace_attributes,
         ),
         tracer_name=host.TRACER_NAME,
     ) as span:

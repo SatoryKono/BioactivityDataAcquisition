@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import time
 from collections.abc import Sequence
-from datetime import UTC, datetime
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
 import pyarrow as pa
 
+from bioetl.domain.context import current_utc_time
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
@@ -232,7 +234,8 @@ class SilverWriterFinalizationCompatibilityMixin:
                 [str(source_batch_id)] if source_batch_id is not None else None
             ),
             started_at=started_at,
-            completed_at=datetime.now(UTC),
+            completed_at=started_at
+            + timedelta(seconds=time.perf_counter() - start_perf),
             version_after=delta_version,
         )
         return SilverWriteResult(
@@ -261,7 +264,7 @@ class SilverWriterFinalizationCompatibilityMixin:
         )
         from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
-        completed_at = datetime.now(UTC)
+        completed_at = current_utc_time()
         first_record = records[0] if records else {}
         run_id = str(first_record.get("_run_id") or getattr(self, "run_id", "") or "")
         manifest_id = (

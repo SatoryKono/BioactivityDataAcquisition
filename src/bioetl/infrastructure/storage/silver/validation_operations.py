@@ -12,6 +12,7 @@ from bioetl.domain.exceptions import (
     PolicyViolationError,
 )
 from bioetl.domain.medallion import Layer, SilverWriteMode, WriteMode, WriteModePolicy
+from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.silver.key_nullability_operations import (
     _collect_key_violations as _collect_key_violations,
 )
@@ -60,11 +61,12 @@ __all__ = [
     "_validate_write_mode_impl",
 ]  # NOTE: _check_schema_drift, _detect_schema_drift, _build_* re-exported from schema_drift_operations
 
+
 @dataclass(frozen=True, slots=True)
 class _PreparedSilverWritePayload:
     """Validated write payload produced before Delta write execution."""
 
-    records: list[dict[str, Any]]  # Any: BronzeRecord is JsonDict (heterogeneous)
+    records: list[BronzeRecord]
     validated_mode: SilverWriteMode
     table_path: str
     arrow_data: pa.Table
@@ -76,7 +78,7 @@ class _PreparedSilverWritePayload:
 class _ValidatedSilverWriteContext:
     """Validated pre-write state before path resolution and Delta dispatch."""
 
-    records: list[dict[str, Any]]  # Any: BronzeRecord is JsonDict (heterogeneous)
+    records: list[BronzeRecord]
     validated_mode: SilverWriteMode
     arrow_data: pa.Table
 
@@ -86,7 +88,7 @@ class _SilverSchemaPolicyRequest:
     """Schema drift policy input after synchronous validation completes."""
 
     table_name: str
-    records: list[dict[str, Any]]  # Any: BronzeRecord is JsonDict (heterogeneous)
+    records: list[BronzeRecord]
     on_schema_mismatch: Literal["error", "evolve", "ignore"]
     validated_mode: SilverWriteMode
     arrow_data: pa.Table
@@ -97,7 +99,7 @@ class _SilverWritePreparationRequest:
     """Normalized request payload for Silver validation and Arrow preparation."""
 
     table_name: str
-    records: list[dict[str, Any]]  # Any: BronzeRecord is JsonDict (heterogeneous)
+    records: list[BronzeRecord]
     primary_keys: list[str]
     schema: pa.Schema
     mode: str
@@ -119,15 +121,15 @@ class _SilverWriterValidationHostProtocol(Protocol):
     _validate_write_mode: Callable[[str], SilverWriteMode]
     _deduplicate_by_primary_keys: Callable[
         [
-            list[dict[str, Any]],
+            list[BronzeRecord],
             list[str],
-        ],  # Any: BronzeRecord is JsonDict (heterogeneous)
-        list[dict[str, Any]],  # Any: BronzeRecord is JsonDict (heterogeneous)
+        ],
+        list[BronzeRecord],
     ]
     _to_policy_write_mode: Callable[[SilverWriteMode], WriteMode]
     _validate_key_nullability: Callable[
         [
-            list[dict[str, Any]],  # Any: BronzeRecord is JsonDict (heterogeneous)
+            list[BronzeRecord],
             list[str],
             list[str] | None,
             list[KeyNullabilityRule] | None,

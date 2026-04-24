@@ -53,6 +53,7 @@ __all__ = [
     "_read_delta_version",
 ]
 
+
 class _SilverMetadataWriteHostProtocol(Protocol):
     """Typed host contract for Silver metadata sidecar stages."""
 

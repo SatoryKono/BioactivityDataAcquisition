@@ -117,6 +117,7 @@ filters:
   silver_filters:
     required_fields:
     - class_level
+    - pref_name
     - protein_class_id
   gold_filters:
     columns:

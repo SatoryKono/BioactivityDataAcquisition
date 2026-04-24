@@ -4,10 +4,13 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Protocol, cast
+from typing import Any, Protocol, cast
+
+from pandera.polars import DataFrameSchema
 
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import GoldRecord, GoldSchemaPolicyByVersion, RunID, ScdConfig
+from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     GoldWriteDispatchContext as _GoldWriteDispatchContext,
 )
@@ -26,11 +29,6 @@ from bioetl.infrastructure.storage.writer_common import (
     iterate_write_targets,
     validate_write_versions,
 )
-
-if TYPE_CHECKING:
-    from pandera.polars import DataFrameSchema
-
-    from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 __all__ = [
     "_build_gold_write_request",
@@ -59,10 +57,12 @@ class _ResolvedSchema(Protocol):
 class _GoldWriterHost(Protocol):
     """Host contract needed by Gold write support helpers."""
 
-    logger: Any
-    _contract_rollout_policy: Any
+    logger: Any  # Any: facade host may provide structlog-like or test-double logger implementations.
+    _contract_rollout_policy: (
+        Any  # Any: rollout policy is runtime-wired and only duck-typed at this seam.
+    )
 
-    async def _prepare_write_gold(self, **kwargs: Any): ...
+    async def _prepare_write_gold(self, **kwargs: object) -> None: ...
 
     async def _dispatch_write(self, context: _GoldWriteDispatchContext) -> None: ...
 
@@ -140,7 +140,10 @@ def _resolve_runtime_services(
         metadata_writer=metadata_writer,
         metadata_coordinator=metadata_coordinator,
         lineage_store=lineage_store,
-        contract_rollout_policy=cast("Any", contract_rollout_policy),
+        contract_rollout_policy=cast(
+            Any,  # Any: builder accepts runtime-wired rollout policy implementations.
+            contract_rollout_policy,
+        ),
     )
 
 

@@ -199,7 +199,7 @@ class PipelineCreateWithServicesRequest:
     runtime: RuntimeConfig
     settings: SettingsPort
     logger: LoggerPort
-    audit: AuditPort
+    audit: AuditPort | None = None
     manifest_id: str | None = None
     execution_fingerprint: str | None = None
     config_hash: str | None = None

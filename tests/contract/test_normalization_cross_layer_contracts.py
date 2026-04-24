@@ -600,7 +600,9 @@ def test_chembl_activity_business_and_set_like_fields_follow_profile_family_cont
     activity_id_row = _matrix_row("chembl_activity", "activity_id")
     activity_properties_row = _matrix_row("chembl_activity", "activity_properties")
     assert activity_id_row["normalizer"] == "normalize_profile_text"
-    assert activity_properties_row["normalizer"] == "normalize_profile_json_string_strict"
+    assert (
+        activity_properties_row["normalizer"] == "normalize_profile_json_string_strict"
+    )
     assert activity_properties_row["set_like"] == "true"
     assert activity_properties_row["strictness"] == "strict_json"
 

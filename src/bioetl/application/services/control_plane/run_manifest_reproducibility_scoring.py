@@ -217,7 +217,9 @@ def _score_lineage_completeness(summary: JsonDict) -> _ScoreCard:
         evidence.append("identity_graph_incomplete")
         blockers.append("identity_graph_incomplete")
     lineage_boundary = summary.get("lineage_closure_boundary")
-    if isinstance(lineage_boundary, dict) and not bool(lineage_boundary.get("supported")):
+    if isinstance(lineage_boundary, dict) and not bool(
+        lineage_boundary.get("supported")
+    ):
         score -= 2
         evidence.append("lineage_closure_boundary_unsupported")
         blockers.append("lineage_closure_boundary_unsupported")
@@ -320,7 +322,9 @@ def _evaluate_threshold_failures(
     failures: list[JsonDict] = []
     for category, minimum_score in thresholds.items():
         score_payload = category_scores.get(category)
-        actual_score = score_payload.get("score") if isinstance(score_payload, dict) else None
+        actual_score = (
+            score_payload.get("score") if isinstance(score_payload, dict) else None
+        )
         if not isinstance(actual_score, int):
             failures.append(
                 {
