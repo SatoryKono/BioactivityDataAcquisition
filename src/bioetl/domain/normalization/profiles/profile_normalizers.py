@@ -27,6 +27,7 @@ from bioetl.domain.normalization.rules import (
     normalize_binary_flag,
     normalize_boolean,
     normalize_case,
+    normalize_cross_pipeline_case,
     normalize_null,
     normalize_operator,
     normalize_unit,

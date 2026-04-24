@@ -9,6 +9,17 @@ from scripts.engineering.ci.quality_integral_gate import (
 from scripts.engineering.ci.quality_integral_gate import _build_test_health_payload
 from scripts.engineering.ci.quality_integral_gate import _classify_test_health
 
+NETWORK_OPT_IN_GATE = "live_network_opt_in_gate"
+LIVE_API_GATE_MODE_NON_ALWAYS = "live_api_gate_mode_non_always"
+PILOT_PROVIDER_COUNT = "pilot_provider_count"
+VCR_ONLY_PROVIDER_COUNT = "vcr_only_provider_count"
+ENFORCED_PROVIDERS = "enforced_providers"
+LIVE_API_GATE_MODE = "live_api_gate_mode"
+NETWORK_OPT_IN_REQUIRED = "network_opt_in_required"
+LIVE_API_MINIMUM_BASELINE = "live_api_minimum_baseline"
+FIXTURE_GOVERNANCE = "fixture_governance"
+CASSETTE_METADATA_PARTIAL = "fixture_governance.cassette_metadata=partial"
+
 
 def test_classify_test_health_environment_limited_green() -> None:
     """Skip- and provider-gated confidence should be environment-limited."""
@@ -21,15 +32,15 @@ def test_classify_test_health_environment_limited_green() -> None:
     )
     test_matrix = {
         "contract_testing": {
-            "network_opt_in_required": True,
-            "live_api_gate_mode": "scheduled",
-            "live_api_minimum_baseline": {
-                "enforced_providers": ["chembl", "pubchem"],
+            NETWORK_OPT_IN_REQUIRED: True,
+            LIVE_API_GATE_MODE: "scheduled",
+            LIVE_API_MINIMUM_BASELINE: {
+                ENFORCED_PROVIDERS: ["chembl", "pubchem"],
                 "pilot_providers": ["crossref"],
                 "vcr_only_providers": ["openalex"],
             },
         },
-        "fixture_governance": {"rollout": {"cassette_metadata": "planned"}},
+        FIXTURE_GOVERNANCE: {"rollout": {"cassette_metadata": "planned"}},
     }
 
     result = _classify_test_health(
@@ -46,10 +57,10 @@ def test_classify_test_health_environment_limited_green() -> None:
     assert result.live_contract_vcr_only_provider_count == 1
     assert dict(result.skip_classes) == {
         "architecture_suite_skips": 12,
-        "live_network_opt_in_gate": 1,
-        "live_api_gate_mode_non_always": 1,
-        "pilot_provider_count": 1,
-        "vcr_only_provider_count": 1,
+        NETWORK_OPT_IN_GATE: 1,
+        LIVE_API_GATE_MODE_NON_ALWAYS: 1,
+        PILOT_PROVIDER_COUNT: 1,
+        VCR_ONLY_PROVIDER_COUNT: 1,
     }
 
 
@@ -64,10 +75,10 @@ def test_classify_test_health_staged_green() -> None:
     )
     test_matrix = {
         "contract_testing": {
-            "network_opt_in_required": False,
-            "live_api_gate_mode": "always",
-            "live_api_minimum_baseline": {
-                "enforced_providers": ["chembl", "pubchem"],
+            NETWORK_OPT_IN_REQUIRED: False,
+            LIVE_API_GATE_MODE: "always",
+            LIVE_API_MINIMUM_BASELINE: {
+                ENFORCED_PROVIDERS: ["chembl", "pubchem"],
                 "pilot_providers": [],
                 "vcr_only_providers": [],
             },
@@ -94,7 +105,7 @@ def test_classify_test_health_staged_green() -> None:
     )
 
     assert result.status == "staged_green"
-    assert "fixture_governance.cassette_metadata=partial" in result.reasons
+    assert CASSETTE_METADATA_PARTIAL in result.reasons
     assert "mutation_testing.ci_gate_mode=partial" in result.reasons
 
 
@@ -109,10 +120,10 @@ def test_classify_test_health_fully_exercised_green() -> None:
     )
     test_matrix = {
         "contract_testing": {
-            "network_opt_in_required": False,
-            "live_api_gate_mode": "always",
-            "live_api_minimum_baseline": {
-                "enforced_providers": ["chembl", "pubchem", "uniprot"],
+            NETWORK_OPT_IN_REQUIRED: False,
+            LIVE_API_GATE_MODE: "always",
+            LIVE_API_MINIMUM_BASELINE: {
+                ENFORCED_PROVIDERS: ["chembl", "pubchem", "uniprot"],
                 "pilot_providers": [],
                 "vcr_only_providers": [],
             },
@@ -149,19 +160,19 @@ def test_build_test_health_payload_uses_canonical_taxonomy() -> None:
     classification = HealthClassification(
         status="staged_green",
         summary="Green status is staged.",
-        reasons=("fixture_governance.cassette_metadata=partial",),
+        reasons=(CASSETTE_METADATA_PARTIAL,),
         architecture_skip_count=0,
         architecture_skip_ratio=0.0,
         live_contract_enforced_provider_count=4,
         live_contract_pilot_provider_count=1,
         live_contract_vcr_only_provider_count=3,
         skip_classes=(
-            ("live_network_opt_in_gate", 1),
-            ("live_api_gate_mode_non_always", 1),
-            ("pilot_provider_count", 1),
-            ("vcr_only_provider_count", 3),
+            (NETWORK_OPT_IN_GATE, 1),
+            (LIVE_API_GATE_MODE_NON_ALWAYS, 1),
+            (PILOT_PROVIDER_COUNT, 1),
+            (VCR_ONLY_PROVIDER_COUNT, 3),
         ),
-        staged_rollout_flags=("fixture_governance.cassette_metadata=partial",),
+        staged_rollout_flags=(CASSETTE_METADATA_PARTIAL,),
     )
     taxonomy = {
         "classification_mode": "informational",
@@ -175,19 +186,19 @@ def test_build_test_health_payload_uses_canonical_taxonomy() -> None:
             }
         },
         "skip_classes": {
-            "live_network_opt_in_gate": {
+            NETWORK_OPT_IN_GATE: {
                 "short_label": "Network Opt-In Gate",
                 "definition": "Live tests require explicit network opt-in.",
             },
-            "live_api_gate_mode_non_always": {
+            LIVE_API_GATE_MODE_NON_ALWAYS: {
                 "short_label": "Scheduled Live Gate",
                 "definition": "Live execution is not always-on.",
             },
-            "pilot_provider_count": {
+            PILOT_PROVIDER_COUNT: {
                 "short_label": "Pilot Providers",
                 "definition": "Providers still staged as live pilots.",
             },
-            "vcr_only_provider_count": {
+            VCR_ONLY_PROVIDER_COUNT: {
                 "short_label": "VCR-Only Providers",
                 "definition": "Providers still outside live baseline enforcement.",
             },
@@ -201,32 +212,32 @@ def test_build_test_health_payload_uses_canonical_taxonomy() -> None:
     assert payload["merge_semantics"] == "informational"
     assert payload["merge_blocking_source"] == "ci_pass_fail_and_quality_gate"
     assert payload["skip_classes"] == {
-        "live_network_opt_in_gate": 1,
-        "live_api_gate_mode_non_always": 1,
-        "pilot_provider_count": 1,
-        "vcr_only_provider_count": 3,
+        NETWORK_OPT_IN_GATE: 1,
+        LIVE_API_GATE_MODE_NON_ALWAYS: 1,
+        PILOT_PROVIDER_COUNT: 1,
+        VCR_ONLY_PROVIDER_COUNT: 3,
     }
     assert payload["skip_classes_detail"] == [
         {
-            "id": "live_network_opt_in_gate",
+            "id": NETWORK_OPT_IN_GATE,
             "count": 1,
             "short_label": "Network Opt-In Gate",
             "definition": "Live tests require explicit network opt-in.",
         },
         {
-            "id": "live_api_gate_mode_non_always",
+            "id": LIVE_API_GATE_MODE_NON_ALWAYS,
             "count": 1,
             "short_label": "Scheduled Live Gate",
             "definition": "Live execution is not always-on.",
         },
         {
-            "id": "pilot_provider_count",
+            "id": PILOT_PROVIDER_COUNT,
             "count": 1,
             "short_label": "Pilot Providers",
             "definition": "Providers still staged as live pilots.",
         },
         {
-            "id": "vcr_only_provider_count",
+            "id": VCR_ONLY_PROVIDER_COUNT,
             "count": 3,
             "short_label": "VCR-Only Providers",
             "definition": "Providers still outside live baseline enforcement.",
