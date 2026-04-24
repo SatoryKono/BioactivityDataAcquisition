@@ -10,7 +10,7 @@ REQ-ARCH-012: Exceptions should be immutable and include context
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 from bioetl.domain.error_types import ErrorType
@@ -47,7 +47,7 @@ class BioETLDomainError(BioETLError):
     context: dict[
         str,
         Any,  # Any: Domain exception context stores JSON-serializable payload values of mixed types.
-    ] = None
+    ] = field(default_factory=dict)
     original_exception: Exception | None = None
 
     def __str__(self) -> str:
@@ -89,9 +89,9 @@ class BioETLValidationError(BioETLDomainError):
     field_name: str | None = None
     invalid_value: Any | None = None  # Any: Generic invalid value from various sources
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Ensure context includes field and value information."""
-        context = self.context or {}
+        context = dict(self.context)
         if self.field_name:
             context["field_name"] = self.field_name
         if self.invalid_value is not None:
@@ -111,9 +111,9 @@ class BioETLConfigurationError(BioETLDomainError):
 
     config_key: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Ensure context includes configuration key."""
-        context = self.context or {}
+        context = dict(self.context)
         if self.config_key:
             context["config_key"] = self.config_key
         object.__setattr__(self, "context", context)
@@ -131,12 +131,12 @@ class BioETLDataQualityError(BioETLDomainError):
     record_id: str | None = None
     severity: str = "warning"
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate severity and ensure context includes record info."""
         if self.severity not in ("warning", "error", "critical"):
             raise ValueError(f"Invalid severity: {self.severity}")
 
-        context = self.context or {}
+        context = dict(self.context)
         if self.record_id:
             context["record_id"] = self.record_id
         context["severity"] = self.severity
@@ -156,9 +156,9 @@ class BioETLIntegrationError(BioETLDomainError):
     operation: str | None = None
     is_retryable: bool = True
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Ensure context includes service and operation info."""
-        context = self.context or {}
+        context = dict(self.context)
         if self.service_name:
             context["service_name"] = self.service_name
         if self.operation:
@@ -179,9 +179,9 @@ class BioETLNotFoundError(BioETLDomainError):
     entity_type: str | None = None
     entity_id: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Ensure context includes entity information."""
-        context = self.context or {}
+        context = dict(self.context)
         if self.entity_type:
             context["entity_type"] = self.entity_type
         if self.entity_id:
@@ -200,9 +200,9 @@ class BioETLConflictError(BioETLDomainError):
 
     conflicting_entity: str | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Ensure context includes conflict information."""
-        context = self.context or {}
+        context = dict(self.context)
         if self.conflicting_entity:
             context["conflicting_entity"] = self.conflicting_entity
         object.__setattr__(self, "context", context)

@@ -44,7 +44,14 @@ def load_provider_enums_from_file(
         yaml_path = _default_enum_path(normalized_provider)
 
     with yaml_path.open() as f:
-        return yaml.safe_load(f)
+        payload = yaml.safe_load(f)
+    if payload is None:
+        return {}
+    if not isinstance(payload, dict):
+        raise ValueError(
+            f"Enum config must be a YAML mapping: {yaml_path}"
+        )
+    return {str(key): value for key, value in payload.items()}
 
 
 def load_chembl_enums_from_file(

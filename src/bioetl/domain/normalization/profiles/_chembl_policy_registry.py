@@ -70,24 +70,24 @@ def _build_policy_surfaces(
 ) -> Mapping[tuple[str, str], ChemblPolicySurface]:
     surfaces: dict[tuple[str, str], ChemblPolicySurface] = {}
 
-    for family in data.controlled_vocabularies:
-        for field_ref in family.fields:
+    for controlled_family in data.controlled_vocabularies:
+        for field_ref in controlled_family.fields:
             entity, field_name = _parse_chembl_field_ref(str(field_ref))
             surfaces[(entity, field_name)] = ChemblPolicySurface(
                 category="controlled_vocabulary",
                 registry_source=CHEMBL_CONTROLLED_VOCAB_CONFIG,
-                invalid_value_mode=family.invalid_value_mode,
+                invalid_value_mode=controlled_family.invalid_value_mode,
             )
 
-    for family in data.ontology_families:
-        for field_ref in family.fields:
+    for ontology_family in data.ontology_families:
+        for field_ref in ontology_family.fields:
             entity, field_name = _parse_chembl_field_ref(str(field_ref))
             surfaces[(entity, field_name)] = ChemblPolicySurface(
                 category="ontology_reference_identifier",
                 registry_source=CHEMBL_ONTOLOGY_POLICY_CONFIG,
                 invalid_value_mode="preserve_unknown_lexeme",
             )
-        for field_ref in family.code_label_fields:
+        for field_ref in ontology_family.code_label_fields:
             entity, field_name = _parse_chembl_field_ref(str(field_ref))
             surfaces[(entity, field_name)] = ChemblPolicySurface(
                 category="derived_vocabulary",

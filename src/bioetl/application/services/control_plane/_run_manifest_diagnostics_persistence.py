@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import cast
+from typing import Literal, cast
 
 from bioetl.domain.control_plane.reproducibility_profiles import (
     build_lineage_closure_boundary as _build_lineage_closure_boundary,
@@ -81,7 +81,7 @@ def build_lineage_closure_boundary(
     contract_ref: object,
 ) -> dict[str, object]:
     """Return the published lineage-closure boundary for one manifested run."""
-    execution_context = (
+    execution_context: Literal["source", "composite"] = (
         "composite" if str(provider or "").strip() == "composite" else "source"
     )
     return _build_lineage_closure_boundary(

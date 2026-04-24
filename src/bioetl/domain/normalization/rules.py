@@ -226,13 +226,6 @@ def _normalize_float_boolean(value: float) -> bool | None:
     return None
 
 
-_BOOLEAN_COERCION_DISPATCH = {
-    bool: lambda val: val,
-    int: _normalize_int_boolean,
-    float: _normalize_float_boolean,
-}
-
-
 def _normalize_str_boolean(value: str) -> bool | None:
     normalized = normalize_string(value)
     if normalized is None:
@@ -247,9 +240,12 @@ def normalize_boolean(
     if value is None:
         return None
 
-    coercer = _BOOLEAN_COERCION_DISPATCH.get(type(value))
-    if coercer is not None:
-        return coercer(value)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int):
+        return _normalize_int_boolean(value)
+    if isinstance(value, float):
+        return _normalize_float_boolean(value)
 
     if isinstance(value, str):
         return _normalize_str_boolean(value)

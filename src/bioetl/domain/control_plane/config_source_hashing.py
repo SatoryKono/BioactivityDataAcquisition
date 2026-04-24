@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from enum import Enum
 from pathlib import PurePath
-from typing import Literal
+from typing import Literal, cast
 
 import yaml
 
@@ -18,7 +18,7 @@ ConfigSourceHashStrategy = Literal["canonical_yaml", "raw_bytes"]
 _YAML_SUFFIXES = frozenset({".yaml", ".yml"})
 
 
-class _UniqueKeySafeLoader(yaml.SafeLoader):
+class _UniqueKeySafeLoader(yaml.SafeLoader):  # type: ignore[misc]
     """PyYAML safe loader that rejects duplicate mapping keys."""
 
 
@@ -66,7 +66,7 @@ def compute_raw_sha256(raw_bytes: bytes) -> str:
 def compute_canonical_yaml_sha256(raw_bytes: bytes) -> str:
     """Compute a SHA-256 digest from YAML semantics, ignoring formatting."""
     text = raw_bytes.decode("utf-8")
-    payload = yaml.load(text, Loader=_UniqueKeySafeLoader)
+    payload = cast(object, yaml.load(text, Loader=_UniqueKeySafeLoader))
     canonical_payload = _to_canonical_jsonable(payload)
     serialized = json.dumps(
         canonical_payload,
@@ -97,7 +97,7 @@ def compute_config_source_hashes(
     )
 
 
-def _normalize_mapping(value: Mapping) -> dict[str, object]:
+def _normalize_mapping(value: Mapping[object, object]) -> dict[str, object]:
     normalized: dict[str, object] = {}
     for raw_key, raw_value in value.items():
         key = str(raw_key)
@@ -109,22 +109,21 @@ def _normalize_mapping(value: Mapping) -> dict[str, object]:
     return {key: normalized[key] for key in sorted(normalized)}
 
 
-def _normalize_sequence(value: list | tuple) -> list[object]:
+def _normalize_sequence(value: list[object] | tuple[object, ...]) -> list[object]:
     return [_to_canonical_jsonable(item) for item in value]
 
 
-_NORMALIZATION_DISPATCH = {
-    datetime: lambda value: value.isoformat(),
-    date: lambda value: value.isoformat(),
-    Enum: lambda value: value.value,
-    Mapping: lambda value: _normalize_mapping(value),
-    list: lambda value: _normalize_sequence(value),
-    tuple: lambda value: _normalize_sequence(value),
-}
-
-
 def _to_canonical_jsonable(value: object) -> object:
-    for type_, normalizer in _NORMALIZATION_DISPATCH.items():
-        if isinstance(value, type_):
-            return normalizer(value)
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, date):
+        return value.isoformat()
+    if isinstance(value, Enum):
+        return value.value
+    if isinstance(value, Mapping):
+        return _normalize_mapping(value)
+    if isinstance(value, list):
+        return _normalize_sequence(value)
+    if isinstance(value, tuple):
+        return _normalize_sequence(value)
     return value
