@@ -121,18 +121,28 @@ def collect_explicit_group_columns(
     ordered: list[str] = []
     used: set[str] = set()
 
-    extracted_fields = {col: extract_field_fn(col) for col in available}
+    available_list = list(available)
+    col_order = {col: i for i, col in enumerate(available_list)}
+
+    field_to_cols: dict[str, list[str]] = {}
+    for col in available_list:
+        extracted = extract_field_fn(col)
+        field_to_cols.setdefault(extracted, []).append(col)
+        if extracted != col:
+            field_to_cols.setdefault(col, []).append(col)
 
     for field_name in group.fields:
         field_matches: list[str] = []
         aliases = resolve_aliases_fn(field_name)
-        for column in available:
-            if column in used:
-                continue
-            extracted = extracted_fields[column]
-            if extracted in aliases or column in aliases:
-                field_matches.append(column)
-                used.add(column)
+
+        for alias in aliases:
+            if alias in field_to_cols:
+                for col in field_to_cols[alias]:
+                    if col not in used:
+                        field_matches.append(col)
+                        used.add(col)
+
+        field_matches.sort(key=lambda c: col_order[c])
         ordered.extend(sort_fn(field_matches, group.provider_order))
 
     return ordered, used
