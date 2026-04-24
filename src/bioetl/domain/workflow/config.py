@@ -99,7 +99,9 @@ class WorkflowRunOptionsConfig:
             ),
             multi_filter_ids=cast(
                 dict[str, tuple[str, ...]] | None,
-                _resolve_workflow_run_option_value(self, override, "multi_filter_ids"),
+                _resolve_workflow_run_option_value(
+                    self, override, "multi_filter_ids"
+                ),
             ),
             fallback_column=cast(
                 str | None,
@@ -107,11 +109,15 @@ class WorkflowRunOptionsConfig:
             ),
             fallback_mapping=cast(
                 dict[str, str] | None,
-                _resolve_workflow_run_option_value(self, override, "fallback_mapping"),
+                _resolve_workflow_run_option_value(
+                    self, override, "fallback_mapping"
+                ),
             ),
             vacuum_after_run=cast(
                 bool | None,
-                _resolve_workflow_run_option_value(self, override, "vacuum_after_run"),
+                _resolve_workflow_run_option_value(
+                    self, override, "vacuum_after_run"
+                ),
             ),
             vacuum_retention_days=cast(
                 int | None,
@@ -135,11 +141,15 @@ class WorkflowRunOptionsConfig:
             ),
             execution_context=cast(
                 str | None,
-                _resolve_workflow_run_option_value(self, override, "execution_context"),
+                _resolve_workflow_run_option_value(
+                    self, override, "execution_context"
+                ),
             ),
             use_cached_bronze=cast(
                 bool | None,
-                _resolve_workflow_run_option_value(self, override, "use_cached_bronze"),
+                _resolve_workflow_run_option_value(
+                    self, override, "use_cached_bronze"
+                ),
             ),
             cached_bronze_path=cast(
                 str | None,
@@ -155,7 +165,9 @@ class WorkflowRunOptionsConfig:
             ),
             replay_of_run_id=cast(
                 str | None,
-                _resolve_workflow_run_option_value(self, override, "replay_of_run_id"),
+                _resolve_workflow_run_option_value(
+                    self, override, "replay_of_run_id"
+                ),
             ),
             replay_of_manifest_id=cast(
                 str | None,
@@ -227,9 +239,8 @@ class WorkflowConfig:
     @property
     def topological_step_ids(self) -> tuple[str, ...]:
         """Return workflow step IDs in dependency order."""
-        return cast(
-            tuple[str, ...],
-            topologically_sorted_step_ids(cast("Sequence[_WorkflowStepLike]", self.steps)),
+        return topologically_sorted_step_ids(
+            cast("Sequence[_WorkflowStepLike]", self.steps)
         )
 
     def get_step(self, step_id: str) -> WorkflowStep | None:

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Protocol, cast
+from typing import Protocol
 
 import click
 
@@ -209,7 +209,7 @@ def build_run_click_command(
         """Run an ETL pipeline."""
         run_callback(ctx, **kwargs)
 
-    callback = cast(CommandCallback, run_command)
+    callback: CommandCallback = run_command
 
     # Apply all option groups
     callback = _add_core_options(validate_pipeline_name)(callback)
