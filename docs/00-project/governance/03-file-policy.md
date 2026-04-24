@@ -33,7 +33,7 @@ Last verified: '2026-03-29'
   project surfaces: `.ai`, `.aiassistant`, `.claude`, `.codex`, `.codex_tmp`,
   `.cursor`, `.gemini`, `.github`, `.idea`, `.jules`, `.junie`, `.sonarlint`,
   `.vibe`, `.vscode`, `assets`, `configs`, `data`, `docs`, `grafana`,
-  `reports`, `scripts`, `src`, `tests`.
+  `reports`, `scripts`, `src`, `testing_support`, `tests`.
 - Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
 - Shared repo tooling surfaces such as `.claude/`, `.codex/`, `.gemini/`,
   `.vibe/`, `.vscode/`, and `.cursor/` MAY оставаться tracked только если они
@@ -88,6 +88,7 @@ Machine-readable каталог для structure hygiene хранится в
 - разрешённый живой состав `docs/plans/**` и правило `max_active_backlog = 1`;
 - допустимые sidecar roots под `src/`: `src/bioetl`, `src/tools`,
   `src/memory`;
+- разрешённый root-level test support family: `testing_support/`;
 - blocked cleanup zones, которые не должны попадать под broad cleanup.
 
 `scripts/engineering/repo/audit_root_cleanliness.py` MUST использовать этот
@@ -125,6 +126,15 @@ Machine-readable каталог для structure hygiene хранится в
   policy/schema/tooling поверхностью.
 - Новые top-level пакеты под `src/` вне этих трёх roots MUST FAIL structure
   governance until they are explicitly ratified.
+
+### 0.4.1. Root-level test support family
+
+- `testing_support/` разрешён как approved root-level test-support package для
+  shared helper modules, которые импортируются несколькими test suites.
+- Этот каталог не является runtime surface и MUST использоваться только для
+  test-only support code.
+- Новые root-level test support directories вне `testing_support/` запрещены,
+  пока не будут явно ратифицированы в structure catalog.
 
 ### 0.5. Retention boundary
 

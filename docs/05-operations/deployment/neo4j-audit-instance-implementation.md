@@ -30,7 +30,7 @@ Last verified: '2026-04-12'
    - Bash version for WSL/Linux
    - Same functionality as PowerShell version
 
-4. ✅ **src/utils/neo4j_audit.py**
+4. ✅ **src/tools/neo4j_audit.py**
    - Helper functions for context-aware Neo4j connection
    - Automatically uses audit instance if LIVE_AUDIT_MODE=1
    - Functions:
@@ -52,7 +52,7 @@ Last verified: '2026-04-12'
 
 - [ ] Review docker-compose.neo4j-audit.yml configuration
 - [ ] Review scripts/ops/runtime/neo4j/start-neo4j-audit.ps1 (or .sh for WSL)
-- [ ] Review src/utils/neo4j_audit.py helper functions
+- [ ] Review src/tools/neo4j_audit.py helper functions
 
 ### Code Integration (30 minutes)
 
@@ -65,7 +65,7 @@ driver = neo4j.driver('bolt://localhost:7687', auth=(...))
 
 **After**:
 ```python
-from src.utils.neo4j_audit import get_neo4j_uri, get_neo4j_auth
+from src.tools.neo4j_audit import get_neo4j_uri, get_neo4j_auth
 
 driver = neo4j.driver(
     get_neo4j_uri(),
@@ -174,7 +174,7 @@ netstat -an | findstr "7475\|7688"
 # ports:
 #   - "7476:7474"
 #   - "7689:7687"
-# Then update src/utils/neo4j_audit.py get_neo4j_uri()
+# Then update src/tools/neo4j_audit.py get_neo4j_uri()
 ```
 
 ### OOMKilled During Audit
@@ -271,7 +271,7 @@ live --report-fast
 | docker-compose.neo4j-audit.yml | Container config | ✅ Ready |
 | scripts/ops/runtime/neo4j/start-neo4j-audit.ps1 | Start/stop script (PowerShell) | ✅ Ready |
 | scripts/ops/runtime/neo4j/start-neo4j-audit.sh | Start/stop script (Bash) | ✅ Ready |
-| src/utils/neo4j_audit.py | Connection helper | ✅ Ready |
+| src/tools/neo4j_audit.py | Connection helper | ✅ Ready |
 | NEO4J_AUDIT_INSTANCE_GUIDE.md | User guide | ✅ Ready |
 | This file | Implementation guide | ✅ Ready |
 

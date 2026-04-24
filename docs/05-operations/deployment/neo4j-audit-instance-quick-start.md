@@ -22,7 +22,7 @@ All files are ready to use. No additional setup needed.
 - **scripts/ops/runtime/neo4j/start-neo4j-audit.sh** — Bash: start/stop/logs (WSL)
 
 ### Code Integration
-- **src/utils/neo4j_audit.py** — Helper functions for context-aware connections
+- **src/tools/neo4j_audit.py** — Helper functions for context-aware connections
 
 ### Documentation
 - **NEO4J_AUDIT_INSTANCE_GUIDE.md** — Full user guide
@@ -97,7 +97,7 @@ bioetl-neo4j          bioetl-neo4j-audit
 ### Automatic Routing (Python)
 
 ```python
-from src.utils.neo4j_audit import get_neo4j_uri, get_neo4j_auth
+from src.tools.neo4j_audit import get_neo4j_uri, get_neo4j_auth
 
 # If LIVE_AUDIT_MODE=1:
 get_neo4j_uri()        # → bolt://localhost:7688 (audit)
@@ -113,7 +113,7 @@ get_neo4j_auth()       # → ('neo4j', 'bioetl_secure_password')
 ## Integration Checklist
 
 - [ ] Review docker-compose.neo4j-audit.yml
-- [ ] Review src/utils/neo4j_audit.py
+- [ ] Review src/tools/neo4j_audit.py
 - [ ] Update Neo4j connection code to use `get_neo4j_uri()` and `get_neo4j_auth()`
 - [ ] Set `LIVE_AUDIT_MODE=1` before running live validation
 - [ ] Test: Run `live --apply --batch-size 5`

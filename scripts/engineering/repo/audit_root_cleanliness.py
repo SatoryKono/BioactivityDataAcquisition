@@ -80,6 +80,17 @@ ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
 )
 
 
+def _approved_root_directories(catalog: dict[str, Any]) -> frozenset[str]:
+    """Return allowed root directories, including catalog-ratified test support."""
+    approved_test_support_dirs: set[str] = set()
+    test_support = catalog.get("test_support_roots")
+    if isinstance(test_support, dict):
+        approved_test_support_dirs = _collect_cataloged_paths(
+            test_support.get("approved_roots", [])
+        )
+    return frozenset(ALLOWED_ROOT_DIRECTORIES | approved_test_support_dirs)
+
+
 def _load_structure_catalog(repo_root: Path) -> dict[str, Any]:
     """Load machine-readable structure governance catalog."""
     catalog_path = repo_root / STRUCTURE_CATALOG_FILE
@@ -401,13 +412,15 @@ def _report_structure_policy_violations(violations: list[str]) -> int:
 
 
 def _unexpected_untracked_root_dirs(
-    untracked_paths: list[str], tracked_root_dirs: set[str]
+    untracked_paths: list[str],
+    tracked_root_dirs: set[str],
+    allowed_root_dirs: frozenset[str],
 ) -> list[str]:
     return sorted(
         root_dir
         for root_dir in _collect_untracked_root_dirs(untracked_paths)
         if root_dir not in tracked_root_dirs
-        and root_dir not in ALLOWED_ROOT_DIRECTORIES
+        and root_dir not in allowed_root_dirs
     )
 
 
@@ -470,10 +483,12 @@ def main() -> int:
         sys.stderr.write(f"ERROR: failed to query git index: {exc}\n")
         return 2
 
+    allowed_root_dirs = _approved_root_directories(structure_catalog)
+
     tracked_root_files, tracked_root_dirs = _collect_tracked_root_entries(tracked_paths)
 
     unexpected_root_files = sorted(tracked_root_files - allowed_root_files)
-    unexpected_root_dirs = sorted(tracked_root_dirs - ALLOWED_ROOT_DIRECTORIES)
+    unexpected_root_dirs = sorted(tracked_root_dirs - allowed_root_dirs)
     missing_allowed_files = sorted(allowed_root_files - tracked_root_files)
 
     root_layout_exit = _report_root_layout_violations(
@@ -507,7 +522,7 @@ def main() -> int:
         _collect_untracked_root_files(untracked_paths)
     )
     unexpected_untracked_root_dirs = _unexpected_untracked_root_dirs(
-        untracked_paths, tracked_root_dirs
+        untracked_paths, tracked_root_dirs, allowed_root_dirs
     )
     strict_untracked_violation = _report_untracked_root_entries(
         unexpected_untracked_root_files=unexpected_untracked_root_files,

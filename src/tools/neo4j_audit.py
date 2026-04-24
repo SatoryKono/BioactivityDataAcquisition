@@ -2,7 +2,7 @@
 Neo4j connection helper for audit workload.
 
 Usage:
-    from src.utils.neo4j_audit import get_neo4j_uri, get_neo4j_auth
+    from src.tools.neo4j_audit import get_neo4j_uri, get_neo4j_auth
 
     # Automatically uses audit instance if LIVE_AUDIT_MODE is set
     uri = get_neo4j_uri()

@@ -361,9 +361,7 @@ def _build_semantic_identity_payload(
         },
         "runtime_overrides": _runtime_overrides_payload(request.runtime_overrides),
         "effective_execution_config": {
-            "config_data": _to_jsonable(
-                request.effective_execution_config.config_data
-            ),
+            "config_data": _to_jsonable(request.effective_execution_config.config_data),
             "effective_hash": request.effective_execution_config.effective_hash,
         },
         "resolved_config_hash": request.resolved_config_hash,
