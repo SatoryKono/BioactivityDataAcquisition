@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Protocol, cast
 from urllib.parse import parse_qs, unquote, urlsplit
 
+from bioetl.domain.context import current_utc_time
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.interfaces.http.types import HealthResponse
 
 if TYPE_CHECKING:
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.domain.ports import HealthMonitorPort
+    from bioetl.domain.ports import ClockPort, HealthMonitorPort
 
 _NOT_FOUND_MESSAGE = "Not Found"
 
@@ -56,11 +56,19 @@ class HealthServerRoutingMixin:
 
     _health_monitor: HealthMonitorPort | None
     _quarantine_service: QuarantineService | None
+    _clock: ClockPort | None
 
     @property
     def uptime_seconds(self) -> float:
         """Get server uptime in seconds."""
         raise NotImplementedError
+
+    def _response_timestamp(self) -> str:
+        """Return the sanctioned timestamp source for health responses."""
+        clock = getattr(self, "_clock", None)
+        if clock is not None:
+            return clock.now().isoformat()
+        return current_utc_time().isoformat()
 
     async def _route_request(self, writer: asyncio.StreamWriter, path: str) -> None:
         """Route request to appropriate handler."""
@@ -269,7 +277,7 @@ class HealthServerRoutingMixin:
             checks["providers"] = state_support._get_provider_statuses()
         return HealthResponse(
             status=status.value.lower(),
-            timestamp=datetime.now(tz=UTC).isoformat(),
+            timestamp=self._response_timestamp(),
             checks=checks,
         )
 
@@ -278,7 +286,7 @@ class HealthServerRoutingMixin:
         await asyncio.sleep(0)
         return HealthResponse(
             status="healthy",
-            timestamp=datetime.now(tz=UTC).isoformat(),
+            timestamp=self._response_timestamp(),
             checks={
                 "server": {
                     "status": "healthy",
@@ -293,7 +301,7 @@ class HealthServerRoutingMixin:
         if not self._health_monitor:
             return HealthResponse(
                 status="healthy",
-                timestamp=datetime.now(tz=UTC).isoformat(),
+                timestamp=self._response_timestamp(),
                 checks={"message": "No health monitor configured"},
             )
         state_support = cast(_HealthStateSupport, self)
@@ -304,7 +312,7 @@ class HealthServerRoutingMixin:
         status = "unhealthy" if has_unhealthy else "healthy"
         return HealthResponse(
             status=status,
-            timestamp=datetime.now(tz=UTC).isoformat(),
+            timestamp=self._response_timestamp(),
             checks={"providers": provider_statuses},
         )
 
@@ -314,13 +322,13 @@ class HealthServerRoutingMixin:
         if not self._health_monitor:
             return HealthResponse(
                 status="healthy",
-                timestamp=datetime.now(tz=UTC).isoformat(),
+                timestamp=self._response_timestamp(),
                 checks={"message": "No health monitor configured"},
             )
         state_support = cast(_HealthStateSupport, self)
         return HealthResponse(
             status=state_support._get_overall_status().value.lower(),
-            timestamp=datetime.now(tz=UTC).isoformat(),
+            timestamp=self._response_timestamp(),
             checks={"providers": state_support._get_provider_statuses()},
         )
 

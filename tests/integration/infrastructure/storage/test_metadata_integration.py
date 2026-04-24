@@ -1,8 +1,4 @@
-"""Unit tests for metadata writing integration with Silver and Gold writers.
-
-Tests that SilverWriter and GoldWriter correctly delegate to MetadataWriterPort
-when configured to write metadata sidecar files.
-"""
+"""Integration tests for metadata writing with Silver and Gold writers."""
 
 from __future__ import annotations
 
@@ -26,13 +22,14 @@ from bioetl.domain.models.metadata import (
     RunTypeEnum,
     SilverMetadata,
 )
-from bioetl.domain.ports.noop import NoOpMetadataWriter
-from bioetl.domain.types import RunID
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
+from bioetl.domain.types import RunID
 from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
     make_produced_artifact_fragment,
 )
+
+pytestmark = pytest.mark.integration
 
 
 class MockMetadataCoordinator:
@@ -79,9 +76,7 @@ class MockMetadataCoordinator:
         environment = EnvironmentMetadata(
             hostname="test", python_version="3.11", bioetl_version="1.0"
         )
-        output = BaseOutputMetadata(
-            record_count=len(input_data.records),
-        )
+        output = BaseOutputMetadata(record_count=len(input_data.records))
         output_ext = GoldOutputExt()
         return GoldMetadata(
             runtime=runtime,
@@ -122,7 +117,6 @@ class MockMetadataWriter:
     """Mock MetadataWriter that records calls."""
 
     def __init__(self) -> None:
-        """Initialize mock writer."""
         self.silver_calls: list[tuple[str | Path, SilverMetadata]] = []
         self.gold_calls: list[tuple[str | Path, GoldMetadata]] = []
 
@@ -134,7 +128,7 @@ class MockMetadataWriter:
         provider: str | None = None,
         entity: str | None = None,
     ) -> str:
-        """Mock Bronze metadata write."""
+        del base_path, metadata, provider, entity
         await asyncio.sleep(0)
         return ""
 
@@ -148,7 +142,7 @@ class MockMetadataWriter:
         provider: str | None = None,
         entity: str | None = None,
     ) -> str:
-        """Record Silver metadata write."""
+        del table_name, flat_structure, provider, entity
         await asyncio.sleep(0)
         self.silver_calls.append((base_path, metadata))
         return str(Path(base_path) / "_metadata.yaml")
@@ -163,7 +157,7 @@ class MockMetadataWriter:
         provider: str | None = None,
         entity: str | None = None,
     ) -> str:
-        """Record Gold metadata write."""
+        del table_name, flat_structure, provider, entity
         await asyncio.sleep(0)
         self.gold_calls.append((base_path, metadata))
         return str(Path(base_path) / "_metadata.yaml")
@@ -180,9 +174,7 @@ class MockMetadataWriter:
         completed_at: datetime | None = None,
         delta_version_after: int | None = None,
     ) -> str | None:
-        """Record Silver metadata finalization as a no-op compatible seam."""
-        await asyncio.sleep(0)
-        _ = (
+        del (
             table_name,
             flat_structure,
             provider,
@@ -191,6 +183,7 @@ class MockMetadataWriter:
             completed_at,
             delta_version_after,
         )
+        await asyncio.sleep(0)
         return str(Path(base_path) / "_metadata.yaml")
 
     async def finalize_gold_metadata(
@@ -204,9 +197,7 @@ class MockMetadataWriter:
         dq_report_path: str | None = None,
         completed_at: datetime | None = None,
     ) -> str | None:
-        """Record Gold metadata finalization as a no-op compatible seam."""
-        await asyncio.sleep(0)
-        _ = (
+        del (
             table_name,
             flat_structure,
             provider,
@@ -214,34 +205,30 @@ class MockMetadataWriter:
             dq_report_path,
             completed_at,
         )
+        await asyncio.sleep(0)
         return str(Path(base_path) / "_metadata.yaml")
 
     async def aclose(self) -> None:
-        """No-op close."""
         await asyncio.sleep(0)
 
 
 @pytest.fixture
 def mock_logger() -> MagicMock:
-    """Create a mock logger."""
     return MagicMock()
 
 
 @pytest.fixture
 def mock_metadata_writer() -> MockMetadataWriter:
-    """Create a mock metadata writer."""
     return MockMetadataWriter()
 
 
 @pytest.fixture
 def mock_metadata_coordinator() -> MockMetadataCoordinator:
-    """Create a mock metadata coordinator."""
     return MockMetadataCoordinator()
 
 
 @pytest.fixture
 def sample_records() -> list[dict[str, Any]]:
-    """Create sample records for testing."""
     run_id = str(uuid4())
     batch_id = str(uuid4())
     return [
@@ -266,7 +253,6 @@ def sample_records() -> list[dict[str, Any]]:
 
 @pytest.fixture
 def silver_schema() -> pa.Schema:
-    """Create sample PyArrow schema for Silver layer."""
     return pa.schema(
         [
             pa.field("id", pa.string()),
@@ -283,14 +269,8 @@ def silver_schema() -> pa.Schema:
 def mock_metadata_coordinator_with_records(
     sample_records: list[dict[str, Any]],
 ) -> MagicMock:
-    """Create a mock metadata coordinator that returns mock metadata objects.
-
-    Uses MagicMock for the metadata objects to avoid complex Pydantic model setup.
-    The test verifies that metadata_writer is called, not the exact metadata content.
-    """
+    """Create a mock metadata coordinator returning mock metadata objects."""
     mock = MagicMock()
-
-    # Create mock SilverMetadata with required attributes for the test assertions
     mock_silver_metadata = MagicMock(spec=SilverMetadata)
     mock_silver_metadata.runtime = MagicMock()
     mock_silver_metadata.runtime.run_id = sample_records[0]["_run_id"]
@@ -313,7 +293,6 @@ def mock_metadata_coordinator_with_records(
         )
     )
 
-    # Create mock GoldMetadata
     mock_gold_metadata = MagicMock(spec=GoldMetadata)
     mock_gold_metadata.runtime = MagicMock()
     mock_gold_metadata.runtime.run_id = sample_records[0]["_run_id"]
@@ -348,7 +327,6 @@ class TestSilverWriterMetadataIntegration:
         sample_records: list[dict[str, Any]],
         silver_schema: pa.Schema,
     ) -> None:
-        """Test that SilverWriter calls metadata writer after write."""
         writer = SilverWriter(
             base_path=tmp_path,
             logger=mock_logger,
@@ -364,14 +342,9 @@ class TestSilverWriterMetadataIntegration:
             mode="merge",
         )
 
-        # Verify metadata writer was called
         assert len(mock_metadata_writer.silver_calls) == 1
         table_path, metadata = mock_metadata_writer.silver_calls[0]
-
-        # Verify path
         assert str(table_path) == f"{tmp_path}/test/table"
-
-        # Verify metadata content
         assert metadata.runtime.run_id == sample_records[0]["_run_id"]
         assert metadata.delta.rows_inserted == 2
         assert metadata.delta.operation == "merge"
@@ -385,14 +358,11 @@ class TestSilverWriterMetadataIntegration:
         sample_records: list[dict[str, Any]],
         silver_schema: pa.Schema,
     ) -> None:
-        """Test that SilverWriter uses NoOpMetadataWriter when not provided."""
         writer = SilverWriter(
             base_path=tmp_path,
             logger=mock_logger,
-            # No metadata_writer provided
         )
 
-        # Should not raise an error
         await writer.write_silver(
             table_name="test.table",
             records=sample_records,
@@ -401,7 +371,6 @@ class TestSilverWriterMetadataIntegration:
             mode="merge",
         )
 
-        # Verify NoOp was used (no metadata file created)
         metadata_file = tmp_path / "test" / "table" / "_metadata.yaml"
         assert not metadata_file.exists()
 
@@ -417,7 +386,6 @@ class TestGoldWriterMetadataIntegration:
         mock_metadata_writer: MockMetadataWriter,
         mock_metadata_coordinator: MockMetadataCoordinator,
     ) -> None:
-        """Test that GoldWriter calls metadata writer after write."""
         import pandera.pandas as pa_pandera
 
         schema = pa_pandera.DataFrameSchema(
@@ -440,27 +408,19 @@ class TestGoldWriterMetadataIntegration:
             {"id": "record2", "value": 43},
         ]
 
-        ingestion_ts = datetime.now(UTC)
-        run_id = RunID(uuid4())
-
         await writer.write_gold(
             table_name="test.gold_table",
             records=records,
             schema=schema,
             primary_keys=["id"],
             mode="overwrite",
-            ingestion_ts=ingestion_ts,
-            run_id=run_id,
+            ingestion_ts=datetime.now(UTC),
+            run_id=RunID(uuid4()),
         )
 
-        # Verify metadata writer was called
         assert len(mock_metadata_writer.gold_calls) == 1
         table_path, metadata = mock_metadata_writer.gold_calls[0]
-
-        # Verify path
         assert str(table_path) == f"{tmp_path}/test/gold_table"
-
-        # Verify metadata content
         assert metadata.output.record_count == 2
         assert metadata.pipeline.provider == "test"
         assert metadata.pipeline.entity == "gold_table"
@@ -471,7 +431,6 @@ class TestGoldWriterMetadataIntegration:
         tmp_path: Path,
         mock_logger: MagicMock,
     ) -> None:
-        """Test that GoldWriter uses NoOpMetadataWriter when not provided."""
         import pandera.pandas as pa_pandera
 
         schema = pa_pandera.DataFrameSchema(
@@ -485,64 +444,17 @@ class TestGoldWriterMetadataIntegration:
         writer = GoldWriter(
             base_path=tmp_path,
             logger=mock_logger,
-            # No metadata_writer provided
         )
 
-        records = [{"id": "record1", "value": 42}]
-        ingestion_ts = datetime.now(UTC)
-        run_id = RunID(uuid4())
-
-        # Should not raise an error
         await writer.write_gold(
             table_name="test.gold_table",
-            records=records,
+            records=[{"id": "record1", "value": 42}],
             schema=schema,
             primary_keys=["id"],
             mode="overwrite",
-            ingestion_ts=ingestion_ts,
-            run_id=run_id,
+            ingestion_ts=datetime.now(UTC),
+            run_id=RunID(uuid4()),
         )
 
-        # Verify NoOp was used (no metadata file created)
         metadata_file = tmp_path / "test" / "gold_table" / "_metadata.yaml"
         assert not metadata_file.exists()
-
-
-class TestNoOpMetadataWriter:
-    """Tests for NoOpMetadataWriter behavior."""
-
-    @pytest.mark.asyncio
-    async def test_noop_returns_empty_string(self) -> None:
-        """Test that NoOpMetadataWriter returns empty strings."""
-        noop = NoOpMetadataWriter()
-
-        # Create minimal metadata objects for testing
-        from bioetl.domain.models.metadata import (
-            EnvironmentMetadata,
-            PipelineMetadata,
-            RuntimeMetadata,
-            RunTypeEnum,
-            SilverMetadata,
-            DeltaMetrics,
-        )
-
-        runtime = RuntimeMetadata(
-            run_id="test",
-            run_type=RunTypeEnum.INCREMENTAL,
-            started_at_utc=datetime.now(UTC),
-        )
-        pipeline = PipelineMetadata(name="test", provider="test", entity="test")
-        environment = EnvironmentMetadata(
-            hostname="test", python_version="3.11", bioetl_version="1.0"
-        )
-        delta = DeltaMetrics(table_path="/test", operation="merge")
-
-        metadata = SilverMetadata(
-            runtime=runtime,
-            pipeline=pipeline,
-            delta=delta,
-            environment=environment,
-        )
-
-        result = await noop.write_silver_metadata("test-output/silver/test", metadata)
-        assert result == ""
