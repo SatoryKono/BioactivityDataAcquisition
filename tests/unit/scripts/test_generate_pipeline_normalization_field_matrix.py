@@ -370,6 +370,39 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     )
 
 
+def test_build_field_matrix_rows_keeps_chembl_cell_line_policy_fields_visible() -> None:
+    rows = build_field_matrix_rows()
+
+    cell_type = _row(rows, "chembl_cell_line", "cell_type")
+    assert cell_type["normalization_source"] == "profile"
+    assert cell_type["normalizer"] == "normalize_profile_null"
+    assert cell_type["dq_coverage"] == "null:pseudo_null_to_null"
+
+    clo_id = _row(rows, "chembl_cell_line", "clo_id")
+    assert clo_id["semantic_category"] == "ontology_reference_identifier"
+    assert clo_id["controlled_vocabulary_source"] == "configs/vocab/chembl_ontology.yaml"
+    assert clo_id["strictness"] == "canonical_ontology_id"
+
+
+def test_build_field_matrix_rows_aligns_chembl_taxonomy_fields_to_integer_contract() -> (
+    None
+):
+    rows = build_field_matrix_rows()
+
+    for pipeline_name, field_name in [
+        ("chembl_activity", "target_taxonomy_id"),
+        ("chembl_assay", "assay_taxonomy_id"),
+        ("chembl_assay", "variant_taxonomy_id"),
+        ("chembl_target", "taxonomy_id"),
+        ("chembl_target_component", "taxonomy_id"),
+        ("chembl_cell_line", "cell_source_taxonomy_id"),
+    ]:
+        row = _row(rows, pipeline_name, field_name)
+        assert row["normalization_source"] == "profile"
+        assert row["normalizer"] == "normalize_profile_int"
+        assert row["field_type"] == "int64"
+
+
 def test_chembl_policy_bearing_fields_do_not_silently_stay_dq_not_configured() -> None:
     """Policy-bearing ChEMBL fields must carry an explicit DQ decision in the matrix."""
     rows = build_field_matrix_rows()

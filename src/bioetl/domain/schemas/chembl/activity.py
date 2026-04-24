@@ -205,9 +205,9 @@ class ActivitySchema(ETLRecordSchema):
     target_organism: Series[str] = pa.Field(
         nullable=False, description="Target organism."
     )
-    target_taxonomy_id: Series[float] = pa.Field(
+    target_taxonomy_id: Series[pd.Int64Dtype] = pa.Field(
         nullable=False,
-        description="Target taxonomy ID (nullable int pattern).",
+        description="Target taxonomy ID.",
     )
     assay_type: Series[str] = pa.Field(
         nullable=False,

@@ -5,6 +5,7 @@ Aligned with RULES.md v5.24 and ChEMBL 34 schema.
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -46,8 +47,8 @@ class TargetSchema(ETLRecordSchema):
 
     # === Metadata ===
     pref_name: Series[str] = pa.Field(nullable=False, description="Preferred name.")
-    taxonomy_id: Series[float] | None = pa.Field(
-        nullable=True, description="NCBI Taxonomy ID (float for nullable int)."
+    taxonomy_id: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="NCBI Taxonomy ID."
     )
     organism: Series[str] = pa.Field(nullable=False, description="Organism.")
     organism_class: Series[str] | None = pa.Field(

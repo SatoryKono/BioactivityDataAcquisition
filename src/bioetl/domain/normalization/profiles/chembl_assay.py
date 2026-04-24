@@ -57,8 +57,10 @@ _META_FIELDS = frozenset(
     }
 )
 _TITLE_FIELDS = frozenset({"assay_pref_name"})
-_INT_FIELDS = frozenset({"confidence_score", "src_id"})
-_FLOAT_FIELDS = frozenset({"assay_taxonomy_id", "score", "variant_taxonomy_id"})
+_INT_FIELDS = frozenset(
+    {"assay_taxonomy_id", "confidence_score", "src_id", "variant_taxonomy_id"}
+)
+_FLOAT_FIELDS = frozenset({"score"})
 _STRICT_JSON_FIELDS = frozenset(
     {
         "assay_classifications",

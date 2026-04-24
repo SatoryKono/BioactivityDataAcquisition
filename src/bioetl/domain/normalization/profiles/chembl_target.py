@@ -40,7 +40,8 @@ _META_FIELDS = frozenset(
     }
 )
 _TITLE_FIELDS = frozenset({"pref_name"})
-_FLOAT_FIELDS = frozenset({"primary_component_id", "taxonomy_id"})
+_INT_FIELDS = frozenset({"taxonomy_id"})
+_FLOAT_FIELDS = frozenset({"primary_component_id"})
 _BOOLEAN_FIELDS = frozenset({"species_group_flag", "downgraded"})
 _STRICT_JSON_FIELDS = frozenset(
     {
@@ -86,6 +87,7 @@ CHEMBL_TARGET_PROFILE = build_standard_profile(
     schema_fields=CHEMBL_TARGET_SCHEMA_FIELDS,
     meta_fields=_META_FIELDS,
     title_fields=_TITLE_FIELDS,
+    int_fields=_INT_FIELDS,
     float_fields=_FLOAT_FIELDS,
     boolean_fields=_BOOLEAN_FIELDS,
     strict_json_fields=_STRICT_JSON_FIELDS,
