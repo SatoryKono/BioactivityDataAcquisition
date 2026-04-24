@@ -256,7 +256,9 @@ def test_naming_audit_uses_registry_for_doc_exceptions(tmp_path: Path) -> None:
     )
 
 
-def test_naming_audit_uses_registry_for_path_level_doc_exceptions(tmp_path: Path) -> None:
+def test_naming_audit_uses_registry_for_path_level_doc_exceptions(
+    tmp_path: Path,
+) -> None:
     mod = _load_naming_audit_module()
     registry = mod.load_naming_registry()
 
@@ -291,8 +293,7 @@ def test_naming_audit_uses_registry_for_path_level_doc_exceptions(tmp_path: Path
     )
 
     assert all(
-        violation.current_name != "UPPER_CASE_GUIDE.md"
-        for violation in results["docs"]
+        violation.current_name != "UPPER_CASE_GUIDE.md" for violation in results["docs"]
     )
 
 
