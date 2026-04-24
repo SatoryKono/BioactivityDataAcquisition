@@ -15,7 +15,6 @@ if str(repo_root) not in sys.path:
 
 from mkdocs.commands import build
 from mkdocs.config import load_config
-from mkdocs.exceptions import AbortException
 
 
 def main() -> int:
@@ -44,11 +43,8 @@ def main() -> int:
         build.build(config)
         print(f"MkDocs site generated at {args.site_dir}")
         return 0
-    except AbortException as e:
+    except Exception as e: # Catch all exceptions
         print(f"Error building MkDocs site: {e}", file=sys.stderr)
-        return 1
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}", file=sys.stderr)
         return 1
 
 

@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
+
+from bioetl.domain.context import current_utc_time
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -82,7 +84,7 @@ class StorageAdapterMaintenanceMixin:
         # Parse table_name to get provider/entity for targeted cleanup
         if "." in table_name:
             provider, entity = table_name.split(".", 1)
-            cutoff_date = datetime.now(UTC) - timedelta(hours=retention_hours)
+            cutoff_date = current_utc_time() - timedelta(hours=retention_hours)
             await self.bronze.cleanup_old_files(
                 cutoff_date=cutoff_date,
                 dry_run=dry_run,

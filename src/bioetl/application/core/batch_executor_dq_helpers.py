@@ -14,8 +14,9 @@ __all__ = [
 
 import json
 from collections.abc import Callable
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING, TypeVar
+
+from bioetl.domain.context import current_utc_time
 
 if TYPE_CHECKING:
     from bioetl.application.core.config import RecordProcessorConfig
@@ -193,7 +194,7 @@ def build_dq_report_context(
         ]
 
     replay_timestamp_anchor = getattr(context, "replay_timestamp_anchor", None)
-    started_at = getattr(context, "started_at", datetime.now(UTC))
+    started_at = getattr(context, "started_at", current_utc_time())
     dq_timestamp = replay_timestamp_anchor or started_at
     current_date_str = dq_timestamp.strftime("%Y-%m-%d")
     dq_entity = extract_dq_entity(config)

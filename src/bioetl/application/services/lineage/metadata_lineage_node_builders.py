@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.lineage.metadata_assemblers_helpers import (
     _resolve_source_batch_ids,
     _resolve_transform_metadata,
 )
+from bioetl.domain.context import current_utc_time
 from bioetl.domain.lineage import (
     DatasetRef,
     LineageEdge,
@@ -38,7 +39,7 @@ def fragment_timestamp(*values: datetime | None) -> datetime:
     for value in values:
         if value is not None:
             return value
-    return datetime.now(UTC)
+    return current_utc_time()
 
 
 def build_fragment_id(prefix: str, *parts: object) -> str:
