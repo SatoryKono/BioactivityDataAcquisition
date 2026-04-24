@@ -7,7 +7,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
-from bioetl.domain.context import current_utc_time
 from bioetl.domain.normalization import normalize_runtime_anchor_payload
 
 if TYPE_CHECKING:
@@ -150,7 +149,11 @@ def fresh_checkpoint_state(
     """Create a fresh checkpoint state for a new composite execution."""
     resolved_created_at = created_at
     if resolved_created_at is None:
-        resolved_created_at = clock.now() if clock is not None else current_utc_time()
+        if clock is None:
+            raise ValueError(
+                "fresh_checkpoint_state requires explicit created_at or injected clock"
+            )
+        resolved_created_at = clock.now()
     return CompositeCheckpointState(
         composite_name=composite_name,
         run_id=run_id,

@@ -31,6 +31,7 @@ from bioetl.composition.factories.services.pipeline_builder import (
 )
 from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import WriteModePolicy
+from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -92,6 +93,7 @@ def build_preflight_service(context: RunnerAssemblyContext) -> PreflightService:
     health_aggregator = HealthAggregator(
         logger=context.logger_port,
         health_check_mode=pipeline.runtime.health_check_mode,
+        clock=SystemClock(),
     )
     medallion_validator = MedallionConfigValidator(
         config=pipeline.config,

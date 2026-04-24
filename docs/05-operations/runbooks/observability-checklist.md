@@ -184,6 +184,30 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
 uv run python -m scripts.docs check-links --links --specs --configs
 ```
 
+### 6a. Lifecycle Regression Expectations
+
+When observability changes touch pipeline milestones or control-plane flows, tests
+must assert emitted signals semantically rather than only verifying wiring or
+adapter parity.
+
+- Prefer bounded label assertions for milestone metrics such as checkpoint
+  operator `operation/status`, lifecycle `dry_run`, and canonical pipeline
+  `phase/status`.
+- Cover at least one representative integration surface with the real
+  `PipelineObserver` so canonical lifecycle events and phase histograms are
+  exercised through `PipelineRunner`, not only through unit seams.
+- Keep assertions low-cardinality: use canonical event names and bounded labels,
+  not free-form message text.
+
+Targeted regression commands for lifecycle/control-plane observability changes:
+
+```bash
+uv run pytest -q tests/unit/application/services/test_checkpoint_service.py
+uv run pytest -q tests/unit/application/services/test_checkpoint_compatibility_service.py
+uv run pytest -q tests/unit/infrastructure/control_plane/test_file_artifact_lifecycle_store.py
+uv run pytest -q tests/integration/test_runner_lifecycle.py
+```
+
 ### 7. Operator Sign-off
 
 - [ ] Metrics endpoint is reachable
