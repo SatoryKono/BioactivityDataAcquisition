@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import datetime
 from typing import TYPE_CHECKING, TypeVar
 
 from bioetl.domain.context import (
@@ -10,6 +11,7 @@ from bioetl.domain.context import (
     InputFilterContext,
     PipelineRunContext,
     VacuumSettings,
+    current_utc_time,
 )
 from bioetl.domain.types import RunID, RunType
 
@@ -57,6 +59,7 @@ class PipelineRunContextService:
         pipeline_name: str,
         run_id: RunID,
         options: RunOptions,
+        started_at: datetime | None = None,
     ) -> PipelineRunContext:
         """Build PipelineRunContext from run options.
 
@@ -79,6 +82,7 @@ class PipelineRunContextService:
             pipeline_name=pipeline_name,
             run_id=run_id,
             run_type=RunType(options.run_type),
+            started_at=started_at if started_at is not None else current_utc_time(),
             replay_of_run_id=options.replay_of_run_id,
             replay_of_manifest_id=options.replay_of_manifest_id,
             resume=options.resume,

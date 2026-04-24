@@ -17,6 +17,8 @@ from bioetl.infrastructure.storage.support.retention import (
     _content_identity,
 )
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.fixture
 def tmp_delta_dir(tmp_path: Path) -> Path:

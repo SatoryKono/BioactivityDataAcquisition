@@ -104,6 +104,7 @@ def _create_runner_from_factory(
     request = PipelineCreateRunnerRequest(
         run_id=ctx.run_id,
         runtime=inputs.runtime_config,
+        started_at=ctx.started_at,
         settings=cast("SettingsPort", inputs.settings),
         observability=cast(
             "ExecutionObservabilityPort",
@@ -139,6 +140,7 @@ def _create_runner_from_factory(
             create_runner(
                 run_id=request.run_id,
                 runtime=request.runtime,
+                started_at=request.started_at,
                 settings=request.settings,
                 observability=request.observability,
                 manifest_id=control_plane.manifest_id,
@@ -320,7 +322,6 @@ def build_pipeline_runner(
     Returns:
         Fully configured PipelineRunner ready for execution.
     """
-    # Initialize registry
     effective_registry = _initialize_registry(
         registry=registry,
         create_registry_fn=create_registry_fn,
@@ -328,7 +329,6 @@ def build_pipeline_runner(
         register_all_pipelines_fn=register_all_pipelines_fn,
     )
 
-    # Resolve optional functions
     resolved_functions = _resolve_optional_functions(
         build_observability_bundle_fn,
         assemble_vacuum_settings_fn,
@@ -337,7 +337,6 @@ def build_pipeline_runner(
         assemble_cached_bronze_context_fn,
     )
 
-    # Prepare runner inputs
     inputs = _prepare_runner_inputs_with_resolved_functions(
         ctx=ctx,
         get_settings_fn=get_settings_fn,
@@ -346,17 +345,14 @@ def build_pipeline_runner(
         resolved_functions=resolved_functions,
     )
 
-    # Handle control plane setup
     ctx, inputs, run_ledger_service = _handle_control_plane_setup(ctx, inputs)
 
-    # Create and configure runner
     runner = _create_runner_from_factory(
         factory=effective_registry.get(ctx.pipeline_name).factory,
         ctx=ctx,
         inputs=inputs,
     )
 
-    # Attach ledger service if available
     if run_ledger_service is not None:
         attach_control_plane_collaborators(runner, run_ledger_service)
 

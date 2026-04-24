@@ -719,11 +719,19 @@ def _load_dq_config(provider: str, entity: str) -> Any | None:
         return None
 
 
-def _dq_coverage(*, provider: str, entity: str, field_name: str) -> str:
+def _dq_coverage(
+    *,
+    provider: str,
+    entity: str,
+    field_name: str,
+    strictness: str,
+) -> str:
     if provider != "composite" and _load_dq_config(provider, entity) is None:
         return "dq_config:unavailable"
     coverage = _dq_rule_coverage_by_field(provider, entity).get(field_name)
     if coverage is None:
+        if strictness == "strict_json":
+            return "runtime_warning:malformed_json_normalized_to_null"
         return "not_configured"
     return coverage
 
@@ -970,6 +978,7 @@ def _entity_profile_row(
             provider=provider,
             entity=entity,
             field_name=field_name,
+            strictness=strictness,
         ),
         "notes": notes,
     }
@@ -1037,6 +1046,7 @@ def _entity_fallback_row(
             provider=provider,
             entity=entity,
             field_name=field_name,
+            strictness=strictness,
         ),
         "notes": "",
     }

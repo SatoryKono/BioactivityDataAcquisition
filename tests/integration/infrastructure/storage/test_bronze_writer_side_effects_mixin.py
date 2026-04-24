@@ -1,4 +1,4 @@
-"""Unit tests for BronzeWriterSideEffectsMixin."""
+"""Integration tests for BronzeWriterSideEffectsMixin."""
 
 from __future__ import annotations
 
@@ -42,7 +42,7 @@ class _Host(BronzeWriterSideEffectsMixin):
         return "abc123checksum"
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 class TestBronzeWriterSideEffectsMixin:
     """Tests for audit and metadata side effects after Bronze write."""
 

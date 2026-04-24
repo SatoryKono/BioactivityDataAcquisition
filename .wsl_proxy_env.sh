@@ -14,3 +14,11 @@ fi
 
 alias proxy-on='_W=$(/sbin/ip route show default | awk '\''{print $3}'\'') && export http_proxy=http://$_W:3128 https_proxy=http://$_W:3128 HTTP_PROXY=http://$_W:3128 HTTPS_PROXY=http://$_W:3128 && echo "proxy ON via $_W:3128"'
 alias proxy-off='unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY && echo "proxy OFF"'
+
+# WSL Browser configuration (for antigravity and other tools)
+if [[ -f "/mnt/c/Windows/System32/cmd.exe" ]]; then
+  export BROWSER='/mnt/c/Windows/System32/cmd.exe /c start'
+fi
+
+# Antigravity alias
+alias antigravity='python3 -m antigravity'

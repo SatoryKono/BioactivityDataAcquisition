@@ -171,6 +171,10 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
         == "normalize_profile_json_string_strict"
     )
     assert chembl_assay_parameters_json["strictness"] == "strict_json"
+    assert (
+        chembl_assay_parameters_json["dq_coverage"]
+        == "runtime_warning:malformed_json_normalized_to_null"
+    )
 
     chembl_publication_type = _row(rows, "chembl_publication", "publication_type")
     assert (
@@ -262,6 +266,10 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     assert activity_properties["normalizer"] == "normalize_profile_json_string_strict"
     assert activity_properties["hash_ordering"] == "set_like"
     assert activity_properties["strictness"] == "strict_json"
+    assert (
+        activity_properties["dq_coverage"]
+        == "runtime_warning:malformed_json_normalized_to_null"
+    )
 
     activity_units = _row(rows, "chembl_activity", "units")
     assert activity_units["semantic_category"] == "controlled_vocabulary"
@@ -293,10 +301,18 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
         target_cross_references["normalizer"] == "normalize_profile_json_string_strict"
     )
     assert target_cross_references["strictness"] == "strict_json"
+    assert (
+        target_cross_references["dq_coverage"]
+        == "runtime_warning:malformed_json_normalized_to_null"
+    )
 
     molecule_properties = _row(rows, "chembl_molecule", "molecule_properties")
     assert molecule_properties["normalizer"] == "normalize_profile_json_string_strict"
     assert molecule_properties["strictness"] == "strict_json"
+    assert (
+        molecule_properties["dq_coverage"]
+        == "runtime_warning:malformed_json_normalized_to_null"
+    )
 
     bao_format = _row(rows, "chembl_activity", "bao_format")
     assert bao_format["semantic_category"] == "ontology_reference_identifier"
@@ -359,13 +375,13 @@ def test_chembl_policy_bearing_fields_do_not_silently_stay_dq_not_configured() -
     rows = build_field_matrix_rows()
     governed_strictness = {
         "strict_enum",
+        "strict_json",
         "controlled_unit",
         "ontology_id",
         "bool_like",
         "flag_like",
         "operator_enum",
         "controlled_vocabulary",
-        "structured_json",
     }
 
     missing = [

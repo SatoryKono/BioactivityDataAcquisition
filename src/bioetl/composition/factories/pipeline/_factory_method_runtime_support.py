@@ -70,6 +70,7 @@ def create_factory_runner_from_request(
     gold_schema: GoldSchemaType,
     run_id: RunID,
     runtime: RuntimeConfig,
+    started_at: datetime,
     settings: Settings,
     observability: ObservabilityBundle,
     yaml_config: PipelineYamlConfig,
@@ -84,6 +85,7 @@ def create_factory_runner_from_request(
     pipeline_request = _CreatePipelineWithServicesRequest(
         run_id=run_id,
         runtime=runtime,
+        started_at=started_at,
         settings=settings,
         logger=observability.logger,
         audit=observability.audit,

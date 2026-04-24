@@ -5,7 +5,10 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import uuid4
 
+import pytest
+
 from bioetl.application.services.lineage.metadata_lineage_node_builders import (
+    fragment_timestamp,
     source_request_node,
     source_system_node,
 )
@@ -70,3 +73,15 @@ def test_source_request_node_exposes_snapshot_identity() -> None:
     assert node.attributes["input_snapshot_count"] == 1
     assert node.attributes["input_snapshot_ids"] == ["chembl-activity-batch-001"]
     assert node.attributes["input_snapshot_content_hashes"] == ["a" * 64]
+
+
+def test_fragment_timestamp_falls_back_to_sanctioned_time_helper(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixed_now = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
+    monkeypatch.setattr(
+        "bioetl.application.services.lineage.metadata_lineage_node_builders.current_utc_time",
+        lambda: fixed_now,
+    )
+
+    assert fragment_timestamp(None, None) == fixed_now

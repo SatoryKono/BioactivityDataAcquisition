@@ -143,10 +143,23 @@ tracked_suite_inventory:
     - tests/integration/config/test_chembl_enum_parity.py
     - tests/integration/config/test_chembl_observed_value_fixtures.py
     - tests/integration/config/test_dq_config_loading.py
+    - tests/integration/infrastructure/storage/test_atomic.py
+    - tests/integration/infrastructure/storage/test_atomic_boost.py
     - tests/integration/infrastructure/storage/test_base_delta_writer_filesystem.py
     - tests/integration/infrastructure/storage/test_bronze_writer_cleanup.py
+    - tests/integration/infrastructure/storage/test_bronze_writer_cleanup_and_sidecar.py
+    - tests/integration/infrastructure/storage/test_bronze_writer_io_mixin_boost.py
+    - tests/integration/infrastructure/storage/test_bronze_writer_metadata_operations.py
+    - tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py
+    - tests/integration/infrastructure/storage/test_composite_checkpoint_writer.py
+    - tests/integration/infrastructure/storage/test_delta_reader.py
+    - tests/integration/infrastructure/storage/test_deterministic_write.py
     - tests/integration/infrastructure/storage/test_export_reader_version_fallback.py
+    - tests/integration/infrastructure/storage/test_gold_writer_read_cleanup.py
     - tests/integration/infrastructure/storage/test_gold_writer_versioning.py
+    - tests/integration/infrastructure/storage/test_metadata_integration.py
+    - tests/integration/infrastructure/storage/test_metadata_writer_filesystem.py
+    - tests/integration/infrastructure/storage/test_retention_dedup.py
     - tests/integration/infrastructure/storage/test_silver_writer.py
     - tests/integration/infrastructure/storage/test_silver_writer_filesystem.py
     - tests/integration/infrastructure/storage/test_storage_factory_audit.py

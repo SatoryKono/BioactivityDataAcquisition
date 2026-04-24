@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from typing import cast
+from unittest.mock import MagicMock
 
 import pytest
 from hypothesis import given
@@ -523,6 +524,57 @@ def test_profile_auto_resolves_for_chembl_publication_runtime_mismatches_and_str
     assert normalized["is_oa"] is True
     assert normalized["authors"] == '{"a":1,"b":2}'
     assert normalized["affiliation_list"] is None
+
+
+@pytest.mark.unit
+def test_finalize_pre_silver_projects_malformed_json_findings_to_dq_warning() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="publication",
+    )
+    mock_logger = MagicMock()
+    mock_logger.warning = MagicMock()
+    mock_context = MagicMock()
+    mock_context.logger = mock_logger
+    pre_silver = PreSilverRecord(
+        entity_id="chembl:publication:1",
+        business_data={
+            "publication_id": "CHEMBL123",
+            "title": "Example publication",
+            "publication_type": "PUBLICATION",
+            "affiliation_list": "not-json",
+        },
+        build_silver_record=lambda _context, entity_id, content_hash, _index, business: {
+            "entity_id": entity_id,
+            "content_hash": content_hash,
+            **business,
+        },
+    )
+
+    silver_record = processor.finalize_pre_silver(
+        pre_silver,
+        context=cast("PipelineContext", mock_context),
+        index=7,
+    )
+
+    assert silver_record is not None
+    assert silver_record["affiliation_list"] is None
+    assert silver_record["_dq_warn"] is True
+    assert len(processor.normalization_findings) == 1
+    finding = processor.normalization_findings[0]
+    assert finding.field_name == "affiliation_list"
+    assert finding.reason_code == "malformed_json_normalized_to_null"
+    mock_logger.warning.assert_called_once_with(
+        "silver_normalization_malformed_json",
+        provider="chembl",
+        entity_type="publication",
+        record_index=7,
+        reason_code="malformed_json_normalized_to_null",
+        field="affiliation_list",
+        action_taken="set_null_and_warn",
+        dq_warn=True,
+        proposed_normalized_outcome=None,
+    )
 
 
 @pytest.mark.unit

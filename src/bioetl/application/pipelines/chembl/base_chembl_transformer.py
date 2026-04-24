@@ -162,21 +162,27 @@ class BaseChemblTransformer(BaseTransformer):
             record={self.primary_id_field: str(primary_id)},
         )
         business_data = self._extract_business_data(record, primary_id)
-        normalized_business_data = _normalize_chembl_business_data(
-            self,
-            business_data,
+        normalizer = RecordNormalizationProcessor(
+            provider=self.provider,
+            entity_type=self.entity_type,
         )
+        normalized_business_data = normalizer.normalize_business_data(business_data)
         content_hash = self.compute_content_hash(
             normalized_business_data,
             exclude_none=True,
         )
-        return _build_chembl_silver_record(
+        silver_record = _build_chembl_silver_record(
             self,
             context,
             entity_id,
             content_hash,
             index,
             normalized_business_data,
+        )
+        return normalizer.project_normalization_findings(
+            silver_record,
+            context=context,
+            index=index,
         )
 
     def _build_pre_silver_json_record(
@@ -257,17 +263,6 @@ class BaseChemblTransformer(BaseTransformer):
 
         """
         ...
-
-
-def _normalize_chembl_business_data(
-    transformer: BaseChemblTransformer,
-    business_data: JsonDict,
-) -> JsonDict:
-    """Normalize ChEMBL business data before legacy hash finalization."""
-    return RecordNormalizationProcessor(
-        provider=transformer.provider,
-        entity_type=transformer.entity_type,
-    ).normalize_business_data(business_data)
 
 
 def _build_chembl_silver_record(

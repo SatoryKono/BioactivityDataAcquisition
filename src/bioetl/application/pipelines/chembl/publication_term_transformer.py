@@ -78,10 +78,11 @@ class PublicationTermTransformer(BaseChemblTransformer):
             self._get_required_field(prepared_record, self.primary_id_field),
         )
         business_data = self._extract_business_data(prepared_record, primary_id)
-        normalized_business_data = RecordNormalizationProcessor(
+        normalizer = RecordNormalizationProcessor(
             provider=self.provider,
             entity_type=self.entity_type,
-        ).normalize_business_data(business_data)
+        )
+        normalized_business_data = normalizer.normalize_business_data(business_data)
         entity_id = _resolve_publication_term_entity_id(
             self,
             prepared_record,
@@ -91,13 +92,18 @@ class PublicationTermTransformer(BaseChemblTransformer):
             normalized_business_data,
             exclude_none=True,
         )
-        return _build_publication_term_silver_record(
+        silver_record = _build_publication_term_silver_record(
             self,
             context,
             entity_id,
             content_hash,
             index,
             normalized_business_data,
+        )
+        return normalizer.project_normalization_findings(
+            silver_record,
+            context=context,
+            index=index,
         )
 
     def _extract_business_data(

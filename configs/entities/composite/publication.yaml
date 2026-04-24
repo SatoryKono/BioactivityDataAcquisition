@@ -1,0 +1,77 @@
+# Composite Publication Entity Configuration
+# Generated: 2026-04-24
+# Status: active
+
+version: 1.0.0
+provider: composite
+entity: publication
+
+# Composite publication entity configuration
+# This config defines how publications from multiple sources are combined
+
+status: active
+
+# Source entities that contribute to this composite
+source_entities:
+  - provider: chembl
+    entity: publication
+  - provider: pubmed
+    entity: publication
+  - provider: openalex
+    entity: publication
+  - provider: semanticscholar
+    entity: publication
+
+# Composite-specific fields
+composite_fields:
+  - name: composite_id
+    type: string
+    description: Unique identifier for the composite publication
+    primary_key: true
+  - name: source_priority
+    type: list
+    description: Priority order of source providers
+    default: [pubmed, chembl, openalex, semanticscholar]
+
+# Quality control settings
+quality:
+  validation_level: strict
+  required_fields:
+    - composite_id
+    - title
+    - publication_date
+  
+# Loading strategy
+loading:
+  strategy: incremental
+  batch_size: 1000
+  
+# Field mapping and resolution rules
+field_resolution:
+  title:
+    strategy: priority
+    sources: [pubmed, chembl, openalex, semanticscholar]
+  
+  abstract:
+    strategy: priority
+    sources: [pubmed, openalex, chembl]
+    
+  publication_date:
+    strategy: earliest
+    
+  authors:
+    strategy: merge_unique
+
+# DQ rules for composite entity
+dq_rules:
+  - field: composite_id
+    rule: not_null
+    severity: critical
+  
+  - field: title
+    rule: not_null
+    severity: high
+    
+  - field: publication_date
+    rule: valid_date
+    severity: medium

@@ -234,6 +234,41 @@ def test_diagnostics_guide_displays_canonical_routes(cli_runner: CliRunner) -> N
 
 
 @pytest.mark.unit
+def test_diagnostics_guide_matches_exact_output(cli_runner: CliRunner) -> None:
+    result = cli_runner.invoke(cli, ["diagnostics", "guide"])
+
+    expected_lines = [
+        "BioETL Diagnostics Guide",
+        "  start_here: bioetl diagnostics guide",
+        "  metrics/admin: bioetl diagnostics metrics [--json]",
+        "  health: bioetl diagnostics health [--provider <provider>] [--json]",
+        "  run: bioetl diagnostics run --run-id <run-id> [--limit 100] [--format text|json|yaml]",
+        "  checkpoint: bioetl diagnostics checkpoint --pipeline <pipeline> [--run-id <run-id>] [--audit-limit 100] [--format text|json|yaml]",
+        "  manifest: bioetl diagnostics manifest <run-id|manifest-id> [--format text|json|yaml]",
+        "  quarantine: bioetl diagnostics quarantine --pipeline <pipeline> [--run-id <run-id>] [--group-by reason-signature] [--json]",
+        "",
+        "Observability verification workflow:",
+        "  1. bioetl diagnostics metrics [--json]",
+        "  2. bioetl diagnostics health [--json]",
+        "  3. python -m scripts.engineering.qa report-observability-metric-inventory --json",
+        "  4. compare inventory output with grafana/prometheus-rules/bioetl_observability.yml and shipped dashboards",
+        "",
+        "Metrics server startup is auto-managed during pipeline runs when metrics are enabled.",
+        "Pushgateway publication is best-effort on run completion; inspect current config with diagnostics metrics.",
+        "",
+        "Legacy command groups remain supported:",
+        "  health check",
+        "  checkpoint inspect",
+        "  checkpoint audit-run",
+        "  run-manifest show",
+        "  quarantine stats",
+    ]
+
+    assert result.exit_code == 0
+    assert result.output == "\n".join(expected_lines) + "\n"
+
+
+@pytest.mark.unit
 def test_diagnostics_guide_lines_are_plain_strings() -> None:
     from bioetl.interfaces.cli.commands.domains.diagnostics.command import (
         _build_diagnostics_guide_lines,

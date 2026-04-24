@@ -215,10 +215,12 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
     Returns:
         PipelineRunContext ready for bootstrap_pipeline_runner.
     """
+    started_at, _ = capture_runtime_timing_anchor()
     return PipelineRunContext(
         pipeline_name=name,
         run_id=cast(RunID, uuid4()),
         run_type=RunType(options.run_type),
+        started_at=started_at,
         resume=options.resume,
         limit=options.limit,
         dry_run=options.dry_run,

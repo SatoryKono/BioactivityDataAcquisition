@@ -168,10 +168,11 @@ class PubChemCompoundTransformer(BaseTransformer):
         if prepared is None:
             return None
         cid, business_data = prepared
-        normalized_business_data = RecordNormalizationProcessor(
+        normalizer = RecordNormalizationProcessor(
             provider=self.provider,
             entity_type=self.entity_type,
-        ).normalize_business_data(business_data)
+        )
+        normalized_business_data = normalizer.normalize_business_data(business_data)
         entity_id = self.compute_entity_id(
             source_id=str(cid), record={"molecule_id": cid}
         )
@@ -180,12 +181,17 @@ class PubChemCompoundTransformer(BaseTransformer):
             exclude_none=True,
         )
 
-        return self._build_pre_silver_record(
+        silver_record = self._build_pre_silver_record(
             context,
             entity_id,
             content_hash,
             index,
             normalized_business_data,
+        )
+        return normalizer.project_normalization_findings(
+            silver_record,
+            context=context,
+            index=index,
         )
 
     async def transform_pre_silver(

@@ -71,10 +71,11 @@ class UniProtProteinTransformer(BaseTransformer, UniProtBusinessDataMixin):
         accession = str(self._get_required_field(record, "primaryAccession"))
         entry_name = self._get_entry_name(record)
         business_data = self._build_business_data(record, accession, entry_name)
-        normalized_business_data = RecordNormalizationProcessor(
+        normalizer = RecordNormalizationProcessor(
             provider=self.provider,
             entity_type=self.entity_type,
-        ).normalize_business_data(business_data)
+        )
+        normalized_business_data = normalizer.normalize_business_data(business_data)
 
         entity_id = self.compute_entity_id(
             source_id=accession,
@@ -85,12 +86,17 @@ class UniProtProteinTransformer(BaseTransformer, UniProtBusinessDataMixin):
             exclude_none=True,
         )
 
-        return self._build_pre_silver_record(
+        silver_record = self._build_pre_silver_record(
             context,
             entity_id,
             content_hash,
             index,
             normalized_business_data,
+        )
+        return normalizer.project_normalization_findings(
+            silver_record,
+            context=context,
+            index=index,
         )
 
     async def transform_pre_silver(

@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-24T08:01:42.812039+00:00",
+  "generated_at": "2026-04-24T09:31:08.336197+00:00",
   "summary": {
-    "total_scripts": 441,
+    "total_scripts": 443,
     "status_counts": {
-      "active": 312,
+      "active": 313,
       "legacy": 15,
       "orphan": 100,
-      "unknown": 14
+      "unknown": 15
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 1,
       "ci": 54,
-      "docs": 139,
-      "scripts": 294,
+      "docs": 141,
+      "scripts": 295,
       "skills": 8,
       "tests": 135
     }
@@ -3081,6 +3081,60 @@
           "line": 121,
           "source_group": "docs",
           "text": "- `scripts/check_dq_dsl_parity.py` (New file)"
+        }
+      ]
+    },
+    {
+      "path": "scripts/check_entity_config_parity.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "docs/03-guides/docs-parity-gate.md",
+          "line": 70,
+          "source_group": "docs",
+          "text": "python3 scripts/check_entity_config_parity.py"
+        },
+        {
+          "path": "docs/03-guides/docs-parity-gate.md",
+          "line": 78,
+          "source_group": "docs",
+          "text": "The main parity check script is located at `scripts/check_entity_config_parity.py`. It performs the following checks:"
+        },
+        {
+          "path": "scripts/ci_check_docs_parity.sh",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "python3 scripts/check_entity_config_parity.py"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ci_check_docs_parity.sh",
+      "type": "sh",
+      "status": "unknown",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "docs/03-guides/docs-parity-gate.md",
+          "line": 41,
+          "source_group": "docs",
+          "text": "run: bash scripts/ci_check_docs_parity.sh"
+        },
+        {
+          "path": "docs/03-guides/docs-parity-gate.md",
+          "line": 56,
+          "source_group": "docs",
+          "text": "- bash scripts/ci_check_docs_parity.sh"
+        },
+        {
+          "path": "docs/03-guides/docs-parity-gate.md",
+          "line": 73,
+          "source_group": "docs",
+          "text": "bash scripts/ci_check_docs_parity.sh"
         }
       ]
     },

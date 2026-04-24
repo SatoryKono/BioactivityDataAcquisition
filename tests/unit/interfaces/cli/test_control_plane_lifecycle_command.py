@@ -6,6 +6,7 @@ import json
 from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, patch
 
+import pytest
 from click.testing import CliRunner
 
 from bioetl.domain.control_plane import (
@@ -99,3 +100,31 @@ def test_control_plane_lifecycle_apply_json_outputs_deleted_paths() -> None:
     assert policy.protected_run_ids == frozenset({"run-1"})
     assert policy.protected_input_snapshot_ids == frozenset({"sha256:abc"})
     assert store.plan.call_args.kwargs == {"dry_run": False}
+
+
+def test_control_plane_lifecycle_uses_sanctioned_now(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = CliRunner()
+    plan = _plan(dry_run=True)
+    store = MagicMock()
+    store.plan.return_value = plan
+    store.apply.return_value = ControlPlaneArtifactLifecycleApplyResult(
+        plan=plan,
+        deleted_paths=(),
+    )
+    fixed_now = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
+    monkeypatch.setattr(
+        "bioetl.interfaces.cli.commands.domains.maintenance.control_plane_lifecycle.current_utc_time",
+        lambda: fixed_now,
+    )
+
+    with patch(
+        "bioetl.interfaces.cli.commands.domains.maintenance.control_plane_lifecycle.bootstrap_control_plane_lifecycle_store",
+        return_value=store,
+    ):
+        result = runner.invoke(cli, ["maintenance", "control-plane-lifecycle"])
+
+    assert result.exit_code == 0, result.output
+    policy = store.plan.call_args.args[0]
+    assert policy.now == fixed_now

@@ -17,7 +17,10 @@ from bioetl.application.core.normalization_fallbacks import (
 )
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
 from bioetl.application.core.pre_silver_record import PreSilverRecord
-from bioetl.domain.normalization.json import serialize_json_canonical
+from bioetl.domain.normalization.json import (
+    canonicalize_json_string,
+    serialize_json_canonical,
+)
 from bioetl.domain.normalization.profiles import (
     FieldRule,
     NormalizationProfile,
@@ -36,6 +39,17 @@ if TYPE_CHECKING:
 
 __all__ = ["NormalizationContractError", "RecordNormalizationProcessor"]
 
+_MALFORMED_JSON_REASON_CODE = "malformed_json_normalized_to_null"
+_MALFORMED_JSON_EVENT = "silver_normalization_malformed_json"
+
+
+@dataclass(frozen=True, slots=True)
+class _NormalizationFinding:
+    field_name: str
+    reason_code: str
+    action_taken: str
+    dq_warn: bool = True
+
 
 class NormalizationContractError(ValueError):
     """Raised when profile-backed runtime normalization would fall back implicitly."""
@@ -53,6 +67,12 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
     content_hash_include_fields: frozenset[str] = frozenset()
     content_hash_exclude_fields: frozenset[str] = frozenset()
     content_hash_policy_by_version: ContentHashPolicyByVersion | None = None
+    _normalization_findings: tuple[_NormalizationFinding, ...] = field(
+        default=(),
+        init=False,
+        repr=False,
+        compare=False,
+    )
 
     def __post_init__(self) -> None:
         if self.profile is not None or self.entity_type is None:
@@ -78,6 +98,11 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
     def normalize_business_data(self, business_data: JsonDict) -> JsonDict:
         """Normalize extracted business data before Silver finalization."""
         return self._normalize_mapping(business_data)
+
+    @property
+    def normalization_findings(self) -> tuple[_NormalizationFinding, ...]:
+        """Return transient runtime findings collected during the latest pass."""
+        return self._normalization_findings
 
     def finalize_pre_silver(
         self,
@@ -106,6 +131,11 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
             index,
             normalized_business_data,
         )
+        silver_record = self.project_normalization_findings(
+            silver_record,
+            context=context,
+            index=index,
+        )
         if self._should_project_hashes_by_version():
             silver_record["_content_hashes_by_version"] = version_hashes
         if pre_silver.apply_structural_policy is not None:
@@ -122,16 +152,30 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
         return silver_record
 
     def _normalize_mapping(self, record: JsonDict) -> JsonDict:
+        object.__setattr__(self, "_normalization_findings", ())
         normalized: JsonDict = {}
+        findings: list[_NormalizationFinding] = []
         for field_name, value in record.items():
             if self._is_passthrough_field(field_name):
                 normalized[field_name] = value
                 continue
-            normalized[field_name] = self._normalize_field_value(
+            normalized_value = self._normalize_field_value(
                 field_name,
                 value,
                 record,
             )
+            normalized[field_name] = normalized_value
+            profile_rule = self._profile_rule(field_name)
+            if profile_rule is not None:
+                finding = self._profile_json_runtime_finding(
+                    profile_rule,
+                    field_name=field_name,
+                    raw_value=value,
+                    normalized_value=normalized_value,
+                )
+                if finding is not None:
+                    findings.append(finding)
+        object.__setattr__(self, "_normalization_findings", tuple(findings))
         return normalized
 
     def _is_passthrough_field(self, field_name: str) -> bool:
@@ -215,6 +259,68 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
             value,
             is_canonical=(field_name == "canonical_smiles"),
         )
+
+    def project_normalization_findings(
+        self,
+        record: JsonDict,
+        *,
+        context: PipelineContext | None = None,
+        index: int | None = None,
+    ) -> JsonDict:
+        """Project transient normalization findings into DQ flags and logs."""
+        if not self._normalization_findings:
+            return record
+
+        projected = dict(record)
+        projected["_dq_warn"] = True
+
+        if context is not None:
+            for finding in self._normalization_findings:
+                context.logger.warning(
+                    _MALFORMED_JSON_EVENT,
+                    provider=self.provider,
+                    entity_type=self.entity_type,
+                    record_index=index,
+                    reason_code=finding.reason_code,
+                    field=finding.field_name,
+                    action_taken=finding.action_taken,
+                    dq_warn=finding.dq_warn,
+                    proposed_normalized_outcome=None,
+                )
+
+        return projected
+
+    def _profile_json_runtime_finding(
+        self,
+        rule: FieldRule,
+        *,
+        field_name: str,
+        raw_value: object,
+        normalized_value: object,
+    ) -> _NormalizationFinding | None:
+        if normalized_value is not None or not isinstance(raw_value, str):
+            return None
+
+        normalized_text = normalize_string(raw_value)
+        if normalized_text is None:
+            return None
+        if not self._rule_uses_json_policy(rule):
+            return None
+
+        try:
+            canonicalize_json_string(normalized_text)
+        except ValueError:
+            return _NormalizationFinding(
+                field_name=field_name,
+                reason_code=_MALFORMED_JSON_REASON_CODE,
+                action_taken="set_null_and_warn",
+            )
+        return None
+
+    def _rule_uses_json_policy(self, rule: FieldRule) -> bool:
+        notes = (rule.notes or "").casefold()
+        normalizer_name = getattr(rule.normalizer, "__name__", "").casefold()
+        return "json" in notes or "json" in normalizer_name
 
     def _should_forbid_fallback(self, field_name: str) -> bool:
         return (

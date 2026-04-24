@@ -134,7 +134,10 @@ class PipelineRunnerService:
         self._ensure_pipeline_exists(pipeline_name)
         effective_run_id: RunID = cast(RunID, run_id or uuid4())
         context = self._build_context(
-            pipeline_name, effective_run_id, effective_options
+            pipeline_name,
+            effective_run_id,
+            effective_options,
+            started_at=started_at,
         )
         run_logger = self._create_run_logger(
             context=context,
@@ -254,12 +257,14 @@ class PipelineRunnerService:
         pipeline_name: str,
         run_id: RunID,
         options: RunOptions,
+        started_at: datetime | None = None,
     ) -> PipelineRunContext:
         """Build PipelineRunContext from options."""
         return self._context_service.build_context(
             pipeline_name=pipeline_name,
             run_id=run_id,
             options=options,
+            started_at=started_at,
         )
 
     async def _execute_pipeline(

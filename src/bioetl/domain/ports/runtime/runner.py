@@ -6,6 +6,7 @@ Defines protocols for pipeline runner creation and execution.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.domain.ports.audit import AuditPort
@@ -197,6 +198,7 @@ class PipelineCreateWithServicesRequest:
 
     run_id: RunID
     runtime: RuntimeConfig
+    started_at: datetime
     settings: SettingsPort
     logger: LoggerPort
     audit: AuditPort | None = None
@@ -221,6 +223,7 @@ class PipelineCreateRunnerRequest:
 
     run_id: RunID
     runtime: RuntimeConfig
+    started_at: datetime
     settings: SettingsPort
     observability: ExecutionObservabilityPort
     control_plane: PipelineControlPlaneArtifacts = PipelineControlPlaneArtifacts()
