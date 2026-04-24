@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-23T19:48:23.642457+00:00",
+  "generated_at": "2026-04-24T05:02:13.847435+00:00",
   "summary": {
     "total_scripts": 437,
     "status_counts": {
-      "active": 306,
+      "active": 310,
       "legacy": 15,
-      "orphan": 103,
-      "unknown": 13
+      "orphan": 100,
+      "unknown": 12
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 1,
       "ci": 52,
       "docs": 136,
-      "scripts": 288,
+      "scripts": 292,
       "skills": 8,
       "tests": 134
     }
@@ -92,13 +92,13 @@
         },
         {
           "path": "tests/unit/scripts/test_sonar_issue_processor.py",
-          "line": 52,
+          "line": 51,
           "source_group": "tests",
           "text": "{\"path\": \"scripts/ai/check_sonar_issues.py\"},"
         },
         {
           "path": "tests/unit/scripts/test_sonar_issue_processor.py",
-          "line": 61,
+          "line": 60,
           "source_group": "tests",
           "text": "\"path_prefix\": \"scripts/ai/check_sonar_issues.py\","
         }
@@ -5498,7 +5498,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/00-project/DOCUMENTATION_GOVERNANCE.md",
@@ -5529,16 +5529,29 @@
           "line": 95,
           "source_group": "scripts",
           "text": "checks_failed.append(\"docs_parity_check.py script not found\")"
+        },
+        {
+          "path": "scripts/engineering/repo/catalog.yaml",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "- docs_parity_check.py"
         }
       ]
     },
     {
       "path": "scripts/documentation_governance_check.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/catalog.yaml",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "- documentation_governance_check.py"
+        }
+      ]
     },
     {
       "path": "scripts/engineering/baselines/__main__.py",
@@ -8852,7 +8865,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 443,
+          "line": 441,
           "source_group": "tests",
           "text": "\"python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\" in workflow"
         }
@@ -8903,7 +8916,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 446,
+          "line": 444,
           "source_group": "tests",
           "text": "\"python scripts/engineering/qa/vcr/check_vcr_filename_policy.py\" in workflow"
         }
@@ -9397,25 +9410,38 @@
     {
       "path": "scripts/generate_adr_registry.py",
       "type": "py",
-      "status": "unknown",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/00-project/DOCUMENTATION_GOVERNANCE.md",
           "line": 333,
           "source_group": "docs",
           "text": "3. `scripts/generate_adr_registry.py` - ADR metadata generation"
+        },
+        {
+          "path": "scripts/engineering/repo/catalog.yaml",
+          "line": 27,
+          "source_group": "scripts",
+          "text": "- generate_adr_registry.py"
         }
       ]
     },
     {
       "path": "scripts/generate_test_github_issues.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/catalog.yaml",
+          "line": 28,
+          "source_group": "scripts",
+          "text": "- generate_test_github_issues.py"
+        }
+      ]
     },
     {
       "path": "scripts/memory/__main__.py",
@@ -11241,8 +11267,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "scripts/engineering/repo/catalog.yaml",
+          "line": 29,
+          "source_group": "scripts",
+          "text": "- optimized_test_runner.py"
+        },
         {
           "path": "scripts/generate_test_github_issues.py",
           "line": 322,
@@ -11824,10 +11856,17 @@
     {
       "path": "scripts/test_selection_strategy.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/catalog.yaml",
+          "line": 30,
+          "source_group": "scripts",
+          "text": "- test_selection_strategy.py"
+        }
+      ]
     },
     {
       "path": "src/tools/apply_elk_layout.py",

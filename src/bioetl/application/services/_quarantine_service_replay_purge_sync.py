@@ -31,7 +31,7 @@ class QuarantineServiceReplayPurgeSyncMixin:
             span_name="quarantine.replay",
             operation="replay",
             pipeline=pipeline,
-            trace_extra={
+            trace_attributes={
                 "bioetl.has_error_code_filter": error_code is not None,
                 "bioetl.max_age_days": max_age_days,
             },
@@ -115,7 +115,7 @@ class QuarantineServiceReplayPurgeSyncMixin:
             span_name="quarantine.purge",
             operation="purge",
             pipeline=pipeline,
-            trace_extra={"bioetl.older_than_days": older_than_days},
+            trace_attributes={"bioetl.older_than_days": older_than_days},
             execute=lambda started_at, started_monotonic: self._purge_impl(
                 pipeline=pipeline,
                 older_than_days=older_than_days,

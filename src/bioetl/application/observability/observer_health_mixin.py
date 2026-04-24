@@ -28,7 +28,7 @@ class _ObserverHealthEmissionMixin:
         health_check_mode: str | None = None,
         fallback_reason: str | None = None,
         health_status: str | HealthStatus | None = None,
-        **extra: Any,
+        **extra: Any,  # Any: observer events forward arbitrary structured diagnostics to emit_event.
     ) -> None:
         """Emit health check result for a component."""
         resolved_status = self._resolve_health_status(
@@ -98,7 +98,7 @@ class _ObserverHealthEmissionMixin:
         duration_seconds: float,
         overall_status: str,
         components_checked: int,
-        **extra: Any,
+        **extra: Any,  # Any: summary emissions allow caller-defined observability payload fragments.
     ) -> None:
         """Emit summary preflight health observability through the observer contract."""
         self.emit_event(

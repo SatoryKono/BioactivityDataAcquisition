@@ -212,7 +212,9 @@ def _render_run_dossier_payload(payload: dict[str, object]) -> str:
     lines.extend(["", "Quarantine", *_render_quarantine_lines(quarantine_summary)])
     lines.extend(["", "Lineage", *_render_lineage_lines(lineage)])
     lines.extend(["", "Traceability", *_render_traceability_lines(traceability)])
-    lines.extend(["", "Evidence Status", f"  missing: {missing}", f"  degraded: {degraded}"])
+    lines.extend(
+        ["", "Evidence Status", f"  missing: {missing}", f"  degraded: {degraded}"]
+    )
     lines.extend(["", "Audit Entries", *_render_audit_entry_lines(audit_entries)])
     lines.extend(["", "Next Steps", *_render_next_step_lines(next_steps)])
 

@@ -287,7 +287,9 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     )
 
     target_cross_references = _row(rows, "chembl_target", "cross_references")
-    assert target_cross_references["normalizer"] == "normalize_profile_json_string_strict"
+    assert (
+        target_cross_references["normalizer"] == "normalize_profile_json_string_strict"
+    )
     assert target_cross_references["strictness"] == "strict_json"
 
     molecule_properties = _row(rows, "chembl_molecule", "molecule_properties")

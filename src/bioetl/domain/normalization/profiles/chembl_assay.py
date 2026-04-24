@@ -74,8 +74,10 @@ def _normalize_bao_label_with_profile_context(
     value: object,
     record: dict[str, object] | None = None,
 ) -> str | None:
-    bao_identifier = None if record is None else normalize_profile_bao_identifier(
-        record.get("bao_format")
+    bao_identifier = (
+        None
+        if record is None
+        else normalize_profile_bao_identifier(record.get("bao_format"))
     )
     return normalize_bao_label(value, bao_identifier=bao_identifier)
 

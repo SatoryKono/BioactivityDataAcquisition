@@ -83,7 +83,7 @@ class BaseServicesFactory:
         data_source: DataSourcePort,
         pipeline_config: PipelineYamlConfig,
         pipeline_name: str,
-        audit: AuditPort,
+        audit: AuditPort | None = None,
         metrics: MetricsPort | None = None,
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,

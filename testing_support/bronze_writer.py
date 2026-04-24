@@ -15,10 +15,17 @@ import pytest
 import zstandard as zstd
 
 from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+
+INVALID_PROVIDER_NAME = "Invalid provider name"
+INVALID_ENTITY_NAME = "Invalid entity name"
+INVALID_JSON = "Invalid JSON"
+META_SUFFIX = ".zst.meta.json"
+TMP_GLOB = "*.tmp"
+SAMPLE_JSON_RECORD = b'{"id": 1}\n'
 
 
 @pytest.fixture
@@ -98,20 +105,20 @@ class TestBronzeWriterNameValidation:
             metrics=NoOpMetrics(),
         )
 
-        with pytest.raises(ValueError, match="Invalid provider name"):
+        with pytest.raises(ValueError, match=INVALID_PROVIDER_NAME):
             writer._validate_bronze_names("", "activity")
 
-        with pytest.raises(ValueError, match="Invalid provider name"):
+        with pytest.raises(ValueError, match=INVALID_PROVIDER_NAME):
             writer._validate_bronze_names("provider/path", "activity")
 
-        with pytest.raises(ValueError, match="Invalid provider name"):
+        with pytest.raises(ValueError, match=INVALID_PROVIDER_NAME):
             writer._validate_bronze_names("provider name", "activity")
 
-        with pytest.raises(ValueError, match="Invalid provider name"):
+        with pytest.raises(ValueError, match=INVALID_PROVIDER_NAME):
             writer._validate_bronze_names("provider.name", "activity")
 
         # Hyphens are not allowed (alphanumeric + underscore only)
-        with pytest.raises(ValueError, match="Invalid provider name"):
+        with pytest.raises(ValueError, match=INVALID_PROVIDER_NAME):
             writer._validate_bronze_names("provider-name", "activity")
 
     def test_validate_bronze_names_invalid_entity(
@@ -124,20 +131,20 @@ class TestBronzeWriterNameValidation:
             metrics=NoOpMetrics(),
         )
 
-        with pytest.raises(ValueError, match="Invalid entity name"):
+        with pytest.raises(ValueError, match=INVALID_ENTITY_NAME):
             writer._validate_bronze_names("chembl", "")
 
-        with pytest.raises(ValueError, match="Invalid entity name"):
+        with pytest.raises(ValueError, match=INVALID_ENTITY_NAME):
             writer._validate_bronze_names("chembl", "entity/path")
 
-        with pytest.raises(ValueError, match="Invalid entity name"):
+        with pytest.raises(ValueError, match=INVALID_ENTITY_NAME):
             writer._validate_bronze_names("chembl", "entity name")
 
-        with pytest.raises(ValueError, match="Invalid entity name"):
+        with pytest.raises(ValueError, match=INVALID_ENTITY_NAME):
             writer._validate_bronze_names("chembl", "entity.name")
 
         # Hyphens are not allowed (alphanumeric + underscore only)
-        with pytest.raises(ValueError, match="Invalid entity name"):
+        with pytest.raises(ValueError, match=INVALID_ENTITY_NAME):
             writer._validate_bronze_names("chembl", "entity-name")
 
     @pytest.mark.asyncio
@@ -159,7 +166,7 @@ class TestBronzeWriterNameValidation:
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
-        with pytest.raises(ValueError, match="Invalid provider name"):
+        with pytest.raises(ValueError, match=INVALID_PROVIDER_NAME):
             await writer.write_bronze(
                 records=iter(sample_records),
                 provider="invalid/provider",
@@ -190,7 +197,7 @@ class TestBronzeWriterNameValidation:
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
-        with pytest.raises(ValueError, match="Invalid entity name"):
+        with pytest.raises(ValueError, match=INVALID_ENTITY_NAME):
             await writer.write_bronze(
                 records=iter(sample_records),
                 provider="chembl",
@@ -260,7 +267,7 @@ class TestBronzeWriterTracing:
         writer._build_bronze_write_result = AsyncMock(return_value=MagicMock())
 
         await writer.write_bronze(
-            records=iter([b'{"id": 1}\n']),
+            records=iter([SAMPLE_JSON_RECORD]),
             provider="chembl",
             entity="activity",
             date=datetime(2024, 1, 15, tzinfo=UTC),
@@ -601,7 +608,7 @@ class TestBronzeWriterWriteLocal:
         assert result.absolute_path == str(full_path)
 
         # Verify metadata file exists
-        meta_path = full_path.with_suffix(".zst.meta.json")
+        meta_path = full_path.with_suffix(META_SUFFIX)
         assert meta_path.exists()
 
         # Verify metadata content
@@ -672,7 +679,7 @@ class TestBronzeWriterWriteLocal:
             # Verify file existence and content
             full_path = tmp_path / result.relative_path
             assert full_path.exists()
-            assert full_path.with_suffix(".zst.meta.json").exists()
+            assert full_path.with_suffix(META_SUFFIX).exists()
 
     @pytest.mark.asyncio
     async def test_write_bronze_with_json_copy(
@@ -935,18 +942,17 @@ class TestBronzeWriterAtomicWrite:
         # Note: We now use Path.replace directly in _write_atomic_stream
         with patch(
             "pathlib.Path.replace", side_effect=OSError("Simulated rename failure")
-        ):
-            with pytest.raises(OSError, match="Simulated rename failure"):
-                await writer.write_bronze(
-                    records=iter(sample_records),
-                    provider="chembl",
-                    entity="activity",
-                    date=date,
-                    batch_id=batch_id,
-                    run_id=run_id,
-                    run_type=run_type,
-                    ingestion_ts=ingestion_ts,
-                )
+        ), pytest.raises(OSError, match="Simulated rename failure"):
+            await writer.write_bronze(
+                records=iter(sample_records),
+                provider="chembl",
+                entity="activity",
+                date=date,
+                batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
+                ingestion_ts=ingestion_ts,
+            )
 
         # Verify no data files exist
         bronze_path = tmp_path / "bronze" / "v1" / "chembl" / "activity"
@@ -957,7 +963,7 @@ class TestBronzeWriterAtomicWrite:
             # Metadata might exist if we mock only data write failure, but here we fail before data write success
 
         # Verify no temp files remain anywhere
-        tmp_files = list(tmp_path.rglob("*.tmp"))
+        tmp_files = list(tmp_path.rglob(TMP_GLOB))
         assert len(tmp_files) == 0, "No temp files should remain after failure"
 
     @pytest.mark.asyncio
@@ -995,7 +1001,7 @@ class TestBronzeWriterAtomicWrite:
         )
 
         full_path = tmp_path / result.relative_path
-        meta_path = full_path.with_suffix(".zst.meta.json")
+        meta_path = full_path.with_suffix(META_SUFFIX)
 
         # Both files must exist
         assert full_path.exists(), "Data file must exist"
@@ -1032,7 +1038,7 @@ class TestBronzeWriterAtomicWrite:
         )
 
         # No temp files should remain
-        tmp_files = list(tmp_path.rglob("*.tmp"))
+        tmp_files = list(tmp_path.rglob(TMP_GLOB))
         assert len(tmp_files) == 0, f"Found orphan temp files: {tmp_files}"
 
     @pytest.mark.asyncio
@@ -1074,7 +1080,7 @@ class TestBronzeWriterAtomicWrite:
                 )
 
         # No temp files should remain
-        tmp_files = list(tmp_path.rglob("*.tmp"))
+        tmp_files = list(tmp_path.rglob(TMP_GLOB))
         assert len(tmp_files) == 0, f"Found orphan temp files: {tmp_files}"
 
     @pytest.mark.asyncio
@@ -1114,7 +1120,7 @@ class TestBronzeWriterAtomicWrite:
         assert len(json_files) == 1
 
         # No temp files should remain
-        tmp_files = list(tmp_path.rglob("*.tmp"))
+        tmp_files = list(tmp_path.rglob(TMP_GLOB))
         assert len(tmp_files) == 0, f"Found orphan temp files: {tmp_files}"
 
 
@@ -1278,8 +1284,8 @@ class TestBronzeWriterMetadataDeterminism:
         )
 
         # Read both metadata files
-        meta_path_1 = (tmp_path / result_1.relative_path).with_suffix(".zst.meta.json")
-        meta_path_2 = (tmp_path / result_2.relative_path).with_suffix(".zst.meta.json")
+        meta_path_1 = (tmp_path / result_1.relative_path).with_suffix(META_SUFFIX)
+        meta_path_2 = (tmp_path / result_2.relative_path).with_suffix(META_SUFFIX)
 
         meta_bytes_1 = await asyncio.to_thread(meta_path_1.read_bytes)
         meta_bytes_2 = await asyncio.to_thread(meta_path_2.read_bytes)
@@ -1694,7 +1700,7 @@ class TestBronzeWriterJsonValidation:
         )
 
         invalid_records = [
-            b'{"id": 1}\n',
+            SAMPLE_JSON_RECORD,
             b"not valid json\n",  # This is invalid
             b'{"id": 3}\n',
         ]
@@ -1704,7 +1710,7 @@ class TestBronzeWriterJsonValidation:
 
         assert exc_info.value.record_index == 1
         assert exc_info.value.original_error is not None
-        assert "Invalid JSON" in str(exc_info.value)
+        assert INVALID_JSON in str(exc_info.value)
 
     def test_validate_json_records_empty_string(
         self, tmp_path: Path, noop_logger: NoOpLogger
@@ -1755,7 +1761,7 @@ class TestBronzeWriterJsonValidation:
         )
 
         valid_records = [
-            b'{"id": 1}\n',
+            SAMPLE_JSON_RECORD,
             b'{"id": 2}\n',
         ]
 
@@ -1765,7 +1771,7 @@ class TestBronzeWriterJsonValidation:
 
         # First record should be validated on demand
         first = next(gen)
-        assert first == b'{"id": 1}\n'
+        assert first == SAMPLE_JSON_RECORD
 
     @pytest.mark.asyncio
     async def test_write_bronze_validates_json_by_default(
@@ -1805,7 +1811,7 @@ class TestBronzeWriterJsonValidation:
             )
 
         assert exc_info.value.record_index == 1
-        assert "Invalid JSON" in str(exc_info.value)
+        assert INVALID_JSON in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_write_bronze_skips_validation_when_disabled(
@@ -1912,7 +1918,7 @@ class TestBronzeWriterJsonValidation:
         from bioetl.domain.exceptions import BronzeValidationError
 
         error = BronzeValidationError(
-            message="Invalid JSON",
+            message=INVALID_JSON,
             record_index=10,
             original_error="Unterminated string",
         )

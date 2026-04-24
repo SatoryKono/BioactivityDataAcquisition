@@ -73,9 +73,7 @@ class _ProtectedRefAccumulator:
             manifest_ids=frozenset(self.manifest_ids),
             run_ids=frozenset(self.run_ids),
             input_snapshot_ids=frozenset(self.input_snapshot_ids),
-            effective_config_artifact_ids=frozenset(
-                self.effective_config_artifact_ids
-            ),
+            effective_config_artifact_ids=frozenset(self.effective_config_artifact_ids),
             lineage_fragment_ids=frozenset(self.lineage_fragment_ids),
         )
 
@@ -100,7 +98,9 @@ def _collect_manifest_protections(
     cutoff: datetime,
     refs: _ProtectedRefAccumulator,
 ) -> None:
-    for manifest_path in _iter_surface_files(base_path, ControlPlaneArtifactSurface.RUN_MANIFEST):
+    for manifest_path in _iter_surface_files(
+        base_path, ControlPlaneArtifactSurface.RUN_MANIFEST
+    ):
         if manifest_path.parent.name in _INDEX_DIR_NAMES:
             continue
         payload = _read_json_object_or_empty(manifest_path)
@@ -134,7 +134,9 @@ def _collect_checkpoint_protections(
     cutoff: datetime,
     refs: _ProtectedRefAccumulator,
 ) -> None:
-    for checkpoint_path in _iter_surface_files(base_path, ControlPlaneArtifactSurface.CHECKPOINT):
+    for checkpoint_path in _iter_surface_files(
+        base_path, ControlPlaneArtifactSurface.CHECKPOINT
+    ):
         payload = _read_json_object_or_empty(checkpoint_path)
         if not payload or _is_payload_stale(checkpoint_path, payload, cutoff):
             continue

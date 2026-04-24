@@ -66,7 +66,7 @@ def _find_any_fallback(
 ) -> typing.Any:  # Any: multipledispatch requires erased types
     """Return the Any-registered dispatcher function when present."""
     if (
-        typing.Any
+        typing.Any  # Any: compat layer must probe the dispatcher catch-all registration key.
         in registry  # Any: multipledispatch stores the catch-all fallback under typing.Any.
     ):
         return registry[

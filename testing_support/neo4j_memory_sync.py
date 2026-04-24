@@ -58,10 +58,45 @@ from scripts.memory.sync import (
 
 pytestmark = pytest.mark.memory
 LEGACY_REPORT_PATH = str(Path(tempfile.gettempdir()) / "neo4j-memory-audit.json")
+LOCALHOST_HTTP_URI = "http://localhost:7474"
+CHEMBL_ACTIVITY_CONFIG_PATH = "configs/entities/chembl/activity.yaml"
+RUN_MANIFEST_LEDGER_DOC_PATH = "docs/04-reference/contracts/run-manifest-ledger.md"
+RUN_MANIFEST_MODULE_PATH = "src/bioetl/domain/control_plane/run_manifest.py"
+APPLICATION_CORE_DIR = "src/bioetl/application/core"
+CHEMBL_CONFIG_DIR = "configs/entities/chembl"
+TESTS_ARCHITECTURE_DIR = "tests/architecture"
+ARCHITECTURE_DIAGRAMS_DIR = "docs/02-architecture/diagrams"
+SCRIPTS_OPS_DIR = "scripts/ops"
+GRAFANA_DASHBOARDS_DIR = "grafana/dashboards"
+GITHUB_WORKFLOWS_DIR = ".github/workflows"
+RECORD_NORMALIZATION_PROCESSOR_PATH = (
+    "src/bioetl/application/core/record_normalization_processor.py"
+)
+ARCHITECTURE_DIAGRAMS_README_PATH = "docs/02-architecture/diagrams/README.md"
+SCRIPTS_MEMORY_MAIN_PATH = "scripts/memory/__main__.py"
+DIAGRAM_QUALITY_GATES_TEST_PATH = "tests/architecture/test_diagram_quality_gates.py"
+BIOETL_RUNTIME_DASHBOARD_PATH = "grafana/dashboards/bioetl-runtime.json"
+TESTS_WORKFLOW_PATH = ".github/workflows/tests.yml"
+SILVER_CHEMBL_ACTIVITY = "silver/chembl/activity"
+SILVER_CHEMBL_ACTIVITY_FIELD = "silver/chembl/activity::activity_id"
+SILVER_COMPOSITE_ACTIVITY = "silver/composite/activity"
+SILVER_COMPOSITE_ACTIVITY_FIELD = "silver/composite/activity::compound_name"
+RUN_MANIFEST_STORAGE_PATH = "control/run_manifest/{manifest_id}.json"
+EFFECTIVE_CONFIG_STORAGE_PATH = "control/effective_config/{artifact_id}.json"
+LINEAGE_FRAGMENT_STORAGE_PATH = "control/lineage/fragments/{fragment_hash}.json"
+ARCHITECTURE_DIAGRAMS_HUB = "architecture diagrams hub"
+INTEGRATION_VCR_POLICY = "integration and VCR execution policy"
+DIAGRAM_GOVERNANCE_POLICY = "diagram governance policy"
+CHEMBL_ADAPTER_SURFACE = "bioetl.infrastructure.adapters.chembl"
+CHEMBL_ADAPTER_IMPL_SURFACE = "bioetl.infrastructure.adapters.chembl.client"
+
+
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[1]
 
 
 def _snapshot() -> tuple[Path, object]:
-    root = Path(__file__).resolve().parents[4]
+    root = _repo_root()
     return root, build_snapshot(root, verified_at="2026-04-09")
 
 
@@ -79,7 +114,7 @@ def test_memory_mapping_path_prefers_canonical_graph_mapping(tmp_path: Path) -> 
 
 
 def test_derive_http_uri_from_bolt() -> None:
-    assert derive_http_uri("bolt://localhost:7687") == "http://localhost:7474"
+    assert derive_http_uri("bolt://localhost:7687") == LOCALHOST_HTTP_URI
     assert (
         derive_http_uri("neo4j+s://graph.example.com:7687")
         == "https://graph.example.com:7474"
@@ -158,26 +193,23 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("repo_zone", "src") in node_keys
     assert ("repo_zone", "docs") in node_keys
     assert ("repo_zone", ".github") in node_keys
-    assert ("directory_surface", "src/bioetl/application/core") in node_keys
-    assert ("directory_surface", "configs/entities/chembl") in node_keys
-    assert ("directory_surface", "tests/architecture") in node_keys
-    assert ("directory_surface", "docs/02-architecture/diagrams") in node_keys
-    assert ("directory_surface", "scripts/ops") in node_keys
-    assert ("directory_surface", "grafana/dashboards") in node_keys
-    assert ("directory_surface", ".github/workflows") in node_keys
+    assert ("directory_surface", APPLICATION_CORE_DIR) in node_keys
+    assert ("directory_surface", CHEMBL_CONFIG_DIR) in node_keys
+    assert ("directory_surface", TESTS_ARCHITECTURE_DIR) in node_keys
+    assert ("directory_surface", ARCHITECTURE_DIAGRAMS_DIR) in node_keys
+    assert ("directory_surface", SCRIPTS_OPS_DIR) in node_keys
+    assert ("directory_surface", GRAFANA_DASHBOARDS_DIR) in node_keys
+    assert ("directory_surface", GITHUB_WORKFLOWS_DIR) in node_keys
     assert (
         "file_surface",
-        "src/bioetl/application/core/record_normalization_processor.py",
+        RECORD_NORMALIZATION_PROCESSOR_PATH,
     ) in node_keys
-    assert ("file_surface", "configs/entities/chembl/activity.yaml") in node_keys
-    assert ("file_surface", "docs/02-architecture/diagrams/README.md") in node_keys
-    assert ("file_surface", "scripts/memory/__main__.py") in node_keys
-    assert (
-        "file_surface",
-        "tests/architecture/test_diagram_quality_gates.py",
-    ) in node_keys
-    assert ("file_surface", "grafana/dashboards/bioetl-runtime.json") in node_keys
-    assert ("file_surface", ".github/workflows/tests.yml") in node_keys
+    assert ("file_surface", CHEMBL_ACTIVITY_CONFIG_PATH) in node_keys
+    assert ("file_surface", ARCHITECTURE_DIAGRAMS_README_PATH) in node_keys
+    assert ("file_surface", SCRIPTS_MEMORY_MAIN_PATH) in node_keys
+    assert ("file_surface", DIAGRAM_QUALITY_GATES_TEST_PATH) in node_keys
+    assert ("file_surface", BIOETL_RUNTIME_DASHBOARD_PATH) in node_keys
+    assert ("file_surface", TESTS_WORKFLOW_PATH) in node_keys
     assert ("layer_family", "domain") in node_keys
     assert ("package_family", "domain/ports") in node_keys
     assert (
@@ -201,40 +233,31 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("provider_surface", "chembl") in node_keys
     assert ("entity_config", "chembl_activity") in node_keys
     assert ("composite_config", "composite_activity") in node_keys
-    assert ("storage_surface", "silver/chembl/activity") in node_keys
-    assert ("storage_surface", "silver/composite/activity") in node_keys
-    assert ("storage_surface", "control/run_manifest/{manifest_id}.json") in node_keys
-    assert (
-        "storage_surface",
-        "control/effective_config/{artifact_id}.json",
-    ) in node_keys
-    assert (
-        "storage_surface",
-        "control/lineage/fragments/{fragment_hash}.json",
-    ) in node_keys
+    assert ("storage_surface", SILVER_CHEMBL_ACTIVITY) in node_keys
+    assert ("storage_surface", SILVER_COMPOSITE_ACTIVITY) in node_keys
+    assert ("storage_surface", RUN_MANIFEST_STORAGE_PATH) in node_keys
+    assert ("storage_surface", EFFECTIVE_CONFIG_STORAGE_PATH) in node_keys
+    assert ("storage_surface", LINEAGE_FRAGMENT_STORAGE_PATH) in node_keys
     assert ("dashboard_surface", "bioetl-overview-v2") in node_keys
-    assert ("doc_source_surface", "architecture diagrams hub") in node_keys
+    assert ("doc_source_surface", ARCHITECTURE_DIAGRAMS_HUB) in node_keys
     assert ("doc_source_surface", "diagram governance workflow") in node_keys
     assert ("doc_source_surface", "normalization plan") in node_keys
     assert ("doc_source_surface", "pipeline normalization matrix") in node_keys
-    assert ("policy_surface", "integration and VCR execution policy") in node_keys
-    assert ("policy_surface", "diagram governance policy") in node_keys
+    assert ("policy_surface", INTEGRATION_VCR_POLICY) in node_keys
+    assert ("policy_surface", DIAGRAM_GOVERNANCE_POLICY) in node_keys
     assert ("script_surface", "scripts/engineering/dev/run_pytest.sh") in node_keys
     assert ("script_surface", "scripts/diagrams/__main__.py") in node_keys
     assert ("script_surface", "scripts/docs/__main__.py") in node_keys
     assert ("script_surface", "scripts/schema/__main__.py") in node_keys
-    assert ("script_surface", "scripts/memory/__main__.py") in node_keys
+    assert ("script_surface", SCRIPTS_MEMORY_MAIN_PATH) in node_keys
     assert ("script_surface", "scripts/engineering/qa/__main__.py") in node_keys
     assert ("port_surface", "bioetl.domain.ports") in node_keys
     assert (
         "port_surface",
         "bioetl.domain.ports.runtime.runner.RunnablePort",
     ) in node_keys
-    assert ("adapter_surface", "bioetl.infrastructure.adapters.chembl") in node_keys
-    assert (
-        "adapter_impl_surface",
-        "bioetl.infrastructure.adapters.chembl.client",
-    ) in node_keys
+    assert ("adapter_surface", CHEMBL_ADAPTER_SURFACE) in node_keys
+    assert ("adapter_impl_surface", CHEMBL_ADAPTER_IMPL_SURFACE) in node_keys
     assert ("pipeline_surface", "chembl_activity") in node_keys
     assert ("contract_surface", "chembl.activity") in node_keys
     assert ("alert_surface", "BioETLPipelineRunFailed") in node_keys
@@ -255,12 +278,9 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("runtime_state_surface", "manifest-left::active-window") in node_keys
     assert ("runtime_state_surface", "manifest-chain-2::retry-window") in node_keys
     assert ("runtime_state_surface", "chembl_activity::composite-lock") in node_keys
-    assert ("schema_field_surface", "silver/chembl/activity::activity_id") in node_keys
+    assert ("schema_field_surface", SILVER_CHEMBL_ACTIVITY_FIELD) in node_keys
     assert ("schema_field_surface", "gold/chembl/assay::_version") in node_keys
-    assert (
-        "schema_field_surface",
-        "silver/composite/activity::compound_name",
-    ) in node_keys
+    assert ("schema_field_surface", SILVER_COMPOSITE_ACTIVITY_FIELD) in node_keys
     assert ("workflow_surface", "tests") in node_keys
     assert ("workflow_job_surface", "tests::governance-preflight") in node_keys
     assert any(label == "workflow_call_surface" for label, _ in node_keys)
@@ -339,7 +359,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert gold_assay.properties["valid_to_column"] == "_valid_to"
 
     shared_activity = snapshot.nodes[
-        NodeKey("storage_surface", "silver/chembl/activity")
+        NodeKey("storage_surface", SILVER_CHEMBL_ACTIVITY)
     ]
     assert sorted(shared_activity.properties["storage_roles"]) == [
         "composite_seed_input",
@@ -347,7 +367,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     ]
 
     composite_activity = snapshot.nodes[
-        NodeKey("storage_surface", "silver/composite/activity")
+        NodeKey("storage_surface", SILVER_COMPOSITE_ACTIVITY)
     ]
     assert composite_activity.properties["config_version"] == "1.0.0"
     assert composite_activity.properties["merge_strategy"] == "left_outer"
@@ -430,14 +450,14 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert assay_version_field.properties["drift_classification"] == "gold_only"
 
     activity_field = snapshot.nodes[
-        NodeKey("schema_field_surface", "silver/chembl/activity::activity_id")
+        NodeKey("schema_field_surface", SILVER_CHEMBL_ACTIVITY_FIELD)
     ]
     assert activity_field.properties["required_in_quality"] is True
     assert activity_field.properties["contract_ref"] == "chembl.activity"
     assert activity_field.properties["drift_classification"] is None
 
     composite_field = snapshot.nodes[
-        NodeKey("schema_field_surface", "silver/composite/activity::compound_name")
+        NodeKey("schema_field_surface", SILVER_COMPOSITE_ACTIVITY_FIELD)
     ]
     assert composite_field.properties["drift_classification"] == "inherited_field"
     assert (
@@ -447,18 +467,13 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
 
     docs_drift_relation = snapshot.relations[
         (
-            NodeKey(
-                "doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md"
-            ),
+            NodeKey("doc_artifact", RUN_MANIFEST_LEDGER_DOC_PATH),
             "DESCRIBES",
-            NodeKey(
-                "module_surface", "src/bioetl/domain/control_plane/run_manifest.py"
-            ),
+            NodeKey("module_surface", RUN_MANIFEST_MODULE_PATH),
         )
     ]
     assert (
-        docs_drift_relation.properties["doc_reference"]
-        == "src/bioetl/domain/control_plane/run_manifest.py"
+        docs_drift_relation.properties["doc_reference"] == RUN_MANIFEST_MODULE_PATH
     )
     assert docs_drift_relation.properties["evidence_kind"] == "direct_path"
     assert docs_drift_relation.properties["confidence"] == "high"
@@ -483,31 +498,31 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ),
     (
         "directory_surface",
-        "src/bioetl/application/core",
+        APPLICATION_CORE_DIR,
         "HOUSES",
         "module_surface",
-        "src/bioetl/application/core/record_normalization_processor.py",
+        RECORD_NORMALIZATION_PROCESSOR_PATH,
     ),
     (
         "directory_surface",
-        "src/bioetl/application/core",
+        APPLICATION_CORE_DIR,
         "CONTAINS",
         "file_surface",
-        "src/bioetl/application/core/record_normalization_processor.py",
+        RECORD_NORMALIZATION_PROCESSOR_PATH,
     ),
     (
         "file_surface",
-        "src/bioetl/application/core/record_normalization_processor.py",
+        RECORD_NORMALIZATION_PROCESSOR_PATH,
         "BACKS",
         "module_surface",
-        "src/bioetl/application/core/record_normalization_processor.py",
+        RECORD_NORMALIZATION_PROCESSOR_PATH,
     ),
     (
         "directory_surface",
-        "configs/entities/chembl",
+        CHEMBL_CONFIG_DIR,
         "CONTAINS",
         "file_surface",
-        "configs/entities/chembl/activity.yaml",
+        CHEMBL_ACTIVITY_CONFIG_PATH,
     ),
     (
         "directory_surface",
@@ -518,31 +533,31 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ),
     (
         "file_surface",
-        "configs/entities/chembl/activity.yaml",
+        CHEMBL_ACTIVITY_CONFIG_PATH,
         "BACKS",
         "entity_config",
         "chembl_activity",
     ),
     (
         "directory_surface",
-        "docs/02-architecture/diagrams",
+        ARCHITECTURE_DIAGRAMS_DIR,
         "CONTAINS",
         "file_surface",
-        "docs/02-architecture/diagrams/README.md",
+        ARCHITECTURE_DIAGRAMS_README_PATH,
     ),
     (
         "directory_surface",
-        "docs/02-architecture/diagrams",
+        ARCHITECTURE_DIAGRAMS_DIR,
         "HOUSES",
         "doc_source_surface",
-        "architecture diagrams hub",
+        ARCHITECTURE_DIAGRAMS_HUB,
     ),
     (
         "file_surface",
-        "docs/02-architecture/diagrams/README.md",
+        ARCHITECTURE_DIAGRAMS_README_PATH,
         "BACKS",
         "doc_artifact",
-        "docs/02-architecture/diagrams/README.md",
+        ARCHITECTURE_DIAGRAMS_README_PATH,
     ),
     (
         "directory_surface",
@@ -563,7 +578,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "docs/04-reference/contracts",
         "HOUSES",
         "doc_artifact",
-        "docs/04-reference/contracts/run-manifest-ledger.md",
+        RUN_MANIFEST_LEDGER_DOC_PATH,
     ),
     (
         "directory_surface",
@@ -574,70 +589,70 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ),
     (
         "directory_surface",
-        "scripts/ops",
+        SCRIPTS_OPS_DIR,
         "CONTAINS",
         "file_surface",
-        "scripts/memory/__main__.py",
+        SCRIPTS_MEMORY_MAIN_PATH,
     ),
     (
         "directory_surface",
-        "scripts/ops",
+        SCRIPTS_OPS_DIR,
         "HOUSES",
         "script_surface",
-        "scripts/memory/__main__.py",
+        SCRIPTS_MEMORY_MAIN_PATH,
     ),
     (
         "file_surface",
-        "scripts/memory/__main__.py",
+        SCRIPTS_MEMORY_MAIN_PATH,
         "BACKS",
         "script_surface",
-        "scripts/memory/__main__.py",
+        SCRIPTS_MEMORY_MAIN_PATH,
     ),
     (
         "directory_surface",
-        "tests/architecture",
+        TESTS_ARCHITECTURE_DIR,
         "CONTAINS",
         "file_surface",
-        "tests/architecture/test_diagram_quality_gates.py",
+        DIAGRAM_QUALITY_GATES_TEST_PATH,
     ),
     (
         "directory_surface",
-        "tests/architecture",
+        TESTS_ARCHITECTURE_DIR,
         "HOUSES",
         "test_surface",
         "architecture tests",
     ),
     (
         "directory_surface",
-        "tests/architecture",
+        TESTS_ARCHITECTURE_DIR,
         "HOUSES",
         "test_artifact",
-        "tests/architecture/test_diagram_quality_gates.py",
+        DIAGRAM_QUALITY_GATES_TEST_PATH,
     ),
     (
         "file_surface",
-        "tests/architecture/test_diagram_quality_gates.py",
+        DIAGRAM_QUALITY_GATES_TEST_PATH,
         "BACKS",
         "test_artifact",
-        "tests/architecture/test_diagram_quality_gates.py",
+        DIAGRAM_QUALITY_GATES_TEST_PATH,
     ),
     (
         "directory_surface",
-        "grafana/dashboards",
+        GRAFANA_DASHBOARDS_DIR,
         "CONTAINS",
         "file_surface",
-        "grafana/dashboards/bioetl-runtime.json",
+        BIOETL_RUNTIME_DASHBOARD_PATH,
     ),
     (
         "directory_surface",
-        "grafana/dashboards",
+        GRAFANA_DASHBOARDS_DIR,
         "HOUSES",
         "dashboard_surface",
         "bioetl-runtime",
     ),
     (
         "file_surface",
-        "grafana/dashboards/bioetl-runtime.json",
+        BIOETL_RUNTIME_DASHBOARD_PATH,
         "BACKS",
         "dashboard_surface",
         "bioetl-runtime",
@@ -645,15 +660,15 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("repo_zone", ".github", "CONTAINS", "directory_surface", ".github"),
     (
         "directory_surface",
-        ".github/workflows",
+        GITHUB_WORKFLOWS_DIR,
         "CONTAINS",
         "file_surface",
-        ".github/workflows/tests.yml",
+        TESTS_WORKFLOW_PATH,
     ),
-    ("directory_surface", ".github/workflows", "HOUSES", "workflow_surface", "tests"),
+    ("directory_surface", GITHUB_WORKFLOWS_DIR, "HOUSES", "workflow_surface", "tests"),
     (
         "file_surface",
-        ".github/workflows/tests.yml",
+        TESTS_WORKFLOW_PATH,
         "BACKS",
         "workflow_surface",
         "tests",
@@ -677,7 +692,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "configs/quality",
         "HOUSES",
         "policy_surface",
-        "integration and VCR execution policy",
+        INTEGRATION_VCR_POLICY,
     ),
     (
         "module_surface",
@@ -706,7 +721,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "BioETL",
         "HAS_ADAPTER",
         "adapter_surface",
-        "bioetl.infrastructure.adapters.chembl",
+        CHEMBL_ADAPTER_SURFACE,
     ),
     ("project", "BioETL", "HAS_PIPELINE", "pipeline_surface", "chembl_activity"),
     ("project", "BioETL", "HAS_CONTRACT", "contract_surface", "chembl.activity"),
@@ -725,35 +740,31 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "BioETL",
         "HAS_STORAGE_SURFACE",
         "storage_surface",
-        "silver/chembl/activity",
+        SILVER_CHEMBL_ACTIVITY,
     ),
     (
         "pipeline_surface",
         "chembl_activity",
         "WRITES_TO",
         "storage_surface",
-        "silver/chembl/activity",
+        SILVER_CHEMBL_ACTIVITY,
     ),
     (
         "pipeline_surface",
         "composite_activity",
         "DEPENDS_ON",
         "storage_surface",
-        "silver/chembl/activity",
+        SILVER_CHEMBL_ACTIVITY,
     ),
     (
         "pipeline_surface",
         "composite_activity",
         "WRITES_TO",
         "storage_surface",
-        "silver/composite/activity",
+        SILVER_COMPOSITE_ACTIVITY,
     ),
     (
-        "storage_surface",
-        "silver/composite/activity",
-        "PROMOTES_TO",
-        "storage_surface",
-        "gold/composite/activity",
+        "storage_surface", SILVER_COMPOSITE_ACTIVITY, "PROMOTES_TO", "storage_surface", "gold/composite/activity"
     ),
     (
         "package_family",
@@ -767,25 +778,25 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "BioETL",
         "HAS_DOC_SOURCE_SURFACE",
         "doc_source_surface",
-        "architecture diagrams hub",
+        ARCHITECTURE_DIAGRAMS_HUB,
     ),
     (
         "policy_surface",
-        "diagram governance policy",
+        DIAGRAM_GOVERNANCE_POLICY,
         "GOVERNS",
         "quality_gate",
         "diagram quality gates",
     ),
     (
         "policy_surface",
-        "diagram governance policy",
+        DIAGRAM_GOVERNANCE_POLICY,
         "GOVERNS",
         "test_surface",
         "architecture tests",
     ),
     (
         "policy_surface",
-        "diagram governance policy",
+        DIAGRAM_GOVERNANCE_POLICY,
         "GOVERNS",
         "doc_source_surface",
         "diagram governance workflow",
@@ -795,7 +806,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "BioETL",
         "HAS_POLICY_SURFACE",
         "policy_surface",
-        "integration and VCR execution policy",
+        INTEGRATION_VCR_POLICY,
     ),
     (
         "script_surface",
@@ -841,35 +852,35 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ),
     (
         "script_surface",
-        "scripts/memory/__main__.py",
+        SCRIPTS_MEMORY_MAIN_PATH,
         "PROVIDES",
         "execution_path",
         f"python -m scripts.memory sync --report {LEGACY_REPORT_PATH}",
     ),
     (
         "policy_surface",
-        "integration and VCR execution policy",
+        INTEGRATION_VCR_POLICY,
         "GOVERNS",
         "test_surface",
         "integration tests",
     ),
     (
         "adapter_surface",
-        "bioetl.infrastructure.adapters.chembl",
+        CHEMBL_ADAPTER_SURFACE,
         "CONTAINS",
         "adapter_impl_surface",
-        "bioetl.infrastructure.adapters.chembl.client",
+        CHEMBL_ADAPTER_IMPL_SURFACE,
     ),
     (
         "adapter_impl_surface",
-        "bioetl.infrastructure.adapters.chembl.client",
+        CHEMBL_ADAPTER_IMPL_SURFACE,
         "DEPENDS_ON",
         "port_surface",
         "bioetl.domain.ports.observability.logging.LoggerPort",
     ),
     (
         "adapter_surface",
-        "bioetl.infrastructure.adapters.chembl",
+        CHEMBL_ADAPTER_SURFACE,
         "DEPENDS_ON",
         "port_surface",
         "bioetl.domain.ports.observability.logging.LoggerPort",
@@ -879,7 +890,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "chembl_activity",
         "DEPENDS_ON",
         "adapter_surface",
-        "bioetl.infrastructure.adapters.chembl",
+        CHEMBL_ADAPTER_SURFACE,
     ),
     (
         "pipeline_surface",
@@ -893,7 +904,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "chembl_activity",
         "DEPENDS_ON",
         "module_surface",
-        "src/bioetl/application/core/record_normalization_processor.py",
+        RECORD_NORMALIZATION_PROCESSOR_PATH,
     ),
     (
         "pipeline_surface",
@@ -949,21 +960,21 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "chembl.activity",
         "DESCRIBED_IN",
         "doc_artifact",
-        "docs/04-reference/contracts/run-manifest-ledger.md",
+        RUN_MANIFEST_LEDGER_DOC_PATH,
     ),
     (
         "module_surface",
-        "src/bioetl/domain/control_plane/run_manifest.py",
+        RUN_MANIFEST_MODULE_PATH,
         "DESCRIBED_IN",
         "doc_artifact",
-        "docs/04-reference/contracts/run-manifest-ledger.md",
+        RUN_MANIFEST_LEDGER_DOC_PATH,
     ),
     (
         "decision",
         "ADR-018-gold-strict-validation",
         "CONSTRAINS",
         "config_artifact",
-        "configs/entities/chembl/activity.yaml",
+        CHEMBL_ACTIVITY_CONFIG_PATH,
     ),
     (
         "contract_surface",
@@ -1026,7 +1037,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "chembl_activity",
         "DEFINED_BY",
         "config_artifact",
-        "configs/entities/chembl/activity.yaml",
+        CHEMBL_ACTIVITY_CONFIG_PATH,
     ),
     (
         "pipeline_surface",
@@ -1160,14 +1171,14 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "run_manifest",
         "BACKED_BY",
         "module_surface",
-        "src/bioetl/domain/control_plane/run_manifest.py",
+        RUN_MANIFEST_MODULE_PATH,
     ),
     (
         "runtime_evidence_surface",
         "run_manifest",
         "WRITES_TO",
         "storage_surface",
-        "control/run_manifest/{manifest_id}.json",
+        RUN_MANIFEST_STORAGE_PATH,
     ),
     (
         "project",
@@ -1188,14 +1199,14 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "run_manifest::json",
         "MATERIALIZED_AS",
         "storage_surface",
-        "control/run_manifest/{manifest_id}.json",
+        RUN_MANIFEST_STORAGE_PATH,
     ),
     (
         "runtime_evidence_surface",
         "effective_config_artifact",
         "WRITES_TO",
         "storage_surface",
-        "control/effective_config/{artifact_id}.json",
+        EFFECTIVE_CONFIG_STORAGE_PATH,
     ),
     (
         "runtime_evidence_surface",
@@ -1209,14 +1220,14 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "effective_config_artifact::json",
         "MATERIALIZED_AS",
         "storage_surface",
-        "control/effective_config/{artifact_id}.json",
+        EFFECTIVE_CONFIG_STORAGE_PATH,
     ),
     (
         "runtime_evidence_surface",
         "lineage",
         "WRITES_TO",
         "storage_surface",
-        "control/lineage/fragments/{fragment_hash}.json",
+        LINEAGE_FRAGMENT_STORAGE_PATH,
     ),
     (
         "runtime_evidence_surface",
@@ -1230,7 +1241,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "lineage::fragment",
         "MATERIALIZED_AS",
         "storage_surface",
-        "control/lineage/fragments/{fragment_hash}.json",
+        LINEAGE_FRAGMENT_STORAGE_PATH,
     ),
     ("project", "BioETL", "HAS_RUN_INSTANCE", "run_instance_surface", "manifest-left"),
     (
@@ -1298,17 +1309,17 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ),
     (
         "storage_surface",
-        "silver/chembl/activity",
+        SILVER_CHEMBL_ACTIVITY,
         "HAS_SCHEMA_FIELD",
         "schema_field_surface",
-        "silver/chembl/activity::activity_id",
+        SILVER_CHEMBL_ACTIVITY_FIELD,
     ),
     (
         "contract_surface",
         "chembl.activity",
         "HAS_SCHEMA_FIELD",
         "schema_field_surface",
-        "silver/chembl/activity::activity_id",
+        SILVER_CHEMBL_ACTIVITY_FIELD,
     ),
     (
         "schema_field_surface",
@@ -1319,7 +1330,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ),
     (
         "schema_field_surface",
-        "silver/composite/activity::compound_name",
+        SILVER_COMPOSITE_ACTIVITY_FIELD,
         "DERIVES_FIELD_FROM",
         "schema_field_surface",
         "silver/chembl/compound_record::compound_name",
@@ -1384,14 +1395,14 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ),
     (
         "doc_artifact",
-        "docs/04-reference/contracts/run-manifest-ledger.md",
+        RUN_MANIFEST_LEDGER_DOC_PATH,
         "DESCRIBES",
         "module_surface",
-        "src/bioetl/domain/control_plane/run_manifest.py",
+        RUN_MANIFEST_MODULE_PATH,
     ),
     (
         "doc_artifact",
-        "docs/04-reference/contracts/run-manifest-ledger.md",
+        RUN_MANIFEST_LEDGER_DOC_PATH,
         "DESCRIBES",
         "module_surface",
         "src/bioetl/infrastructure/config/_base.py",
@@ -1576,7 +1587,7 @@ def test_apply_normalization_evidence_only_executes_batched_statements(
         "scripts.memory.sync._normalization_evidence_statements",
         lambda: list(stub_statements),
     )
-    root = Path(__file__).resolve().parents[4]
+    root = _repo_root()
 
     summary = apply_normalization_evidence_only(
         root,
@@ -1599,7 +1610,7 @@ def test_apply_normalization_evidence_only_executes_batched_statements(
 
 
 def test_duplication_analysis_config_excludes_normalization_registry_path() -> None:
-    root = Path(__file__).resolve().parents[4]
+    root = _repo_root()
     config = _duplication_analysis_config(_load_memory_mapping(root))
 
     assert (
@@ -1925,12 +1936,9 @@ def test_storage_surface_helpers_merge_base_and_pipeline_overrides() -> None:
 def test_storage_ref_from_output_path_normalizes_data_output_prefix() -> None:
     assert (
         _storage_ref_from_output_path("data/output/silver/composite/activity")
-        == "silver/composite/activity"
+        == SILVER_COMPOSITE_ACTIVITY
     )
-    assert (
-        _storage_ref_from_output_path("silver/chembl/activity")
-        == "silver/chembl/activity"
-    )
+    assert _storage_ref_from_output_path(SILVER_CHEMBL_ACTIVITY) == SILVER_CHEMBL_ACTIVITY
 
 
 def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_links() -> (
@@ -1941,7 +1949,7 @@ def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_
     filtered = _filtered_snapshot(snapshot, only_storage_layer=True)
     relation_keys = _relation_keys(filtered)
 
-    assert ("storage_surface", "silver/chembl/activity") in {
+    assert ("storage_surface", SILVER_CHEMBL_ACTIVITY) in {
         (key.label, key.name) for key in filtered.nodes
     }
     assert ("control_plane_artifact_surface", "run_manifest::json") in {
@@ -1953,7 +1961,7 @@ def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_
     assert ("runtime_state_surface", "manifest-chain-2::retry-window") in {
         (key.label, key.name) for key in filtered.nodes
     }
-    assert ("schema_field_surface", "silver/chembl/activity::activity_id") in {
+    assert ("schema_field_surface", SILVER_CHEMBL_ACTIVITY_FIELD) in {
         (key.label, key.name) for key in filtered.nodes
     }
     assert (
@@ -1961,7 +1969,7 @@ def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_
         "chembl_activity",
         "WRITES_TO",
         "storage_surface",
-        "silver/chembl/activity",
+        SILVER_CHEMBL_ACTIVITY,
     ) in relation_keys
     assert (
         "runtime_evidence_surface",
@@ -1979,10 +1987,10 @@ def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_
     ) in relation_keys
     assert (
         "storage_surface",
-        "silver/chembl/activity",
+        SILVER_CHEMBL_ACTIVITY,
         "HAS_SCHEMA_FIELD",
         "schema_field_surface",
-        "silver/chembl/activity::activity_id",
+        SILVER_CHEMBL_ACTIVITY_FIELD,
     ) in relation_keys
 
 
@@ -2003,7 +2011,7 @@ def test_filtered_snapshot_runtime_evidence_layer_preserves_runtime_support_link
     assert ("runtime_state_surface", "manifest-chain-2::retry-window") in {
         (key.label, key.name) for key in filtered.nodes
     }
-    assert ("module_surface", "src/bioetl/domain/control_plane/run_manifest.py") in {
+    assert ("module_surface", RUN_MANIFEST_MODULE_PATH) in {
         (key.label, key.name) for key in filtered.nodes
     }
     assert (
@@ -2011,7 +2019,7 @@ def test_filtered_snapshot_runtime_evidence_layer_preserves_runtime_support_link
         "run_manifest",
         "BACKED_BY",
         "module_surface",
-        "src/bioetl/domain/control_plane/run_manifest.py",
+        RUN_MANIFEST_MODULE_PATH,
     ) in relation_keys
     assert (
         "run_instance_surface",
@@ -2101,22 +2109,22 @@ def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
     filtered = _filtered_snapshot(snapshot, only_docs_drift=True)
     relation_keys = _relation_keys(filtered)
 
-    assert ("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md") in {
+    assert ("doc_artifact", RUN_MANIFEST_LEDGER_DOC_PATH) in {
         (key.label, key.name) for key in filtered.nodes
     }
     assert (
         "doc_artifact",
-        "docs/04-reference/contracts/run-manifest-ledger.md",
+        RUN_MANIFEST_LEDGER_DOC_PATH,
         "DESCRIBES",
         "module_surface",
-        "src/bioetl/domain/control_plane/run_manifest.py",
+        RUN_MANIFEST_MODULE_PATH,
     ) in relation_keys
     assert (
         "module_surface",
-        "src/bioetl/domain/control_plane/run_manifest.py",
+        RUN_MANIFEST_MODULE_PATH,
         "DESCRIBED_IN",
         "doc_artifact",
-        "docs/04-reference/contracts/run-manifest-ledger.md",
+        RUN_MANIFEST_LEDGER_DOC_PATH,
     ) in relation_keys
     assert (
         "doc_claim_surface",
@@ -2558,7 +2566,7 @@ def test_build_fast_analysis_audit_report_uses_bulk_count_queries(monkeypatch) -
             raise AssertionError(f"Unexpected statement: {statement}")
 
     monkeypatch.setattr("scripts.memory.sync.Neo4jHttpClient", StubClient)
-    root = Path(__file__).resolve().parents[4]
+    root = _repo_root()
 
     report = build_fast_analysis_audit_report(snapshot, root, "http://localhost:7474")  # type: ignore[arg-type]
 
@@ -2640,7 +2648,7 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
             )
 
     monkeypatch.setattr("scripts.memory.sync.Neo4jHttpClient", StubClient)
-    root = Path(__file__).resolve().parents[4]
+    root = _repo_root()
 
     report = build_audit_report(snapshot, root, "http://localhost:7474")
 
@@ -2828,7 +2836,7 @@ def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing
 
     _add_complexity_analysis_surfaces(
         snapshot,
-        Path(__file__).resolve().parents[4],
+        _repo_root(),
         project,
         "2026-04-10",
         {

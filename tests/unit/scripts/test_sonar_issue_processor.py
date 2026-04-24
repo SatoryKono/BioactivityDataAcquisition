@@ -20,8 +20,7 @@ sonar.exclusions=\\
     assert properties["sonar.projectKey"] == "SatoryKono_BioactivityDataAcquisition"
     assert properties["sonar.sources"] == "src/bioetl"
     assert properties["sonar.exclusions"] == (
-        "src/bioetl/application/services/foo.py,"
-        "src/bioetl/application/core/bar.py"
+        "src/bioetl/application/services/foo.py,src/bioetl/application/core/bar.py"
     )
 
 

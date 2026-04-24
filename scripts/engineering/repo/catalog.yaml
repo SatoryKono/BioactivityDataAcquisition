@@ -21,6 +21,13 @@ canonical_roots:
 policies:
   canonical_invocation_required_for_new_integrations: true
   no_scripts_in_root: true
+  root_allowlist:
+  - docs_parity_check.py
+  - documentation_governance_check.py
+  - generate_adr_registry.py
+  - generate_test_github_issues.py
+  - optimized_test_runner.py
+  - test_selection_strategy.py
 lifecycle:
   manifest_path: configs/quality/scripts_inventory_manifest.json
   registry_path: configs/quality/scripts_lifecycle_registry.json

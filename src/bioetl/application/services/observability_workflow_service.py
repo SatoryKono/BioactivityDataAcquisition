@@ -169,7 +169,9 @@ class ObservabilityWorkflowService:
         ) as span:
             result = await self._inspect_audit_run_impl(run_id=run_id, limit=limit)
             span.set_attribute(_TRACE_ATTR_SUCCESS, True)
-            span.set_attribute(_TRACE_ATTR_AUDIT_ENTRIES_COUNT, len(result.audit.entries))
+            span.set_attribute(
+                _TRACE_ATTR_AUDIT_ENTRIES_COUNT, len(result.audit.entries)
+            )
             span.set_attribute(
                 "bioetl.has_run_manifest", result.run_manifest is not None
             )
@@ -221,7 +223,9 @@ class ObservabilityWorkflowService:
                 audit_limit=audit_limit,
             )
             span.set_attribute(_TRACE_ATTR_SUCCESS, True)
-            span.set_attribute(_TRACE_ATTR_AUDIT_ENTRIES_COUNT, len(result.audit.entries))
+            span.set_attribute(
+                _TRACE_ATTR_AUDIT_ENTRIES_COUNT, len(result.audit.entries)
+            )
             span.set_attribute(
                 "bioetl.missing_evidence_count", len(result.missing_evidence)
             )
@@ -324,7 +328,9 @@ class ObservabilityWorkflowService:
                 audit_limit=audit_limit,
             )
             span.set_attribute(_TRACE_ATTR_SUCCESS, True)
-            span.set_attribute(_TRACE_ATTR_AUDIT_ENTRIES_COUNT, len(result.audit.entries))
+            span.set_attribute(
+                _TRACE_ATTR_AUDIT_ENTRIES_COUNT, len(result.audit.entries)
+            )
             span.set_attribute("bioetl.has_checkpoint", result.checkpoint is not None)
             span.set_attribute(
                 "bioetl.has_run_manifest", result.run_manifest is not None
@@ -459,9 +465,7 @@ class ObservabilityWorkflowService:
                 silver_total = silver_stats["total_count"]
                 silver_stats["bronze_records"] = bronze_records
                 silver_stats["bronze_ratio"] = silver_total / bronze_records
-                silver_stats["bronze_ratio_pct"] = (
-                    silver_total / bronze_records
-                ) * 100
+                silver_stats["bronze_ratio_pct"] = (silver_total / bronze_records) * 100
         return summary
 
     @staticmethod
@@ -477,7 +481,9 @@ class ObservabilityWorkflowService:
             value = metrics_snapshot.get("records_bronze")
             if not isinstance(value, int) or value <= 0:
                 continue
-            bronze_records = value if bronze_records is None else max(bronze_records, value)
+            bronze_records = (
+                value if bronze_records is None else max(bronze_records, value)
+            )
         return bronze_records
 
     @staticmethod

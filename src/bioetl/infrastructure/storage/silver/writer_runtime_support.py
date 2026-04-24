@@ -10,6 +10,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Protocol, cast
 
+from bioetl.domain.context import current_utc_time
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import (
@@ -163,7 +164,7 @@ def _resolve_runtime_services_for_writer(
 
 
 def _assign_runtime_services(
-    writer: Any,
+    writer: Any,  # Any: runtime services are assigned onto writer instances and test doubles by attribute convention.
     services: SilverWriterRuntimeServices,
 ) -> None:
     """Copy grouped runtime collaborators onto the writer instance."""
@@ -188,7 +189,10 @@ def _assign_runtime_services(
     writer._postwrite = services.postwrite_operations
 
 
-def _rewire_runtime_services(writer: Any) -> None:
+# Any: post-construction rewiring depends on duck-typed writer internals.
+def _rewire_runtime_services(
+    writer: Any,  # Any: post-construction rewiring depends on duck-typed writer internals.
+) -> None:
     """Bind runtime collaborators that need the fully initialized writer instance."""
     if writer._merged is not None:
         writer._merged = replace(
@@ -259,7 +263,7 @@ async def _write_single_target_impl(
     module_name: str,
 ):
     """Execute one physical Silver write target with tracing."""
-    started_at, start_perf = datetime.now(UTC), time.perf_counter()
+    started_at, start_perf = current_utc_time(), time.perf_counter()
     return await execute_with_tracing(
         tracing=writer._tracing,
         module_name=module_name,

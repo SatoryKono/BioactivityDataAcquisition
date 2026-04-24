@@ -114,8 +114,6 @@ def _extract_run_type(record: JsonDict, error_details: JsonDict) -> str:
     return ""
 
 
-
-
 def _normalize_filtered_row(
     record: JsonDict,
     *,

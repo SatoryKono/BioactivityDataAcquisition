@@ -12,6 +12,7 @@ from bioetl.domain.normalization import (
     normalize_hash_identity_record,
     serialize_hash_identity_canonical_json,
 )
+from bioetl.domain.types import BronzeRecord
 
 __all__ = [
     "_deduplicate_by_primary_keys_impl",
@@ -23,15 +24,19 @@ __all__ = [
 _VERSIONED_TABLE_SUFFIX_RE = re.compile(r"__v\d+_\d+_\d+$")
 
 
+# Any: Silver write batches preserve heterogeneous BronzeRecord-compatible values.
 def _primary_key_tuple(
-    record: dict[str, Any],
+    record: BronzeRecord,
     primary_keys: list[str],
 ) -> tuple[object, ...]:
     """Return one stable primary-key tuple for a batch record."""
     return tuple(record.get(primary_key) for primary_key in primary_keys)
 
 
-def _content_identity(record: dict[str, Any]) -> str:
+# Any: content identity canonicalizes heterogeneous batch payloads.
+def _content_identity(
+    record: BronzeRecord,
+) -> str:
     """Return deterministic content identity for one batch record."""
     content_hash = record.get("content_hash")
     if content_hash is not None:
@@ -47,10 +52,12 @@ def _pipeline_name_from_table_name(table_name: str) -> str:
     return normalized_table.replace(".", "_").replace("/", "_")
 
 
+# Any: dedup logic operates on heterogeneous BronzeRecord-compatible rows.
+# Any: winner selection preserves original heterogeneous row values.
 def _deduplicate_by_primary_keys_impl(
-    records: list[dict[str, Any]],
+    records: list[BronzeRecord],
     primary_keys: list[str],
-) -> list[dict[str, Any]]:
+) -> list[BronzeRecord]:
     """Deduplicate records by business key using deterministic content identity.
 
     The current-batch contract mirrors Silver retention compaction:
@@ -78,7 +85,7 @@ def _deduplicate_by_primary_keys_impl(
 
     seen_exact_keys: set[tuple[tuple[object, ...], str]] = set()
     seen_primary_keys: set[tuple[object, ...]] = set()
-    deduplicated: list[dict[str, Any]] = []
+    deduplicated: list[BronzeRecord] = []
     for primary_key, content_identity, record in ranked_records:
         exact_key = (primary_key, content_identity)
         if exact_key in seen_exact_keys:
@@ -91,9 +98,11 @@ def _deduplicate_by_primary_keys_impl(
     return deduplicated
 
 
+# Any: validation helper accepts SilverWriter host objects and lightweight test doubles.
+# Any: validation runs before Pandera coercion on heterogeneous rows.
 def _validate_records(
-    host: Any,
-    records: list[dict[str, Any]],
+    host: Any,  # Any: validation helper accepts SilverWriter host objects and lightweight test doubles.
+    records: list[BronzeRecord],
     table_name: str,
     schema: pa.Schema,
 ) -> None:
@@ -111,9 +120,11 @@ def _validate_records(
         )
 
 
+# Any: validation helper accepts SilverWriter host objects and lightweight test doubles.
+# Any: Pandera validation consumes heterogeneous pre-coercion row payloads.
 def _validate_silver_pandera(
-    host: Any,
-    records: list[dict[str, Any]],
+    host: Any,  # Any: validation helper accepts SilverWriter host objects and lightweight test doubles.
+    records: list[BronzeRecord],
     table_name: str,
 ) -> None:
     """Validate records using Pandera schema before writing to Silver."""

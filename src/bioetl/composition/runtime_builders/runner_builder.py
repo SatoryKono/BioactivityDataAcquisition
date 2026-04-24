@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from inspect import Parameter, signature
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.services.control_plane.run_ledger_service import (
@@ -38,10 +39,6 @@ from bioetl.composition.runtime_builders.inputs_resolver import (
 from bioetl.composition.runtime_builders.inputs_resolver import (
     RunnerInputs as _RunnerInputs,
 )
-from bioetl.domain.ports.runtime.runner import (
-    PipelineControlPlaneArtifacts,
-    PipelineCreateRunnerRequest,
-)
 from bioetl.composition.runtime_builders.ledger_collaborator import (
     attach_control_plane_collaborators,
 )
@@ -49,6 +46,10 @@ from bioetl.composition.runtime_builders.observability_builder import (
     build_observability_bundle,
 )
 from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.ports.runtime.runner import (
+    PipelineControlPlaneArtifacts,
+    PipelineCreateRunnerRequest,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.context import (
@@ -100,39 +101,65 @@ def _create_runner_from_factory(
     ctx: PipelineRunContext,
     inputs: _RunnerInputs,
 ) -> PipelineRunnerProtocol:
+    request = PipelineCreateRunnerRequest(
+        run_id=ctx.run_id,
+        runtime=inputs.runtime_config,
+        settings=cast("SettingsPort", inputs.settings),
+        observability=cast(
+            "ExecutionObservabilityPort",
+            inputs.observability,
+        ),
+        control_plane=PipelineControlPlaneArtifacts(
+            manifest_id=getattr(ctx, "manifest_id", None),
+            execution_fingerprint=getattr(ctx, "execution_fingerprint", None),
+            config_hash=getattr(ctx, "config_hash", None),
+            resolved_config_hash=getattr(ctx, "resolved_config_hash", None),
+            effective_config_hash=getattr(ctx, "effective_config_hash", None),
+            dq_contract_compatibility_hash=getattr(
+                ctx, "dq_contract_compatibility_hash", None
+            ),
+            effective_config_artifact_id=getattr(
+                ctx, "effective_config_artifact_id", None
+            ),
+        ),
+        filter_config=inputs.filter_config,
+        config=inputs.yaml_config,
+        cached_bronze=inputs.cached_bronze,
+    )
+    create_runner = factory.create_runner
+    parameters = signature(create_runner).parameters.values()
+    accepts_kwargs = any(
+        parameter.kind == Parameter.VAR_KEYWORD for parameter in parameters
+    )
+    accepts_request = "request" in signature(create_runner).parameters
+    if not accepts_request and accepts_kwargs:
+        control_plane = request.control_plane
+        return cast(
+            "PipelineRunnerProtocol",
+            create_runner(
+                run_id=request.run_id,
+                runtime=request.runtime,
+                settings=request.settings,
+                observability=request.observability,
+                manifest_id=control_plane.manifest_id,
+                execution_fingerprint=control_plane.execution_fingerprint,
+                config_hash=control_plane.config_hash,
+                resolved_config_hash=control_plane.resolved_config_hash,
+                effective_config_hash=control_plane.effective_config_hash,
+                dq_contract_compatibility_hash=(
+                    control_plane.dq_contract_compatibility_hash
+                ),
+                effective_config_artifact_id=(
+                    control_plane.effective_config_artifact_id
+                ),
+                filter_config=request.filter_config,
+                config=request.config,
+                cached_bronze=request.cached_bronze,
+            ),
+        )
     return cast(
         "PipelineRunnerProtocol",
-        factory.create_runner(
-            PipelineCreateRunnerRequest(
-                run_id=ctx.run_id,
-                runtime=inputs.runtime_config,
-                settings=cast("SettingsPort", inputs.settings),
-                observability=cast(
-                    "ExecutionObservabilityPort",
-                    inputs.observability,
-                ),
-                control_plane=PipelineControlPlaneArtifacts(
-                    manifest_id=getattr(ctx, "manifest_id", None),
-                    execution_fingerprint=getattr(
-                        ctx, "execution_fingerprint", None
-                    ),
-                    config_hash=getattr(ctx, "config_hash", None),
-                    resolved_config_hash=getattr(ctx, "resolved_config_hash", None),
-                    effective_config_hash=getattr(
-                        ctx, "effective_config_hash", None
-                    ),
-                    dq_contract_compatibility_hash=getattr(
-                        ctx, "dq_contract_compatibility_hash", None
-                    ),
-                    effective_config_artifact_id=getattr(
-                        ctx, "effective_config_artifact_id", None
-                    ),
-                ),
-                filter_config=inputs.filter_config,
-                config=inputs.yaml_config,
-                cached_bronze=inputs.cached_bronze,
-            )
-        ),
+        create_runner(request),
     )
 
 

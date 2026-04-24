@@ -200,7 +200,9 @@ def test_adr_024_registry_has_no_contradictory_domain_alias_compatibility_export
     forbidden_by_surface = _forbidden_aliases_by_export_surface(payload)
 
     known_exceptions = payload.get("adr_024_known_exceptions", {})
-    assert isinstance(known_exceptions, dict), "adr_024_known_exceptions must be a mapping"
+    assert isinstance(known_exceptions, dict), (
+        "adr_024_known_exceptions must be a mapping"
+    )
     backward_compatibility = known_exceptions.get("backward_compatibility", [])
     assert isinstance(backward_compatibility, list), (
         "adr_024_known_exceptions.backward_compatibility must be a list"

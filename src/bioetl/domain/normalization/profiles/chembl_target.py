@@ -9,13 +9,15 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
-    normalize_profile_json_string_list_vocabulary_strict,
     normalize_profile_chembl_organism_name,
+    normalize_profile_json_string_list_vocabulary_strict,
 )
 from bioetl.domain.schemas.chembl.target import TargetSchema
-from bioetl.domain.schemas.constants import TARGET_COMPONENT_RELATIONSHIPS
-from bioetl.domain.schemas.constants import TARGET_COMPONENT_TYPES
-from bioetl.domain.schemas.constants import TARGET_TYPES
+from bioetl.domain.schemas.constants import (
+    TARGET_COMPONENT_RELATIONSHIPS,
+    TARGET_COMPONENT_TYPES,
+    TARGET_TYPES,
+)
 
 __all__ = [
     "CHEMBL_TARGET_PROFILE",

@@ -294,7 +294,9 @@ def test_build_composite_control_plane_bundle_can_disable_ledger_while_keeping_m
         == bundle.effective_config_artifact_id
     )
     assert manifest.code_provenance.resolved_config_hash == bundle.resolved_config_hash
-    assert manifest.code_provenance.effective_config_hash == bundle.effective_config_hash
+    assert (
+        manifest.code_provenance.effective_config_hash == bundle.effective_config_hash
+    )
     assert (
         manifest.launch_context["exact_replay_support_boundary"]
         == "composite_snapshot_backed_input_envelope"
@@ -446,7 +448,9 @@ def test_build_composite_control_plane_bundle_allows_replay_ready_with_full_snap
         manifest.code_provenance.effective_config_artifact_id
         == bundle.effective_config_artifact_id
     )
-    assert manifest.code_provenance.effective_config_hash == bundle.effective_config_hash
+    assert (
+        manifest.code_provenance.effective_config_hash == bundle.effective_config_hash
+    )
 
 
 def test_build_composite_control_plane_bundle_persists_manifest_created_when_ledger_enabled(

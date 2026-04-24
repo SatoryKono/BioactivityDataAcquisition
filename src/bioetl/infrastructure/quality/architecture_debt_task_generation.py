@@ -43,6 +43,7 @@ COMMON_CHECKS: Final[tuple[str, ...]] = (
     "python -m scripts.engineering.qa check-exemptions --mode auto --growth-mode auto --trend-report off",
 )
 
+
 def _project_root() -> Path:
     return Path(__file__).resolve().parents[4]
 

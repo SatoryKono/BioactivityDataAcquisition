@@ -122,18 +122,7 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a narrow stdin-driven Sonar issue grouping helper for historical remediation triage; remove it once issue-wave analysis is fully folded into the canonical quality tooling."
     },
-    "scripts/generate_test_github_issues.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded script for generating test GitHub issues; remove it once the associated testing workflow is retired or integrated into a canonical test setup."
-    },
-    "scripts/test_selection_strategy.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded local changed-file test selection helper for historical manual workflows; prefer the canonical sharded pytest and test-selection tooling, and remove it once no operator workflow depends on this orphan utility."
-    },
+    
     "scripts/ai/mcp/mcp_brave_search_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
@@ -774,18 +763,6 @@
       "owner": "@bioetl-platform",
       "decision": "active",
       "next_step": "Retain as the canonical script for validating control plane artifacts in CI workflows.",
-      "review_by": "2026-07-15"
-    },
-    "scripts/documentation_governance_check.py": {
-      "owner": "@bioetl-platform",
-      "decision": "active",
-      "next_step": "Retain as the canonical documentation governance checking script.",
-      "review_by": "2026-07-15"
-    },
-    "scripts/generate_adr_registry.py": {
-      "owner": "@bioetl-platform",
-      "decision": "active",
-      "next_step": "Retain as the canonical ADR registry generation script for documentation automation.",
       "review_by": "2026-07-15"
     }
   }

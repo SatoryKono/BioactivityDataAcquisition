@@ -280,21 +280,28 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
         input_filter=SimpleNamespace(enabled=False),
     )
 
-    result = runner_builder.build_pipeline_runner(
-        context,
-        registry=fake_registry,
-        ensure_providers_loaded_fn=lambda: calls.setdefault("providers", True),
-        register_all_pipelines_fn=lambda registry=None: calls.setdefault(
-            "pipelines_registry", registry
+    with patch(
+        "bioetl.composition.runtime_builders.run_manifest_builder.get_code_revision_provenance",
+        return_value=SimpleNamespace(
+            git_commit="deadbeef" * 5,
+            source_revision_state="clean",
         ),
-        get_settings_fn=get_settings_fn,
-        load_pipeline_config_fn=load_pipeline_config_fn,
-        build_observability_bundle_fn=build_observability_bundle_fn,
-        assemble_vacuum_settings_fn=assemble_vacuum_settings_fn,
-        assemble_runtime_config_fn=assemble_runtime_config_fn,
-        assemble_filter_config_fn=assemble_filter_config_fn,
-        assemble_cached_bronze_context_fn=assemble_cached_bronze_context_fn,
-    )
+    ):
+        result = runner_builder.build_pipeline_runner(
+            context,
+            registry=fake_registry,
+            ensure_providers_loaded_fn=lambda: calls.setdefault("providers", True),
+            register_all_pipelines_fn=lambda registry=None: calls.setdefault(
+                "pipelines_registry", registry
+            ),
+            get_settings_fn=get_settings_fn,
+            load_pipeline_config_fn=load_pipeline_config_fn,
+            build_observability_bundle_fn=build_observability_bundle_fn,
+            assemble_vacuum_settings_fn=assemble_vacuum_settings_fn,
+            assemble_runtime_config_fn=assemble_runtime_config_fn,
+            assemble_filter_config_fn=assemble_filter_config_fn,
+            assemble_cached_bronze_context_fn=assemble_cached_bronze_context_fn,
+        )
 
     assert result == "runner-instance"
     assert calls["providers"] is True
@@ -640,41 +647,48 @@ def test_build_pipeline_runner_keeps_snapshot_backed_execution_identity_stable_a
     def _build_runner_once() -> dict[str, object]:
         fake_factory = _FakeFactory()
         fake_registry = _FakeRegistry(factory=fake_factory)
-        runner_builder.build_pipeline_runner(
-            _build_context(),
-            registry=fake_registry,
-            ensure_providers_loaded_fn=lambda: None,
-            register_all_pipelines_fn=lambda registry=None: None,
-            get_settings_fn=lambda: SimpleNamespace(
-                data_dir=str(tmp_path),
-                pipeline=SimpleNamespace(heartbeat_interval=30),
-                test_mode=False,
+        with patch(
+            "bioetl.composition.runtime_builders.run_manifest_builder.get_code_revision_provenance",
+            return_value=SimpleNamespace(
+                git_commit="deadbeef" * 5,
+                source_revision_state="clean",
             ),
-            load_pipeline_config_fn=lambda _: SimpleNamespace(
-                provider="chembl",
-                entity_type="activity",
-                version="2.0.0",
-                maintenance={"retain_days": 7},
-                input_filter=SimpleNamespace(),
-                business_primary_keys=["activity_id"],
-                technical_primary_key="entity_id",
-            ),
-            build_observability_bundle_fn=lambda **_: _namespace_observability(
-                SimpleNamespace(info=lambda *_, **__: None),
-            ),
-            assemble_vacuum_settings_fn=lambda **_: "vacuum",
-            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
-                run_type="incremental",
-                limit=100,
-                exact_replay=True,
-            ),
-            assemble_filter_config_fn=lambda **_: None,
-            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
-                enabled=True,
-                bronze_path=str(bronze_root),
-                bronze_date="2026-01-01",
-            ),
-        )
+        ):
+            runner_builder.build_pipeline_runner(
+                _build_context(),
+                registry=fake_registry,
+                ensure_providers_loaded_fn=lambda: None,
+                register_all_pipelines_fn=lambda registry=None: None,
+                get_settings_fn=lambda: SimpleNamespace(
+                    data_dir=str(tmp_path),
+                    pipeline=SimpleNamespace(heartbeat_interval=30),
+                    test_mode=False,
+                ),
+                load_pipeline_config_fn=lambda _: SimpleNamespace(
+                    provider="chembl",
+                    entity_type="activity",
+                    version="2.0.0",
+                    maintenance={"retain_days": 7},
+                    input_filter=SimpleNamespace(),
+                    business_primary_keys=["activity_id"],
+                    technical_primary_key="entity_id",
+                ),
+                build_observability_bundle_fn=lambda **_: _namespace_observability(
+                    SimpleNamespace(info=lambda *_, **__: None),
+                ),
+                assemble_vacuum_settings_fn=lambda **_: "vacuum",
+                assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                    run_type="incremental",
+                    limit=100,
+                    exact_replay=True,
+                ),
+                assemble_filter_config_fn=lambda **_: None,
+                assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
+                    enabled=True,
+                    bronze_path=str(bronze_root),
+                    bronze_date="2026-01-01",
+                ),
+            )
         manifest_id = fake_factory.kwargs["manifest_id"]
         manifest_path = (
             tmp_path / "output" / "control" / "run_manifest" / f"{manifest_id}.json"
@@ -1111,31 +1125,40 @@ def test_build_pipeline_runner_allows_forensic_grade_with_exact_replay_and_sidec
     bronze_day.mkdir(parents=True)
     (bronze_day / "batch_2026-01-01_demo.jsonl.zst").write_bytes(b"snapshot-bytes")
 
-    result = _call_build_pipeline_runner(
-        _build_context(limit=25, exact_replay=True),
-        registry=fake_registry,
-        settings=_build_settings(
-            data_dir=str(tmp_path),
-            control_plane=SimpleNamespace(
-                run_manifest_enabled=True,
-                run_ledger_enabled=True,
-                required_persistence_profile="forensic_grade",
+    with patch(
+        "bioetl.composition.runtime_builders.run_manifest_builder.get_code_revision_provenance",
+        return_value=SimpleNamespace(
+            git_commit="deadbeef" * 5,
+            source_revision_state="clean",
+        ),
+    ):
+        result = _call_build_pipeline_runner(
+            _build_context(limit=25, exact_replay=True),
+            registry=fake_registry,
+            settings=_build_settings(
+                data_dir=str(tmp_path),
+                control_plane=SimpleNamespace(
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=True,
+                    required_persistence_profile="forensic_grade",
+                ),
             ),
-        ),
-        pipeline_config=_build_pipeline_config(
-            sink={
-                "bronze": SimpleNamespace(enabled=True, save_metadata=True),
-                "silver": SimpleNamespace(enabled=True, save_metadata=True),
-                "gold": SimpleNamespace(enabled=True, save_metadata=True),
-            },
-        ),
-        assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
-        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
-            enabled=True,
-            bronze_path=str(bronze_root),
-            bronze_date="2026-01-01",
-        ),
-    )
+            pipeline_config=_build_pipeline_config(
+                sink={
+                    "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                    "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                    "gold": SimpleNamespace(enabled=True, save_metadata=True),
+                },
+            ),
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental"
+            ),
+            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
+                enabled=True,
+                bronze_path=str(bronze_root),
+                bronze_date="2026-01-01",
+            ),
+        )
 
     assert result == "runner-instance"
     assert isinstance(fake_factory.kwargs, dict)

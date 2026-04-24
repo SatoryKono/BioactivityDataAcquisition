@@ -18,9 +18,11 @@ from bioetl.domain.normalization.identifiers import (
     normalize_pmc_id,
     normalize_pmid,
 )
-from bioetl.domain.normalization.json import canonicalize_json_string
-from bioetl.domain.normalization.json import deserialize_json_value
-from bioetl.domain.normalization.json import serialize_json_canonical
+from bioetl.domain.normalization.json import (
+    canonicalize_json_string,
+    deserialize_json_value,
+    serialize_json_canonical,
+)
 from bioetl.domain.normalization.rules import (
     normalize_binary_flag,
     normalize_boolean,
@@ -114,9 +116,11 @@ def normalize_profile_governed_uppercase_vocabulary(
         value,
         allowed_values=allowed_values,
         fallback=(
-            lambda normalized: normalize_cross_pipeline_case(normalized, "uppercase")
-            if preserve_unknown
-            else None
+            lambda normalized: (
+                normalize_cross_pipeline_case(normalized, "uppercase")
+                if preserve_unknown
+                else None
+            )
         ),
     )
 
