@@ -212,16 +212,14 @@ def build_run_click_command(
     callback = cast(CommandCallback, run_command)
 
     # Apply all option groups
-    callback = cast(CommandCallback, _add_core_options(validate_pipeline_name)(callback))
-    callback = cast(CommandCallback, _add_filter_options()(callback))
-    callback = cast(CommandCallback, _add_execution_options()(callback))
-    callback = cast(CommandCallback, _add_vacuum_options()(callback))
-    callback = cast(
-        CommandCallback, _add_debug_options(default_health_server_port)(callback)
-    )
-    callback = cast(CommandCallback, _add_tracing_options()(callback))
-    callback = cast(CommandCallback, _add_cache_options()(callback))
-    callback = cast(CommandCallback, _add_replay_parentage_options()(callback))
+    callback = _add_core_options(validate_pipeline_name)(callback)
+    callback = _add_filter_options()(callback)
+    callback = _add_execution_options()(callback)
+    callback = _add_vacuum_options()(callback)
+    callback = _add_debug_options(default_health_server_port)(callback)
+    callback = _add_tracing_options()(callback)
+    callback = _add_cache_options()(callback)
+    callback = _add_replay_parentage_options()(callback)
 
     return click.command()(click.pass_context(callback))
 
