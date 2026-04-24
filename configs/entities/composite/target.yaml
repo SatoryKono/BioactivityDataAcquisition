@@ -12,6 +12,8 @@ pipeline:
   provider: composite
   entity_type: target
   pipeline_name: composite_target
+  business_primary_keys:
+    - composite_target_id
 
 schema:
   compatibility_mode: legacy_composite_entity_stub

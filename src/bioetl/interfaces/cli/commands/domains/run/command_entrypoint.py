@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import Protocol
 
 import click
 
@@ -17,28 +18,33 @@ from bioetl.interfaces.cli.commands.domains.shared.click_options import (
 
 CommandCallback = Callable[..., object]
 CommandDecorator = Callable[[CommandCallback], CommandCallback]
-CommandDecoratorFactory = Callable[..., CommandDecorator]
+
+
+class RunCommandCallback(Protocol):
+    """Typed callback signature consumed by the Click entrypoint."""
+
+    def __call__(self, ctx: click.Context, /, **kwargs: object) -> None: ...
 
 
 def _add_core_options(
     validate_pipeline_name: Callable[..., object],
-) -> Callable:
+) -> CommandDecorator:
     """Add core CLI options to the command."""
 
     def decorator(cmd: CommandCallback) -> CommandCallback:
-        cmd = click.option(  # type: ignore[untyped-decorator]
+        cmd = click.option(
             "--pipeline",
             callback=validate_pipeline_name,
             required=True,
             help="Pipeline to run",
         )(cmd)
         cmd = with_run_type_option("Type of run")(cmd)
-        cmd = click.option(  # type: ignore[untyped-decorator]
+        cmd = click.option(
             "--resume",
             is_flag=True,
             help="Resume from last checkpoint state; not a strict exact replay",
         )(cmd)
-        cmd = click.option(  # type: ignore[untyped-decorator]
+        cmd = click.option(
             "--start-offset",
             type=int,
             default=None,
@@ -50,22 +56,22 @@ def _add_core_options(
     return decorator
 
 
-def _add_filter_options() -> Callable:
+def _add_filter_options() -> CommandDecorator:
     """Add filter-related CLI options."""
 
     def decorator(cmd: CommandCallback) -> CommandCallback:
         cmd = with_limit_option("Maximum number of records to process")(cmd)
-        cmd = click.option(  # type: ignore[untyped-decorator]
+        cmd = click.option(
             "--input-csv",
             type=click.Path(exists=True),
             help="Path to CSV file with filter IDs",
         )(cmd)
-        cmd = click.option(  # type: ignore[untyped-decorator]
+        cmd = click.option(
             "--filter-column",
             type=str,
             help="Column name in CSV containing filter IDs (default: 'id')",
         )(cmd)
-        cmd = click.option(  # type: ignore[untyped-decorator]
+        cmd = click.option(
             "--filter-field",
             type=str,
             help="API field name to filter by (default: 'molecule_chembl_id')",
@@ -75,7 +81,7 @@ def _add_filter_options() -> Callable:
     return decorator
 
 
-def _add_execution_options() -> Callable:
+def _add_execution_options() -> CommandDecorator:
     """Add execution control options."""
 
     def decorator(cmd: CommandCallback) -> CommandCallback:
@@ -88,17 +94,17 @@ def _add_execution_options() -> Callable:
     return decorator
 
 
-def _add_vacuum_options() -> Callable:
+def _add_vacuum_options() -> CommandDecorator:
     """Add Delta table vacuum options."""
 
     def decorator(cmd: CommandCallback) -> CommandCallback:
-        cmd = click.option(  # type: ignore[untyped-decorator]
+        cmd = click.option(
             "--vacuum-after-run",
             is_flag=True,
             default=None,
             help="Run VACUUM on Delta tables after successful run (overrides YAML config)",
         )(cmd)
-        cmd = click.option(  # type: ignore[untyped-decorator]
+        cmd = click.option(
             "--vacuum-retention-days",
             type=int,
             default=None,
@@ -109,7 +115,7 @@ def _add_vacuum_options() -> Callable:
     return decorator
 
 
-def _add_debug_options(default_health_server_port: int) -> Callable:
+def _add_debug_options(default_health_server_port: int) -> CommandDecorator:
     """Add debugging and monitoring options."""
 
     def decorator(cmd: CommandCallback) -> CommandCallback:
@@ -120,11 +126,11 @@ def _add_debug_options(default_health_server_port: int) -> Callable:
     return decorator
 
 
-def _add_tracing_options() -> Callable:
+def _add_tracing_options() -> CommandDecorator:
     """Add tracing configuration options."""
 
     def decorator(cmd: CommandCallback) -> CommandCallback:
-        cmd = click.option(  # type: ignore[untyped-decorator]
+        cmd = click.option(
             "--tracing/--no-tracing",
             "enable_tracing",
             default=None,
@@ -135,30 +141,30 @@ def _add_tracing_options() -> Callable:
     return decorator
 
 
-def _add_cache_options() -> Callable:
+def _add_cache_options() -> CommandDecorator:
     """Add Bronze cache options."""
 
     def decorator(cmd: CommandCallback) -> CommandCallback:
-        cmd = click.option(  # type: ignore[untyped-decorator]
+        cmd = click.option(
             "--use-cached-bronze/--no-cached-bronze",
             "use_cached_bronze",
             default=False,
             help="Load data from Bronze cache instead of API",
             show_default=True,
         )(cmd)
-        cmd = click.option(  # type: ignore[untyped-decorator]
+        cmd = click.option(
             "--cached-bronze-date",
             type=str,
             default=None,
             help="Filter Bronze cache by date (YYYY-MM-DD)",
         )(cmd)
-        cmd = click.option(  # type: ignore[untyped-decorator]
+        cmd = click.option(
             "--cached-bronze-path",
             type=click.Path(exists=True),
             default=None,
             help="Explicit path to Bronze cache directory",
         )(cmd)
-        cmd = click.option(  # type: ignore[untyped-decorator]
+        cmd = click.option(
             "--exact-replay/--no-exact-replay",
             "exact_replay",
             default=False,
@@ -170,17 +176,17 @@ def _add_cache_options() -> Callable:
     return decorator
 
 
-def _add_replay_parentage_options() -> Callable:
+def _add_replay_parentage_options() -> CommandDecorator:
     """Add explicit replay ancestry options."""
 
     def decorator(cmd: CommandCallback) -> CommandCallback:
-        cmd = click.option(  # type: ignore[untyped-decorator]
+        cmd = click.option(
             "--replay-of-run-id",
             type=str,
             default=None,
             help="Explicit parent run_id when this execution is an exact replay",
         )(cmd)
-        cmd = click.option(  # type: ignore[untyped-decorator]
+        cmd = click.option(
             "--replay-of-manifest-id",
             type=str,
             default=None,
@@ -195,13 +201,13 @@ def build_run_click_command(
     *,
     validate_pipeline_name: Callable[..., object],
     default_health_server_port: int,
-    run_callback: Callable[..., None],
+    run_callback: RunCommandCallback,
 ) -> click.Command:
     """Build the canonical Click command object for ``bioetl run``."""
 
-    @click.command()  # type: ignore[untyped-decorator]
-    @click.pass_context  # type: ignore[untyped-decorator]
-    def run_command(ctx: click.Context, **kwargs) -> None:
+    @click.command()
+    @click.pass_context
+    def run_command(ctx: click.Context, /, **kwargs: object) -> None:
         """Run an ETL pipeline."""
         run_callback(ctx, **kwargs)
 

@@ -45,14 +45,14 @@ def test_classify_ambiguity_group_marks_unregistered_overlap_as_duplicate() -> N
 
     symbols = (
         mod.SymbolSurface(
-            name="AlphaEntity",
+            name="AlphaCanonical",
             kind="domain_entity",
             location="src/example/domain.py",
             semantic_family="candidate:alpha",
             source="code",
         ),
         mod.SymbolSurface(
-            name="AlphaPipeline",
+            name="AlphaLegacyAlias",
             kind="pipeline_class",
             location="src/example/pipeline.py",
             semantic_family="candidate:alpha",

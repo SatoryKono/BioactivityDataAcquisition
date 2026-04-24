@@ -16,9 +16,6 @@ __all__ = [
     "UniprotFeatureSchema",
 ]
 
-_SERIES_BOOL = "Series[bool]"
-
-
 class UniprotFeatureSchema(pa.DataFrameModel):  # Pandera typing limitation
     """Sequence features, keywords, PTMs, isoforms and counts."""
 
@@ -125,7 +122,7 @@ class UniprotFeatureSchema(pa.DataFrameModel):  # Pandera typing limitation
         cls, series: Series[pd.Int64Dtype]
     ) -> Series[bool]:
         """Validate cross-reference count is non-negative."""
-        return cast(_SERIES_BOOL, series.isna() | (series >= 0))
+        return cast(Series[bool], series.isna() | (series >= 0))
 
     feature_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of sequence features"
@@ -134,7 +131,7 @@ class UniprotFeatureSchema(pa.DataFrameModel):  # Pandera typing limitation
     @pa.check("feature_count", name="feature_count_non_negative")
     def _check_feature_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate feature count is non-negative."""
-        return cast(_SERIES_BOOL, series.isna() | (series >= 0))
+        return cast(Series[bool], series.isna() | (series >= 0))
 
     keyword_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of keywords"
@@ -143,7 +140,7 @@ class UniprotFeatureSchema(pa.DataFrameModel):  # Pandera typing limitation
     @pa.check("keyword_count", name="keyword_count_non_negative")
     def _check_keyword_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate keyword count is non-negative."""
-        return cast(_SERIES_BOOL, series.isna() | (series >= 0))
+        return cast(Series[bool], series.isna() | (series >= 0))
 
     publication_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of publications"
@@ -152,7 +149,7 @@ class UniprotFeatureSchema(pa.DataFrameModel):  # Pandera typing limitation
     @pa.check("publication_count", name="publication_count_non_negative")
     def _check_publication_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate publication count is non-negative."""
-        return cast(_SERIES_BOOL, series.isna() | (series >= 0))
+        return cast(Series[bool], series.isna() | (series >= 0))
 
     isoform_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of isoforms"
@@ -161,4 +158,4 @@ class UniprotFeatureSchema(pa.DataFrameModel):  # Pandera typing limitation
     @pa.check("isoform_count", name="isoform_count_non_negative")
     def _check_isoform_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate isoform count is non-negative."""
-        return cast(_SERIES_BOOL, series.isna() | (series >= 0))
+        return cast(Series[bool], series.isna() | (series >= 0))

@@ -13,9 +13,6 @@ __all__ = [
     "PubchemPhysChemSchema",
 ]
 
-_SERIES_BOOL = "Series[bool]"
-
-
 class PubchemPhysChemSchema(pa.DataFrameModel):  # Pandera typing limitation
     """Physicochemical descriptors and atom/bond count fields."""
 
@@ -33,7 +30,7 @@ class PubchemPhysChemSchema(pa.DataFrameModel):  # Pandera typing limitation
     @pa.check("exact_mass", name="exact_mass_non_negative")
     def _check_exact_mass(cls, series: Series[float]) -> Series[bool]:
         """Validate exact mass is non-negative."""
-        return cast(_SERIES_BOOL, series.isna() | (series >= 0))
+        return cast(Series[bool], series.isna() | (series >= 0))
 
     monoisotopic_mass: Series[float] | None = pa.Field(
         nullable=True,
@@ -43,7 +40,7 @@ class PubchemPhysChemSchema(pa.DataFrameModel):  # Pandera typing limitation
     @pa.check("monoisotopic_mass", name="monoisotopic_mass_non_negative")
     def _check_monoisotopic_mass(cls, series: Series[float]) -> Series[bool]:
         """Validate monoisotopic mass is non-negative."""
-        return cast(_SERIES_BOOL, series.isna() | (series >= 0))
+        return cast(Series[bool], series.isna() | (series >= 0))
 
     xlogp: Series[float] | None = pa.Field(
         nullable=True,
@@ -53,7 +50,7 @@ class PubchemPhysChemSchema(pa.DataFrameModel):  # Pandera typing limitation
     @pa.check("xlogp", name="xlogp_range")
     def _check_xlogp(cls, series: Series[float]) -> Series[bool]:
         """Validate XLogP range."""
-        return cast(_SERIES_BOOL, series.isna() | ((series >= -20) & (series <= 20)))
+        return cast(Series[bool], series.isna() | ((series >= -20) & (series <= 20)))
 
     tpsa: Series[float] | None = pa.Field(
         nullable=True, description="Topological polar surface area (Å²)"
@@ -62,7 +59,7 @@ class PubchemPhysChemSchema(pa.DataFrameModel):  # Pandera typing limitation
     @pa.check("tpsa", name="tpsa_non_negative")
     def _check_tpsa(cls, series: Series[float]) -> Series[bool]:
         """Validate TPSA is non-negative."""
-        return cast(_SERIES_BOOL, series.isna() | (series >= 0))
+        return cast(Series[bool], series.isna() | (series >= 0))
 
     complexity: Series[float] | None = pa.Field(
         nullable=True, description="Structural complexity score"
@@ -71,7 +68,7 @@ class PubchemPhysChemSchema(pa.DataFrameModel):  # Pandera typing limitation
     @pa.check("complexity", name="complexity_non_negative")
     def _check_complexity(cls, series: Series[float]) -> Series[bool]:
         """Validate complexity is non-negative."""
-        return cast(_SERIES_BOOL, series.isna() | (series >= 0))
+        return cast(Series[bool], series.isna() | (series >= 0))
 
     charge: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Formal charge"
@@ -80,7 +77,7 @@ class PubchemPhysChemSchema(pa.DataFrameModel):  # Pandera typing limitation
     @pa.check("charge", name="charge_range")
     def _check_charge(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate formal charge range."""
-        return cast(_SERIES_BOOL, series.isna() | ((series >= -10) & (series <= 10)))
+        return cast(Series[bool], series.isna() | ((series >= -10) & (series <= 10)))
 
     heavy_atom_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Non-hydrogen atom count"
@@ -89,7 +86,7 @@ class PubchemPhysChemSchema(pa.DataFrameModel):  # Pandera typing limitation
     @pa.check("heavy_atom_count", name="heavy_atom_count_range")
     def _check_heavy_atom_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate heavy atom count range."""
-        return cast(_SERIES_BOOL, series.isna() | ((series >= 1) & (series <= 500)))
+        return cast(Series[bool], series.isna() | ((series >= 1) & (series <= 500)))
 
     h_bond_donor_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Hydrogen bond donor count"
@@ -98,7 +95,7 @@ class PubchemPhysChemSchema(pa.DataFrameModel):  # Pandera typing limitation
     @pa.check("h_bond_donor_count", name="h_bond_donor_count_range")
     def _check_h_bond_donor_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate H-bond donor count range."""
-        return cast(_SERIES_BOOL, series.isna() | ((series >= 0) & (series <= 50)))
+        return cast(Series[bool], series.isna() | ((series >= 0) & (series <= 50)))
 
     h_bond_acceptor_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Hydrogen bond acceptor count"
@@ -109,7 +106,7 @@ class PubchemPhysChemSchema(pa.DataFrameModel):  # Pandera typing limitation
         cls, series: Series[pd.Int64Dtype]
     ) -> Series[bool]:
         """Validate H-bond acceptor count range."""
-        return cast(_SERIES_BOOL, series.isna() | ((series >= 0) & (series <= 50)))
+        return cast(Series[bool], series.isna() | ((series >= 0) & (series <= 50)))
 
     rotatable_bond_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Rotatable bond count"
@@ -118,4 +115,4 @@ class PubchemPhysChemSchema(pa.DataFrameModel):  # Pandera typing limitation
     @pa.check("rotatable_bond_count", name="rotatable_bond_count_range")
     def _check_rotatable_bond_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate rotatable bond count range."""
-        return cast(_SERIES_BOOL, series.isna() | ((series >= 0) & (series <= 100)))
+        return cast(Series[bool], series.isna() | ((series >= 0) & (series <= 100)))

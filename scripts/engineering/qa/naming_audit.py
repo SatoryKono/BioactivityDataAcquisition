@@ -199,6 +199,20 @@ _GENERIC_FAMILY_TOKENS = frozenset(
         "record",
     }
 )
+_CANDIDATE_LABEL_SUFFIX_TOKENS = frozenset(
+    {
+        "pipeline",
+        "transformer",
+        "gold",
+        "schema",
+        "entity",
+        "model",
+        "record",
+        "similarity",
+        "term",
+        "id",
+    }
+)
 _EXPLICIT_NAME_FAMILIES = {
     "pubchemmolecule": "pubchem:molecule",
     "pubchemcompound": "pubchem:molecule",
@@ -624,6 +638,19 @@ def _resolve_semantic_family(name: str) -> str | None:
     )
 
 
+def _candidate_family_label(name: str) -> str:
+    """Collapse role suffixes so routine entity/pipeline pairs do not form ambiguity groups."""
+    tokens = _tokenize_symbol_name(name)
+    while len(tokens) > 1 and tokens[-1] in _CANDIDATE_LABEL_SUFFIX_TOKENS:
+        tokens.pop()
+    return "_".join(tokens)
+
+
+def _is_support_surface(name: str) -> bool:
+    """Exclude abstract/base support symbols from ambiguity inventory."""
+    return name.startswith("Base") or name.endswith("Base") or name.endswith("Record")
+
+
 def _class_surface_kind(py_file: Path, class_name: str) -> str | None:
     """Classify active code surfaces relevant to ambiguity detection."""
     normalized = py_file.as_posix()
@@ -647,6 +674,8 @@ def _iter_class_symbol_surfaces(src_path: Path) -> Iterator[SymbolSurface]:
             if not isinstance(node, ast.ClassDef):
                 continue
             if node.name.startswith("_"):
+                continue
+            if _is_support_surface(node.name):
                 continue
             kind = _class_surface_kind(py_file, node.name)
             if kind is None:
@@ -677,6 +706,8 @@ def _iter_domain_export_surfaces(
     }
 
     for name in sorted(exports):
+        if _is_support_surface(name):
+            continue
         semantic_family = _resolve_semantic_family(name) or _lexical_semantic_family(name)
         if semantic_family is None:
             continue
@@ -864,6 +895,12 @@ def build_ambiguity_groups(
     groups: list[AmbiguityGroup] = []
     for semantic_family in sorted(grouped):
         symbols = tuple(grouped[semantic_family].values())
+        if semantic_family.startswith("candidate:"):
+            labels = {_candidate_family_label(symbol.name) for symbol in symbols}
+            if len(labels) < 2 and not any(
+                symbol.kind == "forbidden_alias" for symbol in symbols
+            ):
+                continue
         if len(symbols) < 2 and not any(
             symbol.kind == "forbidden_alias" for symbol in symbols
         ):

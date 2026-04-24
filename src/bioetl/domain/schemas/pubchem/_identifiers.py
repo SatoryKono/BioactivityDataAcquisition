@@ -15,9 +15,6 @@ __all__ = [
     "PubchemIdentitySchema",
 ]
 
-_SERIES_BOOL = "Series[bool]"
-
-
 class PubchemIdentitySchema(ETLRecordSchema):
     """Primary key and core structure identifier fields for PubChem compounds."""
 
@@ -29,7 +26,7 @@ class PubchemIdentitySchema(ETLRecordSchema):
     @pa.check("molecule_id", name="molecule_id_positive")
     def _check_molecule_id(cls, series: Series[str]) -> Series[bool]:
         """Validate molecule_id/CID is a positive integer string."""
-        return cast(_SERIES_BOOL, series.str.match(r"^[1-9]\d*$"))
+        return cast(Series[bool], series.str.match(r"^[1-9]\d*$"))
 
     canonical_smiles: Series[str] | None = pa.Field(
         nullable=True,
@@ -39,7 +36,7 @@ class PubchemIdentitySchema(ETLRecordSchema):
     @pa.check("canonical_smiles", name="canonical_smiles_length")
     def _check_canonical_smiles(cls, series: Series[str]) -> Series[bool]:
         """Validate canonical SMILES length."""
-        return cast(_SERIES_BOOL, series.isna() | (series.str.len() <= 10000))
+        return cast(Series[bool], series.isna() | (series.str.len() <= 10000))
 
     isomeric_smiles: Series[str] | None = pa.Field(
         nullable=True,
@@ -49,7 +46,7 @@ class PubchemIdentitySchema(ETLRecordSchema):
     @pa.check("isomeric_smiles", name="isomeric_smiles_length")
     def _check_isomeric_smiles(cls, series: Series[str]) -> Series[bool]:
         """Validate isomeric SMILES length."""
-        return cast(_SERIES_BOOL, series.isna() | (series.str.len() <= 10000))
+        return cast(Series[bool], series.isna() | (series.str.len() <= 10000))
 
     inchi: Series[str] | None = pa.Field(
         nullable=True, description="IUPAC InChI identifier"
@@ -58,7 +55,7 @@ class PubchemIdentitySchema(ETLRecordSchema):
     @pa.check("inchi", name="inchi_format")
     def _check_inchi(cls, series: Series[str]) -> Series[bool]:
         """Validate InChI format."""
-        return cast(_SERIES_BOOL, series.isna() | series.str.startswith("InChI="))
+        return cast(Series[bool], series.isna() | series.str.startswith("InChI="))
 
     inchi_key: Series[str] | None = pa.Field(
         nullable=True,
@@ -69,7 +66,7 @@ class PubchemIdentitySchema(ETLRecordSchema):
     def _check_inchikey(cls, series: Series[str]) -> Series[bool]:
         """Validate InChI key format."""
         return cast(
-            _SERIES_BOOL,
+            Series[bool],
             series.isna() | series.str.match(INCHI_KEY_REGEX_PATTERN),
         )
 
