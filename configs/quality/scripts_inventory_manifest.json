@@ -1,19 +1,19 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-24T12:52:09.463161+00:00",
+  "generated_at": "2026-04-24T12:57:09.706706+00:00",
   "summary": {
-    "total_scripts": 443,
+    "total_scripts": 444,
     "status_counts": {
       "active": 313,
       "legacy": 15,
       "orphan": 98,
-      "unknown": 17
+      "unknown": 18
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 1,
       "ci": 56,
-      "docs": 155,
+      "docs": 156,
       "scripts": 295,
       "skills": 8,
       "tests": 135
@@ -12701,6 +12701,63 @@
           "line": 216,
           "source_group": "ci",
           "text": "python3 src/tools/harmonize_link_styles.py --dry-run --fail-on-errors"
+        }
+      ]
+    },
+    {
+      "path": "src/tools/neo4j_audit.py",
+      "type": "py",
+      "status": "unknown",
+      "agent_usage": [],
+      "reference_count": 8,
+      "references": [
+        {
+          "path": "docs/05-operations/deployment/neo4j-audit-instance-guide.md",
+          "line": 66,
+          "source_group": "docs",
+          "text": "# In src/tools/neo4j_audit.py"
+        },
+        {
+          "path": "docs/05-operations/deployment/neo4j-audit-instance-guide.md",
+          "line": 96,
+          "source_group": "docs",
+          "text": "### src/tools/neo4j_audit.py"
+        },
+        {
+          "path": "docs/05-operations/deployment/neo4j-audit-instance-implementation.md",
+          "line": 33,
+          "source_group": "docs",
+          "text": "4. ✅ **src/tools/neo4j_audit.py**"
+        },
+        {
+          "path": "docs/05-operations/deployment/neo4j-audit-instance-implementation.md",
+          "line": 55,
+          "source_group": "docs",
+          "text": "- [ ] Review src/tools/neo4j_audit.py helper functions"
+        },
+        {
+          "path": "docs/05-operations/deployment/neo4j-audit-instance-implementation.md",
+          "line": 177,
+          "source_group": "docs",
+          "text": "# Then update src/tools/neo4j_audit.py get_neo4j_uri()"
+        },
+        {
+          "path": "docs/05-operations/deployment/neo4j-audit-instance-implementation.md",
+          "line": 274,
+          "source_group": "docs",
+          "text": "| src/tools/neo4j_audit.py | Connection helper | ✅ Ready |"
+        },
+        {
+          "path": "docs/05-operations/deployment/neo4j-audit-instance-quick-start.md",
+          "line": 25,
+          "source_group": "docs",
+          "text": "- **src/tools/neo4j_audit.py** — Helper functions for context-aware connections"
+        },
+        {
+          "path": "docs/05-operations/deployment/neo4j-audit-instance-quick-start.md",
+          "line": 116,
+          "source_group": "docs",
+          "text": "- [ ] Review src/tools/neo4j_audit.py"
         }
       ]
     },
