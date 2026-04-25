@@ -95,11 +95,11 @@ class CheckpointService:
         span: Span,
         *,
         success: bool,
-        extra: Mapping[str, object] | None = None,
+        attributes: Mapping[str, object] | None = None,
     ) -> None:
         """Attach bounded result attributes to a checkpoint admin span."""
         span.set_attribute("bioetl.success", success)
-        for key, value in (extra or {}).items():
+        for key, value in (attributes or {}).items():
             span.set_attribute(key, coerce_span_attribute_value(value))
 
     def _record_operator_metrics(
@@ -144,7 +144,7 @@ class CheckpointService:
             self._set_trace_result(
                 span,
                 success=True,
-                extra={"bioetl.checkpoint_count": len(checkpoints)},
+                attributes={"bioetl.checkpoint_count": len(checkpoints)},
             )
             return checkpoints
 
@@ -225,7 +225,7 @@ class CheckpointService:
             self._set_trace_result(
                 span,
                 success=True,
-                extra={"bioetl.checkpoint_found": checkpoint is not None},
+                attributes={"bioetl.checkpoint_found": checkpoint is not None},
             )
             return checkpoint
 
@@ -300,7 +300,7 @@ class CheckpointService:
             self._set_trace_result(
                 span,
                 success=True,
-                extra={"bioetl.checkpoint_deleted": deleted},
+                attributes={"bioetl.checkpoint_deleted": deleted},
             )
             return deleted
 

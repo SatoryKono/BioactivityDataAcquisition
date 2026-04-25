@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 
 __all__ = [
     "all_health_results_healthy",
@@ -12,7 +13,7 @@ __all__ = [
 ]
 
 HealthResultValue = str | float | int | None
-HealthResults = dict[str, dict[str, HealthResultValue]]
+HealthResults = Mapping[str, Mapping[str, HealthResultValue]]
 
 
 def build_health_server_info_lines(host: str, port: int) -> list[str]:

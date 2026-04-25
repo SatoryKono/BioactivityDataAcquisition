@@ -35,21 +35,21 @@ def bootstrap_control_plane_lifecycle_store() -> FileControlPlaneArtifactLifecyc
     )
 
 
-@click.command("control-plane-lifecycle")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@click.command("control-plane-lifecycle")
+@click.option(
     "--retention-days",
     "-r",
     default=90,
     show_default=True,
     help="Minimum age of control-plane artifacts to delete.",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--apply",
     "apply_mode",
     is_flag=True,
     help="Delete selected candidates. Default is dry-run preview.",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json"]),
@@ -57,27 +57,27 @@ def bootstrap_control_plane_lifecycle_store() -> FileControlPlaneArtifactLifecyc
     show_default=True,
     help="Output format for the lifecycle plan.",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--protected-manifest-id",
     multiple=True,
     help="Manifest ID to retain regardless of age.",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--protected-run-id",
     multiple=True,
     help="Run ID to retain regardless of age.",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--protected-effective-config-artifact-id",
     multiple=True,
     help="Effective-config artifact ID to retain regardless of age.",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--protected-lineage-fragment-id",
     multiple=True,
     help="Lineage fragment ID to retain regardless of age.",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--protected-snapshot-id",
     multiple=True,
     help="Input snapshot ID to retain regardless of age.",

@@ -52,6 +52,8 @@ class _PipelineRunnerCleanupHostProtocol(Protocol):
     _logger: LoggerPort
     _executor: BatchExecutor
 
+    def _close_metrics(self) -> None: ...
+
 
 class PipelineRunnerSupportMixin:
     """Delegate thin lifecycle helpers away from the main runner module."""

@@ -119,11 +119,11 @@ class _MetricsTracingMixin:
         *,
         success: bool,
         error: str | None = None,
-        extra: Mapping[str, object] | None = None,
+        attributes: Mapping[str, object] | None = None,
     ) -> None:
         """Attach bounded result attributes to the active metrics span."""
         span.set_attribute("bioetl.success", success)
-        for key, value in (extra or {}).items():
+        for key, value in (attributes or {}).items():
             span.set_attribute(key, coerce_span_attribute_value(value))
         if error is not None:
             span.set_attribute("error", True)
@@ -229,7 +229,7 @@ class _MetricsStartMixin(_MetricsTracingMixin):
                 span,
                 success=result.success,
                 error=result.error,
-                extra={"bioetl.already_running": result.already_running},
+                attributes={"bioetl.already_running": result.already_running},
             )
             return result
 
@@ -320,7 +320,7 @@ class _MetricsStatusMixin(_MetricsTracingMixin):
             self._set_result_attributes(
                 span,
                 success=True,
-                extra={"bioetl.running": running},
+                attributes={"bioetl.running": running},
             )
             return MetricsServerStatus(
                 running=running,

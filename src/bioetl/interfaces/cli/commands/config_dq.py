@@ -36,14 +36,14 @@ def get_config_service() -> ConfigService:
     return _impl()
 
 
-@click.group()  # type: ignore[untyped-decorator]
+@click.group()
 def dq() -> None:
     """Data Quality configuration commands."""
 
 
-@dq.command("show")  # type: ignore[untyped-decorator]
-@click.argument("pipeline")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@dq.command("show")
+@click.argument("pipeline")
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["json", "yaml"]),
@@ -82,9 +82,9 @@ def show_dq_config_command(pipeline: str, output_format: str) -> None:
         echo_info(yaml.dump(dq_config, default_flow_style=False, sort_keys=False))
 
 
-@dq.command("validate")  # type: ignore[untyped-decorator]
-@click.argument("pipeline")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@dq.command("validate")
+@click.argument("pipeline")
+@click.option(
     "--config-file",
     type=click.Path(exists=True),
     help="Path to DQ config file to validate",
@@ -142,16 +142,16 @@ def validate_dq_config_command(pipeline: str, config_file: str | None) -> None:
         echo_error("DQ Configuration validation failed", str(e))
 
 
-@dq.command("show-effective")  # type: ignore[untyped-decorator]
-@click.argument("pipeline")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@dq.command("show-effective")
+@click.argument("pipeline")
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["json", "yaml"]),
     default="yaml",
     help="Output format",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--override",
     "overrides",
     multiple=True,
@@ -203,9 +203,9 @@ def show_effective_config_command(
         echo_error("Failed to create effective config artifact", str(e))
 
 
-@dq.command("check-compatibility")  # type: ignore[untyped-decorator]
-@click.argument("artifact1_file")  # type: ignore[untyped-decorator]
-@click.argument("artifact2_file")  # type: ignore[untyped-decorator]
+@dq.command("check-compatibility")
+@click.argument("artifact1_file")
+@click.argument("artifact2_file")
 def check_compatibility_command(artifact1_file: str, artifact2_file: str) -> None:
     """Check compatibility between two configuration artifacts.
 

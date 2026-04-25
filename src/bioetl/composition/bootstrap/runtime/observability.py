@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from importlib import import_module
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, cast
 from uuid import UUID
 
 from bioetl.composition.observability import ObservabilityBundle
@@ -50,6 +50,23 @@ __all__ = [
     "maybe_start_metrics_server",
     "validate_observability_preflight",
 ]
+
+
+class _ObservabilityApiModule(Protocol):
+    """Typed subset of the public observability API used by this module."""
+
+    def start_metrics_server(
+        self,
+        port: int = 8000,
+        addr: str = "0.0.0.0",
+        *,
+        fail_fast: bool = False,
+        retry_count: int = 3,
+        retry_delay: float = 1.0,
+        logger: LoggerPort | None = None,
+    ) -> bool:
+        """Start the public metrics server."""
+        ...
 
 
 def _create_runtime_audit_port(
@@ -210,7 +227,10 @@ def start_metrics_server(
     logger: LoggerPort | None = None,
 ) -> bool:
     """Compatibility patch-point delegating to the composition observability seam."""
-    observability_api = import_module("bioetl.composition.observability_api")
+    observability_api = cast(
+        _ObservabilityApiModule,
+        import_module("bioetl.composition.observability_api"),
+    )
     return observability_api.start_metrics_server(
         port=port,
         addr=addr,

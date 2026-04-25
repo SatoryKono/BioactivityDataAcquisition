@@ -40,6 +40,35 @@ from bioetl.infrastructure.storage.silver.operations.validation_operations impor
     _prepare_silver_write_payload_impl,
 )
 
+if TYPE_CHECKING:
+    from bioetl.domain.ports import TracingPort
+    from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
+    from bioetl.domain.value_objects.silver_result import SilverWriteResult
+    from bioetl.infrastructure.storage.silver.operations.arrow_operations import (
+        SilverArrowOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.delta_operations import (
+        SilverDeltaOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.maintenance_operations import (
+        SilverMaintenanceOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.merged_operations import (
+        SilverMergedOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
+        SilverMetadataOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
+        SilverPostwriteOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+        SilverValidationOperations,
+    )
+    from bioetl.infrastructure.storage.silver.postwrite_mixin import (
+        _SilverWriterPostwriteSelf,
+    )
+
 
 
 # SilverWriterArrowMixin removed from inheritance (composition pattern)
@@ -111,15 +140,15 @@ class SilverWriter(
 ):
     """Writer for Silver layer (normalized data in Delta Lake)."""
 
-    _tracing: "TracingPort | None"
-    _contract_rollout_policy: "ContractRolloutPolicy | None"
-    _maintenance: "SilverMaintenanceOperations | None"
-    _metadata: "SilverMetadataOperations | None"
-    _validation: "SilverValidationOperations | None"
-    _delta: "SilverDeltaOperations | None"
-    _arrow: "SilverArrowOperations | None"
-    _merged: "SilverMergedOperations | None"
-    _postwrite: "SilverPostwriteOperations | None"
+    _tracing: TracingPort | None
+    _contract_rollout_policy: ContractRolloutPolicy | None
+    _maintenance: SilverMaintenanceOperations | None
+    _metadata: SilverMetadataOperations | None
+    _validation: SilverValidationOperations | None
+    _delta: SilverDeltaOperations | None
+    _arrow: SilverArrowOperations | None
+    _merged: SilverMergedOperations | None
+    _postwrite: SilverPostwriteOperations | None
     _host: object | None
 
     def __setattr__(self, name: str, value: object) -> None:
@@ -210,10 +239,7 @@ class SilverWriter(
     ) -> _ValidatedSilverWriteContext:
         """Delegate arrow validation and building to the validation service."""
         if self._validation:
-            return cast(
-                _ValidatedSilverWriteContext,
-                self._validation._sync_validate_and_build_arrow(request),
-            )
+            return self._validation._sync_validate_and_build_arrow(request)
         else:
             # Fallback to mixin for backward compatibility
             from bioetl.infrastructure.storage.silver.validation_mixin import (
@@ -259,7 +285,7 @@ class SilverWriter(
     def _validate_write_mode(self, mode: str) -> SilverWriteMode:
         """Delegate write mode validation to the validation service."""
         if self._validation:
-            return cast(SilverWriteMode, self._validation._validate_write_mode(mode))
+            return self._validation._validate_write_mode(mode)
         else:
             # Fallback to mixin for backward compatibility
             from bioetl.infrastructure.storage.silver.validation_mixin import (
@@ -271,7 +297,7 @@ class SilverWriter(
     def _to_policy_write_mode(self, mode: SilverWriteMode) -> WriteMode:
         """Delegate write mode policy conversion to the validation service."""
         if self._validation:
-            return cast(WriteMode, self._validation._to_policy_write_mode(mode))
+            return self._validation._to_policy_write_mode(mode)
         else:
             # Fallback to mixin for backward compatibility
             from bioetl.infrastructure.storage.silver.validation_mixin import (
@@ -345,12 +371,9 @@ class SilverWriter(
     ) -> SilverWriteResult | None:
         """Run postwrite finalization through services or legacy mixin fallback."""
         if self._postwrite is not None:
-            return cast(
-                "SilverWriteResult | None",
-                await self._postwrite._complete_silver_write_pipeline(
-                    ctx=ctx,
-                    payload=payload,
-                ),
+            return await self._postwrite._complete_silver_write_pipeline(
+                ctx=ctx,
+                payload=payload,
             )
 
         from bioetl.infrastructure.storage.silver.postwrite_mixin import (

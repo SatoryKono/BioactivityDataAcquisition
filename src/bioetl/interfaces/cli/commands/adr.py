@@ -25,7 +25,7 @@ __all__ = [
 ]
 
 
-@click.group()  # type: ignore[untyped-decorator]
+@click.group()
 def adr() -> None:
     """ADR (Architecture Decision Records) utilities."""
 
@@ -37,8 +37,8 @@ def get_adr_service() -> AdrServicePort:
     return _impl()
 
 
-@adr.command("list")  # type: ignore[untyped-decorator]
-@click.option("--json", "as_json", is_flag=True, help="Output as JSON")  # type: ignore[untyped-decorator]
+@adr.command("list")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 def list_command(as_json: bool) -> None:
     """List all ADR documents.
 
@@ -65,9 +65,9 @@ def list_command(as_json: bool) -> None:
         echo_info(f"  - ADR-{item.number:03d}: {item.title}")
 
 
-@adr.command("show")  # type: ignore[untyped-decorator]
-@click.argument("number", type=int)  # type: ignore[untyped-decorator]
-@click.option("--raw", is_flag=True, help="Print raw markdown content")  # type: ignore[untyped-decorator]
+@adr.command("show")
+@click.argument("number", type=int)
+@click.option("--raw", is_flag=True, help="Print raw markdown content")
 def show_command(number: int, raw: bool) -> None:
     """Show a specific ADR by number.
 
@@ -96,8 +96,8 @@ def show_command(number: int, raw: bool) -> None:
     echo_info(head)
 
 
-@adr.command("validate")  # type: ignore[untyped-decorator]
-@click.option("--json", "as_json", is_flag=True, help="Output as JSON")  # type: ignore[untyped-decorator]
+@adr.command("validate")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 def validate_command(as_json: bool) -> None:
     """Validate ADR repository and print a summary.
 
