@@ -55,6 +55,51 @@ if TYPE_CHECKING:
     )
 
 
+def _record_pipeline_run_metric(
+    metrics: MetricsPort,
+    *,
+    pipeline_name: str,
+    run_type: str,
+    status: str,
+) -> None:
+    """Record pipeline run outcome via the metrics port abstraction."""
+    metrics.increment_counter(
+        "bioetl_pipeline_runs_total",
+        1,
+        {
+            "pipeline": pipeline_name,
+            "run_type": run_type,
+            "status": status,
+        },
+    )
+
+
+def _record_pipeline_audit_event(
+    audit: AuditPort,
+    *,
+    event_name: str,
+    pipeline_name: str,
+    run_id: RunID,
+    run_type: str,
+    status: str,
+    timestamp: datetime,
+    manifest_id: str | None = None,
+    error_type: str | None = None,
+) -> None:
+    """Record pipeline lifecycle outcome via the audit port abstraction."""
+    event_data = {
+        "pipeline": pipeline_name,
+        "run_id": str(run_id),
+        "run_type": run_type,
+        "status": status,
+    }
+    if manifest_id is not None:
+        event_data["manifest_id"] = manifest_id
+    if error_type is not None:
+        event_data["error_type"] = error_type
+    audit.log_event(event_name, event_data, timestamp=timestamp)
+
+
 @dataclass
 class PipelineRunnerService:
     """Interface-agnostic application service for pipeline execution."""
@@ -107,7 +152,8 @@ class PipelineRunnerService:
             context=context,
             options=effective_options,
         )
-        self._record_pipeline_audit_event(
+        _record_pipeline_audit_event(
+            self.audit,
             event_name="PipelineRunStarted",
             pipeline_name=pipeline_name,
             run_id=effective_run_id,
@@ -123,7 +169,8 @@ class PipelineRunnerService:
             run_logger=run_logger,
         )
         if dry_run_result is not None:
-            self._record_pipeline_audit_event(
+            _record_pipeline_audit_event(
+                self.audit,
                 event_name="PipelineRunCompleted",
                 pipeline_name=pipeline_name,
                 run_id=effective_run_id,
@@ -257,12 +304,14 @@ class PipelineRunnerService:
             run_type=run_type,
             started_at=started_at,
         )
-        self._record_pipeline_run_metric(
+        _record_pipeline_run_metric(
+            self.metrics,
             pipeline_name=pipeline_name,
             run_type=run_type,
             status=result.status.value,
         )
-        self._record_pipeline_audit_event(
+        _record_pipeline_audit_event(
+            self.audit,
             event_name="PipelineRunCompleted",
             pipeline_name=pipeline_name,
             run_id=run_id,
@@ -273,49 +322,6 @@ class PipelineRunnerService:
             error_type=result.error_type,
         )
         return result
-
-    def _record_pipeline_run_metric(
-        self,
-        *,
-        pipeline_name: str,
-        run_type: str,
-        status: str,
-    ) -> None:
-        """Record pipeline run outcome via the metrics port abstraction."""
-        self.metrics.increment_counter(
-            "bioetl_pipeline_runs_total",
-            1,
-            {
-                "pipeline": pipeline_name,
-                "run_type": run_type,
-                "status": status,
-            },
-        )
-
-    def _record_pipeline_audit_event(
-        self,
-        *,
-        event_name: str,
-        pipeline_name: str,
-        run_id: RunID,
-        run_type: str,
-        status: str,
-        timestamp: datetime,
-        manifest_id: str | None = None,
-        error_type: str | None = None,
-    ) -> None:
-        """Record pipeline lifecycle outcome via the audit port abstraction."""
-        event_data = {
-            "pipeline": pipeline_name,
-            "run_id": str(run_id),
-            "run_type": run_type,
-            "status": status,
-        }
-        if manifest_id is not None:
-            event_data["manifest_id"] = manifest_id
-        if error_type is not None:
-            event_data["error_type"] = error_type
-        self.audit.log_event(event_name, event_data, timestamp=timestamp)
 
     def _build_run_result(
         self,

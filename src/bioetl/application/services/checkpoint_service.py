@@ -100,7 +100,7 @@ class CheckpointService:
         """Attach bounded result attributes to a checkpoint admin span."""
         span.set_attribute("bioetl.success", success)
         for key, value in (extra or {}).items():
-            span.set_attribute(key, _coerce_span_attribute_value(value))
+            span.set_attribute(key, coerce_span_attribute_value(value))
 
     def _record_operator_metrics(
         self,

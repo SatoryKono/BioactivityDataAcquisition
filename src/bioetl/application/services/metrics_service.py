@@ -124,7 +124,7 @@ class _MetricsTracingMixin:
         """Attach bounded result attributes to the active metrics span."""
         span.set_attribute("bioetl.success", success)
         for key, value in (extra or {}).items():
-            span.set_attribute(key, _coerce_span_attribute_value(value))
+            span.set_attribute(key, coerce_span_attribute_value(value))
         if error is not None:
             span.set_attribute("error", True)
             span.set_attribute("bioetl.error", error)

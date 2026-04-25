@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 from datetime import datetime
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP

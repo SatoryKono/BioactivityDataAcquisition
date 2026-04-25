@@ -27,7 +27,7 @@ def _patch_typing_inspect_get_origin(
             return typing.get_origin(tp)
         return origin
 
-    setattr(typing_inspect_module, "get_origin", _get_origin_with_union_fix)
+    typing_inspect_module.get_origin = _get_origin_with_union_fix
 
 
 def _find_fn_by_subclass_or_union(
@@ -81,6 +81,7 @@ def _patch_dispatcher_call(
 ) -> None:
     """Patch Pandera dispatcher lookup to support subclass and union fallback."""
     original_dispatcher_call = dispatcher_cls.__call__
+    dispatcher_cls_any = typing.cast(typing.Any, dispatcher_cls)
 
     def _resolve_registered_dispatch_fn(
         registry: dict[
@@ -111,7 +112,7 @@ def _patch_dispatcher_call(
             return original_dispatcher_call(self, *args, **kwargs)
         return fn(*args, **kwargs)
 
-    setattr(dispatcher_cls, "__call__", _dispatcher_call_with_any_fallback)
+    setattr(dispatcher_cls_any, "__call__", _dispatcher_call_with_any_fallback)
 
 
 def apply_pandera_typing_compat_if_needed() -> bool:

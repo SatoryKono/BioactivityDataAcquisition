@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from importlib import import_module
+from typing import TYPE_CHECKING
 
 __all__ = [
     "ArchiveOptions",
@@ -32,16 +33,33 @@ _PUBLIC_EXPORTS = {
     "vacuum_table": _RESOURCE_MANAGEMENT_MODULE,
 }
 
-ArchiveOptions: object
-VacuumOptions: object
-archive_table: object
-get_checkpoint_manager: object
-get_lifecycle_service: object
-get_quarantine_manager: object
-inspect_quarantine: object
-list_checkpoints: object
-preview_cleanup: object
-vacuum_table: object
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
+
+    from bioetl.application.core.lifecycle.checkpoint_manager import (
+        CheckpointManagerService,
+    )
+    from bioetl.application.services.medallion_lifecycle import (
+        MedallionLifecycleService,
+    )
+    from bioetl.composition._pipeline_execution import ArchiveOptions as _ArchiveOptions
+    from bioetl.composition._pipeline_execution import VacuumOptions as _VacuumOptions
+    from bioetl.composition._resource_management import CleanupPreviewProtocol
+    from bioetl.composition._resource_management import (
+        QuarantineManagerProtocol,
+    )
+    from bioetl.domain.types import JsonDict
+
+ArchiveOptions: "type[_ArchiveOptions]"
+VacuumOptions: "type[_VacuumOptions]"
+archive_table: "Callable[[str, _ArchiveOptions], Awaitable[int]]"
+get_checkpoint_manager: "Callable[[str], CheckpointManagerService]"
+get_lifecycle_service: "Callable[[], MedallionLifecycleService]"
+get_quarantine_manager: "Callable[[str], QuarantineManagerProtocol]"
+inspect_quarantine: "Callable[[str, int], Awaitable[list[JsonDict]]]"
+list_checkpoints: "Callable[[str], Awaitable[list[object]]]"
+preview_cleanup: "Callable[[str], Awaitable[CleanupPreviewProtocol]]"
+vacuum_table: "Callable[[str, _VacuumOptions], Awaitable[int]]"
 
 
 def __getattr__(name: str) -> object:

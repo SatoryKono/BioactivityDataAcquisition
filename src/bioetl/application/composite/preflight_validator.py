@@ -219,11 +219,11 @@ class CompositePreflightValidationService(
 
 
 class CompositePreflightValidator(CompositePreflightValidationService):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, logger: LoggerPort) -> None:
         warnings.warn(
             "CompositePreflightValidator is deprecated and will be removed in v2.0. "
             "Use CompositePreflightValidationService instead.",
             DeprecationWarning,
             stacklevel=2,
         )
-        super().__init__(*args, **kwargs)
+        super().__init__(logger)

@@ -21,6 +21,32 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
+class _SilverMaintenancePostwriteOps(Protocol):
+    async def maybe_export_csv(
+        self,
+        *,
+        table_name: str,
+        arrow_data: pa.Table,
+        export_path: str,
+        primary_keys: list[str],
+    ) -> None: ...
+
+
+class _SilverMetadataPostwriteOps(Protocol):
+    async def log_silver_audit(
+        self,
+        table_name: str,
+        records: list[BronzeRecord],
+        mode: str,
+        validated_mode: SilverWriteMode,
+        run_id: RunID | None = None,
+        run_type: RunType | None = None,
+        source_batch_id: BatchID | None = None,
+        ingestion_ts: datetime | None = None,
+        error: str | None = None,
+    ) -> None: ...
+
+
 class _SilverWritePostwriteContext(Protocol):
     """Structural type for the write execution context used after Delta write."""
 
@@ -68,8 +94,8 @@ class _SilverPostwriteHostProtocol(Protocol):
     """Structural type for postwrite service dependencies."""
 
     base_path: str | Path
-    _maintenance: object | None
-    _metadata: object | None
+    _maintenance: _SilverMaintenancePostwriteOps | None
+    _metadata: _SilverMetadataPostwriteOps | None
 
     async def _maybe_export_csv(
         self,
@@ -226,24 +252,19 @@ class SilverPostwriteOperations:
         payload: _PreparedSilverWritePayload,
     ) -> SilverWriteResult | None:
         """Finalize the postwrite flow after export/audit orchestration."""
-        finalize_kwargs = {
-            "table_name": ctx.table_name,
-            "records": payload.records,
-            "table_path": payload.table_path,
-            "primary_keys": ctx.primary_keys,
-            "validated_mode": payload.validated_mode,
-            "bronze_refs": ctx.bronze_refs,
-            "partition_cols": ctx.partition_cols,
-            "source_batch_id": ctx.source_batch_id,
-            "started_at": ctx.started_at,
-            "start_perf": ctx.start_perf,
-        }
-        if hasattr(ctx, "quarantined_count"):
-            finalize_kwargs["quarantined_count"] = ctx.quarantined_count
-        if hasattr(ctx, "validation_errors"):
-            finalize_kwargs["validation_errors"] = ctx.validation_errors
         return await self._host._finalize_silver_write_result(
-            **finalize_kwargs,
+            table_name=ctx.table_name,
+            records=payload.records,
+            table_path=payload.table_path,
+            primary_keys=ctx.primary_keys,
+            validated_mode=payload.validated_mode,
+            bronze_refs=ctx.bronze_refs,
+            partition_cols=ctx.partition_cols,
+            source_batch_id=ctx.source_batch_id,
+            quarantined_count=ctx.quarantined_count,
+            validation_errors=ctx.validation_errors,
+            started_at=ctx.started_at,
+            start_perf=ctx.start_perf,
         )
 
     async def _complete_silver_write_pipeline(

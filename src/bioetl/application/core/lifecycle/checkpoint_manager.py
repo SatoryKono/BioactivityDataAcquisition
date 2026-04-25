@@ -111,9 +111,11 @@ class CheckpointManagerService:
         )
         if effective_current_metadata is None or self._compatibility_service is None:
             return checkpoint_metadata, False
-        compatibility_result = self._compatibility_service.validate_checkpoint_compatibility(
-            effective_current_metadata,
-            checkpoint_metadata,
+        compatibility_result = (
+            self._compatibility_service.validate_checkpoint_compatibility(
+                effective_current_metadata,
+                checkpoint_metadata,
+            )
         )
         if compatibility_result.compatible:
             self._logger.info(

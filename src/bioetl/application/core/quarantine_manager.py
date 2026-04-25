@@ -108,7 +108,15 @@ class QuarantineManagerService(QuarantineManagerSupportMixin):
             run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
-        await self._quarantine.write(**request)
+        await self._quarantine.write(
+            pipeline=request["pipeline"],
+            error_code=request["error_code"],
+            payload=request["payload"],
+            bronze_batch_id=request["bronze_batch_id"],
+            run_id=request.get("run_id"),
+            metadata=request.get("metadata"),
+            ingestion_ts=request["ingestion_ts"],
+        )
         emit_quarantine_events(
             emitter=self._domain_event_emitter,
             pipeline_name=self._pipeline_name,

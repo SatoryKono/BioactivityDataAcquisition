@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import click
 
@@ -26,7 +26,7 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 if TYPE_CHECKING:
     from bioetl.application.services.health_service import HealthService
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.composition.health_api import HealthServerDependencies
+    from bioetl.composition.bootstrap.cli.health import HealthServerDependencies
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.config import Settings
 
@@ -74,21 +74,18 @@ def _start_metrics_server_via_interface(
     fail_fast: bool,
     retry_count: int,
     retry_delay: float,
-    logger: LoggerPort,
+    logger: LoggerPort | None,
 ) -> bool:
     """Start the metrics server through the canonical observability facade."""
     from bioetl.interfaces.observability import start_metrics_server as _impl
 
-    return cast(
-        bool,
-        _impl(
-            port=port,
-            addr=addr,
-            fail_fast=fail_fast,
-            retry_count=retry_count,
-            retry_delay=retry_delay,
-            logger=logger,
-        ),
+    return _impl(
+        port=port,
+        addr=addr,
+        fail_fast=fail_fast,
+        retry_count=retry_count,
+        retry_delay=retry_delay,
+        logger=logger,
     )
 
 
@@ -330,19 +327,19 @@ def _render_health_results(
     sys.exit(ExitCode.FAIL)
 
 
-@click.group()  # type: ignore[untyped-decorator]
+@click.group()
 def health() -> None:
     """Health check and monitoring operations."""
 
 
-@health.command("server")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@health.command("server")
+@click.option(
     "--host",
     default="127.0.0.1",
     help="Host to bind to. Use 0.0.0.0 to expose externally.",
     show_default=True,
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--port",
     "-p",
     default=8081,
@@ -376,14 +373,14 @@ def health_server_command(host: str, port: int) -> None:
     _execute_health_server(host, port)
 
 
-@health.command("check")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@health.command("check")
+@click.option(
     "--provider",
     "-p",
     multiple=True,
     help="Provider(s) to check. If not specified, checks all configured providers.",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--json",
     "output_json",
     is_flag=True,

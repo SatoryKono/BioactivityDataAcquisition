@@ -27,6 +27,19 @@ class ModelDumpable(Protocol):
     def model_dump(self) -> dict[str, object]: ...
 
 
+class DQReportServiceFactory(Protocol):
+    def __call__(
+        self,
+        *,
+        logger: LoggerPort,
+        bronze_analyzer: object,
+        silver_analyzer: object,
+        gold_analyzer: object,
+        report_writer: object,
+        metrics: MetricsPort | None,
+    ) -> object: ...
+
+
 def extract_single_dq_config_impl(
     sink: Mapping[str, object],
     layer_name: str,
@@ -165,7 +178,7 @@ def create_dq_services_impl(
     create_silver_analyzer_fn: Callable[[], object],
     create_gold_analyzer_fn: Callable[[], object],
     create_report_writer_fn: Callable[..., object],
-    dq_report_service_cls: type[object],
+    dq_report_service_cls: DQReportServiceFactory,
     is_dq_report_enabled_fn: Callable[[PipelineYamlConfig], bool],
     get_output_root_fn: Callable[[Settings, PipelineYamlConfig], Path],
     get_flat_structure_fn: Callable[[PipelineYamlConfig], bool],

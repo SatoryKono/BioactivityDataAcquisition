@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 
-if TYPE_CHECKING:
-    from bioetl.domain.config import DQConfig, PipelineConfig
-    from bioetl.domain.ports import ContractPolicyPort
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.domain.config import DQConfig, PipelineConfig
+from bioetl.domain.ports import ContractPolicyPort
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 class EntityTypeExtractor(Protocol):

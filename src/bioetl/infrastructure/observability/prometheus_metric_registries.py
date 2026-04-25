@@ -8,7 +8,7 @@ from typing import TypeAlias
 
 from prometheus_client.metrics import Counter, Gauge, Histogram
 
-from bioetl.infrastructure.observability import metrics as _metrics
+from bioetl.infrastructure.observability import metrics_definitions as _metrics
 
 PrometheusCounter: TypeAlias = Counter
 PrometheusGauge: TypeAlias = Gauge

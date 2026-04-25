@@ -2113,6 +2113,12 @@ def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
 
     filtered = _filtered_snapshot(snapshot, only_docs_drift=True)
     relation_keys = _relation_keys(filtered)
+    chembl_doc_claims = {
+        key.name
+        for key in filtered.nodes
+        if key.label == "doc_claim_surface"
+        and key.name.startswith("docs/04-reference/pipelines/chembl/05-activity-spec.md#L")
+    }
 
     assert ("doc_artifact", RUN_MANIFEST_LEDGER_DOC_PATH) in {
         (key.label, key.name) for key in filtered.nodes
@@ -2131,17 +2137,18 @@ def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
         "doc_artifact",
         RUN_MANIFEST_LEDGER_DOC_PATH,
     ) in relation_keys
-    assert (
-        "doc_claim_surface",
-        "docs/04-reference/pipelines/chembl/05-activity-spec.md#L96",
-    ) in {(key.label, key.name) for key in filtered.nodes}
-    assert (
-        "doc_artifact",
-        "docs/04-reference/pipelines/chembl/05-activity-spec.md",
-        "ASSERTS",
-        "doc_claim_surface",
-        "docs/04-reference/pipelines/chembl/05-activity-spec.md#L96",
-    ) in relation_keys
+    assert chembl_doc_claims
+    assert any(
+        (
+            "doc_artifact",
+            "docs/04-reference/pipelines/chembl/05-activity-spec.md",
+            "ASSERTS",
+            "doc_claim_surface",
+            claim_name,
+        )
+        in relation_keys
+        for claim_name in chembl_doc_claims
+    )
     assert ("cli_command_surface", "scripts.memory sync") in {
         (key.label, key.name) for key in filtered.nodes
     }

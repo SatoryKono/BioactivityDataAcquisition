@@ -41,6 +41,30 @@ _RUN_CONTEXT_ALL_FIELDS = (
 )
 
 
+def _coerce_transform_steps(value: object) -> tuple[str, ...]:
+    """Normalize ``transform_steps`` overrides into the canonical tuple form."""
+    transform_steps = _coerce_transform_step_sequence(value)
+    _validate_transform_step_items(transform_steps)
+    return transform_steps
+
+
+def _coerce_transform_step_sequence(value: object) -> tuple[object, ...]:
+    """Convert supported transform-step inputs into a tuple for validation."""
+    if value is None:
+        return ()
+    if isinstance(value, tuple):
+        return value
+    if isinstance(value, list):
+        return tuple(value)
+    raise TypeError("RunContext.create() transform_steps must be a sequence of strings")
+
+
+def _validate_transform_step_items(transform_steps: tuple[object, ...]) -> None:
+    """Reject non-string transform-step values before model construction."""
+    if any(not isinstance(item, str) for item in transform_steps):
+        raise TypeError("RunContext.create() transform_steps must be a sequence of strings")
+
+
 def _resolve_create_input_value(
     *,
     field_name: str,
@@ -84,7 +108,7 @@ def _collect_create_input_values(
         )
         for field_name in _RUN_CONTEXT_ALL_FIELDS
     }
-    values["transform_steps"] = tuple(values["transform_steps"] or ())
+    values["transform_steps"] = _coerce_transform_steps(values["transform_steps"])
     return values
 
 

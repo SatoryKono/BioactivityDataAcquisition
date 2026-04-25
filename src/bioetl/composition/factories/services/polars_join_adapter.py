@@ -8,8 +8,7 @@ from bioetl.application.composite.join_execution import JoinExecutorService
 
 if TYPE_CHECKING:
     import polars as pl
-
-    from bioetl.application.composite.join_execution import JoinHow
+    from polars._typing import JoinStrategy as JoinHow
 
 
 class PolarsJoinAdapter:

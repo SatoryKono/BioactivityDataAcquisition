@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal, Protocol
 
@@ -115,28 +115,38 @@ class _SilverWriterValidationHostProtocol(Protocol):
     _write_policy: WriteModePolicy
     _metrics: MetricsPort | None
     _silver_validator: SilverValidatorPort
-    _get_table_schema: Callable[[str], Awaitable[pa.Schema | None]]
-    _resolve_table_path: Callable[[str], str]
-    _prepare_arrow_data: Callable[..., pa.Table]
-    _validate_write_mode: Callable[[str], SilverWriteMode]
-    _deduplicate_by_primary_keys: Callable[
-        [
-            list[BronzeRecord],
-            list[str],
-        ],
-        list[BronzeRecord],
-    ]
-    _to_policy_write_mode: Callable[[SilverWriteMode], WriteMode]
-    _validate_key_nullability: Callable[
-        [
-            list[BronzeRecord],
-            list[str],
-            list[str] | None,
-            list[KeyNullabilityRule] | None,
-            str,
-        ],
-        None,
-    ]
+
+    def _get_table_schema(self, table_name: str) -> Awaitable[pa.Schema | None]: ...
+
+    def _resolve_table_path(self, table_name: str) -> str: ...
+
+    def _prepare_arrow_data(
+        self,
+        records: list[BronzeRecord],
+        schema: pa.Schema,
+        primary_keys: list[str],
+        *,
+        column_order: list[str] | None,
+    ) -> pa.Table: ...
+
+    def _validate_write_mode(self, mode: str) -> SilverWriteMode: ...
+
+    def _deduplicate_by_primary_keys(
+        self,
+        records: list[BronzeRecord],
+        primary_keys: list[str],
+    ) -> list[BronzeRecord]: ...
+
+    def _to_policy_write_mode(self, mode: SilverWriteMode) -> WriteMode: ...
+
+    def _validate_key_nullability(
+        self,
+        records: list[BronzeRecord],
+        primary_keys: list[str],
+        partition_cols: list[str] | None,
+        key_nullability_rules: list[KeyNullabilityRule] | None,
+        table_name: str,
+    ) -> None: ...
 
     async def _check_schema_drift(
         self,

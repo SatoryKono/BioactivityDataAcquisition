@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
+from collections.abc import Sequence
 from typing import TypeAlias
 
 SpanAttributeValue: TypeAlias = (
@@ -23,14 +23,39 @@ def _sequence_items(value: object) -> list[object] | None:
     return list(value)
 
 
-def _matching_sequence(
-    items: list[object],
-    predicate: Callable[[object], bool],
-) -> SpanAttributeValue | None:
+def _string_sequence(items: list[object]) -> Sequence[str] | None:
     if not items:
-        return []
-    if all(predicate(item) for item in items):
-        return items
+        return ()
+    if all(isinstance(item, str) for item in items):
+        return [item for item in items if isinstance(item, str)]
+    return None
+
+
+def _bool_sequence(items: list[object]) -> Sequence[bool] | None:
+    if not items:
+        return ()
+    if all(isinstance(item, bool) for item in items):
+        return [item for item in items if isinstance(item, bool)]
+    return None
+
+
+def _int_sequence(items: list[object]) -> Sequence[int] | None:
+    if not items:
+        return ()
+    if all(isinstance(item, int) and not isinstance(item, bool) for item in items):
+        return [
+            item
+            for item in items
+            if isinstance(item, int) and not isinstance(item, bool)
+        ]
+    return None
+
+
+def _float_sequence(items: list[object]) -> Sequence[float] | None:
+    if not items:
+        return ()
+    if all(isinstance(item, float) for item in items):
+        return [item for item in items if isinstance(item, float)]
     return None
 
 
@@ -43,13 +68,13 @@ def coerce_span_attribute_value(value: object) -> SpanAttributeValue:
     if items is None:
         return str(value)
 
-    for predicate in (
-        lambda item: isinstance(item, str),
-        lambda item: isinstance(item, bool),
-        lambda item: isinstance(item, int) and not isinstance(item, bool),
-        lambda item: isinstance(item, float),
+    for matcher in (
+        _string_sequence,
+        _bool_sequence,
+        _int_sequence,
+        _float_sequence,
     ):
-        matched = _matching_sequence(items, predicate)
+        matched = matcher(items)
         if matched is not None:
             return matched
 
