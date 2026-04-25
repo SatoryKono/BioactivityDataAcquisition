@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
     from bioetl.domain.ports import LoggerPort, QuarantinePort, TracingPort
+    from bioetl.domain.types import JsonDict, QuarantineRecordStatus
 
 __all__ = ["_QuarantineSyncHost", "_run_traced_sync_operation"]
 
@@ -58,6 +59,44 @@ class _QuarantineSyncHost(Protocol):
         success: bool,
         **extra: object,
     ) -> None: ...
+
+    def _mark_as_reprocessed_impl(
+        self,
+        *,
+        records: list[JsonDict],
+        started_at: datetime,
+        started_monotonic: float,
+    ) -> int: ...
+
+    def _update_status_impl(
+        self,
+        *,
+        payload_hash: str,
+        new_status: QuarantineRecordStatus,
+        started_at: datetime,
+        started_monotonic: float,
+    ) -> bool: ...
+
+    def _replay_impl(
+        self,
+        *,
+        pipeline: str,
+        error_code: str | None,
+        max_age_days: int,
+        now: datetime,
+        started_at: datetime,
+        started_monotonic: float,
+    ) -> list[JsonDict]: ...
+
+    def _purge_impl(
+        self,
+        *,
+        pipeline: str,
+        older_than_days: int,
+        now: datetime,
+        started_at: datetime,
+        started_monotonic: float,
+    ) -> int: ...
 
 
 def _run_traced_sync_operation(

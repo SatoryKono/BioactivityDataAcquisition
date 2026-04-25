@@ -65,7 +65,7 @@ class HealthServerRoutingMixin:
 
     def _response_timestamp(self) -> str:
         """Return the sanctioned timestamp source for health responses."""
-        clock = getattr(self, "_clock", None)
+        clock = cast("ClockPort | None", getattr(self, "_clock", None))
         if clock is not None:
             return clock.now().isoformat()
         return current_utc_time().isoformat()

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from datetime import datetime
-from typing import Any, Protocol, cast
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from pandera.polars import DataFrameSchema
 
@@ -20,6 +20,9 @@ from bioetl.infrastructure.storage.gold.pipeline_helpers import (
 from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     GoldWriteRequest as _GoldWriteRequest,
 )
+from bioetl.infrastructure.storage.gold.pipeline_helpers import (
+    PreparedGoldWriteContext as _PreparedGoldWriteContext,
+)
 from bioetl.infrastructure.storage.gold.runtime_helpers import (
     GoldWriterRuntimeServices,
     build_gold_writer_runtime_services,
@@ -29,6 +32,18 @@ from bioetl.infrastructure.storage.writer_common import (
     iterate_write_targets,
     validate_write_versions,
 )
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import (
+        AuditPort,
+        LineageStorePort,
+        MetadataCoordinatorPort,
+        MetadataWriterPort,
+        MetricsPort,
+        TracingPort,
+    )
+    from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
+    from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 __all__ = [
     "_build_gold_write_request",
@@ -62,7 +77,9 @@ class _GoldWriterHost(Protocol):
         Any  # Any: rollout policy is runtime-wired and only duck-typed at this seam.
     )
 
-    async def _prepare_write_gold(self, **kwargs: object) -> None: ...
+    async def _prepare_write_gold(
+        self, **kwargs: object
+    ) -> _PreparedGoldWriteContext: ...
 
     async def _dispatch_write(self, context: _GoldWriteDispatchContext) -> None: ...
 
@@ -117,17 +134,41 @@ def _resolve_active_gold_schema(schema: object) -> object:
 def _resolve_runtime_services(
     *,
     runtime_services: GoldWriterRuntimeServices | None,
-    legacy_kwargs: dict[str, object],
+    legacy_kwargs: dict[str, Any],
 ) -> GoldWriterRuntimeServices:
     """Normalize legacy constructor kwargs into grouped Gold runtime services."""
-    csv_exporter = legacy_kwargs.pop("csv_exporter", None)
-    tracing = legacy_kwargs.pop("tracing", None)
-    metrics = legacy_kwargs.pop("metrics", None)
-    audit = legacy_kwargs.pop("audit", None)
-    metadata_writer = legacy_kwargs.pop("metadata_writer", None)
-    metadata_coordinator = legacy_kwargs.pop("metadata_coordinator", None)
-    lineage_store = legacy_kwargs.pop("lineage_store", None)
-    contract_rollout_policy = legacy_kwargs.pop("contract_rollout_policy", None)
+    csv_exporter = cast(
+        "CsvExporter | None",
+        legacy_kwargs.pop("csv_exporter", None),
+    )
+    tracing = cast(
+        "TracingPort | None",
+        legacy_kwargs.pop("tracing", None),
+    )
+    metrics = cast(
+        "MetricsPort | None",
+        legacy_kwargs.pop("metrics", None),
+    )
+    audit = cast(
+        "AuditPort | None",
+        legacy_kwargs.pop("audit", None),
+    )
+    metadata_writer = cast(
+        "MetadataWriterPort | None",
+        legacy_kwargs.pop("metadata_writer", None),
+    )
+    metadata_coordinator = cast(
+        "MetadataCoordinatorPort | None",
+        legacy_kwargs.pop("metadata_coordinator", None),
+    )
+    lineage_store = cast(
+        "LineageStorePort | None",
+        legacy_kwargs.pop("lineage_store", None),
+    )
+    contract_rollout_policy = cast(
+        "ContractRolloutPolicy | None",
+        legacy_kwargs.pop("contract_rollout_policy", None),
+    )
     if legacy_kwargs:
         unexpected = ", ".join(sorted(legacy_kwargs))
         raise TypeError(f"Unexpected GoldWriter options: {unexpected}")
@@ -140,10 +181,7 @@ def _resolve_runtime_services(
         metadata_writer=metadata_writer,
         metadata_coordinator=metadata_coordinator,
         lineage_store=lineage_store,
-        contract_rollout_policy=cast(
-            Any,  # Any: builder accepts runtime-wired rollout policy implementations.
-            contract_rollout_policy,
-        ),
+        contract_rollout_policy=contract_rollout_policy,
     )
 
 

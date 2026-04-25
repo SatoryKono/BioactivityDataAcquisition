@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.composition._service_bootstraps import (
     bootstrap_adr_service,
@@ -21,6 +20,46 @@ from bioetl.composition._service_bootstraps import (
     bootstrap_vacuum_service,
     resolve_bootstrap_attr,
 )
+
+if TYPE_CHECKING:
+    from bioetl.application.services.audit_inspection_service import (
+        AuditInspectionService,
+    )
+    from bioetl.application.services.bronze_cleanup_service import (
+        BronzeCleanupService,
+        BronzeCleanupResult,
+    )
+    from bioetl.application.services.checkpoint_service import CheckpointService
+    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+        RunManifestInspectionService,
+    )
+    from bioetl.application.services.execution.pipeline_runner_service import (
+        PipelineRunnerService,
+    )
+    from bioetl.application.services.export_service import ExportService
+    from bioetl.application.services.health_service import HealthService
+    from bioetl.application.services.lineage.lineage_inspection_service import (
+        LineageInspectionService,
+    )
+    from bioetl.application.services.lock_service import LockService
+    from bioetl.application.services.metrics_service import MetricsService
+    from bioetl.application.services.observability_workflow_service import (
+        ObservabilityWorkflowService,
+    )
+    from bioetl.application.services.quarantine_service import QuarantineService
+    from bioetl.application.services.vacuum_service import VacuumService
+    from bioetl.composition.bootstrap.cli.health import HealthServerDependencies
+    from bioetl.composition import PipelineRegistry
+    from bioetl.domain.ports import QuarantinePort
+    from bioetl.domain.workflow import WorkflowConfig
+
+
+class _BronzeCleanupServiceProtocol(Protocol):
+    async def cleanup(
+        self,
+        retention_days: int = 90,
+        dry_run: bool = False,
+    ) -> BronzeCleanupResult: ...
 
 
 __all__ = [
@@ -47,7 +86,7 @@ __all__ = [
 ]
 
 
-def _ensure_registrations(registry: object | None = None) -> None:
+def _ensure_registrations(registry: PipelineRegistry | None = None) -> None:
     """Ensure providers and pipelines are registered lazily to avoid cycles."""
     from bioetl.composition._pipeline_execution import (
         _ensure_registrations as ensure_registrations_impl,
@@ -56,29 +95,29 @@ def _ensure_registrations(registry: object | None = None) -> None:
     ensure_registrations_impl(registry=registry)
 
 
-def get_checkpoint_service() -> object:
+def get_checkpoint_service() -> CheckpointService:
     """Get checkpoint administration service."""
     _ensure_registrations()
-    return bootstrap_checkpoint_service()
+    return cast(CheckpointService, bootstrap_checkpoint_service())
 
 
-def get_audit_service() -> object:
+def get_audit_service() -> AuditInspectionService:
     """Get an audit inspection service for operator diagnostics operations."""
     _ensure_registrations()
-    bootstrap = cast(Callable[[], object], resolve_bootstrap_attr("bootstrap_audit_inspection_service"))
+    bootstrap = resolve_bootstrap_attr("bootstrap_audit_inspection_service")
     return bootstrap()
 
 
-def get_quarantine_service() -> object:
+def get_quarantine_service() -> QuarantineService:
     """Get quarantine administration service."""
     _ensure_registrations()
-    return bootstrap_quarantine_service()
+    return cast(QuarantineService, bootstrap_quarantine_service())
 
 
-def get_bronze_cleanup_service() -> object:
+def get_bronze_cleanup_service() -> BronzeCleanupService:
     """Get Bronze cleanup service."""
     _ensure_registrations()
-    return bootstrap_bronze_cleanup_service()
+    return cast(BronzeCleanupService, bootstrap_bronze_cleanup_service())
 
 
 def get_vacuum_service() -> VacuumService:
@@ -104,7 +143,7 @@ async def cleanup_bronze(
     dry_run: bool = False,
 ) -> BronzeCleanupResult:
     """Clean up Bronze files based on retention policy."""
-    service = get_bronze_cleanup_service()
+    service = cast(_BronzeCleanupServiceProtocol, get_bronze_cleanup_service())
     result = await service.cleanup(
         retention_days=retention_days,
         dry_run=dry_run,
@@ -113,11 +152,14 @@ async def cleanup_bronze(
 
 
 def get_pipeline_runner_service(
-    registry: object | None = None,
-) -> object:
+    registry: PipelineRegistry | None = None,
+) -> PipelineRunnerService:
     """Get universal pipeline runner service."""
     _ensure_registrations(registry=registry)
-    return bootstrap_pipeline_runner_service(registry=registry)
+    return cast(
+        PipelineRunnerService,
+        bootstrap_pipeline_runner_service(registry=registry),
+    )
 
 
 def get_config_service() -> object:
@@ -126,7 +168,7 @@ def get_config_service() -> object:
     return bootstrap_config_service()
 
 
-def load_workflow_config(name: str) -> object:
+def load_workflow_config(name: str) -> WorkflowConfig:
     """Load workflow YAML through the canonical composition service seam."""
     from bioetl.infrastructure.config.workflow_config_api import (
         load_workflow_config as load_workflow_config_impl,
@@ -142,46 +184,46 @@ def get_contract_migration_service() -> object:
     return bootstrap()
 
 
-def get_run_manifest_service() -> object:
+def get_run_manifest_service() -> RunManifestInspectionService:
     """Get a run-manifest inspection service for control-plane operations."""
     _ensure_registrations()
-    bootstrap = cast(Callable[[], object], resolve_bootstrap_attr("bootstrap_run_manifest_service"))
+    bootstrap = resolve_bootstrap_attr("bootstrap_run_manifest_service")
     return bootstrap()
 
 
-def get_lineage_service() -> object:
+def get_lineage_service() -> LineageInspectionService:
     """Get a lineage inspection service for traceability operations."""
     _ensure_registrations()
-    bootstrap = cast(Callable[[], object], resolve_bootstrap_attr("bootstrap_lineage_service"))
+    bootstrap = resolve_bootstrap_attr("bootstrap_lineage_service")
     return bootstrap()
 
 
-def get_health_service() -> object:
+def get_health_service() -> HealthService:
     """Get provider health service."""
     _ensure_registrations()
-    return bootstrap_health_service()
+    return cast(HealthService, bootstrap_health_service())
 
 
-def get_observability_workflow_service() -> object:
+def get_observability_workflow_service() -> ObservabilityWorkflowService:
     """Get workflow-level observability diagnostics helpers."""
     _ensure_registrations()
-    bootstrap = cast(
-        Callable[[], object],
-        resolve_bootstrap_attr("bootstrap_observability_workflow_service"),
-    )
+    bootstrap = resolve_bootstrap_attr("bootstrap_observability_workflow_service")
     return bootstrap()
 
 
-def get_health_server_dependencies() -> object:
+def get_health_server_dependencies() -> HealthServerDependencies:
     """Get dependencies for the health server."""
     _ensure_registrations()
-    return bootstrap_health_server_dependencies()
+    return cast(
+        HealthServerDependencies,
+        bootstrap_health_server_dependencies(),
+    )
 
 
-def get_metrics_service() -> object:
+def get_metrics_service() -> MetricsService:
     """Get metrics administration service."""
     _ensure_registrations()
-    return bootstrap_metrics_service()
+    return cast(MetricsService, bootstrap_metrics_service())
 
 
 def get_adr_service() -> object:
@@ -190,7 +232,7 @@ def get_adr_service() -> object:
     return bootstrap_adr_service()
 
 
-def get_quarantine_port() -> object:
+def get_quarantine_port() -> QuarantinePort:
     """Get the shared low-level quarantine port."""
     _ensure_registrations()
-    return bootstrap_quarantine_port()
+    return cast(QuarantinePort, bootstrap_quarantine_port())

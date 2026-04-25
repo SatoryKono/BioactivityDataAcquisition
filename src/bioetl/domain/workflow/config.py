@@ -60,15 +60,103 @@ class WorkflowRunOptionsConfig:
         self, override: WorkflowRunOptionsConfig
     ) -> WorkflowRunOptionsConfig:
         """Return a merged config where non-null override values win."""
-        merged_values = {
-            field.name: (
-                getattr(override, field.name)
-                if getattr(override, field.name) is not None
-                else getattr(self, field.name)
-            )
-            for field in fields(self)
-        }
-        return WorkflowRunOptionsConfig(**cast("dict[str, object]", merged_values))
+        return WorkflowRunOptionsConfig(
+            run_type=override.run_type if override.run_type is not None else self.run_type,
+            resume=override.resume if override.resume is not None else self.resume,
+            start_offset=(
+                override.start_offset
+                if override.start_offset is not None
+                else self.start_offset
+            ),
+            limit=override.limit if override.limit is not None else self.limit,
+            dry_run=override.dry_run if override.dry_run is not None else self.dry_run,
+            input_csv=override.input_csv if override.input_csv is not None else self.input_csv,
+            filter_column=(
+                override.filter_column
+                if override.filter_column is not None
+                else self.filter_column
+            ),
+            filter_field=(
+                override.filter_field
+                if override.filter_field is not None
+                else self.filter_field
+            ),
+            filter_ids=(
+                override.filter_ids if override.filter_ids is not None else self.filter_ids
+            ),
+            multi_filter_ids=(
+                override.multi_filter_ids
+                if override.multi_filter_ids is not None
+                else self.multi_filter_ids
+            ),
+            fallback_column=(
+                override.fallback_column
+                if override.fallback_column is not None
+                else self.fallback_column
+            ),
+            fallback_mapping=(
+                override.fallback_mapping
+                if override.fallback_mapping is not None
+                else self.fallback_mapping
+            ),
+            vacuum_after_run=(
+                override.vacuum_after_run
+                if override.vacuum_after_run is not None
+                else self.vacuum_after_run
+            ),
+            vacuum_retention_days=(
+                override.vacuum_retention_days
+                if override.vacuum_retention_days is not None
+                else self.vacuum_retention_days
+            ),
+            log_level=override.log_level if override.log_level is not None else self.log_level,
+            ignore_yaml_filter=(
+                override.ignore_yaml_filter
+                if override.ignore_yaml_filter is not None
+                else self.ignore_yaml_filter
+            ),
+            skip_gold=override.skip_gold if override.skip_gold is not None else self.skip_gold,
+            execution_context=(
+                override.execution_context
+                if override.execution_context is not None
+                else self.execution_context
+            ),
+            use_cached_bronze=(
+                override.use_cached_bronze
+                if override.use_cached_bronze is not None
+                else self.use_cached_bronze
+            ),
+            cached_bronze_path=(
+                override.cached_bronze_path
+                if override.cached_bronze_path is not None
+                else self.cached_bronze_path
+            ),
+            cached_bronze_date=(
+                override.cached_bronze_date
+                if override.cached_bronze_date is not None
+                else self.cached_bronze_date
+            ),
+            replay_of_run_id=(
+                override.replay_of_run_id
+                if override.replay_of_run_id is not None
+                else self.replay_of_run_id
+            ),
+            replay_of_manifest_id=(
+                override.replay_of_manifest_id
+                if override.replay_of_manifest_id is not None
+                else self.replay_of_manifest_id
+            ),
+            exact_replay=(
+                override.exact_replay
+                if override.exact_replay is not None
+                else self.exact_replay
+            ),
+            enable_tracing=(
+                override.enable_tracing
+                if override.enable_tracing is not None
+                else self.enable_tracing
+            ),
+        )
 
     def to_mapping(self) -> JsonDict:
         """Return non-null options as a plain mapping."""

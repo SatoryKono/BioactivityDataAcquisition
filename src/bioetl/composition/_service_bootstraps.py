@@ -4,7 +4,50 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from importlib import import_module
-from typing import cast
+from typing import TYPE_CHECKING, Literal, overload, cast
+
+if TYPE_CHECKING:
+    from bioetl.application.services.audit_inspection_service import (
+        AuditInspectionService,
+    )
+    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+        RunManifestInspectionService,
+    )
+    from bioetl.application.services.lineage.lineage_inspection_service import (
+        LineageInspectionService,
+    )
+    from bioetl.application.services.observability_workflow_service import (
+        ObservabilityWorkflowService,
+    )
+
+
+@overload
+def resolve_bootstrap_attr(
+    name: Literal["bootstrap_audit_inspection_service"],
+) -> Callable[[], AuditInspectionService]: ...
+
+
+@overload
+def resolve_bootstrap_attr(
+    name: Literal["bootstrap_run_manifest_service"],
+) -> Callable[[], RunManifestInspectionService]: ...
+
+
+@overload
+def resolve_bootstrap_attr(
+    name: Literal["bootstrap_lineage_service"],
+) -> Callable[[], LineageInspectionService]: ...
+
+
+@overload
+def resolve_bootstrap_attr(
+    name: Literal["bootstrap_observability_workflow_service"],
+) -> Callable[[], ObservabilityWorkflowService]: ...
+
+
+@overload
+def resolve_bootstrap_attr(name: str) -> object:
+    ...
 
 
 def resolve_bootstrap_attr(name: str) -> object:

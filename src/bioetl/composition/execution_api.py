@@ -3,7 +3,14 @@
 from __future__ import annotations
 
 from importlib import import_module
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Coroutine
+
+    from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
+    from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort
 
 _PIPELINE_EXECUTION_MODULE = "bioetl.composition._pipeline_execution"
 _APPLICATION_SERVICES_MODULE = "bioetl.application.services"
@@ -23,6 +30,12 @@ _PUBLIC_EXPORTS: dict[str, str] = {
 }
 
 __all__ = [*_PUBLIC_EXPORTS, "push_metrics_to_gateway"]
+
+build_pipeline_context: "Callable[[str, RunOptions], PipelineRunContext]"
+create_pipeline_runner: "Callable[[str, RunOptions], ExecutionMetricsRunnerPort]"
+ensure_metrics_server_started: "Callable[[], bool]"
+get_pipeline_runner_service: object
+run_pipeline: "Callable[[str, RunOptions], Coroutine[object, object, RunResult]]"
 
 
 def push_metrics_to_gateway(

@@ -39,12 +39,12 @@ if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointManagerService,
     )
+    from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
     from bioetl.composition._pipeline_execution import ArchiveOptions as _ArchiveOptions
     from bioetl.composition._pipeline_execution import VacuumOptions as _VacuumOptions
-    from bioetl.composition._resource_management import CleanupPreviewProtocol
     from bioetl.composition._resource_management import (
         QuarantineManagerProtocol,
     )
@@ -58,7 +58,7 @@ get_lifecycle_service: "Callable[[], MedallionLifecycleService]"
 get_quarantine_manager: "Callable[[str], QuarantineManagerProtocol]"
 inspect_quarantine: "Callable[[str, int], Awaitable[list[JsonDict]]]"
 list_checkpoints: "Callable[[str], Awaitable[list[object]]]"
-preview_cleanup: "Callable[[str], Awaitable[CleanupPreviewProtocol]]"
+preview_cleanup: "Callable[[str], Awaitable[CleanupPreview]]"
 vacuum_table: "Callable[[str, _VacuumOptions], Awaitable[int]]"
 
 

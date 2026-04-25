@@ -313,6 +313,12 @@ module = [
     "psutil.*",
     "click",
     "click.*",
+    "boto3",
+    "boto3.*",
+    "botocore",
+    "botocore.*",
+    "s3transfer",
+    "s3transfer.*",
 ]
 ignore_missing_imports = true
 

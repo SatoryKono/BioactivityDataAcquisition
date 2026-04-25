@@ -48,14 +48,14 @@ def _coerce_transform_steps(value: object) -> tuple[str, ...]:
     return transform_steps
 
 
-def _coerce_transform_step_sequence(value: object) -> tuple[object, ...]:
+def _coerce_transform_step_sequence(value: object) -> tuple[str, ...]:
     """Convert supported transform-step inputs into a tuple for validation."""
     if value is None:
         return ()
-    if isinstance(value, tuple):
-        return value
-    if isinstance(value, list):
-        return tuple(value)
+    if isinstance(value, list | tuple):
+        transform_steps = tuple(value)
+        _validate_transform_step_items(transform_steps)
+        return tuple(cast(str, item) for item in transform_steps)
     raise TypeError("RunContext.create() transform_steps must be a sequence of strings")
 
 

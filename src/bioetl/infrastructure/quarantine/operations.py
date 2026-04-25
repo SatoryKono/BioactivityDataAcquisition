@@ -18,9 +18,12 @@ __all__ = [
 
 
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
-import pyarrow.compute as pc
+try:
+    import pyarrow.compute as pc
+except ImportError:
+    pc = None
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError
 
@@ -47,6 +50,27 @@ from bioetl.infrastructure.quarantine.statistics_support import (
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+    from pyarrow import Array, BooleanArray
+
+
+def _require_pyarrow_compute() -> object:
+    """Return ``pyarrow.compute`` or raise a bounded runtime error."""
+    if pc is None:
+        raise RuntimeError(
+            "Quarantine read operations require pyarrow.compute, but it could not "
+            "be imported in the current environment"
+        )
+    return pc
+
+
+def _equal_mask(left: object, right: object) -> "BooleanArray":
+    compute = _require_pyarrow_compute()
+    return cast("BooleanArray", compute.equal(cast("Array", left), right))
+
+
+def _and_mask(left: object, right: object) -> "BooleanArray":
+    compute = _require_pyarrow_compute()
+    return cast("BooleanArray", compute.and_(left, right))
 
 
 def inspect_records(
@@ -79,12 +103,12 @@ def inspect_records(
     arrow_table = dt.to_pyarrow_table(partitions=[("pipeline", "=", pipeline)])
     status_filter = dq_status or QuarantineRecordStatus.NEW
 
-    mask = pc.equal(arrow_table["pipeline"], pipeline)
+    mask = _equal_mask(arrow_table["pipeline"], pipeline)
     if error_code:
-        mask = pc.and_(mask, pc.equal(arrow_table["error_code"], error_code))
+        mask = _and_mask(mask, _equal_mask(arrow_table["error_code"], error_code))
     if run_id:
-        mask = pc.and_(mask, pc.equal(arrow_table["run_id"], run_id))
-    mask = pc.and_(mask, pc.equal(arrow_table["dq_status"], status_filter.value))
+        mask = _and_mask(mask, _equal_mask(arrow_table["run_id"], run_id))
+    mask = _and_mask(mask, _equal_mask(arrow_table["dq_status"], status_filter.value))
 
     filtered_table = arrow_table.filter(mask)
     filtered_table = filtered_table.sort_by([("ingestion_ts", "descending")])
@@ -204,9 +228,9 @@ def replay_records(
         ],
     )
 
-    mask = pc.equal(arrow_table["pipeline"], pipeline)
+    mask = _equal_mask(arrow_table["pipeline"], pipeline)
     if error_code:
-        mask = pc.and_(mask, pc.equal(arrow_table["error_code"], error_code))
+        mask = _and_mask(mask, _equal_mask(arrow_table["error_code"], error_code))
 
     filtered_table = arrow_table.filter(mask)
     filtered_table = filtered_table.sort_by([("ingestion_ts", "ascending")])
@@ -268,7 +292,7 @@ def get_statistics(
     if len(arrow_table) == 0:
         return empty_stats
     if run_id:
-        arrow_table = arrow_table.filter(pc.equal(arrow_table["run_id"], run_id))
+        arrow_table = arrow_table.filter(_equal_mask(arrow_table["run_id"], run_id))
         if len(arrow_table) == 0:
             return empty_stats
 

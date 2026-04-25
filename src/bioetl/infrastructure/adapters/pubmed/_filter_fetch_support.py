@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.domain.types import BronzeRecord
 
@@ -18,7 +18,7 @@ _PUBLICATION_ONLY_ERROR = "PubMedAdapter only supports 'publication'"
 
 async def empty_async_iterator() -> AsyncIterator[BronzeRecord]:
     """Return an empty async iterator matching BronzeRecord stream contract."""
-    for record in ():
+    for record in cast(tuple[BronzeRecord, ...], ()):
         yield record
 
 

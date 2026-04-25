@@ -163,12 +163,13 @@ async def safe_write_layer(
             ingestion_ts=ingestion_ts,
         )
     except operation_errors as error:
-        emit_batch_failed(
-            emitter=domain_event_emitter,
-            run_id=run_id,
-            batch_id=batch_id,
-            layer=layer,
-            error=error,
-            occurred_at=ingestion_ts,
-        )
+        if isinstance(error, Exception):
+            emit_batch_failed(
+                emitter=domain_event_emitter,
+                run_id=run_id,
+                batch_id=batch_id,
+                layer=layer,
+                error=error,
+                occurred_at=ingestion_ts,
+            )
         raise

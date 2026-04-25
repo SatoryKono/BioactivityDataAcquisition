@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.inputs_resolver import (
         ResolvedVacuumSettings,
     )
-    from bioetl.composition.runtime_builders.runner_builder import (
+    from bioetl.composition.runtime_builders.ledger_collaborator import (
         PipelineRunnerProtocol,
     )
     from bioetl.domain.config import RuntimeConfig

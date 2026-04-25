@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from collections.abc import Callable, Mapping
+from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
@@ -24,6 +24,8 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.types import BronzeRecord
+from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
+from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.delta.resilience import (
     SilverMergeResiliencePolicy,
@@ -31,7 +33,10 @@ from bioetl.infrastructure.storage.delta.resilience import (
 from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
     SilverPostwriteOperations,
 )
-from bioetl.infrastructure.storage.silver.pipeline_helpers import _SilverWriteInvocation
+from bioetl.infrastructure.storage.silver.pipeline_helpers import (
+    _SilverWriteExecutionContext,
+    _SilverWriteInvocation,
+)
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
     SilverWriterRuntimeServices,
     SilverWriterRuntimeServicesRequest,
@@ -75,14 +80,24 @@ class _AwaitTrackingAsyncCallable:
 class _SilverWriterDispatchHost(Protocol):
     """Minimal SilverWriter surface required by runtime helpers."""
 
-    logger: LoggerPort | None
+    logger: LoggerPort
     _pipeline_name: str | None
     _tracing: TracingPort | None
-    _contract_rollout_policy: WriteModePolicy | None
+    _contract_rollout_policy: ContractRolloutPolicy | None
 
-    async def _execute_silver_write_pipeline(self, **kwargs: object): ...
+    async def _execute_silver_write_pipeline(
+        self,
+        *,
+        invocation: _SilverWriteInvocation,
+        ctx: _SilverWriteExecutionContext,
+    ) -> SilverWriteResult | None: ...
 
-    async def _write_single_target(self, **kwargs: object): ...
+    async def _write_single_target(
+        self,
+        *,
+        invocation: _SilverWriteInvocation | None = None,
+        **legacy_kwargs: object,
+    ) -> SilverWriteResult | None: ...
 
 
 def _pop_legacy_runtime_kwargs(
@@ -150,14 +165,11 @@ def _resolve_runtime_services_for_writer(
     """Build runtime services for the writer when callers did not provide them."""
     if runtime_services is not None:
         return runtime_services
-    resolved_request = cast(
-        "SilverWriterRuntimeServicesRequest",
-        replace(
-            runtime_request,
-            logger=writer.logger,
-            base_path=base_path,
-            pipeline_name=writer._pipeline_name,
-        ),
+    resolved_request = replace(
+        runtime_request,
+        logger=writer.logger,
+        base_path=base_path,
+        pipeline_name=writer._pipeline_name,
     )
     return build_silver_writer_runtime_services(request=resolved_request)
 
@@ -258,9 +270,9 @@ async def _write_single_target_impl(
     writer: _SilverWriterDispatchHost,
     *,
     invocation: _SilverWriteInvocation,
-    execute_with_tracing,
+    execute_with_tracing: Callable[..., Awaitable[SilverWriteResult | None]],
     module_name: str,
-):
+) -> SilverWriteResult | None:
     """Execute one physical Silver write target with tracing."""
     started_at, start_perf = current_utc_time(), time.perf_counter()
     return await execute_with_tracing(
@@ -277,7 +289,7 @@ async def _write_dual_targets(
     writer: _SilverWriterDispatchHost,
     *,
     invocation: _SilverWriteInvocation,
-):
+) -> SilverWriteResult | None:
     """Write all versioned Silver targets and fail the logical write on any error."""
     assert writer._contract_rollout_policy is not None
 

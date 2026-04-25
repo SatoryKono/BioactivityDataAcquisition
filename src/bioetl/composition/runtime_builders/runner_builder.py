@@ -69,7 +69,7 @@ if TYPE_CHECKING:
     )
 
 
-__all__ = ["build_pipeline_runner"]
+__all__ = ["PipelineRunnerProtocol", "build_pipeline_runner"]
 
 
 def _initialize_registry(
@@ -130,34 +130,28 @@ def _create_runner_from_factory(
             create_runner,
         )
         control_plane = request.control_plane
-        return cast(
-            "PipelineRunnerProtocol",
-            compatibility_create_runner(
-                run_id=request.run_id,
-                runtime=request.runtime,
-                started_at=request.started_at,
-                settings=request.settings,
-                observability=request.observability,
-                manifest_id=control_plane.manifest_id,
-                execution_fingerprint=control_plane.execution_fingerprint,
-                config_hash=control_plane.config_hash,
-                resolved_config_hash=control_plane.resolved_config_hash,
-                effective_config_hash=control_plane.effective_config_hash,
-                dq_contract_compatibility_hash=(
-                    control_plane.dq_contract_compatibility_hash
-                ),
-                effective_config_artifact_id=(
-                    control_plane.effective_config_artifact_id
-                ),
-                filter_config=request.filter_config,
-                config=request.config,
-                cached_bronze=request.cached_bronze,
+        return compatibility_create_runner(
+            run_id=request.run_id,
+            runtime=request.runtime,
+            started_at=request.started_at,
+            settings=request.settings,
+            observability=request.observability,
+            manifest_id=control_plane.manifest_id,
+            execution_fingerprint=control_plane.execution_fingerprint,
+            config_hash=control_plane.config_hash,
+            resolved_config_hash=control_plane.resolved_config_hash,
+            effective_config_hash=control_plane.effective_config_hash,
+            dq_contract_compatibility_hash=(
+                control_plane.dq_contract_compatibility_hash
             ),
+            effective_config_artifact_id=(
+                control_plane.effective_config_artifact_id
+            ),
+            filter_config=request.filter_config,
+            config=request.config,
+            cached_bronze=request.cached_bronze,
         )
-    return cast(
-        "PipelineRunnerProtocol",
-        create_runner(request),
-    )
+    return cast("PipelineRunnerProtocol", create_runner(request))
 
 
 def _resolve_optional_functions(
