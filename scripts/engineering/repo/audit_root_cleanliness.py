@@ -341,9 +341,9 @@ def _collect_structure_policy_violations(
         if path.startswith("docs/D-") and path.endswith(".md")
     }
     for path in sorted(actual_docs_drafts - docs_drafts):
-        violations.append(
-            f"{path}: legacy flat doc must be cataloged in {STRUCTURE_CATALOG_FILE}"
-        )
+            violations.append(
+                f"{path}: legacy flat doc must be cataloged in {STRUCTURE_CATALOG_FILE.as_posix()}"
+            )
     for path in sorted(docs_drafts - tracked_set):
         violations.append(f"{path}: cataloged legacy doc is missing from tracked tree")
 
@@ -362,9 +362,9 @@ def _collect_structure_policy_violations(
         and path != plans_readme
     }
     for path in sorted(actual_plan_paths - cataloged_plan_paths):
-        violations.append(
-            f"{path}: plan file must be cataloged in {STRUCTURE_CATALOG_FILE}"
-        )
+            violations.append(
+                f"{path}: plan file must be cataloged in {STRUCTURE_CATALOG_FILE.as_posix()}"
+            )
     for path in sorted(cataloged_plan_paths - tracked_set):
         violations.append(f"{path}: cataloged plan file is missing from tracked tree")
 

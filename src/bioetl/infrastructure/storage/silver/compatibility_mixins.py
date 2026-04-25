@@ -44,8 +44,6 @@ from bioetl.infrastructure.storage.silver.validation_mixin import (
 )
 
 
-
-
 def _normalize_completed_at(value: datetime | str) -> datetime:
     """Normalize compatibility timestamps into aware datetimes."""
     if isinstance(value, str):
@@ -275,21 +273,15 @@ class SilverWriterMergedCompatibilityMixin:
     ) -> _PreparedMergedSilverWrite:
         """Compatibility seam for merged payload preparation."""
         if self._merged is not None:
-            return cast(
-                _PreparedMergedSilverWrite,
-                self._merged._prepare_merged_silver_write(request),
-            )
+            return self._merged._prepare_merged_silver_write(request)
 
         from bioetl.infrastructure.storage.silver.merged_mixin import (
             SilverWriterMergedMixin,
         )
 
-        return cast(
-            _PreparedMergedSilverWrite,
-            SilverWriterMergedMixin._prepare_merged_silver_write(
-                self._as_merged_mixin(),
-                request,
-            ),
+        return SilverWriterMergedMixin._prepare_merged_silver_write(
+            self._as_merged_mixin(),
+            request,
         )
 
     async def _write_silver_merged_delta(

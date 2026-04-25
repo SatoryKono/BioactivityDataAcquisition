@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-from typing import cast
 
 import polars as pl
 
@@ -182,17 +181,14 @@ class _CompositeRunnerStageEnrichmentMixin:
         enrichment_results = dict(enrichment_results)
         enrichment_results.update(state.enrichment_results)
 
-        return cast(
-            dict[str, EnrichmentResult],
-            add_not_run_results(
-                enrichment_results,
-                context.enrichers_to_run,
-                self._config.enrichers,
-                state.completed_enrichers,
-                self._runtime.required_only,
-                self._config.name,
-                self._logger,
-            ),
+        return add_not_run_results(
+            enrichment_results,
+            context.enrichers_to_run,
+            self._config.enrichers,
+            state.completed_enrichers,
+            self._runtime.required_only,
+            self._config.name,
+            self._logger,
         )
 
     def _record_completed_enrichment_results(

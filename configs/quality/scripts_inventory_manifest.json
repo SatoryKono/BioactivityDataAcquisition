@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-25T11:50:38.796859+00:00",
+  "generated_at": "2026-04-25T12:55:51.231215+00:00",
   "summary": {
     "total_scripts": 445,
     "status_counts": {
@@ -16,7 +16,7 @@
       "docs": 117,
       "scripts": 295,
       "skills": 8,
-      "tests": 135
+      "tests": 134
     }
   },
   "scripts": [
@@ -1128,7 +1128,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
@@ -1153,12 +1153,6 @@
           "line": 159,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
-        },
-        {
-          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 37,
-          "source_group": "tests",
-          "text": "(workspace_root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").resolve()"
         }
       ]
     },
@@ -1443,7 +1437,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
@@ -1462,12 +1456,6 @@
           "line": 20,
           "source_group": "scripts",
           "text": "EXPECTED_NEEDLE_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_needle_wrapper.sh\""
-        },
-        {
-          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 40,
-          "source_group": "tests",
-          "text": "(workspace_root / \"scripts/ai/mcp/mcp_needle_wrapper.sh\").resolve()"
         }
       ]
     },

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
 from bioetl.composition.factories.dq._context_resolver_support import (
@@ -137,10 +137,10 @@ def _create_dq_report_service(
 
     return DQReportService(
         logger=logger,
-        bronze_analyzer=bronze_analyzer,
-        silver_analyzer=silver_analyzer,
-        gold_analyzer=gold_analyzer,
-        report_writer=report_writer,
+        bronze_analyzer=cast("BronzeDQAnalyzerPort | None", bronze_analyzer),
+        silver_analyzer=cast("SilverDQAnalyzerPort | None", silver_analyzer),
+        gold_analyzer=cast("GoldDQAnalyzerPort | None", gold_analyzer),
+        report_writer=cast("DQReportWriterPort | None", report_writer),
         metrics=metrics,
     )
 

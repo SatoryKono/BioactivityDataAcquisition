@@ -121,8 +121,8 @@
   "cell_source_taxonomy_id": {
     "checks": [],
     "coerce": false,
-    "description": "NCBI Taxonomy ID for source organism (nullable int).",
-    "dtype": "float64",
+    "description": "NCBI Taxonomy ID for source organism.",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -172,7 +172,7 @@
     "checks": [
       {
         "name": "str_matches",
-        "regex": "^CLO_\\d+$"
+        "regex": "^CLO[_:]\\d+$"
       }
     ],
     "coerce": false,
@@ -200,7 +200,7 @@
     "checks": [
       {
         "name": "str_matches",
-        "regex": "^EFO_\\d+$"
+        "regex": "^EFO[_:]\\d+$"
       }
     ],
     "coerce": false,

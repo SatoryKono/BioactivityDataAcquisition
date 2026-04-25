@@ -16,8 +16,15 @@ __all__ = [
 
 
 def _hash_canonical_payload(payload: Mapping[str, object]) -> str:
-    """Return lowercase SHA256 over canonical JSON bytes."""
-    canonical = serialize_json_canonical(dict(payload))
+    """Return lowercase SHA256 over canonical JSON bytes.
+
+    Optional control-plane fields are hashed only when populated so nullable
+    contract expansions do not retroactively perturb existing fingerprints.
+    """
+    canonical_payload = {
+        key: value for key, value in payload.items() if value is not None
+    }
+    canonical = serialize_json_canonical(canonical_payload)
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.wiring.runtime import PipelineService
 from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
@@ -18,6 +18,7 @@ from bioetl.composition.factories.storage import StorageContext, StorageFactory
 from bioetl.composition.observability_resolution import (
     resolve_tracing_port as _resolve_tracing_port,
 )
+from bioetl.domain.ports.noop import NoOpAudit
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -31,10 +32,23 @@ if TYPE_CHECKING:
         MetricsPort,
         QuarantinePort,
         SilverValidatorPort,
+        StoragePort,
         TracingPort,
     )
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+
+def _create_metrics_from_settings(settings: Settings) -> MetricsPort:
+    return create_metrics(settings)
+
+
+def _create_checkpoint_for_storage(storage_ctx: StorageContext) -> CheckpointPort:
+    return create_checkpoint(storage_ctx)
+
+
+def _create_quarantine_from_settings(settings: Settings) -> QuarantinePort:
+    return create_quarantine(settings)
 
 
 @dataclass(frozen=True, slots=True)
@@ -67,11 +81,15 @@ class CommonServicePortsRequest:
     tracer: TracingPort | None = None
     metadata_coordinator: MetadataCoordinator | None = None
     silver_validator: SilverValidatorPort | None = None
-    create_metrics_fn: Callable[[Settings], MetricsPort] = create_metrics
+    create_metrics_fn: Callable[[Settings], MetricsPort] = _create_metrics_from_settings
     storage_factory: type[StorageFactory] = StorageFactory
     create_lock_fn: Callable[[], LockPort] = create_lock
-    create_checkpoint_fn: Callable[[StorageContext], CheckpointPort] = create_checkpoint
-    create_quarantine_fn: Callable[[Settings], QuarantinePort] = create_quarantine
+    create_checkpoint_fn: Callable[[StorageContext], CheckpointPort] = (
+        _create_checkpoint_for_storage
+    )
+    create_quarantine_fn: Callable[[Settings], QuarantinePort] = (
+        _create_quarantine_from_settings
+    )
 
 
 def resolve_tracer(tracer: TracingPort | None) -> TracingPort:
@@ -88,12 +106,13 @@ def build_common_service_ports(
         if request.metrics is not None
         else request.create_metrics_fn(request.settings)
     )
+    audit_port = request.audit if request.audit is not None else NoOpAudit()
     storage_ctx = request.storage_factory.create(
         request.settings,
         request.pipeline_config,
         request.logger,
         metrics=metrics_port,
-        audit=request.audit,
+        audit=audit_port,
         tracing=request.tracer,
         metadata_coordinator=request.metadata_coordinator,
         silver_validator=request.silver_validator,
@@ -129,7 +148,7 @@ def assemble_pipeline_service(
     metadata_writer = MetadataWriter(logger=logger)
     return PipelineService(
         data_source=data_source,
-        storage=common_ports.storage_ctx.adapter,
+        storage=cast("StoragePort", common_ports.storage_ctx.adapter),
         lock=common_ports.lock,
         checkpoint=common_ports.checkpoint,
         quarantine=common_ports.quarantine,

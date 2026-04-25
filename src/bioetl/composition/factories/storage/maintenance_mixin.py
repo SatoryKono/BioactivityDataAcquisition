@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
-
-from bioetl.domain.context import current_utc_time
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -68,29 +66,16 @@ class StorageAdapterMaintenanceMixin:
     ) -> None:
         """Optimize storage for a specific table/entity.
 
-        Performs maintenance operations appropriate for the storage layer:
-        - Delta Lake: Runs VACUUM to remove old files
-        - JSONL/File: Removes files older than retention period
+        Performs Delta-table maintenance only. Bronze retention is an explicit
+        maintenance operation and must not run implicitly during postrun
+        compaction/vacuum flows for the active pipeline run.
 
         Args:
             table_name: Target identifier (e.g., 'provider.entity' for Delta/Bronze)
             retention_hours: Retention period in hours (default 168h = 7 days)
             dry_run: If True, only log what would be done without action
         """
-        # 1. Optimize Silver/Gold Delta Tables
         await self.vacuum(table_name, retention_hours, dry_run)
-
-        # 2. Optimize Bronze (File cleanup)
-        # Parse table_name to get provider/entity for targeted cleanup
-        if "." in table_name:
-            provider, entity = table_name.split(".", 1)
-            cutoff_date = current_utc_time() - timedelta(hours=retention_hours)
-            await self.bronze.cleanup_old_files(
-                cutoff_date=cutoff_date,
-                dry_run=dry_run,
-                provider=provider,
-                entity=entity,
-            )
 
     async def vacuum(
         self,

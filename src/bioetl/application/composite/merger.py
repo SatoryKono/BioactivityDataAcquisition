@@ -35,6 +35,12 @@ from bioetl.domain.composite.result import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.application.composite.column_priority_orderer import (
+        ColumnPriorityOrderer,
+    )
+    from bioetl.application.composite.column_service import (
+        _ColumnPriorityOrderingAdapter,
+    )
     from bioetl.application.composite.cross_validator import (
         EnrichmentCrossValidator,
     )
@@ -70,6 +76,7 @@ class MergeService(
     _parse_pipeline_name = staticmethod(parse_pipeline_name)
     _get_field_aliases = staticmethod(resolve_field_aliases_from_registry)
     _extract_base_column = staticmethod(extract_base_column)
+    _priority_orderer: "ColumnPriorityOrderer | _ColumnPriorityOrderingAdapter | None"
 
     def __init__(
         self,

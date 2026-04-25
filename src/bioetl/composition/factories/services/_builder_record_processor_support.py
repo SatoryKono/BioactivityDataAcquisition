@@ -4,12 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.application.core.wiring.runtime import RecordProcessor
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
     import pandera as pdr
@@ -27,6 +26,7 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.config import ColumnGroupConfig
     from bioetl.domain.config import DQConfig
     from bioetl.domain.context import PipelineContext
+    from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
     from bioetl.domain.ports import (
         GoldValidatorPort,
         TracingPort,
@@ -52,9 +52,9 @@ class _RecordProcessorBuildRequest:
     primary_keys: tuple[str, ...] | list[str]
     silver_table: str
     gold_table: str | None
-    silver_write_mode: str
-    gold_write_mode: str
-    on_schema_mismatch: str
+    silver_write_mode: SilverWriteMode
+    gold_write_mode: GoldWriteMode
+    on_schema_mismatch: Literal["error", "evolve", "ignore"]
     transform_callback: TransformCallback
     gold_filter_callback: GoldFilterCallback
     gold_transform_callback: GoldTransformCallback
@@ -69,7 +69,7 @@ class _RecordProcessorBuildRequest:
     gold_schema_policy_by_version: GoldSchemaPolicyByVersion | None
     record_processor_config_cls: type[RecordProcessorConfig]
     table_config_cls: type[TableConfig]
-    gold_validator_factory: type[GoldValidatorPort] | type[PanderaGoldValidator]
+    gold_validator_factory: Callable[..., GoldValidatorPort]
     record_processor_cls: type[RecordProcessor]
 
 
@@ -106,23 +106,20 @@ def create_record_processor_impl(
         content_hash_policy_by_version=request.content_hash_policy_by_version,
         gold_schema_policy_by_version=request.gold_schema_policy_by_version,
     )
-    components = cast(
-        "BatchProcessingComponents",
-        request.create_batch_processing_components_fn(
-            services=request.services,
-            context=request.context,
-            config=processor_config,
-            error_classifier=ErrorClassifier(),
-            transform_callback=request.transform_callback,
-            gold_filter_callback=request.gold_filter_callback,
-            gold_transform_callback=request.gold_transform_callback,
-            gold_validator=request.gold_validator_factory(
-                cast("pdr.DataFrameSchema | None", active_gold_schema),
-                strict=request.strict_gold_validation,
-            ),
-            tracer=effective_tracer,
-            lock_validator=request.lock_validator,
+    components = request.create_batch_processing_components_fn(
+        services=request.services,
+        context=request.context,
+        config=processor_config,
+        error_classifier=ErrorClassifier(),
+        transform_callback=request.transform_callback,
+        gold_filter_callback=request.gold_filter_callback,
+        gold_transform_callback=request.gold_transform_callback,
+        gold_validator=request.gold_validator_factory(
+            cast("pdr.DataFrameSchema | None", active_gold_schema),
+            strict=request.strict_gold_validation,
         ),
+        tracer=effective_tracer,
+        lock_validator=request.lock_validator,
     )
     return request.record_processor_cls(
         context=request.context,

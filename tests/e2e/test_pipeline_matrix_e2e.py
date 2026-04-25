@@ -155,6 +155,11 @@ PIPELINE_CASES: tuple[PipelineE2ECase, ...] = (
         query="rhodopsin crystal structure",
         cassette_candidates=("test_crossref_search_by_title",),
     ),
+    PipelineE2ECase("composite_activity", "composite", "activity"),
+    PipelineE2ECase("composite_assay", "composite", "assay"),
+    PipelineE2ECase("composite_molecule", "composite", "molecule"),
+    PipelineE2ECase("composite_publication", "composite", "publication"),
+    PipelineE2ECase("composite_target", "composite", "target"),
     PipelineE2ECase(
         "openalex_publication",
         "openalex",

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.core.wiring.runtime import (
@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterPort,
     )
+    from bioetl.application.core.batch_writer import BatchWriteStoragePort
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.ports import GoldValidatorPort, TracingPort
@@ -86,7 +87,7 @@ def create_batch_processing_components(
         else None
     )
     writer = BatchWriter(
-        storage=services.storage,
+        storage=cast("BatchWriteStoragePort", services.storage),
         context=context,
         config=config,
         gold_validator=gold_validator,

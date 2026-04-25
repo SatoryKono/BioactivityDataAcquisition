@@ -7,6 +7,7 @@ Note: Uses in-memory locking - operations only affect current process.
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
@@ -35,19 +36,14 @@ def get_lock_service() -> LockService:
     """Load the lock service through composition on demand."""
     from bioetl.composition.control_plane_api import get_lock_service as _impl
 
-    return _impl()
+    impl = cast("Callable[[], LockService]", _impl)
+    return impl()
 
 
 @lock.command("release")
-@click.option(
-    "--pipeline", required=True, help="Pipeline name (lock key)"
-)
-@click.option(
-    "--run-id", required=True, help="Run ID that holds the lock"
-)
-@click.option(
-    "--exclusive", is_flag=True, help="Release exclusive lock"
-)
+@click.option("--pipeline", required=True, help="Pipeline name (lock key)")
+@click.option("--run-id", required=True, help="Run ID that holds the lock")
+@click.option("--exclusive", is_flag=True, help="Release exclusive lock")
 def release_command(pipeline: str, run_id: str, exclusive: bool) -> None:
     """Release a pipeline lock.
 
@@ -89,12 +85,8 @@ def release_command(pipeline: str, run_id: str, exclusive: bool) -> None:
 
 
 @lock.command("check")
-@click.option(
-    "--pipeline", required=True, help="Pipeline name (lock key)"
-)
-@click.option(
-    "--run-id", required=True, help="Run ID to check"
-)
+@click.option("--pipeline", required=True, help="Pipeline name (lock key)")
+@click.option("--run-id", required=True, help="Run ID to check")
 def check_command(pipeline: str, run_id: str) -> None:
     """Check if a lock is held by a specific run-id.
 

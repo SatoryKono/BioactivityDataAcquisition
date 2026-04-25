@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any
 
 import polars as pl
 
@@ -16,20 +16,11 @@ from bioetl.domain.composite.result import (
     EnrichmentStatus,
 )
 from bioetl.domain.exceptions import BioETLError, StorageError
+from bioetl.domain.ports import MergedStoragePort, SilverStoragePort
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort
     from bioetl.domain.types import BronzeRecord
-
-
-class _MergeInputStoragePort(Protocol):
-    """Minimal storage contract required for merge-input loading."""
-
-    async def read_silver(
-        self,
-        table_name: str,
-        columns: list[str] | None = None,
-    ) -> list[BronzeRecord]: ...
 
 
 @dataclass(frozen=True)
@@ -46,8 +37,9 @@ class _MergeInputLoaderMixin:
 
     # Host-class attributes (set by MergeService.__init__)
     _logger: LoggerPort
-    _storage: _MergeInputStoragePort
+    _storage: MergedStoragePort
     _delta_reader: DeltaReaderPort | None
+    _silver_reader: SilverStoragePort | None
     _renamer: Any  # Any: Host MergeService injects runtime collaborator without importing infra implementation here.
     _config: Any  # Any: Host MergeService provides config object with richer surface than this mixin needs to declare.
 
@@ -164,11 +156,11 @@ class _MergeInputLoaderMixin:
                 f"Reading Silver table {table} requires delta_reader or silver_reader"
             )
 
-        # Fall back to storage adapter - strip "silver/" prefix for storage port
+        # Fall back to the read-compatible silver adapter when Delta is unavailable.
         storage_table = (
             table.removeprefix("silver/") if table.startswith("silver/") else table
         )
-        records = await self._storage.read_silver(storage_table)
+        records = await self._silver_reader.read_silver(storage_table)
         if not records:
             return pl.DataFrame()
         return pl.from_dicts(records)

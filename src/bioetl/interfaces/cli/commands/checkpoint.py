@@ -35,7 +35,7 @@ __all__ = [
 _NONE_ENTRY_LINE = "  - none"
 
 
-@click.group()  # type: ignore[untyped-decorator]
+@click.group()
 def checkpoint() -> None:
     """Manage checkpoints."""
 
@@ -221,8 +221,8 @@ def _render_checkpoint_payload(payload: dict[str, object]) -> str:
     return json.dumps(payload, indent=2, default=str)
 
 
-@checkpoint.command("list")  # type: ignore[untyped-decorator]
-@click.option("--pipeline", required=True, help="Pipeline name")  # type: ignore[untyped-decorator]
+@checkpoint.command("list")
+@click.option("--pipeline", required=True, help="Pipeline name")
 def checkpoint_list(pipeline: str) -> None:
     """List all checkpoints.
 
@@ -241,10 +241,10 @@ def checkpoint_list(pipeline: str) -> None:
     asyncio.run(_list())
 
 
-@checkpoint.command("audit-run")  # type: ignore[untyped-decorator]
-@click.option("--run-id", required=True, help="Pipeline RUN_ID to inspect")  # type: ignore[untyped-decorator]
-@click.option("--limit", default=100, show_default=True, help="Maximum audit entries")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@checkpoint.command("audit-run")
+@click.option("--run-id", required=True, help="Pipeline RUN_ID to inspect")
+@click.option("--limit", default=100, show_default=True, help="Maximum audit entries")
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -270,16 +270,16 @@ def checkpoint_audit_run(run_id: str, limit: int, output_format: str) -> None:
     asyncio.run(_inspect())
 
 
-@checkpoint.command("inspect")  # type: ignore[untyped-decorator]
-@click.option("--pipeline", required=True, help="Pipeline name")  # type: ignore[untyped-decorator]
-@click.option("--run-id", default=None, help="Optional RUN_ID override")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@checkpoint.command("inspect")
+@click.option("--pipeline", required=True, help="Pipeline name")
+@click.option("--run-id", default=None, help="Optional RUN_ID override")
+@click.option(
     "--audit-limit",
     default=100,
     show_default=True,
     help="Maximum audit entries",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),

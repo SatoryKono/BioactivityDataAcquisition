@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.domain.config import RuntimeConfig
+    from bioetl.domain.ports import DataSourcePort
     from bioetl.domain.types import GoldSchemaType
 
 
@@ -133,7 +134,7 @@ def build_pipeline_factory_context(
 
 def build_create_pipeline_with_services_request(
     run_id: RunID,
-    runtime: object,
+    runtime: RuntimeConfig,
     started_at: datetime,
     settings: Settings,
     logger: LoggerPort,
@@ -179,7 +180,7 @@ def create_factory_data_source(
     logger: LoggerPort,
     pipeline_name: str,
     filter_config: InputFilterConfig | None = None,
-):
+) -> DataSourcePort:
     """Create data-source adapter for one pipeline execution context."""
     return create_data_source_fn(
         settings, pipeline_config, logger, filter_config, pipeline_name=pipeline_name

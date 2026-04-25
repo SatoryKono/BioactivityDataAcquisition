@@ -37,7 +37,6 @@ from bioetl.infrastructure.storage.silver.operations.postwrite_operations import
 )
 
 
-
 __all__ = ["SilverWriterFinalizationCompatibilityMixin"]
 
 

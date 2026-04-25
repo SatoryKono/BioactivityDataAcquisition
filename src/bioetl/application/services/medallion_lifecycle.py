@@ -294,14 +294,18 @@ class _MedallionRunLifecycleMixin(_MedallionClearMixin):
         retention_hours: int,
         dry_run: bool,
     ) -> None:
-        """Optimize Silver and Gold tables while avoiding duplicate targets."""
-        await self.storage.optimize(
+        """Vacuum Silver and Gold tables while avoiding duplicate targets.
+
+        Postrun lifecycle maintenance must not prune Bronze files from the
+        active run. Bronze retention remains an explicit maintenance action.
+        """
+        await self.storage.vacuum(
             table_name=silver_table,
             retention_hours=retention_hours,
             dry_run=dry_run,
         )
         if gold_table != silver_table:
-            await self.storage.optimize(
+            await self.storage.vacuum(
                 table_name=gold_table,
                 retention_hours=retention_hours,
                 dry_run=dry_run,

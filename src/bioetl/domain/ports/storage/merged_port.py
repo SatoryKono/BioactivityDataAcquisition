@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.domain.types import BronzeRecord, GoldRecord
 
@@ -61,7 +61,7 @@ class MergedStoragePort(Protocol):
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
-        schema: DataFrameSchema[Any] | None = None,  # Any: composite schema generic stays backend-defined
+        schema: DataFrameSchema[object] | None = None,
     ) -> None:
         """Write merged records to Gold layer without Pandera schema.
 

@@ -7,7 +7,6 @@ import warnings
 from collections.abc import Callable
 from dataclasses import dataclass, fields
 from typing import Any
-
 from bioetl.application.composite.checkpoint._anchor_context import (
     ExpectedCheckpointContext,
     create_expected_checkpoint_context,
@@ -82,8 +81,10 @@ def _resolve_checkpoint_init_value(
     *,
     field_name: str,
     init: CompositeCheckpointServiceContext | None,
-    overrides: dict[str, object],
-) -> object:
+    overrides: dict[
+        str, Any
+    ],  # Any: Arbitrary overrides for checkpoint context parameters.
+) -> Any:  # Any: Return type can be any value from checkpoint context parameters.
     if field_name in overrides:
         return overrides[field_name]
     if field_name in _CHECKPOINT_INIT_OPTIONAL_DEFAULTS and init is None:
@@ -97,7 +98,9 @@ def _resolve_checkpoint_init_value(
 
 def _coerce_checkpoint_service_context(
     init: CompositeCheckpointServiceContext | None,
-    overrides: dict[str, object],
+    overrides: dict[
+        str, Any
+    ],  # Any: Arbitrary overrides for checkpoint context parameters.
 ) -> CompositeCheckpointServiceContext:
     for field_name in _CHECKPOINT_INIT_REQUIRED_FIELDS:
         _resolve_checkpoint_init_value(
@@ -105,7 +108,9 @@ def _coerce_checkpoint_service_context(
             init=init,
             overrides=overrides,
         )
-    resolved_values: dict[str, Any] = {  # Any: Field values are dynamically resolved from CompositeCheckpointServiceContext, which contains various types.
+    resolved_values: dict[
+        str, Any
+    ] = {  # Any: Field values are dynamically resolved from CompositeCheckpointServiceContext, which contains various types.
         field_name: _resolve_checkpoint_init_value(
             field_name=field_name,
             init=init,

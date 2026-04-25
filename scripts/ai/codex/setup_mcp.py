@@ -23,19 +23,11 @@ CACHE_DIR_NAME = ".cache"
 
 
 def _wrapper_command(script_name: str, workspace_root: Path) -> dict[str, Any]:
-    wrapper = workspace_root / "scripts/ai/mcp" / script_name
-    if os.name == "nt":
-        return {
-            "command": "powershell",
-            "args": [
-                "-NoProfile",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-File",
-                wrapper.with_suffix(".ps1").as_posix(),
-            ],
-        }
-    return {"command": "bash", "args": [str(wrapper.with_suffix(".sh"))]}
+    is_windows = os.name == "nt"
+    shell = "powershell" if is_windows else "bash"
+    suffix = ".ps1" if is_windows else ".sh"
+    wrapper = (workspace_root / "scripts/ai/mcp" / script_name).with_suffix(suffix)
+    return {"command": shell, "args": [str(wrapper.resolve())]}
 
 
 def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:

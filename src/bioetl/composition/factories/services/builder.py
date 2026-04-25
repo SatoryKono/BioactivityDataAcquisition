@@ -41,6 +41,9 @@ if TYPE_CHECKING:
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterPort,
     )
+    from bioetl.application.services.checkpoint_compatibility_service import (
+        CheckpointCompatibilityService,
+    )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
         CheckpointPort,
@@ -101,10 +104,10 @@ class ServicesBuilder:
         *,
         loading_strategy: LoadingStrategy | None = None,
         metrics: MetricsPort | None = None,
-        checkpoint_compatibility_service: object | None = None,
+        checkpoint_compatibility_service: CheckpointCompatibilityService | None = None,
         current_metadata: CheckpointMetadata | None = None,
         compatibility_policy: Literal[
-            "observe", "soft_fail", "hard_fail"
+            "observe", "legacy_observe", "soft_fail", "hard_fail"
         ] = "soft_fail",
     ) -> CheckpointManagerService:
         return create_checkpoint_manager(

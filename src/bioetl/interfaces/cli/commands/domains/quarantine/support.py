@@ -6,7 +6,7 @@ import json
 import sys
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from typing import Protocol, TypeVar
+from typing import Protocol, TypeVar, cast
 
 import click
 
@@ -109,12 +109,15 @@ class _QuarantineCommandContext:
         unexpected_error_title: str,
     ) -> _T | None:
         """Run one async quarantine operation with a consistent policy."""
-        return run_quarantine_async(
-            coro,
-            policy=self._build_policy(
-                reason_prefix=reason_prefix,
-                domain_error_title=domain_error_title,
-                unexpected_error_title=unexpected_error_title,
+        return cast(
+            "_T | None",
+            run_quarantine_async(
+                coro,
+                policy=self._build_policy(
+                    reason_prefix=reason_prefix,
+                    domain_error_title=domain_error_title,
+                    unexpected_error_title=unexpected_error_title,
+                ),
             ),
         )
 
@@ -127,12 +130,15 @@ class _QuarantineCommandContext:
         unexpected_error_title: str,
     ) -> _T | None:
         """Run one sync quarantine operation with a consistent policy."""
-        return run_quarantine_sync(
-            fn,
-            policy=self._build_policy(
-                reason_prefix=reason_prefix,
-                domain_error_title=domain_error_title,
-                unexpected_error_title=unexpected_error_title,
+        return cast(
+            "_T | None",
+            run_quarantine_sync(
+                fn,
+                policy=self._build_policy(
+                    reason_prefix=reason_prefix,
+                    domain_error_title=domain_error_title,
+                    unexpected_error_title=unexpected_error_title,
+                ),
             ),
         )
 
