@@ -168,7 +168,6 @@ def iter_rag_sources(root: Path) -> list[Path]:
                 continue
             seen.add(rel_path)
             results.append(path)
-    print(f"DEBUG: iter_rag_sources found {len(results)} files.")
     return results
 
 

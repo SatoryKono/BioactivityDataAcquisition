@@ -199,7 +199,7 @@ def promote_note(
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
-    path = promote_note(
+    promote_note(
         args.source.resolve(),
         target_kind=args.target_kind,
         summary=args.summary,
@@ -207,7 +207,6 @@ def main(argv: list[str] | None = None) -> int:
         move=args.move,
         force_duplicate=args.force_duplicate,
     )
-    print(f"Promoted memory note: {path}")
     return 0
 
 
