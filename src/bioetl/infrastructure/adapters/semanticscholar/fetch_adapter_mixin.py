@@ -6,6 +6,7 @@ Contains FilterableDataSourcePort-compatible filtering methods.
 
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import BronzeRecord
@@ -117,14 +118,29 @@ class SemanticScholarFetchAdapterMixin(_SemanticScholarSearchFetchMixin):
 
         dois = filter_ids[:limit] if limit else filter_ids
         fetched = 0
-        for idx in range(0, len(dois), self.batch_size):
-            batch = dois[idx : idx + self.batch_size]
-            async for record in self._fetch_by_dois(batch):
-                record["_lookup_method"] = "doi"
-                yield record
-                fetched += 1
-                if limit and fetched >= limit:
-                    return
+
+        concurrency_limit = 5
+
+        for chunk_idx in range(0, len(dois), self.batch_size * concurrency_limit):
+            chunk_dois = dois[
+                chunk_idx : chunk_idx + self.batch_size * concurrency_limit
+            ]
+            batches = [
+                chunk_dois[i : i + self.batch_size]
+                for i in range(0, len(chunk_dois), self.batch_size)
+            ]
+
+            tasks = [self._fetch_batch_with_nulls(batch) for batch in batches]
+            results = await asyncio.gather(*tasks)
+
+            for batch_results in results:
+                for record in batch_results:
+                    if record is not None:
+                        record["_lookup_method"] = "doi"
+                        yield record
+                        fetched += 1
+                        if limit and fetched >= limit:
+                            return
 
     async def _batch_doi_phase(
         self,
@@ -145,22 +161,34 @@ class SemanticScholarFetchAdapterMixin(_SemanticScholarSearchFetchMixin):
             BronzeRecord entries from resolved DOIs with lookup metadata.
         """
         count = start_count
-        for idx in range(0, len(valid_dois), self.batch_size):
+        concurrency_limit = 5
+
+        for chunk_idx in range(0, len(valid_dois), self.batch_size * concurrency_limit):
             if limit and count >= limit:
                 return
 
-            batch = valid_dois[idx : idx + self.batch_size]
-            batch_results = await self._fetch_batch_with_nulls(batch)
-            for doi, record in zip(batch, batch_results, strict=True):
-                if record is None:
-                    continue
-                resolved_dois.add(doi.lower())
-                record["_lookup_method"] = "doi"
-                record["_resolved_doi"] = doi
-                count += 1
-                yield record
-                if limit and count >= limit:
-                    return
+            chunk_dois = valid_dois[
+                chunk_idx : chunk_idx + self.batch_size * concurrency_limit
+            ]
+            batches = [
+                chunk_dois[i : i + self.batch_size]
+                for i in range(0, len(chunk_dois), self.batch_size)
+            ]
+
+            tasks = [self._fetch_batch_with_nulls(batch) for batch in batches]
+            results = await asyncio.gather(*tasks)
+
+            for batch, batch_results in zip(batches, results, strict=True):
+                for doi, record in zip(batch, batch_results, strict=True):
+                    if record is None:
+                        continue
+                    resolved_dois.add(doi.lower())
+                    record["_lookup_method"] = "doi"
+                    record["_resolved_doi"] = doi
+                    count += 1
+                    yield record
+                    if limit and count >= limit:
+                        return
 
     async def fetch_filtered_with_fallback(
         self,
