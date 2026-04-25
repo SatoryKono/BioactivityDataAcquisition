@@ -24,7 +24,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 from bioetl.domain.entities import Molecule
 from bioetl.domain.transformations import safe_float, safe_int
 from bioetl.domain.types import GoldRecord, JsonDict
-from bioetl.domain.value_objects import SMILES, InChIKey
+from bioetl.domain.value_objects._chemical_identifiers import InChIKey, SMILES
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId

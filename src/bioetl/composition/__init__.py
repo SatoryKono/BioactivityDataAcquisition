@@ -23,6 +23,15 @@ from __future__ import annotations
 
 from importlib import import_module
 from types import ModuleType
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bioetl.composition.registry import (
+        PipelineDefinition,
+        PipelineRegistry,
+        create_registry,
+    )
+    from bioetl.composition.registry_default import get_default_registry
 
 _LAZY_MODULE_EXPORTS: dict[str, str] = {
     "bootstrap": "bioetl.composition.bootstrap",

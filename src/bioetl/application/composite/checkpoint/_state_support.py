@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.context import current_utc_time
@@ -135,40 +135,59 @@ def _replace_checkpoint_state(
     merge_completed: bool | None = None,
     merge_result: JsonDict | None = None,
 ) -> CompositeCheckpointState:
+    def _resolved(current: object, override: object) -> object:
+        return current if override is None else override
+
     return replace(
         checkpoint_state,
-        state=checkpoint_state.state if state is None else state,
-        seed_completed=(
-            checkpoint_state.seed_completed
-            if seed_completed is None
-            else seed_completed
+        state=cast(CompositePipelineState, _resolved(checkpoint_state.state, state)),
+        seed_completed=cast(
+            bool,
+            _resolved(checkpoint_state.seed_completed, seed_completed),
         ),
-        seed_result=checkpoint_state.seed_result if seed_result is None else seed_result,
+        seed_result=cast(
+            SeedResult | None,
+            _resolved(checkpoint_state.seed_result, seed_result),
+        ),
         completed_dependencies=(
-            checkpoint_state.completed_dependencies
-            if completed_dependencies is None
-            else completed_dependencies
+            cast(
+                frozenset[str],
+                _resolved(
+                    checkpoint_state.completed_dependencies,
+                    completed_dependencies,
+                ),
+            )
         ),
         dependency_results=(
-            checkpoint_state.dependency_results
-            if dependency_results is None
-            else dependency_results
+            cast(
+                dict[str, DependencyResult],
+                _resolved(checkpoint_state.dependency_results, dependency_results),
+            )
         ),
         completed_enrichers=(
-            checkpoint_state.completed_enrichers
-            if completed_enrichers is None
-            else completed_enrichers
+            cast(
+                frozenset[str],
+                _resolved(
+                    checkpoint_state.completed_enrichers,
+                    completed_enrichers,
+                ),
+            )
         ),
         enrichment_results=(
-            checkpoint_state.enrichment_results
-            if enrichment_results is None
-            else enrichment_results
+            cast(
+                dict[str, EnrichmentResult],
+                _resolved(checkpoint_state.enrichment_results, enrichment_results),
+            )
         ),
         merge_completed=(
-            checkpoint_state.merge_completed
-            if merge_completed is None
-            else merge_completed
+            cast(
+                bool,
+                _resolved(checkpoint_state.merge_completed, merge_completed),
+            )
         ),
-        merge_result=checkpoint_state.merge_result if merge_result is None else merge_result,
+        merge_result=cast(
+            JsonDict | None,
+            _resolved(checkpoint_state.merge_result, merge_result),
+        ),
         updated_at=updated_at or _current_utc_now(clock),
     )

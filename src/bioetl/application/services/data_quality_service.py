@@ -259,7 +259,6 @@ class _DataQualityAnomalyMixin(_DataQualityMetricsMixin):
 
 class DataQualityService(
     _DataQualityThresholdMixin,
-    _DataQualityMetricsMixin,
     _DataQualityAnomalyMixin,
 ):
     """Centralized service for data quality evaluation."""

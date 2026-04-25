@@ -26,7 +26,7 @@ from bioetl.domain.entities import PubchemMolecule
 from bioetl.domain.transformations import safe_float, safe_int
 from bioetl.domain.types import JsonDict
 from bioetl.domain.validation import validate_molecular_weight, validate_non_negative
-from bioetl.domain.value_objects import InChIKey
+from bioetl.domain.value_objects._chemical_identifiers import InChIKey
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -188,10 +188,13 @@ class PubChemCompoundTransformer(BaseTransformer):
             index,
             normalized_business_data,
         )
-        return normalizer.project_normalization_findings(
-            silver_record,
-            context=context,
-            index=index,
+        return cast(
+            "SilverRecord",
+            normalizer.project_normalization_findings(
+                cast(JsonDict, silver_record),
+                context=context,
+                index=index,
+            ),
         )
 
     async def transform_pre_silver(

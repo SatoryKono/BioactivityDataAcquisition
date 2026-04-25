@@ -21,7 +21,7 @@ from bioetl.domain.entities import Target
 from bioetl.domain.services import OrganismClassificationService
 from bioetl.domain.transformations import safe_int
 from bioetl.domain.types import GoldRecord, JsonDict
-from bioetl.domain.value_objects import TaxonomyId
+from bioetl.domain.value_objects.taxonomy_id import TaxonomyId
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId

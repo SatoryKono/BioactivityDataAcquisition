@@ -45,7 +45,8 @@ from bioetl.application.pipelines.openalex.extractors import (
 )
 from bioetl.domain.entities.openalex import OpenAlexPublicationEntity
 from bioetl.domain.types import GoldRecord
-from bioetl.domain.value_objects import DOI, PublicationYear
+from bioetl.domain.value_objects._publication_year import PublicationYear
+from bioetl.domain.value_objects.publications import DOI
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
