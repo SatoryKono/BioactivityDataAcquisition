@@ -9,39 +9,36 @@ from numbers import Real
 from typing import Protocol
 
 from bioetl.application.core.batch_transformer_state import (
+    TransformAggregationState,
     TransformResult,
     build_transform_result,
 )
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
+from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
 
 
 class _BatchTransformContext(Protocol):
     """Minimal transform context surface needed by finalization helpers."""
 
-    logger: object
+    @property
+    def logger(self) -> LoggerPort: ...
 
 
 class _TransformConfig(Protocol):
     """Loose transform config surface exposing DQ configuration."""
 
-    dq_config: object | None
-    dq: object | None
+    @property
+    def dq_config(self) -> object | None: ...
 
 
 class _BatchMetricsRecorderService(Protocol):
     """Minimal batch-metrics surface needed by finalization helpers."""
 
-    error_count: object | None
+    @property
+    def error_count(self) -> int | None: ...
 
     def track_dq_validation_failure(self, *, stage: str, severity: str) -> None: ...
-
-
-class _BatchTransformState(Protocol):
-    """Mutable batch state surface required during finalization."""
-
-    records_quarantine_failed: int
-    quarantined_count: int
 
 
 FlushCountCallback = Callable[[], Awaitable[object]]
@@ -70,13 +67,13 @@ async def finalize_batch_transform_result(
     context: _BatchTransformContext,
     config: _TransformConfig,
     batch_metrics: _BatchMetricsRecorderService,
-    state: _BatchTransformState,
+    state: TransformAggregationState,
     records: list[BronzeRecord],
     flush_filtered_records: FlushCountCallback,
     flush_dq_records: FlushCountCallback,
 ) -> TransformResult:
     """Finalize one batch result with DQ checks and quarantine flushing."""
-    dq_config = getattr(config, "dq_config", None) or getattr(config, "dq", None)
+    dq_config = config.dq_config
     soft_threshold = _resolve_threshold_value(
         dq_config,
         "soft_threshold",
@@ -97,6 +94,7 @@ async def finalize_batch_transform_result(
     )
 
     if threshold_result.breach == ThresholdBreachReason.HARD:
+        assert threshold_result.hard_threshold is not None
         context.logger.error(
             "DQ hard threshold exceeded",
             error_rate=threshold_result.error_rate,
@@ -139,7 +137,7 @@ async def finalize_stream_transform_result(
     context: _BatchTransformContext,
     config: _TransformConfig,
     batch_metrics: _BatchMetricsRecorderService,
-    state: _BatchTransformState,
+    state: TransformAggregationState,
     records: list[BronzeRecord],
     flush_filtered_records: FlushCountCallback,
     flush_dq_records: FlushCountCallback,
@@ -238,7 +236,7 @@ def _resolve_threshold_value(
 def _resolve_error_count(
     *,
     batch_metrics: _BatchMetricsRecorderService,
-    state: _BatchTransformState,
+    state: TransformAggregationState,
 ) -> int:
     """Resolve a concrete DQ error count without trusting mock placeholders."""
     error_count = getattr(batch_metrics, "error_count", None)

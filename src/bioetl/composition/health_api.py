@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from importlib import import_module
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 __all__ = [
     "HealthServerDependencies",
+    "HealthServerDependenciesProtocol",
     "get_health_server_dependencies",
     "get_health_service",
     "get_quarantine_port",
@@ -31,10 +32,18 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.cli.health import (
         HealthServerDependencies as _HealthServerDependencies,
     )
-    from bioetl.domain.ports import QuarantinePort
+    from bioetl.domain.ports import HealthMonitorPort, MetricsPort, QuarantinePort
+
+
+class HealthServerDependenciesProtocol(Protocol):
+    """Typed view of health-server dependencies exposed through the facade."""
+
+    health_monitor: HealthMonitorPort
+    metrics: MetricsPort
+
 
 HealthServerDependencies: "type[_HealthServerDependencies]"
-get_health_server_dependencies: "Callable[[], _HealthServerDependencies]"
+get_health_server_dependencies: "Callable[[], HealthServerDependenciesProtocol]"
 get_health_service: "Callable[[], HealthService]"
 get_quarantine_port: "Callable[[], QuarantinePort]"
 get_quarantine_service: "Callable[[], QuarantineService]"

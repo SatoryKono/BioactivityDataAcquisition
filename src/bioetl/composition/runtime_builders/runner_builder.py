@@ -47,6 +47,7 @@ from bioetl.composition.runtime_builders.observability_builder import (
     build_observability_bundle,
 )
 from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
 from bioetl.domain.ports import (
     PipelineControlPlaneArtifacts,
     PipelineCreateRunnerRequest,
@@ -95,7 +96,7 @@ def _create_runner_from_factory(
     request = PipelineCreateRunnerRequest(
         run_id=ctx.run_id,
         runtime=inputs.runtime_config,
-        started_at=ctx.started_at,
+        started_at=getattr(ctx, "started_at", MISSING_RUNTIME_TIMESTAMP),
         settings=cast("SettingsPort", inputs.settings),
         observability=cast(
             "ExecutionObservabilityPort",
@@ -144,9 +145,7 @@ def _create_runner_from_factory(
             dq_contract_compatibility_hash=(
                 control_plane.dq_contract_compatibility_hash
             ),
-            effective_config_artifact_id=(
-                control_plane.effective_config_artifact_id
-            ),
+            effective_config_artifact_id=(control_plane.effective_config_artifact_id),
             filter_config=request.filter_config,
             config=request.config,
             cached_bronze=request.cached_bronze,

@@ -17,10 +17,15 @@ __all__ = [
     "PUBMED_PUBLICATION_SCHEMA_FIELDS",
 ]
 
-_pubmed_publication_schema_cls: Any = PubMedPublicationSchema
-_PUBMED_PUBLICATION_BASE_FIELDS = tuple(
-    _pubmed_publication_schema_cls.to_schema().columns.keys()
-)
+
+def _pubmed_schema_fields(
+    schema_cls: Any,  # Any: Pandera schema classes expose only a runtime `.to_schema()` protocol.
+) -> tuple[str, ...]:
+    """Return ordered Pandera schema fields for the PubMed publication profile."""
+    return tuple(getattr(schema_cls, "to_schema")().columns.keys())
+
+
+_PUBMED_PUBLICATION_BASE_FIELDS = _pubmed_schema_fields(PubMedPublicationSchema)
 _PUBMED_PUBLICATION_COMPAT_IDENTIFIER_FIELDS = tuple(
     field
     for field in (

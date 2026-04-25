@@ -89,7 +89,7 @@ class UniProtIDMappingClient(
             results.update(batch_results)
         return results
 
-    async def fetch(
+    def fetch(
         self,
         entity_type: str,
         limit: int | None = None,

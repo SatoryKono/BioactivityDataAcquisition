@@ -90,7 +90,9 @@ class PostrunMetadataWriteService:
             stats=get_run_statistics(executor),
             dq_reports=dq_reports,
             completed_at=(
-                self._clock.now() if self._clock is not None else MISSING_RUNTIME_TIMESTAMP
+                self._clock.now()
+                if self._clock is not None
+                else MISSING_RUNTIME_TIMESTAMP
             ),
             resolve_delta_version=self._resolve_delta_version,
         )

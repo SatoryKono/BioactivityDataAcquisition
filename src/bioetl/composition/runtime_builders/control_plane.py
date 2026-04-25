@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import is_dataclass, replace
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
+from bioetl.composition.runtime_builders._run_manifest_support import (
+    ManifestControlPlaneRefs as _ManifestControlPlaneRefs,
+)
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     create_and_persist_effective_config_artifact,
 )
-from bioetl.composition.runtime_builders.run_manifest_builder import (
-    _ManifestControlPlaneRefs,
-    create_run_manifest,
-)
+from bioetl.composition.runtime_builders.run_manifest_builder import create_run_manifest
 from bioetl.domain.normalization import normalize_runtime_anchor_payload
 
 if TYPE_CHECKING:
@@ -39,6 +39,10 @@ _OPTIONAL_CONTROL_PLANE_FIELDS = (
     "dq_policy_ref",
     "rule_bundle_version",
 )
+
+
+class _MutableManifestContext(Protocol):
+    manifest_id: str | None
 
 
 def _iter_optional_control_plane_updates(
@@ -91,11 +95,11 @@ def _build_dataclass_manifest_updates(
 
 
 def _apply_manifest_updates_to_mutable_context(
-    ctx: object,
+    ctx: _MutableManifestContext,
     manifest_id: str,
     *,
     optional_updates: tuple[tuple[str, str], ...],
-) -> object:
+) -> _MutableManifestContext:
     ctx.manifest_id = manifest_id
     for field_name, field_value in optional_updates:
         setattr(ctx, field_name, field_value)
@@ -148,7 +152,7 @@ def attach_manifest_id(
         return cast(
             "PipelineRunContext",
             _apply_manifest_updates_to_mutable_context(
-                ctx,
+                cast(_MutableManifestContext, ctx),
                 manifest_id,
                 optional_updates=optional_updates,
             ),

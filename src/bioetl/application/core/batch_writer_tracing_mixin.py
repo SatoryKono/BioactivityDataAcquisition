@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import traceback
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING
 
@@ -75,12 +76,23 @@ class BatchWriterTracingMixin:
             batch_id: Batch identifier for correlation in log output.
         """
         error_type = self._error_classifier.classify(error)
+        error_message = str(error) or repr(error)
         self._context.logger.error(
             "layer_write_failed",
             layer=layer,
-            error=str(error),
+            error=error_message,
             error_type=error_type.value,
+            exception_type=type(error).__name__,
+            exception_module=type(error).__module__,
+            traceback="".join(
+                traceback.format_exception(
+                    type(error),
+                    error,
+                    error.__traceback__,
+                )
+            ).strip(),
             batch_id=str(batch_id),
+            exc_info=True,
         )
         self._batch_metrics.track_error(f"{layer}_write", error_type)
 

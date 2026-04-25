@@ -28,7 +28,7 @@ if TYPE_CHECKING:
         LineageInspectionService,
     )
     from bioetl.application.services.lock_service import LockService
-    from bioetl.domain.ports.adr import AdrServicePort
+    from bioetl.domain.ports import AdrServicePort
 
 get_adr_service: "Callable[[], AdrServicePort]"
 get_config_service: "Callable[[], ConfigService]"

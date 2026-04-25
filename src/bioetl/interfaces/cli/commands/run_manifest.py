@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import click
 
@@ -34,17 +34,17 @@ def get_run_manifest_service() -> RunManifestInspectionService:
         get_run_manifest_service as _impl,
     )
 
-    return cast("RunManifestInspectionService", _impl())
+    return _impl()
 
 
-@click.group()  # type: ignore[untyped-decorator]
+@click.group()
 def run_manifest() -> None:
     """Inspect control-plane run manifests and ledger history."""
 
 
-@run_manifest.command("show")  # type: ignore[untyped-decorator]
-@click.argument("identifier")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@run_manifest.command("show")
+@click.argument("identifier")
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -66,9 +66,9 @@ def show_command(identifier: str, output_format: str) -> None:
     )
 
 
-@run_manifest.command("score")  # type: ignore[untyped-decorator]
-@click.argument("identifier")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@run_manifest.command("score")
+@click.argument("identifier")
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["json", "yaml", "text"]),
@@ -99,10 +99,10 @@ def score_command(identifier: str, output_format: str) -> None:
     )
 
 
-@run_manifest.command("diff")  # type: ignore[untyped-decorator]
-@click.argument("left_identifier")  # type: ignore[untyped-decorator]
-@click.argument("right_identifier")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@run_manifest.command("diff")
+@click.argument("left_identifier")
+@click.argument("right_identifier")
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),

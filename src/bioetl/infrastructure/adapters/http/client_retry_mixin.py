@@ -156,7 +156,9 @@ class HTTPClientRetryMixin:
         return await self.circuit_breaker.call(client.request, method, url, **kwargs)
 
     def _should_continue_retry(
-        self, result: httpx.Response | _RequestAttemptOutcome, retry_state: _RetryRequestState
+        self,
+        result: httpx.Response | _RequestAttemptOutcome,
+        retry_state: _RetryRequestState,
     ) -> bool:
         """Determine if retry should continue based on attempt outcome.
 

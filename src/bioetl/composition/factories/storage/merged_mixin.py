@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar, Literal, Protocol, cast
 
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
+    from pandera.polars import DataFrameSchema
+
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
@@ -23,6 +26,23 @@ class _SilverMergedWriteProtocol(Protocol):
         records: list[JsonDict],
         primary_keys: list[str] | None = None,
         *,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
+    ) -> None: ...
+
+
+class _GoldMergedWriteProtocol(Protocol):
+    """Minimal bound-method contract for merged Gold writes."""
+
+    async def write_gold_merged(
+        self,
+        table_name: str,
+        records: list[JsonDict],
+        primary_keys: list[str] | None = None,
+        *,
+        completed_at: datetime | None = None,
+        schema: DataFrameSchema | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
@@ -123,7 +143,7 @@ class StorageAdapterMergedMixin:
         ],
         primary_keys: list[str] | None = None,
         *,
-        completed_at: object | None = None,
+        completed_at: datetime | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
@@ -145,7 +165,10 @@ class StorageAdapterMergedMixin:
         """
         composite_schema = self._COMPOSITE_GOLD_SCHEMAS.get(table_name)
 
-        await self.gold.write_gold_merged(
+        await cast(
+            _GoldMergedWriteProtocol,
+            self.gold,
+        ).write_gold_merged(
             table_name,
             records,
             primary_keys,

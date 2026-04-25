@@ -78,7 +78,14 @@ class _GoldWriterHost(Protocol):
     )
 
     async def _prepare_write_gold(
-        self, **kwargs: object
+        self,
+        *,
+        table_name: str,
+        records: list[dict[str, Any]],  # Any: Gold writer accepts heterogeneous pre-schema record payloads.
+        mode: str,
+        schema: DataFrameSchema,
+        scd_config: ScdConfig | None,
+        ingestion_ts: datetime | None,
     ) -> _PreparedGoldWriteContext: ...
 
     async def _dispatch_write(self, context: _GoldWriteDispatchContext) -> None: ...
@@ -134,7 +141,7 @@ def _resolve_active_gold_schema(schema: object) -> object:
 def _resolve_runtime_services(
     *,
     runtime_services: GoldWriterRuntimeServices | None,
-    legacy_kwargs: dict[str, Any],
+    legacy_kwargs: dict[str, Any],  # Any: legacy runtime shim forwards heterogeneous optional service objects.
 ) -> GoldWriterRuntimeServices:
     """Normalize legacy constructor kwargs into grouped Gold runtime services."""
     csv_exporter = cast(

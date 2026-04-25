@@ -96,7 +96,7 @@ class RunManifestInspectionIdentityGraphMixin:
         """Return the canonical execution identity payload for inspection output."""
         code_provenance = manifest.code_provenance
         snapshot_fingerprint = diagnostics.get("input_snapshot_identity_fingerprint")
-        return build_execution_identity_payload(
+        payload = build_execution_identity_payload(
             pipeline_name=manifest.pipeline_name,
             run_type=manifest.run_type.value,
             pipeline_version=code_provenance.pipeline_version,
@@ -110,11 +110,10 @@ class RunManifestInspectionIdentityGraphMixin:
             effective_config_artifact_id=code_provenance.effective_config_artifact_id,
             exact_replay=bool(manifest.launch_context.get("exact_replay")),
             input_snapshot_fingerprint=(
-                snapshot_fingerprint
-                if isinstance(snapshot_fingerprint, str)
-                else None
+                snapshot_fingerprint if isinstance(snapshot_fingerprint, str) else None
             ),
         )
+        return {key: value for key, value in payload.items()}
 
     @staticmethod
     def _build_degraded_runtime_anchor_payload(

@@ -18,6 +18,7 @@ from __future__ import annotations
 __all__ = ["RetentionPolicy"]
 
 import asyncio
+import os
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 
@@ -34,6 +35,22 @@ from bioetl.domain.types import JsonDict
 if TYPE_CHECKING:
     from datetime import datetime
     from pathlib import Path
+
+_DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS = 60.0
+
+
+def _resolve_deduplication_timeout_seconds() -> float:
+    """Return dedup timeout from env with a safe bounded fallback."""
+    raw_value = os.getenv("BIOETL_SILVER_DEDUP_TIMEOUT_SECONDS")
+    if raw_value is None:
+        return _DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS
+    try:
+        parsed = float(raw_value)
+    except ValueError:
+        return _DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS
+    if parsed <= 0:
+        return _DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS
+    return parsed
 
 
 def _primary_key_tuple(
@@ -59,13 +76,30 @@ class RetentionPolicy:
     Extracted from SilverWriter to improve separation of concerns.
     """
 
-    def __init__(self, base_path: str | Path) -> None:
+    def __init__(
+        self,
+        base_path: str | Path,
+        *,
+        deduplicate_timeout_seconds: float | None = None,
+    ) -> None:
         """Initialize retention manager.
 
         Args:
             base_path: Base path for Delta tables (local filesystem).
+            deduplicate_timeout_seconds:
+                Maximum time budget for silver deduplication executor work.
+                Falls back to ``BIOETL_SILVER_DEDUP_TIMEOUT_SECONDS`` env var,
+                then to a safe default.
         """
         self.base_path = str(base_path).rstrip("/")
+        timeout = (
+            deduplicate_timeout_seconds
+            if deduplicate_timeout_seconds is not None
+            else _resolve_deduplication_timeout_seconds()
+        )
+        self._deduplicate_timeout_seconds = (
+            timeout if timeout > 0 else _DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS
+        )
 
     def _get_table_path(self, table_name: str) -> str:
         """Get the filesystem path for a table.
@@ -276,7 +310,17 @@ class RetentionPolicy:
 
             return int(duplicates_removed)
 
-        result: int = await loop.run_in_executor(None, _dedup)
+        try:
+            result: int = await asyncio.wait_for(
+                loop.run_in_executor(None, _dedup),
+                timeout=self._deduplicate_timeout_seconds,
+            )
+        except TimeoutError as exc:
+            raise TimeoutError(
+                "Silver deduplication timed out "
+                f"after {self._deduplicate_timeout_seconds:.1f}s "
+                f"for table '{table_name}'"
+            ) from exc
         return result
 
     async def time_travel(

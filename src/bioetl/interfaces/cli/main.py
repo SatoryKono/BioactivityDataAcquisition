@@ -116,7 +116,9 @@ def _load_cli_command(command_name: str) -> Command | Group | None:
     module_name, attribute_name, _help_text = spec
     command = getattr(import_module(module_name), attribute_name)
     if not isinstance(command, Command):
-        raise TypeError(f"{module_name}.{attribute_name} must resolve to a Click command")
+        raise TypeError(
+            f"{module_name}.{attribute_name} must resolve to a Click command"
+        )
     if getattr(command, "name", command_name) != command_name:
         command.name = command_name
     return command

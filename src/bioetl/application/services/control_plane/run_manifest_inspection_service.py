@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
+from typing import cast
 from uuid import UUID
 
 from bioetl.application.services.control_plane._run_manifest_inspection_mixins import (

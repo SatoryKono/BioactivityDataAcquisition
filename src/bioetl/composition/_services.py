@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.composition._service_bootstraps import (
@@ -26,8 +27,8 @@ if TYPE_CHECKING:
         AuditInspectionService,
     )
     from bioetl.application.services.bronze_cleanup_service import (
-        BronzeCleanupService,
         BronzeCleanupResult,
+        BronzeCleanupService,
     )
     from bioetl.application.services.checkpoint_service import CheckpointService
     from bioetl.application.services.control_plane.run_manifest_inspection_service import (
@@ -48,8 +49,8 @@ if TYPE_CHECKING:
     )
     from bioetl.application.services.quarantine_service import QuarantineService
     from bioetl.application.services.vacuum_service import VacuumService
-    from bioetl.composition.bootstrap.cli.health import HealthServerDependencies
     from bioetl.composition import PipelineRegistry
+    from bioetl.composition.health_api import HealthServerDependenciesProtocol
     from bioetl.domain.ports import QuarantinePort
     from bioetl.domain.workflow import WorkflowConfig
 
@@ -98,7 +99,7 @@ def _ensure_registrations(registry: PipelineRegistry | None = None) -> None:
 def get_checkpoint_service() -> CheckpointService:
     """Get checkpoint administration service."""
     _ensure_registrations()
-    return cast(CheckpointService, bootstrap_checkpoint_service())
+    return cast("CheckpointService", bootstrap_checkpoint_service())
 
 
 def get_audit_service() -> AuditInspectionService:
@@ -111,13 +112,13 @@ def get_audit_service() -> AuditInspectionService:
 def get_quarantine_service() -> QuarantineService:
     """Get quarantine administration service."""
     _ensure_registrations()
-    return cast(QuarantineService, bootstrap_quarantine_service())
+    return cast("QuarantineService", bootstrap_quarantine_service())
 
 
 def get_bronze_cleanup_service() -> BronzeCleanupService:
     """Get Bronze cleanup service."""
     _ensure_registrations()
-    return cast(BronzeCleanupService, bootstrap_bronze_cleanup_service())
+    return cast("BronzeCleanupService", bootstrap_bronze_cleanup_service())
 
 
 def get_vacuum_service() -> VacuumService:
@@ -157,7 +158,7 @@ def get_pipeline_runner_service(
     """Get universal pipeline runner service."""
     _ensure_registrations(registry=registry)
     return cast(
-        PipelineRunnerService,
+        "PipelineRunnerService",
         bootstrap_pipeline_runner_service(registry=registry),
     )
 
@@ -180,7 +181,10 @@ def load_workflow_config(name: str) -> WorkflowConfig:
 def get_contract_migration_service() -> object:
     """Get the contract migration planner service."""
     _ensure_registrations()
-    bootstrap = cast(Callable[[], object], resolve_bootstrap_attr("bootstrap_contract_migration_service"))
+    bootstrap = cast(
+        "Callable[[], object]",
+        resolve_bootstrap_attr("bootstrap_contract_migration_service"),
+    )
     return bootstrap()
 
 
@@ -201,7 +205,7 @@ def get_lineage_service() -> LineageInspectionService:
 def get_health_service() -> HealthService:
     """Get provider health service."""
     _ensure_registrations()
-    return cast(HealthService, bootstrap_health_service())
+    return cast("HealthService", bootstrap_health_service())
 
 
 def get_observability_workflow_service() -> ObservabilityWorkflowService:
@@ -211,11 +215,11 @@ def get_observability_workflow_service() -> ObservabilityWorkflowService:
     return bootstrap()
 
 
-def get_health_server_dependencies() -> HealthServerDependencies:
+def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
     """Get dependencies for the health server."""
     _ensure_registrations()
     return cast(
-        HealthServerDependencies,
+        "HealthServerDependenciesProtocol",
         bootstrap_health_server_dependencies(),
     )
 
@@ -223,7 +227,7 @@ def get_health_server_dependencies() -> HealthServerDependencies:
 def get_metrics_service() -> MetricsService:
     """Get metrics administration service."""
     _ensure_registrations()
-    return cast(MetricsService, bootstrap_metrics_service())
+    return cast("MetricsService", bootstrap_metrics_service())
 
 
 def get_adr_service() -> object:
@@ -235,4 +239,4 @@ def get_adr_service() -> object:
 def get_quarantine_port() -> QuarantinePort:
     """Get the shared low-level quarantine port."""
     _ensure_registrations()
-    return cast(QuarantinePort, bootstrap_quarantine_port())
+    return cast("QuarantinePort", bootstrap_quarantine_port())

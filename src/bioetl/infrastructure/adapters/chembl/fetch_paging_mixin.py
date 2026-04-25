@@ -107,13 +107,13 @@ class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
             Limit for this page request, or None if no more records needed
         """
         if limit is None or "limit" not in params:
-            return params.get("limit")
+            return cast(int | None, params.get("limit"))
 
         remaining = limit - records_yielded
         if remaining <= 0:
             return None  # Signal to stop iteration
 
-        return min(params["limit"], remaining)
+        return min(cast(int, params["limit"]), remaining)
 
     async def _page_iterator(
         self,

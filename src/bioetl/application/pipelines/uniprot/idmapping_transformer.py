@@ -144,10 +144,13 @@ class IDMappingTransformer(BaseTransformer):
             index,
             normalized_business_data,
         )
-        return normalizer.project_normalization_findings(
-            silver_record,
-            context=context,
-            index=index,
+        return cast(
+            "SilverRecord",
+            normalizer.project_normalization_findings(
+                cast(JsonDict, silver_record),
+                context=context,
+                index=index,
+            ),
         )
 
     async def transform_pre_silver(

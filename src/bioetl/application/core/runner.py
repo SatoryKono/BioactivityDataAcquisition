@@ -12,6 +12,7 @@ from bioetl.application.core._runner_dependency_support import (
 )
 from bioetl.application.core._runner_support import PipelineRunnerSupportMixin
 from bioetl.application.core._span_helpers import (
+    _TracingProvider,
     build_pipeline_span_attributes,
     start_current_span,
 )
@@ -35,7 +36,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort, TracingPort
 
-__all__ = ["PipelineRunner"]
+__all__ = ["PipelineRunner", "PipelineRunnerDependencies"]
 
 _RUN_FAILURE_EXCEPTIONS = (
     AssertionError,
@@ -145,7 +146,7 @@ class PipelineRunner(PipelineRunnerSupportMixin):
     def _pipeline_span(self) -> Generator[Span, None, None]:
         """Context manager for the top-level pipeline OTel span."""
         with start_current_span(
-            tracing=self._tracer,
+            tracing=cast(_TracingProvider, self._tracer),
             tracer_name="bioetl.runner",
             span_name="pipeline.run",
             attributes=build_pipeline_span_attributes(

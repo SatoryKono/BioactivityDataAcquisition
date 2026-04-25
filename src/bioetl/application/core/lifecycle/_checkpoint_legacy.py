@@ -39,7 +39,7 @@ class CheckpointManager(_CheckpointManagerBase):
         return cast(
             CheckpointManager,
             CheckpointManagerService(
-                *cast(tuple[Any, ...], args), **cast(dict[str, Any], kwargs)
+                *cast(tuple[Any, ...], args), **cast(dict[str, Any], kwargs) # Any: This is a deprecated legacy compatibility alias forwarding generic args/kwargs.
             ),
         )
 

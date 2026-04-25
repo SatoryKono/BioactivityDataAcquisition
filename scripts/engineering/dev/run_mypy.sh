@@ -28,6 +28,19 @@ if [[ "$MYPY_NARROW" == "1" ]]; then
     ARGS=(--follow-imports=skip "${ARGS[@]}")
 fi
 
+HAS_CACHE_DIR=0
+for arg in "${ARGS[@]}"; do
+    if [[ "$arg" == "--cache-dir" ]]; then
+        HAS_CACHE_DIR=1
+        break
+    fi
+done
+
+if [[ "$HAS_CACHE_DIR" == "0" ]]; then
+    DEFAULT_MYPY_CACHE_DIR="${BIOETL_MYPY_CACHE_DIR:-.mypy_cache/linux}"
+    ARGS=(--cache-dir "$DEFAULT_MYPY_CACHE_DIR" "${ARGS[@]}")
+fi
+
 export UV_CACHE_DIR="${UV_CACHE_DIR:-/tmp/uv-cache}"
 export UV_LINK_MODE="${UV_LINK_MODE:-copy}"
 export BIOETL_WSL_VENV_DIR="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}"

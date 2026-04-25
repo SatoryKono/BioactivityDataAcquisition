@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -20,6 +21,7 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
+from bioetl.domain.types import BronzeRecord
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.delta.resilience import (
@@ -247,6 +249,26 @@ def _build_merged_operations(
     from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
     from bioetl.infrastructure.storage.silver.support import resolve_table_path
 
+    async def _noop_write_silver_merged_metadata(
+        *,
+        table_path: str,
+        table_name: str,
+        records: list[BronzeRecord],
+        primary_keys: list[str],
+        completed_at: datetime | None,
+        run_id: str | None,
+        sources_used: list[str] | None,
+    ) -> None:
+        del (
+            table_path,
+            table_name,
+            records,
+            primary_keys,
+            completed_at,
+            run_id,
+            sources_used,
+        )
+
     return SilverMergedOperations(
         logger=logger,
         csv_exporter=request.csv_exporter,
@@ -254,7 +276,7 @@ def _build_merged_operations(
         _resolve_table_path=lambda table_name: resolve_table_path(
             base_path, table_name
         ),
-        _write_silver_merged_metadata=lambda **_kwargs: None,  # Placeholder
+        _write_silver_merged_metadata=_noop_write_silver_merged_metadata,
     )
 
 

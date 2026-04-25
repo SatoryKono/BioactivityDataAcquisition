@@ -23,6 +23,23 @@ if ($MypyNarrow) {
     $ArgsList = @("--follow-imports=skip") + $ArgsList
 }
 
+$HasCacheDir = $false
+foreach ($Arg in $ArgsList) {
+    if ($Arg -eq "--cache-dir") {
+        $HasCacheDir = $true
+        break
+    }
+}
+
+if (-not $HasCacheDir) {
+    $DefaultMypyCacheDir = if ($env:BIOETL_MYPY_CACHE_DIR) {
+        $env:BIOETL_MYPY_CACHE_DIR
+    } else {
+        ".mypy_cache/windows"
+    }
+    $ArgsList = @("--cache-dir", $DefaultMypyCacheDir) + $ArgsList
+}
+
 if (-not $env:UV_CACHE_DIR) {
     $env:UV_CACHE_DIR = Join-Path $env:TEMP "uv-cache"
 }

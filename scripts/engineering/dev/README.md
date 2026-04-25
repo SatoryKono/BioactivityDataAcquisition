@@ -69,6 +69,12 @@ coverage:
 - `run_mypy.* --narrow` adds `--follow-imports=skip` so single-file strict
   probes do not walk the whole repository graph
 
+`run_mypy.sh` and `run_mypy.ps1` also default to platform-specific cache
+directories (`.mypy_cache/linux` and `.mypy_cache/windows`) to avoid cache
+corruption when the same checkout is used from both WSL/Linux and Windows. To
+override that behavior, pass `--cache-dir ...` explicitly or set
+`BIOETL_MYPY_CACHE_DIR`.
+
 `run_pytest.ps1` and `run_pytest.sh` both add default pytest flags unless you ask
 for help/version. Local wrappers now keep coverage opt-in so the default startup
 path stays lightweight; use `--with-coverage` or

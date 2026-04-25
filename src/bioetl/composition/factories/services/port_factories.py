@@ -5,7 +5,8 @@ Extracted from BaseServicesFactory to keep factory.py within LOC limits.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from pathlib import Path
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.composition.observability_resolution import resolve_metrics_port
 from bioetl.domain.ports import (
@@ -13,6 +14,7 @@ from bioetl.domain.ports import (
     LockPort,
     MetricsPort,
     QuarantinePort,
+    SettingsPort,
 )
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
@@ -30,6 +32,12 @@ __all__ = [
 ]
 
 
+class _StorageContextLike(Protocol):
+    """Minimal storage context required for checkpoint-port creation."""
+
+    checkpoints_path: Path
+
+
 def create_lock() -> LockPort:
     """Create in-memory lock for local deployment."""
     lock = MemoryLock()
@@ -39,7 +47,7 @@ def create_lock() -> LockPort:
     return lock
 
 
-def create_checkpoint(storage_ctx: object) -> CheckpointPort:
+def create_checkpoint(storage_ctx: _StorageContextLike) -> CheckpointPort:
     """Create local filesystem checkpoint."""
     checkpoint = LocalCheckpointAdapter(base_path=storage_ctx.checkpoints_path)
     assert isinstance(checkpoint, CheckpointPort), (
@@ -48,7 +56,7 @@ def create_checkpoint(storage_ctx: object) -> CheckpointPort:
     return checkpoint
 
 
-def create_quarantine(settings: object) -> QuarantinePort:
+def create_quarantine(settings: SettingsPort) -> QuarantinePort:
     """Create unified quarantine storage."""
     quarantine = UnifiedQuarantineAdapter(base_path=str(settings.quarantine_path))
     assert isinstance(quarantine, QuarantinePort), (
@@ -57,7 +65,7 @@ def create_quarantine(settings: object) -> QuarantinePort:
     return quarantine
 
 
-def create_metrics(settings: object) -> MetricsPort:
+def create_metrics(settings: SettingsPort) -> MetricsPort:
     """Create metrics port based on settings."""
     metrics: object = resolve_metrics_port(
         metrics=None,

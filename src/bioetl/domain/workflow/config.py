@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, fields
-from typing import TYPE_CHECKING, TypeAlias, cast
+from typing import TYPE_CHECKING, TypeAlias, TypeVar, cast
 
 from bioetl.domain.types import JsonDict
 from bioetl.domain.workflow.dag import topologically_sorted_step_ids
@@ -24,6 +24,15 @@ if TYPE_CHECKING:
 
 _RUN_OPTIONS_MULTI_FILTER_IDS = "multi_filter_ids"
 _RUN_OPTIONS_FILTER_IDS = "filter_ids"
+_RunOptionValue = TypeVar("_RunOptionValue")
+
+
+def _prefer_override(
+    current: _RunOptionValue | None,
+    override: _RunOptionValue | None,
+) -> _RunOptionValue | None:
+    """Return the override when it is set, otherwise keep the current value."""
+    return override if override is not None else current
 
 
 @dataclass(frozen=True, slots=True)
@@ -61,100 +70,72 @@ class WorkflowRunOptionsConfig:
     ) -> WorkflowRunOptionsConfig:
         """Return a merged config where non-null override values win."""
         return WorkflowRunOptionsConfig(
-            run_type=override.run_type if override.run_type is not None else self.run_type,
-            resume=override.resume if override.resume is not None else self.resume,
-            start_offset=(
-                override.start_offset
-                if override.start_offset is not None
-                else self.start_offset
+            run_type=_prefer_override(self.run_type, override.run_type),
+            resume=_prefer_override(self.resume, override.resume),
+            start_offset=_prefer_override(self.start_offset, override.start_offset),
+            limit=_prefer_override(self.limit, override.limit),
+            dry_run=_prefer_override(self.dry_run, override.dry_run),
+            input_csv=_prefer_override(self.input_csv, override.input_csv),
+            filter_column=_prefer_override(
+                self.filter_column,
+                override.filter_column,
             ),
-            limit=override.limit if override.limit is not None else self.limit,
-            dry_run=override.dry_run if override.dry_run is not None else self.dry_run,
-            input_csv=override.input_csv if override.input_csv is not None else self.input_csv,
-            filter_column=(
-                override.filter_column
-                if override.filter_column is not None
-                else self.filter_column
+            filter_field=_prefer_override(self.filter_field, override.filter_field),
+            filter_ids=_prefer_override(self.filter_ids, override.filter_ids),
+            multi_filter_ids=_prefer_override(
+                self.multi_filter_ids,
+                override.multi_filter_ids,
             ),
-            filter_field=(
-                override.filter_field
-                if override.filter_field is not None
-                else self.filter_field
+            fallback_column=_prefer_override(
+                self.fallback_column,
+                override.fallback_column,
             ),
-            filter_ids=(
-                override.filter_ids if override.filter_ids is not None else self.filter_ids
+            fallback_mapping=_prefer_override(
+                self.fallback_mapping,
+                override.fallback_mapping,
             ),
-            multi_filter_ids=(
-                override.multi_filter_ids
-                if override.multi_filter_ids is not None
-                else self.multi_filter_ids
+            vacuum_after_run=_prefer_override(
+                self.vacuum_after_run,
+                override.vacuum_after_run,
             ),
-            fallback_column=(
-                override.fallback_column
-                if override.fallback_column is not None
-                else self.fallback_column
+            vacuum_retention_days=_prefer_override(
+                self.vacuum_retention_days,
+                override.vacuum_retention_days,
             ),
-            fallback_mapping=(
-                override.fallback_mapping
-                if override.fallback_mapping is not None
-                else self.fallback_mapping
+            log_level=_prefer_override(self.log_level, override.log_level),
+            ignore_yaml_filter=_prefer_override(
+                self.ignore_yaml_filter,
+                override.ignore_yaml_filter,
             ),
-            vacuum_after_run=(
-                override.vacuum_after_run
-                if override.vacuum_after_run is not None
-                else self.vacuum_after_run
+            skip_gold=_prefer_override(self.skip_gold, override.skip_gold),
+            execution_context=_prefer_override(
+                self.execution_context,
+                override.execution_context,
             ),
-            vacuum_retention_days=(
-                override.vacuum_retention_days
-                if override.vacuum_retention_days is not None
-                else self.vacuum_retention_days
+            use_cached_bronze=_prefer_override(
+                self.use_cached_bronze,
+                override.use_cached_bronze,
             ),
-            log_level=override.log_level if override.log_level is not None else self.log_level,
-            ignore_yaml_filter=(
-                override.ignore_yaml_filter
-                if override.ignore_yaml_filter is not None
-                else self.ignore_yaml_filter
+            cached_bronze_path=_prefer_override(
+                self.cached_bronze_path,
+                override.cached_bronze_path,
             ),
-            skip_gold=override.skip_gold if override.skip_gold is not None else self.skip_gold,
-            execution_context=(
-                override.execution_context
-                if override.execution_context is not None
-                else self.execution_context
+            cached_bronze_date=_prefer_override(
+                self.cached_bronze_date,
+                override.cached_bronze_date,
             ),
-            use_cached_bronze=(
-                override.use_cached_bronze
-                if override.use_cached_bronze is not None
-                else self.use_cached_bronze
+            replay_of_run_id=_prefer_override(
+                self.replay_of_run_id,
+                override.replay_of_run_id,
             ),
-            cached_bronze_path=(
-                override.cached_bronze_path
-                if override.cached_bronze_path is not None
-                else self.cached_bronze_path
+            replay_of_manifest_id=_prefer_override(
+                self.replay_of_manifest_id,
+                override.replay_of_manifest_id,
             ),
-            cached_bronze_date=(
-                override.cached_bronze_date
-                if override.cached_bronze_date is not None
-                else self.cached_bronze_date
-            ),
-            replay_of_run_id=(
-                override.replay_of_run_id
-                if override.replay_of_run_id is not None
-                else self.replay_of_run_id
-            ),
-            replay_of_manifest_id=(
-                override.replay_of_manifest_id
-                if override.replay_of_manifest_id is not None
-                else self.replay_of_manifest_id
-            ),
-            exact_replay=(
-                override.exact_replay
-                if override.exact_replay is not None
-                else self.exact_replay
-            ),
-            enable_tracing=(
-                override.enable_tracing
-                if override.enable_tracing is not None
-                else self.enable_tracing
+            exact_replay=_prefer_override(self.exact_replay, override.exact_replay),
+            enable_tracing=_prefer_override(
+                self.enable_tracing,
+                override.enable_tracing,
             ),
         )
 

@@ -10,6 +10,7 @@ import click
 
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.domains.health.rendering import (
+    HealthResults,
     all_health_results_healthy,
     build_health_result_lines,
     build_health_server_info_lines,
@@ -26,7 +27,7 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 if TYPE_CHECKING:
     from bioetl.application.services.health_service import HealthService
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.composition.bootstrap.cli.health import HealthServerDependencies
+    from bioetl.composition.health_api import HealthServerDependenciesProtocol
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.config import Settings
 
@@ -44,7 +45,7 @@ def get_health_service() -> HealthService:
     return _impl()
 
 
-def get_health_server_dependencies() -> HealthServerDependencies:
+def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
     """Load health server dependencies through composition on demand."""
     from bioetl.composition.health_api import (
         get_health_server_dependencies as _impl,
@@ -235,7 +236,7 @@ def _execute_health_server(host: str, port: int) -> None:
             coro.close()
 
 
-async def _run_health_checks(provider: tuple[str, ...]) -> dict[str, dict[str, str]]:
+async def _run_health_checks(provider: tuple[str, ...]) -> HealthResults:
     """Execute health checks and return results as serializable dictionary.
 
     Args:
@@ -247,13 +248,13 @@ async def _run_health_checks(provider: tuple[str, ...]) -> dict[str, dict[str, s
     service = get_health_service()
     providers_list = list(provider) if provider else None
     summary = await service.check_providers(providers=providers_list)
-    results: dict[str, dict[str, str]] = summary.to_dict()
+    results: HealthResults = summary.to_dict()
     return results
 
 
 def _execute_health_checks(
     provider: tuple[str, ...],
-) -> dict[str, dict[str, str]] | None:
+) -> HealthResults | None:
     """Execute health checks with CLI error policy and return results.
 
     Args:
@@ -301,7 +302,7 @@ def _execute_health_checks(
 
 
 def _render_health_results(
-    results: dict[str, dict[str, str]],
+    results: HealthResults,
     *,
     output_json: bool,
 ) -> None:
