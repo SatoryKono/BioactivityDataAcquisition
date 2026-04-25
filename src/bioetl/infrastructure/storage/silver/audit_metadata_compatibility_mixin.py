@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.types import BronzeRecord
@@ -17,6 +17,20 @@ if TYPE_CHECKING:
     )
 
 __all__ = ["SilverWriterAuditMetadataCompatibilityMixin"]
+
+
+class _SilverAuditMetadataOps(Protocol):
+    async def _log_silver_audit(
+        self,
+        table_name: str,
+        records: list[BronzeRecord],
+        mode: SilverWriteMode,
+        *,
+        run_id: RunID | None,
+        run_type: RunType | None,
+        source_batch_id: BatchID | None,
+        ingestion_ts: datetime | None,
+    ) -> None: ...
 
 
 class SilverWriterAuditMetadataCompatibilityMixin:
@@ -41,7 +55,7 @@ class SilverWriterAuditMetadataCompatibilityMixin:
     ) -> None:
         """Delegate audit logging to the metadata service."""
         if self._metadata:
-            await cast(Any, self._metadata)._log_silver_audit(  # Any: _metadata is typed as object and its concrete type is determined at runtime.
+            await cast(_SilverAuditMetadataOps, self._metadata)._log_silver_audit(
                 table_name=table_name,
                 records=records,
                 mode=mode,

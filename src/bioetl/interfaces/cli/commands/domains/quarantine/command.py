@@ -6,6 +6,8 @@ Provides error recovery dashboard functionality (ERR-001).
 
 from __future__ import annotations
 
+from typing import cast
+
 import click
 
 from bioetl.interfaces.cli.commands.domains.quarantine._run_scope_stats import (
@@ -23,7 +25,7 @@ def get_quarantine_manager(pipeline: str) -> _QuarantineManager:
     """Load the quarantine manager through composition on demand."""
     from bioetl.composition.resources_api import get_quarantine_manager as _impl
 
-    return _impl(pipeline)
+    return cast(_QuarantineManager, _impl(pipeline))
 
 
 def get_run_manifest_service() -> RunManifestInspectionServiceProtocol:
@@ -32,14 +34,14 @@ def get_run_manifest_service() -> RunManifestInspectionServiceProtocol:
         get_run_manifest_service as _impl,
     )
 
-    return _impl()
+    return cast(RunManifestInspectionServiceProtocol, _impl())
 
 
 def get_quarantine_service() -> _QuarantineService:
     """Load the quarantine service through composition on demand."""
     from bioetl.composition.health_api import get_quarantine_service as _impl
 
-    return _impl()
+    return cast(_QuarantineService, _impl())
 
 
 @click.group()
@@ -48,15 +50,9 @@ def quarantine() -> None:
 
 
 @quarantine.command("inspect")
-@click.option(
-    "--pipeline", required=True, help="Pipeline name"
-)
-@click.option(
-    "--limit", type=int, default=100, help="Maximum records to show"
-)
-@click.option(
-    "--error-code", help="Filter by error code"
-)
+@click.option("--pipeline", required=True, help="Pipeline name")
+@click.option("--limit", type=int, default=100, help="Maximum records to show")
+@click.option("--error-code", help="Filter by error code")
 @click.option(
     "--run-id",
     help="Scope inspection to one pipeline run ID",
@@ -89,15 +85,9 @@ def quarantine_inspect(
 
 
 @quarantine.command("stats")
-@click.option(
-    "--pipeline", required=True, help="Pipeline name"
-)
-@click.option(
-    "--json", "output_json", is_flag=True, help="Output as JSON"
-)
-@click.option(
-    "--error-code", help="Scope stats to one error code"
-)
+@click.option("--pipeline", required=True, help="Pipeline name")
+@click.option("--json", "output_json", is_flag=True, help="Output as JSON")
+@click.option("--error-code", help="Scope stats to one error code")
 @click.option(
     "--run-id",
     help="Scope stats to one pipeline run ID",
@@ -157,18 +147,12 @@ def quarantine_stats(
 
 
 @quarantine.command("replay")
-@click.option(
-    "--pipeline", required=True, help="Pipeline name"
-)
-@click.option(
-    "--error-code", help="Filter by error code"
-)
+@click.option("--pipeline", required=True, help="Pipeline name")
+@click.option("--error-code", help="Filter by error code")
 @click.option(
     "--max-age-days", type=int, default=7, help="Max age of records to replay"
 )
-@click.option(
-    "--dry-run", is_flag=True, help="Show records without replaying"
-)
+@click.option("--dry-run", is_flag=True, help="Show records without replaying")
 def quarantine_replay(
     pipeline: str,
     error_code: str | None,
@@ -190,18 +174,12 @@ def quarantine_replay(
 
 
 @quarantine.command("purge")
-@click.option(
-    "--pipeline", required=True, help="Pipeline name"
-)
+@click.option("--pipeline", required=True, help="Pipeline name")
 @click.option(
     "--older-than-days", type=int, default=30, help="Delete records older than N days"
 )
-@click.option(
-    "--dry-run", is_flag=True, help="Show count without deleting"
-)
-@click.option(
-    "--force", is_flag=True, help="Skip confirmation prompt"
-)
+@click.option("--dry-run", is_flag=True, help="Show count without deleting")
+@click.option("--force", is_flag=True, help="Skip confirmation prompt")
 def quarantine_purge(
     pipeline: str,
     older_than_days: int,
@@ -223,12 +201,8 @@ def quarantine_purge(
 
 
 @quarantine.command("resolve")
-@click.option(
-    "--pipeline", required=True, help="Pipeline name"
-)
-@click.option(
-    "--payload-hash", required=True, help="Payload hash of record to resolve"
-)
+@click.option("--pipeline", required=True, help="Pipeline name")
+@click.option("--payload-hash", required=True, help="Payload hash of record to resolve")
 @click.option(
     "--status", type=click.Choice(["IGNORED", "REPROCESSED"]), default="IGNORED"
 )

@@ -120,24 +120,7 @@ class StorageAdapterWriteMixin:
             args=args,
             kwargs=kwargs,
         )
-        return await self.silver.write_silver(
-            table_name=write_request.table_name,
-            records=write_request.records,
-            primary_keys=write_request.primary_keys,
-            schema=write_request.schema,
-            mode=write_request.mode,
-            partition_cols=write_request.partition_cols,
-            on_schema_mismatch=write_request.on_schema_mismatch,
-            column_order=write_request.column_order,
-            bronze_refs=write_request.bronze_refs,
-            key_nullability_rules=write_request.key_nullability_rules,
-            run_id=write_request.run_id,
-            run_type=write_request.run_type,
-            source_batch_id=write_request.source_batch_id,
-            ingestion_ts=write_request.ingestion_ts,
-            quarantined_count=write_request.quarantined_count,
-            validation_errors=write_request.validation_errors,
-        )
+        return await self.silver.write_silver(write_request)
 
     async def write_gold(
         self,

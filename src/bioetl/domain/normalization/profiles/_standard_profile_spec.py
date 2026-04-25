@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Collection, Mapping
 from dataclasses import dataclass, field, fields
-from typing import Any
 
 from bioetl.domain.normalization.profiles._standard_profile_rule_components import (
     RuleComponentSpec,
@@ -111,7 +110,7 @@ def coerce_standard_profile_spec(
 ) -> StandardProfileSpec:
     """Build a fully-populated standard profile spec from explicit args/overrides."""
     _require_standard_profile_fields(spec, overrides)
-    resolved_values: dict[str, Any] = {  # Any: Field values are dynamically resolved from StandardProfileSpec, which contains various types.
+    resolved_values: dict[str, object] = {
         field_name: _resolve_standard_profile_value(
             field_name=field_name,
             spec=spec,

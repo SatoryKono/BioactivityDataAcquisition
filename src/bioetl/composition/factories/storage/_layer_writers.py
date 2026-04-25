@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.config.contract_policy_loader import (
@@ -46,7 +47,7 @@ def load_contract_rollout_policy(config: PipelineYamlConfig) -> ContractRolloutP
 
 @dataclass(frozen=True, slots=True)
 class _SilverLayerWriterSupport:
-    resolve_delta_writer_base_path_fn: Callable[..., object]
+    resolve_delta_writer_base_path_fn: Callable[..., Path]
     resolve_delta_writer_flat_structure_fn: Callable[..., bool]
     load_contract_rollout_policy_fn: Callable[
         [PipelineYamlConfig], ContractRolloutPolicy
@@ -112,7 +113,7 @@ def create_gold_layer_writer_impl(
     tracing: TracingPort,
     metadata_coordinator: MetadataCoordinator | None,
     audit: AuditPort,
-    resolve_delta_writer_base_path_fn: Callable[..., object],
+    resolve_delta_writer_base_path_fn: Callable[..., Path],
     resolve_delta_writer_flat_structure_fn: Callable[..., bool],
     load_contract_rollout_policy_fn: Callable[
         [PipelineYamlConfig], ContractRolloutPolicy

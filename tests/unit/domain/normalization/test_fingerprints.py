@@ -55,7 +55,7 @@ def test_execution_identity_fingerprint_matches_golden_value() -> None:
 
     assert (
         compute_execution_identity_fingerprint(payload)
-        == "ab7bface86b238e30828761b54e0423d890d7ca1c9c15e630f0ba668bb6d7677"
+        == "fd2ede3ebbd45baed981cd76fc869fde41b97722b1245c59b81eb82a265b4406"
     )
 
 

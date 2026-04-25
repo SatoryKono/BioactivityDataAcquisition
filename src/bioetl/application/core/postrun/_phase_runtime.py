@@ -5,7 +5,11 @@ from __future__ import annotations
 import time
 from collections.abc import Awaitable, Callable
 from contextlib import AbstractContextManager
-from typing import TYPE_CHECKING, Literal, TypeAlias, TypeVar
+from typing import TYPE_CHECKING, Literal, TypeVar
+
+from bioetl.application.observability.span_attribute_values import (
+    coerce_span_attribute_value,
+)
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -24,24 +28,6 @@ PostrunPhaseName = Literal[
     "final_metadata",
 ]
 _ResultT = TypeVar("_ResultT")
-_SpanAttributeValue: TypeAlias = (
-    str | bool | int | float | list[str] | list[bool] | list[int] | list[float]
-)
-
-
-def _coerce_span_attribute_value(value: object) -> _SpanAttributeValue:
-    """Normalize completion metadata to OpenTelemetry-compatible attribute values."""
-    if isinstance(value, (str, bool, int, float)):
-        return value
-    if isinstance(value, list) and all(isinstance(item, str) for item in value):
-        return value
-    if isinstance(value, list) and all(isinstance(item, bool) for item in value):
-        return value
-    if isinstance(value, list) and all(isinstance(item, int) for item in value):
-        return value
-    if isinstance(value, list) and all(isinstance(item, float) for item in value):
-        return value
-    return str(value)
 
 
 def resolve_postrun_phase_log_level(status: str) -> PostrunLogLevel:
@@ -123,7 +109,7 @@ async def run_async_postrun_phase(
             raise
         completion = on_success(result)
         for key, value in completion.span_attributes.items():
-            span.set_attribute(key, _coerce_span_attribute_value(value))
+            span.set_attribute(key, coerce_span_attribute_value(value))
         emit_phase_observability(
             phase=phase,
             status=completion.status,
@@ -159,7 +145,7 @@ def run_sync_postrun_phase(
             raise
         completion = on_success(result)
         for key, value in completion.span_attributes.items():
-            span.set_attribute(key, _coerce_span_attribute_value(value))
+            span.set_attribute(key, coerce_span_attribute_value(value))
         emit_phase_observability(
             phase=phase,
             status=completion.status,

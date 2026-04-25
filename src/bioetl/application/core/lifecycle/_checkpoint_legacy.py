@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import warnings
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
@@ -36,11 +37,12 @@ class CheckpointManager(_CheckpointManagerBase):
             DeprecationWarning,
             stacklevel=3,
         )
+        service_ctor = cast(
+            Callable[..., Any], CheckpointManagerService
+        )  # Any: Callable to allow generic args/kwargs for deprecated class.
         return cast(
             CheckpointManager,
-            CheckpointManagerService(
-                *cast(tuple[Any, ...], args), **cast(dict[str, Any], kwargs) # Any: This is a deprecated legacy compatibility alias forwarding generic args/kwargs.
-            ),
+            service_ctor(*args, **kwargs),
         )
 
     async def load_checkpoint(

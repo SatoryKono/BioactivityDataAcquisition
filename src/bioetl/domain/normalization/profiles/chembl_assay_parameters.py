@@ -74,7 +74,7 @@ _SPECIAL_RULE_COMPONENTS = {
             (
                 "Normalize governed assay-parameter type values against the shared "
                 "registry, while preserving unknown provider lexemes as uppercase "
-                "for explicit raw-vs-canonical review."
+                "for explicit raw-vs-canonical review without rejecting unknown."
             ),
         )
         for field_name in sorted(_TYPE_FIELDS)

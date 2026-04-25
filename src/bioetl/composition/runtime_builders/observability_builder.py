@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import cast
+from uuid import UUID
 
 from bioetl.composition.bootstrap.runtime.dq_bootstrap import (
     bootstrap_dq_monitor_port as _bootstrap_dq_monitor_port_impl,
@@ -41,17 +43,17 @@ __all__ = ["build_observability_bundle"]
 
 def _build_logger_bootstrapper(
     logger_factory: Callable[..., LoggerPort],
-) -> Callable[[str, RunID, str], LoggerPort]:
+) -> Callable[[str, UUID, str], LoggerPort]:
     """Build logger bootstrapper closure for canonical observability bundle."""
 
     def bootstrap_logger(
         logger_pipeline: str,
-        logger_run_id: RunID,
+        logger_run_id: UUID,
         logger_level: str,
     ) -> LoggerPort:
         return logger_factory(
             pipeline=logger_pipeline,
-            run_id=logger_run_id,
+            run_id=cast(RunID, logger_run_id),
             log_level=logger_level,
             json_format=True,
         )
@@ -134,13 +136,13 @@ def _build_dq_monitor_bootstrapper(
     *,
     dq_monitor_factory: Callable[..., DQMonitorPort],
     noop_logger_factory: Callable[[], LoggerPort],
-) -> Callable[[Settings, LoggerPort], DQMonitorPort]:
+) -> Callable[[Settings, LoggerPort | None], DQMonitorPort | None]:
     """Build DQ monitor bootstrapper closure for canonical observability bundle."""
 
     def bootstrap_dq_monitor(
         dq_settings: Settings,
-        dq_logger: LoggerPort,
-    ) -> DQMonitorPort:
+        dq_logger: LoggerPort | None,
+    ) -> DQMonitorPort | None:
         return _bootstrap_dq_monitor_port_impl(
             settings=dq_settings,
             logger=dq_logger,

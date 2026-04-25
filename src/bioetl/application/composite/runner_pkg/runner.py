@@ -61,7 +61,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.checkpoint import CompositeCheckpointState
     from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.ports import LockPort
+    from bioetl.domain.ports import ClockPort, LockPort, TracingPort
 
 
 __all__ = [
@@ -80,8 +80,10 @@ class CompositePipelineRunner(
     """Facade/orchestrator for composite pipeline lifecycle."""
 
     _lock: LockPort
+    _clock: ClockPort | None
     _key_extractor: KeyExtractorService
     _observer: CompositeLifecycleObserverService
+    _tracing: TracingPort | None
 
     def __init__(
         self,
@@ -290,14 +292,20 @@ class CompositePipelineRunner(
 
 
 class CompositePipelineRunnerService(CompositePipelineRunner):
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        config: CompositeConfig,
+        runtime: CompositeRuntimeConfig,
+        deps: CompositeRunnerDependencies,
+        run_id: str | None = None,
+    ) -> None:
         warnings.warn(
             "CompositePipelineRunnerService is deprecated and will be removed in v2.0. "
             "Use CompositePipelineRunner instead.",
             DeprecationWarning,
             stacklevel=2,
         )
-        super().__init__(*args, **kwargs)
+        super().__init__(config=config, runtime=runtime, deps=deps, run_id=run_id)
 
 
 # Also provide the reverse alias for completeness

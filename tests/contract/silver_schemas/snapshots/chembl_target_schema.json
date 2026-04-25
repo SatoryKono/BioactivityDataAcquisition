@@ -280,8 +280,8 @@
   "taxonomy_id": {
     "checks": [],
     "coerce": false,
-    "description": "NCBI Taxonomy ID (float for nullable int).",
-    "dtype": "float64",
+    "description": "NCBI Taxonomy ID.",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false

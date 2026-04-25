@@ -96,9 +96,14 @@
     "unique": false
   },
   "component_type": {
-    "checks": [],
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
     "coerce": false,
-    "description": "Component type (PROTEIN, DNA, RNA, etc.).",
+    "description": "Component type (PROTEIN, DNA, RNA).",
     "dtype": "str",
     "nullable": true,
     "required": false,

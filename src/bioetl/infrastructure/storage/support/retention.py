@@ -69,6 +69,82 @@ def _content_identity(row: JsonDict) -> str:
     return serialize_hash_identity_canonical_json(normalize_hash_identity_record(row))
 
 
+def _get_table_path(base_path: str, table_name: str) -> str:
+    """Get the filesystem path for a table."""
+    return f"{base_path}/{table_name.replace('.', '/')}"
+
+
+def _load_delta_table(table_path: str) -> DeltaTable:
+    """Load a Delta table or translate the not-found error to the domain type."""
+    try:
+        return DeltaTable(table_path)
+    except DeltaTableNotFoundError as exc:
+        raise TableNotFoundError(table_path) from exc
+
+
+def _build_table_info(table: DeltaTable) -> JsonDict:
+    """Build the normalized table-info payload from an open Delta table."""
+    return {
+        "version": table.version(),
+        "num_files": len(table.file_uris()),
+        "schema": table.schema().to_arrow(),
+        "metadata": table.metadata(),
+    }
+
+
+def _deduplicate_delta_rows(
+    table_path: str,
+    primary_keys: Sequence[str],
+) -> int:
+    """Deduplicate one Delta table using deterministic content identity."""
+    import pyarrow as pa
+    from deltalake import DeltaTable as runtime_delta_table
+    from deltalake import write_deltalake
+
+    try:
+        table = runtime_delta_table(table_path).to_pyarrow_table()
+    except DeltaTableNotFoundError as exc:
+        raise TableNotFoundError(table_path) from exc
+    total_before = table.num_rows
+    if total_before == 0:
+        return 0
+
+    ranked_rows = sorted(
+        (
+            (
+                _primary_key_tuple(row, primary_keys),
+                _content_identity(row),
+                row,
+            )
+            for row in table.to_pylist()
+        ),
+        key=lambda item: (item[0], item[1]),
+    )
+
+    seen_exact_keys: set[tuple[tuple[object, ...], str]] = set()
+    seen_primary_keys: set[tuple[object, ...]] = set()
+    deduped_rows: list[JsonDict] = []
+    for primary_key, content_identity, row in ranked_rows:
+        exact_key = (primary_key, content_identity)
+        if exact_key in seen_exact_keys:
+            continue
+        seen_exact_keys.add(exact_key)
+        if primary_key in seen_primary_keys:
+            continue
+        seen_primary_keys.add(primary_key)
+        deduped_rows.append(row)
+
+    duplicates_removed = total_before - len(deduped_rows)
+    if duplicates_removed > 0:
+        write_deltalake(
+            table_or_uri=table_path,
+            data=pa.Table.from_pylist(deduped_rows, schema=table.schema),
+            mode="overwrite",
+            schema_mode="overwrite",
+        )
+    return int(duplicates_removed)
+
+
 class RetentionPolicy:
     """Manager for Delta table retention and maintenance operations.
 
@@ -101,17 +177,6 @@ class RetentionPolicy:
             timeout if timeout > 0 else _DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS
         )
 
-    def _get_table_path(self, table_name: str) -> str:
-        """Get the filesystem path for a table.
-
-        Args:
-            table_name: Table name (e.g., 'chembl.activity' or 'chembl_activity').
-
-        Returns:
-            Path string to the table directory.
-        """
-        return f"{self.base_path}/{table_name.replace('.', '/')}"
-
     async def vacuum(
         self,
         table_name: str,
@@ -134,19 +199,13 @@ class RetentionPolicy:
         Raises:
             TableNotFoundError: If table does not exist.
         """
-        table_path = self._get_table_path(table_name)
+        table_path = _get_table_path(self.base_path, table_name)
         loop = asyncio.get_running_loop()
-        try:
-            dt = await loop.run_in_executor(
-                None,
-                lambda: DeltaTable(table_path),
-            )
-            return await loop.run_in_executor(
-                None,
-                lambda: dt.vacuum(retention_hours=retention_hours, dry_run=dry_run),
-            )
-        except DeltaTableNotFoundError as e:
-            raise TableNotFoundError(table_path) from e
+        dt = await loop.run_in_executor(None, lambda: _load_delta_table(table_path))
+        return await loop.run_in_executor(
+            None,
+            lambda: dt.vacuum(retention_hours=retention_hours, dry_run=dry_run),
+        )
 
     async def optimize(
         self,
@@ -179,19 +238,13 @@ class RetentionPolicy:
         """
         # Note: target_size reserved for future delta-rs API support
         _ = target_size  # Suppress unused variable warning
-        table_path = self._get_table_path(table_name)
+        table_path = _get_table_path(self.base_path, table_name)
         loop = asyncio.get_running_loop()
         filters = partition_filters  # Capture for lambda closure
-        try:
-            dt = await loop.run_in_executor(
-                None,
-                lambda: DeltaTable(table_path),
-            )
-            return await loop.run_in_executor(
-                None, lambda: dt.optimize.compact(partition_filters=filters)
-            )
-        except DeltaTableNotFoundError as e:
-            raise TableNotFoundError(table_path) from e
+        dt = await loop.run_in_executor(None, lambda: _load_delta_table(table_path))
+        return await loop.run_in_executor(
+            None, lambda: dt.optimize.compact(partition_filters=filters)
+        )
 
     async def get_table_info(
         self, table_name: str
@@ -211,21 +264,10 @@ class RetentionPolicy:
         Raises:
             TableNotFoundError: If table does not exist.
         """
-        table_path = self._get_table_path(table_name)
+        table_path = _get_table_path(self.base_path, table_name)
         loop = asyncio.get_running_loop()
-        try:
-            dt = await loop.run_in_executor(
-                None,
-                lambda: DeltaTable(table_path),
-            )
-            return {
-                "version": dt.version(),
-                "num_files": len(dt.file_uris()),
-                "schema": dt.schema().to_arrow(),
-                "metadata": dt.metadata(),
-            }
-        except DeltaTableNotFoundError as e:
-            raise TableNotFoundError(table_path) from e
+        dt = await loop.run_in_executor(None, lambda: _load_delta_table(table_path))
+        return _build_table_info(dt)
 
     async def deduplicate_silver(
         self,
@@ -254,65 +296,14 @@ class RetentionPolicy:
         Raises:
             TableNotFoundError: If table does not exist.
         """
-        table_path = self._get_table_path(table_name)
+        table_path = _get_table_path(self.base_path, table_name)
         loop = asyncio.get_running_loop()
-
-        def _dedup() -> int:
-            import pyarrow as pa
-            from deltalake import DeltaTable as DT
-            from deltalake import write_deltalake
-
-            try:
-                dt = DT(table_path)
-            except DeltaTableNotFoundError as exc:
-                raise TableNotFoundError(table_path) from exc
-
-            table = dt.to_pyarrow_table()
-            total_before = table.num_rows
-            if total_before == 0:
-                return 0
-
-            ranked_rows = sorted(
-                (
-                    (
-                        _primary_key_tuple(row, primary_keys),
-                        _content_identity(row),
-                        row,
-                    )
-                    for row in table.to_pylist()
-                ),
-                key=lambda item: (item[0], item[1]),
-            )
-
-            seen_exact_keys: set[tuple[tuple[object, ...], str]] = set()
-            seen_primary_keys: set[tuple[object, ...]] = set()
-            deduped_rows: list[JsonDict] = []
-            for primary_key, content_identity, row in ranked_rows:
-                exact_key = (primary_key, content_identity)
-                if exact_key in seen_exact_keys:
-                    continue
-                seen_exact_keys.add(exact_key)
-                if primary_key in seen_primary_keys:
-                    continue
-                seen_primary_keys.add(primary_key)
-                deduped_rows.append(row)
-
-            deduped = pa.Table.from_pylist(deduped_rows, schema=table.schema)
-            duplicates_removed = total_before - len(deduped_rows)
-
-            if duplicates_removed > 0:
-                write_deltalake(
-                    table_or_uri=table_path,
-                    data=deduped,
-                    mode="overwrite",
-                    schema_mode="overwrite",
-                )
-
-            return int(duplicates_removed)
-
         try:
             result: int = await asyncio.wait_for(
-                loop.run_in_executor(None, _dedup),
+                loop.run_in_executor(
+                    None,
+                    lambda: _deduplicate_delta_rows(table_path, primary_keys),
+                ),
                 timeout=self._deduplicate_timeout_seconds,
             )
         except TimeoutError as exc:
@@ -351,7 +342,7 @@ class RetentionPolicy:
         if version is not None and timestamp is not None:
             raise ValueError("Specify either version or timestamp, not both")
 
-        table_path = self._get_table_path(table_name)
+        table_path = _get_table_path(self.base_path, table_name)
         loop = asyncio.get_running_loop()
 
         try:

@@ -159,6 +159,7 @@ class TestQuarantineInspect:
         mock_quarantine_manager.inspect.assert_called_once_with(
             limit=100,
             error_code="DQ_MISSING_FIELD",
+            run_id=None,
         )
         assert result.exit_code == 0
 

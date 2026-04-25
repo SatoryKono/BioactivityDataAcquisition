@@ -47,6 +47,9 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
     from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.schemas.pipeline_contract_policy import (
+        PipelineContractPolicy,
+    )
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -135,7 +138,10 @@ def resolve_delta_writer_flat_structure(
     )
 
 
-def load_pipeline_contract_policy(provider: str, entity: str):
+def load_pipeline_contract_policy(
+    provider: str,
+    entity: str,
+) -> PipelineContractPolicy:
     """Return the pipeline contract policy loader used by storage assembly."""
     return _load_pipeline_contract_policy(provider, entity)
 

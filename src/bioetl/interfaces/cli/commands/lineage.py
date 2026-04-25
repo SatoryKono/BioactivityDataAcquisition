@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -32,7 +32,7 @@ def get_lineage_service() -> LineageInspectionService:
     """Load the lineage inspection service through composition on demand."""
     from bioetl.composition.control_plane_api import get_lineage_service as _impl
 
-    return _impl()
+    return cast("LineageInspectionService", _impl())
 
 
 def _render_node_lines(nodes: list[object]) -> list[str]:
@@ -261,12 +261,8 @@ def trace_command(dataset_ref: str, output_format: str) -> None:
 
 
 @lineage.command("explain")
-@click.option(
-    "--run-id", default=None, help="Resolve lineage by RUN_ID"
-)
-@click.option(
-    "--manifest-id", default=None, help="Resolve lineage by MANIFEST_ID"
-)
+@click.option("--run-id", default=None, help="Resolve lineage by RUN_ID")
+@click.option("--manifest-id", default=None, help="Resolve lineage by MANIFEST_ID")
 @click.option(
     "--format",
     "output_format",

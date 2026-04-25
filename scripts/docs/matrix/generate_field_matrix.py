@@ -57,7 +57,8 @@ def _current_normalization_name(*, field_name: str, normalizer_name: str) -> str
     """Return the display name used by the shipped field-matrix contract."""
     if (
         field_name == "activity_properties"
-        and normalizer_name == "normalize_profile_json_string"
+        and normalizer_name
+        in {"normalize_profile_json_string", "normalize_profile_json_string_strict"}
     ):
         return "_normalize_json_string"
     return normalizer_name

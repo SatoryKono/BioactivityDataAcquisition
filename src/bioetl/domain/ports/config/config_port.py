@@ -22,21 +22,55 @@ __all__ = [
 class PipelineSettingsPort(Protocol):
     """Protocol for pipeline-specific settings."""
 
-    batch_size: int
-    relaxed_dq: bool
+    @property
+    def batch_size(self) -> int:
+        """Configured batch size."""
+        ...
+
+    @property
+    def relaxed_dq(self) -> bool:
+        """Whether relaxed data-quality mode is enabled."""
+        ...
 
 
 @runtime_checkable
 class SettingsPort(Protocol):
     """Protocol for application settings."""
 
-    env: str
-    data_dir: str | Path
-    debug: bool
-    test_mode: bool
-    metrics_enabled: bool
-    metrics_port: int
-    pipeline: PipelineSettingsPort
+    @property
+    def env(self) -> str:
+        """Deployment environment."""
+        ...
+
+    @property
+    def data_dir(self) -> str | Path:
+        """Base data directory."""
+        ...
+
+    @property
+    def debug(self) -> bool:
+        """Whether debug mode is enabled."""
+        ...
+
+    @property
+    def test_mode(self) -> bool:
+        """Whether test mode is enabled."""
+        ...
+
+    @property
+    def metrics_enabled(self) -> bool:
+        """Whether metrics are enabled."""
+        ...
+
+    @property
+    def metrics_port(self) -> int:
+        """Metrics port number."""
+        ...
+
+    @property
+    def pipeline(self) -> PipelineSettingsPort:
+        """Pipeline-specific settings."""
+        ...
 
     @property
     def bronze_path(self) -> str | Path:

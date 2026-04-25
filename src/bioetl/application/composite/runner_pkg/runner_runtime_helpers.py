@@ -157,7 +157,7 @@ def resolve_original_run_id(
 ) -> str | None:
     """Resolve the original run ID retained for resumed composite diagnostics."""
     if runtime.resume and state.is_resumable and state.run_id != current_run_id:
-        return cast(str, state.run_id)
+        return state.run_id
     return None
 
 

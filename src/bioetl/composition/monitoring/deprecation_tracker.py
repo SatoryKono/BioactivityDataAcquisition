@@ -28,8 +28,7 @@ def track_deprecated_class(
     """Decorator to track usage of deprecated classes."""
 
     def decorator(cls: type[T]) -> type[T]:
-        cls_any = cast(Any, cls)  # Any: Necessary to allow dynamic modification of __init__ method on a generic type.
-        original_init = cast(Callable[..., None], cls_any.__init__)
+        original_init = cast(Callable[..., None], cls.__init__)
 
         def new_init(
             self: T,
@@ -48,7 +47,7 @@ def track_deprecated_class(
             original_init(self, *args, **kwargs)
 
         # Replace init method
-        cls_any.__init__ = new_init
+        setattr(cls, "__init__", new_init)
 
         return cls
 

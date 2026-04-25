@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.wiring.factory import PipelineService
 from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
@@ -33,10 +33,7 @@ from bioetl.composition.factories.services.common_service_wiring import (
     resolve_tracer,
 )
 from bioetl.composition.factories.services.port_factories import (
-    create_checkpoint,
-    create_lock,
     create_metrics,
-    create_quarantine,
 )
 from bioetl.composition.factories.storage import StorageFactory
 from bioetl.domain.types import JsonDict
@@ -53,6 +50,7 @@ if TYPE_CHECKING:
         MetricsPort,
         QuarantinePort,
         SilverValidatorPort,
+        SettingsPort,
         TracingPort,
     )
     from bioetl.infrastructure.config import Settings
@@ -73,7 +71,7 @@ class BaseServicesFactory:
     @staticmethod
     def _create_metrics(settings: Settings) -> MetricsPort:
         """Compatibility wrapper delegating metrics creation to port factories."""
-        return create_metrics(settings)
+        return create_metrics(cast("SettingsPort", settings))
 
     @classmethod
     def create_common_services(
@@ -104,11 +102,7 @@ class BaseServicesFactory:
                 metadata_coordinator=metadata_coordinator,
                 silver_validator=silver_validator,
                 create_dq_services_fn=cls._create_dq_services,
-                create_metrics_fn=create_metrics,
                 storage_factory=StorageFactory,
-                create_lock_fn=create_lock,
-                create_checkpoint_fn=create_checkpoint,
-                create_quarantine_fn=create_quarantine,
             )
         )
         return assemble_pipeline_service(

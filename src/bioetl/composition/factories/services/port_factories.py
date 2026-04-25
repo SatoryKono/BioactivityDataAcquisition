@@ -35,7 +35,8 @@ __all__ = [
 class _StorageContextLike(Protocol):
     """Minimal storage context required for checkpoint-port creation."""
 
-    checkpoints_path: Path
+    @property
+    def checkpoints_path(self) -> Path: ...
 
 
 def create_lock() -> LockPort:

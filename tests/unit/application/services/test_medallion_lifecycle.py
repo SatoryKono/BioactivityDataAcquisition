@@ -534,7 +534,6 @@ class TestMedallionLifecycleServiceFinalizeRun:
         storage.clear_silver = AsyncMock(return_value=0)
         storage.clear_gold = AsyncMock(return_value=0)
         storage.vacuum = AsyncMock(return_value=42)
-        storage.optimize = AsyncMock()  # Add optimize mock
         return storage
 
     @pytest.fixture
@@ -598,13 +597,12 @@ class TestMedallionLifecycleServiceFinalizeRun:
         assert result.silver_files_removed == 0
         assert result.gold_files_removed == 0
         mock_storage_with_vacuum.vacuum.assert_not_called()
-        mock_storage_with_vacuum.optimize.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_finalize_executes_in_dry_run(
         self, mock_storage_with_vacuum, mock_logger, pipeline_config
     ):
-        """finalize_run executes optimize with dry_run=True."""
+        """finalize_run executes vacuum with dry_run=True."""
         from bioetl.domain.config import RuntimeConfig
         from bioetl.domain.types import RunType
 
@@ -621,29 +619,29 @@ class TestMedallionLifecycleServiceFinalizeRun:
         result = await service.finalize_run(config=pipeline_config, runtime=runtime)
 
         assert result.skipped is False
-        # Should call optimize with dry_run=True
+        # Should call vacuum with dry_run=True
         # Called twice: once for Silver ("test_silver"), once for Gold (default "chembl.activity")
-        mock_storage_with_vacuum.optimize.assert_any_call(
+        mock_storage_with_vacuum.vacuum.assert_any_call(
             table_name="test_silver",
             retention_hours=168,
             dry_run=True,
         )
-        mock_storage_with_vacuum.optimize.assert_any_call(
+        mock_storage_with_vacuum.vacuum.assert_any_call(
             table_name="chembl.activity",
             retention_hours=168,
             dry_run=True,
         )
-        assert mock_storage_with_vacuum.optimize.call_count == 2
+        assert mock_storage_with_vacuum.vacuum.call_count == 2
 
     @pytest.mark.asyncio
-    async def test_finalize_calls_optimize(
+    async def test_finalize_calls_vacuum(
         self,
         mock_storage_with_vacuum,
         mock_logger,
         pipeline_config,
         runtime_config_vacuum_enabled,
     ):
-        """finalize_run calls optimize correctly."""
+        """finalize_run calls vacuum correctly."""
         service = MedallionLifecycleService(
             storage=mock_storage_with_vacuum, logger=mock_logger
         )
@@ -657,30 +655,30 @@ class TestMedallionLifecycleServiceFinalizeRun:
         assert result.silver_files_removed == 0
         assert result.gold_files_removed == 0
 
-        # Verify optimize call
+        # Verify vacuum call
         # Called twice: once for Silver ("test_silver"), once for Gold (default "chembl.activity")
-        mock_storage_with_vacuum.optimize.assert_any_call(
+        mock_storage_with_vacuum.vacuum.assert_any_call(
             table_name="test_silver",
             retention_hours=168,
             dry_run=False,
         )
-        mock_storage_with_vacuum.optimize.assert_any_call(
+        mock_storage_with_vacuum.vacuum.assert_any_call(
             table_name="chembl.activity",
             retention_hours=168,
             dry_run=False,
         )
-        assert mock_storage_with_vacuum.optimize.call_count == 2
+        assert mock_storage_with_vacuum.vacuum.call_count == 2
 
     @pytest.mark.asyncio
-    async def test_finalize_handles_optimize_error_gracefully(
+    async def test_finalize_handles_vacuum_error_gracefully(
         self,
         mock_storage_with_vacuum,
         mock_logger,
         pipeline_config,
         runtime_config_vacuum_enabled,
     ):
-        """finalize_run handles optimize errors gracefully."""
-        mock_storage_with_vacuum.optimize.side_effect = RuntimeError("Optimize failed")
+        """finalize_run handles vacuum errors gracefully."""
+        mock_storage_with_vacuum.vacuum.side_effect = RuntimeError("Vacuum failed")
         service = MedallionLifecycleService(
             storage=mock_storage_with_vacuum, logger=mock_logger
         )

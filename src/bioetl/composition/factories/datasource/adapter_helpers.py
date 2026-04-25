@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import cast
 
 from bioetl.composition.observability_resolution import resolve_metrics_port
 from bioetl.domain.ports import (
@@ -128,7 +129,10 @@ class AdapterHelpersFactory:
         metrics_port = resolve_metrics_port(metrics=metrics)
         adapter_metrics = AdapterMetricsRecorder(metrics_port, provider)
         request_collector = APIRequestCollector()
-        error_handler = ErrorService(logger=logger, metrics=metrics_port)
+        error_handler = cast(
+            ErrorHandlerPort,
+            ErrorService(logger=logger, metrics=metrics_port),
+        )
         fallback_fetch_service = FallbackFetchOrchestratorService(adapter_metrics)
         return AdapterHelperServices(
             metrics=metrics_port,
@@ -160,7 +164,10 @@ class AdapterHelpersFactory:
         del provider
         metrics_port = resolve_metrics_port(metrics=metrics)
         request_collector = APIRequestCollector()
-        error_handler = ErrorService(logger=logger, metrics=metrics_port)
+        error_handler = cast(
+            ErrorHandlerPort,
+            ErrorService(logger=logger, metrics=metrics_port),
+        )
         return SyncAdapterHelperServices(
             metrics=metrics_port,
             error_handler=error_handler,
