@@ -16,7 +16,6 @@ from __future__ import annotations
 
 __all__ = ["QuarantineRecord", "QuarantineService"]
 
-from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING

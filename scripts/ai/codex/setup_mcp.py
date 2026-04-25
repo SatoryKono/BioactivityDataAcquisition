@@ -27,7 +27,9 @@ def _wrapper_command(script_name: str, workspace_root: Path) -> dict[str, Any]:
     shell = "powershell" if is_windows else "bash"
     suffix = ".ps1" if is_windows else ".sh"
     wrapper = (workspace_root / "scripts/ai/mcp" / script_name).with_suffix(suffix)
-    return {"command": shell, "args": [str(wrapper.resolve())]}
+    resolved_wrapper = wrapper.resolve()
+    wrapper_arg = str(resolved_wrapper)
+    return {"command": shell, "args": [wrapper_arg]}
 
 
 def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:

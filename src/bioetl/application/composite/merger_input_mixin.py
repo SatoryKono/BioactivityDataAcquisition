@@ -20,7 +20,6 @@ from bioetl.domain.ports import MergedStoragePort, SilverStoragePort
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort
-    from bioetl.domain.types import BronzeRecord
 
 
 @dataclass(frozen=True)
@@ -160,7 +159,14 @@ class _MergeInputLoaderMixin:
         storage_table = (
             table.removeprefix("silver/") if table.startswith("silver/") else table
         )
-        records = await self._silver_reader.read_silver(storage_table)
+        silver_reader = getattr(self, "_silver_reader", None)
+        if silver_reader is None and not hasattr(self, "_silver_reader"):
+            silver_reader = self._storage
+        if silver_reader is None:
+            raise RuntimeError(
+                f"Reading Silver table {table} requires delta_reader or silver_reader"
+            )
+        records = await silver_reader.read_silver(storage_table)
         if not records:
             return pl.DataFrame()
         return pl.from_dicts(records)

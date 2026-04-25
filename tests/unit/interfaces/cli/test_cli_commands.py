@@ -979,7 +979,7 @@ class TestQuarantineInspectCommand:
 
         assert result.exit_code == 0
         mock_quarantine_manager.inspect.assert_called_once_with(
-            limit=100, error_code=None, run_id=None
+            limit=100, error_code=None
         )
 
     def test_quarantine_inspect_with_custom_limit(

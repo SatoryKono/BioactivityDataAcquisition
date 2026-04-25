@@ -7,7 +7,6 @@ Note: Uses in-memory locking - operations only affect current process.
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
@@ -36,8 +35,7 @@ def get_lock_service() -> LockService:
     """Load the lock service through composition on demand."""
     from bioetl.composition.control_plane_api import get_lock_service as _impl
 
-    impl = cast("Callable[[], LockService]", _impl)
-    return impl()
+    return _impl()
 
 
 @lock.command("release")

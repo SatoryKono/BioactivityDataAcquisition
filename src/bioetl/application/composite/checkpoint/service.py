@@ -6,7 +6,8 @@ import asyncio
 import warnings
 from collections.abc import Callable
 from dataclasses import dataclass, fields
-from typing import Any
+from typing import TypedDict, cast
+
 from bioetl.application.composite.checkpoint._anchor_context import (
     ExpectedCheckpointContext,
     create_expected_checkpoint_context,
@@ -77,14 +78,33 @@ _CHECKPOINT_CONTEXT_FIELD_NAMES = tuple(
 )
 
 
+class _CompositeCheckpointServiceContextKwargs(TypedDict):
+    composite_name: str
+    run_id: str
+    storage: CompositeCheckpointPort
+    logger: LoggerPort
+    resume: bool
+    stale_checkpoint_threshold_hours: float | None
+    expected_effective_config_hash: str | None
+    expected_effective_config_artifact_id: str | None
+    expected_execution_fingerprint: str | None
+    expected_dq_contract_compatibility_hash: str | None
+    expected_contract_ref: str | None
+    expected_contract_version: str | None
+    expected_manifest_id: str | None
+    run_ledger_port: RunLedgerPort | None
+    metrics: MetricsPort | None
+    clock: ClockPort | None
+    load_service_factory: Callable[..., CompositeCheckpointLoadService]
+    persistence_service_factory: Callable[..., CompositeCheckpointPersistenceService]
+
+
 def _resolve_checkpoint_init_value(
     *,
     field_name: str,
     init: CompositeCheckpointServiceContext | None,
-    overrides: dict[
-        str, Any
-    ],  # Any: Arbitrary overrides for checkpoint context parameters.
-) -> Any:  # Any: Return type can be any value from checkpoint context parameters.
+    overrides: dict[str, object],
+) -> object:
     if field_name in overrides:
         return overrides[field_name]
     if field_name in _CHECKPOINT_INIT_OPTIONAL_DEFAULTS and init is None:
@@ -98,9 +118,7 @@ def _resolve_checkpoint_init_value(
 
 def _coerce_checkpoint_service_context(
     init: CompositeCheckpointServiceContext | None,
-    overrides: dict[
-        str, Any
-    ],  # Any: Arbitrary overrides for checkpoint context parameters.
+    overrides: dict[str, object],
 ) -> CompositeCheckpointServiceContext:
     for field_name in _CHECKPOINT_INIT_REQUIRED_FIELDS:
         _resolve_checkpoint_init_value(
@@ -108,9 +126,7 @@ def _coerce_checkpoint_service_context(
             init=init,
             overrides=overrides,
         )
-    resolved_values: dict[
-        str, Any
-    ] = {  # Any: Field values are dynamically resolved from CompositeCheckpointServiceContext, which contains various types.
+    resolved_values: dict[str, object] = {
         field_name: _resolve_checkpoint_init_value(
             field_name=field_name,
             init=init,
@@ -118,7 +134,11 @@ def _coerce_checkpoint_service_context(
         )
         for field_name in _CHECKPOINT_CONTEXT_FIELD_NAMES
     }
-    return CompositeCheckpointServiceContext(**resolved_values)
+    resolved_values["composite_name"] = str(resolved_values["composite_name"])
+    resolved_values["run_id"] = str(resolved_values["run_id"])
+    return CompositeCheckpointServiceContext(
+        **cast(_CompositeCheckpointServiceContextKwargs, resolved_values)
+    )
 
 
 class CompositeCheckpointService:

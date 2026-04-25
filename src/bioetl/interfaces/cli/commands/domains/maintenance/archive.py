@@ -6,7 +6,8 @@ Implements table archival to cold storage.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from collections.abc import Callable
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -35,7 +36,8 @@ def get_lifecycle_service() -> MedallionLifecycleService:
     """Load the lifecycle service through composition on demand."""
     from bioetl.composition.resources_api import get_lifecycle_service as _impl
 
-    return _impl()
+    impl = cast("Callable[[], MedallionLifecycleService]", _impl)
+    return impl()
 
 
 def _handle_archive_failure(
@@ -63,10 +65,10 @@ def _handle_archive_failure(
     )
 
 
-@click.command("archive")  # type: ignore[untyped-decorator]
-@click.argument("table")  # type: ignore[untyped-decorator]
-@click.argument("target_path")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@click.command("archive")
+@click.argument("table")
+@click.argument("target_path")
+@click.option(
     "--remove-source",
     is_flag=True,
     help="Remove source table after archiving",

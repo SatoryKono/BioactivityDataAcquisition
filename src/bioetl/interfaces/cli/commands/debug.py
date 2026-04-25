@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import click
 
@@ -18,6 +18,9 @@ from bioetl.interfaces.cli.formatters import echo_error, echo_info
 if TYPE_CHECKING:
     from bioetl.application.services import RunOptions, RunResult
     from bioetl.application.services.pipeline_debug_service import DebugAbortError
+    from bioetl.application.services.pipeline_runner_service import (
+        PipelineRunnerService,
+    )
     from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.domain.ports import StageBreakpoint
 
@@ -38,21 +41,21 @@ def _load_stage_breakpoint() -> type[StageBreakpoint]:
     """Resolve StageBreakpoint lazily to avoid command import fan-out."""
     from bioetl.domain.ports import StageBreakpoint
 
-    return cast(type[StageBreakpoint], StageBreakpoint)
+    return StageBreakpoint
 
 
 def _load_run_options_type() -> type[RunOptions]:
     """Resolve RunOptions lazily to keep CLI imports lightweight."""
     from bioetl.application.services import RunOptions
 
-    return cast(type[RunOptions], RunOptions)
+    return RunOptions
 
 
 def _load_debug_abort_error_type() -> type[DebugAbortError]:
     """Resolve DebugAbortError lazily to keep CLI imports lightweight."""
     from bioetl.application.services.pipeline_debug_service import DebugAbortError
 
-    return cast(type[DebugAbortError], DebugAbortError)
+    return DebugAbortError
 
 
 def _resolve_context_registry(
@@ -76,48 +79,48 @@ def _validate_pipeline_name(
         validate_pipeline_name,
     )
 
-    return cast(str, validate_pipeline_name(click_context, param, value))
+    return validate_pipeline_name(click_context, param, value)
 
 
 def get_pipeline_runner_service(
     registry: PipelineRegistry | None = None,
-) -> object:
+) -> PipelineRunnerService:
     """Load the pipeline runner service through composition on demand."""
     from bioetl.composition.execution_api import get_pipeline_runner_service as _impl
 
     return _impl(registry=registry)
 
 
-@click.command()  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@click.command()
+@click.option(
     "--pipeline",
     callback=_validate_pipeline_name,
     required=True,
     help="Pipeline to debug",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--breakpoints",
     type=str,
     default=None,
     help=f"Comma-separated breakpoints: {', '.join(_BREAKPOINT_CHOICES)}. "
     "Default: all breakpoints enabled.",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--limit", type=int, default=10, help="Max records to process (default: 10)"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--mode",
     type=click.Choice(["interactive", "log"]),
     default="interactive",
     help="Debug mode: interactive (CLI prompts) or log (auto-continue with logging)",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--run-type",
     type=click.Choice(["incremental", "backfill", "rebuild"]),
     default="incremental",
     help="Type of run",
 )
-@click.pass_context  # type: ignore[untyped-decorator]
+@click.pass_context
 def debug(
     ctx: click.Context,
     pipeline: str,

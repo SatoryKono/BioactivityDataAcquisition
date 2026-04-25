@@ -55,9 +55,9 @@ if TYPE_CHECKING:
 
 
 class _PyArrowComputeModule(Protocol):
-    def equal(self, left: object, right: object) -> "BooleanArray": ...
+    def equal(self, left: object, right: object) -> BooleanArray: ...
 
-    def and_(self, left: object, right: object) -> "BooleanArray": ...
+    def and_(self, left: object, right: object) -> BooleanArray: ...
 
 
 def _require_pyarrow_compute() -> _PyArrowComputeModule:
@@ -70,12 +70,12 @@ def _require_pyarrow_compute() -> _PyArrowComputeModule:
     return cast(_PyArrowComputeModule, pc)
 
 
-def _equal_mask(left: object, right: object) -> "BooleanArray":
+def _equal_mask(left: object, right: object) -> BooleanArray:
     compute = _require_pyarrow_compute()
     return cast("BooleanArray", compute.equal(cast("Array", left), right))
 
 
-def _and_mask(left: object, right: object) -> "BooleanArray":
+def _and_mask(left: object, right: object) -> BooleanArray:
     compute = _require_pyarrow_compute()
     return cast("BooleanArray", compute.and_(left, right))
 

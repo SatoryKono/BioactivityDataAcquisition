@@ -46,8 +46,8 @@ def track_deprecated_class(
             # Call original init
             original_init(self, *args, **kwargs)
 
-        # Replace init method
-        setattr(cls, "__init__", new_init)
+        # Replace init method on the class object itself.
+        cls.__init__ = new_init  # type: ignore[assignment]
 
         return cls
 

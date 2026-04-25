@@ -4,10 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
-from bioetl.domain.ports import (
-    SilverWriteRequest,
-    coerce_silver_write_request,
-)
+from bioetl.domain.ports import SilverWriteRequest
 from bioetl.domain.types import JsonDict, ScdConfig
 
 if TYPE_CHECKING:
@@ -115,12 +112,11 @@ class StorageAdapterWriteMixin:
             Lock validation is performed at Application layer (BatchWriter)
             per RULES.md §4.6 Safety Guard.
         """
-        write_request = coerce_silver_write_request(
+        return await self.silver.write_silver(
             request,
-            args=args,
-            kwargs=kwargs,
+            *args,
+            **kwargs,
         )
-        return await self.silver.write_silver(write_request)
 
     async def write_gold(
         self,

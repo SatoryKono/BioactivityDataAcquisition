@@ -21,8 +21,9 @@ from bioetl.interfaces.cli.commands.inspection_output import (
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
 if TYPE_CHECKING:
-    from bioetl.application.services import ContractMigrationService
     from collections.abc import Callable
+
+    from bioetl.application.services import ContractMigrationService
 
 __all__ = [
     "get_contract_migration_service",

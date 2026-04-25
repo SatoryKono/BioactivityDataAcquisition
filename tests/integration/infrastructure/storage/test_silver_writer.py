@@ -435,6 +435,79 @@ async def test_write_silver_dual_write_routes_to_all_versioned_tables(
 
 
 @pytest.mark.asyncio
+async def test_write_silver_dual_write_accepts_runtime_services_without_logger(
+    temp_delta_path: str,
+    noop_logger,
+) -> None:
+    """Runtime services should fall back to a no-op logger for direct test wiring."""
+    writer = SilverWriter(
+        base_path=temp_delta_path,
+        logger=noop_logger,
+        runtime_services=build_silver_writer_runtime_services(
+            SilverWriterRuntimeServicesRequest(
+                csv_exporter=None,
+                tracing=None,
+                write_policy=None,
+                metrics=None,
+                audit=None,
+                logger=None,
+                silver_validator=None,
+                metadata_writer=None,
+                metadata_coordinator=None,
+                lineage_store=None,
+                dq_calculator=None,
+                merge_resilience_policy=None,
+                base_path=temp_delta_path,
+                contract_rollout_policy=ContractRolloutPolicy(
+                    contract_ref="chembl.activity",
+                    active_version="1.0.0",
+                    mode="dual_read_write",
+                    read_order=("1.0.0", "2.0.0"),
+                    write_versions=("1.0.0", "2.0.0"),
+                    affects_hash=False,
+                ),
+            )
+        ),
+    )
+    schema = pa.schema(
+        [
+            ("id", pa.string()),
+            ("val", pa.string()),
+            ("content_hash", pa.string()),
+            ("_run_id", pa.string()),
+            ("_run_type", pa.string()),
+            ("_source_batch_id", pa.string()),
+            ("_ingestion_ts", pa.string()),
+        ]
+    )
+
+    result = await writer.write_silver(
+        table_name="chembl.activity",
+        records=[
+            {
+                "id": "1",
+                "val": "A",
+                "content_hash": "stable-hash",
+                "_run_id": "run1",
+                "_run_type": "incremental",
+                "_source_batch_id": "batch1",
+                "_ingestion_ts": "2023-01-01T00:00:00",
+            }
+        ],
+        primary_keys=["id"],
+        schema=schema,
+        mode="append",
+    )
+
+    old_table = DeltaTable(f"{temp_delta_path}/chembl/activity__v1_0_0")
+    new_table = DeltaTable(f"{temp_delta_path}/chembl/activity__v2_0_0")
+
+    assert result is not None
+    assert old_table.to_pandas()["content_hash"].iloc[0] == "stable-hash"
+    assert new_table.to_pandas()["content_hash"].iloc[0] == "stable-hash"
+
+
+@pytest.mark.asyncio
 async def test_write_silver_dual_write_fails_logical_write_when_any_target_fails(
     temp_delta_path: str,
     noop_logger,

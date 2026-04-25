@@ -17,17 +17,6 @@ from bioetl.domain.constants import DEFAULT_LOCK_TTL_SECONDS
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.composite.checkpoint import CompositeCheckpointManager
-    from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
-    from bioetl.application.composite.dependency_coordinator import (
-        DependencyCoordinatorService,
-    )
-    from bioetl.application.composite.fsm_helper import FSMStateHelperService
-    from bioetl.application.composite.key_extractor import KeyExtractorService
-    from bioetl.application.composite.lifecycle_observer_service import (
-        CompositeLifecycleObserverService,
-    )
-    from bioetl.application.composite.merger import MergeService
     from bioetl.application.composite.port_types import (
         ClockPort,
         ExecutionMetricsRunnerPort,
@@ -37,13 +26,21 @@ if TYPE_CHECKING:
         QuarantinePort,
         TracingPort,
     )
-    from bioetl.application.composite.preflight_validator import (
-        CompositePreflightValidator,
+    from bioetl.application.composite.runtime_wiring_api import (
+        CompositeCheckpointService,
+        CompositeLifecycleObserverService,
+        CompositePreflightValidationService,
+        DependencyCoordinatorService,
+        EnrichmentCoordinatorService,
+        FSMStateHelperService,
+        KeyExtractorService,
+        MergeService,
     )
     from bioetl.application.services.control_plane.run_ledger_service import (
         RunLedgerService,
     )
     from bioetl.application.services.dq_report_service import DQReportService
+
 __all__ = [
     "CompositeExecutionContext",
     "CompositeRunnerDependencies",
@@ -85,12 +82,12 @@ class CompositeRunnerDependencyGroup:
     key_extractor: KeyExtractorService
     coordinator: EnrichmentCoordinatorService
     merger: MergeService
-    checkpoint_manager: CompositeCheckpointManager
+    checkpoint_manager: CompositeCheckpointService
     logger: LoggerPort
     lock: LockPort
-    fsm_state_helper: FSMStateHelperService
+    fsm_state_helper: FSMStateHelperService | None
     dq_report_service: DQReportService | None = None
-    preflight_validator: CompositePreflightValidator | None = None
+    preflight_validator: CompositePreflightValidationService | None = None
     dependencies_runner_factory: (
         Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort] | None
     ) = None

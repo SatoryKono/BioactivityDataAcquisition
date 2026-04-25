@@ -6,7 +6,8 @@ Implements vacuum operations for Delta tables storage reclamation.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from collections.abc import Callable
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -51,7 +52,8 @@ def get_lifecycle_service() -> MedallionLifecycleService:
     """Load the lifecycle service through composition on demand."""
     from bioetl.composition.resources_api import get_lifecycle_service as _impl
 
-    return _impl()
+    impl = cast("Callable[[], MedallionLifecycleService]", _impl)
+    return impl()
 
 
 def get_vacuum_service() -> VacuumService:
@@ -92,15 +94,15 @@ def _handle_maintenance_failure(
     )
 
 
-@click.command("vacuum")  # type: ignore[untyped-decorator]
-@click.argument("table")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@click.command("vacuum")
+@click.argument("table")
+@click.option(
     "--retention-days",
     "-r",
     default=7,
     help="Minimum age of files to remove (days)",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--dry-run",
     is_flag=True,
     help="Show what would be removed without removing",
@@ -175,19 +177,19 @@ def vacuum_command(table: str, retention_days: int, dry_run: bool) -> None:
             coro.close()
 
 
-@click.command("vacuum-all")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@click.command("vacuum-all")
+@click.option(
     "--retention-days",
     "-r",
     default=7,
     help="Minimum age of files to remove (days)",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--dry-run",
     is_flag=True,
     help="Show what would be removed without removing",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--layer",
     type=click.Choice(["all", "silver", "gold"]),
     default="all",

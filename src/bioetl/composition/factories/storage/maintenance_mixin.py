@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
+
+from bioetl.domain.context import current_utc_time
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -76,6 +78,16 @@ class StorageAdapterMaintenanceMixin:
             dry_run: If True, only log what would be done without action
         """
         await self.vacuum(table_name, retention_hours, dry_run)
+        if "." not in table_name:
+            return
+        provider, entity = table_name.split(".", 1)
+        cutoff_date = current_utc_time() - timedelta(hours=retention_hours)
+        await self.bronze.cleanup_old_files(
+            cutoff_date=cutoff_date,
+            dry_run=dry_run,
+            provider=provider,
+            entity=entity,
+        )
 
     async def vacuum(
         self,

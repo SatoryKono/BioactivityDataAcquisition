@@ -469,6 +469,36 @@ def _handle_stream_chunk(
     return ready_seen, handshake_sent, handshake_deadline
 
 
+def _drain_pending_chunks_after_shutdown(
+    chunks: queue.Queue[tuple[str, bytes | None]],
+    *,
+    stdout_buffer: bytearray,
+    stderr_buffer: bytearray,
+    responses: dict[int, dict[str, Any]],
+    ready_seen: bool,
+) -> bool:
+    """Drain any queued output after the loop to avoid race-induced false negatives."""
+    while True:
+        try:
+            channel, chunk = chunks.get_nowait()
+        except queue.Empty:
+            break
+
+        if chunk is None:
+            continue
+
+        if channel == "stderr":
+            stderr_buffer.extend(chunk)
+            if not ready_seen and _READY_MARKER in stderr_buffer.decode("utf-8", errors="replace"):
+                ready_seen = True
+            continue
+
+        stdout_buffer.extend(chunk)
+        _drain_stdout_messages(stdout_buffer, responses)
+
+    return ready_seen
+
+
 def run_smoke_command(
     command: Sequence[str],
     *,
@@ -524,6 +554,25 @@ def run_smoke_command(
             process.wait(timeout=5)
         for reader in readers:
             reader.join(timeout=1.0)
+
+    try:
+        ready_seen = _drain_pending_chunks_after_shutdown(
+            chunks,
+            stdout_buffer=stdout_buffer,
+            stderr_buffer=stderr_buffer,
+            responses=responses,
+            ready_seen=ready_seen,
+        )
+    except ValueError as exc:
+        return SmokeResult(
+            ok=False,
+            summary=f"sonarqube MCP smoke received invalid stdout transport output: {exc}",
+            responses=tuple(responses.values()),
+            stderr=stderr_buffer.decode("utf-8", errors="replace"),
+            returncode=process.returncode,
+            ready_seen=ready_seen,
+            handshake_sent=handshake_sent,
+        )
 
     # Create final result
     return _create_result(

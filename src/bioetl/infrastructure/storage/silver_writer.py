@@ -40,7 +40,6 @@ from bioetl.infrastructure.storage.silver.operations.validation_operations impor
     _prepare_silver_write_payload_impl,
 )
 
-
 # SilverWriterArrowMixin removed from inheritance (composition pattern)
 # Arrow operations now handled by SilverArrowOperations service
 # SilverWriterDeltaMixin removed from inheritance (composition pattern)
@@ -104,7 +103,7 @@ async def _write_single_target(
     writer: SilverWriter,
     *,
     invocation: _SilverWriteInvocation,
-) -> "silver_result_types.SilverWriteResult | None":
+) -> silver_result_types.SilverWriteResult | None:
     """Execute one physical Silver write target with root-module tracing seam."""
     return await _write_single_target_impl(
         writer,
@@ -125,15 +124,15 @@ class SilverWriter(
 ):
     """Writer for Silver layer (normalized data in Delta Lake)."""
 
-    _tracing: "domain_ports.TracingPort | None"
-    _contract_rollout_policy: "contract_rollout_types.ContractRolloutPolicy | None"
-    _maintenance: "maintenance_operations.SilverMaintenanceOperations | None"
-    _metadata: "metadata_operations.SilverMetadataOperations | None"
-    _validation: "validation_operations.SilverValidationOperations | None"
-    _delta: "delta_operations.SilverDeltaOperations | None"
-    _arrow: "arrow_operations.SilverArrowOperations | None"
-    _merged: "merged_operations.SilverMergedOperations | None"
-    _postwrite: "postwrite_operations.SilverPostwriteOperations | None"
+    _tracing: domain_ports.TracingPort | None
+    _contract_rollout_policy: contract_rollout_types.ContractRolloutPolicy | None
+    _maintenance: maintenance_operations.SilverMaintenanceOperations | None
+    _metadata: metadata_operations.SilverMetadataOperations | None
+    _validation: validation_operations.SilverValidationOperations | None
+    _delta: delta_operations.SilverDeltaOperations | None
+    _arrow: arrow_operations.SilverArrowOperations | None
+    _merged: merged_operations.SilverMergedOperations | None
+    _postwrite: postwrite_operations.SilverPostwriteOperations | None
     _host: object | None
 
     def __setattr__(self, name: str, value: object) -> None:
@@ -296,7 +295,7 @@ class SilverWriter(
         *,
         invocation: _SilverWriteInvocation | None = None,
         **legacy_kwargs: object,
-    ) -> "silver_result_types.SilverWriteResult | None":
+    ) -> silver_result_types.SilverWriteResult | None:
         """Compatibility seam for direct test patching and dual-write orchestration."""
         resolved_invocation = _coerce_silver_write_invocation(
             invocation=invocation,
@@ -312,7 +311,7 @@ class SilverWriter(
         *,
         invocation: _SilverWriteInvocation | None = None,
         **legacy_kwargs: object,
-    ) -> "silver_result_types.SilverWriteResult | None":
+    ) -> silver_result_types.SilverWriteResult | None:
         """Compatibility seam for direct test patching and dual-write orchestration."""
         resolved_invocation = _coerce_silver_write_invocation(
             invocation=invocation,
@@ -353,7 +352,7 @@ class SilverWriter(
         *,
         ctx: _SilverWriteExecutionContext,
         payload: _PreparedSilverWritePayload,
-    ) -> "silver_result_types.SilverWriteResult | None":
+    ) -> silver_result_types.SilverWriteResult | None:
         """Run postwrite finalization through services or legacy mixin fallback."""
         if self._postwrite is not None:
             return await self._postwrite._complete_silver_write_pipeline(

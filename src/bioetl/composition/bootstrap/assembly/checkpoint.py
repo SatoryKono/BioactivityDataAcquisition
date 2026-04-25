@@ -11,6 +11,8 @@ Note:
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from bioetl.domain.ports import (
     CheckpointPort,
     CompositeCheckpointPort,
@@ -23,6 +25,11 @@ from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
 from bioetl.infrastructure.storage.support.checkpoint_writer import (
     FileCompositeCheckpointWriter,
 )
+
+if TYPE_CHECKING:
+    from bioetl.application.services.checkpoint_compatibility_service import (
+        CheckpointCompatibilityService,
+    )
 
 __all__ = [
     "bootstrap_checkpoint_compatibility_service",
@@ -98,7 +105,9 @@ def bootstrap_composite_checkpoint_port() -> CompositeCheckpointPort:
     return checkpoint
 
 
-def bootstrap_checkpoint_compatibility_service(logger: LoggerPort) -> object:
+def bootstrap_checkpoint_compatibility_service(
+    logger: LoggerPort,
+) -> CheckpointCompatibilityService:
     """Create checkpoint compatibility service for DQ contract validation.
 
     Creates a CheckpointCompatibilityService for validating checkpoint compatibility

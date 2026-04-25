@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
+from typing import cast
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
@@ -72,34 +74,7 @@ def build_runtime_config(
     """
     resolved = inputs or CompositeRuntimeCliInput()
     if overrides:
-        resolved = CompositeRuntimeCliInput(
-            resume=overrides.get("resume", resolved.resume),  # type: ignore[arg-type]
-            dry_run=overrides.get("dry_run", resolved.dry_run),  # type: ignore[arg-type]
-            seed_limit=overrides.get("seed_limit", resolved.seed_limit),  # type: ignore[arg-type]
-            enrich_only=overrides.get("enrich_only", resolved.enrich_only),  # type: ignore[arg-type]
-            required_only=overrides.get("required_only", resolved.required_only),  # type: ignore[arg-type]
-            force_enricher=overrides.get("force_enricher", resolved.force_enricher),  # type: ignore[arg-type]
-            use_cached_bronze=overrides.get(
-                "use_cached_bronze",
-                resolved.use_cached_bronze,
-            ),  # type: ignore[arg-type]
-            cached_bronze_date=overrides.get(
-                "cached_bronze_date",
-                resolved.cached_bronze_date,
-            ),  # type: ignore[arg-type]
-            cached_bronze_path=overrides.get(
-                "cached_bronze_path",
-                resolved.cached_bronze_path,
-            ),  # type: ignore[arg-type]
-            cached_bronze_enrichers=overrides.get(
-                "cached_bronze_enrichers",
-                resolved.cached_bronze_enrichers,
-            ),  # type: ignore[arg-type]
-            cached_bronze_dependencies=overrides.get(
-                "cached_bronze_dependencies",
-                resolved.cached_bronze_dependencies,
-            ),  # type: ignore[arg-type]
-        )
+        resolved = _build_overridden_cli_input(resolved, overrides)
     return CompositeRuntimeConfig(
         resume=resolved.resume,
         dry_run=resolved.dry_run,
@@ -112,6 +87,56 @@ def build_runtime_config(
         cached_bronze_date=resolved.cached_bronze_date,
         cached_bronze_enrichers=resolved.cached_bronze_enrichers,
         cached_bronze_dependencies=resolved.cached_bronze_dependencies,
+    )
+
+
+def _build_overridden_cli_input(
+    resolved: CompositeRuntimeCliInput,
+    overrides: Mapping[str, object],
+) -> CompositeRuntimeCliInput:
+    """Apply keyword overrides to the typed composite runtime CLI bundle."""
+    return CompositeRuntimeCliInput(
+        resume=cast(bool, overrides.get("resume", resolved.resume)),
+        dry_run=cast(bool, overrides.get("dry_run", resolved.dry_run)),
+        seed_limit=cast(int | None, overrides.get("seed_limit", resolved.seed_limit)),
+        enrich_only=cast(
+            str | None,
+            overrides.get("enrich_only", resolved.enrich_only),
+        ),
+        required_only=cast(
+            bool,
+            overrides.get("required_only", resolved.required_only),
+        ),
+        force_enricher=cast(
+            str | None,
+            overrides.get("force_enricher", resolved.force_enricher),
+        ),
+        use_cached_bronze=cast(
+            bool,
+            overrides.get("use_cached_bronze", resolved.use_cached_bronze),
+        ),
+        cached_bronze_date=cast(
+            str | None,
+            overrides.get("cached_bronze_date", resolved.cached_bronze_date),
+        ),
+        cached_bronze_path=cast(
+            str | None,
+            overrides.get("cached_bronze_path", resolved.cached_bronze_path),
+        ),
+        cached_bronze_enrichers=cast(
+            bool | None,
+            overrides.get(
+                "cached_bronze_enrichers",
+                resolved.cached_bronze_enrichers,
+            ),
+        ),
+        cached_bronze_dependencies=cast(
+            bool,
+            overrides.get(
+                "cached_bronze_dependencies",
+                resolved.cached_bronze_dependencies,
+            ),
+        ),
     )
 
 

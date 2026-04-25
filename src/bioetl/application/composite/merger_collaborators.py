@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from bioetl.application.composite.aggregator import EnricherAggregator
     from bioetl.application.composite.coalesce_policy import CoalescePolicyService
-    from bioetl.application.composite.column_orderer import ColumnOrderer
     from bioetl.application.composite.column_priority_orderer import (
         ColumnPriorityOrderer,
     )
@@ -32,7 +31,7 @@ class MergeCollaboratorGroup:
     coalesce_policy: CoalescePolicyService
     conflict_resolver: ConflictResolverService
     join_planner: JoinPlannerService
-    orderer: ColumnOrderer | None = None  # Deprecated: Use order_service
+    orderer: ColumnOrderService | None = None  # Deprecated: Use order_service
     priority_orderer: ColumnPriorityOrderer | None = (
         None  # Deprecated: Use order_service
     )

@@ -8,8 +8,9 @@ from __future__ import annotations
 
 import asyncio
 import sys
+from collections.abc import Awaitable, Callable
 from functools import cache
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -64,7 +65,8 @@ async def preview_cleanup(pipeline: str) -> CleanupPreview:
     """Compatibility seam for cleanup preview patched by CLI dry-run tests."""
     from bioetl.composition.resources_api import preview_cleanup as _impl
 
-    return await _impl(pipeline)
+    impl = cast("Callable[[str], Awaitable[CleanupPreview]]", _impl)
+    return await impl(pipeline)
 
 
 def resolve_context_registry(

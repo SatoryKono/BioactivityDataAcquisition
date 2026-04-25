@@ -5,6 +5,23 @@ from __future__ import annotations
 from importlib import import_module
 from typing import TYPE_CHECKING, Protocol
 
+if TYPE_CHECKING:
+    from bioetl.application.services.health_service import HealthService
+    from bioetl.application.services.quarantine_service import QuarantineService
+    from bioetl.composition.bootstrap.cli.health import (
+        HealthServerDependencies as HealthServerDependencies,
+    )
+    from bioetl.domain.ports import HealthMonitorPort, MetricsPort, QuarantinePort
+
+    def get_health_server_dependencies() -> HealthServerDependenciesProtocol: ...
+
+    def get_health_service() -> HealthService: ...
+
+    def get_quarantine_port() -> QuarantinePort: ...
+
+    def get_quarantine_service() -> QuarantineService: ...
+
+
 __all__ = [
     "HealthServerDependencies",
     "HealthServerDependenciesProtocol",
@@ -24,29 +41,12 @@ _PUBLIC_EXPORTS = {
     "get_quarantine_service": _SERVICES_MODULE,
 }
 
-if TYPE_CHECKING:
-    from collections.abc import Callable
-
-    from bioetl.application.services.health_service import HealthService
-    from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.composition.bootstrap.cli.health import (
-        HealthServerDependencies as _HealthServerDependencies,
-    )
-    from bioetl.domain.ports import HealthMonitorPort, MetricsPort, QuarantinePort
-
 
 class HealthServerDependenciesProtocol(Protocol):
     """Typed view of health-server dependencies exposed through the facade."""
 
     health_monitor: HealthMonitorPort
     metrics: MetricsPort
-
-
-HealthServerDependencies: "type[_HealthServerDependencies]"
-get_health_server_dependencies: "Callable[[], HealthServerDependenciesProtocol]"
-get_health_service: "Callable[[], HealthService]"
-get_quarantine_port: "Callable[[], QuarantinePort]"
-get_quarantine_service: "Callable[[], QuarantineService]"
 
 
 def __getattr__(name: str) -> object:

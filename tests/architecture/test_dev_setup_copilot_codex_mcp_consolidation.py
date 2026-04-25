@@ -87,7 +87,7 @@ def _assert_shell_wrapper(
     expected_suffix: str,
 ) -> None:
     assert server["command"] in {shell_name, "bash", "powershell"}
-    assert str(server["args"][-1]).endswith(expected_suffix)
+    assert _posix(str(server["args"][-1])).endswith(expected_suffix)
 
 
 def _assert_platform_wrappers(servers: dict[str, object]) -> None:

@@ -102,7 +102,7 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
                     h.update(block)
             return h.hexdigest()
 
-        return await asyncio.get_running_loop().run_in_executor(None, _compute)
+        return await asyncio.to_thread(_compute)
 
     async def _write_json_copy(
         self,

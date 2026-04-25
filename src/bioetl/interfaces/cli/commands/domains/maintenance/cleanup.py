@@ -6,7 +6,8 @@ Implements Bronze layer cleanup per RULES.md retention policy.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from collections.abc import Awaitable, Callable
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -60,7 +61,8 @@ async def preview_pipeline_cleanup(pipeline: str) -> CleanupPreview:
     """Preview pipeline cleanup scope through composition on demand."""
     from bioetl.composition.resources_api import preview_cleanup as _impl
 
-    return await _impl(pipeline)
+    impl = cast("Callable[[str], Awaitable[CleanupPreview]]", _impl)
+    return await impl(pipeline)
 
 
 def _handle_cleanup_failure(
@@ -90,14 +92,14 @@ def _handle_cleanup_failure(
     )
 
 
-@click.command("bronze-cleanup")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@click.command("bronze-cleanup")
+@click.option(
     "-r",
     "--retention-days",
     default=90,
     help="Remove files older than N days",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--dry-run",
     is_flag=True,
     help="Show what would be removed",
@@ -154,8 +156,8 @@ def bronze_cleanup_command(retention_days: int, dry_run: bool) -> None:
             coro.close()
 
 
-@click.command("cleanup-preview")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@click.command("cleanup-preview")
+@click.option(
     "--pipeline",
     required=True,
     help="Pipeline name to preview (e.g., chembl_activity)",

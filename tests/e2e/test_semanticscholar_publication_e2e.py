@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import asyncio
 import os
-from collections.abc import Generator
 from pathlib import Path
 from typing import Any
 
@@ -30,7 +29,6 @@ from .conftest import (
     assert_silver_table_has_records,
     create_test_context,
     get_silver_records,
-    managed_e2e_data_dir,
 )
 
 # VCR cassette directory for Semantic Scholar E2E tests
@@ -55,56 +53,11 @@ def vcr_config() -> dict[str, Any]:
     }
 
 
-@pytest.fixture(scope="module")
-def semanticscholar_publication_data_dir(
-    tmp_path_factory: pytest.TempPathFactory,
-) -> Generator[Path, None, None]:
-    """Create one shared data dir for deterministic Semantic Scholar playback."""
-    data_dir = (
-        tmp_path_factory.mktemp("semanticscholar_publication_e2e") / "bioetl_data"
-    )
-    with managed_e2e_data_dir(data_dir) as prepared_dir:
-        yield prepared_dir
-
-
-@pytest.fixture(scope="module")
-def semanticscholar_publication_run(
-    semanticscholar_publication_data_dir: Path,
-) -> dict[str, Any]:
-    """Run the deterministic Semantic Scholar publication pipeline once per module."""
-    ctx = create_test_context(
-        "semanticscholar_publication",
-        limit=10,
-        filter_ids=S2_TEST_DOIS,
-        filter_field="doi",
-    )
-    runner = bootstrap_pipeline_runner(ctx)
-    asyncio.run(runner.run())
-
-    bronze_files = assert_bronze_files_exist(
-        semanticscholar_publication_data_dir, "semanticscholar", "publication"
-    )
-    silver_count = assert_silver_table_has_records(
-        semanticscholar_publication_data_dir,
-        "semanticscholar_publication",
-        expected_min=1,
-    )
-    records = get_silver_records(
-        semanticscholar_publication_data_dir,
-        "semanticscholar_publication",
-    )
-    return {
-        "bronze_files": bronze_files,
-        "silver_count": silver_count,
-        "records": records,
-    }
-
-
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_semanticscholar_publication_full_cycle(
-    semanticscholar_publication_run: dict[str, Any],
+    e2e_data_dir: Path,
 ) -> None:
     """E2E: Semantic Scholar Publication pipeline from fetch to Silver.
 
@@ -113,14 +66,29 @@ async def test_semanticscholar_publication_full_cycle(
     2. Bronze files are created
     3. Silver table contains expected records
     """
-    await asyncio.sleep(0)
-    bronze_files = semanticscholar_publication_run["bronze_files"]
+    ctx = create_test_context(
+        "semanticscholar_publication",
+        limit=10,
+        filter_ids=S2_TEST_DOIS,
+        filter_field="doi",
+    )
+
+    runner = bootstrap_pipeline_runner(ctx)
+    await runner.run()
+
+    bronze_files = assert_bronze_files_exist(
+        e2e_data_dir, "semanticscholar", "publication"
+    )
     assert len(bronze_files) >= 1
 
-    silver_count = semanticscholar_publication_run["silver_count"]
+    silver_count = assert_silver_table_has_records(
+        e2e_data_dir,
+        "semanticscholar_publication",
+        expected_min=1,
+    )
     assert silver_count <= 10
 
-    records = semanticscholar_publication_run["records"]
+    records = get_silver_records(e2e_data_dir, "semanticscholar_publication")
     for record in records:
         doi = record.get("publication_doi") or record.get("doi")
         assert doi is not None, "Semantic Scholar records must have a DOI"
@@ -130,14 +98,23 @@ async def test_semanticscholar_publication_full_cycle(
 @pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_semanticscholar_publication_metadata_fields(
-    semanticscholar_publication_run: dict[str, Any],
+    e2e_data_dir: Path,
 ) -> None:
     """E2E: Verify Semantic Scholar metadata fields are extracted.
 
     Semantic Scholar provides title, authors, year, citation counts, etc.
     """
-    await asyncio.sleep(0)
-    records = semanticscholar_publication_run["records"]
+    ctx = create_test_context(
+        "semanticscholar_publication",
+        limit=10,
+        filter_ids=S2_TEST_DOIS,
+        filter_field="doi",
+    )
+
+    runner = bootstrap_pipeline_runner(ctx)
+    await runner.run()
+
+    records = get_silver_records(e2e_data_dir, "semanticscholar_publication")
     assert len(records) >= 1, "Should have at least one S2 record"
 
     metadata_fields = ["title", "publication_year"]
@@ -151,11 +128,20 @@ async def test_semanticscholar_publication_metadata_fields(
 @pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_semanticscholar_publication_citation_fields(
-    semanticscholar_publication_run: dict[str, Any],
+    e2e_data_dir: Path,
 ) -> None:
     """E2E: Verify citation fields from Semantic Scholar."""
-    await asyncio.sleep(0)
-    records = semanticscholar_publication_run["records"]
+    ctx = create_test_context(
+        "semanticscholar_publication",
+        limit=10,
+        filter_ids=S2_TEST_DOIS,
+        filter_field="doi",
+    )
+
+    runner = bootstrap_pipeline_runner(ctx)
+    await runner.run()
+
+    records = get_silver_records(e2e_data_dir, "semanticscholar_publication")
     for record in records:
         citations = record.get("citations_received")
         if citations is not None:

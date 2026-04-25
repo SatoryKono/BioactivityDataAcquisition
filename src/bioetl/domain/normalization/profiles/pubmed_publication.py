@@ -22,7 +22,7 @@ def _pubmed_schema_fields(
     schema_cls: Any,  # Any: Pandera schema classes expose only a runtime `.to_schema()` protocol.
 ) -> tuple[str, ...]:
     """Return ordered Pandera schema fields for the PubMed publication profile."""
-    return tuple(getattr(schema_cls, "to_schema")().columns.keys())
+    return tuple(schema_cls.to_schema().columns.keys())
 
 
 _PUBMED_PUBLICATION_BASE_FIELDS = _pubmed_schema_fields(PubMedPublicationSchema)

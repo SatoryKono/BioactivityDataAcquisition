@@ -141,12 +141,20 @@ def _published_contract_path(entity: str) -> str:
     return f"docs/04-reference/contracts/gold/{entity}_v1.0.json"
 
 
+def _canonical_dtype_name(dtype: object) -> str:
+    rendered = str(dtype).strip().lower()
+    return {
+        "boolean": "bool",
+        "string": "str",
+    }.get(rendered, rendered)
+
+
 def _field_snapshot(schema_cls: type[Any]) -> dict[str, dict[str, Any]]:
     schema = schema_cls.to_schema()
     fields: dict[str, dict[str, Any]] = {}
     for field_name, column in schema.columns.items():
         fields[field_name] = {
-            "dtype": str(column.dtype),
+            "dtype": _canonical_dtype_name(column.dtype),
             "nullable": bool(column.nullable),
             "description": column.description or "",
         }

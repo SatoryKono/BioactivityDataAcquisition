@@ -34,6 +34,7 @@ from typing import IO, Any
 
 from bioetl.domain.exceptions.infrastructure import InfrastructureError as _InfraBase
 from bioetl.infrastructure.storage.delta.resilience import (
+    DEFAULT_ATOMIC_GROUP_REPLACE_RETRY_POLICY,
     DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
     AdaptiveRetryPolicy,
 )
@@ -228,9 +229,13 @@ class AtomicWriteGroup:
 
     """
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        retry_policy: AdaptiveRetryPolicy | None = None,
+    ) -> None:
         self._pending: list[tuple[Path, Path, bytes]] = []  # (target, temp, data)
-        self._retry_policy = DEFAULT_ATOMIC_REPLACE_RETRY_POLICY
+        self._retry_policy = retry_policy or DEFAULT_ATOMIC_GROUP_REPLACE_RETRY_POLICY
 
     def add(self, target: Path, data: bytes) -> None:
         """Add a file to the atomic write group.

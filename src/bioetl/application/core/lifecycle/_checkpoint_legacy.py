@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import warnings
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
@@ -37,9 +37,7 @@ class CheckpointManager(_CheckpointManagerBase):
             DeprecationWarning,
             stacklevel=3,
         )
-        service_ctor = cast(
-            Callable[..., Any], CheckpointManagerService
-        )  # Any: Callable to allow generic args/kwargs for deprecated class.
+        service_ctor = cast(Callable[..., object], CheckpointManagerService)
         return cast(
             CheckpointManager,
             service_ctor(*args, **kwargs),

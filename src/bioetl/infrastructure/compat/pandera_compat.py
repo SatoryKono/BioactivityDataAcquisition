@@ -111,7 +111,7 @@ def _patch_dispatcher_call(
             return original_dispatcher_call(self, *args, **kwargs)
         return fn(*args, **kwargs)
 
-    setattr(dispatcher_cls, "__call__", _dispatcher_call_with_any_fallback)
+    dispatcher_cls.__call__ = _dispatcher_call_with_any_fallback  # type: ignore[method-assign]
 
 
 def apply_pandera_typing_compat_if_needed() -> bool:

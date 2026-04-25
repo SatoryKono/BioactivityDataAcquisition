@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Collection, Mapping
 from dataclasses import dataclass, field, fields
+from typing import TypedDict, cast
 
 from bioetl.domain.normalization.profiles._standard_profile_rule_components import (
     RuleComponentSpec,
@@ -75,6 +76,33 @@ _STANDARD_PROFILE_FIELD_NAMES = tuple(
 )
 
 
+class _StandardProfileSpecKwargs(TypedDict):
+    profile_name: str
+    description: str
+    schema_fields: Collection[str]
+    meta_fields: Collection[str]
+    title_fields: Collection[str]
+    abstract_fields: Collection[str]
+    doi_fields: Collection[str]
+    pmid_fields: Collection[str]
+    pmc_id_fields: Collection[str]
+    date_fields: Collection[str]
+    int_fields: Collection[str]
+    float_fields: Collection[str]
+    set_like_fields: Collection[str]
+    json_string_fields: Collection[str]
+    strict_json_fields: Collection[str]
+    boolean_fields: Collection[str]
+    flag_fields: Collection[str]
+    operator_fields: Collection[str]
+    ontology_id_fields: Collection[str]
+    enum_fields: Mapping[str, frozenset[str]] | None
+    case_fields: Mapping[str, frozenset[str] | None] | None
+    unit_fields: Collection[str] | None
+    null_fields: Collection[str] | None
+    special_rules: Mapping[str, RuleComponentSpec] | None
+
+
 def _resolve_standard_profile_value(
     *,
     field_name: str,
@@ -118,4 +146,6 @@ def coerce_standard_profile_spec(
         )
         for field_name in _STANDARD_PROFILE_FIELD_NAMES
     }
-    return StandardProfileSpec(**resolved_values)
+    resolved_values["profile_name"] = str(resolved_values["profile_name"])
+    resolved_values["description"] = str(resolved_values["description"])
+    return StandardProfileSpec(**cast(_StandardProfileSpecKwargs, resolved_values))

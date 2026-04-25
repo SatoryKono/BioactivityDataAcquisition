@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from pydantic import ValidationError as _ValidationError
 
@@ -91,23 +91,17 @@ def __getattr__(name: str) -> object:
 
 def _resolve_composite_gold_schema(composite_name: str) -> type | None:
     """Resolve composite Gold contract by composite pipeline name."""
-    return cast(
-        type | None,
-        _resolve_composite_gold_schema_impl(
-            composite_name,
-            schema_registry=DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY,
-        ),
+    return _resolve_composite_gold_schema_impl(
+        composite_name,
+        schema_registry=DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY,
     )
 
 
 def _resolve_composite_config_path(name: str) -> Path:
     """Resolve composite config path from canonical composites directory."""
-    return cast(
-        Path,
-        _resolve_composite_config_path_impl(
-            name,
-            config_dir=DEFAULT_COMPOSITE_CONFIG_DIR,
-        ),
+    return _resolve_composite_config_path_impl(
+        name,
+        config_dir=DEFAULT_COMPOSITE_CONFIG_DIR,
     )
 
 
@@ -126,7 +120,7 @@ def _bootstrap_runtime_basics(
     run_id: str | None,
 ) -> CompositeInfrastructureContext:
     """Build base runtime dependencies shared across composite bootstrap."""
-    from uuid import uuid4
+    from uuid import UUID, uuid4
 
     from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
     from bioetl.composition.bootstrap.runtime.observability import (
@@ -138,17 +132,22 @@ def _bootstrap_runtime_basics(
     from bioetl.infrastructure.config import get_settings
     from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
+    def _bootstrap_logger(
+        pipeline_name: str,
+        run_uuid: UUID,
+        level: str,
+    ) -> LoggerPort:
+        return bootstrap_logger_port(
+            pipeline=pipeline_name,
+            run_id=run_uuid,
+            log_level=level,
+        )
+
     return _bootstrap_runtime_basics_impl(
         config=config,
         run_id=run_id,
         settings_provider=get_settings,
-        logger_bootstrapper=lambda pipeline_name, run_uuid, level: (
-            bootstrap_logger_port(
-                pipeline=pipeline_name,
-                run_id=run_uuid,
-                log_level=level,
-            )
-        ),
+        logger_bootstrapper=_bootstrap_logger,
         tracer_bootstrapper=bootstrap_tracer_port,
         storage_bootstrapper=bootstrap_storage_adapter,
         lock_factory=MemoryLock,
@@ -189,9 +188,7 @@ def _build_runner_factories(
         runner_factory_builder_cls=RunnerFactoryBuilderService,
         filter_extraction_service_cls=CompositeFilterExtractionService,
         pipeline_runner_builder=bootstrap_pipeline_runner_impl,
-        resolve_bronze_opts_fn=cast(
-            Callable[..., dict[str, object]], resolve_bronze_opts
-        ),
+        resolve_bronze_opts_fn=resolve_bronze_opts,
     )
     return factories
 

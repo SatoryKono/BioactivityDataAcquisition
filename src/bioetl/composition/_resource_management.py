@@ -46,8 +46,21 @@ _T = TypeVar("_T")
 class QuarantineManagerProtocol(Protocol):
     """Minimal quarantine-manager contract exposed by resource management APIs."""
 
-    def inspect(self, limit: int = 100) -> Awaitable[list[JsonDict]]:
+    def inspect(
+        self,
+        limit: int = 100,
+        error_code: str | None = None,
+        run_id: str | None = None,
+    ) -> Awaitable[list[JsonDict]]:
         """Inspect quarantined records."""
+        ...
+
+    def get_stats(
+        self,
+        error_code: str | None = None,
+        run_id: str | None = None,
+    ) -> Awaitable[JsonDict]:
+        """Return aggregate quarantine statistics."""
         ...
 
 

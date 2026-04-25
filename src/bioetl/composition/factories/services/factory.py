@@ -33,7 +33,10 @@ from bioetl.composition.factories.services.common_service_wiring import (
     resolve_tracer,
 )
 from bioetl.composition.factories.services.port_factories import (
+    create_checkpoint,
+    create_lock,
     create_metrics,
+    create_quarantine,
 )
 from bioetl.composition.factories.storage import StorageFactory
 from bioetl.domain.types import JsonDict
@@ -49,8 +52,8 @@ if TYPE_CHECKING:
         LoggerPort,
         MetricsPort,
         QuarantinePort,
-        SilverValidatorPort,
         SettingsPort,
+        SilverValidatorPort,
         TracingPort,
     )
     from bioetl.infrastructure.config import Settings
@@ -60,7 +63,10 @@ __all__ = [
     "BaseServicesFactory",
     "DQServicesFactory",
     "ServicesBuilder",
+    "create_checkpoint",
     "create_data_normalization_service",
+    "create_lock",
+    "create_quarantine",
     "extract_pipeline_callbacks",
 ]
 
@@ -103,6 +109,10 @@ class BaseServicesFactory:
                 silver_validator=silver_validator,
                 create_dq_services_fn=cls._create_dq_services,
                 storage_factory=StorageFactory,
+                create_metrics_fn=cls._create_metrics,
+                create_lock_fn=create_lock,
+                create_checkpoint_fn=create_checkpoint,
+                create_quarantine_fn=create_quarantine,
             )
         )
         return assemble_pipeline_service(

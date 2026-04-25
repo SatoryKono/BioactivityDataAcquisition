@@ -18,8 +18,9 @@ Structure:
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from importlib import import_module
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from bioetl.application.services import RunOptions
@@ -37,7 +38,8 @@ def create_pipeline_runner(
     """
     from bioetl.composition.execution_api import create_pipeline_runner as _impl
 
-    return _impl(name, options)
+    impl = cast("Callable[[str, RunOptions], ExecutionMetricsRunnerPort]", _impl)
+    return impl(name, options)
 
 
 def main() -> None:

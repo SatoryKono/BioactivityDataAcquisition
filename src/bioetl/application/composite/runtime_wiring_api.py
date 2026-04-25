@@ -9,7 +9,10 @@ importing many individual ``application.composite`` implementation modules.
 from __future__ import annotations
 
 from bioetl.application.composite.aggregator import EnricherAggregator
-from bioetl.application.composite.checkpoint import CompositeCheckpointService
+from bioetl.application.composite.checkpoint import (
+    CompositeCheckpointService,
+    CompositeCheckpointServiceContext,
+)
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
 from bioetl.application.composite.column_priority_orderer import (
     ColumnPriorityOrderer,
@@ -74,6 +77,7 @@ __all__ = [
     "ColumnPriorityOrderer",
     "ColumnRenamer",
     "CompositeCheckpointService",
+    "CompositeCheckpointServiceContext",
     "CompositeLifecycleObserverService",
     "CompositePipelineRunner",
     "CompositePipelineRunnerService",

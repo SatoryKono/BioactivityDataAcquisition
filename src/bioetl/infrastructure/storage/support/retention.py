@@ -18,7 +18,6 @@ from __future__ import annotations
 __all__ = ["RetentionPolicy"]
 
 import asyncio
-import os
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 
@@ -31,6 +30,7 @@ from bioetl.domain.normalization import (
     serialize_hash_identity_canonical_json,
 )
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.config import get_settings
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -40,17 +40,14 @@ _DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS = 60.0
 
 
 def _resolve_deduplication_timeout_seconds() -> float:
-    """Return dedup timeout from env with a safe bounded fallback."""
-    raw_value = os.getenv("BIOETL_SILVER_DEDUP_TIMEOUT_SECONDS")
-    if raw_value is None:
-        return _DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS
-    try:
-        parsed = float(raw_value)
-    except ValueError:
-        return _DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS
-    if parsed <= 0:
-        return _DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS
-    return parsed
+    """Return the centralized dedup timeout setting with a safe fallback."""
+    return float(
+        getattr(
+            get_settings(),
+            "silver_dedup_timeout_seconds",
+            _DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS,
+        )
+    )
 
 
 def _primary_key_tuple(
@@ -164,8 +161,7 @@ class RetentionPolicy:
             base_path: Base path for Delta tables (local filesystem).
             deduplicate_timeout_seconds:
                 Maximum time budget for silver deduplication executor work.
-                Falls back to ``BIOETL_SILVER_DEDUP_TIMEOUT_SECONDS`` env var,
-                then to a safe default.
+                Falls back to centralized settings, then to a safe default.
         """
         self.base_path = str(base_path).rstrip("/")
         timeout = (
