@@ -96,7 +96,7 @@ dev = [
     # Resource monitoring
     "psutil>=5.9",
     "respx>=0.21",
-    "mypy==1.20.1",
+    "mypy==1.20.2",
     "ruff>=0.4",
     "basedpyright>=1.0",
     "pyrefly>=0.18",
