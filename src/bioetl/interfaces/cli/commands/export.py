@@ -29,20 +29,20 @@ def get_export_service() -> ExportService:
     return _impl()
 
 
-@click.command("export")  # type: ignore[untyped-decorator]
-@click.argument("table", required=False)  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@click.command("export")
+@click.argument("table", required=False)
+@click.option(
     "--list",
     "list_tables",
     is_flag=True,
     help="List all available Delta tables",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--preview",
     is_flag=True,
     help="Show table schema and sample data",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--format",
     "-f",
     "output_format",
@@ -50,25 +50,25 @@ def get_export_service() -> ExportService:
     default="csv",
     help="Output format (default: csv)",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--layer",
     "-l",
     type=click.Choice(["silver", "gold"]),
     default="silver",
     help="Medallion layer to export from (default: silver)",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--output",
     "-o",
     type=click.Path(path_type=Path),
     help="Output directory (default: data/exports)",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--limit",
     type=int,
     help="Maximum number of rows to export",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--columns",
     "-c",
     help="Comma-separated list of columns to include",

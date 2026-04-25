@@ -145,6 +145,8 @@ def _normalize_underscore_format(value: str) -> str | None:
     for prefix, canonical_prefix in ONTOLOGY_PREFIXES.items():
         suffix = _get_underscore_suffix(value, prefix, canonical_prefix, upper_value)
         if suffix is not None:
+            if prefix == "CALOHA" and suffix.upper().startswith("TS-"):
+                return suffix.upper()
             return f"{canonical_prefix}{suffix}"
     return None
 

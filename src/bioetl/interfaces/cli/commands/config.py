@@ -57,14 +57,14 @@ def _config_to_dict(config: object) -> JsonDict:
     return {"value": config}  # Wrap primitives in a dict
 
 
-@click.group()  # type: ignore[untyped-decorator]
+@click.group()
 def config() -> None:
     """View and validate configuration."""
 
 
-@config.command("show")  # type: ignore[untyped-decorator]
-@click.argument("pipeline")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@config.command("show")
+@click.argument("pipeline")
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["json", "yaml"]),
@@ -105,8 +105,8 @@ def show_command(pipeline: str, output_format: str) -> None:
         echo_info(yaml.dump(config_dict, default_flow_style=False, sort_keys=False))
 
 
-@config.command("validate")  # type: ignore[untyped-decorator]
-@click.argument("pipeline")  # type: ignore[untyped-decorator]
+@config.command("validate")
+@click.argument("pipeline")
 def validate_command(pipeline: str) -> None:
     """Validate configuration for a pipeline.
 
@@ -135,8 +135,8 @@ def validate_command(pipeline: str) -> None:
         echo_error("Config file not found", str(e))
 
 
-@config.command("show-settings")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@config.command("show-settings")
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["json", "yaml"]),
@@ -191,7 +191,7 @@ def show_settings_command(output_format: str) -> None:
         echo_info(yaml.dump(settings_dict, default_flow_style=False, sort_keys=False))
 
 
-@config.command("list-pipelines")  # type: ignore[untyped-decorator]
+@config.command("list-pipelines")
 def list_pipelines_command() -> None:
     """List all registered pipelines.
 

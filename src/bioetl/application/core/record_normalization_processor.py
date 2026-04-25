@@ -27,6 +27,7 @@ from bioetl.domain.normalization.profiles import (
     resolve_normalization_profile,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_passthrough,
     normalize_profile_smiles,
 )
 from bioetl.domain.normalization.text import (
@@ -239,6 +240,8 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
         value: object,
         record: JsonDict,
     ) -> object:
+        if rule.normalizer is normalize_profile_passthrough:
+            return value
         normalized = rule.apply(value, record=record)
         if isinstance(normalized, dict | list):
             return serialize_json_canonical(normalized)

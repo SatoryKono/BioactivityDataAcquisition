@@ -53,6 +53,9 @@ NULL_PATTERNS: frozenset[str] = frozenset(
         "unknown",
     ]
 )
+_NULL_PATTERNS_UPPER: frozenset[str] = frozenset(
+    pattern.upper() for pattern in NULL_PATTERNS
+)
 UNIT_MAPPING: dict[str, str] = {
     "nL": "nL",
     "NL": "nL",
@@ -246,7 +249,7 @@ def normalize_null(
     normalized = normalize_string(value)
     if normalized is None:
         return None
-    if normalized in NULL_PATTERNS:
+    if normalized.upper() in _NULL_PATTERNS_UPPER:
         return None
     return value
 

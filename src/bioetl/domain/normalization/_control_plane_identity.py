@@ -108,7 +108,7 @@ def build_execution_identity_payload(
     pipeline_name: str | None,
     run_type: str | None,
     pipeline_version: str | None,
-    git_commit: str | None,
+    git_commit: str | None = None,
     effective_config_hash: str | None,
     dq_contract_compatibility_hash: str | None,
     contract_ref: str | None,

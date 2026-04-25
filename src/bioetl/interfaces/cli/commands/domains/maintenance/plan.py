@@ -22,6 +22,7 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 
 if TYPE_CHECKING:
     from bioetl.application.services import ContractMigrationService
+    from collections.abc import Callable
 
 __all__ = [
     "get_contract_migration_service",
@@ -37,7 +38,8 @@ def get_contract_migration_service() -> ContractMigrationService:
         get_contract_migration_service as _impl,
     )
 
-    return _impl()
+    service_factory: Callable[[], ContractMigrationService] = _impl
+    return service_factory()
 
 
 def _format_scalar(value: object) -> str:
@@ -178,9 +180,9 @@ def _handle_plan_failure(
     )
 
 
-@click.command("plan")  # type: ignore[untyped-decorator]
-@click.argument("pipeline")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@click.command("plan")
+@click.argument("pipeline")
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
