@@ -1,42 +1,110 @@
 """Maintenance command group for BioETL CLI.
 
 Registers all maintenance-related subcommands for Delta table operations.
-This module is a thin orchestrator that imports and registers commands.
+This module keeps subcommand imports lazy so ``maintenance --help`` stays cheap.
 """
 
 from __future__ import annotations
 
-import click
+from importlib import import_module
 
-from bioetl.interfaces.cli.commands.domains.maintenance.archive import archive_command
-from bioetl.interfaces.cli.commands.domains.maintenance.cleanup import (
-    bronze_cleanup_command,
-    cleanup_preview_command,
-)
-from bioetl.interfaces.cli.commands.domains.maintenance.control_plane_lifecycle import (
-    control_plane_lifecycle_command,
-)
-from bioetl.interfaces.cli.commands.domains.maintenance.plan import plan_command
-from bioetl.interfaces.cli.commands.domains.maintenance.vacuum import (
-    vacuum_all_command,
-    vacuum_command,
-)
+import click
 
 __all__ = [
     "maintenance",
 ]
 
+_MAINTENANCE_COMMAND_PACKAGE = "bioetl.interfaces.cli.commands.domains.maintenance"
 
-@click.group()  # type: ignore[untyped-decorator]
+_LAZY_MAINTENANCE_COMMANDS: dict[str, tuple[str, str, str]] = {
+    "vacuum": (
+        "vacuum",
+        "vacuum_command",
+        "Vacuum one Delta table",
+    ),
+    "vacuum-all": (
+        "vacuum",
+        "vacuum_all_command",
+        "Vacuum multiple Delta tables",
+    ),
+    "archive": (
+        "archive",
+        "archive_command",
+        "Archive a Delta table",
+    ),
+    "bronze-cleanup": (
+        "cleanup",
+        "bronze_cleanup_command",
+        "Remove expired Bronze artifacts",
+    ),
+    "cleanup-preview": (
+        "cleanup",
+        "cleanup_preview_command",
+        "Preview pipeline cleanup scope",
+    ),
+    "control-plane-lifecycle": (
+        "control_plane_lifecycle",
+        "control_plane_lifecycle_command",
+        "Plan/apply control-plane artifact cleanup",
+    ),
+    "plan": (
+        "plan",
+        "plan_command",
+        "Plan contract migration actions",
+    ),
+}
+
+
+def _load_maintenance_command(name: str) -> click.Command | click.Group | None:
+    """Import one maintenance subcommand only when it is requested."""
+    spec = _LAZY_MAINTENANCE_COMMANDS.get(name)
+    if spec is None:
+        return None
+    module_suffix, attribute_name, _help_text = spec
+    module_name = f"{_MAINTENANCE_COMMAND_PACKAGE}.{module_suffix}"
+    command = getattr(import_module(module_name), attribute_name)
+    if getattr(command, "name", name) != name:
+        command.name = name
+    return command
+
+
+class _LazyMaintenanceGroup(click.Group):
+    """Click group that resolves maintenance subcommands on demand."""
+
+    def list_commands(self, ctx: click.Context) -> list[str]:
+        del ctx
+        return list(_LAZY_MAINTENANCE_COMMANDS)
+
+    def get_command(
+        self,
+        ctx: click.Context,
+        cmd_name: str,
+    ) -> click.Command | click.Group | None:
+        del ctx
+        if cmd_name in self.commands:
+            return self.commands[cmd_name]
+        command = _load_maintenance_command(cmd_name)
+        if command is not None:
+            self.commands[cmd_name] = command
+        return command
+
+    def format_commands(
+        self,
+        ctx: click.Context,
+        formatter: click.HelpFormatter,
+    ) -> None:
+        del ctx
+        rows = [
+            (name, help_text)
+            for name, (_module_name, _attribute_name, help_text) in (
+                _LAZY_MAINTENANCE_COMMANDS.items()
+            )
+        ]
+        if rows:
+            with formatter.section("Commands"):
+                formatter.write_dl(rows)
+
+
+@click.group(cls=_LazyMaintenanceGroup)  # type: ignore[untyped-decorator]
 def maintenance() -> None:
     """Maintenance operations for Delta tables."""
-
-
-# Register all maintenance subcommands
-maintenance.add_command(vacuum_command)
-maintenance.add_command(vacuum_all_command)
-maintenance.add_command(archive_command)
-maintenance.add_command(bronze_cleanup_command)
-maintenance.add_command(cleanup_preview_command)
-maintenance.add_command(control_plane_lifecycle_command)
-maintenance.add_command(plan_command)

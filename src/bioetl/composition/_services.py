@@ -2,50 +2,32 @@
 
 from __future__ import annotations
 
+from importlib import import_module
 from typing import TYPE_CHECKING
 
-from bioetl.application.services import (
-    BronzeCleanupResult,
-    BronzeCleanupService,
-    ConfigService,
-    ContractMigrationService,
-    ExportService,
-    HealthService,
-    LineageInspectionService,
-    MetricsService,
-    ObservabilityWorkflowService,
-    PipelineRunnerService,
-    QuarantineService,
-    RunManifestInspectionService,
-    VacuumService,
-)
-from bioetl.application.services.audit_inspection_service import AuditInspectionService
-from bioetl.application.services.checkpoint_service import CheckpointService
-from bioetl.application.services.lock_service import LockService
-from bioetl.composition.bootstrap import (
-    HealthServerDependencies,
-    bootstrap_adr_service,
-    bootstrap_audit_inspection_service,
-    bootstrap_bronze_cleanup_service,
-    bootstrap_checkpoint_service,
-    bootstrap_config_service,
-    bootstrap_contract_migration_service,
-    bootstrap_health_server_dependencies,
-    bootstrap_health_service,
-    bootstrap_lineage_service,
-    bootstrap_lock_service,
-    bootstrap_metrics_service,
-    bootstrap_observability_workflow_service,
-    bootstrap_pipeline_runner_service,
-    bootstrap_quarantine_port,
-    bootstrap_quarantine_service,
-    bootstrap_run_manifest_service,
-    bootstrap_vacuum_service,
-)
-from bioetl.composition.bootstrap.cli.storage import bootstrap_export_service
-
 if TYPE_CHECKING:
+    from bioetl.application.services import (
+        BronzeCleanupResult,
+        BronzeCleanupService,
+        ConfigService,
+        ContractMigrationService,
+        ExportService,
+        HealthService,
+        LineageInspectionService,
+        MetricsService,
+        ObservabilityWorkflowService,
+        PipelineRunnerService,
+        QuarantineService,
+        RunManifestInspectionService,
+        VacuumService,
+    )
+    from bioetl.application.services.audit_inspection_service import (
+        AuditInspectionService,
+    )
+    from bioetl.application.services.checkpoint_service import CheckpointService
+    from bioetl.application.services.lock_service import LockService
     from bioetl.composition import PipelineRegistry
+    from bioetl.composition.bootstrap import HealthServerDependencies
     from bioetl.domain.ports import AdrServicePort, QuarantinePort
     from bioetl.domain.workflow import WorkflowConfig
 
@@ -83,6 +65,77 @@ def _ensure_registrations(registry: PipelineRegistry | None = None) -> None:
     ensure_registrations_impl(registry=registry)
 
 
+def _bootstrap_attr(name: str) -> object:
+    """Resolve one bootstrap export lazily to keep CLI imports light."""
+    bootstrap = import_module("bioetl.composition.bootstrap")
+    return getattr(bootstrap, name)
+
+
+def bootstrap_checkpoint_service(*args: object, **kwargs: object) -> object:
+    """Compatibility seam for checkpoint service bootstrap patch points."""
+    return _bootstrap_attr("bootstrap_checkpoint_service")(*args, **kwargs)
+
+
+def bootstrap_quarantine_service(*args: object, **kwargs: object) -> object:
+    """Compatibility seam for quarantine service bootstrap patch points."""
+    return _bootstrap_attr("bootstrap_quarantine_service")(*args, **kwargs)
+
+
+def bootstrap_bronze_cleanup_service(*args: object, **kwargs: object) -> object:
+    """Compatibility seam for bronze cleanup bootstrap patch points."""
+    return _bootstrap_attr("bootstrap_bronze_cleanup_service")(*args, **kwargs)
+
+
+def bootstrap_vacuum_service(*args: object, **kwargs: object) -> object:
+    """Compatibility seam for vacuum service bootstrap patch points."""
+    return _bootstrap_attr("bootstrap_vacuum_service")(*args, **kwargs)
+
+
+def bootstrap_export_service(*args: object, **kwargs: object) -> object:
+    """Compatibility seam for export service bootstrap patch points."""
+    return _bootstrap_attr("bootstrap_export_service")(*args, **kwargs)
+
+
+def bootstrap_lock_service(*args: object, **kwargs: object) -> object:
+    """Compatibility seam for lock service bootstrap patch points."""
+    return _bootstrap_attr("bootstrap_lock_service")(*args, **kwargs)
+
+
+def bootstrap_pipeline_runner_service(*args: object, **kwargs: object) -> object:
+    """Compatibility seam for pipeline runner bootstrap patch points."""
+    return _bootstrap_attr("bootstrap_pipeline_runner_service")(*args, **kwargs)
+
+
+def bootstrap_config_service(*args: object, **kwargs: object) -> object:
+    """Compatibility seam for config service bootstrap patch points."""
+    return _bootstrap_attr("bootstrap_config_service")(*args, **kwargs)
+
+
+def bootstrap_health_service(*args: object, **kwargs: object) -> object:
+    """Compatibility seam for health service bootstrap patch points."""
+    return _bootstrap_attr("bootstrap_health_service")(*args, **kwargs)
+
+
+def bootstrap_health_server_dependencies(*args: object, **kwargs: object) -> object:
+    """Compatibility seam for health server dependency bootstrap patch points."""
+    return _bootstrap_attr("bootstrap_health_server_dependencies")(*args, **kwargs)
+
+
+def bootstrap_metrics_service(*args: object, **kwargs: object) -> object:
+    """Compatibility seam for metrics service bootstrap patch points."""
+    return _bootstrap_attr("bootstrap_metrics_service")(*args, **kwargs)
+
+
+def bootstrap_adr_service(*args: object, **kwargs: object) -> object:
+    """Compatibility seam for ADR service bootstrap patch points."""
+    return _bootstrap_attr("bootstrap_adr_service")(*args, **kwargs)
+
+
+def bootstrap_quarantine_port(*args: object, **kwargs: object) -> object:
+    """Compatibility seam for quarantine port bootstrap patch points."""
+    return _bootstrap_attr("bootstrap_quarantine_port")(*args, **kwargs)
+
+
 def get_checkpoint_service() -> CheckpointService:
     """Get a checkpoint service for administrative operations.
 
@@ -99,7 +152,7 @@ def get_checkpoint_service() -> CheckpointService:
 def get_audit_service() -> AuditInspectionService:
     """Get an audit inspection service for operator diagnostics operations."""
     _ensure_registrations()
-    return bootstrap_audit_inspection_service()
+    return _bootstrap_attr("bootstrap_audit_inspection_service")()
 
 
 def get_quarantine_service() -> QuarantineService:
@@ -231,19 +284,19 @@ def load_workflow_config(name: str) -> WorkflowConfig:
 def get_contract_migration_service() -> ContractMigrationService:
     """Get the contract migration planner service."""
     _ensure_registrations()
-    return bootstrap_contract_migration_service()
+    return _bootstrap_attr("bootstrap_contract_migration_service")()
 
 
 def get_run_manifest_service() -> RunManifestInspectionService:
     """Get a run-manifest inspection service for control-plane operations."""
     _ensure_registrations()
-    return bootstrap_run_manifest_service()
+    return _bootstrap_attr("bootstrap_run_manifest_service")()
 
 
 def get_lineage_service() -> LineageInspectionService:
     """Get a lineage inspection service for traceability operations."""
     _ensure_registrations()
-    return bootstrap_lineage_service()
+    return _bootstrap_attr("bootstrap_lineage_service")()
 
 
 def get_health_service() -> HealthService:
@@ -272,7 +325,7 @@ def get_health_service() -> HealthService:
 def get_observability_workflow_service() -> ObservabilityWorkflowService:
     """Get workflow-level observability diagnostics helpers."""
     _ensure_registrations()
-    return bootstrap_observability_workflow_service()
+    return _bootstrap_attr("bootstrap_observability_workflow_service")()
 
 
 def get_health_server_dependencies() -> HealthServerDependencies:

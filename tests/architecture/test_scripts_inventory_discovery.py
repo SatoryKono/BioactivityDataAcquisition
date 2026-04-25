@@ -166,9 +166,9 @@ def test_docs_generated_and_archive_surfaces_are_skipped_from_inventory_scan() -
 
     assert module._is_skipped_rel_path("docs/reports/generated/inventory.md")
     assert module._is_skipped_rel_path("docs/reports/evidence/pillar.yaml")
-    assert module._is_skipped_rel_path("docs/99-archive/root-status-artifacts/report.md")
+    assert module._is_skipped_rel_path(
+        "docs/99-archive/root-status-artifacts/report.md"
+    )
     assert module._is_skipped_rel_path("docs/02-architecture/generated/diagram.svg")
     assert module._is_skipped_rel_path("docs/plans/wip.md")
-    assert not module._is_skipped_rel_path(
-        "docs/03-guides/script-management/README.md"
-    )
+    assert not module._is_skipped_rel_path("docs/03-guides/script-management/README.md")

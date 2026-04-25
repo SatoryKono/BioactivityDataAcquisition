@@ -2,23 +2,49 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from enum import Enum
 from numbers import Real
-from typing import TYPE_CHECKING
+from typing import Protocol
 
-from bioetl.application.core.batch_transformer_state import build_transform_result
+from bioetl.application.core.batch_transformer_state import (
+    TransformResult,
+    build_transform_result,
+)
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
 from bioetl.domain.types import BronzeRecord
 
-if TYPE_CHECKING:
-    from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-    from bioetl.application.core.batch_transformer import BatchTransformContext
-    from bioetl.application.core.transformer_runtime.state import BatchTransformState
-    from bioetl.domain.config.pipeline import TransformConfig
+
+class _BatchTransformContext(Protocol):
+    """Minimal transform context surface needed by finalization helpers."""
+
+    logger: object
 
 
-from bioetl.application.core.batch_transformer_state import TransformResult
+class _TransformConfig(Protocol):
+    """Loose transform config surface exposing DQ configuration."""
+
+    dq_config: object | None
+    dq: object | None
+
+
+class _BatchMetricsRecorderService(Protocol):
+    """Minimal batch-metrics surface needed by finalization helpers."""
+
+    error_count: object | None
+
+    def track_dq_validation_failure(self, *, stage: str, severity: str) -> None: ...
+
+
+class _BatchTransformState(Protocol):
+    """Mutable batch state surface required during finalization."""
+
+    records_quarantine_failed: int
+    quarantined_count: int
+
+
+FlushCountCallback = Callable[[], Awaitable[object]]
 
 
 class ThresholdBreachReason(Enum):
@@ -41,13 +67,13 @@ class DQThresholdCheckResult:
 
 async def finalize_batch_transform_result(
     *,
-    context: BatchTransformContext,
-    config: TransformConfig,
-    batch_metrics: BatchMetricsRecorderService,
-    state: BatchTransformState,
+    context: _BatchTransformContext,
+    config: _TransformConfig,
+    batch_metrics: _BatchMetricsRecorderService,
+    state: _BatchTransformState,
     records: list[BronzeRecord],
-    flush_filtered_records: callable,
-    flush_dq_records: callable,
+    flush_filtered_records: FlushCountCallback,
+    flush_dq_records: FlushCountCallback,
 ) -> TransformResult:
     """Finalize one batch result with DQ checks and quarantine flushing."""
     dq_config = getattr(config, "dq_config", None) or getattr(config, "dq", None)
@@ -85,7 +111,7 @@ async def finalize_batch_transform_result(
         )
         raise DataQualityThresholdError(
             error_rate=threshold_result.error_rate,
-            threshold=float(threshold_result.hard_threshold),
+            threshold=threshold_result.hard_threshold,
         )
 
     if threshold_result.breach == ThresholdBreachReason.SOFT:
@@ -110,13 +136,13 @@ async def finalize_batch_transform_result(
 
 async def finalize_stream_transform_result(
     *,
-    context: BatchTransformContext,
-    config: TransformConfig,
-    batch_metrics: BatchMetricsRecorderService,
-    state: BatchTransformState,
+    context: _BatchTransformContext,
+    config: _TransformConfig,
+    batch_metrics: _BatchMetricsRecorderService,
+    state: _BatchTransformState,
     records: list[BronzeRecord],
-    flush_filtered_records: callable,
-    flush_dq_records: callable,
+    flush_filtered_records: FlushCountCallback,
+    flush_dq_records: FlushCountCallback,
 ) -> TransformResult:
     """Finalize one streaming result via the shared batch finalizer."""
     return await finalize_batch_transform_result(
@@ -211,8 +237,8 @@ def _resolve_threshold_value(
 
 def _resolve_error_count(
     *,
-    batch_metrics: BatchMetricsRecorderService,
-    state: BatchTransformState,
+    batch_metrics: _BatchMetricsRecorderService,
+    state: _BatchTransformState,
 ) -> int:
     """Resolve a concrete DQ error count without trusting mock placeholders."""
     error_count = getattr(batch_metrics, "error_count", None)
@@ -221,7 +247,7 @@ def _resolve_error_count(
     return state.quarantined_count
 
 
-async def _await_flush_count(flush_callback: callable) -> int:
+async def _await_flush_count(flush_callback: FlushCountCallback) -> int:
     """Await one flush callback and coerce absent counts to zero."""
     flushed = await flush_callback()
     return flushed if isinstance(flushed, int) and not isinstance(flushed, bool) else 0

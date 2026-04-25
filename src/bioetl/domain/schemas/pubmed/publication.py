@@ -1,11 +1,4 @@
-"""Pandera schema for PubMed Publication entity.
-
-Aligned with RULES.md v5.24 and MEDLINE DTD.
-Source: https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_230101.dtd
-
-Note: File renamed from article.py to publication.py per ADR-024 Entity Naming Unification.
-PubMedPublicationSchema is the canonical schema name for PubMed publications.
-"""
+"""Pandera schema for PubMed Publication entities."""
 
 from __future__ import annotations
 
@@ -33,10 +26,8 @@ else:
         PublicationBaseSchema as _PublicationBaseSchema,
     )
 
-# Public exports
 __all__ = ["LOOKUP_METHODS", "PubMedPublicationSchema"]
 
-# === Fixed Value Constants ===
 PUBLICATION_STATUSES = ["ppublish", "epublish", "aheadofprint"]
 ISSN_TYPES = ["Print", "Electronic", "Linking"]
 

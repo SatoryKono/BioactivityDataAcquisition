@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import cast
-
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
 )
@@ -113,10 +111,7 @@ class CheckpointManagerService:
         )
         if effective_current_metadata is None or self._compatibility_service is None:
             return checkpoint_metadata, False
-        compatibility_result = cast(
-            CheckpointCompatibilityService,
-            self._compatibility_service,
-        ).validate_checkpoint_compatibility(
+        compatibility_result = self._compatibility_service.validate_checkpoint_compatibility(
             effective_current_metadata,
             checkpoint_metadata,
         )
@@ -198,13 +193,15 @@ class CheckpointManagerService:
     ) -> CheckpointMetadata | None:
         """Load a checkpoint when resume is enabled and policy allows it."""
         if self._resume_blocked_by_loading_strategy():
+            loading_strategy = self._loading_strategy
+            assert loading_strategy is not None
             self._emit_checkpoint_load_status("blocked")
             self._logger.warning(
                 "Checkpoint resume blocked for full_scan_only pipeline. "
                 "Each run performs a full scan; deduplication via content_hash on Silver. "
                 "See ADR-031 for details.",
                 pipeline=self._pipeline_name,
-                loading_strategy=self._loading_strategy.value,
+                loading_strategy=loading_strategy.value,
                 resume_requested=True,
             )
             return None

@@ -1,5 +1,5 @@
 {
-  "artifact_id": "effective-config-0738da3447669e65",
+  "artifact_id": "effective-config-4571b94907fa1ba7",
   "occurrence_envelope": {
     "created_at": "2025-01-01T12:00:00+00:00",
     "effective_execution_timestamp": "2025-01-01T12:00:00+00:00",
@@ -7,7 +7,7 @@
   },
   "schema_version": "1.0",
   "semantic_artifact": {
-    "artifact_id": "effective-config-0738da3447669e65",
+    "artifact_id": "effective-config-4571b94907fa1ba7",
     "contract_refs": [],
     "dq_contract_compatibility_hash": "no_dq_policies",
     "dq_policy_refs": [],
@@ -80,7 +80,7 @@
       {
         "anchor_field": "override_hash",
         "artifact_surface": "semantic_artifact.runtime_overrides.env_overrides",
-        "notes": "Explicit allowlisted environment overrides are materialized into env_overrides and collapsed into the runtime override hash; empty env_overrides payloads must not be interpreted as complete ambient environment provenance.",
+        "notes": "Explicit allowlisted environment overrides are materialized into env_overrides and collapsed into the runtime override hash; non-allowlisted semantic env overrides are rejected during artifact creation.",
         "provenance_status": "identity_anchored",
         "source_class": "env_override"
       },
@@ -108,7 +108,7 @@
       {
         "anchor_field": null,
         "artifact_surface": "not_persisted",
-        "notes": "Ambient process environment outside explicit overrides is intentionally excluded from semantic identity.",
+        "notes": "Ambient process environment outside explicit overrides is intentionally excluded from semantic identity; strict reproducibility relies on an explicit semantic env allowlist.",
         "provenance_status": "unsupported",
         "source_class": "implicit_process_environment"
       }

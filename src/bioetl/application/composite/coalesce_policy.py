@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Protocol
 
 # ColumnPriorityOrderer imported for backward compatibility during migration
@@ -45,7 +45,7 @@ class _ColumnPriorityProvider(Protocol):
         df: pl.DataFrame,
         field: str,
         ordered_cols: list[str],
-        _can_coalesce_fn: callable,
+        _can_coalesce_fn: Callable[[pl.DataFrame, str, str], bool],
     ) -> tuple[list[str], list[str]]: ...
 
 

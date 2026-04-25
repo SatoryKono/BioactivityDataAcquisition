@@ -4,13 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.composition.bootstrap.runtime._observability_preflight_support import (
+    validate_control_plane_readiness,
+    validate_prod_noop_components,
+)
 from bioetl.composition.observability import (
     ObservabilityBundle,
-    ObservabilityContractError,
-)
-from bioetl.composition.runtime_builders.runner_builder_support import (
-    resolve_required_artifact_lineage_layers,
-    validate_required_persistence_profile,
 )
 from bioetl.domain.ports import (
     AuditPort,
@@ -18,12 +17,7 @@ from bioetl.domain.ports import (
     MetricsPort,
     TracingPort,
 )
-from bioetl.domain.ports.noop import (
-    NoOpAudit,
-    NoOpMetrics,
-    NoOpTracing,
-)
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.domain.ports.noop import NoOpAudit
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -64,102 +58,22 @@ def validate_observability_preflight_impl(
     """
     if environment != "prod":
         return
-
-    if isinstance(logger, NoOpLogger):
-        logger.warning(
-            "noop_logger_in_production",
-            stage="bootstrap",
-            reason_code="noop_logger",
-            message="NoOpLogger in production - structured runtime correlation will be lost",
-            recommendation="Use UnifiedLogger or another structured LoggerPort implementation",
-        )
-        if not allow_noop_in_prod:
-            raise ObservabilityContractError(
-                "NoOpLogger is not allowed in prod. "
-                "Enable structured runtime logging or set "
-                "BIOETL_OBSERVABILITY__ALLOW_NOOP_OBSERVABILITY_IN_PROD=true "
-                "for an explicit override."
-            )
-
-    if isinstance(tracer, NoOpTracing):
-        logger.warning(
-            "noop_tracing_in_production",
-            stage="bootstrap",
-            reason_code="noop_tracing",
-            message="NoOpTracing in production - traces will be lost",
-            recommendation="Set BIOETL_OBSERVABILITY__TRACING_ENABLED=true "
-            "and configure OpenTelemetry endpoint",
-        )
-        if not allow_noop_in_prod:
-            raise ObservabilityContractError(
-                "NoOpTracing is not allowed in prod. "
-                "Enable tracing or set "
-                "BIOETL_OBSERVABILITY__ALLOW_NOOP_OBSERVABILITY_IN_PROD=true "
-                "for an explicit override."
-            )
-
-    if isinstance(metrics, NoOpMetrics):
-        logger.warning(
-            "noop_metrics_in_production",
-            stage="bootstrap",
-            reason_code="noop_metrics",
-            message="NoOpMetrics in production - metrics will be lost",
-            recommendation="Set BIOETL_OBSERVABILITY__METRICS_ENABLED=true "
-            "to enable Prometheus metrics collection",
-        )
-        if not allow_noop_in_prod:
-            raise ObservabilityContractError(
-                "NoOpMetrics is not allowed in prod. "
-                "Enable metrics or set "
-                "BIOETL_OBSERVABILITY__ALLOW_NOOP_OBSERVABILITY_IN_PROD=true "
-                "for an explicit override."
-            )
-
-    if _audit_required(audit=audit, audit_required=audit_required):
-        logger.warning(
-            "noop_audit_in_production",
-            stage="bootstrap",
-            reason_code="noop_audit",
-            message="NoOpAudit in production - audit trail persistence will be lost",
-            recommendation="Set BIOETL_OBSERVABILITY__AUDIT_ENABLED=true with a writable audit path",
-        )
-        if not allow_noop_in_prod:
-            raise ObservabilityContractError(
-                "NoOpAudit is not allowed in prod when audit logging is required. "
-                "Enable audit or set "
-                "BIOETL_OBSERVABILITY__ALLOW_NOOP_OBSERVABILITY_IN_PROD=true "
-                "for an explicit override."
-            )
-
-    required_profile, manifest_enabled, ledger_enabled = _control_plane_settings(
-        control_plane=control_plane
+    validate_prod_noop_components(
+        tracer=tracer,
+        metrics=metrics,
+        logger=logger,
+        allow_noop_in_prod=allow_noop_in_prod,
+        audit=audit,
+        audit_required=audit_required,
+        audit_required_fn=_audit_required,
     )
-    _active_layers, missing_artifact_lineage_layers = (
-        resolve_required_artifact_lineage_layers(
-            yaml_config=yaml_config,
-            skip_gold=skip_gold,
-        )
+    validate_control_plane_readiness(
+        logger=logger,
+        control_plane=control_plane,
+        yaml_config=yaml_config,
+        skip_gold=skip_gold,
+        control_plane_settings_fn=_control_plane_settings,
     )
-    try:
-        validate_required_persistence_profile(
-            manifest_enabled=manifest_enabled,
-            ledger_enabled=ledger_enabled,
-            required_profile=required_profile,
-            execution_label="Production observability preflight",
-            missing_artifact_lineage_layers=missing_artifact_lineage_layers,
-        )
-    except RuntimeError as exc:
-        logger.warning(
-            "control_plane_readiness_preflight_failed",
-            stage="bootstrap",
-            reason_code="required_persistence_profile_unsatisfied",
-            message=str(exc),
-            required_persistence_profile=required_profile,
-            run_manifest_enabled=manifest_enabled,
-            run_ledger_enabled=ledger_enabled,
-            missing_artifact_lineage_layers=list(missing_artifact_lineage_layers),
-        )
-        raise ObservabilityContractError(str(exc)) from exc
 
 
 def bootstrap_observability_bundle_impl(

@@ -21,10 +21,7 @@ def classify_provider_type(
 ) -> PublicationTypeEntry | None:
     """Resolve a provider-specific publication type from scalar/list inputs."""
     if lookup is None:
-        return classify_chembl_type(
-            raw_type=raw_type,
-            raw_types_list=raw_types_list,
-        )
+        return None
     if raw_type is not None:
         return lookup.get(raw_type.strip().lower())
     if raw_types_list is not None:

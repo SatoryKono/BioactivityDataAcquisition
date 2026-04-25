@@ -62,10 +62,10 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
         assert result["uo_units"] == "UO_0000065"
 
     @pytest.mark.asyncio
-    async def test_transform_normalizes_standard_units_and_preserves_qudt_uri(
+    async def test_transform_normalizes_activity_units_and_preserves_qudt_uri(
         self, transformer, mock_context
     ):
-        """Canonical fields should normalize without rewriting raw unit or QUDT text."""
+        """Activity unit fields should canonicalize while preserving the QUDT URI."""
         record = {
             "activity_id": 12345,
             "molecule_id": "CHEMBL25",
@@ -78,7 +78,7 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
 
         assert result is not None
         assert result["standard_units"] == "nM"
-        assert result["units"] == "uM"
+        assert result["units"] == "µM"
         assert result["qudt_units"] == LEGACY_QUDT_UNIT_URI
 
     @pytest.mark.asyncio

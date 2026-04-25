@@ -1,8 +1,4 @@
-"""Centralized immutable constants for schema validation.
-
-Enum values originate from `configs/enums/chembl.yaml` and are kept in sync by
-`tests/unit/domain/schemas/test_constants_yaml.py`.
-"""
+"""Centralized immutable constants for schema validation."""
 
 from __future__ import annotations
 
@@ -20,10 +16,6 @@ from bioetl.domain.schemas._schema_validation_patterns import (
     UBERON_ID_PATTERN,
     UO_ID_PATTERN,
 )
-
-# =============================================================================
-# CHEMBL ACTIVITY ENUMS
-# =============================================================================
 
 STANDARD_RELATIONS: frozenset[str] = frozenset(["=", "<", "<=", ">", ">=", "~"])
 
@@ -45,10 +37,8 @@ ACTIVITY_STANDARD_TYPES: frozenset[str] = frozenset(
     ]
 )
 
-# Assay parameter standard types (superset of activity types + parameter-specific)
 ASSAY_PARAMETER_STANDARD_TYPES: frozenset[str] = frozenset(
     [
-        # Measurement types (from ACTIVITY_STANDARD_TYPES)
         "IC50",
         "EC50",
         "Ki",
@@ -62,20 +52,19 @@ ASSAY_PARAMETER_STANDARD_TYPES: frozenset[str] = frozenset(
         "Ratio",
         "ED50",
         "ID50",
-        # Parameter-specific types
-        "CONC",  # Concentration
-        "PH",  # pH level
-        "TEMP",  # Temperature
-        "TIME",  # Incubation time
-        "DOSE",  # Dose
-        "VOLUME",  # Volume
-        "WAVELENGTH",  # Wavelength
-        "PERCENT",  # Percentage
-        "PRESSURE",  # Pressure
-        "HUMIDITY",  # Humidity
-        "CELL_COUNT",  # Cell count
-        "CELL_DENSITY",  # Cell density
-        "SERUM",  # Serum percentage
+        "CONC",
+        "PH",
+        "TEMP",
+        "TIME",
+        "DOSE",
+        "VOLUME",
+        "WAVELENGTH",
+        "PERCENT",
+        "PRESSURE",
+        "HUMIDITY",
+        "CELL_COUNT",
+        "CELL_DENSITY",
+        "SERUM",
     ]
 )
 
@@ -103,10 +92,6 @@ ACTIVITY_STANDARD_UNITS: frozenset[str] = frozenset(
         "mg.kg-1",
     ]
 )
-
-# =============================================================================
-# CHEMBL ASSAY ENUMS
-# =============================================================================
 
 ASSAY_TYPES: frozenset[str] = frozenset(["B", "F", "A", "T", "P", "U"])
 
@@ -139,7 +124,6 @@ ASSAY_CATEGORIES: frozenset[str] = frozenset(
 
 RELATIONSHIP_TYPES: frozenset[str] = frozenset(["D", "H", "M", "N", "S", "U"])
 
-# Additional assay enums
 ASSAY_GROUPS: frozenset[str] = frozenset(["FUNCTIONAL", "BINDING"])
 SUBCELLULAR_FRACTIONS: frozenset[str] = frozenset(
     ["Membrane", "Nucleus", "Cytoplasm", "Mitochondria", "Endoplasmic reticulum"]
@@ -155,10 +139,6 @@ CONFIDENCE_DESCRIPTIONS: frozenset[str] = frozenset(
         "Not determined",
     ]
 )
-
-# =============================================================================
-# CHEMBL MOLECULE ENUMS
-# =============================================================================
 
 MOLECULE_TYPES: frozenset[str] = frozenset(
     [
@@ -180,12 +160,7 @@ MOLECULE_TYPES: frozenset[str] = frozenset(
 STRUCTURE_TYPES: frozenset[str] = frozenset(["MOL", "SEQ", "BOTH", "NONE"])
 RO3_PASS_VALUES: frozenset[str] = frozenset(["Y", "N"])
 
-# max_phase uses float for 0.5, so tuple instead of frozenset
 MAX_PHASE_VALUES: tuple[float, ...] = (-1, 0, 0.5, 1, 2, 3, 4)
-
-# =============================================================================
-# CHEMBL TARGET ENUMS
-# =============================================================================
 
 TARGET_TYPES: frozenset[str] = frozenset(
     [
@@ -217,14 +192,8 @@ TARGET_COMPONENT_RELATIONSHIPS: frozenset[str] = frozenset(
 
 TARGET_COMPONENT_TYPES: frozenset[str] = frozenset(["PROTEIN", "DNA", "RNA"])
 
-# =============================================================================
-# CHEMBL PUBLICATION ENUMS
-# =============================================================================
-
 PUBLICATION_TYPES: frozenset[str] = frozenset(
     [
-        # Canonical kebab-case values after normalization by
-        # normalize_publication_type() (see domain.mapping.publication_type_mapping).
         "journal-article",
         "patent",
         "dataset",

@@ -7,6 +7,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
+from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 from bioetl.domain.types import HealthStatus
 from tests.unit.application.core.test_batch_executor_memory import (
     _create_batch_executor,
@@ -79,11 +80,18 @@ class TestBatchExecutorRecoveryInvariants:
         data_source = FakeDataSource(total_records=1000, fail_at=550)
         checkpoint_port = MemoryCheckpointAdapter()
 
-        async def save_checkpoint(records_processed: int) -> None:
+        async def save_checkpoint(
+            metadata: int | CheckpointMetadata,
+        ) -> None:
+            payload = (
+                metadata.to_dict()
+                if isinstance(metadata, CheckpointMetadata)
+                else {"records_processed": metadata}
+            )
             await checkpoint_port.save(
                 "test",
                 "r1",
-                {"records_processed": records_processed},
+                payload,
             )
 
         # Configure minimal required services

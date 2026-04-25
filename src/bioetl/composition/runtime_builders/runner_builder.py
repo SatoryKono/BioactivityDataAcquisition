@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from inspect import Parameter, signature
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
@@ -40,6 +40,7 @@ from bioetl.composition.runtime_builders.inputs_resolver import (
     RunnerInputs as _RunnerInputs,
 )
 from bioetl.composition.runtime_builders.ledger_collaborator import (
+    PipelineRunnerProtocol,
     attach_control_plane_collaborators,
 )
 from bioetl.composition.runtime_builders.observability_builder import (
@@ -69,16 +70,6 @@ if TYPE_CHECKING:
 
 
 __all__ = ["build_pipeline_runner"]
-
-
-class PipelineRunnerProtocol(Protocol):
-    """Minimal runner contract returned by the runtime builder."""
-
-    services: object
-
-    def attach_run_ledger_service(self, service: RunLedgerService) -> None:
-        """Attach the run-ledger collaborator."""
-        ...
 
 
 def _initialize_registry(
@@ -340,7 +331,6 @@ def build_pipeline_runner(
         assemble_filter_config_fn,
         assemble_cached_bronze_context_fn,
     )
-
     inputs = _prepare_runner_inputs_with_resolved_functions(
         ctx=ctx,
         get_settings_fn=get_settings_fn,
@@ -348,16 +338,12 @@ def build_pipeline_runner(
         load_source_config_fn=load_source_config_fn,
         resolved_functions=resolved_functions,
     )
-
     ctx, inputs, run_ledger_service = _handle_control_plane_setup(ctx, inputs)
-
     runner = _create_runner_from_factory(
         factory=effective_registry.get(ctx.pipeline_name).factory,
         ctx=ctx,
         inputs=inputs,
     )
-
     if run_ledger_service is not None:
         attach_control_plane_collaborators(runner, run_ledger_service)
-
     return runner

@@ -100,10 +100,13 @@ class PublicationTermTransformer(BaseChemblTransformer):
             index,
             normalized_business_data,
         )
-        return normalizer.project_normalization_findings(
-            silver_record,
-            context=context,
-            index=index,
+        return cast(
+            "SilverRecord",
+            normalizer.project_normalization_findings(
+                silver_record,
+                context=context,
+                index=index,
+            ),
         )
 
     def _extract_business_data(

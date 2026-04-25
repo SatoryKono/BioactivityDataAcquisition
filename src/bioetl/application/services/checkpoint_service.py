@@ -11,6 +11,7 @@ from __future__ import annotations
 __all__ = ["CheckpointInfo", "CheckpointService"]
 
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from time import perf_counter
 from typing import TYPE_CHECKING
@@ -27,6 +28,29 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import CheckpointPort, LoggerPort, MetricsPort, TracingPort
 from bioetl.domain.types import JsonDict
+
+_SpanAttributeValue = (
+    str | bool | int | float | Sequence[str] | Sequence[bool] | Sequence[int] | Sequence[float]
+)
+
+
+def _coerce_span_attribute_value(value: object) -> _SpanAttributeValue:
+    """Convert arbitrary service metadata into OpenTelemetry-compatible values."""
+    if isinstance(value, bool | str | int | float):
+        return value
+    if isinstance(value, Sequence) and not isinstance(value, str | bytes | bytearray):
+        items = list(value)
+        if not items:
+            return []
+        if all(isinstance(item, str) for item in items):
+            return items
+        if all(isinstance(item, bool) for item in items):
+            return items
+        if all(isinstance(item, int) and not isinstance(item, bool) for item in items):
+            return items
+        if all(isinstance(item, float) for item in items):
+            return items
+    return str(value)
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,12 +115,12 @@ class CheckpointService:
         span: Span,
         *,
         success: bool,
-        **extra: object,
+        extra: Mapping[str, object] | None = None,
     ) -> None:
         """Attach bounded result attributes to a checkpoint admin span."""
         span.set_attribute("bioetl.success", success)
-        for key, value in extra.items():
-            span.set_attribute(key, value)
+        for key, value in (extra or {}).items():
+            span.set_attribute(key, _coerce_span_attribute_value(value))
 
     def _record_operator_metrics(
         self,
@@ -140,7 +164,7 @@ class CheckpointService:
             self._set_trace_result(
                 span,
                 success=True,
-                **{"bioetl.checkpoint_count": len(checkpoints)},
+                extra={"bioetl.checkpoint_count": len(checkpoints)},
             )
             return checkpoints
 
@@ -221,7 +245,7 @@ class CheckpointService:
             self._set_trace_result(
                 span,
                 success=True,
-                **{"bioetl.checkpoint_found": checkpoint is not None},
+                extra={"bioetl.checkpoint_found": checkpoint is not None},
             )
             return checkpoint
 
@@ -296,7 +320,7 @@ class CheckpointService:
             self._set_trace_result(
                 span,
                 success=True,
-                **{"bioetl.checkpoint_deleted": deleted},
+                extra={"bioetl.checkpoint_deleted": deleted},
             )
             return deleted
 

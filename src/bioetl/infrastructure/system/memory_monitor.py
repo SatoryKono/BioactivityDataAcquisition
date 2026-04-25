@@ -56,27 +56,7 @@ def _check_psutil_available() -> bool:
 
 @dataclass
 class MemoryMonitor:
-    """Monitor memory usage and provide adaptive batch size recommendations.
-
-    This class tracks memory consumption during batch processing and
-    automatically recommends batch size reductions when memory pressure
-    is detected, preventing OOM errors during large dataset processing.
-
-    Implements MemoryMonitorPort from domain/ports/memory.py.
-
-    Performance characteristics:
-    - First call to get_memory_stats(): ~1-2 ms (with psutil already imported)
-    - Subsequent calls: ~0.2-0.5 ms (cached Process instance)
-    - Initialization: <1 ms (no heavy imports in __post_init__)
-
-    Example:
-        >>> monitor = MemoryMonitor(config=MemoryConfig(), logger=logger)
-        >>> batch_size = 1000
-        >>> for batch in data_source:
-        ...     batch_size = monitor.get_recommended_batch_size(batch_size)
-        ...     # Process with adjusted batch size
-
-    """
+    """Monitor memory usage and provide adaptive batch-size recommendations."""
 
     config: MemoryConfig
     logger: LoggerPort | None = None
@@ -92,11 +72,7 @@ class MemoryMonitor:
     )  # Any: psutil.Process cached; optional dependency
 
     def __post_init__(self) -> None:
-        """Initialize memory monitor with lazy psutil detection.
-
-        Uses module-level cache for psutil availability check to avoid
-        repeated import overhead across multiple MemoryMonitor instances.
-        """
+        """Initialize memory monitor with cached psutil detection."""
         self._psutil_available = _check_psutil_available()
         if self._psutil_available and self.logger:
             self.logger.debug("psutil available for memory monitoring")
@@ -112,31 +88,16 @@ class MemoryMonitor:
         return self._last_pressure_state
 
     def get_memory_stats(self) -> MemoryStats:
-        """Get current memory statistics.
-
-        Returns:
-            MemoryStats with current memory usage information.
-
-        """
+        """Get current memory statistics."""
         if self._psutil_available:
             return self._get_stats_psutil()
         return self._get_stats_fallback()
 
     def _get_stats_psutil(self) -> MemoryStats:
-        """Get memory stats using psutil.
-
-        Performance optimization: reuses cached psutil module and Process instance
-        to avoid repeated imports and process lookups (~40ms savings per init).
-
-        Returns:
-            MemoryStats populated with system and process memory usage from psutil.
-        """
+        """Get memory stats using psutil with cached module and process handles."""
         psutil = _PSUTIL_MODULE
         self._last_monitor_mode = "psutil"
-
         vm = psutil.virtual_memory()
-
-        # Cache Process instance for subsequent calls (saves ~0.2ms per call)
         if self._cached_process is None:
             object.__setattr__(self, "_cached_process", psutil.Process())
         process_memory = self._cached_process.memory_info()
@@ -150,34 +111,18 @@ class MemoryMonitor:
         )
 
     def _get_stats_fallback(self) -> MemoryStats:
-        """Get memory stats using fallback methods.
-
-        Returns:
-            MemoryStats from resource module on Unix or conservative estimates on Windows.
-        """
+        """Get memory stats using fallback methods."""
         if sys.platform != "win32":
             return self._get_stats_resource()
         return self._get_stats_estimate()
 
     def _get_stats_resource(self) -> MemoryStats:
-        """Get memory stats using resource module (Unix only).
-
-        Note:
-            This method is only called on Unix platforms (guarded by
-            sys.platform check in _get_stats_fallback).
-
-        Returns:
-            MemoryStats populated from /proc/meminfo and resource module data.
-        """
+        """Get memory stats using the Unix `resource` module and `/proc/meminfo`."""
         import resource
 
         resource_module: Any = resource  # Any: resource module unavailable on Windows
-
-        # Get process memory usage (Unix-only attributes)
         rusage = resource_module.getrusage(resource_module.RUSAGE_SELF)
         process_mb = rusage.ru_maxrss / 1024  # Convert KB to MB on Linux
-
-        # Try to read system memory from /proc/meminfo
         try:
             with Path("/proc/meminfo").open() as f:
                 meminfo = {}
@@ -205,13 +150,7 @@ class MemoryMonitor:
             return self._get_stats_estimate()
 
     def _get_stats_estimate(self) -> MemoryStats:
-        """Provide conservative estimates when actual stats unavailable.
-
-        Returns:
-            MemoryStats with conservative fixed estimates (4GB used, 4GB available, 8GB total).
-        """
-        # Conservative estimate: assume 50% memory used
-        # This is safer than assuming low usage
+        """Provide conservative estimates when actual stats are unavailable."""
         self._last_monitor_mode = "estimate"
         return MemoryStats(
             used_mb=4096.0,  # Assume 4GB used
@@ -222,12 +161,7 @@ class MemoryMonitor:
         )
 
     def is_under_pressure(self) -> bool:
-        """Check if system is under memory pressure.
-
-        Returns:
-            True if memory usage exceeds the configured threshold.
-
-        """
+        """Check if system is under memory pressure."""
         if not self.config.enable_adaptive_sizing:
             self._last_pressure_state = None
             return False
@@ -257,10 +191,7 @@ class MemoryMonitor:
                 stats=stats,
             )
 
-        # Pressure relieved - consider gradual recovery
         self._consecutive_pressure_count = 0
-
-        # If we previously reduced, try to recover gradually
         recovery_target = self._recovery_target_batch_size or self._last_batch_size
         if current_batch_size < recovery_target:
             return self._recover_batch_size(
@@ -343,12 +274,7 @@ class MemoryMonitor:
         )
 
     def _get_reduction_factor(self) -> float:
-        """Get batch size reduction factor based on pressure duration.
-
-        Returns:
-            Reduction factor (0.25 to 0.5).
-
-        """
+        """Get batch-size reduction factor based on pressure duration."""
         if self._consecutive_pressure_count >= 5:
             return 0.25  # Aggressive: reduce to 25%
         if self._consecutive_pressure_count >= 3:
@@ -358,33 +284,14 @@ class MemoryMonitor:
     def estimate_batch_memory_mb(
         self, record_count: int, avg_record_size_bytes: int = 1024
     ) -> float:
-        """Estimate memory usage for a batch.
-
-        Args:
-            record_count: Number of records in batch.
-            avg_record_size_bytes: Average size per record in bytes.
-
-        Returns:
-            Estimated memory usage in MB.
-
-        """
-        # Factor in transformation overhead (2x for in-memory copies)
+        """Estimate memory usage for a batch."""
         overhead_factor = 2.5
         return (record_count * avg_record_size_bytes * overhead_factor) / (1024 * 1024)
 
     def calculate_max_batch_size(self, avg_record_size_bytes: int = 1024) -> int:
-        """Calculate maximum batch size based on available memory.
-
-        Args:
-            avg_record_size_bytes: Average size per record in bytes.
-
-        Returns:
-            Maximum recommended batch size.
-
-        """
+        """Calculate maximum batch size based on available memory."""
         max_memory_bytes = self.config.max_batch_memory_mb * 1024 * 1024
         overhead_factor = 2.5
-
         max_records = int(max_memory_bytes / (avg_record_size_bytes * overhead_factor))
         return max(max_records, self.config.min_batch_size)
 

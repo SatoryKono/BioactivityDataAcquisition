@@ -28,7 +28,7 @@ from bioetl.domain.mapping.pubmed_publication import (
 )
 from bioetl.domain.normalization import normalize_pmc_id
 from bioetl.domain.types import BronzeRecord, JsonDict
-from bioetl.domain.value_objects import DOI, PubMedId
+from bioetl.domain.value_objects.publications import DOI, PubMedId
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DataNormalizationPort, PiiHasherPort

@@ -60,20 +60,17 @@ class RunManifestInspectionIdentityGraphMixin:
         diagnostics: dict[str, object],
     ) -> dict[str, object]:
         """Build identity graph when diagnostics did not already provide one."""
+        mixin = RunManifestInspectionIdentityGraphMixin
         code_provenance = manifest.code_provenance
-        canonical_execution_identity = (
-            RunManifestInspectionIdentityGraphMixin._build_canonical_execution_identity(
-                manifest,
-                diagnostics,
-            )
+        canonical_execution_identity = mixin._build_canonical_execution_identity(
+            manifest,
+            diagnostics,
         )
-        degraded_runtime_anchor_payload = (
-            RunManifestInspectionIdentityGraphMixin._build_degraded_runtime_anchor_payload(
-                manifest
-            )
+        degraded_runtime_anchor_payload = mixin._build_degraded_runtime_anchor_payload(
+            manifest
         )
         return {
-            **RunManifestInspectionIdentityGraphMixin._build_identity_graph_core(
+            **mixin._build_identity_graph_core(
                 manifest,
                 diagnostics,
                 code_provenance=code_provenance,
@@ -93,14 +90,12 @@ class RunManifestInspectionIdentityGraphMixin:
                 ),
                 "payload": degraded_runtime_anchor_payload,
             },
-            **RunManifestInspectionIdentityGraphMixin._build_identity_graph_replay_section(
+            **mixin._build_identity_graph_replay_section(
                 manifest,
                 diagnostics,
             ),
-            **RunManifestInspectionIdentityGraphMixin._build_identity_graph_snapshot_section(
-                diagnostics
-            ),
-            **RunManifestInspectionIdentityGraphMixin._build_identity_graph_artifact_section(
+            **mixin._build_identity_graph_snapshot_section(diagnostics),
+            **mixin._build_identity_graph_artifact_section(
                 manifest,
                 diagnostics,
             ),

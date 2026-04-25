@@ -137,7 +137,9 @@ def track_processed_quarantined(
     )
 
 
-def count_dq_error_types(records: list[tuple[BronzeRecord, ErrorType, str]]) -> Counter:
+def count_dq_error_types(
+    records: list[tuple[BronzeRecord, ErrorType, str]],
+) -> Counter[ErrorType]:
     """Count DQ quarantine entries by error type."""
     return Counter(error_type for _, error_type, _ in records)
 

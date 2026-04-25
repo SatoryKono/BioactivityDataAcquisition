@@ -3,17 +3,18 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, is_dataclass
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
-from uuid import UUID
+from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.effective_config_service import (
     create_effective_config_service,
 )
 from bioetl.composition.runtime_builders._run_manifest_refs import (
     control_plane_root as _shared_control_plane_root,
+)
+from bioetl.composition.runtime_builders._run_manifest_support import (
+    to_serializable_mapping as _to_serializable_mapping,
 )
 from bioetl.domain.control_plane.config_source_hashing import (
     compute_config_source_hashes,
@@ -22,53 +23,12 @@ from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRe
 from bioetl.infrastructure.control_plane import FileEffectiveConfigArtifactStore
 
 if TYPE_CHECKING:
-    from _typeshed import DataclassInstance
-
     from bioetl.composition.runtime_builders.inputs_resolver import (
         RunnerInputs,
     )
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
-
-
-def _normalize_snapshot(value: object) -> object:
-    """Normalize dataclass/Pydantic values into JSON-safe primitives."""
-    if not isinstance(value, type) and is_dataclass(value):
-        return _normalize_snapshot(asdict(cast("DataclassInstance", value)))
-    if hasattr(value, "__dict__") and not isinstance(value, type):
-        return _normalize_snapshot(
-            {key: item for key, item in vars(value).items() if not key.startswith("_")}
-        )
-    if isinstance(value, dict):
-        return {str(key): _normalize_snapshot(item) for key, item in value.items()}
-    if isinstance(value, (list, tuple, set, frozenset)):
-        return [_normalize_snapshot(item) for item in value]
-    if isinstance(value, Enum):
-        return value.value
-    if isinstance(value, UUID):
-        return str(value)
-    return value
-
-
-def _to_serializable_mapping(value: object) -> dict[str, object]:
-    """Convert dataclass or model objects into plain mappings."""
-    if hasattr(value, "model_dump"):
-        payload = value.model_dump(mode="json", exclude_none=True)
-    elif hasattr(value, "dict"):
-        payload = value.dict(exclude_none=True)
-    elif hasattr(value, "__dict__"):
-        payload = {
-            key: item for key, item in vars(value).items() if not key.startswith("_")
-        }
-    else:
-        payload = _normalize_snapshot(value)
-    if not isinstance(payload, dict):
-        return {"value": _normalize_snapshot(payload)}
-    normalized = _normalize_snapshot(payload)
-    if not isinstance(normalized, dict):
-        raise TypeError("Manifest snapshot normalization must return a mapping")
-    return normalized
 
 
 def _build_runtime_overrides_snapshot(ctx: PipelineRunContext) -> dict[str, object]:

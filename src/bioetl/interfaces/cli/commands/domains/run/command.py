@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import sys
+from collections.abc import Callable, Mapping
 from functools import partial
-from typing import TYPE_CHECKING, NoReturn
+from typing import TYPE_CHECKING, NoReturn, cast
 
 import click
 
@@ -38,6 +39,9 @@ from bioetl.interfaces.cli.commands.domains.run.result_flow import (
 )
 from bioetl.interfaces.cli.commands.domains.run.result_presenter import (
     echo_run_result as _echo_run_result,
+)
+from bioetl.interfaces.cli.commands.domains.run.runtime_helpers import (
+    PipelineRunnerService,
 )
 from bioetl.interfaces.cli.commands.domains.run.runtime_helpers import (
     build_run_command_input as _build_run_command_input_impl,
@@ -116,13 +120,13 @@ def get_cli_run_orchestration_service() -> CliRunOrchestrationService:
 
 def get_pipeline_runner_service(
     registry: PipelineRegistry | None = None,
-) -> object:
+) -> PipelineRunnerService:
     """Resolve the pipeline runner service lazily for runtime helpers."""
     from bioetl.composition.execution_api import (
         get_pipeline_runner_service as _impl,
     )
 
-    return _impl(registry=registry)
+    return cast("PipelineRunnerService", _impl(registry=registry))
 
 
 def _exit_with_code(code: int | str | None = None) -> NoReturn:
@@ -156,12 +160,19 @@ def execute_run(
     """Execute run and flush metrics at command boundary."""
     from bioetl.composition.execution_api import push_metrics_to_gateway
 
-    def _flush_metrics_safely(*, pipeline_name: str) -> None:
+    def _flush_metrics_safely(
+        run_label: str = "bioetl",
+        pipeline_name: str | None = None,
+    ) -> bool:
         try:
-            push_metrics_to_gateway(pipeline_name=pipeline_name)
+            push_metrics_to_gateway(
+                run_label=run_label,
+                pipeline_name=pipeline_name,
+            )
+            return True
         except Exception:
             # Metrics publication must never turn a completed CLI run into failure.
-            return
+            return False
 
     return get_cli_run_orchestration_service().execute_pipeline(
         request=request,
@@ -232,7 +243,10 @@ async def _run_pipeline_async(
         registry=registry,
         metrics_starter=ensure_metrics_server_started,
         health_context_factory=health_server_context,
-        runner_service_factory=get_pipeline_runner_service,
+        runner_service_factory=cast(
+            "Callable[..., PipelineRunnerService]",
+            get_pipeline_runner_service,
+        ),
     )
 
 
@@ -248,9 +262,39 @@ async def _run_prepared_request_async(
     )
 
 
-def _run_callback(ctx: click.Context, **options: object) -> None:
+def _build_run_command_input_from_options(
+    options: Mapping[str, object],
+) -> RunCommandInput:
+    """Build typed run-command input from Click's object-valued kwargs mapping."""
+    return RunCommandInput(
+        pipeline=cast("str", options["pipeline"]),
+        run_type=cast("str", options["run_type"]),
+        resume=cast("bool", options["resume"]),
+        start_offset=cast("int | None", options["start_offset"]),
+        limit=cast("int | None", options["limit"]),
+        input_csv=cast("str | None", options["input_csv"]),
+        filter_column=cast("str | None", options["filter_column"]),
+        filter_field=cast("str | None", options["filter_field"]),
+        dry_run=cast("bool", options["dry_run"]),
+        yes=cast("bool", options["yes"]),
+        vacuum_after_run=cast("bool | None", options["vacuum_after_run"]),
+        vacuum_retention_days=cast("int | None", options["vacuum_retention_days"]),
+        debug=cast("bool", options["debug"]),
+        health_server=cast("bool", options["health_server"]),
+        health_port=cast("int", options["health_port"]),
+        enable_tracing=cast("bool | None", options["enable_tracing"]),
+        use_cached_bronze=cast("bool", options["use_cached_bronze"]),
+        cached_bronze_date=cast("str | None", options["cached_bronze_date"]),
+        cached_bronze_path=cast("str | None", options["cached_bronze_path"]),
+        replay_of_run_id=cast("str | None", options["replay_of_run_id"]),
+        replay_of_manifest_id=cast("str | None", options["replay_of_manifest_id"]),
+        exact_replay=cast("bool", options["exact_replay"]),
+    )
+
+
+def _run_callback(ctx: click.Context, /, **options: object) -> None:
     """Canonical callback implementation for the run Click command."""
-    cli_input = RunCommandInput(**options)
+    cli_input = _build_run_command_input_from_options(options)
     if cli_input.exact_replay and not cli_input.use_cached_bronze:
         echo_warning(
             "Strict exact replay requires snapshot-backed cached Bronze inputs; "

@@ -10,12 +10,27 @@ from __future__ import annotations
 
 import ast
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
+import hashlib
 import os
 from pathlib import Path
+import pickle
 import subprocess
+import tempfile
 
 import pytest
 import yaml
+
+_MIN_PARALLEL_CACHE_FILES = 128
+_DEFAULT_CACHE_WORKERS = 8
+_MAX_CACHE_WORKERS = 16
+_ARCHITECTURE_CACHE_VERSION = "v2"
+_ARCHITECTURE_CACHE_DIR = Path(
+    os.environ.get(
+        "BIOETL_ARCHITECTURE_CACHE_DIR",
+        str(Path(tempfile.gettempdir()) / "bioetl-architecture-cache"),
+    )
+)
 
 
 def _list_python_files(root: Path) -> list[Path]:
@@ -34,35 +49,150 @@ def _list_python_files(root: Path) -> list[Path]:
     return sorted(python_files)
 
 
-def _build_text_cache(
-    paths: list[Path],
-) -> dict[Path, str]:
-    """Read each file once and share the in-memory cache across the session."""
-    result: dict[Path, str] = {}
+def _cache_worker_count(total_files: int) -> int:
+    """Choose a conservative worker count for mounted-worktree file reads."""
+    if total_files < _MIN_PARALLEL_CACHE_FILES:
+        return 1
+
+    cpu_count = os.cpu_count() or _DEFAULT_CACHE_WORKERS
+    return min(total_files, _MAX_CACHE_WORKERS, max(_DEFAULT_CACHE_WORKERS, cpu_count))
+
+
+def _read_text_cache_entry(path: Path) -> tuple[Path, str | None]:
+    """Read one UTF-8 text payload for the session cache."""
+    try:
+        return path, path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return path, None
+
+
+def _cache_signature(paths: list[Path]) -> str:
+    """Build a stable cache signature from file paths and stat metadata."""
+    digest = hashlib.sha256(_ARCHITECTURE_CACHE_VERSION.encode("utf-8"))
 
     for path in paths:
         try:
-            text = path.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError):
+            stat_result = path.stat()
+        except OSError:
             continue
 
-        result[path] = text
+        digest.update(str(path).encode("utf-8", errors="ignore"))
+        digest.update(str(stat_result.st_mtime_ns).encode("ascii"))
+        digest.update(str(stat_result.st_size).encode("ascii"))
+
+    return digest.hexdigest()
+
+
+def _cache_file_path(cache_name: str, signature: str) -> Path:
+    """Return the on-disk cache path for one architecture helper cache."""
+    return _ARCHITECTURE_CACHE_DIR / f"{cache_name}-{signature}.pkl"
+
+
+def _load_disk_cache(
+    cache_name: str,
+    paths: list[Path],
+) -> object | None:
+    """Load a persisted cache snapshot when the file manifest still matches."""
+    cache_path = _cache_file_path(cache_name, _cache_signature(paths))
+    try:
+        with cache_path.open("rb") as handle:
+            return pickle.load(handle)
+    except (OSError, EOFError, pickle.PickleError, AttributeError, ValueError):
+        return None
+
+
+def _store_disk_cache(
+    cache_name: str,
+    paths: list[Path],
+    payload: object,
+) -> None:
+    """Persist a cache snapshot atomically for reuse across reruns."""
+    signature = _cache_signature(paths)
+    cache_path = _cache_file_path(cache_name, signature)
+    temp_path = cache_path.with_suffix(".tmp")
+
+    try:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        with temp_path.open("wb") as handle:
+            pickle.dump(payload, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        temp_path.replace(cache_path)
+    except OSError:
+        temp_path.unlink(missing_ok=True)
+
+
+def _build_text_cache(
+    cache_name_or_paths: str | list[Path],
+    paths: list[Path] | None = None,
+) -> dict[Path, str]:
+    """Read each file once and share the in-memory cache across the session."""
+    use_disk_cache = isinstance(cache_name_or_paths, str)
+    if isinstance(cache_name_or_paths, str):
+        cache_name = cache_name_or_paths
+        if paths is None:
+            msg = "paths must be provided when cache_name is passed explicitly"
+            raise TypeError(msg)
+        cache_paths = paths
+    else:
+        cache_name = "ad-hoc-text"
+        cache_paths = cache_name_or_paths
+
+    if use_disk_cache:
+        cached_payload = _load_disk_cache(cache_name, cache_paths)
+        if isinstance(cached_payload, dict):
+            return cached_payload
+
+    result: dict[Path, str] = {}
+    max_workers = _cache_worker_count(len(cache_paths))
+
+    if max_workers == 1:
+        for path in cache_paths:
+            _, text = _read_text_cache_entry(path)
+            if text is not None:
+                result[path] = text
+        return result
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for path, text in executor.map(_read_text_cache_entry, cache_paths):
+            if text is not None:
+                result[path] = text
+    if use_disk_cache:
+        _store_disk_cache(cache_name, cache_paths, result)
     return result
 
 
 def _build_ast_cache(
-    text_cache: dict[Path, str],
+    cache_name_or_text_cache: str | dict[Path, str],
+    text_cache: dict[Path, str] | None = None,
 ) -> dict[Path, ast.Module]:
     """Parse each cached text payload once per pytest session."""
+    use_disk_cache = isinstance(cache_name_or_text_cache, str)
+    if isinstance(cache_name_or_text_cache, str):
+        cache_name = cache_name_or_text_cache
+        if text_cache is None:
+            msg = "text_cache must be provided when cache_name is passed explicitly"
+            raise TypeError(msg)
+        cached_text = text_cache
+    else:
+        cache_name = "ad-hoc-ast"
+        cached_text = cache_name_or_text_cache
+
+    cache_paths = list(cached_text)
+    if use_disk_cache:
+        cached_payload = _load_disk_cache(cache_name, cache_paths)
+        if isinstance(cached_payload, dict):
+            return cached_payload
+
     result: dict[Path, ast.Module] = {}
 
-    for path, content in text_cache.items():
+    for path, content in cached_text.items():
         try:
             tree = ast.parse(content)
         except SyntaxError:
             continue
 
         result[path] = tree
+    if use_disk_cache:
+        _store_disk_cache(cache_name, cache_paths, result)
     return result
 
 
@@ -99,7 +229,7 @@ def source_content_cache(
     src_python_files: list[Path],
 ) -> dict[Path, str]:
     """Raw UTF-8 text of every source file, keyed by absolute Path."""
-    return _build_text_cache(src_python_files)
+    return _build_text_cache("source-content", src_python_files)
 
 
 @pytest.fixture(scope="session")
@@ -107,7 +237,7 @@ def source_ast_cache(
     source_content_cache: dict[Path, str],
 ) -> dict[Path, ast.Module]:
     """Parsed AST of every source file, keyed by absolute Path."""
-    return _build_ast_cache(source_content_cache)
+    return _build_ast_cache("source-ast", source_content_cache)
 
 
 # ---------------------------------------------------------------------------
@@ -127,7 +257,7 @@ def test_content_cache(
     test_python_files: list[Path],
 ) -> dict[Path, str]:
     """Raw UTF-8 text of every test file."""
-    return _build_text_cache(test_python_files)
+    return _build_text_cache("test-content", test_python_files)
 
 
 @pytest.fixture(scope="session")
@@ -135,7 +265,7 @@ def test_ast_cache(
     test_content_cache: dict[Path, str],
 ) -> dict[Path, ast.Module]:
     """Parsed AST of every test file."""
-    return _build_ast_cache(test_content_cache)
+    return _build_ast_cache("test-ast", test_content_cache)
 
 
 # ---------------------------------------------------------------------------
@@ -155,7 +285,7 @@ def docs_text_cache(
     docs_markdown_files: list[Path],
 ) -> dict[Path, str]:
     """Raw UTF-8 text of every docs markdown file."""
-    return _build_text_cache(docs_markdown_files)
+    return _build_text_cache("docs-text", docs_markdown_files)
 
 
 @pytest.fixture(scope="session")
@@ -170,7 +300,7 @@ def workflow_text_cache(
     workflow_yaml_files: list[Path],
 ) -> dict[Path, str]:
     """Raw UTF-8 text of every workflow YAML file."""
-    return _build_text_cache(workflow_yaml_files)
+    return _build_text_cache("workflow-text", workflow_yaml_files)
 
 
 @pytest.fixture(scope="session")
@@ -195,7 +325,7 @@ def config_text_cache(
     config_yaml_files: list[Path],
 ) -> dict[Path, str]:
     """Raw UTF-8 text of every config YAML file."""
-    return _build_text_cache(config_yaml_files)
+    return _build_text_cache("config-text", config_yaml_files)
 
 
 @pytest.fixture(scope="session")

@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import math
-from collections.abc import Callable
-
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization.chembl import (
     normalize_bao_identifier,
@@ -18,16 +15,18 @@ from bioetl.domain.normalization.identifiers import (
     normalize_pmc_id,
     normalize_pmid,
 )
-from bioetl.domain.normalization.json import (
-    canonicalize_json_string,
-    deserialize_json_value,
-    serialize_json_canonical,
+from bioetl.domain.normalization.json import canonicalize_json_string
+from bioetl.domain.normalization.profiles._profile_value_normalizers import (
+    normalize_profile_binary_flag,
+    normalize_profile_boolean,
+    normalize_profile_float,
+    normalize_profile_governed_uppercase_vocabulary,
+    normalize_profile_governed_vocabulary,
+    normalize_profile_int,
+    normalize_profile_json_string_list_vocabulary_strict,
 )
 from bioetl.domain.normalization.rules import (
-    normalize_binary_flag,
-    normalize_boolean,
     normalize_case,
-    normalize_cross_pipeline_case,
     normalize_null,
     normalize_operator,
     normalize_unit,
@@ -70,108 +69,6 @@ __all__ = [
     "normalize_profile_unit",
 ]
 
-_UNHANDLED = object()
-
-
-def _normalize_governed_vocabulary_value(
-    value: object,
-    *,
-    allowed_values: frozenset[str],
-    fallback: Callable[[str], str | None] | None = None,
-) -> object:
-    if not isinstance(value, str):
-        return value
-    normalized = normalize_string(value)
-    if normalized is None:
-        return None
-    canonical = normalize_case(normalized, allowed_values)
-    if canonical is not None:
-        return canonical
-    if fallback is None:
-        return None
-    return fallback(normalized)
-
-
-def normalize_profile_governed_vocabulary(
-    value: object,
-    *,
-    allowed_values: frozenset[str],
-    preserve_unknown: bool = False,
-) -> object:
-    """Normalize one governed text vocabulary against a canonical registry."""
-    return _normalize_governed_vocabulary_value(
-        value,
-        allowed_values=allowed_values,
-        fallback=(lambda normalized: normalized) if preserve_unknown else None,
-    )
-
-
-def normalize_profile_governed_uppercase_vocabulary(
-    value: object,
-    *,
-    allowed_values: frozenset[str],
-    preserve_unknown: bool = False,
-) -> object:
-    """Normalize one governed vocabulary and uppercase unknown lexemes when kept."""
-    return _normalize_governed_vocabulary_value(
-        value,
-        allowed_values=allowed_values,
-        fallback=(
-            lambda normalized: (
-                normalize_cross_pipeline_case(normalized, "uppercase")
-                if preserve_unknown
-                else None
-            )
-        ),
-    )
-
-
-def normalize_profile_json_string_list_vocabulary_strict(
-    value: object,
-    *,
-    allowed_values: frozenset[str],
-) -> object:
-    """Normalize one JSON-array string element-wise against a governed registry."""
-    parsed = _parse_json_string_list(value)
-    if parsed is None:
-        return None
-    normalized_values = [
-        _normalize_json_string_list_vocabulary_item(
-            item,
-            allowed_values=allowed_values,
-        )
-        for item in parsed
-    ]
-    if any(item is None for item in normalized_values):
-        return None
-    return serialize_json_canonical(normalized_values)
-
-
-def _parse_json_string_list(value: object) -> list[object] | None:
-    if not isinstance(value, str):
-        return None
-    normalized = normalize_string(value)
-    if normalized is None:
-        return None
-    try:
-        parsed = deserialize_json_value(normalized)
-    except ValueError:
-        return None
-    return parsed if isinstance(parsed, list) else None
-
-
-def _normalize_json_string_list_vocabulary_item(
-    item: object,
-    *,
-    allowed_values: frozenset[str],
-) -> str | None:
-    canonical = normalize_profile_governed_vocabulary(
-        item,
-        allowed_values=allowed_values,
-        preserve_unknown=False,
-    )
-    return canonical if isinstance(canonical, str) else None
-
 
 def normalize_profile_null(value: object) -> object:
     """Convert pseudo-null values to proper None in profile fields.
@@ -203,16 +100,6 @@ def normalize_profile_case(
         Normalized uppercase value if valid, None otherwise
     """
     return normalize_case(value, allowed_values)
-
-
-def normalize_profile_boolean(value: object) -> bool | None:
-    """Normalize common boolean-like profile fields to canonical bool."""
-    return normalize_boolean(value)
-
-
-def normalize_profile_binary_flag(value: object) -> int | None:
-    """Normalize common boolean-like profile fields to canonical 0/1."""
-    return normalize_binary_flag(value)
 
 
 def normalize_profile_bao_identifier(value: object) -> object:
@@ -349,84 +236,6 @@ def normalize_profile_date(value: object) -> object:
     if not isinstance(value, str):
         return value
     return normalize_partial_date(value)
-
-
-def normalize_profile_int(value: object) -> object:
-    """Coerce one integer-like value to stable scalar semantics."""
-    if type(value) in {type(None), bool, int}:
-        return value
-    coerced = _coerce_profile_int(value)
-    if coerced is _UNHANDLED:
-        return value
-    return coerced
-
-
-def normalize_profile_float(value: object) -> object:
-    """Coerce one float-like value to stable finite scalar semantics."""
-    if type(value) in {type(None), bool}:
-        return value
-    return _normalize_profile_float_value(value)
-
-
-def _normalize_profile_float_value(value: object) -> object:
-    """Normalize already-eligible float-like values."""
-    coerced = _coerce_profile_float(value)
-    if coerced is _UNHANDLED:
-        return value
-    return _finalize_profile_float(coerced, fallback=value)
-
-
-def _coerce_profile_int(value: object) -> int | str | float | None | object:
-    """Return integer-like value, preserving non-integer floats and invalid text."""
-    if isinstance(value, float):
-        return int(value) if value.is_integer() else value
-    if not isinstance(value, str):
-        return _UNHANDLED
-    return _coerce_profile_int_text(value)
-
-
-def _coerce_profile_int_text(value: str) -> int | str | None:
-    """Coerce normalized text to integer when possible."""
-    normalized = normalize_string(value)
-    if normalized is None:
-        return None
-    return _parse_profile_int_text(normalized)
-
-
-def _parse_profile_int_text(value: str) -> int | str:
-    """Parse integer text while preserving non-numeric payloads."""
-    try:
-        return int(value)
-    except ValueError:
-        return value
-
-
-def _coerce_profile_float(value: object) -> float | str | None | object:
-    """Return float-like value, preserving text that cannot be parsed."""
-    if isinstance(value, int | float):
-        return float(value)
-    if not isinstance(value, str):
-        return _UNHANDLED
-    normalized = normalize_string(value)
-    if normalized is None:
-        return None
-    try:
-        return float(normalized)
-    except ValueError:
-        return normalized
-
-
-def _finalize_profile_float(
-    coerced: float | str | None | object,
-    *,
-    fallback: object,
-) -> object:
-    """Finalize coerced float-like values into stable persisted semantics."""
-    if coerced is None or isinstance(coerced, str):
-        return coerced
-    if isinstance(coerced, float):
-        return round(coerced, 10) if math.isfinite(coerced) else None
-    return fallback
 
 
 def normalize_profile_doi(value: object) -> object:

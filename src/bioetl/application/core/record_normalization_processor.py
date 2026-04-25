@@ -242,6 +242,8 @@ class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
         normalized = rule.apply(value, record=record)
         if isinstance(normalized, dict | list):
             return serialize_json_canonical(normalized)
+        if isinstance(normalized, str):
+            return self._normalize_string_field(rule.field_name, normalized)
         return normalized
 
     def _normalize_named_text_field(

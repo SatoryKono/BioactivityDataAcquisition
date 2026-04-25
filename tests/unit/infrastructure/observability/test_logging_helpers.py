@@ -10,7 +10,7 @@ def test_log_error():
     logger = MagicMock()
     error = "Test error"
     log_error(logger, error)
-    logger.error.assert_called_once_with("Error occurred: %s", error)
+    logger.error.assert_called_once_with("error_occurred", error=error)
 
 
 def test_log_debug():
@@ -18,4 +18,4 @@ def test_log_debug():
     logger = MagicMock()
     details = "Test details"
     log_debug(logger, details)
-    logger.debug.assert_called_once_with("Debug info: %s", details)
+    logger.debug.assert_called_once_with("debug_info", details=details)

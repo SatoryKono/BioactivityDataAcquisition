@@ -96,10 +96,13 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
             index,
             normalized_business_data,
         )
-        return normalizer.project_normalization_findings(
-            silver_record,
-            context=context,
-            index=index,
+        return cast(
+            "SilverRecord",
+            normalizer.project_normalization_findings(
+                silver_record,
+                context=context,
+                index=index,
+            ),
         )
 
     def _build_pre_silver_json_record(

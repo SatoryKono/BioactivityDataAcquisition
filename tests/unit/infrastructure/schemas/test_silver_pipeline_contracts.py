@@ -66,7 +66,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("target_id", pa.string()),
         ("target_organism", pa.string()),
         ("target_pref_name", pa.string()),
-        ("target_taxonomy_id", pa.float64()),
+        ("target_taxonomy_id", pa.int64()),
         ("text_value", pa.string()),
         ("toid", pa.float64()),  # Float for nullable int
         ("type", pa.string()),
@@ -96,7 +96,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("assay_pref_name", pa.string()),
         ("assay_strain", pa.string()),
         ("assay_subcellular_fraction", pa.string()),
-        ("assay_taxonomy_id", pa.float64()),  # Float for nullable int
+        ("assay_taxonomy_id", pa.int64()),
         ("assay_test_type", pa.string()),
         ("assay_tissue", pa.string()),
         ("assay_type", pa.string()),
@@ -121,7 +121,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("variant_organism", pa.string()),
         ("variant_sequence", pa.string()),
         ("variant_sequence_json", pa.string()),
-        ("variant_taxonomy_id", pa.float64()),  # Float for nullable int
+        ("variant_taxonomy_id", pa.int64()),
         ("_dq_error", pa.bool_()),
         ("_dq_warn", pa.bool_()),
     ],
@@ -163,7 +163,9 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("cell_source_organism", pa.string()),
         ("cell_source_taxonomy_id", pa.int64()),
         ("cell_source_tissue", pa.string()),
+        ("cell_type", pa.string()),
         ("cellosaurus_id", pa.string()),
+        ("clo_id", pa.string()),
         ("cl_lincs_id", pa.string()),
         ("efo_id", pa.string()),
         ("_dq_error", pa.bool_()),
@@ -357,7 +359,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("target_components", pa.string()),
         ("target_id", pa.string()),
         ("target_type", pa.string()),
-        ("taxonomy_id", pa.float64()),  # Float for nullable int
+        ("taxonomy_id", pa.int64()),
         ("_dq_error", pa.bool_()),
         ("_dq_warn", pa.bool_()),
     ],

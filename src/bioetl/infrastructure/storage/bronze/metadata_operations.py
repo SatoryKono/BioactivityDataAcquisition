@@ -25,10 +25,7 @@ if TYPE_CHECKING:
         InputSnapshotRef,
         SourceMetadata,
     )
-    from bioetl.domain.ports.metadata.coordinator import (
-        BronzeMetadataInput,
-        MetadataCoordinatorPort,
-    )
+    from bioetl.domain.ports import BronzeMetadataInput, MetadataCoordinatorPort
 
 __all__ = [
     "BronzeMetadataWriteRequest",

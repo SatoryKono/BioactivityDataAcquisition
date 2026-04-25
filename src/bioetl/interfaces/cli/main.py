@@ -6,7 +6,9 @@ It keeps import-time overhead low for targeted CLI tests and single-command use.
 
 from __future__ import annotations
 
+import sys
 from importlib import import_module
+from types import ModuleType
 
 import click
 from click.core import Command, Context, Group, HelpFormatter
@@ -184,6 +186,16 @@ def cli(ctx: Context) -> None:
 def main() -> None:
     """Main entry point."""
     cli()
+
+
+class _CallableCliMainModule(ModuleType):
+    """Allow `from bioetl.interfaces.cli import main` to remain callable."""
+
+    def __call__(self) -> None:
+        main()
+
+
+sys.modules[__name__].__class__ = _CallableCliMainModule
 
 
 if __name__ == "__main__":

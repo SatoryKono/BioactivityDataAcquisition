@@ -18,7 +18,7 @@ def log_error(logger: Logger | LoggerPort | object, error: str) -> None:
     if isinstance(logger, Logger):
         logger.error("Error occurred: %s", error)
         return
-    cast(LoggerPort, logger).error(f"Error occurred: {error}")
+    cast(LoggerPort, logger).error("error_occurred", error=error)
 
 
 def log_debug(logger: Logger | LoggerPort | object, details: str) -> None:
@@ -31,4 +31,4 @@ def log_debug(logger: Logger | LoggerPort | object, details: str) -> None:
     if isinstance(logger, Logger):
         logger.debug("Debug info: %s", details)
         return
-    cast(LoggerPort, logger).debug(f"Debug info: {details}")
+    cast(LoggerPort, logger).debug("debug_info", details=details)

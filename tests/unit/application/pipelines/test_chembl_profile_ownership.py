@@ -16,5 +16,7 @@ def test_pure_bao_and_organism_normalization_is_not_transformer_owned() -> None:
         assert "normalize_bao_identifier" not in source, filename
         assert "normalize_chembl_organism_name" not in source, filename
 
-    assay_source = transformer_sources["assay_transformer.py"]
-    assert "normalize_bao_label" in assay_source
+    assay_profile_source = Path(
+        "src/bioetl/domain/normalization/profiles/chembl_assay.py"
+    ).read_text(encoding="utf-8")
+    assert "normalize_bao_label" in assay_profile_source

@@ -17,9 +17,6 @@ from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 if TYPE_CHECKING:
     from bioetl.application.services import RunOptions, RunResult
-    from bioetl.application.services.execution.pipeline_runner_service import (
-        PipelineRunnerService,
-    )
     from bioetl.application.services.pipeline_debug_service import DebugAbortError
     from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.domain.ports import StageBreakpoint
@@ -84,11 +81,11 @@ def _validate_pipeline_name(
 
 def get_pipeline_runner_service(
     registry: PipelineRegistry | None = None,
-) -> PipelineRunnerService:
+) -> object:
     """Load the pipeline runner service through composition on demand."""
     from bioetl.composition.execution_api import get_pipeline_runner_service as _impl
 
-    return cast(PipelineRunnerService, _impl(registry=registry))
+    return _impl(registry=registry)
 
 
 @click.command()  # type: ignore[untyped-decorator]
