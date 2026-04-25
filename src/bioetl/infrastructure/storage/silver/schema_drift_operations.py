@@ -8,7 +8,7 @@ ripple through the wider validation / Arrow-preparation pipeline.
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, Protocol
 
@@ -45,7 +45,8 @@ class _SchemaDriftHostProtocol(Protocol):
     """Minimal host contract for schema drift helpers."""
 
     logger: LoggerPort
-    _get_table_schema: Callable[[str], Awaitable[pa.Schema | None]]
+
+    def _get_table_schema(self, table_name: str) -> Awaitable[pa.Schema | None]: ...
 
 
 # ---------------------------------------------------------------------------

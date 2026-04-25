@@ -6,7 +6,7 @@ import asyncio
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
@@ -41,6 +41,21 @@ from bioetl.infrastructure.storage.silver.operations.metadata_write_support impo
 
 if TYPE_CHECKING:
     import pyarrow as pa
+
+
+class _DQMetricsHostOverride(Protocol):
+    async def _compute_dq_metrics(
+        self,
+        table_name: str,
+        records: list[BronzeRecord],
+        *,
+        quarantined_count: int = 0,
+        validation_errors: Sequence[str] | None = None,
+    ) -> BatchDQMetrics | None: ...
+
+
+class _DeltaVersionHostOverride(Protocol):
+    async def _get_delta_version(self, table_path: str) -> int | None: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -87,20 +102,12 @@ class SilverMetadataOperations:
         """Persist metadata using whichever writer signature is available."""
         if self._metadata_writer is None:
             return None
-        if hasattr(self._metadata_writer, "write_silver_metadata"):
-            try:
-                return await self._metadata_writer.write_silver_metadata(
-                    table_path=table_path,
-                    metadata=metadata,
-                    table_name=table_name,
-                )
-            except TypeError:
-                return await self._metadata_writer.write_silver_metadata(
-                    base_path=table_path,
-                    metadata=metadata,
-                    table_name=table_name,
-                )
-        return await self._metadata_writer.write(metadata)
+        await self._metadata_writer.write_silver_metadata(
+            base_path=table_path,
+            metadata=metadata,
+            table_name=table_name,
+        )
+        return None
 
     async def _resolve_finalization_dq_metrics(
         self,
@@ -113,7 +120,8 @@ class SilverMetadataOperations:
         """Resolve DQ metrics via host override when present, otherwise compute them."""
         host_compute_dq_metrics = getattr(self._host, "_compute_dq_metrics", None)
         if getattr(host_compute_dq_metrics, "__name__", None) == "AsyncMock":
-            dq_metrics = await self._host._compute_dq_metrics(
+            host = cast(_DQMetricsHostOverride, self._host)
+            dq_metrics = await host._compute_dq_metrics(
                 table_name,
                 records,
                 quarantined_count=quarantined_count or 0,
@@ -139,7 +147,8 @@ class SilverMetadataOperations:
     async def _resolve_version_after(self, table_path: str) -> int | None:
         """Read Delta version via host helper when available."""
         if self._host is not None and hasattr(self._host, "_get_delta_version"):
-            return await self._host._get_delta_version(table_path)
+            host = cast(_DeltaVersionHostOverride, self._host)
+            return await host._get_delta_version(table_path)
         return 0
 
     async def compute_dq_metrics(
@@ -158,7 +167,7 @@ class SilverMetadataOperations:
             Computed DQ metrics
         """
         if self._dq_calculator is None:
-            return BatchDQMetrics.empty()
+            return BatchDQMetrics()
 
         # Convert records to dict format for DQ calculation
         records_dict = (
@@ -168,15 +177,14 @@ class SilverMetadataOperations:
         # Get existing schema fields for drift detection
         existing_schema_fields = set(arrow_data.column_names) if arrow_data else set()
 
-        dq_input_kwargs: dict[str, object] = {
-            "records": records_dict,
-            "existing_schema_fields": existing_schema_fields,
-        }
-        if quarantined_count is not None:
-            dq_input_kwargs["quarantined_count"] = quarantined_count
-        if validation_errors is not None:
-            dq_input_kwargs["validation_errors"] = list(validation_errors)
-        dq_input = DQMetricsInput(**dq_input_kwargs)
+        dq_input = DQMetricsInput(
+            records=records_dict,
+            existing_schema_fields=existing_schema_fields,
+            quarantined_count=quarantined_count or 0,
+            validation_errors=(
+                list(validation_errors) if validation_errors is not None else None
+            ),
+        )
 
         return await asyncio.to_thread(self._dq_calculator.calculate, dq_input)
 

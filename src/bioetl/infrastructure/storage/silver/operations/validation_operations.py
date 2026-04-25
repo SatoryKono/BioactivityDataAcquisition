@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Literal, Protocol
+from typing import Literal, Protocol, cast
 
 import pyarrow as pa
 
@@ -34,7 +34,8 @@ class _SilverPayloadPreparationHostProtocol(Protocol):
     """Shared host contract for Silver payload preparation orchestration."""
 
     _host: object | None
-    _resolve_table_path: Callable[[str], str]
+
+    def _resolve_table_path(self, table_name: str) -> str: ...
 
     def _sync_validate_and_build_arrow(
         self,
@@ -45,7 +46,7 @@ class _SilverPayloadPreparationHostProtocol(Protocol):
 class _SilverPayloadPreparationRuntimeProtocol(Protocol):
     """Runtime host contract used after synchronous validation completes."""
 
-    _resolve_table_path: Callable[[str], str]
+    def _resolve_table_path(self, table_name: str) -> str: ...
 
     async def _check_schema_drift(
         self,
@@ -61,8 +62,8 @@ def _resolve_payload_runtime_host(
     """Return the runtime host that owns schema-drift hooks and path resolution."""
     runtime_host = getattr(host, "_host", None)
     if runtime_host is not None:
-        return runtime_host  # type: ignore[return-value]
-    return host  # type: ignore[return-value]
+        return cast(_SilverPayloadPreparationRuntimeProtocol, runtime_host)
+    return cast(_SilverPayloadPreparationRuntimeProtocol, host)
 
 
 async def _prepare_silver_write_payload_impl(

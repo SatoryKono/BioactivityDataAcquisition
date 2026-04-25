@@ -39,6 +39,7 @@ _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
     "constants": ("bioetl.domain.constants", "constants"),
     "contracts": ("bioetl.domain.contracts", "contracts"),
     "control_plane": ("bioetl.domain.control_plane", "control_plane"),
+    "error_types": ("bioetl.domain.error_types", "error_types"),
     "context_cached_bronze": (
         "bioetl.domain.context_cached_bronze",
         "context_cached_bronze",
@@ -49,6 +50,10 @@ _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
     "observability_contract": (
         "bioetl.domain.observability_contract",
         "observability_contract",
+    ),
+    "observability_event_mapping": (
+        "bioetl.domain.observability_event_mapping",
+        "observability_event_mapping",
     ),
     "observability_metric_names": (
         "bioetl.domain.observability_metric_names",
@@ -74,6 +79,7 @@ _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
         "bioetl.domain.types_config_validation",
         "types_config_validation",
     ),
+    "workflow": ("bioetl.domain.workflow", "workflow"),
 }
 
 __all__ = [
@@ -81,6 +87,7 @@ __all__ = [
     "PipelineEvent",
     "composite",
     "control_plane",
+    "error_types",
     "context_cached_bronze",
     "context_filtering",
     "get_version",
@@ -89,9 +96,11 @@ __all__ = [
     "lineage",
     "map_domain_event_to_observability_event",
     "observability_contract",
+    "observability_event_mapping",
     "observability_metric_names",
     "runtime_observability_publication_contract",
     "types_config_validation",
+    "workflow",
     # Data contracts (subpackage)
     "contracts",
     # Constants
@@ -113,11 +122,14 @@ def __getattr__(name: str) -> object:
         "control_plane",
         "context_cached_bronze",
         "context_filtering",
+        "error_types",
         "lineage",
         "observability_contract",
+        "observability_event_mapping",
         "observability_metric_names",
         "runtime_observability_publication_contract",
         "types_config_validation",
+        "workflow",
     }:
         value = _import_module(module_name)
     else:

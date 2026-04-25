@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 
 __all__ = [
     "DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY",
@@ -39,7 +39,7 @@ class _LazyCompositeGoldSchemaRegistry(Mapping[str, type]):
     def __getitem__(self, key: str) -> type:
         return self._materialize()[key]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return iter(self._materialize())
 
     def __len__(self) -> int:

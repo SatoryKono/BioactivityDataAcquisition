@@ -119,4 +119,4 @@ def coerce_standard_profile_spec(
         )
         for field_name in _STANDARD_PROFILE_FIELD_NAMES
     }
-    return cast(StandardProfileSpec, StandardProfileSpec(**resolved_values))
+    return StandardProfileSpec(**cast("dict[str, object]", resolved_values))

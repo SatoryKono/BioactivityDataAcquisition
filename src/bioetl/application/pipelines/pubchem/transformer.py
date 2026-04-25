@@ -26,7 +26,7 @@ from bioetl.domain.entities import PubchemMolecule
 from bioetl.domain.transformations import safe_float, safe_int
 from bioetl.domain.types import JsonDict
 from bioetl.domain.validation import validate_molecular_weight, validate_non_negative
-from bioetl.domain.value_objects._chemical_identifiers import InChIKey
+from bioetl.domain.value_objects import InChIKey
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext

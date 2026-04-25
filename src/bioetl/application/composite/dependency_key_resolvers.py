@@ -317,7 +317,8 @@ def _create_key_resolver(
     normalization_policies: Mapping[str, JoinKeyNormalizationPolicy],
 ) -> TResolver:
     """Build one dependency key resolver with the configured normalization policies."""
-    return resolver_type(logger, normalization_policies=normalization_policies)
+    resolver_helper = create_resolver_helper(logger, normalization_policies)
+    return resolver_type(resolver_helper)
 
 
 __all__ = [

@@ -10,4 +10,5 @@ def load_source_config(*args: object, **kwargs: object) -> object:
     module = import_module("bioetl.infrastructure.config.source_config_loader")
     return module.load_source_config(*args, **kwargs)
 
+
 __all__ = ["load_source_config"]

@@ -39,6 +39,7 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
 class SilverWriterValidationMixin:
     """Mixin with write policy and schema validation logic."""
 
+    _host: object | None = None
     logger: LoggerPort
     _write_policy: WriteModePolicy
     _metrics: MetricsPort | None

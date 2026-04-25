@@ -54,6 +54,12 @@ class _SilverWritePostwriteContext(Protocol):
     def ingestion_ts(self) -> datetime | None: ...
 
     @property
+    def quarantined_count(self) -> int | None: ...
+
+    @property
+    def validation_errors(self) -> Sequence[str] | None: ...
+
+    @property
     def started_at(self) -> datetime: ...
 
     @property
@@ -166,23 +172,20 @@ class SilverWriterPostwriteMixin:
         payload: _PreparedSilverWritePayload,
     ) -> SilverWriteResult | None:
         """Finalize the legacy mixin postwrite flow."""
-        finalize_kwargs = {
-            "table_name": ctx.table_name,
-            "records": payload.records,
-            "table_path": payload.table_path,
-            "primary_keys": ctx.primary_keys,
-            "validated_mode": payload.validated_mode,
-            "bronze_refs": ctx.bronze_refs,
-            "partition_cols": ctx.partition_cols,
-            "source_batch_id": ctx.source_batch_id,
-            "started_at": ctx.started_at,
-            "start_perf": ctx.start_perf,
-        }
-        if hasattr(ctx, "quarantined_count"):
-            finalize_kwargs["quarantined_count"] = ctx.quarantined_count
-        if hasattr(ctx, "validation_errors"):
-            finalize_kwargs["validation_errors"] = ctx.validation_errors
-        return await self._finalize_silver_write_result(**finalize_kwargs)
+        return await self._finalize_silver_write_result(
+            table_name=ctx.table_name,
+            records=payload.records,
+            table_path=payload.table_path,
+            primary_keys=ctx.primary_keys,
+            validated_mode=payload.validated_mode,
+            bronze_refs=ctx.bronze_refs,
+            partition_cols=ctx.partition_cols,
+            source_batch_id=ctx.source_batch_id,
+            quarantined_count=ctx.quarantined_count,
+            validation_errors=ctx.validation_errors,
+            started_at=ctx.started_at,
+            start_perf=ctx.start_perf,
+        )
 
     async def _complete_silver_write_pipeline(
         self: _SilverWriterPostwriteSelf,

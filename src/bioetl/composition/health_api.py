@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from importlib import import_module
+from typing import TYPE_CHECKING
 
 __all__ = [
     "HealthServerDependencies",
@@ -22,11 +23,21 @@ _PUBLIC_EXPORTS = {
     "get_quarantine_service": _SERVICES_MODULE,
 }
 
-HealthServerDependencies: object
-get_health_server_dependencies: object
-get_health_service: object
-get_quarantine_port: object
-get_quarantine_service: object
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from bioetl.application.services.health_service import HealthService
+    from bioetl.application.services.quarantine_service import QuarantineService
+    from bioetl.composition.bootstrap.cli.health import (
+        HealthServerDependencies as _HealthServerDependencies,
+    )
+    from bioetl.domain.ports import QuarantinePort
+
+HealthServerDependencies: "type[_HealthServerDependencies]"
+get_health_server_dependencies: "Callable[[], _HealthServerDependencies]"
+get_health_service: "Callable[[], HealthService]"
+get_quarantine_port: "Callable[[], QuarantinePort]"
+get_quarantine_service: "Callable[[], QuarantineService]"
 
 
 def __getattr__(name: str) -> object:

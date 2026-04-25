@@ -113,9 +113,8 @@ def _coerce_checkpoint_service_context(
         )
         for field_name in _CHECKPOINT_CONTEXT_FIELD_NAMES
     }
-    return cast(
-        CompositeCheckpointServiceContext,
-        CompositeCheckpointServiceContext(**resolved_values),
+    return CompositeCheckpointServiceContext(
+        **cast("dict[str, object]", resolved_values)
     )
 
 

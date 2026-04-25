@@ -3,13 +3,18 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
+    from bioetl.application.core.lifecycle.checkpoint_manager import (
+        CheckpointManagerService as _CheckpointManagerBase,
+    )
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
+else:
+    _CheckpointManagerBase = object
 
 
-class CheckpointManager:
+class CheckpointManager(_CheckpointManagerBase):
     """Deprecated compatibility alias retained for legacy constructor calls."""
 
     @property
@@ -20,7 +25,7 @@ class CheckpointManager:
         cls,
         *args: object,
         **kwargs: object,
-    ) -> object:
+    ) -> CheckpointManager:
         from bioetl.application.core.lifecycle.checkpoint_manager import (
             CheckpointManagerService,
         )
@@ -31,12 +36,17 @@ class CheckpointManager:
             DeprecationWarning,
             stacklevel=3,
         )
-        return CheckpointManagerService(*args, **kwargs)
+        return cast(
+            CheckpointManager,
+            CheckpointManagerService(
+                *cast(tuple[Any, ...], args), **cast(dict[str, Any], kwargs)
+            ),
+        )
 
     async def load_checkpoint(
         self,
         current_metadata: CheckpointMetadata | None = None,
-    ) -> CheckpointMetadata | dict[str, object] | None:
+    ) -> CheckpointMetadata | None:
         raise NotImplementedError
 
     async def save_checkpoint(self, metadata: CheckpointMetadata | int) -> None:

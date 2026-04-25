@@ -122,20 +122,29 @@ class SilverMaintenanceOperations:
         if self._metrics:
             self._metrics.increment_counter("bioetl_silver_vacuum_start_total", 1)
 
-        result = await self._retention_manager.vacuum(
+        removed_files = await self._retention_manager.vacuum(
             table_name, retention_hours, dry_run=dry_run
         )
+        files_removed = len(removed_files)
+        result: JsonDict = {
+            "table": table_name,
+            "retention_hours": retention_hours,
+            "dry_run": dry_run,
+            "files_removed": files_removed,
+            "files": list(removed_files),
+        }
 
         if self._metrics:
             self._metrics.increment_counter("bioetl_silver_vacuum_success_total", 1)
-            self._metrics.gauge(
-                "bioetl_silver_vacuum_files_removed", result.get("files_removed", 0)
+            self._metrics.set_gauge(
+                "bioetl_silver_vacuum_files_removed",
+                float(files_removed),
             )
 
         if self._audit:
             self._audit.log_event(
                 "SilverVacuum",
-                {"table": table_name, "retention_hours": retention_hours, **result},
+                result,
                 timestamp=current_utc_time(),
             )
 

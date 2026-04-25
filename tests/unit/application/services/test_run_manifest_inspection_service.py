@@ -454,16 +454,34 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
     ]
 
 
-def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
-    manifest_store = _InMemoryRunManifestStore()
-    run_id = RunID(uuid4())
-    manifest = _make_manifest(manifest_id="manifest-no-ledger", run_id=run_id)
-    manifest_store.save(manifest)
-    service = RunManifestInspectionService(manifest_port=manifest_store)
-    result = service.show("manifest-no-ledger")
-    assert result.manifest == manifest
-    assert result.ledger_entries == ()
-    assert result.identity_graph == {
+def _expected_input_snapshots() -> list[dict[str, object]]:
+    return [
+        {
+            "provider": "chembl",
+            "entity": "activity",
+            "pipeline_name": "chembl_activity",
+            "query": None,
+            "snapshot_id": "snapshot-1",
+            "content_hash": "sha256:snapshot-1",
+            "immutable_uri": BRONZE_BATCH_URI,
+            "query_fingerprint": None,
+            "storage_provider": "s3",
+            "object_bucket": "bioetl-bronze",
+            "object_key": "chembl/activity/batch_1.jsonl.zst",
+            "object_version_id": "snapshot-version-1",
+            "etag": None,
+            "last_modified": None,
+            "captured_at": None,
+        }
+    ]
+
+
+def _expected_identity_graph_without_ledger(
+    manifest: RunManifest,
+    *,
+    run_id: RunID,
+) -> dict[str, object]:
+    return {
         "run_id": str(run_id),
         "manifest_id": "manifest-no-ledger",
         "execution_fingerprint": manifest.execution_fingerprint,
@@ -499,37 +517,21 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
         "replay_mode": "exact_replay",
         "input_snapshot_count": 1,
-        "input_snapshots": [
-            {
-                "provider": "chembl",
-                "entity": "activity",
-                "pipeline_name": "chembl_activity",
-                "query": None,
-                "snapshot_id": "snapshot-1",
-                "content_hash": "sha256:snapshot-1",
-                "immutable_uri": BRONZE_BATCH_URI,
-                "query_fingerprint": None,
-                "storage_provider": "s3",
-                "object_bucket": "bioetl-bronze",
-                "object_key": "chembl/activity/batch_1.jsonl.zst",
-                "object_version_id": "snapshot-version-1",
-                "etag": None,
-                "last_modified": None,
-                "captured_at": None,
-            }
-        ],
+        "input_snapshots": _expected_input_snapshots(),
         "planned_artifacts": [],
         "published_artifacts": [],
         "occurrence_only_diagnostics": [],
     }
-    assert (
-        result.diagnostics["persistence_profile"]["attained_profile"] == "replay_ready"
-    )
-    assert result.diagnostics["persistence_profile"]["claims"]["replay_ready"] is True
-    assert result.diagnostics["persistence_profile"][
-        "forensic_grade_missing_requirements"
-    ] == ["run_ledger_history"]
-    assert result.diagnostics == {
+
+
+def _expected_diagnostics_without_ledger(
+    manifest: RunManifest,
+    *,
+    run_id: RunID,
+    identity_graph: dict[str, object],
+    reproducibility_audit_score: object,
+) -> dict[str, object]:
+    return {
         "manifest_id": "manifest-no-ledger",
         "manifest_created_at": manifest.created_at.isoformat(),
         "run_id": str(run_id),
@@ -566,32 +568,14 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
         "replay_mode": "exact_replay",
         "input_snapshot_count": 1,
-        "input_snapshots": [
-            {
-                "provider": "chembl",
-                "entity": "activity",
-                "pipeline_name": "chembl_activity",
-                "query": None,
-                "snapshot_id": "snapshot-1",
-                "content_hash": "sha256:snapshot-1",
-                "immutable_uri": BRONZE_BATCH_URI,
-                "query_fingerprint": None,
-                "storage_provider": "s3",
-                "object_bucket": "bioetl-bronze",
-                "object_key": "chembl/activity/batch_1.jsonl.zst",
-                "object_version_id": "snapshot-version-1",
-                "etag": None,
-                "last_modified": None,
-                "captured_at": None,
-            }
-        ],
+        "input_snapshots": _expected_input_snapshots(),
         "dq_policy_ref": "chembl_activity.gold",
         "rule_bundle_version": "2026.03",
         "dq_contract_compatibility_hash": "compat-hash-1",
         "effective_config_artifact_id": "eca-123",
         "planned_artifacts": [],
         "occurrence_only_diagnostics": [],
-        "identity_graph": result.identity_graph,
+        "identity_graph": identity_graph,
         "persistence_profile": {
             "attained_profile": "replay_ready",
             "required_profile": "degraded_observable",
@@ -652,10 +636,36 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "next_steps": [
             "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction."
         ],
-        "reproducibility_audit_score": result.diagnostics[
-            "reproducibility_audit_score"
-        ],
+        "reproducibility_audit_score": reproducibility_audit_score,
     }
+
+
+def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    run_id = RunID(uuid4())
+    manifest = _make_manifest(manifest_id="manifest-no-ledger", run_id=run_id)
+    manifest_store.save(manifest)
+    service = RunManifestInspectionService(manifest_port=manifest_store)
+    result = service.show("manifest-no-ledger")
+    assert result.manifest == manifest
+    assert result.ledger_entries == ()
+    assert result.identity_graph == _expected_identity_graph_without_ledger(
+        manifest,
+        run_id=run_id,
+    )
+    assert (
+        result.diagnostics["persistence_profile"]["attained_profile"] == "replay_ready"
+    )
+    assert result.diagnostics["persistence_profile"]["claims"]["replay_ready"] is True
+    assert result.diagnostics["persistence_profile"][
+        "forensic_grade_missing_requirements"
+    ] == ["run_ledger_history"]
+    assert result.diagnostics == _expected_diagnostics_without_ledger(
+        manifest,
+        run_id=run_id,
+        identity_graph=result.identity_graph,
+        reproducibility_audit_score=result.diagnostics["reproducibility_audit_score"],
+    )
 
 
 def test_show_resume_only_manifest_reports_resume_mode() -> None:

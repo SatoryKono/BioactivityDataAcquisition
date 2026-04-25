@@ -6,9 +6,6 @@ Uses declarative field_specs DSL for mapping where applicable.
 
 from __future__ import annotations
 
-__all__ = ["MoleculeTransformer"]
-
-
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.dict_transformers import flatten_nested_dict
@@ -24,10 +21,12 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 from bioetl.domain.entities import Molecule
 from bioetl.domain.transformations import safe_float, safe_int
 from bioetl.domain.types import GoldRecord, JsonDict
-from bioetl.domain.value_objects._chemical_identifiers import InChIKey, SMILES
+from bioetl.domain.value_objects import SMILES, InChIKey
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId
+
+__all__ = ["MoleculeTransformer"]
 
 OptionalJsonDict = JsonDict | None
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from importlib import import_module
+from typing import TYPE_CHECKING
 
 __all__ = [
     "get_adr_service",
@@ -15,12 +16,26 @@ __all__ = [
 
 _SERVICES_MODULE = "bioetl.composition._services"
 
-get_adr_service: object
-get_config_service: object
-get_export_service: object
-get_lineage_service: object
-get_lock_service: object
-get_run_manifest_service: object
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from bioetl.application.services.config_service import ConfigService
+    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+        RunManifestInspectionService,
+    )
+    from bioetl.application.services.export_service import ExportService
+    from bioetl.application.services.lineage.lineage_inspection_service import (
+        LineageInspectionService,
+    )
+    from bioetl.application.services.lock_service import LockService
+    from bioetl.domain.ports.adr import AdrServicePort
+
+get_adr_service: "Callable[[], AdrServicePort]"
+get_config_service: "Callable[[], ConfigService]"
+get_export_service: "Callable[[], ExportService]"
+get_lineage_service: "Callable[[], LineageInspectionService]"
+get_lock_service: "Callable[[], LockService]"
+get_run_manifest_service: "Callable[[], RunManifestInspectionService]"
 
 
 def __getattr__(name: str) -> object:

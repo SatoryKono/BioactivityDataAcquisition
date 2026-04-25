@@ -1,41 +1,41 @@
 {
   "summary": {
-    "scanned_modules": 1707,
-    "total_internal_imports": 6628,
+    "scanned_modules": 1709,
+    "total_internal_imports": 6631,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
-    "cross_layer_group_edges_total": 296,
+    "cross_layer_group_edges_total": 301,
     "violations": 0
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1117,
+      "imports": 1116,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 984,
+      "imports": 987,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "application",
-      "imports": 201,
+      "imports": 205,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 514,
+      "imports": 509,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 352,
+      "imports": 353,
       "allowed": true
     },
     {
@@ -53,7 +53,7 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 739,
+      "imports": 740,
       "allowed": true
     },
     {
@@ -215,13 +215,13 @@
       "imports": 32
     },
     {
-      "source": "composition.factories",
-      "target": "infrastructure.adapters",
-      "imports": 31
-    },
-    {
       "source": "infrastructure.storage",
       "target": "domain.models",
+      "imports": 32
+    },
+    {
+      "source": "composition.factories",
+      "target": "infrastructure.adapters",
       "imports": 31
     },
     {
@@ -275,19 +275,24 @@
       "imports": 19
     },
     {
+      "source": "application.pipelines",
+      "target": "domain.value_objects",
+      "imports": 18
+    },
+    {
       "source": "application.services",
       "target": "domain.control_plane",
       "imports": 18
     },
     {
-      "source": "application.core",
-      "target": "domain.config",
-      "imports": 17
-    },
-    {
       "source": "application.pipelines",
       "target": "domain.ports",
       "imports": 17
+    },
+    {
+      "source": "application.core",
+      "target": "domain.config",
+      "imports": 16
     },
     {
       "source": "composition.factories",
@@ -311,11 +316,6 @@
     },
     {
       "source": "application.core",
-      "target": "domain.value_objects",
-      "imports": 14
-    },
-    {
-      "source": "application.pipelines",
       "target": "domain.value_objects",
       "imports": 14
     },

@@ -12,6 +12,8 @@ from bioetl.domain.ports import QuarantineWriteRequest
 from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, JsonDict, RunID
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterPort,
     )
@@ -138,7 +140,7 @@ def track_processed_quarantined(
 
 
 def count_dq_error_types(
-    records: list[tuple[BronzeRecord, ErrorType, str]],
+    records: Sequence[tuple[BronzeRecord, ErrorType, str]],
 ) -> Counter[ErrorType]:
     """Count DQ quarantine entries by error type."""
     return Counter(error_type for _, error_type, _ in records)

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import warnings
 from collections.abc import Callable
-from typing import Any, TypeVar
+from typing import Any, cast, TypeVar
 
 T = TypeVar("T")
 
@@ -28,7 +28,8 @@ def track_deprecated_class(
     """Decorator to track usage of deprecated classes."""
 
     def decorator(cls: type[T]) -> type[T]:
-        original_init = cls.__init__
+        cls_any = cast(Any, cls)
+        original_init = cast(Callable[..., None], cls_any.__init__)
 
         def new_init(
             self: T,
@@ -47,7 +48,7 @@ def track_deprecated_class(
             original_init(self, *args, **kwargs)
 
         # Replace init method
-        setattr(cls, "__init__", new_init)
+        cls_any.__init__ = new_init
 
         return cls
 

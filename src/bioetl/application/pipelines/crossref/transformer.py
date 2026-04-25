@@ -37,7 +37,7 @@ from bioetl.application.pipelines.crossref._business_data_builder import (
 )
 from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 from bioetl.domain.types import GoldRecord, JsonDict
-from bioetl.domain.value_objects._publication_year import PublicationYear
+from bioetl.domain.value_objects import PublicationYear
 from bioetl.domain.value_objects.publications import DOI
 
 if TYPE_CHECKING:

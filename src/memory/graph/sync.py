@@ -13059,16 +13059,19 @@ def _link_pipeline_normalization_modules(
 
 
 def _build_normalization_pipeline_evidence() -> dict[str, dict[str, JsonValue]]:
-    from scripts.docs.generate_pipeline_normalization_field_matrix import (
-        FALLBACK_BUSINESS,
-        FALLBACK_TECHNICAL_PASSTHROUGH,
-        build_field_matrix_rows,
-    )
+    try:
+        from scripts.docs.generate_pipeline_normalization_field_matrix import (
+            FALLBACK_BUSINESS,
+            FALLBACK_TECHNICAL_PASSTHROUGH,
+            build_field_matrix_rows,
+        )
 
-    from bioetl.domain.normalization.profiles.registry import (
-        NORMALIZATION_PROFILE_REGISTRY,
-        resolve_normalization_profile_module_path,
-    )
+        from bioetl.domain.normalization.profiles.registry import (
+            NORMALIZATION_PROFILE_REGISTRY,
+            resolve_normalization_profile_module_path,
+        )
+    except (AttributeError, ImportError):
+        return {}
 
     evidence: dict[str, dict[str, JsonValue]] = {}
     _accumulate_field_matrix_evidence(

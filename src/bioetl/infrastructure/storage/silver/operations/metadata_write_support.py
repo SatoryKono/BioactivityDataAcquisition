@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Protocol
 
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
@@ -23,17 +25,29 @@ from bioetl.infrastructure.storage.silver.operations.metadata_builders import (
 class _MetadataWriteOps(Protocol):
     """Minimal host surface needed by write/audit helpers."""
 
-    _logger: LoggerPort
-    _metrics: MetricsPort | None
-    _audit: AuditPort | None
+    @property
+    def _logger(self) -> LoggerPort: ...
+
+    @property
+    def _metrics(self) -> MetricsPort | None: ...
+
+    @property
+    def _audit(self) -> AuditPort | None: ...
 
     async def _persist_silver_metadata(
         self,
         *,
-        metadata,
+        metadata: SilverMetadata,
         table_name: str,
         table_path: str,
     ) -> SilverWriteResult | None: ...
+
+
+class _SilverAuditHost:
+    """Simple audit host adapter exposing the logger expected by audit builders."""
+
+    def __init__(self, logger: LoggerPort) -> None:
+        self.logger = logger
 
 
 async def _write_silver_metadata(
@@ -47,7 +61,7 @@ async def _write_silver_metadata(
     run_id: RunID | None = None,
     run_type: RunType | None = None,
     source_batch_id: BatchID | None = None,
-    ingestion_ts: object | None = None,
+    ingestion_ts: datetime | None = None,
     transform_version: str | None = None,
     transform_steps: tuple[str, ...] | None = None,
 ) -> SilverWriteResult | None:
@@ -102,7 +116,7 @@ def _emit_silver_metadata_write_success(
     records: list[BronzeRecord],
     dq_metrics: BatchDQMetrics,
     *,
-    timestamp: object | None,
+    timestamp: datetime | None,
 ) -> None:
     """Emit success metrics and audit for one Silver metadata write."""
     if metadata_ops._metrics:
@@ -132,7 +146,7 @@ async def _log_silver_audit_event(
     run_id: RunID | None,
     run_type: RunType | None,
     source_batch_id: BatchID | None,
-    ingestion_ts,
+    ingestion_ts: datetime | None,
 ) -> None:
     """Build and persist one Silver audit entry."""
     if not metadata_ops._audit:
@@ -143,14 +157,6 @@ async def _log_silver_audit_event(
         _SilverAuditWriteRequest,
     )
 
-    class AuditHostWrapper:
-        def __init__(self, ops: _MetadataWriteOps) -> None:
-            self.metadata_ops = ops
-
-        @property
-        def logger(self) -> LoggerPort:
-            return self.metadata_ops._logger
-
     request = _SilverAuditWriteRequest(
         table_name=table_name,
         records=records,
@@ -160,5 +166,8 @@ async def _log_silver_audit_event(
         source_batch_id=source_batch_id,
         ingestion_ts=ingestion_ts,
     )
-    audit_entry = _build_silver_audit_entry(AuditHostWrapper(metadata_ops), request)
+    audit_entry = _build_silver_audit_entry(
+        _SilverAuditHost(metadata_ops._logger),
+        request,
+    )
     await metadata_ops._audit.log_write(audit_entry)

@@ -44,11 +44,3 @@ exemptions:
     owner_tests:
       - tests/unit/domain/schemas/generated/test_schema_registry.py
       - tests/unit/domain/schemas/test_generated_registry.py
-  - source: src/bioetl/interfaces/cli/commands/domains/diagnostics/command.py
-    policy: aggregate_owner
-    reason: >
-      Diagnostics command coverage remains grouped in CLI diagnostics owner
-      tests rather than a mirrored domains/diagnostics module test.
-    owner_tests:
-      - tests/unit/interfaces/cli/commands/test_diagnostics.py
-      - tests/unit/interfaces/cli/commands/test_diagnostics_boundary.py

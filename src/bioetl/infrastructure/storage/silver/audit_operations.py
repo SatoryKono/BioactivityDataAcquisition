@@ -39,7 +39,8 @@ class _SilverAuditWriteRequest:
 class _SilverAuditHostProtocol(Protocol):
     """Minimal host contract for Silver audit entry construction."""
 
-    logger: LoggerPort
+    @property
+    def logger(self) -> LoggerPort: ...
 
 
 def _build_silver_audit_entry(

@@ -11,7 +11,8 @@ from importlib import import_module
 from types import ModuleType
 
 import click
-from click.core import Command, Context, Group, HelpFormatter
+from click.core import Command, Context, Group
+from click.formatting import HelpFormatter
 
 from bioetl import __version__ as BIOETL_VERSION
 from bioetl.interfaces.cli.registry_helpers import (
@@ -114,12 +115,14 @@ def _load_cli_command(command_name: str) -> Command | Group | None:
 
     module_name, attribute_name, _help_text = spec
     command = getattr(import_module(module_name), attribute_name)
+    if not isinstance(command, Command):
+        raise TypeError(f"{module_name}.{attribute_name} must resolve to a Click command")
     if getattr(command, "name", command_name) != command_name:
         command.name = command_name
     return command
 
 
-class _LazyCliGroup(Group):  # type: ignore[misc]
+class _LazyCliGroup(Group):
     """Click group that resolves BioETL subcommands on demand."""
 
     def list_commands(self, ctx: Context) -> list[str]:
@@ -175,9 +178,9 @@ def build_cli_registry() -> object:
     return _build_main_registry()
 
 
-@click.group(cls=_LazyCliGroup)  # type: ignore[untyped-decorator]
-@click.version_option(version=BIOETL_VERSION)  # type: ignore[untyped-decorator]
-@click.pass_context  # type: ignore[untyped-decorator]
+@click.group(cls=_LazyCliGroup)
+@click.version_option(version=BIOETL_VERSION)
+@click.pass_context
 def cli(ctx: Context) -> None:
     """BioETL - Bioactivity Data ETL Pipeline."""
     del ctx

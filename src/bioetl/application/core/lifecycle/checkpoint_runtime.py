@@ -189,7 +189,8 @@ def handle_incompatible_checkpoint(
     if disposition == "observe_blocked_identity":
         logger.warning(
             "Checkpoint execution identity mismatch observed; resume blocked "
-            "despite degraded observe policy.",
+            "despite observe policy. Resume blocked despite degraded observe "
+            "policy semantics.",
             **payload,
         )
         return None

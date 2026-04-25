@@ -61,10 +61,14 @@ class WorkflowRunOptionsConfig:
     ) -> WorkflowRunOptionsConfig:
         """Return a merged config where non-null override values win."""
         merged_values = {
-            field_name: _resolve_workflow_run_option_value(self, override, field_name)
-            for field_name in _RUN_OPTION_FIELD_NAMES
+            field.name: (
+                getattr(override, field.name)
+                if getattr(override, field.name) is not None
+                else getattr(self, field.name)
+            )
+            for field in fields(self)
         }
-        return WorkflowRunOptionsConfig(**cast(dict[str, object], merged_values))
+        return WorkflowRunOptionsConfig(**cast("dict[str, object]", merged_values))
 
     def to_mapping(self) -> JsonDict:
         """Return non-null options as a plain mapping."""
@@ -75,11 +79,6 @@ class WorkflowRunOptionsConfig:
                 continue
             result[field.name] = _serialize_workflow_run_option_value(field.name, value)
         return result
-
-
-_RUN_OPTION_FIELD_NAMES = tuple(
-    field.name for field in fields(WorkflowRunOptionsConfig)
-)
 
 
 @dataclass(frozen=True, slots=True)
@@ -135,18 +134,6 @@ class WorkflowConfig:
             if step.step_id == step_id:
                 return step
         return None
-
-
-def _resolve_workflow_run_option_value(
-    base: WorkflowRunOptionsConfig,
-    override: WorkflowRunOptionsConfig,
-    field_name: str,
-) -> object | None:
-    """Return one merged workflow run-option value."""
-    override_value = getattr(override, field_name)
-    if override_value is not None:
-        return cast("object", override_value)
-    return cast("object | None", getattr(base, field_name))
 
 
 def _serialize_workflow_run_option_value(field_name: str, value: object) -> object:

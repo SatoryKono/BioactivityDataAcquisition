@@ -63,6 +63,10 @@ def _load_maintenance_command(name: str) -> click.Command | click.Group | None:
     module_suffix, attribute_name, _help_text = spec
     module_name = f"{_MAINTENANCE_COMMAND_PACKAGE}.{module_suffix}"
     command = getattr(import_module(module_name), attribute_name)
+    if not isinstance(command, click.Command):
+        raise TypeError(
+            f"{module_name}.{attribute_name} must resolve to a Click command"
+        )
     if getattr(command, "name", name) != name:
         command.name = name
     return command
@@ -105,6 +109,6 @@ class _LazyMaintenanceGroup(click.Group):
                 formatter.write_dl(rows)
 
 
-@click.group(cls=_LazyMaintenanceGroup)  # type: ignore[untyped-decorator]
+@click.group(cls=_LazyMaintenanceGroup)
 def maintenance() -> None:
     """Maintenance operations for Delta tables."""
