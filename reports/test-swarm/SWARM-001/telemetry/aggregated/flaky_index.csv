@@ -1,0 +1,2 @@
+test_nodeid,total_runs,intermittent_fails,flaky_index,triage_status,suspected_cause
+tests/architecture/test_architecture_dependency_docs_drift.py::test_dependency_map_drift_check_passes_current_repo,5,1,0.2,quarantined,Shared state
