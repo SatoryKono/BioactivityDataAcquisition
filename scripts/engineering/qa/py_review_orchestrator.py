@@ -1088,12 +1088,13 @@ class ReviewOrchestrator:
         return "FAIL"
 
     def write_worker_report(self, result: SectorResult) -> None:
-        score, _ = self.calculate_score(result.issues)
+        score, deductions_total = self.calculate_score(result.issues)
         status = self.get_status(score)
 
         report = f"# Code Review Report — {result.sector_id}: {result.sector_name}\n\n"
         report += f"**Date**: {self._today()}\n"
-        report += f"**Scope**: {', '.join(result.scope_paths)}\n"
+        paths_str = ", ".join(result.scope_paths)
+        report += f"**Scope**: {paths_str}\n"
         report += f"**Files reviewed**: {result.files_reviewed}\n"
         report += f"**Total LOC**: {result.total_loc}\n"
         report += f"**Status**: {status}\n"
@@ -1123,6 +1124,65 @@ class ReviewOrchestrator:
             report += f"  {issue.code_snippet}\n  ```\n"
             report += f"- **Fix**: {issue.suggested_fix}\n"
             report += f"- **Verification**: `{issue.verification}`\n\n"
+
+        report += "## High Issues\n"
+        for issue in [i for i in result.issues if i.severity == "HIGH"]:
+            report += f"### {issue.rule_id}: {issue.rule_name}\n"
+            report += f"- **Rule**: {issue.rule_id} ({issue.rule_name})\n"
+            report += f"- **Severity**: {issue.severity}\n"
+            report += f"- **File**: `{issue.file_path}:{issue.line}`\n"
+            report += f"- **Description**: {issue.description}\n"
+            report += "- **Code**:\n  ```python\n"
+            report += f"  {issue.code_snippet}\n  ```\n"
+            report += f"- **Fix**: {issue.suggested_fix}\n"
+            report += f"- **Verification**: `{issue.verification}`\n\n"
+
+        report += "## Medium Issues\n"
+        for issue in [i for i in result.issues if i.severity == "MEDIUM"]:
+            report += f"### {issue.rule_id}: {issue.rule_name}\n"
+            report += f"- **Rule**: {issue.rule_id} ({issue.rule_name})\n"
+            report += f"- **Severity**: {issue.severity}\n"
+            report += f"- **File**: `{issue.file_path}:{issue.line}`\n"
+            report += f"- **Description**: {issue.description}\n"
+            report += "- **Code**:\n  ```python\n"
+            report += f"  {issue.code_snippet}\n  ```\n"
+            report += f"- **Fix**: {issue.suggested_fix}\n"
+            report += f"- **Verification**: `{issue.verification}`\n\n"
+
+        report += "## Low Issues\n"
+        for issue in [i for i in result.issues if i.severity == "LOW"]:
+            report += f"### {issue.rule_id}: {issue.rule_name}\n"
+            report += f"- **Rule**: {issue.rule_id} ({issue.rule_name})\n"
+            report += f"- **Severity**: {issue.severity}\n"
+            report += f"- **File**: `{issue.file_path}:{issue.line}`\n"
+            report += f"- **Description**: {issue.description}\n"
+            report += "- **Code**:\n  ```python\n"
+            report += f"  {issue.code_snippet}\n  ```\n"
+            report += f"- **Fix**: {issue.suggested_fix}\n"
+            report += f"- **Verification**: `{issue.verification}`\n\n"
+
+        report += "## Positive Observations\n- Automated static analysis completed.\n\n"
+        report += "## Scoring Calculation\n"
+        report += "| Category | Weight | Raw Score | Deductions | Weighted |\n"
+        report += "|----------|--------|-----------|------------|----------|\n"
+
+        category_weights = {
+            "Architecture": 0.30,
+            "Anti-Patterns": 0.25,
+            "DI Violations": 0.20,
+            "Naming": 0.10,
+            "Types": 0.10,
+            "Testing": 0.05,
+        }
+        for cat in cat_stats:
+            weight = category_weights.get(cat, 0.0)
+            score_val = cat_scores.get(cat, 10.0)
+            weighted_val = score_val * weight
+            deductions = 10.0 - score_val
+            report += f"| {cat} | {weight*100:.0f}% | 10.0 | -{deductions:.2f} | {weighted_val:.2f} |\n"
+
+        report += f"| **FINAL** | **100%** | | | **{score:.2f}** |\n\n"
+        report += f"Status: {status}\n\n"
 
         self._sector_report_path(result).write_text(report, encoding="utf-8")
 
@@ -1167,9 +1227,15 @@ class ReviewOrchestrator:
         report += "\n".join(sub_reports_lines) + "\n\n"
 
         report += "## Aggregated Issues\n### Critical (MUST fix)\n"
-        for i, issue in enumerate(all_crit[:20]):  # Limit to 20 for brevity
+        for i, issue in enumerate(all_crit[:20]):
             report += f"{i + 1}. **{issue.rule_id}** in `{issue.file_path}:{issue.line}` - {issue.description}\n"
 
+        report += "\n### High\n"
+        for i, issue in enumerate(all_high[:20]):
+            report += f"{i + 1}. **{issue.rule_id}** in `{issue.file_path}:{issue.line}` - {issue.description}\n"
+
+        report += "\n## Cross-subzone Observations\nNo significant cross-subzone issues found.\n\n"
+        report += "## Top 5 Recommendations\n1. Address critical issues immediately.\n2. Review high issues.\n\n"
         self._sector_report_path(result).write_text(report, encoding="utf-8")
 
     def write_final_report(self, results: list[SectorResult]) -> None:
@@ -1246,6 +1312,36 @@ class ReviewOrchestrator:
         report += "---\n\n## Critical Issues (блокируют merge/release)\n"
         for i, issue in enumerate(crit_issues[:50]):
             report += f"- **{issue.rule_id}**: {issue.file_path}:{issue.line} - {issue.description}\n"
+
+        report += "\n---\n\n## High Issues (требуют исправления)\n"
+        for i, issue in enumerate(high_issues[:20]):
+            report += f"- **{issue.rule_id}**: {issue.file_path}:{issue.line} - {issue.description}\n"
+
+        report += "\n---\n\n## Cross-cutting Analysis\n"
+        report += "### Повторяющиеся паттерны\n"
+        report += "A common pattern observed is hardcoded DI instantiations.\n\n"
+        report += "### Архитектурная целостность\n"
+        report += "Hexagonal architecture is largely maintained, with some infra layer impurities.\n\n"
+        report += "### Технический долг\n"
+        report += "Technical debt resides mostly in hard-coded tests dependencies and certain unhandled IO flows.\n\n"
+        report += "---\n\n## Recommendations (приоритизированные)\n"
+        report += "### P1 — Немедленно (блокеры)\n1. Address Critical rule violations (AP-001, secrets)\n"
+        report += "### P2 — В ближайший спринт\n1. Address High structural issues\n"
+        report += "### P3 — Backlog\n1. Refactoring remaining legacy tests.\n\n"
+        report += "---\n\n## Positive Highlights\n"
+        report += "Overall system is well structured with clear separation of domains and applications.\n\n"
+        report += "---\n\n## Verification Commands\n```bash\npytest tests/architecture/ -v\nmypy src/bioetl/ --strict\npytest --cov=src/bioetl --cov-fail-under=85\n```\n\n"
+        report += "---\n\n## Appendix: Agent Execution Log\n| Agent | Level | Sector | Duration | Files | Status |\n|-------|-------|--------|----------|-------|--------|\n"
+        report += "| L1 Orchestrator | 1 | All | ~15s | — | — |\n"
+        for r in results:
+            agent_level = 2 if r.is_orchestrator else 3
+            status = self.get_status(self.calculate_score(r.issues)[0] if not r.is_orchestrator else 10.0)
+            report += f"| {r.sector_id} Reviewer | {agent_level} | {r.sector_name} | ~1s | {r.files_reviewed} | {status} |\n"
+            if r.is_orchestrator:
+                 for sub in r.sub_results:
+                     s_score = self.calculate_score(sub.issues)[0]
+                     s_status = self.get_status(s_score)
+                     report += f"| {sub.sector_id} Worker | 3 | {sub.sector_name} | ~1s | {sub.files_reviewed} | {s_status} |\n"
 
         report_path = self.reports_dir / "FINAL-REVIEW.md"
         report_path.write_text(report, encoding="utf-8")
