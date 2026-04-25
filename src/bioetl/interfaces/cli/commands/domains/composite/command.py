@@ -6,8 +6,9 @@ multiple data sources (seed + enrichers) into a unified dataset.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -199,88 +200,88 @@ def _exit_with_composite_result(success: bool, error_message: str | None) -> Non
     _exit_with_composite_result_impl(success, error_message)
 
 
-@click.command(name="run-composite")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@click.command(name="run-composite")
+@click.option(
     "--composite",
     callback=_validate_composite_name,
     required=True,
     help="Composite pipeline name (e.g., 'publication')",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--resume",
     is_flag=True,
     help="Resume from last checkpoint state; not a strict exact replay",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--dry-run",
     is_flag=True,
     help="Preview execution without writing data",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--seed-limit",
     type=int,
     help="Maximum records for seed pipeline",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--enrich-only",
     type=str,
     help="Run only specified enrichers (comma-separated)",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--required-only",
     is_flag=True,
     help="Skip optional enrichers",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--force-enricher",
     type=str,
     help="Force re-run of specified enricher (ignores checkpoint)",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--use-cached-bronze/--no-cached-bronze",
     "use_cached_bronze",
     default=False,
     help="Load data from Bronze cache instead of API",
     show_default=True,
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--cached-bronze-date",
     type=str,
     default=None,
     help="Filter Bronze cache by date (YYYY-MM-DD)",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--cached-bronze-path",
     type=click.Path(exists=True),
     default=None,
     help="Explicit path to Bronze cache directory",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--cached-bronze-enrichers/--no-cached-bronze-enrichers",
     "cached_bronze_enrichers",
     default=None,
     help="Override cached Bronze for enrichers (default: follow --use-cached-bronze)",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--cached-bronze-dependencies/--no-cached-bronze-dependencies",
     "cached_bronze_dependencies",
     default=False,
     help="Override cached Bronze for dependencies (default: use API)",
     show_default=True,
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--debug",
     is_flag=True,
     help="Enable DEBUG level logging",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--health-server/--no-health-server",
     "health_server",
     default=True,
     help="Enable/disable HTTP health server during execution.",
     show_default=True,
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--health-port",
     type=int,
     default=DEFAULT_HEALTH_SERVER_PORT,
@@ -320,7 +321,7 @@ def run_composite(**options: object) -> None:
         health_server: When True, starts an HTTP health server during execution.
         health_port: TCP port for the HTTP health server.
     """
-    cli_input = CompositeRunCommandInput(**options)
+    cli_input = _build_composite_run_command_input(options)
     runtime = build_runtime_config(
         CompositeRuntimeCliInput(
             resume=cli_input.resume,
@@ -355,3 +356,32 @@ def run_composite(**options: object) -> None:
         health_port=cli_input.health_port,
     )
     _exit_with_composite_result(success, error_message)
+
+
+def _build_composite_run_command_input(
+    options: Mapping[str, object],
+) -> CompositeRunCommandInput:
+    """Convert Click callback kwargs into the typed composite CLI bundle."""
+    return CompositeRunCommandInput(
+        composite=cast(str, options["composite"]),
+        resume=cast(bool, options.get("resume", False)),
+        dry_run=cast(bool, options.get("dry_run", False)),
+        seed_limit=cast(int | None, options.get("seed_limit")),
+        enrich_only=cast(str | None, options.get("enrich_only")),
+        required_only=cast(bool, options.get("required_only", False)),
+        force_enricher=cast(str | None, options.get("force_enricher")),
+        use_cached_bronze=cast(bool, options.get("use_cached_bronze", False)),
+        cached_bronze_date=cast(str | None, options.get("cached_bronze_date")),
+        cached_bronze_path=cast(str | None, options.get("cached_bronze_path")),
+        cached_bronze_enrichers=cast(
+            bool | None,
+            options.get("cached_bronze_enrichers"),
+        ),
+        cached_bronze_dependencies=cast(
+            bool,
+            options.get("cached_bronze_dependencies", False),
+        ),
+        debug=cast(bool, options.get("debug", False)),
+        health_server=cast(bool, options.get("health_server", True)),
+        health_port=cast(int, options.get("health_port", DEFAULT_HEALTH_SERVER_PORT)),
+    )

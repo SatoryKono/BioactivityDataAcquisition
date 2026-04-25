@@ -23,7 +23,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import SecretStr, model_validator
+from pydantic import SecretStr, field_validator, model_validator
 from pydantic.fields import Field
 from pydantic_settings import (
     BaseSettings,
@@ -306,6 +306,15 @@ class Settings(BaseSettings):
     """Port for Prometheus metrics HTTP server (default: 8000)."""
     metrics_addr: str = Field(default="0.0.0.0")
     """Address to bind Prometheus metrics HTTP server (default: 0.0.0.0)."""
+    silver_dedup_timeout_seconds: float = Field(
+        default=60.0,
+        validation_alias="BIOETL_SILVER_DEDUP_TIMEOUT_SECONDS",
+        description=(
+            "Timeout budget in seconds for Silver deduplication executor work "
+            "(BIOETL_SILVER_DEDUP_TIMEOUT_SECONDS)"
+        ),
+    )
+    """Timeout budget in seconds for Silver deduplication work."""
     strict_error_handling: bool = Field(
         default=False,
         description="When True, API client errors raise exceptions instead of being silently ignored. "
@@ -358,6 +367,20 @@ class Settings(BaseSettings):
         default=None,
         description="API key for PubMed",
     )
+
+    @field_validator("silver_dedup_timeout_seconds", mode="before")
+    @classmethod
+    def _validate_silver_dedup_timeout_seconds(cls, value: object) -> float:
+        """Coerce invalid or non-positive timeout values back to the safe default."""
+        if value is None or value == "":
+            return 60.0
+        if isinstance(value, bool):
+            return 60.0
+        if isinstance(value, (int, float, str)):
+            parsed = float(value)
+            return parsed if parsed > 0 else 60.0
+        return 60.0
+
     semanticscholar_api_key: SecretStr | None = Field(
         default=None,
         description="API key for Semantic Scholar Academic Graph API",

@@ -7,7 +7,8 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import TYPE_CHECKING
+from collections.abc import Callable
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -44,7 +45,8 @@ def get_checkpoint_manager(pipeline: str) -> CheckpointManagerService:
     """Load the checkpoint manager through composition on demand."""
     from bioetl.composition.resources_api import get_checkpoint_manager as _impl
 
-    return _impl(pipeline)
+    impl = cast("Callable[[str], CheckpointManagerService]", _impl)
+    return impl(pipeline)
 
 
 def get_observability_workflow_service() -> ObservabilityWorkflowService:

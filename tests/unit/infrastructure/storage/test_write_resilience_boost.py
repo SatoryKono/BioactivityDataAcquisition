@@ -12,6 +12,7 @@ from bioetl.infrastructure.storage.delta.resilience import (
     AdaptiveRetryPolicy,
     SilverMergeResiliencePolicy,
     _deterministic_jitter_seconds,
+    build_default_atomic_group_replace_retry_policy,
     build_default_atomic_replace_retry_policy,
     build_default_silver_merge_policy,
 )
@@ -208,6 +209,35 @@ class TestBuildDefaultAtomicReplaceRetryPolicy:
         policy = build_default_atomic_replace_retry_policy()
         assert policy.max_retries == 3
         assert policy.base_delay_seconds == pytest.approx(0.002)
+
+
+@pytest.mark.unit
+class TestBuildDefaultAtomicGroupReplaceRetryPolicy:
+    """Tests for group-commit retry policy defaults."""
+
+    def test_windows_group_policy_uses_smaller_per_file_delay(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Windows group commits should use a tighter retry budget than single writes."""
+        monkeypatch.setattr(
+            "bioetl.infrastructure.storage.delta.resilience.os.name", "nt"
+        )
+        policy = build_default_atomic_group_replace_retry_policy()
+        assert policy.max_retries == 10
+        assert policy.base_delay_seconds == pytest.approx(0.001)
+        assert policy.max_delay_seconds == pytest.approx(0.01)
+
+    def test_non_windows_group_policy_remains_small(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Non-Windows group commits should also keep the retry budget tight."""
+        monkeypatch.setattr(
+            "bioetl.infrastructure.storage.delta.resilience.os.name", "posix"
+        )
+        policy = build_default_atomic_group_replace_retry_policy()
+        assert policy.max_retries == 3
+        assert policy.base_delay_seconds == pytest.approx(0.001)
+        assert policy.max_delay_seconds == pytest.approx(0.01)
 
 
 @pytest.mark.unit

@@ -113,7 +113,7 @@ class RunManifestInspectionIdentityGraphMixin:
                 snapshot_fingerprint if isinstance(snapshot_fingerprint, str) else None
             ),
         )
-        return {key: value for key, value in payload.items()}
+        return dict(payload)
 
     @staticmethod
     def _build_degraded_runtime_anchor_payload(

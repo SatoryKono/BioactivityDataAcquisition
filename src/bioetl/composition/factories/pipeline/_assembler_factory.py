@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import datetime
-from typing import Generic, TypeVar, cast
+from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 import pyarrow as pa
 
@@ -21,6 +21,7 @@ from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )
 from bioetl.composition.factories.pipeline.assembler_helpers import (
+    _FactoryLike,
     build_factory_context,
     create_runner_from_factory,
     create_with_services_from_factory,
@@ -49,6 +50,7 @@ from bioetl.domain.ports import (
     DataNormalizationPort,
     DataSourcePort,
     DQMonitorPort,
+    ExecutionObservabilityPort,
     LoggerPort,
     MetricsPort,
     PiiHasherPort,
@@ -61,6 +63,11 @@ from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
+if TYPE_CHECKING:
+    from bioetl.domain.config import RuntimeConfig
+    from bioetl.domain.context import CachedBronzeContext
+    from bioetl.domain.types import RunID
+
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 
 
@@ -71,7 +78,7 @@ def _public_assembler_seam(name: str) -> object:
 
 
 def _public_assembler_callable(name: str) -> Callable[..., object]:
-    """Resolve a callable from the public assembler façade with explicit typing."""
+    """Resolve a callable from the public assembler facade with explicit typing."""
     return cast(Callable[..., object], _public_assembler_seam(name))
 
 
@@ -118,8 +125,9 @@ class GenericPipelineFactory(Generic[TPipeline]):
             provider=provider,
             provider_registry=provider_registry,
             data_source_creator=data_source_creator,
-            get_data_source_creator_fn=_public_assembler_seam(
-                "get_data_source_creator"
+            get_data_source_creator_fn=cast(
+                Callable[..., DataSourceCreatorProtocol],
+                _public_assembler_seam("get_data_source_creator"),
             ),
         )
 
@@ -180,7 +188,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         return cast(
             PipelineService,
             _public_assembler_callable("build_factory_services")(
-                factory_context=build_factory_context(self),
+                factory_context=build_factory_context(cast(_FactoryLike, self)),
                 request=_BuildFactoryServicesRequest(
                     settings,
                     logger,
@@ -200,10 +208,13 @@ class GenericPipelineFactory(Generic[TPipeline]):
         return cast(
             TPipeline,
             create_with_services_from_factory(
-                self,
+                cast(_FactoryLike, self),
                 request=request,
-                create_pipeline_instance_with_services_fn=_public_assembler_callable(
-                    "create_pipeline_instance_with_services"
+                create_pipeline_instance_with_services_fn=cast(
+                    Callable[..., BasePipeline],
+                    _public_assembler_callable(
+                        "create_pipeline_instance_with_services"
+                    ),
                 ),
             ),
         )
@@ -215,11 +226,14 @@ class GenericPipelineFactory(Generic[TPipeline]):
     ) -> PipelineRunner:
         if request is None:
             request = PipelineCreateRunnerRequest(
-                run_id=kwargs["run_id"],
-                runtime=kwargs["runtime"],
+                run_id=cast("RunID", kwargs["run_id"]),
+                runtime=cast("RuntimeConfig", kwargs["runtime"]),
                 started_at=cast("datetime", kwargs["started_at"]),
                 settings=cast("Settings", kwargs["settings"]),
-                observability=cast("ObservabilityBundle", kwargs["observability"]),
+                observability=cast(
+                    "ExecutionObservabilityPort",
+                    kwargs["observability"],
+                ),
                 control_plane=cast(
                     "PipelineControlPlaneArtifacts",
                     kwargs.get("control_plane"),
@@ -229,7 +243,10 @@ class GenericPipelineFactory(Generic[TPipeline]):
                     kwargs.get("filter_config"),
                 ),
                 config=cast("PipelineYamlConfig | None", kwargs.get("config")),
-                cached_bronze=kwargs.get("cached_bronze"),
+                cached_bronze=cast(
+                    "CachedBronzeContext | None",
+                    kwargs.get("cached_bronze"),
+                ),
             )
             if kwargs.get("control_plane") is None:
                 request = PipelineCreateRunnerRequest(
@@ -267,7 +284,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
                     cached_bronze=request.cached_bronze,
                 )
         return create_runner_from_factory(
-            self,
+            cast(_FactoryLike, self),
             request=_CreateFactoryRunnerRequest(
                 pipeline_name=self.pipeline_name,
                 silver_schema=self.silver_schema,
@@ -288,11 +305,14 @@ class GenericPipelineFactory(Generic[TPipeline]):
                 effective_config_artifact_id=(
                     request.control_plane.effective_config_artifact_id
                 ),
-                filter_config=cast("InputFilterConfig | None", request.filter_config),
+                filter_config=request.filter_config,
                 config=cast("PipelineYamlConfig | None", request.config),
                 cached_bronze=request.cached_bronze,
             ),
-            assemble_runner_fn=_public_assembler_seam("assemble_runner"),
+            assemble_runner_fn=cast(
+                Callable[..., PipelineRunner],
+                _public_assembler_seam("assemble_runner"),
+            ),
         )
 
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import click
 
@@ -80,16 +80,13 @@ def _start_metrics_server_via_interface(
     """Start the metrics server through the canonical observability facade."""
     from bioetl.interfaces.observability import start_metrics_server as _impl
 
-    return cast(
-        bool,
-        _impl(
-            port=port,
-            addr=addr,
-            fail_fast=fail_fast,
-            retry_count=retry_count,
-            retry_delay=retry_delay,
-            logger=logger,
-        ),
+    return _impl(
+        port=port,
+        addr=addr,
+        fail_fast=fail_fast,
+        retry_count=retry_count,
+        retry_delay=retry_delay,
+        logger=logger,
     )
 
 

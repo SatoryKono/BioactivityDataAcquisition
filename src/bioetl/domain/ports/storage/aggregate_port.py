@@ -10,6 +10,7 @@ from bioetl.domain.ports.storage.lifecycle_port import StorageLifecyclePort
 from bioetl.domain.ports.storage.merged_port import MergedStoragePort
 from bioetl.domain.ports.storage.silver_port import SilverStoragePort
 from bioetl.domain.ports.storage_maintenance import StorageMaintenancePort
+from bioetl.domain.types import MetaDict
 
 __all__ = ["StoragePort"]
 
@@ -31,4 +32,10 @@ class StoragePort(
     ``StoragePort``).
     """
 
-    ...
+    def preview_cleanup(
+        self,
+        silver_table: str,
+        gold_table: str | None = None,
+    ) -> MetaDict:
+        """Preview Silver and optional Gold cleanup without deleting data."""
+        ...

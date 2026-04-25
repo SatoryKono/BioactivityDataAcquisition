@@ -3,12 +3,31 @@
 from __future__ import annotations
 
 from importlib import import_module
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Coroutine
-
-    from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
+    from bioetl.application.services import (
+        PipelineRunResult as PipelineRunResult,
+    )
+    from bioetl.application.services import (
+        RunOptions as RunOptions,
+    )
+    from bioetl.application.services import (
+        RunResult as RunResult,
+    )
+    from bioetl.application.services.execution.pipeline_runner_service import (
+        PipelineRunnerService as PipelineRunnerService,
+    )
+    from bioetl.composition import (
+        ArchiveOptions as ArchiveOptions,
+    )
+    from bioetl.composition import (
+        VacuumOptions as VacuumOptions,
+    )
+    from bioetl.composition.bootstrap import (
+        maybe_start_metrics_server as maybe_start_metrics_server,
+    )
+    from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import ExecutionMetricsRunnerPort
 
@@ -29,13 +48,39 @@ _PUBLIC_EXPORTS: dict[str, str] = {
     "run_pipeline": _PIPELINE_EXECUTION_MODULE,
 }
 
-__all__ = [*_PUBLIC_EXPORTS, "push_metrics_to_gateway"]
+__all__ = [
+    "ArchiveOptions",
+    "PipelineRunResult",
+    "RunOptions",
+    "RunResult",
+    "VacuumOptions",
+    "build_pipeline_context",
+    "create_pipeline_runner",
+    "ensure_metrics_server_started",
+    "get_pipeline_runner_service",
+    "maybe_start_metrics_server",
+    "push_metrics_to_gateway",
+    "run_pipeline",
+]
 
-build_pipeline_context: "Callable[[str, RunOptions], PipelineRunContext]"
-create_pipeline_runner: "Callable[[str, RunOptions], ExecutionMetricsRunnerPort]"
-ensure_metrics_server_started: "Callable[[], bool]"
-get_pipeline_runner_service: object
-run_pipeline: "Callable[[str, RunOptions], Coroutine[object, object, RunResult]]"
+if TYPE_CHECKING:
+
+    def build_pipeline_context(
+        name: str, options: RunOptions
+    ) -> PipelineRunContext: ...
+
+    def create_pipeline_runner(
+        name: str,
+        options: RunOptions,
+    ) -> ExecutionMetricsRunnerPort: ...
+
+    def ensure_metrics_server_started() -> bool: ...
+
+    def get_pipeline_runner_service(
+        registry: PipelineRegistry | None = None,
+    ) -> PipelineRunnerService: ...
+
+    async def run_pipeline(name: str, options: RunOptions) -> RunResult: ...
 
 
 def push_metrics_to_gateway(
@@ -49,16 +94,16 @@ def push_metrics_to_gateway(
         push_metrics_to_gateway as _impl,
     )
 
-    return _impl(
-        run_label=run_label,
-        pipeline_name=pipeline_name,
-        run_type=run_type,
+    return bool(
+        _impl(
+            run_label=run_label,
+            pipeline_name=pipeline_name,
+            run_type=run_type,
+        )
     )
 
 
-def __getattr__(
-    name: str,
-) -> Any:  # Any: lazy export returns either classes or callables from multiple modules.
+def __getattr__(name: str) -> object:
     """Resolve execution-oriented public exports lazily."""
     module_name = _PUBLIC_EXPORTS.get(name)
     if module_name is None:

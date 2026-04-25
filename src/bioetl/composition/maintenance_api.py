@@ -17,17 +17,17 @@ _SERVICES_MODULE = "bioetl.composition._services"
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
 
+    from bioetl.application.services import ContractMigrationService
     from bioetl.application.services.bronze_cleanup_service import (
         BronzeCleanupResult,
         BronzeCleanupService,
     )
-    from bioetl.application.services import ContractMigrationService
     from bioetl.application.services.vacuum_service import VacuumService
 
-cleanup_bronze: "Callable[[int, bool], Awaitable[BronzeCleanupResult]]"
-get_bronze_cleanup_service: "Callable[[], BronzeCleanupService]"
-get_contract_migration_service: "Callable[[], ContractMigrationService]"
-get_vacuum_service: "Callable[[], VacuumService]"
+cleanup_bronze: Callable[[int, bool], Awaitable[BronzeCleanupResult]]
+get_bronze_cleanup_service: Callable[[], BronzeCleanupService]
+get_contract_migration_service: Callable[[], ContractMigrationService]
+get_vacuum_service: Callable[[], VacuumService]
 
 
 def __getattr__(name: str) -> object:

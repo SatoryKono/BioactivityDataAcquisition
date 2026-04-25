@@ -32,7 +32,12 @@ if TYPE_CHECKING:
     )
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.ports import CompositeCheckpointPort, LoggerPort, MetricsPort
+    from bioetl.domain.ports import (
+        ClockPort,
+        CompositeCheckpointPort,
+        LoggerPort,
+        MetricsPort,
+    )
     from bioetl.infrastructure.config import Settings
 
 
@@ -52,56 +57,23 @@ def build_runtime_management_services(
     control_plane_bundle: CompositeControlPlaneBundle | None = None,
 ) -> RuntimeManagementServicesBundle:
     """Build checkpoint, FSM, DQ, and quarantine runtime services."""
-
-    expected_effective_config_hash = _resolve_expected_effective_config_hash(
+    checkpoint_storage = bootstrap_composite_checkpoint_port()
+    checkpoint_manager = _create_checkpoint_manager(
         config=config,
+        runtime=runtime,
         control_plane_bundle=control_plane_bundle,
+        logger=logger,
+        run_id=run_id,
+        checkpoint_storage=checkpoint_storage,
+        checkpoint_manager_cls=checkpoint_manager_cls,
+        checkpoint_clock=infra_context.clock,
     )
-    checkpoint_storage: CompositeCheckpointPort = bootstrap_composite_checkpoint_port()
     quarantine_port = (
         bootstrap_quarantine_port() if config.cross_validation.enabled else None
     )
-    checkpoint_clock = infra_context.clock
-    checkpoint_manager_kwargs: dict[str, object] = {
-        "composite_name": config.name,
-        "run_id": run_id,
-        "storage": checkpoint_storage,
-        "logger": logger,
-        "resume": runtime.resume,
-        "expected_effective_config_hash": expected_effective_config_hash,
-        "expected_contract_ref": normalize_contract_ref(config.name),
-        "expected_contract_version": normalize_contract_version(
-            getattr(config, "version", "")
-        ),
-        "expected_manifest_id": (
-            None if control_plane_bundle is None else control_plane_bundle.manifest_id
-        ),
-        "expected_execution_fingerprint": (
-            None
-            if control_plane_bundle is None
-            else control_plane_bundle.execution_fingerprint
-        ),
-        "expected_dq_contract_compatibility_hash": (
-            None
-            if control_plane_bundle is None
-            else control_plane_bundle.dq_contract_compatibility_hash
-        ),
-        "expected_effective_config_artifact_id": (
-            None
-            if control_plane_bundle is None
-            else control_plane_bundle.effective_config_artifact_id
-        ),
-        "run_ledger_port": (
-            None
-            if control_plane_bundle is None
-            or control_plane_bundle.run_ledger_service is None
-            else control_plane_bundle.run_ledger_service.ledger_port
-        ),
-    }
-    if checkpoint_clock is not None:
-        checkpoint_manager_kwargs["clock"] = checkpoint_clock
+
     return RuntimeManagementServicesBundle(
-        checkpoint_manager=checkpoint_manager_cls(**checkpoint_manager_kwargs),
+        checkpoint_manager=checkpoint_manager,
         dq_report_service=create_dq_report_service(
             logger,
             settings,
@@ -113,6 +85,89 @@ def build_runtime_management_services(
             run_id=run_id,
         ),
         quarantine_port=quarantine_port,
+    )
+
+
+def _create_checkpoint_manager(
+    *,
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    control_plane_bundle: CompositeControlPlaneBundle | None,
+    logger: LoggerPort,
+    run_id: str,
+    checkpoint_storage: CompositeCheckpointPort,
+    checkpoint_manager_cls: type[CompositeCheckpointService],
+    checkpoint_clock: ClockPort | None,
+) -> CompositeCheckpointService:
+    expected_manifest_id = (
+        None if control_plane_bundle is None else control_plane_bundle.manifest_id
+    )
+    expected_execution_fingerprint = (
+        None
+        if control_plane_bundle is None
+        else control_plane_bundle.execution_fingerprint
+    )
+    expected_dq_contract_compatibility_hash = (
+        None
+        if control_plane_bundle is None
+        else control_plane_bundle.dq_contract_compatibility_hash
+    )
+    expected_effective_config_artifact_id = (
+        None
+        if control_plane_bundle is None
+        else control_plane_bundle.effective_config_artifact_id
+    )
+    run_ledger_port = (
+        None
+        if control_plane_bundle is None
+        or control_plane_bundle.run_ledger_service is None
+        else control_plane_bundle.run_ledger_service.ledger_port
+    )
+    expected_effective_config_hash = _resolve_expected_effective_config_hash(
+        config=config,
+        control_plane_bundle=control_plane_bundle,
+    )
+    expected_contract_ref = normalize_contract_ref(config.name)
+    expected_contract_version = normalize_contract_version(
+        getattr(config, "version", "")
+    )
+    if checkpoint_clock is None:
+        return checkpoint_manager_cls(
+            composite_name=config.name,
+            run_id=run_id,
+            storage=checkpoint_storage,
+            logger=logger,
+            resume=runtime.resume,
+            expected_effective_config_hash=expected_effective_config_hash,
+            expected_contract_ref=expected_contract_ref,
+            expected_contract_version=expected_contract_version,
+            expected_manifest_id=expected_manifest_id,
+            expected_execution_fingerprint=expected_execution_fingerprint,
+            expected_dq_contract_compatibility_hash=(
+                expected_dq_contract_compatibility_hash
+            ),
+            expected_effective_config_artifact_id=(
+                expected_effective_config_artifact_id
+            ),
+            run_ledger_port=run_ledger_port,
+        )
+    return checkpoint_manager_cls(
+        composite_name=config.name,
+        run_id=run_id,
+        storage=checkpoint_storage,
+        logger=logger,
+        resume=runtime.resume,
+        expected_effective_config_hash=expected_effective_config_hash,
+        expected_contract_ref=expected_contract_ref,
+        expected_contract_version=expected_contract_version,
+        expected_manifest_id=expected_manifest_id,
+        expected_execution_fingerprint=expected_execution_fingerprint,
+        expected_dq_contract_compatibility_hash=(
+            expected_dq_contract_compatibility_hash
+        ),
+        expected_effective_config_artifact_id=expected_effective_config_artifact_id,
+        run_ledger_port=run_ledger_port,
+        clock=checkpoint_clock,
     )
 
 

@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import Protocol
 
 from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
+from bioetl.application.core.wiring.transformer import BaseTransformer
+from bioetl.composition.factories.datasource.data_source_factory import (
+    DataSourceCreatorProtocol,
+)
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _CreateFactoryRunnerRequest,
     _CreatePipelineWithServicesRequest,
@@ -14,20 +18,40 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     create_factory_runner,
 )
 
-if TYPE_CHECKING:
-    from bioetl.composition.factories.pipeline.assembler import GenericPipelineFactory
 
-TPipeline = TypeVar("TPipeline", bound=BasePipeline)
+class _FactoryLike(Protocol):
+    @property
+    def pipeline_name(self) -> str: ...
+
+    @property
+    def _create_data_source(self) -> DataSourceCreatorProtocol: ...
+
+    @property
+    def pipeline_class(self) -> type[BasePipeline]: ...
+
+    @property
+    def provider(self) -> str: ...
+
+    @property
+    def transformer_class(self) -> type[BaseTransformer] | None: ...
+
+    @property
+    def pandera_silver_schema(self) -> object | None: ...
+
+    def create_with_services(
+        self,
+        request: _CreatePipelineWithServicesRequest,
+    ) -> BasePipeline: ...
 
 
 def build_factory_context(
-    factory: GenericPipelineFactory[TPipeline],
+    factory: _FactoryLike,
 ) -> _PipelineFactoryContext:
     """Build typed factory context used by composition helper methods."""
     return build_pipeline_factory_context(
         pipeline_name=factory.pipeline_name,
         create_data_source_fn=factory._create_data_source,
-        pipeline_class=cast(type[BasePipeline] | None, factory.pipeline_class),
+        pipeline_class=factory.pipeline_class,
         provider=factory.provider,
         transformer_class=factory.transformer_class,
         pandera_silver_schema=factory.pandera_silver_schema,
@@ -35,26 +59,23 @@ def build_factory_context(
 
 
 def create_with_services_from_factory(
-    factory: GenericPipelineFactory[TPipeline],
+    factory: _FactoryLike,
     request: _CreatePipelineWithServicesRequest,
     *,
     create_pipeline_instance_with_services_fn: Callable[..., BasePipeline],
-) -> TPipeline:
+) -> BasePipeline:
     """Create a typed pipeline instance using shared factory helper plumbing."""
-    return cast(
-        TPipeline,
-        create_pipeline_instance_with_services_fn(
-            factory_context=build_factory_context(factory),
-            request=request,
-        ),
+    return create_pipeline_instance_with_services_fn(
+        factory_context=build_factory_context(factory),
+        request=request,
     )
 
 
 def create_runner_from_factory(
-    factory: GenericPipelineFactory[TPipeline],
+    factory: _FactoryLike,
     request: _CreateFactoryRunnerRequest,
     *,
-    assemble_runner_fn: object,
+    assemble_runner_fn: Callable[..., PipelineRunner],
 ) -> PipelineRunner:
     """Create a runner using the factory's current bound service constructor."""
     return create_factory_runner(

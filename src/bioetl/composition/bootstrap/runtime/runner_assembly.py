@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.runner_pkg import CompositePipelineRunner
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
@@ -30,12 +30,30 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.runtime_wiring_api import (
+        CompositeCheckpointService,
+        CompositeLifecycleObserverService,
+        CompositePreflightValidationService,
+        DependencyCoordinatorService,
+        EnrichmentCoordinatorService,
+        FSMStateHelperService,
+        KeyExtractorService,
+        MergeService,
         PipelineRunner,
     )
+    from bioetl.application.services.control_plane.run_ledger_service import (
+        RunLedgerService,
+    )
+    from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
     )
-    from bioetl.domain.ports import LockPort, MetricsPort, TracingPort
+    from bioetl.domain.ports import (
+        ClockPort,
+        LockPort,
+        MetricsPort,
+        QuarantinePort,
+        TracingPort,
+    )
     from bioetl.infrastructure.config import Settings
 
 
@@ -56,7 +74,63 @@ def create_composite_runner_service(
     bootstrap seams can stay assertion-friendly in tests.
     """
     if inputs is None:
-        inputs = CompositeRunnerServiceInputs(**kwargs)
+        inputs = CompositeRunnerServiceInputs(
+            config=cast(CompositeConfig, kwargs["config"]),
+            runtime=cast(CompositeRuntimeConfig, kwargs["runtime"]),
+            run_id=cast(str | None, kwargs.get("run_id")),
+            logger=cast(LoggerPort, kwargs["logger"]),
+            lock=cast(LockPort, kwargs["lock"]),
+            seed_runner_factory=cast(
+                "Callable[[], PipelineRunner]",
+                kwargs["seed_runner_factory"],
+            ),
+            enricher_runner_factory=cast(
+                "Callable[[str, pl.DataFrame], PipelineRunner]",
+                kwargs["enricher_runner_factory"],
+            ),
+            key_extractor=cast("KeyExtractorService", kwargs["key_extractor"]),
+            coordinator=cast("EnrichmentCoordinatorService", kwargs["coordinator"]),
+            merger=cast("MergeService", kwargs["merger"]),
+            checkpoint_manager=cast(
+                "CompositeCheckpointService",
+                kwargs["checkpoint_manager"],
+            ),
+            fsm_state_helper=cast(
+                "FSMStateHelperService | None",
+                kwargs.get("fsm_state_helper"),
+            ),
+            dq_report_service=cast(
+                "DQReportService | None",
+                kwargs.get("dq_report_service"),
+            ),
+            preflight_validator=cast(
+                "CompositePreflightValidationService | None",
+                kwargs.get("preflight_validator"),
+            ),
+            dependencies_runner_factory=cast(
+                "Callable[[str, pl.DataFrame], PipelineRunner] | None",
+                kwargs.get("dependencies_runner_factory"),
+            ),
+            dependency_coordinator=cast(
+                "DependencyCoordinatorService | None",
+                kwargs.get("dependency_coordinator"),
+            ),
+            quarantine_port=cast(
+                "QuarantinePort | None", kwargs.get("quarantine_port")
+            ),
+            metrics=cast("MetricsPort | None", kwargs.get("metrics")),
+            tracer=cast("TracingPort | None", kwargs.get("tracer")),
+            observer=cast(
+                "CompositeLifecycleObserverService | None",
+                kwargs.get("observer"),
+            ),
+            manifest_id=cast(str | None, kwargs.get("manifest_id")),
+            run_ledger_service=cast(
+                "RunLedgerService | None",
+                kwargs.get("run_ledger_service"),
+            ),
+            clock=cast("ClockPort | None", kwargs.get("clock")),
+        )
     elif kwargs:
         unexpected = ", ".join(sorted(kwargs))
         raise TypeError(

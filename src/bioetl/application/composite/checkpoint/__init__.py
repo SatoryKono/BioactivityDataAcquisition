@@ -26,12 +26,14 @@ from bioetl.application.composite.checkpoint._anchor_context import (
 from bioetl.application.composite.checkpoint.service import (
     CompositeCheckpointManager,
     CompositeCheckpointService,
+    CompositeCheckpointServiceContext,
 )
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 
 __all__ = [
     "CompositeCheckpointManager",
     "CompositeCheckpointService",
+    "CompositeCheckpointServiceContext",
     "CompositeCheckpointState",
     "ExpectedCheckpointContext",
     "create_expected_checkpoint_context",

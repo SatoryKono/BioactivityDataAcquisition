@@ -6,7 +6,8 @@ Provides commands to list, show, and validate ADR documents.
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+from collections.abc import Callable
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -34,7 +35,8 @@ def get_adr_service() -> AdrServicePort:
     """Load the ADR service through composition on demand."""
     from bioetl.composition.control_plane_api import get_adr_service as _impl
 
-    return _impl()
+    impl = cast("Callable[[], AdrServicePort]", _impl)
+    return impl()
 
 
 @adr.command("list")

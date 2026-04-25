@@ -36,7 +36,6 @@ from bioetl.infrastructure.storage.silver.operations.postwrite_operations import
     SilverPostwriteOperations,
 )
 
-
 __all__ = ["SilverWriterFinalizationCompatibilityMixin"]
 
 
@@ -50,11 +49,11 @@ def _as_metadata_mixin(
 class SilverWriterFinalizationCompatibilityMixin:
     """Delegation surface for Silver finalization and postwrite helpers."""
 
-    _delta: "SilverDeltaOperations | None"
-    _maintenance: "SilverMaintenanceOperations | None"
-    _metadata: "SilverMetadataOperations | None"
+    _delta: SilverDeltaOperations | None
+    _maintenance: SilverMaintenanceOperations | None
+    _metadata: SilverMetadataOperations | None
     _metadata_writer: MetadataWriterPort | None
-    _postwrite: "SilverPostwriteOperations | None"
+    _postwrite: SilverPostwriteOperations | None
     base_path_obj: Path
 
     async def _get_delta_version(self, table_path: str) -> int | None:
@@ -262,12 +261,7 @@ class SilverWriterFinalizationCompatibilityMixin:
         start_perf = time.perf_counter()
         delta_version = await self._get_delta_version(table_path)
         dq_metrics = await self._compute_dq_metrics(table_name, records)
-        from bioetl.infrastructure.storage.silver.metadata_mixin import (
-            SilverWriterMetadataMixin,
-        )
-
-        await SilverWriterMetadataMixin._write_silver_metadata(
-            _as_metadata_mixin(self),
+        await _as_metadata_mixin(self)._write_silver_metadata(
             table_path=table_path,
             table_name=table_name,
             records=records,

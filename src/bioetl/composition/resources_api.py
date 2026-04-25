@@ -5,6 +5,16 @@ from __future__ import annotations
 from importlib import import_module
 from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from bioetl.composition._pipeline_execution import ArchiveOptions, VacuumOptions
+    from bioetl.composition._resource_management import (
+        CheckpointManagerProtocol,
+        CleanupPreviewProtocol,
+        MedallionLifecycleServiceProtocol,
+        QuarantineManagerProtocol,
+    )
+    from bioetl.domain.types import JsonDict
+
 __all__ = [
     "ArchiveOptions",
     "VacuumOptions",
@@ -34,32 +44,25 @@ _PUBLIC_EXPORTS = {
 }
 
 if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable
 
-    from bioetl.application.core.lifecycle.checkpoint_manager import (
-        CheckpointManagerService,
-    )
-    from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview
-    from bioetl.application.services.medallion_lifecycle import (
-        MedallionLifecycleService,
-    )
-    from bioetl.composition._pipeline_execution import ArchiveOptions as _ArchiveOptions
-    from bioetl.composition._pipeline_execution import VacuumOptions as _VacuumOptions
-    from bioetl.composition._resource_management import (
-        QuarantineManagerProtocol,
-    )
-    from bioetl.domain.types import JsonDict
+    async def archive_table(table: str, options: ArchiveOptions) -> int: ...
 
-ArchiveOptions: "type[_ArchiveOptions]"
-VacuumOptions: "type[_VacuumOptions]"
-archive_table: "Callable[[str, _ArchiveOptions], Awaitable[int]]"
-get_checkpoint_manager: "Callable[[str], CheckpointManagerService]"
-get_lifecycle_service: "Callable[[], MedallionLifecycleService]"
-get_quarantine_manager: "Callable[[str], QuarantineManagerProtocol]"
-inspect_quarantine: "Callable[[str, int], Awaitable[list[JsonDict]]]"
-list_checkpoints: "Callable[[str], Awaitable[list[object]]]"
-preview_cleanup: "Callable[[str], Awaitable[CleanupPreview]]"
-vacuum_table: "Callable[[str, _VacuumOptions], Awaitable[int]]"
+    def get_checkpoint_manager(pipeline: str) -> CheckpointManagerProtocol: ...
+
+    def get_lifecycle_service() -> MedallionLifecycleServiceProtocol: ...
+
+    def get_quarantine_manager(pipeline: str) -> QuarantineManagerProtocol: ...
+
+    async def inspect_quarantine(
+        pipeline: str,
+        limit: int = 100,
+    ) -> list[JsonDict]: ...
+
+    async def list_checkpoints(pipeline: str) -> list[object]: ...
+
+    async def preview_cleanup(pipeline: str) -> CleanupPreviewProtocol: ...
+
+    async def vacuum_table(table: str, options: VacuumOptions) -> int: ...
 
 
 def __getattr__(name: str) -> object:

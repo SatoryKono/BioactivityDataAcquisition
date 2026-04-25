@@ -7,12 +7,16 @@ Silver Delta merge execution.
 from __future__ import annotations
 
 __all__ = [
+    "DEFAULT_ATOMIC_GROUP_REPLACE_RETRY_POLICY",
     "DEFAULT_ATOMIC_REPLACE_RETRY_POLICY",
     "DEFAULT_SILVER_MERGE_POLICY",
+    "NON_WINDOWS_ATOMIC_GROUP_REPLACE_RETRY_POLICY",
     "NON_WINDOWS_ATOMIC_REPLACE_RETRY_POLICY",
+    "WINDOWS_ATOMIC_GROUP_REPLACE_RETRY_POLICY",
     "WINDOWS_ATOMIC_REPLACE_RETRY_POLICY",
     "AdaptiveRetryPolicy",
     "SilverMergeResiliencePolicy",
+    "build_default_atomic_group_replace_retry_policy",
     "build_default_atomic_replace_retry_policy",
     "build_default_silver_merge_policy",
 ]
@@ -123,6 +127,24 @@ NON_WINDOWS_ATOMIC_REPLACE_RETRY_POLICY = AdaptiveRetryPolicy(
     adaptive=True,
 )
 
+WINDOWS_ATOMIC_GROUP_REPLACE_RETRY_POLICY = AdaptiveRetryPolicy(
+    enabled=True,
+    max_retries=10,
+    base_delay_seconds=0.001,
+    max_delay_seconds=0.01,
+    jitter_seconds=0.0,
+    adaptive=True,
+)
+
+NON_WINDOWS_ATOMIC_GROUP_REPLACE_RETRY_POLICY = AdaptiveRetryPolicy(
+    enabled=True,
+    max_retries=3,
+    base_delay_seconds=0.001,
+    max_delay_seconds=0.01,
+    jitter_seconds=0.0,
+    adaptive=True,
+)
+
 
 def build_default_atomic_replace_retry_policy() -> AdaptiveRetryPolicy:
     """Return OS-specific default policy for atomic Path.replace retries.
@@ -136,6 +158,23 @@ def build_default_atomic_replace_retry_policy() -> AdaptiveRetryPolicy:
 
 
 DEFAULT_ATOMIC_REPLACE_RETRY_POLICY = build_default_atomic_replace_retry_policy()
+
+
+def build_default_atomic_group_replace_retry_policy() -> AdaptiveRetryPolicy:
+    """Return a rename-group policy tuned for multi-file commit throughput.
+
+    Group commits may apply the retry backoff many times in one operation.
+    Keep the policy resilient to transient sharing violations while using
+    a much smaller per-file delay budget than single-file metadata writes.
+    """
+    if os.name == "nt":
+        return WINDOWS_ATOMIC_GROUP_REPLACE_RETRY_POLICY
+    return NON_WINDOWS_ATOMIC_GROUP_REPLACE_RETRY_POLICY
+
+
+DEFAULT_ATOMIC_GROUP_REPLACE_RETRY_POLICY = (
+    build_default_atomic_group_replace_retry_policy()
+)
 
 
 def build_default_silver_merge_policy() -> SilverMergeResiliencePolicy:

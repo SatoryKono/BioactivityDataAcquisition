@@ -99,11 +99,20 @@ class ExecutionObservabilityPort(Protocol):
     rather than a concrete composition bundle type.
     """
 
-    logger: LoggerPort
-    metrics: MetricsPort
-    tracer: TracingPort | None
-    audit: AuditPort
-    dq_monitor: DQMonitorPort | None
+    @property
+    def logger(self) -> LoggerPort: ...
+
+    @property
+    def metrics(self) -> MetricsPort: ...
+
+    @property
+    def tracer(self) -> TracingPort | None: ...
+
+    @property
+    def audit(self) -> AuditPort: ...
+
+    @property
+    def dq_monitor(self) -> DQMonitorPort | None: ...
 
 
 @dataclass(frozen=True, slots=True)

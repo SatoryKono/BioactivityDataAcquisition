@@ -15,12 +15,12 @@ from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics, SchemaDriftInfo
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
+from bioetl.infrastructure.storage.silver.merged_mixin import (
+    SilverWriterMergedMixin,
+)
 from bioetl.infrastructure.storage.silver.merged_operations import (
     _MergedSilverWriteRequest,
     _PreparedMergedSilverWrite,
-)
-from bioetl.infrastructure.storage.silver.merged_mixin import (
-    SilverWriterMergedMixin,
 )
 from bioetl.infrastructure.storage.silver.metadata_mixin import (
     SilverWriterMetadataMixin,
@@ -28,19 +28,19 @@ from bioetl.infrastructure.storage.silver.metadata_mixin import (
 from bioetl.infrastructure.storage.silver.operations.merged_operations import (
     SilverMergedOperations,
 )
+from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+    SilverValidationOperations,
+)
 from bioetl.infrastructure.storage.silver.pipeline_helpers import (
     _SilverWriteExecutionContext,
     _SilverWriteInvocation,
     execute_silver_write_pipeline,
 )
-from bioetl.infrastructure.storage.silver.operations.validation_operations import (
-    SilverValidationOperations,
+from bioetl.infrastructure.storage.silver.validation_mixin import (
+    SilverWriterValidationMixin,
 )
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _PreparedSilverWritePayload,
-)
-from bioetl.infrastructure.storage.silver.validation_mixin import (
-    SilverWriterValidationMixin,
 )
 
 
@@ -54,7 +54,7 @@ def _normalize_completed_at(value: datetime | str) -> datetime:
 class SilverWriterDQCompatibilityMixin:
     """Compatibility surface for Silver DQ and schema helper methods."""
 
-    _validation: "SilverValidationOperations | None"
+    _validation: SilverValidationOperations | None
 
     def _as_validation_mixin(self) -> SilverWriterValidationMixin:
         """Treat this compatibility host as a validation-mixin implementation."""
@@ -189,16 +189,12 @@ class SilverWriterDQCompatibilityMixin:
     async def _get_table_schema(self, table_name: str) -> pa.Schema | None:
         """Get the schema of an existing Silver table."""
         try:
-            from deltalake import DeltaTable as PatchedDeltaTable
-            from deltalake.exceptions import (
-                TableNotFoundError as DeltaTableNotFoundError,
-            )
+            from bioetl.infrastructure.storage.base_delta_writer import BaseDeltaWriter
 
-            table_path = self._resolve_table_path(table_name)
-            dt = PatchedDeltaTable(table_path)
-            return dt.schema().to_arrow()
-        except DeltaTableNotFoundError:
-            return None
+            return await BaseDeltaWriter._get_table_schema(
+                cast("BaseDeltaWriter", self),
+                table_name,
+            )
         except (
             AttributeError,
             ImportError,
@@ -207,18 +203,13 @@ class SilverWriterDQCompatibilityMixin:
             TypeError,
             ValueError,
         ):
-            from bioetl.infrastructure.storage.base_delta_writer import BaseDeltaWriter
-
-            return await BaseDeltaWriter._get_table_schema(
-                cast("BaseDeltaWriter", self),
-                table_name,
-            )
+            return None
 
 
 class SilverWriterMergedCompatibilityMixin:
     """Compatibility surface for merged-write helpers."""
 
-    _merged: "SilverMergedOperations | None"
+    _merged: SilverMergedOperations | None
 
     def _as_merged_mixin(self) -> SilverWriterMergedMixin:
         """Treat this compatibility host as a merged-mixin implementation."""

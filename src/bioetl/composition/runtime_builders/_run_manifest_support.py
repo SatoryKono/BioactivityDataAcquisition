@@ -49,6 +49,7 @@ __all__ = [
     "resolve_replay_parentage",
     "resolve_run_context_values",
     "to_serializable_mapping",
+    "validate_reproducible_sink_modes",
 ]
 
 
@@ -94,6 +95,33 @@ def resolve_replay_capability(
     return ReplayCapability.REBUILD_ONLY
 
 
+def validate_reproducible_sink_modes(
+    *,
+    yaml_config: object,
+    strict_replay_requested: bool,
+) -> None:
+    """Reject append-mode semantic outputs for strict reproducibility contexts."""
+    if not strict_replay_requested:
+        return
+    sink = getattr(yaml_config, "sink", None)
+    if not isinstance(sink, dict):
+        return
+    blocked = [
+        f"sink.{layer_name}.mode=append"
+        for layer_name in ("silver", "gold")
+        if (layer_config := sink.get(layer_name)) is not None
+        and _sink_layer_enabled(layer_config)
+        and _sink_layer_mode(layer_config) == "append"
+    ]
+    if blocked:
+        details = ", ".join(blocked)
+        raise RuntimeError(
+            "Strict reproducibility contexts cannot use append-mode Silver/Gold "
+            f"semantic outputs ({details}); use merge/upsert, overwrite, or SCD2 "
+            "semantics with stable keys instead"
+        )
+
+
 def _build_cached_bronze_snapshot_refs(
     *,
     cached_bronze: object | None,
@@ -120,3 +148,18 @@ def _build_cached_bronze_snapshot_refs(
             "Cached Bronze execution requires at least one persisted batch file for snapshot provenance"
         )
     return snapshot_refs
+
+
+def _sink_layer_enabled(layer_config: object) -> bool:
+    if isinstance(layer_config, dict):
+        return bool(layer_config.get("enabled", True))
+    return bool(getattr(layer_config, "enabled", True))
+
+
+def _sink_layer_mode(layer_config: object) -> str:
+    raw_mode = (
+        layer_config.get("mode", "")
+        if isinstance(layer_config, dict)
+        else getattr(layer_config, "mode", "")
+    )
+    return str(raw_mode or "").strip().lower()

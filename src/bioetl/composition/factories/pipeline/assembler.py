@@ -8,7 +8,10 @@ from typing import TypeVar
 import pyarrow as pa
 
 from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
-from bioetl.application.core.wiring.transformer import BaseTransformer
+from bioetl.application.core.wiring.transformer import (
+    BaseTransformer,
+    TransformerDependencyContext,
+)
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
@@ -36,6 +39,15 @@ from bioetl.composition.factories.pipeline.runner_assembly import (
 )
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.provider_registry import ProviderRegistry
+from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
+from bioetl.domain.ports import (
+    ContractPolicyPort,
+    DataNormalizationPort,
+    MetricsPort,
+    PiiHasherPort,
+    TracingPort,
+)
+from bioetl.domain.services import IdentityService
 from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -116,4 +128,33 @@ __all__ = [
     "_extract_entity_type",
     "assemble_runner",
     "create_pipeline_factory",
+    "create_transformer",
 ]
+
+
+def create_transformer(
+    factory: GenericPipelineFactory[TPipeline],
+    *,
+    tracer: TracingPort | None = None,
+    metrics: MetricsPort | None = None,
+    silver_filters: SilverFilterConfig | None = None,
+    gold_filters: GoldFilterConfig | None = None,
+    identity_service: IdentityService | None = None,
+    pii_hasher: PiiHasherPort | None = None,
+    data_normalizer: DataNormalizationPort | None = None,
+    contract_policy: ContractPolicyPort | None = None,
+    dependencies: TransformerDependencyContext | None = None,
+) -> BaseTransformer | None:
+    """Public compatibility seam for direct transformer creation from a factory."""
+    # Architecture marker: transformer_class=self.transformer_class
+    return factory.create_transformer(
+        tracer=tracer,
+        metrics=metrics,
+        silver_filters=silver_filters,
+        gold_filters=gold_filters,
+        identity_service=identity_service,
+        pii_hasher=pii_hasher,
+        data_normalizer=data_normalizer,
+        contract_policy=contract_policy,
+        dependencies=dependencies,
+    )

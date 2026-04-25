@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from contextlib import AbstractAsyncContextManager
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.services.execution.cli_run_orchestration_models import (
     RunExecutionRequest,
@@ -47,7 +47,7 @@ def get_pipeline_runner_service(
     """Resolve the pipeline runner service lazily for CLI runtime helpers."""
     from bioetl.composition.execution_api import get_pipeline_runner_service as _impl
 
-    return _impl(registry=registry)
+    return cast(PipelineRunnerService, _impl(registry=registry))
 
 
 def build_run_command_input(

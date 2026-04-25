@@ -24,6 +24,7 @@ from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_SILVER_MERGE_POLICY,
     SilverMergeResiliencePolicy,
@@ -152,13 +153,11 @@ def _build_maintenance_operations(
     )
 
 
-def _require_logger(logger: LoggerPort | None) -> LoggerPort:
-    """Resolve a required logger dependency for operation builders."""
-    if logger is None:
-        raise RuntimeError(
-            "SilverWriter runtime requires a logger before building operation services"
-        )
-    return logger
+def _resolve_operation_logger(logger: LoggerPort | None) -> LoggerPort:
+    """Resolve an operation-service logger with a safe compatibility fallback."""
+    if logger is not None:
+        return logger
+    return NoOpLogger()
 
 
 def _build_metadata_operations(
@@ -168,7 +167,7 @@ def _build_metadata_operations(
     dq_calculator: DQMetricsCalculator,
 ) -> SilverMetadataOperations:
     """Create metadata operations bound to resolved metadata and DQ collaborators."""
-    logger = _require_logger(request.logger)
+    logger = _resolve_operation_logger(request.logger)
     return SilverMetadataOperations(
         _logger=logger,
         _metrics=request.metrics,
@@ -191,7 +190,7 @@ def _build_validation_operations(
     if request.base_path is None:
         return None
     base_path = request.base_path
-    logger = _require_logger(request.logger)
+    logger = _resolve_operation_logger(request.logger)
 
     # Import here to avoid circular imports
     from bioetl.infrastructure.storage.silver.support import (
@@ -228,7 +227,7 @@ def _build_delta_operations(
     merge_resilience_policy: SilverMergeResiliencePolicy,
 ) -> SilverDeltaOperations:
     """Create delta operations around the resolved resilience policy."""
-    logger = _require_logger(request.logger)
+    logger = _resolve_operation_logger(request.logger)
     return SilverDeltaOperations(
         logger=logger,
         _metrics=request.metrics,
@@ -243,7 +242,7 @@ def _build_merged_operations(
     if request.base_path is None:
         return None
     base_path = request.base_path
-    logger = _require_logger(request.logger)
+    logger = _resolve_operation_logger(request.logger)
 
     # Import here to avoid circular imports
     from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter

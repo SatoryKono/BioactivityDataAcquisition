@@ -22,10 +22,10 @@ from bioetl.application.core.wiring.runtime import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.application.core.batch_writer import BatchWriteStoragePort
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterPort,
     )
-    from bioetl.application.core.batch_writer import BatchWriteStoragePort
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.ports import GoldValidatorPort, TracingPort

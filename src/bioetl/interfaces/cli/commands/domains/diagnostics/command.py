@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -20,6 +20,7 @@ from bioetl.interfaces.cli.commands.domains.health.rendering import (
     all_health_results_healthy,
 )
 from bioetl.interfaces.cli.commands.domains.quarantine.support import (
+    _QuarantineManager,
     _show_quarantine_stats,
 )
 from bioetl.interfaces.cli.commands.inspection_output import (
@@ -75,11 +76,11 @@ def get_metrics_operator_profile() -> MetricsOperatorProfile:
     return _impl()
 
 
-def get_quarantine_manager(pipeline: str) -> object:
+def get_quarantine_manager(pipeline: str) -> _QuarantineManager:
     """Load the quarantine manager through composition on demand."""
     from bioetl.composition.resources_api import get_quarantine_manager as _impl
 
-    return _impl(pipeline)
+    return cast(_QuarantineManager, _impl(pipeline))
 
 
 def _build_diagnostics_guide_lines() -> list[str]:
@@ -87,25 +88,25 @@ def _build_diagnostics_guide_lines() -> list[str]:
     return build_diagnostics_guide_lines()
 
 
-@click.group()  # type: ignore[untyped-decorator]
+@click.group()
 def diagnostics() -> None:
     """Unified operator diagnostics across health, checkpoints, manifests, and quarantine."""
 
 
-@diagnostics.command("guide")  # type: ignore[untyped-decorator]
+@diagnostics.command("guide")
 def diagnostics_guide() -> None:
     """Show the canonical diagnostics discovery and routing guide."""
     render_guide_lines(build_diagnostics_guide_lines())
 
 
-@diagnostics.command("health")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@diagnostics.command("health")
+@click.option(
     "--provider",
     "-p",
     multiple=True,
     help="Provider name(s) to check; omit to check all configured providers",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--json",
     "output_json",
     is_flag=True,
@@ -128,8 +129,8 @@ def diagnostics_health(provider: tuple[str, ...], output_json: bool) -> None:
         raise SystemExit(ExitCode.FAIL)
 
 
-@diagnostics.command("metrics")  # type: ignore[untyped-decorator]
-@click.option("--json", "output_json", is_flag=True, help="Output as JSON")  # type: ignore[untyped-decorator]
+@diagnostics.command("metrics")
+@click.option("--json", "output_json", is_flag=True, help="Output as JSON")
 def diagnostics_metrics(output_json: bool) -> None:
     """Show the canonical metrics/admin observability workflow summary."""
     profile = get_metrics_operator_profile()
@@ -139,10 +140,10 @@ def diagnostics_metrics(output_json: bool) -> None:
     render_guide_lines(build_metrics_profile_lines(profile))
 
 
-@diagnostics.command("run")  # type: ignore[untyped-decorator]
-@click.option("--run-id", required=True, help="Pipeline RUN_ID to inspect")  # type: ignore[untyped-decorator]
-@click.option("--limit", default=100, show_default=True, help="Maximum audit entries")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@diagnostics.command("run")
+@click.option("--run-id", required=True, help="Pipeline RUN_ID to inspect")
+@click.option("--limit", default=100, show_default=True, help="Maximum audit entries")
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -171,16 +172,16 @@ def diagnostics_run(run_id: str, limit: int, output_format: str) -> None:
     asyncio.run(_inspect())
 
 
-@diagnostics.command("checkpoint")  # type: ignore[untyped-decorator]
-@click.option("--pipeline", required=True, help="Pipeline name")  # type: ignore[untyped-decorator]
-@click.option("--run-id", default=None, help="Optional RUN_ID override")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@diagnostics.command("checkpoint")
+@click.option("--pipeline", required=True, help="Pipeline name")
+@click.option("--run-id", default=None, help="Optional RUN_ID override")
+@click.option(
     "--audit-limit",
     default=100,
     show_default=True,
     help="Maximum audit entries",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -215,9 +216,9 @@ def diagnostics_checkpoint(
     asyncio.run(_inspect())
 
 
-@diagnostics.command("manifest")  # type: ignore[untyped-decorator]
-@click.argument("identifier")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@diagnostics.command("manifest")
+@click.argument("identifier")
+@click.option(
     "--format",
     "output_format",
     type=click.Choice(["text", "json", "yaml"]),
@@ -253,17 +254,17 @@ def _emit_manifest_payload(
     )
 
 
-@diagnostics.command("quarantine")  # type: ignore[untyped-decorator]
-@click.option("--pipeline", required=True, help="Pipeline name")  # type: ignore[untyped-decorator]
-@click.option("--json", "output_json", is_flag=True, help="Output as JSON")  # type: ignore[untyped-decorator]
-@click.option("--error-code", help="Scope stats to one error code")  # type: ignore[untyped-decorator]
-@click.option("--run-id", help="Scope stats to one pipeline run ID")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@diagnostics.command("quarantine")
+@click.option("--pipeline", required=True, help="Pipeline name")
+@click.option("--json", "output_json", is_flag=True, help="Output as JSON")
+@click.option("--error-code", help="Scope stats to one error code")
+@click.option("--run-id", help="Scope stats to one pipeline run ID")
+@click.option(
     "--silver-filter-only",
     is_flag=True,
     help="Shortcut for --error-code FILTERED_OUT_SILVER",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--group-by",
     type=click.Choice(
         [
@@ -278,7 +279,7 @@ def _emit_manifest_payload(
     ),
     help="Focused Silver reject grouping for operator triage",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--top",
     type=int,
     default=10,

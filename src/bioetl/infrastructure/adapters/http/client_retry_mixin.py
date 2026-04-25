@@ -182,10 +182,7 @@ class HTTPClientRetryMixin:
         url: str,
         **kwargs: Any,  # Any: forwarding arbitrary request kwargs to underlying HTTP client
     ) -> httpx.Response:
-        """Execute request with retries, backoff, and observability.
-
-        Improved version with better separation of concerns and reduced complexity.
-        """
+        """Execute request with retries, backoff, and observability."""
         client = self._get_client()
         retry_state = _RetryRequestState()
         start_time = time.perf_counter()
@@ -252,7 +249,6 @@ class HTTPClientRetryMixin:
                 retries_used=retries_used,
                 span=span,
             )
-
         except CircuitBreakerOpenError as exc:
             handle_circuit_breaker_trip(
                 exc,
