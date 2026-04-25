@@ -25,7 +25,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.entities import TargetComponent
 from bioetl.domain.transformations import safe_int
-from bioetl.domain.value_objects import validate_taxonomy_id
+from bioetl.domain.value_objects.taxonomy_id import validate_taxonomy_id
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId

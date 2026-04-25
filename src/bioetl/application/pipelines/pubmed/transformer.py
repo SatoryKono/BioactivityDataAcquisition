@@ -42,7 +42,7 @@ from bioetl.domain.mapping.pubmed_publication import (
     build_pubmed_publication_type_fields,
 )
 from bioetl.domain.types import GoldRecord, JsonDict
-from bioetl.domain.value_objects import PublicationYear
+from bioetl.domain.value_objects._publication_year import PublicationYear
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext

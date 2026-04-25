@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import warnings
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from typing import cast
 
 from bioetl.application.composite.checkpoint._anchor_context import (
@@ -73,6 +73,9 @@ _CHECKPOINT_INIT_OPTIONAL_DEFAULTS: dict[str, object] = {
     "load_service_factory": CompositeCheckpointLoadService,
     "persistence_service_factory": CompositeCheckpointPersistenceService,
 }
+_CHECKPOINT_CONTEXT_FIELD_NAMES = tuple(
+    field.name for field in fields(CompositeCheckpointServiceContext)
+)
 
 
 def _resolve_checkpoint_init_value(
@@ -102,151 +105,17 @@ def _coerce_checkpoint_service_context(
             init=init,
             overrides=overrides,
         )
-    return CompositeCheckpointServiceContext(
-        composite_name=cast(
-            str,
-            _resolve_checkpoint_init_value(
-                field_name="composite_name",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        run_id=cast(
-            str,
-            _resolve_checkpoint_init_value(
-                field_name="run_id",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        storage=cast(
-            CompositeCheckpointPort,
-            _resolve_checkpoint_init_value(
-                field_name="storage",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        logger=cast(
-            LoggerPort,
-            _resolve_checkpoint_init_value(
-                field_name="logger",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        resume=cast(
-            bool,
-            _resolve_checkpoint_init_value(
-                field_name="resume",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        stale_checkpoint_threshold_hours=cast(
-            float | None,
-            _resolve_checkpoint_init_value(
-                field_name="stale_checkpoint_threshold_hours",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        expected_effective_config_hash=cast(
-            str | None,
-            _resolve_checkpoint_init_value(
-                field_name="expected_effective_config_hash",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        expected_effective_config_artifact_id=cast(
-            str | None,
-            _resolve_checkpoint_init_value(
-                field_name="expected_effective_config_artifact_id",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        expected_execution_fingerprint=cast(
-            str | None,
-            _resolve_checkpoint_init_value(
-                field_name="expected_execution_fingerprint",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        expected_dq_contract_compatibility_hash=cast(
-            str | None,
-            _resolve_checkpoint_init_value(
-                field_name="expected_dq_contract_compatibility_hash",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        expected_contract_ref=cast(
-            str | None,
-            _resolve_checkpoint_init_value(
-                field_name="expected_contract_ref",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        expected_contract_version=cast(
-            str | None,
-            _resolve_checkpoint_init_value(
-                field_name="expected_contract_version",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        expected_manifest_id=cast(
-            str | None,
-            _resolve_checkpoint_init_value(
-                field_name="expected_manifest_id",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        run_ledger_port=cast(
-            RunLedgerPort | None,
-            _resolve_checkpoint_init_value(
-                field_name="run_ledger_port",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        metrics=cast(
-            MetricsPort | None,
-            _resolve_checkpoint_init_value(
-                field_name="metrics",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        clock=cast(
-            ClockPort | None,
-            _resolve_checkpoint_init_value(
-                field_name="clock",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        load_service_factory=cast(
-            Callable[..., CompositeCheckpointLoadService],
-            _resolve_checkpoint_init_value(
-                field_name="load_service_factory",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
-        persistence_service_factory=cast(
-            Callable[..., CompositeCheckpointPersistenceService],
-            _resolve_checkpoint_init_value(
-                field_name="persistence_service_factory",
-                init=init,
-                overrides=overrides,
-            ),
-        ),
+    resolved_values = {
+        field_name: _resolve_checkpoint_init_value(
+            field_name=field_name,
+            init=init,
+            overrides=overrides,
+        )
+        for field_name in _CHECKPOINT_CONTEXT_FIELD_NAMES
+    }
+    return cast(
+        CompositeCheckpointServiceContext,
+        CompositeCheckpointServiceContext(**resolved_values),
     )
 
 

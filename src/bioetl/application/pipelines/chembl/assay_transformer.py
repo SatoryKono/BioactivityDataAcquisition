@@ -29,7 +29,7 @@ from bioetl.domain.transformations import (
     safe_float,
     safe_str,
 )
-from bioetl.domain.value_objects import validate_taxonomy_id
+from bioetl.domain.value_objects.taxonomy_id import validate_taxonomy_id
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId

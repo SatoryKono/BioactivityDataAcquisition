@@ -93,7 +93,7 @@ def _coerce_publication_transformer_init(
             "BasePublicationTransformerContext."
         )
 
-    unexpected = sorted(
+    unexpected_keys = sorted(
         kwargs.keys()
         - {
             "entity_type",
@@ -110,8 +110,8 @@ def _coerce_publication_transformer_init(
             "record_normalizer",
         }
     )
-    if unexpected:
-        unexpected_args = ", ".join(unexpected)
+    if unexpected_keys:
+        unexpected_args = ", ".join(unexpected_keys)
         raise TypeError(
             "BasePublicationTransformer received unexpected keyword arguments: "
             f"{unexpected_args}"
@@ -254,10 +254,13 @@ def _assemble_publication_silver_record(
         index,
         normalized_business_data,
     )
-    return transformer._record_normalizer.project_normalization_findings(
-        silver_record,
-        context=context,
-        index=index,
+    return cast(
+        "SilverRecord",
+        transformer._record_normalizer.project_normalization_findings(
+            cast("JsonDict", silver_record),
+            context=context,
+            index=index,
+        ),
     )
 
 

@@ -357,13 +357,34 @@ def build_next_steps(
     missing_evidence: tuple[str, ...],
     degraded_evidence: tuple[str, ...],
 ) -> tuple[str, ...]:
+    steps = list(_manifest_next_steps(run_manifest))
+    steps.extend(_missing_evidence_steps(missing_evidence))
+    steps.extend(_degraded_evidence_steps(degraded_evidence))
+    seen: dict[str, None] = {}
+    return tuple(
+        step for step in steps if not (step in seen or seen.setdefault(step, None))
+    )
+
+
+def _manifest_next_steps(
+    run_manifest: RunManifestInspectionResult | None,
+) -> tuple[str, ...]:
+    if run_manifest is None:
+        return ()
+    diagnostics_steps = run_manifest.diagnostics.get("next_steps")
+    if not isinstance(diagnostics_steps, list):
+        return ()
+    return tuple(str(step) for step in diagnostics_steps)
+
+
+def _missing_evidence_steps(missing_evidence: tuple[str, ...]) -> tuple[str, ...]:
+    if "run_manifest" not in missing_evidence:
+        return ()
+    return ("Persist and inspect run-manifest/ledger artifacts for this run.",)
+
+
+def _degraded_evidence_steps(degraded_evidence: tuple[str, ...]) -> tuple[str, ...]:
     steps: list[str] = []
-    if run_manifest is not None:
-        diagnostics_steps = run_manifest.diagnostics.get("next_steps")
-        if isinstance(diagnostics_steps, list):
-            steps.extend(str(step) for step in diagnostics_steps)
-    if "run_manifest" in missing_evidence:
-        steps.append("Persist and inspect run-manifest/ledger artifacts for this run.")
     if any(item.startswith("persistence_profile:") for item in degraded_evidence):
         steps.append(
             "Review required persistence profile before treating this run as "
@@ -374,10 +395,7 @@ def build_next_steps(
             "Use audit, manifest, and lineage sections as the current traceability "
             "fallback."
         )
-    seen: dict[str, None] = {}
-    return tuple(
-        step for step in steps if not (step in seen or seen.setdefault(step, None))
-    )
+    return tuple(steps)
 
 
 def build_status_section(

@@ -57,32 +57,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class PipelineRunnerService:
-    """Application service for running pipelines.
-
-    Provides a universal, interface-agnostic API for pipeline execution.
-    Stateless and thread-safe - creates runners per call via injected factory.
-
-    This service can be used from:
-    - CLI (Click commands)
-    - REST API (FastAPI/Flask endpoints)
-    - Schedulers (Airflow operators, Prefect flows)
-    - Python scripts (direct programmatic access)
-
-    Attributes:
-        runner_factory: Factory for creating pipeline runners (injected).
-        metrics_extractor: Extractor for runner execution metrics (injected).
-        logger: Structured logger for observability (injected).
-        metrics: Metrics sink for pipeline-run counters (injected).
-        audit: Audit sink for pipeline lifecycle events (injected).
-        _context_service: Helper service for building effective options and run context.
-        _execution_service: Helper service for executing the prepared runner.
-
-    Example:
-        >>> service = get_pipeline_runner_service()
-        >>> options = RunOptions(run_type="incremental", limit=100)
-        >>> result = await service.run("chembl_activity", options=options)
-        >>> logger.info("pipeline_complete", records_silver=result.records_silver, duration_s=result.duration_seconds)
-    """
+    """Interface-agnostic application service for pipeline execution."""
 
     runner_factory: RunnerFactoryPort
     metrics_extractor: MetricsExtractorPort
@@ -92,17 +67,6 @@ class PipelineRunnerService:
     clock: ClockPort
     _context_service: PipelineRunContextService
     _execution_service: PipelineRunExecutionService
-
-    @staticmethod
-    def _require_execution_runner(
-        runner: object,
-    ) -> ExecutionMetricsRunnerPort:
-        """Validate producer output before pipeline side effects begin."""
-        from bioetl.domain.ports import ExecutionMetricsRunnerPort
-
-        if not isinstance(runner, ExecutionMetricsRunnerPort):
-            raise TypeError("Runner does not implement ExecutionMetricsRunnerPort")
-        return runner
 
     async def run(
         self,
@@ -169,7 +133,7 @@ class PipelineRunnerService:
             )
             return dry_run_result
 
-        runner = self._require_execution_runner(self.runner_factory.create(context))
+        runner = _require_execution_runner(self.runner_factory.create(context))
         return await self._execute_pipeline(
             runner=runner,
             run_logger=run_logger,
@@ -372,3 +336,12 @@ class PipelineRunnerService:
             run_type=run_type,
             started_at=started_at,
         )
+
+
+def _require_execution_runner(runner: object) -> ExecutionMetricsRunnerPort:
+    """Validate producer output before pipeline side effects begin."""
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort
+
+    if not isinstance(runner, ExecutionMetricsRunnerPort):
+        raise TypeError("Runner does not implement ExecutionMetricsRunnerPort")
+    return runner

@@ -11,11 +11,14 @@ from __future__ import annotations
 __all__ = ["CheckpointInfo", "CheckpointService"]
 
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from dataclasses import dataclass
 from time import perf_counter
 from typing import TYPE_CHECKING
 
+from bioetl.application.observability.span_attribute_values import (
+    coerce_span_attribute_value,
+)
 from bioetl.application.observability.span_helpers import traced_async_operation
 from bioetl.application.services._checkpoint_service_support import (
     _CHECKPOINT_OPERATOR_DURATION_METRIC,
@@ -28,29 +31,6 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import CheckpointPort, LoggerPort, MetricsPort, TracingPort
 from bioetl.domain.types import JsonDict
-
-_SpanAttributeValue = (
-    str | bool | int | float | Sequence[str] | Sequence[bool] | Sequence[int] | Sequence[float]
-)
-
-
-def _coerce_span_attribute_value(value: object) -> _SpanAttributeValue:
-    """Convert arbitrary service metadata into OpenTelemetry-compatible values."""
-    if isinstance(value, bool | str | int | float):
-        return value
-    if isinstance(value, Sequence) and not isinstance(value, str | bytes | bytearray):
-        items = list(value)
-        if not items:
-            return []
-        if all(isinstance(item, str) for item in items):
-            return items
-        if all(isinstance(item, bool) for item in items):
-            return items
-        if all(isinstance(item, int) and not isinstance(item, bool) for item in items):
-            return items
-        if all(isinstance(item, float) for item in items):
-            return items
-    return str(value)
 
 
 @dataclass(frozen=True, slots=True)

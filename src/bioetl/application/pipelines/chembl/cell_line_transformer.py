@@ -18,7 +18,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import CellLine
-from bioetl.domain.value_objects import TaxonomyId
+from bioetl.domain.value_objects.taxonomy_id import TaxonomyId
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId

@@ -12,11 +12,14 @@ Note:
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.observability.span_attribute_values import (
+    coerce_span_attribute_value,
+)
 from bioetl.application.observability.span_helpers import traced_operation
 from bioetl.domain.exceptions import BioETLError, MetricsServerError
 from bioetl.domain.ports import ClockPort, MetricsPublisherPort, MetricsServerPort
@@ -44,29 +47,6 @@ _METRICS_START_ERRORS = (
     ValueError,
     TypeError,
 )
-
-_SpanAttributeValue = (
-    str | bool | int | float | Sequence[str] | Sequence[bool] | Sequence[int] | Sequence[float]
-)
-
-
-def _coerce_span_attribute_value(value: object) -> _SpanAttributeValue:
-    """Convert arbitrary service metadata into OpenTelemetry-compatible values."""
-    if isinstance(value, bool | str | int | float):
-        return value
-    if isinstance(value, Sequence) and not isinstance(value, str | bytes | bytearray):
-        items = list(value)
-        if not items:
-            return []
-        if all(isinstance(item, str) for item in items):
-            return items
-        if all(isinstance(item, bool) for item in items):
-            return items
-        if all(isinstance(item, int) and not isinstance(item, bool) for item in items):
-            return items
-        if all(isinstance(item, float) for item in items):
-            return items
-    return str(value)
 
 
 @dataclass(frozen=True, slots=True)

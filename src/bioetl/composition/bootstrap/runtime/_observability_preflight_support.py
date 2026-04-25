@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Protocol
+
 from bioetl.composition.observability import ObservabilityContractError
 from bioetl.composition.runtime_builders.runner_builder_support import (
     resolve_required_artifact_lineage_layers,
@@ -10,6 +12,14 @@ from bioetl.composition.runtime_builders.runner_builder_support import (
 from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
 from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+
+class _AuditRequiredFn(Protocol):
+    def __call__(self, *, audit: AuditPort | None, audit_required: bool) -> bool: ...
+
+
+class _ControlPlaneSettingsFn(Protocol):
+    def __call__(self, *, control_plane: object | None) -> tuple[str, bool, bool]: ...
 
 
 def _raise_if_noop_in_prod(
@@ -45,7 +55,7 @@ def validate_prod_noop_components(
     allow_noop_in_prod: bool,
     audit: AuditPort | None,
     audit_required: bool,
-    audit_required_fn: callable,
+    audit_required_fn: _AuditRequiredFn,
 ) -> None:
     """Validate logger, tracer, metrics, and audit ports for prod readiness."""
     _raise_if_noop_in_prod(
@@ -121,7 +131,7 @@ def validate_control_plane_readiness(
     control_plane: object | None,
     yaml_config: object | None,
     skip_gold: bool,
-    control_plane_settings_fn: callable,
+    control_plane_settings_fn: _ControlPlaneSettingsFn,
 ) -> None:
     """Validate control-plane persistence requirements for observability."""
     required_profile, manifest_enabled, ledger_enabled = control_plane_settings_fn(

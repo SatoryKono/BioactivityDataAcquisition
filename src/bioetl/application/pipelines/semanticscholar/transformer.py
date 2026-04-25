@@ -29,7 +29,8 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
 )
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
 from bioetl.domain.types import GoldRecord
-from bioetl.domain.value_objects import DOI, PublicationYear, PubMedId
+from bioetl.domain.value_objects._publication_year import PublicationYear
+from bioetl.domain.value_objects.publications import DOI, PubMedId
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
