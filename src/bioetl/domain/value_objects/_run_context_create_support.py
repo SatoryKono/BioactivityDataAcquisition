@@ -62,7 +62,9 @@ def _coerce_transform_step_sequence(value: object) -> tuple[str, ...]:
 def _validate_transform_step_items(transform_steps: tuple[object, ...]) -> None:
     """Reject non-string transform-step values before model construction."""
     if any(not isinstance(item, str) for item in transform_steps):
-        raise TypeError("RunContext.create() transform_steps must be a sequence of strings")
+        raise TypeError(
+            "RunContext.create() transform_steps must be a sequence of strings"
+        )
 
 
 def _resolve_create_input_value(

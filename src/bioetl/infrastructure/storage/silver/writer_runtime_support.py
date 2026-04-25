@@ -62,7 +62,7 @@ class _AwaitTrackingAsyncCallable:
         self.await_args = SimpleNamespace(args=args, kwargs=kwargs)
         result = self._func(*args, **kwargs)
         if hasattr(result, "__await__"):
-            return await result  # type: ignore[misc]
+            return await cast(Awaitable[object], result)
         return result
 
     def assert_awaited_once_with(self, *args: object, **kwargs: object) -> None:

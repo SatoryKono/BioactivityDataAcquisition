@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from contextlib import AbstractContextManager
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.postrun._phase_descriptions import (
+    PostrunLogLevel,
     describe_compaction_phase,
     describe_dq_phase,
     describe_dq_report_phase,
@@ -12,32 +15,87 @@ from bioetl.application.core.postrun._phase_descriptions import (
     describe_vacuum_phase,
 )
 from bioetl.application.core.postrun._phase_runtime import (
+    PostrunPhaseName,
     emit_postrun_phase_observability,
     run_async_postrun_phase,
     run_sync_postrun_phase,
 )
+from bioetl.domain.ports import (
+    ExecutorMetricsPort,
+    LoggerPort,
+    MetricsPort,
+    TracingPort,
+)
+from bioetl.domain.value_objects.dq_result import DQResult
 
 if TYPE_CHECKING:
+    from opentelemetry.trace import Span
+
+    from bioetl.application.core.postrun.cleanup_orchestrator import (
+        PostrunCleanupService,
+    )
+    from bioetl.application.core.postrun.compact_orchestrator import (
+        CompactionResult,
+        PostrunCompactService,
+    )
+    from bioetl.application.core.postrun.dq_report_orchestrator import (
+        PostrunDQReportService,
+    )
+    from bioetl.application.core.postrun.metadata_write_service import (
+        PostrunMetadataWriteService,
+    )
+    from bioetl.application.services.data_quality_service import DataQualityService
     from bioetl.application.services.dq_report_service import (
         DQReportContext,
         DQReportResult,
     )
+    from bioetl.application.services.medallion_lifecycle import (
+        MedallionLifecycleService,
+    )
     from bioetl.application.services.medallion_types import VacuumResult
-    from bioetl.domain.ports import ExecutorMetricsPort, TracingPort
-    from bioetl.domain.value_objects.dq_result import DQResult
+    from bioetl.domain.config import PipelineConfig, RuntimeConfig
+    from bioetl.domain.context import PipelineContext
 
 
 class PostrunServiceSupportMixin:
     """Own thin phase execution helpers outside the main postrun shell."""
 
-    def _emit_postrun_phase_observability(self, **kwargs: object) -> None:
+    _config: PipelineConfig
+    _runtime: RuntimeConfig
+    _context: PipelineContext
+    _dq_service: DataQualityService
+    _lifecycle_service: MedallionLifecycleService
+    _compact_orchestrator: PostrunCompactService
+    _cleanup_orchestrator: PostrunCleanupService
+    _dq_report_orchestrator: PostrunDQReportService
+    _metadata_write_orchestrator: PostrunMetadataWriteService
+    _logger: LoggerPort
+    _metrics: MetricsPort
+    _postrun_span: Callable[[str], AbstractContextManager[Span]]
+    OPERATION_ERRORS: tuple[type[BaseException], ...]
+    METRIC_POSTRUN_PHASE_EVENTS_TOTAL: str
+    METRIC_POSTRUN_PHASE_DURATION_SECONDS: str
+
+    def _emit_postrun_phase_observability(
+        self,
+        *,
+        phase: PostrunPhaseName,
+        status: str,
+        duration_seconds: float,
+        level: PostrunLogLevel | None = None,
+        **extra: object,
+    ) -> None:
         emit_postrun_phase_observability(
             metrics=self._metrics,
             logger=self._logger,
             pipeline_name=self._config.pipeline_name,
             phase_events_metric=self.METRIC_POSTRUN_PHASE_EVENTS_TOTAL,
             phase_duration_metric=self.METRIC_POSTRUN_PHASE_DURATION_SECONDS,
-            **kwargs,
+            phase=phase,
+            status=status,
+            duration_seconds=duration_seconds,
+            level=level,
+            **extra,
         )
 
     def _run_dq_phase(self, executor: ExecutorMetricsPort) -> DQResult:
@@ -50,7 +108,7 @@ class PostrunServiceSupportMixin:
             on_success=describe_dq_phase,
         )
 
-    async def _run_compaction_phase(self):
+    async def _run_compaction_phase(self) -> CompactionResult:
         return await run_async_postrun_phase(
             span_factory=self._postrun_span,
             phase="compaction",
@@ -88,15 +146,16 @@ class PostrunServiceSupportMixin:
         executor: ExecutorMetricsPort,
         dq_reports: DQReportResult | None,
     ) -> None:
+        async def _write_final_metadata() -> bool:
+            return await self._metadata_write_orchestrator.write_final_metadata_if_available(
+                executor,
+                dq_reports,
+            )
+
         await run_async_postrun_phase(
             span_factory=self._postrun_span,
             phase="final_metadata",
-            operation=lambda: (
-                self._metadata_write_orchestrator.write_final_metadata_if_available(
-                    executor,
-                    dq_reports,
-                )
-            ),
+            operation=_write_final_metadata,
             operation_errors=self.OPERATION_ERRORS,
             emit_phase_observability=self._emit_postrun_phase_observability,
             on_success=lambda wrote_metadata: describe_final_metadata_phase(
@@ -116,7 +175,7 @@ class PostrunServiceSupportMixin:
             metrics=self._metrics,
         )
 
-    async def run_silver_compact_if_needed(self):
+    async def run_silver_compact_if_needed(self) -> CompactionResult:
         return await self._compact_orchestrator.run_if_needed()
 
     async def cleanup(self, tracer: TracingPort | None) -> None:

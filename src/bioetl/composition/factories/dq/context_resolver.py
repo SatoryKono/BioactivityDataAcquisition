@@ -28,10 +28,14 @@ if TYPE_CHECKING:
     from pydantic import BaseModel
 
     from bioetl.domain.ports import (
+        BronzeDQAnalyzerPort,
         BronzeDQConfigPort,
+        DQReportWriterPort,
+        GoldDQAnalyzerPort,
         GoldDQConfigPort,
         LoggerPort,
         MetricsPort,
+        SilverDQAnalyzerPort,
         SilverDQConfigPort,
     )
     from bioetl.domain.types import JsonDict
@@ -119,6 +123,28 @@ def get_output_root(
     return get_output_root_impl(settings, pipeline_config)
 
 
+def _create_dq_report_service(
+    *,
+    logger: LoggerPort,
+    bronze_analyzer: object,
+    silver_analyzer: object,
+    gold_analyzer: object,
+    report_writer: object,
+    metrics: MetricsPort | None,
+) -> object:
+    """Bridge the DQ report service constructor to the factory protocol."""
+    from bioetl.application.services.dq_report_service import DQReportService
+
+    return DQReportService(
+        logger=logger,
+        bronze_analyzer=bronze_analyzer,
+        silver_analyzer=silver_analyzer,
+        gold_analyzer=gold_analyzer,
+        report_writer=report_writer,
+        metrics=metrics,
+    )
+
+
 # ---- DQ services factory ----
 
 
@@ -129,8 +155,6 @@ def create_dq_services(
     metrics: MetricsPort | None = None,
 ) -> JsonDict:  # Any: heterogeneous DQ service instances
     """Create DQ analyzers, report writer, and report service."""
-    from bioetl.application.services.dq_report_service import DQReportService
-
     return create_dq_services_impl(
         settings,
         pipeline_config,
@@ -140,7 +164,7 @@ def create_dq_services(
         create_silver_analyzer_fn=DQServicesFactory.create_silver_analyzer,
         create_gold_analyzer_fn=DQServicesFactory.create_gold_analyzer,
         create_report_writer_fn=DQServicesFactory.create_report_writer,
-        dq_report_service_cls=DQReportService,
+        dq_report_service_cls=_create_dq_report_service,
         is_dq_report_enabled_fn=is_dq_report_enabled,
         get_output_root_fn=get_output_root,
         get_flat_structure_fn=get_flat_structure,

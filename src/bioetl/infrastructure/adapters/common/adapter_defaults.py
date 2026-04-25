@@ -12,10 +12,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
+from bioetl.domain.ports import ErrorHandlerPort
 from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
@@ -34,7 +35,7 @@ def create_default_error_handler(
     """
     from bioetl.infrastructure.adapters.error_handling import ErrorService
 
-    return cast(ErrorHandlerPort, ErrorService(logger, metrics=metrics))
+    return cast("ErrorHandlerPort", ErrorService(logger, metrics=metrics))
 
 
 def create_default_fallback_service(

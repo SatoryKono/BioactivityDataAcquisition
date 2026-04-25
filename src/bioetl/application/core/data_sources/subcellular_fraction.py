@@ -1,12 +1,8 @@
-"""Subcellular Fraction Data Source wrapper.
-
-Wraps a DataSourcePort to extract unique assay_subcellular_fraction values
-from Assay records and emit derived subcellular_fraction records.
-"""
+"""Subcellular Fraction Data Source wrapper."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core import subcellular_fraction_support as support
 from bioetl.application.core.data_source_mixins import (
@@ -146,11 +142,22 @@ class SubcellularFractionDataSource(
 
     async def _fetch_filtered_fractions(
         self,
-        assays: AsyncIterator[JsonDict],
+        assays: AsyncIterator[object],
         limit: int | None,
     ) -> AsyncIterator[JsonDict]:
-        async for record in self._extract_unique_fractions(assays, limit):
+        async for record in self._extract_unique_fractions(
+            self._coerce_assay_records(assays), limit
+        ):
             yield record
+
+    async def _coerce_assay_records(
+        self,
+        assays: AsyncIterator[object],
+    ) -> AsyncIterator[JsonDict]:
+        """Yield only mapping-shaped assay records expected by extraction helpers."""
+        async for assay in assays:
+            if isinstance(assay, dict):
+                yield cast("JsonDict", assay)
 
     async def _extract_unique_fractions(
         self,

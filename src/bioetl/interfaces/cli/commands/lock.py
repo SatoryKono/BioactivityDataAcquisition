@@ -26,7 +26,7 @@ __all__ = [
 ]
 
 
-@click.group()  # type: ignore[untyped-decorator]
+@click.group()
 def lock() -> None:
     """Manage pipeline locks."""
 
@@ -38,14 +38,14 @@ def get_lock_service() -> LockService:
     return _impl()
 
 
-@lock.command("release")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@lock.command("release")
+@click.option(
     "--pipeline", required=True, help="Pipeline name (lock key)"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--run-id", required=True, help="Run ID that holds the lock"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--exclusive", is_flag=True, help="Release exclusive lock"
 )
 def release_command(pipeline: str, run_id: str, exclusive: bool) -> None:
@@ -88,11 +88,11 @@ def release_command(pipeline: str, run_id: str, exclusive: bool) -> None:
     asyncio.run(_run())
 
 
-@lock.command("check")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@lock.command("check")
+@click.option(
     "--pipeline", required=True, help="Pipeline name (lock key)"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--run-id", required=True, help="Run ID to check"
 )
 def check_command(pipeline: str, run_id: str) -> None:

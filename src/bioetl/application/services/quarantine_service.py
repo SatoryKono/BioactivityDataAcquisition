@@ -16,6 +16,7 @@ from __future__ import annotations
 
 __all__ = ["QuarantineRecord", "QuarantineService"]
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -39,6 +40,48 @@ if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
     from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort, TracingPort
+
+_SpanAttributeValue = (
+    str
+    | bool
+    | int
+    | float
+    | Sequence[str]
+    | Sequence[bool]
+    | Sequence[int]
+    | Sequence[float]
+)
+
+
+def _coerce_span_attribute_value(value: object) -> _SpanAttributeValue:
+    """Normalize dynamic attributes to OpenTelemetry-supported primitive values."""
+    if isinstance(value, (str, bool, int, float)):
+        return value
+    if (
+        isinstance(value, Sequence)
+        and not isinstance(value, (str, bytes, bytearray))
+        and all(isinstance(item, str) for item in value)
+    ):
+        return value
+    if (
+        isinstance(value, Sequence)
+        and not isinstance(value, (str, bytes, bytearray))
+        and all(isinstance(item, bool) for item in value)
+    ):
+        return value
+    if (
+        isinstance(value, Sequence)
+        and not isinstance(value, (str, bytes, bytearray))
+        and all(isinstance(item, int) for item in value)
+    ):
+        return value
+    if (
+        isinstance(value, Sequence)
+        and not isinstance(value, (str, bytes, bytearray))
+        and all(isinstance(item, float) for item in value)
+    ):
+        return value
+    return str(value)
 
 
 @dataclass(frozen=True, slots=True)
@@ -118,7 +161,7 @@ class QuarantineService(
         """Attach bounded result attributes to an active trace span."""
         span.set_attribute("bioetl.success", success)
         for key, value in extra.items():
-            span.set_attribute(key, value)
+            span.set_attribute(key, _coerce_span_attribute_value(value))
 
     def _record_operator_metrics(
         self,

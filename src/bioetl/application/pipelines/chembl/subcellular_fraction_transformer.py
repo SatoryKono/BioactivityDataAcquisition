@@ -99,7 +99,7 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
         return cast(
             "SilverRecord",
             normalizer.project_normalization_findings(
-                silver_record,
+                cast(JsonDict, silver_record),
                 context=context,
                 index=index,
             ),

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 
 import pyarrow as pa
@@ -287,3 +288,35 @@ def test_content_identity_fallback_uses_canonical_hash_identity_contract() -> No
     assert _content_identity(row) == serialize_hash_identity_canonical_json(
         normalize_hash_identity_record(row)
     )
+
+
+@pytest.mark.asyncio
+async def test_deduplicate_times_out_for_stuck_executor(tmp_delta_dir: Path) -> None:
+    """Dedup must fail fast when background executor work stalls."""
+    import deltalake
+
+    class _StuckDeltaTable:
+        def __init__(self, table_path: str) -> None:
+            self._table_path = table_path
+
+        def to_pyarrow_table(self) -> pa.Table:
+            time.sleep(0.1)
+            return pa.table(
+                {
+                    "activity_id": pa.array(["1"]),
+                    "value": pa.array([10.0]),
+                    "_ingestion_ts": pa.array(["2024-01-01T00:00:00Z"]),
+                }
+            )
+
+    original_delta_table = deltalake.DeltaTable
+    deltalake.DeltaTable = _StuckDeltaTable
+    try:
+        mgr = RetentionPolicy(
+            base_path=str(tmp_delta_dir),
+            deduplicate_timeout_seconds=0.01,
+        )
+        with pytest.raises(TimeoutError, match="Silver deduplication timed out"):
+            await mgr.deduplicate_silver("test_entity", primary_keys=["activity_id"])
+    finally:
+        deltalake.DeltaTable = original_delta_table

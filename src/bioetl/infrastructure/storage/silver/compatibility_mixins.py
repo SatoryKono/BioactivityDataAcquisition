@@ -4,45 +4,46 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from datetime import datetime
-from typing import TYPE_CHECKING, Literal, cast
+from typing import Literal, cast
 
 import polars as pl
 import pyarrow as pa
 
+from bioetl.domain.config import KeyNullabilityRule
 from bioetl.domain.ports import SilverWriteRequest, coerce_silver_write_request
 from bioetl.domain.types import BronzeRecord
+from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics, SchemaDriftInfo
+from bioetl.domain.value_objects.silver_result import SilverWriteResult
+from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
 from bioetl.infrastructure.storage.silver.merged_operations import (
     _MergedSilverWriteRequest,
     _PreparedMergedSilverWrite,
+)
+from bioetl.infrastructure.storage.silver.merged_mixin import (
+    SilverWriterMergedMixin,
+)
+from bioetl.infrastructure.storage.silver.metadata_mixin import (
+    SilverWriterMetadataMixin,
+)
+from bioetl.infrastructure.storage.silver.operations.merged_operations import (
+    SilverMergedOperations,
 )
 from bioetl.infrastructure.storage.silver.pipeline_helpers import (
     _SilverWriteExecutionContext,
     _SilverWriteInvocation,
     execute_silver_write_pipeline,
 )
+from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+    SilverValidationOperations,
+)
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _PreparedSilverWritePayload,
 )
+from bioetl.infrastructure.storage.silver.validation_mixin import (
+    SilverWriterValidationMixin,
+)
 
-if TYPE_CHECKING:
-    from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics, SchemaDriftInfo
-    from bioetl.domain.value_objects.silver_result import SilverWriteResult
-    from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
-    from bioetl.infrastructure.storage.silver.merged_mixin import (
-        SilverWriterMergedMixin,
-    )
-    from bioetl.infrastructure.storage.silver.metadata_mixin import (
-        SilverWriterMetadataMixin,
-    )
-    from bioetl.infrastructure.storage.silver.operations.merged_operations import (
-        SilverMergedOperations,
-    )
-    from bioetl.infrastructure.storage.silver.operations.validation_operations import (
-        SilverValidationOperations,
-    )
-    from bioetl.infrastructure.storage.silver.validation_mixin import (
-        SilverWriterValidationMixin,
-    )
+
 
 
 def _normalize_completed_at(value: datetime | str) -> datetime:
@@ -55,13 +56,20 @@ def _normalize_completed_at(value: datetime | str) -> datetime:
 class SilverWriterDQCompatibilityMixin:
     """Compatibility surface for Silver DQ and schema helper methods."""
 
-    _validation: SilverValidationOperations | None
+    _validation: "SilverValidationOperations | None"
 
     def _as_validation_mixin(self) -> SilverWriterValidationMixin:
         """Treat this compatibility host as a validation-mixin implementation."""
         return cast("SilverWriterValidationMixin", self)
 
-    def _resolve_table_path(self, table_name: str) -> str: ...
+    def _resolve_table_path(self, table_name: str) -> str:
+        """Resolve the physical table path for one Silver table."""
+        from bioetl.infrastructure.storage.base_delta_writer import BaseDeltaWriter
+
+        return BaseDeltaWriter._resolve_table_path(
+            cast("BaseDeltaWriter", self),
+            table_name,
+        )
 
     def _validate_silver_pandera(
         self,
@@ -183,12 +191,9 @@ class SilverWriterDQCompatibilityMixin:
     async def _get_table_schema(self, table_name: str) -> pa.Schema | None:
         """Get the schema of an existing Silver table."""
         try:
+            from deltalake import DeltaTable as PatchedDeltaTable
             from deltalake.exceptions import (
                 TableNotFoundError as DeltaTableNotFoundError,
-            )
-
-            from bioetl.infrastructure.storage.base_delta_writer import (
-                DeltaTable as PatchedDeltaTable,
             )
 
             table_path = self._resolve_table_path(table_name)
@@ -215,7 +220,7 @@ class SilverWriterDQCompatibilityMixin:
 class SilverWriterMergedCompatibilityMixin:
     """Compatibility surface for merged-write helpers."""
 
-    _merged: SilverMergedOperations | None
+    _merged: "SilverMergedOperations | None"
 
     def _as_merged_mixin(self) -> SilverWriterMergedMixin:
         """Treat this compatibility host as a merged-mixin implementation."""
@@ -270,15 +275,21 @@ class SilverWriterMergedCompatibilityMixin:
     ) -> _PreparedMergedSilverWrite:
         """Compatibility seam for merged payload preparation."""
         if self._merged is not None:
-            return self._merged._prepare_merged_silver_write(request)
+            return cast(
+                _PreparedMergedSilverWrite,
+                self._merged._prepare_merged_silver_write(request),
+            )
 
         from bioetl.infrastructure.storage.silver.merged_mixin import (
             SilverWriterMergedMixin,
         )
 
-        return SilverWriterMergedMixin._prepare_merged_silver_write(
-            self._as_merged_mixin(),
-            request,
+        return cast(
+            _PreparedMergedSilverWrite,
+            SilverWriterMergedMixin._prepare_merged_silver_write(
+                self._as_merged_mixin(),
+                request,
+            ),
         )
 
     async def _write_silver_merged_delta(
@@ -345,9 +356,9 @@ class SilverWriterMergedCompatibilityMixin:
             SilverWriterMetadataMixin,
         )
 
-        normalized_completed_at = completed_at
-        if completed_at is not None:
-            normalized_completed_at = _normalize_completed_at(completed_at)
+        normalized_completed_at = (
+            _normalize_completed_at(completed_at) if completed_at is not None else None
+        )
 
         await SilverWriterMetadataMixin._write_silver_merged_metadata(
             self._as_metadata_mixin(),
@@ -364,36 +375,76 @@ class SilverWriterMergedCompatibilityMixin:
 class SilverWriterWriteCompatibilityMixin:
     """Compatibility surface for the main Silver write entrypoints."""
 
-    def _should_dual_write(self) -> bool: ...
+    def _should_dual_write(self) -> bool:
+        """Return whether the writer should fan out to multiple targets."""
+        raise NotImplementedError
 
     async def _write_single_target(
         self,
-        **kwargs: object,
-    ) -> SilverWriteResult | None: ...
+        *,
+        invocation: _SilverWriteInvocation | None = None,
+        **legacy_kwargs: object,
+    ) -> SilverWriteResult | None:
+        """Write one Silver target."""
+        del invocation, legacy_kwargs
+        raise NotImplementedError
 
     async def _write_dual_targets(
         self,
-        **kwargs: object,
-    ) -> SilverWriteResult | None: ...
+        *,
+        invocation: _SilverWriteInvocation | None = None,
+        **legacy_kwargs: object,
+    ) -> SilverWriteResult | None:
+        """Write all configured Silver targets."""
+        del invocation, legacy_kwargs
+        raise NotImplementedError
 
     async def _prepare_silver_write_payload(
         self,
-        **kwargs: object,
-    ) -> _PreparedSilverWritePayload: ...
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        primary_keys: list[str],
+        schema: pa.Schema,
+        mode: str,
+        on_schema_mismatch: Literal["error", "evolve", "ignore"],
+        column_order: list[str] | None,
+        partition_cols: list[str] | None,
+        key_nullability_rules: list[KeyNullabilityRule] | None,
+    ) -> _PreparedSilverWritePayload:
+        """Prepare validated Silver payload for downstream write dispatch."""
+        del (
+            table_name,
+            records,
+            primary_keys,
+            schema,
+            mode,
+            on_schema_mismatch,
+            column_order,
+            partition_cols,
+            key_nullability_rules,
+        )
+        raise NotImplementedError
 
     async def _dispatch_write_with_domain_errors(
         self,
         *,
         table_name: str,
         request: _DeltaWriteRequest,
-    ) -> None: ...
+    ) -> None:
+        """Dispatch the underlying Delta write."""
+        del table_name, request
+        raise NotImplementedError
 
     async def _complete_silver_write_pipeline(
         self,
         *,
         ctx: _SilverWriteExecutionContext,
         payload: _PreparedSilverWritePayload,
-    ) -> SilverWriteResult | None: ...
+    ) -> SilverWriteResult | None:
+        """Run post-dispatch pipeline completion."""
+        del ctx, payload
+        raise NotImplementedError
 
     async def write_silver(
         self,

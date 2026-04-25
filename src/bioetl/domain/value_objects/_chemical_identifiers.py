@@ -21,6 +21,9 @@ if TYPE_CHECKING:
 
         def __init__(self, value: _ValueT) -> None: ...
 
+        @property
+        def value(self) -> _ValueT: ...
+
 else:
     from bioetl.domain.value_objects.base import ValueObject as _ValueObjectBase
 

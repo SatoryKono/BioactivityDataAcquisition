@@ -81,7 +81,7 @@ def _patch_dispatcher_call(
 ) -> None:
     """Patch Pandera dispatcher lookup to support subclass and union fallback."""
     original_dispatcher_call = dispatcher_cls.__call__
-    dispatcher_cls_any = typing.cast(typing.Any, dispatcher_cls)
+    dispatcher_cls_any = typing.cast(typing.Any, dispatcher_cls)  # Any: Required to dynamically set __call__ attribute on the Dispatcher class.
 
     def _resolve_registered_dispatch_fn(
         registry: dict[

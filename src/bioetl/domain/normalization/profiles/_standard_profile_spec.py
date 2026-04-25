@@ -111,7 +111,7 @@ def coerce_standard_profile_spec(
 ) -> StandardProfileSpec:
     """Build a fully-populated standard profile spec from explicit args/overrides."""
     _require_standard_profile_fields(spec, overrides)
-    resolved_values: dict[str, Any] = {
+    resolved_values: dict[str, Any] = {  # Any: Field values are dynamically resolved from StandardProfileSpec, which contains various types.
         field_name: _resolve_standard_profile_value(
             field_name=field_name,
             spec=spec,

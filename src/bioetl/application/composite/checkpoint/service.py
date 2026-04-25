@@ -105,7 +105,7 @@ def _coerce_checkpoint_service_context(
             init=init,
             overrides=overrides,
         )
-    resolved_values: dict[str, Any] = {
+    resolved_values: dict[str, Any] = {  # Any: Field values are dynamically resolved from CompositeCheckpointServiceContext, which contains various types.
         field_name: _resolve_checkpoint_init_value(
             field_name=field_name,
             init=init,

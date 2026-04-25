@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import datetime
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.types import BronzeRecord
@@ -22,7 +22,7 @@ __all__ = ["SilverWriterAuditMetadataCompatibilityMixin"]
 class SilverWriterAuditMetadataCompatibilityMixin:
     """Delegation surface for Silver audit and metadata write helpers."""
 
-    _metadata: SilverWriterMetadataMixin | None
+    _metadata: object | None
 
     def _as_metadata_mixin(self) -> SilverWriterMetadataMixin:
         """Treat this compatibility host as a SilverWriterMetadataMixin implementation."""
@@ -41,7 +41,7 @@ class SilverWriterAuditMetadataCompatibilityMixin:
     ) -> None:
         """Delegate audit logging to the metadata service."""
         if self._metadata:
-            return await self._metadata._log_silver_audit(
+            await cast(Any, self._metadata)._log_silver_audit(  # Any: _metadata is typed as object and its concrete type is determined at runtime.
                 table_name=table_name,
                 records=records,
                 mode=mode,
@@ -50,12 +50,13 @@ class SilverWriterAuditMetadataCompatibilityMixin:
                 source_batch_id=source_batch_id,
                 ingestion_ts=ingestion_ts,
             )
+            return
 
         from bioetl.infrastructure.storage.silver.metadata_mixin import (
             SilverWriterMetadataMixin,
         )
 
-        return await SilverWriterMetadataMixin._log_silver_audit(
+        await SilverWriterMetadataMixin._log_silver_audit(
             self._as_metadata_mixin(),
             table_name,
             records,
@@ -65,6 +66,7 @@ class SilverWriterAuditMetadataCompatibilityMixin:
             source_batch_id=source_batch_id,
             ingestion_ts=ingestion_ts,
         )
+        return
 
     def _should_skip_silver_metadata_write(
         self,

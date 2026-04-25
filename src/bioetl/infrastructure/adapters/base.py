@@ -108,6 +108,7 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
     provider_name: str
     logger: LoggerPort
     metrics: MetricsPort | None
+    _metrics: MetricsPort | None
     _error_handler: ErrorHandlerPort
     _adapter_metrics: AdapterMetricsRecorder
     _request_collector: APIRequestCollector

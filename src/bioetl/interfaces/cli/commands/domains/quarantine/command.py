@@ -8,17 +8,25 @@ from __future__ import annotations
 
 import click
 
+from bioetl.interfaces.cli.commands.domains.quarantine._run_scope_stats import (
+    RunManifestInspectionServiceProtocol,
+)
+from bioetl.interfaces.cli.commands.domains.quarantine.support import (
+    _QuarantineManager,
+    _QuarantineService,
+)
+
 SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"
 
 
-def get_quarantine_manager(pipeline: str) -> object:
+def get_quarantine_manager(pipeline: str) -> _QuarantineManager:
     """Load the quarantine manager through composition on demand."""
     from bioetl.composition.resources_api import get_quarantine_manager as _impl
 
     return _impl(pipeline)
 
 
-def get_run_manifest_service() -> object:
+def get_run_manifest_service() -> RunManifestInspectionServiceProtocol:
     """Load the run manifest service through composition on demand."""
     from bioetl.composition.control_plane_api import (
         get_run_manifest_service as _impl,
@@ -27,33 +35,33 @@ def get_run_manifest_service() -> object:
     return _impl()
 
 
-def get_quarantine_service() -> object:
+def get_quarantine_service() -> _QuarantineService:
     """Load the quarantine service through composition on demand."""
     from bioetl.composition.health_api import get_quarantine_service as _impl
 
     return _impl()
 
 
-@click.group()  # type: ignore[untyped-decorator]
+@click.group()
 def quarantine() -> None:
     """Manage quarantine (failed records)."""
 
 
-@quarantine.command("inspect")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@quarantine.command("inspect")
+@click.option(
     "--pipeline", required=True, help="Pipeline name"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--limit", type=int, default=100, help="Maximum records to show"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--error-code", help="Filter by error code"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--run-id",
     help="Scope inspection to one pipeline run ID",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--silver-filter-only",
     is_flag=True,
     help="Shortcut for --error-code FILTERED_OUT_SILVER",
@@ -80,26 +88,26 @@ def quarantine_inspect(
     )
 
 
-@quarantine.command("stats")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@quarantine.command("stats")
+@click.option(
     "--pipeline", required=True, help="Pipeline name"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--json", "output_json", is_flag=True, help="Output as JSON"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--error-code", help="Scope stats to one error code"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--run-id",
     help="Scope stats to one pipeline run ID",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--silver-filter-only",
     is_flag=True,
     help="Shortcut for --error-code FILTERED_OUT_SILVER",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--group-by",
     type=click.Choice(
         [
@@ -114,7 +122,7 @@ def quarantine_inspect(
     ),
     help="Focused Silver reject grouping for operator triage",
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--top",
     type=int,
     default=10,
@@ -148,17 +156,17 @@ def quarantine_stats(
     )
 
 
-@quarantine.command("replay")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@quarantine.command("replay")
+@click.option(
     "--pipeline", required=True, help="Pipeline name"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--error-code", help="Filter by error code"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--max-age-days", type=int, default=7, help="Max age of records to replay"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--dry-run", is_flag=True, help="Show records without replaying"
 )
 def quarantine_replay(
@@ -181,17 +189,17 @@ def quarantine_replay(
     )
 
 
-@quarantine.command("purge")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@quarantine.command("purge")
+@click.option(
     "--pipeline", required=True, help="Pipeline name"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--older-than-days", type=int, default=30, help="Delete records older than N days"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--dry-run", is_flag=True, help="Show count without deleting"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--force", is_flag=True, help="Skip confirmation prompt"
 )
 def quarantine_purge(
@@ -214,14 +222,14 @@ def quarantine_purge(
     )
 
 
-@quarantine.command("resolve")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
+@quarantine.command("resolve")
+@click.option(
     "--pipeline", required=True, help="Pipeline name"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--payload-hash", required=True, help="Payload hash of record to resolve"
 )
-@click.option(  # type: ignore[untyped-decorator]
+@click.option(
     "--status", type=click.Choice(["IGNORED", "REPROCESSED"]), default="IGNORED"
 )
 def quarantine_resolve(pipeline: str, payload_hash: str, status: str) -> None:

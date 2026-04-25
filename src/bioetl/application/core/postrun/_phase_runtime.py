@@ -25,14 +25,7 @@ PostrunPhaseName = Literal[
 ]
 _ResultT = TypeVar("_ResultT")
 _SpanAttributeValue: TypeAlias = (
-    str
-    | bool
-    | int
-    | float
-    | list[str]
-    | list[bool]
-    | list[int]
-    | list[float]
+    str | bool | int | float | list[str] | list[bool] | list[int] | list[float]
 )
 
 

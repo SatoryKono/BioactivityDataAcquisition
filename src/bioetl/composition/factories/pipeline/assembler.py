@@ -86,7 +86,8 @@ def assemble_runner(
     dq_configs_extractor: Callable[
         [PipelineYamlConfig | None],
         DQConfigsContext,
-    ] = _extract_dq_configs,
+    ]
+    | None = None,
 ) -> PipelineRunner:
     return _assemble_runner_impl(
         pipeline=pipeline,
@@ -94,7 +95,11 @@ def assemble_runner(
         silver_schema=silver_schema,
         gold_schema=gold_schema,
         strict_gold_validation=strict_gold_validation,
-        dq_configs_extractor=dq_configs_extractor,
+        dq_configs_extractor=(
+            _extract_dq_configs
+            if dq_configs_extractor is None
+            else dq_configs_extractor
+        ),
         yaml_config=yaml_config,
     )
 

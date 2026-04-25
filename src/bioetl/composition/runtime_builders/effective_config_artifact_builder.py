@@ -17,6 +17,7 @@ from bioetl.composition.runtime_builders._run_manifest_support import (
     to_serializable_mapping as _to_serializable_mapping,
 )
 from bioetl.domain.control_plane.config_source_hashing import (
+    ConfigSourceHashStrategy,
     compute_config_source_hashes,
 )
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
@@ -110,7 +111,7 @@ def _compute_file_hashes(
     *,
     relative_path: str,
     path: Path,
-) -> tuple[str | None, str | None, str | None]:
+) -> tuple[str | None, str | None, ConfigSourceHashStrategy | None]:
     """Return semantic and raw hashes for one config source file when available."""
     if not path.exists() or not path.is_file():
         return None, None, None

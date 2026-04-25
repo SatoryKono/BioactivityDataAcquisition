@@ -30,10 +30,12 @@ class QuarantineServiceStatusSyncMixin:
             operation="mark_reprocessed",
             pipeline=None,
             trace_attributes={"bioetl.input_record_count": len(records)},
-            execute=lambda started_at, started_monotonic: self._mark_as_reprocessed_impl(
-                records=records,
-                started_at=started_at,
-                started_monotonic=started_monotonic,
+            execute=lambda started_at, started_monotonic: (
+                self._mark_as_reprocessed_impl(
+                    records=records,
+                    started_at=started_at,
+                    started_monotonic=started_monotonic,
+                )
             ),
             success_of=lambda count: count == len(records),
             result_extra_of=lambda count: {"bioetl.updated_count": count},

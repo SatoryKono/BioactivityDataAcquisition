@@ -18,6 +18,14 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import ClockPort
     from bioetl.domain.types import JsonDict
+else:
+    from bioetl.domain.composite.result import (
+        DependencyResult,
+        EnrichmentResult,
+        SeedResult,
+    )
+    from bioetl.domain.ports import ClockPort
+    from bioetl.domain.types import JsonDict
 
 
 def _current_utc_now(clock: ClockPort | None = None) -> datetime:

@@ -18,7 +18,7 @@ __all__ = [
 
 
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 try:
     import pyarrow.compute as pc
@@ -50,17 +50,24 @@ from bioetl.infrastructure.quarantine.statistics_support import (
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+
     from pyarrow import Array, BooleanArray
 
 
-def _require_pyarrow_compute() -> object:
+class _PyArrowComputeModule(Protocol):
+    def equal(self, left: object, right: object) -> "BooleanArray": ...
+
+    def and_(self, left: object, right: object) -> "BooleanArray": ...
+
+
+def _require_pyarrow_compute() -> _PyArrowComputeModule:
     """Return ``pyarrow.compute`` or raise a bounded runtime error."""
     if pc is None:
         raise RuntimeError(
             "Quarantine read operations require pyarrow.compute, but it could not "
             "be imported in the current environment"
         )
-    return pc
+    return cast(_PyArrowComputeModule, pc)
 
 
 def _equal_mask(left: object, right: object) -> "BooleanArray":

@@ -23,7 +23,7 @@ _EXPORT_ATTRIBUTE_MODULES = {
 }
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(name: str) -> Any:  # Any: Dynamically returns attributes from lazily imported modules.
     """Lazily import export adapters to avoid importing optional stacks eagerly."""
     module_name = _EXPORT_ATTRIBUTE_MODULES.get(name)
     if module_name is None:

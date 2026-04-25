@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import (
@@ -69,7 +69,7 @@ class ErrorService:
         _ = response
         return self._adapter_classifier.classify_http_status(status_code)
 
-    def classify_exception(self, error: InfrastructureSourceError) -> ErrorCategory:
+    def classify_exception(self, error: Exception) -> ErrorCategory:
         """Classify exception into error category.
 
         Uses ErrorClassifier to determine ErrorType, then maps to ErrorCategory.
@@ -82,7 +82,7 @@ class ErrorService:
         """
         return self._adapter_classifier.classify_exception(error)
 
-    def get_error_type(self, error: InfrastructureSourceError) -> ErrorType:
+    def get_error_type(self, error: Exception) -> ErrorType:
         """Get ErrorType for an exception.
 
         Args:
@@ -97,7 +97,7 @@ class ErrorService:
         self,
         provider: str,
         operation: str,
-        error: InfrastructureSourceError,
+        error: Exception,
         context: JsonDict | None = None,  # Any: untyped API JSON record
     ) -> AdapterErrorContext:
         """Log error with unified structured context.
@@ -135,7 +135,7 @@ class ErrorService:
     def _resolve_error_category(
         self,
         *,
-        error: InfrastructureSourceError,
+        error: Exception,
         status_code: int | None,
     ) -> ErrorCategory:
         """Resolve error category from HTTP status code or exception type."""
@@ -144,7 +144,7 @@ class ErrorService:
             status_code=status_code,
         )
 
-    def should_retry(self, error: InfrastructureSourceError) -> bool:
+    def should_retry(self, error: Exception) -> bool:
         """Determine if error should be retried.
 
         Args:
@@ -200,7 +200,7 @@ class ErrorService:
 
     def wrap_error(
         self,
-        error: InfrastructureSourceError,
+        error: Exception,
         provider: str,
         status_code: int | None = None,
         retry_after: float | None = None,
@@ -216,7 +216,7 @@ class ErrorService:
         error_type = self.get_error_type(error)
         return self._error_mapper.map_to_domain_error(
             DomainErrorMappingInput(
-                error=error,
+                error=cast(InfrastructureSourceError, error),
                 provider=provider,
                 error_type=error_type,
                 status_code=status_code,
@@ -229,7 +229,7 @@ class ErrorService:
 
     def handle_error(
         self,
-        error: InfrastructureSourceError,
+        error: Exception,
         provider: str,
         operation: str,
         context: JsonDict | None = None,  # Any: untyped API JSON record

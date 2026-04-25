@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from importlib import import_module
-from typing import TYPE_CHECKING, Literal, overload, cast
+from typing import TYPE_CHECKING, Literal, cast, overload
 
 if TYPE_CHECKING:
     from bioetl.application.services.audit_inspection_service import (
@@ -46,8 +46,7 @@ def resolve_bootstrap_attr(
 
 
 @overload
-def resolve_bootstrap_attr(name: str) -> object:
-    ...
+def resolve_bootstrap_attr(name: str) -> object: ...
 
 
 def resolve_bootstrap_attr(name: str) -> object:
