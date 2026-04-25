@@ -60,118 +60,11 @@ class WorkflowRunOptionsConfig:
         self, override: WorkflowRunOptionsConfig
     ) -> WorkflowRunOptionsConfig:
         """Return a merged config where non-null override values win."""
-        return WorkflowRunOptionsConfig(
-            run_type=cast(
-                str | None,
-                _resolve_workflow_run_option_value(self, override, "run_type"),
-            ),
-            resume=cast(
-                bool | None,
-                _resolve_workflow_run_option_value(self, override, "resume"),
-            ),
-            start_offset=cast(
-                int | None,
-                _resolve_workflow_run_option_value(self, override, "start_offset"),
-            ),
-            limit=cast(
-                int | None,
-                _resolve_workflow_run_option_value(self, override, "limit"),
-            ),
-            dry_run=cast(
-                bool | None,
-                _resolve_workflow_run_option_value(self, override, "dry_run"),
-            ),
-            input_csv=cast(
-                str | None,
-                _resolve_workflow_run_option_value(self, override, "input_csv"),
-            ),
-            filter_column=cast(
-                str | None,
-                _resolve_workflow_run_option_value(self, override, "filter_column"),
-            ),
-            filter_field=cast(
-                str | None,
-                _resolve_workflow_run_option_value(self, override, "filter_field"),
-            ),
-            filter_ids=cast(
-                tuple[str, ...] | None,
-                _resolve_workflow_run_option_value(self, override, "filter_ids"),
-            ),
-            multi_filter_ids=cast(
-                dict[str, tuple[str, ...]] | None,
-                _resolve_workflow_run_option_value(self, override, "multi_filter_ids"),
-            ),
-            fallback_column=cast(
-                str | None,
-                _resolve_workflow_run_option_value(self, override, "fallback_column"),
-            ),
-            fallback_mapping=cast(
-                dict[str, str] | None,
-                _resolve_workflow_run_option_value(self, override, "fallback_mapping"),
-            ),
-            vacuum_after_run=cast(
-                bool | None,
-                _resolve_workflow_run_option_value(self, override, "vacuum_after_run"),
-            ),
-            vacuum_retention_days=cast(
-                int | None,
-                _resolve_workflow_run_option_value(
-                    self, override, "vacuum_retention_days"
-                ),
-            ),
-            log_level=cast(
-                str | None,
-                _resolve_workflow_run_option_value(self, override, "log_level"),
-            ),
-            ignore_yaml_filter=cast(
-                bool | None,
-                _resolve_workflow_run_option_value(
-                    self, override, "ignore_yaml_filter"
-                ),
-            ),
-            skip_gold=cast(
-                bool | None,
-                _resolve_workflow_run_option_value(self, override, "skip_gold"),
-            ),
-            execution_context=cast(
-                str | None,
-                _resolve_workflow_run_option_value(self, override, "execution_context"),
-            ),
-            use_cached_bronze=cast(
-                bool | None,
-                _resolve_workflow_run_option_value(self, override, "use_cached_bronze"),
-            ),
-            cached_bronze_path=cast(
-                str | None,
-                _resolve_workflow_run_option_value(
-                    self, override, "cached_bronze_path"
-                ),
-            ),
-            cached_bronze_date=cast(
-                str | None,
-                _resolve_workflow_run_option_value(
-                    self, override, "cached_bronze_date"
-                ),
-            ),
-            replay_of_run_id=cast(
-                str | None,
-                _resolve_workflow_run_option_value(self, override, "replay_of_run_id"),
-            ),
-            replay_of_manifest_id=cast(
-                str | None,
-                _resolve_workflow_run_option_value(
-                    self, override, "replay_of_manifest_id"
-                ),
-            ),
-            exact_replay=cast(
-                bool | None,
-                _resolve_workflow_run_option_value(self, override, "exact_replay"),
-            ),
-            enable_tracing=cast(
-                bool | None,
-                _resolve_workflow_run_option_value(self, override, "enable_tracing"),
-            ),
-        )
+        merged_values = {
+            field_name: _resolve_workflow_run_option_value(self, override, field_name)
+            for field_name in _RUN_OPTION_FIELD_NAMES
+        }
+        return WorkflowRunOptionsConfig(**cast(dict[str, object], merged_values))
 
     def to_mapping(self) -> JsonDict:
         """Return non-null options as a plain mapping."""
@@ -182,6 +75,11 @@ class WorkflowRunOptionsConfig:
                 continue
             result[field.name] = _serialize_workflow_run_option_value(field.name, value)
         return result
+
+
+_RUN_OPTION_FIELD_NAMES = tuple(
+    field.name for field in fields(WorkflowRunOptionsConfig)
+)
 
 
 @dataclass(frozen=True, slots=True)

@@ -41,20 +41,7 @@ _AUDIT_ADAPTER_CLOSED_MESSAGE = "FileAuditAdapter has been closed"
 
 
 class FileAuditAdapter:
-    """File-based implementation of AuditPort.
-
-    Writes audit entries to daily JSON Lines files in the configured
-    audit directory. Each entry is appended atomically to prevent
-    data loss on concurrent writes.
-
-    Example:
-        >>> adapter = FileAuditAdapter(Path("./data/audit"), logger)
-        >>> await adapter.log_write(entry)
-        >>> entries = await adapter.get_entries(run_id=run_id)
-
-    Implements:
-        AuditPort: Domain port for audit logging.
-    """
+    """File-based implementation of the audit port."""
 
     TRACER_NAME = "bioetl.audit"
     AUDIT_WRITE_EVENTS_TOTAL = "bioetl_audit_write_events_total"
@@ -69,12 +56,7 @@ class FileAuditAdapter:
         metrics: MetricsPort | None = None,
         tracing: TracingPort | None = None,
     ) -> None:
-        """Initialize file audit adapter.
-
-        Args:
-            base_path: Directory path for audit log files.
-            logger: Structured logger for observability.
-        """
+        """Initialize file audit adapter."""
         self.base_path = Path(base_path)
         self.logger = logger
         self.metrics = metrics if metrics is not None else NoOpMetrics()
@@ -121,14 +103,7 @@ class FileAuditAdapter:
         )
 
     def _get_audit_file_path(self, date: datetime) -> Path:
-        """Get the audit file path for a specific date.
-
-        Args:
-            date: The date for the audit file.
-
-        Returns:
-            Path to the audit file for the given date.
-        """
+        """Get the audit file path for a specific date."""
         date_str = date.strftime("%Y-%m-%d")
         return self.base_path / f"audit_{date_str}.jsonl"
 
@@ -142,18 +117,10 @@ class FileAuditAdapter:
         self.base_path.mkdir(parents=True, exist_ok=True)
 
     def _write_entry_sync(self, entry: AuditEntry) -> None:
-        """Synchronously write an entry to the audit file.
-
-        Args:
-            entry: The audit entry to write.
-        """
+        """Synchronously write an entry to the audit file."""
         self._ensure_directory()
         file_path = self._get_audit_file_path(entry.timestamp)
-
-        # Convert entry to JSON line
         json_line = serialize_to_json(entry.to_dict(), sort_keys=True) + "\n"
-
-        # Append atomically using exclusive create + append mode
         with open(file_path, "a", encoding="utf-8") as f:
             f.write(json_line)
             f.flush()
@@ -177,15 +144,7 @@ class FileAuditAdapter:
             f.flush()
 
     async def log_write(self, entry: AuditEntry) -> None:
-        """Log a write operation to the audit trail.
-
-        Args:
-            entry: The audit entry containing operation details.
-
-        Raises:
-            RuntimeError: If the adapter has been closed.
-            OSError: If the file write fails.
-        """
+        """Log a write operation to the audit trail."""
         if self._closed:
             raise RuntimeError(_AUDIT_ADAPTER_CLOSED_MESSAGE)
         started = time.perf_counter()
@@ -260,26 +219,11 @@ class FileAuditAdapter:
         end_time: datetime | None,
         limit: int,
     ) -> list[AuditEntry]:
-        """Synchronously read and filter audit entries.
-
-        Args:
-            run_id: Filter by pipeline run ID.
-            layer: Filter by Medallion layer.
-            table_name: Filter by target table name.
-            start_time: Filter entries after this time.
-            end_time: Filter entries before this time.
-            limit: Maximum number of entries to return.
-
-        Returns:
-            List of matching audit entries.
-        """
+        """Synchronously read and filter audit entries."""
         entries: list[AuditEntry] = []
-
         if not self.base_path.exists():
             return entries
-
         audit_files = sorted(self.base_path.glob("audit_*.jsonl"), reverse=True)
-
         for file_path in audit_files:
             if len(entries) >= limit:
                 break
@@ -307,22 +251,7 @@ class FileAuditAdapter:
         end_time: datetime | None = None,
         limit: int = 100,
     ) -> list[AuditEntry]:
-        """Query audit entries with optional filters.
-
-        Args:
-            run_id: Filter by pipeline run ID.
-            layer: Filter by Medallion layer.
-            table_name: Filter by target table name.
-            start_time: Filter entries after this time.
-            end_time: Filter entries before this time.
-            limit: Maximum number of entries to return.
-
-        Returns:
-            List of matching audit entries, ordered by timestamp descending.
-
-        Raises:
-            RuntimeError: If the adapter has been closed.
-        """
+        """Query audit entries with optional filters."""
         if self._closed:
             raise RuntimeError(_AUDIT_ADAPTER_CLOSED_MESSAGE)
         started = time.perf_counter()
@@ -368,10 +297,7 @@ class FileAuditAdapter:
             return entries
 
     async def aclose(self) -> None:
-        """Gracefully close the audit adapter.
-
-        This method is idempotent (safe to call multiple times).
-        """
+        """Gracefully close the audit adapter."""
         await asyncio.sleep(0)
         with self._tracer.start_as_current_span("audit.close") as span:
             span.set_attribute("bioetl.audit.already_closed", self._closed)

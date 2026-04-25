@@ -8,22 +8,30 @@ from __future__ import annotations
 
 import click
 
-from bioetl.composition.control_plane_api import (
-    get_run_manifest_service,
-)
-from bioetl.composition.health_api import (
-    get_quarantine_service,
-)
-from bioetl.composition.resources_api import get_quarantine_manager
-from bioetl.interfaces.cli.commands.domains.quarantine.support import (
-    _inspect_quarantine,
-    _purge_quarantine,
-    _replay_quarantine,
-    _resolve_quarantine_record,
-    _show_quarantine_stats,
-)
-
 SILVER_FILTER_ERROR_CODE = "FILTERED_OUT_SILVER"
+
+
+def get_quarantine_manager(pipeline: str) -> object:
+    """Load the quarantine manager through composition on demand."""
+    from bioetl.composition.resources_api import get_quarantine_manager as _impl
+
+    return _impl(pipeline)
+
+
+def get_run_manifest_service() -> object:
+    """Load the run manifest service through composition on demand."""
+    from bioetl.composition.control_plane_api import (
+        get_run_manifest_service as _impl,
+    )
+
+    return _impl()
+
+
+def get_quarantine_service() -> object:
+    """Load the quarantine service through composition on demand."""
+    from bioetl.composition.health_api import get_quarantine_service as _impl
+
+    return _impl()
 
 
 @click.group()  # type: ignore[untyped-decorator]
@@ -58,6 +66,10 @@ def quarantine_inspect(
     silver_filter_only: bool,
 ) -> None:
     """Inspect quarantined records for a pipeline."""
+    from bioetl.interfaces.cli.commands.domains.quarantine.support import (
+        _inspect_quarantine,
+    )
+
     resolved_error_code = SILVER_FILTER_ERROR_CODE if silver_filter_only else error_code
     _inspect_quarantine(
         get_quarantine_manager(pipeline),
@@ -119,6 +131,10 @@ def quarantine_stats(
     top: int,
 ) -> None:
     """Show quarantine statistics dashboard for a pipeline."""
+    from bioetl.interfaces.cli.commands.domains.quarantine.support import (
+        _show_quarantine_stats,
+    )
+
     resolved_error_code = SILVER_FILTER_ERROR_CODE if silver_filter_only else error_code
     _show_quarantine_stats(
         get_quarantine_manager(pipeline),
@@ -152,6 +168,10 @@ def quarantine_replay(
     dry_run: bool,
 ) -> None:
     """Replay (retry) quarantined records."""
+    from bioetl.interfaces.cli.commands.domains.quarantine.support import (
+        _replay_quarantine,
+    )
+
     _replay_quarantine(
         get_quarantine_service(),
         pipeline=pipeline,
@@ -181,6 +201,10 @@ def quarantine_purge(
     force: bool,
 ) -> None:
     """Purge old quarantine records."""
+    from bioetl.interfaces.cli.commands.domains.quarantine.support import (
+        _purge_quarantine,
+    )
+
     _purge_quarantine(
         get_quarantine_service(),
         pipeline=pipeline,
@@ -202,6 +226,10 @@ def quarantine_purge(
 )
 def quarantine_resolve(pipeline: str, payload_hash: str, status: str) -> None:
     """Mark a quarantine record as resolved."""
+    from bioetl.interfaces.cli.commands.domains.quarantine.support import (
+        _resolve_quarantine_record,
+    )
+
     _resolve_quarantine_record(
         get_quarantine_service(),
         pipeline=pipeline,
@@ -221,5 +249,6 @@ COMMANDS = (
 __all__ = [
     "get_quarantine_manager",
     "get_quarantine_service",
+    "get_run_manifest_service",
     "quarantine",
 ]

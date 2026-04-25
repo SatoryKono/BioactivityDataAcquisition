@@ -460,9 +460,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
     manifest = _make_manifest(manifest_id="manifest-no-ledger", run_id=run_id)
     manifest_store.save(manifest)
     service = RunManifestInspectionService(manifest_port=manifest_store)
-
     result = service.show("manifest-no-ledger")
-
     assert result.manifest == manifest
     assert result.ledger_entries == ()
     assert result.identity_graph == {
@@ -652,7 +650,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
             "cross_validation_signal_present": False,
         },
         "next_steps": [
-            "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
+            "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction."
         ],
         "reproducibility_audit_score": result.diagnostics[
             "reproducibility_audit_score"

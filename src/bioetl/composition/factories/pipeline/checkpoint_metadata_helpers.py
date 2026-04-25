@@ -95,61 +95,36 @@ def _resolve_input_snapshot_ids(pipeline: BasePipeline) -> tuple[str, ...]:
     return tuple(snapshot.snapshot_id for snapshot in snapshot_refs)
 
 
+def _resolve_run_context_metadata(
+    pipeline: BasePipeline,
+) -> dict[str, str | None]:
+    """Resolve string metadata fields from the pipeline run context."""
+    run_context = _resolve_run_context_payload(pipeline)
+    field_names = (
+        "pipeline_version",
+        "git_commit",
+        "effective_config_hash",
+        "dq_contract_compatibility_hash",
+        "manifest_id",
+        "contract_ref",
+        "contract_version",
+        "effective_config_artifact_id",
+        "composite_run_identity",
+        "execution_fingerprint",
+    )
+    return {
+        field_name: (
+            _coerce_optional_str(getattr(run_context, field_name, None))
+            if run_context is not None
+            else None
+        )
+        for field_name in field_names
+    }
+
+
 def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetadata:
     """Build current execution identity metadata for checkpoint compatibility."""
-    run_context = _resolve_run_context_payload(pipeline)
-    pipeline_version = (
-        _coerce_optional_str(getattr(run_context, "pipeline_version", None))
-        if run_context is not None
-        else None
-    )
-    git_commit = (
-        _coerce_optional_str(getattr(run_context, "git_commit", None))
-        if run_context is not None
-        else None
-    )
-    effective_config_hash = (
-        _coerce_optional_str(getattr(run_context, "effective_config_hash", None))
-        if run_context is not None
-        else None
-    )
-    dq_contract_compatibility_hash = (
-        _coerce_optional_str(
-            getattr(run_context, "dq_contract_compatibility_hash", None)
-        )
-        if run_context is not None
-        else None
-    )
-    manifest_id = (
-        _coerce_optional_str(getattr(run_context, "manifest_id", None))
-        if run_context is not None
-        else None
-    )
-    contract_ref = (
-        _coerce_optional_str(getattr(run_context, "contract_ref", None))
-        if run_context is not None
-        else None
-    )
-    contract_version = (
-        _coerce_optional_str(getattr(run_context, "contract_version", None))
-        if run_context is not None
-        else None
-    )
-    effective_config_artifact_id = (
-        _coerce_optional_str(getattr(run_context, "effective_config_artifact_id", None))
-        if run_context is not None
-        else None
-    )
-    composite_run_identity = (
-        _coerce_optional_str(getattr(run_context, "composite_run_identity", None))
-        if run_context is not None
-        else None
-    )
-    manifest_execution_fingerprint = (
-        _coerce_optional_str(getattr(run_context, "execution_fingerprint", None))
-        if run_context is not None
-        else None
-    )
+    run_context_metadata = _resolve_run_context_metadata(pipeline)
     exact_replay = bool(getattr(pipeline.runtime, "exact_replay", False))
     input_snapshot_ids = _resolve_input_snapshot_ids(pipeline)
     input_snapshot_fingerprint = compute_input_snapshot_identity_fingerprint(
@@ -161,18 +136,22 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
     identity_payload = _normalize_execution_identity_payload(
         pipeline_name=pipeline.config.pipeline_name,
         run_type=run_type_value,
-        pipeline_version=pipeline_version,
-        git_commit=git_commit,
-        effective_config_hash=effective_config_hash,
-        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        manifest_id=manifest_id,
-        contract_ref=contract_ref,
-        contract_version=contract_version,
-        effective_config_artifact_id=effective_config_artifact_id,
+        pipeline_version=run_context_metadata["pipeline_version"],
+        git_commit=run_context_metadata["git_commit"],
+        effective_config_hash=run_context_metadata["effective_config_hash"],
+        dq_contract_compatibility_hash=run_context_metadata[
+            "dq_contract_compatibility_hash"
+        ],
+        manifest_id=run_context_metadata["manifest_id"],
+        contract_ref=run_context_metadata["contract_ref"],
+        contract_version=run_context_metadata["contract_version"],
+        effective_config_artifact_id=run_context_metadata[
+            "effective_config_artifact_id"
+        ],
         exact_replay=exact_replay,
         input_snapshot_fingerprint=input_snapshot_fingerprint,
     )
-    execution_fingerprint = manifest_execution_fingerprint or (
+    execution_fingerprint = run_context_metadata["execution_fingerprint"] or (
         compute_execution_identity_fingerprint(identity_payload)
     )
 
@@ -185,10 +164,12 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
         ],
         pipeline_version=identity_payload["pipeline_version"],
         effective_config_hash=identity_payload["effective_config_hash"],
-        effective_config_artifact_id=effective_config_artifact_id,
+        effective_config_artifact_id=run_context_metadata[
+            "effective_config_artifact_id"
+        ],
         execution_fingerprint=execution_fingerprint,
-        composite_run_identity=composite_run_identity,
-        manifest_id=manifest_id,
+        composite_run_identity=run_context_metadata["composite_run_identity"],
+        manifest_id=run_context_metadata["manifest_id"],
         contract_ref=identity_payload["contract_ref"],
         contract_version=identity_payload["contract_version"],
         exact_replay=exact_replay,
@@ -196,11 +177,13 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
         input_snapshot_fingerprint=input_snapshot_fingerprint,
         run_context={
             "pipeline_name": pipeline.config.pipeline_name,
-            "manifest_id": manifest_id,
+            "manifest_id": run_context_metadata["manifest_id"],
             "execution_fingerprint": execution_fingerprint,
-            "git_commit": git_commit,
+            "git_commit": run_context_metadata["git_commit"],
             "effective_config_hash": identity_payload["effective_config_hash"],
-            "effective_config_artifact_id": effective_config_artifact_id,
+            "effective_config_artifact_id": run_context_metadata[
+                "effective_config_artifact_id"
+            ],
             "dq_contract_compatibility_hash": identity_payload[
                 "dq_contract_compatibility_hash"
             ],

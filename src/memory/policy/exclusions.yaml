@@ -31,6 +31,8 @@ rag_exclusions:
     reason: "Episodic memory is short-lived and should not feed durable retrieval by default."
   - pattern: "src/memory/curated/archive/**"
     reason: "Archived curated notes are historical, not active retrieval context."
+  - pattern: "src/bioetl/composition/resources_api.py"
+    reason: "File was renamed to resource_management_api.py and should no longer be indexed."
 graph_exclusions:
   - pattern: "site/**"
     reason: "Static site output duplicates published docs."

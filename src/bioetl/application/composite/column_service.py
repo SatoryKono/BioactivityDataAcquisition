@@ -38,9 +38,7 @@ from bioetl.domain.value_objects.column_order import (
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
-
 __all__ = ["ColumnOrderService"]
-
 _SortFn = Callable[[list[str], tuple[str, ...]], list[str]]
 
 
@@ -317,8 +315,6 @@ class ColumnOrderService:
             logger
         )
 
-    # === Semantic Group Ordering (ColumnOrderer compatibility) ===
-
     def order_columns(self, df: pl.DataFrame) -> pl.DataFrame:
         """Order DataFrame columns by semantic groups."""
         if not df.columns:
@@ -373,8 +369,6 @@ class ColumnOrderService:
 
         return list(columns)
 
-    # === Priority Ordering (ColumnPriorityOrderer compatibility) ===
-
     def collect_field_columns(
         self,
         field: str,
@@ -410,8 +404,6 @@ class ColumnOrderService:
         return self._priority_orderer.filter_compatible_columns(
             df, field, ordered_cols, can_coalesce
         )
-
-    # === Internal helpers ===
 
     def _count_groups(self, columns: Sequence[str]) -> dict[str, int]:
         """Count columns per semantic group."""
@@ -495,8 +487,6 @@ class ColumnOrderService:
             collect_group_columns=self._collect_group_columns,
             logger=self._logger,
         )
-
-    # === Static helpers for backward compatibility ===
 
     @staticmethod
     def get_enricher_prefix(enricher_pipeline: str) -> str:

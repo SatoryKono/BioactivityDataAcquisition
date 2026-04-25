@@ -26,7 +26,6 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.entities import Bioactivity
 from bioetl.domain.normalization.chembl import (
-    normalize_bao_identifier,
     normalize_qudt_unit,
     normalize_standard_unit,
     normalize_uo_identifier,
@@ -36,6 +35,10 @@ from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects import validate_taxonomy_id
 
 if TYPE_CHECKING:
+    from bioetl.application.core.base_transformer import TransformerDependencyContext
+    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
+    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
+    from bioetl.domain.services import IdentityService
     from bioetl.domain.types import BronzeRecord, PrimaryId
 
 OptionalString = str | None
@@ -164,6 +167,31 @@ class ActivityTransformer(BaseChemblTransformer):
     entity_class = Bioactivity
     primary_id_field = "activity_id"
 
+    def __init__(
+        self,
+        provider: str = "chembl",
+        entity_type: str | None = None,
+        silver_filters: SilverFilterConfig | None = None,
+        gold_filters: GoldFilterConfig | None = None,
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
+        identity_service: IdentityService | None = None,
+        pii_hasher: PiiHasherPort | None = None,
+        dependencies: TransformerDependencyContext | None = None,
+    ) -> None:
+        """Bind the unified Bioactivity entity to the canonical activity profile."""
+        super().__init__(
+            provider=provider,
+            entity_type=entity_type or "activity",
+            silver_filters=silver_filters,
+            gold_filters=gold_filters,
+            tracer=tracer,
+            metrics=metrics,
+            identity_service=identity_service,
+            pii_hasher=pii_hasher,
+            dependencies=dependencies,
+        )
+
     @staticmethod
     def _extract_ligand_efficiency(
         le_data: JsonDict | None,  # Any: untyped ChEMBL API JSON
@@ -259,12 +287,6 @@ class ActivityTransformer(BaseChemblTransformer):
         business_data["publication_id"] = business_data.get(
             "publication_id"
         ) or record.get("publication_id")
-        business_data["bao_endpoint"] = normalize_bao_identifier(
-            cast(OptionalString, business_data.get("bao_endpoint"))
-        )
-        business_data["bao_format"] = normalize_bao_identifier(
-            cast(OptionalString, business_data.get("bao_format"))
-        )
         business_data["uo_units"] = normalize_uo_identifier(
             cast(OptionalString, business_data.get("uo_units"))
         )

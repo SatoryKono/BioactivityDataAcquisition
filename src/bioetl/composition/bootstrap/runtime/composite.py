@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
@@ -73,6 +74,18 @@ def __getattr__(name: str) -> object:
         from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 
         return CompositeRuntimeConfig
+    if name == "create_composite_runner_service":
+        from bioetl.composition.bootstrap.runtime.runner_assembly import (
+            create_composite_runner_service,
+        )
+
+        return create_composite_runner_service
+    if name == "_create_dq_report_service":
+        from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
+            _create_dq_report_service,
+        )
+
+        return _create_dq_report_service
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
@@ -176,7 +189,9 @@ def _build_runner_factories(
         runner_factory_builder_cls=RunnerFactoryBuilderService,
         filter_extraction_service_cls=CompositeFilterExtractionService,
         pipeline_runner_builder=bootstrap_pipeline_runner_impl,
-        resolve_bronze_opts_fn=resolve_bronze_opts,
+        resolve_bronze_opts_fn=cast(
+            Callable[..., dict[str, object]], resolve_bronze_opts
+        ),
     )
     return factories
 
@@ -205,6 +220,18 @@ def _build_support_services(
         load_field_group_registry_fn=_load_field_group_registry,
         create_dq_report_service_fn=_create_dq_report_service,
     )
+
+
+def _load_field_group_registry(
+    composite_name: str,
+    logger: LoggerPort,
+) -> object | None:
+    """Compatibility seam exposing the canonical field-group loader helper."""
+    from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
+        _load_field_group_registry as _impl,
+    )
+
+    return _impl(composite_name, logger)
 
 
 def _build_composite_bootstrap_plan(

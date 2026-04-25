@@ -6,13 +6,10 @@ Implements Bronze layer cleanup per RULES.md retention policy.
 from __future__ import annotations
 
 import asyncio
+from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.composition.maintenance_api import get_bronze_cleanup_service
-from bioetl.composition.resources_api import (
-    preview_cleanup as preview_pipeline_cleanup,
-)
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
@@ -27,6 +24,10 @@ from bioetl.interfaces.cli.formatters import (
     echo_info,
     format_bytes,
 )
+
+if TYPE_CHECKING:
+    from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview
+    from bioetl.application.services.bronze_cleanup_service import BronzeCleanupService
 
 __all__ = [
     "bronze_cleanup_command",
@@ -44,6 +45,22 @@ _CLEANUP_PREVIEW_UNEXPECTED_ERROR_TITLE = (
 _CLEANUP_PREVIEW_INTERRUPTED_MESSAGE = (
     "Maintenance cleanup-preview interrupted by user (Ctrl+C)"
 )
+
+
+def get_bronze_cleanup_service() -> BronzeCleanupService:
+    """Load the bronze cleanup service through composition on demand."""
+    from bioetl.composition.maintenance_api import (
+        get_bronze_cleanup_service as _impl,
+    )
+
+    return _impl()
+
+
+async def preview_pipeline_cleanup(pipeline: str) -> CleanupPreview:
+    """Preview pipeline cleanup scope through composition on demand."""
+    from bioetl.composition.resources_api import preview_cleanup as _impl
+
+    return await _impl(pipeline)
 
 
 def _handle_cleanup_failure(

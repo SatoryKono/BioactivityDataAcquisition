@@ -32,6 +32,22 @@ def _optional_payload_string(
     return None if value is None else str(value)
 
 
+def _optional_snapshot_string(
+    payload: dict[str, object],
+    key: str,
+) -> str | None:
+    value = payload.get(key)
+    return None if value is None else str(value)
+
+
+def _optional_snapshot_datetime(
+    payload: dict[str, object],
+    key: str,
+) -> datetime | None:
+    value = payload.get(key)
+    return None if value is None else datetime.fromisoformat(str(value))
+
+
 class RunManifestHydrationMixin:
     """Hydrate typed control-plane objects from normalized manifest payloads."""
 
@@ -108,45 +124,21 @@ class RunManifestHydrationMixin:
             RunInputSnapshotRef(
                 snapshot_id=str(item["snapshot_id"]),
                 content_hash=str(item["content_hash"]),
-                immutable_uri=(
-                    None
-                    if item.get("immutable_uri") is None
-                    else str(item["immutable_uri"])
+                immutable_uri=_optional_snapshot_string(item, "immutable_uri"),
+                query_fingerprint=_optional_snapshot_string(
+                    item,
+                    "query_fingerprint",
                 ),
-                query_fingerprint=(
-                    None
-                    if item.get("query_fingerprint") is None
-                    else str(item["query_fingerprint"])
+                storage_provider=_optional_snapshot_string(item, "storage_provider"),
+                object_bucket=_optional_snapshot_string(item, "object_bucket"),
+                object_key=_optional_snapshot_string(item, "object_key"),
+                object_version_id=_optional_snapshot_string(
+                    item,
+                    "object_version_id",
                 ),
-                storage_provider=(
-                    None
-                    if item.get("storage_provider") is None
-                    else str(item["storage_provider"])
-                ),
-                object_bucket=(
-                    None
-                    if item.get("object_bucket") is None
-                    else str(item["object_bucket"])
-                ),
-                object_key=(
-                    None if item.get("object_key") is None else str(item["object_key"])
-                ),
-                object_version_id=(
-                    None
-                    if item.get("object_version_id") is None
-                    else str(item["object_version_id"])
-                ),
-                etag=None if item.get("etag") is None else str(item["etag"]),
-                last_modified=(
-                    None
-                    if item.get("last_modified") is None
-                    else str(item["last_modified"])
-                ),
-                captured_at=(
-                    None
-                    if item.get("captured_at") is None
-                    else datetime.fromisoformat(str(item["captured_at"]))
-                ),
+                etag=_optional_snapshot_string(item, "etag"),
+                last_modified=_optional_snapshot_string(item, "last_modified"),
+                captured_at=_optional_snapshot_datetime(item, "captured_at"),
             )
             for item in payload
             if isinstance(item, dict)

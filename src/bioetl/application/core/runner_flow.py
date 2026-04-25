@@ -160,15 +160,22 @@ def record_stage_completed(
 
 def record_run_finished(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append successful completion ledger entry."""
-    _record_run_metrics_event(
-        host,
-        lambda ledger_service, metrics_snapshot, details: (
-            ledger_service.record_run_finished(
+
+    def _record_finished(
+        ledger_service: RunLedgerService,
+        metrics_snapshot: dict[str, int],
+        details: JsonDict | None,
+    ) -> object:
+        if details is None:
+            return ledger_service.record_run_finished(
                 metrics_snapshot=metrics_snapshot,
-                details=details,
             )
-        ),
-    )
+        return ledger_service.record_run_finished(
+            metrics_snapshot=metrics_snapshot,
+            details=details,
+        )
+
+    _record_run_metrics_event(host, _record_finished)
 
 
 def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:

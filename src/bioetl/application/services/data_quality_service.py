@@ -168,7 +168,7 @@ class _DataQualityMetricsMixin:
         )
 
 
-class _DataQualityAnomalyMixin:
+class _DataQualityAnomalyMixin(_DataQualityMetricsMixin):
     """Anomaly detection and anomaly logging helpers."""
 
     _dq_monitor: DQMonitorPort | None

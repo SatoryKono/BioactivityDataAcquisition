@@ -159,18 +159,19 @@ def update_correlation_anchor_gaps(
     }:
         return
     diagnostic = extract_diagnostic_context(entry)
-    if diagnostic.get("resolved_config_hash") is None:
-        gap_counter["resolved_config_hash"] += 1
-    if diagnostic.get("effective_config_hash") is None:
-        gap_counter["effective_config_hash"] += 1
-    if diagnostic.get("contract_ref") is None:
-        gap_counter["contract_ref"] += 1
-    if _extract_contract_version_anchor(diagnostic) is None:
-        gap_counter["contract_version"] += 1
-    if event_family in {"checkpoint", "composite"} and (
-        diagnostic.get("composite_run_id") is None
-    ):
-        gap_counter["composite_run_id"] += 1
+    required_anchors = {
+        "resolved_config_hash": diagnostic.get("resolved_config_hash"),
+        "effective_config_hash": diagnostic.get("effective_config_hash"),
+        "contract_ref": diagnostic.get("contract_ref"),
+        "contract_version": _extract_contract_version_anchor(diagnostic),
+    }
+    for anchor_name, anchor_value in required_anchors.items():
+        if anchor_value is None:
+            gap_counter[anchor_name] += 1
+    if event_family in {"checkpoint", "composite"}:
+        composite_run_id = diagnostic.get("composite_run_id")
+        if composite_run_id is None:
+            gap_counter["composite_run_id"] += 1
 
 
 def extract_diagnostic_context(entry: RunLedgerEntry) -> dict[str, object]:

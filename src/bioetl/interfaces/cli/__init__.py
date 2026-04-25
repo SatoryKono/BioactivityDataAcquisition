@@ -18,15 +18,12 @@ Structure:
 
 from __future__ import annotations
 
+from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.application.services import RunOptions
     from bioetl.domain.ports import ExecutionMetricsRunnerPort
-
-from bioetl.interfaces.cli.commands.domains.run.support import validate_pipeline_name
-from bioetl.interfaces.cli.main import cli as cli
-from bioetl.interfaces.cli.main import main as main
 
 
 def create_pipeline_runner(
@@ -43,6 +40,13 @@ def create_pipeline_runner(
     return _impl(name, options)
 
 
+def main() -> None:
+    """Invoke the canonical CLI entry point."""
+    from bioetl.interfaces.cli.main import main as _impl
+
+    _impl()
+
+
 def __dir__() -> list[str]:
     """Return stable CLI exports for introspection."""
     return sorted(set(globals()) | set(__all__))
@@ -54,3 +58,22 @@ __all__ = [
     "main",
     "validate_pipeline_name",
 ]
+
+_PUBLIC_EXPORTS = {
+    "cli": ("bioetl.interfaces.cli.main", "cli"),
+    "validate_pipeline_name": (
+        "bioetl.interfaces.cli.commands.domains.run.support",
+        "validate_pipeline_name",
+    ),
+}
+
+
+def __getattr__(name: str) -> object:
+    """Resolve CLI convenience exports lazily to avoid cross-command fan-out."""
+    spec = _PUBLIC_EXPORTS.get(name)
+    if spec is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    module_name, attr_name = spec
+    value = getattr(import_module(module_name), attr_name)
+    globals()[name] = value
+    return value

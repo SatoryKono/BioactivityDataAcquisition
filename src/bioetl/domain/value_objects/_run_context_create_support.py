@@ -1,0 +1,124 @@
+"""Support helpers for ``RunContext.create`` input coercion."""
+
+from __future__ import annotations
+
+from datetime import datetime
+from typing import TYPE_CHECKING, cast
+
+from bioetl.domain.types import RunID, RunType
+
+if TYPE_CHECKING:
+    from bioetl.domain.value_objects.run_context import RunContextCreateInput
+
+_RUN_CONTEXT_REQUIRED_FIELDS = (
+    "run_id",
+    "run_type",
+    "started_at",
+    "provider",
+    "entity",
+)
+_RUN_CONTEXT_OPTIONAL_DEFAULTS: dict[str, object] = {
+    "transform_version": None,
+    "transform_steps": (),
+    "pipeline_version": None,
+    "git_commit": None,
+    "config_hash": None,
+    "resolved_config_hash": None,
+    "effective_config_hash": None,
+    "manifest_id": None,
+    "contract_ref": None,
+    "contract_version": None,
+    "contract_schema_hash": None,
+    "dq_policy_ref": None,
+    "rule_bundle_version": None,
+    "dq_contract_compatibility_hash": None,
+    "effective_config_artifact_id": None,
+    "execution_fingerprint": None,
+}
+_RUN_CONTEXT_ALL_FIELDS = (
+    *_RUN_CONTEXT_REQUIRED_FIELDS,
+    *_RUN_CONTEXT_OPTIONAL_DEFAULTS.keys(),
+)
+
+
+def _resolve_create_input_value(
+    *,
+    field_name: str,
+    inputs: RunContextCreateInput | None,
+    overrides: dict[str, object],
+) -> object:
+    if field_name in overrides:
+        return overrides[field_name]
+    if field_name in _RUN_CONTEXT_OPTIONAL_DEFAULTS and inputs is None:
+        return _RUN_CONTEXT_OPTIONAL_DEFAULTS[field_name]
+    if inputs is None:
+        raise TypeError(
+            f"RunContext.create() missing required argument: '{field_name}'"
+        )
+    return getattr(inputs, field_name)
+
+
+def _ensure_required_create_input_fields(
+    inputs: RunContextCreateInput | None,
+    overrides: dict[str, object],
+) -> None:
+    for field_name in _RUN_CONTEXT_REQUIRED_FIELDS:
+        _resolve_create_input_value(
+            field_name=field_name,
+            inputs=inputs,
+            overrides=overrides,
+        )
+
+
+def _collect_create_input_values(
+    inputs: RunContextCreateInput | None,
+    overrides: dict[str, object],
+) -> dict[str, object]:
+    """Collect field values for ``RunContextCreateInput`` construction."""
+    _ensure_required_create_input_fields(inputs, overrides)
+    values = {
+        field_name: _resolve_create_input_value(
+            field_name=field_name,
+            inputs=inputs,
+            overrides=overrides,
+        )
+        for field_name in _RUN_CONTEXT_ALL_FIELDS
+    }
+    values["transform_steps"] = tuple(values["transform_steps"] or ())
+    return values
+
+
+def coerce_run_context_create_input(
+    inputs: RunContextCreateInput | None,
+    overrides: dict[str, object],
+) -> RunContextCreateInput:
+    from bioetl.domain.value_objects.run_context import RunContextCreateInput
+
+    values = _collect_create_input_values(inputs, overrides)
+    return RunContextCreateInput(
+        run_id=cast("RunID", values["run_id"]),
+        run_type=cast("RunType", values["run_type"]),
+        started_at=cast(datetime, values["started_at"]),
+        provider=cast(str, values["provider"]),
+        entity=cast(str, values["entity"]),
+        transform_version=cast("str | None", values["transform_version"]),
+        transform_steps=cast("tuple[str, ...]", values["transform_steps"]),
+        pipeline_version=cast("str | None", values["pipeline_version"]),
+        git_commit=cast("str | None", values["git_commit"]),
+        config_hash=cast("str | None", values["config_hash"]),
+        resolved_config_hash=cast("str | None", values["resolved_config_hash"]),
+        effective_config_hash=cast("str | None", values["effective_config_hash"]),
+        manifest_id=cast("str | None", values["manifest_id"]),
+        contract_ref=cast("str | None", values["contract_ref"]),
+        contract_version=cast("str | None", values["contract_version"]),
+        contract_schema_hash=cast("str | None", values["contract_schema_hash"]),
+        dq_policy_ref=cast("str | None", values["dq_policy_ref"]),
+        rule_bundle_version=cast("str | None", values["rule_bundle_version"]),
+        dq_contract_compatibility_hash=cast(
+            "str | None", values["dq_contract_compatibility_hash"]
+        ),
+        effective_config_artifact_id=cast(
+            "str | None", values["effective_config_artifact_id"]
+        ),
+        execution_fingerprint=cast("str | None", values["execution_fingerprint"]),
+    )

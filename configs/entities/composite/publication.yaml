@@ -12,8 +12,17 @@ pipeline:
   provider: composite
   entity_type: publication
   pipeline_name: composite_publication
+  loading_strategy: full_scan_only
   business_primary_keys:
     - composite_id
+  sink:
+    gold:
+      mode: scd2
+      scd_config:
+        valid_from_col: _valid_from
+        valid_to_col: _valid_to
+        current_flag_col: _is_current
+        version_col: _version
 
 schema:
   compatibility_mode: legacy_composite_entity_stub
@@ -86,7 +95,7 @@ quality:
   
 # Loading strategy
 loading:
-  strategy: incremental
+  strategy: full_scan_only
   batch_size: 1000
   
 # Field mapping and resolution rules

@@ -16,7 +16,11 @@ class CheckpointManager:
     def current_metadata(self) -> CheckpointMetadata | None:
         raise NotImplementedError
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(
+        cls,
+        *args: object,
+        **kwargs: object,
+    ) -> object:
         from bioetl.application.core.lifecycle.checkpoint_manager import (
             CheckpointManagerService,
         )

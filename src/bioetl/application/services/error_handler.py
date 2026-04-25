@@ -131,7 +131,7 @@ class ErrorHandlerService:
         error_type = self._get_error_type(exception)
 
         # Increment error counter
-        self._metrics.increment_counter(
+        self._increment_counter(
             "errors.total",
             1,
             labels={
@@ -142,7 +142,7 @@ class ErrorHandlerService:
 
         # Record specific error types
         if isinstance(exception, BioETLIntegrationError):
-            self._metrics.increment_counter(
+            self._increment_counter(
                 "errors.integration",
                 1,
                 labels={
@@ -151,11 +151,39 @@ class ErrorHandlerService:
                 },
             )
         elif isinstance(exception, BioETLDomainError):
-            self._metrics.increment_counter(
+            self._increment_counter(
                 "errors.domain",
                 1,
                 labels={"service": self._service_name},
             )
+
+    def _increment_counter(
+        self,
+        name: str,
+        value: int,
+        labels: dict[str, str] | None = None,
+    ) -> None:
+        """Increment metrics via the canonical or legacy counter API."""
+        increment_counter = getattr(self._metrics, "increment_counter", None)
+        if callable(increment_counter):
+            increment_counter(name, value, labels=labels)
+            return
+
+        increment = getattr(self._metrics, "increment", None)
+        if not callable(increment):
+            return
+
+        for kwargs in (
+            {"value": float(value), "_tags": labels},
+            {"tags": labels},
+            {"_tags": labels},
+            {},
+        ):
+            try:
+                increment(name, **kwargs)
+                return
+            except TypeError:
+                continue
 
     def _prepare_log_context(
         self,

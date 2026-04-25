@@ -12,6 +12,7 @@ Note:
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -43,6 +44,29 @@ _METRICS_START_ERRORS = (
     ValueError,
     TypeError,
 )
+
+_SpanAttributeValue = (
+    str | bool | int | float | Sequence[str] | Sequence[bool] | Sequence[int] | Sequence[float]
+)
+
+
+def _coerce_span_attribute_value(value: object) -> _SpanAttributeValue:
+    """Convert arbitrary service metadata into OpenTelemetry-compatible values."""
+    if isinstance(value, bool | str | int | float):
+        return value
+    if isinstance(value, Sequence) and not isinstance(value, str | bytes | bytearray):
+        items = list(value)
+        if not items:
+            return []
+        if all(isinstance(item, str) for item in items):
+            return items
+        if all(isinstance(item, bool) for item in items):
+            return items
+        if all(isinstance(item, int) and not isinstance(item, bool) for item in items):
+            return items
+        if all(isinstance(item, float) for item in items):
+            return items
+    return str(value)
 
 
 @dataclass(frozen=True, slots=True)
@@ -115,12 +139,12 @@ class _MetricsTracingMixin:
         *,
         success: bool,
         error: str | None = None,
-        **extra: object,
+        extra: Mapping[str, object] | None = None,
     ) -> None:
         """Attach bounded result attributes to the active metrics span."""
         span.set_attribute("bioetl.success", success)
-        for key, value in extra.items():
-            span.set_attribute(key, value)
+        for key, value in (extra or {}).items():
+            span.set_attribute(key, _coerce_span_attribute_value(value))
         if error is not None:
             span.set_attribute("error", True)
             span.set_attribute("bioetl.error", error)
@@ -225,7 +249,7 @@ class _MetricsStartMixin(_MetricsTracingMixin):
                 span,
                 success=result.success,
                 error=result.error,
-                **{"bioetl.already_running": result.already_running},
+                extra={"bioetl.already_running": result.already_running},
             )
             return result
 
@@ -314,7 +338,9 @@ class _MetricsStatusMixin(_MetricsTracingMixin):
         ) as span:
             running = self._server.is_running()
             self._set_result_attributes(
-                span, success=True, **{"bioetl.running": running}
+                span,
+                success=True,
+                extra={"bioetl.running": running},
             )
             return MetricsServerStatus(
                 running=running,

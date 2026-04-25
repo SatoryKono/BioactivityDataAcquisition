@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Protocol, TypeVar, cast
+from typing import TYPE_CHECKING, Protocol, TypeAlias, TypeVar, cast
 
 import orjson
 
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="BaseEntity")
 TEntity_co = TypeVar("TEntity_co", bound="BaseEntity", covariant=True)
 ScalarValue = str | int | float | bool | None
-_DICT_STR_OBJECT = "dict[str, object]"
+_DICT_STR_OBJECT: TypeAlias = dict[str, object]
 
 
 class _EntityConstructor(Protocol[TEntity_co]):

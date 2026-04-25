@@ -159,7 +159,7 @@ class SharedActivityTransformerTransformTests:
 
     @pytest.mark.asyncio
     async def test_transform_with_quality_annotations(self, transformer, mock_context):
-        """Test transformation with data quality annotations."""
+        """Unknown validity enums should collapse while annotations stay intact."""
         record = {
             "activity_id": 12345,
             "molecule_id": "CHEMBL25",
@@ -175,7 +175,7 @@ class SharedActivityTransformerTransformTests:
 
         assert result is not None
         assert result["activity_comment"] == "Potent inhibitor"
-        assert result["data_validity_comment"] == "Valid"
+        assert result["data_validity_comment"] is None
         assert result["data_validity_description"] == "Data passed validation"
         assert result["potential_duplicate"] == 0
         assert result["manual_curation_flag"] == 1

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import datetime
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.context import current_utc_time
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 def _current_utc_now(clock: ClockPort | None = None) -> datetime:
     """Return current UTC timestamp from an injected clock when available."""
-    return clock.now() if clock is not None else cast(datetime, current_utc_time())
+    return clock.now() if clock is not None else current_utc_time()
 
 
 def with_seed_completed(
@@ -125,15 +125,50 @@ def _replace_checkpoint_state(
     *,
     clock: ClockPort | None = None,
     updated_at: datetime | None = None,
-    **changes: object,
+    state: CompositePipelineState | None = None,
+    seed_completed: bool | None = None,
+    seed_result: SeedResult | None = None,
+    completed_dependencies: frozenset[str] | None = None,
+    dependency_results: dict[str, DependencyResult] | None = None,
+    completed_enrichers: frozenset[str] | None = None,
+    enrichment_results: dict[str, EnrichmentResult] | None = None,
+    merge_completed: bool | None = None,
+    merge_result: JsonDict | None = None,
 ) -> CompositeCheckpointState:
-    # `dataclasses.replace` accepts field-aligned keyword overrides, but mypy
-    # cannot infer them from this helper's dynamic kwargs surface.
-    return cast(
-        "CompositeCheckpointState",
-        replace(
-            checkpoint_state,
-            updated_at=updated_at or _current_utc_now(clock),
-            **changes,
+    return replace(
+        checkpoint_state,
+        state=checkpoint_state.state if state is None else state,
+        seed_completed=(
+            checkpoint_state.seed_completed
+            if seed_completed is None
+            else seed_completed
         ),
+        seed_result=checkpoint_state.seed_result if seed_result is None else seed_result,
+        completed_dependencies=(
+            checkpoint_state.completed_dependencies
+            if completed_dependencies is None
+            else completed_dependencies
+        ),
+        dependency_results=(
+            checkpoint_state.dependency_results
+            if dependency_results is None
+            else dependency_results
+        ),
+        completed_enrichers=(
+            checkpoint_state.completed_enrichers
+            if completed_enrichers is None
+            else completed_enrichers
+        ),
+        enrichment_results=(
+            checkpoint_state.enrichment_results
+            if enrichment_results is None
+            else enrichment_results
+        ),
+        merge_completed=(
+            checkpoint_state.merge_completed
+            if merge_completed is None
+            else merge_completed
+        ),
+        merge_result=checkpoint_state.merge_result if merge_result is None else merge_result,
+        updated_at=updated_at or _current_utc_now(clock),
     )

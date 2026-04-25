@@ -3,38 +3,10 @@
 from __future__ import annotations
 
 from importlib import import_module
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
-    from bioetl.composition._pipeline_execution import (
-        ArchiveOptions,
-        VacuumOptions,
-        build_pipeline_context,
-        create_pipeline_runner,
-        ensure_metrics_server_started,
-        run_pipeline,
-    )
-    from bioetl.composition._services import get_pipeline_runner_service
-    from bioetl.composition.bootstrap import maybe_start_metrics_server
+from typing import Any
 
 _PIPELINE_EXECUTION_MODULE = "bioetl.composition._pipeline_execution"
 _APPLICATION_SERVICES_MODULE = "bioetl.application.services"
-
-__all__ = [
-    "ArchiveOptions",
-    "PipelineRunResult",
-    "RunOptions",
-    "RunResult",
-    "VacuumOptions",
-    "build_pipeline_context",
-    "create_pipeline_runner",
-    "ensure_metrics_server_started",
-    "get_pipeline_runner_service",
-    "maybe_start_metrics_server",
-    "push_metrics_to_gateway",
-    "run_pipeline",
-]
 
 _PUBLIC_EXPORTS: dict[str, str] = {
     "ArchiveOptions": _PIPELINE_EXECUTION_MODULE,
@@ -49,6 +21,8 @@ _PUBLIC_EXPORTS: dict[str, str] = {
     "maybe_start_metrics_server": "bioetl.composition.bootstrap",
     "run_pipeline": _PIPELINE_EXECUTION_MODULE,
 }
+
+__all__ = [*_PUBLIC_EXPORTS, "push_metrics_to_gateway"]
 
 
 def push_metrics_to_gateway(

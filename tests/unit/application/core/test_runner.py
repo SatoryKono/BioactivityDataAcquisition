@@ -647,6 +647,7 @@ class TestPipelineRunnerRun:
         assert ledger_service.record_run_exception.call_args.kwargs == {
             "error": mock_executor.execute.side_effect,
             "metrics_snapshot": runner.execution_metrics,
+            "details": None,
         }
         ledger_service.record_run_failed.assert_not_called()
         ledger_service.record_run_finished.assert_not_called()
@@ -671,7 +672,8 @@ class TestPipelineRunnerRun:
             for call in ledger_service.record_stage_completed.call_args_list
         ] == list(ORDINARY_RUN_LEDGER_STAGE_NAMES[:2])
         ledger_service.record_run_shutdown.assert_called_once_with(
-            metrics_snapshot=runner.execution_metrics
+            metrics_snapshot=runner.execution_metrics,
+            details=None,
         )
         ledger_service.record_run_exception.assert_not_called()
         ledger_service.record_run_finished.assert_not_called()

@@ -1,11 +1,5 @@
 # mypy: disable-error-code="misc,untyped-decorator"
-"""Common metadata models shared across all Medallion layers.
-
-Contains governance, runtime, pipeline, environment and base output models.
-These are the foundational building blocks used by Bronze, Silver, and Gold metadata.
-
-ADR-029: Output metadata unification across Medallion layers.
-"""
+"""Common metadata models shared across Medallion layers."""
 
 from __future__ import annotations
 
@@ -35,11 +29,6 @@ class RunTypeEnum(StrEnum):
     INCREMENTAL = "incremental"
     BACKFILL = "backfill"
     REBUILD = "rebuild"
-
-
-# =============================================================================
-# Governance Metadata Components
-# =============================================================================
 
 
 class GovernanceLineageConfig(BaseModel):
@@ -139,11 +128,6 @@ class GovernanceMetadata(BaseModel):
     classification: str | None = Field(
         default=None, description="Data classification (public, internal, restricted)"
     )
-
-
-# =============================================================================
-# Common Components
-# =============================================================================
 
 
 class RuntimeMetadata(BaseModel):
@@ -252,11 +236,6 @@ class EnvironmentMetadata(BaseModel):
     bioetl_version: str = Field(description="BioETL package version")
 
 
-# =============================================================================
-# Unified Output Metadata (ADR-029)
-# =============================================================================
-
-
 class BaseOutputMetadata(BaseModel):
     """Base output metadata contract for all Medallion layers.
 
@@ -316,11 +295,7 @@ class BaseOutputMetadata(BaseModel):
     @computed_field
     @property
     def write_duration_ms(self) -> int | None:
-        """Calculate write duration in milliseconds.
-
-        Returns:
-            Duration in milliseconds, or None if timestamps missing.
-        """
+        """Calculate write duration in milliseconds when timestamps are present."""
         if self.write_started_at and self.write_completed_at:
             delta = self.write_completed_at - self.write_started_at
             return int(delta.total_seconds() * 1000)

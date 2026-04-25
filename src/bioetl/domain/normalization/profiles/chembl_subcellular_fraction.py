@@ -10,6 +10,7 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_governed_vocabulary,
+    normalize_profile_title,
 )
 from bioetl.domain.schemas.chembl.subcellular_fraction import (
     SubcellularFractionSchema,
@@ -51,7 +52,7 @@ CHEMBL_SUBCELLULAR_FRACTION_PROFILE = build_standard_profile(
     special_rules={
         "subcellular_fraction": (
             lambda value: normalize_profile_governed_vocabulary(
-                value,
+                normalize_profile_title(value),
                 allowed_values=SUBCELLULAR_FRACTIONS,
                 preserve_unknown=True,
             ),

@@ -45,7 +45,13 @@ from importlib import import_module as _import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.domain.value_objects.academic_ids import ISSN, ORCID, OpenAlexId, SemanticScholarId
+    from bioetl.domain.value_objects._chemical_identifiers import SMILES, InChIKey
+    from bioetl.domain.value_objects.academic_ids import (
+        ISSN,
+        ORCID,
+        OpenAlexId,
+        SemanticScholarId,
+    )
     from bioetl.domain.value_objects.activity import (
         ActivityValue,
         ConfidenceScore,
@@ -59,7 +65,11 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.value_objects.base import ValueObject
     from bioetl.domain.value_objects.chemical import MolecularWeight, PublicationYear
-    from bioetl.domain.value_objects.compound_ids import AssayId, CompoundId, CompoundSource
+    from bioetl.domain.value_objects.compound_ids import (
+        AssayId,
+        CompoundId,
+        CompoundSource,
+    )
     from bioetl.domain.value_objects.dq_anomaly import (
         DQAnomaly,
         DQAnomalySeverity,
@@ -77,7 +87,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.value_objects.publications import DOI, PubMedId
     from bioetl.domain.value_objects.taxonomy_id import TaxonomyId, validate_taxonomy_id
-    from bioetl.domain.value_objects._chemical_identifiers import InChIKey, SMILES
 
 _MODULE_ACADEMIC_IDS = "bioetl.domain.value_objects.academic_ids"
 _MODULE_ACTIVITY = "bioetl.domain.value_objects.activity"

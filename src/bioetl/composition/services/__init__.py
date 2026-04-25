@@ -20,22 +20,15 @@ from bioetl.composition.services.versioning import (
     get_pipeline_version,
 )
 
-# Re-export input types from domain.ports for convenience
-from bioetl.domain.ports import (
-    BronzeMetadataInput,
-    GoldMetadataInput,
-    SilverMetadataInput,
-)
-
-_LAZY_EXPORT_MODULES: dict[str, str] = {
-    "MetadataCoordinator": "bioetl.composition._services",
+_LAZY_EXPORTS: dict[str, tuple[str, str]] = {
+    "BronzeMetadataInput": ("bioetl.domain.ports", "BronzeMetadataInput"),
+    "GoldMetadataInput": ("bioetl.domain.ports", "GoldMetadataInput"),
+    "MetadataCoordinator": ("bioetl.composition._services", "MetadataCoordinator"),
+    "SilverMetadataInput": ("bioetl.domain.ports", "SilverMetadataInput"),
 }
 
 __all__ = [
-    "BronzeMetadataInput",
-    "GoldMetadataInput",
-    "MetadataCoordinator",
-    "SilverMetadataInput",
+    *_LAZY_EXPORTS,
     "compute_config_hash",
     "get_code_revision_provenance",
     "get_git_commit",
@@ -46,11 +39,11 @@ __all__ = [
 def __getattr__(name: str) -> object:
     """Resolve compatibility exports lazily to avoid bootstrap import cycles."""
     try:
-        module_name = _LAZY_EXPORT_MODULES[name]
+        module_name, attr_name = _LAZY_EXPORTS[name]
     except KeyError as exc:  # pragma: no cover - standard attribute path
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}") from exc
 
-    value = getattr(import_module(module_name), name)
+    value = getattr(import_module(module_name), attr_name)
     globals()[name] = value
     return value
 

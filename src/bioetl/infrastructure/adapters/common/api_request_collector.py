@@ -16,10 +16,13 @@ from bioetl.domain.models.metadata import (
     SourceMetadata,
 )
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.time import SystemClock
 
 
 class APIRequestCollector:
     """Collect API request metadata and build SourceMetadata snapshots."""
+
+    _clock = SystemClock()
 
     def __init__(self) -> None:
         """Initialize an empty request collector."""
@@ -64,7 +67,7 @@ class APIRequestCollector:
             request_duration_ms=duration_ms,
             status_code=status_code,
             rate_limit=rate_limit,
-            timestamp=timestamp or datetime.now(UTC),
+            timestamp=timestamp or self._clock.now(),
         )
 
         with self._lock:

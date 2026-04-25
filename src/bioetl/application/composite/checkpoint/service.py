@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import warnings
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
 from bioetl.application.composite.checkpoint._anchor_context import (
     ExpectedCheckpointContext,
@@ -25,9 +26,6 @@ from bioetl.application.composite.port_types import (
     MetricsPort,
     RunLedgerPort,
 )
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
 
 
 @dataclass(frozen=True, slots=True)
@@ -321,40 +319,37 @@ class CompositeCheckpointService:
     @property
     def expected_effective_config_hash(self) -> str:
         """Expose the configured effective-config anchor for dependent helpers."""
-        return cast(str, self._expected_checkpoint_context.effective_config_hash)
+        return self._expected_checkpoint_context.effective_config_hash
 
     @property
     def expected_effective_config_artifact_id(self) -> str:
         """Expose the configured effective-config artifact anchor."""
-        return cast(str, self._expected_checkpoint_context.effective_config_artifact_id)
+        return self._expected_checkpoint_context.effective_config_artifact_id
 
     @property
     def expected_execution_fingerprint(self) -> str:
         """Expose the configured execution-fingerprint anchor."""
-        return cast(str, self._expected_checkpoint_context.execution_fingerprint)
+        return self._expected_checkpoint_context.execution_fingerprint
 
     @property
     def expected_dq_contract_compatibility_hash(self) -> str:
         """Expose the configured DQ compatibility anchor."""
-        return cast(
-            str,
-            self._expected_checkpoint_context.dq_contract_compatibility_hash,
-        )
+        return self._expected_checkpoint_context.dq_contract_compatibility_hash
 
     @property
     def expected_contract_ref(self) -> str:
         """Expose the configured contract-ref anchor for dependent helpers."""
-        return cast(str, self._expected_checkpoint_context.contract_ref)
+        return self._expected_checkpoint_context.contract_ref
 
     @property
     def expected_contract_version(self) -> str:
         """Expose the configured contract-version anchor for dependent helpers."""
-        return cast(str, self._expected_checkpoint_context.contract_version)
+        return self._expected_checkpoint_context.contract_version
 
     @property
     def expected_manifest_id(self) -> str:
         """Expose the configured manifest anchor for checkpoint correlation."""
-        return cast(str, self._expected_checkpoint_context.manifest_id)
+        return self._expected_checkpoint_context.manifest_id
 
     async def load(self) -> CompositeCheckpointState:
         """Load checkpoint state or create a fresh one."""
@@ -374,12 +369,12 @@ class CompositeCheckpointService:
     async def delete_orphaned(self) -> int:
         """Delete orphaned checkpoint files from previous runs."""
         await asyncio.sleep(0)
-        return cast(int, self._persistence_service.delete_orphaned())
+        return self._persistence_service.delete_orphaned()
 
     async def list_all(self) -> list[str]:
         """List all checkpoints for this composite pipeline."""
         await asyncio.sleep(0)
-        return cast(list[str], self._persistence_service.list_all())
+        return self._persistence_service.list_all()
 
 
 class CompositeCheckpointManager(CompositeCheckpointService):
