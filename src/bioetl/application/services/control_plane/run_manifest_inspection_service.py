@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from typing import cast
 from uuid import UUID
 
 from bioetl.application.services.control_plane._run_manifest_inspection_mixins import (
@@ -167,12 +166,12 @@ class RunManifestInspectionService(
         """Resolve manifest_id first, then run_id lookup when identifier is UUID-like."""
         manifest = self.manifest_port.get(identifier)
         if manifest is not None:
-            return cast(RunManifest, manifest)
+            return manifest
         run_id = self._parse_run_id(identifier)
         if run_id is not None:
             manifest = self.manifest_port.get_by_run_id(run_id)
             if manifest is not None:
-                return cast(RunManifest, manifest)
+                return manifest
         raise ValueError(f"Run manifest not found for identifier: {identifier}")
 
     @staticmethod

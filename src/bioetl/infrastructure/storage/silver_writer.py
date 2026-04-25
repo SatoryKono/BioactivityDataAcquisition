@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio as _asyncio
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import pyarrow as pa
 from deltalake import DeltaTable as _DeltaTable
@@ -36,8 +36,6 @@ from bioetl.infrastructure.storage.silver.maintenance_mixin import (
 # SilverWriterValidationMixin removed; validation handled by SilverValidationOperations service
 from bioetl.infrastructure.storage.silver.operations.validation_operations import (
     _prepare_silver_write_payload_impl,
-    _PreparedSilverWritePayload,
-    _SilverWritePreparationRequest,
 )
 
 # SilverWriterArrowMixin removed from inheritance (composition pattern)
@@ -56,6 +54,11 @@ from bioetl.infrastructure.storage.silver.pipeline_helpers import (
 # Postwrite operations now handled by SilverPostwriteOperations service
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
     SilverWriterRuntimeServices,
+)
+from bioetl.infrastructure.storage.silver.validation_operations import (
+    _PreparedSilverWritePayload,
+    _SilverWritePreparationRequest,
+    _ValidatedSilverWriteContext,
 )
 from bioetl.infrastructure.storage.silver.writer_runtime_support import (
     _assign_runtime_services,
@@ -76,7 +79,30 @@ write_deltalake = _write_deltalake
 # in this root module while the implementations live in split validation helpers.
 
 if TYPE_CHECKING:
+    from bioetl.domain.ports import TracingPort
+    from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
+    from bioetl.infrastructure.storage.silver.operations.arrow_operations import (
+        SilverArrowOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.delta_operations import (
+        SilverDeltaOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.maintenance_operations import (
+        SilverMaintenanceOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.merged_operations import (
+        SilverMergedOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
+        SilverMetadataOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
+        SilverPostwriteOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+        SilverValidationOperations,
+    )
 __all__ = ["SilverWriteMode", "SilverWriter", "_SilverWriteExecutionContext"]
 
 
@@ -104,6 +130,16 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
     SilverWriterMaintenanceMixin,
 ):
     """Writer for Silver layer (normalized data in Delta Lake)."""
+
+    _tracing: TracingPort | None
+    _contract_rollout_policy: ContractRolloutPolicy | None
+    _maintenance: SilverMaintenanceOperations | None
+    _metadata: SilverMetadataOperations | None
+    _validation: SilverValidationOperations | None
+    _delta: SilverDeltaOperations | None
+    _arrow: SilverArrowOperations | None
+    _merged: SilverMergedOperations | None
+    _postwrite: SilverPostwriteOperations | None
 
     def __setattr__(self, name: str, value: object) -> None:
         """Keep validation service host wiring in sync for direct test assignment."""
@@ -147,8 +183,9 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         _rewire_runtime_services(self)
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
-        self._check_schema_drift = _AwaitTrackingAsyncCallable(  # type: ignore[method-assign]
-            self._check_schema_drift
+        self._check_schema_drift = cast(
+            Any,
+            _AwaitTrackingAsyncCallable(self._check_schema_drift),
         )
 
     def _should_dual_write(self) -> bool:
@@ -202,7 +239,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
     def _sync_validate_and_build_arrow(
         self,
         request: _SilverWritePreparationRequest,
-    ) -> _PreparedSilverWritePayload:
+    ) -> _ValidatedSilverWriteContext:
         """Delegate arrow validation and building to the validation service."""
         if self._validation:
             return self._validation._sync_validate_and_build_arrow(request)

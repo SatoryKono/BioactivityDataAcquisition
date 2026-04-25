@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.types import BronzeRecord
@@ -12,12 +12,21 @@ from bioetl.domain.types import BronzeRecord
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SilverMetadata
     from bioetl.domain.types import BatchID, RunID, RunType
+    from bioetl.infrastructure.storage.silver.metadata_mixin import (
+        SilverWriterMetadataMixin,
+    )
 
 __all__ = ["SilverWriterAuditMetadataCompatibilityMixin"]
 
 
 class SilverWriterAuditMetadataCompatibilityMixin:
     """Delegation surface for Silver audit and metadata write helpers."""
+
+    _metadata: SilverWriterMetadataMixin | None
+
+    def _as_metadata_mixin(self) -> SilverWriterMetadataMixin:
+        """Treat this compatibility host as a SilverWriterMetadataMixin implementation."""
+        return cast("SilverWriterMetadataMixin", self)
 
     async def _log_silver_audit(
         self,
@@ -47,7 +56,7 @@ class SilverWriterAuditMetadataCompatibilityMixin:
         )
 
         return await SilverWriterMetadataMixin._log_silver_audit(
-            self,
+            self._as_metadata_mixin(),
             table_name,
             records,
             mode,
@@ -70,7 +79,7 @@ class SilverWriterAuditMetadataCompatibilityMixin:
         )
 
         return SilverWriterMetadataMixin._should_skip_silver_metadata_write(
-            self,
+            self._as_metadata_mixin(),
             records=records,
             table_path=table_path,
             event_name=event_name,
@@ -91,7 +100,7 @@ class SilverWriterAuditMetadataCompatibilityMixin:
         )
 
         await SilverWriterMetadataMixin._write_silver_metadata_file(
-            self,
+            self._as_metadata_mixin(),
             table_path=table_path,
             metadata=metadata,
             table_name=table_name,
@@ -116,7 +125,7 @@ class SilverWriterAuditMetadataCompatibilityMixin:
         )
 
         await SilverWriterMetadataMixin._maybe_log_silver_audit(
-            self,
+            self._as_metadata_mixin(),
             table_name=table_name,
             records=records,
             mode=mode,
@@ -170,7 +179,7 @@ class SilverWriterAuditMetadataCompatibilityMixin:
         )
 
         await SilverWriterMetadataMixin._write_silver_metadata(
-            self,
+            self._as_metadata_mixin(),
             resolved_request,
         )
 
@@ -180,4 +189,6 @@ class SilverWriterAuditMetadataCompatibilityMixin:
             SilverWriterMetadataMixin,
         )
 
-        return await SilverWriterMetadataMixin._get_delta_version(self, table_path)
+        return await SilverWriterMetadataMixin._get_delta_version(
+            self._as_metadata_mixin(), table_path
+        )

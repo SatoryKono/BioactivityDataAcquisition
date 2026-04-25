@@ -62,7 +62,6 @@ from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
-_OPTIONAL_STRING_TYPE = "str | None"
 
 
 def _public_assembler_seam(name: str) -> object:
@@ -78,7 +77,7 @@ def _public_assembler_callable(name: str) -> Callable[..., object]:
 
 def _optional_string_kwarg(kwargs: dict[str, object], key: str) -> str | None:
     """Return one optional string kwarg with explicit typing for runner shims."""
-    return cast(_OPTIONAL_STRING_TYPE, kwargs.get(key))
+    return cast(str | None, kwargs.get(key))
 
 
 class GenericPipelineFactory(Generic[TPipeline]):

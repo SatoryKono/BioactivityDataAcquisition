@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator, Mapping
+from typing import cast
 
 __all__ = [
     "DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY",
@@ -10,7 +11,7 @@ __all__ = [
 
 
 def _build_default_gold_schema_registry() -> dict[str, type]:
-    from bioetl.domain.contracts import (
+    from bioetl.domain.contracts.gold import (
         CompositeActivityGoldSchema,
         CompositeAssayGoldSchema,
         CompositeMoleculeGoldSchema,
@@ -19,11 +20,11 @@ def _build_default_gold_schema_registry() -> dict[str, type]:
     )
 
     return {
-        "activity": CompositeActivityGoldSchema,
-        "assay": CompositeAssayGoldSchema,
-        "molecule": CompositeMoleculeGoldSchema,
-        "publication": CompositePublicationGoldSchema,
-        "target": CompositeTargetGoldSchema,
+        "activity": cast(type, CompositeActivityGoldSchema),
+        "assay": cast(type, CompositeAssayGoldSchema),
+        "molecule": cast(type, CompositeMoleculeGoldSchema),
+        "publication": cast(type, CompositePublicationGoldSchema),
+        "target": cast(type, CompositeTargetGoldSchema),
     }
 
 

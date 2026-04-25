@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 from urllib.parse import urlencode
 
 from bioetl.application.services.audit_inspection_service import AuditInspectionResult
@@ -23,6 +23,18 @@ TRACE_DRILLDOWN_DEFAULT_TO = "now"
 TRACE_WINDOW_PADDING = timedelta(minutes=5)
 
 
+class _CheckpointLookupService(Protocol):
+    async def get_checkpoint(self, pipeline_name: str) -> CheckpointInfo | None: ...
+
+
+class _LineageExplainService(Protocol):
+    def explain_run(self, run_id: str) -> LineageRunExplanationResult: ...
+
+
+class _RunManifestShowService(Protocol):
+    def show(self, identifier: str) -> RunManifestInspectionResult: ...
+
+
 def resolve_pipeline_name(
     run_manifest: RunManifestInspectionResult | None,
 ) -> str | None:
@@ -33,7 +45,7 @@ def resolve_pipeline_name(
 
 async def resolve_checkpoint_for_run(
     *,
-    checkpoint_service: object,
+    checkpoint_service: _CheckpointLookupService,
     run_id: str,
     pipeline_name: str | None,
 ) -> CheckpointInfo | None:
@@ -52,7 +64,7 @@ async def resolve_checkpoint_for_run(
 
 
 def resolve_lineage_for_run(
-    lineage_service: object | None,
+    lineage_service: _LineageExplainService | None,
     run_id: str,
 ) -> LineageRunExplanationResult | None:
     if lineage_service is None:
@@ -64,7 +76,7 @@ def resolve_lineage_for_run(
 
 
 def resolve_run_manifest(
-    run_manifest_service: object | None,
+    run_manifest_service: _RunManifestShowService | None,
     identifier: str,
 ) -> RunManifestInspectionResult | None:
     if run_manifest_service is None:
@@ -199,8 +211,9 @@ def resolve_manifest_run_type(
     if run_manifest is None:
         return None
     run_type = getattr(run_manifest.manifest, "run_type", None)
-    if hasattr(run_type, "value"):
-        run_type = run_type.value
+    run_type_value = getattr(run_type, "value", None)
+    if isinstance(run_type_value, str):
+        run_type = run_type_value
     return str(run_type) if run_type not in {None, ""} else None
 
 

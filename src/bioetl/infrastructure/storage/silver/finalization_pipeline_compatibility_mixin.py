@@ -5,21 +5,23 @@ from __future__ import annotations
 import time
 from collections.abc import Sequence
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pyarrow as pa
 
 from bioetl.domain.context import current_utc_time
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.ports import MetadataWriterPort
 from bioetl.domain.types import BronzeRecord
-from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
+from bioetl.infrastructure.storage.silver.operations.metadata_finalization_support import (
     _PreparedSilverWriteFinalizationContext,
-)
-from bioetl.infrastructure.storage.silver.operations.validation_operations import (
-    _PreparedSilverWritePayload,
 )
 from bioetl.infrastructure.storage.silver.pipeline_helpers import (
     _SilverWriteExecutionContext,
+)
+from bioetl.infrastructure.storage.silver.validation_operations import (
+    _PreparedSilverWritePayload,
 )
 
 if TYPE_CHECKING:
@@ -27,12 +29,43 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
     from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
+    from bioetl.infrastructure.storage.silver.operations.delta_operations import (
+        SilverDeltaOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.maintenance_operations import (
+        SilverMaintenanceOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
+        SilverMetadataOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
+        SilverPostwriteOperations,
+    )
 
 __all__ = ["SilverWriterFinalizationCompatibilityMixin"]
 
 
 class SilverWriterFinalizationCompatibilityMixin:
     """Delegation surface for Silver finalization and postwrite helpers."""
+
+    _delta: SilverDeltaOperations | None
+    _maintenance: SilverMaintenanceOperations | None
+    _metadata: SilverMetadataOperations | None
+    _metadata_writer: MetadataWriterPort | None
+    _postwrite: SilverPostwriteOperations | None
+    base_path_obj: Path
+
+    async def _get_delta_version(self, table_path: str) -> int | None: ...
+
+    async def _compute_dq_metrics(
+        self,
+        table_name: str,
+        records: list[BronzeRecord],
+        quarantined_count: int = 0,
+        validation_errors: Sequence[str] | None = None,
+    ) -> object: ...
+
+    async def _write_silver_metadata(self, *args: object, **kwargs: object) -> None: ...
 
     async def _dispatch_write_with_domain_errors(
         self,
@@ -255,15 +288,11 @@ class SilverWriterFinalizationCompatibilityMixin:
         started_at: datetime,
     ) -> SilverWriteResult:
         """Fallback for legacy tests that inject a metadata writer directly."""
-        from bioetl.domain.models.metadata import SilverMetadata
-        from bioetl.domain.value_objects.metadata import (
-            DeltaMetrics,
-            EnvironmentMetadata,
-            PipelineMetadata,
-            RuntimeMetadata,
-            RunTypeEnum,
-        )
         from bioetl.domain.value_objects.silver_result import SilverWriteResult
+        from bioetl.infrastructure.storage.silver.operations.metadata_builders import (
+            _build_silver_metadata,
+            _SilverMetadataBuildRequest,
+        )
 
         completed_at = current_utc_time()
         first_record = records[0] if records else {}
@@ -276,27 +305,24 @@ class SilverWriterFinalizationCompatibilityMixin:
             ).strip()
             or None
         )
-        metadata = SilverMetadata(
-            table_name=table_name,
-            runtime=RuntimeMetadata(
+        metadata = _build_silver_metadata(
+            _SilverMetadataBuildRequest(
+                table_name=table_name,
+                table_path=table_path,
+                records=records,
+                dq_metrics=None,
+                mode="merge",
+                runtime_started_at=started_at,
+                runtime_completed_at=completed_at,
                 run_id=run_id or "legacy-direct-metadata-writer",
                 manifest_id=manifest_id,
-                run_type=RunTypeEnum.INCREMENTAL,
-                started_at=started_at,
-                completed_at=completed_at,
-                duration_seconds=int((completed_at - started_at).total_seconds()),
-            ),
-            pipeline=PipelineMetadata(name="test", version="1.0"),
-            delta=DeltaMetrics(
-                rows_inserted=len(records),
-                rows_updated=0,
-                rows_deleted=0,
-                files_added=1,
-            ),
-            environment=EnvironmentMetadata(
-                bioetl_version="test",
-                python_version="test",
-            ),
+                run_type="incremental",
+                source_batch_id=None,
+                transform_version=getattr(self, "_transform_version", None),
+                transform_steps=getattr(self, "_transform_steps", ()),
+                bronze_refs=None,
+                version_after=None,
+            )
         )
         await self._metadata_writer.write(metadata)
         delta_version = await self._get_delta_version(table_path)

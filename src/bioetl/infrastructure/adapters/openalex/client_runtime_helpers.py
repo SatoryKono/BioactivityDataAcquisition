@@ -97,10 +97,10 @@ def _coerce_openalex_runtime_services_request(
     """Normalize request-style and legacy kwargs runtime inputs."""
     if request is not None:
         if kwargs:
-            unexpected = ", ".join(sorted(kwargs))
+            unexpected_args = ", ".join(sorted(kwargs))
             raise TypeError(
                 "build_openalex_runtime_services received unexpected keyword "
-                f"arguments with request object: {unexpected}"
+                f"arguments with request object: {unexpected_args}"
             )
         return request
 
@@ -126,9 +126,9 @@ def _coerce_openalex_runtime_services_request(
         "logger",
         "runtime_errors",
     }
-    unexpected = sorted(kwargs.keys() - expected_keys)
-    if unexpected:
-        unexpected_args = ", ".join(unexpected)
+    unexpected_keys = sorted(kwargs.keys() - expected_keys)
+    if unexpected_keys:
+        unexpected_args = ", ".join(unexpected_keys)
         raise TypeError(
             "build_openalex_runtime_services received unexpected keyword "
             f"arguments: {unexpected_args}"

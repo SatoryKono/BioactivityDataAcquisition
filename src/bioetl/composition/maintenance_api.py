@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from importlib import import_module
+from typing import TYPE_CHECKING
 
 __all__ = [
     "cleanup_bronze",
@@ -13,10 +14,19 @@ __all__ = [
 
 _SERVICES_MODULE = "bioetl.composition._services"
 
-cleanup_bronze: object
-get_bronze_cleanup_service: object
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
+
+    from bioetl.application.services.bronze_cleanup_service import (
+        BronzeCleanupResult,
+        BronzeCleanupService,
+    )
+    from bioetl.application.services.vacuum_service import VacuumService
+
+cleanup_bronze: "Callable[[int, bool], Awaitable[BronzeCleanupResult]]"
+get_bronze_cleanup_service: "Callable[[], BronzeCleanupService]"
 get_contract_migration_service: object
-get_vacuum_service: object
+get_vacuum_service: "Callable[[], VacuumService]"
 
 
 def __getattr__(name: str) -> object:

@@ -2,9 +2,17 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TypeVar
 
-from bioetl.application.core.wiring.factory import BasePipeline
+import pyarrow as pa
+
+from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
+from bioetl.application.core.wiring.transformer import BaseTransformer
+from bioetl.composition.bootstrap_contexts import DQConfigsContext
+from bioetl.composition.factories.datasource.data_source_factory import (
+    DataSourceCreatorProtocol,
+)
 from bioetl.composition.factories.datasource.data_source_factory import (
     get_data_source_creator as _rf014_get_data_source_creator,
 )
@@ -26,6 +34,10 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
 from bioetl.composition.factories.pipeline.runner_assembly import (
     assemble_runner_impl as _rf014_assemble_runner_impl,
 )
+from bioetl.composition.observability import ObservabilityBundle
+from bioetl.composition.providers.provider_registry import ProviderRegistry
+from bioetl.domain.types import GoldSchemaType
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 get_data_source_creator = _rf014_get_data_source_creator
 build_factory_services = _rf014_build_factory_services
@@ -37,24 +49,53 @@ TPipeline = TypeVar("TPipeline", bound=BasePipeline)
 
 
 class GenericPipelineFactory(_GenericPipelineFactory[TPipeline]):
-    def create_transformer(self, *args: object, **kwargs: object) -> object:
-        return super().create_transformer(*args, **kwargs)
-
-    def create_with_services(self, *args: object, **kwargs: object) -> object:
-        # transformer_class=self.transformer_class stays delegated via helper owners.
-        return super().create_with_services(*args, **kwargs)
+    pass
 
 
 def create_pipeline_factory(
-    *args: object, **kwargs: object
-) -> GenericPipelineFactory[object]:
-    return GenericPipelineFactory(*args, **kwargs)
+    pipeline_name: str,
+    pipeline_class: type[TPipeline],
+    provider: str,
+    silver_schema: pa.Schema | None = None,
+    gold_schema: GoldSchemaType | None = None,
+    pandera_silver_schema: object | None = None,
+    data_source_creator: DataSourceCreatorProtocol | None = None,
+    transformer_class: type[BaseTransformer] | None = None,
+    provider_registry: ProviderRegistry | None = None,
+) -> GenericPipelineFactory[TPipeline]:
+    return GenericPipelineFactory(
+        pipeline_name=pipeline_name,
+        pipeline_class=pipeline_class,
+        provider=provider,
+        silver_schema=silver_schema,
+        gold_schema=gold_schema,
+        pandera_silver_schema=pandera_silver_schema,
+        data_source_creator=data_source_creator,
+        transformer_class=transformer_class,
+        provider_registry=provider_registry,
+    )
 
 
-def assemble_runner(**kwargs: object) -> object:
+def assemble_runner(
+    pipeline: BasePipeline,
+    observability: ObservabilityBundle,
+    silver_schema: pa.Schema | None,
+    gold_schema: GoldSchemaType,
+    strict_gold_validation: bool,
+    yaml_config: PipelineYamlConfig | None = None,
+    dq_configs_extractor: Callable[
+        [PipelineYamlConfig | None],
+        DQConfigsContext,
+    ] = _extract_dq_configs,
+) -> PipelineRunner:
     return _assemble_runner_impl(
-        dq_configs_extractor=_extract_dq_configs,
-        **kwargs,
+        pipeline=pipeline,
+        observability=observability,
+        silver_schema=silver_schema,
+        gold_schema=gold_schema,
+        strict_gold_validation=strict_gold_validation,
+        dq_configs_extractor=dq_configs_extractor,
+        yaml_config=yaml_config,
     )
 
 

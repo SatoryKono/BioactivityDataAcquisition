@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 
 import pyarrow as pa
 
@@ -20,11 +20,6 @@ from bioetl.infrastructure.storage.silver.merged_operations import (
     _PreparedMergedSilverWrite,
     _write_silver_merged_delta,
 )
-
-if TYPE_CHECKING:
-    from bioetl.infrastructure.storage.silver.metadata_mixin import (
-        _MergedSilverMetadataWriterProtocol,
-    )
 
 
 class _MergedSilverMetadataWriterProtocol(Protocol):
@@ -43,7 +38,7 @@ class _MergedSilverMetadataWriterProtocol(Protocol):
     ) -> Awaitable[None]: ...
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(slots=True)
 class SilverMergedOperations:
     """Merged operations service for Silver layer writes.
 

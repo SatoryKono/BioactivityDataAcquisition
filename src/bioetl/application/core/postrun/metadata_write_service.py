@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Awaitable
-from typing import TYPE_CHECKING, Literal, cast
+from typing import TYPE_CHECKING, Literal
 
 from bioetl.application.core.postrun._metadata_writes import (
     build_final_metadata_write_coroutines,
@@ -80,24 +80,19 @@ class PostrunMetadataWriteService:
         dq_reports: DQReportResult | None,
     ) -> list[Awaitable[object]]:
         """Build final metadata write coroutines for the current postrun flow."""
-        return cast(
-            list[Awaitable[object]],
-            build_final_metadata_write_coroutines(
-                metadata_coordinator=self._metadata_coordinator,
-                metadata_writer=self._metadata_writer,
-                storage=self._storage,
-                config=self._config,
-                runtime=self._runtime,
-                context=self._context,
-                stats=get_run_statistics(executor),
-                dq_reports=dq_reports,
-                completed_at=(
-                    self._clock.now()
-                    if self._clock is not None
-                    else MISSING_RUNTIME_TIMESTAMP
-                ),
-                resolve_delta_version=self._resolve_delta_version,
+        return build_final_metadata_write_coroutines(
+            metadata_coordinator=self._metadata_coordinator,
+            metadata_writer=self._metadata_writer,
+            storage=self._storage,
+            config=self._config,
+            runtime=self._runtime,
+            context=self._context,
+            stats=get_run_statistics(executor),
+            dq_reports=dq_reports,
+            completed_at=(
+                self._clock.now() if self._clock is not None else MISSING_RUNTIME_TIMESTAMP
             ),
+            resolve_delta_version=self._resolve_delta_version,
         )
 
     def _resolve_delta_version(
@@ -106,12 +101,9 @@ class PostrunMetadataWriteService:
         layer: Literal["silver", "gold"],
     ) -> int | None:
         """Resolve the latest Delta version through the injected resolver."""
-        return cast(
-            int | None,
-            self._metadata_version_resolver.resolve_delta_version(
-                table_path,
-                layer=layer,
-            ),
+        return self._metadata_version_resolver.resolve_delta_version(
+            table_path,
+            layer=layer,
         )
 
 

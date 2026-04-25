@@ -39,6 +39,7 @@ from bioetl.interfaces.cli.formatters import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.domain.ports import LoggerPort
@@ -59,7 +60,7 @@ def build_cli_registry() -> PipelineRegistry:
     return _impl()
 
 
-async def preview_cleanup(pipeline: str) -> object:
+async def preview_cleanup(pipeline: str) -> CleanupPreview:
     """Compatibility seam for cleanup preview patched by CLI dry-run tests."""
     from bioetl.composition.resources_api import preview_cleanup as _impl
 

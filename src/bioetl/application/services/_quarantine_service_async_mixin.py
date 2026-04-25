@@ -50,6 +50,23 @@ class _QuarantineAsyncHost(Protocol):
         **extra: object,
     ) -> None: ...
 
+    async def _inspect_impl(
+        self,
+        *,
+        pipeline: str,
+        limit: int,
+        error_code: str | None,
+        start_time: float,
+    ) -> list[QuarantineRecord]: ...
+
+    async def _get_stats_impl(
+        self,
+        *,
+        pipeline: str,
+        error_code: str | None,
+        start_time: float,
+    ) -> JsonDict: ...
+
 
 class QuarantineServiceAsyncMixin:
     """Async admin operations for QuarantineService."""

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar
 
 from bioetl.application.core.batch_executor_dq_helpers import (
     build_dataframe_from_records,
@@ -155,21 +155,18 @@ class _BatchExecutorDQMixin:
         stage: str = "other",
     ) -> object | None:
         """Build Polars dataframe from records, returning None on failure."""
-        return cast(
-            object | None,
-            build_dataframe_from_records(
-                records=records,
-                logger=self._logger,
-                metrics=self._services.metrics,
-                pipeline=self._config.pipeline_name,
-                stage=stage,
-            ),
+        return build_dataframe_from_records(
+            records=records,
+            logger=self._logger,
+            metrics=self._services.metrics,
+            pipeline=self._config.pipeline_name,
+            stage=stage,
         )
 
     @staticmethod
     def _dataframe_error_types() -> tuple[type[Exception], ...]:
         """Resolve exception types raised while building Polars dataframes."""
-        return cast(tuple[type[Exception], ...], dataframe_error_types())
+        return dataframe_error_types()
 
     @staticmethod
     def _stringify_value(
@@ -188,17 +185,15 @@ class _BatchExecutorDQMixin:
         plain scalars/strings across rows. For such columns we stringify values so
         the dataframe builder sees a single consistent type.
         """
-        return cast(
-            list[dict[str, object]] | None, normalize_records_for_polars(records)
-        )
+        return normalize_records_for_polars(records)
 
     def _get_dq_thresholds(self) -> tuple[float, float]:
         """Resolve DQ thresholds from config, falling back to defaults."""
-        return cast(tuple[float, float], get_dq_thresholds(self._config))
+        return get_dq_thresholds(self._config)
 
     def _extract_dq_entity(self) -> str:
         """Derive entity name for report naming from silver table naming."""
-        return cast(str, extract_dq_entity(self._config))
+        return extract_dq_entity(self._config)
 
     def get_dq_context(self) -> DQReportContext | None:
         """Build report context from DQ data accumulated during execution.

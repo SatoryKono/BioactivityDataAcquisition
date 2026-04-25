@@ -69,7 +69,7 @@ import warnings
 
 
 class DataSourceCreatorPort(DataSourceCreatorProtocol):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: object, **kwargs: object) -> None:
         warnings.warn(
             "DataSourceCreatorPort is deprecated and will be removed in v2.0. "
             "Use DataSourceCreatorProtocol instead.",

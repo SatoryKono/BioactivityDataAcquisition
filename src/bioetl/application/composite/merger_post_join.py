@@ -118,11 +118,13 @@ def finalize_merged_dataframe(
         dependency_results=dependency_results,
     )
     merged_df = host._drop_excluded_fields(merged_df)
-    merged_df = host._orderer.order_columns(merged_df)
-    host._logger.info(
-        "Ordered columns by semantic groups",
-        total_columns=len(merged_df.columns),
-    )
+    orderer = host._orderer
+    if orderer is not None:
+        merged_df = orderer.order_columns(merged_df)
+        host._logger.info(
+            "Ordered columns by semantic groups",
+            total_columns=len(merged_df.columns),
+        )
     return merged_df
 
 

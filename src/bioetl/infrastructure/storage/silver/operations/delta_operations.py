@@ -34,12 +34,14 @@ if TYPE_CHECKING:
 class _SilverDeltaHostProtocol(Protocol):
     """Shared Delta host contract for mixin and operations implementations."""
 
-    logger: LoggerPort
-    _metrics: MetricsPort | None
-    _merge_resilience_policy: SilverMergeResiliencePolicy
-
     @property
     def _logger(self) -> LoggerPort: ...
+
+    @property
+    def _metrics(self) -> MetricsPort | None: ...
+
+    @property
+    def _merge_resilience_policy(self) -> SilverMergeResiliencePolicy: ...
 
     def _load_silver_writer_module(self) -> object: ...
 
@@ -224,7 +226,7 @@ async def _dispatch_write_with_domain_errors_impl(
     )
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(slots=True)
 class SilverDeltaOperations:
     """Delta operations service for Silver layer writes.
 

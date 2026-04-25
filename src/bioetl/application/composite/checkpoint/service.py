@@ -6,7 +6,7 @@ import asyncio
 import warnings
 from collections.abc import Callable
 from dataclasses import dataclass, fields
-from typing import cast
+from typing import Any
 
 from bioetl.application.composite.checkpoint._anchor_context import (
     ExpectedCheckpointContext,
@@ -105,7 +105,7 @@ def _coerce_checkpoint_service_context(
             init=init,
             overrides=overrides,
         )
-    resolved_values = {
+    resolved_values: dict[str, Any] = {
         field_name: _resolve_checkpoint_init_value(
             field_name=field_name,
             init=init,
@@ -113,9 +113,7 @@ def _coerce_checkpoint_service_context(
         )
         for field_name in _CHECKPOINT_CONTEXT_FIELD_NAMES
     }
-    return CompositeCheckpointServiceContext(
-        **cast("dict[str, object]", resolved_values)
-    )
+    return CompositeCheckpointServiceContext(**resolved_values)
 
 
 class CompositeCheckpointService:

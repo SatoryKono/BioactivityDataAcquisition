@@ -11,6 +11,9 @@ __all__ = [
     "render_health_results_json",
 ]
 
+HealthResultValue = str | float | int | None
+HealthResults = dict[str, dict[str, HealthResultValue]]
+
 
 def build_health_server_info_lines(host: str, port: int) -> list[str]:
     """Build startup lines for the health server command."""
@@ -25,14 +28,14 @@ def build_health_server_info_lines(host: str, port: int) -> list[str]:
     ]
 
 
-def all_health_results_healthy(results: dict[str, dict[str, str]]) -> bool:
+def all_health_results_healthy(results: HealthResults) -> bool:
     """Return True when every provider result is healthy."""
     return all(
         result.get("status", "unknown") == "healthy" for result in results.values()
     )
 
 
-def render_health_results_json(results: dict[str, dict[str, str]]) -> str:
+def render_health_results_json(results: HealthResults) -> str:
     """Render health results as formatted JSON."""
     return json.dumps(results, indent=2)
 
@@ -46,11 +49,11 @@ def _health_status_icon(status: str) -> str:
     return "[FAIL]"
 
 
-def build_health_result_lines(results: dict[str, dict[str, str]]) -> list[str]:
+def build_health_result_lines(results: HealthResults) -> list[str]:
     """Build human-readable health check output lines."""
     lines: list[str] = []
     for provider, result in results.items():
-        status = result.get("status", "unknown")
+        status = str(result.get("status", "unknown"))
         line = f"  {_health_status_icon(status)} {provider}: {status}"
         if "latency_ms" in result:
             line += f" ({result['latency_ms']}ms)"

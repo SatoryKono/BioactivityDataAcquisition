@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import cast
 
 from bioetl.application.services._quarantine_service_support import (
     _QUARANTINE_OPERATOR_ERRORS,
@@ -27,28 +26,25 @@ class QuarantineServiceReplayPurgeSyncMixin:
         max_age_days: int = 7,
     ) -> list[JsonDict]:
         """Replay quarantine records for reprocessing."""
-        return cast(
-            list[JsonDict],
-            _run_traced_sync_operation(
-                self,
-                span_name="quarantine.replay",
-                operation="replay",
+        return _run_traced_sync_operation(
+            self,
+            span_name="quarantine.replay",
+            operation="replay",
+            pipeline=pipeline,
+            trace_attributes={
+                "bioetl.has_error_code_filter": error_code is not None,
+                "bioetl.max_age_days": max_age_days,
+            },
+            execute=lambda started_at, started_monotonic: self._replay_impl(
                 pipeline=pipeline,
-                trace_attributes={
-                    "bioetl.has_error_code_filter": error_code is not None,
-                    "bioetl.max_age_days": max_age_days,
-                },
-                execute=lambda started_at, started_monotonic: self._replay_impl(
-                    pipeline=pipeline,
-                    error_code=error_code,
-                    max_age_days=max_age_days,
-                    now=started_at,
-                    started_at=started_at,
-                    started_monotonic=started_monotonic,
-                ),
-                success_of=lambda _records: True,
-                result_extra_of=lambda records: {"bioetl.record_count": len(records)},
+                error_code=error_code,
+                max_age_days=max_age_days,
+                now=started_at,
+                started_at=started_at,
+                started_monotonic=started_monotonic,
             ),
+            success_of=lambda _records: True,
+            result_extra_of=lambda records: {"bioetl.record_count": len(records)},
         )
 
     def _replay_impl(
@@ -114,24 +110,21 @@ class QuarantineServiceReplayPurgeSyncMixin:
         older_than_days: int = 30,
     ) -> int:
         """Purge old quarantine records."""
-        return cast(
-            int,
-            _run_traced_sync_operation(
-                self,
-                span_name="quarantine.purge",
-                operation="purge",
+        return _run_traced_sync_operation(
+            self,
+            span_name="quarantine.purge",
+            operation="purge",
+            pipeline=pipeline,
+            trace_attributes={"bioetl.older_than_days": older_than_days},
+            execute=lambda started_at, started_monotonic: self._purge_impl(
                 pipeline=pipeline,
-                trace_attributes={"bioetl.older_than_days": older_than_days},
-                execute=lambda started_at, started_monotonic: self._purge_impl(
-                    pipeline=pipeline,
-                    older_than_days=older_than_days,
-                    now=started_at,
-                    started_at=started_at,
-                    started_monotonic=started_monotonic,
-                ),
-                success_of=lambda _count: True,
-                result_extra_of=lambda count: {"bioetl.records_purged": count},
+                older_than_days=older_than_days,
+                now=started_at,
+                started_at=started_at,
+                started_monotonic=started_monotonic,
             ),
+            success_of=lambda _count: True,
+            result_extra_of=lambda count: {"bioetl.records_purged": count},
         )
 
     def _purge_impl(

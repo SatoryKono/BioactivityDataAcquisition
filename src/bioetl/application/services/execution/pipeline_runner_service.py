@@ -268,7 +268,7 @@ class PipelineRunnerService:
         pipeline_name: str,
         run_id: RunID,
         options: RunOptions,
-        started_at: datetime | None = None,
+        started_at: datetime,
     ) -> PipelineRunContext:
         """Build PipelineRunContext from options."""
         return self._context_service.build_context(

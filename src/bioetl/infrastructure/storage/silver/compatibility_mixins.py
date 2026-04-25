@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from datetime import datetime
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, cast
 
 import polars as pl
 import pyarrow as pa
@@ -20,10 +20,29 @@ from bioetl.infrastructure.storage.silver.pipeline_helpers import (
     _SilverWriteInvocation,
     execute_silver_write_pipeline,
 )
+from bioetl.infrastructure.storage.silver.validation_operations import (
+    _PreparedSilverWritePayload,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics, SchemaDriftInfo
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
+    from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
+    from bioetl.infrastructure.storage.silver.merged_mixin import (
+        SilverWriterMergedMixin,
+    )
+    from bioetl.infrastructure.storage.silver.metadata_mixin import (
+        SilverWriterMetadataMixin,
+    )
+    from bioetl.infrastructure.storage.silver.operations.merged_operations import (
+        SilverMergedOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+        SilverValidationOperations,
+    )
+    from bioetl.infrastructure.storage.silver.validation_mixin import (
+        SilverWriterValidationMixin,
+    )
 
 
 def _normalize_completed_at(value: datetime | str) -> datetime:
@@ -35,6 +54,14 @@ def _normalize_completed_at(value: datetime | str) -> datetime:
 
 class SilverWriterDQCompatibilityMixin:
     """Compatibility surface for Silver DQ and schema helper methods."""
+
+    _validation: SilverValidationOperations | None
+
+    def _as_validation_mixin(self) -> SilverWriterValidationMixin:
+        """Treat this compatibility host as a validation-mixin implementation."""
+        return cast("SilverWriterValidationMixin", self)
+
+    def _resolve_table_path(self, table_name: str) -> str: ...
 
     def _validate_silver_pandera(
         self,
@@ -50,7 +77,11 @@ class SilverWriterDQCompatibilityMixin:
             SilverWriterValidationMixin,
         )
 
-        SilverWriterValidationMixin._validate_silver_pandera(self, records, table_name)
+        SilverWriterValidationMixin._validate_silver_pandera(
+            self._as_validation_mixin(),
+            records,
+            table_name,
+        )
 
     async def _check_schema_drift(
         self,
@@ -70,7 +101,10 @@ class SilverWriterDQCompatibilityMixin:
         )
 
         await SilverWriterValidationMixin._check_schema_drift(
-            self, table_name, records, on_schema_mismatch
+            self._as_validation_mixin(),
+            table_name,
+            records,
+            on_schema_mismatch,
         )
 
     async def _detect_schema_drift(
@@ -93,7 +127,7 @@ class SilverWriterDQCompatibilityMixin:
     async def _compute_dq_metrics(
         self,
         table_name: str,
-        records: pl.DataFrame | list[dict],
+        records: pl.DataFrame | list[dict[str, object]],
         quarantined_count: int = 0,
         validation_errors: Sequence[str] | None = None,
     ) -> BatchDQMetrics:
@@ -170,11 +204,26 @@ class SilverWriterDQCompatibilityMixin:
             TypeError,
             ValueError,
         ):
-            return await super()._get_table_schema(table_name)
+            from bioetl.infrastructure.storage.base_delta_writer import BaseDeltaWriter
+
+            return await BaseDeltaWriter._get_table_schema(
+                cast("BaseDeltaWriter", self),
+                table_name,
+            )
 
 
 class SilverWriterMergedCompatibilityMixin:
     """Compatibility surface for merged-write helpers."""
+
+    _merged: SilverMergedOperations | None
+
+    def _as_merged_mixin(self) -> SilverWriterMergedMixin:
+        """Treat this compatibility host as a merged-mixin implementation."""
+        return cast("SilverWriterMergedMixin", self)
+
+    def _as_metadata_mixin(self) -> SilverWriterMetadataMixin:
+        """Treat this compatibility host as a metadata-mixin implementation."""
+        return cast("SilverWriterMetadataMixin", self)
 
     async def write_silver_merged(
         self,
@@ -205,7 +254,7 @@ class SilverWriterMergedCompatibilityMixin:
         )
 
         await SilverWriterMergedMixin.write_silver_merged(
-            self,
+            self._as_merged_mixin(),
             table_name=table_name,
             records=records,
             primary_keys=primary_keys,
@@ -227,7 +276,10 @@ class SilverWriterMergedCompatibilityMixin:
             SilverWriterMergedMixin,
         )
 
-        return SilverWriterMergedMixin._prepare_merged_silver_write(self, request)
+        return SilverWriterMergedMixin._prepare_merged_silver_write(
+            self._as_merged_mixin(),
+            request,
+        )
 
     async def _write_silver_merged_delta(
         self,
@@ -248,7 +300,7 @@ class SilverWriterMergedCompatibilityMixin:
         )
 
         await SilverWriterMergedMixin._write_silver_merged_delta(
-            self,
+            self._as_merged_mixin(),
             table_path=table_path,
             arrow_table=arrow_table,
         )
@@ -272,7 +324,7 @@ class SilverWriterMergedCompatibilityMixin:
         )
 
         await SilverWriterMergedMixin._export_silver_merged_csv(
-            self,
+            self._as_merged_mixin(),
             table_name=table_name,
             arrow_table=arrow_table,
         )
@@ -298,7 +350,7 @@ class SilverWriterMergedCompatibilityMixin:
             normalized_completed_at = _normalize_completed_at(completed_at)
 
         await SilverWriterMetadataMixin._write_silver_merged_metadata(
-            self,
+            self._as_metadata_mixin(),
             table_path=table_path,
             table_name=table_name,
             records=records,
@@ -311,6 +363,37 @@ class SilverWriterMergedCompatibilityMixin:
 
 class SilverWriterWriteCompatibilityMixin:
     """Compatibility surface for the main Silver write entrypoints."""
+
+    def _should_dual_write(self) -> bool: ...
+
+    async def _write_single_target(
+        self,
+        **kwargs: object,
+    ) -> SilverWriteResult | None: ...
+
+    async def _write_dual_targets(
+        self,
+        **kwargs: object,
+    ) -> SilverWriteResult | None: ...
+
+    async def _prepare_silver_write_payload(
+        self,
+        **kwargs: object,
+    ) -> _PreparedSilverWritePayload: ...
+
+    async def _dispatch_write_with_domain_errors(
+        self,
+        *,
+        table_name: str,
+        request: _DeltaWriteRequest,
+    ) -> None: ...
+
+    async def _complete_silver_write_pipeline(
+        self,
+        *,
+        ctx: _SilverWriteExecutionContext,
+        payload: _PreparedSilverWritePayload,
+    ) -> SilverWriteResult | None: ...
 
     async def write_silver(
         self,

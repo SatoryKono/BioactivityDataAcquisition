@@ -10,7 +10,7 @@ and _create_default_*_fallback_service functions (RF-002).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
 
@@ -34,7 +34,7 @@ def create_default_error_handler(
     """
     from bioetl.infrastructure.adapters.error_handling import ErrorService
 
-    return ErrorService(logger, metrics=metrics)
+    return cast(ErrorHandlerPort, ErrorService(logger, metrics=metrics))
 
 
 def create_default_fallback_service(

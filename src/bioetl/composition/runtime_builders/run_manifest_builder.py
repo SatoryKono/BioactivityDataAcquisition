@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -67,7 +66,6 @@ class _RunManifestCreateRequestInputs:
 
 _STRICT_PERSISTENCE_PROFILES = {"replay_ready", "forensic_grade"}
 _REPRODUCIBLE_APPEND_BLOCKED_LAYERS = ("silver", "gold")
-_TRUTHY_ENV_VALUES = {"1", "true", "yes", "on"}
 
 
 def _create_ledger_service(
@@ -92,11 +90,11 @@ def _create_ledger_service(
 def _resolve_code_revision_for_manifest(
     *,
     resolved_config_hash: str,
+    test_mode: bool,
 ) -> CodeRevisionProvenance:
     """Return code provenance, with a deterministic test-only fallback."""
     code_revision = get_code_revision_provenance()
-    test_mode = os.getenv("BIOETL_TEST_MODE", "").strip().lower()
-    if code_revision.git_commit is not None or test_mode not in _TRUTHY_ENV_VALUES:
+    if code_revision.git_commit is not None or not test_mode:
         return code_revision
     return CodeRevisionProvenance(
         git_commit=f"test-{resolved_config_hash[:12]}",
@@ -146,6 +144,7 @@ def _build_manifest_create_request(
     )
     code_revision = _resolve_code_revision_for_manifest(
         resolved_config_hash=request_inputs.resolved_config_hash,
+        test_mode=bool(getattr(inputs.settings, "test_mode", False)),
     )
     request = RunManifestCreateSpec(
         run_id=ctx.run_id,
