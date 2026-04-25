@@ -14,6 +14,7 @@ from __future__ import annotations
 
 __all__ = ["PubChemFetchStrategies"]
 
+import asyncio
 from typing import TYPE_CHECKING
 
 import pubchempy as pcp
@@ -136,29 +137,37 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
         self,
         smiles_list: list[str],
         limit: int | None = None,
+        batch_size: int = 10,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch compounds by SMILES strings."""
         fetched = 0
-        for smiles in smiles_list:
+        valid_smiles = [s for s in smiles_list if not is_blank_value(s)]
+
+        for i in range(0, len(valid_smiles), batch_size):
+            chunk = valid_smiles[i : i + batch_size]
             if is_limit_reached(limit, fetched):
                 return
-            if is_blank_value(smiles):
-                continue
 
-            try:
-                records = await self._fetch_single_smiles(smiles)
-                for record in records:
+            tasks = [self._fetch_single_smiles(s) for s in chunk]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+
+            for smiles, result in zip(chunk, results, strict=True):
+                if isinstance(result, self.FETCH_STRATEGY_ERRORS):
+                    self._logger.warning(
+                        "smiles_fetch_failed",
+                        provider=self._provider_name,
+                        smiles=smiles[:50],
+                        error=str(result),
+                    )
+                    continue
+                elif isinstance(result, BaseException):
+                    raise result
+
+                for record in result:
                     if is_limit_reached(limit, fetched):
                         return
                     yield record
                     fetched += 1
-            except self.FETCH_STRATEGY_ERRORS as error:
-                self._logger.warning(
-                    "smiles_fetch_failed",
-                    provider=self._provider_name,
-                    smiles=smiles[:50],
-                    error=str(error),
-                )
 
     def _parse_valid_cids(self, cid_list: list[str]) -> list[int]:
         """Parse and validate CID list, returning only valid integers."""
@@ -220,15 +229,14 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
         self,
         inchikey_list: list[str],
         limit: int | None = None,
+        batch_size: int = 10,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch compounds by InChIKey list."""
         fetched = 0
+        valid_keys = []
         for inchikey in inchikey_list:
-            if is_limit_reached(limit, fetched):
-                return
             if is_blank_value(inchikey):
                 continue
-
             cleaned = inchikey.strip()
             if not is_valid_inchikey(cleaned):
                 self._logger.warning(
@@ -238,18 +246,30 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
                     reason="invalid_format",
                 )
                 continue
+            valid_keys.append(cleaned)
 
-            try:
-                records = await self._fetch_single_inchikey(cleaned)
-                for record in records:
+        for i in range(0, len(valid_keys), batch_size):
+            chunk = valid_keys[i : i + batch_size]
+            if is_limit_reached(limit, fetched):
+                return
+
+            tasks = [self._fetch_single_inchikey(k) for k in chunk]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+
+            for cleaned, result in zip(chunk, results, strict=True):
+                if isinstance(result, self.FETCH_STRATEGY_ERRORS):
+                    self._logger.warning(
+                        "inchikey_fetch_failed",
+                        provider=self._provider_name,
+                        inchikey=cleaned,
+                        error=str(result),
+                    )
+                    continue
+                elif isinstance(result, BaseException):
+                    raise result
+
+                for record in result:
                     if is_limit_reached(limit, fetched):
                         return
                     yield record
                     fetched += 1
-            except self.FETCH_STRATEGY_ERRORS as error:
-                self._logger.warning(
-                    "inchikey_fetch_failed",
-                    provider=self._provider_name,
-                    inchikey=cleaned,
-                    error=str(error),
-                )
