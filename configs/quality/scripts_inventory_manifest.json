@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-26T16:47:17.131943+00:00",
+  "generated_at": "2026-04-26T17:00:14.790329+00:00",
   "summary": {
     "total_scripts": 443,
     "status_counts": {
@@ -8667,7 +8667,7 @@
           "path": ".github/workflows/tests.yml",
           "line": 69,
           "source_group": "ci",
-          "text": "run: python scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90"
+          "text": "run: uv run python scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90"
         },
         {
           "path": "docs/03-guides/testing.md",
@@ -8776,7 +8776,7 @@
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
-          "line": 43,
+          "line": 51,
           "source_group": "ci",
           "text": "run: python scripts/engineering/repo/audit_root_cleanliness.py"
         },
