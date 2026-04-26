@@ -163,6 +163,17 @@ def _pipe_reader(
     chunks: queue.Queue[tuple[str, bytes | None]],
 ) -> None:
     try:
+        if channel == "stderr":
+            while True:
+                try:
+                    chunk = stream.readline()
+                except OSError:
+                    chunk = b""
+                if not chunk:
+                    break
+                chunks.put((channel, chunk))
+            return
+
         while True:
             try:
                 chunk = (
@@ -237,7 +248,7 @@ def _run_smoke_test_loop(
     result_handshake_sent = False
     result_handshake_deadline = None
     result_now = start
-    
+
     try:
         while True:
             now = time.monotonic()

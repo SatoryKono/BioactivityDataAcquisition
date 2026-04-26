@@ -8,6 +8,7 @@ from collections.abc import AsyncGenerator
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+import pytest_asyncio
 
 from bioetl.domain.types import HealthStatus
 from bioetl.interfaces.http.health_server import HealthServer
@@ -336,7 +337,7 @@ class TestHealthServer:
 class TestHealthServerHTTP:
     """Tests for HTTP request handling via actual connections."""
 
-    @pytest.fixture
+    @pytest_asyncio.fixture(loop_scope="function")
     async def running_server(self) -> AsyncGenerator[HealthServer, None]:
         """Create and start a health server."""
         server = HealthServer(host="127.0.0.1", port=0)
@@ -520,7 +521,7 @@ class TestHealthServerHTTP:
 class TestHealthServerQuarantineExplorer:
     """Tests for /ops/quarantine/* explorer endpoints."""
 
-    @pytest.fixture
+    @pytest_asyncio.fixture(loop_scope="function")
     async def running_server_without_quarantine(
         self,
     ) -> AsyncGenerator[HealthServer, None]:
@@ -530,7 +531,7 @@ class TestHealthServerQuarantineExplorer:
         yield server
         await server.stop()
 
-    @pytest.fixture
+    @pytest_asyncio.fixture(loop_scope="function")
     async def running_server_with_quarantine(
         self,
     ) -> AsyncGenerator[tuple[HealthServer, MagicMock], None]:

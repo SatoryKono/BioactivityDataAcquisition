@@ -10,6 +10,8 @@ CODEX_TOOL_HOME_DEFAULT="${REPO_ROOT}/.cache/tools/codex-cli"
 CODEX_NPM_PREFIX="${CODEX_NPM_PREFIX:-${CODEX_TOOL_HOME_DEFAULT}/npm-global}"
 CODEX_NPM_CACHE="${CODEX_NPM_CACHE:-${CODEX_TOOL_HOME_DEFAULT}/npm-cache}"
 CODEX_BIN="${CODEX_NPM_PREFIX}/bin/codex"
+USER_CODEX_PREFIX_DEFAULT="${HOME}/.npm-global"
+USER_CODEX_BIN_DEFAULT="${USER_CODEX_PREFIX_DEFAULT}/bin/codex"
 
 MODE="ensure"
 PRINT_BIN=0
@@ -40,6 +42,30 @@ for arg in "$@"; do
     esac
 done
 
+resolve_existing_codex() {
+    local path_bin=""
+    if [[ -x "${CODEX_BIN}" ]]; then
+        CODEX_BIN="${CODEX_BIN}"
+        CODEX_NPM_PREFIX="${CODEX_NPM_PREFIX}"
+        return 0
+    fi
+
+    if [[ -x "${USER_CODEX_BIN_DEFAULT}" ]]; then
+        CODEX_BIN="${USER_CODEX_BIN_DEFAULT}"
+        CODEX_NPM_PREFIX="${USER_CODEX_PREFIX_DEFAULT}"
+        return 0
+    fi
+
+    path_bin="$(command -v codex 2>/dev/null || true)"
+    if [[ -n "${path_bin}" && -x "${path_bin}" ]]; then
+        CODEX_BIN="${path_bin}"
+        CODEX_NPM_PREFIX="$(cd "$(dirname "${path_bin}")/.." && pwd)"
+        return 0
+    fi
+
+    return 1
+}
+
 if ! command -v node >/dev/null 2>&1; then
     echo "[ensure-codex] ERROR: Node.js is required but was not found in PATH" >&2
     exit 1
@@ -48,6 +74,10 @@ fi
 if ! command -v npm >/dev/null 2>&1; then
     echo "[ensure-codex] ERROR: npm is required but was not found in PATH" >&2
     exit 1
+fi
+
+if [[ "${MODE}" != "update" ]]; then
+    resolve_existing_codex || true
 fi
 
 if [[ "${ALLOW_INSTALL}" -eq 1 ]]; then

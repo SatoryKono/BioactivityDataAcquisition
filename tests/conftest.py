@@ -1,6 +1,7 @@
 import enum
 import os
 import sys
+import asyncio
 from functools import cache
 from pathlib import Path
 from typing import Any
@@ -46,8 +47,28 @@ def pytest_cmdline_main(config):
 def pytest_configure(config):
     # Keep it here as well just in case
     _normalize_enum_option(config.option, "diff_mode")
+    _configure_windows_asyncio(config)
     if _selected_paths_need_hypothesis(config):
         _configure_hypothesis_profiles()
+
+
+def _configure_windows_asyncio(config: pytest.Config) -> None:
+    """Tune pytest-asyncio defaults for Windows socket pressure."""
+    if not sys.platform.startswith("win"):
+        return
+
+    # On Windows/Python 3.13, function-scoped loop creation across thousands of
+    # async tests can exhaust socket buffers during socketpair() setup.
+    config.inicfg["asyncio_default_test_loop_scope"] = "module"
+    config.inicfg["asyncio_default_fixture_loop_scope"] = "module"
+
+
+@pytest.fixture(scope="session")
+def event_loop_policy() -> Any:
+    """Use Selector policy on Windows to avoid Proactor loop socket pressure."""
+    if sys.platform.startswith("win"):
+        return asyncio.WindowsSelectorEventLoopPolicy()
+    return asyncio.get_event_loop_policy()
 
 
 def _normalize_enum_option(option_namespace: object, option_name: str) -> None:
