@@ -641,7 +641,9 @@ def _build_temp_output_path(input_path: Path, output_path: Path) -> Path:
     return output_path.with_name(f".{output_path.stem}.tmp{output_path.suffix}")
 
 
-def _header_by_index(first_row: ET.Element, shared_strings: list[str]) -> dict[int, str]:
+def _header_by_index(
+    first_row: ET.Element, shared_strings: list[str]
+) -> dict[int, str]:
     return {
         column_index(cell.attrib["r"]): cell_text(cell, shared_strings)
         for cell in first_row.findall("a:c", NS)

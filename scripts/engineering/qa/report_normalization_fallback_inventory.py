@@ -146,15 +146,15 @@ def _render_markdown(payload: dict[str, object], *, limit: int) -> str:
             f"(`{kpi.get('numerator', 0)}` / `{kpi.get('denominator', 0)}`) "
             f"{kpi.get('description', '')}".rstrip()
         )
-    semantic_invariants = cast(list[dict[str, Any]], payload.get("semantic_invariants", []))
+    semantic_invariants = cast(
+        list[dict[str, Any]], payload.get("semantic_invariants", [])
+    )
     if semantic_invariants:
         lines.extend(["", "## Semantic Invariant Context", ""])
         for kpi in semantic_invariants:
             regressions = cast(list[str], kpi.get("regressions", []))
             regression_note = (
-                f" Regressions: {', '.join(regressions)}."
-                if regressions
-                else ""
+                f" Regressions: {', '.join(regressions)}." if regressions else ""
             )
             lines.append(
                 f"- {kpi.get('surface', 'profile_semantics')} / {kpi.get('name', 'semantic_kpi')}: "

@@ -5,7 +5,8 @@ import os
 import sys
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+
 
 def test_field_classification():
     """Test that fields are correctly classified by type."""
@@ -17,21 +18,29 @@ def test_field_classification():
     print("=== Testing Field Type Classification ===")
 
     # Verify manual_curation_flag is in INT_FIELDS (not FLOAT_FIELDS)
-    assert "manual_curation_flag" in INT_FIELDS, "manual_curation_flag should be in INT_FIELDS"
-    assert "manual_curation_flag" not in FLOAT_FIELDS, "manual_curation_flag should not be in FLOAT_FIELDS"
+    assert "manual_curation_flag" in INT_FIELDS, (
+        "manual_curation_flag should be in INT_FIELDS"
+    )
+    assert "manual_curation_flag" not in FLOAT_FIELDS, (
+        "manual_curation_flag should not be in FLOAT_FIELDS"
+    )
 
     print("✓ manual_curation_flag correctly classified as INT field")
 
     # Verify other flag fields are correctly classified
     assert "standard_flag" in INT_FIELDS, "standard_flag should be in INT_FIELDS"
-    assert "potential_duplicate" in INT_FIELDS, "potential_duplicate should be in INT_FIELDS"
+    assert "potential_duplicate" in INT_FIELDS, (
+        "potential_duplicate should be in INT_FIELDS"
+    )
 
     print("✓ All flag fields correctly classified as INT fields")
 
     # Verify float fields don't include flags
     flag_fields = {"manual_curation_flag", "standard_flag", "potential_duplicate"}
     for flag_field in flag_fields:
-        assert flag_field not in FLOAT_FIELDS, f"{flag_field} should not be in FLOAT_FIELDS"
+        assert flag_field not in FLOAT_FIELDS, (
+            f"{flag_field} should not be in FLOAT_FIELDS"
+        )
 
     print("✓ No flag fields incorrectly classified as FLOAT fields")
 
@@ -72,6 +81,7 @@ def test_field_classification():
 
     print("✓ All expected fields present in FLOAT_FIELDS")
 
+
 def test_field_type_consistency():
     """Test that field types are consistent between profile and schema."""
     from bioetl.domain.normalization.profiles._chembl_activity_fields import (
@@ -83,7 +93,9 @@ def test_field_type_consistency():
 
     # Test that INT_FIELDS and FLOAT_FIELDS are disjoint
     intersection = INT_FIELDS & FLOAT_FIELDS
-    assert len(intersection) == 0, f"INT_FIELDS and FLOAT_FIELDS should be disjoint, but found: {intersection}"
+    assert len(intersection) == 0, (
+        f"INT_FIELDS and FLOAT_FIELDS should be disjoint, but found: {intersection}"
+    )
 
     print("✓ INT_FIELDS and FLOAT_FIELDS are properly disjoint")
 
@@ -92,10 +104,15 @@ def test_field_type_consistency():
     print(f"Total numeric fields: {len(all_numeric_fields)}")
 
     # Verify no duplicates within each set
-    assert len(INT_FIELDS) == len(set(INT_FIELDS)), "INT_FIELDS should not have duplicates"
-    assert len(FLOAT_FIELDS) == len(set(FLOAT_FIELDS)), "FLOAT_FIELDS should not have duplicates"
+    assert len(INT_FIELDS) == len(set(INT_FIELDS)), (
+        "INT_FIELDS should not have duplicates"
+    )
+    assert len(FLOAT_FIELDS) == len(set(FLOAT_FIELDS)), (
+        "FLOAT_FIELDS should not have duplicates"
+    )
 
     print("✓ No duplicate fields within type categories")
+
 
 def test_flag_field_semantics():
     """Test the semantics of flag fields."""
@@ -112,9 +129,12 @@ def test_flag_field_semantics():
     print("✓ All flag fields properly classified as integers")
 
     # Verify the specific fix for DQ-004
-    assert "manual_curation_flag" in INT_FIELDS, "DQ-004: manual_curation_flag should be in INT_FIELDS"
+    assert "manual_curation_flag" in INT_FIELDS, (
+        "DQ-004: manual_curation_flag should be in INT_FIELDS"
+    )
 
     print("✓ DQ-004 specific fix verified: manual_curation_flag is now INT")
+
 
 def test_profile_integration():
     """Test that the profile integration works correctly."""
@@ -146,6 +166,7 @@ def test_profile_integration():
 
     print("✓ Field classifications have reasonable sizes")
 
+
 def test_before_after_comparison():
     """Document the before/after state of the type consistency fix."""
 
@@ -162,6 +183,7 @@ def test_before_after_comparison():
     print("  • Proper flag field handling")
 
     print("\n✓ Type consistency issue resolved")
+
 
 if __name__ == "__main__":
     try:
@@ -182,5 +204,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

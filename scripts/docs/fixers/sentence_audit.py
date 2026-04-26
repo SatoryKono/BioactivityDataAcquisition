@@ -315,7 +315,9 @@ def _extract_backticks(sentence: str) -> list[str]:
 def _get_probe_tokens(sentence: str, freq: Counter) -> list[str]:
     """Get the top probe tokens from the sentence."""
     sentence_tokens = tokenize(sentence)
-    ranked_tokens = sorted(sentence_tokens, key=lambda token: (freq.get(token, 10**9), token))
+    ranked_tokens = sorted(
+        sentence_tokens, key=lambda token: (freq.get(token, 10**9), token)
+    )
     return ranked_tokens[:5]
 
 
@@ -475,9 +477,7 @@ def _prepare_output_directory() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def _build_first_line_index(
-    lines: list[tuple[Path, int, str]]
-) -> dict[str, int]:
+def _build_first_line_index(lines: list[tuple[Path, int, str]]) -> dict[str, int]:
     """Build an index of the first line for each path."""
     first_line_idx_by_path: dict[str, int] = {}
     for idx, (path, _, _) in enumerate(lines):
@@ -555,18 +555,14 @@ def _write_csv_report(rows: list[dict[str, str]]) -> None:
         writer.writerows(rows)
 
 
-def _write_summary_report(
-    rows: list[dict[str, str]], doc_files: list[Path]
-) -> None:
+def _write_summary_report(rows: list[dict[str, str]], doc_files: list[Path]) -> None:
     """Write the summary report."""
     total = len(rows)
     ok = sum(1 for row in rows if row[STATUS_FIELD] == "да")
     bad = total - ok
     high_total = sum(1 for row in rows if row["risk"] == "high")
     high_ok = sum(
-        1
-        for row in rows
-        if row["risk"] == "high" and row[STATUS_FIELD] == "да"
+        1 for row in rows if row["risk"] == "high" and row[STATUS_FIELD] == "да"
     )
     high_bad = high_total - high_ok
 
@@ -584,9 +580,7 @@ def _write_summary_report(
         f.write(f"- Полный CSV: `{rel(OUT_CSV)}`\n\n")
         f.write("## Топ-20 документов с максимальным числом несоответствий\n\n")
         bad_by_doc = Counter(
-            row[DOC_FIELD]
-            for row in rows
-            if row[STATUS_FIELD] == "нет"
+            row[DOC_FIELD] for row in rows if row[STATUS_FIELD] == "нет"
         )
         f.write("| Документ | Несоответствий |\n")
         f.write("|---|---:|\n")
@@ -643,7 +637,9 @@ def _write_prompts_report(prompt_map: dict[str, list[dict[str, str]]]) -> None:
             f.write("```\n\n")
 
 
-def _write_prompts_high_report(prompt_map_high: dict[str, list[dict[str, str]]]) -> None:
+def _write_prompts_high_report(
+    prompt_map_high: dict[str, list[dict[str, str]]],
+) -> None:
     """Write the high-risk prompts report."""
     with OUT_PROMPTS_HIGH.open("w", encoding="utf-8") as f:
         f.write("# High-risk промпты для модификации документов\n\n")
@@ -652,7 +648,8 @@ def _write_prompts_high_report(prompt_map_high: dict[str, list[dict[str, str]]])
         )
         for doc_name in sorted(prompt_map_high):
             mismatches = sorted(
-                prompt_map_high[doc_name], key=lambda item: int(item[SENTENCE_NUMBER_FIELD])
+                prompt_map_high[doc_name],
+                key=lambda item: int(item[SENTENCE_NUMBER_FIELD]),
             )
             f.write(f"## {doc_name}\n\n")
             f.write("```text\n")

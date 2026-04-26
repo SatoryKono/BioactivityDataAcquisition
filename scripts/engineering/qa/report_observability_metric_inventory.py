@@ -259,7 +259,9 @@ def _helper_metric_candidates(
         )
         if metric_name is None:
             continue
-        if keyword.arg in _RUNTIME_METRIC_NAME_KEYWORDS or metric_name.startswith("bioetl_"):
+        if keyword.arg in _RUNTIME_METRIC_NAME_KEYWORDS or metric_name.startswith(
+            "bioetl_"
+        ):
             candidates.add(metric_name)
     return candidates
 
@@ -424,7 +426,9 @@ def _record_runtime_mentions(
     alias_metric_names: set[str],
 ) -> None:
     for metric_name in sorted(direct_metric_names):
-        target = canonical_mentions if metric_name.startswith("bioetl_") else alias_mentions
+        target = (
+            canonical_mentions if metric_name.startswith("bioetl_") else alias_mentions
+        )
         target[metric_name].append(relative_path)
     for metric_name in sorted(helper_metric_names - direct_metric_names):
         helper_backed_mentions[metric_name].append(relative_path)
@@ -588,10 +592,12 @@ def _extract_rule_metric_names(groups: list[object]) -> list[str]:
     return sorted(metric_names)
 
 
-def collect_metric_inventory(repo_root: Path) -> dict[str, list[str] | dict[str, list[str]]]:
+def collect_metric_inventory(
+    repo_root: Path,
+) -> dict[str, list[str] | dict[str, list[str]]]:
     registered = sorted(REGISTERED_PROMETHEUS_METRIC_NAMES)
-    runtime_mentions, helper_backed_mentions, alias_mentions = _scan_runtime_metric_calls(
-        repo_root
+    runtime_mentions, helper_backed_mentions, alias_mentions = (
+        _scan_runtime_metric_calls(repo_root)
     )
 
     doc_paths: list[Path] = []

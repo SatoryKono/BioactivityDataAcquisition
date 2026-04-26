@@ -28,6 +28,7 @@ except ModuleNotFoundError:  # pragma: no cover - direct script execution fallba
         # Try absolute import with path adjustment
         import sys
         from pathlib import Path
+
         sys.path.insert(0, str(Path(__file__).parent))
         from hotspot_family_metrics import (  # type: ignore[no-redef]
             PROJECT_ROOT,

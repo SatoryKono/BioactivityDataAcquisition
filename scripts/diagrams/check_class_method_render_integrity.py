@@ -243,7 +243,9 @@ def _resolved_scan_dirs(source_dir: Path, svg_dir: Path | None) -> tuple[Path, P
     return source_root, resolved_svg_dir
 
 
-def _collect_integrity_issues(sources: list[Path], svg_dir: Path) -> list[IntegrityIssue]:
+def _collect_integrity_issues(
+    sources: list[Path], svg_dir: Path
+) -> list[IntegrityIssue]:
     all_issues: list[IntegrityIssue] = []
     for mmd_path in sources:
         if mmd_path.suffix != ".mmd":
@@ -285,9 +287,7 @@ def _write_report(
         sys.stdout.write(
             f"[{issue.severity}] {issue.rule} {issue.file}: {issue.message}\n"
         )
-    sys.stdout.write(
-        f"class-method-render-integrity: FAILED ({len(issues)} issues)\n"
-    )
+    sys.stdout.write(f"class-method-render-integrity: FAILED ({len(issues)} issues)\n")
 
 
 def main() -> int:

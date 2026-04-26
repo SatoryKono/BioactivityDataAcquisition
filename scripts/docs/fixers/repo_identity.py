@@ -64,7 +64,9 @@ def _parser() -> argparse.ArgumentParser:
     )
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--write", action="store_true", help="Rewrite mismatched files.")
-    mode.add_argument("--check", action="store_true", help="Fail if mismatches are found.")
+    mode.add_argument(
+        "--check", action="store_true", help="Fail if mismatches are found."
+    )
     return parser
 
 

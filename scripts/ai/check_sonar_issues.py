@@ -90,8 +90,7 @@ def _print_quarantine_ratchet_status(
     ratchet_failed = entry_count > max_entries
     print(f"Quarantine ratchet: {entry_count} / {max_entries}")
     print(
-        "Quarantine ratchet status: "
-        f"{'exceeded' if ratchet_failed else 'within limit'}"
+        f"Quarantine ratchet status: {'exceeded' if ratchet_failed else 'within limit'}"
     )
     return ratchet_failed
 

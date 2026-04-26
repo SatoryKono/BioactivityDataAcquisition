@@ -222,7 +222,9 @@ def _parse_measured_only_ratchet(payload: object) -> MeasuredOnlyRatchet:
     scoped_limits: list[MeasuredOnlyRatchetScope] = []
     for item in scoped_limits_payload:
         if not isinstance(item, dict):
-            raise ValueError("measured_only_ratchet.scoped_limits rows must be mappings")
+            raise ValueError(
+                "measured_only_ratchet.scoped_limits rows must be mappings"
+            )
         scope = MeasuredOnlyRatchetScope(
             path_prefix=str(item["path_prefix"]),
             max_modules=int(item["max_modules"]),
@@ -376,6 +378,8 @@ def _module_docstring_first_line(path: Path) -> str | None:
                 return None
             return value.splitlines()[0].strip()
     return None
+
+
 def find_first_party_imports_of_measured_only_modules(
     registry: CompatibilityRegistry,
     *,
@@ -394,8 +398,8 @@ def find_first_party_imports_of_measured_only_modules(
         measured_module_names=measured_module_names,
     ):
         relative_path = path.resolve().relative_to(repo_root).as_posix()
-        current_module = relative_path.removeprefix("src/").removesuffix(".py").replace(
-            "/", "."
+        current_module = (
+            relative_path.removeprefix("src/").removesuffix(".py").replace("/", ".")
         )
         for imported_module in _iter_imported_modules(path):
             if imported_module == current_module:
@@ -448,9 +452,7 @@ def _candidate_import_paths_via_rg(
         return None
     return tuple(
         sorted(
-            Path(line.strip())
-            for line in result.stdout.splitlines()
-            if line.strip()
+            Path(line.strip()) for line in result.stdout.splitlines() if line.strip()
         )
     )
 
@@ -459,7 +461,7 @@ def _candidate_import_paths_via_python(
     *,
     src_root: Path,
     measured_module_names: set[str],
-    ) -> tuple[Path, ...]:
+) -> tuple[Path, ...]:
     """Fallback candidate scan when ripgrep is unavailable."""
     candidates: list[Path] = []
     for path in src_root.rglob("*.py"):

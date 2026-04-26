@@ -378,7 +378,9 @@ def main() -> int:
     """Run registry<->DQ consistency validation."""
     repo_root = Path(__file__).resolve().parents[3]
     registry_path = repo_root / "configs" / "base" / "contract_registry.yaml"
-    diagnostics_path = repo_root / "reports/quality/contract-registry-dq-diagnostics.json"
+    diagnostics_path = (
+        repo_root / "reports/quality/contract-registry-dq-diagnostics.json"
+    )
     diagnostics_path.parent.mkdir(parents=True, exist_ok=True)
 
     if not registry_path.exists():

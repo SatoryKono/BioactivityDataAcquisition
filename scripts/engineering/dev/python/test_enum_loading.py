@@ -5,7 +5,8 @@ import os
 import sys
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+
 
 def test_enum_loader():
     """Test the enum loader functionality."""
@@ -28,6 +29,7 @@ def test_enum_loader():
 
     print("✓ Enum loader tests passed!")
 
+
 def test_normalize_enum():
     """Test the enum normalization function."""
     from bioetl.domain.normalization.profiles.profile_normalizers import (
@@ -39,7 +41,9 @@ def test_normalize_enum():
 
     # Test valid values
     assert normalize_profile_enum("IC50", allowed_values=allowed_values) == "IC50"
-    assert normalize_profile_enum("ic50", allowed_values=allowed_values) == "ic50"  # Should be normalized by string normalization
+    assert (
+        normalize_profile_enum("ic50", allowed_values=allowed_values) == "ic50"
+    )  # Should be normalized by string normalization
     assert normalize_profile_enum("  IC50  ", allowed_values=allowed_values) == "IC50"
 
     # Test invalid values
@@ -48,6 +52,7 @@ def test_normalize_enum():
     assert normalize_profile_enum(None, allowed_values=allowed_values) is None
 
     print("✓ Enum normalization tests passed!")
+
 
 def test_field_loading():
     """Test that fields can be loaded from the updated module."""
@@ -68,6 +73,7 @@ def test_field_loading():
 
     print("✓ Field loading tests passed!")
 
+
 if __name__ == "__main__":
     try:
         test_enum_loader()
@@ -77,5 +83,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

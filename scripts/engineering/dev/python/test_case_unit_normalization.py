@@ -5,7 +5,8 @@ import os
 import sys
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+
 
 def test_normalization_rules():
     """Test the normalization rules functionality."""
@@ -63,6 +64,7 @@ def test_normalization_rules():
     print("Total unit mappings:", len(UNIT_MAPPING))
     print("Sample mappings:", list(UNIT_MAPPING.items())[:5])
 
+
 def test_profile_integration():
     """Test that the profile integration works correctly."""
     # Test imports work
@@ -85,6 +87,7 @@ def test_profile_integration():
     assert CHEMBL_ACTIVITY_PROFILE.profile_name == "chembl.activity"
 
     print("✓ Profile integration tests passed!")
+
 
 def test_normalize_functions():
     """Test the profile normalizer functions."""
@@ -109,6 +112,7 @@ def test_normalize_functions():
 
     print("✓ Profile normalizer function tests passed!")
 
+
 if __name__ == "__main__":
     try:
         test_normalization_rules()
@@ -118,5 +122,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

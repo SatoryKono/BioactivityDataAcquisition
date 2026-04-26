@@ -543,7 +543,9 @@ class ADRRegistryGenerator:
             return
 
         # Write main registry index
-        index_content = self.generate_registry_index(decision_link_prefix="../decisions")
+        index_content = self.generate_registry_index(
+            decision_link_prefix="../decisions"
+        )
         index_file = self.output_dir / "index.md"
         with open(index_file, "w", encoding="utf-8") as f:
             f.write(index_content)

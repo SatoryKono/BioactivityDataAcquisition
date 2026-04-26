@@ -132,7 +132,10 @@ def _validate_inline_dq_thresholds(
 ) -> tuple[list[str], list[str], list[str]]:
     """Return deprecated inline DQ threshold findings."""
     medium: list[str] = []
-    for dq_parent_name, dq_parent in (("top-level", top), ("pipeline", pipeline_config)):
+    for dq_parent_name, dq_parent in (
+        ("top-level", top),
+        ("pipeline", pipeline_config),
+    ):
         dq = _as_dict(dq_parent.get("dq_overrides"))
         if "soft_fail_threshold" in dq or "hard_fail_threshold" in dq:
             medium.append(
@@ -141,7 +144,9 @@ def _validate_inline_dq_thresholds(
     return [], medium, []
 
 
-def _validate_gold_filters(top: dict[str, Any]) -> tuple[list[str], list[str], list[str]]:
+def _validate_gold_filters(
+    top: dict[str, Any],
+) -> tuple[list[str], list[str], list[str]]:
     """Return findings for missing gold filter declarations."""
     low: list[str] = []
     filters = _as_dict(top.get("filters"))
@@ -181,7 +186,9 @@ def analyze_standard_config(
         gaps.low.extend(low)
 
 
-def _validate_composite_seed(seed: dict[str, Any]) -> tuple[list[str], list[str], list[str]]:
+def _validate_composite_seed(
+    seed: dict[str, Any],
+) -> tuple[list[str], list[str], list[str]]:
     """Return findings for composite seed configuration."""
     medium: list[str] = []
     if seed:
@@ -232,9 +239,11 @@ def _validate_composite_dq_overrides(
     if not isinstance(dq, dict):
         return [], [], []
     if "soft_fail_threshold" in dq or "hard_fail_threshold" in dq:
-        return [], [
-            "Inline dq_overrides thresholds in composite (deprecated per ADR-027)"
-        ], []
+        return (
+            [],
+            ["Inline dq_overrides thresholds in composite (deprecated per ADR-027)"],
+            [],
+        )
     return [], [], []
 
 
@@ -452,7 +461,9 @@ def _print_verbose_config_status(cfg: Path, gaps: ConfigGaps) -> None:
 
 def _iter_config_files() -> list[Path]:
     """Return all config files participating in the audit."""
-    return sorted(ENTITY_CONFIGS_DIR.rglob("*.yaml")) + sorted(COMPOSITES_DIR.glob("*.yaml"))
+    return sorted(ENTITY_CONFIGS_DIR.rglob("*.yaml")) + sorted(
+        COMPOSITES_DIR.glob("*.yaml")
+    )
 
 
 def main() -> int:

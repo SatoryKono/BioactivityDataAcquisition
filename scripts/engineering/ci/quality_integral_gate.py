@@ -239,7 +239,9 @@ def _missing_architecture_stats(returncode: int) -> ArchitectureTestStats:
     )
 
 
-def _parse_architecture_junit(junit_path: Path, *, returncode: int) -> ArchitectureTestStats:
+def _parse_architecture_junit(
+    junit_path: Path, *, returncode: int
+) -> ArchitectureTestStats:
     """Parse architecture JUnit XML into stable counters."""
     if not junit_path.exists():
         return _missing_architecture_stats(returncode)
@@ -460,12 +462,8 @@ def _skip_classes_detail(
             {
                 "id": skip_class,
                 "count": count,
-                "short_label": _taxonomy_string(
-                    entry.get("short_label"), skip_class
-                ),
-                "definition": _taxonomy_string(
-                    entry.get("definition"), skip_class
-                ),
+                "short_label": _taxonomy_string(entry.get("short_label"), skip_class),
+                "definition": _taxonomy_string(entry.get("definition"), skip_class),
             }
         )
     return details
@@ -563,9 +561,13 @@ def _classify_test_health(
             reasons=("merge-blocking failures remain present",),
             architecture_skip_count=architecture_stats.skipped,
             architecture_skip_ratio=skip_ratio,
-            live_contract_enforced_provider_count=len(contract_context.enforced_providers),
+            live_contract_enforced_provider_count=len(
+                contract_context.enforced_providers
+            ),
             live_contract_pilot_provider_count=len(contract_context.pilot_providers),
-            live_contract_vcr_only_provider_count=len(contract_context.vcr_only_providers),
+            live_contract_vcr_only_provider_count=len(
+                contract_context.vcr_only_providers
+            ),
             skip_classes=skip_classes,
             staged_rollout_flags=staged_flags,
         )
@@ -582,9 +584,13 @@ def _classify_test_health(
             reasons=tuple(environment_reasons),
             architecture_skip_count=architecture_stats.skipped,
             architecture_skip_ratio=skip_ratio,
-            live_contract_enforced_provider_count=len(contract_context.enforced_providers),
+            live_contract_enforced_provider_count=len(
+                contract_context.enforced_providers
+            ),
             live_contract_pilot_provider_count=len(contract_context.pilot_providers),
-            live_contract_vcr_only_provider_count=len(contract_context.vcr_only_providers),
+            live_contract_vcr_only_provider_count=len(
+                contract_context.vcr_only_providers
+            ),
             skip_classes=skip_classes,
             staged_rollout_flags=staged_flags,
         )
@@ -599,9 +605,13 @@ def _classify_test_health(
             reasons=staged_flags,
             architecture_skip_count=architecture_stats.skipped,
             architecture_skip_ratio=skip_ratio,
-            live_contract_enforced_provider_count=len(contract_context.enforced_providers),
+            live_contract_enforced_provider_count=len(
+                contract_context.enforced_providers
+            ),
             live_contract_pilot_provider_count=len(contract_context.pilot_providers),
-            live_contract_vcr_only_provider_count=len(contract_context.vcr_only_providers),
+            live_contract_vcr_only_provider_count=len(
+                contract_context.vcr_only_providers
+            ),
             skip_classes=skip_classes,
             staged_rollout_flags=staged_flags,
         )
@@ -660,9 +670,7 @@ def _environment_limited_reasons(
         contract_context.live_api_gate_mode
         and contract_context.live_api_gate_mode != "always"
     ):
-        reasons.append(
-            f"live API gate mode is {contract_context.live_api_gate_mode}"
-        )
+        reasons.append(f"live API gate mode is {contract_context.live_api_gate_mode}")
     if contract_context.vcr_only_providers:
         reasons.append(
             "live minimum baseline excludes "
@@ -791,7 +799,8 @@ def _metric_comparison(
         <= _require_int(ci_target, "ruff_formatting_violations_max"),
         "coverage_ok": (
             coverage_percent is not None
-            and coverage_percent >= _require_float(ci_target, "coverage_threshold_percent")
+            and coverage_percent
+            >= _require_float(ci_target, "coverage_threshold_percent")
         ),
     }
 
@@ -859,8 +868,7 @@ def _summary_lines(
     skip_classes_detail = test_health_payload["skip_classes_detail"]
     skip_classes_rendered = (
         ", ".join(
-            f"{item['short_label']}={item['count']}"
-            for item in skip_classes_detail
+            f"{item['short_label']}={item['count']}" for item in skip_classes_detail
         )
         if skip_classes_detail
         else "none"

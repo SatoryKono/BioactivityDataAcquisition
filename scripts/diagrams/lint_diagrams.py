@@ -64,9 +64,7 @@ _NON_FLOW_RE = re.compile(
     re.IGNORECASE,
 )
 _CLASS_DIAGRAM_RE = re.compile(r"^\s*classDiagram\b", re.IGNORECASE)
-_UNESCAPED_DUNDER_METHOD_RE = re.compile(
-    r"^\s*[+\-#~][^\n]*?(?<!\\)__\w+__(?=\s*\()"
-)
+_UNESCAPED_DUNDER_METHOD_RE = re.compile(r"^\s*[+\-#~][^\n]*?(?<!\\)__\w+__(?=\s*\()")
 _STYLE_OR_CLASSDEF_RE = re.compile(r"^\s*(style|classDef)\b")
 _HEX_COLOR_RE = re.compile(r"#[0-9a-f]{6}\b", re.IGNORECASE)
 _SUBGRAPH_RE = re.compile(r"^\s*subgraph\b", re.IGNORECASE)
@@ -620,7 +618,9 @@ def check_layout_policy(path: Path, lines: list[str]) -> list[Issue]:
 
     has_elk = any(_has_elk_layout_init(ln) for ln in lines)
     edge_routing = _extract_edge_routing(lines)
-    allow_polyline = any("@allow-polyline-routing" in ln or "@allow-polyline" in ln for ln in lines)
+    allow_polyline = any(
+        "@allow-polyline-routing" in ln or "@allow-polyline" in ln for ln in lines
+    )
 
     if not has_elk and nodes > ELK_ERROR_THRESHOLD:
         issues.append(
@@ -940,7 +940,9 @@ def _collect_class_method_render_observations(
         method_name = parsed_signature[0].replace("\\_", "_")
         tail = parsed_signature[1].strip()
         if tail:
-            target_lines = colon_return_lines if tail.startswith(":") else bare_return_lines
+            target_lines = (
+                colon_return_lines if tail.startswith(":") else bare_return_lines
+            )
             target_lines.append(idx)
 
         if len(stripped) > CLASS_METHOD_WARN_LINE_CHARS:
@@ -1101,7 +1103,9 @@ def lint_file(path: Path, stale_days: int) -> list[Issue]:
     return _collect_file_issues(path=path, lines=lines, stale_days=stale_days)
 
 
-def _collect_file_issues(path: Path, *, lines: list[str], stale_days: int) -> list[Issue]:
+def _collect_file_issues(
+    path: Path, *, lines: list[str], stale_days: int
+) -> list[Issue]:
     """Collect all lint issues for a parsed diagram file."""
     issue_groups = (
         check_metadata_headers(path, lines),

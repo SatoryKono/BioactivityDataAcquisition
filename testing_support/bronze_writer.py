@@ -940,9 +940,12 @@ class TestBronzeWriterAtomicWrite:
 
         # Mock Path.replace to fail (simulating rename failure)
         # Note: We now use Path.replace directly in _write_atomic_stream
-        with patch(
-            "pathlib.Path.replace", side_effect=OSError("Simulated rename failure")
-        ), pytest.raises(OSError, match="Simulated rename failure"):
+        with (
+            patch(
+                "pathlib.Path.replace", side_effect=OSError("Simulated rename failure")
+            ),
+            pytest.raises(OSError, match="Simulated rename failure"),
+        ):
             await writer.write_bronze(
                 records=iter(sample_records),
                 provider="chembl",

@@ -5,7 +5,8 @@ import os
 import sys
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+
 
 def test_enum_loader():
     """Test the enhanced enum loader functionality."""
@@ -56,6 +57,7 @@ def test_enum_loader():
 
     print("✅ Enum loader tests passed!")
 
+
 def test_assay_profile_integration():
     """Test that assay profile uses externalized enums."""
     from bioetl.domain.normalization.profiles.chembl_assay import (
@@ -81,8 +83,14 @@ def test_assay_profile_integration():
     field_rules = CHEMBL_ASSAY_PROFILE.field_rules
 
     # Check enum fields
-    enum_fields = ["assay_type", "relationship_type", "assay_category",
-                   "assay_test_type", "assay_group", "confidence_description"]
+    enum_fields = [
+        "assay_type",
+        "relationship_type",
+        "assay_category",
+        "assay_test_type",
+        "assay_group",
+        "confidence_description",
+    ]
 
     for field in enum_fields:
         assert field in field_rules, f"{field} not found in field rules"
@@ -96,8 +104,13 @@ def test_assay_profile_integration():
     # The enum normalizer handles both validation and case normalization.
 
     # Verify that enum fields have enum rules (which include case handling)
-    for field in ["assay_type", "relationship_type", "assay_category",
-                   "assay_test_type", "assay_group"]:
+    for field in [
+        "assay_type",
+        "relationship_type",
+        "assay_category",
+        "assay_test_type",
+        "assay_group",
+    ]:
         rule = field_rules[field]
         assert "enum" in rule.notes.lower(), field + " should have enum rule"
         # Enum rules handle case-insensitive matching internally
@@ -105,6 +118,7 @@ def test_assay_profile_integration():
     print("✓ All enum fields properly configured with case-insensitive matching")
 
     print("✅ Assay profile integration tests passed!")
+
 
 def test_cross_pipeline_consistency():
     """Test consistency between activity and assay enum handling."""
@@ -137,6 +151,7 @@ def test_cross_pipeline_consistency():
 
     print("✅ Cross-pipeline consistency tests passed!")
 
+
 def test_error_handling():
     """Test error handling for missing enums."""
     from bioetl.domain.config.enum_loader import get_chembl_enum
@@ -161,6 +176,7 @@ def test_error_handling():
 
     print("✅ Error handling tests passed!")
 
+
 if __name__ == "__main__":
     try:
         test_enum_loader()
@@ -178,5 +194,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

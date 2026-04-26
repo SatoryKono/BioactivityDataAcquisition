@@ -367,12 +367,16 @@ def _process_workbook(
                     zout.writestr(copy.copy(info), ET.tostring(root, encoding="utf-8"))
                     continue
 
-                header_by_index, index_by_header = _extract_headers(rows, shared_strings)
+                header_by_index, index_by_header = _extract_headers(
+                    rows, shared_strings
+                )
 
                 for row in rows[1:]:
                     row_map = _build_row_map(row, header_by_index, shared_strings)
                     updated = _update_row(row_map, contract_index=contract_index)
-                    _apply_updates(row, updated, index_by_header, shared_strings, change_counter)
+                    _apply_updates(
+                        row, updated, index_by_header, shared_strings, change_counter
+                    )
 
                 zout.writestr(copy.copy(info), ET.tostring(root, encoding="utf-8"))
 
@@ -388,9 +392,7 @@ def _extract_headers(
         header_by_index[column_index(cell.attrib["r"])] = cell_text(
             cell, shared_strings
         )
-    index_by_header = {
-        header: index for index, header in header_by_index.items()
-    }
+    index_by_header = {header: index for index, header in header_by_index.items()}
     return header_by_index, index_by_header
 
 
@@ -399,9 +401,7 @@ def _build_row_map(
 ) -> dict[str, str]:
     """Build a map of header to cell value for a row."""
     return {
-        header_by_index[column_index(cell.attrib["r"])]: cell_text(
-            cell, shared_strings
-        )
+        header_by_index[column_index(cell.attrib["r"])]: cell_text(cell, shared_strings)
         for cell in row.findall("a:c", NS)
         if column_index(cell.attrib["r"]) in header_by_index
     }

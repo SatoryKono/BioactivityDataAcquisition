@@ -429,7 +429,9 @@ def verify_checksums(
 # =============================================================================
 
 
-def _results_by_status(report: VerificationReport) -> dict[str, list[VerificationResult]]:
+def _results_by_status(
+    report: VerificationReport,
+) -> dict[str, list[VerificationResult]]:
     by_status: dict[str, list[VerificationResult]] = {}
     for result in report.results:
         by_status.setdefault(result.status, []).append(result)

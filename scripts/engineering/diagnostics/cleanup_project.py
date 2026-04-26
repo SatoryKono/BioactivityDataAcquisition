@@ -380,7 +380,9 @@ def delete_targets(
 # =============================================================================
 
 
-def _targets_by_category(targets: list[CleanupTarget]) -> dict[str, list[CleanupTarget]]:
+def _targets_by_category(
+    targets: list[CleanupTarget],
+) -> dict[str, list[CleanupTarget]]:
     """Group targets by cleanup category."""
     by_category: dict[str, list[CleanupTarget]] = {}
     for target in targets:

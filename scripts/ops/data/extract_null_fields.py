@@ -82,7 +82,9 @@ def extract_null_fields(csv_path, fields_to_extract, output_path):
 
         # Сохраняем
         df.to_csv(output_path, index=False)
-        print("  ✓ Saved", len(df), "rows ×", len(df.columns), "columns to", output_path)
+        print(
+            "  ✓ Saved", len(df), "rows ×", len(df.columns), "columns to", output_path
+        )
         print("    Columns:", ", ".join(df.columns.tolist()))
 
     except Exception as e:

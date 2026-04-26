@@ -197,7 +197,9 @@ def _consume_page(
     reviews.extend(review_nodes.get("nodes") or [])
     review_threads.extend(threads.get("nodes") or [])
     comments_cursor = (
-        comments["pageInfo"]["endCursor"] if comments["pageInfo"]["hasNextPage"] else None
+        comments["pageInfo"]["endCursor"]
+        if comments["pageInfo"]["hasNextPage"]
+        else None
     )
     reviews_cursor = (
         review_nodes["pageInfo"]["endCursor"]

@@ -427,7 +427,9 @@ def _add_pipelines_from_silver_tables(pipelines: set[str], silver_dir: Path) -> 
 
 
 def _provider_directories(silver_dir: Path) -> list[Path]:
-    return [provider_dir for provider_dir in silver_dir.iterdir() if provider_dir.is_dir()]
+    return [
+        provider_dir for provider_dir in silver_dir.iterdir() if provider_dir.is_dir()
+    ]
 
 
 def _silver_entity_directories(provider_dir: Path) -> list[Path]:

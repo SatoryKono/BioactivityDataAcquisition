@@ -5,7 +5,8 @@ import os
 import sys
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+
 
 def test_enum_loader():
     """Test the enum loader functionality."""
@@ -28,12 +29,15 @@ def test_enum_loader():
 
     print("✓ Enum loader tests passed!")
 
+
 def test_normalize_enum():
     """Test the enum normalization function."""
     # Import only what we need to avoid full bioetl dependencies
     from bioetl.domain.normalization.text import normalize_string
 
-    def normalize_profile_enum(value: object, *, allowed_values: frozenset[str]) -> object:
+    def normalize_profile_enum(
+        value: object, *, allowed_values: frozenset[str]
+    ) -> object:
         """Normalize one enum-like profile field against allowed values."""
         if value is None:
             return None
@@ -47,7 +51,9 @@ def test_normalize_enum():
 
     # Test valid values
     assert normalize_profile_enum("IC50", allowed_values=allowed_values) == "IC50"
-    assert normalize_profile_enum("ic50", allowed_values=allowed_values) == "ic50"  # String normalization preserves case
+    assert (
+        normalize_profile_enum("ic50", allowed_values=allowed_values) == "ic50"
+    )  # String normalization preserves case
     assert normalize_profile_enum("  IC50  ", allowed_values=allowed_values) == "IC50"
 
     # Test invalid values
@@ -57,22 +63,27 @@ def test_normalize_enum():
 
     print("✓ Enum normalization tests passed!")
 
+
 def test_field_loading():
     """Test that fields can be loaded from the updated module."""
     # Import directly to avoid full bioetl dependencies
     import importlib.util
+
     spec = importlib.util.spec_from_file_location(
         "_chembl_activity_fields",
-        "src/bioetl/domain/normalization/profiles/_chembl_activity_fields.py"
+        "src/bioetl/domain/normalization/profiles/_chembl_activity_fields.py",
     )
     module = importlib.util.module_from_spec(spec)
 
     # Mock the ActivitySchema import to avoid pandas dependency
     import sys
     from unittest.mock import MagicMock
+
     mock_schema = MagicMock()
     mock_schema.to_schema.return_value.columns.keys.return_value = []
-    sys.modules['bioetl.domain.schemas.chembl.activity'] = MagicMock(ActivitySchema=mock_schema)
+    sys.modules["bioetl.domain.schemas.chembl.activity"] = MagicMock(
+        ActivitySchema=mock_schema
+    )
 
     # Now load the module
     spec.loader.exec_module(module)
@@ -88,6 +99,7 @@ def test_field_loading():
 
     print("✓ Field loading tests passed!")
 
+
 if __name__ == "__main__":
     try:
         test_enum_loader()
@@ -97,5 +109,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

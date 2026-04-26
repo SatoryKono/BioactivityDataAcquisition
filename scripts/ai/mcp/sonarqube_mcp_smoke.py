@@ -66,7 +66,8 @@ def _build_handshake_lines() -> bytes:
         "params": {},
     }
     return b"".join(
-        json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8") + b"\n"
+        json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
+        + b"\n"
         for payload in (
             initialize_request,
             initialized_notification,
@@ -126,7 +127,9 @@ def _drain_stdout_messages(
     _drain_stdout_lines(stdout_buffer, responses)
 
 
-def _find_response(messages: Sequence[dict[str, Any]], request_id: int) -> dict[str, Any] | None:
+def _find_response(
+    messages: Sequence[dict[str, Any]], request_id: int
+) -> dict[str, Any] | None:
     for message in messages:
         if message.get("id") == request_id:
             return message
@@ -190,7 +193,9 @@ def _pipe_reader(
         chunks.put((channel, None))
 
 
-def _setup_process_and_validation(command: Sequence[str]) -> tuple[subprocess.Popen[bytes], bool, str]:
+def _setup_process_and_validation(
+    command: Sequence[str],
+) -> tuple[subprocess.Popen[bytes], bool, str]:
     """Setup subprocess and validate stdio pipes."""
     process = subprocess.Popen(
         list(command),
@@ -202,7 +207,6 @@ def _setup_process_and_validation(command: Sequence[str]) -> tuple[subprocess.Po
         process.kill()
         return process, False, "sonarqube MCP smoke could not open process stdio pipes."
     return process, True, ""
-
 
 
 def _start_io_threads(
@@ -297,9 +301,16 @@ def _run_smoke_test_loop(
             result_handshake_sent = handshake_sent
             result_handshake_deadline = handshake_deadline
             result_now = now
-        return result_ready_seen, result_handshake_sent, result_handshake_deadline, result_now
+        return (
+            result_ready_seen,
+            result_handshake_sent,
+            result_handshake_deadline,
+            result_now,
+        )
     except ValueError as exc:
-        raise ValueError(f"sonarqube MCP smoke received invalid stdout transport output: {exc}") from exc
+        raise ValueError(
+            f"sonarqube MCP smoke received invalid stdout transport output: {exc}"
+        ) from exc
 
 
 def _create_result(
@@ -311,10 +322,7 @@ def _create_result(
     stderr_buffer: bytearray,
 ) -> SmokeResult:
     """Create the final smoke test result."""
-    response_list = tuple(
-        responses[request_id]
-        for request_id in sorted(responses)
-    )
+    response_list = tuple(responses[request_id] for request_id in sorted(responses))
     initialize_response = _find_response(response_list, _INITIALIZE_REQUEST_ID)
     tools_list_response = _find_response(response_list, _TOOLS_LIST_REQUEST_ID)
     stderr_text = stderr_buffer.decode("utf-8", errors="replace")
@@ -469,7 +477,9 @@ def _handle_stream_chunk(
 ) -> tuple[bool, bool, float | None]:
     if channel == "stderr":
         stderr_buffer.extend(chunk)
-        if not ready_seen and _READY_MARKER in stderr_buffer.decode("utf-8", errors="replace"):
+        if not ready_seen and _READY_MARKER in stderr_buffer.decode(
+            "utf-8", errors="replace"
+        ):
             process_stdin.write(_build_handshake_lines())
             process_stdin.flush()
             return True, True, time.monotonic() + handshake_timeout_seconds
@@ -500,7 +510,9 @@ def _drain_pending_chunks_after_shutdown(
 
         if channel == "stderr":
             stderr_buffer.extend(chunk)
-            if not ready_seen and _READY_MARKER in stderr_buffer.decode("utf-8", errors="replace"):
+            if not ready_seen and _READY_MARKER in stderr_buffer.decode(
+                "utf-8", errors="replace"
+            ):
                 ready_seen = True
             continue
 

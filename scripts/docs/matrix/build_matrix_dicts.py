@@ -326,8 +326,8 @@ def _build_column_entries(
     for raw_value, occurrence_count in sorted(
         global_counter.items(), key=lambda item: (-item[1], item[0])
     ):
-        proposed_canonical_value, normalization_rule, review_status = (
-            _propose_value(column, raw_value)
+        proposed_canonical_value, normalization_rule, review_status = _propose_value(
+            column, raw_value
         )
         entry = {
             "raw_value": raw_value,
@@ -389,8 +389,7 @@ def _raise_conflicting_detail_text(
     detail: str,
 ) -> None:
     raise ValueError(
-        f"Conflicting detail text for ID {detail_id}: "
-        f"{existing_detail!r} != {detail!r}"
+        f"Conflicting detail text for ID {detail_id}: {existing_detail!r} != {detail!r}"
     )
 
 
@@ -400,8 +399,7 @@ def _raise_conflicting_detail_id(
     detail_id: int,
 ) -> None:
     raise ValueError(
-        f"Conflicting detail ID for {detail!r}: "
-        f"{existing_id} != {detail_id}"
+        f"Conflicting detail ID for {detail!r}: {existing_id} != {detail_id}"
     )
 
 

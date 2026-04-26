@@ -13,7 +13,9 @@ if str(REPO_ROOT) not in sys.path:
 import scripts.ai.code_quality_analysis as _impl
 
 main = _impl.main
-__all__ = getattr(_impl, "__all__", [name for name in vars(_impl) if not name.startswith("_")])
+__all__ = getattr(
+    _impl, "__all__", [name for name in vars(_impl) if not name.startswith("_")]
+)
 globals().update({name: getattr(_impl, name) for name in __all__})
 
 

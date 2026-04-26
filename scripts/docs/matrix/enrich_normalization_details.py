@@ -90,23 +90,59 @@ _TOKEN_DETAILS: Final[dict[str, str]] = {
 }
 _SHEET_COLUMN_OVERRIDES: Final[dict[tuple[str, str], str]] = {
     ("chembl_publication", "title"): "normalize_title(): html strip; NFC; ws collapse",
-    ("chembl_publication", "abstract"): "normalize_abstract(): html strip; NFC; ws collapse",
+    (
+        "chembl_publication",
+        "abstract",
+    ): "normalize_abstract(): html strip; NFC; ws collapse",
     ("chembl_publication", "authors"): "normalize_author_list(): parse -> JSON",
-    ("chembl_publication", "author_keys"): "normalize_author_keys(): Surname_F pipe-joined",
+    (
+        "chembl_publication",
+        "author_keys",
+    ): "normalize_author_keys(): Surname_F pipe-joined",
     ("chembl_publication", "publication_type"): "doc_type -> canonical kebab-case type",
     ("chembl_publication", "publication_year"): "publication_year via INT coercion",
-    ("chembl_publication", "creation_date"): "nested chembl_release.creation_date passthrough",
-    ("chembl_assay", "bao_format"): "trim; blank->null; BAO id -> canonical BAO_########",
-    ("chembl_assay", "bao_label"): "canonical from BAO format when known; else trim; lower",
-    ("chembl_assay", "assay_organism"): "trim; blank->null; ws collapse; drop trailing strain notes",
-    ("chembl_activity", "standard_units"): "trim; blank->null; shared unit aliases -> canonical symbol",
-    ("chembl_activity", "uo_units"): "trim; blank->null; UO id -> canonical UO_########",
+    (
+        "chembl_publication",
+        "creation_date",
+    ): "nested chembl_release.creation_date passthrough",
+    (
+        "chembl_assay",
+        "bao_format",
+    ): "trim; blank->null; BAO id -> canonical BAO_########",
+    (
+        "chembl_assay",
+        "bao_label",
+    ): "canonical from BAO format when known; else trim; lower",
+    (
+        "chembl_assay",
+        "assay_organism",
+    ): "trim; blank->null; ws collapse; drop trailing strain notes",
+    (
+        "chembl_activity",
+        "standard_units",
+    ): "trim; blank->null; shared unit aliases -> canonical symbol",
+    (
+        "chembl_activity",
+        "uo_units",
+    ): "trim; blank->null; UO id -> canonical UO_########",
     ("chembl_activity", "qudt_units"): "trim; blank->null; preserve full URI",
-    ("chembl_activity", "target_taxonomy_id"): "target_tax_id -> target_taxonomy_id; validate",
-    ("chembl_target", "organism_class"): "derived via organism classifier; taxonomy first",
-    ("chembl_target", "organism"): "trim; blank->null; ws collapse; drop trailing strain notes",
+    (
+        "chembl_activity",
+        "target_taxonomy_id",
+    ): "target_tax_id -> target_taxonomy_id; validate",
+    (
+        "chembl_target",
+        "organism_class",
+    ): "derived via organism classifier; taxonomy first",
+    (
+        "chembl_target",
+        "organism",
+    ): "trim; blank->null; ws collapse; drop trailing strain notes",
     ("chembl_target", "taxonomy_id"): "TaxonomyId.from_raw(): trim; int; invalid->null",
-    ("chembl_molecule", "canonical_smiles"): "SMILES.from_raw(canonical=True); trim; empty->null",
+    (
+        "chembl_molecule",
+        "canonical_smiles",
+    ): "SMILES.from_raw(canonical=True); trim; empty->null",
     ("chembl_molecule", "inchi_key"): "InChIKey.from_raw(): trim; upper; pattern check",
 }
 _SHEET_COLUMN_SET_OVERRIDES: Final[dict[tuple[str, frozenset[str]], str]] = {

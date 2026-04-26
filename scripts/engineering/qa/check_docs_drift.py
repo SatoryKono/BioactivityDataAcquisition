@@ -3,6 +3,7 @@
 Скрипт для проверки дрейфа документации.
 Запрещает абсолютные локальные пути и ссылки на другой репозиторий.
 """
+
 import re
 import sys
 from pathlib import Path
@@ -22,11 +23,7 @@ def _file_content(file_path: Path) -> str:
 
 def _matched_patterns(content: str) -> list[str]:
     """Return forbidden regex patterns found in content."""
-    return [
-        pattern
-        for pattern in _FORBIDDEN_PATTERNS
-        if re.search(pattern, content)
-    ]
+    return [pattern for pattern in _FORBIDDEN_PATTERNS if re.search(pattern, content)]
 
 
 def check_file_forbidden_patterns(file_path: Path) -> list[str]:

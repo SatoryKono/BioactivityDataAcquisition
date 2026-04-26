@@ -89,7 +89,9 @@ def _repo_relative_path(path: Path) -> Path:
 def _normalize_repo_relative_path(path: Path) -> Path:
     """Normalize and validate a repository-relative path."""
     if path.is_absolute():
-        raise ValueError(f"expected repository-relative path, got absolute path: {path}")
+        raise ValueError(
+            f"expected repository-relative path, got absolute path: {path}"
+        )
 
     normalized_parts: list[str] = []
     for part in path.parts:
@@ -270,9 +272,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _checked_targets(results: list[FileCheckResult]) -> list[FileCheckResult]:
-    return [
-        result for result in results if result.diagram_type in TARGET_DIAGRAM_TYPES
-    ]
+    return [result for result in results if result.diagram_type in TARGET_DIAGRAM_TYPES]
 
 
 def _summary_line(**fields: object) -> str:
@@ -303,9 +303,7 @@ def _run_check_mode(
     return 1 if offending else 0
 
 
-def _apply_fixes(
-    offending: list[FileCheckResult], *, dry_run: bool
-) -> tuple[int, int]:
+def _apply_fixes(offending: list[FileCheckResult], *, dry_run: bool) -> tuple[int, int]:
     changed_files = 0
     replacements = 0
     for result in offending:

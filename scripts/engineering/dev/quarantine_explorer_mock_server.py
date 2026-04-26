@@ -157,7 +157,14 @@ def _scoped_allowed_values(
     field: str | None,
     run_id: str | None,
     payload_hash: str | None,
-) -> tuple[set[str] | None, set[str] | None, set[str] | None, set[str] | None, set[str] | None, set[str] | None]:
+) -> tuple[
+    set[str] | None,
+    set[str] | None,
+    set[str] | None,
+    set[str] | None,
+    set[str] | None,
+    set[str] | None,
+]:
     return (
         _normalize_multi(pipeline),
         _normalize_multi(run_type),
@@ -383,8 +390,7 @@ class MockQuarantineExplorerService:
         return {
             "total": total,
             "by_reason_code": [
-                {"key": key, "count": count}
-                for key, count in by_reason.most_common(20)
+                {"key": key, "count": count} for key, count in by_reason.most_common(20)
             ],
             "by_field": [
                 {"key": key, "count": count} for key, count in by_field.most_common(20)
@@ -422,10 +428,18 @@ class MockQuarantineExplorerService:
         )
         return {
             "pipelines": sorted(
-                {str(row.get("pipeline", "")).strip() for row in rows if row.get("pipeline")}
+                {
+                    str(row.get("pipeline", "")).strip()
+                    for row in rows
+                    if row.get("pipeline")
+                }
             ),
             "run_types": sorted(
-                {str(row.get("run_type", "")).strip() for row in rows if row.get("run_type")}
+                {
+                    str(row.get("run_type", "")).strip()
+                    for row in rows
+                    if row.get("run_type")
+                }
             ),
             "reason_codes": sorted(
                 {
@@ -438,7 +452,11 @@ class MockQuarantineExplorerService:
                 {str(row.get("field", "")).strip() for row in rows if row.get("field")}
             ),
             "run_ids": sorted(
-                {str(row.get("run_id", "")).strip() for row in rows if row.get("run_id")}
+                {
+                    str(row.get("run_id", "")).strip()
+                    for row in rows
+                    if row.get("run_id")
+                }
             ),
         }
 

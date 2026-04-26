@@ -92,7 +92,9 @@ def _base_name(base: ast.expr) -> str:
     return ast.unparse(base)
 
 
-def _class_method_groups(node: ast.ClassDef) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def _class_method_groups(
+    node: ast.ClassDef,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Split class methods into public and private groups."""
     methods_public: list[dict[str, Any]] = []
     methods_private: list[dict[str, Any]] = []
@@ -318,7 +320,7 @@ def _grand_totals(layer_stats: dict[str, dict[str, int]]) -> dict[str, int]:
 
 
 def _top_class_entries(
-    all_classes: list[tuple[str, str, dict[str, Any]]]
+    all_classes: list[tuple[str, str, dict[str, Any]]],
 ) -> list[dict[str, Any]]:
     """Return top 20 classes by LOC."""
     all_classes.sort(key=lambda t: t[2]["loc"], reverse=True)
@@ -336,7 +338,7 @@ def _top_class_entries(
 
 
 def _top_function_entries(
-    all_functions: list[tuple[str, str, dict[str, Any]]]
+    all_functions: list[tuple[str, str, dict[str, Any]]],
 ) -> list[dict[str, Any]]:
     """Return top 20 functions by LOC."""
     all_functions.sort(key=lambda t: t[2]["loc"], reverse=True)
@@ -353,7 +355,7 @@ def _top_function_entries(
 
 
 def _missing_suffix_entries(
-    all_classes: list[tuple[str, str, dict[str, Any]]]
+    all_classes: list[tuple[str, str, dict[str, Any]]],
 ) -> list[dict[str, Any]]:
     """Return classes that do not follow NAME-001 suffix guidance."""
     missing_suffix: list[dict[str, Any]] = []

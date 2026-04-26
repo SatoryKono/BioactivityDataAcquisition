@@ -5,7 +5,7 @@ import sys
 import tempfile
 from unittest.mock import AsyncMock, MagicMock
 
-sys.path.insert(0, 'src')
+sys.path.insert(0, "src")
 
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.storage.silver.operations.maintenance_operations import (

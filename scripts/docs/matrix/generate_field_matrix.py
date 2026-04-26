@@ -55,11 +55,10 @@ def _normalizer_name(normalizer: Any) -> str:
 
 def _current_normalization_name(*, field_name: str, normalizer_name: str) -> str:
     """Return the display name used by the shipped field-matrix contract."""
-    if (
-        field_name == "activity_properties"
-        and normalizer_name
-        in {"normalize_profile_json_string", "normalize_profile_json_string_strict"}
-    ):
+    if field_name == "activity_properties" and normalizer_name in {
+        "normalize_profile_json_string",
+        "normalize_profile_json_string_strict",
+    }:
         return "_normalize_json_string"
     return normalizer_name
 
@@ -69,15 +68,15 @@ def _render_current_normalization(
 ) -> str:
     """Render the active normalization contract from one field rule."""
     parts = [f"normalizer={normalizer_name}"]
-    parts.append("content_hash=included" if include_in_hash else "content_hash=excluded")
+    parts.append(
+        "content_hash=included" if include_in_hash else "content_hash=excluded"
+    )
     if set_like:
         parts.append("hash_order=set_like")
     return "; ".join(parts)
 
 
-def _render_proposed_normalization(
-    field_name: str, current_normalization: str
-) -> str:
+def _render_proposed_normalization(field_name: str, current_normalization: str) -> str:
     """Render planned normalization contract with deterministic fallback."""
     return _PROPOSED_NORMALIZATION_OVERRIDES.get(field_name, current_normalization)
 

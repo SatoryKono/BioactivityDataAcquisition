@@ -103,7 +103,9 @@ def _ensure_path_within_root(path: Path, root: Path) -> Path:
     resolved_root = root.resolve()
     resolved_path = path.resolve()
     if resolved_root != resolved_path and resolved_root not in resolved_path.parents:
-        raise ValueError(f"refusing to process path outside {resolved_root}: {resolved_path}")
+        raise ValueError(
+            f"refusing to process path outside {resolved_root}: {resolved_path}"
+        )
     return resolved_path
 
 
@@ -348,7 +350,10 @@ def _append_svg_png_drift_issues(
     png_w: int,
     png_h: int,
 ) -> None:
-    if shape.edge_labels > 0 and (shape.text_nodes + shape.foreign_object_text_nodes) == 0:
+    if (
+        shape.edge_labels > 0
+        and (shape.text_nodes + shape.foreign_object_text_nodes) == 0
+    ):
         issues.append(
             Issue(
                 "DIAG-T025",
@@ -642,9 +647,7 @@ def check_diag_t027(
     for rel in source_paths:
         path = REPO_ROOT / rel
         if not path.exists():
-            issues.append(
-                Issue("DIAG-T027", "WARNING", str(rel), SOURCE_FILE_MISSING)
-            )
+            issues.append(Issue("DIAG-T027", "WARNING", str(rel), SOURCE_FILE_MISSING))
             continue
 
         lines = path.read_text(encoding="utf-8").splitlines()
@@ -732,9 +735,7 @@ def check_diag_t028(
     for rel in source_paths:
         path = REPO_ROOT / rel
         if not path.exists():
-            issues.append(
-                Issue("DIAG-T028", "WARNING", str(rel), SOURCE_FILE_MISSING)
-            )
+            issues.append(Issue("DIAG-T028", "WARNING", str(rel), SOURCE_FILE_MISSING))
             continue
 
         lines = path.read_text(encoding="utf-8").splitlines()
@@ -833,9 +834,7 @@ def check_diag_t029(
     for rel in source_paths:
         path = REPO_ROOT / rel
         if not path.exists():
-            issues.append(
-                Issue("DIAG-T029", "WARNING", str(rel), SOURCE_FILE_MISSING)
-            )
+            issues.append(Issue("DIAG-T029", "WARNING", str(rel), SOURCE_FILE_MISSING))
             continue
 
         canonical_svg = tmpdir / f"theme-canonical-{path.stem}.svg"
@@ -951,7 +950,9 @@ def _resolve_optional_cli_path(path: Path | None) -> Path | None:
     return _resolve_repo_relative_cli_path(path)
 
 
-def _load_suite_manifests(src_manifest: Path, rnd_manifest: Path) -> tuple[list[Path], list[Path]]:
+def _load_suite_manifests(
+    src_manifest: Path, rnd_manifest: Path
+) -> tuple[list[Path], list[Path]]:
     return (
         load_manifest(src_manifest, (".mmd", ".mermaid")),
         load_manifest(rnd_manifest, (".svg",)),
@@ -966,7 +967,9 @@ def _probe_backend_for_suite(
     puppeteer: Path | None,
     tmpdir: Path,
 ) -> tuple[bool, str]:
-    needs_render_backend = not (args.skip_chaos and args.skip_growth and args.skip_theme)
+    needs_render_backend = not (
+        args.skip_chaos and args.skip_growth and args.skip_theme
+    )
     if not needs_render_backend:
         return True, ""
     return probe_render_backend(
@@ -1120,7 +1123,9 @@ def _write_optional_outputs(
         json_out = (
             args.json_out if args.json_out.is_absolute() else REPO_ROOT / args.json_out
         )
-        _write_suite_output(json_out, json.dumps(payload, ensure_ascii=True, indent=2) + "\n")
+        _write_suite_output(
+            json_out, json.dumps(payload, ensure_ascii=True, indent=2) + "\n"
+        )
     if args.markdown_out is not None:
         md_out = (
             args.markdown_out

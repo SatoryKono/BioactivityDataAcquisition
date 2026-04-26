@@ -71,7 +71,7 @@ print("=" * 60)
 test_categories = defaultdict(list)
 for failure in test_failures:
     # Extract test class name
-    match = re.search(r'::([^:]+)::', failure)
+    match = re.search(r"::([^:]+)::", failure)
     if match:
         test_class = match.group(1)
         test_categories[test_class].append(failure)
@@ -85,8 +85,8 @@ for test_class, failures in test_categories.items():
 
     # Show first 3 examples
     for i, failure in enumerate(failures[:3]):
-        test_name = failure.split('::')[-1]
-        print(f"   {i+1}. {test_name}")
+        test_name = failure.split("::")[-1]
+        print(f"   {i + 1}. {test_name}")
     if len(failures) > 3:
         print(f"   ... and {len(failures) - 3} more")
 

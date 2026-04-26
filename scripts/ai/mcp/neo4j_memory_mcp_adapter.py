@@ -70,7 +70,9 @@ def _read_line_message(stream: BinaryIO) -> dict[str, Any] | None:
 
 
 def _write_line_message(stream: BinaryIO, message: dict[str, Any]) -> None:
-    stream.write(json.dumps(message, separators=(",", ":"), sort_keys=True).encode("utf-8"))
+    stream.write(
+        json.dumps(message, separators=(",", ":"), sort_keys=True).encode("utf-8")
+    )
     stream.write(b"\n")
     stream.flush()
 
@@ -87,7 +89,12 @@ def _pump_framed_to_line(
             if message is None:
                 break
             _write_line_message(target, message)
-    except (OSError, BrokenPipeError, ConnectionResetError, ValueError) as exc:  # pragma: no cover - exercised via subprocess tests
+    except (
+        OSError,
+        BrokenPipeError,
+        ConnectionResetError,
+        ValueError,
+    ) as exc:  # pragma: no cover - exercised via subprocess tests
         errors.put(PumpError("client->server", str(exc)))
     except Exception as exc:  # pragma: no cover - exercised via subprocess tests
         errors.put(PumpError("client->server", f"unexpected error: {exc}"))
@@ -111,7 +118,12 @@ def _pump_line_to_framed(
             if message is None:
                 break
             _write_framed_message(target, message)
-    except (OSError, BrokenPipeError, ConnectionResetError, ValueError) as exc:  # pragma: no cover - exercised via subprocess tests
+    except (
+        OSError,
+        BrokenPipeError,
+        ConnectionResetError,
+        ValueError,
+    ) as exc:  # pragma: no cover - exercised via subprocess tests
         errors.put(PumpError("server->client", str(exc)))
     except Exception as exc:  # pragma: no cover - exercised via subprocess tests
         errors.put(PumpError("server->client", f"unexpected error: {exc}"))

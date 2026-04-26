@@ -97,7 +97,9 @@ def _ensure_repo_path(path: Path) -> Path:
     repo_root = SCRIPT_DIR.parents[1].resolve()
     resolved_path = path.resolve()
     if repo_root != resolved_path and repo_root not in resolved_path.parents:
-        raise ValueError(f"refusing to process path outside {repo_root}: {resolved_path}")
+        raise ValueError(
+            f"refusing to process path outside {repo_root}: {resolved_path}"
+        )
     return resolved_path
 
 
@@ -540,7 +542,9 @@ def _build_group_stats(
     if width_strategy != "global":
         return dict(group_stats_raw)
 
-    global_max_width = max(stats.max_visible_width for stats in group_stats_raw.values())
+    global_max_width = max(
+        stats.max_visible_width for stats in group_stats_raw.values()
+    )
     global_max_title = max(stats.max_title_len for stats in group_stats_raw.values())
     return {
         group_name: UniformStats(
@@ -706,7 +710,9 @@ def _resolve_flowchart_uniform_stats(
     nodes: list[FlowchartNode],
     groups: list[UniformGroup],
     width_strategy: str,
-) -> tuple[dict[str, UniformStats], dict[str, UniformStats] | None, UniformStats | None]:
+) -> tuple[
+    dict[str, UniformStats], dict[str, UniformStats] | None, UniformStats | None
+]:
     """Resolve per-node stats for flowchart nodes, optionally grouped."""
     if not groups:
         stats = _compute_flowchart_uniform(nodes)
@@ -731,7 +737,9 @@ def _build_flowchart_group_stats(
     if width_strategy != "global":
         return dict(group_stats_raw)
 
-    global_max_width = max(stats.max_visible_width for stats in group_stats_raw.values())
+    global_max_width = max(
+        stats.max_visible_width for stats in group_stats_raw.values()
+    )
     global_max_title = max(stats.max_title_len for stats in group_stats_raw.values())
     return {
         group_name: UniformStats(

@@ -135,7 +135,9 @@ def _tracked_not_in_nav_paths(not_in_nav: set[str]) -> set[str]:
     }
 
 
-def _resolved_docs_target(source: Path, raw_target: str, *, docs_root: Path) -> str | None:
+def _resolved_docs_target(
+    source: Path, raw_target: str, *, docs_root: Path
+) -> str | None:
     resolved = (source.parent / raw_target).resolve()
     try:
         return resolved.relative_to(docs_root).as_posix()
@@ -217,7 +219,12 @@ def _current_docs_state() -> tuple[list[str], list[str], set[str], list[str]]:
         for path in all_rel_paths
         if path not in nav_docs and _should_track_kpi_not_in_nav(path)
     )
-    return all_rel_paths, nav_docs, set(not_in_nav), _collect_orphans(all_docs, set(not_in_nav))
+    return (
+        all_rel_paths,
+        nav_docs,
+        set(not_in_nav),
+        _collect_orphans(all_docs, set(not_in_nav)),
+    )
 
 
 def _deadline_days_remaining(target_deadline: date) -> int:

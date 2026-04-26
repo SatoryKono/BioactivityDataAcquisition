@@ -11,7 +11,9 @@ from xml.etree import ElementTree as ET
 _OOXML_HOST = "schemas.openxmlformats.org"
 NS: Final[dict[str, str]] = {
     "a": urlunsplit(("http", _OOXML_HOST, "/spreadsheetml/2006/main", "", "")),
-    "r": urlunsplit(("http", _OOXML_HOST, "/officeDocument/2006/relationships", "", "")),
+    "r": urlunsplit(
+        ("http", _OOXML_HOST, "/officeDocument/2006/relationships", "", "")
+    ),
     "pr": urlunsplit(("http", _OOXML_HOST, "/package/2006/relationships", "", "")),
 }
 MAIN_NS: Final[str] = NS["a"]

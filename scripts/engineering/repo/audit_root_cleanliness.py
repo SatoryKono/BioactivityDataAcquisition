@@ -100,7 +100,12 @@ def _load_structure_catalog(repo_root: Path) -> dict[str, Any]:
     with catalog_path.open("r", encoding="utf-8") as handle:
         payload = yaml.safe_load(handle) or {}
 
-    required_sections = {"docs_drafts", "plans", "src_sidecars", "blocked_cleanup_zones"}
+    required_sections = {
+        "docs_drafts",
+        "plans",
+        "src_sidecars",
+        "blocked_cleanup_zones",
+    }
     missing_sections = sorted(
         section for section in required_sections if section not in payload
     )
@@ -341,9 +346,9 @@ def _collect_structure_policy_violations(
         if path.startswith("docs/D-") and path.endswith(".md")
     }
     for path in sorted(actual_docs_drafts - docs_drafts):
-            violations.append(
-                f"{path}: legacy flat doc must be cataloged in {STRUCTURE_CATALOG_FILE.as_posix()}"
-            )
+        violations.append(
+            f"{path}: legacy flat doc must be cataloged in {STRUCTURE_CATALOG_FILE.as_posix()}"
+        )
     for path in sorted(docs_drafts - tracked_set):
         violations.append(f"{path}: cataloged legacy doc is missing from tracked tree")
 
@@ -362,9 +367,9 @@ def _collect_structure_policy_violations(
         and path != plans_readme
     }
     for path in sorted(actual_plan_paths - cataloged_plan_paths):
-            violations.append(
-                f"{path}: plan file must be cataloged in {STRUCTURE_CATALOG_FILE.as_posix()}"
-            )
+        violations.append(
+            f"{path}: plan file must be cataloged in {STRUCTURE_CATALOG_FILE.as_posix()}"
+        )
     for path in sorted(cataloged_plan_paths - tracked_set):
         violations.append(f"{path}: cataloged plan file is missing from tracked tree")
 
@@ -381,7 +386,9 @@ def _collect_structure_policy_violations(
             f"{max_active_backlog} active_backlog file(s), found {active_backlog_count}"
         )
 
-    approved_src_roots = _collect_cataloged_paths(catalog["src_sidecars"]["approved_roots"])
+    approved_src_roots = _collect_cataloged_paths(
+        catalog["src_sidecars"]["approved_roots"]
+    )
     actual_src_roots = {
         "/".join(path.split("/", maxsplit=2)[:2])
         for path in tracked_paths
@@ -396,7 +403,9 @@ def _collect_structure_policy_violations(
     blocked_cleanup_paths = _collect_cataloged_paths(blocked_cleanup_entries)
     for path in sorted(blocked_cleanup_paths):
         if not (repo_root / path).exists():
-            violations.append(f"{path}: blocked cleanup zone declared in catalog but missing")
+            violations.append(
+                f"{path}: blocked cleanup zone declared in catalog but missing"
+            )
 
     return violations
 
@@ -419,8 +428,7 @@ def _unexpected_untracked_root_dirs(
     return sorted(
         root_dir
         for root_dir in _collect_untracked_root_dirs(untracked_paths)
-        if root_dir not in tracked_root_dirs
-        and root_dir not in allowed_root_dirs
+        if root_dir not in tracked_root_dirs and root_dir not in allowed_root_dirs
     )
 
 
@@ -505,7 +513,9 @@ def main() -> int:
         return tracked_policy_exit
 
     structure_policy_exit = _report_structure_policy_violations(
-        _collect_structure_policy_violations(repo_root, tracked_paths, structure_catalog)
+        _collect_structure_policy_violations(
+            repo_root, tracked_paths, structure_catalog
+        )
     )
     if structure_policy_exit:
         return structure_policy_exit

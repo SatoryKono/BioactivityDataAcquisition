@@ -43,7 +43,9 @@ def _ensure_repo_path(path: Path) -> Path:
     resolved_root = REPO_ROOT.resolve()
     resolved_path = path.resolve()
     if resolved_root != resolved_path and resolved_root not in resolved_path.parents:
-        raise ValueError(f"refusing to write path outside {resolved_root}: {resolved_path}")
+        raise ValueError(
+            f"refusing to write path outside {resolved_root}: {resolved_path}"
+        )
     return resolved_path
 
 
@@ -333,9 +335,7 @@ def main() -> int:
     args = parse_args()
 
     try:
-        checks = (
-            _quality_checks(args) + _lint_checks(args) + _nightly_checks(args)
-        )
+        checks = _quality_checks(args) + _lint_checks(args) + _nightly_checks(args)
     except (FileNotFoundError, ValueError) as exc:
         _err(f"[ERROR] {exc}")
         return 2

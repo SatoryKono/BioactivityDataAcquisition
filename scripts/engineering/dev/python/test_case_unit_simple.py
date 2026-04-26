@@ -5,7 +5,8 @@ import os
 import sys
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+
 
 def test_normalization_rules():
     """Test the normalization rules functionality."""
@@ -37,10 +38,14 @@ def test_normalization_rules():
     assert normalize_case("  ec50  ", activity_types) == "EC50"
     assert normalize_case("ki", activity_types) == "Ki"  # Returns enum's original case
     assert normalize_case("Ki", activity_types) == "Ki"  # Exact match
-    assert normalize_case("KI", activity_types) == "Ki"  # Case-insensitive, returns enum case
+    assert (
+        normalize_case("KI", activity_types) == "Ki"
+    )  # Case-insensitive, returns enum case
     assert normalize_case("kd", activity_types) == "Kd"  # Returns enum's original case
     assert normalize_case("Kd", activity_types) == "Kd"  # Exact match
-    assert normalize_case("KD", activity_types) == "Kd"  # Case-insensitive, returns enum case
+    assert (
+        normalize_case("KD", activity_types) == "Kd"
+    )  # Case-insensitive, returns enum case
 
     # Invalid cases
     assert normalize_case("X", assay_types) is None
@@ -94,10 +99,13 @@ def test_normalization_rules():
     print("Total unit mappings:", len(UNIT_MAPPING))
 
     # Show bioactivity-relevant units
-    bioactivity_units = {k: v for k, v in UNIT_MAPPING.items() if v in ['nM', 'µM', 'mM', 'M', '%']}
+    bioactivity_units = {
+        k: v for k, v in UNIT_MAPPING.items() if v in ["nM", "µM", "mM", "M", "%"]
+    }
     print("Bioactivity units:", len(bioactivity_units), "mappings")
     for k, v in list(bioactivity_units.items())[:10]:
         print(f"  {k} → {v}")
+
 
 def test_profile_normalizers():
     """Test the profile normalizer functions."""
@@ -129,7 +137,9 @@ def test_profile_normalizers():
 
     for input_val, expected in test_cases:
         result = normalize_profile_case(input_val, allowed_values=assay_types)
-        assert result == expected, f"Expected {expected}, got {result} for input {input_val}"
+        assert result == expected, (
+            f"Expected {expected}, got {result} for input {input_val}"
+        )
 
     # Test invalid cases
     assert normalize_profile_case("X", allowed_values=assay_types) is None
@@ -155,7 +165,9 @@ def test_profile_normalizers():
 
     for input_val, expected in unit_test_cases:
         result = normalize_profile_unit(input_val)
-        assert result == expected, f"Expected {expected}, got {result} for input {input_val}"
+        assert result == expected, (
+            f"Expected {expected}, got {result} for input {input_val}"
+        )
 
     # Test invalid unit inputs
     assert normalize_profile_unit(None) is None
@@ -163,6 +175,7 @@ def test_profile_normalizers():
     assert normalize_profile_unit("") is None
 
     print("✓ Unit normalizer tests passed!")
+
 
 def test_edge_cases():
     """Test edge cases and error handling."""
@@ -194,6 +207,7 @@ def test_edge_cases():
 
     print("✓ Edge case tests passed!")
 
+
 if __name__ == "__main__":
     try:
         test_normalization_rules()
@@ -208,5 +222,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
