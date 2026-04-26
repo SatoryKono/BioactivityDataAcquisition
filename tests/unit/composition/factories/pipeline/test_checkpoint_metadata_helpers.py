@@ -4,8 +4,11 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from types import SimpleNamespace
-from typing import cast
+from typing import TYPE_CHECKING, cast
 from uuid import uuid4
+
+if TYPE_CHECKING:
+    from bioetl.application.core.base import BasePipeline
 
 from bioetl.application.services.run_manifest_service import (
     RunManifestCreateRequest,
@@ -21,6 +24,7 @@ from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
 from bioetl.domain.types import RunType
 from bioetl.domain.value_objects.run_context import RunContext
+from tests.helpers.control_plane import InMemoryRunManifestStore
 
 
 def _make_pipeline(**overrides: object) -> object:
@@ -41,21 +45,7 @@ def _make_pipeline(**overrides: object) -> object:
     return cast("BasePipeline", SimpleNamespace(**defaults))
 
 
-class _InMemoryRunManifestStore:
-    def save(self, manifest) -> None:  # pragma: no cover - trivial test stub
-        self._manifest = manifest
-
-    def get(self, manifest_id: str):
-        manifest = getattr(self, "_manifest", None)
-        if manifest is None or manifest.manifest_id != manifest_id:
-            return None
-        return manifest
-
-    def get_by_run_id(self, run_id):
-        manifest = getattr(self, "_manifest", None)
-        if manifest is None or manifest.run_id != run_id:
-            return None
-        return manifest
+_InMemoryRunManifestStore = InMemoryRunManifestStore
 
 
 def test_build_current_checkpoint_metadata_includes_resume_anchors(tmp_path) -> None:

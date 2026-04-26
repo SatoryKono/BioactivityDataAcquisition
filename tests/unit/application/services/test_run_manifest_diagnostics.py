@@ -29,39 +29,15 @@ from bioetl.domain.normalization import (
     build_execution_identity_payload,
     compute_execution_identity_fingerprint,
 )
-from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID, RunType
+from tests.helpers.control_plane import InMemoryRunLedgerStore
 
 _VALID_CONFIG_HASH = "a" * 64
 _VALID_RESOLVED_CONFIG_HASH = "b" * 64
 _VALID_EFFECTIVE_CONFIG_HASH = "c" * 64
 
 
-class _InMemoryRunLedgerStore(RunLedgerPort):
-    def __init__(self) -> None:
-        self.items: list[RunLedgerEntry] = []
-
-    def append(self, entry: RunLedgerEntry) -> None:
-        self.items.append(entry)
-
-    def list_entries(self, manifest_id: str) -> list[RunLedgerEntry]:
-        return [item for item in self.items if item.manifest_id == manifest_id]
-
-    def list_entries_by_run_id(self, run_id: RunID) -> list[RunLedgerEntry]:
-        return [item for item in self.items if item.run_id == run_id]
-
-    def list_entries_after(
-        self,
-        manifest_id: str,
-        after_entry_id: str | None,
-    ) -> list[RunLedgerEntry]:
-        entries = self.list_entries(manifest_id)
-        if after_entry_id is None:
-            return entries
-        for index, item in enumerate(entries):
-            if item.entry_id == after_entry_id:
-                return entries[index + 1 :]
-        raise ValueError(f"missing watermark {after_entry_id!r}")
+_InMemoryRunLedgerStore = InMemoryRunLedgerStore
 
 
 def _make_manifest() -> RunManifest:
@@ -288,7 +264,7 @@ def _build_ledger_entries(
         service.record_run_shutdown(metrics_snapshot={"records_silver": 2})
     else:
         raise AssertionError(f"unsupported terminal status {terminal_status!r}")
-    return tuple(store.items)
+    return tuple(store._items)
 
 
 def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> None:

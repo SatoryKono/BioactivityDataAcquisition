@@ -373,9 +373,10 @@ class TestAggregateInvariantProtection:
             pytest.skip("Aggregates directory not found")
         violations = _immutable_property_violations(aggregates_dir)
 
-        # Note: This is a soft check - existing code returns tuples correctly
-        if violations:
-            pytest.skip(f"Found potential issues: {violations}")
+        assert not violations, (
+            "Aggregate properties returning collections should return immutable types.\n"
+            + "\n".join(f"  - {v}" for v in violations)
+        )
 
 
 class TestDomainEventsForCoordination:

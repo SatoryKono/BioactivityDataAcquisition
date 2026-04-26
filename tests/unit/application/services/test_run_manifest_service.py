@@ -23,27 +23,13 @@ from bioetl.domain.control_plane import (
     RunSourceRef,
 )
 from bioetl.domain.exceptions import StorageError
-from bioetl.domain.ports import RunManifestPort
 from bioetl.domain.types import RunID, RunType
+from tests.helpers.control_plane import InMemoryRunManifestStore
 from bioetl.infrastructure.control_plane import FileRunManifestStore
 from tests.helpers.clock import FixedClock
 
 
-class _InMemoryRunManifestStore(RunManifestPort):
-    def __init__(self) -> None:
-        self._items: dict[str, RunManifest] = {}
-        self._by_run_id: dict[str, str] = {}
-
-    def save(self, manifest: RunManifest) -> None:
-        self._items[manifest.manifest_id] = manifest
-        self._by_run_id[str(manifest.run_id)] = manifest.manifest_id
-
-    def get(self, manifest_id: str) -> RunManifest | None:
-        return self._items.get(manifest_id)
-
-    def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
-        manifest_id = self._by_run_id.get(str(run_id))
-        return None if manifest_id is None else self._items.get(manifest_id)
+_InMemoryRunManifestStore = InMemoryRunManifestStore
 
 
 class _MissingLookupRunManifestStore(_InMemoryRunManifestStore):
