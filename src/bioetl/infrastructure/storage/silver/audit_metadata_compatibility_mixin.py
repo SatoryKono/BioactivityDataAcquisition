@@ -80,7 +80,6 @@ class SilverWriterAuditMetadataCompatibilityMixin:
             source_batch_id=source_batch_id,
             ingestion_ts=ingestion_ts,
         )
-        return
 
     def _should_skip_silver_metadata_write(
         self,

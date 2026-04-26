@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import time
 from collections.abc import Iterator
 from dataclasses import dataclass
@@ -341,7 +342,7 @@ class BronzeWriter(
             atomic_write_bytes(prepared.meta_path, meta_bytes)
             return count, size
 
-        record_count, uncompressed_size = _write_task()
+        record_count, uncompressed_size = await asyncio.to_thread(_write_task)
         return build_bronze_write_artifacts(
             full_path=prepared.full_path,
             record_count=record_count,

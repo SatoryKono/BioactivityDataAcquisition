@@ -5,10 +5,10 @@ Test suite for BioETL Link Checker Plugin
 Tests the core functionality of the link checker plugin.
 """
 
-import os
 import tempfile
-import shutil
-from unittest.mock import patch, MagicMock
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
 import pytest
 from docs.plugins.link_checker.plugin import LinkCheckerPlugin
 
@@ -25,7 +25,7 @@ class TestLinkCheckerPlugin:
             "max_redirects": 5,
             "ignore_patterns": ["localhost", "127.0.0.1"],
             "report_dir": "reports/links",
-            "fail_on_error": False
+            "fail_on_error": False,
         }
 
     def test_initialization(self):
@@ -40,16 +40,21 @@ class TestLinkCheckerPlugin:
         """Test finding HTML files in directory."""
         # Create temporary directory with HTML files
         with tempfile.TemporaryDirectory() as temp_dir:
+            temp_dir_path = Path(temp_dir)
             # Create some HTML files
             for i in range(3):
-                with open(os.path.join(temp_dir, f"page{i}.html"), "w") as f:
-                    f.write(f"<html><body>Page {i}</body></html>")
+                (temp_dir_path / f"page{i}.html").write_text(
+                    f"<html><body>Page {i}</body></html>",
+                    encoding="utf-8",
+                )
 
             # Create subdirectory with HTML file
-            subdir = os.path.join(temp_dir, "subdir")
-            os.makedirs(subdir)
-            with open(os.path.join(subdir, "subpage.html"), "w") as f:
-                f.write("<html><body>Sub page</body></html>")
+            subdir = temp_dir_path / "subdir"
+            subdir.mkdir()
+            (subdir / "subpage.html").write_text(
+                "<html><body>Sub page</body></html>",
+                encoding="utf-8",
+            )
 
             # Test finding files
             html_files = self.plugin._find_html_files(temp_dir)
@@ -60,16 +65,16 @@ class TestLinkCheckerPlugin:
         """Test checking valid internal link."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create target file
-            target_file = os.path.join(temp_dir, "target.html")
-            with open(target_file, "w") as f:
-                f.write("<html><body>Target</body></html>")
+            temp_dir_path = Path(temp_dir)
+            target_file = temp_dir_path / "target.html"
+            target_file.write_text("<html><body>Target</body></html>", encoding="utf-8")
 
             # Test valid internal link
             result = self.plugin._check_link(
                 "target.html",
                 "Target Page",
                 "index.html",
-                os.path.join(temp_dir, "index.html")
+                str(temp_dir_path / "index.html"),
             )
 
             assert result is not None
@@ -80,12 +85,13 @@ class TestLinkCheckerPlugin:
     def test_check_internal_link_broken(self):
         """Test checking broken internal link."""
         with tempfile.TemporaryDirectory() as temp_dir:
+            temp_dir_path = Path(temp_dir)
             # Test broken internal link
             result = self.plugin._check_link(
                 "nonexistent.html",
                 "Broken Link",
                 "index.html",
-                os.path.join(temp_dir, "index.html")
+                str(temp_dir_path / "index.html"),
             )
 
             assert result is not None
@@ -103,10 +109,7 @@ class TestLinkCheckerPlugin:
         mock_get.return_value = mock_response
 
         result = self.plugin._check_link(
-            "https://example.com",
-            "Example",
-            "index.html",
-            "/path/to/index.html"
+            "https://example.com", "Example", "index.html", "/path/to/index.html"
         )
 
         assert result is not None
@@ -125,10 +128,7 @@ class TestLinkCheckerPlugin:
         mock_get.return_value = mock_response
 
         result = self.plugin._check_link(
-            "https://example.com/broken",
-            "Broken",
-            "index.html",
-            "/path/to/index.html"
+            "https://example.com/broken", "Broken", "index.html", "/path/to/index.html"
         )
 
         assert result is not None
@@ -154,7 +154,7 @@ class TestLinkCheckerPlugin:
             "https://example.com/original",
             "Original",
             "index.html",
-            "/path/to/index.html"
+            "/path/to/index.html",
         )
 
         assert result is not None
@@ -165,10 +165,7 @@ class TestLinkCheckerPlugin:
     def test_ignore_patterns(self):
         """Test that ignored patterns are respected."""
         result = self.plugin._check_link(
-            "http://localhost/test",
-            "Localhost",
-            "index.html",
-            "/path/to/index.html"
+            "http://localhost/test", "Localhost", "index.html", "/path/to/index.html"
         )
 
         assert result is None  # Should be ignored
@@ -184,7 +181,7 @@ class TestLinkCheckerPlugin:
                 "source_file": "index.html",
                 "link_url": "https://example.com",
                 "status": "valid",
-                "is_internal": False
+                "is_internal": False,
             }
         ]
 
@@ -203,7 +200,7 @@ class TestLinkCheckerPlugin:
         test_cases = [
             (95, "#4c1", "passing"),
             (85, "#dbab09", "warning"),
-            (75, "#e05d44", "failing")
+            (75, "#e05d44", "failing"),
         ]
 
         for health_score, expected_color, expected_status in test_cases:

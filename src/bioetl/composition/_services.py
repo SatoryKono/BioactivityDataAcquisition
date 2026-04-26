@@ -87,6 +87,11 @@ __all__ = [
 ]
 
 
+def _resolve_bootstrap_callable(name: str) -> Callable[[], object]:
+    """Resolve dynamically exported bootstrap hooks as zero-arg callables."""
+    return cast("Callable[[], object]", resolve_bootstrap_attr(name))
+
+
 def _ensure_registrations(registry: PipelineRegistry | None = None) -> None:
     """Ensure providers and pipelines are registered lazily to avoid cycles."""
     from bioetl.composition._pipeline_execution import (
@@ -105,7 +110,7 @@ def get_checkpoint_service() -> CheckpointService:
 def get_audit_service() -> AuditInspectionService:
     """Get an audit inspection service for operator diagnostics operations."""
     _ensure_registrations()
-    bootstrap = resolve_bootstrap_attr("bootstrap_audit_inspection_service")
+    bootstrap = _resolve_bootstrap_callable("bootstrap_audit_inspection_service")
     return bootstrap()
 
 
@@ -191,14 +196,14 @@ def get_contract_migration_service() -> object:
 def get_run_manifest_service() -> RunManifestInspectionService:
     """Get a run-manifest inspection service for control-plane operations."""
     _ensure_registrations()
-    bootstrap = resolve_bootstrap_attr("bootstrap_run_manifest_service")
+    bootstrap = _resolve_bootstrap_callable("bootstrap_run_manifest_service")
     return bootstrap()
 
 
 def get_lineage_service() -> LineageInspectionService:
     """Get a lineage inspection service for traceability operations."""
     _ensure_registrations()
-    bootstrap = resolve_bootstrap_attr("bootstrap_lineage_service")
+    bootstrap = _resolve_bootstrap_callable("bootstrap_lineage_service")
     return bootstrap()
 
 
@@ -211,7 +216,7 @@ def get_health_service() -> HealthService:
 def get_observability_workflow_service() -> ObservabilityWorkflowService:
     """Get workflow-level observability diagnostics helpers."""
     _ensure_registrations()
-    bootstrap = resolve_bootstrap_attr("bootstrap_observability_workflow_service")
+    bootstrap = _resolve_bootstrap_callable("bootstrap_observability_workflow_service")
     return bootstrap()
 
 

@@ -33,6 +33,8 @@ if TYPE_CHECKING:
     )
     from bioetl.composition.registry_default import get_default_registry
 
+_COMPOSITION_REGISTRY_MODULE = "bioetl.composition.registry"
+
 _LAZY_MODULE_EXPORTS: dict[str, str] = {
     "bootstrap": "bioetl.composition.bootstrap",
     "composite_api": "bioetl.composition.composite_api",
@@ -49,9 +51,9 @@ _LAZY_MODULE_EXPORTS: dict[str, str] = {
     "types": "bioetl.composition.types",
 }
 _LAZY_ATTR_EXPORTS: dict[str, tuple[str, str]] = {
-    "PipelineDefinition": ("bioetl.composition.registry", "PipelineDefinition"),
-    "PipelineRegistry": ("bioetl.composition.registry", "PipelineRegistry"),
-    "create_registry": ("bioetl.composition.registry", "create_registry"),
+    "PipelineDefinition": (_COMPOSITION_REGISTRY_MODULE, "PipelineDefinition"),
+    "PipelineRegistry": (_COMPOSITION_REGISTRY_MODULE, "PipelineRegistry"),
+    "create_registry": (_COMPOSITION_REGISTRY_MODULE, "create_registry"),
     "get_default_registry": (
         "bioetl.composition.registry_default",
         "get_default_registry",

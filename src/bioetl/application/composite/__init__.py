@@ -41,6 +41,11 @@ __all__ = [
     "PreflightValidationResult",
 ]
 
+_COMPOSITE_CHECKPOINT_MODULE = "bioetl.application.composite.checkpoint"
+_COMPOSITE_PREFLIGHT_VALIDATOR_MODULE = (
+    "bioetl.application.composite.preflight_validator"
+)
+
 _LAZY_ATTR_EXPORTS: dict[str, tuple[str, str]] = {
     "ColumnOrderService": (
         "bioetl.application.composite.column_service",
@@ -48,15 +53,15 @@ _LAZY_ATTR_EXPORTS: dict[str, tuple[str, str]] = {
     ),
     "ColumnRenamer": ("bioetl.application.composite.column_renamer", "ColumnRenamer"),
     "CompositeCheckpointManager": (
-        "bioetl.application.composite.checkpoint",
+        _COMPOSITE_CHECKPOINT_MODULE,
         "CompositeCheckpointManager",
     ),
     "CompositeCheckpointService": (
-        "bioetl.application.composite.checkpoint",
+        _COMPOSITE_CHECKPOINT_MODULE,
         "CompositeCheckpointService",
     ),
     "CompositeCheckpointState": (
-        "bioetl.application.composite.checkpoint",
+        _COMPOSITE_CHECKPOINT_MODULE,
         "CompositeCheckpointState",
     ),
     "CompositePipelineRunner": (
@@ -72,11 +77,11 @@ _LAZY_ATTR_EXPORTS: dict[str, tuple[str, str]] = {
         "CompositePipelineState",
     ),
     "CompositePreflightValidationService": (
-        "bioetl.application.composite.preflight_validator",
+        _COMPOSITE_PREFLIGHT_VALIDATOR_MODULE,
         "CompositePreflightValidationService",
     ),
     "CompositePreflightValidator": (
-        "bioetl.application.composite.preflight_validator",
+        _COMPOSITE_PREFLIGHT_VALIDATOR_MODULE,
         "CompositePreflightValidator",
     ),
     "CompositeRuntimeConfig": (
@@ -97,11 +102,11 @@ _LAZY_ATTR_EXPORTS: dict[str, tuple[str, str]] = {
     ),
     "MergeService": ("bioetl.application.composite.merger", "MergeService"),
     "PreflightValidationError": (
-        "bioetl.application.composite.preflight_validator",
+        _COMPOSITE_PREFLIGHT_VALIDATOR_MODULE,
         "PreflightValidationError",
     ),
     "PreflightValidationResult": (
-        "bioetl.application.composite.preflight_validator",
+        _COMPOSITE_PREFLIGHT_VALIDATOR_MODULE,
         "PreflightValidationResult",
     ),
 }

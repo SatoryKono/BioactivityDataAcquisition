@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-26T13:42:56.308082+00:00",
+  "generated_at": "2026-04-26T14:20:47.257456+00:00",
   "summary": {
     "total_scripts": 445,
     "status_counts": {
@@ -6028,25 +6028,25 @@
         },
         {
           "path": "docs/03-guides/script-management/script-analysis-prompt.md",
-          "line": 120,
+          "line": 130,
           "source_group": "docs",
           "text": "scripts/engineering/ci/run_pytest_resilient.py"
         },
         {
           "path": "docs/03-guides/script-management/script-analysis-prompt.md",
-          "line": 123,
+          "line": 133,
           "source_group": "docs",
           "text": "scripts/engineering/ci/run_pytest_resilient.py"
         },
         {
           "path": "docs/03-guides/script-management/script-analysis-prompt.md",
-          "line": 350,
+          "line": 376,
           "source_group": "docs",
-          "text": "| TR-001 | `run_pytest.sh`, `run_pytest.ps1`, `run_pytest_resilient.py` | `run_pytest_resilient.py` | 2 scripts | Medium |"
+          "text": "| TR-001   | `run_pytest.sh`, `run_pytest.ps1`, `run_pytest_resilient.py` | `run_pytest_resilient.py` | 2 scripts | Medium     |"
         },
         {
           "path": "docs/03-guides/script-management/script-analysis-prompt.md",
-          "line": 393,
+          "line": 421,
           "source_group": "docs",
           "text": "- Standardize on `run_pytest_resilient.py`"
         }
@@ -8111,7 +8111,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1429,
+          "line": 1426,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },

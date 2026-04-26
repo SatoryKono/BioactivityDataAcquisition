@@ -1,4 +1,5 @@
----
+______________________________________________________________________
+
 id: task-refresh
 title: Refresh before retrieval
 task_id: task-refresh
@@ -6,10 +7,12 @@ created_at: '2026-04-26T11:13:49Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
+
 - src/memory/README.md
-summary: Active task session context.
-query: Refresh before retrieval
----
+  summary: Active task session context.
+  query: Refresh before retrieval
+
+______________________________________________________________________
 
 # Session note
 

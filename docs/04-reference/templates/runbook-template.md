@@ -1,14 +1,17 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: template
 Class: internal
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Priority: <P0|P1|P2|P3|Informational>
-Runtime profile: <Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.>
-Last verified: '2026-03-30'
----
+  Priority: \<P0|P1|P2|P3|Informational>
+  Runtime profile: \<Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.>
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # <Runbook Title>
 
@@ -63,13 +66,13 @@ Last verified: '2026-03-30'
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Sections | All mandatory runbook sections MUST exist | `<pass|fail>` | `<section check>` |
-| Runtime | Runtime profile MUST match ADR-010 posture | `<pass|fail|n/a>` | `<runtime note>` |
-| Safety | Destructive actions MUST include guardrails or backups | `<pass|fail|n/a>` | `<procedure step>` |
-| Verification | Success criteria MUST be executable | `<pass|fail>` | `<verification step>` |
-| Ownership | Escalation or owner path SHOULD be explicit | `<pass|fail|n/a>` | `<owner / team>` |
+| Control      | Requirement                                            | Status   | Evidence |
+| ------------ | ------------------------------------------------------ | -------- | -------- |
+| Sections     | All mandatory runbook sections MUST exist              | \`\<pass | fail>\`  |
+| Runtime      | Runtime profile MUST match ADR-010 posture             | \`\<pass | fail     |
+| Safety       | Destructive actions MUST include guardrails or backups | \`\<pass | fail     |
+| Verification | Success criteria MUST be executable                    | \`\<pass | fail>\`  |
+| Ownership    | Escalation or owner path SHOULD be explicit            | \`\<pass | fail     |
 
 ## References
 

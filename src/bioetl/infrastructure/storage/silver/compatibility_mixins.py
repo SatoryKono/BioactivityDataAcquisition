@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Sequence
 from datetime import datetime
 from typing import Literal, cast
@@ -370,6 +371,7 @@ class SilverWriterWriteCompatibilityMixin:
     ) -> SilverWriteResult | None:
         """Write one Silver target."""
         del invocation, legacy_kwargs
+        await asyncio.sleep(0)
         raise NotImplementedError
 
     async def _write_dual_targets(
@@ -380,6 +382,7 @@ class SilverWriterWriteCompatibilityMixin:
     ) -> SilverWriteResult | None:
         """Write all configured Silver targets."""
         del invocation, legacy_kwargs
+        await asyncio.sleep(0)
         raise NotImplementedError
 
     async def _prepare_silver_write_payload(
@@ -407,6 +410,7 @@ class SilverWriterWriteCompatibilityMixin:
             partition_cols,
             key_nullability_rules,
         )
+        await asyncio.sleep(0)
         raise NotImplementedError
 
     async def _dispatch_write_with_domain_errors(
@@ -417,6 +421,7 @@ class SilverWriterWriteCompatibilityMixin:
     ) -> None:
         """Dispatch the underlying Delta write."""
         del table_name, request
+        await asyncio.sleep(0)
         raise NotImplementedError
 
     async def _complete_silver_write_pipeline(
@@ -427,6 +432,7 @@ class SilverWriterWriteCompatibilityMixin:
     ) -> SilverWriteResult | None:
         """Run post-dispatch pipeline completion."""
         del ctx, payload
+        await asyncio.sleep(0)
         raise NotImplementedError
 
     async def write_silver(
