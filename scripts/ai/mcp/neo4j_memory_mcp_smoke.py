@@ -110,6 +110,25 @@ def _find_response(messages: Sequence[dict[str, Any]], request_id: int) -> dict[
     return None
 
 
+def _to_bytes(payload: bytes | str | None) -> bytes:
+    if payload is None:
+        return b""
+    if isinstance(payload, bytes):
+        return payload
+    return payload.encode("utf-8", errors="replace")
+
+
+def _has_complete_handshake(responses: Sequence[dict[str, Any]]) -> bool:
+    initialize_response = _find_response(responses, _INITIALIZE_REQUEST_ID)
+    tools_list_response = _find_response(responses, _TOOLS_LIST_REQUEST_ID)
+    if initialize_response is None or tools_list_response is None:
+        return False
+    if "result" not in initialize_response or "result" not in tools_list_response:
+        return False
+    tools_payload = tools_list_response["result"]
+    return isinstance(tools_payload, dict) and "tools" in tools_payload
+
+
 def run_smoke_command(
     command: Sequence[str],
     *,
@@ -126,12 +145,39 @@ def run_smoke_command(
             input=_build_handshake(),
             timeout=timeout_seconds,
         )
-    except subprocess.TimeoutExpired:
+    except subprocess.TimeoutExpired as exc:
+        partial_stdout = _to_bytes(exc.output)
+        partial_stderr = _to_bytes(exc.stderr)
         process.kill()
         stdout, stderr = process.communicate()
+        stdout = partial_stdout + _to_bytes(stdout)
+        stderr = partial_stderr + _to_bytes(stderr)
+        try:
+            responses = tuple(_parse_frames(stdout))
+        except ValueError as parse_exc:
+            return SmokeResult(
+                ok=False,
+                summary=(
+                    "neo4j-memory MCP smoke received invalid framed output: "
+                    f"{parse_exc}"
+                ),
+                stderr=stderr.decode("utf-8", errors="replace"),
+                returncode=process.returncode,
+            )
+        if _has_complete_handshake(responses):
+            return SmokeResult(
+                ok=True,
+                summary=(
+                    "neo4j-memory MCP smoke completed initialize/tools/list over framed stdio."
+                ),
+                responses=responses,
+                stderr=stderr.decode("utf-8", errors="replace"),
+                returncode=0,
+            )
         return SmokeResult(
             ok=False,
             summary="neo4j-memory MCP smoke timed out before initialize/tools/list completed.",
+            responses=responses,
             stderr=stderr.decode("utf-8", errors="replace"),
             returncode=process.returncode,
         )

@@ -211,7 +211,7 @@ timeout = 60
 # Timeout method: thread works on all platforms (signal only on Unix)
 timeout_method = "thread"
 asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope = "function"
+asyncio_default_fixture_loop_scope = "module"
 cache_dir = "/tmp/bioetl-pytest-cache"
 filterwarnings = [
     "error",
