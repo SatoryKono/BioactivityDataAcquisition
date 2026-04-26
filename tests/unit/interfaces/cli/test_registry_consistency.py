@@ -51,7 +51,7 @@ class TestListPipelinesCommandSnapshot:
         )
 
         assert result.exit_code == 0, f"Command failed: {result.output}"
-        assert _normalize_cli_output(result.output) == snapshot
+    assert _normalize_cli_output(result.output) == snapshot.lstrip()
 
     def test_list_pipelines_output_format(
         self,

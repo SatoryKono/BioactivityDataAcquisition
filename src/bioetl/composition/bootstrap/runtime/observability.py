@@ -282,6 +282,20 @@ def bootstrap_observability_bundle(
     Returns:
         Validated ObservabilityBundle with logger, metrics, tracer, and DQ monitor.
     """
+
+    def _audit_bootstrapper(
+        audit_settings: Settings,
+        audit_logger: LoggerPort,
+        audit_metrics: MetricsPort,
+        audit_tracer: TracingPort,
+    ) -> AuditPort:
+        return _create_runtime_audit_port(
+            settings=audit_settings,
+            logger=audit_logger,
+            metrics=audit_metrics,
+            tracing=audit_tracer,
+        )
+
     return _bootstrap_observability_bundle_impl(
         pipeline=pipeline,
         run_id=run_id,
