@@ -12,8 +12,8 @@ They also support the staged internal layout migration:
 
 from __future__ import annotations
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 try:
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_repo_root

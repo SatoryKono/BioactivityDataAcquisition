@@ -11,10 +11,11 @@ for identified problems like:
 """
 
 import os
-import sys
 import subprocess
+import sys
 from datetime import datetime
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
 import requests
 from dotenv import load_dotenv
 
@@ -31,76 +32,68 @@ TEST_PROBLEM_CATEGORIES = {
         "title": "Test Timeout Issues",
         "description": "Tests that exceed reasonable execution time limits",
         "labels": ["test", "performance", "timeout"],
-        "severity": "high"
+        "severity": "high",
     },
     "coverage": {
         "title": "Missing Test Coverage",
         "description": "Code areas lacking adequate test coverage",
         "labels": ["test", "coverage", "quality"],
-        "severity": "medium"
+        "severity": "medium",
     },
     "flaky": {
         "title": "Flaky Test Detection",
         "description": "Tests with inconsistent pass/fail results",
         "labels": ["test", "flaky", "reliability"],
-        "severity": "high"
+        "severity": "high",
     },
     "infrastructure": {
         "title": "Test Infrastructure Issues",
         "description": "Problems with test setup, fixtures, or configuration",
         "labels": ["test", "infrastructure", "tech-debt"],
-        "severity": "medium"
+        "severity": "medium",
     },
     "performance": {
         "title": "Slow Test Performance",
         "description": "Tests that run significantly slower than expected",
         "labels": ["test", "performance", "optimization"],
-        "severity": "medium"
-    }
+        "severity": "medium",
+    },
 }
 
 
-def get_github_headers() -> Dict[str, str]:
+def get_github_headers() -> dict[str, str]:
     """Get headers for GitHub API requests."""
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github.v3+json"
+        "Accept": "application/vnd.github.v3+json",
     }
     return headers
 
 
-def create_github_issue(
-    title: str,
-    body: str,
-    labels: List[str]
-) -> Optional[str]:
+def create_github_issue(title: str, body: str, labels: list[str]) -> str | None:
     """Create a GitHub issue and return its URL."""
-    
+
     if not GITHUB_TOKEN:
         print("❌ GitHub token not configured. Set GITHUB_TOKEN environment variable.")
         return None
-    
+
     url = f"https://api.github.com/repos/{GITHUB_REPO}/issues"
     headers = get_github_headers()
-    
-    payload = {
-        "title": title,
-        "body": body,
-        "labels": labels
-    }
-    
+
+    payload = {"title": title, "body": body, "labels": labels}
+
     try:
         response = requests.post(url, headers=headers, json=payload, timeout=30)
         response.raise_for_status()
         issue = response.json()
         print(f"✅ Created GitHub issue: {issue['html_url']}")
-        return issue['html_url']
+        return issue["html_url"]
     except requests.RequestException as e:
         print(f"❌ Error creating GitHub issue: {e}")
         return None
 
 
-def analyze_test_timeout_issues() -> Dict[str, str]:
+def analyze_test_timeout_issues() -> dict[str, str]:
     """Analyze and identify test timeout issues."""
 
     issues_found = {}
@@ -141,16 +134,16 @@ Several test categories are experiencing timeout issues that prevent normal exec
 - Integration tests: Significant number with VCR dependencies
 - Test execution timeout: >300 seconds observed
 """
-    
+
     issues_found["timeout"] = issue_body
     return issues_found
 
 
-def analyze_coverage_issues() -> Dict[str, str]:
+def analyze_coverage_issues() -> dict[str, str]:
     """Analyze test coverage issues."""
-    
+
     issues_found = {}
-    
+
     issue_body = """# Missing Test Coverage Analysis
 
 ## Problem
@@ -198,16 +191,16 @@ suggesting potential test coverage gaps.
 - Test files: 1286
 - Coverage measurement: Unreliable due to exclusions
 """
-    
+
     issues_found["coverage"] = issue_body
     return issues_found
 
 
-def analyze_test_infrastructure() -> Dict[str, str]:
+def analyze_test_infrastructure() -> dict[str, str]:
     """Analyze test infrastructure issues."""
-    
+
     issues_found = {}
-    
+
     issue_body = """# Test Infrastructure Issues Analysis
 
 ## Problem
@@ -270,43 +263,45 @@ Test infrastructure complexity is causing execution and maintenance challenges.
 - Hypothesis: Property-based testing
 - Missing: pytest-xdist, test parallelization
 """
-    
+
     issues_found["infrastructure"] = issue_body
     return issues_found
 
 
 def generate_github_issues_for_all_problems():
     """Generate GitHub issues for all identified test problems."""
-    
+
     if not GITHUB_TOKEN:
         print("⚠️  GitHub token not configured. Issues will be generated as markdown.")
         print("Set GITHUB_TOKEN environment variable to create real GitHub issues.")
-    
+
     created_issues = []
-    
+
     # Analyze all problem categories
     all_analyses = {}
     all_analyses.update(analyze_test_timeout_issues())
     all_analyses.update(analyze_coverage_issues())
     all_analyses.update(analyze_test_infrastructure())
-    
+
     # Create GitHub issues for each problem category
     for problem_type, analysis_func in [
         ("timeout", analyze_test_timeout_issues),
         ("coverage", analyze_coverage_issues),
-        ("infrastructure", analyze_test_infrastructure)
+        ("infrastructure", analyze_test_infrastructure),
     ]:
         issues = analysis_func()
         for issue_type, issue_body in issues.items():
-            config = TEST_PROBLEM_CATEGORIES.get(issue_type, TEST_PROBLEM_CATEGORIES["infrastructure"])
-            
+            config = TEST_PROBLEM_CATEGORIES.get(
+                issue_type, TEST_PROBLEM_CATEGORIES["infrastructure"]
+            )
+
             title = f"[{config['severity'].upper()}] {config['title']} - {datetime.now().strftime('%Y-%m-%d')}"
-            
+
             # Add context to issue body
             full_body = f"""# {title}
 
 **Created**: {datetime.now().isoformat()}
-**Severity**: {config['severity']}
+**Severity**: {config["severity"]}
 **Category**: {issue_type}
 
 {issue_body}
@@ -322,34 +317,34 @@ def generate_github_issues_for_all_problems():
 - Test runner: `scripts/optimized_test_runner.py`
 - Sonar configuration: `sonar-project.properties`
 """
-            
+
             if GITHUB_TOKEN:
                 issue_url = create_github_issue(title, full_body, config["labels"])
                 if issue_url:
                     created_issues.append((title, issue_url))
             else:
                 # Output as markdown for manual creation
-                print(f"\n{'='*80}")
+                print(f"\n{'=' * 80}")
                 print(f"ISSUE TO CREATE MANUALLY: {title}")
-                print(f"{'='*80}")
+                print(f"{'=' * 80}")
                 print(full_body)
-                print(f"{'='*80}\n")
-    
+                print(f"{'=' * 80}\n")
+
     return created_issues
 
 
 def main():
     """Main entry point."""
-    
+
     print("🔍 Analyzing Test Problems and Generating GitHub Issues")
     print("=" * 60)
-    
+
     created_issues = generate_github_issues_for_all_problems()
-    
+
     print("\n" + "=" * 60)
     print("📊 SUMMARY")
     print("=" * 60)
-    
+
     if created_issues:
         print(f"✅ Created {len(created_issues)} GitHub issues:")
         for title, url in created_issues:
@@ -357,10 +352,12 @@ def main():
     else:
         print("⚠️  No GitHub issues created (missing GITHUB_TOKEN)")
         print("Markdown issue templates have been generated above for manual creation.")
-    
+
     print("\n🎯 RECOMMENDED NEXT STEPS:")
     print("1. Review and prioritize the created issues")
-    print("2. Implement the optimized test runner: python3 scripts/optimized_test_runner.py --list")
+    print(
+        "2. Implement the optimized test runner: python3 scripts/optimized_test_runner.py --list"
+    )
     print("3. Gradually reduce Sonar exclusions and add tests")
     print("4. Implement test parallelization with pytest-xdist")
     print("5. Update test documentation and infrastructure")
