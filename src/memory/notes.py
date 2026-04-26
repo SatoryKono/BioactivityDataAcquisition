@@ -50,8 +50,9 @@ def parse_markdown_note(path: Path) -> MemoryNote:
     if not lines:
         raise ValueError(f"note is missing YAML frontmatter: {path}")
     first_line = lines[0].strip()
-    if first_line != FRONTMATTER_DELIMITER and not LEGACY_FRONTMATTER_DELIMITER_PATTERN.match(
-        first_line
+    if (
+        first_line != FRONTMATTER_DELIMITER
+        and not LEGACY_FRONTMATTER_DELIMITER_PATTERN.match(first_line)
     ):
         raise ValueError(f"note is missing YAML frontmatter: {path}")
 

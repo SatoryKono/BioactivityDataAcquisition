@@ -165,14 +165,22 @@ def _resolve_runtime_services_for_writer(
     """Build runtime services for the writer when callers did not provide them."""
     if runtime_services is not None:
         return runtime_services
-    resolved_request = cast(
-        "SilverWriterRuntimeServicesRequest",
-        replace(
-            runtime_request,
-            logger=writer.logger,
-            base_path=base_path,
-            pipeline_name=writer._pipeline_name,
-        ),
+    resolved_request = SilverWriterRuntimeServicesRequest(
+        csv_exporter=runtime_request.csv_exporter,
+        tracing=runtime_request.tracing,
+        write_policy=runtime_request.write_policy,
+        metrics=runtime_request.metrics,
+        audit=runtime_request.audit,
+        logger=writer.logger,
+        silver_validator=runtime_request.silver_validator,
+        metadata_writer=runtime_request.metadata_writer,
+        metadata_coordinator=runtime_request.metadata_coordinator,
+        lineage_store=runtime_request.lineage_store,
+        dq_calculator=runtime_request.dq_calculator,
+        merge_resilience_policy=runtime_request.merge_resilience_policy,
+        contract_rollout_policy=runtime_request.contract_rollout_policy,
+        base_path=base_path,
+        pipeline_name=writer._pipeline_name,
     )
     return build_silver_writer_runtime_services(resolved_request)
 
