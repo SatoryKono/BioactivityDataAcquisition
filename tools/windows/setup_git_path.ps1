@@ -54,3 +54,16 @@ if ($updated.Count -eq 0) {
     Write-Host 'Updated profile file(s):'
     $updated | ForEach-Object { Write-Host $_ }
 }
+
+$userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+if ([string]::IsNullOrWhiteSpace($userPath)) {
+    $segments = @()
+} else {
+    $segments = $userPath -split ';' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+}
+
+$desired = 'C:\Program Files\Git\cmd'
+$filtered = @($segments | Where-Object { $_ -ine $desired })
+$newPath = @($desired) + $filtered
+[Environment]::SetEnvironmentVariable('Path', ($newPath -join ';'), 'User')
+Write-Host 'Updated user PATH order for new sessions.'

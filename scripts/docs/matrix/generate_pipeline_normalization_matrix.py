@@ -1841,6 +1841,11 @@ def build_artifacts() -> dict[str, str]:
     }
 
 
+def _normalize_newlines(payload: str) -> str:
+    """Normalize line endings for deterministic cross-platform comparisons."""
+    return payload.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def write_artifacts(out_dir: Path) -> dict[str, object]:
     out_dir.mkdir(parents=True, exist_ok=True)
     artifacts = build_artifacts()
@@ -1848,7 +1853,7 @@ def write_artifacts(out_dir: Path) -> dict[str, object]:
     surface_kpis = build_surface_coverage_kpis(rows)
     semantic_kpis = build_profile_semantic_invariants()
     for name, payload in artifacts.items():
-        (out_dir / name).write_text(payload, encoding="utf-8")
+        (out_dir / name).write_text(payload, encoding="utf-8", newline="\n")
     return {
         "out_dir": str(out_dir),
         "rows": len(rows),
@@ -1864,7 +1869,9 @@ def check_artifacts(out_dir: Path) -> int:
         path = out_dir / name
         if not path.exists():
             return 1
-        if path.read_text(encoding="utf-8") != payload:
+        if _normalize_newlines(path.read_text(encoding="utf-8")) != _normalize_newlines(
+            payload
+        ):
             return 1
     return 0
 
