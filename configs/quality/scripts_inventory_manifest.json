@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-25T15:27:03.479577+00:00",
+  "generated_at": "2026-04-26T10:45:40.988580+00:00",
   "summary": {
     "total_scripts": 445,
     "status_counts": {
@@ -481,19 +481,19 @@
       "references": [
         {
           "path": "scripts/ai/codex/run-codex.ps1",
-          "line": 40,
+          "line": 62,
           "source_group": "scripts",
           "text": "start         Start interactive Codex (use launch-interactive.ps1)"
         },
         {
           "path": "scripts/ai/codex/run-codex.ps1",
-          "line": 48,
+          "line": 70,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\codex\\launch-interactive.ps1"
         },
         {
           "path": "scripts/ai/codex/run-codex.ps1",
-          "line": 200,
+          "line": 213,
           "source_group": "scripts",
           "text": "Write-Host \"    .\\scripts\\ai\\codex\\launch-interactive.ps1\""
         }

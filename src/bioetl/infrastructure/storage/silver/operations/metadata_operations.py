@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
@@ -71,6 +72,21 @@ class SilverMetadataOperations:
     _dq_calculator: DQMetricsCalculator | None = None
     _host: object | None = None
 
+    def _log_debug(self, message: str) -> None:
+        """Best-effort debug logging."""
+        if hasattr(self._logger, "debug"):
+            self._logger.debug(message)
+
+    def _log_info(self, message: str) -> None:
+        """Best-effort info logging."""
+        if hasattr(self._logger, "info"):
+            self._logger.info(message)
+
+    def _log_warning(self, message: str) -> None:
+        """Best-effort warning logging."""
+        if hasattr(self._logger, "warning"):
+            self._logger.warning(message)
+
     def _resolve_manifest_id(
         self,
         *,
@@ -90,6 +106,7 @@ class SilverMetadataOperations:
         if coordinator_manifest_id is not None:
             return str(coordinator_manifest_id)
 
+        self._log_debug("Silver metadata manifest_id is unavailable")
         return None
 
     async def _persist_silver_metadata(
@@ -101,12 +118,34 @@ class SilverMetadataOperations:
     ) -> SilverWriteResult | None:
         """Persist metadata using whichever writer signature is available."""
         if self._metadata_writer is None:
+            self._log_info(
+                "Skipping Silver metadata persistence: metadata writer missing"
+            )
             return None
-        await self._metadata_writer.write_silver_metadata(
-            base_path=table_path,
-            metadata=metadata,
-            table_name=table_name,
+
+        write_silver_metadata = self._metadata_writer.write_silver_metadata
+        parameters = inspect.signature(write_silver_metadata).parameters
+        accepts_var_kwargs = any(
+            parameter.kind is inspect.Parameter.VAR_KEYWORD
+            for parameter in parameters.values()
         )
+
+        if "base_path" in parameters or accepts_var_kwargs:
+            await write_silver_metadata(
+                base_path=table_path,
+                metadata=metadata,
+                table_name=table_name,
+            )
+        elif "table_path" in parameters:
+            legacy_write = cast(Any, write_silver_metadata)
+            await legacy_write(
+                table_path=table_path,
+                metadata=metadata,
+                table_name=table_name,
+            )
+        else:
+            legacy_write = cast(Any, write_silver_metadata)
+            await legacy_write(table_path, metadata, table_name=table_name)
         return None
 
     async def _resolve_finalization_dq_metrics(
@@ -158,23 +197,14 @@ class SilverMetadataOperations:
         quarantined_count: int | None = None,
         validation_errors: Sequence[str] | None = None,
     ) -> BatchDQMetrics:
-        """Compute data quality metrics for Silver write.
-
-        Args:
-            arrow_data: PyArrow table with data
-
-        Returns:
-            Computed DQ metrics
-        """
+        """Compute data quality metrics for Silver write."""
         if self._dq_calculator is None:
+            self._log_warning("DQ calculator missing; returning empty BatchDQMetrics")
             return BatchDQMetrics()
 
-        # Convert records to dict format for DQ calculation
         records_dict = (
             [dict(record) for record in arrow_data.to_pylist()] if arrow_data else []
         )
-
-        # Get existing schema fields for drift detection
         existing_schema_fields = set(arrow_data.column_names) if arrow_data else set()
 
         dq_input = DQMetricsInput(
@@ -232,19 +262,7 @@ class SilverMetadataOperations:
         ingestion_ts: datetime | None = None,
         error: str | None = None,
     ) -> None:
-        """Log Silver write audit event.
-
-        Args:
-            table_name: Name of the table
-            records: Records that were written
-            mode: Write mode
-            validated_mode: Validated write mode
-            run_id: Optional run ID
-            run_type: Optional run type
-            source_batch_id: Optional source batch ID
-            ingestion_ts: Optional ingestion timestamp
-            error: Optional error message
-        """
+        """Log Silver write audit event."""
         if not self._audit:
             return
 
@@ -295,11 +313,7 @@ class SilverMetadataOperations:
         started_at: datetime,
         start_perf: float,
     ) -> _PreparedSilverWriteFinalizationContext:
-        """Prepare DQ/version/timing context before Silver metadata persistence.
-
-        This method computes DQ metrics, gets the Delta version, and calculates
-        timing information to prepare the finalization context.
-        """
+        """Prepare DQ/version/timing context before Silver metadata persistence."""
         return await _prepare_silver_write_finalization_context(
             self,
             table_name=table_name,
@@ -329,11 +343,7 @@ class SilverMetadataOperations:
         started_at: datetime,
         start_perf: float,
     ) -> SilverWriteResult | None:
-        """Compute DQ metrics, write metadata, and build final result.
-
-        This method coordinates the finalization of a Silver write operation,
-        including DQ metrics calculation, metadata writing, and result construction.
-        """
+        """Compute DQ metrics, write metadata, and build final result."""
         return await _finalize_silver_write_result(
             self,
             table_name=table_name,
