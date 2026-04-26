@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Жизненный цикл пайплайна
 
@@ -19,18 +22,18 @@ Last verified: '2026-03-29'
 
 ## Очистка слоёв по типу запуска
 
-| RunType | clear-silver | clear-gold | Обоснование |
-|---------|--------------|------------|-------------|
-| `INCREMENTAL` | ❌ | ❌ | Merge/upsert сохраняет существующие данные |
-| `BACKFILL` | ✅ | ✅ | Заполнение исторических данных |
-| `REBUILD` | ✅ | ✅ | Полная перестройка таблицы |
+| RunType       | clear-silver | clear-gold | Обоснование                                |
+| ------------- | ------------ | ---------- | ------------------------------------------ |
+| `INCREMENTAL` | ❌           | ❌         | Merge/upsert сохраняет существующие данные |
+| `BACKFILL`    | ✅           | ✅         | Заполнение исторических данных             |
+| `REBUILD`     | ✅           | ✅         | Полная перестройка таблицы                 |
 
 ### Почему incremental не очищает данные?
 
 Medallion архитектура требует идемпотентности для инкрементальных обновлений:
 
 1. **Silver слой**: Использует merge/upsert по `content-hash`
-2. **Gold слой**: Применяет SCD Type 2 или партиционирование
+1. **Gold слой**: Применяет SCD Type 2 или партиционирование
 
 Удаление данных при incremental run привело бы к потере исторических записей.
 
@@ -39,8 +42,8 @@ Medallion архитектура требует идемпотентности �
 Блокировка (`LockCoordinator`) гарантирует:
 
 1. **Эксклюзивный доступ**: Только один процесс выполняет пайплайн
-2. **Heartbeat**: Периодическое продление TTL блокировки
-3. **Graceful release**: Освобождение в `finally` даже при ошибках
+1. **Heartbeat**: Периодическое продление TTL блокировки
+1. **Graceful release**: Освобождение в `finally` даже при ошибках
 
 ```python
 async with self._services, self._lock_manager:
@@ -59,10 +62,10 @@ async with self._services, self._lock_manager:
 
 Параметр `BIOETL_FAIL_FAST_METRICS` управляет поведением при ошибках запуска Prometheus сервера:
 
-| Значение | Поведение |
-|----------|-----------|
+| Значение          | Поведение                                                      |
+| ----------------- | -------------------------------------------------------------- |
 | `false` (default) | Warning в лог, метрики отключаются, пайплайн продолжает работу |
-| `true` | Исключение `MetricsServerError`, пайплайн не запускается |
+| `true`            | Исключение `MetricsServerError`, пайплайн не запускается       |
 
 ### Рекомендации
 
@@ -86,10 +89,10 @@ metrics:
 При получении `SIGTERM`/`SIGINT`:
 
 1. `ShutdownSignal.set()` активируется
-2. Текущий батч завершается
-3. Checkpoint сохраняется
-4. Lock освобождается
-5. Exit code 0
+1. Текущий батч завершается
+1. Checkpoint сохраняется
+1. Lock освобождается
+1. Exit code 0
 
 См. [ADR-008: Graceful Shutdown Strategy](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)
 
@@ -104,9 +107,9 @@ Composite pipelines используют отдельный оркестрато
 ### Ключевые отличия
 
 1. **Без трансформеров**: Composite не использует `*Transformer` классы
-2. **Оркестрация**: `application/composite/` содержит 15 модулей сервисов
-3. **Merge**: `MergeService` выполняет JOIN по `join_keys` из composite-конфига
-4. **Fan-out**: Enrichers могут выполняться параллельно (если `optional: true`)
+1. **Оркестрация**: `application/composite/` содержит 15 модулей сервисов
+1. **Merge**: `MergeService` выполняет JOIN по `join_keys` из composite-конфига
+1. **Fan-out**: Enrichers могут выполняться параллельно (если `optional: true`)
 
 См. [ADR-026: Composite Pipeline Pattern](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
 

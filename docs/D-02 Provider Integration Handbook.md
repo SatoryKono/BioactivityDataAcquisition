@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 0.3.0
 Status: draft
 Class: repo-only
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last synchronized: '2026-04-08'
----
+  Last synchronized: '2026-04-08'
+
+______________________________________________________________________
 
 # D-02 Provider Integration Handbook (Draft Sync Note)
 
@@ -33,12 +36,11 @@ D-02 фиксирует будущую структуру unified provider handb
 ## План синхронизации D-02
 
 1. Держать в D-02 только integration flow map: `provider config -> adapter -> registration -> first entity pipeline -> tests/docs`.
-2. Все исполняемые команды оставлять в `03-guides` и ссылаться на них без копирования.
-3. Для каждого этапа добавить owner-ссылку на канонический doc вместо переписывания требований.
+1. Все исполняемые команды оставлять в `03-guides` и ссылаться на них без копирования.
+1. Для каждого этапа добавить owner-ссылку на канонический doc вместо переписывания требований.
 
 ## Критерии промоушена в future published handbook
 
 1. D-02 не содержит дублированных нормативных checklists.
-2. Каждая стадия onboarding имеет ровно один canonical reference link.
-3. Проверки CI и validation команды перечислены только через ссылки на актуальные guides.
-
+1. Каждая стадия onboarding имеет ровно один canonical reference link.
+1. Проверки CI и validation команды перечислены только через ссылки на актуальные guides.

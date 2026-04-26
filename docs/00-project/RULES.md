@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 6.1.2
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
-  - BioETL Team
-Last verified: '2026-04-09'
----
+
+- BioETL Team
+  Last verified: '2026-04-09'
+
+______________________________________________________________________
 
 # BioETL: Правила Проекта
 
@@ -483,9 +486,9 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 См. [ADR-023](../02-architecture/decisions/ADR-023-entity-type-patterns.md) и [ADR-024](../02-architecture/decisions/ADR-024-entity-naming-unification.md) для паттернов типов и именования сущностей.
 
-| Сценарий                             | Стратегия ID                                                        |
-| ------------------------------------ | ------------------------------------------------------------------- |
-| Источник предоставляет стабильный ID | Использовать как есть (`chembl-id`, `pubchem-cid`)                  |
+| Сценарий                             | Стратегия ID                                                                              |
+| ------------------------------------ | ----------------------------------------------------------------------------------------- |
+| Источник предоставляет стабильный ID | Использовать как есть (`chembl-id`, `pubchem-cid`)                                        |
 | ID отсутствует                       | **Content Hash**: lowercase SHA-256 hex от `provider + canonical_json(normalized_record)` |
 
 - **Алгоритм**: `sha256(provider + canonical_json(normalized_record)).hexdigest()`
@@ -1230,15 +1233,15 @@ async with services:  # --aenter-- инициализирует ресурсы
 
 #### Архитектурные Тесты Детерминизма
 
-| Тест                                       | REQ          | Проверка                                    | Файл                                        |
-| ------------------------------------------ | ------------ | ------------------------------------------- | ------------------------------------------- |
-| `test-no-random-import-in-storage-writers` | REQ-ARCH-030 | Запрет `import random`                      | `test_no_random_in_writers.py`              |
-| `test-no-random-uniform-calls-in-storage`  | REQ-ARCH-030 | Запрет `random.uniform()`                   | `test_no_random_in_writers.py`              |
-| `test-no-random-choice-calls-in-storage`   | REQ-ARCH-030 | Запрет `random.choice()`                    | `test_no_random_in_writers.py`              |
-| `test-no-datetime-now-in-infrastructure`   | REQ-ARCH-031 | Запрет `datetime.now()`                     | `test_no_datetime_now_in_infrastructure.py` |
-| `test-no-datetime-now-in-domain`           | REQ-ARCH-031 | Запрет `datetime.now()` вне sanctioned seam | `test_no_datetime_now_in_domain.py`         |
-| `test-replay-critical-time-seams`          | REQ-ARCH-031 | Запрет скрытого wall-clock в replay-critical runtime/checkpoint paths | `test_replay_critical_time_seams.py` |
-| `test-allowed-files-still-exist`           | REQ-ARCH-031 | Валидация исключений                        | `test_no_datetime_now_in_infrastructure.py` |
+| Тест                                       | REQ          | Проверка                                                              | Файл                                        |
+| ------------------------------------------ | ------------ | --------------------------------------------------------------------- | ------------------------------------------- |
+| `test-no-random-import-in-storage-writers` | REQ-ARCH-030 | Запрет `import random`                                                | `test_no_random_in_writers.py`              |
+| `test-no-random-uniform-calls-in-storage`  | REQ-ARCH-030 | Запрет `random.uniform()`                                             | `test_no_random_in_writers.py`              |
+| `test-no-random-choice-calls-in-storage`   | REQ-ARCH-030 | Запрет `random.choice()`                                              | `test_no_random_in_writers.py`              |
+| `test-no-datetime-now-in-infrastructure`   | REQ-ARCH-031 | Запрет `datetime.now()`                                               | `test_no_datetime_now_in_infrastructure.py` |
+| `test-no-datetime-now-in-domain`           | REQ-ARCH-031 | Запрет `datetime.now()` вне sanctioned seam                           | `test_no_datetime_now_in_domain.py`         |
+| `test-replay-critical-time-seams`          | REQ-ARCH-031 | Запрет скрытого wall-clock в replay-critical runtime/checkpoint paths | `test_replay_critical_time_seams.py`        |
+| `test-allowed-files-still-exist`           | REQ-ARCH-031 | Валидация исключений                                                  | `test_no_datetime_now_in_infrastructure.py` |
 
 #### Детерминистичный Retry Jitter
 
@@ -1330,11 +1333,11 @@ PipelineRunner.run() создаёт PipelineObserver напрямую вмест
 
 <!-- Updated: was 527 LOC / 8 методов, now 818 LOC / 21 метод (audit 2026-02-14) -->
 
-| ❌ Неверно                      | ✅ Верно                                                                                                          |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| ❌ Неверно                      | ✅ Верно                                                                                                                    |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | "PreflightService — god object" | "PreflightService (`preflight/service.py`, 221 LOC, 8 методов, 2 публичных) имеет узкую ответственность pre-run validation" |
-| "Компонент перегружен"          | "Компонент (`file.py`, N строк) содержит M методов, делегирует K сервисам"                                        |
-| "Нет валидации X"               | "Валидация X отсутствует в `file.py` (проверено grep по 'X')"                                                     |
+| "Компонент перегружен"          | "Компонент (`file.py`, N строк) содержит M методов, делегирует K сервисам"                                                  |
+| "Нет валидации X"               | "Валидация X отсутствует в `file.py` (проверено grep по 'X')"                                                               |
 
 #### 7.1.4. Типичные Ложные Выводы
 
@@ -1406,13 +1409,13 @@ ratchets.
 
 **Минимальный evidence block MUST содержать:**
 
-| Поле | Требование |
-| --- | --- |
-| **Before metrics** | Конкретные значения до изменения (`cross_layer_group_edges_total=...`, `ruff_error_count=...`, `files_ge_250_loc=...`) |
-| **After metrics** | Те же метрики после изменения |
-| **Gate / verification** | Список фактически запущенных quality gates, test files или команд |
-| **Outcome** | Один из статусов: `improved`, `unchanged`, `worsened` |
-| **Justification** | Обязателен для `unchanged` и `worsened`; должен объяснять, почему changeset принят |
+| Поле                    | Требование                                                                                                             |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Before metrics**      | Конкретные значения до изменения (`cross_layer_group_edges_total=...`, `ruff_error_count=...`, `files_ge_250_loc=...`) |
+| **After metrics**       | Те же метрики после изменения                                                                                          |
+| **Gate / verification** | Список фактически запущенных quality gates, test files или команд                                                      |
+| **Outcome**             | Один из статусов: `improved`, `unchanged`, `worsened`                                                                  |
+| **Justification**       | Обязателен для `unchanged` и `worsened`; должен объяснять, почему changeset принят                                     |
 
 **Формат фиксации evidence SHOULD быть таким:**
 

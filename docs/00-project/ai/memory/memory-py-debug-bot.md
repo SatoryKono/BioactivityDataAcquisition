@@ -6,7 +6,7 @@
 
 > **Focus**: Root cause analysis, test failure debugging, systematic hypothesis verification, error classification.
 
----
+______________________________________________________________________
 
 ## 1. Identity & Scope
 
@@ -39,33 +39,33 @@ signals for the touched path:
   `files_ge_250_loc`, `max_internal_fan_in`, and related family caps;
 - report debt outcome as `improved`, `unchanged`, or `worsened`.
 
----
+______________________________________________________________________
 
 ## 2. Error Classification
 
 ### Categories
 
-| Category | Symptoms | Strategy |
-|----------|----------|----------|
-| **Import/Module** | `ModuleNotFoundError`, `ImportError` | Check layer boundaries, `__init__.py` |
-| **Type** | `TypeError`, `AttributeError`, mypy errors | Check signatures, Protocol compliance |
-| **Data/Validation** | `ValidationError`, Pandera failures | Check schema drift, test fixtures |
-| **State** | `AssertionError` in assertions | Check operation order, side effects |
-| **Infrastructure** | `ConnectionError`, `TimeoutError` | Check VCR cassettes, mock setup |
-| **Flaky** | Passes/fails intermittently | Check ordering, shared state, time-dependent logic |
+| Category            | Symptoms                                   | Strategy                                           |
+| ------------------- | ------------------------------------------ | -------------------------------------------------- |
+| **Import/Module**   | `ModuleNotFoundError`, `ImportError`       | Check layer boundaries, `__init__.py`              |
+| **Type**            | `TypeError`, `AttributeError`, mypy errors | Check signatures, Protocol compliance              |
+| **Data/Validation** | `ValidationError`, Pandera failures        | Check schema drift, test fixtures                  |
+| **State**           | `AssertionError` in assertions             | Check operation order, side effects                |
+| **Infrastructure**  | `ConnectionError`, `TimeoutError`          | Check VCR cassettes, mock setup                    |
+| **Flaky**           | Passes/fails intermittently                | Check ordering, shared state, time-dependent logic |
 
 ### Severity
 
-| Category | Severity | Typical Causes |
-|----------|:--------:|----------------|
-| Architecture violation | P0 | Cross-layer import, global state |
-| Type error (mypy) | P1 | Missing annotation, Any usage |
-| Test failure (logic) | P1 | Incorrect transformation, missing edge case |
-| Test failure (infra) | P2 | VCR cassette outdated, fixture mismatch |
-| DQ threshold exceeded | P2 | Schema drift, upstream data change |
-| Config mismatch | P2 | Missing key, wrong merge order |
+| Category               | Severity | Typical Causes                              |
+| ---------------------- | :------: | ------------------------------------------- |
+| Architecture violation |    P0    | Cross-layer import, global state            |
+| Type error (mypy)      |    P1    | Missing annotation, Any usage               |
+| Test failure (logic)   |    P1    | Incorrect transformation, missing edge case |
+| Test failure (infra)   |    P2    | VCR cassette outdated, fixture mismatch     |
+| DQ threshold exceeded  |    P2    | Schema drift, upstream data change          |
+| Config mismatch        |    P2    | Missing key, wrong merge order              |
 
----
+______________________________________________________________________
 
 ## 3. Debugging Methodology
 
@@ -109,18 +109,18 @@ mypy src/bioetl/path/to/module.py --strict --show-error-codes
 
 Apply fix -> trigger `py-test-bot (phase=retest)`.
 
----
+______________________________________________________________________
 
 ## 4. Known Pandera/Schema Issues
 
-| Issue | Root Cause | Fix |
-|-------|-----------|-----|
-| `pd.Int64Dtype` with `None` | `df["col"] = None` creates object dtype | Use `pd.array([pd.NA], dtype=pd.Int64Dtype())` |
-| `Series[date]` with `nullable=True` | pandera cannot coerce None -> NaT | Known limitation, use workaround |
-| pmid regex `^[1-9]\d*$` | pandera may pass "0" despite regex | Add explicit check |
-| Float coercion in Gold | Pandas nullable int handling | Use `coerce=True`, `Series[float]` |
+| Issue                               | Root Cause                              | Fix                                            |
+| ----------------------------------- | --------------------------------------- | ---------------------------------------------- |
+| `pd.Int64Dtype` with `None`         | `df["col"] = None` creates object dtype | Use `pd.array([pd.NA], dtype=pd.Int64Dtype())` |
+| `Series[date]` with `nullable=True` | pandera cannot coerce None -> NaT       | Known limitation, use workaround               |
+| pmid regex `^[1-9]\d*$`             | pandera may pass "0" despite regex      | Add explicit check                             |
+| Float coercion in Gold              | Pandas nullable int handling            | Use `coerce=True`, `Series[float]`             |
 
----
+______________________________________________________________________
 
 ## 5. Layer Boundary Debugging
 
@@ -139,11 +139,12 @@ grep "^from bioetl\." src/bioetl/path/to/module.py
 ```
 
 Fix options:
-1. Move the import to correct layer
-2. Create a Port/Protocol in domain
-3. Use TYPE_CHECKING guard (type hints only)
 
----
+1. Move the import to correct layer
+1. Create a Port/Protocol in domain
+1. Use TYPE_CHECKING guard (type hints only)
+
+______________________________________________________________________
 
 ## 6. DBG Iteration Template
 
@@ -155,21 +156,25 @@ Fix options:
 - **Category**: Import | Type | Data | State | Infrastructure | Flaky
 - **Symptom**: <exact test path and error>
 - **Stack trace** (key lines):
-  ```
-  <first 10-15 lines>
-  ```
+```
+
+\<first 10-15 lines>
+
+````
 - **Hypothesis**: <concrete assumption about cause>
 - **Verification**: <command/action to verify>
-  ```bash
-  <executed command>
-  ```
-- **Verification result**: <confirmed / disproved + evidence>
+```bash
+<executed command>
+````
+
+- **Verification result**: \<confirmed / disproved + evidence>
 - **Fix**:
   - File: `src/bioetl/path:42-48`
   - Change: <description>
 - **Re-test required**: yes
-- **Side effects**: <none / potential impacts>
-```
+- **Side effects**: \<none / potential impacts>
+
+````
 
 ---
 
@@ -188,24 +193,25 @@ Fix options:
 - **Proposals**:
   - Alternative approach: <description>
   - Review needed: <who / what>
-```
+````
 
----
+______________________________________________________________________
 
 ## 8. Architecture Rules to Check During Fix
 
-| Rule | Description | Verification |
-|------|-------------|-------------|
-| RULES-§2.1 | Layer boundaries | Fix doesn't introduce cross-layer imports |
-| ADR-010 | Local-only | Fix doesn't introduce Docker/Redis |
-| RULES-§4.2 | No print()/sentinel | Fix uses structured logging |
-| ADR-014 | Deterministic writes | Fix doesn't break sort_by/UTC/atomic |
+| Rule       | Description          | Verification                              |
+| ---------- | -------------------- | ----------------------------------------- |
+| RULES-§2.1 | Layer boundaries     | Fix doesn't introduce cross-layer imports |
+| ADR-010    | Local-only           | Fix doesn't introduce Docker/Redis        |
+| RULES-§4.2 | No print()/sentinel  | Fix uses structured logging               |
+| ADR-014    | Deterministic writes | Fix doesn't break sort_by/UTC/atomic      |
 
----
+______________________________________________________________________
 
 ## 9. Common Fix Patterns
 
 ### Import Error Fix
+
 ```python
 # Wrong: direct import of infrastructure in application
 from bioetl.infrastructure.adapters.chembl.client import ChEMBLClient
@@ -215,6 +221,7 @@ from bioetl.domain.ports import DataSourcePort
 ```
 
 ### Type Error Fix
+
 ```python
 # Wrong: missing Optional
 def process(self, data: list) -> Result:
@@ -224,11 +231,13 @@ def process(self, data: list[dict[str, Any]]) -> Result:
 ```
 
 ### DI Violation Fix
+
 ```python
 # Wrong: hard-coded constructor
 class MyService:
     def __init__(self):
         self.client = HTTPClient()
+
 
 # Correct: constructor injection
 class MyService:
@@ -236,30 +245,30 @@ class MyService:
         self._client = client
 ```
 
----
+______________________________________________________________________
 
 ## 10. Integration with Other Agents
 
-| Event | Action |
-|-------|--------|
-| Fix applied | -> `py-test-bot` (phase=retest) |
-| Fix requires plan change | -> `py-plan-bot` (update `03-plan-updated.md`) |
-| Fix affects docs/docstring | -> `py-doc-bot` |
-| Fix violates architecture | -> `py-audit-bot` (check) |
+| Event                      | Action                                         |
+| -------------------------- | ---------------------------------------------- |
+| Fix applied                | -> `py-test-bot` (phase=retest)                |
+| Fix requires plan change   | -> `py-plan-bot` (update `03-plan-updated.md`) |
+| Fix affects docs/docstring | -> `py-doc-bot`                                |
+| Fix violates architecture  | -> `py-audit-bot` (check)                      |
 
----
+______________________________________________________________________
 
 ## 11. Key Files for Debugging
 
-| What | Path |
-|------|------|
-| Test conftest | `tests/conftest.py` |
-| Domain ports | `src/bioetl/domain/ports/` |
-| VCR cassettes | `tests/fixtures/vcr/` |
-| Architecture tests | `tests/architecture/` |
-| Error definitions | `src/bioetl/domain/exceptions/` |
+| What               | Path                            |
+| ------------------ | ------------------------------- |
+| Test conftest      | `tests/conftest.py`             |
+| Domain ports       | `src/bioetl/domain/ports/`      |
+| VCR cassettes      | `tests/fixtures/vcr/`           |
+| Architecture tests | `tests/architecture/`           |
+| Error definitions  | `src/bioetl/domain/exceptions/` |
 
----
+______________________________________________________________________
 
 ## 12. Unified Script Commands (diagnostics & data)
 
@@ -287,6 +296,6 @@ python -m scripts.engineering.qa check-c901
 python -m scripts.engineering.ci run-tests
 ```
 
----
+______________________________________________________________________
 
 *This memory file is specific to py-debug-bot. For general project context see `agent-memory.md`.*

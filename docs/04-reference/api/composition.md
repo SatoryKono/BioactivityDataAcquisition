@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Composition Layer API Reference
 
@@ -24,20 +27,20 @@ Its package root currently exports registry helpers, while execution/services/re
 seams are exposed through dedicated submodules such as `entrypoints`,
 `execution_api`, `services_api`, and `resources_api`.
 
----
+______________________________________________________________________
 
 ## Package Structure
 
-| Subpackage | Description | Key Public Symbols |
-|---|---|---|
-| `composition.factories` | Factory classes for creating wired components | `GenericPipelineFactory`, `DataSourceFactory`, `StorageFactory`, `DQServicesFactory`, `build_pipeline_services` |
-| `composition.bootstrap` | Application bootstrapping and stable bootstrap access seams | `bootstrap_pipeline_runner`, `bootstrap_pipeline_runner_service`, `bootstrap_composite_runner`, CLI bootstrap helpers, `load_pipeline_config` (re-export), `load_composite_config` |
-| `composition.providers` | Provider registration and discovery | `ProviderRegistry`, `create_provider_registry`, `ensure_providers_loaded` |
-| `composition.runtime_builders` | Leaf runtime assembly helpers | `build_pipeline_runner` |
-| `composition.services` | Thin re-exports for metadata/version helpers | `MetadataCoordinator`, `compute_config_hash`, `get_code_revision_provenance`, `get_git_commit`, `get_pipeline_version` |
-| `composition` (top-level) | Narrow package-root facade | `PipelineDefinition`, `PipelineRegistry`, `create_registry`, `get_default_registry`; broader APIs live in submodules |
+| Subpackage                     | Description                                                 | Key Public Symbols                                                                                                                                                                 |
+| ------------------------------ | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `composition.factories`        | Factory classes for creating wired components               | `GenericPipelineFactory`, `DataSourceFactory`, `StorageFactory`, `DQServicesFactory`, `build_pipeline_services`                                                                    |
+| `composition.bootstrap`        | Application bootstrapping and stable bootstrap access seams | `bootstrap_pipeline_runner`, `bootstrap_pipeline_runner_service`, `bootstrap_composite_runner`, CLI bootstrap helpers, `load_pipeline_config` (re-export), `load_composite_config` |
+| `composition.providers`        | Provider registration and discovery                         | `ProviderRegistry`, `create_provider_registry`, `ensure_providers_loaded`                                                                                                          |
+| `composition.runtime_builders` | Leaf runtime assembly helpers                               | `build_pipeline_runner`                                                                                                                                                            |
+| `composition.services`         | Thin re-exports for metadata/version helpers                | `MetadataCoordinator`, `compute_config_hash`, `get_code_revision_provenance`, `get_git_commit`, `get_pipeline_version`                                                             |
+| `composition` (top-level)      | Narrow package-root facade                                  | `PipelineDefinition`, `PipelineRegistry`, `create_registry`, `get_default_registry`; broader APIs live in submodules                                                               |
 
----
+______________________________________________________________________
 
 ## Factories (`composition.factories`)
 
@@ -47,42 +50,42 @@ submodules remain useful, but they are not package-root exports unless noted.
 
 ### Package-Root Factory Symbols
 
-| Symbol | Description |
-|---|---|
-| `GenericPipelineFactory` | Generic pipeline factory with type parameter |
+| Symbol                      | Description                                                   |
+| --------------------------- | ------------------------------------------------------------- |
+| `GenericPipelineFactory`    | Generic pipeline factory with type parameter                  |
 | `create_pipeline_factory()` | Narrow public helper for configured pipeline factory creation |
-| `assemble_runner()` | Public helper for runner assembly from a configured pipeline |
-| `DataSourceFactory` | Creates data source adapters for all providers |
-| `StorageFactory` | Creates storage components (Bronze/Silver/Gold writers) |
-| `StorageAdapter` | Unified storage adapter combining all writer ports |
-| `StorageContext` | Storage context with paths and configuration |
-| `DQServicesFactory` | Creates data quality service instances |
-| `BaseServicesFactory` | Base factory for application services |
-| `ServicesBuilder` | Builds application service instances |
-| `build_pipeline_services()` | Public service-bundle assembly helper |
+| `assemble_runner()`         | Public helper for runner assembly from a configured pipeline  |
+| `DataSourceFactory`         | Creates data source adapters for all providers                |
+| `StorageFactory`            | Creates storage components (Bronze/Silver/Gold writers)       |
+| `StorageAdapter`            | Unified storage adapter combining all writer ports            |
+| `StorageContext`            | Storage context with paths and configuration                  |
+| `DQServicesFactory`         | Creates data quality service instances                        |
+| `BaseServicesFactory`       | Base factory for application services                         |
+| `ServicesBuilder`           | Builds application service instances                          |
+| `build_pipeline_services()` | Public service-bundle assembly helper                         |
 
 ### Notable Nested Factory Symbols
 
 Import the symbols below from their defining submodules rather than from the
 `composition.factories` package root.
 
-| Symbol | Description |
-|---|---|
-| `PipelineFactoryConfig` | Named tuple with factory configuration |
-| `RunContextFactory` | Creates pipeline run contexts |
-| `DomainConfigResolver` | Resolves domain config from YAML sources |
-| `TransformerBuilder` | Builds transformer instances with dependencies |
-| `HttpClientFactory` | Creates configured HTTP clients with retry/rate limiting |
-| `ResolvedHttpConfig` | Resolved HTTP client configuration |
-| `CrossrefAdapterFactory` | CrossRef-specific adapter factory |
-| `AdapterHelpersFactory` | Creates adapter helper services |
-| `RunnerFactory` | Creates `PipelineRunner` instances with all dependencies |
-| `MetricsExtractor` | Extracts metrics from completed runs |
-| `ServiceBundleDependencies` | Dependencies required for service bundle creation |
-| `UuidBatchIdGenerator` | UUID-based batch ID generation (implements `BatchIdGeneratorPort`) |
-| `PipelineContractValidator` | Validates pipeline contracts at assembly time |
+| Symbol                      | Description                                                        |
+| --------------------------- | ------------------------------------------------------------------ |
+| `PipelineFactoryConfig`     | Named tuple with factory configuration                             |
+| `RunContextFactory`         | Creates pipeline run contexts                                      |
+| `DomainConfigResolver`      | Resolves domain config from YAML sources                           |
+| `TransformerBuilder`        | Builds transformer instances with dependencies                     |
+| `HttpClientFactory`         | Creates configured HTTP clients with retry/rate limiting           |
+| `ResolvedHttpConfig`        | Resolved HTTP client configuration                                 |
+| `CrossrefAdapterFactory`    | CrossRef-specific adapter factory                                  |
+| `AdapterHelpersFactory`     | Creates adapter helper services                                    |
+| `RunnerFactory`             | Creates `PipelineRunner` instances with all dependencies           |
+| `MetricsExtractor`          | Extracts metrics from completed runs                               |
+| `ServiceBundleDependencies` | Dependencies required for service bundle creation                  |
+| `UuidBatchIdGenerator`      | UUID-based batch ID generation (implements `BatchIdGeneratorPort`) |
+| `PipelineContractValidator` | Validates pipeline contracts at assembly time                      |
 
----
+______________________________________________________________________
 
 ## Bootstrap (`composition.bootstrap`)
 
@@ -94,127 +97,127 @@ loading is owned by `bioetl.infrastructure.config.composite_config_api` and is
 exposed through sanctioned public bootstrap/entrypoint seams for stable runtime
 access.
 
-| Module | Description |
-|---|---|
-| `runtime.assembly` | Core assembly wiring (vacuum settings, storage) |
-| `runtime.pipeline` | Pipeline bootstrap from config |
-| `runtime.runner` | Runner bootstrap with all dependencies |
-| `runtime.runner_assembly` | Runner assembly helpers |
-| `runtime.observability` | Observability stack setup |
-| `runtime.observability_bundle` | Bundles logger + metrics + tracing |
-| `runtime.logger_bootstrap` | Logger initialization |
-| `runtime.metrics_bootstrap` | Metrics initialization |
-| `runtime.tracing_bootstrap` | Tracing initialization |
-| `runtime.dq_bootstrap` | DQ services initialization |
-| `runtime.runtime_basics` | Basic runtime setup |
-| `runtime.classification_init` | Publication type classification loading |
-| `runtime.composite` | Composite pipeline bootstrap |
-| `runtime.composite_bootstrap_builders` | Composite pipeline builder helpers |
-| `runtime.composite_support_helpers` | Composite support service helpers |
+| Module                                     | Description                                                      |
+| ------------------------------------------ | ---------------------------------------------------------------- |
+| `runtime.assembly`                         | Core assembly wiring (vacuum settings, storage)                  |
+| `runtime.pipeline`                         | Pipeline bootstrap from config                                   |
+| `runtime.runner`                           | Runner bootstrap with all dependencies                           |
+| `runtime.runner_assembly`                  | Runner assembly helpers                                          |
+| `runtime.observability`                    | Observability stack setup                                        |
+| `runtime.observability_bundle`             | Bundles logger + metrics + tracing                               |
+| `runtime.logger_bootstrap`                 | Logger initialization                                            |
+| `runtime.metrics_bootstrap`                | Metrics initialization                                           |
+| `runtime.tracing_bootstrap`                | Tracing initialization                                           |
+| `runtime.dq_bootstrap`                     | DQ services initialization                                       |
+| `runtime.runtime_basics`                   | Basic runtime setup                                              |
+| `runtime.classification_init`              | Publication type classification loading                          |
+| `runtime.composite`                        | Composite pipeline bootstrap                                     |
+| `runtime.composite_bootstrap_builders`     | Composite pipeline builder helpers                               |
+| `runtime.composite_support_helpers`        | Composite support service helpers                                |
 | `runtime.composite_infrastructure_context` | Typed container for shared composite infrastructure dependencies |
 
-| Class | Description |
-|---|---|
-| `CompositeSupportServicesFactory` | Factory for composite pipeline support services |
-| `CompositeSupportServices` | Container for composite support service instances |
-| `CompositeFilterExtractionService` | Filter extraction for composite pipelines |
-| `RunnerFactoryBuilderService` | Builds runner factories from configuration |
+| Class                              | Description                                       |
+| ---------------------------------- | ------------------------------------------------- |
+| `CompositeSupportServicesFactory`  | Factory for composite pipeline support services   |
+| `CompositeSupportServices`         | Container for composite support service instances |
+| `CompositeFilterExtractionService` | Filter extraction for composite pipelines         |
+| `RunnerFactoryBuilderService`      | Builds runner factories from configuration        |
 
 ### CLI Bootstrap
 
-| Module | Description |
-|---|---|
-| `cli.config` | CLI config subcommand bootstrap |
-| `cli.health` | CLI health subcommand bootstrap |
+| Module           | Description                             |
+| ---------------- | --------------------------------------- |
+| `cli.config`     | CLI config subcommand bootstrap         |
+| `cli.health`     | CLI health subcommand bootstrap         |
 | `cli.checkpoint` | CLI checkpoint and quarantine bootstrap |
-| `cli.lock` | CLI lock subcommand bootstrap |
-| `cli.metrics` | CLI metrics subcommand bootstrap |
-| `cli.storage` | CLI storage subcommand bootstrap |
-| `cli.adr` | CLI ADR subcommand bootstrap |
-| `cli.noop` | NoOp implementations for CLI |
+| `cli.lock`       | CLI lock subcommand bootstrap           |
+| `cli.metrics`    | CLI metrics subcommand bootstrap        |
+| `cli.storage`    | CLI storage subcommand bootstrap        |
+| `cli.adr`        | CLI ADR subcommand bootstrap            |
+| `cli.noop`       | NoOp implementations for CLI            |
 
 ### Assembly
 
-| Module | Description |
-|---|---|
-| `assembly.storage` | Storage assembly (paths, Delta config) |
-| `assembly.checkpoint` | Checkpoint assembly |
+| Module                | Description                            |
+| --------------------- | -------------------------------------- |
+| `assembly.storage`    | Storage assembly (paths, Delta config) |
+| `assembly.checkpoint` | Checkpoint assembly                    |
 
----
+______________________________________________________________________
 
 ## Providers (`composition.providers`)
 
-| Class | Description |
-|---|---|
+| Class              | Description                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------- |
 | `ProviderRegistry` | Instance-scoped registry for provider metadata and creation, with a shared default compatibility facade |
-| `ProviderConfig` | Configuration for a single provider |
-| `HttpConfig` | HTTP client configuration per provider |
+| `ProviderConfig`   | Configuration for a single provider                                                                     |
+| `HttpConfig`       | HTTP client configuration per provider                                                                  |
 
-| Module | Description |
-|---|---|
-| `registration` | Provider registration orchestration over internal config builders |
-| `registration_*` | Internal provider config builders; not a canonical application-facing surface (see [Internal/Extended Material](#internalextended-material)) |
-| `decorators` | Provider adapter decorators (circuit breaker, retry) |
-| `loader` | Canonical provider loading lifecycle (`ensure_providers_loaded`) for the shared runtime/bootstrap registry |
-| `_loading` | Leaf loading helpers behind the public `loader` lifecycle |
-| `_registration_contracts` | Leaf provider assembly/loading contracts used by registration helpers |
-| `_default_registry` | Approved module-level singleton helper for default provider registry |
+| Module                    | Description                                                                                                                                  |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `registration`            | Provider registration orchestration over internal config builders                                                                            |
+| `registration_*`          | Internal provider config builders; not a canonical application-facing surface (see [Internal/Extended Material](#internalextended-material)) |
+| `decorators`              | Provider adapter decorators (circuit breaker, retry)                                                                                         |
+| `loader`                  | Canonical provider loading lifecycle (`ensure_providers_loaded`) for the shared runtime/bootstrap registry                                   |
+| `_loading`                | Leaf loading helpers behind the public `loader` lifecycle                                                                                    |
+| `_registration_contracts` | Leaf provider assembly/loading contracts used by registration helpers                                                                        |
+| `_default_registry`       | Approved module-level singleton helper for default provider registry                                                                         |
 
----
+______________________________________________________________________
 
 ## Registry (`composition.registry`)
 
-| Class | Description |
-|---|---|
-| `PipelineRegistry` | Registry for pipeline definitions and lookup |
+| Class                | Description                                                             |
+| -------------------- | ----------------------------------------------------------------------- |
+| `PipelineRegistry`   | Registry for pipeline definitions and lookup                            |
 | `PipelineDefinition` | Named tuple: (provider, entity_type, pipeline_class, transformer_class) |
 
----
+______________________________________________________________________
 
 ## Observability (`composition.observability`)
 
-| Class | Description |
-|---|---|
-| `ObservabilityBundle` | Container for logger + metrics + tracer instances |
-| `ObservabilityContractError` | Raised when observability contract is violated |
+| Class                        | Description                                       |
+| ---------------------------- | ------------------------------------------------- |
+| `ObservabilityBundle`        | Container for logger + metrics + tracer instances |
+| `ObservabilityContractError` | Raised when observability contract is violated    |
 
----
+______________________________________________________________________
 
 ## Runtime Builders (`composition.runtime_builders`)
 
 Package-root export status:
 
-| Symbol | Description |
-|---|---|
+| Symbol                    | Description                                                        |
+| ------------------------- | ------------------------------------------------------------------ |
 | `build_pipeline_runner()` | Assembles a fully configured `PipelineRunner` from resolved inputs |
 
 Nested runtime-builder helpers such as `build_observability_bundle`,
 `RunnerInputs`, and `ResolvedVacuumSettings` live in defining submodules and are
 not exported by the `composition.runtime_builders` package root.
 
----
+______________________________________________________________________
 
 ## Bootstrap Contexts
 
-| Class | Description |
-|---|---|
+| Class                      | Description                               |
+| -------------------------- | ----------------------------------------- |
 | `PipelineCallbacksContext` | Pipeline lifecycle callback configuration |
-| `DQConfigsContext` | DQ configuration context |
-| `DQOutputPathsContext` | DQ report output paths |
-| `RateLimitContext` | Rate limiting context |
+| `DQConfigsContext`         | DQ configuration context                  |
+| `DQOutputPathsContext`     | DQ report output paths                    |
+| `RateLimitContext`         | Rate limiting context                     |
 
----
+______________________________________________________________________
 
 ## Public Composition Seams
 
 Current sanctioned public surfaces in `composition/`:
 
-| Module | Policy Role | New Code Guidance |
-|---|---|---|
-| `entrypoints` | `public-entrypoint` stable public seam | Treat as execution-focused seam. For service/resource operations, import `services_api` / `resources_api` directly. |
-| `execution_api` | Narrow execution-focused public API | Prefer for new CLI/orchestration execution call sites. |
-| `services_api` | Narrow services-focused public API | Prefer for new service/bootstrap retrieval call sites. |
-| `resources_api` | Narrow resource-management public API | Prefer for new quarantine/checkpoint/lifecycle call sites. |
+| Module          | Policy Role                            | New Code Guidance                                                                                                   |
+| --------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `entrypoints`   | `public-entrypoint` stable public seam | Treat as execution-focused seam. For service/resource operations, import `services_api` / `resources_api` directly. |
+| `execution_api` | Narrow execution-focused public API    | Prefer for new CLI/orchestration execution call sites.                                                              |
+| `services_api`  | Narrow services-focused public API     | Prefer for new service/bootstrap retrieval call sites.                                                              |
+| `resources_api` | Narrow resource-management public API  | Prefer for new quarantine/checkpoint/lifecycle call sites.                                                          |
 
 Internal modules `_pipeline_execution`, `_resource_management`, `_services` remain
 implementation seams behind the public modules above and are not sanctioned import paths
@@ -231,7 +234,7 @@ This section contains references to internal implementation details and extended
 ### Internal Modules
 
 - **`_pipeline_execution`**: Internal implementation behind `entrypoints`/`execution_api`
-- **`_resource_management`**: Internal implementation behind `entrypoints`/`resources_api`  
+- **`_resource_management`**: Internal implementation behind `entrypoints`/`resources_api`
 - **`_services`**: Internal implementation behind `entrypoints`/`services_api`
 
 For comprehensive documentation on internal modules, see:
@@ -260,13 +263,13 @@ For complete type mapping documentation, see:
 
 1. **Primary vs Secondary**: Use the main API documentation for published surfaces. Consult internal/extended material only when you need implementation details.
 
-2. **Stability**: Internal material may change without notice and is not subject to the same compatibility guarantees as published surfaces.
+1. **Stability**: Internal material may change without notice and is not subject to the same compatibility guarantees as published surfaces.
 
-3. **Audience**: Intended for maintainers, contributors, and advanced users who need to understand or modify internal implementation.
+1. **Audience**: Intended for maintainers, contributors, and advanced users who need to understand or modify internal implementation.
 
 See the [Internal/Extended Material Index](../internalextended/index.md) for complete documentation.
 
----
+______________________________________________________________________
 
 ## Entrypoints (`composition.entrypoints`)
 
@@ -285,34 +288,34 @@ When new call sites only need one capability family, import the narrower
 `execution_api`, `services_api`, or `resources_api` modules directly instead of
 expanding `entrypoints`.
 
----
+______________________________________________________________________
 
 ## Services (`composition.services`)
 
-| Module | Description |
-|---|---|
-| `__init__` | Re-exports `MetadataCoordinator` plus metadata input types for convenience |
-| `versioning` | Version resolution service |
+| Module       | Description                                                                |
+| ------------ | -------------------------------------------------------------------------- |
+| `__init__`   | Re-exports `MetadataCoordinator` plus metadata input types for convenience |
+| `versioning` | Version resolution service                                                 |
 
----
+______________________________________________________________________
 
 ## Top-Level Modules
 
-| Module | Description |
-|---|---|
-| `builders` | `FilterConfigBuilder` -- builds filter configs from YAML |
-| `bootstrap_logger` | `BootstrapLogger` -- logging during bootstrap phase |
-| `bootstrap_contexts` | Context objects for bootstrap configuration |
-| `entrypoints` | Retained stable public composition seam (execution-first + legacy compatibility lookup) |
-| `execution_api` | Public execution-focused composition API |
-| `services_api` | Public services-focused composition API |
-| `resources_api` | Public resource-management composition API |
-| `composite_api` | Public composite-runtime composition API |
-| `observability_api` | Public observability composition API |
-| `types` | Type definitions for composition layer |
-| `_pipeline_execution` | Internal implementation module behind `entrypoints`/`execution_api` (see [Internal/Extended Material](#internalextended-material)) |
+| Module                 | Description                                                                                                                        |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `builders`             | `FilterConfigBuilder` -- builds filter configs from YAML                                                                           |
+| `bootstrap_logger`     | `BootstrapLogger` -- logging during bootstrap phase                                                                                |
+| `bootstrap_contexts`   | Context objects for bootstrap configuration                                                                                        |
+| `entrypoints`          | Retained stable public composition seam (execution-first + legacy compatibility lookup)                                            |
+| `execution_api`        | Public execution-focused composition API                                                                                           |
+| `services_api`         | Public services-focused composition API                                                                                            |
+| `resources_api`        | Public resource-management composition API                                                                                         |
+| `composite_api`        | Public composite-runtime composition API                                                                                           |
+| `observability_api`    | Public observability composition API                                                                                               |
+| `types`                | Type definitions for composition layer                                                                                             |
+| `_pipeline_execution`  | Internal implementation module behind `entrypoints`/`execution_api` (see [Internal/Extended Material](#internalextended-material)) |
 | `_resource_management` | Internal implementation module behind `entrypoints`/`resources_api` (see [Internal/Extended Material](#internalextended-material)) |
-| `_services` | Internal implementation module behind `entrypoints`/`services_api` (see [Internal/Extended Material](#internalextended-material)) |
-| `_pipeline_execution` | Internal implementation module behind `entrypoints`/`execution_api` (see [Internal/Extended Material](#internalextended-material)) |
+| `_services`            | Internal implementation module behind `entrypoints`/`services_api` (see [Internal/Extended Material](#internalextended-material))  |
+| `_pipeline_execution`  | Internal implementation module behind `entrypoints`/`execution_api` (see [Internal/Extended Material](#internalextended-material)) |
 | `_resource_management` | Internal implementation module behind `entrypoints`/`resources_api` (see [Internal/Extended Material](#internalextended-material)) |
-| `_services` | Internal implementation module behind `entrypoints`/`services_api` (see [Internal/Extended Material](#internalextended-material)) |
+| `_services`            | Internal implementation module behind `entrypoints`/`services_api` (see [Internal/Extended Material](#internalextended-material))  |

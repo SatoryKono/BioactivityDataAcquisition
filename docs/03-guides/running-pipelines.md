@@ -195,12 +195,12 @@ bioetl run --pipeline chembl_activity --resume
 `--resume` означает восстановление из checkpoint state, а не strict exact replay.
 Чтобы не смешивать operator semantics:
 
-| Surface | Что означает | Что не означает |
-| ------- | ------------ | --------------- |
-| `--resume` | Продолжить прерванный запуск из checkpoint state с compatibility checks | Не публикует новый run как exact replay родительского run |
-| `--run-type rebuild` | Пересчитать производные слои заново из доступного source-of-truth/Bronze | Не использует checkpoint continuation и не доказывает exact replay |
-| `--exact-replay` | Запросить strict exact replay на snapshot-backed inputs внутри опубликованной support boundary с fail-closed policy | Не является обычным resume или обычным rebuild |
-| `replay_mode=same_data_state_recovery` | Inspection-классификация run, у которого есть immutable snapshots и same-data-state recovery anchors | Не отдельный CLI flag |
+| Surface                                | Что означает                                                                                                        | Что не означает                                                    |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `--resume`                             | Продолжить прерванный запуск из checkpoint state с compatibility checks                                             | Не публикует новый run как exact replay родительского run          |
+| `--run-type rebuild`                   | Пересчитать производные слои заново из доступного source-of-truth/Bronze                                            | Не использует checkpoint continuation и не доказывает exact replay |
+| `--exact-replay`                       | Запросить strict exact replay на snapshot-backed inputs внутри опубликованной support boundary с fail-closed policy | Не является обычным resume или обычным rebuild                     |
+| `replay_mode=same_data_state_recovery` | Inspection-классификация run, у которого есть immutable snapshots и same-data-state recovery anchors                | Не отдельный CLI flag                                              |
 
 Resume-совместимость checkpoint управляется через
 `settings.pipeline.control_plane.checkpoint_compatibility_policy`:

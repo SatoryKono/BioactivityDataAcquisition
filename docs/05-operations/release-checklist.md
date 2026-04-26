@@ -23,13 +23,13 @@ This checklist documents the pre-release verification completed for BioETL v5.9.
 
 ### 5.1. Build & Test Verification
 
-| Command                | Status  | Notes                                                    |
-| ---------------------- | ------- | -------------------------------------------------------- |
-| `make clean`           | ✅ Pass | Build artifacts cleaned                                  |
+| Command                | Status  | Notes                                                                |
+| ---------------------- | ------- | -------------------------------------------------------------------- |
+| `make clean`           | ✅ Pass | Build artifacts cleaned                                              |
 | `make clean-preflight` | ✅ Pass | Extended cleanup via `scripts/engineering/repo/preflight_cleanup.sh` |
-| `make install`         | ✅ Pass | Dependencies installed via uv                            |
-| `make lint`            | ✅ Pass | ruff and mypy checks were green at verification time     |
-| `make test`            | ✅ Pass | Stable local test suite was green at verification time   |
+| `make install`         | ✅ Pass | Dependencies installed via uv                                        |
+| `make lint`            | ✅ Pass | ruff and mypy checks were green at verification time                 |
+| `make test`            | ✅ Pass | Stable local test suite was green at verification time               |
 
 ### 5.2. Smoke Tests
 

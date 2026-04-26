@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 0.3.0
 Status: draft
 Class: repo-only
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last synchronized: '2026-04-08'
----
+  Last synchronized: '2026-04-08'
+
+______________________________________________________________________
 
 # D-05 Pipelines and Config Specification (Draft Sync Note)
 
@@ -33,12 +36,11 @@ D-05 остаётся draft-конденсатором для будущей uni
 ## План синхронизации D-05
 
 1. Держать в D-05 только high-level map: config hierarchy, required config surfaces, validation gates.
-2. Все исполняемые примеры команд оставлять в `03-guides` и `scripts/schema/README.md`.
-3. Для каждой pipeline/config области фиксировать один canonical link вместо повторения текста.
+1. Все исполняемые примеры команд оставлять в `03-guides` и `scripts/schema/README.md`.
+1. Для каждой pipeline/config области фиксировать один canonical link вместо повторения текста.
 
 ## Критерии промоушена в future published handbook
 
 1. D-05 не содержит копий таблиц и command blocks из канонических guides.
-2. Все обязательные секции unified config описаны через ссылочную карту на актуальные документы.
-3. Любая правка config workflow сначала отражается в canonical guides/tooling docs, потом в D-05 summary.
-
+1. Все обязательные секции unified config описаны через ссылочную карту на актуальные документы.
+1. Любая правка config workflow сначала отражается в canonical guides/tooling docs, потом в D-05 summary.

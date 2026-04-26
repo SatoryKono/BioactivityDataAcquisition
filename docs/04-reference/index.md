@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-02'
----
+  Last verified: '2026-04-02'
+
+______________________________________________________________________
 
 # Reference Index
 
@@ -21,15 +24,15 @@ design rationale and layer structure.
 
 ## Reference Surfaces
 
-| Section | Purpose | Entry point |
-|---|---|---|
-| CLI | Supported command-line surface | [cli.md](cli.md) |
-| Contracts | Published control-plane, observability, and gold-contract material | [contracts/README.md](contracts/README.md) |
-| Providers | Provider-specific published specs and field surfaces | [providers/README.md](providers/README.md) |
-| Pipelines | Pipeline-specific published specs and historical pipeline artifacts | [pipelines/README.md](pipelines/README.md) |
-| API | Generated or curated package/module API reference | [api/index.md](api/index.md) |
-| Templates | Reusable templates for ADRs, contracts, specs, and runbooks | [templates/index.md](templates/index.md) |
-| Internal/Extended | Internal implementation details and extended surfaces | [internalextended/index.md](internalextended/index.md) |
+| Section           | Purpose                                                             | Entry point                                            |
+| ----------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
+| CLI               | Supported command-line surface                                      | [cli.md](cli.md)                                       |
+| Contracts         | Published control-plane, observability, and gold-contract material  | [contracts/README.md](contracts/README.md)             |
+| Providers         | Provider-specific published specs and field surfaces                | [providers/README.md](providers/README.md)             |
+| Pipelines         | Pipeline-specific published specs and historical pipeline artifacts | [pipelines/README.md](pipelines/README.md)             |
+| API               | Generated or curated package/module API reference                   | [api/index.md](api/index.md)                           |
+| Templates         | Reusable templates for ADRs, contracts, specs, and runbooks         | [templates/index.md](templates/index.md)               |
+| Internal/Extended | Internal implementation details and extended surfaces               | [internalextended/index.md](internalextended/index.md) |
 
 ## Current High-Signal References
 

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.1.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-12'
----
+  Last verified: '2026-04-12'
+
+______________________________________________________________________
 
 # Observability Layers Architecture
 

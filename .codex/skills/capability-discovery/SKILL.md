@@ -1,10 +1,6 @@
----
-name: capability-discovery
-description: Use before workflow execution to discover available agents, skills, and quality commands in the project environment. Use when adapting gh-workflow commands to project-specific tooling.
-allowed-tools: Bash, Read, Glob, Grep
-context: fork
-agent: Explore
----
+______________________________________________________________________
+
+## name: capability-discovery description: Use before workflow execution to discover available agents, skills, and quality commands in the project environment. Use when adapting gh-workflow commands to project-specific tooling. allowed-tools: Bash, Read, Glob, Grep context: fork agent: Explore
 
 # Capability Discovery
 
@@ -13,6 +9,7 @@ This skill discovers available capabilities (skills, agents, commands) in the us
 ## Purpose
 
 Before executing workflows, discover what tools are available so commands can:
+
 - Invoke specialized agents if available
 - Use custom skills instead of defaults
 - Apply project-specific quality commands
@@ -169,21 +166,23 @@ Before detailed review:
 
 When capabilities are not found:
 
-| Missing Capability | Fallback |
-|-------------------|----------|
-| No custom agents | Use built-in review checklist |
-| No lint skill | Detect from tech stack |
+| Missing Capability                   | Fallback                              |
+| ------------------------------------ | ------------------------------------- |
+| No custom agents                     | Use built-in review checklist         |
+| No lint skill                        | Detect from tech stack                |
 | No AGENTS.md / Codex config commands | Use standard tools for detected stack |
-| No tech stack detected | Ask user for commands |
+| No tech stack detected               | Ask user for commands                 |
 
 ## Integration Points
 
 This skill is invoked by:
+
 - `gh-start` - Before implementation
 - `gh-review` - Before code review
 - `gh-address` - Before addressing feedback
 
 Results inform:
+
 - Which agents to delegate to
 - Which quality commands to run
 - How to adapt workflow to project
@@ -191,6 +190,6 @@ Results inform:
 ## Best Practices
 
 1. **Cache results** - Don't re-scan within same session
-2. **Prefer explicit** - `AGENTS.md` and `.codex/config.toml` over inferred defaults
-3. **Report clearly** - Show what was found and what wasn't
-4. **Enable fallbacks** - Never block workflow due to missing capabilities
+1. **Prefer explicit** - `AGENTS.md` and `.codex/config.toml` over inferred defaults
+1. **Report clearly** - Show what was found and what wasn't
+1. **Enable fallbacks** - Never block workflow due to missing capabilities

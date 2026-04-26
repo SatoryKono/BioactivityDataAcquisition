@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.3.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-13'
----
+  Last verified: '2026-04-13'
+
+______________________________________________________________________
 
 # BioETL Dashboards v2: Usage
 
@@ -15,12 +18,12 @@ Last verified: '2026-04-13'
 
 ## Какие дашборды использовать
 
-| Dashboard | UID | Для чего |
-|---|---|---|
-| 1. Overview | `bioetl-overview-v2` | Общее состояние пайплайна, control-plane и lineage health |
-| 2. Runtime | `bioetl-runtime` | Runtime triage: warnings, unstructured logs, adaptive-memory signals, alert conditions |
-| 3. Provider Health | `bioetl-provider-health-v2` | Incident triage по provider health: latency/failures/degraded/retries exhausted |
-| 4. Data Quality | `bioetl-dq-v2` | Качество данных, карантин, аномалии, freshness |
+| Dashboard                 | UID                             | Для чего                                                                                   |
+| ------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------ |
+| 1. Overview               | `bioetl-overview-v2`            | Общее состояние пайплайна, control-plane и lineage health                                  |
+| 2. Runtime                | `bioetl-runtime`                | Runtime triage: warnings, unstructured logs, adaptive-memory signals, alert conditions     |
+| 3. Provider Health        | `bioetl-provider-health-v2`     | Incident triage по provider health: latency/failures/degraded/retries exhausted            |
+| 4. Data Quality           | `bioetl-dq-v2`                  | Качество данных, карантин, аномалии, freshness                                             |
 | 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | Record-level explorer для `filtered_out`/`FILTERED_OUT_SILVER` записей (quarantine-backed) |
 
 ## Фильтрация
@@ -36,21 +39,21 @@ Last verified: '2026-04-13'
 ## Что смотреть в первую очередь
 
 1. `bioetl-overview-v2`, panel `id=4` (`Overall Yield (Selected Range)`):
-`sum(increase(gold[$__range])) / clamp_min(sum(increase(bronze[$__range])), 1)`
-2. `bioetl-runtime`, panel `id=2`, `id=3`, `id=4`, `id=5`, `id=6`, `id=7`:
-warnings, unstructured logs и alert-condition сигналы по DQ/control-plane/provider/freshness.
-3. `bioetl-runtime`, panel `id=18`, `id=19`, `id=20`, `id=21`:
-adaptive-memory triage: pressure events, resize events, fallback monitor decisions и бинарный pressure-active signal.
-4. `bioetl-provider-health-v2`, panel `id=1`, `id=104`, `id=106`, `id=107`, `id=108`, `id=109`, `id=102`:
-p95 latency trend + current p95, failure/degraded trend, provider failure share и retries exhausted.
-5. `bioetl-dq-v2`, panel `id=2` (`Data Quality Score (Volume-weighted)`):
-`sum(score * record_count) / clamp_min(sum(record_count), 1)` на базе
-`bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`
-6. `bioetl-dq-v2`, panel `id=6`, `id=7`, `id=12`:
-range-based quarantine/threshold/failures for the active Grafana window.
-7. `bioetl-overview-v2`, panel `id=111`, `id=112`, `id=113`, `id=114`, `id=120`, `id=115`:
-manifest/ledger failures, checkpoint incompatibilities, missing lineage refs,
-composite source selections и fragment outcomes по `layer/status`.
+   `sum(increase(gold[$__range])) / clamp_min(sum(increase(bronze[$__range])), 1)`
+1. `bioetl-runtime`, panel `id=2`, `id=3`, `id=4`, `id=5`, `id=6`, `id=7`:
+   warnings, unstructured logs и alert-condition сигналы по DQ/control-plane/provider/freshness.
+1. `bioetl-runtime`, panel `id=18`, `id=19`, `id=20`, `id=21`:
+   adaptive-memory triage: pressure events, resize events, fallback monitor decisions и бинарный pressure-active signal.
+1. `bioetl-provider-health-v2`, panel `id=1`, `id=104`, `id=106`, `id=107`, `id=108`, `id=109`, `id=102`:
+   p95 latency trend + current p95, failure/degraded trend, provider failure share и retries exhausted.
+1. `bioetl-dq-v2`, panel `id=2` (`Data Quality Score (Volume-weighted)`):
+   `sum(score * record_count) / clamp_min(sum(record_count), 1)` на базе
+   `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`
+1. `bioetl-dq-v2`, panel `id=6`, `id=7`, `id=12`:
+   range-based quarantine/threshold/failures for the active Grafana window.
+1. `bioetl-overview-v2`, panel `id=111`, `id=112`, `id=113`, `id=114`, `id=120`, `id=115`:
+   manifest/ledger failures, checkpoint incompatibilities, missing lineage refs,
+   composite source selections и fragment outcomes по `layer/status`.
 
 ## Silver Filter Rejects workflow
 
@@ -65,11 +68,11 @@ composite source selections и fragment outcomes по `layer/status`.
 - Короткая triage sequence:
   1. Начните с `1. Overview` или `2. Runtime`, чтобы подтвердить spike по
      `Silver Filter Rejects` в текущем time range.
-  2. Перейдите в `4. Data Quality` и проверьте `Top Silver Reject Reasons` /
+  1. Перейдите в `4. Data Quality` и проверьте `Top Silver Reject Reasons` /
      `Top Silver Reject Fields`, чтобы сузить проблему до bounded cause summary.
-  3. Откройте `5. Silver Reject Explorer` для record-level списка, выбора
+  1. Откройте `5. Silver Reject Explorer` для record-level списка, выбора
      `reason_code/field/run_id` и detail по конкретному `payload_hash`.
-  4. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и
+  1. Используйте quarantine CLI для action-операций (`replay/resolve/purge`) и
      финального подтверждения remediation.
 - Эти панели отвечают на вопросы:
   - растёт ли объём `filtered_out`;
@@ -112,12 +115,12 @@ composite source selections и fragment outcomes по `layer/status`.
 ## Частые проблемы
 
 1. `No data`:
-проверьте `http://localhost:8000/metrics`, затем `http://localhost:9090/targets`.
-2. Пустой `$provider`:
-нет ни одной серии `bioetl_health_check_success_total`, `bioetl_health_check_degraded_total`
-или `bioetl_health_check_failures_total` в metrics endpoint.
-3. Пустой `$run_type`:
-нет метрик `bioetl_records_processed_total` для выбранного `$pipeline`.
-4. `bioetl-silver-reject-explorer` показывает plugin error или `No data`:
-проверьте, что выбран конкретный `$pipeline` (не `All`) и что backend отвечает на
-`/ops/quarantine/filter-options?pipeline=<pipeline_name>`.
+   проверьте `http://localhost:8000/metrics`, затем `http://localhost:9090/targets`.
+1. Пустой `$provider`:
+   нет ни одной серии `bioetl_health_check_success_total`, `bioetl_health_check_degraded_total`
+   или `bioetl_health_check_failures_total` в metrics endpoint.
+1. Пустой `$run_type`:
+   нет метрик `bioetl_records_processed_total` для выбранного `$pipeline`.
+1. `bioetl-silver-reject-explorer` показывает plugin error или `No data`:
+   проверьте, что выбран конкретный `$pipeline` (не `All`) и что backend отвечает на
+   `/ops/quarantine/filter-options?pipeline=<pipeline_name>`.

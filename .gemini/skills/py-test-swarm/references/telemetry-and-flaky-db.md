@@ -3,6 +3,7 @@
 ## Raw event JSONL schema
 
 Store events in:
+
 - `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/telemetry/raw/events_<agent_id>.jsonl`
 
 Example:
@@ -32,11 +33,13 @@ Example:
 ```
 
 Allowed `outcome` values:
+
 - `pass`, `fail`, `error`, `skip`, `xfail`, `xpass`
 
 ## Aggregated outputs
 
 Generate:
+
 - `telemetry/aggregated/failure_stats.csv`
 - `telemetry/aggregated/flaky_index.csv`
 - `telemetry/failure_frequency_summary.md`
@@ -56,11 +59,11 @@ test_nodeid,total_runs,intermittent_fails,flaky_index,triage_status,suspected_ca
 
 ## Alert thresholds
 
-| Condition | Alert | Action |
-|-----------|-------|--------|
-| failure_frequency > 0.10 | Warning | prioritize debug |
+| Condition                | Alert    | Action                   |
+| ------------------------ | -------- | ------------------------ |
+| failure_frequency > 0.10 | Warning  | prioritize debug         |
 | failure_frequency > 0.20 | Critical | mandatory fix/quarantine |
-| flaky_index > 0.15 | Critical | mandatory stabilization |
+| flaky_index > 0.15       | Critical | mandatory stabilization  |
 
 ## Flakiness database (`flakiness-database.json`)
 
@@ -92,6 +95,7 @@ Top-level skeleton:
 ```
 
 Each flaky test item should include:
+
 - test ID and classification (`layer`, `module`, `provider`, `test_type`)
 - run statistics (`total_runs`, pass/fail/error counts)
 - flakiness rate and alert level
@@ -102,9 +106,10 @@ Each flaky test item should include:
 ## Summary expectations (`failure_frequency_summary.md`)
 
 Include:
+
 1. Top-20 unstable tests
-2. Layer/module heatmap (text table)
-3. deterministic vs flaky split
-4. root-cause clusters by `normalized_error_signature`
-5. duration vs failure-probability observations
-6. delta vs `baseline_report` (if provided)
+1. Layer/module heatmap (text table)
+1. deterministic vs flaky split
+1. root-cause clusters by `normalized_error_signature`
+1. duration vs failure-probability observations
+1. delta vs `baseline_report` (if provided)

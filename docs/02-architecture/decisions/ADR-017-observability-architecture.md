@@ -142,16 +142,16 @@ Canonical naming rules:
 
 Representative runtime families:
 
-| Metric                                  | Type      | Labels                     | Description                            |
-| --------------------------------------- | --------- | -------------------------- | -------------------------------------- |
-| `bioetl_pipeline_duration_seconds`      | Histogram | pipeline, stage, status, run_type | Pipeline/stage duration           |
-| `bioetl_records_processed_total`        | Counter   | pipeline, stage, run_type  | Processed record count                 |
-| `bioetl_errors_total`                   | Counter   | pipeline, stage, error_code | Error taxonomy counts                |
-| `bioetl_circuit_breaker_state`          | Gauge     | adapter                    | 0=Closed, 1=Half-Open, 2=Open          |
-| `bioetl_dq_validation_score`            | Gauge     | pipeline, entity           | DQ score in `[0,1]`                    |
-| `bioetl_data_freshness_seconds`         | Gauge     | pipeline, entity           | Application-owned ingestion anchor     |
-| `bioetl_postrun_phase_events_total`     | Counter   | pipeline, phase, status    | Bounded postrun subphase outcomes      |
-| `bioetl_postrun_phase_duration_seconds` | Histogram | pipeline, phase, status    | Bounded postrun subphase durations     |
+| Metric                                  | Type      | Labels                            | Description                        |
+| --------------------------------------- | --------- | --------------------------------- | ---------------------------------- |
+| `bioetl_pipeline_duration_seconds`      | Histogram | pipeline, stage, status, run_type | Pipeline/stage duration            |
+| `bioetl_records_processed_total`        | Counter   | pipeline, stage, run_type         | Processed record count             |
+| `bioetl_errors_total`                   | Counter   | pipeline, stage, error_code       | Error taxonomy counts              |
+| `bioetl_circuit_breaker_state`          | Gauge     | adapter                           | 0=Closed, 1=Half-Open, 2=Open      |
+| `bioetl_dq_validation_score`            | Gauge     | pipeline, entity                  | DQ score in `[0,1]`                |
+| `bioetl_data_freshness_seconds`         | Gauge     | pipeline, entity                  | Application-owned ingestion anchor |
+| `bioetl_postrun_phase_events_total`     | Counter   | pipeline, phase, status           | Bounded postrun subphase outcomes  |
+| `bioetl_postrun_phase_duration_seconds` | Histogram | pipeline, phase, status           | Bounded postrun subphase durations |
 
 Legacy `kebab-case` names such as `pipeline-duration-seconds` are not part of
 the current runtime contract.
@@ -162,11 +162,11 @@ the current runtime contract.
 used without infrastructure dependencies. `NoOpLogger` remains an
 adapter-level fallback in infrastructure.
 
-| Port          | NoOp Implementation | Location                                          |
-| ------------- | ------------------- | ------------------------------------------------- |
-| `LoggerPort`  | `NoOpLogger`        | `infrastructure/observability/noop_logger.py`     |
-| `MetricsPort` | `NoOpMetrics`       | `domain/ports/noop/_metrics.py`                   |
-| `TracingPort` | `NoOpTracing`       | `domain/ports/noop/_tracing.py`                   |
+| Port          | NoOp Implementation | Location                                      |
+| ------------- | ------------------- | --------------------------------------------- |
+| `LoggerPort`  | `NoOpLogger`        | `infrastructure/observability/noop_logger.py` |
+| `MetricsPort` | `NoOpMetrics`       | `domain/ports/noop/_metrics.py`               |
+| `TracingPort` | `NoOpTracing`       | `domain/ports/noop/_tracing.py`               |
 
 **Key Features of NoOp Implementations:**
 

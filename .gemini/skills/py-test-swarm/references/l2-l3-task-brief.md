@@ -87,13 +87,13 @@ Always prepend this to L3 prompt:
 
 ## Failure Classification Matrix
 
-| Category | Signals | Typical action |
-|----------|---------|----------------|
-| Import/Module | ModuleNotFoundError, ImportError | validate package/init and boundaries |
-| Type | TypeError, AttributeError | verify signatures/protocol contracts |
-| Data/Validation | ValidationError, Pandera | inspect schema drift and fixtures |
-| State | AssertionError | inspect side effects/order/state leakage |
-| Infrastructure | Timeout/Connection errors | inspect VCR/mocks/retries |
-| Contract | response shape changed | update contracts/cassettes |
-| Flaky | intermittent pass/fail | rerun N times and classify |
-| Env/Config | env-dependent behavior | normalize env/fixtures |
+| Category        | Signals                          | Typical action                           |
+| --------------- | -------------------------------- | ---------------------------------------- |
+| Import/Module   | ModuleNotFoundError, ImportError | validate package/init and boundaries     |
+| Type            | TypeError, AttributeError        | verify signatures/protocol contracts     |
+| Data/Validation | ValidationError, Pandera         | inspect schema drift and fixtures        |
+| State           | AssertionError                   | inspect side effects/order/state leakage |
+| Infrastructure  | Timeout/Connection errors        | inspect VCR/mocks/retries                |
+| Contract        | response shape changed           | update contracts/cassettes               |
+| Flaky           | intermittent pass/fail           | rerun N times and classify               |
+| Env/Config      | env-dependent behavior           | normalize env/fixtures                   |

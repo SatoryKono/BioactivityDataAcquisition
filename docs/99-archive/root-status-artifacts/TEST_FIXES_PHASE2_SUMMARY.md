@@ -13,8 +13,9 @@ This document summarizes Phase 2 of the test failure resolution, focusing on fix
 ### Root Cause Analysis
 
 The `SeedKeyResolver` and `ChainedKeyResolver` classes were incorrectly trying to access:
+
 1. `self._normalization_policies` - Should be `self._resolver_helper._normalization_policies`
-2. `self._logger` - Should be `self._resolver_helper.log_*` methods
+1. `self._logger` - Should be `self._resolver_helper.log_*` methods
 
 ### Files Modified
 
@@ -23,17 +24,19 @@ The `SeedKeyResolver` and `ChainedKeyResolver` classes were incorrectly trying t
 ### Specific Changes
 
 #### 1. Normalization Policies Access
+
 ```python
 # Before (incorrect)
-normalization_policies=self._normalization_policies,
+normalization_policies = (self._normalization_policies,)
 
 # After (correct)
-normalization_policies=self._resolver_helper._normalization_policies,
+normalization_policies = (self._resolver_helper._normalization_policies,)
 ```
 
 **Lines fixed**: 86, 181
 
 #### 2. Logger Method Access
+
 ```python
 # Before (incorrect)
 self._logger.debug(...)
@@ -51,6 +54,7 @@ self._resolver_helper.log_error(...)
 **Lines fixed**: 88, 142, 152, 184, 257, 266
 
 ### Total Changes
+
 - **Files modified**: 1
 - **Lines changed**: 8
 - **Attribute access issues fixed**: 2 types (normalization policies + logger methods)
@@ -58,6 +62,7 @@ self._resolver_helper.log_error(...)
 ## Verification
 
 ### Unit Test Verification
+
 ```bash
 # Test that resolvers can be created and access helper attributes
 python3 -c "
@@ -78,6 +83,7 @@ print('✅ Has access to logger methods:', hasattr(resolver._resolver_helper, 'l
 ```
 
 ### Test Execution
+
 ```bash
 # Before fixes
 python3 -m pytest tests/unit/application/composite/test_dependency_key_resolvers.py::TestSeedKeyResolver::test_returns_seed_keys_with_canonical_normalization
@@ -91,11 +97,13 @@ python3 -m pytest tests/unit/application/composite/test_dependency_key_resolvers
 ## Impact Assessment
 
 ### Before Phase 2
+
 - **Attribute access errors**: Multiple test files affected
 - **Test pass rate**: Blocked by attribute errors
 - **Code quality**: Poor encapsulation, direct attribute access
 
 ### After Phase 2
+
 - **Attribute access errors**: 100% resolved
 - **Test pass rate**: Attribute errors eliminated (remaining issues are test data-related)
 - **Code quality**: Proper encapsulation through resolver helper
@@ -103,12 +111,15 @@ python3 -m pytest tests/unit/application/composite/test_dependency_key_resolvers
 ## Design Improvements
 
 ### Encapsulation
+
 The fixes enforce proper encapsulation:
+
 - `SeedKeyResolver` and `ChainedKeyResolver` delegate to `ResolverHelper`
 - All logging and normalization policies accessed through helper
 - Consistent pattern across both resolver classes
 
 ### Maintainability
+
 - Single source of truth for logging and normalization
 - Easier to modify behavior in one place (`ResolverHelper`)
 - Better separation of concerns
@@ -118,10 +129,12 @@ The fixes enforce proper encapsulation:
 ### Deferred for Future Work
 
 1. **Test Data Issues**
+
    - DOI normalization type mismatch in test fixtures
    - Not related to attribute access
 
-2. **Other Missing Attributes**
+1. **Other Missing Attributes**
+
    - `SilverWriter._maybe_export_csv`
    - `BatchMetricsRecorderService.error_count`
    - `JoinExecutorService` imports
@@ -136,14 +149,16 @@ The fixes enforce proper encapsulation:
 ## Next Steps
 
 ### Phase 3: Complete Class Implementations
+
 1. Fix remaining missing attributes in other classes
-2. Resolve import issues
-3. Update test fixtures for data type issues
+1. Resolve import issues
+1. Update test fixtures for data type issues
 
 ### Phase 4: Test Infrastructure
+
 1. Modernize HTTP server setup
-2. Update mock configurations
-3. Enhance async test handling
+1. Update mock configurations
+1. Enhance async test handling
 
 ## Conclusion
 

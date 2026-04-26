@@ -58,10 +58,10 @@ ______________________________________________________________________
 
 ### Occurrence-Scoped Provenance
 
-| Поле            | Тип   | Описание                             |
-| --------------- | ----- | ------------------------------------ |
-| `content_hash`  | `str` | SHA256 от business data              |
-| `_index`        | `int` | Порядковый номер записи              |
+| Поле           | Тип   | Описание                |
+| -------------- | ----- | ----------------------- |
+| `content_hash` | `str` | SHA256 от business data |
+| `_index`       | `int` | Порядковый номер записи |
 
 `run_id`, `run_type`, `source_batch_id` и `ingestion_ts` не входят в
 persisted Silver/Gold row contract. Эти occurrence-scoped anchors публикуются

@@ -59,17 +59,17 @@ ______________________________________________________________________
 
 ## File Inventory
 
-| File                   | Location       | Purpose                                  |
-| ---------------------- | -------------- | ---------------------------------------- |
-| `wsl_proxy.py`         | `scripts/ops/` | HTTP CONNECT proxy (Python stdlib)       |
-| `start-wsl-proxy.bat`  | `scripts/ops/` | Start proxy in background                |
-| `codex.bat`            | `scripts/ops/` | Launch interactive Codex from Windows    |
-| `codex-exec.bat`       | `scripts/ops/` | Launch full-auto Codex from Windows      |
+| File                   | Location                   | Purpose                                  |
+| ---------------------- | -------------------------- | ---------------------------------------- |
+| `wsl_proxy.py`         | `scripts/ops/`             | HTTP CONNECT proxy (Python stdlib)       |
+| `start-wsl-proxy.bat`  | `scripts/ops/`             | Start proxy in background                |
+| `codex.bat`            | `scripts/ops/`             | Launch interactive Codex from Windows    |
+| `codex-exec.bat`       | `scripts/ops/`             | Launch full-auto Codex from Windows      |
 | `.setup_wsl_codex.sh`  | `scripts/engineering/dev/` | DNS resolver (dig + PowerShell fallback) |
-| `.wsl_proxy_env.sh`    | repo root      | Auto-configure proxy env vars            |
-| `.codex/config.toml`   | repo root      | Project-level Codex config               |
-| `~/.codex/config.toml` | WSL home       | Global Codex config (MCP servers)        |
-| `~/.bashrc`            | WSL home       | Sources DNS + proxy scripts              |
+| `.wsl_proxy_env.sh`    | repo root                  | Auto-configure proxy env vars            |
+| `.codex/config.toml`   | repo root                  | Project-level Codex config               |
+| `~/.codex/config.toml` | WSL home                   | Global Codex config (MCP servers)        |
+| `~/.bashrc`            | WSL home                   | Sources DNS + proxy scripts              |
 
 ______________________________________________________________________
 

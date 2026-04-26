@@ -49,4 +49,3 @@ D-07 сохраняется как draft-рамка для будущего cons
 1. Единый observability терминологический словарь согласован между contracts, guides и runbooks.
 2. D-07 не содержит дублируемых таблиц метрик/алертов и не конфликтует с Grafana/Prometheus rollout.
 3. Любое утверждение в D-07 трассируется к published source и проверяемому runtime artifact.
-

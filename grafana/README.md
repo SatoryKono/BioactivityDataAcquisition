@@ -5,40 +5,40 @@
 **Статус:** Production Ready
 **Совместимость:** BioETL v5.21+, Grafana 9+, Prometheus 2.40+
 
----
+______________________________________________________________________
 
 ## Содержание
 
-1. [Архитектура мониторинга](#1-архитектура-мониторинга)
-2. [Цепочка данных: от кода до графика](#2-цепочка-данных-от-кода-до-графика)
-3. [Быстрый запуск](#3-быстрый-запуск)
-4. [Конфигурация инфраструктуры](#4-конфигурация-инфраструктуры)
-5. [Полный каталог метрик BioETL](#5-полный-каталог-метрик-bioetl)
-6. [Переменные фильтрации (Template Variables)](#6-переменные-фильтрации-template-variables)
-8. [Архив: Overview/Data Quality/Provider Health v1](#8-архив-overviewdata-qualityprovider-health-v1)
-9. [Дашборд: 1. Overview](#9-дашборд-1-overview)
-13.1. [Дашборд: 2. Runtime](#131-дашборд-2-runtime)
-13. [Дашборд: 3. Provider Health](#13-дашборд-3-provider-health)
-11. [Дашборд: 4. Data Quality](#11-дашборд-4-data-quality)
-12. [Дашборд: 5. Silver Reject Explorer](#12-дашборд-5-silver-reject-explorer)
-14. [Справочник PromQL-паттернов](#14-справочник-promql-паттернов)
-15. [Устранение неполадок](#15-устранение-неполадок)
-16. [Архитектурные решения и обоснования](#16-архитектурные-решения-и-обоснования)
-17. [Подробный разбор типов метрик Prometheus](#17-подробный-разбор-типов-метрик-prometheus)
-18. [Medallion Architecture и метрики](#18-medallion-architecture-и-метрики)
-19. [Circuit Breaker и мониторинг провайдеров](#19-circuit-breaker-и-мониторинг-провайдеров)
-20. [Data Quality Monitor (DQMonitorPort)](#20-data-quality-monitor-dqmonitorport)
-21. [Rate Limiting и его мониторинг](#21-rate-limiting-и-его-мониторинг)
-22. [Рекомендации по созданию пользовательских дашбордов](#22-рекомендации-по-созданию-пользовательских-дашбордов)
-23. [FAQ (Часто задаваемые вопросы)](#23-faq-часто-задаваемые-вопросы)
-24. [Alerting (Настройка оповещений)](#24-alerting-настройка-оповещений)
-25. [Глоссарий](#25-глоссарий)
-26. [Сводная таблица дашбордов](#26-сводная-таблица-дашбордов)
-27. [Жизненный цикл метрики: от кода до графика](#27-жизненный-цикл-метрики-от-кода-до-графика)
-28. [Безопасность и production-конфигурация](#28-безопасность-и-production-конфигурация)
-29. [Интеграция с CI/CD](#29-интеграция-с-cicd)
+1. [Архитектура мониторинга](#1-%D0%B0%D1%80%D1%85%D0%B8%D1%82%D0%B5%D0%BA%D1%82%D1%83%D1%80%D0%B0-%D0%BC%D0%BE%D0%BD%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%BD%D0%B3%D0%B0)
+1. [Цепочка данных: от кода до графика](#2-%D1%86%D0%B5%D0%BF%D0%BE%D1%87%D0%BA%D0%B0-%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85-%D0%BE%D1%82-%D0%BA%D0%BE%D0%B4%D0%B0-%D0%B4%D0%BE-%D0%B3%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0)
+1. [Быстрый запуск](#3-%D0%B1%D1%8B%D1%81%D1%82%D1%80%D1%8B%D0%B9-%D0%B7%D0%B0%D0%BF%D1%83%D1%81%D0%BA)
+1. [Конфигурация инфраструктуры](#4-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D1%83%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D0%B8%D0%BD%D1%84%D1%80%D0%B0%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%82%D1%83%D1%80%D1%8B)
+1. [Полный каталог метрик BioETL](#5-%D0%BF%D0%BE%D0%BB%D0%BD%D1%8B%D0%B9-%D0%BA%D0%B0%D1%82%D0%B0%D0%BB%D0%BE%D0%B3-%D0%BC%D0%B5%D1%82%D1%80%D0%B8%D0%BA-bioetl)
+1. [Переменные фильтрации (Template Variables)](#6-%D0%BF%D0%B5%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%BD%D1%8B%D0%B5-%D1%84%D0%B8%D0%BB%D1%8C%D1%82%D1%80%D0%B0%D1%86%D0%B8%D0%B8-template-variables)
+1. [Архив: Overview/Data Quality/Provider Health v1](#8-%D0%B0%D1%80%D1%85%D0%B8%D0%B2-overviewdata-qualityprovider-health-v1)
+1. [Дашборд: 1. Overview](#9-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-1-overview)
+   13.1. [Дашборд: 2. Runtime](#131-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-2-runtime)
+1. [Дашборд: 3. Provider Health](#13-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-3-provider-health)
+1. [Дашборд: 4. Data Quality](#11-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-4-data-quality)
+1. [Дашборд: 5. Silver Reject Explorer](#12-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-5-silver-reject-explorer)
+1. [Справочник PromQL-паттернов](#14-%D1%81%D0%BF%D1%80%D0%B0%D0%B2%D0%BE%D1%87%D0%BD%D0%B8%D0%BA-promql-%D0%BF%D0%B0%D1%82%D1%82%D0%B5%D1%80%D0%BD%D0%BE%D0%B2)
+1. [Устранение неполадок](#15-%D1%83%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5-%D0%BD%D0%B5%D0%BF%D0%BE%D0%BB%D0%B0%D0%B4%D0%BE%D0%BA)
+1. [Архитектурные решения и обоснования](#16-%D0%B0%D1%80%D1%85%D0%B8%D1%82%D0%B5%D0%BA%D1%82%D1%83%D1%80%D0%BD%D1%8B%D0%B5-%D1%80%D0%B5%D1%88%D0%B5%D0%BD%D0%B8%D1%8F-%D0%B8-%D0%BE%D0%B1%D0%BE%D1%81%D0%BD%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F)
+1. [Подробный разбор типов метрик Prometheus](#17-%D0%BF%D0%BE%D0%B4%D1%80%D0%BE%D0%B1%D0%BD%D1%8B%D0%B9-%D1%80%D0%B0%D0%B7%D0%B1%D0%BE%D1%80-%D1%82%D0%B8%D0%BF%D0%BE%D0%B2-%D0%BC%D0%B5%D1%82%D1%80%D0%B8%D0%BA-prometheus)
+1. [Medallion Architecture и метрики](#18-medallion-architecture-%D0%B8-%D0%BC%D0%B5%D1%82%D1%80%D0%B8%D0%BA%D0%B8)
+1. [Circuit Breaker и мониторинг провайдеров](#19-circuit-breaker-%D0%B8-%D0%BC%D0%BE%D0%BD%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%BD%D0%B3-%D0%BF%D1%80%D0%BE%D0%B2%D0%B0%D0%B9%D0%B4%D0%B5%D1%80%D0%BE%D0%B2)
+1. [Data Quality Monitor (DQMonitorPort)](#20-data-quality-monitor-dqmonitorport)
+1. [Rate Limiting и его мониторинг](#21-rate-limiting-%D0%B8-%D0%B5%D0%B3%D0%BE-%D0%BC%D0%BE%D0%BD%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%BD%D0%B3)
+1. [Рекомендации по созданию пользовательских дашбордов](#22-%D1%80%D0%B5%D0%BA%D0%BE%D0%BC%D0%B5%D0%BD%D0%B4%D0%B0%D1%86%D0%B8%D0%B8-%D0%BF%D0%BE-%D1%81%D0%BE%D0%B7%D0%B4%D0%B0%D0%BD%D0%B8%D1%8E-%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D0%BA%D0%B8%D1%85-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4%D0%BE%D0%B2)
+1. [FAQ (Часто задаваемые вопросы)](#23-faq-%D1%87%D0%B0%D1%81%D1%82%D0%BE-%D0%B7%D0%B0%D0%B4%D0%B0%D0%B2%D0%B0%D0%B5%D0%BC%D1%8B%D0%B5-%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81%D1%8B)
+1. [Alerting (Настройка оповещений)](#24-alerting-%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D0%BE%D0%BF%D0%BE%D0%B2%D0%B5%D1%89%D0%B5%D0%BD%D0%B8%D0%B9)
+1. [Глоссарий](#25-%D0%B3%D0%BB%D0%BE%D1%81%D1%81%D0%B0%D1%80%D0%B8%D0%B9)
+1. [Сводная таблица дашбордов](#26-%D1%81%D0%B2%D0%BE%D0%B4%D0%BD%D0%B0%D1%8F-%D1%82%D0%B0%D0%B1%D0%BB%D0%B8%D1%86%D0%B0-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4%D0%BE%D0%B2)
+1. [Жизненный цикл метрики: от кода до графика](#27-%D0%B6%D0%B8%D0%B7%D0%BD%D0%B5%D0%BD%D0%BD%D1%8B%D0%B9-%D1%86%D0%B8%D0%BA%D0%BB-%D0%BC%D0%B5%D1%82%D1%80%D0%B8%D0%BA%D0%B8-%D0%BE%D1%82-%D0%BA%D0%BE%D0%B4%D0%B0-%D0%B4%D0%BE-%D0%B3%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0)
+1. [Безопасность и production-конфигурация](#28-%D0%B1%D0%B5%D0%B7%D0%BE%D0%BF%D0%B0%D1%81%D0%BD%D0%BE%D1%81%D1%82%D1%8C-%D0%B8-production-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D1%83%D1%80%D0%B0%D1%86%D0%B8%D1%8F)
+1. [Интеграция с CI/CD](#29-%D0%B8%D0%BD%D1%82%D0%B5%D0%B3%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D1%81-cicd)
 
----
+______________________________________________________________________
 
 > Примечание: в репозитории сейчас поставляются `bioetl-runtime.json` и `*-v2.json` дашборды.
 > Исторические v1 surfaces ниже сведены к краткой archival note, без подробного operator walkthrough.
@@ -136,6 +136,7 @@ Observability-подсистема BioETL следует принципам Hexa
 - **Composition Root** собирает зависимости в `src/bioetl/composition/bootstrap/runtime/observability.py`. Функция `bootstrap_metrics_port(settings)` создаёт PrometheusMetrics или NoOpMetrics в зависимости от настроек. Функция `maybe_start_metrics_server(settings)` запускает HTTP-сервер для экспорта метрик.
 
 Такая архитектура обеспечивает:
+
 - Application и Domain код не зависит от Prometheus.
 - Переключение на другой бэкенд (StatsD, CloudWatch) требует только новый Adapter и изменение wiring в Composition Root.
 - В тестах можно подставить NoOpMetrics или мок, не трогая бизнес-логику.
@@ -174,7 +175,7 @@ src/bioetl/
     └── anomaly.py                     # DataQualityMonitor (реализация DQMonitorPort)
 ```
 
----
+______________________________________________________________________
 
 ## 2. Цепочка данных: от кода до графика
 
@@ -193,9 +194,9 @@ src/bioetl/
 # src/bioetl/infrastructure/observability/metrics.py
 
 RECORDS_PROCESSED_TOTAL = Counter(
-    "bioetl_records_processed_total",            # Имя в Prometheus
-    "Total number of records processed",          # Описание
-    ["pipeline", "stage", "run_type"],            # Labels
+    "bioetl_records_processed_total",  # Имя в Prometheus
+    "Total number of records processed",  # Описание
+    ["pipeline", "stage", "run_type"],  # Labels
 )
 ```
 
@@ -228,7 +229,12 @@ self._metrics.increment_counter(
 self._metrics.observe_histogram(
     "pipeline_duration_seconds",
     value=elapsed_seconds,
-    labels={"pipeline": "chembl", "stage": "fetch", "status": "success", "run_type": "incremental"},
+    labels={
+        "pipeline": "chembl",
+        "stage": "fetch",
+        "status": "success",
+        "run_type": "incremental",
+    },
 )
 
 # Установка gauge
@@ -243,6 +249,7 @@ self._metrics.set_gauge(
 
 ```python
 # src/bioetl/infrastructure/observability/prometheus_metrics.py
+
 
 class PrometheusMetrics(MetricsPort):
     def increment_counter(self, name: str, value: int, labels: dict[str, str]) -> None:
@@ -283,6 +290,7 @@ bioetl_pipeline_duration_seconds_count{pipeline="chembl",stage="fetch",status="s
 ```
 
 Особенности HTTP-сервера:
+
 - Запускается в daemon-потоке (не блокирует основной процесс).
 - Thread-safe: `prometheus_client` гарантирует потокобезопасность.
 - Если порт занят (`EADDRINUSE`), поведение зависит от `fail_fast`: при `true` бросает `MetricsServerError`, при `false` тихо продолжает работу без метрик.
@@ -345,7 +353,7 @@ providers:
       path: /var/lib/grafana/dashboards   # Mount point из docker-compose
 ```
 
----
+______________________________________________________________________
 
 ## 3. Быстрый запуск
 
@@ -404,19 +412,19 @@ curl -s http://localhost:8000/metrics | grep bioetl_
 
 ### 3.4 Переменные окружения
 
-| Переменная | Значение по умолчанию | Описание |
-|---|---|---|
-| `BIOETL_METRICS_ENABLED` | `true` | Включить/выключить сбор метрик |
-| `BIOETL_METRICS_PORT` | `8000` | Порт HTTP-сервера метрик |
-| `BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED` | `true` | Запускать ли HTTP-сервер |
-| `BIOETL_OBSERVABILITY__METRICS_FAIL_FAST` | `false` | Падать при ошибке запуска сервера |
-| `BIOETL_OBSERVABILITY__METRICS_RETRY_COUNT` | `3` | Количество попыток запуска (1-10) |
-| `BIOETL_OBSERVABILITY__METRICS_RETRY_DELAY` | `1.0` | Задержка между попытками (0.1-10.0 с) |
-| `GF_SECURITY_ADMIN_PASSWORD` | `admin` | Пароль администратора Grafana |
-| `BIOETL_ENABLE_TRACING_DATASOURCES` | `false` | Подключать Loki/Tempo datasource в Grafana provisioning |
-| `BIOETL_OBSERVABILITY__TRACING_ENABLED` | `false` | Включить OpenTelemetry spans и log-trace correlation |
+| Переменная                                     | Значение по умолчанию | Описание                                                |
+| ---------------------------------------------- | --------------------- | ------------------------------------------------------- |
+| `BIOETL_METRICS_ENABLED`                       | `true`                | Включить/выключить сбор метрик                          |
+| `BIOETL_METRICS_PORT`                          | `8000`                | Порт HTTP-сервера метрик                                |
+| `BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED` | `true`                | Запускать ли HTTP-сервер                                |
+| `BIOETL_OBSERVABILITY__METRICS_FAIL_FAST`      | `false`               | Падать при ошибке запуска сервера                       |
+| `BIOETL_OBSERVABILITY__METRICS_RETRY_COUNT`    | `3`                   | Количество попыток запуска (1-10)                       |
+| `BIOETL_OBSERVABILITY__METRICS_RETRY_DELAY`    | `1.0`                 | Задержка между попытками (0.1-10.0 с)                   |
+| `GF_SECURITY_ADMIN_PASSWORD`                   | `admin`               | Пароль администратора Grafana                           |
+| `BIOETL_ENABLE_TRACING_DATASOURCES`            | `false`               | Подключать Loki/Tempo datasource в Grafana provisioning |
+| `BIOETL_OBSERVABILITY__TRACING_ENABLED`        | `false`               | Включить OpenTelemetry spans и log-trace correlation    |
 
----
+______________________________________________________________________
 
 ## 4. Конфигурация инфраструктуры
 
@@ -425,6 +433,7 @@ curl -s http://localhost:8000/metrics | grep bioetl_
 Базовый стек состоит из трёх сервисов, объединённых в bridge-сеть `monitoring`:
 
 **Prometheus:**
+
 - Image: `prom/prometheus:latest`
 - Container: `bioetl-prometheus`
 - Порт: `9090:9090`
@@ -434,6 +443,7 @@ curl -s http://localhost:8000/metrics | grep bioetl_
 - Restart: `unless-stopped`
 
 **Grafana:**
+
 - Image: `grafana/grafana:12.0.0`
 - Container: `bioetl-grafana`
 - Порт: `3000:3000`
@@ -446,6 +456,7 @@ curl -s http://localhost:8000/metrics | grep bioetl_
 - Restart: `unless-stopped`
 
 **Pushgateway:**
+
 - Image: `prom/pushgateway:latest`
 - Container: `bioetl-pushgateway`
 - Порт: `9091:9091`
@@ -490,21 +501,21 @@ Host Machine (Windows/macOS/Linux)
 
 ### 4.3 URL и порты
 
-| Компонент | URL | Порт | Назначение |
-|---|---|---|---|
-| BioETL Metrics | `http://localhost:8000/metrics` | 8000 | Prometheus exposition format |
-| Prometheus UI | `http://localhost:9090` | 9090 | Query interface, target status |
-| Prometheus Targets | `http://localhost:9090/targets` | 9090 | Статус scrape targets |
-| Prometheus API | `http://localhost:9090/api/v1/...` | 9090 | HTTP API для PromQL |
-| Pushgateway | `http://localhost:9091` | 9091 | Push endpoint для ad-hoc/ephemeral jobs |
-| Grafana UI | `http://localhost:3000` | 3000 | Дашборды, логин: admin/admin |
-| Grafana Explore | `http://localhost:3000/explore` | 3000 | Ad-hoc PromQL запросы |
-| Grafana Dashboards | `http://localhost:3000/dashboards` | 3000 | Список дашбордов |
-| Loki API | `http://localhost:3100` | 3100 | Log query/search backend |
-| Tempo API | `http://localhost:3200` | 3200 | Trace query backend |
-| Tempo OTLP gRPC | `localhost:4317` | 4317 | Trace ingestion endpoint |
+| Компонент          | URL                                | Порт | Назначение                              |
+| ------------------ | ---------------------------------- | ---- | --------------------------------------- |
+| BioETL Metrics     | `http://localhost:8000/metrics`    | 8000 | Prometheus exposition format            |
+| Prometheus UI      | `http://localhost:9090`            | 9090 | Query interface, target status          |
+| Prometheus Targets | `http://localhost:9090/targets`    | 9090 | Статус scrape targets                   |
+| Prometheus API     | `http://localhost:9090/api/v1/...` | 9090 | HTTP API для PromQL                     |
+| Pushgateway        | `http://localhost:9091`            | 9091 | Push endpoint для ad-hoc/ephemeral jobs |
+| Grafana UI         | `http://localhost:3000`            | 3000 | Дашборды, логин: admin/admin            |
+| Grafana Explore    | `http://localhost:3000/explore`    | 3000 | Ad-hoc PromQL запросы                   |
+| Grafana Dashboards | `http://localhost:3000/dashboards` | 3000 | Список дашбордов                        |
+| Loki API           | `http://localhost:3100`            | 3100 | Log query/search backend                |
+| Tempo API          | `http://localhost:3200`            | 3200 | Trace query backend                     |
+| Tempo OTLP gRPC    | `localhost:4317`                   | 4317 | Trace ingestion endpoint                |
 
----
+______________________________________________________________________
 
 ## 5. Полный каталог метрик BioETL
 
@@ -514,105 +525,105 @@ Host Machine (Windows/macOS/Linux)
 
 ### 5.1 Pipeline Metrics (основные метрики пайплайна)
 
-| Метрика | Тип | Labels | Описание |
-|---|---|---|---|
-| `bioetl_pipeline_duration_seconds` | Histogram | `pipeline`, `stage`, `status`, `run_type` | Длительность выполнения стадий пайплайна в секундах. Status: success/failure. |
-| `bioetl_records_processed_total` | Counter | `pipeline`, `stage`, `run_type` | Суммарное количество обработанных записей. Stage: bronze, silver, gold, quarantined. |
-| `bioetl_errors_total` | Counter | `pipeline`, `stage`, `error_code` | Суммарное количество ошибок. Error_code — машиночитаемый код ошибки. |
-| `bioetl_batch_size_records` | Histogram | `pipeline`, `stage` | Распределение размеров батчей (количество записей). Buckets: 100, 500, 1K, 5K, 10K, 50K. |
-| `bioetl_pipeline_runs_total` | Counter | `pipeline`, `run_type`, `status` | Количество запусков пайплайна. Run_type: incremental, backfill, rebuild. |
-| `bioetl_phase_duration_seconds` | Histogram | `pipeline`, `phase`, `status` | Длительность фаз жизненного цикла пайплайна (fetch, transform, load). |
+| Метрика                            | Тип       | Labels                                    | Описание                                                                                 |
+| ---------------------------------- | --------- | ----------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `bioetl_pipeline_duration_seconds` | Histogram | `pipeline`, `stage`, `status`, `run_type` | Длительность выполнения стадий пайплайна в секундах. Status: success/failure.            |
+| `bioetl_records_processed_total`   | Counter   | `pipeline`, `stage`, `run_type`           | Суммарное количество обработанных записей. Stage: bronze, silver, gold, quarantined.     |
+| `bioetl_errors_total`              | Counter   | `pipeline`, `stage`, `error_code`         | Суммарное количество ошибок. Error_code — машиночитаемый код ошибки.                     |
+| `bioetl_batch_size_records`        | Histogram | `pipeline`, `stage`                       | Распределение размеров батчей (количество записей). Buckets: 100, 500, 1K, 5K, 10K, 50K. |
+| `bioetl_pipeline_runs_total`       | Counter   | `pipeline`, `run_type`, `status`          | Количество запусков пайплайна. Run_type: incremental, backfill, rebuild.                 |
+| `bioetl_phase_duration_seconds`    | Histogram | `pipeline`, `phase`, `status`             | Длительность фаз жизненного цикла пайплайна (fetch, transform, load).                    |
 
 ### 5.2 Input Filter Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---|---|---|---|
-| `bioetl_filter_ids_loaded_total` | Counter | `pipeline`, `source_file` | Количество уникальных ID, загруженных из фильтра. |
-| `bioetl_filter_ids_duplicates_total` | Counter | `pipeline`, `source_file` | Количество дубликатов, найденных в фильтре. |
+| Метрика                                   | Тип     | Labels                    | Описание                                             |
+| ----------------------------------------- | ------- | ------------------------- | ---------------------------------------------------- |
+| `bioetl_filter_ids_loaded_total`          | Counter | `pipeline`, `source_file` | Количество уникальных ID, загруженных из фильтра.    |
+| `bioetl_filter_ids_duplicates_total`      | Counter | `pipeline`, `source_file` | Количество дубликатов, найденных в фильтре.          |
 | `bioetl_filter_combinations_loaded_total` | Counter | `pipeline`, `source_file` | Количество загруженных комбинаций из мульти-фильтра. |
 
 ### 5.3 Data Quality Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---|---|---|---|
-| `bioetl_dq_records_quarantined_total` | Counter | `pipeline`, `error_type`, `run_type` | Количество записей, отправленных на карантин из-за проблем качества. |
-| `bioetl_dq_validation_score` | Gauge | `pipeline`, `entity` | Entity-level оценка качества данных (0.0-1.0, где 1.0 = все записи валидны). |
-| `bioetl_dq_validation_record_count` | Gauge | `pipeline`, `entity` | Record count для последнего entity-level DQ snapshot; используется для volume-weighted aggregate score. |
-| `bioetl_data_freshness_seconds` | Gauge | `pipeline`, `entity` | Unix timestamp последнего успешного ingestion для pipeline/entity; lag считается как `time() - metric`. |
-| `bioetl_dq_anomaly_detected` | Counter | `pipeline`, `metric`, `severity`, `anomaly_type` | Количество обнаруженных аномалий качества данных. |
-| `bioetl_dq_check_duration_ms` | Histogram | `pipeline` | Длительность проверок качества данных в миллисекундах. |
-| `bioetl_dq_baseline_updated` | Counter | `pipeline`, `metric` | Количество обновлений baseline для DQ монитора. |
-| `bioetl_dq_baseline_samples` | Gauge | `pipeline`, `metric` | Текущее количество samples в baseline DQ. |
-| `bioetl_dq_soft_threshold_exceeded` | Counter | `pipeline` | Количество превышений мягкого порога DQ. |
-| `bioetl_silver_filter_rejections_total` | Counter | `pipeline`, `run_type`, `reason_code`, `rule_type`, `field` | Bounded operator summary для Silver rejects по structured labels; raw `message` и unconstrained field text сюда не попадают. |
+| Метрика                                 | Тип       | Labels                                                      | Описание                                                                                                                     |
+| --------------------------------------- | --------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `bioetl_dq_records_quarantined_total`   | Counter   | `pipeline`, `error_type`, `run_type`                        | Количество записей, отправленных на карантин из-за проблем качества.                                                         |
+| `bioetl_dq_validation_score`            | Gauge     | `pipeline`, `entity`                                        | Entity-level оценка качества данных (0.0-1.0, где 1.0 = все записи валидны).                                                 |
+| `bioetl_dq_validation_record_count`     | Gauge     | `pipeline`, `entity`                                        | Record count для последнего entity-level DQ snapshot; используется для volume-weighted aggregate score.                      |
+| `bioetl_data_freshness_seconds`         | Gauge     | `pipeline`, `entity`                                        | Unix timestamp последнего успешного ingestion для pipeline/entity; lag считается как `time() - metric`.                      |
+| `bioetl_dq_anomaly_detected`            | Counter   | `pipeline`, `metric`, `severity`, `anomaly_type`            | Количество обнаруженных аномалий качества данных.                                                                            |
+| `bioetl_dq_check_duration_ms`           | Histogram | `pipeline`                                                  | Длительность проверок качества данных в миллисекундах.                                                                       |
+| `bioetl_dq_baseline_updated`            | Counter   | `pipeline`, `metric`                                        | Количество обновлений baseline для DQ монитора.                                                                              |
+| `bioetl_dq_baseline_samples`            | Gauge     | `pipeline`, `metric`                                        | Текущее количество samples в baseline DQ.                                                                                    |
+| `bioetl_dq_soft_threshold_exceeded`     | Counter   | `pipeline`                                                  | Количество превышений мягкого порога DQ.                                                                                     |
+| `bioetl_silver_filter_rejections_total` | Counter   | `pipeline`, `run_type`, `reason_code`, `rule_type`, `field` | Bounded operator summary для Silver rejects по structured labels; raw `message` и unconstrained field text сюда не попадают. |
 
 ### 5.4 Circuit Breaker Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---|---|---|---|
-| `bioetl_circuit_breaker_state` | Gauge | `adapter` | Текущее состояние circuit breaker: 0=closed (здоров), 1=half-open (проверка), 2=open (отключён). |
-| `bioetl_circuit_breaker_trips_total` | Counter | `adapter` | Количество срабатываний (переходов в open). |
-| `bioetl_circuit_breaker_success_total` | Counter | `adapter` | Количество успешных вызовов через circuit breaker. |
-| `bioetl_circuit_breaker_failure_total` | Counter | `adapter` | Количество неуспешных вызовов через circuit breaker. |
+| Метрика                                | Тип     | Labels    | Описание                                                                                         |
+| -------------------------------------- | ------- | --------- | ------------------------------------------------------------------------------------------------ |
+| `bioetl_circuit_breaker_state`         | Gauge   | `adapter` | Текущее состояние circuit breaker: 0=closed (здоров), 1=half-open (проверка), 2=open (отключён). |
+| `bioetl_circuit_breaker_trips_total`   | Counter | `adapter` | Количество срабатываний (переходов в open).                                                      |
+| `bioetl_circuit_breaker_success_total` | Counter | `adapter` | Количество успешных вызовов через circuit breaker.                                               |
+| `bioetl_circuit_breaker_failure_total` | Counter | `adapter` | Количество неуспешных вызовов через circuit breaker.                                             |
 
 ### 5.5 Health Check Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---|---|---|---|
-| `bioetl_pipeline_health_check_passed` | Gauge | `pipeline`, `component` | Статус health check компонента (1=passed, 0=failed). |
-| `bioetl_infrastructure_validated` | Gauge | `pipeline`, `run_id` | Статус валидации инфраструктуры (1=validated, 0=not). |
-| `bioetl_health_check_duration_seconds` | Histogram | `pipeline` | Длительность health check операций в секундах. |
-| `bioetl_health_check_status` | Gauge | `component` | Статус здоровья компонента: 0=unknown, 1=healthy, 2=degraded. |
-| `bioetl_health_check_latency_seconds` | Histogram | `provider` | Латентность health check в секундах. |
-| `bioetl_health_check_latency_seconds` | Histogram | `provider` | Латентность health check в секундах. |
-| `bioetl_health_check_success_total` | Counter | `provider` | Количество health check с результатом `HEALTHY`. |
-| `bioetl_health_check_degraded_total` | Counter | `provider` | Количество health check с результатом `DEGRADED`. |
-| `bioetl_health_check_failures_total` | Counter | `provider` | Количество health check с результатом `UNHEALTHY` или probe-exception. |
+| Метрика                                | Тип       | Labels                  | Описание                                                               |
+| -------------------------------------- | --------- | ----------------------- | ---------------------------------------------------------------------- |
+| `bioetl_pipeline_health_check_passed`  | Gauge     | `pipeline`, `component` | Статус health check компонента (1=passed, 0=failed).                   |
+| `bioetl_infrastructure_validated`      | Gauge     | `pipeline`, `run_id`    | Статус валидации инфраструктуры (1=validated, 0=not).                  |
+| `bioetl_health_check_duration_seconds` | Histogram | `pipeline`              | Длительность health check операций в секундах.                         |
+| `bioetl_health_check_status`           | Gauge     | `component`             | Статус здоровья компонента: 0=unknown, 1=healthy, 2=degraded.          |
+| `bioetl_health_check_latency_seconds`  | Histogram | `provider`              | Латентность health check в секундах.                                   |
+| `bioetl_health_check_latency_seconds`  | Histogram | `provider`              | Латентность health check в секундах.                                   |
+| `bioetl_health_check_success_total`    | Counter   | `provider`              | Количество health check с результатом `HEALTHY`.                       |
+| `bioetl_health_check_degraded_total`   | Counter   | `provider`              | Количество health check с результатом `DEGRADED`.                      |
+| `bioetl_health_check_failures_total`   | Counter   | `provider`              | Количество health check с результатом `UNHEALTHY` или probe-exception. |
 
 ### 5.6 Adapter / HTTP Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---|---|---|---|
-| `bioetl_adapter_request_duration_seconds` | Histogram | `provider`, `endpoint` | Длительность API-запросов адаптера в секундах. Buckets: 0.05-30s. |
-| `bioetl_adapter_requests_total` | Counter | `provider`, `endpoint`, `status` | Количество API-запросов адаптера. |
-| `bioetl_adapter_batch_size` | Histogram | `provider`, `endpoint` | Распределение размеров ответов адаптера. |
-| `bioetl_adapter_dropped_duplicates_total` | Counter | `provider`, `entity_type` | Количество дубликатов, удалённых адаптером. |
-| `bioetl_data_source_retries_total` | Counter | `provider`, `operation` | Количество retry-попыток для data source. |
-| `bioetl_data_source_retry_exhausted_total` | Counter | `provider`, `operation` | Количество исчерпанных retry-попыток. |
-| `bioetl_http_request_duration_seconds` | Histogram | `provider`, `method`, `status` | Длительность HTTP-запросов в секундах. |
-| `bioetl_http_retries_total` | Counter | `provider`, `method` | Количество HTTP retry-попыток. |
-| `bioetl_http_request_errors_total` | Counter | `provider`, `method`, `error_type` | Количество HTTP-ошибок. |
-| `bioetl_provider_health_status` | Gauge | `provider` | Статус здоровья провайдера: 0=unknown, 1=healthy, 2=degraded. |
-| `bioetl_rate_limiter_tokens_available` | Gauge | `provider` | Текущее количество доступных токенов в rate limiter. |
-| `bioetl_rate_limiter_wait_seconds` | Histogram | `provider` | Время ожидания в rate limiter. |
+| Метрика                                    | Тип       | Labels                             | Описание                                                          |
+| ------------------------------------------ | --------- | ---------------------------------- | ----------------------------------------------------------------- |
+| `bioetl_adapter_request_duration_seconds`  | Histogram | `provider`, `endpoint`             | Длительность API-запросов адаптера в секундах. Buckets: 0.05-30s. |
+| `bioetl_adapter_requests_total`            | Counter   | `provider`, `endpoint`, `status`   | Количество API-запросов адаптера.                                 |
+| `bioetl_adapter_batch_size`                | Histogram | `provider`, `endpoint`             | Распределение размеров ответов адаптера.                          |
+| `bioetl_adapter_dropped_duplicates_total`  | Counter   | `provider`, `entity_type`          | Количество дубликатов, удалённых адаптером.                       |
+| `bioetl_data_source_retries_total`         | Counter   | `provider`, `operation`            | Количество retry-попыток для data source.                         |
+| `bioetl_data_source_retry_exhausted_total` | Counter   | `provider`, `operation`            | Количество исчерпанных retry-попыток.                             |
+| `bioetl_http_request_duration_seconds`     | Histogram | `provider`, `method`, `status`     | Длительность HTTP-запросов в секундах.                            |
+| `bioetl_http_retries_total`                | Counter   | `provider`, `method`               | Количество HTTP retry-попыток.                                    |
+| `bioetl_http_request_errors_total`         | Counter   | `provider`, `method`, `error_type` | Количество HTTP-ошибок.                                           |
+| `bioetl_provider_health_status`            | Gauge     | `provider`                         | Статус здоровья провайдера: 0=unknown, 1=healthy, 2=degraded.     |
+| `bioetl_rate_limiter_tokens_available`     | Gauge     | `provider`                         | Текущее количество доступных токенов в rate limiter.              |
+| `bioetl_rate_limiter_wait_seconds`         | Histogram | `provider`                         | Время ожидания в rate limiter.                                    |
 
 ### 5.7 Transformer Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---|---|---|---|
-| `bioetl_transform_duration_seconds` | Histogram | `provider`, `entity_type` | Длительность трансформации данных в секундах. |
-| `bioetl_transform_errors_total` | Counter | `provider`, `entity_type`, `error_type` | Количество ошибок трансформации. |
+| Метрика                             | Тип       | Labels                                  | Описание                                      |
+| ----------------------------------- | --------- | --------------------------------------- | --------------------------------------------- |
+| `bioetl_transform_duration_seconds` | Histogram | `provider`, `entity_type`               | Длительность трансформации данных в секундах. |
+| `bioetl_transform_errors_total`     | Counter   | `provider`, `entity_type`, `error_type` | Количество ошибок трансформации.              |
 
 ### 5.8 Storage Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---|---|---|---|
-| `bioetl_vacuum_files_removed_total` | Counter | `table`, `layer` | Количество файлов, удалённых vacuum-операциями. |
-| `bioetl_storage_optimization_total` | Counter | `pipeline`, `status` | Количество операций оптимизации хранилища. |
-| `bioetl_bronze_write_duration_seconds` | Histogram | `provider`, `entity` | Длительность записи в Bronze-слой. |
-| `bioetl_bronze_records_written_total` | Counter | `provider`, `entity` | Количество записей, записанных в Bronze. |
-| `bioetl_bronze_bytes_written_total` | Counter | `provider`, `entity` | Количество байт, записанных в Bronze (compressed). |
-| `bioetl_policy_violations_total` | Counter | `layer`, `mode` | Количество нарушений write policy. |
-| `bioetl_silver_validation_failures_total` | Counter | `table`, `pipeline` | Количество ошибок валидации Silver schema. |
+| Метрика                                   | Тип       | Labels               | Описание                                           |
+| ----------------------------------------- | --------- | -------------------- | -------------------------------------------------- |
+| `bioetl_vacuum_files_removed_total`       | Counter   | `table`, `layer`     | Количество файлов, удалённых vacuum-операциями.    |
+| `bioetl_storage_optimization_total`       | Counter   | `pipeline`, `status` | Количество операций оптимизации хранилища.         |
+| `bioetl_bronze_write_duration_seconds`    | Histogram | `provider`, `entity` | Длительность записи в Bronze-слой.                 |
+| `bioetl_bronze_records_written_total`     | Counter   | `provider`, `entity` | Количество записей, записанных в Bronze.           |
+| `bioetl_bronze_bytes_written_total`       | Counter   | `provider`, `entity` | Количество байт, записанных в Bronze (compressed). |
+| `bioetl_policy_violations_total`          | Counter   | `layer`, `mode`      | Количество нарушений write policy.                 |
+| `bioetl_silver_validation_failures_total` | Counter   | `table`, `pipeline`  | Количество ошибок валидации Silver schema.         |
 
 ### 5.9 Shutdown Metrics
 
-| Метрика | Тип | Labels | Описание |
-|---|---|---|---|
+| Метрика                     | Тип     | Labels   | Описание                         |
+| --------------------------- | ------- | -------- | -------------------------------- |
 | `bioetl_shutdown_initiated` | Counter | `reason` | Количество инициаций завершения. |
 | `bioetl_shutdown_completed` | Counter | `reason` | Количество завершённых shutdown. |
 
----
+______________________________________________________________________
 
 ## 6. Переменные фильтрации (Template Variables)
 
@@ -644,12 +655,14 @@ Host Machine (Windows/macOS/Linux)
 **Каскадная зависимость:** Значения `$run_type` зависят от выбранного `$pipeline`. При смене пайплайна список доступных run types автоматически обновляется.
 
 **Какие метрики поддерживают `run_type`:**
+
 - `bioetl_records_processed_total` (pipeline, stage, **run_type**)
 - `bioetl_pipeline_duration_seconds` (pipeline, stage, status, **run_type**)
 - `bioetl_dq_records_quarantined_total` (pipeline, error_type, **run_type**)
 - `bioetl_pipeline_runs_total` (pipeline, **run_type**, status)
 
 **Какие метрики НЕ поддерживают `run_type`:**
+
 - `bioetl_errors_total` — фильтруется только по `pipeline`
 - `bioetl_batch_size_records` — фильтруется только по `pipeline`
 - `bioetl_data_freshness_seconds` — фильтруется только по `pipeline`
@@ -665,6 +678,7 @@ v1 dashboards (`bioetl-overview.json`, `bioetl-dq.json`, `bioetl-provider-health
 shipped pack.
 
 Если нужно быстро понять старую структуру:
+
 - `bioetl-overview.json`: broad trend overview по throughput/errors/duration/freshness;
 - `bioetl-dq.json`: ранний DQ surface вокруг duration/rate/gold-vs-bronze/batch size;
 - `bioetl-provider-health.json`: legacy provider surface на pipeline counters, до перехода к dedicated health-check metrics.
@@ -672,7 +686,7 @@ shipped pack.
 Для реальной эксплуатации используйте разделы `v2` ниже и quick-start цепочку из
 `docs/03-guides/dashboards/monitoring-index.md`.
 
----
+______________________________________________________________________
 
 ## 9. Дашборд: 1. Overview
 
@@ -684,17 +698,17 @@ shipped pack.
 
 ### Панели
 
-| ID | Название | Тип | PromQL | Описание |
-|---|---|---|---|---|
-| 99 | Pipeline | Stat | `max(label_values(bioetl_records_processed_total{...}, pipeline)) or vector(0)` | Информационная панель с именем текущего пайплайна. |
-| 100 | Run Type | Stat | `max(label_values(bioetl_records_processed_total{..., run_type=~"$run_type"}, run_type)) or vector(0)` | Информационная панель с текущим типом запуска. |
-| 1 | Processing Volume by Stage | Timeseries | `sum by (stage) (last_over_time(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Latest observed stage totals внутри активного окна Grafana; для batch-style exporter это устойчивее, чем `increase(...)` на sparse scrapes. |
-| 2 | Stage Distribution in Range | Piechart | `sum by (stage) (last_over_time(...[$__range]))` | Распределение последних observed stage totals внутри выбранного временного окна. |
-| 3 | Pipeline Distribution in Range | Piechart | `sum by (pipeline) (last_over_time(...[$__range]))` | Распределение последних observed totals по пайплайнам внутри выбранного временного окна. |
-| 4 | Overall Yield (Selected Range) | Gauge | `gold_last[$__range] / clamp_min(bronze_last[$__range], 1)` | Yield по последним observed Bronze/Gold totals внутри выбранного временного окна. |
-| 101 | Latest Data Timestamp | Stat | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})` | Последний observed ingestion timestamp из доменной freshness-метрики. |
-| 118 | Silver Filter Rejects | Stat | `round(sum(last_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Отдельный shipped signal для Silver filter rejection внутри текущего временного окна Grafana; использует latest observed counter value, чтобы не терять single-run batch totals. |
-| 119 | Silver Filter Reject Rate | Gauge | `filtered_out_last[$__range] / clamp_min(bronze_last[$__range], 1)` | Доля intentionally excluded Silver filters относительно Bronze input по последним observed totals внутри выбранного временного окна. |
+| ID  | Название                       | Тип        | PromQL                                                                                                                       | Описание                                                                                                                                                                         |
+| --- | ------------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 99  | Pipeline                       | Stat       | `max(label_values(bioetl_records_processed_total{...}, pipeline)) or vector(0)`                                              | Информационная панель с именем текущего пайплайна.                                                                                                                               |
+| 100 | Run Type                       | Stat       | `max(label_values(bioetl_records_processed_total{..., run_type=~"$run_type"}, run_type)) or vector(0)`                       | Информационная панель с текущим типом запуска.                                                                                                                                   |
+| 1   | Processing Volume by Stage     | Timeseries | `sum by (stage) (last_over_time(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Latest observed stage totals внутри активного окна Grafana; для batch-style exporter это устойчивее, чем `increase(...)` на sparse scrapes.                                      |
+| 2   | Stage Distribution in Range    | Piechart   | `sum by (stage) (last_over_time(...[$__range]))`                                                                             | Распределение последних observed stage totals внутри выбранного временного окна.                                                                                                 |
+| 3   | Pipeline Distribution in Range | Piechart   | `sum by (pipeline) (last_over_time(...[$__range]))`                                                                          | Распределение последних observed totals по пайплайнам внутри выбранного временного окна.                                                                                         |
+| 4   | Overall Yield (Selected Range) | Gauge      | `gold_last[$__range] / clamp_min(bronze_last[$__range], 1)`                                                                  | Yield по последним observed Bronze/Gold totals внутри выбранного временного окна.                                                                                                |
+| 101 | Latest Data Timestamp          | Stat       | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})`                                                                  | Последний observed ingestion timestamp из доменной freshness-метрики.                                                                                                            |
+| 118 | Silver Filter Rejects          | Stat       | `round(sum(last_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`                 | Отдельный shipped signal для Silver filter rejection внутри текущего временного окна Grafana; использует latest observed counter value, чтобы не терять single-run batch totals. |
+| 119 | Silver Filter Reject Rate      | Gauge      | `filtered_out_last[$__range] / clamp_min(bronze_last[$__range], 1)`                                                          | Доля intentionally excluded Silver filters относительно Bronze input по последним observed totals внутри выбранного временного окна.                                             |
 
 **Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
 
@@ -706,14 +720,15 @@ pipeline dashboards использует TraceQL filter по `span."bioetl.pipel
 `span."bioetl.run_type"`.
 
 **Silver Rejects triage sequence:**
+
 1. Начните с `1. Overview` или `2. Runtime`, чтобы увидеть summary spike по
    `Silver Filter Rejects`.
-2. Перейдите в `4. Data Quality`, чтобы проверить bounded breakdown через
+1. Перейдите в `4. Data Quality`, чтобы проверить bounded breakdown через
    `Top Silver Reject Reasons` и `Top Silver Reject Fields`.
-3. Перейдите в `5. Silver Reject Explorer` для record-level browsing.
-4. Используйте quarantine CLI для execution (`resolve/replay`) и final action.
+1. Перейдите в `5. Silver Reject Explorer` для record-level browsing.
+1. Используйте quarantine CLI для execution (`resolve/replay`) и final action.
 
----
+______________________________________________________________________
 
 ## 11. Дашборд: 4. Data Quality
 
@@ -725,71 +740,72 @@ pipeline dashboards использует TraceQL filter по `span."bioetl.pipel
 
 ### Панели
 
-| ID | Название | Тип | PromQL | Описание |
-|---|---|---|---|---|
-| 99 | Pipeline | Stat | `max(label_values(..., pipeline)) or vector(0)` | Информационная панель пайплайна. |
-| 100 | Run Type | Stat | `max(label_values(..., run_type)) or vector(0)` | Информационная панель типа запуска. |
-| 1 | Data Flow in Range: Bronze -> Silver -> Gold | Timeseries | `sum by (pipeline, stage) (last_over_time(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Latest observed data-flow totals Bronze → Silver → Gold внутри активного Grafana окна; оптимизировано под sparse batch exporter. |
-| 2 | Data Quality Score (Volume-weighted) | Gauge | `sum(score * record_count) / clamp_min(sum(record_count), 1)` | Канонический DQ gauge на базе `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`, чтобы крупные сущности не смешивались с малыми через простой `avg(...)`. |
-| 3 | Source Records in Range (Bronze) | Stat | `round(sum(last_over_time(bioetl_records_processed_total{...stage="bronze"}[$__range])) or vector(0))` | Последний observed Bronze input внутри активного Grafana окна. |
-| 4 | Clean Records in Range (Gold) | Stat | `round(sum(last_over_time(bioetl_records_processed_total{...stage="gold"}[$__range])) or vector(0))` | Последний observed Gold output внутри активного Grafana окна. |
-| 5 | Worst-Entity DQ Score | Gauge | `min(bioetl_dq_validation_score{pipeline=~"$pipeline"}) or vector(0)` | Худший observed DQ score по сущностям внутри выбранного pipeline scope. |
-| 117 | Silver Filter Rejects | Stat | `round(sum(last_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Отдельный счётчик Silver filter rejects внутри текущего временного окна; не заменяет `Records Quarantined`. |
-| 118 | Silver Filter Rejects by Pipeline | Bar gauge | `sum by (pipeline) (last_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))` | Breakdown intentional Silver exclusions по выбранным pipeline values через latest observed totals внутри текущего окна. |
-| 121 | Top Silver Reject Reasons | Bar gauge | `topk(10, sum by (reason_code) (last_over_time(bioetl_silver_filter_rejections_total{...}[$__range])))` | Bounded top-10 summary по `reason_code` без fractional `increase(...)` artefacts на sparse batch scrapes. |
-| 122 | Top Silver Reject Fields | Bar gauge | `topk(10, sum by (field) (last_over_time(bioetl_silver_filter_rejections_total{...}[$__range])))` | Bounded top-10 summary по `field`; exact field/root-cause drilldown делается в `5. Silver Reject Explorer`. |
-| 101 | Latest Data Timestamp | Stat | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})` | Последний observed ingestion timestamp внутри выбранного pipeline scope. |
+| ID  | Название                                     | Тип        | PromQL                                                                                                                                 | Описание                                                                                                                                                                   |
+| --- | -------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 99  | Pipeline                                     | Stat       | `max(label_values(..., pipeline)) or vector(0)`                                                                                        | Информационная панель пайплайна.                                                                                                                                           |
+| 100 | Run Type                                     | Stat       | `max(label_values(..., run_type)) or vector(0)`                                                                                        | Информационная панель типа запуска.                                                                                                                                        |
+| 1   | Data Flow in Range: Bronze -> Silver -> Gold | Timeseries | `sum by (pipeline, stage) (last_over_time(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Latest observed data-flow totals Bronze → Silver → Gold внутри активного Grafana окна; оптимизировано под sparse batch exporter.                                           |
+| 2   | Data Quality Score (Volume-weighted)         | Gauge      | `sum(score * record_count) / clamp_min(sum(record_count), 1)`                                                                          | Канонический DQ gauge на базе `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`, чтобы крупные сущности не смешивались с малыми через простой `avg(...)`. |
+| 3   | Source Records in Range (Bronze)             | Stat       | `round(sum(last_over_time(bioetl_records_processed_total{...stage="bronze"}[$__range])) or vector(0))`                                 | Последний observed Bronze input внутри активного Grafana окна.                                                                                                             |
+| 4   | Clean Records in Range (Gold)                | Stat       | `round(sum(last_over_time(bioetl_records_processed_total{...stage="gold"}[$__range])) or vector(0))`                                   | Последний observed Gold output внутри активного Grafana окна.                                                                                                              |
+| 5   | Worst-Entity DQ Score                        | Gauge      | `min(bioetl_dq_validation_score{pipeline=~"$pipeline"}) or vector(0)`                                                                  | Худший observed DQ score по сущностям внутри выбранного pipeline scope.                                                                                                    |
+| 117 | Silver Filter Rejects                        | Stat       | `round(sum(last_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`                           | Отдельный счётчик Silver filter rejects внутри текущего временного окна; не заменяет `Records Quarantined`.                                                                |
+| 118 | Silver Filter Rejects by Pipeline            | Bar gauge  | `sum by (pipeline) (last_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range]))`                                | Breakdown intentional Silver exclusions по выбранным pipeline values через latest observed totals внутри текущего окна.                                                    |
+| 121 | Top Silver Reject Reasons                    | Bar gauge  | `topk(10, sum by (reason_code) (last_over_time(bioetl_silver_filter_rejections_total{...}[$__range])))`                                | Bounded top-10 summary по `reason_code` без fractional `increase(...)` artefacts на sparse batch scrapes.                                                                  |
+| 122 | Top Silver Reject Fields                     | Bar gauge  | `topk(10, sum by (field) (last_over_time(bioetl_silver_filter_rejections_total{...}[$__range])))`                                      | Bounded top-10 summary по `field`; exact field/root-cause drilldown делается в `5. Silver Reject Explorer`.                                                                |
+| 101 | Latest Data Timestamp                        | Stat       | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})`                                                                            | Последний observed ingestion timestamp внутри выбранного pipeline scope.                                                                                                   |
 
 **Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
 
 Важно: shipped DQ surface теперь явно различает два потока.
+
 - DQ quarantine = `bioetl_dq_records_quarantined_total`
 - Silver filter rejects = `bioetl_records_processed_total{stage="filtered_out"}`
 
 Для bounded reason-level summary dashboard дополнительно использует:
+
 - `bioetl_silver_filter_rejections_total{reason_code,rule_type,field}`
 - неизвестные значения схлопываются в `other`
 - raw `message` не используется как Prometheus label
 
 **Drilldown:** dashboard link `Back to Overview` плюс `5. Silver Reject Explorer`, `Explore Logs (Loki, tracing profile)` и
-`Explore Traces (Tempo, tracing profile)` используют текущее временное окно. Panel `Data Flow in
-Range: Bronze -> Silver -> Gold` дублирует Explore handoff через data links для DQ
+`Explore Traces (Tempo, tracing profile)` используют текущее временное окно. Panel `Data Flow in Range: Bronze -> Silver -> Gold` дублирует Explore handoff через data links для DQ
 incidents и freshness investigation. Tempo drilldown предфильтрован по
 `span."bioetl.pipeline"` и `span."bioetl.run_type"`.
 
----
+______________________________________________________________________
 
 ## 12. Дашборд: 5. Silver Reject Explorer
 
-**Файл:** `grafana/dashboards/bioetl-silver-reject-explorer.json`  
-**UID:** `bioetl-silver-reject-explorer`  
-**Refresh:** 30 секунд  
-**Time range:** Последние 12 часов  
+**Файл:** `grafana/dashboards/bioetl-silver-reject-explorer.json`
+**UID:** `bioetl-silver-reject-explorer`
+**Refresh:** 30 секунд
+**Time range:** Последние 12 часов
 **Назначение:** Record-level browsing для Silver `filtered_out` записей на read-only quarantine API.
 
 ### Панели
 
-| Название | Тип | Источник |
-|---|---|---|
-| Filtered Records Total | Stat | `/ops/quarantine/filtered-stats` |
-| Reject Rate vs Bronze | Gauge | `/ops/quarantine/filtered-stats` |
-| Top Reject Reasons / Fields / Signatures | Bar gauge / Table | `/ops/quarantine/filtered-stats` |
-| Filtered Records Table | Table | `/ops/quarantine/filtered-records` |
-| Selected Record Details | Table | `/ops/quarantine/filtered-record/{payload_hash}` |
-| Run Scope Summary | Stat | `/ops/quarantine/filtered-stats` |
+| Название                                 | Тип               | Источник                                         |
+| ---------------------------------------- | ----------------- | ------------------------------------------------ |
+| Filtered Records Total                   | Stat              | `/ops/quarantine/filtered-stats`                 |
+| Reject Rate vs Bronze                    | Gauge             | `/ops/quarantine/filtered-stats`                 |
+| Top Reject Reasons / Fields / Signatures | Bar gauge / Table | `/ops/quarantine/filtered-stats`                 |
+| Filtered Records Table                   | Table             | `/ops/quarantine/filtered-records`               |
+| Selected Record Details                  | Table             | `/ops/quarantine/filtered-record/{payload_hash}` |
+| Run Scope Summary                        | Stat              | `/ops/quarantine/filtered-stats`                 |
 
 **Datasource:** `Quarantine Explorer` (`yesoreyeram-infinity-datasource`, provisioning: `grafana/provisioning/datasources-core/quarantine-explorer.yml`).
 
 **Фильтры:** `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash` + стандартный Grafana time picker.
 
-**Важно:** это не Prometheus dashboard для row-level таблиц.  
-`1-4` dashboards остаются Prometheus summary/bounded-breakdown поверхностями;  
+**Важно:** это не Prometheus dashboard для row-level таблиц.
+`1-4` dashboards остаются Prometheus summary/bounded-breakdown поверхностями;
 `5. Silver Reject Explorer` закрывает exact record-level drilldown gap.
 
-**Drilldown:** links `Back to Overview`, `Back to Data Quality`, `Open Logs`, `Open Traces`;  
+**Drilldown:** links `Back to Overview`, `Back to Data Quality`, `Open Logs`, `Open Traces`;
 table row links дают self-drilldown по `payload_hash` и CLI handoff.
 
----
+______________________________________________________________________
 
 ## 13. Дашборд: 3. Provider Health
 
@@ -801,18 +817,18 @@ table row links дают self-drilldown по `payload_hash` и CLI handoff.
 
 ### Панели
 
-| ID | Название | Тип | PromQL | Описание |
-|---|---|---|---|---|
-| 1 | Health Check Latency by Provider (p95) | Timeseries | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__interval])))` | p95 latency trend по выбранным providers. |
-| 2 | Healthy Checks | Stat | `round(sum(increase(bioetl_health_check_success_total{provider=~"$provider"}[$__range])) or vector(0))` | Completed probes со статусом `HEALTHY` в выбранном окне. |
-| 105 | Degraded Checks | Stat | `round(sum(increase(bioetl_health_check_degraded_total{provider=~"$provider"}[$__range])) or vector(0))` | Completed probes со статусом `DEGRADED` в выбранном окне. |
-| 104 | Provider Failure Rate | Gauge | `failures_increase / clamp_min(total_increase, 1)` | Failure-rate за выбранный range. |
-| 7 | Health Checks Total | Stat | `round(sum(increase(success+degraded+failures[$__range])) or vector(0))` | Общий completed health-check volume в выбранном окне. |
-| 106 | Failure & Degraded Trend by Provider | Timeseries | `round(sum by (provider) (increase(failures|degraded[$__interval])) or vector(0))` | Устойчивость деградации/ошибок по provider. |
-| 107 | Provider Failure Share (Selected Range) | Bar gauge | `100 * failures_by_provider / clamp_min(total_failures, 1)` | Ранжирование providers по доле failed probes. |
-| 108 | Retries Exhausted by Provider / Operation | Table | `round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[$__range])) or vector(0))` | Где retries чаще всего исчерпываются. |
-| 109 | Retries Exhausted Trend by Provider / Operation | Timeseries | `round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[$__interval])) or vector(0))` | Тренд retry exhaustion incidents во времени. |
-| 102 | Provider Health Check Latency (p95) - $provider | Repeated Gauge | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__range])))` | Current p95 by provider для выбранного range. |
+| ID  | Название                                        | Тип            | PromQL                                                                                                               | Описание                                                  |
+| --- | ----------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| 1   | Health Check Latency by Provider (p95)          | Timeseries     | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__interval])))`                                       | p95 latency trend по выбранным providers.                 |
+| 2   | Healthy Checks                                  | Stat           | `round(sum(increase(bioetl_health_check_success_total{provider=~"$provider"}[$__range])) or vector(0))`              | Completed probes со статусом `HEALTHY` в выбранном окне.  |
+| 105 | Degraded Checks                                 | Stat           | `round(sum(increase(bioetl_health_check_degraded_total{provider=~"$provider"}[$__range])) or vector(0))`             | Completed probes со статусом `DEGRADED` в выбранном окне. |
+| 104 | Provider Failure Rate                           | Gauge          | `failures_increase / clamp_min(total_increase, 1)`                                                                   | Failure-rate за выбранный range.                          |
+| 7   | Health Checks Total                             | Stat           | `round(sum(increase(success+degraded+failures[$__range])) or vector(0))`                                             | Общий completed health-check volume в выбранном окне.     |
+| 106 | Failure & Degraded Trend by Provider            | Timeseries     | \`round(sum by (provider) (increase(failures                                                                         | degraded[$\_\_interval])) or vector(0))\`                 |
+| 107 | Provider Failure Share (Selected Range)         | Bar gauge      | `100 * failures_by_provider / clamp_min(total_failures, 1)`                                                          | Ранжирование providers по доле failed probes.             |
+| 108 | Retries Exhausted by Provider / Operation       | Table          | `round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[$__range])) or vector(0))`    | Где retries чаще всего исчерпываются.                     |
+| 109 | Retries Exhausted Trend by Provider / Operation | Timeseries     | `round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[$__interval])) or vector(0))` | Тренд retry exhaustion incidents во времени.              |
+| 102 | Provider Health Check Latency (p95) - $provider | Repeated Gauge | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__range])))`                                          | Current p95 by provider для выбранного range.             |
 
 **Используемые метрики:** `health_check_latency_seconds`, `provider_health_status`, `health_check_success_total`, `health_check_degraded_total`, `health_check_failures_total`.
 
@@ -827,7 +843,7 @@ dashboard-variable interpolation. Дополнительное сужение п
 `span."bioetl.provider"` по текущему `$provider`; финальная correlation всё так
 же идёт через `trace_id` / `span_id`.
 
----
+______________________________________________________________________
 
 ## 13.1. Дашборд: 2. Runtime
 
@@ -839,21 +855,21 @@ dashboard-variable interpolation. Дополнительное сужение п
 
 ### Панели
 
-| ID | Название | Тип | Query | Описание |
-|---|---|---|---|---|
-| 2 | Warnings | Stat | Loki `count_over_time(... level=\"warning\" ... [$__range])` | Количество structured warning logs за текущее временное окно Grafana по `$pipeline`. |
-| 3 | Unstructured Logs | Stat | Loki `count_over_time(... | json | __error__!=\"\" ... [$__range])` | Объём строк, не соответствующих shipped JSON log contract, за текущее временное окно Grafana. |
-| 4 | DQ Alert Conditions | Stat | Prometheus | Суммарный triage-signal по shipped DQ alert families, привязанный к тем же fixed windows, что и rule pack (`15m`/`30m`). |
-| 5 | Control-plane Alert Conditions | Stat | Prometheus | Failures по manifest writes, ledger appends, checkpoint incompatibility и missing lineage refs, привязанные к shipped alert windows (`15m`/`30m`). |
-| 6 | Provider Alert Conditions | Stat | Prometheus | Provider failure-rate и retry-exhaustion conditions, привязанные к shipped alert windows (`15m` и `1h`). |
-| 7 | Freshness Alert Conditions | Stat | Prometheus | Количество freshness conditions старше 24h. |
-| 8 | Top Warning Events | Bar gauge | Loki | Наиболее частые warning events за текущее временное окно Grafana. |
-| 9 | Log Hygiene Trend | Timeseries | Loki | Тренд warnings против unstructured rows с adaptive bucket size через `$__interval`. |
-| 18 | Memory Pressure Events | Stat | `round(sum(increase(bioetl_memory_pressure_events_total{pipeline=~"$pipeline"}[$__range])) or vector(0))` | Количество adaptive-memory решений, которые реально увидели pressure внутри выбранного окна. |
-| 19 | Batch Resize Events | Stat | `round(sum(increase(bioetl_memory_batch_resize_events_total{pipeline=~"$pipeline"}[$__range])) or vector(0))` | Сколько раз runtime менял batch size из-за pressure или recovery-шага. |
-| 20 | Fallback Monitor Decisions | Stat | `round(sum(increase(bioetl_memory_monitor_fallback_events_total{pipeline=~"$pipeline"}[$__range])) or vector(0))` | Сигнал, что memory decisions шли через bounded fallback monitor modes (`resource`, `estimate`, `unknown`), а не по основному psutil path. |
-| 21 | Memory Pressure Active | Stat | `max(max_over_time(bioetl_memory_pressure_state{pipeline=~"$pipeline"}[$__range])) or vector(0)` | Быстрый бинарный индикатор, был ли pressure хотя бы раз за выбранный диапазон. |
-| 17 | Silver Filter Rejects | Stat | `round(sum(last_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))` | Быстрый triage-signal внутри текущего временного окна, который помогает отличить intentional Silver exclusions от DQ/schema проблем без fractional sparse-counter artefacts. Panel description направляет в `4. Data Quality` для bounded cause breakdown и в quarantine CLI для exact drilldown. |
+| ID  | Название                       | Тип        | Query                                                                                                             | Описание                                                                                                                                                                                                                                                                                          |
+| --- | ------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2   | Warnings                       | Stat       | Loki `count_over_time(... level=\"warning\" ... [$__range])`                                                      | Количество structured warning logs за текущее временное окно Grafana по `$pipeline`.                                                                                                                                                                                                              |
+| 3   | Unstructured Logs              | Stat       | Loki \`count_over_time(...                                                                                        | json                                                                                                                                                                                                                                                                                              |
+| 4   | DQ Alert Conditions            | Stat       | Prometheus                                                                                                        | Суммарный triage-signal по shipped DQ alert families, привязанный к тем же fixed windows, что и rule pack (`15m`/`30m`).                                                                                                                                                                          |
+| 5   | Control-plane Alert Conditions | Stat       | Prometheus                                                                                                        | Failures по manifest writes, ledger appends, checkpoint incompatibility и missing lineage refs, привязанные к shipped alert windows (`15m`/`30m`).                                                                                                                                                |
+| 6   | Provider Alert Conditions      | Stat       | Prometheus                                                                                                        | Provider failure-rate и retry-exhaustion conditions, привязанные к shipped alert windows (`15m` и `1h`).                                                                                                                                                                                          |
+| 7   | Freshness Alert Conditions     | Stat       | Prometheus                                                                                                        | Количество freshness conditions старше 24h.                                                                                                                                                                                                                                                       |
+| 8   | Top Warning Events             | Bar gauge  | Loki                                                                                                              | Наиболее частые warning events за текущее временное окно Grafana.                                                                                                                                                                                                                                 |
+| 9   | Log Hygiene Trend              | Timeseries | Loki                                                                                                              | Тренд warnings против unstructured rows с adaptive bucket size через `$__interval`.                                                                                                                                                                                                               |
+| 18  | Memory Pressure Events         | Stat       | `round(sum(increase(bioetl_memory_pressure_events_total{pipeline=~"$pipeline"}[$__range])) or vector(0))`         | Количество adaptive-memory решений, которые реально увидели pressure внутри выбранного окна.                                                                                                                                                                                                      |
+| 19  | Batch Resize Events            | Stat       | `round(sum(increase(bioetl_memory_batch_resize_events_total{pipeline=~"$pipeline"}[$__range])) or vector(0))`     | Сколько раз runtime менял batch size из-за pressure или recovery-шага.                                                                                                                                                                                                                            |
+| 20  | Fallback Monitor Decisions     | Stat       | `round(sum(increase(bioetl_memory_monitor_fallback_events_total{pipeline=~"$pipeline"}[$__range])) or vector(0))` | Сигнал, что memory decisions шли через bounded fallback monitor modes (`resource`, `estimate`, `unknown`), а не по основному psutil path.                                                                                                                                                         |
+| 21  | Memory Pressure Active         | Stat       | `max(max_over_time(bioetl_memory_pressure_state{pipeline=~"$pipeline"}[$__range])) or vector(0)`                  | Быстрый бинарный индикатор, был ли pressure хотя бы раз за выбранный диапазон.                                                                                                                                                                                                                    |
+| 17  | Silver Filter Rejects          | Stat       | `round(sum(last_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`      | Быстрый triage-signal внутри текущего временного окна, который помогает отличить intentional Silver exclusions от DQ/schema проблем без fractional sparse-counter artefacts. Panel description направляет в `4. Data Quality` для bounded cause breakdown и в quarantine CLI для exact drilldown. |
 
 **Фильтрация:** `$pipeline`, `$run_type`.
 
@@ -873,14 +889,15 @@ old/new batch sizes и host-specific memory values остаются в checkpoin
 run ledger diagnostics и trace events, а не в Grafana labels.
 
 **Silver Rejects triage sequence:**
+
 1. Используйте panel `Silver Filter Rejects` как быстрый runtime signal, чтобы
    отделить intentional exclusions от общего DQ/runtime шума.
-2. Если spike подтверждён, переходите по dashboard link `4. Data Quality` за
+1. Если spike подтверждён, переходите по dashboard link `4. Data Quality` за
    bounded cause summary.
-3. Для record-level списка и details переходите в `5. Silver Reject Explorer`.
-4. Для execution (`resolve/replay/purge`) используйте quarantine CLI.
+1. Для record-level списка и details переходите в `5. Silver Reject Explorer`.
+1. Для execution (`resolve/replay/purge`) используйте quarantine CLI.
 
----
+______________________________________________________________________
 
 ## 14. Справочник PromQL-паттернов
 
@@ -969,7 +986,7 @@ sum(rate(bioetl_http_request_errors_total[5m])) by (provider)
      sum(rate(bioetl_adapter_requests_total[5m])) by (provider))
 ```
 
----
+______________________________________________________________________
 
 ## 15. Устранение неполадок
 
@@ -1076,11 +1093,12 @@ lsof -i :8000
 ### 15.5 Dropdown переменных пустой
 
 Если выпадающий список `Pipeline` или `Run Type` не содержит значений:
+
 - Убедитесь, что пайплайн выполнялся хотя бы один раз после запуска Prometheus.
 - Проверьте в Prometheus UI: `http://localhost:9090/graph` → введите `bioetl_records_processed_total` → Execute. Должны появиться результаты.
 - Подождите 15-30 секунд после запуска пайплайна (интервал скрейпинга Prometheus).
 
----
+______________________________________________________________________
 
 ## 16. Архитектурные решения и обоснования
 
@@ -1121,8 +1139,12 @@ Prometheus выбран по следующим причинам:
 ```python
 @runtime_checkable
 class MetricsPort(Protocol):
-    def observe_histogram(self, name: str, value: float, labels: dict[str, str]) -> None: ...
-    def increment_counter(self, name: str, value: int, labels: dict[str, str]) -> None: ...
+    def observe_histogram(
+        self, name: str, value: float, labels: dict[str, str]
+    ) -> None: ...
+    def increment_counter(
+        self, name: str, value: int, labels: dict[str, str]
+    ) -> None: ...
     def set_gauge(self, name: str, value: float, labels: dict[str, str]) -> None: ...
     def close(self) -> None: ...
 ```
@@ -1135,9 +1157,9 @@ class MetricsPort(Protocol):
 - **Graceful degradation в server.py:** При `fail_fast=false` (по умолчанию) ошибка запуска сервера логируется, но не прерывает пайплайн.
 - **Принцип:** Observability не должна блокировать бизнес-логику. Потеря метрик — допустимый tradeoff при сетевых проблемах.
 
----
+______________________________________________________________________
 
----
+______________________________________________________________________
 
 ## 17. Подробный разбор типов метрик Prometheus
 
@@ -1156,6 +1178,7 @@ Prometheus client автоматически создаёт для каждог�
 Пример: `increase(bioetl_records_processed_total{pipeline="chembl", stage="bronze"}[1h])` — показывает абсолютное увеличение количества записей за последний час.
 
 В BioETL Counter-метрики применяются для:
+
 - Подсчёта обработанных записей по стадиям Medallion Architecture (`records_processed_total`).
 - Учёта ошибок по типам и стадиям (`errors_total`).
 - Отслеживания HTTP-ошибок по провайдерам (`http_request_errors_total`).
@@ -1167,7 +1190,7 @@ Prometheus client автоматически создаёт для каждог�
 
 Histogram собирает наблюдения (обычно длительности или размеры) и распределяет их по заранее определённым бакетам. Prometheus автоматически создаёт три time series для каждой гистограммы:
 
-- `_bucket{le="X"}` — количество наблюдений, попавших в бакет с границей <= X.
+- `_bucket{le="X"}` — количество наблюдений, попавших в бакет с границей \<= X.
 - `_sum` — сумма всех наблюдённых значений.
 - `_count` — общее количество наблюдений.
 - `_created` — timestamp создания.
@@ -1193,6 +1216,7 @@ rate(bioetl_adapter_request_duration_seconds_count{provider="chembl"}[5m])
 ```
 
 В BioETL Histogram-метрики применяются для:
+
 - Измерения длительности пайплайнов (`pipeline_duration_seconds`).
 - Измерения длительности отдельных фаз (`phase_duration_seconds`).
 - Распределения размеров батчей (`batch_size_records`).
@@ -1221,7 +1245,7 @@ Gauge — метрика, значение которой может произ�
 
 - `bioetl_rate_limiter_tokens_available{provider="chembl"}` — текущее количество доступных токенов в rate limiter. Когда значение падает до 0, запросы к провайдеру блокируются до восстановления токенов.
 
----
+______________________________________________________________________
 
 ## 18. Medallion Architecture и метрики
 
@@ -1316,12 +1340,12 @@ entity-level gauge-метрик:
 Этот показатель используется в gauge-панели `4. Data Quality`
 с пороговыми значениями:
 
-| Значение | Цвет | Интерпретация |
-|---|---|---|
-| < 50% | Красный | Критическая проблема: более половины записей теряется |
-| 50-80% | Оранжевый | Предупреждение: значительная потеря данных, требует внимания |
-| 80-95% | Жёлтый | Допустимо: небольшая потеря на валидации/дедупликации |
-| > 95% | Зелёный | Нормально: высокое качество данных |
+| Значение | Цвет      | Интерпретация                                                |
+| -------- | --------- | ------------------------------------------------------------ |
+| < 50%    | Красный   | Критическая проблема: более половины записей теряется        |
+| 50-80%   | Оранжевый | Предупреждение: значительная потеря данных, требует внимания |
+| 80-95%   | Жёлтый    | Допустимо: небольшая потеря на валидации/дедупликации        |
+| > 95%    | Зелёный   | Нормально: высокое качество данных                           |
 
 Entity-level gauge `bioetl_dq_validation_score` сохраняется отдельно и остаётся
 полезным для worst-case surface (`Worst-Entity DQ Score`), но aggregate panel
@@ -1329,6 +1353,7 @@ Entity-level gauge `bioetl_dq_validation_score` сохраняется отде�
 приравнивались к малым.
 
 Типичное значение для здорового пайплайна: 95-99%. Снижение обычно объясняется:
+
 - Записями с невалидными полями и schema violations.
 - DQ quarantine по типизированным ошибкам.
 - Аномалиями и soft-threshold событиями, зафиксированными в DQ layer.
@@ -1341,10 +1366,11 @@ Entity-level gauge `bioetl_dq_validation_score` сохраняется отде�
 - `bioetl_dq_records_quarantined_total{pipeline, error_type, run_type}` — детализированный счётчик с указанием типа ошибки (`schema_violation`, `null_required_field`, `duplicate`, `type_mismatch` и др.).
 
 Важно:
+
 - `bioetl_records_processed_total{stage="quarantined"}` может встречаться как legacy/support signal в части runtime paths.
 - shipped dashboards и alerting должны опираться на `bioetl_dq_records_quarantined_total`, когда речь идёт именно о DQ quarantine.
 
----
+______________________________________________________________________
 
 ## 19. Circuit Breaker и мониторинг провайдеров
 
@@ -1379,6 +1405,7 @@ sum(rate(bioetl_circuit_breaker_success_total{adapter="chembl"}[5m]))
 Дашборд `3. Provider Health` предоставляет четыре gauge-панели для отдельных провайдеров (UniProt, PubMed, PubChem, ChemBL). Каждая панель показывает P95-латентность API-запросов в секундах за последние 5 минут.
 
 Пороговые значения gauge:
+
 - **< 0.5 сек (зелёный):** Нормальная латентность. API отвечает быстро.
 - **0.5-1.0 сек (жёлтый):** Повышенная латентность. Может указывать на нагрузку на стороне провайдера.
 - **1.0-2.0 сек (оранжевый):** Высокая латентность. Рекомендуется проверить rate limiting и сетевые условия.
@@ -1386,7 +1413,7 @@ sum(rate(bioetl_circuit_breaker_success_total{adapter="chembl"}[5m]))
 
 Панель "Error Rate by Provider" показывает процент HTTP-ошибок. Нормальное значение — 0%. Любое ненулевое значение требует исследования. Источник данных — метрика `bioetl_http_request_errors_total`, которая инкрементируется при каждом неуспешном HTTP-запросе. Типы ошибок фиксируются в label `error_type`: timeout, connection_error, http_4xx, http_5xx.
 
----
+______________________________________________________________________
 
 ## 20. Data Quality Monitor (DQMonitorPort)
 
@@ -1413,16 +1440,18 @@ z_score = (current_value - baseline_mean) / baseline_stddev
 ```
 
 Пороги severity:
+
 - |z_score| > 2.0: MEDIUM
 - |z_score| > 2.5: HIGH
 - |z_score| > 3.0: CRITICAL
 
 Пример: если baseline средний record_count = 15,000 с stddev = 500, и текущий record_count = 12,000:
+
 - z_score = (12000 - 15000) / 500 = -6.0
 - Severity = CRITICAL (|z_score| > 3.0)
 - Anomaly type = DROP (текущее значение ниже baseline)
 
----
+______________________________________________________________________
 
 ## 21. Rate Limiting и его мониторинг
 
@@ -1445,18 +1474,18 @@ histogram_quantile(0.95, rate(bioetl_rate_limiter_wait_seconds_bucket[5m])) by (
 rate(bioetl_rate_limiter_wait_seconds_sum[1h]) / rate(bioetl_rate_limiter_wait_seconds_count[1h])
 ```
 
----
+______________________________________________________________________
 
 ## 22. Рекомендации по созданию пользовательских дашбордов
 
 ### 22.1 Создание через Grafana UI
 
 1. Открыть `http://localhost:3000`.
-2. Перейти: Dashboards → New → New Dashboard → Add visualization.
-3. Выбрать datasource: Prometheus.
-4. Ввести PromQL-запрос, например: `bioetl_records_processed_total{pipeline="chembl"}`.
-5. Настроить визуализацию (panel type, thresholds, legend).
-6. Сохранить дашборд.
+1. Перейти: Dashboards → New → New Dashboard → Add visualization.
+1. Выбрать datasource: Prometheus.
+1. Ввести PromQL-запрос, например: `bioetl_records_processed_total{pipeline="chembl"}`.
+1. Настроить визуализацию (panel type, thresholds, legend).
+1. Сохранить дашборд.
 
 ### 22.2 Создание JSON-дашборда для provisioning
 
@@ -1506,29 +1535,29 @@ Grafana автоматически обнаружит новый файл в т�
 
 ### 22.3 Рекомендуемые визуализации по типу метрик
 
-| Тип метрики | Рекомендуемая визуализация | Функция PromQL |
-|---|---|---|
-| Counter (total) | Timeseries с `rate()` | `rate(metric[5m])` |
-| Counter (total) | Stat (суммарное значение) | `sum(metric)` |
-| Histogram (duration) | Timeseries с перцентилями | `histogram_quantile(0.95, rate(metric_bucket[5m]))` |
-| Histogram (size) | Bar chart | `histogram_quantile(0.50, metric_bucket)` |
-| Gauge (state) | Stat с color mapping | `metric` (сырое значение) |
-| Gauge (score) | Gauge с thresholds | `metric` (значение 0-1) |
-| Gauge (freshness) | Stat с unit "seconds" | `time() - metric` |
-| Counter ratio | Gauge (0-100%) | `sum(a) / sum(b)` |
+| Тип метрики          | Рекомендуемая визуализация | Функция PromQL                                      |
+| -------------------- | -------------------------- | --------------------------------------------------- |
+| Counter (total)      | Timeseries с `rate()`      | `rate(metric[5m])`                                  |
+| Counter (total)      | Stat (суммарное значение)  | `sum(metric)`                                       |
+| Histogram (duration) | Timeseries с перцентилями  | `histogram_quantile(0.95, rate(metric_bucket[5m]))` |
+| Histogram (size)     | Bar chart                  | `histogram_quantile(0.50, metric_bucket)`           |
+| Gauge (state)        | Stat с color mapping       | `metric` (сырое значение)                           |
+| Gauge (score)        | Gauge с thresholds         | `metric` (значение 0-1)                             |
+| Gauge (freshness)    | Stat с unit "seconds"      | `time() - metric`                                   |
+| Counter ratio        | Gauge (0-100%)             | `sum(a) / sum(b)`                                   |
 
 ### 22.4 Рекомендуемые интервалы rate()
 
-| Сценарий | Интервал | Обоснование |
-|---|---|---|
-| Live мониторинг (короткие runtime/overview тренды) | `[1m]` | Максимальная отзывчивость |
-| Стандартный мониторинг | `[5m]` | Баланс отзывчивости и сглаживания |
-| Trend-анализ | `[15m]` или `[30m]` | Сглаженные тренды без шума |
-| Долгосрочный анализ | `[1h]` | Дневные и недельные паттерны |
+| Сценарий                                           | Интервал            | Обоснование                       |
+| -------------------------------------------------- | ------------------- | --------------------------------- |
+| Live мониторинг (короткие runtime/overview тренды) | `[1m]`              | Максимальная отзывчивость         |
+| Стандартный мониторинг                             | `[5m]`              | Баланс отзывчивости и сглаживания |
+| Trend-анализ                                       | `[15m]` или `[30m]` | Сглаженные тренды без шума        |
+| Долгосрочный анализ                                | `[1h]`              | Дневные и недельные паттерны      |
 
 Правило: интервал rate() должен быть как минимум в 4 раза больше scrape_interval Prometheus (15s × 4 = 60s = 1m).
 
----
+______________________________________________________________________
 
 ## 23. FAQ (Часто задаваемые вопросы)
 
@@ -1557,12 +1586,12 @@ v1 дашборды оптимизированы для историческог
    ```python
    MY_NEW_METRIC = Counter("bioetl_my_new_metric", "Description", ["label1", "label2"])
    ```
-2. Добавьте в словарь `COUNTERS`, `HISTOGRAMS` или `GAUGES` в `prometheus_metrics.py`.
-3. Вызывайте через MetricsPort в application-коде:
+1. Добавьте в словарь `COUNTERS`, `HISTOGRAMS` или `GAUGES` в `prometheus_metrics.py`.
+1. Вызывайте через MetricsPort в application-коде:
    ```python
    self._metrics.increment_counter("my_new_metric", value=1, labels={"label1": "val"})
    ```
-4. Добавьте панель в JSON-дашборд или через Grafana UI.
+1. Добавьте панель в JSON-дашборд или через Grafana UI.
 
 ### Как метрики переживают перезапуск приложения?
 
@@ -1573,11 +1602,13 @@ v1 дашборды оптимизированы для историческог
 ### Как работает формат Prometheus exposition?
 
 Метрики экспортируются в текстовом формате. Каждая строка — одна time series:
+
 ```
 metric_name{label1="value1", label2="value2"} numeric_value timestamp
 ```
 
 Специальные строки начинаются с `#`:
+
 - `# HELP metric_name Description` — описание метрики.
 - `# TYPE metric_name counter|gauge|histogram|summary` — тип метрики.
 
@@ -1590,15 +1621,16 @@ Prometheus парсит этот формат при каждом scrape и со
 ### Можно ли использовать Grafana без Docker?
 
 Да. Установите Prometheus и Grafana нативно, затем:
+
 1. Запустите Prometheus с конфигом `grafana/prometheus.yml`. Измените target на `localhost:8000`.
-2. Запустите Grafana. Добавьте Prometheus как datasource (`http://localhost:9090`).
-3. Импортируйте JSON-файлы из `grafana/dashboards/` через UI: Dashboards → Import → Upload JSON file.
+1. Запустите Grafana. Добавьте Prometheus как datasource (`http://localhost:9090`).
+1. Импортируйте JSON-файлы из `grafana/dashboards/` через UI: Dashboards → Import → Upload JSON file.
 
 Или настройте provisioning, скопировав содержимое `grafana/provisioning/` в директорию provisioning Grafana и обновив `path` в `bioetl.yaml` на абсолютный путь к `grafana/dashboards/`.
 
----
+______________________________________________________________________
 
----
+______________________________________________________________________
 
 ## 24. Alerting (Настройка оповещений)
 
@@ -1607,32 +1639,32 @@ Prometheus парсит этот формат при каждом scrape и со
 Grafana поддерживает встроенные алерты на основе PromQL-условий. Для настройки:
 
 1. Откройте панель дашборда → Edit.
-2. Перейдите на вкладку "Alert" (доступна для Timeseries и Stat панелей).
-3. Определите условие: например, `WHEN avg() OF query(A, 5m, now) IS ABOVE 2` (средняя латентность > 2 секунд).
-4. Настройте notification channel (Email, Slack, PagerDuty, Webhook).
-5. Сохраните дашборд.
+1. Перейдите на вкладку "Alert" (доступна для Timeseries и Stat панелей).
+1. Определите условие: например, `WHEN avg() OF query(A, 5m, now) IS ABOVE 2` (средняя латентность > 2 секунд).
+1. Настройте notification channel (Email, Slack, PagerDuty, Webhook).
+1. Сохраните дашборд.
 
 ### 24.2 Рекомендуемые алерты для BioETL
 
 **Критические алерты (требуют немедленного внимания):**
 
-| Алерт | Условие PromQL | Severity | Описание |
-|---|---|---|---|
-| Circuit Breaker Open | `bioetl_circuit_breaker_state == 2` | CRITICAL | Провайдер полностью отключён. Пайплайн не может получать данные. |
-| Quality Ratio Drop | `sum(records_processed{stage="gold"}) / sum(records_processed{stage="bronze"}) < 0.5` | CRITICAL | Более 50% данных теряется. Возможна проблема с источником или схемой. |
-| Zero Records | `increase(bioetl_records_processed_total{stage="bronze"}[1h]) == 0` | CRITICAL | За последний час не загружено ни одной записи. Пайплайн может быть остановлен. |
-| Health Check Failed | `bioetl_health_check_status == 0` | CRITICAL | Компонент инфраструктуры недоступен. |
+| Алерт                | Условие PromQL                                                                        | Severity | Описание                                                                       |
+| -------------------- | ------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| Circuit Breaker Open | `bioetl_circuit_breaker_state == 2`                                                   | CRITICAL | Провайдер полностью отключён. Пайплайн не может получать данные.               |
+| Quality Ratio Drop   | `sum(records_processed{stage="gold"}) / sum(records_processed{stage="bronze"}) < 0.5` | CRITICAL | Более 50% данных теряется. Возможна проблема с источником или схемой.          |
+| Zero Records         | `increase(bioetl_records_processed_total{stage="bronze"}[1h]) == 0`                   | CRITICAL | За последний час не загружено ни одной записи. Пайплайн может быть остановлен. |
+| Health Check Failed  | `bioetl_health_check_status == 0`                                                     | CRITICAL | Компонент инфраструктуры недоступен.                                           |
 
 **Предупреждающие алерты (требуют внимания в рабочее время):**
 
-| Алерт | Условие PromQL | Severity | Описание |
-|---|---|---|---|
-| High Latency | `histogram_quantile(0.95, rate(bioetl_adapter_request_duration_seconds_bucket[5m])) > 5` | WARNING | P95 латентность API > 5 секунд. Провайдер может деградировать. |
-| Error Rate Spike | `rate(bioetl_http_request_errors_total[5m]) > 0.1` | WARNING | Более 10% запросов завершаются ошибкой. |
-| Data Staleness | `(time() - bioetl_data_freshness_seconds) > 86400` | WARNING | Данные старше 24 часов. Пайплайн не выполнялся. |
-| Retry Exhaustion | `increase(bioetl_data_source_retry_exhausted_total[1h]) > 0` | WARNING | Retry-попытки исчерпаны. Запросы к провайдеру не проходят. |
-| DQ Anomaly | `increase(bioetl_dq_anomaly_detected{severity="critical"}[1h]) > 0` | WARNING | Обнаружена критическая аномалия качества данных. |
-| High Quarantine Rate | `sum(rate(bioetl_dq_records_quarantined_total[5m])) / clamp_min(sum(rate(bioetl_records_processed_total{stage="bronze"}[5m])), 1) > 0.1` | WARNING | Более 10% записей ушло в DQ quarantine. |
+| Алерт                | Условие PromQL                                                                                                                           | Severity | Описание                                                       |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------- |
+| High Latency         | `histogram_quantile(0.95, rate(bioetl_adapter_request_duration_seconds_bucket[5m])) > 5`                                                 | WARNING  | P95 латентность API > 5 секунд. Провайдер может деградировать. |
+| Error Rate Spike     | `rate(bioetl_http_request_errors_total[5m]) > 0.1`                                                                                       | WARNING  | Более 10% запросов завершаются ошибкой.                        |
+| Data Staleness       | `(time() - bioetl_data_freshness_seconds) > 86400`                                                                                       | WARNING  | Данные старше 24 часов. Пайплайн не выполнялся.                |
+| Retry Exhaustion     | `increase(bioetl_data_source_retry_exhausted_total[1h]) > 0`                                                                             | WARNING  | Retry-попытки исчерпаны. Запросы к провайдеру не проходят.     |
+| DQ Anomaly           | `increase(bioetl_dq_anomaly_detected{severity="critical"}[1h]) > 0`                                                                      | WARNING  | Обнаружена критическая аномалия качества данных.               |
+| High Quarantine Rate | `sum(rate(bioetl_dq_records_quarantined_total[5m])) / clamp_min(sum(rate(bioetl_records_processed_total{stage="bronze"}[5m])), 1) > 0.1` | WARNING  | Более 10% записей ушло в DQ quarantine.                        |
 
 ### 24.3 Prometheus Alerting Rules
 
@@ -1709,55 +1741,55 @@ open http://localhost:9090/rules
 open http://localhost:9090/alerts
 ```
 
----
+______________________________________________________________________
 
 ## 25. Глоссарий
 
-| Термин | Определение |
-|---|---|
-| **Bronze** | Первый слой Medallion Architecture. Содержит сырые данные из внешних API без обработки. Формат: Parquet. |
-| **Silver** | Второй слой. Данные после валидации, дедупликации и нормализации. Формат: Delta Lake с ACID-гарантиями. |
-| **Gold** | Третий слой. Финальные бизнес-готовые таблицы для аналитики. Формат: Delta Lake. |
-| **Quarantined** | Записи, не прошедшие валидацию в Silver/Gold. Сохраняются отдельно для ручного анализа. |
-| **Circuit Breaker** | Паттерн, защищающий от каскадных сбоев. Автоматически отключает провайдер при превышении порога ошибок (ADR-007). |
-| **Counter** | Тип метрики Prometheus. Монотонно возрастающее значение. Сбрасывается при перезапуске процесса. |
-| **Gauge** | Тип метрики Prometheus. Произвольное значение, может расти и уменьшаться. Представляет текущее состояние. |
-| **Histogram** | Тип метрики Prometheus. Распределение значений по бакетам. Позволяет вычислять перцентили. |
-| **PromQL** | Prometheus Query Language. Функциональный язык запросов для агрегации и анализа time series. |
-| **Scrape** | Процесс сбора метрик. Prometheus выполняет HTTP GET к targets каждые `scrape_interval` секунд. |
-| **Target** | Endpoint, с которого Prometheus собирает метрики. В BioETL: `host.docker.internal:8000`. |
-| **Time Series** | Уникальная комбинация имени метрики и набора labels. Каждая time series хранит набор пар (timestamp, value). |
-| **Label** | Ключ-значение пара, добавляющая измерение к метрике. Позволяет фильтровать и группировать данные. |
-| **Template Variable** | Переменная Grafana, значения которой определяются PromQL-запросом. Используется для динамической фильтрации дашбордов. |
-| **Provisioning** | Механизм автоматической загрузки конфигурации (datasources, dashboards) при старте Grafana. |
-| **MetricsPort** | Protocol-интерфейс в domain-слое BioETL. Абстрагирует запись метрик от конкретной реализации (Prometheus, NoOp). |
-| **NoOpMetrics** | Null Object реализация MetricsPort. Все методы — пустые no-op. Используется когда метрики отключены. |
-| **Rate Limiter** | Механизм ограничения скорости запросов к внешним API для соблюдения лимитов провайдера. |
-| **Run Type** | Тип запуска пайплайна: incremental (только новые данные), backfill (ретроспективное заполнение), rebuild (полная пересборка). |
-| **TSDB** | Time Series Database. Хранилище Prometheus для time series данных. Оптимизировано для append и range queries. |
-| **Adapter** | В контексте Hexagonal Architecture: реализация порта для конкретной технологии (ChemBLClient, PrometheusMetrics). |
-| **Exposition Format** | Текстовый формат экспорта метрик Prometheus: `metric{labels} value timestamp`. |
-| **Retention** | Период хранения данных в Prometheus TSDB. По умолчанию 15 дней. Настраивается через `--storage.tsdb.retention.time`. |
-| **DQ Monitor** | Data Quality Monitor. Компонент обнаружения аномалий на основе Z-score анализа baseline метрик. |
-| **Z-score** | Статистическая мера, показывающая, на сколько стандартных отклонений значение отклоняется от среднего. |
-| **Medallion Architecture** | Паттерн организации данных в три слоя (Bronze → Silver → Gold) с повышением качества на каждом уровне. |
+| Термин                     | Определение                                                                                                                   |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Bronze**                 | Первый слой Medallion Architecture. Содержит сырые данные из внешних API без обработки. Формат: Parquet.                      |
+| **Silver**                 | Второй слой. Данные после валидации, дедупликации и нормализации. Формат: Delta Lake с ACID-гарантиями.                       |
+| **Gold**                   | Третий слой. Финальные бизнес-готовые таблицы для аналитики. Формат: Delta Lake.                                              |
+| **Quarantined**            | Записи, не прошедшие валидацию в Silver/Gold. Сохраняются отдельно для ручного анализа.                                       |
+| **Circuit Breaker**        | Паттерн, защищающий от каскадных сбоев. Автоматически отключает провайдер при превышении порога ошибок (ADR-007).             |
+| **Counter**                | Тип метрики Prometheus. Монотонно возрастающее значение. Сбрасывается при перезапуске процесса.                               |
+| **Gauge**                  | Тип метрики Prometheus. Произвольное значение, может расти и уменьшаться. Представляет текущее состояние.                     |
+| **Histogram**              | Тип метрики Prometheus. Распределение значений по бакетам. Позволяет вычислять перцентили.                                    |
+| **PromQL**                 | Prometheus Query Language. Функциональный язык запросов для агрегации и анализа time series.                                  |
+| **Scrape**                 | Процесс сбора метрик. Prometheus выполняет HTTP GET к targets каждые `scrape_interval` секунд.                                |
+| **Target**                 | Endpoint, с которого Prometheus собирает метрики. В BioETL: `host.docker.internal:8000`.                                      |
+| **Time Series**            | Уникальная комбинация имени метрики и набора labels. Каждая time series хранит набор пар (timestamp, value).                  |
+| **Label**                  | Ключ-значение пара, добавляющая измерение к метрике. Позволяет фильтровать и группировать данные.                             |
+| **Template Variable**      | Переменная Grafana, значения которой определяются PromQL-запросом. Используется для динамической фильтрации дашбордов.        |
+| **Provisioning**           | Механизм автоматической загрузки конфигурации (datasources, dashboards) при старте Grafana.                                   |
+| **MetricsPort**            | Protocol-интерфейс в domain-слое BioETL. Абстрагирует запись метрик от конкретной реализации (Prometheus, NoOp).              |
+| **NoOpMetrics**            | Null Object реализация MetricsPort. Все методы — пустые no-op. Используется когда метрики отключены.                          |
+| **Rate Limiter**           | Механизм ограничения скорости запросов к внешним API для соблюдения лимитов провайдера.                                       |
+| **Run Type**               | Тип запуска пайплайна: incremental (только новые данные), backfill (ретроспективное заполнение), rebuild (полная пересборка). |
+| **TSDB**                   | Time Series Database. Хранилище Prometheus для time series данных. Оптимизировано для append и range queries.                 |
+| **Adapter**                | В контексте Hexagonal Architecture: реализация порта для конкретной технологии (ChemBLClient, PrometheusMetrics).             |
+| **Exposition Format**      | Текстовый формат экспорта метрик Prometheus: `metric{labels} value timestamp`.                                                |
+| **Retention**              | Период хранения данных в Prometheus TSDB. По умолчанию 15 дней. Настраивается через `--storage.tsdb.retention.time`.          |
+| **DQ Monitor**             | Data Quality Monitor. Компонент обнаружения аномалий на основе Z-score анализа baseline метрик.                               |
+| **Z-score**                | Статистическая мера, показывающая, на сколько стандартных отклонений значение отклоняется от среднего.                        |
+| **Medallion Architecture** | Паттерн организации данных в три слоя (Bronze → Silver → Gold) с повышением качества на каждом уровне.                        |
 
----
+______________________________________________________________________
 
 ## 26. Сводная таблица дашбордов
 
-| Дашборд | UID | Версия | Panels | Refresh | Time Range | Метрики | Назначение |
-|---|---|---|---|---|---|---|---|
-| BioETL Overview | `bioetl-overview` | 1 | 8 | 30s | 6h | `records_processed_total`, `errors_total`, `pipeline_duration_seconds`, `batch_size_records`, `data_freshness_seconds`, `filter_ids_*` | Полный обзор пайплайнов |
-| 1. Overview | `bioetl-overview-v2` | 2 | 7 | 30s | 12h | `records_processed_total`, `data_freshness_seconds` | Selected-range overview по pipeline/control-plane/lineage |
-| 2. Runtime | `bioetl-runtime` | 1 | 9 | 30s | 12h | `control_plane_*`, `dq_*`, `health_check_*`, `data_source_retry_exhausted_total` + Loki log hygiene queries | Runtime triage: warnings, unstructured logs, alert conditions |
-| BioETL Provider Health | `bioetl-provider-health` | 1 | 6 | 30s | 6h | `records_processed_total`, `batch_size_records` | Пропускная способность по стадиям |
-| 3. Provider Health | `bioetl-provider-health-v2` | 2 | 5 | 30s | 12h | `health_check_latency_seconds`, `provider_health_status`, `health_check_success_total`, `health_check_degraded_total`, `health_check_failures_total` | Операционный health-check обзор по провайдерам |
-| BioETL Data Quality | `bioetl-dq` | 1 | 4 | 30s | 6h | `pipeline_duration_seconds`, `records_processed_total`, `batch_size_records` | DQ мониторинг с перцентилями |
-| 4. Data Quality | `bioetl-dq-v2` | 2 | 7 | 30s | 12h | `records_processed_total`, `data_freshness_seconds` | Selected-range DQ surface |
-| 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1 | 8 | 30s | 12h | Quarantine Explorer API (`/ops/quarantine/filtered-*`) | Record-level browsing для Silver rejects |
+| Дашборд                   | UID                             | Версия | Panels | Refresh | Time Range | Метрики                                                                                                                                              | Назначение                                                    |
+| ------------------------- | ------------------------------- | ------ | ------ | ------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| BioETL Overview           | `bioetl-overview`               | 1      | 8      | 30s     | 6h         | `records_processed_total`, `errors_total`, `pipeline_duration_seconds`, `batch_size_records`, `data_freshness_seconds`, `filter_ids_*`               | Полный обзор пайплайнов                                       |
+| 1. Overview               | `bioetl-overview-v2`            | 2      | 7      | 30s     | 12h        | `records_processed_total`, `data_freshness_seconds`                                                                                                  | Selected-range overview по pipeline/control-plane/lineage     |
+| 2. Runtime                | `bioetl-runtime`                | 1      | 9      | 30s     | 12h        | `control_plane_*`, `dq_*`, `health_check_*`, `data_source_retry_exhausted_total` + Loki log hygiene queries                                          | Runtime triage: warnings, unstructured logs, alert conditions |
+| BioETL Provider Health    | `bioetl-provider-health`        | 1      | 6      | 30s     | 6h         | `records_processed_total`, `batch_size_records`                                                                                                      | Пропускная способность по стадиям                             |
+| 3. Provider Health        | `bioetl-provider-health-v2`     | 2      | 5      | 30s     | 12h        | `health_check_latency_seconds`, `provider_health_status`, `health_check_success_total`, `health_check_degraded_total`, `health_check_failures_total` | Операционный health-check обзор по провайдерам                |
+| BioETL Data Quality       | `bioetl-dq`                     | 1      | 4      | 30s     | 6h         | `pipeline_duration_seconds`, `records_processed_total`, `batch_size_records`                                                                         | DQ мониторинг с перцентилями                                  |
+| 4. Data Quality           | `bioetl-dq-v2`                  | 2      | 7      | 30s     | 12h        | `records_processed_total`, `data_freshness_seconds`                                                                                                  | Selected-range DQ surface                                     |
+| 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1      | 8      | 30s     | 12h        | Quarantine Explorer API (`/ops/quarantine/filtered-*`)                                                                                               | Record-level browsing для Silver rejects                      |
 
----
+______________________________________________________________________
 
 ## 27. Жизненный цикл метрики: от кода до графика
 
@@ -1770,9 +1802,9 @@ open http://localhost:9090/alerts
 from prometheus_client import Counter
 
 RECORDS_PROCESSED_TOTAL = Counter(
-    "bioetl_records_processed_total",          # Имя метрики (prefix bioetl_)
-    "Total number of records processed",        # HELP-строка (описание)
-    ["pipeline", "stage", "run_type"],           # Labels (измерения)
+    "bioetl_records_processed_total",  # Имя метрики (prefix bioetl_)
+    "Total number of records processed",  # HELP-строка (описание)
+    ["pipeline", "stage", "run_type"],  # Labels (измерения)
 )
 ```
 
@@ -1789,6 +1821,7 @@ COUNTERS = {
     "errors_total": ERRORS_TOTAL,
     # ...
 }
+
 
 def increment_counter(self, name: str, value: int, labels: dict[str, str]) -> None:
     counter = self.COUNTERS.get(name)
@@ -1810,7 +1843,11 @@ async def _process_bronze(self, records: list[dict]) -> int:
     self._metrics.increment_counter(
         "records_processed_total",
         value=count,
-        labels={"pipeline": self._pipeline_name, "stage": "bronze", "run_type": self._run_type},
+        labels={
+            "pipeline": self._pipeline_name,
+            "stage": "bronze",
+            "run_type": self._run_type,
+        },
     )
     return count
 ```
@@ -1859,12 +1896,13 @@ Application code → increment_counter("records_processed_total", ...) →
 ```
 
 Задержка от момента инструментации до отображения на дашборде складывается из:
+
 - Интервал scrape: до 15 секунд
-- Обработка Prometheus: <1 секунда
+- Обработка Prometheus: \<1 секунда
 - Refresh дашборда: до 30 секунд
 - Итого: максимальная задержка ~50 секунд для shipped dashboards
 
----
+______________________________________________________________________
 
 ## 28. Безопасность и production-конфигурация
 
@@ -1888,8 +1926,8 @@ environment:
 Metrics endpoint (`/metrics` на порту 8000) по умолчанию открыт без аутентификации. В production рекомендуется:
 
 1. **Network isolation:** Ограничить доступ к порту 8000 через firewall rules. Только Prometheus должен иметь доступ.
-2. **Reverse proxy:** Поставить nginx/Envoy перед metrics endpoint с basic auth.
-3. **Prometheus basic auth:** Настроить аутентификацию в `prometheus.yml`:
+1. **Reverse proxy:** Поставить nginx/Envoy перед metrics endpoint с basic auth.
+1. **Prometheus basic auth:** Настроить аутентификацию в `prometheus.yml`:
 
 ```yaml
 scrape_configs:
@@ -1910,6 +1948,7 @@ scrape_configs:
 - **Мониторинг cardinality:** `prometheus_tsdb_head_series` показывает текущее количество active time series. Порог предупреждения: >10,000. Критический: >100,000.
 
 Пример вычисления cardinality для `records_processed_total`:
+
 - 4 пайплайна × 4 стадии × 3 типа запуска = 48 time series
 - Плюс автоматически созданные `_created`: ещё 48
 - Итого: 96 time series от одной метрики
@@ -1924,6 +1963,7 @@ Prometheus хранит данные в локальной TSDB. Парамет�
 - `--storage.tsdb.retention.size` — не ограничено (по умолчанию)
 
 Для production рекомендуется:
+
 - Установить обе опции: `--storage.tsdb.retention.time=30d --storage.tsdb.retention.size=5GB`
 - Использовать persistent volume для данных Prometheus (уже настроено в docker-compose.monitoring.yml: volume `prometheus-data`)
 - Для долгосрочного хранения (месяцы/годы) использовать remote write в Thanos, Cortex или VictoriaMetrics
@@ -1934,11 +1974,11 @@ Prometheus хранит данные в локальной TSDB. Парамет�
 
 1. **Sharded Prometheus:** Несколько инстансов Prometheus, каждый скрейпит подмножество targets. Grafana использует datasource с type `prometheus` и настройкой `exemplarTraceIdDestinations` для корреляции.
 
-2. **Federation:** Центральный Prometheus агрегирует данные из дочерних инстансов через `federation` endpoint.
+1. **Federation:** Центральный Prometheus агрегирует данные из дочерних инстансов через `federation` endpoint.
 
-3. **VictoriaMetrics:** Совместимая с Prometheus TSDB с более эффективным storage и встроенной поддержкой кластеризации. Замена datasource URL в Grafana на VictoriaMetrics endpoint (полностью совместим с PromQL).
+1. **VictoriaMetrics:** Совместимая с Prometheus TSDB с более эффективным storage и встроенной поддержкой кластеризации. Замена datasource URL в Grafana на VictoriaMetrics endpoint (полностью совместим с PromQL).
 
----
+______________________________________________________________________
 
 ## 29. Интеграция с CI/CD
 
@@ -2009,12 +2049,12 @@ print(f\"Grafana: {data['database']}\" )
    ```bash
    grep -rn "old_metric_name" grafana/dashboards/
    ```
-2. Обновить PromQL-запросы в соответствующих JSON-файлах.
-3. Обновить каталог метрик в документации (раздел 5 этого документа).
-4. Запустить CI-валидацию (раздел 29.1).
-5. Выполнить smoke-тест (раздел 29.2).
+1. Обновить PromQL-запросы в соответствующих JSON-файлах.
+1. Обновить каталог метрик в документации (раздел 5 этого документа).
+1. Запустить CI-валидацию (раздел 29.1).
+1. Выполнить smoke-тест (раздел 29.2).
 
----
+______________________________________________________________________
 
 **Конец документа.**
 

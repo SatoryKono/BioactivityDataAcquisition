@@ -1,6 +1,5 @@
 # Pipeline Config Loader Ownership Evidence Summary
 
-
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
 Примечание о rebaseline: the current repo state still supports the retain-and-thin interpretation for `PipelineConfigLoader`; canonical ownership remains with the narrower resolver/API seams.
@@ -24,11 +23,11 @@ around `pipeline_config_api.py` and `domain_config_resolver.py`?
 
 1. Canonical staged pipeline YAML loading now lives in
    `pipeline_config_api.py`.
-2. Canonical YAML + DQ -> domain resolution now lives in
+1. Canonical YAML + DQ -> domain resolution now lives in
    `domain_config_resolver.py`.
-3. `PipelineConfigLoader` is no longer the architectural center of the config
+1. `PipelineConfigLoader` is no longer the architectural center of the config
    topology.
-4. `PipelineConfigLoader` still adds real retained value as a tested
+1. `PipelineConfigLoader` still adds real retained value as a tested
    infrastructure convenience seam.
 
 ## Текущая интерпретация Boundary

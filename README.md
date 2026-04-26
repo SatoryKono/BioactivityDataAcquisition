@@ -99,14 +99,14 @@ but active docs in `docs/00-05` remain the source of truth.
 
 ## Repository Structure
 
-| Path            | Role                                                                                          | Orientation                                                  |
-| --------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `src/bioetl/`   | Runtime source tree organized by the five-layer architecture                                  | [Source Map](src/bioetl/README.md)                           |
-| `configs/`      | Provider, entity, composite, contract, and quality configuration assets                       | [configs/README.md](configs/README.md)                       |
-| `tests/`        | Unit, integration, e2e, smoke, contract, security, performance, and architecture verification | `tests/` mirrors source concerns by scope and policy surface |
-| `docs/`         | Published documentation tree: canonical active docs plus selected extended mirrors            | Start at [Project Map](docs/00-project/00-map.md)            |
-| `docs/reports/` | Repo-only curated evidence and report artifacts (not published in MkDocs)                     | [docs/reports/index.md](docs/reports/index.md)               |
-| `reports/`      | Generated or working analysis outputs before curation                                         | [reports/README.md](reports/README.md)                       |
+| Path            | Role                                                                                          | Orientation                                                    |
+| --------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `src/bioetl/`   | Runtime source tree organized by the five-layer architecture                                  | [Source Map](src/bioetl/README.md)                             |
+| `configs/`      | Provider, entity, composite, contract, and quality configuration assets                       | [configs/README.md](configs/README.md)                         |
+| `tests/`        | Unit, integration, e2e, smoke, contract, security, performance, and architecture verification | `tests/` mirrors source concerns by scope and policy surface   |
+| `docs/`         | Published documentation tree: canonical active docs plus selected extended mirrors            | Start at [Project Map](docs/00-project/00-map.md)              |
+| `docs/reports/` | Repo-only curated evidence and report artifacts (not published in MkDocs)                     | [docs/reports/index.md](docs/reports/index.md)                 |
+| `reports/`      | Generated or working analysis outputs before curation                                         | [reports/README.md](reports/README.md)                         |
 | `scripts/`      | Canonical tooling by domain, with engineering governance indexed under `scripts/engineering/` | [scripts/engineering/README.md](scripts/engineering/README.md) |
 
 The current top-level layout is intentionally stable. Structural improvements
@@ -204,7 +204,7 @@ uv sync --extra dev --extra tracing
    python3 -m venv .venv
    . .venv/bin/activate
    pip install -e ".[dev,tracing,docs]"
-   ```
+```
 
 1. **Configure Environment** *(optional)*:
    Copy the example configuration if you need API keys for providers.
@@ -217,51 +217,51 @@ uv sync --extra dev --extra tracing
 
    **Environment Variables:**
 
-   | Variable                                   | Description                                                 | Default           |
-   | ------------------------------------------ | ----------------------------------------------------------- | ----------------- |
-   | **Core**                                   |                                                             |                   |
-   | `BIOETL_ENV`                               | Environment (`dev` / `staging` / `prod`)                    | `dev`             |
-   | `BIOETL_DATA_DIR`                          | Base directory for Bronze/Silver/Gold data                  | `data`            |
-   | `BIOETL_DEBUG`                             | Enable debug features                                       | `false`           |
-   | `BIOETL_TEST_MODE`                         | Use fixtures instead of real APIs                           | `false`           |
-   | **Pipeline**                               |                                                             |                   |
-   | `BIOETL_PIPELINE__BATCH_SIZE`              | Records per batch write (1–10000)                           | `100`             |
-   | `BIOETL_PIPELINE__CHECKPOINT_INTERVAL`     | Save checkpoint every N records (≥100)                      | `1000`            |
-   | `BIOETL_PIPELINE__MAX_CONCURRENT_BATCHES`  | Max concurrent batch writes (1–16)                          | `4`               |
-   | `BIOETL_PIPELINE__HEARTBEAT_INTERVAL`      | Lock heartbeat interval in seconds (5–60)                   | `30`              |
-   | **Provider API Keys**                      |                                                             |                   |
-   | `BIOETL_UNIPROT_API_KEY`                   | UniProt API key (higher rate limits)                        | —                 |
-   | `BIOETL_PUBMED_API_KEY`                    | NCBI E-utilities API key                                    | —                 |
-   | `BIOETL_PUBMED_EMAIL`                      | Email for NCBI tool identification                          | —                 |
-   | `BIOETL_OPENALEX_EMAIL`                    | Email for OpenAlex polite pool                              | —                 |
-   | `BIOETL_SEMANTICSCHOLAR_API_KEY`           | Semantic Scholar API key                                    | —                 |
-   | `BIOETL_CROSSREF_EMAIL`                    | Email for Crossref polite pool                              | —                 |
-   | **Security**                               |                                                             |                   |
-   | `BIOETL_PII_SALT_CURRENT`                  | Salt for PII hashing (≥32 chars, required in prod)          | —                 |
-   | `BIOETL_PII_SALT_NEXT`                     | Next salt for rotation                                      | —                 |
-   | `BIOETL_SALT_ROTATION_ACTIVE`              | Whether salt rotation is active                             | `false`           |
-   | **Observability**                          |                                                             |                   |
-   | `BIOETL_LOG_LEVEL`                         | Logging level (`DEBUG`/`INFO`/`WARNING`/`ERROR`/`CRITICAL`) | `INFO`            |
-   | `BIOETL_LOG_FORMAT`                        | Log format (`json` / `text`)                                | `json`            |
+   | Variable                                   | Description                                                 | Default                   |
+   | ------------------------------------------ | ----------------------------------------------------------- | ------------------------- |
+   | **Core**                                   |                                                             |                           |
+   | `BIOETL_ENV`                               | Environment (`dev` / `staging` / `prod`)                    | `dev`                     |
+   | `BIOETL_DATA_DIR`                          | Base directory for Bronze/Silver/Gold data                  | `data`                    |
+   | `BIOETL_DEBUG`                             | Enable debug features                                       | `false`                   |
+   | `BIOETL_TEST_MODE`                         | Use fixtures instead of real APIs                           | `false`                   |
+   | **Pipeline**                               |                                                             |                           |
+   | `BIOETL_PIPELINE__BATCH_SIZE`              | Records per batch write (1–10000)                           | `100`                     |
+   | `BIOETL_PIPELINE__CHECKPOINT_INTERVAL`     | Save checkpoint every N records (≥100)                      | `1000`                    |
+   | `BIOETL_PIPELINE__MAX_CONCURRENT_BATCHES`  | Max concurrent batch writes (1–16)                          | `4`                       |
+   | `BIOETL_PIPELINE__HEARTBEAT_INTERVAL`      | Lock heartbeat interval in seconds (5–60)                   | `30`                      |
+   | **Provider API Keys**                      |                                                             |                           |
+   | `BIOETL_UNIPROT_API_KEY`                   | UniProt API key (higher rate limits)                        | —                         |
+   | `BIOETL_PUBMED_API_KEY`                    | NCBI E-utilities API key                                    | —                         |
+   | `BIOETL_PUBMED_EMAIL`                      | Email for NCBI tool identification                          | —                         |
+   | `BIOETL_OPENALEX_EMAIL`                    | Email for OpenAlex polite pool                              | —                         |
+   | `BIOETL_SEMANTICSCHOLAR_API_KEY`           | Semantic Scholar API key                                    | —                         |
+   | `BIOETL_CROSSREF_EMAIL`                    | Email for Crossref polite pool                              | —                         |
+   | **Security**                               |                                                             |                           |
+   | `BIOETL_PII_SALT_CURRENT`                  | Salt for PII hashing (≥32 chars, required in prod)          | —                         |
+   | `BIOETL_PII_SALT_NEXT`                     | Next salt for rotation                                      | —                         |
+   | `BIOETL_SALT_ROTATION_ACTIVE`              | Whether salt rotation is active                             | `false`                   |
+   | **Observability**                          |                                                             |                           |
+   | `BIOETL_LOG_LEVEL`                         | Logging level (`DEBUG`/`INFO`/`WARNING`/`ERROR`/`CRITICAL`) | `INFO`                    |
+   | `BIOETL_LOG_FORMAT`                        | Log format (`json` / `text`)                                | `json`                    |
    | `BIOETL_LOG_FILE`                          | Log file path                                               | `reports/logs/bioetl.log` |
-   | `BIOETL_METRICS_ENABLED`                   | Enable Prometheus metrics                                   | `true`            |
-   | `BIOETL_METRICS_PORT`                      | Prometheus HTTP server port                                 | `8000`            |
-   | `BIOETL_OBSERVABILITY__TRACING_ENABLED`    | Enable OpenTelemetry tracing                                | `false`           |
-   | `BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED` | Enable data quality monitoring                              | `false`           |
-   | **Data Quality**                           |                                                             |                   |
-   | `BIOETL_DQ_SOFT_THRESHOLD`                 | Warning error rate threshold                                | `0.05`            |
-   | `BIOETL_DQ_HARD_THRESHOLD`                 | Fail batch error rate threshold                             | `0.20`            |
-   | **Resilience**                             |                                                             |                   |
-   | `BIOETL_CB_FAILURE_THRESHOLD`              | Consecutive errors to open circuit breaker                  | `5`               |
-   | `BIOETL_CB_RECOVERY_TIMEOUT`               | Circuit breaker recovery timeout (seconds)                  | `300`             |
-   | `BIOETL_RETRY_MAX_ATTEMPTS`                | Maximum retry attempts                                      | `3`               |
-   | `BIOETL_RETRY_MULTIPLIER`                  | Exponential backoff multiplier                              | `2.0`             |
-   | **Delta Lake**                             |                                                             |                   |
-   | `BIOETL_DELTA_VACUUM_RETENTION`            | VACUUM retention (days)                                     | `7`               |
-   | `BIOETL_DELTA_FORENSIC_RETENTION`          | Forensic retention (days)                                   | `7`               |
-   | **Quarantine**                             |                                                             |                   |
-   | `BIOETL_QUARANTINE_RETENTION_DAYS`         | Quarantine record retention (days)                          | `30`              |
-   | `BIOETL_QUARANTINE_PAYLOAD_MAX_SIZE`       | Max payload size (bytes)                                    | `65536`           |
+   | `BIOETL_METRICS_ENABLED`                   | Enable Prometheus metrics                                   | `true`                    |
+   | `BIOETL_METRICS_PORT`                      | Prometheus HTTP server port                                 | `8000`                    |
+   | `BIOETL_OBSERVABILITY__TRACING_ENABLED`    | Enable OpenTelemetry tracing                                | `false`                   |
+   | `BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED` | Enable data quality monitoring                              | `false`                   |
+   | **Data Quality**                           |                                                             |                           |
+   | `BIOETL_DQ_SOFT_THRESHOLD`                 | Warning error rate threshold                                | `0.05`                    |
+   | `BIOETL_DQ_HARD_THRESHOLD`                 | Fail batch error rate threshold                             | `0.20`                    |
+   | **Resilience**                             |                                                             |                           |
+   | `BIOETL_CB_FAILURE_THRESHOLD`              | Consecutive errors to open circuit breaker                  | `5`                       |
+   | `BIOETL_CB_RECOVERY_TIMEOUT`               | Circuit breaker recovery timeout (seconds)                  | `300`                     |
+   | `BIOETL_RETRY_MAX_ATTEMPTS`                | Maximum retry attempts                                      | `3`                       |
+   | `BIOETL_RETRY_MULTIPLIER`                  | Exponential backoff multiplier                              | `2.0`                     |
+   | **Delta Lake**                             |                                                             |                           |
+   | `BIOETL_DELTA_VACUUM_RETENTION`            | VACUUM retention (days)                                     | `7`                       |
+   | `BIOETL_DELTA_FORENSIC_RETENTION`          | Forensic retention (days)                                   | `7`                       |
+   | **Quarantine**                             |                                                             |                           |
+   | `BIOETL_QUARANTINE_RETENTION_DAYS`         | Quarantine record retention (days)                          | `30`                      |
+   | `BIOETL_QUARANTINE_PAYLOAD_MAX_SIZE`       | Max payload size (bytes)                                    | `65536`                   |
 
    See [`.env.example`](configs/.env.example) for the full list with comments.
 

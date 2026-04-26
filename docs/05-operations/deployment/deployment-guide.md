@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # BioETL Kubernetes Deployment Guide
 
@@ -26,10 +29,10 @@ This guide covers deploying BioETL to Kubernetes with monitoring via Prometheus 
 ### Manifests Created
 
 1. **k8s-deployment.yaml** - Core BioETL application with ConfigMap and Secrets
-2. **k8s-monitoring.yaml** - Prometheus and Grafana monitoring stack
-3. **k8s-networking.yaml** - Ingress, autoscaling, network policies, and quotas
+1. **k8s-monitoring.yaml** - Prometheus and Grafana monitoring stack
+1. **k8s-networking.yaml** - Ingress, autoscaling, network policies, and quotas
 
----
+______________________________________________________________________
 
 ## Prerequisites
 
@@ -53,7 +56,7 @@ kubectl get storageclass
 kubectl get namespaces
 ```
 
----
+______________________________________________________________________
 
 ## Step 1: Build and Push Container Image
 
@@ -103,7 +106,7 @@ kubectl create secret docker-registry regcred \
 # - name: regcred
 ```
 
----
+______________________________________________________________________
 
 ## Step 2: Configure Secrets
 
@@ -132,7 +135,7 @@ BIOETL_PUBMED_EMAIL: "your@email.com"
 BIOETL_CROSSREF_EMAIL: "your@email.com"
 ```
 
----
+______________________________________________________________________
 
 ## Step 3: Create Storage Classes (if needed)
 
@@ -191,7 +194,7 @@ Then update manifests to use it:
 storageClassName: fast-ssd
 ```
 
----
+______________________________________________________________________
 
 ## Step 4: Deploy BioETL Application
 
@@ -219,7 +222,7 @@ kubectl rollout status deployment/bioetl
 kubectl get pods -l app=bioetl -w
 ```
 
----
+______________________________________________________________________
 
 ## Step 5: Deploy Monitoring Stack
 
@@ -236,7 +239,7 @@ kubectl logs -f deployment/prometheus
 kubectl logs -f deployment/grafana
 ```
 
----
+______________________________________________________________________
 
 ## Step 6: Configure Ingress & Networking
 
@@ -300,7 +303,7 @@ kubectl port-forward svc/grafana 3000:3000 &
 # Access at http://localhost:3000 (Grafana) and http://localhost:8000/metrics (BioETL)
 ```
 
----
+______________________________________________________________________
 
 ## Step 7: Verify Deployment
 
@@ -321,7 +324,7 @@ kubectl port-forward svc/grafana 3000:3000
 # Open http://localhost:3000 (login: admin / password from secret)
 ```
 
----
+______________________________________________________________________
 
 ## Scaling & Updates
 
@@ -360,7 +363,7 @@ kubectl rollout status deployment/bioetl
 kubectl rollout undo deployment/bioetl
 ```
 
----
+______________________________________________________________________
 
 ## Troubleshooting
 
@@ -411,7 +414,7 @@ kubectl port-forward svc/grafana 3000:3000
 # Settings → Data Sources
 ```
 
----
+______________________________________________________________________
 
 ## Backup & Recovery
 
@@ -442,7 +445,7 @@ kubectl cp ./backup.tar.gz default/$(kubectl get pod -l app=bioetl -o jsonpath='
 kubectl exec deployment/bioetl -- tar xzf /tmp/backup.tar.gz -C /
 ```
 
----
+______________________________________________________________________
 
 ## Production Checklist
 
@@ -463,7 +466,7 @@ kubectl exec deployment/bioetl -- tar xzf /tmp/backup.tar.gz -C /
 - [ ] Enable pod security policies
 - [ ] Set up CI/CD pipeline for automated deployments
 
----
+______________________________________________________________________
 
 ## Environment-Specific Configuration
 
@@ -498,7 +501,7 @@ resources:
     memory: 2Gi
 ```
 
----
+______________________________________________________________________
 
 ## References
 

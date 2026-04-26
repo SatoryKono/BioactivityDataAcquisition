@@ -22,8 +22,8 @@ This section contains internal implementation details and extended surfaces that
 ## Usage Guidelines
 
 1. **Primary vs Secondary**: Use the main reference documentation for published surfaces. Consult this section only when you need implementation details.
-2. **Stability**: Internal material may change without notice and is not subject to the same compatibility guarantees as published surfaces.
-3. **Audience**: Intended for maintainers, contributors, and advanced users who need to understand or modify internal implementation.
+1. **Stability**: Internal material may change without notice and is not subject to the same compatibility guarantees as published surfaces.
+1. **Audience**: Intended for maintainers, contributors, and advanced users who need to understand or modify internal implementation.
 
 ## Related Documentation
 
@@ -33,10 +33,10 @@ This section contains internal implementation details and extended surfaces that
 
 ## Document Status
 
-| Document | Status | Last Updated |
-|----------|--------|--------------|
-| composition-internal.md | Active | 2026-04-24 |
-| provider-registration-internal.md | Active | 2026-04-24 |
-| extended-ports.md | Active | 2026-04-24 |
-| internal-type-mappings.md | Active | 2026-04-24 |
-| implementation-patterns.md | Active | 2026-04-24 |
+| Document                          | Status | Last Updated |
+| --------------------------------- | ------ | ------------ |
+| composition-internal.md           | Active | 2026-04-24   |
+| provider-registration-internal.md | Active | 2026-04-24   |
+| extended-ports.md                 | Active | 2026-04-24   |
+| internal-type-mappings.md         | Active | 2026-04-24   |
+| implementation-patterns.md        | Active | 2026-04-24   |

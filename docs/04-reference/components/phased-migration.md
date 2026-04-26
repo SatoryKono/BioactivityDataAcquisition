@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Phased Migration Support
 
@@ -21,6 +24,7 @@ The Phased Migration Support system enables safe, controlled adoption of breakin
 ```python
 from dataclasses import dataclass
 from typing import Literal, Optional
+
 
 @dataclass(frozen=True)
 class MigrationPhaseConfig:
@@ -78,7 +82,9 @@ def version_compare(v1: str, v2: str) -> int:
 ### PhasedMigrationSupportService
 
 ```python
-from bioetl.domain.services.phased_migration_support import PhasedMigrationSupportService
+from bioetl.domain.services.phased_migration_support import (
+    PhasedMigrationSupportService,
+)
 
 service = PhasedMigrationSupportService()
 ```
@@ -88,9 +94,11 @@ service = PhasedMigrationSupportService()
 Gets the current migration phase and version information.
 
 **Returns:**
+
 - `MigrationStatus`: Current migration status
 
 **Example:**
+
 ```python
 status = service.get_current_migration_status()
 print(f"Current phase: {status.current_phase}")
@@ -104,13 +112,16 @@ print(f"Migration warnings: {status.migration_warnings}")
 Checks if a configuration is backward compatible with a target phase.
 
 **Parameters:**
+
 - `config`: Configuration dictionary to check
 - `target_phase`: Optional target phase name (default: current phase)
 
 **Returns:**
+
 - `dict`: Compatibility issues (empty if compatible)
 
 **Example:**
+
 ```python
 config = {"aggregation": {"group_by": ["field1"]}}
 issues = service.check_backward_compatibility(config, "v1.1")
@@ -127,14 +138,17 @@ else:
 Applies migration fallbacks to make configuration compatible with target phase.
 
 **Parameters:**
+
 - `config`: Configuration dictionary to migrate
 - `target_phase`: Target phase name
 - `fallback_behavior`: How to handle fallback issues
 
 **Returns:**
+
 - `tuple[dict, list]`: (modified_config, warnings)
 
 **Example:**
+
 ```python
 config = {"aggregation": {}}  # Missing required fields
 
@@ -154,13 +168,16 @@ process_pipeline(modified_config)
 Generates a migration guide between two phases.
 
 **Parameters:**
+
 - `from_phase`: Source phase name
 - `to_phase`: Target phase name
 
 **Returns:**
+
 - `dict`: Migration guide with steps and considerations
 
 **Example:**
+
 ```python
 guide = service.get_migration_guide("v1.0", "v1.1")
 
@@ -176,9 +193,11 @@ print(f"Deprecations: {guide['deprecations']}")
 Gets list of all supported migration phases.
 
 **Returns:**
+
 - `list[dict]`: List of supported phases with details
 
 **Example:**
+
 ```python
 phases = service.get_supported_phases()
 for phase in phases:
@@ -195,10 +214,10 @@ for phase in phases:
 class MigrationStatus:
     """Current migration status information."""
 
-    current_phase: str           # Current migration phase
+    current_phase: str  # Current migration phase
     supported_phases: list[str]  # All supported phase names
-    current_version: str         # Current version string
-    migration_warnings: list[str] # Any migration warnings
+    current_version: str  # Current version string
+    migration_warnings: list[str]  # Any migration warnings
     is_migration_mode: bool = False  # Whether in active migration
 ```
 
@@ -236,6 +255,7 @@ def safe_migrate_config(config: dict, target_version: str) -> dict:
     print("✅ Configuration is compatible")
     return config
 
+
 # Usage during pipeline initialization
 migrated_config = safe_migrate_config(original_config, "v1.1")
 process_pipeline(migrated_config)
@@ -266,15 +286,14 @@ def run_pipeline_with_version_awareness(pipeline_config: dict):
         pipeline_config = apply_v1_1_config(pipeline_config)
 
     # Check compatibility with latest version
-    latest_issues = service.check_backward_compatibility(
-        pipeline_config, "latest"
-    )
+    latest_issues = service.check_backward_compatibility(pipeline_config, "latest")
 
     if latest_issues:
         print(f"⚠️  Configuration not ready for latest version: {latest_issues}")
 
     # Run pipeline
     return execute_pipeline(pipeline_config)
+
 
 # Usage
 results = run_pipeline_with_version_awareness(base_config)
@@ -293,10 +312,10 @@ def test_migration(from_version: str, to_version: str, test_config: dict):
     # Get migration guide
     guide = service.get_migration_guide(from_version, to_version)
 
-    if guide['breaking_changes']:
+    if guide["breaking_changes"]:
         print(f"⚠️  Breaking changes: {guide['breaking_changes']}")
 
-    if guide['deprecations']:
+    if guide["deprecations"]:
         print(f"ℹ️  Deprecations: {guide['deprecations']}")
 
     # Apply migration
@@ -313,6 +332,7 @@ def test_migration(from_version: str, to_version: str, test_config: dict):
     else:
         print(f"❌ Migration failed: {validation_result.issues}")
         return False, validation_result.issues
+
 
 # Test all migration paths
 migration_tests = [
@@ -351,7 +371,7 @@ def create_rollback_plan(current_version: str) -> dict:
         "current_version": current_version,
         "fallback_versions": fallback_versions,
         "rollback_steps": [],
-        "risk_assessment": "low"
+        "risk_assessment": "low",
     }
 
     # Add rollback steps for each fallback version
@@ -360,17 +380,18 @@ def create_rollback_plan(current_version: str) -> dict:
 
         step = {
             "target_version": fallback_version,
-            "breaking_changes": guide['breaking_changes'],
-            "estimated_impact": "medium" if guide['breaking_changes'] else "low",
-            "steps": guide['steps']
+            "breaking_changes": guide["breaking_changes"],
+            "estimated_impact": "medium" if guide["breaking_changes"] else "low",
+            "steps": guide["steps"],
         }
 
-        plan['rollback_steps'].append(step)
+        plan["rollback_steps"].append(step)
 
-        if guide['breaking_changes']:
-            plan['risk_assessment'] = "high"
+        if guide["breaking_changes"]:
+            plan["risk_assessment"] = "high"
 
     return plan
+
 
 # Usage during deployment planning
 rollback_plan = create_rollback_plan("v1.2")
@@ -379,7 +400,7 @@ print(f"Current: {rollback_plan['current_version']}")
 print(f"Fallbacks: {rollback_plan['fallback_versions']}")
 print(f"Risk: {rollback_plan['risk_assessment']}")
 
-for i, step in enumerate(rollback_plan['rollback_steps'], 1):
+for i, step in enumerate(rollback_plan["rollback_steps"], 1):
     print(f"\nStep {i}: Rollback to {step['target_version']}")
     print(f"  Impact: {step['estimated_impact']}")
     print(f"  Breaking changes: {len(step['breaking_changes'])}")
@@ -392,11 +413,13 @@ for i, step in enumerate(rollback_plan['rollback_steps'], 1):
 **Use Case**: Critical security fixes, urgent bug fixes
 
 **Characteristics**:
+
 - All users migrate at once
 - No backward compatibility
 - Requires coordinated deployment
 
 **Implementation**:
+
 ```python
 # Force immediate migration
 service = PhasedMigrationSupportService()
@@ -422,32 +445,34 @@ if status.current_phase != "v2.0":
 **Use Case**: Major feature releases, architectural changes
 
 **Characteristics**:
+
 - Phased rollout over weeks/months
 - Both old and new versions supported
 - Monitoring and feedback collection
 
 **Implementation**:
+
 ```python
 # Gradual migration with monitoring
 service = PhasedMigrationSupportService()
 
 # Phase 1: Enable new version
-service.update_migration_phase({
-    "phase_name": "v2.0_gradual",
-    "start_version": "2.0.0",
-    "migration_strategy": "gradual",
-    "fallback_behavior": "warn"
-})
+service.update_migration_phase(
+    {
+        "phase_name": "v2.0_gradual",
+        "start_version": "2.0.0",
+        "migration_strategy": "gradual",
+        "fallback_behavior": "warn",
+    }
+)
 
 # Phase 2: Monitor and collect feedback
-monitoring_results = monitor_migration({
-    "old_version": "1.5.0",
-    "new_version": "2.0.0",
-    "duration": "P7D"  # 7 days
-})
+monitoring_results = monitor_migration(
+    {"old_version": "1.5.0", "new_version": "2.0.0", "duration": "P7D"}  # 7 days
+)
 
 # Phase 3: Analyze results
-if monitoring_results['error_rate'] < 0.01:
+if monitoring_results["error_rate"] < 0.01:
     # Proceed with full migration
     complete_migration()
 else:
@@ -464,22 +489,26 @@ disable_old_versions()
 **Use Case**: Experimental features, non-critical enhancements
 
 **Characteristics**:
+
 - Users opt-in to new version
 - Old version remains fully supported
 - No forced migration timeline
 
 **Implementation**:
+
 ```python
 # Optional migration with user choice
 service = PhasedMigrationSupportService()
 
 # Enable optional version
-service.add_optional_version({
-    "version": "2.1.0",
-    "description": "Experimental feature release",
-    "migration_strategy": "optional",
-    "fallback_behavior": "silent"
-})
+service.add_optional_version(
+    {
+        "version": "2.1.0",
+        "description": "Experimental feature release",
+        "migration_strategy": "optional",
+        "fallback_behavior": "silent",
+    }
+)
 
 # Let users choose version
 user_preference = get_user_preference()
@@ -514,9 +543,9 @@ Follow semantic versioning for all configurations:
 # - PATCH: Backward-compatible bug fixes
 
 versions = {
-    "breaking": "2.0.0",      # Major version bump
-    "feature": "1.5.0",       # Minor version bump
-    "bugfix": "1.4.1"        # Patch version bump
+    "breaking": "2.0.0",  # Major version bump
+    "feature": "1.5.0",  # Minor version bump
+    "bugfix": "1.4.1",  # Patch version bump
 }
 ```
 
@@ -528,7 +557,7 @@ Always maintain backward compatibility within major versions:
 # ✅ GOOD: Add new optional fields
 config_v2 = {
     **config_v1,  # Keep all v1 fields
-    "new_feature": "disabled"  # New field with safe default
+    "new_feature": "disabled",  # New field with safe default
 }
 
 # ❌ BAD: Remove or rename fields
@@ -547,18 +576,15 @@ Use formal deprecation process for removing features:
 deprecation_plan = {
     "feature": "legacy_api",
     "deprecation_version": "1.5.0",  # First marked as deprecated
-    "removal_version": "2.0.0",     # Will be removed in 2.0.0
+    "removal_version": "2.0.0",  # Will be removed in 2.0.0
     "replacement": "new_api",
     "warnings": [
         {
             "version": "1.5.0",
-            "message": "legacy_api is deprecated, use new_api instead"
+            "message": "legacy_api is deprecated, use new_api instead",
         },
-        {
-            "version": "1.6.0",
-            "message": "legacy_api will be removed in 2.0.0"
-        }
-    ]
+        {"version": "1.6.0", "message": "legacy_api will be removed in 2.0.0"},
+    ],
 }
 ```
 
@@ -573,26 +599,26 @@ migration_tests = {
         "from": "1.0.0",
         "to": "1.1.0",
         "type": "minor",
-        "expected": "automatic"
+        "expected": "automatic",
     },
     "skip_version": {
         "from": "1.0.0",
         "to": "1.2.0",
         "type": "minor_skip",
-        "expected": "automatic_with_warnings"
+        "expected": "automatic_with_warnings",
     },
     "major": {
         "from": "1.5.0",
         "to": "2.0.0",
         "type": "major",
-        "expected": "manual_with_fallbacks"
-    }
+        "expected": "manual_with_fallbacks",
+    },
 }
 
 # Run all migration tests
 for test_name, test_config in migration_tests.items():
     result = run_migration_test(test_config)
-    assert result == test_config['expected'], f"{test_name} failed"
+    assert result == test_config["expected"], f"{test_name} failed"
 ```
 
 ### 5. User Communication
@@ -608,29 +634,25 @@ announcement = {
         "announcement": "2024-04-01",
         "testing_period": "2024-04-15 to 2024-05-15",
         "migration_date": "2024-05-30",
-        "fallback_end": "2024-06-30"
+        "fallback_end": "2024-06-30",
     },
     "breaking_changes": [
         "Removed legacy_api endpoint",
-        "Changed authentication mechanism"
+        "Changed authentication mechanism",
     ],
     "migration_guide": {
         "steps": [
             "Update client libraries",
             "Test in staging environment",
-            "Deploy to production"
+            "Deploy to production",
         ],
-        "resources": [
-            "Migration documentation",
-            "API reference",
-            "Support contact"
-        ]
+        "resources": ["Migration documentation", "API reference", "Support contact"],
     },
     "support": {
         "email": "support@bioetl.org",
         "slack": "#migration-support",
-        "office_hours": "Mon-Fri 9am-5pm UTC"
-    }
+        "office_hours": "Mon-Fri 9am-5pm UTC",
+    },
 }
 ```
 
@@ -642,12 +664,14 @@ announcement = {
 # Cache migration checks to avoid repeated processing
 from functools import lru_cache
 
+
 @lru_cache(maxsize=100)
 def check_migration_cached(config_hash: str, target_phase: str) -> dict:
     """Cached migration compatibility check"""
     service = PhasedMigrationSupportService()
     config = get_config_by_hash(config_hash)
     return service.check_backward_compatibility(config, target_phase)
+
 
 # Usage
 issues = check_migration_cached("abc123", "v1.1")
@@ -667,21 +691,26 @@ def migrate_config_batch(configs: list, target_phase: str) -> list:
             migrated, warnings = service.apply_migration_fallback(
                 config, target_phase, fallback_behavior="warn"
             )
-            results.append({
-                "original": config,
-                "migrated": migrated,
-                "warnings": warnings,
-                "success": True
-            })
+            results.append(
+                {
+                    "original": config,
+                    "migrated": migrated,
+                    "warnings": warnings,
+                    "success": True,
+                }
+            )
         except Exception as e:
-            results.append({
-                "original": config,
-                "migrated": None,
-                "error": str(e),
-                "success": False
-            })
+            results.append(
+                {
+                    "original": config,
+                    "migrated": None,
+                    "error": str(e),
+                    "success": False,
+                }
+            )
 
     return results
+
 
 # Usage
 batch_results = migrate_config_batch(user_configs, "v1.1")
@@ -693,6 +722,7 @@ batch_results = migrate_config_batch(user_configs, "v1.1")
 # Use threading for independent migrations
 import concurrent.futures
 
+
 def parallel_migrate(configs: list, target_phase: str, workers: int = 4) -> list:
     """Migrate configurations in parallel"""
     service = PhasedMigrationSupportService()
@@ -702,7 +732,12 @@ def parallel_migrate(configs: list, target_phase: str, workers: int = 4) -> list
             migrated, warnings = service.apply_migration_fallback(
                 config, target_phase, fallback_behavior="warn"
             )
-            return {"config": config, "migrated": migrated, "warnings": warnings, "success": True}
+            return {
+                "config": config,
+                "migrated": migrated,
+                "warnings": warnings,
+                "success": True,
+            }
         except Exception as e:
             return {"config": config, "error": str(e), "success": False}
 
@@ -710,6 +745,7 @@ def parallel_migrate(configs: list, target_phase: str, workers: int = 4) -> list
         results = list(executor.map(migrate_one, configs))
 
     return results
+
 
 # Usage for large-scale migrations
 parallel_results = parallel_migrate(large_config_set, "v1.1", workers=8)
@@ -722,6 +758,7 @@ parallel_results = parallel_migrate(large_config_set, "v1.1", workers=8)
 #### Issue: Version Conflict
 
 **Symptoms:**
+
 - `VersionConflictError` during migration
 - Incompatible configuration versions
 - Pipeline failures after migration
@@ -729,12 +766,14 @@ parallel_results = parallel_migrate(large_config_set, "v1.1", workers=8)
 **Solutions:**
 
 1. **Check Migration Guide**:
+
 ```python
 guide = service.get_migration_guide("v1.0", "v1.1")
 print(f"Breaking changes: {guide['breaking_changes']}")
 ```
 
 2. **Apply Fallbacks**:
+
 ```python
 migrated_config, warnings = service.apply_migration_fallback(
     config, "v1.1", fallback_behavior="warn"
@@ -742,6 +781,7 @@ migrated_config, warnings = service.apply_migration_fallback(
 ```
 
 3. **Manual Intervention**:
+
 ```python
 # Manually resolve conflicts
 if warnings:
@@ -753,6 +793,7 @@ if warnings:
 #### Issue: Fallback Loop
 
 **Symptoms:**
+
 - Infinite fallback attempts
 - Configuration oscillates between versions
 - Migration never completes
@@ -760,6 +801,7 @@ if warnings:
 **Solutions:**
 
 1. **Set Fallback Limit**:
+
 ```python
 max_attempts = 3
 attempt = 0
@@ -780,6 +822,7 @@ if attempt == max_attempts:
 ```
 
 2. **Manual Resolution**:
+
 ```python
 # After max attempts, manually resolve
 final_config = manual_resolve_conflicts(config)
@@ -788,6 +831,7 @@ final_config = manual_resolve_conflicts(config)
 #### Issue: Performance Degradation
 
 **Symptoms:**
+
 - Slow migration processing
 - High CPU/memory usage
 - Timeout errors
@@ -795,22 +839,25 @@ final_config = manual_resolve_conflicts(config)
 **Solutions:**
 
 1. **Batch Processing**:
+
 ```python
 # Process in batches
 batch_size = 100
 for i in range(0, len(configs), batch_size):
-    batch = configs[i:i+batch_size]
+    batch = configs[i : i + batch_size]
     results = migrate_config_batch(batch, target_phase)
     process_results(results)
 ```
 
 2. **Parallel Processing**:
+
 ```python
 # Use parallel migration
 results = parallel_migrate(large_config_set, target_phase, workers=8)
 ```
 
 3. **Optimize Configuration**:
+
 ```python
 # Remove unnecessary fields before migration
 optimized_config = remove_deprecated_fields(config)

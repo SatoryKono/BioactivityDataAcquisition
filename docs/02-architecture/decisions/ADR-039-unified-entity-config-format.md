@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-039: Unified Entity Configuration Format
 
@@ -39,11 +42,11 @@ configs/
 ### Проблемы
 
 1. **Навигационная нагрузка**: изменение одного pipeline требует редактирования 5–7 файлов
-2. **Рассинхронизация**: изменения в schema не синхронизировались с DQ rules (разные PR)
-3. **Именование без иерархии**: файлы не группированы по принадлежности к entity
-4. **Дублирование provider/entity**: поля `provider` и `entity` повторялись в каждом файле
-5. **Сложность тестирования**: тест для одного pipeline нуждался в фикстурах из 11 путей
-6. **`config_loader.py` перегружен**: множество ad-hoc merge функций вместо единого механизма
+1. **Рассинхронизация**: изменения в schema не синхронизировались с DQ rules (разные PR)
+1. **Именование без иерархии**: файлы не группированы по принадлежности к entity
+1. **Дублирование provider/entity**: поля `provider` и `entity` повторялись в каждом файле
+1. **Сложность тестирования**: тест для одного pipeline нуждался в фикстурах из 11 путей
+1. **`config_loader.py` перегружен**: множество ad-hoc merge функций вместо единого механизма
 
 ### Катализатор
 
@@ -119,14 +122,14 @@ hash_policy:
 
 ### 2. Секции Unified Entity Config
 
-| Секция | Назначение | Соответствует |
-|--------|-----------|---------------|
-| `pipeline` | Execution settings, batch_size, DQ overrides | legacy `pipelines/{p}/{e}.yaml` |
-| `schema` | Column groups, content_hash, Silver/Gold layer filters | legacy `schemas/{p}/{e}.yaml` |
-| `quality` | Field/cross/conditional validations, key nullability | legacy `quality/entities/{p}/{e}.yaml` |
-| `filters` | Input filter, extraction params, Silver/Gold filters | legacy `filters/entities/{p}/{e}.yaml` |
-| `contracts` | PK, merge keys, rename map, hash config | legacy `contracts/pipelines/{p}/{e}.yaml` |
-| `hash_policy` | Hash algorithm details and field selection | legacy `hash_policy/{p}/{e}.yaml` |
+| Секция        | Назначение                                             | Соответствует                             |
+| ------------- | ------------------------------------------------------ | ----------------------------------------- |
+| `pipeline`    | Execution settings, batch_size, DQ overrides           | legacy `pipelines/{p}/{e}.yaml`           |
+| `schema`      | Column groups, content_hash, Silver/Gold layer filters | legacy `schemas/{p}/{e}.yaml`             |
+| `quality`     | Field/cross/conditional validations, key nullability   | legacy `quality/entities/{p}/{e}.yaml`    |
+| `filters`     | Input filter, extraction params, Silver/Gold filters   | legacy `filters/entities/{p}/{e}.yaml`    |
+| `contracts`   | PK, merge keys, rename map, hash config                | legacy `contracts/pipelines/{p}/{e}.yaml` |
+| `hash_policy` | Hash algorithm details and field selection             | legacy `hash_policy/{p}/{e}.yaml`         |
 
 ### 3. Приоритет загрузки в `load_pipeline_config()`
 
@@ -162,6 +165,7 @@ migration-only и в active runtime contract должны отбрасывать
 ```python
 def _load_unified_entity_raw(path: Path) -> dict[str, Any]:
     """Load unified entity YAML file, returning empty dict when absent."""
+
 
 def _get_unified_section(
     unified_raw: dict[str, Any], section: str
@@ -254,6 +258,7 @@ configs/
 ```
 
 **Удалённые директории** (RF-CFG-035):
+
 - legacy provider/entity pipeline directory — перенесено в `configs/entities/`
 - `configs/schemas/{providers}/` — поглощено в `configs/entities/{p}/{e}.yaml#schema` <!-- doc-lint: allow-legacy -->
 - legacy `quality/entities` directory — поглощено в `configs/entities/{p}/{e}.yaml#quality`
@@ -287,18 +292,18 @@ normalization и schema/filter/source assembly вынесены в отдель�
 ### Positive
 
 1. **5-в-1**: Один unified entity config заменяет 5–6 отдельных файлов (pipeline, schema, quality, filters, contracts)
-2. **Навигация**: Изменение entity требует редактирования одного файла вместо поиска по 9 директориям
-3. **Atomic changes**: PR для добавления поля — один файл с изменениями schema + DQ + filters
-4. **Backward compatible**: Transitional payload normalization сохраняет совместимость
+1. **Навигация**: Изменение entity требует редактирования одного файла вместо поиска по 9 директориям
+1. **Atomic changes**: PR для добавления поля — один файл с изменениями schema + DQ + filters
+1. **Backward compatible**: Transitional payload normalization сохраняет совместимость
    для legacy key shapes без возврата к legacy file-path lookup
-5. **DRY**: `provider` и `entity` объявляются один раз на уровне файла
-6. **Тестируемость**: Фикстуры для теста одного pipeline в одном файле
+1. **DRY**: `provider` и `entity` объявляются один раз на уровне файла
+1. **Тестируемость**: Фикстуры для теста одного pipeline в одном файле
 
 ### Negative
 
 1. **Большие файлы**: Unified entity config может достигать 400+ строк для сложных entity (activity: ~350 строк)
-2. **Секционный конфликт**: При merge из нескольких источников приоритет секций требует понимания алгоритма
-3. **Нормализация остаётся сложной**: Поддержка legacy/new payload shapes всё ещё
+1. **Секционный конфликт**: При merge из нескольких источников приоритет секций требует понимания алгоритма
+1. **Нормализация остаётся сложной**: Поддержка legacy/new payload shapes всё ещё
    увеличивает когнитивную нагрузку на normalization module и schema normalizers,
    хотя сам `config_loader.py` после extraction стал проще
 
@@ -307,14 +312,15 @@ normalization и schema/filter/source assembly вынесены в отдель�
 1. **Legacy file-path fallback удалён**: `load_pipeline_config()` использует только
    `configs/entities/{provider}/{entity}.yaml`; transitional compatibility остаётся
    в payload normalization, alias handling и provider/source coercion
-2. **21 standard pipelines** полностью переведены на unified format; composite pipelines (5) используют `configs/composites/` (ADR-026)
-3. **`_deep_merge()` делегирует в `config_merge()`** — унифицировано с ADR-037
+1. **21 standard pipelines** полностью переведены на unified format; composite pipelines (5) используют `configs/composites/` (ADR-026)
+1. **`_deep_merge()` делегирует в `config_merge()`** — унифицировано с ADR-037
 
 ## Alternatives Considered
 
 ### A. Только внешние файлы с ссылками
 
 Сохранить раздельные файлы, но добавить `entity.yaml` как манифест со ссылками:
+
 ```yaml
 # entity.yaml (manifest only)
 includes:
@@ -341,13 +347,13 @@ includes:
 
 ### Files Modified
 
-| Файл | Изменение |
-|------|-----------|
-| `src/bioetl/infrastructure/config_loader.py` | Сохраняет read/validate/map orchestration и compatibility wrappers для test-facing private helpers |
-| `src/bioetl/infrastructure/config/pipeline_payload_normalization.py` | Новый normalization boundary: convention defaults, filter/source merge, schema bridge, legacy/new payload coercion |
-| `tests/architecture/test_pipeline_external_schema_non_empty.py` | Добавлена `find_pipeline_config()`, поддержка unified формата |
-| `tests/unit/infrastructure/config/test_pipeline_config_legacy_normalization.py` | Закрепляет явный `read -> normalize -> validate -> map` pipeline и compatibility surface |
-| `configs/entities/{p}/{e}.yaml` | 21 unified entity configs (all standard pipelines) |
+| Файл                                                                            | Изменение                                                                                                          |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `src/bioetl/infrastructure/config_loader.py`                                    | Сохраняет read/validate/map orchestration и compatibility wrappers для test-facing private helpers                 |
+| `src/bioetl/infrastructure/config/pipeline_payload_normalization.py`            | Новый normalization boundary: convention defaults, filter/source merge, schema bridge, legacy/new payload coercion |
+| `tests/architecture/test_pipeline_external_schema_non_empty.py`                 | Добавлена `find_pipeline_config()`, поддержка unified формата                                                      |
+| `tests/unit/infrastructure/config/test_pipeline_config_legacy_normalization.py` | Закрепляет явный `read -> normalize -> validate -> map` pipeline и compatibility surface                           |
+| `configs/entities/{p}/{e}.yaml`                                                 | 21 unified entity configs (all standard pipelines)                                                                 |
 
 ### Deleted Directories (RF-CFG-035)
 
@@ -405,19 +411,19 @@ contracts:
 
 ## Changelog
 
-| Date | Author | Change |
-|------|--------|--------|
+| Date       | Author      | Change                                                 |
+| ---------- | ----------- | ------------------------------------------------------ |
 | 2026-02-24 | Claude Code | Initial version — documenting completed implementation |
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-039-unified-entity-config-format.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `declared` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status     | Evidence                                  |
+| ------------ | -------------------------------------------------------------------------- | ---------- | ----------------------------------------- |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass`     | `ADR-039-unified-entity-config-format.md` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass`     | `Accepted`                                |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `declared` | `metadata block`                          |
+| Verification | Implementation and validation expectations MUST be documented              | `pass`     | `Verification / Acceptance Criteria`      |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass`     | `References`                              |
 
 ## Rollback
 

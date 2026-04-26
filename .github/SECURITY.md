@@ -3,51 +3,58 @@
 ## Threat Model
 
 ### Data Sources
+
 BioETL integrates with the following public APIs:
+
 - **ChEMBL** — Bioactivity data from scientific literature
 - **PubChem** — Chemical compound information
 - **UniProt** — Protein sequence and functional data
 - **PubMed** — Scientific publication metadata
 
 ### Trust Boundaries
-| Boundary | Risk Level | Mitigation |
-|----------|------------|------------|
-| API responses | Medium | Schema validation, input sanitization |
-| User configuration | Low | YAML schema validation |
-| Local filesystem | Low | Path traversal prevention |
+
+| Boundary           | Risk Level | Mitigation                            |
+| ------------------ | ---------- | ------------------------------------- |
+| API responses      | Medium     | Schema validation, input sanitization |
+| User configuration | Low        | YAML schema validation                |
+| Local filesystem   | Low        | Path traversal prevention             |
 
 ### Attack Vectors
 
-| Vector | Description | Mitigation |
-|--------|-------------|------------|
-| **API Injection** | Malformed data in API responses | Strict schema validation at adapter level |
-| **Data Poisoning** | Corrupted or malicious records | Multi-layer validation (Bronze → Silver → Gold) |
-| **Secrets Exposure** | Credentials in logs/code/VCR cassettes | Environment variables, sanitization hooks |
-| **Dependency Vulnerabilities** | CVEs in third-party packages | Regular pip-audit scans, Dependabot |
+| Vector                         | Description                            | Mitigation                                      |
+| ------------------------------ | -------------------------------------- | ----------------------------------------------- |
+| **API Injection**              | Malformed data in API responses        | Strict schema validation at adapter level       |
+| **Data Poisoning**             | Corrupted or malicious records         | Multi-layer validation (Bronze → Silver → Gold) |
+| **Secrets Exposure**           | Credentials in logs/code/VCR cassettes | Environment variables, sanitization hooks       |
+| **Dependency Vulnerabilities** | CVEs in third-party packages           | Regular pip-audit scans, Dependabot             |
 
 ## Secret Management
 
 ### Environment Variables
+
 All secrets MUST follow the naming convention:
+
 ```
 BIOETL_{PROVIDER}_{KEY}
 ```
 
 Examples:
+
 - `BIOETL_CHEMBL_API_KEY`
 - `BIOETL_PUBCHEM_API_KEY`
 - `BIOETL_UNIPROT_API_KEY`
 
 ### Security Requirements
 
-| Requirement | Status |
-|-------------|--------|
-| Never commit `.env` files | ✅ Enforced via `.gitignore` |
-| VCR cassettes sanitized | ✅ `before_record` hooks remove secrets |
-| No hardcoded credentials | ✅ Checked by linting rules |
-| Secrets not in logs | ✅ Structlog filtering configured |
+| Requirement               | Status                                  |
+| ------------------------- | --------------------------------------- |
+| Never commit `.env` files | ✅ Enforced via `.gitignore`            |
+| VCR cassettes sanitized   | ✅ `before_record` hooks remove secrets |
+| No hardcoded credentials  | ✅ Checked by linting rules             |
+| Secrets not in logs       | ✅ Structlog filtering configured       |
 
 ### Loading Secrets
+
 ```python
 import os
 
@@ -75,13 +82,14 @@ api_key = "sk-1234567890"  # NEVER do this
 
 ### Validation Layers
 
-| Layer | Tool | Validation Type |
-|-------|------|-----------------|
-| **Adapters** | Custom schemas | Input format, required fields |
-| **Silver** | PyArrow/Delta | Schema enforcement, type coercion |
-| **Gold** | Pandera | Business rules, cross-field validation |
+| Layer        | Tool           | Validation Type                        |
+| ------------ | -------------- | -------------------------------------- |
+| **Adapters** | Custom schemas | Input format, required fields          |
+| **Silver**   | PyArrow/Delta  | Schema enforcement, type coercion      |
+| **Gold**     | Pandera        | Business rules, cross-field validation |
 
 ### Invalid Record Handling
+
 - Records failing validation are sent to **Quarantine**
 - Quarantine records include: original data, error details, timestamp
 - Thresholds: >5% errors = warning, >20% errors = batch failure
@@ -89,6 +97,7 @@ api_key = "sk-1234567890"  # NEVER do this
 ## Dependencies
 
 ### Security Scanning
+
 ```bash
 # Run dependency audit
 pip-audit
@@ -98,6 +107,7 @@ make security-check
 ```
 
 ### Automated Monitoring
+
 - **Dependabot alerts**: Enabled via `.github/dependabot.yml` (pip + GitHub Actions)
 - **detect-secrets**: Runs in CI (`.github/workflows/security.yml`) to prevent credential leaks
 - **pip-audit**: Runs in CI (`.github/workflows/security.yml`) for dependency vulnerability scanning
@@ -105,38 +115,44 @@ make security-check
 - **Update policy**: Security patches applied within 72 hours
 
 ### Pinned Dependencies
+
 All production dependencies are pinned in `pyproject.toml` with exact versions to ensure reproducible builds and prevent supply chain attacks.
 
 ## Reporting Vulnerabilities
 
 ### Contact
+
 - **Email**: security@example.com
 - **Response time**: 72 hours for initial acknowledgment
 
 ### Disclosure Process
+
 1. **Report** — Send details to security email (encrypted if needed)
-2. **Acknowledgment** — We respond within 72 hours
-3. **Investigation** — We assess severity and impact
-4. **Fix** — Patch developed and tested
-5. **Disclosure** — Coordinated public disclosure after fix
+1. **Acknowledgment** — We respond within 72 hours
+1. **Investigation** — We assess severity and impact
+1. **Fix** — Patch developed and tested
+1. **Disclosure** — Coordinated public disclosure after fix
 
 ### What to Include
+
 - Description of the vulnerability
 - Steps to reproduce
 - Potential impact assessment
 - Suggested fix (if any)
 
 ### Scope
-| In Scope | Out of Scope |
-|----------|--------------|
-| BioETL codebase | Third-party API security |
+
+| In Scope               | Out of Scope                   |
+| ---------------------- | ------------------------------ |
+| BioETL codebase        | Third-party API security       |
 | Configuration handling | Infrastructure not owned by us |
-| Data validation logic | Social engineering attacks |
-| Secret management | Physical security |
+| Data validation logic  | Social engineering attacks     |
+| Secret management      | Physical security              |
 
 ## Security Best Practices for Contributors
 
 ### Code Review Checklist
+
 - [ ] No hardcoded secrets or credentials
 - [ ] Input validation for external data
 - [ ] Proper error handling (no stack traces in production)
@@ -144,6 +160,7 @@ All production dependencies are pinned in `pyproject.toml` with exact versions t
 - [ ] Dependencies from trusted sources only
 
 ### Forbidden Patterns
+
 ```python
 # ❌ Hardcoded secrets
 API_KEY = "sk-secret-key-here"
@@ -159,6 +176,7 @@ httpx.get(url, verify=False)
 ```
 
 ### Recommended Patterns
+
 ```python
 # ✅ Environment variables
 api_key = os.environ["BIOETL_CHEMBL_API_KEY"]
@@ -173,6 +191,6 @@ logger.info("API key configured", has_key=bool(api_key))
 httpx.get(url)  # verify=True by default
 ```
 
----
+______________________________________________________________________
 
 *Last updated: 2025-12-25*

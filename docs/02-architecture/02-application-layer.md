@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Слой Application (Приложение)
 
@@ -103,7 +106,7 @@ compatibility aliases в defining modules и не считаются предп�
 - **`FilteredDataSource`** (`filtered_data_source.py`) — Filter wrapper для data sources
 - **`IDMappingDataSource`** (`idmapping_data_source.py`) — ID mapping wrapper
 
-Подробнее о компонентах исполнения пайплайнов см. [раздел 2.4](#24-core--ядро-исполнения-пайплайнов).
+Подробнее о компонентах исполнения пайплайнов см. [раздел 2.4](#24-core--%D1%8F%D0%B4%D1%80%D0%BE-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F-%D0%BF%D0%B0%D0%B9%D0%BF%D0%BB%D0%B0%D0%B9%D0%BD%D0%BE%D0%B2).
 
 ### 2.3. Трансформеры (Transformer DI)
 
@@ -169,12 +172,12 @@ factory = GenericPipelineFactory(
 
 **Ключевые компоненты:**
 
-| Файл                              | Компонент                   | Назначение                                                               |
-| --------------------------------- | --------------------------- | ------------------------------------------------------------------------ |
-| `runner.py`                       | `PipelineRunner`            | Оркестрирует жизненный цикл пайплайна: блокировки, чекпоинты, исполнение |
-| `batch_executor.py`               | `BatchExecutor`             | Координирует data flow: извлечение → трансформация → запись              |
+| Файл                                 | Компонент                   | Назначение                                                                         |
+| ------------------------------------ | --------------------------- | ---------------------------------------------------------------------------------- |
+| `runner.py`                          | `PipelineRunner`            | Оркестрирует жизненный цикл пайплайна: блокировки, чекпоинты, исполнение           |
+| `batch_executor.py`                  | `BatchExecutor`             | Координирует data flow: извлечение → трансформация → запись                        |
 | `../services/medallion_lifecycle.py` | `MedallionLifecycleService` | Управляет очисткой Silver/Gold слоёв по политике, VACUUM (`application/services/`) |
-| `pipeline_services.py`            | `PipelineService`           | DI bundle сервисов для PipelineRunner                                    |
+| `pipeline_services.py`               | `PipelineService`           | DI bundle сервисов для PipelineRunner                                              |
 
 **`PipelineRunner`** — координатор исполнения:
 
@@ -212,19 +215,20 @@ class PipelineService:
 Содержит компоненты для **композитных пайплайнов** — оркестрации нескольких пайплайнов для обогащения данных из разных источников. Основные классы — `CompositePipelineRunner` (оркестратор seed→enrich→merge) и `EnrichmentCoordinatorService` (параллельный fan-out enrichers).
 
 Текущая composite-specific DQ/cross-validation semantics:
+
 - `EnrichmentCrossValidator` валидирует enricher-поля относительно seed-данных до merge closeout;
 - при `ENRICHER_ERROR` он nullify-ит enricher-prefixed columns и добавляет `_cv_*` metadata columns;
 - эта семантика сейчас формализована как composite runtime behavior, а не как полностью унифицированный rule-provenance contract для всех DQ путей.
 
 **Ключевые компоненты:**
 
-| Файл/Пакет              | Компонент                       | Назначение                                                |
-| ------------------------ | ------------------------------- | --------------------------------------------------------- |
-| `runner_pkg/runner.py`   | `CompositePipelineRunner`       | Оркестрирует: seed → enrich (fan-out) → merge             |
-| `coordinator.py`         | `EnrichmentCoordinatorService`  | Параллельный запуск enrichers через asyncio.gather        |
-| `merger.py`              | `MergeService`                  | Объединение данных из разных источников (LEFT OUTER JOIN) |
-| `key_extractor.py`       | `KeyExtractorService`           | Извлечение join keys из seed pipeline                     |
-| `checkpoint/service.py`  | `CompositeCheckpointService`    | Resume после сбоя                                         |
+| Файл/Пакет              | Компонент                      | Назначение                                                |
+| ----------------------- | ------------------------------ | --------------------------------------------------------- |
+| `runner_pkg/runner.py`  | `CompositePipelineRunner`      | Оркестрирует: seed → enrich (fan-out) → merge             |
+| `coordinator.py`        | `EnrichmentCoordinatorService` | Параллельный запуск enrichers через asyncio.gather        |
+| `merger.py`             | `MergeService`                 | Объединение данных из разных источников (LEFT OUTER JOIN) |
+| `key_extractor.py`      | `KeyExtractorService`          | Извлечение join keys из seed pipeline                     |
+| `checkpoint/service.py` | `CompositeCheckpointService`   | Resume после сбоя                                         |
 
 **Workflow Composite Pipeline:**
 
@@ -239,33 +243,33 @@ Seed Pipeline → Extract Keys → [CrossRef, OpenAlex, PubMed, SemanticScholar]
 
 `CompositePipelineRunner` декомпозирован на mixins для управления сложностью:
 
-| Файл                              | Назначение                                                |
-| --------------------------------- | --------------------------------------------------------- |
-| `runner.py`                       | Главный класс `CompositePipelineRunner`                   |
-| `runner_stage_mixin.py`           | Оркестрация seed/enrich/merge стадий                      |
-| `runner_stage_enrichment_mixin.py`| Fan-out enrichment stage                                  |
-| `runner_merge_stage_mixin.py`     | Merge stage orchestration                                 |
-| `runner_observability_mixin.py`   | Metrics и tracing для composite run                       |
-| `runner_support_mixin.py`         | Вспомогательные операции (config, validation)             |
-| `runner_stage_support_mixin.py`   | Поддержка отдельных стадий                                |
-| `runner_helpers.py`               | Pure functions для runner                                 |
-| `runner_constants.py`             | Константы composite runner                                |
+| Файл                               | Назначение                                    |
+| ---------------------------------- | --------------------------------------------- |
+| `runner.py`                        | Главный класс `CompositePipelineRunner`       |
+| `runner_stage_mixin.py`            | Оркестрация seed/enrich/merge стадий          |
+| `runner_stage_enrichment_mixin.py` | Fan-out enrichment stage                      |
+| `runner_merge_stage_mixin.py`      | Merge stage orchestration                     |
+| `runner_observability_mixin.py`    | Metrics и tracing для composite run           |
+| `runner_support_mixin.py`          | Вспомогательные операции (config, validation) |
+| `runner_stage_support_mixin.py`    | Поддержка отдельных стадий                    |
+| `runner_helpers.py`                | Pure functions для runner                     |
+| `runner_constants.py`              | Константы composite runner                    |
 
 #### 2.5.2. Merger Mixin Decomposition
 
 `MergeService` декомпозирован на mixins для разделения ответственностей:
 
-| Файл                              | Назначение                                                |
-| --------------------------------- | --------------------------------------------------------- |
-| `merger.py`                       | Главный `MergeService` (координация)                      |
-| `merger_collaborators.py`         | Bundle collaborator-ов и legacy wiring bridge             |
-| `merger_collaborators.py`         | Bundle collaborator-ов и compatibility bridge              |
-| `merger_input_mixin.py`           | Чтение и подготовка входных данных                        |
-| `merger_io_mixin.py`              | I/O операции merge                                        |
-| `merger_output_mixin.py`          | Формирование результата merge                             |
-| `merger_metrics_mixin.py`         | Метрики merge операций                                    |
-| `merger_orchestration.py`         | Оркестрация merge workflow                                |
-| `merger_post_join.py`             | Post-join обработка (conflict resolution, coalesce)       |
+| Файл                      | Назначение                                          |
+| ------------------------- | --------------------------------------------------- |
+| `merger.py`               | Главный `MergeService` (координация)                |
+| `merger_collaborators.py` | Bundle collaborator-ов и legacy wiring bridge       |
+| `merger_collaborators.py` | Bundle collaborator-ов и compatibility bridge       |
+| `merger_input_mixin.py`   | Чтение и подготовка входных данных                  |
+| `merger_io_mixin.py`      | I/O операции merge                                  |
+| `merger_output_mixin.py`  | Формирование результата merge                       |
+| `merger_metrics_mixin.py` | Метрики merge операций                              |
+| `merger_orchestration.py` | Оркестрация merge workflow                          |
+| `merger_post_join.py`     | Post-join обработка (conflict resolution, coalesce) |
 
 Compatibility bridge и collaborator bundle для `MergeService` находятся в
 `merger_collaborators.py`. `merger.py` остаётся facade/orchestration entrypoint,
@@ -278,38 +282,38 @@ Compatibility bridge и collaborator bundle для `MergeService` находят
 
 **Column management:**
 
-| Файл                         | Компонент                  | Назначение                              |
-| ---------------------------- | -------------------------- | --------------------------------------- |
-| `column_orderer.py`          | `ColumnOrdererService`     | Порядок колонок в результате merge      |
-| `column_orderer_helpers.py`  | Helper functions           | Вспомогательные функции для ordering    |
-| `column_priority_orderer.py` | `ColumnPriorityOrderer`    | Priority-based column ordering          |
-| `column_renamer.py`          | `ColumnRenamerService`     | Переименование колонок (suffix removal) |
+| Файл                         | Компонент               | Назначение                              |
+| ---------------------------- | ----------------------- | --------------------------------------- |
+| `column_orderer.py`          | `ColumnOrdererService`  | Порядок колонок в результате merge      |
+| `column_orderer_helpers.py`  | Helper functions        | Вспомогательные функции для ordering    |
+| `column_priority_orderer.py` | `ColumnPriorityOrderer` | Priority-based column ordering          |
+| `column_renamer.py`          | `ColumnRenamerService`  | Переименование колонок (suffix removal) |
 
 **Join infrastructure:**
 
-| Файл                           | Компонент                    | Назначение                                |
-| ------------------------------ | ---------------------------- | ----------------------------------------- |
-| `join_planner.py`              | `JoinPlannerService`         | Планирование join операций                |
-| `join_execution.py`            | `JoinExecutorService`        | Исполнение Polars join                    |
-| `join_key_resolution.py`       | `JoinKeyResolverService`     | Разрешение join key columns               |
-| `dependency_joiner.py`         | `DependencyJoinerService`    | Join по dependency edges                  |
-| `dependency_coordinator.py`    | `DependencyCoordinatorService` | Координация dependency joins            |
-| `dependency_key_resolvers.py`  | Key resolver functions       | Разрешение ключей зависимостей            |
-| `dependency_join_support.py`   | Support utilities            | Вспомогательные функции dependency join   |
-| `dependency_progress_tracker.py` | Progress tracking          | Отслеживание прогресса dependency joins   |
-| `dependency_result_mapper.py`  | Result mapping               | Маппинг результатов dependency join       |
+| Файл                             | Компонент                      | Назначение                              |
+| -------------------------------- | ------------------------------ | --------------------------------------- |
+| `join_planner.py`                | `JoinPlannerService`           | Планирование join операций              |
+| `join_execution.py`              | `JoinExecutorService`          | Исполнение Polars join                  |
+| `join_key_resolution.py`         | `JoinKeyResolverService`       | Разрешение join key columns             |
+| `dependency_joiner.py`           | `DependencyJoinerService`      | Join по dependency edges                |
+| `dependency_coordinator.py`      | `DependencyCoordinatorService` | Координация dependency joins            |
+| `dependency_key_resolvers.py`    | Key resolver functions         | Разрешение ключей зависимостей          |
+| `dependency_join_support.py`     | Support utilities              | Вспомогательные функции dependency join |
+| `dependency_progress_tracker.py` | Progress tracking              | Отслеживание прогресса dependency joins |
+| `dependency_result_mapper.py`    | Result mapping                 | Маппинг результатов dependency join     |
 
 **Other composite services:**
 
-| Файл                         | Компонент                  | Назначение                              |
-| ---------------------------- | -------------------------- | --------------------------------------- |
-| `conflict_resolver.py`       | `ConflictResolverService`  | Разрешение конфликтов при merge         |
-| `coalesce_policy.py`         | `CoalescePolicyService`    | Coalesce стратегии (prefer_seed и др.)  |
-| `aggregator.py`              | `EnricherAggregator`       | Агрегация результатов enrichers         |
-| `cross_validator.py`         | `CrossValidatorService`    | Cross-validation merge результатов      |
-| `deduplication.py`           | `DeduplicationService`     | Дедупликация записей                    |
-| `coordinator_result_mixin.py`| Result mixin               | Формирование результата координатора    |
-| `fsm_helper.py`              | `FSMStateHelper`           | Управление FSM состояниями              |
+| Файл                          | Компонент                 | Назначение                             |
+| ----------------------------- | ------------------------- | -------------------------------------- |
+| `conflict_resolver.py`        | `ConflictResolverService` | Разрешение конфликтов при merge        |
+| `coalesce_policy.py`          | `CoalescePolicyService`   | Coalesce стратегии (prefer_seed и др.) |
+| `aggregator.py`               | `EnricherAggregator`      | Агрегация результатов enrichers        |
+| `cross_validator.py`          | `CrossValidatorService`   | Cross-validation merge результатов     |
+| `deduplication.py`            | `DeduplicationService`    | Дедупликация записей                   |
+| `coordinator_result_mixin.py` | Result mixin              | Формирование результата координатора   |
+| `fsm_helper.py`               | `FSMStateHelper`          | Управление FSM состояниями             |
 
 **Preflight validation:**
 
@@ -328,51 +332,51 @@ Compatibility bridge и collaborator bundle для `MergeService` находят
 
 **CLI Orchestration и Pipeline Run:**
 
-| Файл                              | Компонент                        | Назначение                                              |
-| --------------------------------- | -------------------------------- | ------------------------------------------------------- |
-| `cli_run_orchestration_service.py`| `CliRunOrchestrationService`     | Верхнеуровневая CLI-оркестрация запуска пайплайна       |
-| `pipeline_runner_service.py`      | `PipelineRunnerService`          | Координация запуска пайплайна (preflight→exec→postrun)  |
-| `pipeline_run_context_service.py` | `PipelineRunContextService`      | Управление run context (run_id, config, logger binding) |
-| `pipeline_run_execution_service.py`| `PipelineRunExecutionService`   | Исполнение pipeline run (batch loop)                    |
-| `pipeline_run_lifecycle_service.py`| `PipelineRunLifecycleService`   | Lifecycle hooks (pre-run, post-run, cleanup)            |
-| `pipeline_runner_models.py`       | Models                           | Модели результатов pipeline run                         |
-| `pipeline_debug_service.py`       | `PipelineDebugService`           | Debug logging для pipeline execution                    |
+| Файл                                | Компонент                     | Назначение                                              |
+| ----------------------------------- | ----------------------------- | ------------------------------------------------------- |
+| `cli_run_orchestration_service.py`  | `CliRunOrchestrationService`  | Верхнеуровневая CLI-оркестрация запуска пайплайна       |
+| `pipeline_runner_service.py`        | `PipelineRunnerService`       | Координация запуска пайплайна (preflight→exec→postrun)  |
+| `pipeline_run_context_service.py`   | `PipelineRunContextService`   | Управление run context (run_id, config, logger binding) |
+| `pipeline_run_execution_service.py` | `PipelineRunExecutionService` | Исполнение pipeline run (batch loop)                    |
+| `pipeline_run_lifecycle_service.py` | `PipelineRunLifecycleService` | Lifecycle hooks (pre-run, post-run, cleanup)            |
+| `pipeline_runner_models.py`         | Models                        | Модели результатов pipeline run                         |
+| `pipeline_debug_service.py`         | `PipelineDebugService`        | Debug logging для pipeline execution                    |
 
 **Metadata и Medallion Lifecycle:**
 
-| Файл                           | Компонент                    | Назначение                                              |
-| ------------------------------ | ---------------------------- | ------------------------------------------------------- |
-| `medallion_lifecycle.py`       | `MedallionLifecycleService`  | Очистка Silver/Gold по политике (REBUILD/BACKFILL/INCR) |
-| `medallion_maintenance_mixin.py`| Maintenance mixin           | VACUUM и maintenance операции                           |
-| `medallion_types.py`           | Types                        | Типы для medallion lifecycle                            |
-| `metadata_coordinator.py`      | `MetadataCoordinator`        | Координация сборки метаданных                           |
-| `metadata_assemblers.py`       | Assembler functions          | Сборка Bronze/Silver/Gold метаданных                    |
-| `metadata_assemblers_helpers.py`| Helper functions            | Вспомогательные функции для assemblers                  |
+| Файл                             | Компонент                   | Назначение                                              |
+| -------------------------------- | --------------------------- | ------------------------------------------------------- |
+| `medallion_lifecycle.py`         | `MedallionLifecycleService` | Очистка Silver/Gold по политике (REBUILD/BACKFILL/INCR) |
+| `medallion_maintenance_mixin.py` | Maintenance mixin           | VACUUM и maintenance операции                           |
+| `medallion_types.py`             | Types                       | Типы для medallion lifecycle                            |
+| `metadata_coordinator.py`        | `MetadataCoordinator`       | Координация сборки метаданных                           |
+| `metadata_assemblers.py`         | Assembler functions         | Сборка Bronze/Silver/Gold метаданных                    |
+| `metadata_assemblers_helpers.py` | Helper functions            | Вспомогательные функции для assemblers                  |
 
 **Data Quality:**
 
-| Файл                           | Компонент                    | Назначение                                              |
-| ------------------------------ | ---------------------------- | ------------------------------------------------------- |
-| `data_quality_service.py`      | `DataQualityService`         | Оркестрация DQ-анализа Bronze/Silver/Gold               |
-| `dq_report_service.py`         | `DQReportService`            | Формирование и запись DQ-отчётов                        |
-| `dq_report_generation_mixin.py`| Report generation mixin     | Генерация DQ-отчётов                                    |
-| `dq_report_models.py`          | Models                       | Модели DQ-отчётов                                       |
-| `dq/`                          | DQ subpackage                | Специализированные DQ-компоненты                        |
+| Файл                            | Компонент               | Назначение                                |
+| ------------------------------- | ----------------------- | ----------------------------------------- |
+| `data_quality_service.py`       | `DataQualityService`    | Оркестрация DQ-анализа Bronze/Silver/Gold |
+| `dq_report_service.py`          | `DQReportService`       | Формирование и запись DQ-отчётов          |
+| `dq_report_generation_mixin.py` | Report generation mixin | Генерация DQ-отчётов                      |
+| `dq_report_models.py`           | Models                  | Модели DQ-отчётов                         |
+| `dq/`                           | DQ subpackage           | Специализированные DQ-компоненты          |
 
 **Other Services:**
 
-| Файл                      | Компонент            | Назначение                                        |
-| ------------------------- | -------------------- | ------------------------------------------------- |
-| `health_service.py`       | `HealthService`      | Агрегация health-статусов адаптеров и сервисов    |
-| `export_service.py`       | `ExportService`      | Экспорт Gold-данных в CSV/Parquet по запросу       |
-| `export_models.py`        | Models               | Модели для export операций                         |
-| `config_service.py`       | `ConfigService`      | Загрузка и валидация конфигураций                  |
-| `metrics_service.py`      | `MetricsService`     | Управление метриками pipeline run                  |
-| `lock_service.py`         | `LockService`        | Оркестрация блокировок pipeline                    |
-| `checkpoint_service.py`   | `CheckpointService`  | Управление чекпоинтами                             |
-| `quarantine_service.py`   | `QuarantineService`  | Обработка quarantine записей                       |
-| `shutdown_service.py`     | `ShutdownService`    | Graceful shutdown                                  |
-| `bronze_cleanup_service.py`| `BronzeCleanupService` | Очистка Bronze данных                           |
+| Файл                        | Компонент              | Назначение                                     |
+| --------------------------- | ---------------------- | ---------------------------------------------- |
+| `health_service.py`         | `HealthService`        | Агрегация health-статусов адаптеров и сервисов |
+| `export_service.py`         | `ExportService`        | Экспорт Gold-данных в CSV/Parquet по запросу   |
+| `export_models.py`          | Models                 | Модели для export операций                     |
+| `config_service.py`         | `ConfigService`        | Загрузка и валидация конфигураций              |
+| `metrics_service.py`        | `MetricsService`       | Управление метриками pipeline run              |
+| `lock_service.py`           | `LockService`          | Оркестрация блокировок pipeline                |
+| `checkpoint_service.py`     | `CheckpointService`    | Управление чекпоинтами                         |
+| `quarantine_service.py`     | `QuarantineService`    | Обработка quarantine записей                   |
+| `shutdown_service.py`       | `ShutdownService`      | Graceful shutdown                              |
+| `bronze_cleanup_service.py` | `BronzeCleanupService` | Очистка Bronze данных                          |
 
 Сервисы инжектируются через DI в `PipelineRunner` и `CompositeRunner` из слоя `composition/`.
 
@@ -382,7 +386,7 @@ Compatibility bridge и collaborator bundle для `MergeService` находят
 - **Минимум логики:** Слой `Application` должен быть "тонким". Вся сложная бизнес-логика выносится в `Domain`, а детали реализации — в `Infrastructure`.
 - **Управление транзакциями:** Этот слой отвечает за управление жизненным циклом операций, включая обработку ошибок, повторные попытки и откат в случае сбоя.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 4. Связанные Материалы
 
@@ -394,15 +398,15 @@ Compatibility bridge и collaborator bundle для `MergeService` находят
 
 ### Связанные Диаграммы
 
-| Диаграмма                 | Файл                                                                                                                 | Описание                                 |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| Application Layer Classes | [06-application-layer-class-diagram.mermaid](diagrams/foundation/06-application-layer-class-diagram.mmd)            | Классы слоя Application                  |
-| Pipeline Execution        | [06-pipeline-execution.mermaid](diagrams/foundation/06-pipeline-execution.mmd)                                      | Поток выполнения пайплайна               |
-| Pipeline Hierarchy        | [17-pipeline-hierarchy.mermaid](diagrams/foundation/17-pipeline-hierarchy.mmd)                                      | Иерархия Pipeline/Transformer            |
-| Layers Interaction        | [05-layers-interaction.mermaid](diagrams/foundation/05-layers-interaction.mmd)                                      | Взаимодействие слоёв (включая Composite) |
-| Composite Pipeline        | [29-composite-pipeline-workflow.mermaid](diagrams/foundation/29-composite-pipeline-workflow.mmd)                     | Workflow Composite Pipeline              |
-| Pipeline Core             | [40-application-core-collaboration.mermaid](diagrams/foundation/40-application-core-collaboration.mmd)              | Ядро пайплайнов                          |
-| BaseTransformer           | [09-transformers.mermaid](diagrams/class-diagrams/09-transformers.mmd)                    | Template Method паттерн                  |
+| Диаграмма                 | Файл                                                                                                     | Описание                                 |
+| ------------------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Application Layer Classes | [06-application-layer-class-diagram.mermaid](diagrams/foundation/06-application-layer-class-diagram.mmd) | Классы слоя Application                  |
+| Pipeline Execution        | [06-pipeline-execution.mermaid](diagrams/foundation/06-pipeline-execution.mmd)                           | Поток выполнения пайплайна               |
+| Pipeline Hierarchy        | [17-pipeline-hierarchy.mermaid](diagrams/foundation/17-pipeline-hierarchy.mmd)                           | Иерархия Pipeline/Transformer            |
+| Layers Interaction        | [05-layers-interaction.mermaid](diagrams/foundation/05-layers-interaction.mmd)                           | Взаимодействие слоёв (включая Composite) |
+| Composite Pipeline        | [29-composite-pipeline-workflow.mermaid](diagrams/foundation/29-composite-pipeline-workflow.mmd)         | Workflow Composite Pipeline              |
+| Pipeline Core             | [40-application-core-collaboration.mermaid](diagrams/foundation/40-application-core-collaboration.mmd)   | Ядро пайплайнов                          |
+| BaseTransformer           | [09-transformers.mermaid](diagrams/class-diagrams/09-transformers.mmd)                                   | Template Method паттерн                  |
 
 ### Связанные ADR
 

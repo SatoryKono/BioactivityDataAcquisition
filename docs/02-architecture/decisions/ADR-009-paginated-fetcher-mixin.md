@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-009: PaginatedFetcherMixin Design
 
@@ -23,9 +26,9 @@ All data source adapters (ChEMBL, PubChem, UniProt) implement pagination, but ea
 We have implemented **`PaginatedFetcherMixin`** in `infrastructure/adapters/http/pagination.py`:
 
 1. **Mixin pattern**: Composable with any HTTP adapter
-2. **Callback-based**: Adapter provides fetch function, mixin handles loop
-3. **Generator-based**: Yields items lazily via `AsyncIterator`
-4. **Global limit support**: Stops across page boundaries
+1. **Callback-based**: Adapter provides fetch function, mixin handles loop
+1. **Generator-based**: Yields items lazily via `AsyncIterator`
+1. **Global limit support**: Stops across page boundaries
 
 ## Design
 
@@ -59,6 +62,7 @@ async def fetch-page(cursor: Any | None, fetched: int) -> tuple[list[T], Any | N
 ### 1. DRY Principle
 
 Before (duplicated in each adapter):
+
 ```python
 # ChEMBL adapter
 async def fetch(self, watermark, limit):
@@ -82,6 +86,7 @@ async def fetch(self, watermark, limit):
 ```
 
 After (shared loop logic):
+
 ```python
 class ChEMBLAdapter(PaginatedFetcherMixin):
     async def fetch(self, watermark, limit):
@@ -117,6 +122,7 @@ async def -fetch-page(self, cursor, fetched):
 ### 4. Generator-Based Memory Efficiency
 
 Using `AsyncIterator` instead of collecting all items:
+
 - Constant memory regardless of dataset size
 - Enables streaming to Bronze layer
 - Natural backpressure via async iteration
@@ -137,12 +143,12 @@ This protocol enables type checking for fetch functions without requiring inheri
 
 ## Pagination Patterns Supported
 
-| API | Cursor Type | Example |
-|-----|-------------|---------|
-| ChEMBL | Offset (int) | `offset=1000` |
-| PubChem | Page token (str) | `ListKey=xyz123` |
-| UniProt | URL (str) | `https://api.../next` |
-| Generic | Any | Adapter-defined |
+| API     | Cursor Type      | Example               |
+| ------- | ---------------- | --------------------- |
+| ChEMBL  | Offset (int)     | `offset=1000`         |
+| PubChem | Page token (str) | `ListKey=xyz123`      |
+| UniProt | URL (str)        | `https://api.../next` |
+| Generic | Any              | Adapter-defined       |
 
 The mixin is agnostic to cursor type—it just passes through.
 
@@ -157,6 +163,7 @@ class PaginatedAdapter(ABC):
 ```
 
 Rejected because:
+
 - Forces single inheritance
 - Doesn't compose well with other mixins
 - Tighter coupling than needed
@@ -170,6 +177,7 @@ async def fetch(self, watermark, limit):
 ```
 
 Rejected because:
+
 - Magic behavior hidden in decorator
 - Harder to debug
 - Less explicit control flow
@@ -182,6 +190,7 @@ async def paginated-fetch(fetcher, fetch-func, limit):
 ```
 
 Considered but mixin preferred because:
+
 - Cleaner API for adapters (`self.paginated-fetch(...)`)
 - Can access adapter state if needed
 - More idiomatic for class-based adapters
@@ -189,6 +198,7 @@ Considered but mixin preferred because:
 ## Consequences
 
 ### Positive
+
 - Single implementation of pagination logic
 - Consistent limit enforcement
 - Type-safe via Protocol
@@ -196,6 +206,7 @@ Considered but mixin preferred because:
 - Easy to test (mock fetch-func)
 
 ### Negative
+
 - **Mixin complexity**: Mixins can make class hierarchies harder to understand. Mitigated by simple, focused interface.
 - **Callback overhead**: Slight indirection vs inline loop. Negligible compared to network I/O.
 
@@ -204,14 +215,14 @@ Considered but mixin preferred because:
 ```python
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 
+
 class UniProtAdapter(PaginatedFetcherMixin):
     async def fetch(
         self, watermark: Watermark | None, limit: int | None
     ) -> AsyncIterator[dict]:
         async def fetch_page(offset: int | None, fetched: int):
             page = await self.client.get(
-                "/uniprotkb/search",
-                params={"cursor": offset, "size": self.page_size}
+                "/uniprotkb/search", params={"cursor": offset, "size": self.page_size}
             )
             items = page.json()["results"]
             next_cursor = page.headers.get("x-next-cursor")
@@ -232,13 +243,13 @@ class UniProtAdapter(PaginatedFetcherMixin):
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-009-paginated-fetcher-mixin.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                             |
+| ------------ | -------------------------------------------------------------------------- | ------ | ------------------------------------ |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-009-paginated-fetcher-mixin.md` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                           |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                     |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria` |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                         |
 
 ## Rollout
 

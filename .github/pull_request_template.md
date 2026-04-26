@@ -34,6 +34,7 @@
 ## Architecture verification evidence
 
 <!-- Required for architecture/debt/gate/refactor changes. -->
+
 <!-- Record concrete before/after values and the exact gates you ran. -->
 
 - Before metrics:

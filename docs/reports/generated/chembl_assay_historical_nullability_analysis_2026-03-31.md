@@ -68,45 +68,45 @@ Inference:
 
 ## Field Analysis
 
-| Field | Current Nullable | Completeness | Observed Types | Normalization Opportunities | Validation Opportunities | Recommendation | Risk |
-| --- | --- | ---: | --- | --- | --- | --- | --- |
-| `assay_id` | `False` | `100%` | `str` | Already normalized via alias support from `assay_chembl_id`; optional trim guard only | Keep ChEMBL ID regex | Keep as-is | Low |
-| `description` | `False` | `100%` | `str` | Optional trim and whitespace collapse | Optional minimum-length or non-blank guard | Keep as-is | Low |
-| `assay_type` | `False` | `100%` | `str` | Trim and uppercase controlled vocabulary normalization | Existing enum is good; keep strict enum | Keep as-is | Low |
-| `assay_type_description` | `True` | `100%` | `str` | Controlled label normalization or derive from `assay_type` | Enum or cross-field consistency with `assay_type` | Safe candidate; tighten after adding consistency test | Low |
-| `assay_test_type` | `True` | `0%` | none | None until field appears historically | Existing optional enum is enough | Keep nullable | Low |
-| `assay_category` | `True` | `0%` | none | None until field appears historically | Existing optional enum is enough | Keep nullable | Low |
-| `assay_group` | `True` | `0%` | none | None until field appears historically | Free-text only if field starts appearing | Keep nullable | Low |
-| `assay_organism` | `True` | `97.27%` | `str` | ChEMBL organism display normalization, whitespace collapse, trailing annotation cleanup | Cross-check with `assay_taxonomy_id` when both exist | Keep nullable; normalization now implemented, no tightening yet | Medium |
-| `assay_taxonomy_id` | `True` | `97.27%` | `int` | Already validated through `validate_taxonomy_id` | Nullable integer semantics are good; improve physical dtype | Keep nullable; type cleanup candidate | Medium |
-| `assay_strain` | `True` | `0%` | none | None until field appears historically | None now | Keep nullable | Low |
-| `assay_tissue` | `True` | `8.18%` | `str` | Trim, whitespace normalization | Optional controlled vocabulary later if needed | Keep nullable | Low |
-| `assay_cell_type` | `True` | `33.64%` | `str` | Trim, whitespace normalization | Optional pattern or lookup later | Keep nullable | Low |
-| `assay_subcellular_fraction` | `True` | `3.64%` | `str` | Trim and case normalization | Candidate enum only after more evidence | Keep nullable | Low |
-| `target_id` | `False` | `100%` | `str` | Already source-to-silver mapped cleanly | Keep ChEMBL ID regex | Keep as-is | Low |
-| `relationship_type` | `True` | `100%` | `str` | Trim and uppercase | Existing enum is good; extraction currently fixes this to `D` | Safe candidate; tightening is extraction-conditioned | Low |
-| `relationship_description` | `True` | `100%` | `str` | Prefer deriving from `relationship_type` or canonical mapping | Add cross-field consistency with `relationship_type` | Normalize first, then tighten if still desired | Medium |
-| `confidence_score` | `True` | `100%` | `int` | Already integer-like; no extra normalization needed | Existing range is good; extraction currently constrains values to `8..9` | Safe candidate; tightening is extraction-conditioned | Low |
-| `confidence_description` | `True` | `100%` | `str` | Prefer deriving from `confidence_score` or controlled mapping | Add cross-field consistency with `confidence_score` | Normalize first, then tighten if still desired | Medium |
-| `src_id` | `True` | `100%` | `int` | Already integer-like | Candidate enum `{1}` under current ChEMBL extraction | Safe candidate but low business value | Low |
-| `src_assay_id` | `True` | `0%` | none | None until field appears | None now | Keep nullable | Low |
-| `publication_id` | `False` | `100%` | `str` | Already source-mapped from `document_chembl_id` | Keep ChEMBL ID regex; add runtime required guard | Keep non-nullable; fix filter alignment | Low |
-| `assay_pref_name` | `True` | `0%` | none | None until field appears | None now | Keep nullable | Low |
-| `score` | `True` | `0%` | none | None until field appears | Existing float coercion path is enough | Keep nullable | Low |
-| `cell_id` | `True` | `30.00%` | `str` | Trim only | Add ChEMBL ID pattern if not already enforced elsewhere | Keep nullable | Low |
-| `tissue_id` | `True` | `8.18%` | `str` | Trim only | Add ChEMBL ID pattern if not already enforced elsewhere | Keep nullable | Low |
-| `bao_format` | `False` | `100%` | `str` | BAO canonicalization to `BAO_########` | Existing BAO regex is good; runtime required guard is now aligned | Keep non-nullable; normalization implemented | Low |
-| `bao_label` | `True` | `100%` | `str` | Controlled mapping from `bao_format`; fallback trim/lower | Add cross-field consistency with `bao_format` | Normalize first, then reconsider tightening | Medium |
-| `aidx` | `True` | `100%` | `str` | Trim only | Add pattern check if semantics are known | Safe candidate, but low ROI | Low |
-| `variant_accession` | `True` | `7.27%` | derived `str` when present | Normalize UniProt-like accessions if needed | Add accession pattern if business use increases | Keep nullable | Low |
-| `variant_isoform` | `True` | `0%` | none | None now | None now | Keep nullable | Low |
-| `variant_mutation` | `True` | `7.27%` | `str` | Trim and mutation notation normalization later | Optional mutation pattern checks | Keep nullable | Low |
-| `variant_organism` | `True` | `7.27%` | `str` | Reuse ChEMBL organism normalization helper | Optional consistency with `variant_taxonomy_id` | Keep nullable | Low |
-| `variant_sequence` | `True` | `7.27%` | `str` after flattening | Uppercase amino acid sequence normalization if needed | Optional amino-acid alphabet check | Keep nullable | Low |
-| `variant_taxonomy_id` | `True` | `7.27%` | `int` | Already validated through `validate_taxonomy_id` | Improve physical dtype to nullable integer | Keep nullable; type cleanup candidate | Low |
-| `variant_sequence_json` | `True` | `7.27%` | JSON string after serialization | None beyond serialization | Optional JSON-shape regression tests | Keep nullable | Low |
-| `assay_classifications` | `True` | `100%` | raw `list`, serialized JSON string in silver | Serialization already stable | Optional JSON-shape or list-shape checks only | Keep nullable; semantic payload is optional despite structural presence | Low |
-| `assay_parameters` | `True` | `100%` | raw `list`, serialized JSON string in silver | Serialization already stable | Optional JSON-shape or list-shape checks only | Keep nullable; semantic payload is optional despite structural presence | Low |
+| Field                        | Current Nullable | Completeness | Observed Types                               | Normalization Opportunities                                                             | Validation Opportunities                                                 | Recommendation                                                          | Risk   |
+| ---------------------------- | ---------------- | -----------: | -------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------- | ------ |
+| `assay_id`                   | `False`          |       `100%` | `str`                                        | Already normalized via alias support from `assay_chembl_id`; optional trim guard only   | Keep ChEMBL ID regex                                                     | Keep as-is                                                              | Low    |
+| `description`                | `False`          |       `100%` | `str`                                        | Optional trim and whitespace collapse                                                   | Optional minimum-length or non-blank guard                               | Keep as-is                                                              | Low    |
+| `assay_type`                 | `False`          |       `100%` | `str`                                        | Trim and uppercase controlled vocabulary normalization                                  | Existing enum is good; keep strict enum                                  | Keep as-is                                                              | Low    |
+| `assay_type_description`     | `True`           |       `100%` | `str`                                        | Controlled label normalization or derive from `assay_type`                              | Enum or cross-field consistency with `assay_type`                        | Safe candidate; tighten after adding consistency test                   | Low    |
+| `assay_test_type`            | `True`           |         `0%` | none                                         | None until field appears historically                                                   | Existing optional enum is enough                                         | Keep nullable                                                           | Low    |
+| `assay_category`             | `True`           |         `0%` | none                                         | None until field appears historically                                                   | Existing optional enum is enough                                         | Keep nullable                                                           | Low    |
+| `assay_group`                | `True`           |         `0%` | none                                         | None until field appears historically                                                   | Free-text only if field starts appearing                                 | Keep nullable                                                           | Low    |
+| `assay_organism`             | `True`           |     `97.27%` | `str`                                        | ChEMBL organism display normalization, whitespace collapse, trailing annotation cleanup | Cross-check with `assay_taxonomy_id` when both exist                     | Keep nullable; normalization now implemented, no tightening yet         | Medium |
+| `assay_taxonomy_id`          | `True`           |     `97.27%` | `int`                                        | Already validated through `validate_taxonomy_id`                                        | Nullable integer semantics are good; improve physical dtype              | Keep nullable; type cleanup candidate                                   | Medium |
+| `assay_strain`               | `True`           |         `0%` | none                                         | None until field appears historically                                                   | None now                                                                 | Keep nullable                                                           | Low    |
+| `assay_tissue`               | `True`           |      `8.18%` | `str`                                        | Trim, whitespace normalization                                                          | Optional controlled vocabulary later if needed                           | Keep nullable                                                           | Low    |
+| `assay_cell_type`            | `True`           |     `33.64%` | `str`                                        | Trim, whitespace normalization                                                          | Optional pattern or lookup later                                         | Keep nullable                                                           | Low    |
+| `assay_subcellular_fraction` | `True`           |      `3.64%` | `str`                                        | Trim and case normalization                                                             | Candidate enum only after more evidence                                  | Keep nullable                                                           | Low    |
+| `target_id`                  | `False`          |       `100%` | `str`                                        | Already source-to-silver mapped cleanly                                                 | Keep ChEMBL ID regex                                                     | Keep as-is                                                              | Low    |
+| `relationship_type`          | `True`           |       `100%` | `str`                                        | Trim and uppercase                                                                      | Existing enum is good; extraction currently fixes this to `D`            | Safe candidate; tightening is extraction-conditioned                    | Low    |
+| `relationship_description`   | `True`           |       `100%` | `str`                                        | Prefer deriving from `relationship_type` or canonical mapping                           | Add cross-field consistency with `relationship_type`                     | Normalize first, then tighten if still desired                          | Medium |
+| `confidence_score`           | `True`           |       `100%` | `int`                                        | Already integer-like; no extra normalization needed                                     | Existing range is good; extraction currently constrains values to `8..9` | Safe candidate; tightening is extraction-conditioned                    | Low    |
+| `confidence_description`     | `True`           |       `100%` | `str`                                        | Prefer deriving from `confidence_score` or controlled mapping                           | Add cross-field consistency with `confidence_score`                      | Normalize first, then tighten if still desired                          | Medium |
+| `src_id`                     | `True`           |       `100%` | `int`                                        | Already integer-like                                                                    | Candidate enum `{1}` under current ChEMBL extraction                     | Safe candidate but low business value                                   | Low    |
+| `src_assay_id`               | `True`           |         `0%` | none                                         | None until field appears                                                                | None now                                                                 | Keep nullable                                                           | Low    |
+| `publication_id`             | `False`          |       `100%` | `str`                                        | Already source-mapped from `document_chembl_id`                                         | Keep ChEMBL ID regex; add runtime required guard                         | Keep non-nullable; fix filter alignment                                 | Low    |
+| `assay_pref_name`            | `True`           |         `0%` | none                                         | None until field appears                                                                | None now                                                                 | Keep nullable                                                           | Low    |
+| `score`                      | `True`           |         `0%` | none                                         | None until field appears                                                                | Existing float coercion path is enough                                   | Keep nullable                                                           | Low    |
+| `cell_id`                    | `True`           |     `30.00%` | `str`                                        | Trim only                                                                               | Add ChEMBL ID pattern if not already enforced elsewhere                  | Keep nullable                                                           | Low    |
+| `tissue_id`                  | `True`           |      `8.18%` | `str`                                        | Trim only                                                                               | Add ChEMBL ID pattern if not already enforced elsewhere                  | Keep nullable                                                           | Low    |
+| `bao_format`                 | `False`          |       `100%` | `str`                                        | BAO canonicalization to `BAO_########`                                                  | Existing BAO regex is good; runtime required guard is now aligned        | Keep non-nullable; normalization implemented                            | Low    |
+| `bao_label`                  | `True`           |       `100%` | `str`                                        | Controlled mapping from `bao_format`; fallback trim/lower                               | Add cross-field consistency with `bao_format`                            | Normalize first, then reconsider tightening                             | Medium |
+| `aidx`                       | `True`           |       `100%` | `str`                                        | Trim only                                                                               | Add pattern check if semantics are known                                 | Safe candidate, but low ROI                                             | Low    |
+| `variant_accession`          | `True`           |      `7.27%` | derived `str` when present                   | Normalize UniProt-like accessions if needed                                             | Add accession pattern if business use increases                          | Keep nullable                                                           | Low    |
+| `variant_isoform`            | `True`           |         `0%` | none                                         | None now                                                                                | None now                                                                 | Keep nullable                                                           | Low    |
+| `variant_mutation`           | `True`           |      `7.27%` | `str`                                        | Trim and mutation notation normalization later                                          | Optional mutation pattern checks                                         | Keep nullable                                                           | Low    |
+| `variant_organism`           | `True`           |      `7.27%` | `str`                                        | Reuse ChEMBL organism normalization helper                                              | Optional consistency with `variant_taxonomy_id`                          | Keep nullable                                                           | Low    |
+| `variant_sequence`           | `True`           |      `7.27%` | `str` after flattening                       | Uppercase amino acid sequence normalization if needed                                   | Optional amino-acid alphabet check                                       | Keep nullable                                                           | Low    |
+| `variant_taxonomy_id`        | `True`           |      `7.27%` | `int`                                        | Already validated through `validate_taxonomy_id`                                        | Improve physical dtype to nullable integer                               | Keep nullable; type cleanup candidate                                   | Low    |
+| `variant_sequence_json`      | `True`           |      `7.27%` | JSON string after serialization              | None beyond serialization                                                               | Optional JSON-shape regression tests                                     | Keep nullable                                                           | Low    |
+| `assay_classifications`      | `True`           |       `100%` | raw `list`, serialized JSON string in silver | Serialization already stable                                                            | Optional JSON-shape or list-shape checks only                            | Keep nullable; semantic payload is optional despite structural presence | Low    |
+| `assay_parameters`           | `True`           |       `100%` | raw `list`, serialized JSON string in silver | Serialization already stable                                                            | Optional JSON-shape or list-shape checks only                            | Keep nullable; semantic payload is optional despite structural presence | Low    |
 
 ## Safe Nullable Tightenings
 
@@ -290,10 +290,10 @@ Goal:
 Suggested scope:
 
 - add cross-field validation:
-  - `assay_type` <-> `assay_type_description`
-  - `relationship_type` <-> `relationship_description`
-  - `confidence_score` <-> `confidence_description`
-  - `bao_format` <-> `bao_label`
+  - `assay_type` \<-> `assay_type_description`
+  - `relationship_type` \<-> `relationship_description`
+  - `confidence_score` \<-> `confidence_description`
+  - `bao_format` \<-> `bao_label`
 - evaluate nullable integer cleanup for:
   - `assay_taxonomy_id`
   - `variant_taxonomy_id`
@@ -305,9 +305,9 @@ Risk:
 ## Recommended Rollout Order
 
 1. `PR0`: align runtime required fields for `publication_id` and `bao_format`
-2. `PR1`: tighten `assay_type_description`, `relationship_type`, `confidence_score`
-3. `PR2`: normalize `bao_format`, `bao_label`, and add controlled cross-field consistency
-4. `PR3`: type cleanup for taxonomy IDs and optional additional tightenings like `src_id` or `aidx`
+1. `PR1`: tighten `assay_type_description`, `relationship_type`, `confidence_score`
+1. `PR2`: normalize `bao_format`, `bao_label`, and add controlled cross-field consistency
+1. `PR3`: type cleanup for taxonomy IDs and optional additional tightenings like `src_id` or `aidx`
 
 ## Bottom Line
 

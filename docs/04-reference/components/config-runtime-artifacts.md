@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Configuration Runtime Artifacts
 
@@ -134,18 +137,23 @@ service = EffectiveConfigService()
 Creates an immutable configuration artifact from current configuration.
 
 **Parameters:**
+
 - `config`: Current pipeline configuration dictionary
 
 **Returns:**
+
 - `EffectiveConfigArtifact`: Immutable configuration snapshot
 
 **Example:**
+
 ```python
-artifact = service.create_artifact({
-    "pipeline_name": "chembl_molecule_etl",
-    "sources": ["chembl", "pubchem"],
-    "dq_contracts": [...]
-})
+artifact = service.create_artifact(
+    {
+        "pipeline_name": "chembl_molecule_etl",
+        "sources": ["chembl", "pubchem"],
+        "dq_contracts": [...],
+    }
+)
 ```
 
 #### serialize_config(artifact: EffectiveConfigArtifact) -> str
@@ -153,12 +161,15 @@ artifact = service.create_artifact({
 Serializes configuration artifact to JSON string.
 
 **Parameters:**
+
 - `artifact`: EffectiveConfigArtifact to serialize
 
 **Returns:**
+
 - `str`: JSON serialized configuration
 
 **Example:**
+
 ```python
 json_string = service.serialize_config(artifact)
 # Store in database or file system
@@ -169,12 +180,15 @@ json_string = service.serialize_config(artifact)
 Deserializes configuration artifact from JSON string.
 
 **Parameters:**
+
 - `json_str`: JSON serialized configuration
 
 **Returns:**
+
 - `EffectiveConfigArtifact`: Deserialized artifact
 
 **Example:**
+
 ```python
 artifact = service.deserialize_config(json_string)
 ```
@@ -184,12 +198,15 @@ artifact = service.deserialize_config(json_string)
 Computes cryptographic hash of configuration artifact.
 
 **Parameters:**
+
 - `artifact`: EffectiveConfigArtifact to hash
 
 **Returns:**
+
 - `str`: SHA-256 hash of configuration
 
 **Example:**
+
 ```python
 config_hash = service.compute_hash(artifact)
 # Use for change detection and compatibility checking
@@ -200,17 +217,19 @@ config_hash = service.compute_hash(artifact)
 Checks if saved checkpoint is compatible with current configuration.
 
 **Parameters:**
+
 - `saved_hash`: Hash of saved configuration
 - `current_config`: Current configuration dictionary
 
 **Returns:**
+
 - `bool`: True if compatible, False otherwise
 
 **Example:**
+
 ```python
 compatible = service.is_checkpoint_compatible(
-    saved_hash="a1b2c3...",
-    current_config=current_config
+    saved_hash="a1b2c3...", current_config=current_config
 )
 if not compatible:
     # Handle incompatibility (reprocess data, notify user, etc.)
@@ -222,13 +241,16 @@ if not compatible:
 Analyzes differences between two configuration artifacts.
 
 **Parameters:**
+
 - `saved_artifact`: Previous configuration artifact
 - `current_artifact`: Current configuration artifact
 
 **Returns:**
+
 - `ConfigDriftReport`: Detailed report of changes
 
 **Example:**
+
 ```python
 report = service.get_config_drift(old_artifact, new_artifact)
 if report.has_changes():
@@ -248,9 +270,11 @@ artifact = service.create_artifact(config)
 Computes the cryptographic hash of this artifact.
 
 **Returns:**
+
 - `str`: SHA-256 hash
 
 **Example:**
+
 ```python
 hash_value = artifact.compute_hash()
 ```
@@ -260,9 +284,11 @@ hash_value = artifact.compute_hash()
 Returns the pre-computed hash (if available).
 
 **Returns:**
+
 - `str`: Pre-computed hash or None
 
 **Example:**
+
 ```python
 hash_value = artifact.get_hash()
 ```
@@ -272,9 +298,11 @@ hash_value = artifact.get_hash()
 Validates the configuration artifact structure.
 
 **Returns:**
+
 - `bool`: True if valid, False otherwise
 
 **Example:**
+
 ```python
 if not artifact.validate():
     raise ValueError("Invalid configuration artifact")
@@ -285,9 +313,11 @@ if not artifact.validate():
 Returns metadata about the artifact.
 
 **Returns:**
+
 - `dict`: Metadata dictionary
 
 **Example:**
+
 ```python
 metadata = artifact.get_metadata()
 print(f"Created: {metadata['timestamp']}")
@@ -315,6 +345,7 @@ def should_reprocess_data(saved_hash: str, current_config: dict) -> bool:
 
     return False
 
+
 # Usage in pipeline
 if should_reprocess_data(saved_checkpoint_hash, current_config):
     print("⚠️  Configuration changed, reprocessing data...")
@@ -337,12 +368,12 @@ def log_configuration_version(config: dict, context: dict):
 
     # Store in version history
     version_log = {
-        "timestamp": artifact.metadata['timestamp'],
-        "pipeline": artifact.metadata['pipeline_name'],
+        "timestamp": artifact.metadata["timestamp"],
+        "pipeline": artifact.metadata["pipeline_name"],
         "hash": artifact.compute_hash(),
-        "environment": context.get('environment', 'unknown'),
-        "user": context.get('user', 'system'),
-        "config_size": len(service.serialize_config(artifact))
+        "environment": context.get("environment", "unknown"),
+        "user": context.get("user", "system"),
+        "config_size": len(service.serialize_config(artifact)),
     }
 
     # Write to version history database
@@ -350,11 +381,11 @@ def log_configuration_version(config: dict, context: dict):
 
     return version_log
 
+
 # Usage during pipeline initialization
-version_info = log_configuration_version(pipeline_config, {
-    "environment": "production",
-    "user": "pipeline-runner"
-})
+version_info = log_configuration_version(
+    pipeline_config, {"environment": "production", "user": "pipeline-runner"}
+)
 print(f"Configuration version logged: {version_info['hash']}")
 ```
 
@@ -372,16 +403,16 @@ def debug_with_artifact(issue_context: dict):
 
     # Create debug bundle
     debug_bundle = {
-        "issue_id": issue_context['issue_id'],
-        "timestamp": issue_context['timestamp'],
+        "issue_id": issue_context["issue_id"],
+        "timestamp": issue_context["timestamp"],
         "configuration": {
             "artifact": service.serialize_config(artifact),
             "hash": artifact.compute_hash(),
-            "metadata": artifact.get_metadata()
+            "metadata": artifact.get_metadata(),
         },
         "environment": get_environment_info(),
-        "logs": get_relevant_logs(issue_context['time_range']),
-        "metrics": get_relevant_metrics(issue_context['time_range'])
+        "logs": get_relevant_logs(issue_context["time_range"]),
+        "metrics": get_relevant_metrics(issue_context["time_range"]),
     }
 
     # Save debug bundle
@@ -389,15 +420,18 @@ def debug_with_artifact(issue_context: dict):
 
     return debug_bundle
 
+
 # Usage when debugging pipeline issues
 try:
     run_pipeline()
 except Exception as e:
-    debug_bundle = debug_with_artifact({
-        "issue_id": f"error-{uuid.uuid4()}",
-        "timestamp": datetime.now().isoformat(),
-        "time_range": "PT1H"  # Last 1 hour
-    })
+    debug_bundle = debug_with_artifact(
+        {
+            "issue_id": f"error-{uuid.uuid4()}",
+            "timestamp": datetime.now().isoformat(),
+            "time_range": "PT1H",  # Last 1 hour
+        }
+    )
     print(f"🐛 Debug bundle created: {debug_bundle['issue_id']}")
     raise  # Re-raise exception after creating debug bundle
 ```
@@ -425,12 +459,14 @@ def rollback_configuration(target_hash: str):
     current_artifact = service.create_artifact(current_config)
 
     # Log rollback event
-    log_rollback_event({
-        "from_hash": current_artifact.compute_hash(),
-        "to_hash": target_hash,
-        "timestamp": datetime.now().isoformat(),
-        "user": get_current_user()
-    })
+    log_rollback_event(
+        {
+            "from_hash": current_artifact.compute_hash(),
+            "to_hash": target_hash,
+            "timestamp": datetime.now().isoformat(),
+            "user": get_current_user(),
+        }
+    )
 
     # Apply new configuration
     apply_pipeline_config(target_artifact)
@@ -439,8 +475,9 @@ def rollback_configuration(target_hash: str):
         "success": True,
         "from_hash": current_artifact.compute_hash(),
         "to_hash": target_hash,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
+
 
 # Usage for configuration rollback
 rollback_result = rollback_configuration("a1b2c3...previous_hash...")
@@ -492,13 +529,16 @@ def on_config_change(new_config: dict):
     artifact = service.create_artifact(new_config)
 
     # Store in history database
-    save_to_config_history({
-        "hash": artifact.compute_hash(),
-        "timestamp": datetime.now().isoformat(),
-        "config": service.serialize_config(artifact),
-        "user": get_current_user(),
-        "context": get_change_context()
-    })
+    save_to_config_history(
+        {
+            "hash": artifact.compute_hash(),
+            "timestamp": datetime.now().isoformat(),
+            "config": service.serialize_config(artifact),
+            "user": get_current_user(),
+            "context": get_change_context(),
+        }
+    )
+
 
 # Call on every configuration change
 on_config_change(new_pipeline_config)
@@ -520,6 +560,7 @@ def safe_load_checkpoint(checkpoint_hash: str):
         print("⚠️  Checkpoint incompatible, reprocessing...")
         return reprocess_data()
 
+
 # Always use safe loading
 data = safe_load_checkpoint(saved_hash)
 ```
@@ -532,6 +573,7 @@ data = safe_load_checkpoint(saved_hash)
 # Cache configuration artifacts to avoid repeated parsing
 from functools import lru_cache
 
+
 @lru_cache(maxsize=100)
 def get_cached_artifact(config_dict: frozenset) -> EffectiveConfigArtifact:
     """Cache artifacts based on frozen config dictionary"""
@@ -539,6 +581,7 @@ def get_cached_artifact(config_dict: frozenset) -> EffectiveConfigArtifact:
     # Convert dict to frozenset for hashability
     frozen_config = frozenset(config_dict.items())
     return service.create_artifact(dict(frozen_config))
+
 
 # Usage
 config = {"batch_size": 1000, "sources": ["chembl"]}
@@ -557,22 +600,27 @@ def process_config_batch(configs: list) -> list:
     for config in configs:
         try:
             artifact = service.create_artifact(config)
-            results.append({
-                "config": config,
-                "artifact": artifact,
-                "hash": artifact.compute_hash(),
-                "valid": artifact.validate()
-            })
+            results.append(
+                {
+                    "config": config,
+                    "artifact": artifact,
+                    "hash": artifact.compute_hash(),
+                    "valid": artifact.validate(),
+                }
+            )
         except Exception as e:
-            results.append({
-                "config": config,
-                "error": str(e),
-                "artifact": None,
-                "hash": None,
-                "valid": False
-            })
+            results.append(
+                {
+                    "config": config,
+                    "error": str(e),
+                    "artifact": None,
+                    "hash": None,
+                    "valid": False,
+                }
+            )
 
     return results
+
 
 # Usage
 batch_results = process_config_batch([config1, config2, config3])
@@ -585,6 +633,7 @@ batch_results = process_config_batch([config1, config2, config3])
 #### Issue: Configuration Hash Mismatch
 
 **Symptoms:**
+
 - Checkpoint compatibility failures
 - "Configuration changed" warnings
 - Unexpected reprocessing
@@ -592,6 +641,7 @@ batch_results = process_config_batch([config1, config2, config3])
 **Solutions:**
 
 1. **Regenerate Artifacts**:
+
 ```python
 # Force regenerate both artifacts and compare
 current_artifact = service.create_artifact(current_config)
@@ -605,14 +655,18 @@ print(f"Saved: {saved_hash}")
 ```
 
 2. **Check for Uncommitted Changes**:
+
 ```bash
 # Check git status for uncommitted config changes
 git status configs/
 ```
 
 3. **Review Migration Status**:
+
 ```python
-from bioetl.domain.services.phased_migration_support import PhasedMigrationSupportService
+from bioetl.domain.services.phased_migration_support import (
+    PhasedMigrationSupportService,
+)
 
 service = PhasedMigrationSupportService()
 status = service.get_current_migration_status()
@@ -623,6 +677,7 @@ print(f"Migration warnings: {status.migration_warnings}")
 #### Issue: Serialization Errors
 
 **Symptoms:**
+
 - `JSONSerializationError`
 - Corrupted configuration artifacts
 - Deserialization failures
@@ -630,6 +685,7 @@ print(f"Migration warnings: {status.migration_warnings}")
 **Solutions:**
 
 1. **Validate Before Serialization**:
+
 ```python
 artifact = service.create_artifact(config)
 if not artifact.validate():
@@ -639,34 +695,40 @@ json_string = service.serialize_config(artifact)
 ```
 
 2. **Use Canonical JSON**:
+
 ```python
 # Ensure consistent serialization
 import json
 
+
 def canonical_json(obj: dict) -> str:
     """Serialize with consistent formatting"""
-    return json.dumps(obj, sort_keys=True, indent=2, separators=(',', ': '))
+    return json.dumps(obj, sort_keys=True, indent=2, separators=(",", ": "))
+
 
 config_json = canonical_json(config_dict)
 ```
 
 3. **Handle Large Configurations**:
+
 ```python
 # For large configs, use streaming or chunked processing
 CHUNK_SIZE = 1024 * 1024  # 1MB chunks
+
 
 def serialize_large_config(artifact: EffectiveConfigArtifact, file_path: str):
     """Serialize large config to file in chunks"""
     json_str = service.serialize_config(artifact)
 
-    with open(file_path, 'w') as f:
+    with open(file_path, "w") as f:
         for i in range(0, len(json_str), CHUNK_SIZE):
-            f.write(json_str[i:i+CHUNK_SIZE])
+            f.write(json_str[i : i + CHUNK_SIZE])
 ```
 
 #### Issue: Performance Degradation
 
 **Symptoms:**
+
 - Slow configuration loading
 - High memory usage
 - Pipeline delays
@@ -674,9 +736,11 @@ def serialize_large_config(artifact: EffectiveConfigArtifact, file_path: str):
 **Solutions:**
 
 1. **Enable Caching**:
+
 ```python
 # Cache frequently used configurations
 from functools import lru_cache
+
 
 @lru_cache(maxsize=50)
 def get_cached_config(config_id: str) -> EffectiveConfigArtifact:
@@ -686,10 +750,11 @@ def get_cached_config(config_id: str) -> EffectiveConfigArtifact:
 ```
 
 2. **Lazy Loading**:
+
 ```python
 # Load configuration only when needed
 def get_config_lazy(config_id: str):
-    if not hasattr(get_config_lazy, 'cache'):
+    if not hasattr(get_config_lazy, "cache"):
         get_config_lazy.cache = {}
 
     if config_id not in get_config_lazy.cache:
@@ -699,6 +764,7 @@ def get_config_lazy(config_id: str):
 ```
 
 3. **Optimize Validation**:
+
 ```python
 # Skip validation for trusted configurations
 artifact = service.create_artifact(config, validate=False)

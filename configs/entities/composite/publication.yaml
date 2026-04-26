@@ -92,25 +92,25 @@ quality:
     - composite_id
     - title
     - publication_date
-  
+
 # Loading strategy
 loading:
   strategy: full_scan_only
   batch_size: 1000
-  
+
 # Field mapping and resolution rules
 field_resolution:
   title:
     strategy: priority
     sources: [pubmed, chembl, openalex, semanticscholar]
-  
+
   abstract:
     strategy: priority
     sources: [pubmed, openalex, chembl]
-    
+
   publication_date:
     strategy: earliest
-    
+
   authors:
     strategy: merge_unique
 
@@ -119,11 +119,11 @@ dq_rules:
   - field: composite_id
     rule: not_null
     severity: critical
-  
+
   - field: title
     rule: not_null
     severity: high
-    
+
   - field: publication_date
     rule: valid_date
     severity: medium

@@ -79,5 +79,5 @@
 ## Top Insights
 
 1. The architecture is best understood as Hexagonal structure plus Medallion data flow, with DDD and DI supplying the implementation discipline inside that frame. (EV-patterns-hexagonal-ports-and-adapters-is-explicit, EV-patterns-medallion-bronze-silver-gold-flow, EV-patterns-domain-driven-design-primitives, EV-patterns-dependency-injection-lives-in-composition)
-2. Dependency Injection is the operational keystone that keeps the larger architecture patterns practical rather than aspirational. (EV-patterns-dependency-injection-lives-in-composition)
-3. Registry/factory seams are the project’s main extensibility mechanism, but they would benefit from a clearer statement of surface hierarchy. (EV-patterns-registry-and-factory-assembly-seams)
+1. Dependency Injection is the operational keystone that keeps the larger architecture patterns practical rather than aspirational. (EV-patterns-dependency-injection-lives-in-composition)
+1. Registry/factory seams are the project’s main extensibility mechanism, but they would benefit from a clearer statement of surface hierarchy. (EV-patterns-registry-and-factory-assembly-seams)

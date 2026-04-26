@@ -43,14 +43,14 @@ plugins:
 
 ## Configuration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `enabled` | bool | `true` | Enable/disable the plugin |
-| `timeout` | int | `10` | HTTP request timeout in seconds |
-| `max_redirects` | int | `5` | Maximum redirects to follow |
-| `ignore_patterns` | list | `["localhost", "127.0.0.1"]` | Patterns to ignore |
-| `report_dir` | str | `"reports/links"` | Directory for reports |
-| `fail_on_error` | bool | `false` | Fail build on broken links |
+| Option            | Type | Default                      | Description                     |
+| ----------------- | ---- | ---------------------------- | ------------------------------- |
+| `enabled`         | bool | `true`                       | Enable/disable the plugin       |
+| `timeout`         | int  | `10`                         | HTTP request timeout in seconds |
+| `max_redirects`   | int  | `5`                          | Maximum redirects to follow     |
+| `ignore_patterns` | list | `["localhost", "127.0.0.1"]` | Patterns to ignore              |
+| `report_dir`      | str  | `"reports/links"`            | Directory for reports           |
+| `fail_on_error`   | bool | `false`                      | Fail build on broken links      |
 
 ## Usage
 
@@ -135,9 +135,10 @@ Visual status badge showing health score:
 ```
 
 Badge colors:
+
 - **Green** (≥95%): Passing
 - **Yellow** (80-95%): Warning
-- **Red** (<80%): Failing
+- **Red** (\<80%): Failing
 
 ## Examples
 
@@ -245,15 +246,19 @@ mkdocs>=1.4.0
 ### Common Issues
 
 **Issue**: Plugin not loading
+
 - **Solution**: Ensure plugin is in `mkdocs.yml` and Python path is correct
 
 **Issue**: Slow link checking
+
 - **Solution**: Increase timeout or reduce max_workers
 
 **Issue**: False positives on valid links
+
 - **Solution**: Add patterns to `ignore_patterns` or adjust timeout
 
 **Issue**: Build fails due to broken links
+
 - **Solution**: Set `fail_on_error: false` or fix broken links
 
 ### Debugging
@@ -271,10 +276,10 @@ grep "link_checker" build.log
 Contributions are welcome! Please follow these guidelines:
 
 1. **Fork the repository**
-2. **Create a feature branch**: `git checkout -b feature/your-feature`
-3. **Commit changes**: `git commit -m 'Add some feature'`
-4. **Push to branch**: `git push origin feature/your-feature`
-5. **Open a pull request**
+1. **Create a feature branch**: `git checkout -b feature/your-feature`
+1. **Commit changes**: `git commit -m 'Add some feature'`
+1. **Push to branch**: `git push origin feature/your-feature`
+1. **Open a pull request**
 
 ### Code Style
 
@@ -298,12 +303,14 @@ For issues or questions:
 ## Changelog
 
 ### v1.0.0 (2026-04-24)
+
 - Initial release
 - Basic link checking functionality
 - JSON/HTML/SVG report generation
 - MkDocs plugin integration
 
 ### Future Roadmap
+
 - v1.1.0: Advanced link analysis (anchor validation, deep linking)
 - v1.2.0: Historical trend tracking
 - v1.3.0: Webhook notifications for broken links

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 0.3.0
 Status: draft
 Class: repo-only
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last synchronized: '2026-04-08'
----
+  Last synchronized: '2026-04-08'
+
+______________________________________________________________________
 
 # D-08 Security and Compliance Dossier (Draft Sync Note)
 
@@ -41,13 +44,12 @@ D-08 фиксирует рамку будущего consolidated security/compli
 ## План синхронизации D-08
 
 1. Оставлять в D-08 только карту canonical security/compliance surfaces.
-2. Не дублировать исполняемые security checks; ссылаться на workflow и тестовые файлы.
-3. Любые изменения policy сначала вносить в `.github/SECURITY.md` и governance/runbook docs, затем отражать в D-08 как summary.
-4. При появлении нового compliance gate сначала закреплять его в CI и published docs, и только после этого добавлять в D-08.
+1. Не дублировать исполняемые security checks; ссылаться на workflow и тестовые файлы.
+1. Любые изменения policy сначала вносить в `.github/SECURITY.md` и governance/runbook docs, затем отражать в D-08 как summary.
+1. При появлении нового compliance gate сначала закреплять его в CI и published docs, и только после этого добавлять в D-08.
 
 ## Критерии промоушена в future published handbook
 
 1. Единый security/compliance glossary согласован между policy, rules, runbooks и CI checks.
-2. D-08 не содержит дублируемых нормативных таблиц и не конфликтует с `.github/SECURITY.md`.
-3. Все утверждения в D-08 трассируются к published source и проверяемым controls в CI/tests.
-
+1. D-08 не содержит дублируемых нормативных таблиц и не конфликтует с `.github/SECURITY.md`.
+1. Все утверждения в D-08 трассируются к published source и проверяемым controls в CI/tests.

@@ -5,6 +5,7 @@
 ### Option 1: Interactive Mode (Recommended for First Use)
 
 From PowerShell in project root:
+
 ```powershell
 wsl -- codex
 ```
@@ -14,11 +15,13 @@ Then type your prompt directly in the Codex terminal interface.
 ### Option 2: From WSL Terminal
 
 Open WSL:
+
 ```powershell
 wsl
 ```
 
 Then run Codex:
+
 ```bash
 cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 codex
@@ -55,16 +58,21 @@ wsl -- codex exec --full-auto "your prompt here"
 ## Troubleshooting
 
 ### "stdin is not a terminal"
+
 This happens when running Codex from a non-interactive shell. Use WSL's native terminal or PowerShell directly.
 
 ### "Codex CLI not found"
+
 Reinstall:
+
 ```bash
 wsl -- npm install -g @openai/codex
 ```
 
 ### "OpenAI API timeout"
+
 Configure proxy (if behind corporate VPN):
+
 ```bash
 wsl -- bash -c "source .wsl_proxy_env.sh && codex"
 ```
@@ -72,13 +80,13 @@ wsl -- bash -c "source .wsl_proxy_env.sh && codex"
 ## Best Workflow
 
 1. **Open PowerShell** in project root
-2. **Start WSL**: `wsl`
-3. **Navigate to project**: `cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2`
-4. **Start Codex**: `codex`
-5. **Type your prompt** and press Enter
-6. **Review the output**
-7. **Type more prompts** in the same session (optional)
-8. **Exit**: Press `Ctrl+C`
+1. **Start WSL**: `wsl`
+1. **Navigate to project**: `cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2`
+1. **Start Codex**: `codex`
+1. **Type your prompt** and press Enter
+1. **Review the output**
+1. **Type more prompts** in the same session (optional)
+1. **Exit**: Press `Ctrl+C`
 
 ## Tips
 
@@ -88,6 +96,6 @@ wsl -- bash -c "source .wsl_proxy_env.sh && codex"
 - Use `↑/↓` arrows to navigate prompt history
 - Tab key provides auto-completion
 
----
+______________________________________________________________________
 
 See `CODEX_WSL_SETUP.md` for detailed information.

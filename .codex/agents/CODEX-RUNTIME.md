@@ -11,6 +11,7 @@ available in this repository.
 `spawn_agent()` enum values.
 
 In this Codex environment, use:
+
 - `default` for orchestration, audit, planning, review, and documentation analysis
 - `explorer` for narrow read-only codebase questions
 - `worker` for isolated implementation work with an explicit write scope
@@ -30,17 +31,17 @@ spawn_agent(
 
 ## Recommended Mapping
 
-| Logical profile | Preferred Codex agent type | Notes |
-|-----------------|----------------------------|-------|
-| `py-audit-bot` | `default` | Read-only audit/review work |
-| `py-architecture-debt-bot` | `default` | Debt-reduction orchestration surface; may own `src/`/`tests/` implementation while delegating configs/docs |
-| `py-plan-bot` | `default` | Planning and decomposition |
-| `py-test-bot` | `default` or `worker` | `worker` only when editing tests |
-| `py-config-bot` | `worker` | Owns `configs/` write scope |
-| `py-debug-bot` | `worker` | Owns isolated fix scope in `src/` or `tests/` |
-| `py-doc-bot` | `worker` | Owns `docs/` / docstring edits |
-| `py-test-swarm` | `default` | L1 orchestration, delegates further |
-| `py-review-orchestrator` | `default` | L1 review orchestration |
+| Logical profile            | Preferred Codex agent type | Notes                                                                                                      |
+| -------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `py-audit-bot`             | `default`                  | Read-only audit/review work                                                                                |
+| `py-architecture-debt-bot` | `default`                  | Debt-reduction orchestration surface; may own `src/`/`tests/` implementation while delegating configs/docs |
+| `py-plan-bot`              | `default`                  | Planning and decomposition                                                                                 |
+| `py-test-bot`              | `default` or `worker`      | `worker` only when editing tests                                                                           |
+| `py-config-bot`            | `worker`                   | Owns `configs/` write scope                                                                                |
+| `py-debug-bot`             | `worker`                   | Owns isolated fix scope in `src/` or `tests/`                                                              |
+| `py-doc-bot`               | `worker`                   | Owns `docs/` / docstring edits                                                                             |
+| `py-test-swarm`            | `default`                  | L1 orchestration, delegates further                                                                        |
+| `py-review-orchestrator`   | `default`                  | L1 review orchestration                                                                                    |
 
 Repo-wide documentation audits should use the `documentation-audit` /
 `documentation-cascade-audit` skill surfaces instead of the retired
@@ -58,6 +59,7 @@ documentation-only logical profile.
 ## Output Convention
 
 When invoking a logical BioETL profile through a native Codex agent:
+
 - mention the profile file path explicitly
 - pass `task_id`, `phase` / `mode`, and `scope`
 - require the expected artifact path when the profile defines one

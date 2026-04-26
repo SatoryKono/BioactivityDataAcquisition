@@ -9,25 +9,26 @@ This directory contains historical schema documentation that has been removed fr
 These historical schemas are retained for:
 
 1. **Historical Context**: Understanding the evolution of data contracts
-2. **Migration Reference**: Assisting with data migration from legacy formats
-3. **Audit Trail**: Maintaining a record of past data structures
+1. **Migration Reference**: Assisting with data migration from legacy formats
+1. **Audit Trail**: Maintaining a record of past data structures
 
 ## Archived Schema Pages
 
 ### ChEMBL Entity Schemas
 
-| Entity | Historical Schema Page | Current Canonical Source |
-|--------|------------------------|--------------------------|
+| Entity   | Historical Schema Page                                                         | Current Canonical Source                                              |
+| -------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
 | Activity | [activity-schema-historical.md](./domain/chembl/activity-schema-historical.md) | [provider reference](../../04-reference/providers/chembl/activity.md) |
-| Assay | [assay-schema-historical.md](./domain/chembl/assay-schema-historical.md) | [provider reference](../../04-reference/providers/chembl/assay.md) |
+| Assay    | [assay-schema-historical.md](./domain/chembl/assay-schema-historical.md)       | [provider reference](../../04-reference/providers/chembl/assay.md)    |
 | Molecule | [molecule-schema-historical.md](./domain/chembl/molecule-schema-historical.md) | [provider reference](../../04-reference/providers/chembl/molecule.md) |
-| Target | [target-schema-historical.md](./domain/chembl/target-schema-historical.md) | [provider reference](../../04-reference/providers/chembl/target.md) |
+| Target   | [target-schema-historical.md](./domain/chembl/target-schema-historical.md)     | [provider reference](../../04-reference/providers/chembl/target.md)   |
 
 ## Migration Notes
 
 ### Issue #3092 Implementation (2026-04-24)
 
 **Changes Made:**
+
 - Moved historical schema pages from `docs/04-reference/schemas/domain/chembl/` to `docs/99-archive/schemas/domain/chembl/`
 - Updated all schema pages with prominent **⚠️ HISTORICAL CONTENT - ARCHIVED** banners
 - Added migration notes and current canonical source references
@@ -35,6 +36,7 @@ These historical schemas are retained for:
 - Updated "Last verified" dates to 2026-04-24
 
 **Rationale:**
+
 - Historical deep schema pages created ambiguity with current canonical contracts
 - Developers were confused about which documentation represented current reality
 - Maintenance burden of keeping both historical and current schemas updated
@@ -45,11 +47,13 @@ These historical schemas are retained for:
 ### When to Use Historical Schemas
 
 ✅ **Appropriate Uses:**
+
 - Understanding legacy data formats during migration
 - Historical research and audit purposes
 - Comparing evolution of data contracts over time
 
 ❌ **Inappropriate Uses:**
+
 - Developing new features (use current provider references)
 - Configuring pipelines (use current entity configs)
 - Data validation (use current runtime validation)
@@ -59,8 +63,8 @@ These historical schemas are retained for:
 For all development work, use these current sources instead:
 
 1. **Provider References**: `docs/04-reference/providers/{provider}/{entity}.md`
-2. **Entity Configs**: `configs/entities/{provider}/{entity}.yaml`
-3. **Runtime Validation**: Actual validation code in `src/bioetl/domain/validation/`
+1. **Entity Configs**: `configs/entities/{provider}/{entity}.yaml`
+1. **Runtime Validation**: Actual validation code in `src/bioetl/domain/validation/`
 
 ## Structure
 

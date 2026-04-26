@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Title: Control-Plane Lifecycle Runbook
 Status: Active
 Class: operational
 Owner: BioETL Team
 Reviewers:
-  - BioETL Team
-Last verified: "2026-04-22"
----
+
+- BioETL Team
+  Last verified: "2026-04-22"
+
+______________________________________________________________________
 
 # Control-Plane Lifecycle Runbook
 
@@ -19,8 +22,8 @@ and cached Bronze snapshot files under `data/output/bronze/`.
 Cleanup is planner-driven:
 
 1. Build a dry-run plan.
-2. Review candidates and protected-reference reasons.
-3. Re-run the same command with `--apply` only after review.
+1. Review candidates and protected-reference reasons.
+1. Re-run the same command with `--apply` only after review.
 
 Dry-run is the default. Apply mode deletes only files selected by the planner.
 

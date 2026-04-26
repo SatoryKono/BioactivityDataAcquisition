@@ -42,6 +42,7 @@
 ### Tension 1: Green size governance vs large hotspot tail
 
 **Evidence in tension**
+
 - `EV-governance-signals-file-size-ratchet-tracks-exemptions-not-raw-hotspots`
 - `EV-governance-signals-file-size-ratchet-tightened-from-six-to-zero`
 
@@ -50,6 +51,7 @@
 ### Tension 2: Duplication is measurable, but not governed
 
 **Evidence in tension**
+
 - `EV-governance-signals-composition-duplication-snapshot-has-28-r0801-occurrences`
 - `EV-governance-signals-application-duplication-snapshot-has-88-r0801-occurrences`
 - `EV-governance-signals-duplication-governance-excludes-composition-and-application`
@@ -73,5 +75,5 @@
 ## Top Insights
 
 1. `C901` is currently a trustworthy clean baseline for future refactor work. (`EV-governance-signals-c901-enforceable-baseline-is-green`)
-2. Zero file-size exemptions is not the same thing as zero large-file debt in the source tree. (`EV-governance-signals-file-size-ratchet-tracks-exemptions-not-raw-hotspots`, `EV-governance-signals-file-size-ratchet-tightened-from-six-to-zero`)
-3. Duplication in `application` and `composition` is already measurable, but still sits outside the repo’s default enforceable governance trend. (`EV-governance-signals-composition-duplication-snapshot-has-28-r0801-occurrences`, `EV-governance-signals-application-duplication-snapshot-has-88-r0801-occurrences`, `EV-governance-signals-duplication-governance-excludes-composition-and-application`)
+1. Zero file-size exemptions is not the same thing as zero large-file debt in the source tree. (`EV-governance-signals-file-size-ratchet-tracks-exemptions-not-raw-hotspots`, `EV-governance-signals-file-size-ratchet-tightened-from-six-to-zero`)
+1. Duplication in `application` and `composition` is already measurable, but still sits outside the repo’s default enforceable governance trend. (`EV-governance-signals-composition-duplication-snapshot-has-28-r0801-occurrences`, `EV-governance-signals-application-duplication-snapshot-has-88-r0801-occurrences`, `EV-governance-signals-duplication-governance-excludes-composition-and-application`)

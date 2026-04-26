@@ -68,9 +68,9 @@ ______________________________________________________________________
 ## 5. Metadata & Lineage (RULES.md §2.3, §2.4)
 
 - [ ] Silver/Gold persisted rows do **not** include occurrence-scoped provenance
-      such as `_run_id`, `_run_type`, `_source_batch_id`, or `_ingestion_ts`
+  such as `_run_id`, `_run_type`, `_source_batch_id`, or `_ingestion_ts`
 - [ ] Occurrence-scoped provenance is published through metadata sidecars,
-      lineage fragments, audit, run manifest, and run ledger
+  lineage fragments, audit, run manifest, and run ledger
 - [ ] Lineage recorded in metadata sidecar (`*_metadata.yaml`)
 - [ ] Full Bronze paths NOT stored in each record
 

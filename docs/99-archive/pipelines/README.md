@@ -19,8 +19,8 @@ This section contains historical pipeline specifications that are no longer part
 ## Usage Guidelines
 
 1. **Historical Context**: These documents provide historical context and should not be used as current specifications.
-2. **Current Specifications**: For current pipeline specifications, refer to the active documentation in [docs/04-reference/pipelines](../../04-reference/pipelines/).
-3. **Redirect Notices**: Each archived document contains a redirect notice pointing to the current active specification.
+1. **Current Specifications**: For current pipeline specifications, refer to the active documentation in [docs/04-reference/pipelines](../../04-reference/pipelines/).
+1. **Redirect Notices**: Each archived document contains a redirect notice pointing to the current active specification.
 
 ## Related Documentation
 
@@ -30,7 +30,7 @@ This section contains historical pipeline specifications that are no longer part
 
 ## Document Status
 
-| Document | Status | Last Updated |
-|----------|--------|--------------|
-| openalex-publication-historical.md | Historical | 2026-04-24 |
-| semanticscholar-publication-historical.md | Historical | 2026-04-24 |
+| Document                                  | Status     | Last Updated |
+| ----------------------------------------- | ---------- | ------------ |
+| openalex-publication-historical.md        | Historical | 2026-04-24   |
+| semanticscholar-publication-historical.md | Historical | 2026-04-24   |

@@ -5,6 +5,7 @@ This directory now serves as the curated repo-only reports surface. It is
 sets.
 
 Canonical sources:
+
 - docs/02-architecture — ADRs, architecture policies, and reference diagrams
 - docs/03-guides — implementation and operational guides
 - docs/04-reference — pipeline, provider, and contract specifications

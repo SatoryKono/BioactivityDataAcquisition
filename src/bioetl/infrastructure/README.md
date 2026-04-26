@@ -6,14 +6,14 @@ become the place where orchestration or dependency wiring is decided.
 
 ## Main Families
 
-| Package | Responsibility |
-| --- | --- |
-| `adapters/` | Provider clients, HTTP integrations, common adapter helpers, decorators |
-| `storage/` | Bronze/Silver/Gold storage implementations and storage support code |
-| `config/` | YAML/config loading, normalization, and source resolution |
-| `observability/` | Logger, metrics, tracing, and anomaly-detection implementations |
-| `checkpoint/`, `locking/`, `time/`, `system/` | Runtime support services |
-| `quality/`, `validation/`, `audit/`, `errors/`, `security/`, `serialization/`, `export/` | Specialized implementation families |
+| Package                                                                                  | Responsibility                                                          |
+| ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `adapters/`                                                                              | Provider clients, HTTP integrations, common adapter helpers, decorators |
+| `storage/`                                                                               | Bronze/Silver/Gold storage implementations and storage support code     |
+| `config/`                                                                                | YAML/config loading, normalization, and source resolution               |
+| `observability/`                                                                         | Logger, metrics, tracing, and anomaly-detection implementations         |
+| `checkpoint/`, `locking/`, `time/`, `system/`                                            | Runtime support services                                                |
+| `quality/`, `validation/`, `audit/`, `errors/`, `security/`, `serialization/`, `export/` | Specialized implementation families                                     |
 
 ## Provider Adapters
 

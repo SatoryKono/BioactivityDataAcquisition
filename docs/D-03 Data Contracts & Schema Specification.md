@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 0.3.0
 Status: draft
 Class: repo-only
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last synchronized: '2026-04-08'
----
+  Last synchronized: '2026-04-08'
+
+______________________________________________________________________
 
 # D-03 Data Contracts and Schema Specification (Draft Sync Note)
 
@@ -32,12 +35,11 @@ D-03 фиксирует будущий consolidated handbook для contract gov
 ## План синхронизации D-03
 
 1. Оставить в D-03 только карту контрактных surfaces: code contracts, generated artifacts, test governance, live contract workflows.
-2. Нормативные правила (SemVer, compatibility, CI blockers) ссылать напрямую на ADR/contract docs.
-3. Для provider drift reporting описывать только integration points с `tests/contract/` и `scripts/qa`, без дублирования schema snapshot governance.
+1. Нормативные правила (SemVer, compatibility, CI blockers) ссылать напрямую на ADR/contract docs.
+1. Для provider drift reporting описывать только integration points с `tests/contract/` и `scripts/qa`, без дублирования schema snapshot governance.
 
 ## Критерии промоушена в future published handbook
 
 1. D-03 не дублирует текст из `contracts/README` и `testing.md`.
-2. Все contract workflow шаги покрыты ссылками на исполняемые scripts и test suites.
-3. Термины `schema stability`, `provider drift`, `live contracts` определены согласованно с `configs/quality/test_matrix.yaml`.
-
+1. Все contract workflow шаги покрыты ссылками на исполняемые scripts и test suites.
+1. Термины `schema stability`, `provider drift`, `live contracts` определены согласованно с `configs/quality/test_matrix.yaml`.

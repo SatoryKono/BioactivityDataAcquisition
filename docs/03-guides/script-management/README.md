@@ -5,6 +5,7 @@ This directory contains documentation and guides for managing the BioETL script 
 ## Contents
 
 ### 📋 Script Analysis and Cleanup
+
 - **[script-analysis-prompt.md](script-analysis-prompt.md)** - Comprehensive guide for analyzing scripts to identify obsolete, duplicate, and suboptimal scripts with systematic cleanup planning.
 
 ## Purpose
@@ -12,9 +13,9 @@ This directory contains documentation and guides for managing the BioETL script 
 The script management guides provide:
 
 1. **Systematic Analysis Methods** - Structured approaches for evaluating script quality and usage
-2. **Cleanup Strategies** - Safe methods for removing technical debt
-3. **Governance Patterns** - Best practices for script organization and maintenance
-4. **Decision Frameworks** - Criteria for evaluating script health and cleanup priority
+1. **Cleanup Strategies** - Safe methods for removing technical debt
+1. **Governance Patterns** - Best practices for script organization and maintenance
+1. **Decision Frameworks** - Criteria for evaluating script health and cleanup priority
 
 ## Usage
 
@@ -29,10 +30,10 @@ The script management guides provide:
 ### How to Use
 
 1. **Start with Analysis**: Use `script-analysis-prompt.md` to evaluate current inventory
-2. **Identify Issues**: Categorize scripts by obsolete/duplicate/suboptimal/governance
-3. **Plan Actions**: Create phased cleanup plan based on risk assessment
-4. **Implement**: Execute cleanup with proper validation
-5. **Document**: Update inventory and lifecycle records
+1. **Identify Issues**: Categorize scripts by obsolete/duplicate/suboptimal/governance
+1. **Plan Actions**: Create phased cleanup plan based on risk assessment
+1. **Implement**: Execute cleanup with proper validation
+1. **Document**: Update inventory and lifecycle records
 
 ## Related Documentation
 
@@ -48,6 +49,7 @@ The script management guides provide:
 **Last Updated**: 2024-04-14
 
 **Contributing**:
+
 - Follow existing format and structure
 - Update change log in documents
 - Ensure cross-references are maintained
@@ -75,7 +77,7 @@ pylint scripts/**/*.py
 ### Key Metrics
 
 - **Total Scripts**: Check inventory manifest
-- **Legacy Scripts**: Aim for <10% of total
+- **Legacy Scripts**: Aim for \<10% of total
 - **Duplicate Scripts**: Target 0%
 - **Governance Compliance**: Target 100%
 
@@ -95,7 +97,7 @@ pylint scripts/**/*.py
 - Create interactive decision trees
 - Add real-world examples and case studies
 
----
+______________________________________________________________________
 
 **Status**: Active
 **Version**: 1.0

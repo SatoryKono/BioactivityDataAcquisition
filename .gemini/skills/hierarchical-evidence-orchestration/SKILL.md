@@ -1,7 +1,6 @@
----
-name: hierarchical-evidence-orchestration
-description: Orchestrate hierarchical evidence work for a BioETL topic by decomposing it into shard packs, delegating `collecting-evidence` across those shards, and then running `synthesizing-pillars` on completed packs before assembling a cross-synthesis. Use when users ask for repo-wide or multi-package evidence programs, recursive topology studies, naming/documentation drift waves, or coordinated evidence-then-synthesis workflows.
----
+______________________________________________________________________
+
+## name: hierarchical-evidence-orchestration description: Orchestrate hierarchical evidence work for a BioETL topic by decomposing it into shard packs, delegating `collecting-evidence` across those shards, and then running `synthesizing-pillars` on completed packs before assembling a cross-synthesis. Use when users ask for repo-wide or multi-package evidence programs, recursive topology studies, naming/documentation drift waves, or coordinated evidence-then-synthesis workflows.
 
 # Hierarchical Evidence Orchestration
 
@@ -29,11 +28,11 @@ Do not use this skill for a single small pillar that fits cleanly into one `coll
 Read, in this order:
 
 1. `../../../docs/00-project/ai/memory/agent-memory.md`
-2. `../../../docs/00-project/ai/agents/agents/ORCHESTRATION.md`
-3. `../collecting-evidence/SKILL.md`
-4. `../synthesizing-pillars/SKILL.md`
-5. [references/orchestration-contract.md](references/orchestration-contract.md)
-6. [references/shard-task-briefs.md](references/shard-task-briefs.md)
+1. `../../../docs/00-project/ai/agents/agents/ORCHESTRATION.md`
+1. `../collecting-evidence/SKILL.md`
+1. `../synthesizing-pillars/SKILL.md`
+1. [references/orchestration-contract.md](references/orchestration-contract.md)
+1. [references/shard-task-briefs.md](references/shard-task-briefs.md)
 
 ## Input Contract
 

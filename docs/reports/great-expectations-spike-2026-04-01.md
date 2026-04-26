@@ -19,15 +19,15 @@ The repository already has multiple active data-quality layers:
 1. Runtime DataFrame validation through `PanderaSilverValidator` and
    `PanderaGoldValidator` in
    `src/bioetl/infrastructure/validation/pandera_validator.py`.
-2. Threshold- and anomaly-oriented DQ evaluation through
+1. Threshold- and anomaly-oriented DQ evaluation through
    `src/bioetl/application/services/data_quality_service.py`.
-3. Silver schema contract protection through
+1. Silver schema contract protection through
    `tests/contract/silver_schemas/` and the published
    `docs/03-guides/silver-schema-testing-guide.md`.
-4. Gold contract governance through
+1. Gold contract governance through
    `docs/02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md`
    plus contract-test surfaces under `tests/contract/` and `tests/architecture/`.
-5. Operational handling for DQ failures through
+1. Operational handling for DQ failures through
    `docs/05-operations/runbooks/dq-failure-investigation.md`.
 
 This means the repo already supports:
@@ -69,15 +69,15 @@ range. The issue is fit and operating cost, not basic compatibility.
 
 ## Comparison Against Current BioETL Needs
 
-| Need | Current BioETL path | GX value-add | Assessment |
-|---|---|---|---|
-| Runtime dataframe validation in ETL code | `PanderaSilverValidator` / `PanderaGoldValidator` | Overlapping capability with more orchestration concepts | Weak fit |
-| Silver schema stability and contract drift | Snapshot and contract tests in `tests/contract/silver_schemas/` | Can express expectations, but duplicates existing CI enforcement | Weak fit |
-| Gold breaking-change governance | ADR-036 + contract tests + future compatibility gate (`#2516`) | Does not replace versioning policy or contract governance | Weak fit |
-| DQ thresholding and anomaly decisions | `DataQualityService` | GX is not a natural replacement for metrics thresholds and anomaly handling | Weak fit |
-| Human-readable validation reports for non-dev consumers | Limited today | Stronger due to expectation/result/reporting workflow | Moderate fit |
-| Scheduled validation workflows with persistent checkpoints/actions | Limited today | Stronger due to Checkpoints and Actions model | Moderate fit |
-| External warehouse / SQL / multi-asset validation surfaces | Not the current dominant repo surface | Potentially useful if this becomes central later | Future fit only |
+| Need                                                               | Current BioETL path                                             | GX value-add                                                                | Assessment      |
+| ------------------------------------------------------------------ | --------------------------------------------------------------- | --------------------------------------------------------------------------- | --------------- |
+| Runtime dataframe validation in ETL code                           | `PanderaSilverValidator` / `PanderaGoldValidator`               | Overlapping capability with more orchestration concepts                     | Weak fit        |
+| Silver schema stability and contract drift                         | Snapshot and contract tests in `tests/contract/silver_schemas/` | Can express expectations, but duplicates existing CI enforcement            | Weak fit        |
+| Gold breaking-change governance                                    | ADR-036 + contract tests + future compatibility gate (`#2516`)  | Does not replace versioning policy or contract governance                   | Weak fit        |
+| DQ thresholding and anomaly decisions                              | `DataQualityService`                                            | GX is not a natural replacement for metrics thresholds and anomaly handling | Weak fit        |
+| Human-readable validation reports for non-dev consumers            | Limited today                                                   | Stronger due to expectation/result/reporting workflow                       | Moderate fit    |
+| Scheduled validation workflows with persistent checkpoints/actions | Limited today                                                   | Stronger due to Checkpoints and Actions model                               | Moderate fit    |
+| External warehouse / SQL / multi-asset validation surfaces         | Not the current dominant repo surface                           | Potentially useful if this becomes central later                            | Future fit only |
 
 ## Lightweight Prototype Decision
 
@@ -106,15 +106,15 @@ Do not adopt Great Expectations now.
    `Pandera` is integrated into runtime validators, test suites, and schema
    documentation. GX would introduce a second validation-authoring surface with
    overlapping responsibility.
-2. The strongest GX features are workflow/reporting features, not missing core
+1. The strongest GX features are workflow/reporting features, not missing core
    validation features. BioETL's immediate quality work is about tightening
    gates, schema compatibility, and lineage-aware governance, not about
    introducing a new validation platform.
-3. The current roadmap issues already point to better near-term leverage:
+1. The current roadmap issues already point to better near-term leverage:
    `#2511` for focused test/DQ gates and `#2516` for Gold schema compatibility.
    Those items build directly on existing repo surfaces instead of creating a
    parallel framework track.
-4. Maintenance burden would increase immediately:
+1. Maintenance burden would increase immediately:
    dependency management, onboarding, config conventions, checkpoint storage,
    expectation ownership, and CI/runtime policy decisions.
 
@@ -124,24 +124,24 @@ Re-open the question only if one or more of the following becomes true:
 
 1. BioETL needs stakeholder-facing validation artifacts or "data docs" that are
    materially more useful than current test output and runbooks.
-2. Validation moves from mostly in-process pandas ETL checks to persistent
+1. Validation moves from mostly in-process pandas ETL checks to persistent
    multi-dataset or warehouse-backed validation workflows.
-3. The project needs checkpoint/action orchestration as a first-class platform
+1. The project needs checkpoint/action orchestration as a first-class platform
    concern, rather than as plain CI/test/runtime logic.
-4. `Pandera`-based validation becomes difficult to maintain or cannot express a
+1. `Pandera`-based validation becomes difficult to maintain or cannot express a
    required class of checks without substantial custom code.
 
 ## Practical Next Steps Instead Of GX Adoption
 
 1. Keep `Pandera` as the primary runtime dataframe validation layer.
-2. Use `#2511` to narrow and formalize:
+1. Use `#2511` to narrow and formalize:
    - unit-test standards around transformer validation,
    - VCR/integration policy,
    - contract drift checks,
    - small, high-signal validation gates.
-3. Use `#2516` to implement the Gold schema compatibility CI gate described by
+1. Use `#2516` to implement the Gold schema compatibility CI gate described by
    ADR-036.
-4. If reporting or persistent checkpoint needs emerge later, run a second spike
+1. If reporting or persistent checkpoint needs emerge later, run a second spike
    scoped specifically to:
    - Gold publication checks,
    - external warehouse datasets,

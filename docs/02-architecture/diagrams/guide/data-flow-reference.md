@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Data Flow
 
@@ -16,24 +19,24 @@ Last verified: '2026-03-29'
 
 Medallion Architecture — трёхслойная модель хранения данных: Bronze → Silver → Gold.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Medallion Architecture Diagram
 
 > **Diagram:** See [`03-medallion-data-flow.mmd`](../architecture/03-medallion-data-flow.mmd)
 > *(rendered не публикуются; используй source `.mmd`)*
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Layer Specifications (§2.1)
 
-| Layer      | Format          | Validation       | Retention         | Idempotency            |
-| ---------- | --------------- | ---------------- | ----------------- | ---------------------- |
-| **Bronze** | JSONL + zstd    | None             | 90 days → Archive | Append-only            |
-| **Silver** | Delta Lake      | Pandera (soft)   | Permanent         | Merge/Upsert           |
-| **Gold**   | Delta Lake      | Pandera (strict) | Permanent         | SCD Type 2 / Overwrite |
+| Layer      | Format       | Validation       | Retention         | Idempotency            |
+| ---------- | ------------ | ---------------- | ----------------- | ---------------------- |
+| **Bronze** | JSONL + zstd | None             | 90 days → Archive | Append-only            |
+| **Silver** | Delta Lake   | Pandera (soft)   | Permanent         | Merge/Upsert           |
+| **Gold**   | Delta Lake   | Pandera (strict) | Permanent         | SCD Type 2 / Overwrite |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Storage Paths
 
@@ -68,14 +71,14 @@ data/output/                       # Local-Only (current)
 Examples: `["year", "month"]`, `["assay-type"]`, `["organism"]`, or `[]` (no partitioning).
 See `configs/entities/{provider}/{entity}.yaml` for specific configurations.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Pipeline Execution Flow
 
 > **Diagram:** See [`04-pipeline-execution-flow.mmd`](../architecture/04-pipeline-execution-flow.mmd)
 > *(rendered не публикуются; используй source `.mmd`)*
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Required Metadata Fields (§2.4)
 
@@ -92,7 +95,7 @@ Persisted Silver/Gold rows keep only deterministic semantic system fields
 (`entity_id`, `content_hash`, `_source`, `_index`). Occurrence-scoped runtime
 anchors are published through sidecar/control-plane artifacts.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Silver → Gold Transformation
 
@@ -106,7 +109,7 @@ anchors are published through sidecar/control-plane artifacts.
 
 **Code Reference**: `src/bioetl/application/core/base_transformer/base.py` → `BaseTransformer.transform_for_gold()`
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Data Quality Flow (§2.6)
 
@@ -126,7 +129,7 @@ flowchart TD
 - `5-20%` errors → Warning in logs
 - `> 20%` errors → Batch fails entirely
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Error Handling Summary
 
@@ -137,7 +140,7 @@ flowchart TD
 | **Data Quality**                    | Route to Quarantine            | §2.6      |
 | **Lock Lost**                       | Abort to prevent split-brain   | §3.3      |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Related Documents
 

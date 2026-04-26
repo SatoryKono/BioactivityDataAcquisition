@@ -64,29 +64,29 @@ bioetl run --pipeline <NAME> [OPTIONS]
 
 **Опции:**
 
-| Опция                                    | Тип    | По умолчанию  | Описание                                          |
-| ---------------------------------------- | ------ | ------------- | ------------------------------------------------- |
-| `--run-type`                             | choice | `incremental` | Тип запуска: `incremental`, `backfill`, `rebuild` |
-| `--limit`                                | int    | None          | Максимальное количество записей                   |
-| `--resume`                               | flag   | False         | Продолжить с последнего checkpoint                |
-| `--start-offset`                         | int    | None          | Начать incremental run с указанного offset        |
-| `--dry-run`                              | flag   | False         | Предпросмотр без записи данных                    |
-| `--yes`, `-y`                            | flag   | False         | Пропустить подтверждение для rebuild/backfill     |
-| `--input-csv`                            | path   | None          | Путь к CSV с ID для фильтрации                    |
-| `--filter-column`                        | str    | None          | Имя колонки в CSV; runtime fallback обычно `id`   |
-| `--filter-field`                         | str    | None          | Поле API; effective default зависит от pipeline   |
-| `--vacuum-after-run`                     | flag   | None          | Запустить VACUUM после успешного выполнения       |
-| `--vacuum-retention-days`                | int    | None          | Retention для VACUUM (дней, override YAML config) |
-| `--debug`                                | flag   | False         | Включить DEBUG логирование                        |
+| Опция                                    | Тип    | По умолчанию  | Описание                                                                                  |
+| ---------------------------------------- | ------ | ------------- | ----------------------------------------------------------------------------------------- |
+| `--run-type`                             | choice | `incremental` | Тип запуска: `incremental`, `backfill`, `rebuild`                                         |
+| `--limit`                                | int    | None          | Максимальное количество записей                                                           |
+| `--resume`                               | flag   | False         | Продолжить с последнего checkpoint                                                        |
+| `--start-offset`                         | int    | None          | Начать incremental run с указанного offset                                                |
+| `--dry-run`                              | flag   | False         | Предпросмотр без записи данных                                                            |
+| `--yes`, `-y`                            | flag   | False         | Пропустить подтверждение для rebuild/backfill                                             |
+| `--input-csv`                            | path   | None          | Путь к CSV с ID для фильтрации                                                            |
+| `--filter-column`                        | str    | None          | Имя колонки в CSV; runtime fallback обычно `id`                                           |
+| `--filter-field`                         | str    | None          | Поле API; effective default зависит от pipeline                                           |
+| `--vacuum-after-run`                     | flag   | None          | Запустить VACUUM после успешного выполнения                                               |
+| `--vacuum-retention-days`                | int    | None          | Retention для VACUUM (дней, override YAML config)                                         |
+| `--debug`                                | flag   | False         | Включить DEBUG логирование                                                                |
 | `--checkpoint-compatibility`             | choice | None          | Политика совместимости checkpoint (`observe`, `soft_fail`, `hard_fail`, `legacy_observe`) |
-| `--health-server/--no-health-server`     | flag   | True          | Включить HTTP health server                       |
-| `--health-port`                          | int    | 8081          | Порт для health server                            |
-| `--use-cached-bronze/--no-cached-bronze` | flag   | False         | Читать Bronze cache вместо API                    |
-| `--cached-bronze-date`                   | str    | None          | Фильтровать Bronze cache по дате `YYYY-MM-DD`     |
-| `--cached-bronze-path`                   | path   | None          | Явный путь к каталогу Bronze cache                |
-| `--exact-replay/--no-exact-replay`       | flag   | False         | Включить strict exact replay внутри опубликованной support boundary с fail-closed policy |
-| `--replay-of-run-id`                     | str    | None          | Явный parent `run_id` для exact replay            |
-| `--replay-of-manifest-id`                | str    | None          | Явный parent `manifest_id` для exact replay       |
+| `--health-server/--no-health-server`     | flag   | True          | Включить HTTP health server                                                               |
+| `--health-port`                          | int    | 8081          | Порт для health server                                                                    |
+| `--use-cached-bronze/--no-cached-bronze` | flag   | False         | Читать Bronze cache вместо API                                                            |
+| `--cached-bronze-date`                   | str    | None          | Фильтровать Bronze cache по дате `YYYY-MM-DD`                                             |
+| `--cached-bronze-path`                   | path   | None          | Явный путь к каталогу Bronze cache                                                        |
+| `--exact-replay/--no-exact-replay`       | flag   | False         | Включить strict exact replay внутри опубликованной support boundary с fail-closed policy  |
+| `--replay-of-run-id`                     | str    | None          | Явный parent `run_id` для exact replay                                                    |
+| `--replay-of-manifest-id`                | str    | None          | Явный parent `manifest_id` для exact replay                                               |
 
 **Примеры:**
 
@@ -137,13 +137,13 @@ bioetl run --pipeline chembl_activity \
 
 **Operator distinction:**
 
-| Surface | What operators should read it as | What operators must not read it as |
-| ------- | -------------------------------- | ---------------------------------- |
-| `--resume` | Checkpoint continuation of the current pipeline execution | Strict exact replay of a prior run |
-| `--run-type rebuild` | Fresh recomputation of downstream data from available sources/Bronze | Checkpoint continuation or replay proof |
-| `--exact-replay` | Fail-closed request for strict exact replay on snapshot-backed inputs внутри опубликованной support boundary | Ordinary rerun, rebuild, or degraded resume |
-| `replay_mode=same_data_state_recovery` in inspection | A manifested run that can recover the same data state from immutable inputs | A separate CLI mode |
-| `replay_mode=rebuild` in inspection | Ordinary rebuild/rerun path outside strict exact replay | Snapshot-backed same-data-state recovery |
+| Surface                                              | What operators should read it as                                                                             | What operators must not read it as          |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| `--resume`                                           | Checkpoint continuation of the current pipeline execution                                                    | Strict exact replay of a prior run          |
+| `--run-type rebuild`                                 | Fresh recomputation of downstream data from available sources/Bronze                                         | Checkpoint continuation or replay proof     |
+| `--exact-replay`                                     | Fail-closed request for strict exact replay on snapshot-backed inputs внутри опубликованной support boundary | Ordinary rerun, rebuild, or degraded resume |
+| `replay_mode=same_data_state_recovery` in inspection | A manifested run that can recover the same data state from immutable inputs                                  | A separate CLI mode                         |
+| `replay_mode=rebuild` in inspection                  | Ordinary rebuild/rerun path outside strict exact replay                                                      | Snapshot-backed same-data-state recovery    |
 
 **Checkpoint resume policy (runtime setting):**
 
@@ -573,14 +573,14 @@ bioetl debug --pipeline <NAME> [OPTIONS]
 
 **Опции:**
 
-| Опция                                    | Тип    | По умолчанию  | Описание                                          |
-| ---------------------------------------- | ------ | ------------- | ------------------------------------------------- |
-| `--breakpoint <STEP>`                     | choice | None          | Точка останова: `preflight`, `bronze`, `silver`, `gold`, `postrun` |
-| `--step-into`                            | flag   | False         | Пошаговое выполнение внутри этапа                |
-| `--inspect-state`                        | flag   | False         | Показать полное состояние перед каждым шагом     |
-| `--debugger-port`                         | int    | 5678          | Порт для удалённого отладчика                    |
-| `--limit`                                | int    | 100           | Максимальное количество записей для отладки      |
-| `--dry-run`                              | flag   | True          | Не записывать данные (только чтение)              |
+| Опция                 | Тип    | По умолчанию | Описание                                                           |
+| --------------------- | ------ | ------------ | ------------------------------------------------------------------ |
+| `--breakpoint <STEP>` | choice | None         | Точка останова: `preflight`, `bronze`, `silver`, `gold`, `postrun` |
+| `--step-into`         | flag   | False        | Пошаговое выполнение внутри этапа                                  |
+| `--inspect-state`     | flag   | False        | Показать полное состояние перед каждым шагом                       |
+| `--debugger-port`     | int    | 5678         | Порт для удалённого отладчика                                      |
+| `--limit`             | int    | 100          | Максимальное количество записей для отладки                        |
+| `--dry-run`           | flag   | True         | Не записывать данные (только чтение)                               |
 
 **Примеры:**
 
@@ -596,6 +596,7 @@ bioetl debug --pipeline chembl_activity --debugger-port 5678
 ```
 
 **См. также:**
+
 - `bioetl run` — для обычного выполнения
 - [Debugging Guide](../03-guides/troubleshooting.md)
 
@@ -613,17 +614,17 @@ bioetl diagnostics [OPTIONS]
 
 **Опции:**
 
-| Опция                                    | Тип    | По умолчанию  | Описание                                          |
-| ---------------------------------------- | ------ | ------------- | ------------------------------------------------- |
-| `--metrics`                              | flag   | True          | Включить метрики производительности              |
-| `--health`                               | flag   | True          | Включить health checks провайдеров                |
-| `--checkpoints`                          | flag   | True          | Включить информацию о checkpoints                 |
-| `--manifests`                            | flag   | True          | Включить данные о manifests и ledgers             |
-| `--quarantine`                           | flag   | True          | Включить статистику quarantine                     |
-| `--json`                                 | flag   | False         | Вывод в формате JSON                              |
-| `--output`, `-o`                         | path   | None          | Сохранить отчёт в файл                            |
-| `--since`                                | str    | `1h`          | Период для метрик (например, `1h`, `24h`, `7d`)   |
-| `--pipeline`                             | str    | None          | Фильтр по конкретному пайплайну                 |
+| Опция            | Тип  | По умолчанию | Описание                                        |
+| ---------------- | ---- | ------------ | ----------------------------------------------- |
+| `--metrics`      | flag | True         | Включить метрики производительности             |
+| `--health`       | flag | True         | Включить health checks провайдеров              |
+| `--checkpoints`  | flag | True         | Включить информацию о checkpoints               |
+| `--manifests`    | flag | True         | Включить данные о manifests и ledgers           |
+| `--quarantine`   | flag | True         | Включить статистику quarantine                  |
+| `--json`         | flag | False        | Вывод в формате JSON                            |
+| `--output`, `-o` | path | None         | Сохранить отчёт в файл                          |
+| `--since`        | str  | `1h`         | Период для метрик (например, `1h`, `24h`, `7d`) |
+| `--pipeline`     | str  | None         | Фильтр по конкретному пайплайну                 |
 
 **Примеры:**
 
@@ -642,6 +643,7 @@ bioetl diagnostics --since 24h
 ```
 
 **См. также:**
+
 - `bioetl health` — для health checks
 - `bioetl run-manifest` — для inspection manifests
 
@@ -667,12 +669,12 @@ bioetl dq validate --entity <PROVIDER.ENTITY> [OPTIONS]
 
 **Опции:**
 
-| Опция                                    | Тип    | По умолчанию  | Описание                                          |
-| ---------------------------------------- | ------ | ------------- | ------------------------------------------------- |
-| `--entity <PROVIDER.ENTITY>`              | str    | None          | Сущность в формате `provider.entity`              |
-| `--strict`                               | flag   | False         | Strict validation (fail на warnings)             |
-| `--show-rules`                           | flag   | False         | Показать все DQ правила                           |
-| `--test-data`                           | path   | None          | Тестировать с пользовательскими данными           |
+| Опция                        | Тип  | По умолчанию | Описание                                |
+| ---------------------------- | ---- | ------------ | --------------------------------------- |
+| `--entity <PROVIDER.ENTITY>` | str  | None         | Сущность в формате `provider.entity`    |
+| `--strict`                   | flag | False        | Strict validation (fail на warnings)    |
+| `--show-rules`               | flag | False        | Показать все DQ правила                 |
+| `--test-data`                | path | None         | Тестировать с пользовательскими данными |
 
 **Примеры:**
 
@@ -688,6 +690,7 @@ bioetl dq validate --entity chembl.activity --strict
 ```
 
 **См. также:**
+
 - [DQ Contracts](contracts/dq-contracts.md)
 - `bioetl config validate` — для общей валидации конфигурации
 
@@ -713,14 +716,14 @@ bioetl lineage show --entity <PROVIDER.ENTITY> --record-id <ID> [OPTIONS]
 
 **Опции:**
 
-| Опция                                    | Тип    | По умолчанию  | Описание                                          |
-| ---------------------------------------- | ------ | ------------- | ------------------------------------------------- |
-| `--entity <PROVIDER.ENTITY>`              | str    | None          | Сущность в формате `provider.entity`              |
-| `--record-id <ID>`                        | str    | None          | Идентификатор записи                               |
-| `--format`, `-f`                          | choice | `text`        | Формат вывода: `text`, `json`, `dot`              |
-| `--depth`, `-d`                           | int    | 3             | Глубина lineage графа                             |
-| `--include-fields`                       | flag   | False         | Включить field-level lineage                      |
-| `--output`, `-o`                         | path   | None          | Сохранить в файл                                  |
+| Опция                        | Тип    | По умолчанию | Описание                             |
+| ---------------------------- | ------ | ------------ | ------------------------------------ |
+| `--entity <PROVIDER.ENTITY>` | str    | None         | Сущность в формате `provider.entity` |
+| `--record-id <ID>`           | str    | None         | Идентификатор записи                 |
+| `--format`, `-f`             | choice | `text`       | Формат вывода: `text`, `json`, `dot` |
+| `--depth`, `-d`              | int    | 3            | Глубина lineage графа                |
+| `--include-fields`           | flag   | False        | Включить field-level lineage         |
+| `--output`, `-o`             | path   | None         | Сохранить в файл                     |
 
 **Примеры:**
 
@@ -739,6 +742,7 @@ bioetl lineage show --entity chembl.activity --record-id ACT12345 --depth 5 --in
 ```
 
 **См. также:**
+
 - [Lineage Architecture](contracts/run-manifest-ledger.md)
 - `bioetl run --tracing` — для включения tracing
 
@@ -795,12 +799,12 @@ Dashboard для работы с проблемными записями.
 bioetl quarantine inspect --pipeline <NAME> [OPTIONS]
 ```
 
-| Опция                 | Тип  | По умолчанию | Описание                                         |
-| --------------------- | ---- | ------------ | ------------------------------------------------ |
-| `--pipeline`          | str  | Required     | Имя пайплайна                                    |
-| `--limit`             | int  | 100          | Максимум записей                                 |
-| `--error-code`        | str  | None         | Фильтр по коду ошибки                            |
-| `--run-id`            | str  | None         | Ограничить просмотр одним run                    |
+| Опция                  | Тип  | По умолчанию | Описание                                        |
+| ---------------------- | ---- | ------------ | ----------------------------------------------- |
+| `--pipeline`           | str  | Required     | Имя пайплайна                                   |
+| `--limit`              | int  | 100          | Максимум записей                                |
+| `--error-code`         | str  | None         | Фильтр по коду ошибки                           |
+| `--run-id`             | str  | None         | Ограничить просмотр одним run                   |
 | `--silver-filter-only` | flag | False        | Shortcut для `--error-code FILTERED_OUT_SILVER` |
 
 **Примеры:**
@@ -816,15 +820,15 @@ bioetl quarantine inspect --pipeline chembl_activity --error-code DQ-MISSING-FIE
 bioetl quarantine stats --pipeline <NAME> [--json]
 ```
 
-| Опция                 | Тип  | По умолчанию | Описание                                         |
-| --------------------- | ---- | ------------ | ------------------------------------------------ |
-| `--pipeline`          | str  | Required     | Имя пайплайна                                    |
-| `--json`              | flag | False        | Вывод в JSON                                     |
-| `--error-code`        | str  | None         | Ограничить статистику одним кодом ошибки         |
-| `--run-id`            | str  | None         | Ограничить статистику одним run                  |
-| `--silver-filter-only` | flag | False        | Shortcut для `--error-code FILTERED_OUT_SILVER` |
-| `--group-by`          | str  | None         | Фокусная Silver-группировка (`reason-code`, `field`, `rule-type`, `operator`, `reason-code-field`, `reason-signature`) |
-| `--top`               | int  | 10           | Лимит элементов в группировках                   |
+| Опция                  | Тип  | По умолчанию | Описание                                                                                                               |
+| ---------------------- | ---- | ------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `--pipeline`           | str  | Required     | Имя пайплайна                                                                                                          |
+| `--json`               | flag | False        | Вывод в JSON                                                                                                           |
+| `--error-code`         | str  | None         | Ограничить статистику одним кодом ошибки                                                                               |
+| `--run-id`             | str  | None         | Ограничить статистику одним run                                                                                        |
+| `--silver-filter-only` | flag | False        | Shortcut для `--error-code FILTERED_OUT_SILVER`                                                                        |
+| `--group-by`           | str  | None         | Фокусная Silver-группировка (`reason-code`, `field`, `rule-type`, `operator`, `reason-code-field`, `reason-signature`) |
+| `--top`                | int  | 10           | Лимит элементов в группировках                                                                                         |
 
 Показывает: общее количество, распределение по кодам ошибок, статусы (`NEW`, `IGNORED`, `REPROCESSED`).
 
@@ -1027,16 +1031,16 @@ bioetl maintenance control-plane-lifecycle [OPTIONS]
 `data/output/checkpoints` и `data/output/bronze`. По умолчанию команда работает
 в dry-run режиме.
 
-| Опция                                      | Тип    | По умолчанию | Описание                                     |
-| ------------------------------------------ | ------ | ------------ | -------------------------------------------- |
-| `--retention-days`, `-r`                   | int    | 90           | Удалить unprotected artifacts старше N дней  |
-| `--apply`                                  | flag   | False        | Применить план удаления                      |
-| `--format`                                 | choice | `text`       | Формат вывода: `text`, `json`                |
-| `--protected-manifest-id`                  | repeat | None         | Manifest ID, который нельзя удалять          |
-| `--protected-run-id`                       | repeat | None         | Run ID, который нельзя удалять               |
-| `--protected-effective-config-artifact-id` | repeat | None         | Effective-config artifact ID для защиты      |
-| `--protected-lineage-fragment-id`          | repeat | None         | Lineage fragment ID для защиты               |
-| `--protected-snapshot-id`                  | repeat | None         | Content-addressed snapshot ID для защиты     |
+| Опция                                      | Тип    | По умолчанию | Описание                                    |
+| ------------------------------------------ | ------ | ------------ | ------------------------------------------- |
+| `--retention-days`, `-r`                   | int    | 90           | Удалить unprotected artifacts старше N дней |
+| `--apply`                                  | flag   | False        | Применить план удаления                     |
+| `--format`                                 | choice | `text`       | Формат вывода: `text`, `json`               |
+| `--protected-manifest-id`                  | repeat | None         | Manifest ID, который нельзя удалять         |
+| `--protected-run-id`                       | repeat | None         | Run ID, который нельзя удалять              |
+| `--protected-effective-config-artifact-id` | repeat | None         | Effective-config artifact ID для защиты     |
+| `--protected-lineage-fragment-id`          | repeat | None         | Lineage fragment ID для защиты              |
+| `--protected-snapshot-id`                  | repeat | None         | Content-addressed snapshot ID для защиты    |
 
 **Примеры:**
 

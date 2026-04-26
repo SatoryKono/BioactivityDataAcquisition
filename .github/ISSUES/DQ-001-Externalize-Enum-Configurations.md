@@ -1,8 +1,8 @@
 # Externalize Enum Configurations for ChEMBL Activity Fields
 
-**Status**: Open  
-**Priority**: P1 (High)  
-**Labels**: `normalization`, `configuration`, `DQ`  
+**Status**: Open
+**Priority**: P1 (High)
+**Labels**: `normalization`, `configuration`, `DQ`
 **Epic**: Data Quality Improvements 2024Q2
 
 ## 🎯 Problem
@@ -12,19 +12,21 @@ Current enum-like fields (assay_type, action_type, standard_units, etc.) have ha
 ## 🔍 Root Cause
 
 1. **Hardcoded Values**: Enum values are scattered across code files
-2. **Limited Validation**: Some enum fields lack proper Pandera validation
-3. **Maintainability Issues**: Updating enum values requires changes in multiple places
-4. **Inconsistent Handling**: Different fields use different approaches
+1. **Limited Validation**: Some enum fields lack proper Pandera validation
+1. **Maintainability Issues**: Updating enum values requires changes in multiple places
+1. **Inconsistent Handling**: Different fields use different approaches
 
 ## 📋 Scope
 
 **Affected Components:**
+
 - `configs/enums/` - New configuration files needed
 - `src/bioetl/domain/normalization/profiles/chembl_activity.py` - Update to use external enums
 - `src/bioetl/domain/schemas/activity.py` - Add Pandera validation
 - Test files - Update to reflect new enum handling
 
 **Impact Analysis:**
+
 ```bash
 # Find current enum usage
 grep -rn "assay_type\|action_type\|standard_units" src/bioetl/domain/ --include="*.py" | wc -l
@@ -35,6 +37,7 @@ grep -rn "assay_type\|action_type\|standard_units" src/bioetl/domain/ --include=
 ### Phase 1: Configuration Setup (3 days)
 
 1. **Create Enum Configuration Files**
+
    ```yaml
    # configs/enums/chembl.yaml
    activity:
@@ -44,44 +47,41 @@ grep -rn "assay_type\|action_type\|standard_units" src/bioetl/domain/ --include=
      relations: ["=", "<", "<=", ">", ">=", "~"]
    ```
 
-2. **Update Normalization Profile**
+1. **Update Normalization Profile**
+
    ```python
    # src/bioetl/domain/normalization/profiles/chembl_activity.py
    from bioetl.configs.enums import chembl
-   
-   FIELD_RULES = {
-       "assay_type": {
-           "type": "enum",
-           "values": chembl.activity.assay_types
-       }
-   }
+
+   FIELD_RULES = {"assay_type": {"type": "enum", "values": chembl.activity.assay_types}}
    ```
 
-3. **Add Pandera Validation**
+1. **Add Pandera Validation**
+
    ```python
    # src/bioetl/domain/schemas/activity.py
    import pandera as pa
    from bioetl.configs.enums import chembl
-   
+
+
    class ActivitySchema(pa.DataFrameModel):
-       assay_type: pa.typing.Series[pa.String] = pa.Field(
-           isin=chembl.activity.assay_types
-       )
+       assay_type: pa.typing.Series[pa.String] = pa.Field(isin=chembl.activity.assay_types)
    ```
 
 ### Phase 2: Implementation (4 days)
 
 1. **Update Normalization Logic**
+
    ```python
    # Apply enum configurations in normalization
    def normalize_activity(activity: dict) -> dict:
        activity["assay_type"] = normalize_enum(
-           activity["assay_type"],
-           chembl.activity.assay_types
+           activity["assay_type"], chembl.activity.assay_types
        )
    ```
 
-2. **Add Validation Tests**
+1. **Add Validation Tests**
+
    ```python
    # tests/unit/domain/test_normalization.py
    def test_enum_normalization():
@@ -89,27 +89,31 @@ grep -rn "assay_type\|action_type\|standard_units" src/bioetl/domain/ --include=
        assert normalize_enum("invalid", chembl.activity.assay_types) is None
    ```
 
-3. **Update Documentation**
+1. **Update Documentation**
+
    ```markdown
    # docs/02-architecture/normalization.md
    ## Enum Configuration
-   
+
    All enum fields are configured in `configs/enums/chembl.yaml`
    ```
 
 ### Phase 3: Validation (2 days)
 
 1. **Test Enum Handling**
+
    ```bash
    pytest tests/unit/domain/test_normalization.py -v
    ```
 
-2. **Validate Data Quality**
+1. **Validate Data Quality**
+
    ```bash
    python scripts/validate_data_quality.py --enum-check
    ```
 
-3. **Monitor Production**
+1. **Monitor Production**
+
    ```bash
    # Check for enum validation errors
    grep "enum" logs/production.log
@@ -143,17 +147,20 @@ mypy src/bioetl/domain/normalization/ --strict
 ## 📈 Impact Assessment
 
 ### Positive Impacts
+
 - **Maintainability**: Centralized enum management
 - **Consistency**: Uniform enum handling across codebase
 - **Validation**: Comprehensive Pandera checks
 - **Documentation**: Clear enum configuration
 
 ### Potential Risks
+
 - **Breaking Changes**: Existing data might not match new enums
 - **Performance**: Additional validation overhead
 - **Complexity**: More configuration to maintain
 
 ### Mitigation Strategies
+
 - **Backward Compatibility**: Support both old and new enum values
 - **Gradual Rollout**: Deploy in stages
 - **Comprehensive Testing**: Validate all scenarios
@@ -166,8 +173,8 @@ mypy src/bioetl/domain/normalization/ --strict
 
 ## ⏳ Time Estimate
 
-**Total**: 9 days  
-**Start Date**: 2024-05-20  
+**Total**: 9 days
+**Start Date**: 2024-05-20
 **Target Completion**: 2024-06-03
 
 ## 👥 Assignee

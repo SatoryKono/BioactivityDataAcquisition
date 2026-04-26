@@ -7,7 +7,7 @@ available in this repository.
 
 ## Key Rule
 
-In Gemini CLI, logical profiles are implemented as **sub-agent tools**. 
+In Gemini CLI, logical profiles are implemented as **sub-agent tools**.
 Instead of spawning an agent with a message, you call the tool directly.
 
 ## Invocation Pattern
@@ -22,16 +22,16 @@ py-audit-bot(query="Perform baseline audit for task RF-001 in src/bioetl/applica
 
 ## Available Sub-Agents (Tools)
 
-| Tool Name | Role | Primary Responsibility |
-|-----------|------|------------------------|
-| `py-audit-bot` | Compliance Gate | Baseline/final audit, RULES.md/ADR verification |
-| `py-plan-bot` | Architect | Planning, decomposition, composite design |
-| `py-test-bot` | Tester | Unit and integration testing, VCR management |
-| `py-config-bot` | Config Engineer | YAML configurations in `configs/` |
-| `py-debug-bot` | Troubleshooter | Root cause analysis and fixing test failures |
-| `py-doc-bot` | Technical Writer | Documentation, ADRs, Mermaid diagrams |
-| `py-test-swarm` | QA Orchestrator | Hierarchical testing (L1→L2→L3) |
-| `py-review-orchestrator` | Review Lead | Hierarchical code review (S1-S8) |
+| Tool Name                | Role             | Primary Responsibility                          |
+| ------------------------ | ---------------- | ----------------------------------------------- |
+| `py-audit-bot`           | Compliance Gate  | Baseline/final audit, RULES.md/ADR verification |
+| `py-plan-bot`            | Architect        | Planning, decomposition, composite design       |
+| `py-test-bot`            | Tester           | Unit and integration testing, VCR management    |
+| `py-config-bot`          | Config Engineer  | YAML configurations in `configs/`               |
+| `py-debug-bot`           | Troubleshooter   | Root cause analysis and fixing test failures    |
+| `py-doc-bot`             | Technical Writer | Documentation, ADRs, Mermaid diagrams           |
+| `py-test-swarm`          | QA Orchestrator  | Hierarchical testing (L1→L2→L3)                 |
+| `py-review-orchestrator` | Review Lead      | Hierarchical code review (S1-S8)                |
 
 ## Ownership Rules
 

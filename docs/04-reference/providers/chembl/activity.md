@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Пайплайн: ChEMBL Activity
 
@@ -15,13 +18,13 @@ Last verified: '2026-03-30'
 **Сущность:** `activity`
 **Версия схемы:** 1.2.0
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 1. Описание
 
 Пайплайн извлекает данные о биологической активности молекул из API ChEMBL. Каждая запись содержит результат измерения активности (IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50 и др.) для пары молекула-мишень.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 2. Конфигурация
 
@@ -67,7 +70,7 @@ quality:
           nullable: false
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 3. Схема данных
 
@@ -79,46 +82,46 @@ quality:
 
 #### Идентификаторы
 
-| Поле                 | Тип   | Обязательное | Описание                                   |
-| -------------------- | ----- | ------------ | ------------------------------------------ |
-| `activity_id`        | `str` | **Да**       | Уникальный идентификатор записи активности |
+| Поле                 | Тип   | Обязательное | Описание                                        |
+| -------------------- | ----- | ------------ | ----------------------------------------------- |
+| `activity_id`        | `str` | **Да**       | Уникальный идентификатор записи активности      |
 | `molecule_id`        | `str` | **Да**       | Канонический ID молекулы (например, `CHEMBL25`) |
-| `target_id`          | `str` | Нет          | Канонический ID мишени                     |
-| `assay_id`           | `str` | Нет          | Канонический ID анализа                    |
-| `publication_id`     | `str` | Нет          | Канонический ID публикации (provider PK)   |
-| `publication_doi`    | `str` | Нет          | DOI публикации                             |
-| `publication_pmid`   | `str` | Нет          | PubMed ID                                  |
-| `publication_pmc_id` | `str` | Нет          | PubMed Central ID                          |
-| `record_id`          | `int` | Нет          | Внутренний ID записи                       |
-| `src_id`             | `int` | Нет          | ID источника данных                        |
+| `target_id`          | `str` | Нет          | Канонический ID мишени                          |
+| `assay_id`           | `str` | Нет          | Канонический ID анализа                         |
+| `publication_id`     | `str` | Нет          | Канонический ID публикации (provider PK)        |
+| `publication_doi`    | `str` | Нет          | DOI публикации                                  |
+| `publication_pmid`   | `str` | Нет          | PubMed ID                                       |
+| `publication_pmc_id` | `str` | Нет          | PubMed Central ID                               |
+| `record_id`          | `int` | Нет          | Внутренний ID записи                            |
+| `src_id`             | `int` | Нет          | ID источника данных                             |
 
 #### Данные молекулы
 
-| Поле                        | Тип   | Описание                           |
-| --------------------------- | ----- | ---------------------------------- |
-| `canonical_smiles`          | `str` | SMILES-формула молекулы            |
-| `molecule_pref_name`        | `str` | Предпочтительное название молекулы |
-| `parent_molecule_id`        | `str` | ID родительской молекулы           |
+| Поле                 | Тип   | Описание                           |
+| -------------------- | ----- | ---------------------------------- |
+| `canonical_smiles`   | `str` | SMILES-формула молекулы            |
+| `molecule_pref_name` | `str` | Предпочтительное название молекулы |
+| `parent_molecule_id` | `str` | ID родительской молекулы           |
 
 #### Данные мишени
 
-|Поле|Тип|Описание|
-|---|---|---|
-|`target_pref_name`|`str`|Название мишени|
-|`target_organism`|`str`|Организм мишени|
-|`target_taxonomy_id`|`float`|NCBI Taxonomy ID (nullable int pattern)|
+| Поле                 | Тип     | Описание                                |
+| -------------------- | ------- | --------------------------------------- |
+| `target_pref_name`   | `str`   | Название мишени                         |
+| `target_organism`    | `str`   | Организм мишени                         |
+| `target_taxonomy_id` | `float` | NCBI Taxonomy ID (nullable int pattern) |
 
 #### Данные анализа
 
-|Поле|Тип|Описание|
-|---|---|---|
-|`assay_type`|`str`|Тип анализа (B, F, A, T, P)|
-|`assay_description`|`str`|Описание анализа|
-|`assay_variant_accession`|`str`|Accession варианта белка в анализе|
-|`assay_variant_mutation`|`str`|Мутация варианта в анализе|
-|`bao_endpoint`|`str`|BAO endpoint (онтология)|
-|`bao_format`|`str`|BAO format|
-|`bao_label`|`str`|BAO label|
+| Поле                      | Тип   | Описание                           |
+| ------------------------- | ----- | ---------------------------------- |
+| `assay_type`              | `str` | Тип анализа (B, F, A, T, P)        |
+| `assay_description`       | `str` | Описание анализа                   |
+| `assay_variant_accession` | `str` | Accession варианта белка в анализе |
+| `assay_variant_mutation`  | `str` | Мутация варианта в анализе         |
+| `bao_endpoint`            | `str` | BAO endpoint (онтология)           |
+| `bao_format`              | `str` | BAO format                         |
+| `bao_label`               | `str` | BAO label                          |
 
 #### Сырые значения активности
 
@@ -164,29 +167,29 @@ quality:
 
 #### Данные публикации (Document/Publication data)
 
-| Поле               | Тип   | Описание                              |
-| ------------------ | ----- | ------------------------------------- |
-| `journal`          | `str` | Журнал публикации                     |
-| `publication_year` | `int` | Год публикации                        |
+| Поле               | Тип   | Описание          |
+| ------------------ | ----- | ----------------- |
+| `journal`          | `str` | Журнал публикации |
+| `publication_year` | `int` | Год публикации    |
 
 #### Метаданные качества
 
-|Поле|Тип|Описание|
-|---|---|---|
-|`activity_comment`|`str`|Комментарий к активности|
-|`data_validity_comment`|`str`|Комментарий о валидности|
-|`data_validity_description`|`str`|Описание проблемы с данными|
-|`potential_duplicate`|`int`|Флаг потенциального дубликата|
-|`manual_curation_flag`|`int`|Флаг ручной кураторской проверки (0/1)|
-|`original_activity_id`|`int`|ID исходной записи активности (traceability)|
+| Поле                        | Тип   | Описание                                     |
+| --------------------------- | ----- | -------------------------------------------- |
+| `activity_comment`          | `str` | Комментарий к активности                     |
+| `data_validity_comment`     | `str` | Комментарий о валидности                     |
+| `data_validity_description` | `str` | Описание проблемы с данными                  |
+| `potential_duplicate`       | `int` | Флаг потенциального дубликата                |
+| `manual_curation_flag`      | `int` | Флаг ручной кураторской проверки (0/1)       |
+| `original_activity_id`      | `int` | ID исходной записи активности (traceability) |
 
 #### Тип действия (Action Type)
 
 Поля развёрнуты из вложенного словаря ChEMBL API (`action_type`):
 
-| Поле               | Тип   | Описание                                            |
-| ------------------ | ----- | --------------------------------------------------- |
-| `action_type`      | `str` | Тип действия: INHIBITOR, AGONIST, ANTAGONIST и др.  |
+| Поле                      | Тип   | Описание                                            |
+| ------------------------- | ----- | --------------------------------------------------- |
+| `action_type`             | `str` | Тип действия: INHIBITOR, AGONIST, ANTAGONIST и др.  |
 | `action_type_description` | `str` | Описание типа действия                              |
 | `action_type_parent_type` | `str` | Родительская группа типа действия (может быть null) |
 
@@ -194,19 +197,19 @@ quality:
 
 #### Системные поля persisted-row contract
 
-| Поле               | Тип   | Описание                             |
-| ------------------ | ----- | ------------------------------------ |
-| `entity_id`        | `str` | `chembl:{activity_id}`               |
-| `content_hash`     | `str` | SHA256-хеш содержимого               |
-| `_source`          | `str` | Канонический provider/source anchor  |
-| `_index`           | `int` | Порядковый индекс записи в батче     |
+| Поле           | Тип   | Описание                            |
+| -------------- | ----- | ----------------------------------- |
+| `entity_id`    | `str` | `chembl:{activity_id}`              |
+| `content_hash` | `str` | SHA256-хеш содержимого              |
+| `_source`      | `str` | Канонический provider/source anchor |
+| `_index`       | `int` | Порядковый индекс записи в батче    |
 
 Occurrence-scoped provenance (`_run_id`, `_run_type`, `_source_batch_id`,
 `_ingestion_ts`) не входит в физический Silver/Gold row contract и
 публикуется через sidecar metadata, lineage fragments, run manifest, run
 ledger и audit artifacts.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ### 3.2. Валидация при создании сущности
 
@@ -220,7 +223,7 @@ def validate_invariants(self) -> None:
         raise ValueError("pChemBL value must be non-negative")
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 4. Нормализация данных
 
@@ -280,7 +283,7 @@ META_FIELDS = {
 }
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 5. Валидация и Data Quality
 
@@ -319,7 +322,7 @@ META_FIELDS = {
 }
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 6. Запись в слои Medallion
 
@@ -351,7 +354,7 @@ META_FIELDS = {
 }
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ### 6.2. Silver Layer
 
@@ -385,15 +388,15 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
 )
 ```
 
-| Параметр                 | Значение                                      |
-| ------------------------ | --------------------------------------------- |
-| **Формат**               | Delta Lake                                    |
-| **Режим записи**         | `merge` (active pipeline config)              |
-| **Бизнес-ключ**          | `activity_id`                                 |
-| **Партиционирование**    | Не задано в активном entity config            |
+| Параметр                 | Значение                                             |
+| ------------------------ | ---------------------------------------------------- |
+| **Формат**               | Delta Lake                                           |
+| **Режим записи**         | `merge` (active pipeline config)                     |
+| **Бизнес-ключ**          | `activity_id`                                        |
+| **Партиционирование**    | Не задано в активном entity config                   |
 | **Приоритет конфликтов** | REBUILD > BACKFILL > INCREMENTAL (run_type metadata) |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ### 6.3. Gold Layer
 
@@ -401,13 +404,13 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
 In the active config, `sink.gold.enabled: false`, so the pipeline stops after
 Bronze and Silver writes.
 
-| Параметр        | Значение                                 |
-| --------------- | ---------------------------------------- |
-| **Статус**      | Disabled in `configs/entities/chembl/activity.yaml` |
-| **Причина**     | Активный pipeline config не включает Gold sink |
-| **Контракт**    | Gold contract exports may exist as reference artifacts, but they are not emitted by the current pipeline |
+| Параметр     | Значение                                                                                                 |
+| ------------ | -------------------------------------------------------------------------------------------------------- |
+| **Статус**   | Disabled in `configs/entities/chembl/activity.yaml`                                                      |
+| **Причина**  | Активный pipeline config не включает Gold sink                                                           |
+| **Контракт** | Gold contract exports may exist as reference artifacts, but they are not emitted by the current pipeline |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 7. Полный поток данных
 
@@ -448,7 +451,7 @@ ChEMBL API (/activity.json)
 └─────────────────────────────────────────┘
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 8. Результат обработки батча
 
@@ -460,31 +463,31 @@ class BatchResult:
     quarantined_count: int  # Отправлено в карантин
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 9. Инкрементальная загрузка
 
 Отдельный watermark-модуль удалён (см. ADR-011). Инкрементальность обеспечивается
 через `run_type`, checkpoints и идемпотентный merge по ключам/хешу.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 10. Связанные файлы
 
-| Компонент     | Путь                                                              |
-| ------------- | ----------------------------------------------------------------- |
-| Конфигурация  | `configs/entities/chembl/activity.yaml`                          |
-| Сущность      | `src/bioetl/domain/entities/bioactivity/_entity.py`               |
-| Трансформер   | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
-| Gold sink     | Disabled in `configs/entities/chembl/activity.yaml`                |
-| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`            |
-| Silver Schema | `src/bioetl/infrastructure/schemas/silver.py`                     |
-| Bronze Writer | `src/bioetl/infrastructure/storage/bronze_writer.py`              |
-| Silver Writer | `src/bioetl/infrastructure/storage/silver_writer.py`              |
-| Gold Writer   | Not used by the active `chembl_activity` pipeline                  |
+| Компонент     | Путь                                                                         |
+| ------------- | ---------------------------------------------------------------------------- |
+| Конфигурация  | `configs/entities/chembl/activity.yaml`                                      |
+| Сущность      | `src/bioetl/domain/entities/bioactivity/_entity.py`                          |
+| Трансформер   | `src/bioetl/application/pipelines/chembl/activity_transformer.py`            |
+| Gold sink     | Disabled in `configs/entities/chembl/activity.yaml`                          |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`                      |
+| Silver Schema | `src/bioetl/infrastructure/schemas/silver.py`                                |
+| Bronze Writer | `src/bioetl/infrastructure/storage/bronze_writer.py`                         |
+| Silver Writer | `src/bioetl/infrastructure/storage/silver_writer.py`                         |
+| Gold Writer   | Not used by the active `chembl_activity` pipeline                            |
 | Data Contract | `src/bioetl/domain/contracts/gold/` (canonical source for generated exports) |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 11. Пример использования CLI
 
@@ -502,29 +505,29 @@ bioetl run --pipeline chembl_activity --run-type backfill
 bioetl run --pipeline chembl_activity --run-type rebuild
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Contract References
 
-| Артефакт | Ссылка |
-| --- | --- |
-| Gold contract export | [chembl_activity_v1.0.json](../../contracts/gold/chembl_activity_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Артефакт             | Ссылка                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Gold contract export | [chembl_activity_v1.0.json](../../contracts/gold/chembl_activity_v1.0.json)              |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Compliance
 
-| Контроль | Статус | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Runtime alignment | Pass | Активный runtime и config surface описаны в разделах `Конфигурация` и `Связанные файлы` |
-| Contract linkage | Pass | [chembl_activity_v1.0.json](../../contracts/gold/chembl_activity_v1.0.json) |
-| API governance | Pass | См. [API Compliance](#api-compliance) |
-| Contract note | Reference-only | Gold export опубликован как reference surface, несмотря на disabled gold sink в active config |
+| Контроль          | Статус         | Evidence                                                                                      |
+| ----------------- | -------------- | --------------------------------------------------------------------------------------------- |
+| Metadata          | Pass           | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`      |
+| Runtime alignment | Pass           | Активный runtime и config surface описаны в разделах `Конфигурация` и `Связанные файлы`       |
+| Contract linkage  | Pass           | [chembl_activity_v1.0.json](../../contracts/gold/chembl_activity_v1.0.json)                   |
+| API governance    | Pass           | См. [API Compliance](#api-compliance)                                                         |
+| Contract note     | Reference-only | Gold export опубликован как reference surface, несмотря на disabled gold sink в active config |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## API Compliance
 

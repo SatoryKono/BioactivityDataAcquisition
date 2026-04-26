@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # PubChem Compound Pipeline Specification
 
@@ -17,15 +20,15 @@ Last verified: '2026-03-29'
 
 ## Current Canonical Contract Summary
 
-| Parameter | Value |
-|-----------|-------|
-| Pipeline ID | `pubchem_compound` |
-| Provider | `pubchem` |
-| Entity | `compound` |
-| Business Primary Keys | `["molecule_id"]` |
-| Silver Format | `delta` |
-| Gold Format | `delta` |
-| Gold Mode | `scd2` |
+| Parameter             | Value              |
+| --------------------- | ------------------ |
+| Pipeline ID           | `pubchem_compound` |
+| Provider              | `pubchem`          |
+| Entity                | `compound`         |
+| Business Primary Keys | `["molecule_id"]`  |
+| Silver Format         | `delta`            |
+| Gold Format           | `delta`            |
+| Gold Mode             | `scd2`             |
 
 ## Notes
 
@@ -43,18 +46,18 @@ Last verified: '2026-03-29'
 
 ## Contract References
 
-| Artifact | Link |
-| --- | --- |
-| Provider reference | [compound.md](../../providers/pubchem/compound.md) |
-| Gold contract export | [pubchem_compound_v1.0.json](../../contracts/gold/pubchem_compound_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Artifact             | Link                                                                                     |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Provider reference   | [compound.md](../../providers/pubchem/compound.md)                                       |
+| Gold contract export | [pubchem_compound_v1.0.json](../../contracts/gold/pubchem_compound_v1.0.json)            |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
 ## Compliance
 
-| Control | Status | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Canonical source traceability | Pass | Page delegates current contract to the linked canonical source and active config surface |
-| Contract linkage | Pass | [pubchem_compound_v1.0.json](../../contracts/gold/pubchem_compound_v1.0.json) |
-| Published-page role | Pass | Canonical compact summary is explicitly bounded by current canonical sources |
+| Control                       | Status | Evidence                                                                                 |
+| ----------------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| Metadata                      | Pass   | YAML header contains `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
+| Canonical source traceability | Pass   | Page delegates current contract to the linked canonical source and active config surface |
+| Contract linkage              | Pass   | [pubchem_compound_v1.0.json](../../contracts/gold/pubchem_compound_v1.0.json)            |
+| Published-page role           | Pass   | Canonical compact summary is explicitly bounded by current canonical sources             |

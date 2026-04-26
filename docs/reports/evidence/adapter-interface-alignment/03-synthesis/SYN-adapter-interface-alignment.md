@@ -94,16 +94,19 @@ Rebaseline note: the seam alignment pressure points remain current, so this synt
 ## Recommended Decisions
 
 - **DEC-ADAPT-001:** Choose the canonical helper-synthesis boundary for adapter construction.
+
   - Options:
     - Normalize on `DataSourceFactory.create()` as the single adapter-construction seam.
     - Normalize on provider-specific composition creators and reduce `DataSourceFactory` to a thinner facade.
 
 - **DEC-ADAPT-002:** Formalize the `custom_creator` contract.
+
   - Options:
     - Replace `Callable[..., DataSourcePort]` with a typed protocol.
     - Keep the callable seam but define a shared helper-bundle object or kwargs contract that every custom creator must accept.
 
 - **DEC-ADAPT-003:** Define the mandatory helper bundle for HTTP adapters as an explicit composition concept.
+
   - Minimum likely members:
     - `error_handler`
     - `adapter_metrics`
@@ -124,5 +127,5 @@ Rebaseline note: the seam alignment pressure points remain current, so this synt
 ## Top Insights
 
 1. The safest outward-facing interface is already present in `data_source_creator`; the system should preserve that small surface rather than expand caller responsibilities. (EV-adapter-alignment-tests-preserve-minimal-provider-bound-surface, EV-adapter-alignment-biblio-data-source-creators-centralize-helper-wiring)
-2. `fallback_fetch_service` and its helper peers are part of the real adapter contract, not incidental wiring. (EV-adapter-alignment-http-adapters-require-fallback-helper)
-3. The root seam problem is the dual construction model around `custom_creator`, not provider-specific behavior by itself. (EV-adapter-alignment-custom-creator-bypasses-global-helper-injection, EV-adapter-alignment-custom-creator-dynamic-contract)
+1. `fallback_fetch_service` and its helper peers are part of the real adapter contract, not incidental wiring. (EV-adapter-alignment-http-adapters-require-fallback-helper)
+1. The root seam problem is the dual construction model around `custom_creator`, not provider-specific behavior by itself. (EV-adapter-alignment-custom-creator-bypasses-global-helper-injection, EV-adapter-alignment-custom-creator-dynamic-contract)

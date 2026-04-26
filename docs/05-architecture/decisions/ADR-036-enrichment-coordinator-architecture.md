@@ -1,6 +1,7 @@
 # ADR 036: Enrichment Coordinator Architecture
 
 ## Status
+
 **Accepted** ✅
 
 ## Context
@@ -14,6 +15,7 @@ After comprehensive analysis, we decide to **keep the current architecture with 
 ### Current Architecture Assessment
 
 **Complexity Metrics**:
+
 - **File size**: 314 lines
 - **Public methods**: 1 (primary orchestration)
 - **Private methods**: 12+ (orchestration logic)
@@ -21,6 +23,7 @@ After comprehensive analysis, we decide to **keep the current architecture with 
 - **Complexity score**: 8/10 (appropriate for domain)
 
 **Architecture Patterns**:
+
 ```mermaid
 classDiagram
     EnrichmentCoordinatorService "1" *-- "1" EnrichmentCoordinatorResultMixin : inherits
@@ -53,21 +56,25 @@ flowchart TD
 ### Key Components
 
 1. **Main Orchestration** (`run_enrichers`)
+
    - Entry point for enrichment execution
    - Builds tasks and coordinates parallel execution
    - Handles result collection and aggregation
 
-2. **Single Enricher Execution** (`_run_single_enricher`)
+1. **Single Enricher Execution** (`_run_single_enricher`)
+
    - Core execution logic with error handling
    - Manages semaphore-based concurrency
    - Handles timeouts and execution errors
 
-3. **Error Handling System**
+1. **Error Handling System**
+
    - Timeout handling with required/optional logic
    - Execution error handling with classification
    - Result building for different outcome types
 
-4. **State Management**
+1. **State Management**
+
    - Execution context tracking
    - Timestamp management
    - Progress logging
@@ -77,16 +84,19 @@ flowchart TD
 ### Why Current Architecture is Sound
 
 1. **Appropriate Complexity for Orchestration**
+
    - Parallel execution requires sophisticated coordination
    - Multiple error paths are necessary for robustness
    - State management is essential for observability
 
-2. **Proper Separation of Concerns**
+1. **Proper Separation of Concerns**
+
    - Orchestration logic separated from execution
    - Error handling isolated in dedicated methods
    - Result building abstracted appropriately
 
-3. **Good Testability**
+1. **Good Testability**
+
    - Clear method boundaries enable unit testing
    - Dependency injection for key components
    - Mockable error scenarios
@@ -94,16 +104,19 @@ flowchart TD
 ### Targeted Improvement Opportunities
 
 1. **Error Handling Consolidation**
+
    - Current: 4 separate exception handlers
    - Target: 2 unified error handlers
    - Benefit: Reduced cognitive complexity
 
-2. **State Management Simplification**
+1. **State Management Simplification**
+
    - Current: Complex execution context
    - Target: Simplified context with derived properties
    - Benefit: Easier to understand and maintain
 
-3. **Result Building Unification**
+1. **Result Building Unification**
+
    - Current: Multiple result construction methods
    - Target: Unified result builder
    - Benefit: Consistent patterns
@@ -113,6 +126,7 @@ flowchart TD
 ### Phase 1: Error Handling Refactoring ✅ RECOMMENDED
 
 **Current Complex Pattern**:
+
 ```python
 try:
     runner, completed_at, duration = await self._run_with_timeout(...)
@@ -128,6 +142,7 @@ except BioETLError as e:
 ```
 
 **Proposed Simplified Pattern**:
+
 ```python
 try:
     return await self._execute_enricher_safely(execution_context, keys, runner_factory)
@@ -138,6 +153,7 @@ except Exception as e:
 ### Phase 2: State Management Simplification 🟡 OPTIONAL
 
 **Current Complex Context**:
+
 ```python
 @dataclass(frozen=True, slots=True)
 class _EnricherExecutionContext:
@@ -148,6 +164,7 @@ class _EnricherExecutionContext:
 ```
 
 **Proposed Simplified Context**:
+
 ```python
 @dataclass(frozen=True, slots=True)
 class _EnricherExecutionContext:
@@ -163,48 +180,59 @@ class _EnricherExecutionContext:
 ### Phase 3: Observability Enhancement 🟡 FUTURE
 
 **Proposed Metrics Addition**:
+
 ```python
-def _log_enricher_metrics(self, enricher: EnricherConfig, duration: float, result: EnrichmentResult) -> None:
-    self._metrics.observe_histogram("bioetl_enricher_duration_seconds", duration, {
-        "enricher": enricher.pipeline,
-        "status": result.status.value,
-        "records_input": result.records_input,
-        "records_enriched": result.records_enriched,
-    })
+def _log_enricher_metrics(
+    self, enricher: EnricherConfig, duration: float, result: EnrichmentResult
+) -> None:
+    self._metrics.observe_histogram(
+        "bioetl_enricher_duration_seconds",
+        duration,
+        {
+            "enricher": enricher.pipeline,
+            "status": result.status.value,
+            "records_input": result.records_input,
+            "records_enriched": result.records_enriched,
+        },
+    )
 ```
 
 ## Success Metrics
 
 ### Refactoring Goals
 
-| Metric | Current | Target | Status |
-|--------|---------|-------|--------|
-| Exception handlers | 4 | 2 | ✅ Achievable |
-| Method complexity | 8/10 | 7/10 | ✅ Realistic |
-| Test coverage | 85% | 95% | ✅ Maintainable |
-| Code clarity | Good | Excellent | ✅ Improvable |
+| Metric             | Current | Target    | Status          |
+| ------------------ | ------- | --------- | --------------- |
+| Exception handlers | 4       | 2         | ✅ Achievable   |
+| Method complexity  | 8/10    | 7/10      | ✅ Realistic    |
+| Test coverage      | 85%     | 95%       | ✅ Maintainable |
+| Code clarity       | Good    | Excellent | ✅ Improvable   |
 
 ### Quality Indicators
 
 1. **Maintainability**: Improved through simpler error handling
-2. **Testability**: Enhanced with clearer method boundaries
-3. **Robustness**: Preserved through careful refactoring
-4. **Performance**: No impact (same execution paths)
+1. **Testability**: Enhanced with clearer method boundaries
+1. **Robustness**: Preserved through careful refactoring
+1. **Performance**: No impact (same execution paths)
 
 ## Migration Plan
 
 ### Incremental Implementation
 
 1. **Extract Helper Methods**
+
    ```python
    async def _execute_with_error_handling(self, execution_context, keys, runner_factory):
        try:
-           return await self._execute_enricher_safely(execution_context, keys, runner_factory)
+           return await self._execute_enricher_safely(
+               execution_context, keys, runner_factory
+           )
        except Exception as e:
            return self._handle_any_enricher_error(execution_context, e)
    ```
 
-2. **Consolidate Error Handling**
+1. **Consolidate Error Handling**
+
    ```python
    def _handle_any_enricher_error(self, execution_context, error):
        if isinstance(error, TimeoutError):
@@ -212,7 +240,8 @@ def _log_enricher_metrics(self, enricher: EnricherConfig, duration: float, resul
        return self._handle_enricher_execution_error(error, execution_context)
    ```
 
-3. **Simplify State Management**
+1. **Simplify State Management**
+
    ```python
    def _initialize_execution(self, enricher, keys):
        started_at, started_monotonic_at = capture_runtime_timing_anchor()
@@ -220,13 +249,14 @@ def _log_enricher_metrics(self, enricher: EnricherConfig, duration: float, resul
            enricher=enricher,
            records_input=len(keys),
            started_at=started_at,
-           started_monotonic_at=started_monotonic_at
+           started_monotonic_at=started_monotonic_at,
        )
    ```
 
 ## Backward Compatibility
 
 ✅ **100% Backward Compatible**
+
 - No public API changes
 - Same external behavior
 - Identical error handling semantics
@@ -235,21 +265,27 @@ def _log_enricher_metrics(self, enricher: EnricherConfig, duration: float, resul
 ## Alternatives Considered
 
 ### ❌ Major Architecture Restructuring
+
 **Rejected because**:
+
 - High risk of introducing bugs
 - Significant testing overhead
 - Minimal benefit over incremental approach
 - Would disrupt existing workflows
 
 ### ❌ Complete Rewrite
+
 **Rejected because**:
+
 - Extreme risk for questionable benefit
 - Would require full regression testing
 - Development time not justified
 - Current architecture is fundamentally sound
 
 ### ✅ Incremental Refactoring
+
 **Selected because**:
+
 - Low risk, high reward
 - Preserves existing functionality
 - Enables gradual improvement
@@ -312,6 +348,7 @@ sequenceDiagram
 The `EnrichmentCoordinatorService` represents **proper architectural design** for its orchestration role. While it has moderate complexity, this complexity is **largely justified** by the requirements of parallel execution, error handling, and state management.
 
 **Recommendation**:
+
 - ✅ **Keep current architecture** as foundation
 - ✅ **Implement targeted refactoring** for error handling
 - 🟡 **Consider optional simplifications** for state management

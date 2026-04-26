@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-030: Publication Pagination Strategy (force-full-scan)
 
@@ -21,7 +24,7 @@ Publication entities (documents, works, papers) from external APIs present uniqu
 ### Problem Statement
 
 1. **Offset instability**: Publication APIs (ChEMBL `/document`, CrossRef Works, PubMed) frequently update their datasets
-2. **Offset-based resume fails**: When resuming from offset N after API data changes:
+1. **Offset-based resume fails**: When resuming from offset N after API data changes:
    - Records may shift positions, causing **duplicates** (same record fetched twice)
    - Records may be skipped entirely, causing **data loss**
    - Results are **non-reproducible** across runs
@@ -38,23 +41,23 @@ Run 2 (resume): Fetch records 1000-2000
 
 ### Affected Pipelines
 
-| Pipeline | Provider | Entity Type | Primary Key |
-|----------|----------|-------------|-------------|
-| `chembl_publication` | ChEMBL | publication | document-chembl-id |
-| `chembl_publication_term` | ChEMBL | publication-term | entity-id |
-| `chembl_publication_similarity` | ChEMBL | publication-similarity | sim-id |
-| `pubmed_publication` | PubMed | publication | pmid |
-| `crossref_publication` | CrossRef | work | doi |
-| `openalex_publication` | OpenAlex | publication | openalex-id |
-| `semanticscholar_publication` | SemanticScholar | publication | paper-id |
+| Pipeline                        | Provider        | Entity Type            | Primary Key        |
+| ------------------------------- | --------------- | ---------------------- | ------------------ |
+| `chembl_publication`            | ChEMBL          | publication            | document-chembl-id |
+| `chembl_publication_term`       | ChEMBL          | publication-term       | entity-id          |
+| `chembl_publication_similarity` | ChEMBL          | publication-similarity | sim-id             |
+| `pubmed_publication`            | PubMed          | publication            | pmid               |
+| `crossref_publication`          | CrossRef        | work                   | doi                |
+| `openalex_publication`          | OpenAlex        | publication            | openalex-id        |
+| `semanticscholar_publication`   | SemanticScholar | publication            | paper-id           |
 
 ## Decision
 
 Introduce `force-full-scan` flag for publication entities that:
 
 1. **Disables checkpoint-based resume** for the pipeline
-2. **Each run performs a full scan** of the data source
-3. **Deduplication is handled on Silver layer** via `content-hash`
+1. **Each run performs a full scan** of the data source
+1. **Deduplication is handled on Silver layer** via `content-hash`
 
 ### Configuration
 
@@ -66,7 +69,7 @@ class PipelineConfig:
     # ... existing fields ...
 
     # Pagination strategy (ADR-030)
-    force-full-scan: bool = False
+    force - full - scan: bool = False
 ```
 
 ### YAML Configuration
@@ -86,8 +89,8 @@ force-full-scan: true
 When `force-full-scan=True` and `resume=True` is requested:
 
 1. **Warning logged** with explanation
-2. **Checkpoint loading is skipped**
-3. **Full extraction proceeds** from offset 0
+1. **Checkpoint loading is skipped**
+1. **Full extraction proceeds** from offset 0
 
 ```python
 # CheckpointManager.load-checkpoint()
@@ -107,7 +110,7 @@ Silver layer merge handles duplicates via:
 
 ```python
 # Silver write uses MERGE with content-hash
-write-mode = SilverWriteMode.MERGE  # Upsert by primary key
+write - mode = SilverWriteMode.MERGE  # Upsert by primary key
 ```
 
 Records with identical `content-hash` are deduplicated during merge.
@@ -117,16 +120,16 @@ Records with identical `content-hash` are deduplicated during merge.
 ### Positive
 
 1. **Reproducible runs**: Each execution produces consistent results
-2. **No data loss**: Full scan guarantees all current records are captured
-3. **No duplicates in Silver**: Merge deduplication handles repeated records
-4. **Simple mental model**: "Run = full dataset snapshot"
-5. **Resilient to API changes**: No dependency on stable offsets
+1. **No data loss**: Full scan guarantees all current records are captured
+1. **No duplicates in Silver**: Merge deduplication handles repeated records
+1. **Simple mental model**: "Run = full dataset snapshot"
+1. **Resilient to API changes**: No dependency on stable offsets
 
 ### Negative
 
 1. **Longer run times**: Full scan vs incremental requires more API calls
-2. **Higher API load**: May increase rate limiting on some providers
-3. **Cannot resume mid-run**: Interruption requires restart from beginning
+1. **Higher API load**: May increase rate limiting on some providers
+1. **Cannot resume mid-run**: Interruption requires restart from beginning
 
 ### Mitigations
 
@@ -144,18 +147,21 @@ Records with identical `content-hash` are deduplicated during merge.
 ### Alternative 1: Cursor-based Pagination
 
 **Rejected** because:
+
 - Not all APIs support stable cursors (ChEMBL, PubMed use offset)
 - Cursor state is opaque and cannot be validated after API changes
 
 ### Alternative 2: Timestamp-based Incremental
 
 **Rejected** because:
+
 - APIs don't provide reliable `updated-at` for all records
 - Historical records may be modified without timestamp update
 
 ### Alternative 3: API-specific Sync Tokens
 
 **Rejected** because:
+
 - Would require per-provider implementation
 - Most publication APIs don't support sync tokens
 
@@ -164,20 +170,25 @@ Records with identical `content-hash` are deduplicated during merge.
 ### Files Modified
 
 **Domain:**
+
 - `src/bioetl/domain/config.py` — Add `force-full-scan` field to `PipelineConfig`
 
 **Application:**
+
 - `src/bioetl/application/core/lifecycle/checkpoint_manager.py` — Block resume when `force-full-scan=True`
 
 **Infrastructure:**
+
 - `src/bioetl/infrastructure/schemas/pipeline_config.py` — Add `force-full-scan` to YAML schema
 - `src/bioetl/infrastructure/config/_base.py` — Pass `force-full-scan` in `yaml_config_to_domain`
 
 **Composition:**
+
 - `src/bioetl/composition/factories/services_factory.py` — Pass `force-full-scan` to `CheckpointManager`
 - `src/bioetl/composition/factories/pipeline_factory.py` — Use `config.force-full-scan`
 
 **Configs:**
+
 - `configs/entities/chembl/publication.yaml` — `force-full-scan: true`
 - `configs/entities/chembl/publication_term.yaml` — `force-full-scan: true`
 - `configs/entities/chembl/publication_similarity.yaml` — `force-full-scan: true`
@@ -200,13 +211,13 @@ Records with identical `content-hash` are deduplicated during merge.
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-030-publication-pagination-strategy.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                                     |
+| ------------ | -------------------------------------------------------------------------- | ------ | -------------------------------------------- |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-030-publication-pagination-strategy.md` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                                   |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                             |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria`         |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                                 |
 
 ## Rollout
 

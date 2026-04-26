@@ -24,78 +24,78 @@
 
 ### Оркестрация
 
-| Skill | Назначение |
-|-------|---------|
-| `agent-orchestration` | Карта координации multi-agent workflow |
+| Skill                                 | Назначение                                                                                                                             |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `agent-orchestration`                 | Карта координации multi-agent workflow                                                                                                 |
 | `hierarchical-evidence-orchestration` | Иерархическая evidence-wave orchestration: shard collection через `collecting-evidence` + shard synthesis через `synthesizing-pillars` |
-| `py-review-orchestrator` | Иерархическая кампания code review |
-| `py-test-swarm` | Иерархический test swarm (L1/L2/L3) |
+| `py-review-orchestrator`              | Иерархическая кампания code review                                                                                                     |
+| `py-test-swarm`                       | Иерархический test swarm (L1/L2/L3)                                                                                                    |
 
 ### Профильные Skills
 
-| Skill | Назначение |
-|-------|---------|
-| `py-audit-bot` | Профиль аудита |
+| Skill           | Назначение           |
+| --------------- | -------------------- |
+| `py-audit-bot`  | Профиль аудита       |
 | `py-config-bot` | Профиль конфигурации |
-| `py-debug-bot` | Профиль отладки |
-| `py-doc-bot` | Профиль документации |
-| `py-plan-bot` | Профиль планирования |
-| `py-test-bot` | Профиль тестирования |
+| `py-debug-bot`  | Профиль отладки      |
+| `py-doc-bot`    | Профиль документации |
+| `py-plan-bot`   | Профиль планирования |
+| `py-test-bot`   | Профиль тестирования |
 
 ### Архитектура и Качество
 
-| Skill | Назначение |
-|-------|---------|
-| `architecture-guardian` | Проверка архитектурных границ |
-| `verify-architecture` | Быстрые/полные архитектурные проверки |
-| `vcr-record` | Запись и безопасная поддержка VCR cassette |
+| Skill                   | Назначение                                 |
+| ----------------------- | ------------------------------------------ |
+| `architecture-guardian` | Проверка архитектурных границ              |
+| `verify-architecture`   | Быстрые/полные архитектурные проверки      |
+| `vcr-record`            | Запись и безопасная поддержка VCR cassette |
 
 ### Observability
 
-| Skill | Назначение |
-|-------|---------|
-| `grafana-dashboard-extension` | Расширение, правка и валидация shipped Grafana dashboards |
-| `prometheus-metric-discovery` | Поиск реальных Prometheus metrics, labels и selector-кандидатов |
-| `prometheus-query-debugger` | Отладка PromQL, empty-state semantics и aggregation mistakes |
-| `prometheus-alert-rule-editor` | Создание и безопасная правка Prometheus-backed alert rules |
-| `prometheus-rule-testing` | Детерминированная проверка repo-backed Prometheus rules через `promtool` |
+| Skill                          | Назначение                                                               |
+| ------------------------------ | ------------------------------------------------------------------------ |
+| `grafana-dashboard-extension`  | Расширение, правка и валидация shipped Grafana dashboards                |
+| `prometheus-metric-discovery`  | Поиск реальных Prometheus metrics, labels и selector-кандидатов          |
+| `prometheus-query-debugger`    | Отладка PromQL, empty-state semantics и aggregation mistakes             |
+| `prometheus-alert-rule-editor` | Создание и безопасная правка Prometheus-backed alert rules               |
+| `prometheus-rule-testing`      | Детерминированная проверка repo-backed Prometheus rules через `promtool` |
 
 ### Документация
 
-| Skill | Назначение |
-|-------|---------|
-| `documentation-audit` | Полный аудит и обновление документации |
-| `documentation-cascade-audit` | Иерархический аудит документации |
+| Skill                         | Назначение                             |
+| ----------------------------- | -------------------------------------- |
+| `documentation-audit`         | Полный аудит и обновление документации |
+| `documentation-cascade-audit` | Иерархический аудит документации       |
 
 ### Утилиты
 
-| Skill | Назначение |
-|-------|---------|
-| `capability-discovery` | Обнаружение доступных agents/skills/quality commands |
-| `deep-research` | Структурированный deep research workflow |
-| `repo-config` | Получение динамической конфигурации репозитория |
-| `suggest-users` | Подбор reviewers/assignees на основе контекста репозитория |
-| `create-pr` | Гайд по workflow создания PR |
+| Skill                  | Назначение                                                 |
+| ---------------------- | ---------------------------------------------------------- |
+| `capability-discovery` | Обнаружение доступных agents/skills/quality commands       |
+| `deep-research`        | Структурированный deep research workflow                   |
+| `repo-config`          | Получение динамической конфигурации репозитория            |
+| `suggest-users`        | Подбор reviewers/assignees на основе контекста репозитория |
+| `create-pr`            | Гайд по workflow создания PR                               |
 
 ### Разработка и Дизайн
 
-| Skill | Назначение |
-|-------|---------|
-| `new-pipeline` | Создание provider/entity pipeline |
+| Skill                        | Назначение                                  |
+| ---------------------------- | ------------------------------------------- |
+| `new-pipeline`               | Создание provider/entity pipeline           |
 | `technical-designer-mermaid` | Проектирование технических Mermaid-диаграмм |
 
 ## Wave 6 Consolidation (2026-03-12)
 
 Удалены 6 skills из устаревшего parallel runtime surface и docs-зеркал:
 
-| Удалён | Причина |
-|--------|---------|
-| `collecting-evidence` | Ledger framework — не используется в BioETL |
-| `synthesizing-pillars` | Ledger framework — не используется |
-| `making-decisions` | Ledger framework — не используется |
-| `generating-constrained-specs` | Ledger framework — не используется |
-| `initializing-ledger` | Ledger framework — не используется |
-| `nci-analysis` | Propaganda analysis — нерелевантно для ETL |
+| Удалён                         | Причина                                     |
+| ------------------------------ | ------------------------------------------- |
+| `collecting-evidence`          | Ledger framework — не используется в BioETL |
+| `synthesizing-pillars`         | Ledger framework — не используется          |
+| `making-decisions`             | Ledger framework — не используется          |
+| `generating-constrained-specs` | Ledger framework — не используется          |
+| `initializing-ledger`          | Ledger framework — не используется          |
+| `nci-analysis`                 | Propaganda analysis — нерелевантно для ETL  |
 
 Также удалены 2 OpenAI metadata файла (`*.openai.yaml`).
 

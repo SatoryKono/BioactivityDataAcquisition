@@ -17,10 +17,10 @@ still wins and the mirror must be re-synced.
 
 ## Consumers
 
-| Script                                      | What it checks                                                         |
-| ------------------------------------------- | ---------------------------------------------------------------------- |
-| `scripts/ai/codex/check_skills_mirror.sh`   | Overlays reference bundles from `_references/local` onto skill mirrors |
-| `scripts/ai/codex/check_skills_layout.sh`   | Validates `_references` exists as a required subdirectory              |
+| Script                                    | What it checks                                                         |
+| ----------------------------------------- | ---------------------------------------------------------------------- |
+| `scripts/ai/codex/check_skills_mirror.sh` | Overlays reference bundles from `_references/local` onto skill mirrors |
+| `scripts/ai/codex/check_skills_layout.sh` | Validates `_references` exists as a required subdirectory              |
 
 ## Rules
 

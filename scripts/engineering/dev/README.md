@@ -156,54 +156,54 @@ python -m scripts.engineering.dev <command> [args...]
 
 ## Commands
 
-| Command          | Script                                   | Description                                                      |
-| ---------------- | ---------------------------------------- | ---------------------------------------------------------------- |
-| `setup`          | `scripts/engineering/dev/dev_setup.sh`               | Legacy shell facade; currently not the supported onboarding path |
-| `setup --quick`  | `scripts/engineering/dev/dev_setup.sh`               | Legacy placeholder mode; not recommended for current setup       |
-| `setup --ci`     | `scripts/engineering/dev/dev_setup.sh`               | Legacy placeholder mode; not recommended for current setup       |
-| `install-deps`   | `scripts/engineering/dev/install_deps.py`            | Auxiliary helper script, not a full project bootstrap            |
-| `probe-quality`  | `scripts/engineering/dev/quality_gate_probe.py`      | Measure narrow pytest/mypy startup latency and timeout behavior  |
-| `pretest-guardrails` | `scripts/engineering/dev/pretest_guardrails.sh`  | Run cleanup + repo/docs/memory/architecture preflight            |
-| `run-tests`      | `scripts/engineering/dev/run_tests.py`               | Run tests                                                        |
-| `pytest-sharded` | `scripts/engineering/dev/run_pytest_sharded.sh`      | Run the recommended path-based pytest shards                     |
-| `mock-metrics`   | `scripts/engineering/dev/metrics_mock_server.py`     | Start mock metrics server                                        |
-| `mock-quarantine`| `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock quarantine explorer API server                        |
-| `test-changed`   | `scripts/engineering/dev/run_tests.py changed`       | Run tests for changed files only                                 |
-| `setup-mcp`      | `scripts/engineering/dev/setup_copilot_codex_mcp.py` | Compatibility facade for canonical Codex MCP setup               |
+| Command              | Script                                                       | Description                                                      |
+| -------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
+| `setup`              | `scripts/engineering/dev/dev_setup.sh`                       | Legacy shell facade; currently not the supported onboarding path |
+| `setup --quick`      | `scripts/engineering/dev/dev_setup.sh`                       | Legacy placeholder mode; not recommended for current setup       |
+| `setup --ci`         | `scripts/engineering/dev/dev_setup.sh`                       | Legacy placeholder mode; not recommended for current setup       |
+| `install-deps`       | `scripts/engineering/dev/install_deps.py`                    | Auxiliary helper script, not a full project bootstrap            |
+| `probe-quality`      | `scripts/engineering/dev/quality_gate_probe.py`              | Measure narrow pytest/mypy startup latency and timeout behavior  |
+| `pretest-guardrails` | `scripts/engineering/dev/pretest_guardrails.sh`              | Run cleanup + repo/docs/memory/architecture preflight            |
+| `run-tests`          | `scripts/engineering/dev/run_tests.py`                       | Run tests                                                        |
+| `pytest-sharded`     | `scripts/engineering/dev/run_pytest_sharded.sh`              | Run the recommended path-based pytest shards                     |
+| `mock-metrics`       | `scripts/engineering/dev/metrics_mock_server.py`             | Start mock metrics server                                        |
+| `mock-quarantine`    | `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock quarantine explorer API server                        |
+| `test-changed`       | `scripts/engineering/dev/run_tests.py changed`               | Run tests for changed files only                                 |
+| `setup-mcp`          | `scripts/engineering/dev/setup_copilot_codex_mcp.py`         | Compatibility facade for canonical Codex MCP setup               |
 
 ## When to Use
 
-| Command          | When                                                                                                                | Trigger                                                |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `setup`          | Legacy compatibility entrypoint only; use `make install` instead                                                    | Manual, only if intentionally testing the shell facade |
-| `setup --quick`  | Legacy compatibility entrypoint only; use `make install` + targeted verify commands instead                         | Manual, exceptional use only                           |
-| `setup --ci`     | Legacy compatibility entrypoint only; CI should use the maintained repo commands                                    | CI migration/legacy compatibility only                 |
-| `install-deps`   | Specialized helper for one auxiliary package; not for normal repo setup                                             | Manual, rare maintenance task                          |
-| `pretest-guardrails` | Before broad bash pytest runs when you want drift/governance/memory issues caught up front                     | Manual, or auto-triggered by bash pytest runners       |
-| `run-tests`      | Local test execution; supports modes: `all`, `unit`, `arch`, `integration`, `contract`, `smoke`, `security`, `memory`, `cov`  | Manual, during development                             |
-| `pytest-sharded` | Faster local feedback for the large pytest suite by running stable path-based shards through the maintained wrapper | Manual, during development                             |
-| `mock-metrics`   | When developing or testing Grafana dashboards locally; starts Prometheus mock server with sample data               | Manual, during dashboard development                   |
-| `mock-quarantine`| When validating `5. Silver Reject Explorer` against `/ops/quarantine/*` without real Delta data                     | Manual, during dashboard/API smoke checks              |
-| `test-changed`   | Quick feedback during development; canonical changed-file runner with fast unit fallback                            | Manual, during development                             |
-| `setup-mcp`      | One-time AI tooling setup; compatibility facade for canonical `scripts.ai.codex` MCP setup                           | Manual, initial setup                                  |
+| Command              | When                                                                                                                         | Trigger                                                |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `setup`              | Legacy compatibility entrypoint only; use `make install` instead                                                             | Manual, only if intentionally testing the shell facade |
+| `setup --quick`      | Legacy compatibility entrypoint only; use `make install` + targeted verify commands instead                                  | Manual, exceptional use only                           |
+| `setup --ci`         | Legacy compatibility entrypoint only; CI should use the maintained repo commands                                             | CI migration/legacy compatibility only                 |
+| `install-deps`       | Specialized helper for one auxiliary package; not for normal repo setup                                                      | Manual, rare maintenance task                          |
+| `pretest-guardrails` | Before broad bash pytest runs when you want drift/governance/memory issues caught up front                                   | Manual, or auto-triggered by bash pytest runners       |
+| `run-tests`          | Local test execution; supports modes: `all`, `unit`, `arch`, `integration`, `contract`, `smoke`, `security`, `memory`, `cov` | Manual, during development                             |
+| `pytest-sharded`     | Faster local feedback for the large pytest suite by running stable path-based shards through the maintained wrapper          | Manual, during development                             |
+| `mock-metrics`       | When developing or testing Grafana dashboards locally; starts Prometheus mock server with sample data                        | Manual, during dashboard development                   |
+| `mock-quarantine`    | When validating `5. Silver Reject Explorer` against `/ops/quarantine/*` without real Delta data                              | Manual, during dashboard/API smoke checks              |
+| `test-changed`       | Quick feedback during development; canonical changed-file runner with fast unit fallback                                     | Manual, during development                             |
+| `setup-mcp`          | One-time AI tooling setup; compatibility facade for canonical `scripts.ai.codex` MCP setup                                   | Manual, initial setup                                  |
 
 ## Other Files
 
-| File                                      | Description                                                                               |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `scripts/engineering/dev/run_tests.sh`                | Run tests (shell variant)                                                                 |
-| `scripts/engineering/dev/run_tests.ps1`               | Run tests (PowerShell variant)                                                            |
-| `scripts/engineering/dev/run_mypy.sh`                 | Run mypy with local-environment fallbacks (shell variant)                                 |
-| `scripts/engineering/dev/run_mypy.ps1`                | Run mypy with local-environment fallbacks (PowerShell variant)                            |
-| `scripts/engineering/dev/pretest_guardrails.sh`       | Run cleanup + repo/docs/memory/architecture preflight before broad bash pytest runs       |
-| `scripts/engineering/dev/run_pytest.sh`               | Run pytest directly                                                                       |
-| `scripts/engineering/dev/run_pytest.ps1`              | Run pytest directly (PowerShell variant)                                                  |
-| `scripts/engineering/dev/run_pytest_sharded.sh`       | Run the recommended path-based pytest shard plan (shell variant)                          |
-| `scripts/engineering/dev/quality_gate_probe.py`       | Diagnose narrow pytest/mypy startup latency and timeout behavior                          |
-| `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock `/ops/quarantine/*` endpoints for Silver Reject Explorer smoke checks |
-| `scripts/engineering/dev/setup_copilot_codex_mcp.sh`  | Setup MCP compatibility facade (shell variant)                                            |
-| `scripts/engineering/dev/setup_copilot_codex_mcp.ps1` | Setup MCP compatibility facade (PowerShell variant)                                       |
-| `scripts/engineering/dev/setup_env_windows.ps1`       | Create/update the stable Windows virtualenv at `.venv-win`                                |
-| `scripts/engineering/dev/setup_env_wsl.sh`            | Create/update the stable WSL virtualenv outside the repo (default: `$HOME/.venvs/bioetl`) |
-| `scripts/engineering/dev/.wsl-vpn-fix.ps1`            | Recover Windows-side VPN proxy settings for WSL interoperability                          |
-| `scripts/engineering/dev/.setup_wsl_codex.sh`         | WSL/Codex DNS and connectivity bootstrap helper for the documented WSL setup flow         |
+| File                                                         | Description                                                                               |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| `scripts/engineering/dev/run_tests.sh`                       | Run tests (shell variant)                                                                 |
+| `scripts/engineering/dev/run_tests.ps1`                      | Run tests (PowerShell variant)                                                            |
+| `scripts/engineering/dev/run_mypy.sh`                        | Run mypy with local-environment fallbacks (shell variant)                                 |
+| `scripts/engineering/dev/run_mypy.ps1`                       | Run mypy with local-environment fallbacks (PowerShell variant)                            |
+| `scripts/engineering/dev/pretest_guardrails.sh`              | Run cleanup + repo/docs/memory/architecture preflight before broad bash pytest runs       |
+| `scripts/engineering/dev/run_pytest.sh`                      | Run pytest directly                                                                       |
+| `scripts/engineering/dev/run_pytest.ps1`                     | Run pytest directly (PowerShell variant)                                                  |
+| `scripts/engineering/dev/run_pytest_sharded.sh`              | Run the recommended path-based pytest shard plan (shell variant)                          |
+| `scripts/engineering/dev/quality_gate_probe.py`              | Diagnose narrow pytest/mypy startup latency and timeout behavior                          |
+| `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock `/ops/quarantine/*` endpoints for Silver Reject Explorer smoke checks          |
+| `scripts/engineering/dev/setup_copilot_codex_mcp.sh`         | Setup MCP compatibility facade (shell variant)                                            |
+| `scripts/engineering/dev/setup_copilot_codex_mcp.ps1`        | Setup MCP compatibility facade (PowerShell variant)                                       |
+| `scripts/engineering/dev/setup_env_windows.ps1`              | Create/update the stable Windows virtualenv at `.venv-win`                                |
+| `scripts/engineering/dev/setup_env_wsl.sh`                   | Create/update the stable WSL virtualenv outside the repo (default: `$HOME/.venvs/bioetl`) |
+| `scripts/engineering/dev/.wsl-vpn-fix.ps1`                   | Recover Windows-side VPN proxy settings for WSL interoperability                          |
+| `scripts/engineering/dev/.setup_wsl_codex.sh`                | WSL/Codex DNS and connectivity bootstrap helper for the documented WSL setup flow         |

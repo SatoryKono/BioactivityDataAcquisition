@@ -13,11 +13,13 @@ This document describes the internal implementation modules within the compositi
 **Purpose**: Internal implementation module behind the public `entrypoints` and `execution_api` modules.
 
 **Key Responsibilities**:
+
 - Pipeline execution orchestration
 - Runner lifecycle management
 - Execution context setup
 
 **Public Counterparts**:
+
 - `composition.entrypoints`
 - `composition.execution_api`
 
@@ -26,11 +28,13 @@ This document describes the internal implementation modules within the compositi
 **Purpose**: Internal implementation module behind the public `entrypoints` and `resources_api` modules.
 
 **Key Responsibilities**:
+
 - Resource lifecycle management
 - Checkpoint handling
 - Quarantine operations
 
 **Public Counterparts**:
+
 - `composition.entrypoints`
 - `composition.resources_api`
 
@@ -39,11 +43,13 @@ This document describes the internal implementation modules within the compositi
 **Purpose**: Internal implementation module behind the public `entrypoints` and `services_api` modules.
 
 **Key Responsibilities**:
+
 - Service discovery and registration
 - Dependency injection
 - Service lifecycle management
 
 **Public Counterparts**:
+
 - `composition.entrypoints`
 - `composition.services_api`
 
@@ -74,8 +80,8 @@ graph TD
 ## Usage Guidelines
 
 1. **Import Paths**: Always import from public modules (`entrypoints`, `execution_api`, etc.) rather than internal modules.
-2. **Stability**: Internal modules may change without notice.
-3. **Testing**: Internal modules should only be imported by tests within the `composition` package.
+1. **Stability**: Internal modules may change without notice.
+1. **Testing**: Internal modules should only be imported by tests within the `composition` package.
 
 ## Related Documentation
 

@@ -21,16 +21,16 @@ script-codex/                    script-gemini/
 
 ## 📊 Comparison
 
-| Aspect | Codex | Gemini |
-|--------|-------|--------|
-| **Provider** | OpenAI | Google |
-| **AI Model** | GPT | Gemini |
-| **Runtime** | Node.js + npm | Python + pip |
-| **Package** | @openai/codex | google-generativeai |
-| **API Key Source** | https://platform.openai.com | https://aistudio.google.com |
-| **Config File** | .env.codex | .env.gemini |
-| **Environment Var** | OPENAI_API_KEY | GEMINI_API_KEY |
-| **Entry Point** | run-codex.ps1 | run-gemini.ps1 |
+| Aspect              | Codex                       | Gemini                      |
+| ------------------- | --------------------------- | --------------------------- |
+| **Provider**        | OpenAI                      | Google                      |
+| **AI Model**        | GPT                         | Gemini                      |
+| **Runtime**         | Node.js + npm               | Python + pip                |
+| **Package**         | @openai/codex               | google-generativeai         |
+| **API Key Source**  | https://platform.openai.com | https://aistudio.google.com |
+| **Config File**     | .env.codex                  | .env.gemini                 |
+| **Environment Var** | OPENAI_API_KEY              | GEMINI_API_KEY              |
+| **Entry Point**     | run-codex.ps1               | run-gemini.ps1              |
 
 ## 🚀 Usage
 
@@ -84,18 +84,18 @@ notepad .env.gemini               # Add Google API key
 ### Codex (OpenAI)
 
 1. https://platform.openai.com/api-keys
-2. Sign in
-3. "Create new secret key"
-4. Copy key (starts with `sk-`)
-5. Paste into `script-codex/.env.codex`
+1. Sign in
+1. "Create new secret key"
+1. Copy key (starts with `sk-`)
+1. Paste into `script-codex/.env.codex`
 
 ### Gemini (Google)
 
 1. https://aistudio.google.com/app/apikeys
-2. Sign in with Google
-3. "Create API Key"
-4. Copy key (starts with `AIzaSy`)
-5. Paste into `script-gemini/.env.gemini`
+1. Sign in with Google
+1. "Create API Key"
+1. Copy key (starts with `AIzaSy`)
+1. Paste into `script-gemini/.env.gemini`
 
 ## ✨ Architecture (Identical)
 
@@ -109,6 +109,7 @@ run-<tool>.ps1 (dispatcher)
 ```
 
 This ensures:
+
 - ✅ Automatic checks on startup
 - ✅ Automatic setup if needed
 - ✅ Clear error messages
@@ -140,7 +141,7 @@ cd script-codex
 notepad .env.codex
 .\run-codex.ps1
 
-# Gemini  
+# Gemini
 cd script-gemini
 notepad .env.gemini
 .\run-gemini.ps1
@@ -163,6 +164,7 @@ GEMINI_API_KEY=AIzaSy...
 ## ✅ Status
 
 Both systems are:
+
 - ✅ Fully configured
 - ✅ Automatically setting up
 - ✅ Ready to use
@@ -171,15 +173,15 @@ Both systems are:
 
 ## 🎓 Comparison Table
 
-| Task | Codex | Gemini |
-|------|-------|--------|
-| Code analysis | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-| Refactoring | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-| Q&A | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| Writing | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| Learning | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| Speed | Fast | Fast |
-| Cost | Paid | Free tier available |
+| Task          | Codex      | Gemini              |
+| ------------- | ---------- | ------------------- |
+| Code analysis | ⭐⭐⭐⭐⭐ | ⭐⭐⭐              |
+| Refactoring   | ⭐⭐⭐⭐⭐ | ⭐⭐⭐              |
+| Q&A           | ⭐⭐⭐⭐   | ⭐⭐⭐⭐⭐          |
+| Writing       | ⭐⭐⭐⭐   | ⭐⭐⭐⭐⭐          |
+| Learning      | ⭐⭐⭐⭐   | ⭐⭐⭐⭐⭐          |
+| Speed         | Fast       | Fast                |
+| Cost          | Paid       | Free tier available |
 
 ## 🚀 Ready!
 
@@ -195,14 +197,15 @@ Both tools are ready to use:
 
 Choose the right tool for your task! 🎯
 
----
+______________________________________________________________________
 
 **Next Steps:**
 
 1. Add API keys to both `.env` files
-2. Run either tool
-3. Start using them!
+1. Run either tool
+1. Start using them!
 
 💡 Pro tip: Use both together for best results!
+
 - Codex for code
 - Gemini for ideas & research

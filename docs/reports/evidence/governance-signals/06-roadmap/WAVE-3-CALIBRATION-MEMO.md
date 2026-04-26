@@ -5,6 +5,7 @@
 This memo calibrates whether BioETL should expand named hotspot programs beyond the existing `application/core` scope.
 
 The goal is intentionally narrow:
+
 - keep targeted governance understandable,
 - avoid turning generic file-size noise into program sprawl,
 - rank candidate seams in `application` and `composition` using the evidence now available after Wave 2.
@@ -23,9 +24,9 @@ The goal is intentionally narrow:
 Candidates were ranked against four questions:
 
 1. Is the pressure concentrated in a seam that developers can name and navigate?
-2. Do we see more than one signal at once: large-file tail, duplication, or known structural pain?
-3. Would a named program create a focused burn-down path rather than a vague repo-wide obligation?
-4. Is the signal clean enough that a hotspot budget would guide behavior instead of amplifying noise?
+1. Do we see more than one signal at once: large-file tail, duplication, or known structural pain?
+1. Would a named program create a focused burn-down path rather than a vague repo-wide obligation?
+1. Is the signal clean enough that a hotspot budget would guide behavior instead of amplifying noise?
 
 ## Current Program To Preserve
 
@@ -34,6 +35,7 @@ Candidates were ranked against four questions:
 **Status:** keep as the current named hotspot program.
 
 This remains the cleanest existing program boundary:
+
 - it is already budgeted in `configs/quality/debt_scorecard.yaml`,
 - it still appears in the raw large-file tail,
 - it was already called out in prior structural planning as a cognitively wide package that mixes lifecycle, batch execution, callbacks, tracing-adjacent helpers, and shared execution contracts.
@@ -47,6 +49,7 @@ This is still the best reference model for what a named hotspot program should l
 **Recommendation:** add as the next named hotspot program in a future follow-up wave.
 
 **Why it ranks first**
+
 - It is already called out in `RF-FS-002-baseline-2026-03-19.md` (historical archive path no longer published; see `docs/99-archive/README.md`) as one of the four hotspot packages and is described there as mixing planning, dependency/join logic, validation, preflight, and runner behavior.
 - The raw file tail is concentrated enough to look like one seam rather than scattered provider noise. Current larger files include:
   - `runner_pkg/runner_support_mixin.py`
@@ -55,11 +58,13 @@ This is still the best reference model for what a named hotspot program should l
 - Wave 2 duplication output already shows composite-specific duplication examples around `runner_pkg` stage-support code, which suggests real internal overlap rather than only package-barrel noise.
 
 **Why it is governable**
+
 - The seam is conceptually coherent: composite runtime orchestration.
 - The likely remediation path is understandable: runner support, checkpointing, join/dependency logic, and composite lifecycle helpers.
 - A named program here would still be narrow enough to support targeted refactor waves without pretending the entire `application/` tree is one hotspot.
 
 **Main caution**
+
 - The package is broad enough that the budget should be path-based and narrow.
 - Prefer `src/bioetl/application/composite/` as the program scope, not all of `application`.
 
@@ -68,6 +73,7 @@ This is still the best reference model for what a named hotspot program should l
 **Recommendation:** keep as a calibrated candidate, but do not promote to a named hotspot program yet.
 
 **Why it is a real candidate**
+
 - The raw large-file tail is visibly concentrated in factory-heavy seams:
   - `factories/pipeline/configs.py`
   - `factories/transformer_factory.py`
@@ -77,6 +83,7 @@ This is still the best reference model for what a named hotspot program should l
 - Prior planning in `RF-FS-001-baseline-2026-03-19.md` (historical archive path no longer published; see `docs/99-archive/README.md`) already identifies `pipeline_builder.py` as a composition hotspot that should be decomposed by actual seams, not just by line count.
 
 **Why it does not rank first**
+
 - The current duplication baseline for `composition` is still visibly noisy around:
   - `__init__` facades,
   - export barrels,
@@ -85,6 +92,7 @@ This is still the best reference model for what a named hotspot program should l
 - That means the seam is real, but the governance signal is not clean enough yet to justify a named budget without a normalization pass.
 
 **Practical read**
+
 - This is a good next report-only pressure seam.
 - It is not yet a good named-budget seam.
 
@@ -93,6 +101,7 @@ This is still the best reference model for what a named hotspot program should l
 **Recommendation:** do not create a named hotspot program here.
 
 **Why not**
+
 - The large-file tail is real, but it is distributed across provider-specific modules:
   - `pubmed/extractors/date.py`
   - `pubmed/blocks.py`
@@ -102,6 +111,7 @@ This is still the best reference model for what a named hotspot program should l
 - The duplication baseline also points to provider and transformer overlap, but that overlap is not one cohesive seam. It is a mix of extractor patterns, transformer business logic, and provider-specific inheritance/mixin reuse.
 
 **Consequence**
+
 - This area is better served by provider-focused refactor waves or pipeline-family cleanups.
 - A named hotspot program here would likely be too broad or too arbitrary to be useful.
 
@@ -110,6 +120,7 @@ This is still the best reference model for what a named hotspot program should l
 **Recommendation:** do not promote at this stage.
 
 **Why not**
+
 - There is still some structural pressure here, but it currently looks more like a local refactor queue than a hotspot-program candidate.
 - Recent work already reduced pressure in provider registration modules such as `registration_biblio.py`, which weakens the case for elevating this entire seam into a standing named budget.
 
@@ -142,9 +153,9 @@ and defer any `composition` expansion until after one more normalization/calibra
 If the user wants to operationalize Wave 3, the next change should be a small governance PR that:
 
 1. adds a second named hotspot program in `configs/quality/debt_scorecard.yaml` for `src/bioetl/application/composite/`,
-2. keeps budgets intentionally narrow and symmetric with the existing `core_orchestration` style,
-3. does not add any new blocking duplication gate,
-4. leaves `composition/factories` in report-only observation mode.
+1. keeps budgets intentionally narrow and symmetric with the existing `core_orchestration` style,
+1. does not add any new blocking duplication gate,
+1. leaves `composition/factories` in report-only observation mode.
 
 ## Verification Gates For That Follow-Up
 
@@ -157,6 +168,7 @@ If the user wants to operationalize Wave 3, the next change should be a small go
 Wave 3 should expand carefully, not broadly.
 
 The evidence supports:
+
 - **keep** `application/core`,
 - **add next** `application/composite`,
 - **observe but do not budget yet** `composition/factories`,

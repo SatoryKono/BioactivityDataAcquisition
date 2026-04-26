@@ -7,6 +7,7 @@
 ### 🔄 Key Updates
 
 #### 1. **run-gemini.ps1** (Enhanced Main Entry Point)
+
 - ✅ Quick environment checks without blocking
 - ✅ Python3 + google-generativeai detection
 - ✅ Clear warning messages if components missing
@@ -15,6 +16,7 @@
 - ✅ Better status messages
 
 #### 2. **run-gemini.sh** (Enhanced WSL Entry)
+
 - ✅ Same quick checks as PowerShell version
 - ✅ Consistent error handling
 - ✅ Warning messages for missing components
@@ -22,6 +24,7 @@
 - ✅ Interactive + prompt modes supported
 
 #### 3. **run-gemini-impl.sh** (Enhanced Launcher)
+
 - ✅ Multiple Python3 location checks
 - ✅ Auto-install google-generativeai if missing
 - ✅ Better error messages
@@ -30,12 +33,14 @@
 - ✅ Verbose error output
 
 #### 4. **check-env.ps1 & check-env.sh** (Enhanced Checkers)
+
 - ✅ Fixed API key detection
 - ✅ Proper format validation (AIzaSy...)
 - ✅ Better error messages
 - ✅ Consistent format
 
 #### 5. **setup-env.sh** (Enhanced Setup)
+
 - ✅ Better API key validation
 - ✅ Improved error messages
 - ✅ Proper exit codes
@@ -44,15 +49,15 @@
 
 Both script-codex and script-gemini now have:
 
-| Feature | Codex | Gemini |
-|---------|-------|--------|
-| Quick env check | ✅ | ✅ |
-| Auto-detect components | ✅ | ✅ |
-| Clear warnings | ✅ | ✅ |
-| Setup guidance | ✅ | ✅ |
-| Error handling | ✅ | ✅ |
-| Proxy support | ✅ | ✅ |
-| Multiple entry points | ✅ | ✅ |
+| Feature                | Codex | Gemini |
+| ---------------------- | ----- | ------ |
+| Quick env check        | ✅    | ✅     |
+| Auto-detect components | ✅    | ✅     |
+| Clear warnings         | ✅    | ✅     |
+| Setup guidance         | ✅    | ✅     |
+| Error handling         | ✅    | ✅     |
+| Proxy support          | ✅    | ✅     |
+| Multiple entry points  | ✅    | ✅     |
 
 ## Testing Status
 
@@ -79,12 +84,14 @@ Both script-codex and script-gemini now have:
 ### Error Handling
 
 If components missing:
+
 ```
 [!] Some components missing
 [i] Run setup first: .\run-gemini.ps1 setup
 ```
 
 Setup runs all installations:
+
 ```
 [i] Running setup (this may take 2-3 minutes)...
 [!] DO NOT CLOSE THIS WINDOW
@@ -138,18 +145,21 @@ script-gemini/
 ## Next Steps
 
 1. **Add API Key:**
+
    ```powershell
    notepad script-gemini\.env.gemini
    ```
 
-2. **Test Setup:**
+1. **Test Setup:**
+
    ```powershell
    cd script-gemini
    .\run-gemini.ps1 check
    .\run-gemini.ps1 setup
    ```
 
-3. **Use Gemini:**
+1. **Use Gemini:**
+
    ```powershell
    .\run-gemini.ps1 "what is quantum computing?"
    ```
@@ -162,11 +172,12 @@ script-gemini/
 ✅ Both fully tested and working
 ✅ Both production-ready
 
----
+______________________________________________________________________
 
 **Both AI tools now have feature parity!** 🚀
 
 They share:
+
 - Same entry point pattern
 - Same error handling
 - Same auto-setup logic

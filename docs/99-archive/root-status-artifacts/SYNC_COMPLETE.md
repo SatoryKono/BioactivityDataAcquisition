@@ -6,19 +6,20 @@ script-gemini успешно обновлена со всеми улучшени
 
 ## 📊 Feature Parity
 
-| Feature | Before | After |
-|---------|--------|-------|
-| Quick env check | ✅ | ✅✨ |
-| Component detection | ⚠️ | ✅✨ |
-| Error messages | ✅ | ✅✨ |
-| Setup guidance | ✅ | ✅✨ |
-| Auto-install | ✅ | ✅✨ |
-| Proxy support | ✅ | ✅✨ |
-| Exit codes | ✅ | ✅✨ |
+| Feature             | Before | After |
+| ------------------- | ------ | ----- |
+| Quick env check     | ✅     | ✅✨  |
+| Component detection | ⚠️     | ✅✨  |
+| Error messages      | ✅     | ✅✨  |
+| Setup guidance      | ✅     | ✅✨  |
+| Auto-install        | ✅     | ✅✨  |
+| Proxy support       | ✅     | ✅✨  |
+| Exit codes          | ✅     | ✅✨  |
 
 ## 🔄 Key Improvements (Applied to Both)
 
 ### 1. Smart Environment Detection
+
 ```powershell
 # Before: Silent failure
 # After: Quick check with clear warnings
@@ -29,6 +30,7 @@ script-gemini успешно обновлена со всеми улучшени
 ```
 
 ### 2. Better Error Handling
+
 ```bash
 # Before: Generic errors
 # After: Specific, actionable errors
@@ -37,6 +39,7 @@ script-gemini успешно обновлена со всеми улучшени
 ```
 
 ### 3. Auto-Install on Demand
+
 ```bash
 # If package missing, automatically installs it
 [INFO] Installing package...
@@ -44,6 +47,7 @@ script-gemini успешно обновлена со всеми улучшени
 ```
 
 ### 4. Consistent Architecture
+
 ```
 Both tools now use:
 entry point → quick check → guidance → setup → launch
@@ -109,6 +113,7 @@ script-codex/               script-gemini/
 ## ✨ Changes Applied
 
 ### PowerShell Launchers
+
 - ✅ Quick environment checks (no blocking)
 - ✅ Component detection with clear messages
 - ✅ Setup guidance if components missing
@@ -116,12 +121,14 @@ script-codex/               script-gemini/
 - ✅ Better status formatting
 
 ### Bash Launchers
+
 - ✅ Same quick checks as PowerShell
 - ✅ Consistent error messages
 - ✅ Setup guidance
 - ✅ Proper exit codes
 
 ### Implementation Scripts
+
 - ✅ Multiple binary location checks
 - ✅ Auto-install missing packages
 - ✅ Better error messages
@@ -129,11 +136,13 @@ script-codex/               script-gemini/
 - ✅ Proper exit codes
 
 ### Environment Checkers
+
 - ✅ Fixed API key detection
 - ✅ Format validation
 - ✅ Better messages
 
 ### Setup Scripts
+
 - ✅ Better API key validation
 - ✅ Improved error messages
 - ✅ Proper exit codes
@@ -141,6 +150,7 @@ script-codex/               script-gemini/
 ## 🎯 Testing Checklist
 
 Both tools now:
+
 - ✅ Detect installed components
 - ✅ Warn about missing components
 - ✅ Guide users to run setup
@@ -152,13 +162,13 @@ Both tools now:
 
 ## 📊 Comparison Summary
 
-| | Before | After |
-|---|--------|-------|
-| User Experience | Good | Excellent |
-| Error Handling | Basic | Robust |
-| Auto-Setup | Yes | Enhanced |
-| Consistency | Partial | Complete |
-| Documentation | Separate | Unified |
+|                 | Before   | After     |
+| --------------- | -------- | --------- |
+| User Experience | Good     | Excellent |
+| Error Handling  | Basic    | Robust    |
+| Auto-Setup      | Yes      | Enhanced  |
+| Consistency     | Partial  | Complete  |
+| Documentation   | Separate | Unified   |
 
 ## 🚀 Both Tools Ready
 
@@ -168,7 +178,7 @@ cd script-codex
 .\run-codex.ps1
 # → Type: analyze code
 
-# Gemini - General Q&A  
+# Gemini - General Q&A
 cd script-gemini
 .\run-gemini.ps1
 # → Type: explain quantum computing
@@ -204,11 +214,12 @@ cd script-gemini
 ✅ **Testing**: Both working
 ✅ **Production Ready**: YES
 
----
+______________________________________________________________________
 
 ## Summary
 
 Both AI tools now have:
+
 - **Same user experience**
 - **Same error handling**
 - **Same setup flow**
@@ -216,6 +227,7 @@ Both AI tools now have:
 - **Same quality level**
 
 Choose based on your needs:
+
 - **Codex** → Code-focused tasks
 - **Gemini** → General Q&A
 

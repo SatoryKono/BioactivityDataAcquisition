@@ -59,7 +59,7 @@ echo ""
 
 if gunzip -c "${INPUT_FILE}" | docker load; then
     log_success "Image loaded successfully"
-    
+
     # Verify
     if docker image inspect ollama/ollama:latest >/dev/null 2>&1; then
         log_success "Verification passed - image is ready"

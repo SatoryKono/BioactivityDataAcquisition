@@ -26,7 +26,7 @@ try {
     $nodeJob = Start-Job -ScriptBlock { node --version }
     $nodeResult = Wait-Job -Job $nodeJob -Timeout 5 | Receive-Job
     Remove-Job -Job $nodeJob -Force 2>$null
-    
+
     if ($nodeResult) {
         Write-Success "Node.js installed: $nodeResult"
     } else {
@@ -44,7 +44,7 @@ try {
     $npmJob = Start-Job -ScriptBlock { npm --version }
     $npmResult = Wait-Job -Job $npmJob -Timeout 5 | Receive-Job
     Remove-Job -Job $npmJob -Force 2>$null
-    
+
     if ($npmResult) {
         Write-Success "npm installed: $npmResult"
     } else {
@@ -62,7 +62,7 @@ try {
     $pythonJob = Start-Job -ScriptBlock { python3 --version }
     $pythonResult = Wait-Job -Job $pythonJob -Timeout 5 | Receive-Job
     Remove-Job -Job $pythonJob -Force 2>$null
-    
+
     if ($pythonResult) {
         Write-Success "Python installed: $pythonResult"
     } else {
@@ -78,9 +78,9 @@ Write-Info "Checking configuration..."
 $envFile = Join-Path $RootDir ".env.mistrallvibe"
 if (Test-Path $envFile) {
     $envContent = Get-Content $envFile -Raw
-    
+
     # Check if API key is configured (not the placeholder)
-    if ($envContent -match 'MISTRAL_API_KEY\s*=\s*"?[a-zA-Z0-9_-]{20,}' -or 
+    if ($envContent -match 'MISTRAL_API_KEY\s*=\s*"?[a-zA-Z0-9_-]{20,}' -or
         $envContent -match 'VIBE_API_KEY\s*=\s*"?[a-zA-Z0-9_-]{20,}') {
         Write-Success ".env.mistrallvibe configured with API key"
     } elseif ($envContent -match "your-api-key-here") {
@@ -103,7 +103,7 @@ try {
     $vibeJob = Start-Job -ScriptBlock { vibe --version 2>$null }
     $vibeResult = Wait-Job -Job $vibeJob -Timeout 5 | Receive-Job
     Remove-Job -Job $vibeJob -Force 2>$null
-    
+
     if ($vibeResult) {
         Write-Success "Mistral Vibe installed: $vibeResult"
     } else {

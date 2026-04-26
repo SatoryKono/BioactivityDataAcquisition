@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Active canonical policy
 Class: published
 Owner: Architecture / Domain
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-09'
----
+  Last verified: '2026-04-09'
+
+______________________________________________________________________
 
 # Content Hash Identity Policy (Canonical)
 

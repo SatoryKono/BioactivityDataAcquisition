@@ -1,17 +1,20 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: template
 Class: internal
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-XXX: <Decision Title>
 
 **Date:** <YYYY-MM-DD>
-**Status:** <Proposed|Accepted|Superseded|Rejected>
+**Status:** \<Proposed|Accepted|Superseded|Rejected>
 **Decision makers:** <role-or-team>
 **Related:** <ADR-010>, <ADR-014>, <issue-or-pr>
 
@@ -32,13 +35,13 @@ Last verified: '2026-03-30'
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Classification | Document class MUST match publication intent | `<pass|fail|n/a>` | `<doc class / nav path>` |
-| Architecture | Decision MUST align with relevant ADRs | `<pass|fail|n/a>` | `<ADR links>` |
-| Requirements | Normative statements MUST use RFC 2119 keywords where binding | `<pass|fail|n/a>` | `<section links>` |
-| Runtime | Decision MUST state ADR-010 impact if runtime behavior changes | `<pass|fail|n/a>` | `<runtime note>` |
-| Contracts | Contract impact SHOULD be linked when schema/API behavior changes | `<pass|fail|n/a>` | `<contract refs>` |
+| Control        | Requirement                                                       | Status   | Evidence |
+| -------------- | ----------------------------------------------------------------- | -------- | -------- |
+| Classification | Document class MUST match publication intent                      | \`\<pass | fail     |
+| Architecture   | Decision MUST align with relevant ADRs                            | \`\<pass | fail     |
+| Requirements   | Normative statements MUST use RFC 2119 keywords where binding     | \`\<pass | fail     |
+| Runtime        | Decision MUST state ADR-010 impact if runtime behavior changes    | \`\<pass | fail     |
+| Contracts      | Contract impact SHOULD be linked when schema/API behavior changes | \`\<pass | fail     |
 
 ## Consequences
 

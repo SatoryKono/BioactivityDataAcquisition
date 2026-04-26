@@ -82,32 +82,35 @@ The repository includes pre-commit hooks that prevent cache files from being com
 ### What Should NOT Be in Git
 
 1. **Cache Directories**: `__pycache__`, `.pytest_cache`, `.mypy_cache`, `.ruff_cache`
-2. **Temporary Files**: `*.pyc`, `*.pyo`, `*.tmp`, `*.log`
-3. **Local Environments**: `.venv/`, `.python-user/`, `venv/`
-4. **AI Agent Files**: `.codex_tmp/`, `.codex_tmp_issue_*.md`
-5. **Root Test Scripts**: `test_*.js`, `test_*.py`, `test_*.json` in repository root
+1. **Temporary Files**: `*.pyc`, `*.pyo`, `*.tmp`, `*.log`
+1. **Local Environments**: `.venv/`, `.python-user/`, `venv/`
+1. **AI Agent Files**: `.codex_tmp/`, `.codex_tmp_issue_*.md`
+1. **Root Test Scripts**: `test_*.js`, `test_*.py`, `test_*.json` in repository root
 
 ### What SHOULD Be in Git
 
 1. **Source Code**: All files in `src/`
-2. **Configuration**: `configs/`, `pyproject.toml`, CI/CD files
-3. **Tests**: All test files in `tests/`
-4. **Documentation**: All files in `docs/`
-5. **Historical Archives**: `scripts/ops/archive/`, `docs/99-archive/` (for reference)
+1. **Configuration**: `configs/`, `pyproject.toml`, CI/CD files
+1. **Tests**: All test files in `tests/`
+1. **Documentation**: All files in `docs/`
+1. **Historical Archives**: `scripts/ops/archive/`, `docs/99-archive/` (for reference)
 
 ## 🔧 Maintenance Schedule
 
 ### Weekly
+
 - Run cleanup script in dry-run mode
 - Check repository size growth
 - Review CI/CD pipeline results
 
 ### Monthly
+
 - Run full cleanup (if needed)
 - Update `.gitignore` patterns
 - Review pre-commit hook effectiveness
 
 ### Quarterly
+
 - Archive old documentation
 - Review historical migration scripts
 - Optimize Git LFS usage
@@ -115,11 +118,13 @@ The repository includes pre-commit hooks that prevent cache files from being com
 ## 📈 Impact Metrics
 
 ### Before Cleanup
+
 - Repository size: ~777 MB
 - Cache/temporary files: ~250 MB (32%)
 - Orphan files: ~20 files
 
 ### After Cleanup
+
 - Repository size: ~776.7 MB (310KB reduction)
 - Cache/temporary files: ~0 MB
 - Orphan files: ~0 files
@@ -128,10 +133,10 @@ The repository includes pre-commit hooks that prevent cache files from being com
 ## 🎯 Best Practices
 
 1. **Always use dry-run first**: `python scripts/ops/support/repo/cleanup_repository.py --dry-run`
-2. **Commit cleanup changes separately**: Makes reviews easier
-3. **Document exceptions**: If you need to keep a cache file, document why
-4. **Use Git LFS for large files**: Anything >1MB should use LFS
-5. **Keep historical archives**: They provide valuable context
+1. **Commit cleanup changes separately**: Makes reviews easier
+1. **Document exceptions**: If you need to keep a cache file, document why
+1. **Use Git LFS for large files**: Anything >1MB should use LFS
+1. **Keep historical archives**: They provide valuable context
 
 ## 🔗 Related Documents
 

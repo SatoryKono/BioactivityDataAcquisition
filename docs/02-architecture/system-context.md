@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # System Context
 
@@ -20,7 +23,7 @@ C4 System Context diagram показывает BioETL как центральн�
 > Активные архитектурные документы описывают только локальный runtime:
 > локальную файловую систему, локальные checkpoints и `MemoryLock`.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## System Context Diagram (Local-Only)
 
@@ -75,7 +78,7 @@ flowchart TB
     FS -->|Delta Lake| API
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## System Boundaries
 
@@ -90,18 +93,18 @@ flowchart TB
 
 ### External Systems
 
-| System       | Role                     | Protocol        | Status               |
-| ------------ | ------------------------ | --------------- | -------------------- |
-| **ChEMBL**   | Bioactivity data source  | REST API (EBI)  | Active               |
-| **PubChem**  | Chemical compound data   | REST API (NCBI) | Active               |
-| **UniProt**  | Protein/target data      | REST API        | Active               |
-| **PubMed**   | Publication metadata     | REST API (NCBI) | Active               |
-| **CrossRef**  | Publication metadata  | REST API        | Active               |
-| **OpenAlex**  | Academic knowledge graph | REST API     | Active               |
-| **Semantic Scholar** | Publication metadata | REST API (AI2) | Active          |
-| **Local FS** | Medallion layers storage | File I/O        | Active (Local-Only)  |
+| System               | Role                     | Protocol        | Status              |
+| -------------------- | ------------------------ | --------------- | ------------------- |
+| **ChEMBL**           | Bioactivity data source  | REST API (EBI)  | Active              |
+| **PubChem**          | Chemical compound data   | REST API (NCBI) | Active              |
+| **UniProt**          | Protein/target data      | REST API        | Active              |
+| **PubMed**           | Publication metadata     | REST API (NCBI) | Active              |
+| **CrossRef**         | Publication metadata     | REST API        | Active              |
+| **OpenAlex**         | Academic knowledge graph | REST API        | Active              |
+| **Semantic Scholar** | Publication metadata     | REST API (AI2)  | Active              |
+| **Local FS**         | Medallion layers storage | File I/O        | Active (Local-Only) |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Data Flow Summary (Local-Only)
 
@@ -118,7 +121,7 @@ flowchart TB
                        └─────────────────┘
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Architecture Style
 
@@ -135,7 +138,7 @@ BioETL использует **Ports & Adapters** (Hexagonal Architecture):
 - Расширяемость для новых провайдеров
 - Явное разделение между доменными портами и локальными инфраструктурными реализациями
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Related Documents
 

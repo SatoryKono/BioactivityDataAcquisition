@@ -26,25 +26,29 @@ script-codex/
 ## 🎯 Main Features
 
 ### 1. **Single Entry Point**
-   - `run-codex.ps1` (Windows/PowerShell)
-   - `run-codex.sh` (WSL/Bash)
+
+- `run-codex.ps1` (Windows/PowerShell)
+- `run-codex.sh` (WSL/Bash)
 
 ### 2. **Automatic Environment Check**
-   - Verifies WSL, Node.js, npm, Codex
-   - Creates missing files
-   - Shows clear status
+
+- Verifies WSL, Node.js, npm, Codex
+- Creates missing files
+- Shows clear status
 
 ### 3. **Automatic Setup**
-   - Installs Node.js if missing
-   - Installs npm if missing
-   - Installs Codex CLI if missing
-   - All done automatically!
+
+- Installs Node.js if missing
+- Installs npm if missing
+- Installs Codex CLI if missing
+- All done automatically!
 
 ### 4. **Helper Scripts Separated**
-   - `helper/check-env.ps1` - Check (PowerShell)
-   - `helper/check-env.sh` - Check (Bash)
-   - `helper/setup-env.sh` - Setup components
-   - `helper/run-codex-impl.sh` - Launch Codex
+
+- `helper/check-env.ps1` - Check (PowerShell)
+- `helper/check-env.sh` - Check (Bash)
+- `helper/setup-env.sh` - Setup components
+- `helper/run-codex-impl.sh` - Launch Codex
 
 ## 💻 Usage
 
@@ -73,27 +77,27 @@ bash run-codex.sh "analyze code"   # With prompt
 ### On First Run:
 
 1. **Check** - run-codex.ps1 calls helper/check-env.ps1
-2. **Detect Missing** - If anything missing, runs setup
-3. **Setup** - helper/setup-env.sh installs components
-4. **Launch** - helper/run-codex-impl.sh starts Codex
+1. **Detect Missing** - If anything missing, runs setup
+1. **Setup** - helper/setup-env.sh installs components
+1. **Launch** - helper/run-codex-impl.sh starts Codex
 
 ### On Subsequent Runs:
 
 1. **Quick Check** - Verifies everything is OK
-2. **Direct Launch** - Skips setup, runs Codex
+1. **Direct Launch** - Skips setup, runs Codex
 
 ## 📋 Commands
 
-| Command | Purpose |
-|---------|---------|
-| `run-codex.ps1` | Start interactive Codex |
-| `run-codex.ps1 "prompt"` | With prompt |
-| `run-codex.ps1 exec "prompt"` | Auto-execute |
-| `run-codex.ps1 check` | Check setup |
-| `run-codex.ps1 setup` | Install components |
-| `run-codex.ps1 login` | API key login |
-| `run-codex.ps1 device-login` | Device auth |
-| `run-codex.ps1 help` | Show help |
+| Command                       | Purpose                 |
+| ----------------------------- | ----------------------- |
+| `run-codex.ps1`               | Start interactive Codex |
+| `run-codex.ps1 "prompt"`      | With prompt             |
+| `run-codex.ps1 exec "prompt"` | Auto-execute            |
+| `run-codex.ps1 check`         | Check setup             |
+| `run-codex.ps1 setup`         | Install components      |
+| `run-codex.ps1 login`         | API key login           |
+| `run-codex.ps1 device-login`  | Device auth             |
+| `run-codex.ps1 help`          | Show help               |
 
 ## 🎓 Code Flow
 
@@ -120,6 +124,7 @@ Run Codex with environment
 ## 📦 Helper Scripts
 
 ### check-env.ps1 / check-env.sh
+
 - Checks WSL availability
 - Checks Node.js & npm
 - Checks Codex CLI
@@ -127,6 +132,7 @@ Run Codex with environment
 - Returns status
 
 ### setup-env.sh
+
 - Installs Node.js
 - Installs npm
 - Installs Codex
@@ -134,6 +140,7 @@ Run Codex with environment
 - Verifies API key
 
 ### run-codex-impl.sh
+
 - Loads .env.codex
 - Sets up environment
 - Launches Codex
@@ -141,20 +148,20 @@ Run Codex with environment
 
 ## ✨ Benefits
 
-✅ Single entry point (run-codex.ps1 or run-codex.sh)  
-✅ Automatic environment checks  
-✅ Automatic component installation  
-✅ Clear status messages  
-✅ Modular helper scripts  
-✅ Works on first run  
-✅ No manual configuration needed  
+✅ Single entry point (run-codex.ps1 or run-codex.sh)
+✅ Automatic environment checks
+✅ Automatic component installation
+✅ Clear status messages
+✅ Modular helper scripts
+✅ Works on first run
+✅ No manual configuration needed
 ✅ Portable (can copy entire folder)
 
 ## 🚀 Getting Started
 
 1. Edit `.env.codex` with your API key
-2. Run: `.\run-codex.ps1`
-3. That's it! Codex will setup and launch
+1. Run: `.\run-codex.ps1`
+1. That's it! Codex will setup and launch
 
 ## 📝 Notes
 
@@ -164,7 +171,7 @@ Run Codex with environment
 - Fully consolidated in one folder
 - Can be copied to other machines
 
----
+______________________________________________________________________
 
 **Status**: ✅ Complete and ready to use!
 

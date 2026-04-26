@@ -21,25 +21,24 @@ Use this schema for `05-risks/RISKS.yaml`.
 
 ## Required Fields
 
-| Field | Type | Description |
-|---|---|---|
-| `id` | string | Semantic risk ID prefixed with `RISK-` |
-| `risk` | string | Concise description of the negative outcome |
-| `created_by` | string | The `DEC-*` ID that introduces or surfaces the risk |
-| `severity` | string | Recommended values: `high`, `medium`, `low` |
-| `likelihood` | string | Recommended values: `high`, `medium`, `low` |
-| `mitigations` | list[string] | One or more practical mitigation actions |
+| Field         | Type         | Description                                         |
+| ------------- | ------------ | --------------------------------------------------- |
+| `id`          | string       | Semantic risk ID prefixed with `RISK-`              |
+| `risk`        | string       | Concise description of the negative outcome         |
+| `created_by`  | string       | The `DEC-*` ID that introduces or surfaces the risk |
+| `severity`    | string       | Recommended values: `high`, `medium`, `low`         |
+| `likelihood`  | string       | Recommended values: `high`, `medium`, `low`         |
+| `mitigations` | list[string] | One or more practical mitigation actions            |
 
 ## Recommended Fields
 
-| Field | Type | Description |
-|---|---|---|
-| `triggers` | list[string] | Signals that the risk is materializing |
-| `notes` | string | Context, monitoring guidance, or ownership notes |
+| Field      | Type         | Description                                      |
+| ---------- | ------------ | ------------------------------------------------ |
+| `triggers` | list[string] | Signals that the risk is materializing           |
+| `notes`    | string       | Context, monitoring guidance, or ownership notes |
 
 ## Quality Gate
 
 - Every risk links back to a creating decision.
 - Severity and likelihood are explicitly stated.
 - At least one mitigation is documented.
-

@@ -33,7 +33,7 @@ python -m scripts.schema <command> [args...]
 | `generate-field-diagnostics` | `scripts/schema/generate_field_level_diagnostics.py`                   | Generate field-level schema drift diagnostics CSV                                      |
 | `generate-field-spec`        | `scripts/schema/generate_field_transformation_spec.py`                 | Generate deterministic per-field transformation specification CSV                      |
 | `validate-configs`           | `scripts/schema/validate_pipeline_configs.py`                          | Validate unified pipeline YAML configs against JSON Schema                             |
-| `validate-unified-configs`   | `scripts/schema/validate_unified_configs.py`                           | Canonical structural unified-config validator retained for compatibility use cases      |
+| `validate-unified-configs`   | `scripts/schema/validate_unified_configs.py`                           | Canonical structural unified-config validator retained for compatibility use cases     |
 | `analyze-gaps`               | `scripts/schema/config_gap_analysis.py`                                | Config gap analysis between configs and code                                           |
 
 ## When to Use

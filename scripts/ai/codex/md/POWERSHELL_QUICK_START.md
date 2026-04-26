@@ -19,6 +19,7 @@ This runs better in PowerShell than cmd.exe because it has proper color output.
 ```
 
 This installs:
+
 - Node.js & npm (if needed)
 - Codex CLI
 - WSL proxy configuration
@@ -29,7 +30,7 @@ This installs:
 .\scripts\ops\codex.bat "what's in the src directory?"
 ```
 
----
+______________________________________________________________________
 
 ## All PowerShell Commands
 
@@ -79,7 +80,7 @@ This installs:
 .\scripts\ops\start-wsl-proxy.bat
 ```
 
----
+______________________________________________________________________
 
 ## Common Workflows
 
@@ -107,11 +108,12 @@ This installs:
 .\scripts\ops\codex.bat "generate docstrings for the BioETL module"
 ```
 
----
+______________________________________________________________________
 
 ## Troubleshooting in PowerShell
 
 ### Issue: "command not found"
+
 ```powershell
 # Make sure you're in the repo root
 pwd
@@ -119,6 +121,7 @@ cd E:\g-drive\05_AI\github\BioactivityDataAcquisition2
 ```
 
 ### Issue: WSL not working
+
 ```powershell
 # Check if WSL is installed
 wsl --list --verbose
@@ -128,12 +131,14 @@ wsl --install -d Ubuntu
 ```
 
 ### Issue: Node.js errors in WSL
+
 ```powershell
 # Run setup again
 .\script-codex\setup-codex-wsl.bat
 ```
 
 ### Issue: Docker Desktop not responding
+
 ```powershell
 # Verify Docker is running
 docker ps
@@ -143,6 +148,7 @@ docker ps
 ```
 
 ### Issue: Network/proxy errors
+
 ```powershell
 # Start proxy server
 .\scripts\ops\start-wsl-proxy.bat
@@ -151,11 +157,12 @@ docker ps
 .\scripts\ops\codex.bat "your prompt"
 ```
 
----
+______________________________________________________________________
 
 ## Documentation to Read
 
 From PowerShell:
+
 ```powershell
 # Main Codex guide
 notepad .\script-codex\README.md
@@ -173,31 +180,34 @@ notepad .\docs\05-operations\tooling\scripts-ops\INDEX.md
 notepad .\docs\05-operations\tooling\scripts-ops\00_START_HERE.md
 ```
 
----
+______________________________________________________________________
 
 ## Tips for PowerShell
 
 1. **Use `verify-setup.ps1` not the batch version** — better output and colors
 
-2. **Tab completion works** — type `.\scripts\ops\co` and press Tab
+1. **Tab completion works** — type `.\scripts\ops\co` and press Tab
 
-3. **Use quotes for prompts with spaces**:
+1. **Use quotes for prompts with spaces**:
+
    ```powershell
    .\scripts\ops\codex.bat "your prompt here"
    ```
 
-4. **View exit code** to see if command succeeded:
+1. **View exit code** to see if command succeeded:
+
    ```powershell
    .\scripts\ops\codex.bat "something"
    echo "Exit code: $LASTEXITCODE"
    ```
 
-5. **Run multiple commands**:
+1. **Run multiple commands**:
+
    ```powershell
    .\scripts\ops\codex.bat "task 1"; .\scripts\ops\codex.bat "task 2"
    ```
 
----
+______________________________________________________________________
 
 ## If You Prefer WSL Bash
 
@@ -212,13 +222,13 @@ bash ./scripts/ops/diagnose-codex-wsl.sh
 
 But PowerShell is easier for Windows users because path handling is simpler.
 
----
+______________________________________________________________________
 
 ## Ready to Start?
 
 1. Open PowerShell
-2. `.\scripts\ops\verify-setup.ps1`
-3. `.\script-codex\setup-codex-wsl.bat`
-4. `.\scripts\ops\codex.bat "hello"`
+1. `.\scripts\ops\verify-setup.ps1`
+1. `.\script-codex\setup-codex-wsl.bat`
+1. `.\scripts\ops\codex.bat "hello"`
 
 That's it! Enjoy using Codex! 🚀

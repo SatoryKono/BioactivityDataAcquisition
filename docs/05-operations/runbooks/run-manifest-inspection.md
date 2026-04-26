@@ -1,14 +1,17 @@
----
+______________________________________________________________________
+
 Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Priority: P1
-Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-04-23'
----
+  Priority: P1
+  Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+  Last verified: '2026-04-23'
+
+______________________________________________________________________
 
 # Run Manifest Inspection
 
@@ -304,18 +307,18 @@ For the published supported lineage closure surface, the canonical operator path
    - `runtime.manifest_id`
    - `output.artifact_id`
    - `output.lineage_fragment_id`
-2. Resolve the immutable run context:
+1. Resolve the immutable run context:
    - `bioetl run-manifest show <run_id|manifest_id> --format json`
-3. Inspect:
+1. Inspect:
    - `diagnostics.artifact_refs`
    - `diagnostics.lineage_fragment_ids`
    - `identity_graph.execution_fingerprint`
    - `manifest.source_refs`
    - `ledger_entries` for `artifact_published`
-4. Treat `diagnostics.artifact_refs[*].artifact_id` as the operator-facing alias
+1. Treat `diagnostics.artifact_refs[*].artifact_id` as the operator-facing alias
    of the published `dataset_ref` so that sidecar `output.artifact_id`,
    inspection diagnostics, and ledger linkage all use the same visible anchor.
-5. Confirm that:
+1. Confirm that:
    - the sidecar `artifact_id` matches the produced artifact referenced by the
      lineage fragment;
    - the sidecar `lineage_fragment_id` matches one of the published fragment
@@ -336,6 +339,7 @@ direct lookup by semantic `lineage_fragment_id` as ambiguous and pivot through
 
 If any of those anchors disagree, treat it as lineage integrity drift rather
 than silently accepting the bundle as canonical.
+
 - `persistence_profile.attained_profile=forensic_grade` means the run is both
   replay-ready and backed by ledger/artifact-lineage evidence suitable for
   stronger postmortem reconstruction within the current supported lineage

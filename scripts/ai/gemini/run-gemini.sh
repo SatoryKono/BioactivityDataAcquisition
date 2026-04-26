@@ -157,7 +157,7 @@ case "$COMMAND" in
         echo ""
         bash "${HELPER_DIR}/run-gemini-impl.sh" --prompt "$*" --approval-mode yolo
         ;;
-    
+
     *)
         # Treat first arg as prompt
         log_info "Launching Gemini with prompt..."

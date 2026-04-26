@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Пайплайн: ChEMBL Subcellular Fraction
 
@@ -15,7 +18,7 @@ Last verified: '2026-03-30'
 **Сущность:** `subcellular_fraction`
 **Версия схемы:** 1.0.0
 
----
+______________________________________________________________________
 
 ## 1. Описание
 
@@ -25,24 +28,24 @@ Last verified: '2026-03-30'
 
 **Источник данных:** ChEMBL REST API, производная таблица из `assay`
 
----
+______________________________________________________________________
 
 ## 2. Ключевые поля
 
 ### Идентификаторы
 
-| Поле | Тип | Описание |
-|------|-----|----------|
+| Поле                   | Тип   | Описание                               |
+| ---------------------- | ----- | -------------------------------------- |
 | `subcellular_fraction` | `str` | Название фракции (PK, нормализованное) |
 
 ### Статистика
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `assay_count` | `int` | Количество ассеев, использующих данную фракцию |
-| `example_assay_id` | `str` | Ссылка на пример ассея |
+| Поле               | Тип   | Описание                                       |
+| ------------------ | ----- | ---------------------------------------------- |
+| `assay_count`      | `int` | Количество ассеев, использующих данную фракцию |
+| `example_assay_id` | `str` | Ссылка на пример ассея                         |
 
----
+______________________________________________________________________
 
 ## 3. Трансформация
 
@@ -51,19 +54,19 @@ Last verified: '2026-03-30'
 ### Основные операции
 
 1. Извлечение уникальных значений `assay_subcellular_fraction` из данных ассеев
-2. Подсчёт количества ассеев для каждой фракции
-3. Выбор примера ассея для каждой фракции
+1. Подсчёт количества ассеев для каждой фракции
+1. Выбор примера ассея для каждой фракции
 
----
+______________________________________________________________________
 
 ## 4. Конфигурация
 
-| Параметр | Путь |
-|----------|------|
-| Entity config | `configs/entities/chembl/subcellular_fraction.yaml` |
+| Параметр      | Путь                                                                 |
+| ------------- | -------------------------------------------------------------------- |
+| Entity config | `configs/entities/chembl/subcellular_fraction.yaml`                  |
 | Pipeline spec | `docs/04-reference/pipelines/chembl/14-subcellular-fraction-spec.md` |
 
----
+______________________________________________________________________
 
 ## 5. Применение
 
@@ -71,32 +74,32 @@ Last verified: '2026-03-30'
 - **Обогащение ассеев**: Группировка ассеев по используемой субклеточной фракции
 - **Справочная таблица**: Уникальный список фракций для фильтрации и анализа
 
----
+______________________________________________________________________
 
 ## 6. Связи
 
-| Связь | Сущность | Описание |
-|-------|----------|----------|
+| Связь    | Сущность       | Описание                              |
+| -------- | -------------- | ------------------------------------- |
 | Источник | `chembl_assay` | Фракции извлекаются из записей ассеев |
 
----
+______________________________________________________________________
 
 ## Contract References
 
-| Артефакт | Ссылка |
-| --- | --- |
+| Артефакт             | Ссылка                                                                                              |
+| -------------------- | --------------------------------------------------------------------------------------------------- |
 | Gold contract export | [chembl_subcellular_fraction_v1.0.json](../../contracts/gold/chembl_subcellular_fraction_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                                  |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md)            |
 
 ## Compliance
 
-| Контроль | Статус | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Runtime alignment | Pass | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
-| Contract linkage | Pass | [chembl_subcellular_fraction_v1.0.json](../../contracts/gold/chembl_subcellular_fraction_v1.0.json) |
-| API governance | Pass | См. [API Compliance](#api-compliance) |
+| Контроль          | Статус | Evidence                                                                                                       |
+| ----------------- | ------ | -------------------------------------------------------------------------------------------------------------- |
+| Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`                       |
+| Runtime alignment | Pass   | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
+| Contract linkage  | Pass   | [chembl_subcellular_fraction_v1.0.json](../../contracts/gold/chembl_subcellular_fraction_v1.0.json)            |
+| API governance    | Pass   | См. [API Compliance](#api-compliance)                                                                          |
 
 ## API Compliance
 

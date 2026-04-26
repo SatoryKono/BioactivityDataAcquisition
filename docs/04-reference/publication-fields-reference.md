@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Publication Fields Reference
 
@@ -15,6 +18,7 @@ Last verified: '2026-03-29'
 > publication contract.
 >
 > Current canonical publication contracts live in:
+>
 > - [providers/chembl/publication.md](providers/chembl/publication.md)
 > - [providers/pubmed/publication.md](providers/pubmed/publication.md)
 > - [providers/crossref/publication.md](providers/crossref/publication.md)
@@ -52,8 +56,8 @@ Last verified: '2026-03-29'
 For implementation, validation, and schema work:
 
 1. Start with the provider reference page for the relevant publication source.
-2. Treat `configs/entities/{provider}/publication.yaml` as the canonical field
+1. Treat `configs/entities/{provider}/publication.yaml` as the canonical field
    and alias registry.
-3. Use active guides such as
+1. Use active guides such as
    [../03-guides/publication-validation-guide.md](../03-guides/publication-validation-guide.md)
    for workflow guidance, not this historical artifact.

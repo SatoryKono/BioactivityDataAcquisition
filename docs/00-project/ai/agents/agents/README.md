@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-31'
----
+  Last verified: '2026-03-31'
+
+______________________________________________________________________
 
 # Agent Catalog — BioETL
 
@@ -25,16 +28,16 @@ Consolidated agent registry for published docs navigation.
 
 ## BioETL Core (8 active agents)
 
-| Agent | Model | Role |
-|-------|-------|------|
-| `py-audit-bot` | opus | Code/architecture audit, RULES.md compliance |
-| `py-plan-bot` | opus | Task planning, RF-* decomposition |
-| `py-test-bot` | sonnet | Tests (baseline/final/retest), coverage |
-| `py-config-bot` | sonnet | YAML configs (pipeline/DQ/filter) |
-| `py-debug-bot` | opus | RCA, bug fixes, regression debugging |
-| `py-doc-bot` | sonnet | Docs, ADR, CHANGELOG, Mermaid diagrams |
-| `py-test-swarm` | opus | Hierarchical testing (L1->L2->L3) |
-| `py-review-orchestrator` | opus | Code review (S1-S8 stages) |
+| Agent                    | Model  | Role                                         |
+| ------------------------ | ------ | -------------------------------------------- |
+| `py-audit-bot`           | opus   | Code/architecture audit, RULES.md compliance |
+| `py-plan-bot`            | opus   | Task planning, RF-\* decomposition           |
+| `py-test-bot`            | sonnet | Tests (baseline/final/retest), coverage      |
+| `py-config-bot`          | sonnet | YAML configs (pipeline/DQ/filter)            |
+| `py-debug-bot`           | opus   | RCA, bug fixes, regression debugging         |
+| `py-doc-bot`             | sonnet | Docs, ADR, CHANGELOG, Mermaid diagrams       |
+| `py-test-swarm`          | opus   | Hierarchical testing (L1->L2->L3)            |
+| `py-review-orchestrator` | opus   | Code review (S1-S8 stages)                   |
 
 Repo-wide documentation audits are no longer routed through a dedicated
 documentation-only agent entry in active orchestration docs; use the
@@ -43,19 +46,19 @@ workflow.
 
 ## Generic Utilities (12 agents)
 
-| Agent | Model | Role |
-|-------|-------|------|
-| `sp-code-reviewer` | sonnet | General-purpose code review |
-| `sp-debugger` | sonnet | Bug diagnosis, root cause analysis |
-| `sp-refactoring-specialist` | sonnet | Code refactoring |
-| `sp-architect-reviewer` | sonnet | Architecture evaluation |
-| `sp-test-automator` | sonnet | Test framework automation |
-| `sp-api-designer` | sonnet | API design, OpenAPI specs |
-| `sp-data-engineer` | sonnet | Data pipelines, ETL patterns |
-| `sp-database-optimizer` | sonnet | Query optimization, indexing |
-| `sp-dependency-manager` | sonnet | CVE audit, version conflicts |
-| `sp-git-workflow-manager` | sonnet | Git branching strategies |
-| `sp-prompt-engineer` | sonnet | LLM prompt design and testing |
+| Agent                                 | Model  | Role                               |
+| ------------------------------------- | ------ | ---------------------------------- |
+| `sp-code-reviewer`                    | sonnet | General-purpose code review        |
+| `sp-debugger`                         | sonnet | Bug diagnosis, root cause analysis |
+| `sp-refactoring-specialist`           | sonnet | Code refactoring                   |
+| `sp-architect-reviewer`               | sonnet | Architecture evaluation            |
+| `sp-test-automator`                   | sonnet | Test framework automation          |
+| `sp-api-designer`                     | sonnet | API design, OpenAPI specs          |
+| `sp-data-engineer`                    | sonnet | Data pipelines, ETL patterns       |
+| `sp-database-optimizer`               | sonnet | Query optimization, indexing       |
+| `sp-dependency-manager`               | sonnet | CVE audit, version conflicts       |
+| `sp-git-workflow-manager`             | sonnet | Git branching strategies           |
+| `sp-prompt-engineer`                  | sonnet | LLM prompt design and testing      |
 | `sp-scientific-literature-researcher` | sonnet | Scientific paper search (BGPT MCP) |
 
 ## Orchestration Workflow

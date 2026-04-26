@@ -3,6 +3,7 @@
 ## What Was Analyzed
 
 Your project has existing Codex scripts for Windows:
+
 - `scripts/ops/launchers/codex/codex.bat` - WSL2-based interactive launcher
 - `scripts/ops/launchers/codex/codex-exec.bat` - WSL2-based auto-execution launcher
 - `scripts/ops/launchers/codex/start-codex.bat` - Quick start wrapper
@@ -16,18 +17,21 @@ Your project has existing Codex scripts for Windows:
 ### New Shell Scripts (for WSL direct use)
 
 1. **`scripts/ops/launchers/codex/codex.sh`**
+
    - WSL bash launcher for interactive & prompt-based Codex usage
    - Auto-detects repository path
    - Verifies Node.js and Codex CLI availability
    - No path conversion needed (runs natively in WSL)
 
-2. **`scripts/ops/launchers/codex/codex-exec.sh`**
+1. **`scripts/ops/launchers/codex/codex-exec.sh`**
+
    - WSL auto-execution launcher (full-auto mode)
    - Runs without user confirmations
    - Requires a prompt argument
    - Direct WSL context for performance
 
-3. **`script-codex/helper/setup-wsl.sh`**
+1. **`script-codex/helper/setup-wsl.sh`**
+
    - Comprehensive WSL setup script
    - Installs Node.js, npm, and Codex CLI
    - Configures WSL proxy for VPN access
@@ -45,6 +49,7 @@ Your project has existing Codex scripts for Windows:
 ### Documentation
 
 5. **`docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md`** (detailed guide)
+
    - Complete setup instructions
    - Prerequisites and verification steps
    - Proxy configuration for VPN access
@@ -53,7 +58,8 @@ Your project has existing Codex scripts for Windows:
    - Advanced configuration options
    - Best practices
 
-6. **`docs/05-operations/tooling/scripts-ops/CODEX_WSL_QUICK_REF.md`** (quick reference)
+1. **`docs/05-operations/tooling/scripts-ops/CODEX_WSL_QUICK_REF.md`** (quick reference)
+
    - One-page quick start
    - Command cheat sheet
    - Common prompts and tasks
@@ -65,11 +71,13 @@ Your project has existing Codex scripts for Windows:
 ### Step 1: Install Dependencies (One-Time)
 
 From PowerShell in project root:
+
 ```powershell
 wsl -d Debian -- bash ./script-codex/helper/setup-wsl.sh
 ```
 
 Or from WSL directly:
+
 ```bash
 bash ./script-codex/helper/setup-wsl.sh
 ```
@@ -85,6 +93,7 @@ curl -I https://api.openai.com  # Should return 200 OK
 ### Step 3: Start Using Codex
 
 From PowerShell:
+
 ```powershell
 # Interactive
 .\scripts\ops\codex-wsl.bat
@@ -98,6 +107,7 @@ From PowerShell:
 ```
 
 From WSL:
+
 ```bash
 # Interactive
 ./scripts/ops/launchers/codex/codex.sh
@@ -130,28 +140,33 @@ OpenAI API (via proxy if behind VPN)
 ## Key Features
 
 ✅ **Native WSL Support**
+
 - Run Codex directly in WSL bash
 - No path conversion needed
 - Better performance than WSL2 interop
 
 ✅ **VPN/Proxy Support**
+
 - Auto-configurable Windows proxy bridge
 - Works behind corporate firewalls
 - Proxy detection in setup script
 
 ✅ **Flexible Execution**
+
 - Interactive mode (TUI)
 - Prompt mode (one-shot analysis)
 - Auto-execution mode (full-auto)
 - Multiple model support (GPT-4, o3, etc.)
 
 ✅ **Comprehensive Setup**
+
 - Single command setup: `script-codex/helper/setup-wsl.sh`
 - Dependency verification
 - Connectivity testing
 - Clear diagnostic output
 
 ✅ **Well Documented**
+
 - Detailed setup guide (`CODEX_WSL_SETUP.md`)
 - Quick reference card (`CODEX_WSL_QUICK_REF.md`)
 - Troubleshooting sections
@@ -159,47 +174,52 @@ OpenAI API (via proxy if behind VPN)
 
 ## Files Reference
 
-| File | Purpose | Platform |
-|------|---------|----------|
-| `codex.sh` | **NEW** WSL launcher (interactive) | WSL bash |
-| `codex-exec.sh` | **NEW** WSL auto-exec launcher | WSL bash |
-| `script-codex/helper/setup-wsl.sh` | **NEW** Installation & setup | WSL bash |
-| `codex-wsl.bat` | **NEW** Windows wrapper for WSL | PowerShell |
-| `codex.bat` | Original Windows launcher | PowerShell |
-| `codex-exec.bat` | Original Windows auto-exec | PowerShell |
-| `start-codex.bat` | Existing quick launcher | PowerShell |
-| `wsl_proxy.py` | HTTP proxy bridge | Python (Windows) |
-| `start-wsl-proxy.bat` | Existing proxy launcher | PowerShell |
-| `.wsl_proxy_env.sh` | Proxy environment vars | WSL bash |
-| `CODEX_WSL_SETUP.md` | **NEW** Detailed guide | Markdown |
-| `CODEX_WSL_QUICK_REF.md` | **NEW** Quick reference | Markdown |
-| `CODEX_SETUP.md` | Existing setup guide | Markdown |
-| `CODEX_QUICK_REF.md` | Existing quick ref | Markdown |
+| File                               | Purpose                            | Platform         |
+| ---------------------------------- | ---------------------------------- | ---------------- |
+| `codex.sh`                         | **NEW** WSL launcher (interactive) | WSL bash         |
+| `codex-exec.sh`                    | **NEW** WSL auto-exec launcher     | WSL bash         |
+| `script-codex/helper/setup-wsl.sh` | **NEW** Installation & setup       | WSL bash         |
+| `codex-wsl.bat`                    | **NEW** Windows wrapper for WSL    | PowerShell       |
+| `codex.bat`                        | Original Windows launcher          | PowerShell       |
+| `codex-exec.bat`                   | Original Windows auto-exec         | PowerShell       |
+| `start-codex.bat`                  | Existing quick launcher            | PowerShell       |
+| `wsl_proxy.py`                     | HTTP proxy bridge                  | Python (Windows) |
+| `start-wsl-proxy.bat`              | Existing proxy launcher            | PowerShell       |
+| `.wsl_proxy_env.sh`                | Proxy environment vars             | WSL bash         |
+| `CODEX_WSL_SETUP.md`               | **NEW** Detailed guide             | Markdown         |
+| `CODEX_WSL_QUICK_REF.md`           | **NEW** Quick reference            | Markdown         |
+| `CODEX_SETUP.md`                   | Existing setup guide               | Markdown         |
+| `CODEX_QUICK_REF.md`               | Existing quick ref                 | Markdown         |
 
 ## Common Usage Scenarios
 
 ### Scenario 1: Quick Analysis from PowerShell
+
 ```powershell
 .\scripts\ops\codex-wsl.bat "identify performance issues in the ETL pipeline"
 ```
 
 ### Scenario 2: Deep Interactive Session from WSL
+
 ```bash
 ./scripts/ops/launchers/codex/codex.sh
 # Then type prompts interactively in the TUI
 ```
 
 ### Scenario 3: Auto-Apply Refactoring
+
 ```bash
 ./scripts/ops/launchers/codex/codex-exec.sh "add comprehensive error handling to all data loaders"
 ```
 
 ### Scenario 4: Code Generation
+
 ```bash
 ./scripts/ops/launchers/codex/codex.sh "generate Pydantic models for the bronze layer schema"
 ```
 
 ### Scenario 5: Read-Only Code Review
+
 ```bash
 ./scripts/ops/launchers/codex/codex.sh -s read-only "review security of credential handling"
 ```
@@ -217,10 +237,10 @@ See `CODEX_WSL_SETUP.md` for comprehensive troubleshooting.
 ## Next Steps
 
 1. ✅ Run setup: `bash ./script-codex/helper/setup-wsl.sh`
-2. ✅ Test: `./scripts/ops/launchers/codex/codex.sh --version`
-3. ✅ Try: `./scripts/ops/launchers/codex/codex.sh "explain the pipeline"`
-4. ✅ Explore: Review `CODEX_WSL_QUICK_REF.md` for examples
-5. ✅ Integrate: Add Codex to your development workflow
+1. ✅ Test: `./scripts/ops/launchers/codex/codex.sh --version`
+1. ✅ Try: `./scripts/ops/launchers/codex/codex.sh "explain the pipeline"`
+1. ✅ Explore: Review `CODEX_WSL_QUICK_REF.md` for examples
+1. ✅ Integrate: Add Codex to your development workflow
 
 ## Notes
 
@@ -231,6 +251,6 @@ See `CODEX_WSL_SETUP.md` for comprehensive troubleshooting.
 - Codex preserves terminal history for analysis reference
 - Sessions can be resumed with `codex resume --last`
 
----
+______________________________________________________________________
 
 **Questions or issues?** See `CODEX_WSL_SETUP.md` for detailed help.

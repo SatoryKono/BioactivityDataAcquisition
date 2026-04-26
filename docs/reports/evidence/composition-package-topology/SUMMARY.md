@@ -5,7 +5,6 @@
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-
 ## Интерпретация верхнего уровня
 
 - Cross-shard interpretation lives in [03-synthesis/CROSS-SYNTHESIS.md](./03-synthesis/CROSS-SYNTHESIS.md).
@@ -15,10 +14,10 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 ## Созданные объекты evidence
 
 1. `EV-composition-package-topology-bootstrap-is-partitioned-into-assembly-cli-and-runtime-subpackages`
-2. `EV-composition-package-topology-factories-is-subdivided-into-datasource-dq-pipeline-services-and-storage-subsystems`
-3. `EV-composition-package-topology-providers-is-the-registry-and-registration-seam`
-4. `EV-composition-package-topology-runtime-builders-handle-small-runtime-assembly-helpers`
-5. `EV-composition-package-topology-services-is-a-compact-support-package-with-versioning-and-service-facade`
+1. `EV-composition-package-topology-factories-is-subdivided-into-datasource-dq-pipeline-services-and-storage-subsystems`
+1. `EV-composition-package-topology-providers-is-the-registry-and-registration-seam`
+1. `EV-composition-package-topology-runtime-builders-handle-small-runtime-assembly-helpers`
+1. `EV-composition-package-topology-services-is-a-compact-support-package-with-versioning-and-service-facade`
 
 ## Проверка gate
 

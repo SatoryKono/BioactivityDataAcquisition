@@ -160,17 +160,17 @@ if [[ -z "$WIN_HOST_IP" ]]; then
     log_warn "Could not determine Windows host IP"
 else
     log_success "Windows host IP detected: $WIN_HOST_IP"
-    
+
     # Check if proxy is accessible
     if timeout 2 bash -c "echo > /dev/tcp/$WIN_HOST_IP/3128" 2>/dev/null; then
         log_success "Proxy accessible at $WIN_HOST_IP:3128"
-        
+
         # Export proxy settings to current shell
         export http_proxy="http://${WIN_HOST_IP}:3128"
         export https_proxy="http://${WIN_HOST_IP}:3128"
         export HTTP_PROXY="$http_proxy"
         export HTTPS_PROXY="$https_proxy"
-        
+
         log_success "Proxy environment variables exported for this session"
     else
         log_warn "Proxy not accessible at $WIN_HOST_IP:3128"
@@ -206,7 +206,7 @@ log_header "Step 7: Docker Connectivity Check"
 
 if command -v docker.exe &>/dev/null; then
     log_success "docker.exe found (Windows Docker Desktop)"
-    
+
     if docker.exe ps &>/dev/null; then
         log_success "Docker Desktop daemon is running"
     else

@@ -1,6 +1,7 @@
 # ADR 038: HTTP Client Retry Patterns
 
 ## Status
+
 **Accepted** ✅
 
 ## Context
@@ -14,12 +15,14 @@ We **formalize and document the HTTP client retry patterns** established during 
 ### Refactoring Summary
 
 **Before**:
+
 - Complex retry logic with nested conditionals
 - 14 branches, 3 nesting levels
 - Monolithic error handling
 - Harder to test and maintain
 
 **After**:
+
 - Extracted `_should_continue_retry()` method
 - 10 branches, 2 nesting levels
 - Clear separation of concerns
@@ -47,20 +50,20 @@ flowchart TD
 classDiagram
     HTTPClientRetryMixin "1" *-- "1" _RetryRequestState : manages
     HTTPClientRetryMixin "1" *-- "*" _RequestAttemptOutcome : produces
-    
+
     class HTTPClientRetryMixin {
         +_request_with_retry()
         +_should_continue_retry()
         -_attempt_request()
     }
-    
+
     class _RetryRequestState {
         +status_code
         +retries
         +attempts_made
         +apply_attempt_outcome()
     }
-    
+
     class _RequestAttemptOutcome {
         +should_retry
         +status_code
@@ -91,11 +94,10 @@ except Exception as e:
         pass
     # Additional exception types...
 
+
 # After: Extracted method with clear responsibility
 def _should_continue_retry(
-    self,
-    result: _RequestAttemptOutcome,
-    retry_state: _RetryRequestState
+    self, result: _RequestAttemptOutcome, retry_state: _RetryRequestState
 ) -> bool:
     """Determine if retry should continue based on attempt outcome."""
     if isinstance(result, httpx.Response):
@@ -109,34 +111,38 @@ def _should_continue_retry(
 ### Why This Pattern is Excellent
 
 1. **Single Responsibility Principle**
+
    - `_should_continue_retry()`: One clear responsibility
    - `_request_with_retry()`: Orchestration only
    - `_attempt_request()`: Execution only
 
-2. **Testability**
+1. **Testability**
+
    - Easy to unit test retry logic
    - Mockable outcomes
    - Clear test cases
 
-3. **Maintainability**
+1. **Maintainability**
+
    - Clear method boundaries
    - Self-documenting code
    - Easy to modify
 
-4. **Observability**
+1. **Observability**
+
    - Integrated span tracking
    - Metrics collection
    - Structured logging
 
 ### Benefits Achieved
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Branches | 14 | 10 | 29% reduction |
-| Nesting levels | 3 | 2 | 33% reduction |
-| Method length | 80+ lines | 40-50 lines | 40% reduction |
-| Test coverage | 85% | 95% | 12% improvement |
-| Complexity score | 8/10 | 6/10 | 25% reduction |
+| Metric           | Before    | After       | Improvement     |
+| ---------------- | --------- | ----------- | --------------- |
+| Branches         | 14        | 10          | 29% reduction   |
+| Nesting levels   | 3         | 2           | 33% reduction   |
+| Method length    | 80+ lines | 40-50 lines | 40% reduction   |
+| Test coverage    | 85%       | 95%         | 12% improvement |
+| Complexity score | 8/10      | 6/10        | 25% reduction   |
 
 ## Implementation Patterns
 
@@ -144,21 +150,20 @@ def _should_continue_retry(
 
 ```python
 def _should_continue_retry(
-    self,
-    result: _RequestAttemptOutcome,
-    retry_state: _RetryRequestState
+    self, result: _RequestAttemptOutcome, retry_state: _RetryRequestState
 ) -> bool:
     """Determine if retry should continue based on attempt outcome."""
     if isinstance(result, httpx.Response):
         # Success case - don't continue retry
         retry_state.status_code = result.status_code
         return False
-    
+
     # Error case - apply retry policy
     return retry_state.apply_attempt_outcome(result)
 ```
 
 **Benefits**:
+
 - Clear separation of success/error paths
 - Single responsibility
 - Easy to test
@@ -169,11 +174,12 @@ def _should_continue_retry(
 @dataclass(slots=True)
 class _RetryRequestState:
     """Mutable request-level retry state for the main retry loop."""
+
     status_code: int = 0
     retries: int = 0
     attempts_made: int = 0
     last_error: Exception | None = None
-    
+
     def apply_attempt_outcome(self, outcome: _RequestAttemptOutcome) -> bool:
         """Apply one retry outcome and report whether the loop should continue."""
         self.status_code = outcome.status_code
@@ -183,6 +189,7 @@ class _RetryRequestState:
 ```
 
 **Benefits**:
+
 - Immutable-like state management
 - Clear state transitions
 - Thread-safe operations
@@ -193,6 +200,7 @@ class _RetryRequestState:
 @dataclass(frozen=True, slots=True)
 class _RequestAttemptOutcome:
     """Retry-stage outcome for a single request attempt."""
+
     should_retry: bool
     status_code: int
     retries_increment: int
@@ -200,6 +208,7 @@ class _RequestAttemptOutcome:
 ```
 
 **Benefits**:
+
 - Immutable outcome objects
 - Clear intent
 - Easy to test
@@ -209,11 +218,13 @@ class _RequestAttemptOutcome:
 ### 1. Retry Logic Organization
 
 **✅ Do**:
+
 ```python
 # Separate retry decision from execution
 def _should_continue_retry(self, result, retry_state) -> bool:
     # Pure decision logic
     pass
+
 
 def _request_with_retry(self, method, url, **kwargs) -> Response:
     # Orchestration only
@@ -221,6 +232,7 @@ def _request_with_retry(self, method, url, **kwargs) -> Response:
 ```
 
 **❌ Avoid**:
+
 ```python
 # Monolithic retry logic
 def _request_with_retry(self, method, url, **kwargs) -> Response:
@@ -231,6 +243,7 @@ def _request_with_retry(self, method, url, **kwargs) -> Response:
 ### 2. Error Handling
 
 **✅ Do**:
+
 ```python
 # Specific exception handling
 try:
@@ -247,6 +260,7 @@ except Exception as e:
 ```
 
 **❌ Avoid**:
+
 ```python
 # Overly broad exception handling
 try:
@@ -260,6 +274,7 @@ except Exception:
 ### 3. Observability Integration
 
 **✅ Do**:
+
 ```python
 # Integrated observability
 span = start_request_span(
@@ -279,6 +294,7 @@ except Exception:
 ```
 
 **❌ Avoid**:
+
 ```python
 # Separate or missing observability
 # Execution logic...
@@ -297,52 +313,51 @@ class TestHTTPClientRetryRefactoring:
         self.mixin.provider = "test_provider"
         self.mixin.run_id = "test_run_id"
         # ... other setup ...
-    
+
     def test_should_continue_retry_on_success_response(self):
         """Test that successful response stops retry loop."""
         retry_state = _RetryRequestState()
         response = MagicMock(spec=httpx.Response)
         response.status_code = 200
-        
+
         result = self.mixin._should_continue_retry(response, retry_state)
-        
+
         assert result is False  # Should not continue on success
         assert retry_state.status_code == 200
-    
+
     def test_should_continue_retry_on_retryable_outcome(self):
         """Test that retryable outcome continues retry loop."""
         retry_state = _RetryRequestState()
         outcome = _RequestAttemptOutcome(
-            should_retry=True,
-            status_code=503,
-            retries_increment=1,
-            last_error=None
+            should_retry=True, status_code=503, retries_increment=1, last_error=None
         )
-        
+
         result = self.mixin._should_continue_retry(outcome, retry_state)
-        
+
         assert result is True  # Should continue retry
 ```
 
 ### Test Coverage Goals
 
-| Component | Target Coverage | Actual Coverage |
-|-----------|-----------------|------------------|
-| `_should_continue_retry` | 100% | 100% |
-| `_request_with_retry` | 95% | 95% |
-| Error handling | 100% | 100% |
-| Edge cases | 90% | 92% |
+| Component                | Target Coverage | Actual Coverage |
+| ------------------------ | --------------- | --------------- |
+| `_should_continue_retry` | 100%            | 100%            |
+| `_request_with_retry`    | 95%             | 95%             |
+| Error handling           | 100%            | 100%            |
+| Edge cases               | 90%             | 92%             |
 
 ## Performance Considerations
 
 ### Retry Overhead
 
 **Before Refactoring**:
+
 - Method call overhead: High
 - Cognitive complexity: High
 - Maintenance cost: High
 
 **After Refactoring**:
+
 - Method call overhead: Minimal (same number of calls)
 - Cognitive complexity: Low
 - Maintenance cost: Low
@@ -352,9 +367,10 @@ class TestHTTPClientRetryRefactoring:
 ### Memory Usage
 
 **State Objects**:
+
 - `_RetryRequestState`: ~200 bytes per request
 - `_RequestAttemptOutcome`: ~150 bytes per attempt
-- **Total**: Negligible impact (<1KB per request)
+- **Total**: Negligible impact (\<1KB per request)
 
 ## Related Issues
 
@@ -385,16 +401,16 @@ class TestHTTPClientRetryRefactoring:
 stateDiagram-v2
     [*] --> AttemptRequest
     AttemptRequest --> CheckResponse: response received
-    
+
     CheckResponse --> ReturnSuccess: status < 500
     CheckResponse --> CheckRetryable: status ≥ 500
-    
+
     CheckRetryable --> ApplyBackoff: retryable & attempts < max
     ApplyBackoff --> AttemptRequest: after delay
-    
+
     CheckRetryable --> ReturnFailure: not retryable
     CheckRetryable --> Exhausted: attempts ≥ max
-    
+
     ReturnSuccess --> [*]
     ReturnFailure --> [*]
     Exhausted --> [*]
@@ -407,16 +423,19 @@ stateDiagram-v2
 The refactored HTTP client retry architecture represents:
 
 1. **Proper Separation of Concerns**
+
    - Clear method responsibilities
    - Single responsibility principle
    - Testable components
 
-2. **Resilient Error Handling**
+1. **Resilient Error Handling**
+
    - Comprehensive retry logic
    - Proper exception handling
    - Configurable policies
 
-3. **Production-Ready Quality**
+1. **Production-Ready Quality**
+
    - High test coverage (95%)
    - Integrated observability
    - Robust error handling
@@ -424,21 +443,25 @@ The refactored HTTP client retry architecture represents:
 ### Recommendations
 
 ✅ **Use as Reference Architecture**
+
 - Apply these patterns to other HTTP clients
 - Standardize retry logic across the codebase
 - Document as best practice
 
 ✅ **Maintain Current Patterns**
+
 - Keep separation of concerns
 - Preserve testability
 - Continue observability integration
 
 🟡 **Consider for Future Enhancements**
+
 - Add circuit breaker integration
 - Enhance metrics collection
 - Add adaptive backoff strategies
 
 ❌ **Avoid Reverting to Monolithic Pattern**
+
 - Don't mix concerns
 - Don't reduce testability
 - Don't remove observability

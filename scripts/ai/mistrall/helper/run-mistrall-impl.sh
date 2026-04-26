@@ -56,9 +56,9 @@ CONTAINER_PATTERN="${OLLAMA_CONTAINER}"
 # Function: Start service
 start_service() {
     log_info "Starting Mistral Ollama service..."
-    
+
     cd "${ROOT_DIR}"
-    
+
     if docker compose -f "${COMPOSE_FILE}" up; then
         log_success "Mistral started on port ${MISTRALL_PORT}"
     else
@@ -71,9 +71,9 @@ start_service() {
 # Function: Start daemon
 start_daemon() {
     log_info "Starting Mistral as daemon..."
-    
+
     cd "${ROOT_DIR}"
-    
+
     if docker compose -f "${COMPOSE_FILE}" up -d; then
         log_success "Mistral daemon started (container: ${OLLAMA_CONTAINER})"
         log_info "API: http://localhost:${MISTRALL_PORT}"
@@ -88,9 +88,9 @@ start_daemon() {
 # Function: Stop service
 stop_service() {
     log_info "Stopping Mistral..."
-    
+
     cd "${ROOT_DIR}"
-    
+
     if docker compose -f "${COMPOSE_FILE}" down; then
         log_success "Mistral stopped"
     else
@@ -102,12 +102,12 @@ stop_service() {
 # Function: Show status
 show_status() {
     log_info "Checking Mistral status..."
-    
+
     if docker ps -a | grep -q "${CONTAINER_PATTERN}"; then
         if docker ps | grep -q "${CONTAINER_PATTERN}"; then
             log_success "Mistral container is RUNNING"
             docker ps --filter "name=${OLLAMA_CONTAINER}" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-            
+
             # Check API health
             if curl -s http://localhost:${MISTRALL_PORT}/api/tags >/dev/null 2>&1; then
                 log_success "API is responding"
@@ -129,7 +129,7 @@ show_status() {
 # Function: Show logs
 show_logs() {
     log_info "Showing Mistral logs..."
-    
+
     cd "${ROOT_DIR}"
     docker compose -f "${COMPOSE_FILE}" logs -f
     return 0
@@ -138,14 +138,14 @@ show_logs() {
 # Function: Shell access
 shell_access() {
     log_info "Opening shell in Mistral container..."
-    
+
     CONTAINER_ID=$(docker ps -q -f "name=${OLLAMA_CONTAINER}" | head -1)
-    
+
     if [[ -z "${CONTAINER_ID}" ]]; then
         log_error "Mistral container not running"
         exit 1
     fi
-    
+
     docker exec -it "${CONTAINER_ID}" bash || true
     return 0
 }
@@ -153,15 +153,15 @@ shell_access() {
 # Function: Pull model
 pull_model() {
     log_info "Pulling model: ${MISTRALL_MODEL}"
-    
+
     CONTAINER_ID=$(docker ps -q -f "name=${OLLAMA_CONTAINER}" | head -1)
-    
+
     if [[ -z "${CONTAINER_ID}" ]]; then
         log_error "Mistral container not running"
         log_info "Start it first: ./run-mistrall.sh daemon"
         return 1
     fi
-    
+
     if docker exec -it "${CONTAINER_ID}" ollama pull "${MISTRALL_MODEL}"; then
         log_success "Model pulled: ${MISTRALL_MODEL}"
     else
@@ -179,31 +179,31 @@ case "$COMMAND" in
     start)
         start_service
         ;;
-    
+
     daemon)
         start_daemon
         ;;
-    
+
     stop)
         stop_service
         ;;
-    
+
     status)
         show_status
         ;;
-    
+
     logs)
         show_logs
         ;;
-    
+
     shell)
         shell_access
         ;;
-    
+
     pull)
         pull_model
         ;;
-    
+
     *)
         log_error "Unknown operation: $COMMAND"
         exit 1

@@ -164,4 +164,3 @@ jobs:
                         reports/e2e/pytest_exit_code_live.txt
                     if-no-files-found: warn
                     retention-days: 14
-

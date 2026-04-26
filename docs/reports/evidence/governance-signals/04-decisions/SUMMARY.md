@@ -6,22 +6,22 @@
 
 ## Решения Summary
 
-| ID | Decision | Status | Evidence Count |
-|----|----------|--------|---------------:|
-| `DEC-governance-c901-zero-new-debt-baseline` | Keep `C901` as zero-new-debt blocking baseline | `accepted` | 2 |
-| `DEC-governance-duplication-expand-report-only-baseline` | Expand duplication governance to `composition` and `application` in report-only mode first | `accepted` | 3 |
-| `DEC-governance-file-size-report-dual-track` | Keep zero-exemption ratchet and add separate raw hotspot tail reporting | `accepted` | 3 |
-| `DEC-governance-expand-named-hotspot-programs-after-calibration` | Keep current `application/core` hotspot program and run one calibration wave for additional named hotspots | `accepted` | 4 |
+| ID                                                               | Decision                                                                                                   | Status     | Evidence Count |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ---------- | -------------: |
+| `DEC-governance-c901-zero-new-debt-baseline`                     | Keep `C901` as zero-new-debt blocking baseline                                                             | `accepted` |              2 |
+| `DEC-governance-duplication-expand-report-only-baseline`         | Expand duplication governance to `composition` and `application` in report-only mode first                 | `accepted` |              3 |
+| `DEC-governance-file-size-report-dual-track`                     | Keep zero-exemption ratchet and add separate raw hotspot tail reporting                                    | `accepted` |              3 |
+| `DEC-governance-expand-named-hotspot-programs-after-calibration` | Keep current `application/core` hotspot program and run one calibration wave for additional named hotspots | `accepted` |              4 |
 
 ## Риски Created
 
-| ID | Risk | Severity | Linked Decision |
-|----|------|----------|-----------------|
-| `RISK-governance-c901-refactor-friction` | Strict zero-new-debt baseline can slow large refactors | `medium` | `DEC-governance-c901-zero-new-debt-baseline` |
-| `RISK-governance-duplication-noise-overload` | New duplication reports may be noisy and reduce trust in the signal | `medium` | `DEC-governance-duplication-expand-report-only-baseline` |
-| `RISK-governance-duplication-check-runtime` | Expanded duplication scans may increase check time | `low` | `DEC-governance-duplication-expand-report-only-baseline` |
-| `RISK-governance-metric-semantics-confusion` | Readers may confuse exemption debt with raw hotspot inventory | `medium` | `DEC-governance-file-size-report-dual-track` |
-| `RISK-governance-misprioritized-hotspots` | New hotspot programs may target visible but low-leverage seams | `medium` | `DEC-governance-expand-named-hotspot-programs-after-calibration` |
+| ID                                           | Risk                                                                | Severity | Linked Decision                                                  |
+| -------------------------------------------- | ------------------------------------------------------------------- | -------- | ---------------------------------------------------------------- |
+| `RISK-governance-c901-refactor-friction`     | Strict zero-new-debt baseline can slow large refactors              | `medium` | `DEC-governance-c901-zero-new-debt-baseline`                     |
+| `RISK-governance-duplication-noise-overload` | New duplication reports may be noisy and reduce trust in the signal | `medium` | `DEC-governance-duplication-expand-report-only-baseline`         |
+| `RISK-governance-duplication-check-runtime`  | Expanded duplication scans may increase check time                  | `low`    | `DEC-governance-duplication-expand-report-only-baseline`         |
+| `RISK-governance-metric-semantics-confusion` | Readers may confuse exemption debt with raw hotspot inventory       | `medium` | `DEC-governance-file-size-report-dual-track`                     |
+| `RISK-governance-misprioritized-hotspots`    | New hotspot programs may target visible but low-leverage seams      | `medium` | `DEC-governance-expand-named-hotspot-programs-after-calibration` |
 
 ## Quality Gate Status
 

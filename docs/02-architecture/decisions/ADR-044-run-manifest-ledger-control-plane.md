@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-02'
----
+  Last verified: '2026-04-02'
+
+______________________________________________________________________
 
 # ADR-044: Run Manifest and Run Ledger Control Plane
 
@@ -146,17 +149,17 @@ The enabled control-plane path follows these invariants:
 ### Positive
 
 1. Each run becomes a globally addressable reproducibility object.
-2. Run-centric provenance can be inspected without reconstructing logs.
-3. Sidecars now link upward to the control plane through `manifest_id`.
-4. The model creates a stable base for future lineage and replay tooling.
-5. Runtime code avoids a “one manifest for everything” god-object and keeps
+1. Run-centric provenance can be inspected without reconstructing logs.
+1. Sidecars now link upward to the control plane through `manifest_id`.
+1. The model creates a stable base for future lineage and replay tooling.
+1. Runtime code avoids a “one manifest for everything” god-object and keeps
    launch-time and in-run concerns separated.
 
 ### Negative
 
 1. Additional control-plane files are written for every run.
-2. Readers that only knew `run_id` must learn the `manifest_id` link.
-3. File-backed inspection is simple but not optimized for large historical query workloads.
+1. Readers that only knew `run_id` must learn the `manifest_id` link.
+1. File-backed inspection is simple but not optimized for large historical query workloads.
 
 ## Implementation Notes
 

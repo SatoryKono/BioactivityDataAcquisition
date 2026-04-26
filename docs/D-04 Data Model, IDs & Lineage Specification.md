@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 0.3.0
 Status: draft
 Class: repo-only
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last synchronized: '2026-04-08'
----
+  Last synchronized: '2026-04-08'
+
+______________________________________________________________________
 
 # D-04 Data Model, IDs and Lineage Specification (Draft Sync Note)
 
@@ -33,12 +36,11 @@ D-04 сохраняется как draft-рамка для будущего unif
 ## План синхронизации D-04
 
 1. Использовать D-04 как навигационную карту между data layers, hash-policy, output metadata и control-plane contracts.
-2. Любые изменения identity/hash semantics документировать сначала в hash-policy/ADR, а в D-04 оставлять только ссылочный summary.
-3. Линейдж-полевая таксономия и storage guarantees должны ссылаться на published contract docs, а не дублироваться здесь.
+1. Любые изменения identity/hash semantics документировать сначала в hash-policy/ADR, а в D-04 оставлять только ссылочный summary.
+1. Линейдж-полевая таксономия и storage guarantees должны ссылаться на published contract docs, а не дублироваться здесь.
 
 ## Критерии промоушена в future published handbook
 
 1. D-04 содержит только согласованную модель терминов и cross-links к каноническим правилам.
-2. Нет повторного описания low-level алгоритмов, уже закреплённых в `hash-policy` и коде.
-3. Все runtime-facing lineage guarantees ссылаются на соответствующие ADR/contract pages.
-
+1. Нет повторного описания low-level алгоритмов, уже закреплённых в `hash-policy` и коде.
+1. Все runtime-facing lineage guarantees ссылаются на соответствующие ADR/contract pages.

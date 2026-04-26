@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Пайплайн: ChEMBL Publication Similarity
 
@@ -15,36 +18,36 @@ Last verified: '2026-03-30'
 **Сущность:** `publication_similarity`
 **Версия схемы:** 1.2.0
 
----
+______________________________________________________________________
 
 ## 1. Описание
 
 Пайплайн извлекает данные о сходстве публикаций (коэффициенты Танимото) из API ChEMBL. Используется для анализа связей между научными публикациями на основе молекулярного и таргетного сходства. Endpoint API остаётся `/document-similarity`.
 
----
+______________________________________________________________________
 
 ## 2. Ключевые поля
 
 ### Идентификаторы
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `sim_id` | `int` | Уникальный идентификатор записи сходства |
-| `doc_1` | `int` | ID первой публикации |
-| `doc_2` | `int` | ID второй публикации |
-| `pubmed_id1` | `int` | PubMed ID первой публикации |
-| `pubmed_id2` | `int` | PubMed ID второй публикации |
+| Поле         | Тип   | Описание                                 |
+| ------------ | ----- | ---------------------------------------- |
+| `sim_id`     | `int` | Уникальный идентификатор записи сходства |
+| `doc_1`      | `int` | ID первой публикации                     |
+| `doc_2`      | `int` | ID второй публикации                     |
+| `pubmed_id1` | `int` | PubMed ID первой публикации              |
+| `pubmed_id2` | `int` | PubMed ID второй публикации              |
 
 ### Коэффициенты Танимото
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `tid_tani` | `float` | Коэффициент Танимото по таргетам |
-| `mol_tani` | `float` | Коэффициент Танимото по молекулам |
-| `avg_tani` | `float` | Среднее значение (вычисляемое) |
+| Поле       | Тип     | Описание                            |
+| ---------- | ------- | ----------------------------------- |
+| `tid_tani` | `float` | Коэффициент Танимото по таргетам    |
+| `mol_tani` | `float` | Коэффициент Танимото по молекулам   |
+| `avg_tani` | `float` | Среднее значение (вычисляемое)      |
 | `max_tani` | `float` | Максимальное значение (вычисляемое) |
 
----
+______________________________________________________________________
 
 ## 3. Трансформация
 
@@ -76,21 +79,21 @@ schema/config surface. Тип сходства представлен число
 добавить в `configs/enums/chembl.yaml`, Pandera schema и normalization profile
 одним изменением.
 
----
+______________________________________________________________________
 
 ## 4. Валидация
 
 ### DQ-правила
 
 1. **`sim_id`** — обязательное
-2. **`doc_1`**, **`doc_2`** — обязательные (foreign keys)
+1. **`doc_1`**, **`doc_2`** — обязательные (foreign keys)
 
 ### Gold-фильтры
 
 - `max_tani >= 0.5` — только значимые связи попадают в Gold
 - Обязательные поля: `sim_id`, `doc_1`, `doc_2`
 
----
+______________________________________________________________________
 
 ## 5. Использование CLI
 
@@ -102,34 +105,34 @@ bioetl run --pipeline chembl_publication_similarity
 bioetl run --pipeline chembl_publication_similarity --limit 1000
 ```
 
----
+______________________________________________________________________
 
 ## 6. Связанные файлы
 
-| Компонент | Путь |
-|-----------|------|
-| Конфигурация | `configs/entities/chembl/publication_similarity.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/publication_similarity_transformer.py` |
-| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
+| Компонент     | Путь                                                                            |
+| ------------- | ------------------------------------------------------------------------------- |
+| Конфигурация  | `configs/entities/chembl/publication_similarity.yaml`                           |
+| Трансформер   | `src/bioetl/application/pipelines/chembl/publication_similarity_transformer.py` |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`                         |
 
----
+______________________________________________________________________
 
 ## Contract References
 
-| Артефакт | Ссылка |
-| --- | --- |
+| Артефакт             | Ссылка                                                                                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------- |
 | Gold contract export | [chembl_publication_similarity_v1.0.json](../../contracts/gold/chembl_publication_similarity_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                                      |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md)                |
 
 ## Compliance
 
-| Контроль | Статус | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Runtime alignment | Pass | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
-| Contract linkage | Pass | [chembl_publication_similarity_v1.0.json](../../contracts/gold/chembl_publication_similarity_v1.0.json) |
-| API governance | Pass | См. [API Compliance](#api-compliance) |
+| Контроль          | Статус | Evidence                                                                                                       |
+| ----------------- | ------ | -------------------------------------------------------------------------------------------------------------- |
+| Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`                       |
+| Runtime alignment | Pass   | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
+| Contract linkage  | Pass   | [chembl_publication_similarity_v1.0.json](../../contracts/gold/chembl_publication_similarity_v1.0.json)        |
+| API governance    | Pass   | См. [API Compliance](#api-compliance)                                                                          |
 
 ## API Compliance
 

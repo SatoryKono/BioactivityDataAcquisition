@@ -53,8 +53,10 @@ uv run python -m scripts.docs build-site --strict
 - Preferred end-to-end entrypoint: `uv run python -m scripts.docs verify`
 
 - Published workflow guide: [Docs Verification](../03-guides/docs-verification.md)
+
 - `make docs-build` remains a convenient wrapper for a non-strict site build when
   you only need a local rendered preview.
+
 - Migration to MkDocs 2.x must be tracked as a dedicated task with explicit compatibility validation.
 
 ______________________________________________________________________
@@ -85,22 +87,22 @@ ______________________________________________________________________
 
 ## Сводная таблица
 
-| Файл                           | Директория           | bioetl? | Unified command                                    | Make-цель    | Описание                                   |
-| ------------------------------ | -------------------- | ------- | -------------------------------------------------- | ------------ | ------------------------------------------ |
-| `create_pipeline.py`           | src/tools/           | Да      | —                                                  | —            | Генерация boilerplate для новых пайплайнов |
-| `verify_schema_parity.py`      | src/tools/           | Да      | —                                                  | —            | Верификация Silver↔Gold schema parity      |
-| `file_merger.py`               | src/tools/           | Нет     | —                                                  | —            | Объединение файлов с метаданными           |
-| `cleanup_project.py`           | scripts/engineering/diagnostics/ | Нет     | —                                                  | `make clean` | Очистка кэшей и артефактов                 |
-| `cleanup_consolidate.py`       | scripts/engineering/diagnostics/ | Нет     | —                                                  | —            | Консолидированный аудит очистки            |
-| `audit_structure.py`           | scripts/engineering/diagnostics/ | Нет     | —                                                  | —            | Аудит соответствия File Policy             |
-| `vacuum_delta.py`              | scripts/ops/data/    | Нет     | `uv run python -m scripts.ops.data vacuum`         | —            | VACUUM Delta Lake таблиц                   |
-| `dq_baseline_update.py`        | scripts/engineering/baselines/ | Нет     | `uv run python -m scripts.engineering.baselines dq-baseline` | — | Пересчёт DQ baseline |
-| `verify_checksums.py`          | scripts/ops/data/    | Нет     | `uv run python -m scripts.ops.data checksums`      | —            | Верификация контрольных сумм               |
-| `salt_rotate.py`               | scripts/ops/         | Нет     | —                                                  | —            | Ротация PII-соли                           |
-| `naming_audit.py`              | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-naming`         | —            | Аудит naming conventions                   |
-| `lint_terminology.py`          | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-terminology`    | —            | Линтер терминологии                        |
-| `config_gap_analysis.py`       | scripts/schema/      | Нет     | `uv run python -m scripts.schema analyze-gaps`     | —            | Анализ расхождений конфигов                |
-| `validate_pipeline_configs.py` | scripts/schema/      | Нет     | `uv run python -m scripts.schema validate-configs` | —            | Валидация configs vs JSON Schema           |
+| Файл                           | Директория                       | bioetl? | Unified command                                              | Make-цель    | Описание                                   |
+| ------------------------------ | -------------------------------- | ------- | ------------------------------------------------------------ | ------------ | ------------------------------------------ |
+| `create_pipeline.py`           | src/tools/                       | Да      | —                                                            | —            | Генерация boilerplate для новых пайплайнов |
+| `verify_schema_parity.py`      | src/tools/                       | Да      | —                                                            | —            | Верификация Silver↔Gold schema parity      |
+| `file_merger.py`               | src/tools/                       | Нет     | —                                                            | —            | Объединение файлов с метаданными           |
+| `cleanup_project.py`           | scripts/engineering/diagnostics/ | Нет     | —                                                            | `make clean` | Очистка кэшей и артефактов                 |
+| `cleanup_consolidate.py`       | scripts/engineering/diagnostics/ | Нет     | —                                                            | —            | Консолидированный аудит очистки            |
+| `audit_structure.py`           | scripts/engineering/diagnostics/ | Нет     | —                                                            | —            | Аудит соответствия File Policy             |
+| `vacuum_delta.py`              | scripts/ops/data/                | Нет     | `uv run python -m scripts.ops.data vacuum`                   | —            | VACUUM Delta Lake таблиц                   |
+| `dq_baseline_update.py`        | scripts/engineering/baselines/   | Нет     | `uv run python -m scripts.engineering.baselines dq-baseline` | —            | Пересчёт DQ baseline                       |
+| `verify_checksums.py`          | scripts/ops/data/                | Нет     | `uv run python -m scripts.ops.data checksums`                | —            | Верификация контрольных сумм               |
+| `salt_rotate.py`               | scripts/ops/                     | Нет     | —                                                            | —            | Ротация PII-соли                           |
+| `naming_audit.py`              | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-naming`       | —            | Аудит naming conventions                   |
+| `lint_terminology.py`          | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-terminology`  | —            | Линтер терминологии                        |
+| `config_gap_analysis.py`       | scripts/schema/                  | Нет     | `uv run python -m scripts.schema analyze-gaps`               | —            | Анализ расхождений конфигов                |
+| `validate_pipeline_configs.py` | scripts/schema/                  | Нет     | `uv run python -m scripts.schema validate-configs`           | —            | Валидация configs vs JSON Schema           |
 
 > Для детального описания каждого скрипта, параметров и примеров: `scripts/<group>/README.md`.
 

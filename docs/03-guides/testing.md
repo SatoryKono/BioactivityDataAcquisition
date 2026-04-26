@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-02'
----
+  Last verified: '2026-04-02'
+
+______________________________________________________________________
 
 # Testing Guide
 
@@ -21,6 +24,7 @@ Last verified: '2026-04-02'
 - **Mocking**: In-memory fakes предпочтительны, `unittest.mock.MagicMock` допустим
 
 Source of truth для тестовой governance:
+
 - [ADR-042](../02-architecture/decisions/ADR-042-testing-strategy-matrix.md)
 - `configs/quality/test_matrix.yaml`
 - `configs/quality/integration_vcr_policy.yaml`
@@ -113,6 +117,7 @@ Supported policy slice for issue `#2598`:
   default path.
 
 Текущее состояние rollout по ADR-042:
+
 - mutation testing в CI блокирует только `domain/` с порогом `70%`
 - `application/` mutation target (`60%`) задокументирован, но пока staged и не является blocking gate
 - VCR cassette metadata (`*_meta.yaml`) перешли в `enforced` rollout: `configs/quality/test_matrix.yaml` теперь объявляет managed inventory contract для всего canonical VCR estate, а repo-wide metadata coverage больше не держится на seeded subset
@@ -425,12 +430,12 @@ uv run coverage html -d reports/coverage/htmlcov
 
 ### 4.2. Integration / E2E execution matrix
 
-| Surface | CI / single-OS | Windows PowerShell | WSL/Linux | Notes |
-| ------- | --------------- | ------------------ | --------- | ----- |
-| Integration replay | `uv run python -m pytest tests/integration/ --vcr-record=none -m "integration and not e2e"` | `.\scripts\engineering\dev\run_pytest.ps1 tests\integration\ --vcr-record=none -m "integration and not e2e"` | `bash scripts/engineering/dev/run_pytest.sh tests/integration/ --vcr-record=none -m "integration and not e2e"` | canonical stable feedback path |
-| E2E replay | `uv run python -m pytest tests/e2e/ -m e2e --vcr-record=none -v` | `.\scripts\engineering\dev\run_pytest.ps1 tests\e2e\ -m e2e --vcr-record=none` | `bash scripts/engineering/dev/run_pytest.sh tests/e2e/ -m e2e --vcr-record=none` | local-only execution, no live network |
-| Targeted cassette refresh | `uv run python -m pytest <target> --vcr-record=new_episodes -v` | `.\scripts\engineering\dev\run_pytest.ps1 <target> --vcr-record=new_episodes -v` | `bash scripts/engineering/dev/run_pytest.sh <target> --vcr-record=new_episodes -v` | supported refresh path |
-| Live contract verification | `uv run pytest tests/contract/ -v --tb=short --network` | n/a | n/a | scheduled/manual workflow path, separate from replay policy |
+| Surface                    | CI / single-OS                                                                              | Windows PowerShell                                                                                           | WSL/Linux                                                                                                      | Notes                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Integration replay         | `uv run python -m pytest tests/integration/ --vcr-record=none -m "integration and not e2e"` | `.\scripts\engineering\dev\run_pytest.ps1 tests\integration\ --vcr-record=none -m "integration and not e2e"` | `bash scripts/engineering/dev/run_pytest.sh tests/integration/ --vcr-record=none -m "integration and not e2e"` | canonical stable feedback path                              |
+| E2E replay                 | `uv run python -m pytest tests/e2e/ -m e2e --vcr-record=none -v`                            | `.\scripts\engineering\dev\run_pytest.ps1 tests\e2e\ -m e2e --vcr-record=none`                               | `bash scripts/engineering/dev/run_pytest.sh tests/e2e/ -m e2e --vcr-record=none`                               | local-only execution, no live network                       |
+| Targeted cassette refresh  | `uv run python -m pytest <target> --vcr-record=new_episodes -v`                             | `.\scripts\engineering\dev\run_pytest.ps1 <target> --vcr-record=new_episodes -v`                             | `bash scripts/engineering/dev/run_pytest.sh <target> --vcr-record=new_episodes -v`                             | supported refresh path                                      |
+| Live contract verification | `uv run pytest tests/contract/ -v --tb=short --network`                                     | n/a                                                                                                          | n/a                                                                                                            | scheduled/manual workflow path, separate from replay policy |
 
 ### 4.3. Cassette lifecycle rules
 
@@ -459,15 +464,15 @@ uv run coverage html -d reports/coverage/htmlcov
 
 ### 4.1. Быстрый старт для рекомендуемого локального прогона
 
-| Шаг | Команда | Назначение |
-| --- | ------- | ---------- |
-| 1 | `make install` | CI/single-OS bootstrap через `uv sync` или `.venv` fallback |
-| 2 | `setup_env_windows.ps1` / `setup_env_wsl.sh` | Mixed-checkout bootstrap в `.venv-win` или `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` |
-| 3 | `make test-fast` | Получить быстрый feedback для unit + architecture |
-| 4 | `make test` | Выполнить стабильный локальный прогон с coverage gate 85% |
-| 5 | `make test-cov-fast-stable` | Выполнить ускоренный split-run для локального coverage анализа |
-| 6 | `uv run coverage html -d reports/coverage/htmlcov` | Сгенерировать HTML coverage report при необходимости |
-| 7 | `uv run python -m pytest tests/e2e/ -m e2e -v` | Отдельно запустить E2E в Local-Only режиме |
+| Шаг | Команда                                            | Назначение                                                                               |
+| --- | -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| 1   | `make install`                                     | CI/single-OS bootstrap через `uv sync` или `.venv` fallback                              |
+| 2   | `setup_env_windows.ps1` / `setup_env_wsl.sh`       | Mixed-checkout bootstrap в `.venv-win` или `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` |
+| 3   | `make test-fast`                                   | Получить быстрый feedback для unit + architecture                                        |
+| 4   | `make test`                                        | Выполнить стабильный локальный прогон с coverage gate 85%                                |
+| 5   | `make test-cov-fast-stable`                        | Выполнить ускоренный split-run для локального coverage анализа                           |
+| 6   | `uv run coverage html -d reports/coverage/htmlcov` | Сгенерировать HTML coverage report при необходимости                                     |
+| 7   | `uv run python -m pytest tests/e2e/ -m e2e -v`     | Отдельно запустить E2E в Local-Only режиме                                               |
 
 **Примечания:**
 
@@ -526,12 +531,12 @@ timings зависят от hardware, Python version, coverage mode и сост�
 
 Hypothesis настроен с профилями для разных сценариев (см. `tests/conftest.py`):
 
-| Профиль    | max-examples | Использование                  |
-| ---------- | ------------ | ------------------------------ |
-| `ci`       | 10           | Автоматически в CI (CI=true)   |
-| `fast`     | 5            | Быстрый smoke test             |
+| Профиль    | max-examples | Использование                   |
+| ---------- | ------------ | ------------------------------- |
+| `ci`       | 10           | Автоматически в CI (CI=true)    |
+| `fast`     | 5            | Быстрый smoke test              |
 | `dev`      | 50           | Более глубокий локальный прогон |
-| `thorough` | 200          | Pre-release тестирование       |
+| `thorough` | 200          | Pre-release тестирование        |
 
 ```bash
 # Использование профилей
@@ -624,6 +629,7 @@ provider-contract-drift.yml
 ### 7.1. Полная настройка окружения
 
 Для первичной настройки или восстановления окружения используйте:
+
 ```bash
 # Канонический локальный bootstrap
 make install
@@ -644,23 +650,28 @@ dependency verification. `scripts/engineering/dev/dev_setup.sh` — legacy place
 Перед запуском основного набора тестов или линтеров необходимо убедиться, что все критические зависимости и инструменты установлены.
 
 **Runtime зависимости:**
+
 ```bash
 make test-deps
 ```
+
 Проверяет доступность `pandas`, `pandera`, `polars` и др. Локально это быстрый smoke-check перед `make test`; в CI аналогичная проверка выполняется отдельным `smoke-check` job в `.github/workflows/tests.yml`.
 
 **Инструменты разработки:**
+
 ```bash
 make test-deps-dev
 ```
+
 Дополнительно проверяет наличие `ruff`, `mypy`, `detect-secrets` и других инструментов аудита.
 
 ### 7.3. Решение проблем с воспроизводимостью
 
 Если аудит или CI падают с ошибками `ModuleNotFoundError`:
+
 1. Выполните `make install` или `make setup-dev`.
-2. В mixed Windows + WSL checkout пересоберите правильное OS-specific окружение через `setup_env_windows.ps1` или `setup_env_wsl.sh`, а затем запускайте `run_pytest.ps1|.sh` / `run_mypy.ps1|.sh`.
-3. Проверьте статус инструментов через `make test-deps-dev`.
+1. В mixed Windows + WSL checkout пересоберите правильное OS-specific окружение через `setup_env_windows.ps1` или `setup_env_wsl.sh`, а затем запускайте `run_pytest.ps1|.sh` / `run_mypy.ps1|.sh`.
+1. Проверьте статус инструментов через `make test-deps-dev`.
 
 В CI для этого используется не `make test`, а отдельный набор шагов в
 `.github/workflows/tests.yml`: короткий `smoke-check`, затем независимые

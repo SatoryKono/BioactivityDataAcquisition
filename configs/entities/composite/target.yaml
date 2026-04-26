@@ -79,22 +79,22 @@ quality:
     - composite_target_id
     - target_name
     - organism
-  
+
 # Loading strategy
 loading:
   strategy: incremental
   batch_size: 200
-  
+
 # Field mapping and resolution rules
 field_resolution:
   target_name:
     strategy: priority
     sources: [chembl, uniprot]
-    
+
   organism:
     strategy: priority
     sources: [chembl, uniprot]
-    
+
   target_type:
     strategy: priority
     sources: [chembl, uniprot]
@@ -104,11 +104,11 @@ dq_rules:
   - field: composite_target_id
     rule: not_null
     severity: critical
-  
+
   - field: target_name
     rule: not_null
     severity: high
-    
+
   - field: organism
     rule: not_null
     severity: medium

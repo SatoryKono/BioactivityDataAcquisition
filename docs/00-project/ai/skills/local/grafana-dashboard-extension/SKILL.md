@@ -1,7 +1,6 @@
----
-name: grafana-dashboard-extension
-description: Extend, edit, validate, and review shipped Grafana dashboards for BioETL. Use when tasks touch `grafana/dashboards/*.json`, dashboard navigation, panel queries, variables, units, thresholds, Loki/Tempo drilldowns, or operator-facing dashboard UX. Treat repo dashboard JSON as source of truth and update docs when shipped dashboard behavior changes.
----
+______________________________________________________________________
+
+## name: grafana-dashboard-extension description: Extend, edit, validate, and review shipped Grafana dashboards for BioETL. Use when tasks touch `grafana/dashboards/*.json`, dashboard navigation, panel queries, variables, units, thresholds, Loki/Tempo drilldowns, or operator-facing dashboard UX. Treat repo dashboard JSON as source of truth and update docs when shipped dashboard behavior changes.
 
 # Grafana Dashboard Extension
 
@@ -35,8 +34,8 @@ Trigger this skill when the user asks to:
 Before editing:
 
 1. Read the target dashboard JSON in `grafana/dashboards/`.
-2. Read `docs/03-guides/dashboards/dashboard-extension-llm.md`.
-3. If the task affects shipped navigation or operator workflow, also read:
+1. Read `docs/03-guides/dashboards/dashboard-extension-llm.md`.
+1. If the task affects shipped navigation or operator workflow, also read:
    - `docs/03-guides/dashboards/README.md`
    - `docs/03-guides/dashboards/monitoring-index.md`
    - `docs/03-guides/dashboards/dashboard-v2-usage.md`

@@ -7,16 +7,17 @@
 ## Цель
 
 Обеспечить воспроизводимый pipeline:
+
 1. Проверка диаграммных quality gates.
-2. Рендер диаграмм.
-3. Обновление `*-with-descriptions.docx` и `*-with-descriptions.pdf`.
+1. Рендер диаграмм.
+1. Обновление `*-with-descriptions.docx` и `*-with-descriptions.pdf`.
 
 ## Канонические инструменты агента
 
 1. `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh` — единый quality gate (lint/syntax/render/smoke/quality).
-2. `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-2.py` — генерация DOCX из `*-with-descriptions.md`.
-3. `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-3.py` — генерация PDF из `*-with-descriptions.md`.
-4. `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh` — единый orchestrator для полного цикла.
+1. `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-2.py` — генерация DOCX из `*-with-descriptions.md`.
+1. `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-3.py` — генерация PDF из `*-with-descriptions.md`.
+1. `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh` — единый orchestrator для полного цикла.
 
 ## Базовые команды
 
@@ -34,18 +35,18 @@ bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh --skip-checks
 
 ## Режимы
 
-| Режим | Описание |
-|---|---|
-| `CHECK` | Только `py-doc-bot-1.sh` |
+| Режим     | Описание                    |
+| --------- | --------------------------- |
+| `CHECK`   | Только `py-doc-bot-1.sh`    |
 | `BUNDLES` | Только `docx/pdf` генерация |
-| `FULL` | Checks + bundles |
+| `FULL`    | Checks + bundles            |
 
 ## Инварианты
 
 1. Использовать orchestrator и канонические скрипты из `docs/00-project/ai/agents/scripts/diagrams/`; путь `scripts/diagrams/` сохраняется как compatibility-слой.
-2. Следовать ADR-040 (diagram governance).
-3. При ошибках окружения (`pandoc`, `wkhtmltopdf`, `mmdc`) завершать с явным сообщением.
-4. Не менять зоны вне диаграммного контура без явного запроса.
+1. Следовать ADR-040 (diagram governance).
+1. При ошибках окружения (`pandoc`, `wkhtmltopdf`, `mmdc`) завершать с явным сообщением.
+1. Не менять зоны вне диаграммного контура без явного запроса.
 
 ## Ожидаемые артефакты
 

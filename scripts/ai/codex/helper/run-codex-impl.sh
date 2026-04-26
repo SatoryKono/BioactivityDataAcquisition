@@ -31,7 +31,7 @@ if [[ ! -x "${ENSURE_SCRIPT}" ]]; then
 fi
 
 # Use timeout on ENSURE_SCRIPT calls
-CODEX_BIN="" 
+CODEX_BIN=""
 CODEX_PREFIX=""
 if timeout 10 "${ENSURE_SCRIPT}" --no-install --print-bin >/dev/null 2>&1; then
     CODEX_BIN="$(timeout 10 "${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null || echo "")"

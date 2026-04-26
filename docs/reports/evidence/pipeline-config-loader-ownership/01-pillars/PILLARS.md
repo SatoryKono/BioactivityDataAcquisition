@@ -31,8 +31,8 @@ around `pipeline_config_api.py` and `domain_config_resolver.py`?
 ## Evaluation Focus
 
 1. Where does canonical staged YAML loading live now?
-2. Where does canonical YAML + DQ -> domain resolution live now?
-3. Do higher layers still treat `PipelineConfigLoader` as the primary contract?
-4. What concrete value does `PipelineConfigLoader` still provide?
-5. Does current code support retaining the class only as a legacy convenience
+1. Where does canonical YAML + DQ -> domain resolution live now?
+1. Do higher layers still treat `PipelineConfigLoader` as the primary contract?
+1. What concrete value does `PipelineConfigLoader` still provide?
+1. Does current code support retaining the class only as a legacy convenience
    seam rather than as a behavioral owner?

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-014: Deterministic Writes and Retries
 
@@ -19,19 +22,20 @@ Last verified: '2026-03-30'
 Для обеспечения воспроизводимости и упрощения отладки пайплайнов необходим детерминизм:
 
 1. **Проблема отладки**: При расследовании инцидентов невозможно воспроизвести точное поведение из-за:
+
    - `random.uniform()` в retry jitter
    - `datetime.now()` вызывается в разных местах с микросекундными различиями
 
-2. **Проблема тестирования**: Тесты с random/datetime.now() flaky и непредсказуемы
+1. **Проблема тестирования**: Тесты с random/datetime.now() flaky и непредсказуемы
 
-3. **Источники недетерминизма в кодовой базе**:
+1. **Источники недетерминизма в кодовой базе**:
 
-| Файл | Паттерн | Контекст |
-|------|---------|----------|
-| `infrastructure/adapters/http/client.py` | `random.uniform()` | Retry jitter |
-| `infrastructure/storage/gold_writer.py` | `random.uniform()` | Write backoff |
-| `infrastructure/storage/bronze_writer.py` | `datetime.now()` | Ingestion timestamp |
-| `infrastructure/quarantine/unified.py` | `datetime.now()` | Error timestamp |
+| Файл                                      | Паттерн            | Контекст            |
+| ----------------------------------------- | ------------------ | ------------------- |
+| `infrastructure/adapters/http/client.py`  | `random.uniform()` | Retry jitter        |
+| `infrastructure/storage/gold_writer.py`   | `random.uniform()` | Write backoff       |
+| `infrastructure/storage/bronze_writer.py` | `datetime.now()`   | Ingestion timestamp |
+| `infrastructure/quarantine/unified.py`    | `datetime.now()`   | Error timestamp     |
 
 ## Decision
 
@@ -105,17 +109,18 @@ Domain business paths не должны создавать текущее вре
 
 ### 4. Архитектурные Тесты
 
-| Тест | Цель |
-|------|------|
-| `test-no-random-in-writers` | Блокирует `import random` в `infrastructure/storage/` |
-| `test-no-datetime-now-in-infrastructure` | Блокирует `datetime.now()` в `infrastructure/` |
-| `test-no-datetime-now-in-domain` | Блокирует `datetime.now()` в `domain/` вне `domain/context.py` |
-| `test-replay-critical-time-seams` | Блокирует `datetime.now()` в replay-critical `application/` и `composition/` runtime/checkpoint/control-plane seams |
-| `test-no-structlog-in-application-interfaces` | Блокирует прямой импорт `structlog` в `application/` и `interfaces/` |
+| Тест                                          | Цель                                                                                                                |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `test-no-random-in-writers`                   | Блокирует `import random` в `infrastructure/storage/`                                                               |
+| `test-no-datetime-now-in-infrastructure`      | Блокирует `datetime.now()` в `infrastructure/`                                                                      |
+| `test-no-datetime-now-in-domain`              | Блокирует `datetime.now()` в `domain/` вне `domain/context.py`                                                      |
+| `test-replay-critical-time-seams`             | Блокирует `datetime.now()` в replay-critical `application/` и `composition/` runtime/checkpoint/control-plane seams |
+| `test-no-structlog-in-application-interfaces` | Блокирует прямой импорт `structlog` в `application/` и `interfaces/`                                                |
 
 ### 5. Изоляция логирования
 
 Application и interfaces слои **MUST NOT** импортировать `structlog` напрямую — использовать абстракцию `LoggerPort` из `domain.ports`. Это обеспечивает:
+
 - Тестируемость (можно подменить логгер в тестах)
 - Независимость от конкретной реализации
 - Единообразие обработки ошибок
@@ -125,30 +130,30 @@ Application и interfaces слои **MUST NOT** импортировать `stru
 ### Положительные
 
 1. **Воспроизводимость**: Одинаковые входные данные → одинаковое поведение
-2. **Тестируемость**: Детерминистичные тесты без flakiness
-3. **Отладка**: Можно воспроизвести точную последовательность событий
-4. **Консистентность**: Все записи в batch имеют одинаковый `_ingestion_ts`
+1. **Тестируемость**: Детерминистичные тесты без flakiness
+1. **Отладка**: Можно воспроизвести точную последовательность событий
+1. **Консистентность**: Все записи в batch имеют одинаковый `_ingestion_ts`
 
 ### Отрицательные
 
 1. **API усложнение**: Дополнительные параметры (`ingestion_ts`, `deterministic`)
-2. **Миграция**: Требуется обновление всех вызовов infrastructure компонентов
-3. **API discipline**: replay-critical seams больше нельзя quietly переводить на локальный wall-clock fallback; время должно приходить из `ClockPort` или explicit timestamp parameter
+1. **Миграция**: Требуется обновление всех вызовов infrastructure компонентов
+1. **API discipline**: replay-critical seams больше нельзя quietly переводить на локальный wall-clock fallback; время должно приходить из `ClockPort` или explicit timestamp parameter
 
 ## Implementation
 
 ### Изменённые файлы
 
-| Файл | Изменение |
-|------|-----------|
-| `domain/context.py` | Добавлен `started_at` field |
-| `application/core/record_processor.py` | Использует `context.started_at` |
-| `application/core/base.py` | Использует `PipelineContext.create()` |
-| `infrastructure/adapters/http/client.py` | Добавлен `deterministic` mode |
-| `infrastructure/storage/gold_writer.py` | Удалён `random`, фиксированный backoff |
-| `infrastructure/storage/bronze_writer.py` | Принимает `ingestion_ts` параметр |
-| `infrastructure/quarantine/unified.py` | Принимает `ingestion_ts` параметр |
-| `domain/ports/quarantine.py` | Обновлён `QuarantinePort.write()` |
+| Файл                                      | Изменение                              |
+| ----------------------------------------- | -------------------------------------- |
+| `domain/context.py`                       | Добавлен `started_at` field            |
+| `application/core/record_processor.py`    | Использует `context.started_at`        |
+| `application/core/base.py`                | Использует `PipelineContext.create()`  |
+| `infrastructure/adapters/http/client.py`  | Добавлен `deterministic` mode          |
+| `infrastructure/storage/gold_writer.py`   | Удалён `random`, фиксированный backoff |
+| `infrastructure/storage/bronze_writer.py` | Принимает `ingestion_ts` параметр      |
+| `infrastructure/quarantine/unified.py`    | Принимает `ingestion_ts` параметр      |
+| `domain/ports/quarantine.py`              | Обновлён `QuarantinePort.write()`      |
 
 ### Архитектурные тесты
 
@@ -159,13 +164,13 @@ Application и interfaces слои **MUST NOT** импортировать `stru
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-014-deterministic-writes.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                             |
+| ------------ | -------------------------------------------------------------------------- | ------ | ------------------------------------ |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-014-deterministic-writes.md`    |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                           |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                     |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria` |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                         |
 
 ## Rollout
 

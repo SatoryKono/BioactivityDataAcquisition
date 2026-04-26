@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-12'
----
+  Last verified: '2026-04-12'
+
+______________________________________________________________________
 
 # AI Runtime Mirror Ownership
 
@@ -17,20 +20,20 @@ Last verified: '2026-04-12'
 
 ## Ownership Matrix
 
-| Surface | Primary role | Source-of-truth status | Editable for behavior | Expected content |
-| --- | --- | --- | --- | --- |
-| `.codex/**` | Codex runtime surface | Canonical for Codex runtime behavior | Yes | live agent registry, skills, Codex-specific orchestration, runtime settings |
-| `.claude/**` | Claude runtime surface | Canonical for Claude runtime behavior | Yes | Claude-specific agent registry, commands, skills, project context, runtime settings |
-| `docs/00-project/ai/**` | Published/internal mirror surface | Not canonical for runtime behavior | Only for mirror/index/guidance updates | curated mirrors, navigation, contributor guidance, memory entrypoints, prompt and skill indexes |
+| Surface                 | Primary role                      | Source-of-truth status                | Editable for behavior                  | Expected content                                                                                |
+| ----------------------- | --------------------------------- | ------------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `.codex/**`             | Codex runtime surface             | Canonical for Codex runtime behavior  | Yes                                    | live agent registry, skills, Codex-specific orchestration, runtime settings                     |
+| `.claude/**`            | Claude runtime surface            | Canonical for Claude runtime behavior | Yes                                    | Claude-specific agent registry, commands, skills, project context, runtime settings             |
+| `docs/00-project/ai/**` | Published/internal mirror surface | Not canonical for runtime behavior    | Only for mirror/index/guidance updates | curated mirrors, navigation, contributor guidance, memory entrypoints, prompt and skill indexes |
 
 ## Source-of-Truth Rules
 
 1. `.codex/**` is the authoritative source for Codex runtime behavior.
-2. `.claude/**` is the authoritative source for Claude runtime behavior.
-3. `docs/00-project/ai/**` is a repo-only or internal-published mirror layer for
+1. `.claude/**` is the authoritative source for Claude runtime behavior.
+1. `docs/00-project/ai/**` is a repo-only or internal-published mirror layer for
    discoverability and contributor guidance; it MUST NOT redefine runtime
    behavior on its own.
-4. Canonical project rules still come from:
+1. Canonical project rules still come from:
    - `docs/00-project/RULES.md`
    - `docs/01-requirements/REQUIREMENTS.md`
    - accepted ADRs in `docs/02-architecture/decisions/`
@@ -40,8 +43,8 @@ Last verified: '2026-04-12'
 Default sync direction is:
 
 1. runtime tree changes first (`.codex/**` or `.claude/**`)
-2. published/internal mirror refresh second (`docs/00-project/ai/**`)
-3. governance/index refresh third, if the mirror contract changed
+1. published/internal mirror refresh second (`docs/00-project/ai/**`)
+1. governance/index refresh third, if the mirror contract changed
 
 This means:
 

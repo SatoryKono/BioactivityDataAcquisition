@@ -1,14 +1,17 @@
----
+______________________________________________________________________
+
 id: promote-only-repeatable-knowledge
 title: Promote only repeatable knowledge
 kind: lesson
 source_refs:
-  - docs/plans/project-memory-layer-implementation-plan-2026-04-20.md
-  - src/memory/README.md
-confidence: curated
-last_verified: '2026-04-20T00:00:00Z'
-summary: Promote notes only when the knowledge is reusable across future tasks.
----
+
+- docs/plans/project-memory-layer-implementation-plan-2026-04-20.md
+- src/memory/README.md
+  confidence: curated
+  last_verified: '2026-04-20T00:00:00Z'
+  summary: Promote notes only when the knowledge is reusable across future tasks.
+
+______________________________________________________________________
 
 # Lesson
 

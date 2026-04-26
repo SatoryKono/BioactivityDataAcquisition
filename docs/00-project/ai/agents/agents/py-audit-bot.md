@@ -104,7 +104,7 @@ ______________________________________________________________________
   - Final/targeted: `reports/{LLM}/review_py-audit-bot_{YYYYMMDD}_{HHMM}_final.md`
   - Форматируй по RFC 2119, включай evidence и команды проверки.
 
----
+______________________________________________________________________
 
 ## Обязательные правила
 
@@ -188,12 +188,12 @@ grep -rn ": Any\| Any " src/bioetl/<scope>/ --include="*.py"
 
 ### D. DI Violations
 
-| ID      | Pattern                    | Detection                                         |
-| ------- | -------------------------- | ------------------------------------------------- |
-| DI-V001 | Hard-coded constructor     | `self.client = ConcreteClass()`                   |
-| DI-V002 | Method-level instantiation | `def run(): client = Client()`                    |
-| DI-V003 | Service Locator            | `ServiceLocator.get()`, `Container.resolve()`     |
-| DI-V004 | Import-time side effects   | `logger = structlog.get_logger()` at module level |
+| ID      | Pattern                    | Detection                                              |
+| ------- | -------------------------- | ------------------------------------------------------ |
+| DI-V001 | Hard-coded constructor     | `self.client = ConcreteClass()`                        |
+| DI-V002 | Method-level instantiation | `def run(): client = Client()`                         |
+| DI-V003 | Service Locator            | `ServiceLocator.get()`, `Container.resolve()`          |
+| DI-V004 | Import-time side effects   | `logger = structlog.get_logger()` at module level      |
 | DI-V005 | Factory in business logic  | Factory calls outside `composition/` in business logic |
 
 ### E. Naming Conventions

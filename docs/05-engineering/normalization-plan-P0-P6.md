@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.1.0
 Status: active
 Class: published
 Owner: Architecture / Domain
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-10'
----
+  Last verified: '2026-04-10'
+
+______________________________________________________________________
 
 # Compatibility Redirect
 

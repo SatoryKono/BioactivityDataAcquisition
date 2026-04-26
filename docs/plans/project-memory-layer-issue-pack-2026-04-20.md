@@ -17,12 +17,12 @@ Primary rollout plan:
 ## Suggested dependency order
 
 1. Memory subsystem scaffold, policy, catalog, and schemas
-2. Graph subsystem migration into `src/memory/graph`
-3. Deterministic RAG manifests and retrieval metadata
-4. Timeline/event memory for runs, CI, and incidents
-5. Curated and episodic memory with retention and pruning
-6. Tooling, validation, refresh, and CI integration
-7. Documentation and agent workflow integration
+1. Graph subsystem migration into `src/memory/graph`
+1. Deterministic RAG manifests and retrieval metadata
+1. Timeline/event memory for runs, CI, and incidents
+1. Curated and episodic memory with retention and pruning
+1. Tooling, validation, refresh, and CI integration
+1. Documentation and agent workflow integration
 
 ## Issue 1
 

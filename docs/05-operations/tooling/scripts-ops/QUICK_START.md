@@ -7,22 +7,27 @@ Codex is fully installed and working in your WSL Ubuntu environment.
 ## How to Use Codex (Simplest Way)
 
 ### Step 1: Open PowerShell in Project Root
+
 ```powershell
 cd E:\g-drive\05_AI\github\BioactivityDataAcquisition2
 ```
 
 ### Step 2: Launch WSL
+
 ```powershell
 wsl
 ```
 
 ### Step 3: Start Codex
+
 ```bash
 codex
 ```
 
 ### Step 4: Type Your Prompt
+
 You'll see a Codex interactive terminal. Type your prompt:
+
 ```
 analyze the data pipeline architecture
 ```
@@ -30,6 +35,7 @@ analyze the data pipeline architecture
 Press Enter and Codex will respond.
 
 ### Step 5: Continue or Exit
+
 - Type more prompts (same session)
 - Press `Ctrl+C` to exit
 
@@ -60,6 +66,7 @@ add docstrings to all public methods
 ## Navigation Shortcuts
 
 In Codex interactive mode:
+
 - `↑/↓` - Navigate command history
 - `Tab` - Auto-complete
 - `Ctrl+L` - Clear screen
@@ -87,38 +94,43 @@ wsl -- codex
 ## Important Notes
 
 1. **First response takes 20-30 seconds** - This is normal (Codex connects to OpenAI)
-2. **Use `wsl` to enter WSL** - Then run `codex` normally
-3. **Stay in project directory** - For better context
-4. **Press Ctrl+C to exit** - From Codex TUI
-5. **Review output carefully** - Before applying auto-exec changes
+1. **Use `wsl` to enter WSL** - Then run `codex` normally
+1. **Stay in project directory** - For better context
+1. **Press Ctrl+C to exit** - From Codex TUI
+1. **Review output carefully** - Before applying auto-exec changes
 
 ## Common Tasks
 
 ### Analyze Code
+
 ```
 explain the ChemBL extraction pipeline
 ```
 
 ### Generate Code
+
 ```
 create comprehensive unit tests for this transformer
 ```
 
 ### Refactor
+
 ```
 optimize these database queries for performance
 ```
 
 ### Debug
+
 ```
 why does this health_check_degraded occur on startup?
 ```
 
 ### Document
+
 ```
 generate docstrings for all methods in this module
 ```
 
----
+______________________________________________________________________
 
 **You're all set! Start with:** `wsl` then `codex`

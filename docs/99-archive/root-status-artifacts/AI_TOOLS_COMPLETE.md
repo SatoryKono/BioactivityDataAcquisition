@@ -70,33 +70,35 @@ notepad .env.gemini               # Get key: https://aistudio.google.com/app/api
 ## 🔐 API Keys
 
 **Codex:**
+
 - Get from: https://platform.openai.com/api-keys
 - Format: `sk-...`
 - File: `script-codex/.env.codex`
 
 **Gemini:**
+
 - Get from: https://aistudio.google.com/app/apikeys
 - Format: `AIzaSy...`
 - File: `script-gemini/.env.gemini`
 
 ## 📊 Comparison
 
-| | Codex | Gemini |
-|-|-------|--------|
-| Provider | OpenAI | Google |
-| Best For | Code | General Q&A |
-| Runtime | Node.js | Python |
-| Setup | Automatic | Automatic |
-| Entry | run-codex.ps1 | run-gemini.ps1 |
+|          | Codex         | Gemini         |
+| -------- | ------------- | -------------- |
+| Provider | OpenAI        | Google         |
+| Best For | Code          | General Q&A    |
+| Runtime  | Node.js       | Python         |
+| Setup    | Automatic     | Automatic      |
+| Entry    | run-codex.ps1 | run-gemini.ps1 |
 
 ## ✨ Architecture
 
 Both use identical pattern:
 
 1. **Entry Point** (`run-*.ps1`) - Dispatcher
-2. **Check** (`check-env.*`) - Verify setup
-3. **Setup** (`setup-env.sh`) - Auto-install (if needed)
-4. **Launch** (`run-*-impl.sh`) - Run tool
+1. **Check** (`check-env.*`) - Verify setup
+1. **Setup** (`setup-env.sh`) - Auto-install (if needed)
+1. **Launch** (`run-*-impl.sh`) - Run tool
 
 This ensures consistency and reliability.
 
@@ -159,21 +161,25 @@ cd script-gemini
 ```
 
 Both will:
+
 1. Check all dependencies
-2. Install missing components
-3. Launch immediately
+1. Install missing components
+1. Launch immediately
 
 ## 🚀 Next Steps
 
 1. **Get Codex API Key:**
+
    - https://platform.openai.com/api-keys
    - Edit: `script-codex/.env.codex`
 
-2. **Get Gemini API Key:**
+1. **Get Gemini API Key:**
+
    - https://aistudio.google.com/app/apikeys
    - Edit: `script-gemini/.env.gemini`
 
-3. **Start using:**
+1. **Start using:**
+
    ```powershell
    .\script-codex\run-codex.ps1
    .\script-gemini\run-gemini.ps1
@@ -200,7 +206,7 @@ Both will:
 ✅ **Full Automation:** Everything auto-configures
 ✅ **Consistent Experience:** Same pattern for both
 
----
+______________________________________________________________________
 
 ## 🚀 You're All Set!
 

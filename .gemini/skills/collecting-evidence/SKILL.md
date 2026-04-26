@@ -1,9 +1,6 @@
----
-name: collecting-evidence
-description: Use when researching a specific pillar and need to create traceable evidence objects. Guides creation of YAML evidence files with semantic IDs, confidence scores, and assumptions.
-context: fork
-agent: general-purpose
----
+______________________________________________________________________
+
+## name: collecting-evidence description: Use when researching a specific pillar and need to create traceable evidence objects. Guides creation of YAML evidence files with semantic IDs, confidence scores, and assumptions. context: fork agent: general-purpose
 
 # Evidence Collection
 
@@ -31,6 +28,7 @@ Use TodoWrite to track these mandatory steps:
 ### Step 1: Load Pillar Scope
 
 Read `01-pillars/PILLARS.md` to understand:
+
 - Pillar priority level
 - Specific research questions for this pillar
 - Any scope restrictions
@@ -41,24 +39,26 @@ See [references/research-protocols.md](references/research-protocols.md) for pil
 
 For each research question, identify potential sources:
 
-| Source Type | Examples | Typical Confidence |
-|-------------|----------|-------------------|
-| `url` | Research reports, documentation | 60-90 |
-| `pdf` | Academic papers, whitepapers | 70-95 |
-| `interview` | User interviews, expert calls | 50-80 |
-| `internal-doc` | Company data, prior research | 60-85 |
-| `experiment` | A/B tests, prototypes | 70-95 |
-| `dataset` | Analytics, survey results | 65-90 |
+| Source Type    | Examples                        | Typical Confidence |
+| -------------- | ------------------------------- | ------------------ |
+| `url`          | Research reports, documentation | 60-90              |
+| `pdf`          | Academic papers, whitepapers    | 70-95              |
+| `interview`    | User interviews, expert calls   | 50-80              |
+| `internal-doc` | Company data, prior research    | 60-85              |
+| `experiment`   | A/B tests, prototypes           | 70-95              |
+| `dataset`      | Analytics, survey results       | 65-90              |
 
 ### Step 3: Collect Raw Evidence
 
 For each source:
+
 1. Extract the key claim(s)
-2. Note supporting quotes/data
-3. Assess confidence level
-4. List assumptions
+1. Note supporting quotes/data
+1. Assess confidence level
+1. List assumptions
 
 **Web research protocol:**
+
 - Use WebSearch for discovery
 - Use WebFetch to retrieve and analyze content
 - Track source URLs and retrieval dates
@@ -121,15 +121,16 @@ assumptions: []
 
 Each Evidence Object must pass:
 
-| Check | Requirement |
-|-------|-------------|
-| Falsifiable claim | Claim can be proven wrong |
-| Confidence assigned | 0.0-1.0 value present |
-| Assumptions listed | At least 1 assumption |
-| Source traceable | Can revisit the source |
-| ID is semantic | Follows ID scheme |
+| Check               | Requirement               |
+| ------------------- | ------------------------- |
+| Falsifiable claim   | Claim can be proven wrong |
+| Confidence assigned | 0.0-1.0 value present     |
+| Assumptions listed  | At least 1 assumption     |
+| Source traceable    | Can revisit the source    |
+| ID is semantic      | Follows ID scheme         |
 
 **Quality warnings:**
+
 - Confidence > 0.9 without peer-reviewed source
 - Multiple evidence objects with identical claims
 - Assumptions that can't be tested
@@ -155,6 +156,7 @@ If gate fails, continue research until threshold met.
 Use the **AskUserQuestion tool** when:
 
 ### Source prioritization needed
+
 ```
 Question: "Multiple sources available for [topic]. Which to prioritize?"
 Options:
@@ -165,6 +167,7 @@ Options:
 ```
 
 ### Confidence assessment uncertain
+
 ```
 Question: "How confident should I rate this claim: '[claim]'?"
 Options:
@@ -175,6 +178,7 @@ Options:
 ```
 
 ### Contradictory evidence found
+
 ```
 Question: "Sources disagree on [topic]. Source A says X, Source B says Y."
 Options:
@@ -185,6 +189,7 @@ Options:
 ```
 
 ### Evidence gate failing
+
 ```
 Question: "Only [N] evidence objects for [pillar]. Need [5-N] more to pass gate."
 Options:

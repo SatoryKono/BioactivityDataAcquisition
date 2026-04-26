@@ -39,16 +39,16 @@ BioETL предоставляет комплексную систему observab
 Для operator-facing observability discovery используйте один маршрут:
 
 1. `bioetl diagnostics guide` — показать canonical routing по diagnostics surface.
-2. `bioetl diagnostics metrics [--json]` — проверить metrics/admin profile:
+1. `bioetl diagnostics metrics [--json]` — проверить metrics/admin profile:
    текущий metrics endpoint, running/stopped status, tracing/audit flags и
    Pushgateway publication mode.
-3. `bioetl diagnostics health [--json]` — проверить provider health.
-4. `bioetl diagnostics run --run-id <run-id>` или
+1. `bioetl diagnostics health [--json]` — проверить provider health.
+1. `bioetl diagnostics run --run-id <run-id>` или
    `bioetl diagnostics checkpoint --pipeline <pipeline>` — углубиться в
    run/checkpoint diagnostics.
-5. `python -m scripts.engineering.qa report-observability-metric-inventory --json` —
+1. `python -m scripts.engineering.qa report-observability-metric-inventory --json` —
    сверить canonical metric vocabulary между runtime emitters, docs и rules.
-6. Сравнить inventory output с
+1. Сравнить inventory output с
    `grafana/prometheus-rules/bioetl_observability.yml` и shipped Grafana
    dashboard JSON до того, как трактовать missing panel data как runtime outage.
 
@@ -185,16 +185,16 @@ curl http://localhost:8000/metrics | grep bioetl_
 
 #### Data Quality Metrics
 
-| Метрика                               | Тип       | Labels                                   | Описание                                                                              |
-| ------------------------------------- | --------- | ---------------------------------------- | ------------------------------------------------------------------------------------- |
-| `bioetl_dq_records_quarantined_total` | Counter   | pipeline, error_type, run_type           | Карантинные записи                                                                    |
-| `bioetl_dq_check_duration_ms`         | Histogram | pipeline                                 | Длительность DQ проверок                                                              |
+| Метрика                               | Тип       | Labels                                   | Описание                                                                                  |
+| ------------------------------------- | --------- | ---------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `bioetl_dq_records_quarantined_total` | Counter   | pipeline, error_type, run_type           | Карантинные записи                                                                        |
+| `bioetl_dq_check_duration_ms`         | Histogram | pipeline                                 | Длительность DQ проверок                                                                  |
 | `bioetl_dq_validation_failures_total` | Counter   | pipeline, stage, severity                | Превышения DQ порогов; `severity` использует bounded vocabulary `soft_fail` / `hard_fail` |
-| `bioetl_dq_validation_score`          | Gauge     | pipeline, entity                         | Оценка валидности (0.0-1.0)                                                           |
-| `bioetl_dq_anomaly_detected`          | Counter   | pipeline, metric, severity, anomaly_type | Обнаруженные аномалии                                                                 |
-| `bioetl_data_freshness_seconds`       | Gauge     | pipeline, entity                         | Unix timestamp последнего successful ingestion; lag вычисляется как `time() - metric` |
-| `bioetl_dq_baseline_updated`          | Counter   | pipeline, metric                         | Обновления baseline                                                                   |
-| `bioetl_dq_baseline_samples`          | Gauge     | pipeline, metric                         | Семплы в baseline                                                                     |
+| `bioetl_dq_validation_score`          | Gauge     | pipeline, entity                         | Оценка валидности (0.0-1.0)                                                               |
+| `bioetl_dq_anomaly_detected`          | Counter   | pipeline, metric, severity, anomaly_type | Обнаруженные аномалии                                                                     |
+| `bioetl_data_freshness_seconds`       | Gauge     | pipeline, entity                         | Unix timestamp последнего successful ingestion; lag вычисляется как `time() - metric`     |
+| `bioetl_dq_baseline_updated`          | Counter   | pipeline, metric                         | Обновления baseline                                                                       |
+| `bioetl_dq_baseline_samples`          | Gauge     | pipeline, metric                         | Семплы в baseline                                                                         |
 
 ### Silver filter rejects: operator semantics
 
@@ -233,20 +233,20 @@ curl http://localhost:8000/metrics | grep bioetl_
 
 #### Control Plane & Traceability Metrics
 
-| Метрика                                        | Тип     | Labels                                   | Описание                                                                          |
-| ---------------------------------------------- | ------- | ---------------------------------------- | --------------------------------------------------------------------------------- |
-| `bioetl_control_plane_manifest_writes_total`   | Counter | pipeline, run_type, status               | Попытки записи immutable run manifest                                             |
-| `bioetl_control_plane_ledger_appends_total`    | Counter | pipeline, event_type, status             | Попытки append в run ledger                                                       |
-| `bioetl_checkpoint_compatibility_events_total` | Counter | pipeline, disposition                    | Исходы compatibility policy при resume                                            |
-| `bioetl_checkpoint_load_events_total`          | Counter | pipeline, status                         | Bounded runtime/composite checkpoint load decisions during resume paths           |
-| `bioetl_checkpoint_operator_operations_total`  | Counter | operation, status                        | Bounded checkpoint admin actions for `list` / `get` / `delete` workflows         |
-| `bioetl_checkpoint_operator_duration_seconds`  | Histogram | operation, status                      | Latency of checkpoint admin/operator workflows                                    |
-| `bioetl_checkpoint_save_events_total`          | Counter | pipeline, operation, status              | Исходы checkpoint save paths (`periodic`, `exception`, `shutdown`, `manual`, composite stage transitions) |
-| `bioetl_checkpoint_save_duration_seconds`      | Histogram | pipeline, operation, status            | Длительность checkpoint save operations                                           |
-| `bioetl_lineage_fragments_emitted_total`       | Counter | pipeline, layer, status                  | Попытки публикации lineage fragments                                              |
-| `bioetl_lineage_refs_missing_total`            | Counter | pipeline, layer, ref_type                | Missing upstream lineage references during persistence                            |
-| `bioetl_composite_source_selection_total`      | Counter | pipeline, decision_type, selected_source | Low-cardinality composite source-selection decisions during composite persistence |
-| `bioetl_control_plane_reads_total`             | Counter | store, operation, status                  | Срез успехов/промахов/провалов manifest/ledger/lineage lookup-путей              |
+| Метрика                                        | Тип       | Labels                                   | Описание                                                                                                  |
+| ---------------------------------------------- | --------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `bioetl_control_plane_manifest_writes_total`   | Counter   | pipeline, run_type, status               | Попытки записи immutable run manifest                                                                     |
+| `bioetl_control_plane_ledger_appends_total`    | Counter   | pipeline, event_type, status             | Попытки append в run ledger                                                                               |
+| `bioetl_checkpoint_compatibility_events_total` | Counter   | pipeline, disposition                    | Исходы compatibility policy при resume                                                                    |
+| `bioetl_checkpoint_load_events_total`          | Counter   | pipeline, status                         | Bounded runtime/composite checkpoint load decisions during resume paths                                   |
+| `bioetl_checkpoint_operator_operations_total`  | Counter   | operation, status                        | Bounded checkpoint admin actions for `list` / `get` / `delete` workflows                                  |
+| `bioetl_checkpoint_operator_duration_seconds`  | Histogram | operation, status                        | Latency of checkpoint admin/operator workflows                                                            |
+| `bioetl_checkpoint_save_events_total`          | Counter   | pipeline, operation, status              | Исходы checkpoint save paths (`periodic`, `exception`, `shutdown`, `manual`, composite stage transitions) |
+| `bioetl_checkpoint_save_duration_seconds`      | Histogram | pipeline, operation, status              | Длительность checkpoint save operations                                                                   |
+| `bioetl_lineage_fragments_emitted_total`       | Counter   | pipeline, layer, status                  | Попытки публикации lineage fragments                                                                      |
+| `bioetl_lineage_refs_missing_total`            | Counter   | pipeline, layer, ref_type                | Missing upstream lineage references during persistence                                                    |
+| `bioetl_composite_source_selection_total`      | Counter   | pipeline, decision_type, selected_source | Low-cardinality composite source-selection decisions during composite persistence                         |
+| `bioetl_control_plane_reads_total`             | Counter   | store, operation, status                 | Срез успехов/промахов/провалов manifest/ledger/lineage lookup-путей                                       |
 
 > Guardrail: для control-plane/traceability метрик нельзя использовать
 > `run_id`, `manifest_id`, paths и другие high-cardinality идентификаторы как
@@ -273,23 +273,23 @@ checkpoint compatibility и read failures. Основной операторск
 
 #### Storage Metrics
 
-| Метрика                                   | Тип       | Labels           | Описание                   |
-| ----------------------------------------- | --------- | ---------------- | -------------------------- |
-| `bioetl_vacuum_files_removed_total`       | Counter   | table, layer     | Удалённые файлы            |
-| `bioetl_bronze_write_duration_seconds`    | Histogram | provider, entity | Длительность записи Bronze |
-| `bioetl_bronze_records_written_total`     | Counter   | provider, entity | Записи в Bronze            |
-| `bioetl_bronze_bytes_written_total`       | Counter   | provider, entity | Байты в Bronze             |
-| `bioetl_policy_violations_total`          | Counter   | layer, mode      | Нарушения политик          |
+| Метрика                                   | Тип       | Labels           | Описание                                                                                                                          |
+| ----------------------------------------- | --------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `bioetl_vacuum_files_removed_total`       | Counter   | table, layer     | Удалённые файлы                                                                                                                   |
+| `bioetl_bronze_write_duration_seconds`    | Histogram | provider, entity | Длительность записи Bronze                                                                                                        |
+| `bioetl_bronze_records_written_total`     | Counter   | provider, entity | Записи в Bronze                                                                                                                   |
+| `bioetl_bronze_bytes_written_total`       | Counter   | provider, entity | Байты в Bronze                                                                                                                    |
+| `bioetl_policy_violations_total`          | Counter   | layer, mode      | Нарушения политик                                                                                                                 |
 | `bioetl_silver_validation_failures_total` | Counter   | table, pipeline  | Canonical Silver Pandera validation failures; increments on failed Silver schema validation outcome before `SchemaViolationError` |
 
 #### Audit Traceability Metrics
 
-| Метрика                               | Тип       | Labels                    | Описание                                      |
-| ------------------------------------- | --------- | ------------------------- | --------------------------------------------- |
-| `bioetl_audit_write_events_total`     | Counter   | layer, operation, status  | Outcomes file-backed audit write operations   |
-| `bioetl_audit_write_duration_seconds` | Histogram | layer, operation, status  | Latency of audit write operations             |
-| `bioetl_audit_query_events_total`     | Counter   | layer_filter, status      | Outcomes audit inspection/query workflows     |
-| `bioetl_audit_query_duration_seconds` | Histogram | layer_filter, status      | Latency of audit inspection/query workflows   |
+| Метрика                               | Тип       | Labels                   | Описание                                    |
+| ------------------------------------- | --------- | ------------------------ | ------------------------------------------- |
+| `bioetl_audit_write_events_total`     | Counter   | layer, operation, status | Outcomes file-backed audit write operations |
+| `bioetl_audit_write_duration_seconds` | Histogram | layer, operation, status | Latency of audit write operations           |
+| `bioetl_audit_query_events_total`     | Counter   | layer_filter, status     | Outcomes audit inspection/query workflows   |
+| `bioetl_audit_query_duration_seconds` | Histogram | layer_filter, status     | Latency of audit inspection/query workflows |
 
 Guardrail:
 
@@ -322,9 +322,9 @@ Guardrail:
 
 #### Preflight Metrics
 
-| Метрика                                   | Тип   | Labels   | Описание                        |
-| ----------------------------------------- | ----- | -------- | ------------------------------- |
-| `bioetl_infrastructure_validated`         | Gauge | pipeline | Статус валидации инфраструктуры |
+| Метрика                           | Тип   | Labels   | Описание                        |
+| --------------------------------- | ----- | -------- | ------------------------------- |
+| `bioetl_infrastructure_validated` | Gauge | pipeline | Статус валидации инфраструктуры |
 
 #### Adapter / HTTP Metrics
 

@@ -4,6 +4,7 @@ Prepared: 2026-04-13
 Repository: `SatoryKono/BioactivityDataAcquisition`
 
 Notes:
+
 - Duplicate-check searches against existing GitHub issues for `compatibility facade`, `measured-only`, `lineage`, and `compatibility surface` returned no matches at preparation time.
 - Remote issue creation was not possible from this environment because no GitHub CLI or API token was available.
 

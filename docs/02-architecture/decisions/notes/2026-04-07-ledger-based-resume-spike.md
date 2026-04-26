@@ -171,10 +171,10 @@ ordinary/composite split.
 
 ## Trade-Off Comparison
 
-| Model | Value | Migration cost | Operational risk | Compatibility impact |
-| --- | --- | --- | --- | --- |
-| Checkpoint = operational state, ledger = provenance | High for current Local-Only profile because it is already implemented, simple, and operator-comprehensible | Low incremental cost because it matches current main | Low to moderate; failure domain is limited to checkpoint state and existing compatibility policy | Low; aligns with current CLI, docs, tests, and published contract |
-| Ledger = source of resumable execution state | Low to moderate near-term value in current profile because manifest/ledger already solve provenance and inspection, not missing operational state | High; requires new event completeness rules, projector semantics, migration, and rollback plan | High; replay bugs would affect resume correctness, duplicate work, and operator trust | Medium to high; changes published control-plane semantics and ordinary resume contract |
+| Model                                               | Value                                                                                                                                             | Migration cost                                                                                 | Operational risk                                                                                 | Compatibility impact                                                                   |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Checkpoint = operational state, ledger = provenance | High for current Local-Only profile because it is already implemented, simple, and operator-comprehensible                                        | Low incremental cost because it matches current main                                           | Low to moderate; failure domain is limited to checkpoint state and existing compatibility policy | Low; aligns with current CLI, docs, tests, and published contract                      |
+| Ledger = source of resumable execution state        | Low to moderate near-term value in current profile because manifest/ledger already solve provenance and inspection, not missing operational state | High; requires new event completeness rules, projector semantics, migration, and rollback plan | High; replay bugs would affect resume correctness, duplicate work, and operator trust            | Medium to high; changes published control-plane semantics and ordinary resume contract |
 
 ## Recommendation
 
@@ -227,4 +227,3 @@ This spike recommends keeping the current intentional split:
 - ledger = provenance and inspection;
 - composite replay = narrow checkpoint suffix recovery helper, not a universal
   event-sourced runtime.
-

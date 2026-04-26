@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Test Execution Optimization Guide
 
@@ -83,8 +86,8 @@ make test-cov-fast-stable
 This target runs in two phases:
 
 1. parallel pass for `not serial and not e2e and not benchmark and not slow`;
-2. serial pass for `serial and not e2e and not benchmark and not slow`;
-3. coverage combine and threshold enforcement.
+1. serial pass for `serial and not e2e and not benchmark and not slow`;
+1. coverage combine and threshold enforcement.
 
 Notes:
 
@@ -319,9 +322,9 @@ CI already includes several optimizations:
 Because of that, the next optimization pass should focus on:
 
 1. reducing unstable or unnecessarily serial tests;
-2. shrinking slow fixture setup;
-3. improving targeted local developer loops;
-4. keeping CI cache keys and shard balance healthy.
+1. shrinking slow fixture setup;
+1. improving targeted local developer loops;
+1. keeping CI cache keys and shard balance healthy.
 
 Do not replace the real CI with generic sample YAML. If the workflow changes, update `.github/workflows/tests.yml` and this guide together.
 

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-028: Filter Rules Externalization
 
@@ -19,11 +22,12 @@ Last verified: '2026-03-30'
 Filter configurations (`input-filter` and `gold-filters`) were embedded directly in pipeline YAML configuration files (`configs/entities/{provider}/{entity}.yaml`). This caused several problems:
 
 1. **Duplication**: Same filter patterns repeated across pipelines (e.g., batch-size defaults)
-2. **Maintenance burden**: Changing global filter policies required editing multiple files
-3. **No reusability**: Impossible to share filter patterns across providers/entities
-4. **SRP violation**: Pipeline config mixed orchestration and filtering concerns
+1. **Maintenance burden**: Changing global filter policies required editing multiple files
+1. **No reusability**: Impossible to share filter patterns across providers/entities
+1. **SRP violation**: Pipeline config mixed orchestration and filtering concerns
 
 Example of duplication:
+
 ```yaml
 # configs/entities/chembl/activity.yaml
 input-filter:
@@ -52,12 +56,14 @@ configs/
 ```
 
 **Merge priority** (later wins for scalars, special handling for collections):
+
 1. `configs/base/pipeline.yaml#filter_defaults`
-2. `configs/providers/{provider}.yaml#filters`
-3. `configs/entities/{provider}/{entity}.yaml#filters`
-4. Inline `filter-rules` in pipeline config (for exceptional cases)
+1. `configs/providers/{provider}.yaml#filters`
+1. `configs/entities/{provider}/{entity}.yaml#filters`
+1. Inline `filter-rules` in pipeline config (for exceptional cases)
 
 Pipeline configs reference filter config via `filter-config-file`:
+
 ```yaml
 pipeline-name: chembl_activity
 filter-config-file: ../../entities/chembl/activity.yaml
@@ -66,28 +72,33 @@ filter-config-file: ../../entities/chembl/activity.yaml
 ### Implementation Components
 
 1. **Pydantic schemas**: `src/bioetl/infrastructure/schemas/filter_config.py`
+
    - `InputFilterFileConfig`: Input filter configuration
    - `GoldFiltersFileConfig`: Gold layer filter configuration
    - `FilterConfigFile`: Complete schema with to-domain() conversion
 
-2. **Configuration loader**: `src/bioetl/infrastructure/config/filter_config_loader.py`
+1. **Configuration loader**: `src/bioetl/infrastructure/config/filter_config_loader.py`
+
    - `FilterConfigLoader.load(provider, entity, inline-overrides)`: Merges and returns domain objects
    - `FilterConfigLoader.load-as-dict(provider, entity, inline-overrides)`: Merges and returns raw dict (used by pipeline config loading)
    - `FilterConfigLoader._merge_hierarchy()`: Shared 4-level merge logic
    - Thread-safe caching for performance
    - Deep merge with list deduplication for required-fields/exclude-if-present
 
-3. **Pipeline config integration**: `src/bioetl/infrastructure/config_loader.py`
+1. **Pipeline config integration**: `src/bioetl/infrastructure/config_loader.py`
+
    - `_apply_hierarchical_filter_config()`: Single entry point for filter merge during pipeline loading
    - Delegates to `FilterConfigLoader.load-as-dict()` for the full hierarchy
    - Collects inline overrides from pipeline YAML (`input-filter`, `gold-filters`, `silver-filters`, `extraction-params`, `filter-rules`)
 
-4. **Config files**: unified hierarchy in `configs/base|providers|entities`
+1. **Config files**: unified hierarchy in `configs/base|providers|entities`
+
    - `base/pipeline.yaml#filter_defaults`: Global defaults (batch-size=100)
    - `providers/{provider}.yaml#filters`: Provider-specific settings (e.g., ChEMBL batch-size=1000)
    - `entities/{provider}/{entity}.yaml#filters`: Entity-specific rules
 
-5. **Pipeline schema**: `src/bioetl/infrastructure/schemas/pipeline_config.py`
+1. **Pipeline schema**: `src/bioetl/infrastructure/schemas/pipeline_config.py`
+
    - `filter-config-file` field for convention-based path (informational)
    - `filter-rules` field for inline overrides
    - Legacy `input-filter`/`gold-filters` fields retained for backward compatibility
@@ -118,37 +129,37 @@ filter-config-file: ../../entities/chembl/activity.yaml
 
 ## Merge Rules
 
-| Data Type | Behavior | Example |
-|-----------|----------|---------|
-| Scalars | Override (later wins) | `batch-size: 50` replaces `100` |
-| `required-fields` | Concatenate with dedup | Entity fields added to provider |
-| `exclude-if-present` | Concatenate with dedup | Entity exclusions added to provider |
-| Nested dicts (`columns`, `ranges`, etc.) | Recursive merge | Entity columns merged with provider |
-| Other lists | Override (later wins) | `columns.field: [A, B]` replaces `[X, Y]` |
+| Data Type                                | Behavior               | Example                                   |
+| ---------------------------------------- | ---------------------- | ----------------------------------------- |
+| Scalars                                  | Override (later wins)  | `batch-size: 50` replaces `100`           |
+| `required-fields`                        | Concatenate with dedup | Entity fields added to provider           |
+| `exclude-if-present`                     | Concatenate with dedup | Entity exclusions added to provider       |
+| Nested dicts (`columns`, `ranges`, etc.) | Recursive merge        | Entity columns merged with provider       |
+| Other lists                              | Override (later wins)  | `columns.field: [A, B]` replaces `[X, Y]` |
 
 ## Filter Types
 
 ### Input Filter Parameters
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `enabled` | bool | Enable/disable input filtering |
-| `source-path` | str | Path to CSV file with filter IDs |
-| `column-name` | str | CSV column with primary IDs |
-| `filter-field` | str | API field to filter by |
-| `batch-size` | int | IDs per API request (1-1000) |
-| `fallback-column` | str | Optional fallback search field |
+| Parameter         | Type | Description                      |
+| ----------------- | ---- | -------------------------------- |
+| `enabled`         | bool | Enable/disable input filtering   |
+| `source-path`     | str  | Path to CSV file with filter IDs |
+| `column-name`     | str  | CSV column with primary IDs      |
+| `filter-field`    | str  | API field to filter by           |
+| `batch-size`      | int  | IDs per API request (1-1000)     |
+| `fallback-column` | str  | Optional fallback search field   |
 
 ### Gold Filter Types
 
-| Filter | Parameters | Description |
-|--------|------------|-------------|
-| `required-fields` | list[str] | Fields must be non-null |
-| `columns` | dict[str, list] | Value inclusion list |
-| `ranges` | dict[str, Range] | Numeric bounds |
-| `list-lengths` | dict[str, MinMax] | List size constraints |
-| `list-contains` | dict[str, Contains] | List content filter |
-| `exclude-if-present` | list[str] | Exclude if field has value |
+| Filter               | Parameters          | Description                |
+| -------------------- | ------------------- | -------------------------- |
+| `required-fields`    | list[str]           | Fields must be non-null    |
+| `columns`            | dict[str, list]     | Value inclusion list       |
+| `ranges`             | dict[str, Range]    | Numeric bounds             |
+| `list-lengths`       | dict[str, MinMax]   | List size constraints      |
+| `list-contains`      | dict[str, Contains] | List content filter        |
+| `exclude-if-present` | list[str]           | Exclude if field has value |
 
 ### §3. Extraction-Level Filtering (extraction-params)
 
@@ -214,62 +225,68 @@ Entity-level `extraction-params` полностью заменяет provider-le
 
 ### Filter Type Comparison
 
-| Aspect | `input-filter` (§1) | `gold-filters` (§2) | `extraction-params` (§3) |
-|--------|---------------------|----------------------|--------------------------|
-| Stage | Bronze extract | Silver→Gold transform | Bronze extract |
-| Side | Client-side (ID batching) | Client-side (DataFrame) | Server-side (API query) |
-| Source | CSV file (dynamic) | YAML (static) | YAML (static) |
-| Filters by | Record IDs | Field values, ranges, nulls | Record properties |
-| Merge behavior | Recursive merge | Recursive merge | Full override (section-level) |
-| CLI override | No (ADR-014) | No (ADR-014) | No (ADR-014) |
-| Affects content-hash | No (ADR-014) | No | No (ADR-014) |
-| Provider-specific | No (generic ID filter) | No (generic DataFrame filter) | Yes (API syntax) |
+| Aspect               | `input-filter` (§1)       | `gold-filters` (§2)           | `extraction-params` (§3)      |
+| -------------------- | ------------------------- | ----------------------------- | ----------------------------- |
+| Stage                | Bronze extract            | Silver→Gold transform         | Bronze extract                |
+| Side                 | Client-side (ID batching) | Client-side (DataFrame)       | Server-side (API query)       |
+| Source               | CSV file (dynamic)        | YAML (static)                 | YAML (static)                 |
+| Filters by           | Record IDs                | Field values, ranges, nulls   | Record properties             |
+| Merge behavior       | Recursive merge           | Recursive merge               | Full override (section-level) |
+| CLI override         | No (ADR-014)              | No (ADR-014)                  | No (ADR-014)                  |
+| Affects content-hash | No (ADR-014)              | No                            | No (ADR-014)                  |
+| Provider-specific    | No (generic ID filter)    | No (generic DataFrame filter) | Yes (API syntax)              |
 
 ## Alternatives Considered
 
 ### 1. Keep Inline Only
+
 Keep all filter configs inline in pipeline files. Rejected because:
+
 - Duplication of provider defaults
 - No reusability across entities
 - Inconsistent with DQ configuration approach
 
 ### 2. Merge with DQ Config
+
 Combine filter and DQ rules in same hierarchy. Rejected because:
+
 - Different concerns (filtering vs. validation)
 - Filter rules more entity-specific
 - Cleaner separation of responsibilities
 
 ### 3. Code-based Filters
+
 Define filters in Python code. Rejected because:
+
 - Requires code changes for config updates
 - Less accessible to non-developers
 - Violates configuration-driven principle
 
 ## Provider Defaults
 
-| Provider | Default Batch Size | Notes |
-|----------|-------------------|-------|
-| ChEMBL | 1000 | API optimal (entity-level overrides: molecule=20, activity=1500) |
-| PubChem | 1 | SMILES search limitation |
-| UniProt | 100 | OR-query batching |
-| PubMed | 100 | NCBI E-utilities |
-| CrossRef | 50 | Polite pool |
-| OpenAlex | 50 | Polite pool |
-| SemanticScholar | 100 | Paper lookup |
+| Provider        | Default Batch Size | Notes                                                            |
+| --------------- | ------------------ | ---------------------------------------------------------------- |
+| ChEMBL          | 1000               | API optimal (entity-level overrides: molecule=20, activity=1500) |
+| PubChem         | 1                  | SMILES search limitation                                         |
+| UniProt         | 100                | OR-query batching                                                |
+| PubMed          | 100                | NCBI E-utilities                                                 |
+| CrossRef        | 50                 | Polite pool                                                      |
+| OpenAlex        | 50                 | Polite pool                                                      |
+| SemanticScholar | 100                | Paper lookup                                                     |
 
 ## Compliance
 
-| Requirement | Status | Implementation |
-|-------------|--------|----------------|
-| Hierarchical merge | PASS | `FilterConfigLoader._merge_hierarchy()` |
-| Single merge mechanism | PASS | Consolidated into `FilterConfigLoader` (no duplication) |
-| Provider defaults | PASS | `configs/providers/{provider}.yaml#filters` |
-| Entity overrides | PASS | `configs/entities/{provider}/{entity}.yaml#filters` |
-| Inline overrides | PASS | `filter-rules` / inline sections in pipeline YAML |
-| Backward compatibility | PASS | Inline `input-filter`/`gold-filters` supported |
-| Domain conversion | PASS | `FilterConfigFile.to-domain()` |
-| Extraction params | PASS | `extraction-params` section in filter YAML |
-| Silver filters | PASS | `silver-filters` section now loaded from hierarchy |
+| Requirement            | Status | Implementation                                          |
+| ---------------------- | ------ | ------------------------------------------------------- |
+| Hierarchical merge     | PASS   | `FilterConfigLoader._merge_hierarchy()`                 |
+| Single merge mechanism | PASS   | Consolidated into `FilterConfigLoader` (no duplication) |
+| Provider defaults      | PASS   | `configs/providers/{provider}.yaml#filters`             |
+| Entity overrides       | PASS   | `configs/entities/{provider}/{entity}.yaml#filters`     |
+| Inline overrides       | PASS   | `filter-rules` / inline sections in pipeline YAML       |
+| Backward compatibility | PASS   | Inline `input-filter`/`gold-filters` supported          |
+| Domain conversion      | PASS   | `FilterConfigFile.to-domain()`                          |
+| Extraction params      | PASS   | `extraction-params` section in filter YAML              |
+| Silver filters         | PASS   | `silver-filters` section now loaded from hierarchy      |
 
 ## References
 
@@ -283,12 +300,12 @@ Define filters in Python code. Rejected because:
 
 ## Changelog
 
-| Date | Author | Change |
-|------|--------|--------|
-| 2026-01-20 | Claude Code | Initial version |
-| 2026-02-09 | Claude Code | Added §3 Extraction-Level Filtering (extraction-params) |
+| Date       | Author      | Change                                                                                                                                                                                                                                                                                         |
+| ---------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-01-20 | Claude Code | Initial version                                                                                                                                                                                                                                                                                |
+| 2026-02-09 | Claude Code | Added §3 Extraction-Level Filtering (extraction-params)                                                                                                                                                                                                                                        |
 | 2026-02-17 | Claude Code | Consolidated filter merge: removed legacy `load_filter_config`/`merge_filter_config` from `config_loader.py`, unified via `FilterConfigLoader._merge_hierarchy()`. All 4 filter sections (`input-filter`, `silver-filters`, `gold-filters`, `extraction-params`) now load from full hierarchy. |
-| 2026-02-17 | Claude Code | Fixed: ChEMBL provider batch-size in table: 20 → 1000 (actual provider default) |
+| 2026-02-17 | Claude Code | Fixed: ChEMBL provider batch-size in table: 20 → 1000 (actual provider default)                                                                                                                                                                                                                |
 
 ## Rollout
 

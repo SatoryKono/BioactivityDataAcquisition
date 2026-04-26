@@ -71,11 +71,11 @@ introducing a concrete logging framework into the domain layer.
 
 ### Data Source Ports
 
-| Port                       | Methods                                                                        | Description                                       |
-| -------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------- |
-| `DataSourcePort`           | `fetch()`, `health_check()`, `aclose()`                                        | Base port for fetching records from external APIs |
+| Port                       | Methods                                                                        | Description                                                                                             |
+| -------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `DataSourcePort`           | `fetch()`, `health_check()`, `aclose()`                                        | Base port for fetching records from external APIs                                                       |
 | `FilterableDataSourcePort` | `fetch_filtered()`, `fetch_multi_filtered()`, `fetch_filtered_with_fallback()` | Extended port with server-side filtering (see [Internal/Extended Material](#internalextended-material)) |
-| `DataSourceFactoryPort`    | `list_providers()`, `create()`                                                 | Factory for creating data source adapters         |
+| `DataSourceFactoryPort`    | `list_providers()`, `create()`                                                 | Factory for creating data source adapters                                                               |
 
 **DataSourcePort signatures:**
 

@@ -29,4 +29,3 @@ Use this template for `00-brief/BRIEF.md`.
 - Why this brief is specific enough for ledger work:
 - Remaining ambiguities:
 ```
-

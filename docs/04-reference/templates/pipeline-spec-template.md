@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: template
 Class: internal
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # <Provider> <Entity> Pipeline Specification
 
@@ -17,14 +20,14 @@ Last verified: '2026-03-30'
 
 ## Identification
 
-| Parameter | Value |
-|---|---|
-| Pipeline ID | `<provider_entity>` |
-| Provider | `<provider>` |
-| Entity | `<entity>` |
+| Parameter             | Value                  |
+| --------------------- | ---------------------- |
+| Pipeline ID           | `<provider_entity>`    |
+| Provider              | `<provider>`           |
+| Entity                | `<entity>`             |
 | Business primary keys | `<[field_a, field_b]>` |
-| Loading strategy | `<full_scan_only|null|other>` |
-| Gold status | `<enabled|disabled>` |
+| Loading strategy      | \`\<full_scan_only     |
+| Gold status           | \`\<enabled            |
 
 ## Active Runtime Contract
 
@@ -34,13 +37,13 @@ Last verified: '2026-03-30'
 
 ## Source Files
 
-| Component | Path |
-|---|---|
-| Entity config | `configs/entities/<provider>/<entity>.yaml` |
-| Provider config | `configs/providers/<provider>.yaml` |
-| Transformer | `src/bioetl/application/pipelines/<provider>/<entity>_transformer.py` |
-| Adapter(s) | `src/bioetl/infrastructure/adapters/<provider>/` |
-| Contracts | `src/bioetl/domain/contracts/gold/` |
+| Component       | Path                                                                  |
+| --------------- | --------------------------------------------------------------------- |
+| Entity config   | `configs/entities/<provider>/<entity>.yaml`                           |
+| Provider config | `configs/providers/<provider>.yaml`                                   |
+| Transformer     | `src/bioetl/application/pipelines/<provider>/<entity>_transformer.py` |
+| Adapter(s)      | `src/bioetl/infrastructure/adapters/<provider>/`                      |
+| Contracts       | `src/bioetl/domain/contracts/gold/`                                   |
 
 ## ETL Flow
 
@@ -56,11 +59,11 @@ Last verified: '2026-03-30'
 
 ### Load
 
-| Layer | Status | Format | Mode | Target |
-|---|---|---|---|---|
-| Bronze | `<enabled|disabled>` | `<format>` | `<mode>` | `<path>` |
-| Silver | `<enabled|disabled>` | `<format>` | `<mode>` | `<path-or-table>` |
-| Gold | `<enabled|disabled>` | `<format>` | `<mode>` | `<path-or-table>` |
+| Layer  | Status      | Format      | Mode       | Target   |
+| ------ | ----------- | ----------- | ---------- | -------- |
+| Bronze | \`\<enabled | disabled>\` | `<format>` | `<mode>` |
+| Silver | \`\<enabled | disabled>\` | `<format>` | `<mode>` |
+| Gold   | \`\<enabled | disabled>\` | `<format>` | `<mode>` |
 
 ## Validation and Quality
 
@@ -85,13 +88,13 @@ bioetl run --pipeline <provider_entity> --resume
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Runtime truth | Spec MUST match active config and current code paths | `<pass|fail>` | `<config/code refs>` |
-| Storage | Silver MUST use Delta Lake; Gold behavior MUST be explicit | `<pass|fail|n/a>` | `<storage section>` |
-| Contracts | Gold contract link SHOULD exist when Gold schema is published | `<pass|fail|n/a>` | `<contract path>` |
-| Recovery | Related runbook SHOULD be linked for failure handling | `<pass|fail|n/a>` | `<runbook path>` |
-| Governance | Normative statements MUST use RFC 2119 keywords where binding | `<pass|fail>` | `<section refs>` |
+| Control       | Requirement                                                   | Status   | Evidence |
+| ------------- | ------------------------------------------------------------- | -------- | -------- |
+| Runtime truth | Spec MUST match active config and current code paths          | \`\<pass | fail>\`  |
+| Storage       | Silver MUST use Delta Lake; Gold behavior MUST be explicit    | \`\<pass | fail     |
+| Contracts     | Gold contract link SHOULD exist when Gold schema is published | \`\<pass | fail     |
+| Recovery      | Related runbook SHOULD be linked for failure handling         | \`\<pass | fail     |
+| Governance    | Normative statements MUST use RFC 2119 keywords where binding | \`\<pass | fail>\`  |
 
 ## References
 

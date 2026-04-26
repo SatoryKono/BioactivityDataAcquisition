@@ -1,4 +1,5 @@
----
+______________________________________________________________________
+
 id: session-example
 task_id: task-example
 title: Example session note
@@ -7,8 +8,10 @@ ttl_days: 14
 confidence: episodic
 summary: Short-lived task context.
 source_refs:
-  - src/memory/README.md
----
+
+- src/memory/README.md
+
+______________________________________________________________________
 
 # Session note
 

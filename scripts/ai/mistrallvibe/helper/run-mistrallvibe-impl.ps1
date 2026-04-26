@@ -39,13 +39,13 @@ $serverScript = Join-Path $RootDir "vibe-server.js"
 # Function: Start Vibe
 function Start-Vibe {
     Write-Info "Starting Mistral Vibe Server..."
-    
+
     if ([string]::IsNullOrEmpty($env:VIBE_API_KEY) -or $env:VIBE_API_KEY -eq "your-api-key-here") {
         Write-Error "API key not configured in .env.mistrallvibe"
         Write-Info "Get your API key from: https://console.mistral.ai/api-keys/"
         return 1
     }
-    
+
     # Check if node exists
     try {
         $nodeCheck = node --version 2>$null
@@ -57,16 +57,16 @@ function Start-Vibe {
         Write-Error "Node.js is not installed"
         return 1
     }
-    
+
     if (-not (Test-Path $serverScript)) {
         Write-Error "vibe-server.js not found"
         return 1
     }
-    
+
     Write-Info "Starting server on $env:VIBE_HOST`:$env:VIBE_PORT"
     Write-Info "Open http://$env:VIBE_HOST`:$env:VIBE_PORT in your browser"
     Write-Host ""
-    
+
     Push-Location $RootDir
     & node vibe-server.js
     Pop-Location
@@ -75,9 +75,9 @@ function Start-Vibe {
 # Function: Stop Vibe
 function Stop-Vibe {
     Write-Info "Stopping Mistral Vibe..."
-    
+
     $processes = Get-Process -Name "node" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like "*vibe-server.js*" }
-    
+
     if ($processes) {
         $processes | Stop-Process -Force -ErrorAction SilentlyContinue
         Write-Success "Vibe stopped"
@@ -90,9 +90,9 @@ function Stop-Vibe {
 function Status-Vibe {
     Write-Info "Checking Mistral Vibe status..."
     Write-Host ""
-    
+
     $processes = Get-Process -Name "node" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like "*vibe-server.js*" }
-    
+
     if ($processes) {
         Write-Success "Vibe is RUNNING"
         Write-Info "Web UI: http://$env:VIBE_HOST`:$env:VIBE_PORT"
@@ -111,7 +111,7 @@ function Show-Logs {
 function Show-ApiKey {
     Write-Info "Your Mistral Vibe API key:"
     Write-Host ""
-    
+
     if ([string]::IsNullOrEmpty($env:VIBE_API_KEY) -or $env:VIBE_API_KEY -eq "your-api-key-here") {
         Write-Error "API key not configured"
         Write-Host ""
@@ -129,7 +129,7 @@ function Show-ApiKey {
 # Function: Open browser
 function Open-Browser {
     Write-Info "Opening browser..."
-    
+
     Start-Process "http://$env:VIBE_HOST`:$env:VIBE_PORT"
 }
 

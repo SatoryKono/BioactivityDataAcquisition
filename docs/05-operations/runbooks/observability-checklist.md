@@ -1,14 +1,17 @@
----
+______________________________________________________________________
+
 Version: 1.1.2
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Priority: P2
-Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-04-12'
----
+  Priority: P2
+  Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+  Last verified: '2026-04-12'
+
+______________________________________________________________________
 
 # Observability Checklist
 
@@ -158,9 +161,13 @@ bioetl diagnostics manifest <run-id|manifest-id> --format json
 - Confirm the returned diagnostics payload is sufficient for incident routing:
 
 - `diagnostics.latest_status`
+
 - `diagnostics.latest_event_type`
+
 - `diagnostics.event_family_counts`
+
 - `diagnostics.alert_signals`
+
 - `diagnostics.next_steps`
 
 - If `diagnostics.alert_signals.artifact_linkage_gap=true`, escalation must include artifact/linkage remediation before retry.

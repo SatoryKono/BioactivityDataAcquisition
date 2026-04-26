@@ -6,19 +6,19 @@ Quick overview of ADR status and distribution.
 
 ## 📈 Status Distribution
 
-| Status | Count | Percentage |
-|--------|-------|------------|
-| `active` | 37 | 82.2% |
-| `archived` | 1 | 2.2% |
-| `deprecated` | 3 | 6.7% |
-| `draft` | 1 | 2.2% |
-| `superseded` | 3 | 6.7% |
+| Status       | Count | Percentage |
+| ------------ | ----- | ---------- |
+| `active`     | 37    | 82.2%      |
+| `archived`   | 1     | 2.2%       |
+| `deprecated` | 3     | 6.7%       |
+| `draft`      | 1     | 2.2%       |
+| `superseded` | 3     | 6.7%       |
 
-## 🏷️  Category Distribution
+## 🏷️ Category Distribution
 
-| Category | Count | Percentage |
-|----------|-------|------------|
-| `architecture` | 45 | 100.0% |
+| Category       | Count | Percentage |
+| -------------- | ----- | ---------- |
+| `architecture` | 45    | 100.0%     |
 
 ## 🕒 Recent Activity
 

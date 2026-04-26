@@ -41,4 +41,3 @@ jobs:
             reports/docs-kpi/docs-kpi-weekly.json
             reports/docs-kpi/docs-kpi-weekly.md
           retention-days: 30
-

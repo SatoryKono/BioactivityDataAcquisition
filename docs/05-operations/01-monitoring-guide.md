@@ -33,15 +33,15 @@ target windows, and alert-to-SLI mapping.
 Используйте observability surface в таком порядке:
 
 1. `bioetl diagnostics guide` — discovery entrypoint для supported commands.
-2. `bioetl diagnostics metrics [--json]` — текущий metrics/admin profile:
+1. `bioetl diagnostics metrics [--json]` — текущий metrics/admin profile:
    endpoint, running/stopped status, tracing/audit flags и Pushgateway mode.
-3. `bioetl diagnostics health [--json]` — provider health summary.
-4. `bioetl diagnostics run --run-id <run-id>` или
+1. `bioetl diagnostics health [--json]` — provider health summary.
+1. `bioetl diagnostics run --run-id <run-id>` или
    `bioetl diagnostics checkpoint --pipeline <pipeline>` — workflow-level
    расследование run/checkpoint state.
-5. `python -m scripts.engineering.qa report-observability-metric-inventory --json` —
+1. `python -m scripts.engineering.qa report-observability-metric-inventory --json` —
    reconciliation surface между runtime emitters, docs и Prometheus rules.
-6. Сравните inventory output с
+1. Сравните inventory output с
    `grafana/prometheus-rules/bioetl_observability.yml` и shipped dashboard JSON
    до того, как трактовать missing panels как runtime outage.
 

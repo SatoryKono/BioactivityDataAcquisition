@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.1.0
 Status: template
 Class: internal
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-01'
----
+  Last verified: '2026-04-01'
+
+______________________________________________________________________
 
 # Data Contract Specification: <Provider> <Entity> v<major>.<minor>
 
@@ -24,22 +27,22 @@ Last verified: '2026-04-01'
 
 ## Identity
 
-| Parameter | Value |
-|---|---|
-| Provider | `<provider>` |
-| Entity | `<entity>` |
-| Version | `<major>.<minor>.<patch>` |
-| Status | `<draft|active|deprecated|superseded>` |
-| Compatibility | `<backward-compatible|breaking>` |
+| Parameter     | Value                     |
+| ------------- | ------------------------- |
+| Provider      | `<provider>`              |
+| Entity        | `<entity>`                |
+| Version       | `<major>.<minor>.<patch>` |
+| Status        | \`\<draft                 |
+| Compatibility | \`\<backward-compatible   |
 
 ## Source Of Truth And Publication
 
-| Artifact | Path |
-|---|---|
-| Domain / code source | `<code path>` |
-| Published contract | `docs/04-reference/contracts/<subdir>/<provider>_<entity>_v<major>.<minor>.<ext>` |
-| Related provider spec | `docs/04-reference/providers/<provider>/<entity>.md` |
-| Related pipeline spec | `docs/04-reference/pipelines/<provider>/<spec>.md` |
+| Artifact              | Path                                                                              |
+| --------------------- | --------------------------------------------------------------------------------- |
+| Domain / code source  | `<code path>`                                                                     |
+| Published contract    | `docs/04-reference/contracts/<subdir>/<provider>_<entity>_v<major>.<minor>.<ext>` |
+| Related provider spec | `docs/04-reference/providers/<provider>/<entity>.md`                              |
+| Related pipeline spec | `docs/04-reference/pipelines/<provider>/<spec>.md`                                |
 
 ## Backward Compatibility
 
@@ -50,10 +53,10 @@ Last verified: '2026-04-01'
 
 ## Field Semantics
 
-| Field | Type | Nullable | Required | Description |
-|---|---|---|---|---|
-| `<field_name>` | `<type>` | `<true|false>` | `<true|false>` | `<meaning>` |
-| `<field_name>` | `<type>` | `<true|false>` | `<true|false>` | `<meaning>` |
+| Field          | Type     | Nullable | Required | Description |
+| -------------- | -------- | -------- | -------- | ----------- |
+| `<field_name>` | `<type>` | \`\<true | false>\` | \`\<true    |
+| `<field_name>` | `<type>` | \`\<true | false>\` | \`\<true    |
 
 ## Constraints
 
@@ -80,13 +83,13 @@ Last verified: '2026-04-01'
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Versioning | Version MUST follow the project contract versioning policy | `<pass|fail>` | `<version field>` |
-| Source of truth | Code and published export MUST identify the canonical source | `<pass|fail>` | `<paths>` |
-| Validation | Validation and parity checks MUST be listed | `<pass|fail>` | `<check refs>` |
-| Traceability | Breaking changes SHOULD link ADR + migration evidence | `<pass|fail|n/a>` | `<ADR / changelog>` |
-| Consumer bounds | Consumer assumptions MUST be bounded explicitly | `<pass|fail>` | `<scope / obligations>` |
+| Control         | Requirement                                                  | Status   | Evidence |
+| --------------- | ------------------------------------------------------------ | -------- | -------- |
+| Versioning      | Version MUST follow the project contract versioning policy   | \`\<pass | fail>\`  |
+| Source of truth | Code and published export MUST identify the canonical source | \`\<pass | fail>\`  |
+| Validation      | Validation and parity checks MUST be listed                  | \`\<pass | fail>\`  |
+| Traceability    | Breaking changes SHOULD link ADR + migration evidence        | \`\<pass | fail     |
+| Consumer bounds | Consumer assumptions MUST be bounded explicitly              | \`\<pass | fail>\`  |
 
 ## References
 

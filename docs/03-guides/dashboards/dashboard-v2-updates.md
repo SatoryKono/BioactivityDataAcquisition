@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Dashboard v2 Updates (Audit 2026-03-29)
 
@@ -30,8 +33,8 @@ Last verified: '2026-03-29'
 ## Исправления, внесенные в JSON
 
 1. Удалены устаревшие переменные `run_id` из всех 4 дашбордов.
-2. Удалены вводящие в заблуждение формулировки про "Latest Run Only".
-3. Исправлен DQ panel `id=12`:
+1. Удалены вводящие в заблуждение формулировки про "Latest Run Only".
+1. Исправлен DQ panel `id=12`:
 
 ```promql
 sum(increase(bioetl_silver_validation_failures_total{pipeline=~"$pipeline"}[24h]))

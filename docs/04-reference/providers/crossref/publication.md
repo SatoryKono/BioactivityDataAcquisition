@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Пайплайн: CrossRef Publication
 
@@ -15,7 +18,7 @@ Last verified: '2026-03-30'
 **Сущность:** `publication` (CrossRef API использует термин `work`, но `entity_type` в конфигурации — `publication`, унифицирован с другими провайдерами)
 **Версия схемы:** 1.2.0
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 1. Описание
 
@@ -27,7 +30,7 @@ Last verified: '2026-03-30'
 1. **Обогащение PubMed публикаций** — дополнительные метаданные (citations_received, citations_made)
 1. **Резолюция DOI** — получение полных метаданных по списку DOI
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 2. Ключевые поля
 
@@ -61,22 +64,22 @@ Last verified: '2026-03-30'
 
 ### Метрики цитирования
 
-| Поле              | Тип           | Описание                                        |
-| ----------------- | ------------- | ----------------------------------------------- |
+| Поле                 | Тип           | Описание                                        |
+| -------------------- | ------------- | ----------------------------------------------- |
 | `citations_received` | `int \| None` | Количество цитирований (is-referenced-by-count) |
 | `citations_made`     | `int \| None` | Количество ссылок в публикации                  |
 
 ### Классификация
 
-| Поле          | Тип           | Описание                                    |
-| ------------- | ------------- | ------------------------------------------- |
-| `publication_type`    | `str`         | Тип документа: `PUBLICATION` или `PREPRINT` |
-| `issn`        | `list[str]`   | Список ISSN журнала                         |
-| `language`    | `str \| None` | Код языка публикации                        |
-| `license_url` | `str \| None` | URL лицензии                                |
-| `subjects`    | `list[str]`   | Предметные области                          |
+| Поле               | Тип           | Описание                                    |
+| ------------------ | ------------- | ------------------------------------------- |
+| `publication_type` | `str`         | Тип документа: `PUBLICATION` или `PREPRINT` |
+| `issn`             | `list[str]`   | Список ISSN журнала                         |
+| `language`         | `str \| None` | Код языка публикации                        |
+| `license_url`      | `str \| None` | URL лицензии                                |
+| `subjects`         | `list[str]`   | Предметные области                          |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 3. Трансформация
 
@@ -119,7 +122,7 @@ entity_id = f"crossref:{normalized_doi}"
   artifacts
 - None-значения исключаются из хэша
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 4. Особенности
 
@@ -159,7 +162,7 @@ input_filter:
   fallback_column: "title"  # Поиск по заголовку при 404
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 5. Использование CLI
 
@@ -187,7 +190,7 @@ doi,title
 10.1016/j.cell.2019.03.025,Structure of the human receptor
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 6. Health Check
 
@@ -199,7 +202,7 @@ CrossRef adapter реализует health check через `/works?rows=1`:
 | `DEGRADED`  | Ответ 200 за > 5 сек     |
 | `UNHEALTHY` | Ошибка или не-200 статус |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 7. Error Handling
 
@@ -224,7 +227,7 @@ CrossRef adapter реализует health check через `/works?rows=1`:
 | Missing DOI        | Skip record (log warning) |
 | Invalid DOI format | Skip record               |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 8. Gold Filters
 
@@ -239,21 +242,21 @@ gold_filters:
       max: 2100
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 9. Связанные файлы
 
 | Компонент              | Путь                                                       |
 | ---------------------- | ---------------------------------------------------------- |
-| Конфигурация пайплайна | `configs/entities/crossref/publication.yaml`              |
-| Конфигурация источника | `configs/providers/crossref.yaml`                            |
+| Конфигурация пайплайна | `configs/entities/crossref/publication.yaml`               |
+| Конфигурация источника | `configs/providers/crossref.yaml`                          |
 | Трансформер            | `src/bioetl/application/pipelines/crossref/transformer.py` |
 | Адаптер                | `src/bioetl/infrastructure/adapters/crossref/client.py`    |
 | Batch Processor        | `src/bioetl/infrastructure/adapters/crossref/batch.py`     |
 | Fallback Handler       | `src/bioetl/infrastructure/adapters/crossref/fallback.py`  |
 | Domain Entity          | `src/bioetl/domain/entities/crossref.py`                   |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 10. Примеры данных
 
@@ -297,28 +300,28 @@ Occurrence-scoped provenance anchors публикуются через sidecar m
 lineage fragments, run manifest и run ledger, а не через persisted Silver/Gold
 rows.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Contract References
 
-| Артефакт | Ссылка |
-| --- | --- |
-| Gold contract export | [crossref_publication_v1.0.json](../../contracts/gold/crossref_publication_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Артефакт             | Ссылка                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Gold contract export | [crossref_publication_v1.0.json](../../contracts/gold/crossref_publication_v1.0.json)    |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Compliance
 
-| Контроль | Статус | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Runtime alignment | Pass | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
-| Contract linkage | Pass | [crossref_publication_v1.0.json](../../contracts/gold/crossref_publication_v1.0.json) |
-| API governance | Pass | См. [API Compliance](#api-compliance) |
+| Контроль          | Статус | Evidence                                                                                                       |
+| ----------------- | ------ | -------------------------------------------------------------------------------------------------------------- |
+| Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`                       |
+| Runtime alignment | Pass   | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
+| Contract linkage  | Pass   | [crossref_publication_v1.0.json](../../contracts/gold/crossref_publication_v1.0.json)                          |
+| API governance    | Pass   | См. [API Compliance](#api-compliance)                                                                          |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## API Compliance
 

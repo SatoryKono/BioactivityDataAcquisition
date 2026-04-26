@@ -1,4 +1,5 @@
----
+______________________________________________________________________
+
 id: summary-example
 task_id: task-example
 title: Example episodic summary
@@ -7,8 +8,10 @@ ttl_days: 14
 confidence: episodic
 summary: Working summary not yet promoted to curated memory.
 source_refs:
-  - src/memory/README.md
----
+
+- src/memory/README.md
+
+______________________________________________________________________
 
 # Episodic summary
 

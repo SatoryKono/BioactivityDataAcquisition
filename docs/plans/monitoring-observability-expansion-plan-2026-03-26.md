@@ -45,17 +45,17 @@ The implementation must follow these constraints:
 
 1. Do not publish planning content under `docs/03-guides/` as if it were a
    normative guide.
-2. Do not introduce a second metric naming scheme. New metrics must follow the
+1. Do not introduce a second metric naming scheme. New metrics must follow the
    canonical `bioetl_*` `snake_case` convention.
-3. Do not bypass the existing generic `MetricsPort` pattern. New metrics must
+1. Do not bypass the existing generic `MetricsPort` pattern. New metrics must
    be defined in the existing observability metric definition modules and
    registered through the Prometheus adapter path already used by the project.
-4. Do not copy the current high-cardinality drift of `run_id` labels into new
+1. Do not copy the current high-cardinality drift of `run_id` labels into new
    metrics.
-5. Do not model per-record, per-field, or per-path lineage as Prometheus
+1. Do not model per-record, per-field, or per-path lineage as Prometheus
    labels. Prometheus is for aggregate operational signals; run-specific
    inspection remains the job of manifest, ledger, and sidecar inspection.
-6. Prefer extending existing dashboards and alert rule files before adding new
+1. Prefer extending existing dashboards and alert rule files before adding new
    top-level assets.
 
 ## Current state summary
@@ -86,12 +86,12 @@ The implementation must follow these constraints:
 
 1. No dedicated aggregate metrics for manifest creation, ledger appends, and
    checkpoint compatibility outcomes.
-2. No aggregated operational metrics for lineage fragment emission or lineage
+1. No aggregated operational metrics for lineage fragment emission or lineage
    completeness by layer.
-3. No Grafana row or dashboard focused on control-plane and lineage health.
-4. No alert set covering control-plane write failures or lineage completeness
+1. No Grafana row or dashboard focused on control-plane and lineage health.
+1. No alert set covering control-plane write failures or lineage completeness
    regressions.
-5. Existing documentation does not yet connect monitoring workflows with the
+1. Existing documentation does not yet connect monitoring workflows with the
    run manifest/run ledger inspection path.
 
 ## Proposed rollout
@@ -124,14 +124,14 @@ registration flow.
 
 Candidate metrics to evaluate and implement:
 
-| Candidate metric | Type | Labels | Purpose |
-|---|---|---|---|
-| `bioetl_control_plane_manifest_writes_total` | Counter | `pipeline,run_type,status` | Track successful and failed manifest persistence |
-| `bioetl_control_plane_ledger_appends_total` | Counter | `pipeline,event_type,status` | Track ledger append outcomes |
-| `bioetl_checkpoint_compatibility_events_total` | Counter | `pipeline,disposition` | Observe resume compatibility outcomes |
-| `bioetl_lineage_fragments_emitted_total` | Counter | `pipeline,layer,status` | Count lineage fragment publication attempts |
-| `bioetl_lineage_refs_missing_total` | Counter | `pipeline,layer,ref_type` | Surface missing upstream references |
-| `bioetl_composite_source_selection_total` | Counter | `pipeline,decision_type,selected_source` | Observe composite merge/source-selection decisions |
+| Candidate metric                               | Type    | Labels                                   | Purpose                                            |
+| ---------------------------------------------- | ------- | ---------------------------------------- | -------------------------------------------------- |
+| `bioetl_control_plane_manifest_writes_total`   | Counter | `pipeline,run_type,status`               | Track successful and failed manifest persistence   |
+| `bioetl_control_plane_ledger_appends_total`    | Counter | `pipeline,event_type,status`             | Track ledger append outcomes                       |
+| `bioetl_checkpoint_compatibility_events_total` | Counter | `pipeline,disposition`                   | Observe resume compatibility outcomes              |
+| `bioetl_lineage_fragments_emitted_total`       | Counter | `pipeline,layer,status`                  | Count lineage fragment publication attempts        |
+| `bioetl_lineage_refs_missing_total`            | Counter | `pipeline,layer,ref_type`                | Surface missing upstream references                |
+| `bioetl_composite_source_selection_total`      | Counter | `pipeline,decision_type,selected_source` | Observe composite merge/source-selection decisions |
 
 Label policy for new metrics:
 
@@ -166,11 +166,11 @@ Recommended dashboard work order:
    - manifest writes;
    - ledger append success/failure;
    - checkpoint compatibility events.
-2. Extend `grafana/dashboards/bioetl-dq-v2.json` only where lineage and DQ
+1. Extend `grafana/dashboards/bioetl-dq-v2.json` only where lineage and DQ
    overlap operationally:
    - missing lineage references;
    - lineage completeness versus DQ failures.
-3. Introduce a dedicated `bioetl-control-plane-v1.json` only if the added
+1. Introduce a dedicated `bioetl-control-plane-v1.json` only if the added
    panels materially overload the existing overview dashboard.
 
 Dashboard requirements:
@@ -270,10 +270,10 @@ Additional explicit check:
 ## Recommended execution order
 
 1. Align contracts and docs.
-2. Add low-cardinality metrics.
-3. Extend existing dashboards.
-4. Add alert rules.
-5. Add tests and smoke validation.
+1. Add low-cardinality metrics.
+1. Extend existing dashboards.
+1. Add alert rules.
+1. Add tests and smoke validation.
 
 ## Acceptance criteria
 

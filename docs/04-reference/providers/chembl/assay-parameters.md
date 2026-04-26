@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Пайплайн: ChEMBL Assay Parameters
 
@@ -15,30 +18,31 @@ Last verified: '2026-03-30'
 **Сущность:** `assay_parameters`
 **Версия схемы:** 1.2.0
 
----
+______________________________________________________________________
 
 ## 1. Описание
 
 Пайплайн извлекает данные о параметрах экспериментальных анализов из API ChEMBL. Параметры включают условия эксперимента: концентрации, температуру, pH, время инкубации и другие экспериментальные переменные.
 
----
+______________________________________________________________________
 
 ## 2. Ключевые поля
 
 ### Идентификаторы
 
-| Поле | Тип | Описание |
-|------|-----|----------|
+| Поле             | Тип   | Описание                           |
+| ---------------- | ----- | ---------------------------------- |
 | `assay_param_id` | `int` | Уникальный идентификатор параметра |
-| `assay_id` | `str` | ChEMBL ID связанного анализа |
+| `assay_id`       | `str` | ChEMBL ID связанного анализа       |
 
 ### Тип параметра
 
-| Поле | Тип | Описание |
-|------|-----|----------|
+| Поле   | Тип   | Описание                                    |
+| ------ | ----- | ------------------------------------------- |
 | `type` | `str` | Тип параметра (нормализованный к uppercase) |
 
 **Известные типы параметров:**
+
 - `CONC` — концентрация
 - `PH` — кислотность
 - `TEMP` — температура
@@ -57,25 +61,25 @@ Last verified: '2026-03-30'
 
 ### Сырые значения
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `value` | `float` | Числовое значение |
-| `text_value` | `str` | Текстовое значение |
-| `relation` | `str` | Отношение (=, <, >, etc.) |
-| `units` | `str` | Единицы измерения |
-| `comments` | `str` | Комментарии |
+| Поле         | Тип     | Описание                   |
+| ------------ | ------- | -------------------------- |
+| `value`      | `float` | Числовое значение          |
+| `text_value` | `str`   | Текстовое значение         |
+| `relation`   | `str`   | Отношение (=, \<, >, etc.) |
+| `units`      | `str`   | Единицы измерения          |
+| `comments`   | `str`   | Комментарии                |
 
 ### Стандартизированные значения
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `standard_value` | `float` | Стандартизированное числовое значение |
-| `standard_text_value` | `str` | Стандартизированное текстовое значение |
-| `standard_type` | `str` | Стандартизированный тип |
-| `standard_relation` | `str` | Стандартизированное отношение |
-| `standard_units` | `str` | Стандартизированные единицы |
+| Поле                  | Тип     | Описание                               |
+| --------------------- | ------- | -------------------------------------- |
+| `standard_value`      | `float` | Стандартизированное числовое значение  |
+| `standard_text_value` | `str`   | Стандартизированное текстовое значение |
+| `standard_type`       | `str`   | Стандартизированный тип                |
+| `standard_relation`   | `str`   | Стандартизированное отношение          |
+| `standard_units`      | `str`   | Стандартизированные единицы            |
 
----
+______________________________________________________________________
 
 ## 3. Трансформация
 
@@ -93,21 +97,21 @@ entity_id = f"chembl:{assay_param_id}"
 type = param_type.upper() if param_type else "UNKNOWN"
 ```
 
----
+______________________________________________________________________
 
 ## 4. Валидация
 
 ### DQ-правила
 
 1. **`assay_param_id`** — обязательное (primary key)
-2. **`assay_id`** — обязательное (foreign key)
-3. **`type`** — обязательное
+1. **`assay_id`** — обязательное (foreign key)
+1. **`type`** — обязательное
 
 ### Gold-фильтры
 
 - Обязательные поля: `assay_id`, `type`
 
----
+______________________________________________________________________
 
 ## 5. Использование CLI
 
@@ -122,40 +126,40 @@ bioetl run --pipeline chembl_assay_parameters --limit 1000
 bioetl run --pipeline chembl_assay_parameters --input-csv data/input/assay_parameters.csv
 ```
 
----
+______________________________________________________________________
 
 ## 6. Партиционирование
 
 Silver-таблица партиционируется по полю `type` для оптимизации запросов по типу параметра.
 
----
+______________________________________________________________________
 
 ## 7. Связанные файлы
 
-| Компонент | Путь |
-|-----------|------|
-| Конфигурация | `configs/entities/chembl/assay_parameters.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/assay_parameters_transformer.py` |
-| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
+| Компонент     | Путь                                                                      |
+| ------------- | ------------------------------------------------------------------------- |
+| Конфигурация  | `configs/entities/chembl/assay_parameters.yaml`                           |
+| Трансформер   | `src/bioetl/application/pipelines/chembl/assay_parameters_transformer.py` |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`                   |
 
----
+______________________________________________________________________
 
 ## Contract References
 
-| Артефакт | Ссылка |
-| --- | --- |
+| Артефакт             | Ссылка                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------- |
 | Gold contract export | [chembl_assay_parameters_v1.0.json](../../contracts/gold/chembl_assay_parameters_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                          |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md)    |
 
 ## Compliance
 
-| Контроль | Статус | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Runtime alignment | Pass | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
-| Contract linkage | Pass | [chembl_assay_parameters_v1.0.json](../../contracts/gold/chembl_assay_parameters_v1.0.json) |
-| API governance | Pass | См. [API Compliance](#api-compliance) |
+| Контроль          | Статус | Evidence                                                                                                       |
+| ----------------- | ------ | -------------------------------------------------------------------------------------------------------------- |
+| Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`                       |
+| Runtime alignment | Pass   | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
+| Contract linkage  | Pass   | [chembl_assay_parameters_v1.0.json](../../contracts/gold/chembl_assay_parameters_v1.0.json)                    |
+| API governance    | Pass   | См. [API Compliance](#api-compliance)                                                                          |
 
 ## API Compliance
 
