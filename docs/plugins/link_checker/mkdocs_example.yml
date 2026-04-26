@@ -55,12 +55,12 @@ plugins:
       timeout: 15               # HTTP request timeout in seconds
       max_redirects: 5          # Maximum number of redirects to follow
       ignore_patterns:         # URL patterns to ignore
-        - "localhost"
-        - "127.0.0.1"
-        - "staging\.example\.com"
-        - "\.local$"
-        - "192\.168\."
-        - "10\."
+        - 'localhost'
+        - '127.0.0.1'
+        - 'staging\.example\.com'
+        - '\.local$'
+        - '192\.168\.'
+        - '10\.'
       report_dir: "reports/links"  # Directory to save reports
       fail_on_error: false      # Set to true to fail build on broken links
 

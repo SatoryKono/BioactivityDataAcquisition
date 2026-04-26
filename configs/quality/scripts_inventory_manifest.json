@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-26T13:35:01.298509+00:00",
+  "generated_at": "2026-04-26T13:42:56.308082+00:00",
   "summary": {
     "total_scripts": 445,
     "status_counts": {
@@ -4016,7 +4016,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 129,
+          "line": 164,
           "source_group": "ci",
           "text": "entry: python scripts/diagrams/lint_diagrams.py"
         },
@@ -4094,7 +4094,7 @@
       "references": [
         {
           "path": ".pre-commit-config.yaml",
-          "line": 135,
+          "line": 170,
           "source_group": "ci",
           "text": "entry: python scripts/diagrams/prune_orphan_nodes.py --check"
         },
@@ -6919,19 +6919,19 @@
       "references": [
         {
           "path": ".pre-commit-config.yaml",
-          "line": 66,
+          "line": 101,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m pip_audit --cache-dir .cache/pip-audit --skip-editable --strict"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 185,
+          "line": 220,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 192,
+          "line": 227,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
         },
@@ -8105,7 +8105,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 199,
+          "line": 234,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -8730,7 +8730,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 185,
+          "line": 220,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"
         },
@@ -8781,7 +8781,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 192,
+          "line": 227,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
         },
@@ -8949,7 +8949,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 105,
+          "line": 140,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/repo/audit_root_cleanliness.py"
         },
@@ -11321,7 +11321,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 119,
+          "line": 154,
           "source_group": "ci",
           "text": "entry: python scripts/schema/check_config_invariants.py"
         },
@@ -11696,7 +11696,7 @@
       "references": [
         {
           "path": ".pre-commit-config.yaml",
-          "line": 111,
+          "line": 146,
           "source_group": "ci",
           "text": "entry: python scripts/schema/lint_config_paths.py"
         },
@@ -11729,7 +11729,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 95,
+          "line": 130,
           "source_group": "ci",
           "text": "entry: python scripts/schema/validate_pipeline_configs.py"
         },
