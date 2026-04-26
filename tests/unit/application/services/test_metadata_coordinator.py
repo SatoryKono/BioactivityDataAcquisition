@@ -35,6 +35,8 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.run_context import RunContext
 
+_FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+
 
 @pytest.fixture
 def run_context() -> RunContext:
@@ -42,7 +44,7 @@ def run_context() -> RunContext:
     return RunContext.create(
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
-        started_at=datetime.now(UTC),
+        started_at=_FIXED_TIME,
         provider="chembl",
         entity="activity",
     )
@@ -62,7 +64,7 @@ class TestRunContext:
     def test_create_with_valid_data(self) -> None:
         """Test creating RunContext with valid data."""
         run_id = RunID(uuid4())
-        started_at = datetime.now(UTC)
+        started_at = _FIXED_TIME
 
         context = RunContext.create(
             run_id=run_id,
@@ -96,7 +98,7 @@ class TestRunContext:
             RunContext.create(
                 run_id=RunID(uuid4()),
                 run_type=RunType.INCREMENTAL,
-                started_at=datetime.now(UTC),
+                started_at=_FIXED_TIME,
                 provider="",
                 entity="activity",
             )
@@ -107,7 +109,7 @@ class TestRunContext:
             RunContext.create(
                 run_id=RunID(uuid4()),
                 run_type=RunType.INCREMENTAL,
-                started_at=datetime.now(UTC),
+                started_at=_FIXED_TIME,
                 provider="chembl",
                 entity="",
             )
@@ -156,7 +158,7 @@ class TestBronzeMetadata:
 
     def test_create_bronze_metadata(self, coordinator: MetadataCoordinator) -> None:
         """Test creating Bronze metadata."""
-        started_at = datetime.now(UTC)
+        started_at = _FIXED_TIME
         completed_at = started_at + timedelta(seconds=5.5)
 
         input_data = BronzeMetadataInput(
@@ -177,7 +179,7 @@ class TestBronzeMetadata:
 
     def test_bronze_runtime_metadata(self, coordinator: MetadataCoordinator) -> None:
         """Test Bronze runtime metadata contains correct values."""
-        started_at = datetime.now(UTC)
+        started_at = _FIXED_TIME
         completed_at = started_at + timedelta(seconds=3.0)
 
         input_data = BronzeMetadataInput(
@@ -205,8 +207,8 @@ class TestBronzeMetadata:
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
         )
 
         metadata = coordinator.create_bronze_metadata(input_data)
@@ -220,7 +222,7 @@ class TestBronzeMetadata:
         context = RunContext.create(
             run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
             provider="chembl",
             entity="activity",
             config_hash="a" * 64,
@@ -240,8 +242,8 @@ class TestBronzeMetadata:
             record_count=25,
             compressed_size=2048,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
         )
 
         metadata = coordinator.create_bronze_metadata(input_data)
@@ -262,7 +264,7 @@ class TestBronzeMetadata:
         context = RunContext.create(
             run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
             provider="chembl",
             entity="activity",
             config_hash="legacy-config-hash",
@@ -275,8 +277,8 @@ class TestBronzeMetadata:
             record_count=25,
             compressed_size=2048,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
         )
 
         metadata = coordinator.create_bronze_metadata(input_data)
@@ -287,7 +289,7 @@ class TestBronzeMetadata:
 
     def test_bronze_output_metadata(self, coordinator: MetadataCoordinator) -> None:
         """Test Bronze output metadata contains file info (ADR-029 unified structure)."""
-        started_at = datetime.now(UTC)
+        started_at = _FIXED_TIME
         completed_at = started_at
 
         input_data = BronzeMetadataInput(
@@ -321,8 +323,8 @@ class TestBronzeMetadata:
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
             query_string="assay_type=B&standard_type=IC50",
         )
 
@@ -344,8 +346,8 @@ class TestBronzeMetadata:
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
             source_metadata=source,
             query_string="override_query=should_be_ignored",
         )
@@ -369,8 +371,8 @@ class TestBronzeMetadata:
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
             source_metadata=source,
             query_string="injected_query=value",
         )
@@ -407,8 +409,8 @@ class TestBronzeMetadata:
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
             source_metadata=source,
         )
 
@@ -436,8 +438,8 @@ class TestBronzeMetadata:
             record_count=100,
             compressed_size=5000,
             output_path="v1/chembl/activity/2024-01-15/batch.jsonl.zst",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
             # No query_string provided
         )
 
@@ -490,7 +492,7 @@ class TestSilverMetadata:
                 "_run_id": str(coordinator.run_context.run_id),
                 "_run_type": "incremental",
                 "_source_batch_id": str(uuid4()),
-                "_ingestion_ts": datetime.now(UTC).isoformat(),
+                "_ingestion_ts": _FIXED_TIME.isoformat(),
                 "chembl_id": "CHEMBL123",
             }
         ]
@@ -599,7 +601,7 @@ class TestSilverMetadata:
         context = RunContext.create(
             run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
             provider="composite",
             entity="publication",
             contract_version="2.0.0",
@@ -949,7 +951,7 @@ class TestTransformVersionTracking:
         context = RunContext.create(
             run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
             provider="chembl",
             entity="activity",
             transform_version="3.0.0",
@@ -979,7 +981,7 @@ class TestTransformVersionTracking:
         context = RunContext.create(
             run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
             provider="chembl",
             entity="activity",
             transform_version="4.0.0",
@@ -1008,7 +1010,7 @@ class TestTransformVersionTracking:
     def test_run_context_with_transform_info(self) -> None:
         """Test RunContext can be created with transform version and steps."""
         run_id = RunID(uuid4())
-        started_at = datetime.now(UTC)
+        started_at = _FIXED_TIME
 
         context = RunContext.create(
             run_id=run_id,
@@ -1028,7 +1030,7 @@ class TestTransformVersionTracking:
         context = RunContext.create(
             run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
             provider="chembl",
             entity="activity",
         )
@@ -1043,7 +1045,7 @@ class TestTransformVersionTracking:
         context = RunContext.create(
             run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
             provider="chembl",
             entity="activity",
             transform_version="1.0.0",
@@ -1088,7 +1090,7 @@ class TestRunTypeMappings:
         context = RunContext.create(
             run_id=RunID(uuid4()),
             run_type=run_type,
-            started_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
             provider="test",
             entity="entity",
         )
@@ -1099,8 +1101,8 @@ class TestRunTypeMappings:
             record_count=1,
             compressed_size=100,
             output_path="path",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
         )
 
         metadata = coordinator.create_bronze_metadata(input_data)
@@ -1122,8 +1124,8 @@ class TestConsistencyAcrossLayers:
             record_count=10,
             compressed_size=1000,
             output_path="path",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
         )
         bronze = coordinator.create_bronze_metadata(bronze_input)
 
@@ -1159,8 +1161,8 @@ class TestConsistencyAcrossLayers:
             record_count=10,
             compressed_size=1000,
             output_path="path",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
         )
         bronze = coordinator.create_bronze_metadata(bronze_input)
 
@@ -1198,8 +1200,8 @@ class TestConsistencyAcrossLayers:
             record_count=10,
             compressed_size=1000,
             output_path="path",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
         )
         bronze = coordinator.create_bronze_metadata(bronze_input)
 
@@ -1246,7 +1248,7 @@ class TestLineageFragments:
         context = RunContext.create(
             run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
             provider="chembl",
             entity="activity",
             manifest_id="manifest-001",
@@ -1267,8 +1269,8 @@ class TestLineageFragments:
             record_count=50,
             compressed_size=1024,
             output_path="v1/chembl/activity/2026-03-24/batch-1.jsonl.zst",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
             source_metadata=SourceMetadata(
                 type="api",
                 url="https://www.ebi.ac.uk/chembl/api/data/activity",
@@ -1327,8 +1329,8 @@ class TestLineageFragments:
             record_count=50,
             compressed_size=1024,
             output_path="v1/chembl/activity/2026-03-24/batch-1.jsonl.zst",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
             source_metadata=SourceMetadata(
                 type="api",
                 url="https://www.ebi.ac.uk/chembl/api/data/activity",
@@ -1340,7 +1342,7 @@ class TestLineageFragments:
             RunContext.create(
                 run_id=RunID(uuid4()),
                 run_type=RunType.INCREMENTAL,
-                started_at=datetime.now(UTC),
+                started_at=_FIXED_TIME,
                 provider="chembl",
                 entity="activity",
             )
@@ -1349,7 +1351,7 @@ class TestLineageFragments:
             RunContext.create(
                 run_id=RunID(uuid4()),
                 run_type=RunType.INCREMENTAL,
-                started_at=datetime.now(UTC),
+                started_at=_FIXED_TIME,
                 provider="chembl",
                 entity="activity",
             )
@@ -1361,7 +1363,7 @@ class TestLineageFragments:
         context = RunContext.create(
             run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
             provider="chembl",
             entity="activity",
             transform_version="2.1.0",
@@ -1434,7 +1436,7 @@ class TestLineageFragments:
             RunContext.create(
                 run_id=RunID(uuid4()),
                 run_type=RunType.INCREMENTAL,
-                started_at=datetime.now(UTC),
+                started_at=_FIXED_TIME,
                 provider="chembl",
                 entity="activity",
                 transform_version="2.1.0",
@@ -1445,7 +1447,7 @@ class TestLineageFragments:
             RunContext.create(
                 run_id=RunID(uuid4()),
                 run_type=RunType.INCREMENTAL,
-                started_at=datetime.now(UTC),
+                started_at=_FIXED_TIME,
                 provider="chembl",
                 entity="activity",
                 transform_version="2.1.0",
@@ -1459,7 +1461,7 @@ class TestLineageFragments:
         context = RunContext.create(
             run_id=RunID(uuid4()),
             run_type=RunType.INCREMENTAL,
-            started_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
             provider="composite",
             entity="publication",
         )
@@ -1524,7 +1526,7 @@ class TestLineageFragments:
         context = RunContext.create(
             run_id=RunID(uuid4()),
             run_type=RunType.REBUILD,
-            started_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
             provider="chembl",
             entity="activity",
             transform_version="3.0.0",
@@ -1588,7 +1590,7 @@ class TestLineageFragments:
             RunContext.create(
                 run_id=RunID(uuid4()),
                 run_type=RunType.REBUILD,
-                started_at=datetime.now(UTC),
+                started_at=_FIXED_TIME,
                 provider="chembl",
                 entity="activity",
                 transform_version="3.0.0",
@@ -1599,7 +1601,7 @@ class TestLineageFragments:
             RunContext.create(
                 run_id=RunID(uuid4()),
                 run_type=RunType.REBUILD,
-                started_at=datetime.now(UTC),
+                started_at=_FIXED_TIME,
                 provider="chembl",
                 entity="activity",
                 transform_version="3.0.0",
@@ -1613,7 +1615,7 @@ class TestLineageFragments:
         context = RunContext.create(
             run_id=RunID(uuid4()),
             run_type=RunType.REBUILD,
-            started_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
             provider="composite",
             entity="publication",
             manifest_id="manifest-003",
@@ -1758,8 +1760,8 @@ class TestLineageFragments:
             record_count=10,
             compressed_size=512,
             output_path="v1/chembl/activity/2026-03-24/batch-1.jsonl.zst",
-            started_at=datetime.now(UTC),
-            completed_at=datetime.now(UTC),
+            started_at=_FIXED_TIME,
+            completed_at=_FIXED_TIME,
         )
 
         bundle = coordinator.create_bronze_metadata_bundle(input_data)

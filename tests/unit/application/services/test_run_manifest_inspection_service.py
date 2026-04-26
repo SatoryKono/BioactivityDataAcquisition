@@ -43,6 +43,7 @@ from bioetl.domain.normalization import (
     compute_execution_identity_fingerprint,
 )
 
+_FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
 _VALID_CONFIG_HASH = "a" * 64
 _VALID_RESOLVED_CONFIG_HASH = "b" * 64
 _VALID_EFFECTIVE_CONFIG_HASH = "c" * 64
@@ -240,7 +241,7 @@ def _make_manifest(
         manifest_id=manifest_id,
         execution_fingerprint=execution_fingerprint or f"fingerprint-{manifest_id}",
         schema_version="1.0",
-        created_at=created_at or datetime.now(UTC),
+        created_at=created_at or _FIXED_TIME,
         run_id=run_id,
         run_type=run_type,
         pipeline_name="chembl_activity",
@@ -301,7 +302,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         event_type="run_finished",
-        occurred_at=datetime.now(UTC),
+        occurred_at=_FIXED_TIME,
         status="success",
     )
     ledger_store.append(ledger_entry)
@@ -729,7 +730,7 @@ def test_show_surfaces_persisted_resume_diagnostics() -> None:
             run_id=run_id,
             event_type="checkpoint_resume_rejected",
             event_family="pipeline.lifecycle",
-            occurred_at=datetime.now(UTC),
+            occurred_at=_FIXED_TIME,
             status="rejected",
             details={
                 "compatibility_disposition": "hard_fail",
@@ -911,7 +912,7 @@ def test_show_collects_artifact_diagnostic_links() -> None:
             manifest_id="manifest-2",
             run_id=run_id,
             event_type="artifact_published",
-            occurred_at=datetime.now(UTC),
+            occurred_at=_FIXED_TIME,
             status="published",
             stage="silver",
             dataset_ref="silver:chembl.activity@1",
@@ -980,7 +981,7 @@ def test_show_marks_artifact_linkage_gap_signal() -> None:
             manifest_id="manifest-3",
             run_id=run_id,
             event_type="artifact_published",
-            occurred_at=datetime.now(UTC),
+            occurred_at=_FIXED_TIME,
             status="published",
             stage="silver",
             details={"artifact_path": SILVER_ARTIFACT_PATH},
@@ -1037,7 +1038,7 @@ def test_show_distinguishes_partial_artifact_anchor_gaps(
             manifest_id="manifest-partial-gap",
             run_id=run_id,
             event_type="artifact_published",
-            occurred_at=datetime.now(UTC),
+            occurred_at=_FIXED_TIME,
             status="published",
             stage="silver",
             dataset_ref=dataset_ref,
@@ -1069,7 +1070,7 @@ def test_show_collects_dq_trace_anchors() -> None:
             manifest_id="manifest-dq",
             run_id=run_id,
             event_type="dq_policy_applied",
-            occurred_at=datetime.now(UTC),
+            occurred_at=_FIXED_TIME,
             event_family="dq",
             status="failed",
             stage="gold",
@@ -1678,7 +1679,7 @@ def test_show_surfaces_cross_validation_traceability_in_diagnostics() -> None:
             manifest_id="manifest-cv",
             run_id=run_id,
             event_type="dq_policy_applied",
-            occurred_at=datetime.now(UTC),
+            occurred_at=_FIXED_TIME,
             event_family="dq",
             status="failed",
             stage="cross_validation",

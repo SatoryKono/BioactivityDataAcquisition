@@ -15,6 +15,8 @@ from bioetl.domain.exceptions import StorageError
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane import FileRunLedgerStore
 
+_FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+
 
 def test_file_store_round_trips_entries_by_manifest_and_run_id(tmp_path) -> None:
     run_id = RunID(uuid4())
@@ -24,7 +26,7 @@ def test_file_store_round_trips_entries_by_manifest_and_run_id(tmp_path) -> None
         manifest_id="manifest-1",
         run_id=run_id,
         event_type="manifest_created",
-        occurred_at=datetime.now(UTC),
+        occurred_at=_FIXED_TIME,
         status="created",
     )
     second = RunLedgerEntry(
@@ -32,7 +34,7 @@ def test_file_store_round_trips_entries_by_manifest_and_run_id(tmp_path) -> None
         manifest_id="manifest-1",
         run_id=run_id,
         event_type="run_finished",
-        occurred_at=datetime.now(UTC),
+        occurred_at=_FIXED_TIME,
         status="success",
         dataset_ref="gold:chembl.activity",
         lineage_fragment_id="gold:fragment-1",
@@ -58,7 +60,7 @@ def test_file_store_emits_ledger_append_metric(tmp_path) -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         event_type="run_finished",
-        occurred_at=datetime.now(UTC),
+        occurred_at=_FIXED_TIME,
         status="success",
         details={"_diagnostic": {"pipeline": "chembl_activity"}},
     )
@@ -88,7 +90,7 @@ def test_file_store_emits_ledger_read_metric_on_list_success(tmp_path) -> None:
         manifest_id="manifest-2",
         run_id=run_id,
         event_type="run_finished",
-        occurred_at=datetime.now(UTC),
+        occurred_at=_FIXED_TIME,
         status="success",
     )
 
@@ -138,7 +140,7 @@ def test_file_store_preserves_append_only_jsonl_order(tmp_path) -> None:
         manifest_id="manifest-append-only",
         run_id=run_id,
         event_type="manifest_created",
-        occurred_at=datetime.now(UTC),
+        occurred_at=_FIXED_TIME,
         status="created",
     )
     second = RunLedgerEntry(
@@ -146,7 +148,7 @@ def test_file_store_preserves_append_only_jsonl_order(tmp_path) -> None:
         manifest_id="manifest-append-only",
         run_id=run_id,
         event_type="run_started",
-        occurred_at=datetime.now(UTC),
+        occurred_at=_FIXED_TIME,
         status="running",
     )
 
@@ -173,7 +175,7 @@ def test_file_store_wraps_partial_append_failure_and_preserves_existing_events(
         manifest_id="manifest-1",
         run_id=initial_run_id,
         event_type="manifest_created",
-        occurred_at=datetime.now(UTC),
+        occurred_at=_FIXED_TIME,
         status="created",
     )
     failed = RunLedgerEntry(
@@ -181,7 +183,7 @@ def test_file_store_wraps_partial_append_failure_and_preserves_existing_events(
         manifest_id="manifest-1",
         run_id=failed_run_id,
         event_type="run_finished",
-        occurred_at=datetime.now(UTC),
+        occurred_at=_FIXED_TIME,
         status="failed",
     )
 
@@ -224,7 +226,7 @@ def test_file_store_rolls_back_ledger_append_when_run_index_write_fails(
         manifest_id="manifest-1",
         run_id=run_id,
         event_type="run_finished",
-        occurred_at=datetime.now(UTC),
+        occurred_at=_FIXED_TIME,
         status="success",
     )
 
@@ -252,7 +254,7 @@ def test_file_store_fails_closed_on_truncated_tail_line_during_reads(tmp_path) -
         manifest_id="manifest-1",
         run_id=run_id,
         event_type="manifest_created",
-        occurred_at=datetime.now(UTC),
+        occurred_at=_FIXED_TIME,
         status="created",
     )
 
@@ -291,7 +293,7 @@ def test_file_store_fails_closed_on_invalid_json_line_during_reads(tmp_path) -> 
         manifest_id="manifest-1",
         run_id=run_id,
         event_type="manifest_created",
-        occurred_at=datetime.now(UTC),
+        occurred_at=_FIXED_TIME,
         status="created",
     )
 
@@ -312,7 +314,7 @@ def test_file_store_lists_entries_after_watermark(tmp_path) -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         event_type="manifest_created",
-        occurred_at=datetime.now(UTC),
+        occurred_at=_FIXED_TIME,
         status="created",
     )
     second = RunLedgerEntry(
@@ -320,7 +322,7 @@ def test_file_store_lists_entries_after_watermark(tmp_path) -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         event_type="stage_completed",
-        occurred_at=datetime.now(UTC),
+        occurred_at=_FIXED_TIME,
         status="completed",
     )
     third = RunLedgerEntry(
@@ -328,7 +330,7 @@ def test_file_store_lists_entries_after_watermark(tmp_path) -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         event_type="run_finished",
-        occurred_at=datetime.now(UTC),
+        occurred_at=_FIXED_TIME,
         status="success",
     )
 

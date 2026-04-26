@@ -17,6 +17,8 @@ from bioetl.infrastructure.observability.anomaly import (
     AnomalyType,
 )
 
+_FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+
 
 @pytest.fixture
 def mock_logger() -> MagicMock:
@@ -64,8 +66,6 @@ class TestAnomaly:
     @pytest.fixture
     def sample_anomaly(self):
         """Create a sample anomaly."""
-        from datetime import UTC, datetime
-
         return AnomalyRecord(
             metric_name="record_count",
             current_value=500.0,
@@ -74,7 +74,7 @@ class TestAnomaly:
             anomaly_type=AnomalyType.DROP,
             severity=AnomalySeverity.CRITICAL,
             z_score=-10.0,
-            timestamp=datetime.now(UTC),
+            timestamp=_FIXED_TIME,
             message="Record count dropped significantly",
         )
 
@@ -138,20 +138,20 @@ class TestAnomalyDetector:
 
     def test_detect_no_baseline_returns_none(self, detector):
         """Test detect returns None when no baseline exists."""
-        result = detector.detect("unknown_metric", 100, timestamp=datetime.now(UTC))
+        result = detector.detect("unknown_metric", 100, timestamp=_FIXED_TIME)
         assert result is None
 
     def test_detect_normal_value_returns_none(self, detector):
         """Test detect returns None for normal value."""
         detector.update_baseline("metric", [100.0, 100.0, 100.0, 100.0, 100.0])
-        result = detector.detect("metric", 100.0, timestamp=datetime.now(UTC))
+        result = detector.detect("metric", 100.0, timestamp=_FIXED_TIME)
         assert result is None
 
     def test_detect_spike_anomaly(self, detector):
         """Test detection of spike anomaly."""
         # Use values with some variance so stddev > 0
         detector.update_baseline("metric", [95.0, 100.0, 105.0, 98.0, 102.0])
-        result = detector.detect("metric", 500.0, timestamp=datetime.now(UTC))
+        result = detector.detect("metric", 500.0, timestamp=_FIXED_TIME)
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.SPIKE
@@ -161,7 +161,7 @@ class TestAnomalyDetector:
         """Test detection of drop anomaly."""
         # Use values with some variance so stddev > 0
         detector.update_baseline("metric", [95.0, 100.0, 105.0, 98.0, 102.0])
-        result = detector.detect("metric", 10.0, timestamp=datetime.now(UTC))
+        result = detector.detect("metric", 10.0, timestamp=_FIXED_TIME)
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.DROP
@@ -179,7 +179,7 @@ class TestAnomalyDetector:
         """Test detection when standard deviation is zero."""
         detector.update_baseline("metric", [100.0, 100.0, 100.0, 100.0, 100.0])
         # When stddev is 0, special handling applies
-        result = detector.detect("metric", 150.0, timestamp=datetime.now(UTC))
+        result = detector.detect("metric", 150.0, timestamp=_FIXED_TIME)
 
         # Should handle gracefully without division by zero
         # Per implementation, uses percentage deviation when stddev=0
@@ -227,9 +227,7 @@ class TestAnomalyDetectorSeverityCalculation:
         # Set baseline with values that give mean~100 and stddev~10
         detector.update_baseline("metric", [90.0, 95.0, 100.0, 105.0, 110.0])
 
-        result = detector.detect(
-            "metric", 125.0, timestamp=datetime.now(UTC)
-        )  # ~2.5 std dev
+        result = detector.detect("metric", 125.0, timestamp=_FIXED_TIME)  # ~2.5 std dev
 
         if result:
             assert result.severity in (
@@ -242,9 +240,7 @@ class TestAnomalyDetectorSeverityCalculation:
         # Set baseline with values that give mean~100 and stddev~10
         detector.update_baseline("metric", [90.0, 95.0, 100.0, 105.0, 110.0])
 
-        result = detector.detect(
-            "metric", 200.0, timestamp=datetime.now(UTC)
-        )  # ~10 std dev
+        result = detector.detect("metric", 200.0, timestamp=_FIXED_TIME)  # ~10 std dev
 
         if result:
             assert result.severity in (
@@ -272,7 +268,7 @@ class TestAnomalyDetectorEdgeCases:
         try:
             detector.update_baseline("metric", [100])
             # Stddev of single value is 0
-            detector.detect("metric", 110, timestamp=datetime.now(UTC))
+            detector.detect("metric", 110, timestamp=_FIXED_TIME)
         except (ValueError, statistics.StatisticsError):
             pass  # Expected behavior
 
@@ -280,7 +276,7 @@ class TestAnomalyDetectorEdgeCases:
         """Test handling of negative values."""
         detector = AnomalyDetector()
         detector.update_baseline("metric", [-100, -90, -110, -95, -105])
-        result = detector.detect("metric", -500, timestamp=datetime.now(UTC))
+        result = detector.detect("metric", -500, timestamp=_FIXED_TIME)
 
         # Should detect as anomaly
         assert result is not None
@@ -289,7 +285,7 @@ class TestAnomalyDetectorEdgeCases:
         """Test handling of float values."""
         detector = AnomalyDetector()
         detector.update_baseline("metric", [1.5, 1.6, 1.4, 1.55, 1.45])
-        result = detector.detect("metric", 5.0, timestamp=datetime.now(UTC))
+        result = detector.detect("metric", 5.0, timestamp=_FIXED_TIME)
 
         assert result is not None
 
@@ -329,9 +325,7 @@ class TestAnomalyDetectorThresholds:
         detector = AnomalyDetector()
         detector.set_threshold("metric", min_value=100, max_value=200)
 
-        result = detector.detect(
-            "metric", 50, timestamp=datetime.now(UTC)
-        )  # Below minimum
+        result = detector.detect("metric", 50, timestamp=_FIXED_TIME)  # Below minimum
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.THRESHOLD_EXCEEDED
@@ -342,9 +336,7 @@ class TestAnomalyDetectorThresholds:
         detector = AnomalyDetector()
         detector.set_threshold("metric", min_value=100, max_value=200)
 
-        result = detector.detect(
-            "metric", 250, timestamp=datetime.now(UTC)
-        )  # Above maximum
+        result = detector.detect("metric", 250, timestamp=_FIXED_TIME)  # Above maximum
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.THRESHOLD_EXCEEDED
@@ -444,9 +436,7 @@ class TestDataQualityMonitor:
         monitor = DataQualityMonitorService(logger=mock_logger)
         monitor.add_metric("record_count", [1000, 1050, 980, 1020, 1010])
 
-        anomalies = monitor.check_quality(
-            {"record_count": 1000}, timestamp=datetime.now(UTC)
-        )
+        anomalies = monitor.check_quality({"record_count": 1000}, timestamp=_FIXED_TIME)
 
         assert anomalies == []
 
@@ -460,7 +450,7 @@ class TestDataQualityMonitor:
         monitor.add_metric("record_count", [1000, 1050, 980, 1020, 1010])
 
         anomalies = monitor.check_quality(
-            {"record_count": 100}, timestamp=datetime.now(UTC)
+            {"record_count": 100}, timestamp=_FIXED_TIME
         )  # Low value
 
         assert len(anomalies) == 1
@@ -493,7 +483,7 @@ class TestDataQualityMonitor:
         monitor.add_metric("record_count", [1000, 1050, 980])
 
         monitor.update_baseline_from_metrics(
-            {"record_count": 1020}, timestamp=datetime.now(UTC)
+            {"record_count": 1020}, timestamp=_FIXED_TIME
         )
 
         # Baseline should be updated
@@ -512,9 +502,7 @@ class TestDataQualityMonitor:
         monitor.add_metric("error_rate", [0.01, 0.02, 0.01], max_threshold=0.1)
 
         # This should trigger a critical anomaly (exceeds 0.1 threshold)
-        monitor.update_baseline_from_metrics(
-            {"error_rate": 0.5}, timestamp=datetime.now(UTC)
-        )
+        monitor.update_baseline_from_metrics({"error_rate": 0.5}, timestamp=_FIXED_TIME)
 
         # Baseline should NOT be updated with the anomalous value
         assert 0.5 not in monitor.detector._baselines.get("error_rate", [])
