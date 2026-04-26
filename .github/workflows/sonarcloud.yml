@@ -44,6 +44,18 @@ jobs:
         with:
           uv-extras: "dev"
 
+      - name: Validate canonical Sonar config
+        if: steps.sonar-token.outputs.available == 'true'
+        run: |
+          test -f sonar-project.properties
+          grep -q '^sonar.sources=src/bioetl$' sonar-project.properties
+
+      - name: Run SonarCloud scan
+        if: steps.sonar-token.outputs.available == 'true'
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
       - name: Build Sonar baseline report
         env:
           SONARQUBE_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -66,15 +78,3 @@ jobs:
             --strict-live \
             --require-authoritative-scope \
             --max-quarantine-entries 159
-
-      - name: Validate canonical Sonar config
-        if: steps.sonar-token.outputs.available == 'true'
-        run: |
-          test -f sonar-project.properties
-          grep -q '^sonar.sources=src/bioetl$' sonar-project.properties
-
-      - name: Run SonarCloud scan
-        if: steps.sonar-token.outputs.available == 'true'
-        uses: SonarSource/sonarqube-scan-action@v6
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
