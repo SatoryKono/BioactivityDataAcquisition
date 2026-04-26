@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import re
 
-import pytest
 from click.testing import CliRunner
+import pytest
 
 
 _ANSI_ESCAPE_RE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
@@ -26,21 +26,13 @@ def cli_runner() -> CliRunner:
 
 
 class TestListPipelinesCommandSnapshot:
-    """Snapshot tests for list-pipelines CLI output."""
+    """Regression tests for list-pipelines CLI output."""
 
     def test_list_pipelines_command_output(
         self,
         cli_runner: CliRunner,
-        request: pytest.FixtureRequest,
     ) -> None:
-        """CLI output should match the stored list-pipelines snapshot.
-
-        If the pipeline list changes intentionally, update the snapshot with:
-            pytest tests/unit/interfaces/cli/test_registry_consistency.py --snapshot-update
-        """
-        pytest.importorskip("syrupy", reason="syrupy required for snapshot tests")
-        snapshot = request.getfixturevalue("snapshot")
-
+        """CLI output should match the expected pipeline list."""
         from bioetl.interfaces.cli.main import cli
 
         result = cli_runner.invoke(
@@ -51,7 +43,30 @@ class TestListPipelinesCommandSnapshot:
         )
 
         assert result.exit_code == 0, f"Command failed: {result.output}"
-    assert _normalize_cli_output(result.output) == snapshot.lstrip()
+        assert _normalize_cli_output(result.output) == (
+            "Available pipelines:\n"
+            "  - chembl_activity\n"
+            "  - chembl_assay\n"
+            "  - chembl_assay_parameters\n"
+            "  - chembl_cell_line\n"
+            "  - chembl_compound_record\n"
+            "  - chembl_molecule\n"
+            "  - chembl_protein_class\n"
+            "  - chembl_publication\n"
+            "  - chembl_publication_similarity\n"
+            "  - chembl_publication_term\n"
+            "  - chembl_subcellular_fraction\n"
+            "  - chembl_target\n"
+            "  - chembl_target_component\n"
+            "  - chembl_tissue\n"
+            "  - crossref_publication\n"
+            "  - openalex_publication\n"
+            "  - pubchem_compound\n"
+            "  - pubmed_publication\n"
+            "  - semanticscholar_publication\n"
+            "  - uniprot_idmapping\n"
+            "  - uniprot_protein\n"
+        )
 
     def test_list_pipelines_output_format(
         self,
