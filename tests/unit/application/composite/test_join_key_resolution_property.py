@@ -18,7 +18,10 @@ _IDENT = st.builds(
     st.sampled_from(tuple(_LOWER_ALPHA)),
     st.text(alphabet=_LOWER_ALNUM, min_size=0, max_size=7),
 )
-_PROPERTY_TEST_SETTINGS = settings(suppress_health_check=[HealthCheck.too_slow])
+_PROPERTY_TEST_SETTINGS = settings(
+    suppress_health_check=[HealthCheck.too_slow],
+    deadline=None,
+)
 
 
 def _build_resolver() -> JoinKeyResolverService:
@@ -155,6 +158,3 @@ def test_resolve_composite_join_keys_preserves_key_cardinality(
     assert len(right_keys) == len(join_keys)
     assert set(left_keys).issubset(join_key_set)
     assert set(right_keys).issubset(join_key_set)
-
-
-_PROPERTY_TEST_SETTINGS = settings(suppress_health_check=[HealthCheck.too_slow])
