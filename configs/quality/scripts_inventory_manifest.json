@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-26T16:47:17.131943+00:00",
+  "generated_at": "2026-04-26T17:23:34.282121+00:00",
   "summary": {
     "total_scripts": 443,
     "status_counts": {
@@ -5965,7 +5965,7 @@
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 62,
+          "line": 63,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/ci/validate_contract_identity.py"
         },
@@ -5986,7 +5986,7 @@
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 78,
+          "line": 79,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/ci/validate_contract_registry.py"
         },
@@ -6027,7 +6027,7 @@
         },
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 116,
+          "line": 117,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/ci/validate_registry_dq_refs.py"
         },
@@ -6060,13 +6060,13 @@
         },
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 97,
+          "line": 98,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/ci/validate_schema_classifier_gate.py --base-sha \"$BASE_SHA\" --head-sha \"$HEAD_SHA\""
         },
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 99,
+          "line": 100,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/ci/validate_schema_classifier_gate.py --head-sha \"$HEAD_SHA\""
         },
@@ -7575,7 +7575,7 @@
       "references": [
         {
           "path": ".github/workflows/duplication-complexity.yml",
-          "line": 209,
+          "line": 210,
           "source_group": "ci",
           "text": "run: python -m scripts.engineering.qa check-constructor-args --warn-only"
         },
@@ -8667,7 +8667,7 @@
           "path": ".github/workflows/tests.yml",
           "line": 69,
           "source_group": "ci",
-          "text": "run: python scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90"
+          "text": "run: uv run python scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90"
         },
         {
           "path": "docs/03-guides/testing.md",
@@ -8776,7 +8776,7 @@
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
-          "line": 43,
+          "line": 51,
           "source_group": "ci",
           "text": "run: python scripts/engineering/repo/audit_root_cleanliness.py"
         },

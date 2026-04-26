@@ -412,6 +412,8 @@ known-first-party = ["bioetl", "tests"]
 "src/bioetl/composition/**/*.py" = ["ARG001", "ARG002", "ARG004", "ARG005", "E402"]
 # Interfaces layer
 "src/bioetl/interfaces/**/*.py" = ["ARG001", "ARG002"]
+# Memory graph module is a standalone tool; print() is expected, line lengths are relaxed
+"src/memory/**/*.py" = ["T201", "E501", "F821", "B008"]
 
 # ============ MUTMUT (Mutation Testing) ============
 [tool.mutmut]

@@ -128,6 +128,7 @@ jobs:
               "src/bioetl/application/pipelines/",  # Extractors with complex parsing logic (CC=11-12)
               "src/bioetl/interfaces/cli/",  # CLI formatters with presentation logic (CC=11)
               "src/tools/",  # Utility scripts with complex reporting logic
+              "src/memory/",  # Memory graph importers with complex record iteration (CC=12-13)
           }
 
           # Exempted files (specific files with justified complexity)
