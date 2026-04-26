@@ -14,6 +14,10 @@ class InMemoryRunManifestStore(RunManifestPort):
         self._items: dict[str, RunManifest] = {}
         self._by_run_id: dict[str, str] = {}
 
+    @property
+    def items(self) -> dict[str, RunManifest]:
+        return self._items
+
     def save(self, manifest: RunManifest) -> None:
         self._items[manifest.manifest_id] = manifest
         self._by_run_id[str(manifest.run_id)] = manifest.manifest_id
@@ -29,6 +33,10 @@ class InMemoryRunManifestStore(RunManifestPort):
 class InMemoryRunLedgerStore(RunLedgerPort):
     def __init__(self) -> None:
         self._items: list[RunLedgerEntry] = []
+
+    @property
+    def items(self) -> list[RunLedgerEntry]:
+        return self._items
 
     def append(self, entry: RunLedgerEntry) -> None:
         self._items.append(entry)

@@ -1393,7 +1393,7 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
         ledger_port=ledger_store,
         manifest_id=manifest.manifest_id,
         run_id=run_id,
-        _entry_id_factory=lambda: f"entry-smoke-{len(ledger_store._items) + 1}",
+        _entry_id_factory=lambda: f"entry-smoke-{len(ledger_store.items) + 1}",
     )
     ledger_service.record_manifest_created(manifest)
     ledger_service.record_run_started()

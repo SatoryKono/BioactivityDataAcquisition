@@ -264,7 +264,7 @@ def _build_ledger_entries(
         service.record_run_shutdown(metrics_snapshot={"records_silver": 2})
     else:
         raise AssertionError(f"unsupported terminal status {terminal_status!r}")
-    return tuple(store._items)
+    return tuple(store.items)
 
 
 def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> None:

@@ -304,7 +304,14 @@ def bootstrap_observability_bundle(
         logger_bootstrapper=bootstrap_logger_port,
         tracer_bootstrapper=bootstrap_tracer_port,
         metrics_bootstrapper=bootstrap_metrics_port,
-        audit_bootstrapper=_audit_bootstrapper,
+        audit_bootstrapper=lambda audit_settings, audit_logger, audit_metrics, audit_tracer: (
+            _create_runtime_audit_port(
+                settings=audit_settings,
+                logger=audit_logger,
+                metrics=audit_metrics,
+                tracing=audit_tracer,
+            )
+        ),
         dq_monitor_bootstrapper=bootstrap_dq_monitor_port,
         preflight_validator=validate_observability_preflight,
         yaml_config=yaml_config,
