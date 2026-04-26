@@ -1,4 +1,4 @@
-.PHONY: qa-arch-fast qa-debt quarantine-inspect quarantine-replay quarantine-purge release-lock
+.PHONY: qa-arch-fast qa-arch-full qa-debt quarantine-inspect quarantine-replay quarantine-purge release-lock
 
 RUN ?= python3 -m
 PIPELINE ?=
@@ -6,6 +6,9 @@ RUN_ID ?=
 
 qa-arch-fast:
 	$(RUN) pytest tests/architecture/ -m "not slow and not serial and not memory"
+
+qa-arch-full:
+	$(RUN) pytest tests/architecture/ -m "not slow and not benchmark and not memory"
 
 qa-debt:
 	$(RUN) scripts.engineering.qa.check_quality_exemptions --trend-report on
