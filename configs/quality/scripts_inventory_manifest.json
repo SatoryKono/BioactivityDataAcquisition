@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-26T12:17:11.237750+00:00",
+  "generated_at": "2026-04-26T13:18:50.909078+00:00",
   "summary": {
     "total_scripts": 445,
     "status_counts": {
@@ -62,7 +62,7 @@
       "references": [
         {
           "path": ".github/workflows/sonarcloud.yml",
-          "line": 64,
+          "line": 76,
           "source_group": "ci",
           "text": "python3 scripts/ai/check_sonar_issues.py \\"
         },
@@ -2643,7 +2643,7 @@
       "references": [
         {
           "path": ".github/workflows/sonarcloud.yml",
-          "line": 51,
+          "line": 63,
           "source_group": "ci",
           "text": "python3 scripts/ai/sonar_issue_processor.py --write"
         },

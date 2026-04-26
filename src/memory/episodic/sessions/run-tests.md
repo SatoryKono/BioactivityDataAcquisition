@@ -1,5 +1,4 @@
-______________________________________________________________________
-
+---
 id: run-tests
 title: Run BioETL tests
 task_id: run-tests
@@ -7,10 +6,10 @@ created_at: '2026-04-24T05:26:48Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
-
 - <add-source-ref>
-
-## summary: Active task session context. query: BioETL tests
+summary: Active task session context.
+query: BioETL tests
+---
 
 # Session note
 
