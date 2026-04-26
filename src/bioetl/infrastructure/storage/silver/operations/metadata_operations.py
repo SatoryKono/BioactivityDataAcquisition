@@ -263,6 +263,7 @@ class SilverMetadataOperations:
         error: str | None = None,
     ) -> None:
         """Log Silver write audit event."""
+        del mode, error
         if not self._audit:
             return
 

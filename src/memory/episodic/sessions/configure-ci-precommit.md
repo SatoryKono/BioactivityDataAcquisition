@@ -7,8 +7,7 @@ ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
-summary: Active task session context.
-query: Configure CI Local Precommit in Run/Debug configuration by integrating relevant CI checks into pre-commit hooks.
+summary: "Active task session context. query: Configure CI Local Precommit in Run/Debug configuration by integrating relevant CI checks into pre-commit hooks."
 ---
 
 # Session note

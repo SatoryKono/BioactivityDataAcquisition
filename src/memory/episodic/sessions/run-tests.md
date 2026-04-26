@@ -7,8 +7,7 @@ ttl_days: 14
 confidence: episodic
 source_refs:
 - <add-source-ref>
-summary: Active task session context.
-query: BioETL tests
+summary: "Active task session context. query: BioETL tests"
 ---
 
 # Session note
