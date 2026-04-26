@@ -33,7 +33,7 @@ ______________________________________________________________________
   `docs/05-operations/`, а одноразовые status/recovery/final-summary артефакты
   MUST архивироваться под `docs/99-archive/`.
 - Root-level tracked директории MUST ограничиваться approved runtime/tooling and
-  project surfaces: `.ai`, `.aiassistant`, `ai`, `.claude`, `.codex`, `.codex_tmp`,
+  project surfaces: `.ai`, `.aiassistant`, `ai`, `.codex`, `.codex_tmp`,
   `.cursor`, `.gemini`, `.github`, `.idea`, `.jules`, `.junie`, `.sonarlint`,
   `.vibe`, `.vscode`, `assets`, `configs`, `data`, `docs`, `grafana`,
   `reports`, `scripts`, `src`, `testing_support`, `tests`.

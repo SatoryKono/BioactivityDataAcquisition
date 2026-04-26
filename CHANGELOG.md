@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Claude runtime path migration (`.claude/*` -> `ai/claude/*`)**: Introduced canonical Claude runtime tree under `ai/claude/` and updated architecture tests, CI workflows, engineering scripts, and runtime/docs links to resolve the new location. Legacy `.claude/` is retained as a compatibility layer for one release window.
+- **Claude runtime path migration (`.claude/*` -> `ai/claude/*`)**: Canonical Claude runtime tree now lives under `ai/claude/`; architecture tests, CI workflows, engineering scripts, and runtime/docs links were updated. Legacy `.claude/` compatibility layer has been removed after stabilization.
 
 - **Normalization governance closure for ChEMBL and publication types (#3033, #3035, #3036, #3038, #3040):** ChEMBL assay-parameter canonicalization now lives in the shipped profile, ChEMBL assay structured JSON/code-label semantics have focused tests, publication providers preserve raw publication-type values while deriving taxonomy-backed classification fields, and observed-value fixtures now guard representative ChEMBL enum/unit-like fields offline.
   - Modified: `configs/enums/chembl.yaml`, `configs/entities/chembl/publication.yaml`, ChEMBL/publication normalization profiles, publication transformers, and generated normalization matrix artifacts.
