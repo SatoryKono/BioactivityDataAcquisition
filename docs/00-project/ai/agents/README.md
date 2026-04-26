@@ -27,7 +27,7 @@ ______________________________________________________________________
 - Логические профили `py-*` отображаются на native runtime mechanisms
   (`spawn_agent` roles в Codex, runtime-specific agent tools/registries в других
   средах).
-- Edit runtime behavior in `.codex/**` or `.claude/**` first; use this docs
+- Edit runtime behavior in `.codex/**` or `ai/claude/**` first; use this docs
   surface for published mirrors, navigation, and contributor guidance.
 
 Ownership and sync rules are fixed in

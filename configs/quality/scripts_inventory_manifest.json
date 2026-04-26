@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-26T16:16:04.707235+00:00",
+  "generated_at": "2026-04-26T16:47:17.131943+00:00",
   "summary": {
     "total_scripts": 443,
     "status_counts": {
@@ -3898,7 +3898,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 42,
+      "reference_count": 41,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -3920,13 +3920,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 166,
-          "source_group": "ci",
-          "text": "entry: python scripts/diagrams/lint_diagrams.py"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 413,
+          "line": 182,
           "source_group": "ci",
           "text": "entry: python scripts/diagrams/lint_diagrams.py"
         },
@@ -3947,6 +3941,12 @@
           "line": 176,
           "source_group": "docs",
           "text": "`scripts/diagrams/lint_diagrams.py` проверяет оба каталога:"
+        },
+        {
+          "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
+          "line": 249,
+          "source_group": "docs",
+          "text": "**CI Rules (lint_diagrams.py):**"
         }
       ]
     },
@@ -3994,17 +3994,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 22,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
-          "line": 172,
-          "source_group": "ci",
-          "text": "entry: python scripts/diagrams/prune_orphan_nodes.py --check"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 419,
+          "line": 188,
           "source_group": "ci",
           "text": "entry: python scripts/diagrams/prune_orphan_nodes.py --check"
         },
@@ -4043,6 +4037,12 @@
           "line": 484,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --check"
+        },
+        {
+          "path": "docs/02-architecture/diagrams/README.md",
+          "line": 487,
+          "source_group": "docs",
+          "text": "python scripts/diagrams/prune_orphan_nodes.py --check --json"
         }
       ]
     },
@@ -6754,41 +6754,23 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 5,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
-          "line": 104,
+          "line": 109,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m pip_audit --cache-dir .cache/pip-audit --skip-editable --strict"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 222,
+          "line": 238,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 229,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 351,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py -m pip_audit --cache-dir .cache/pip-audit --skip-editable --strict"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 469,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 476,
+          "line": 245,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
         },
@@ -7934,7 +7916,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 26,
+      "reference_count": 25,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -7962,13 +7944,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 236,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 483,
+          "line": 252,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -7983,6 +7959,12 @@
           "line": 71,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --check"
+        },
+        {
+          "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
+          "line": 72,
+          "source_group": "docs",
+          "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         }
       ]
     },
@@ -8577,7 +8559,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -8587,13 +8569,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 222,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 469,
+          "line": 238,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"
         },
@@ -8634,7 +8610,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -8644,13 +8620,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 229,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 476,
+          "line": 245,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
         },
@@ -8802,7 +8772,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 15,
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -8812,19 +8782,13 @@
         },
         {
           "path": ".github/workflows/root-hygiene.yml",
-          "line": 34,
+          "line": 37,
           "source_group": "ci",
           "text": "run: python scripts/engineering/repo/audit_root_cleanliness.py"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 143,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/repo/audit_root_cleanliness.py"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 390,
+          "line": 158,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/repo/audit_root_cleanliness.py"
         },
@@ -8851,6 +8815,12 @@
           "line": 201,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py"
+        },
+        {
+          "path": "docs/03-guides/cleanup-policy.md",
+          "line": 269,
+          "source_group": "docs",
+          "text": "- CI **MUST** run `scripts/engineering/repo/audit_root_cleanliness.py`; this"
         }
       ]
     },
@@ -11180,7 +11150,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -11190,13 +11160,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 158,
-          "source_group": "ci",
-          "text": "entry: uv run --active python scripts/schema/check_config_invariants.py"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 405,
+          "line": 173,
           "source_group": "ci",
           "text": "entry: uv run --active python scripts/schema/check_config_invariants.py"
         },
@@ -11567,17 +11531,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
-          "line": 149,
-          "source_group": "ci",
-          "text": "entry: python scripts/schema/lint_config_paths.py"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 396,
+          "line": 164,
           "source_group": "ci",
           "text": "entry: python scripts/schema/lint_config_paths.py"
         },
@@ -11600,7 +11558,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 9,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -11610,13 +11568,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 133,
-          "source_group": "ci",
-          "text": "entry: python scripts/schema/validate_pipeline_configs.py"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 380,
+          "line": 148,
           "source_group": "ci",
           "text": "entry: python scripts/schema/validate_pipeline_configs.py"
         },
@@ -11649,6 +11601,12 @@
           "line": 16,
           "source_group": "scripts",
           "text": "- `scripts/schema/validate_pipeline_configs.py` is an officially supported compatibility wrapper around the canonical validator in `docs/00-project/ai/agents/scripts/py-config-bot-2.py`."
+        },
+        {
+          "path": "scripts/schema/README.md",
+          "line": 35,
+          "source_group": "scripts",
+          "text": "| `validate-configs`           | `scripts/schema/validate_pipeline_configs.py`                          | Validate unified pipeline YAML configs against JSON Schema                             |"
         }
       ]
     },
@@ -11754,25 +11712,25 @@
       "references": [
         {
           "path": "src/tools/README.md",
-          "line": 210,
+          "line": 212,
           "source_group": "scripts",
           "text": "### apply_entity_naming_rename_plan.py"
         },
         {
           "path": "src/tools/README.md",
-          "line": 214,
+          "line": 216,
           "source_group": "scripts",
           "text": "**Location:** `src/tools/apply_entity_naming_rename_plan.py`"
         },
         {
           "path": "src/tools/README.md",
-          "line": 219,
+          "line": 221,
           "source_group": "scripts",
           "text": "python src/tools/apply_entity_naming_rename_plan.py --wave W1-domain-entities"
         },
         {
           "path": "src/tools/README.md",
-          "line": 220,
+          "line": 222,
           "source_group": "scripts",
           "text": "python src/tools/apply_entity_naming_rename_plan.py --wave W2-gold-contract-schemas --apply"
         },
@@ -11805,19 +11763,19 @@
         },
         {
           "path": "src/tools/README.md",
-          "line": 223,
+          "line": 225,
           "source_group": "scripts",
           "text": "### create_pipeline.py"
         },
         {
           "path": "src/tools/README.md",
-          "line": 227,
+          "line": 229,
           "source_group": "scripts",
           "text": "**Location:** `src/tools/create_pipeline.py`"
         },
         {
           "path": "src/tools/README.md",
-          "line": 232,
+          "line": 234,
           "source_group": "scripts",
           "text": "python src/tools/create_pipeline.py --provider <name> --entity <name> --dry-run"
         }
@@ -11862,19 +11820,19 @@
         },
         {
           "path": "src/tools/README.md",
-          "line": 250,
+          "line": 252,
           "source_group": "scripts",
           "text": "### differentiate_linkstyle.py"
         },
         {
           "path": "src/tools/README.md",
-          "line": 254,
+          "line": 256,
           "source_group": "scripts",
           "text": "**Location:** `src/tools/differentiate_linkstyle.py`"
         },
         {
           "path": "src/tools/README.md",
-          "line": 259,
+          "line": 261,
           "source_group": "scripts",
           "text": "python src/tools/differentiate_linkstyle.py --dry-run"
         }
@@ -12147,13 +12105,13 @@
         },
         {
           "path": "src/tools/README.md",
-          "line": 263,
+          "line": 265,
           "source_group": "scripts",
           "text": "### scripts/config_matrix_generator.py"
         },
         {
           "path": "src/tools/README.md",
-          "line": 267,
+          "line": 269,
           "source_group": "scripts",
           "text": "**Location:** `src/tools/scripts/config_matrix_generator.py`"
         },
@@ -12207,7 +12165,7 @@
         },
         {
           "path": "src/tools/README.md",
-          "line": 283,
+          "line": 285,
           "source_group": "scripts",
           "text": "**Location:** `src/tools/scripts/validate_unified_configs.py`"
         },

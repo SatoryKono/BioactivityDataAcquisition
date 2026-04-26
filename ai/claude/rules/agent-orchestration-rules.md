@@ -1,7 +1,6 @@
 # Claude Orchestration Rules Mirror
 
-This file exists as a compatibility surface for runtime checks that still
-reference `.claude/rules/agent-orchestration-rules.md`.
+This file is the Claude orchestration-rules surface in `ai/claude/rules/`.
 
 Canonical orchestration guidance lives under:
 

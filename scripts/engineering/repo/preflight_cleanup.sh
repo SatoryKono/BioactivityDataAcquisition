@@ -64,9 +64,9 @@ safe_file_size_bytes() {
 
 FIND_ROOTS=(.)
 EXCLUDE_DIRS=(
+  ai
   .benchmarks
   .cache
-  .claude
   .codex
   .codex_tmp
   .coverage-sharded

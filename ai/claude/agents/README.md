@@ -1,9 +1,8 @@
 # Claude Agent Surface Mirror
 
-This directory is a compatibility mirror for tooling that still resolves
-`.claude/agents/*` paths.
+This directory is the Claude runtime agent surface under `ai/claude/agents/*`.
 
-Canonical agent registry surfaces live here:
+Canonical cross-runtime references:
 
 - `.codex/agents/README.md`
 - `.codex/agents/ORCHESTRATION.md`

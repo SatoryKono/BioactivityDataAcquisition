@@ -18,8 +18,8 @@ LEGACY_ENTITY_NAMES: Final[frozenset[str]] = frozenset(
 )
 
 LEGACY_PATH_FRAGMENTS: Final[tuple[tuple[str, str], ...]] = (
-    ("../../" + "dq/", "../../quality/"),
-    ("../../" + "filter/", "../../filters/"),
+    (f"../../{'dq'}/", "../../quality/"),
+    (f"../../{'filter'}/", "../../filters/"),
 )
 
 PROVIDER_AUTH_REQUIREMENTS: Final[dict[str, list[str]]] = {
@@ -134,8 +134,8 @@ QUALITY_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
         "entity_cross_field_validations",
         "key_nullability",
         "entity_conditional_validations",
-        "required_fields",
-        "validation_level",
+        "provider_conditional_validations",
+        "dq_rules",
     }
 )
 
@@ -150,7 +150,7 @@ FILTER_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
         "extraction_params",
         "batch_size",
         "page_size",
-        "compatibility_mode",
+        "filter_rules",
     }
 )
 
@@ -161,7 +161,8 @@ CONTRACT_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
         "rename_map",
         "hash_include",
         "hash_exclude",
-        "compatibility_mode",
+        "scd_type",
+        "gold_business_rules",
     }
 )
 

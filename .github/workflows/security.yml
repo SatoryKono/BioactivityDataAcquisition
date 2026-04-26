@@ -9,14 +9,14 @@ on:
       - 'docs/**'
       - '*.md'
       - '.ai/**'
-      - '.claude/**'
+      - 'ai/claude/**'
       - 'LICENSE'
   pull_request:
     paths-ignore:
       - 'docs/**'
       - '*.md'
       - '.ai/**'
-      - '.claude/**'
+      - 'ai/claude/**'
       - 'LICENSE'
 
 concurrency:

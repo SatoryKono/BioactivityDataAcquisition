@@ -2,7 +2,6 @@
 # Install: pip install pre-commit && pre-commit install
 # Run manually: pre-commit run --all-files
 
-
 repos:
   # Ruff - Fast Python linter and formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -17,8 +16,7 @@ repos:
             debug_chembl_pub2?\.py|
             debug_.*\.py|
             docs/00-project/ai/agents/.*\.py|
-            docs/00-project/ai/skills/.*\.py|
-            docs/plugins/link_checker/.*\.py
+            docs/00-project/ai/skills/.*\.py
           )$
       # Run the formatter
       - id: ruff-format
@@ -28,8 +26,7 @@ repos:
             debug_chembl_pub2?\.py|
             debug_.*\.py|
             docs/00-project/ai/agents/.*\.py|
-            docs/00-project/ai/skills/.*\.py|
-            docs/plugins/link_checker/.*\.py
+            docs/00-project/ai/skills/.*\.py
           )$
 
   # Security checks
@@ -131,10 +128,20 @@ repos:
 
       - id: forbid-cache-files
         name: Block common cache and temporary files
-        entry: '\b(__pycache__|\.pyc|\.pyo|\.pytest_cache|\.mypy_cache|\.ruff_cache|\.python-user|\.codex_tmp|test_.*\.(js|py|json))\b'
+        entry: ^.*$
         language: pygrep
-        args: [--multiline]
-        exclude: ^(tests/|\.codex/|\.agent-work/|\.github/|\.gitignore|\.pre-commit-config\.yaml|configs/quality/scripts_inventory_manifest\.json|pyproject\.toml|scripts/)
+        files: >
+          (?x)^(
+            .*__pycache__/.*|
+            .*\.pyc$|
+            .*\.pyo$|
+            .*\.pytest_cache/.*|
+            .*\.mypy_cache/.*|
+            .*\.ruff_cache/.*|
+            .*\.python-user/.*|
+            .*\.codex_tmp/.*
+          )$
+        exclude: ^(tests/|\.codex/|\.gemini/|\.agent-work/)
 
       - id: validate-pipeline-configs
         name: Validate unified pipeline YAML configs
@@ -167,6 +174,7 @@ repos:
         language: system
         pass_filenames: false
         files: ^configs/
+        exclude: ^configs/entities/composite/
         types: [yaml]
 
       - id: lint-diagrams

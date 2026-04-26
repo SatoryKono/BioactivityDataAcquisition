@@ -10,16 +10,16 @@ Run the role-specific workflow as defined in the py-architecture-debt-bot profil
 
 ## Source Of Truth
 
-- Primary profile: `../../../.claude/agents/py-architecture-debt-bot.md`
-- Team orchestration: `../../../.claude/agents/ORCHESTRATION.md`
-- Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`
+- Primary profile: `ai/claude/agents/py-architecture-debt-bot.md`
+- Team orchestration: `ai/claude/agents/ORCHESTRATION.md`
+- Shared project context: `docs/00-project/ai/memory/agent-memory.md`
 - Deterministic helpers:
   - `python -m scripts.engineering.qa generate-debt-tasks`
   - `python -m scripts.engineering.qa reduce-architecture-debt`
 
 ## Workflow
 
-1. Open and follow `../../../.claude/agents/py-architecture-debt-bot.md`.
+1. Open and follow `ai/claude/agents/py-architecture-debt-bot.md`.
 1. Use the deterministic helpers before editing code or delegating subagents.
 1. Keep `configs/` mutations delegated to `py-config-bot`.
 1. Close every debt-reduction wave with `py-test-bot`, `py-doc-bot`, and `py-audit-bot`.

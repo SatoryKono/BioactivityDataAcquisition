@@ -3,21 +3,14 @@ ______________________________________________________________________
 id: task-refresh
 title: Refresh before retrieval
 task_id: task-refresh
-created_at: '2026-04-26T11:13:49Z'
-ttl_days: '14'
+created_at: '2026-04-26T15:58:49Z'
+ttl_days: 14
 confidence: episodic
 source_refs:
 
 - src/memory/README.md
-- 'Title: Refresh before retrieval'
-- 'Retrieval query: Refresh before retrieval'
-- 'Catalog hits: 0'
-- 'RAG hits: 1'
-- 'Timeline hits: 1'
-- Replace with current findings
   summary: Active task session context.
   query: Refresh before retrieval
-  kind: episodic
 
 ______________________________________________________________________
 

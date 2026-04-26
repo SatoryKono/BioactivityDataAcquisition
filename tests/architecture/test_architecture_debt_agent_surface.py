@@ -6,9 +6,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-CODEX_AGENT = ROOT / ".claude" / "agents" / "py-architecture-debt-bot.md"
-CLAUDE_AGENT = ROOT / ".claude" / "agents" / "py-architecture-debt-bot.md"
-SKILL_FILE = ROOT / ".claude" / "skills" / "py-architecture-debt-bot" / "SKILL.md"
+CODEX_AGENT = ROOT / "ai" / "claude" / "agents" / "py-architecture-debt-bot.md"
+CLAUDE_AGENT = ROOT / "ai" / "claude" / "agents" / "py-architecture-debt-bot.md"
+SKILL_FILE = ROOT / "ai" / "claude" / "skills" / "py-architecture-debt-bot" / "SKILL.md"
 PROMPT_FILES = (
     ROOT
     / "docs"
@@ -39,7 +39,7 @@ def test_architecture_debt_runtime_surfaces_exist() -> None:
 
 def test_architecture_debt_skill_points_to_claude_surface() -> None:
     text = SKILL_FILE.read_text(encoding="utf-8")
-    assert ".claude/agents/py-architecture-debt-bot.md" in text
+    assert "ai/claude/agents/py-architecture-debt-bot.md" in text
     assert ".codex/agents/py-architecture-debt-bot.md" not in text
 
 

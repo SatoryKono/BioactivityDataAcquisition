@@ -17,7 +17,7 @@ ______________________________________________________________________
 ## Source Of Truth
 
 - Canonical skill entrypoint: `.codex/skills/py-test-swarm/SKILL.md`
-- Team orchestration map: `.claude/agents/ORCHESTRATION.md`
+- Team orchestration map: `ai/claude/agents/ORCHESTRATION.md`
 - Shared project context: `docs/00-project/ai/memory/agent-memory.md`
 
 ## Workflow
