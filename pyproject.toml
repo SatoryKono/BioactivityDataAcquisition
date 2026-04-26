@@ -7,10 +7,9 @@ name = "bioetl"
 version = "6.1.0"
 description = "BioETL: Bioactivity data acquisition and processing pipeline"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: MIT License",
@@ -262,7 +261,7 @@ precision = 2
 # - Checks Awaitable[T] type annotations are properly awaited
 # Architecture tests in tests/test_architecture.py provide additional validation.
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 strict = true
 incremental = false  # Work around unstable cache/build-graph crashes in compiled mypy on large graphs.
 warn_return_any = true

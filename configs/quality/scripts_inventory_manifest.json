@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-26T19:48:46.411105+00:00",
+  "generated_at": "2026-04-26T19:59:11.838096+00:00",
   "summary": {
     "total_scripts": 443,
     "status_counts": {
@@ -5908,7 +5908,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 633,
+          "line": 626,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -7611,13 +7611,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 700,
+          "line": 693,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 709,
+          "line": 702,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         }
@@ -8040,7 +8040,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 553,
+          "line": 546,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -11580,7 +11580,7 @@
         },
         {
           "path": "pyproject.toml",
-          "line": 124,
+          "line": 123,
           "source_group": "build",
           "text": "# JSON Schema validation (scripts/validate_pipeline_configs.py)"
         },

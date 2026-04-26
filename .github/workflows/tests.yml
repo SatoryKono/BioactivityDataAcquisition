@@ -54,7 +54,7 @@ jobs:
             -   name: Install uv + cache + dependencies
                 uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
+                    python-version: "3.12"
 
             -   name: Validate VCR cassette placement
                 run: python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py
@@ -95,7 +95,7 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
+                    python-version: "3.12"
 
             -   name: Run control-plane completeness smoke
                 run: |
@@ -128,7 +128,7 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
+                    python-version: "3.12"
 
             -   name: Validate quality exemptions registry (owner/reason/expiry metadata)
                 run: |
@@ -200,7 +200,7 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
+                    python-version: "3.12"
 
             -   name: Start local Neo4j for live audit
                 run: docker compose up -d neo4j
@@ -236,7 +236,7 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
+                    python-version: "3.12"
 
             -   name: Validate pipeline configs + schema links (blocking)
                 run: uv run python scripts/schema/validate_pipeline_configs.py
@@ -295,7 +295,7 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
+                    python-version: "3.12"
 
             -   name: Run Track D fail-fast gate (fixtures + compatibility + linkage)
                 run: |
@@ -330,7 +330,7 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
+                    python-version: "3.12"
 
             -   name: Run DQ consistency validation
                 run: uv run python scripts/engineering/qa/validate_dq_consistency.py
@@ -414,7 +414,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                python-version: [ "3.11", "3.12" ]
+                python-version: [ "3.12" ]
                 test-group:
                     -   name: unit-domain
                         path: tests/unit/domain/
@@ -451,23 +451,16 @@ jobs:
                 run: |
                     mkdir -p reports/coverage
                     mkdir -p reports/test-telemetry
-                    if [ "${{ matrix.python-version }}" = "3.11" ]; then
-                      COVERAGE_FILE=reports/coverage/.coverage.${{ matrix.test-group.name }} \
-                      uv run pytest ${{ matrix.test-group.path }} \
-                        -m "not serial and not memory" \
-                        -n auto --dist loadscope --max-worker-restart=0 \
-                        -q --tb=short \
-                        --junitxml=reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml \
-                        --cov=src/bioetl --cov-report=
-                    else
-                      uv run pytest ${{ matrix.test-group.path }} \
-                        -m "not serial and not memory" \
-                        -n auto --dist loadscope --max-worker-restart=0 \
-                        -q --tb=short
-                    fi
+                    COVERAGE_FILE=reports/coverage/.coverage.${{ matrix.test-group.name }} \
+                    uv run pytest ${{ matrix.test-group.path }} \
+                      -m "not serial and not memory" \
+                      -n auto --dist loadscope --max-worker-restart=0 \
+                      -q --tb=short \
+                      --junitxml=reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml \
+                      --cov=src/bioetl --cov-report=
 
-            -   name: Upload coverage shard (${{ matrix.test-group.name }} on Python 3.11)
-                if: always() && matrix.python-version == '3.11'
+            -   name: Upload coverage shard (${{ matrix.test-group.name }} on Python 3.12)
+                if: always() && matrix.python-version == '3.12'
                 uses: actions/upload-artifact@v4
                 with:
                     name: coverage-data-${{ matrix.test-group.name }}
@@ -475,8 +468,8 @@ jobs:
                     if-no-files-found: error
                     retention-days: 7
 
-            -   name: Upload test telemetry (${{ matrix.test-group.name }} on Python 3.11)
-                if: always() && matrix.python-version == '3.11'
+            -   name: Upload test telemetry (${{ matrix.test-group.name }} on Python 3.12)
+                if: always() && matrix.python-version == '3.12'
                 uses: actions/upload-artifact@v4
                 with:
                     name: test-telemetry-${{ matrix.test-group.name }}
@@ -668,7 +661,7 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
+                    python-version: "3.12"
 
             -   name: Download JUnit telemetry shards
                 uses: actions/download-artifact@v4
