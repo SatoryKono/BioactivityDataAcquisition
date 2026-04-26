@@ -77,6 +77,7 @@ ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
         "scripts",
         "src",
         "tests",
+        "tools",
     }
 )
 

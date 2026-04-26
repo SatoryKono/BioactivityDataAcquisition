@@ -66,7 +66,7 @@ jobs:
                 run: uv run python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check
 
             -   name: Validate VCR metadata stale-age policy
-                run: python scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90
+                run: uv run python scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90
 
             -   name: Validate VCR metadata catalog
                 run: uv run python -m scripts.engineering.qa report-vcr-metadata --check
