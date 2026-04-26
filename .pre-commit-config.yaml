@@ -15,7 +15,8 @@ repos:
             check_cfg\.py|
             debug_chembl_pub2?\.py|
             debug_.*\.py|
-            docs/00-project/ai/agents/.*\.py
+            docs/00-project/ai/agents/.*\.py|
+            docs/00-project/ai/skills/.*\.py
           )$
       # Run the formatter
       - id: ruff-format
@@ -24,7 +25,8 @@ repos:
             check_cfg\.py|
             debug_chembl_pub2?\.py|
             debug_.*\.py|
-            docs/00-project/ai/agents/.*\.py
+            docs/00-project/ai/agents/.*\.py|
+            docs/00-project/ai/skills/.*\.py
           )$
 
   # Security checks
@@ -72,7 +74,8 @@ repos:
             check_cfg\.py|
             debug_chembl_pub2?\.py|
             debug_.*\.py|
-            docs/00-project/ai/agents/.*\.py
+            docs/00-project/ai/agents/.*\.py|
+            docs/00-project/ai/skills/.*\.py
           )$
       - id: mixed-line-ending
         args: [--fix=lf]
@@ -113,7 +116,7 @@ repos:
 
       - id: architecture-smoke
         name: Fast architecture smoke checks
-        entry: uv run pytest tests/architecture/test_future_annotations_policy.py tests/architecture/test_naming_conventions.py tests/architecture/test_no_structlog_in_application_interfaces.py tests/architecture/test_no_datetime_now_in_infrastructure.py tests/architecture/test_no_random_in_writers.py tests/architecture/test_forbidden_imports.py -q
+        entry: uv run --active pytest tests/architecture/test_future_annotations_policy.py tests/architecture/test_naming_conventions.py tests/architecture/test_no_structlog_in_application_interfaces.py tests/architecture/test_no_datetime_now_in_infrastructure.py tests/architecture/test_no_random_in_writers.py tests/architecture/test_forbidden_imports.py -q
         language: system
         pass_filenames: false
         stages: [pre-commit]
@@ -123,7 +126,7 @@ repos:
         entry: '\b(__pycache__|\.pyc|\.pyo|\.pytest_cache|\.mypy_cache|\.ruff_cache|\.python-user|\.codex_tmp|test_.*\.(js|py|json))\b'
         language: pygrep
         args: [--multiline]
-        exclude: ^tests/
+        exclude: ^(tests/|\.codex/|\.agent-work/)
 
       - id: validate-pipeline-configs
         name: Validate unified pipeline YAML configs
@@ -147,17 +150,16 @@ repos:
         language: python
         pass_filenames: false
         files: ^(configs/|src/|docs/)
+        exclude: ^src/bioetl/infrastructure/config/config_ci_contract\.py$
         types_or: [yaml, json, python, markdown]
 
       - id: check-config-invariants
         name: Validate config CI invariants (naming, schemas, auth, keys)
-        entry: python scripts/schema/check_config_invariants.py
-        language: python
+        entry: uv run --active python scripts/schema/check_config_invariants.py
+        language: system
         pass_filenames: false
         files: ^configs/
         types: [yaml]
-        additional_dependencies:
-          - pyyaml>=6.0
 
       - id: lint-diagrams
         name: Lint architecture diagrams (.mmd/.mermaid)

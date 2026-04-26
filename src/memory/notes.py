@@ -11,6 +11,10 @@ from typing import Any
 import yaml
 
 FRONTMATTER_DELIMITER = "---"
+LEGACY_FRONTMATTER_DELIMITER_PATTERN = re.compile(r"^_{3,}$")
+LEGACY_INDENTED_TOP_LEVEL_KEY_PATTERN = re.compile(
+    r"^\s{2,}(confidence|last_verified|summary|query|kind):"
+)
 SLUG_PATTERN = re.compile(r"[^a-z0-9]+")
 HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 
@@ -42,16 +46,50 @@ def normalize_text_key(value: str) -> str:
 def parse_markdown_note(path: Path) -> MemoryNote:
     """Parse a markdown note with YAML frontmatter."""
     text = path.read_text(encoding="utf-8")
-    if not text.startswith(f"{FRONTMATTER_DELIMITER}\n"):
+    lines = text.splitlines(keepends=True)
+    if not lines:
         raise ValueError(f"note is missing YAML frontmatter: {path}")
-    parts = text.split(f"\n{FRONTMATTER_DELIMITER}\n", 1)
-    if len(parts) != 2:
+    first_line = lines[0].strip()
+    if first_line != FRONTMATTER_DELIMITER and not LEGACY_FRONTMATTER_DELIMITER_PATTERN.match(
+        first_line
+    ):
+        raise ValueError(f"note is missing YAML frontmatter: {path}")
+
+    delimiter = first_line
+    end_index: int | None = None
+    for idx in range(1, len(lines)):
+        if lines[idx].strip() == delimiter:
+            end_index = idx
+            break
+    if end_index is None:
         raise ValueError(f"note frontmatter is not terminated: {path}")
-    metadata_text = parts[0][len(FRONTMATTER_DELIMITER) + 1 :]
-    metadata = yaml.safe_load(metadata_text) or {}
+
+    metadata_text = "".join(lines[1:end_index])
+    metadata = _load_frontmatter_metadata(metadata_text)
     if not isinstance(metadata, dict):
         raise ValueError(f"note frontmatter must be a mapping: {path}")
-    return MemoryNote(metadata=metadata, body=parts[1].lstrip("\n"))
+    body = "".join(lines[end_index + 1 :]).lstrip("\n")
+    return MemoryNote(metadata=metadata, body=body)
+
+
+def _load_frontmatter_metadata(metadata_text: str) -> dict[str, Any]:
+    """Parse note frontmatter with compatibility fallback for legacy malformed notes."""
+    try:
+        loaded = yaml.safe_load(metadata_text) or {}
+    except yaml.YAMLError:
+        normalized_lines = []
+        for line in metadata_text.splitlines():
+            if LEGACY_INDENTED_TOP_LEVEL_KEY_PATTERN.match(line):
+                normalized_lines.append(line.lstrip())
+            else:
+                normalized_lines.append(line)
+        loaded = yaml.safe_load("\n".join(normalized_lines)) or {}
+    if not isinstance(loaded, dict):
+        raise ValueError("note frontmatter must be a mapping")
+    ttl_days = loaded.get("ttl_days")
+    if isinstance(ttl_days, str) and ttl_days.isdigit():
+        loaded["ttl_days"] = int(ttl_days)
+    return loaded
 
 
 def extract_markdown_headings(body: str) -> list[str]:
