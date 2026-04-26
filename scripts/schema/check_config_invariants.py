@@ -75,15 +75,21 @@ def _deep_string_search(obj: Any, fragment: str) -> bool:
 
 
 def _entity_configs() -> list[Path]:
-    return sorted(p for p in ENTITIES_DIR.rglob(YAML_GLOB) if not p.name.startswith("_"))
+    return sorted(
+        p for p in ENTITIES_DIR.rglob(YAML_GLOB) if not p.name.startswith("_")
+    )
 
 
 def _provider_configs() -> list[Path]:
-    return sorted(p for p in PROVIDERS_DIR.glob(YAML_GLOB) if not p.name.startswith("_"))
+    return sorted(
+        p for p in PROVIDERS_DIR.glob(YAML_GLOB) if not p.name.startswith("_")
+    )
 
 
 def _composite_configs() -> list[Path]:
-    return sorted(p for p in COMPOSITES_DIR.glob(YAML_GLOB) if not p.name.startswith("_"))
+    return sorted(
+        p for p in COMPOSITES_DIR.glob(YAML_GLOB) if not p.name.startswith("_")
+    )
 
 
 def _all_config_paths() -> list[Path]:
@@ -133,7 +139,9 @@ def _append_entity_config_consistency_errors(
         return provider, entity
 
     entities = provider_data_by_name.get(provider, {}).get("entities")
-    declared_entities = {str(item) for item in entities} if isinstance(entities, list) else set()
+    declared_entities = (
+        {str(item) for item in entities} if isinstance(entities, list) else set()
+    )
     if declared_entities and entity not in declared_entities:
         errors.append(
             f"INV-CFG-002 {_rel(path)}: entity {entity!r} not declared in "

@@ -155,7 +155,9 @@ def _build_markdown(
     return "\n".join(lines)
 
 
-def _selected_runs(paths: list[Path], required_runs: int) -> tuple[list[Path], list[str]]:
+def _selected_runs(
+    paths: list[Path], required_runs: int
+) -> tuple[list[Path], list[str]]:
     """Select rerun reports and emit count violation when incomplete."""
     violations: list[str] = []
     if len(paths) < required_runs:
@@ -218,9 +220,7 @@ def _print_summary(runs: list[Path], recurrent_counters: Counter[str]) -> None:
     print("[e2e-rerun-stability] summary")
     print(f"  runs={len(runs)} reports={[str(path) for path in runs]}")
     print(f"  recurrent_infra_flaky={recurrent_counters.get('infra_flaky', 0)}")
-    print(
-        f"  recurrent_code_regression={recurrent_counters.get('code_regression', 0)}"
-    )
+    print(f"  recurrent_code_regression={recurrent_counters.get('code_regression', 0)}")
 
 
 def main() -> int:

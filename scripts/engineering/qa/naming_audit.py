@@ -551,7 +551,9 @@ def _iter_python_files(base_path: Path) -> Iterator[Path]:
         yield py_file
 
 
-def _iter_python_modules_with_trees(base_path: Path) -> Iterator[tuple[Path, ast.Module]]:
+def _iter_python_modules_with_trees(
+    base_path: Path,
+) -> Iterator[tuple[Path, ast.Module]]:
     """Yield parsed AST modules under the requested base path."""
     for py_file in _iter_python_files(base_path):
         try:
@@ -680,9 +682,9 @@ def _iter_class_symbol_surfaces(src_path: Path) -> Iterator[SymbolSurface]:
             kind = _class_surface_kind(py_file, node.name)
             if kind is None:
                 continue
-            semantic_family = _resolve_semantic_family(node.name) or _lexical_semantic_family(
+            semantic_family = _resolve_semantic_family(
                 node.name
-            )
+            ) or _lexical_semantic_family(node.name)
             if semantic_family is None:
                 continue
             yield SymbolSurface(
@@ -708,7 +710,9 @@ def _iter_domain_export_surfaces(
     for name in sorted(exports):
         if _is_support_surface(name):
             continue
-        semantic_family = _resolve_semantic_family(name) or _lexical_semantic_family(name)
+        semantic_family = _resolve_semantic_family(name) or _lexical_semantic_family(
+            name
+        )
         if semantic_family is None:
             continue
         kind = "forbidden_alias" if name in forbidden_alias_names else "domain_export"
@@ -740,9 +744,9 @@ def _iter_pipeline_id_surfaces(configs_path: Path) -> Iterator[SymbolSurface]:
         pipeline_name = str(pipeline.get("pipeline_name", "")).strip()
         if not pipeline_name:
             continue
-        semantic_family = _resolve_semantic_family(pipeline_name) or _lexical_semantic_family(
+        semantic_family = _resolve_semantic_family(
             pipeline_name
-        )
+        ) or _lexical_semantic_family(pipeline_name)
         if semantic_family is None:
             continue
         yield SymbolSurface(
@@ -757,9 +761,9 @@ def _iter_pipeline_id_surfaces(configs_path: Path) -> Iterator[SymbolSurface]:
 def _iter_registry_symbol_surfaces(registry: NamingRegistry) -> Iterator[SymbolSurface]:
     """Materialize registry-backed ambiguity surfaces not otherwise visible in code."""
     for entry in registry.adr_024_derived_entities:
-        semantic_family = _resolve_semantic_family(entry.name) or _lexical_semantic_family(
+        semantic_family = _resolve_semantic_family(
             entry.name
-        )
+        ) or _lexical_semantic_family(entry.name)
         if semantic_family is None:
             continue
         yield SymbolSurface(
@@ -771,9 +775,9 @@ def _iter_registry_symbol_surfaces(registry: NamingRegistry) -> Iterator[SymbolS
         )
 
     for entry in registry.adr_024_legacy_fields:
-        semantic_family = _resolve_semantic_family(entry.name) or _lexical_semantic_family(
+        semantic_family = _resolve_semantic_family(
             entry.name
-        )
+        ) or _lexical_semantic_family(entry.name)
         if semantic_family is None:
             continue
         yield SymbolSurface(
@@ -888,9 +892,9 @@ def build_ambiguity_groups(
     """Build a deterministic ambiguity map for naming-family overlap."""
     grouped: dict[str, dict[tuple[str, str, str], SymbolSurface]] = defaultdict(dict)
     for symbol in _iter_all_symbol_surfaces(src_path, configs_path, registry):
-        grouped[symbol.semantic_family][
-            (symbol.name, symbol.kind, symbol.location)
-        ] = symbol
+        grouped[symbol.semantic_family][(symbol.name, symbol.kind, symbol.location)] = (
+            symbol
+        )
 
     groups: list[AmbiguityGroup] = []
     for semantic_family in sorted(grouped):
@@ -909,7 +913,9 @@ def build_ambiguity_groups(
     return groups
 
 
-def _doc_relative_parts(docs_path: Path, md_file: Path) -> tuple[Path | None, tuple[str, ...]]:
+def _doc_relative_parts(
+    docs_path: Path, md_file: Path
+) -> tuple[Path | None, tuple[str, ...]]:
     try:
         rel = md_file.relative_to(docs_path)
         return rel, rel.parts

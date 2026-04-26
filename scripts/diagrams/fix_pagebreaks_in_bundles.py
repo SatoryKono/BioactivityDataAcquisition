@@ -28,7 +28,9 @@ def _safe_bundle_path(path: Path) -> Path:
     resolved_root = DIAGRAM_ROOT.resolve()
     resolved_path = path.resolve()
     if resolved_root != resolved_path and resolved_root not in resolved_path.parents:
-        raise ValueError(f"refusing to modify file outside {resolved_root}: {resolved_path}")
+        raise ValueError(
+            f"refusing to modify file outside {resolved_root}: {resolved_path}"
+        )
     return resolved_path
 
 

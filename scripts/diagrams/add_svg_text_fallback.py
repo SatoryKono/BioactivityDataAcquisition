@@ -280,9 +280,7 @@ def _wrap_text_safe(line: str, max_chars: int) -> list[str]:
     return chunks if chunks else [line]
 
 
-def _process_chunks(
-    chunks: list[str], max_chars: int, label_kind: str
-) -> list[str]:
+def _process_chunks(chunks: list[str], max_chars: int, label_kind: str) -> list[str]:
     """Process text chunks, handling long tokens appropriately."""
     processed: list[str] = []
     for chunk in chunks:

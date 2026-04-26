@@ -22,7 +22,7 @@ SIMULATED_SONAR_ISSUES = [
         "message": "Potential null pointer dereference",
         "component": "src/backend/services/UserService.java",
         "line": 42,
-        "creationDate": "2024-01-15T10:30:00+0000"
+        "creationDate": "2024-01-15T10:30:00+0000",
     },
     {
         "key": "ISSUE-2",
@@ -31,7 +31,7 @@ SIMULATED_SONAR_ISSUES = [
         "message": "SQL injection vulnerability",
         "component": "src/backend/api/UserController.java",
         "line": 87,
-        "creationDate": "2024-01-10T09:15:00+0000"
+        "creationDate": "2024-01-10T09:15:00+0000",
     },
     {
         "key": "ISSUE-3",
@@ -40,7 +40,7 @@ SIMULATED_SONAR_ISSUES = [
         "message": "Unused variable 'temp'",
         "component": "src/frontend/components/UserProfile.jsx",
         "line": 15,
-        "creationDate": "2024-01-12T14:20:00+0000"
+        "creationDate": "2024-01-12T14:20:00+0000",
     },
     {
         "key": "ISSUE-4",
@@ -49,7 +49,7 @@ SIMULATED_SONAR_ISSUES = [
         "message": "Missing error handling for database connection",
         "component": "src/database/repositories/BaseRepository.java",
         "line": 28,
-        "creationDate": "2024-01-18T11:45:00+0000"
+        "creationDate": "2024-01-18T11:45:00+0000",
     },
     {
         "key": "ISSUE-5",
@@ -58,8 +58,8 @@ SIMULATED_SONAR_ISSUES = [
         "message": "Method 'calculateTotal' has high cognitive complexity",
         "component": "src/utils/mathHelper.js",
         "line": 63,
-        "creationDate": "2024-01-16T13:10:00+0000"
-    }
+        "creationDate": "2024-01-16T13:10:00+0000",
+    },
 ]
 
 # Project layer mapping
@@ -69,7 +69,7 @@ LAYER_MAPPING = {
     "database": ["src/database", "src/models", "src/repositories"],
     "tests": ["src/tests", "test", "tests"],
     "config": ["config", "src/config"],
-    "utils": ["src/utils", "src/helpers", "src/common"]
+    "utils": ["src/utils", "src/helpers", "src/common"],
 }
 
 
@@ -79,7 +79,9 @@ def get_sonar_issues(project_key: str) -> list[dict[str, Any]]:
     return SIMULATED_SONAR_ISSUES
 
 
-def group_issues_by_layer(issues: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+def group_issues_by_layer(
+    issues: list[dict[str, Any]],
+) -> dict[str, list[dict[str, Any]]]:
     """Group issues by project layers based on file paths."""
     layered_issues = {layer: [] for layer in LAYER_MAPPING}
     unclassified = []
@@ -120,7 +122,9 @@ def create_github_issue_simulation(layer: str, issues: list[dict[str, Any]]) -> 
     # Show issue details
     print("    Issues included:")
     for i, issue in enumerate(issues, 1):
-        print(f"      {i}. [{issue['severity']}] {issue['message']} ({issue['component']}:{issue['line']})")
+        print(
+            f"      {i}. [{issue['severity']}] {issue['message']} ({issue['component']}:{issue['line']})"
+        )
 
     return mock_url
 

@@ -8,10 +8,10 @@ committed to git.
 Usage:
     # Dry run (show what would be cleaned)
     python scripts/ops/support/repo/cleanup_repository.py --dry-run
-    
+
     # Actually clean
     python scripts/ops/support/repo/cleanup_repository.py
-    
+
     # Clean specific categories
     python scripts/ops/support/repo/cleanup_repository.py --cache --temp
 """
@@ -28,7 +28,7 @@ from typing import List, Tuple
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
-    stream=sys.stdout
+    stream=sys.stdout,
 )
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ class RepositoryCleaner:
         if path.is_file():
             return path.stat().st_size
         elif path.is_dir():
-            return sum(f.stat().st_size for f in path.rglob('*') if f.is_file())
+            return sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
         return 0
 
     def _remove_path(self, path: Path) -> bool:
@@ -140,41 +140,43 @@ class RepositoryCleaner:
         if root:
             self.clean_root_directory()
 
-        logger.info(f"Cleanup complete: {self.files_removed} files, {self.size_freed:,} bytes freed")
+        logger.info(
+            f"Cleanup complete: {self.files_removed} files, {self.size_freed:,} bytes freed"
+        )
 
 
 def main() -> None:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="BioETL Repository Cleanup Tool",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Show what would be cleaned without actually deleting files"
+        help="Show what would be cleaned without actually deleting files",
     )
 
     parser.add_argument(
         "--no-cache",
         action="store_false",
         dest="cache",
-        help="Skip cache directory cleanup"
+        help="Skip cache directory cleanup",
     )
 
     parser.add_argument(
         "--no-temp",
         action="store_false",
         dest="temp",
-        help="Skip temporary file cleanup"
+        help="Skip temporary file cleanup",
     )
 
     parser.add_argument(
         "--no-root",
         action="store_false",
         dest="root",
-        help="Skip root directory cleanup"
+        help="Skip root directory cleanup",
     )
 
     args = parser.parse_args()

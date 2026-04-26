@@ -17,58 +17,40 @@ from pathlib import Path
 TEST_SELECTION_STRATEGY = {
     "domain": {
         "trigger_files": ["src/bioetl/domain/"],
-        "test_paths": [
-            "tests/unit/domain/",
-            "tests/architecture/"
-        ],
-        "description": "Domain layer changes - run unit and architecture tests"
+        "test_paths": ["tests/unit/domain/", "tests/architecture/"],
+        "description": "Domain layer changes - run unit and architecture tests",
     },
     "application": {
         "trigger_files": ["src/bioetl/application/"],
-        "test_paths": [
-            "tests/unit/application/",
-            "tests/integration/application/"
-        ],
-        "description": "Application layer changes - run unit and related integration tests"
+        "test_paths": ["tests/unit/application/", "tests/integration/application/"],
+        "description": "Application layer changes - run unit and related integration tests",
     },
     "infrastructure_adapters": {
         "trigger_files": ["src/bioetl/infrastructure/adapters/"],
-        "test_paths": [
-            "tests/unit/infrastructure/adapters/",
-            "tests/integration/"
-        ],
-        "description": "Adapter changes - run unit and integration tests for the provider"
+        "test_paths": ["tests/unit/infrastructure/adapters/", "tests/integration/"],
+        "description": "Adapter changes - run unit and integration tests for the provider",
     },
     "composition": {
         "trigger_files": ["src/bioetl/composition/"],
-        "test_paths": [
-            "tests/unit/composition/",
-            "tests/architecture/"
-        ],
-        "description": "Composition changes - run unit and architecture tests"
+        "test_paths": ["tests/unit/composition/", "tests/architecture/"],
+        "description": "Composition changes - run unit and architecture tests",
     },
     "interfaces": {
         "trigger_files": ["src/bioetl/interfaces/"],
-        "test_paths": [
-            "tests/unit/interfaces/"
-        ],
-        "description": "Interface changes - run interface unit tests"
+        "test_paths": ["tests/unit/interfaces/"],
+        "description": "Interface changes - run interface unit tests",
     },
     "configs": {
         "trigger_files": ["configs/"],
-        "test_paths": [
-            "tests/integration/"
-        ],
-        "description": "Configuration changes - run integration tests"
+        "test_paths": ["tests/integration/"],
+        "description": "Configuration changes - run integration tests",
     },
     "python_files": {
         "trigger_files": ["*.py"],
-        "test_paths": [
-            "tests/architecture/"
-        ],
+        "test_paths": ["tests/architecture/"],
         "pre_check": ["make lint"],
-        "description": "Any Python file change - run linting and architecture tests"
-    }
+        "description": "Any Python file change - run linting and architecture tests",
+    },
 }
 
 
@@ -80,15 +62,15 @@ def detect_changed_files(git_diff_target: str = "HEAD") -> set[str]:
             ["git", "diff", "--name-only", git_diff_target],
             capture_output=True,
             text=True,
-            timeout=30
+            timeout=30,
         )
 
         if result.returncode != 0:
             print(f"⚠️  Git diff failed: {result.stderr}")
             return set()
 
-        changed_files = set(result.stdout.strip().split('\n'))
-        changed_files.discard('')  # Remove empty entries
+        changed_files = set(result.stdout.strip().split("\n"))
+        changed_files.discard("")  # Remove empty entries
 
         return changed_files
 
@@ -164,7 +146,10 @@ def _strategy_matches_changed_files(
     for trigger_pattern in trigger_files:
         if not isinstance(trigger_pattern, str):
             continue
-        if any(_matches_trigger_pattern(trigger_pattern, changed_file) for changed_file in changed_files):
+        if any(
+            _matches_trigger_pattern(trigger_pattern, changed_file)
+            for changed_file in changed_files
+        ):
             return True
     return False
 
@@ -179,7 +164,10 @@ def _append_python_strategy_if_needed(
     matched_strategies: list[str],
     changed_files: set[str],
 ) -> None:
-    if any(path.endswith(".py") for path in changed_files) and "python_files" not in matched_strategies:
+    if (
+        any(path.endswith(".py") for path in changed_files)
+        and "python_files" not in matched_strategies
+    ):
         matched_strategies.append("python_files")
 
 
@@ -283,27 +271,21 @@ def main():
     )
 
     parser.add_argument(
-        "--git-target",
-        default="HEAD",
-        help="Git target for diff (default: HEAD)"
+        "--git-target", default="HEAD", help="Git target for diff (default: HEAD)"
     )
 
     parser.add_argument(
-        "--coverage",
-        action="store_true",
-        help="Run with coverage analysis"
+        "--coverage", action="store_true", help="Run with coverage analysis"
     )
 
     parser.add_argument(
-        "--list",
-        action="store_true",
-        help="List available test selection strategies"
+        "--list", action="store_true", help="List available test selection strategies"
     )
 
     parser.add_argument(
         "--manual-files",
         nargs="+",
-        help="Manually specify changed files instead of git diff"
+        help="Manually specify changed files instead of git diff",
     )
 
     args = parser.parse_args()

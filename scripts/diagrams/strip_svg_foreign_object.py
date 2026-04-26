@@ -55,7 +55,9 @@ def _write_text_atomic(path: Path, payload: str) -> None:
     temp_path.replace(path)
 
 
-def _strip_foreign_objects_tree(path: Path) -> tuple[ET.ElementTree[ET.Element[str]], int]:
+def _strip_foreign_objects_tree(
+    path: Path,
+) -> tuple[ET.ElementTree[ET.Element[str]], int]:
     tree = ET.parse(path)
     root = tree.getroot()
     removed = 0

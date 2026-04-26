@@ -342,7 +342,9 @@ def _report_missing_documented_ports(
     code_classes: set[str],
 ) -> None:
     """Report documented ports that are no longer defined in code."""
-    missing_ports = sorted(port_ref for port_ref in port_refs if port_ref not in code_classes)
+    missing_ports = sorted(
+        port_ref for port_ref in port_refs if port_ref not in code_classes
+    )
     for port_name in missing_ports:
         report.add(
             "ports",
@@ -546,7 +548,9 @@ def _check_runtime_mirror_rule(report: DriftReport, rule: RuntimeMirrorRule) -> 
 
     assert canonical_text is not None
     assert mirror_text is not None
-    _check_runtime_mirror_versions(report, rule, mirror_path, canonical_text, mirror_text)
+    _check_runtime_mirror_versions(
+        report, rule, mirror_path, canonical_text, mirror_text
+    )
     _check_runtime_mirror_sections(
         report,
         rule,

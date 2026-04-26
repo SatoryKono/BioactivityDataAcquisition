@@ -1906,9 +1906,7 @@ def main() -> None:
     }
 
     try:
-        selected_operations = (
-            [args.only] if args.only else list(operations.keys())
-        )
+        selected_operations = [args.only] if args.only else list(operations.keys())
         for operation_key in selected_operations:
             operations[operation_key](api)
         print("\n✅ Done!")

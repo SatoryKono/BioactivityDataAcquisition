@@ -103,7 +103,9 @@ def _build_handshake() -> bytes:
     )
 
 
-def _find_response(messages: Sequence[dict[str, Any]], request_id: int) -> dict[str, Any] | None:
+def _find_response(
+    messages: Sequence[dict[str, Any]], request_id: int
+) -> dict[str, Any] | None:
     for message in messages:
         if message.get("id") == request_id:
             return message

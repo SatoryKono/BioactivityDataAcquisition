@@ -8,7 +8,8 @@ import sys
 def main():
     data = json.load(sys.stdin)
     issues = [
-        issue for issue in data.get("issues", [])
+        issue
+        for issue in data.get("issues", [])
         if "Cognitive Complexity" in issue.get("message", "")
     ]
 
@@ -28,6 +29,7 @@ def main():
         print(f"File: {file}")
         for message in files[file]:
             print(f"  - {message}")
+
 
 if __name__ == "__main__":
     main()

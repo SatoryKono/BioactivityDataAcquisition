@@ -25,9 +25,7 @@ def _parse_file_tree(filepath: Path) -> ast.AST | None:
 def _is_port_related_import(node: ast.ImportFrom) -> bool:
     """Return True when import comes from domain ports/types surface."""
     module = node.module
-    return bool(module) and (
-        "domain.ports" in module or "domain.types" in module
-    )
+    return bool(module) and ("domain.ports" in module or "domain.types" in module)
 
 
 def _is_adapter_like_path(filepath: Path) -> bool:
@@ -47,8 +45,10 @@ def check_adapter_implements_port(filepath: Path) -> list[str]:
         for node in ast.walk(tree)
         if isinstance(node, ast.ImportFrom)
     )
-    if _is_adapter_like_path(filepath) and not has_port_import and filepath.name.endswith(
-        "client.py"
+    if (
+        _is_adapter_like_path(filepath)
+        and not has_port_import
+        and filepath.name.endswith("client.py")
     ):
         # Client modules may not always import ports directly.
         return violations
@@ -59,10 +59,7 @@ def check_adapter_implements_port(filepath: Path) -> list[str]:
 def _infrastructure_import_violation(py_file: Path) -> str | None:
     """Return violation message when infrastructure imports application layer."""
     content = py_file.read_text(encoding="utf-8")
-    if (
-        "from bioetl.application" in content
-        or "import bioetl.application" in content
-    ):
+    if "from bioetl.application" in content or "import bioetl.application" in content:
         return f"{py_file}: infrastructure imports from application layer"
     return None
 

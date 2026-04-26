@@ -26,7 +26,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ENTITIES_DIR = PROJECT_ROOT / "configs" / "entities"
 SRC_DIR = PROJECT_ROOT / "src"
 DEFAULT_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "unified_schema_map.csv"
-JSON_SCHEMA_DRAFT7_URI = urlunsplit(("http", "json-schema.org", "/draft-07/schema", "", ""))
+JSON_SCHEMA_DRAFT7_URI = urlunsplit(
+    ("http", "json-schema.org", "/draft-07/schema", "", "")
+)
 
 CHEMBL_MANIFEST = (
     SRC_DIR
@@ -180,7 +182,10 @@ def _assigned_value(node: ast.stmt) -> ast.AST | None:
 
 
 def _binding_from_pipeline_call(element: ast.Call) -> PipelineBinding | None:
-    if not isinstance(element.func, ast.Name) or element.func.id != "PipelineFactoryConfig":
+    if (
+        not isinstance(element.func, ast.Name)
+        or element.func.id != "PipelineFactoryConfig"
+    ):
         return None
 
     kwargs = {kw.arg: kw.value for kw in element.keywords if kw.arg is not None}
@@ -492,7 +497,9 @@ def _resolve_required_location(
     return location
 
 
-def _column_names(fields: list[dict[str, object]], *, key: str = "name") -> list[object]:
+def _column_names(
+    fields: list[dict[str, object]], *, key: str = "name"
+) -> list[object]:
     return [field[key] for field in fields]
 
 

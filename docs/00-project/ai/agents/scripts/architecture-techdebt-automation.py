@@ -226,7 +226,9 @@ def _validate_budget_only_grace_windows(
     return governance_errors
 
 
-def _window_is_active(window: dict[str, object], today: date) -> tuple[date, date] | None:
+def _window_is_active(
+    window: dict[str, object], today: date
+) -> tuple[date, date] | None:
     """Return active start/end dates for one approved grace window."""
     if not window.get("approved"):
         return None
@@ -388,7 +390,9 @@ def _extract_ordered_targets(
     return ordered_targets
 
 
-def _extract_baseline_by_registry(scorecard_raw: dict[str, object]) -> dict[str, object]:
+def _extract_baseline_by_registry(
+    scorecard_raw: dict[str, object],
+) -> dict[str, object]:
     """Return baseline counts keyed by registry name."""
     baseline = scorecard_raw.get("baseline", {})
     baseline_by_registry = (
@@ -410,7 +414,9 @@ def _format_priority_registry_trend_line(
     current_count = int(summary_by_registry.get(registry_name, 0))
     baseline_count_raw = baseline_by_registry.get(registry_name, current_count)
     baseline_count = (
-        int(baseline_count_raw) if isinstance(baseline_count_raw, int) else current_count
+        int(baseline_count_raw)
+        if isinstance(baseline_count_raw, int)
+        else current_count
     )
     current_budget = int(current_budget_by_registry.get(registry_name, 0))
     next_budget = (
@@ -444,7 +450,9 @@ def _print_validation_errors(header: str, items: list[str]) -> int:
     return 1
 
 
-def _print_summary_snapshot(args: argparse.Namespace, summary: object, scorecard_raw: dict[str, object]) -> None:
+def _print_summary_snapshot(
+    args: argparse.Namespace, summary: object, scorecard_raw: dict[str, object]
+) -> None:
     """Print scorecard summary breakdown and optional trend report."""
     print(
         "[quality-exemptions] scorecard snapshot "

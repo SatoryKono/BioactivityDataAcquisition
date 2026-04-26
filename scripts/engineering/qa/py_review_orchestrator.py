@@ -227,8 +227,16 @@ DOMAIN_COVERED_PATH_GROUPS = (
     ),
 )
 DOMAIN_SUBSECTOR_DEFS = (
-    ("S1.1", "Ports+Contracts", ("src/bioetl/domain/ports", "src/bioetl/domain/contracts")),
-    ("S1.2", "Entities+VOs", ("src/bioetl/domain/entities", "src/bioetl/domain/value_objects")),
+    (
+        "S1.1",
+        "Ports+Contracts",
+        ("src/bioetl/domain/ports", "src/bioetl/domain/contracts"),
+    ),
+    (
+        "S1.2",
+        "Entities+VOs",
+        ("src/bioetl/domain/entities", "src/bioetl/domain/value_objects"),
+    ),
     ("S1.3", "Schemas", ("src/bioetl/domain/schemas",)),
     (
         "S1.4",
@@ -255,7 +263,11 @@ CONFIG_COVERED_PATH_GROUPS = (
 )
 CONFIG_SUBSECTOR_DEFS = (
     ("S7.1", "Entities", ("configs/entities",)),
-    ("S7.2", "Composites+Contracts+Providers", ("configs/composites", "configs/contracts", "configs/providers")),
+    (
+        "S7.2",
+        "Composites+Contracts+Providers",
+        ("configs/composites", "configs/contracts", "configs/providers"),
+    ),
 )
 CONFIG_OTHER_PATHS = (
     "configs/base",
@@ -575,7 +587,9 @@ class ReviewOrchestrator:
         return [dict(item) for item in STATIC_SUBSECTOR_DEFS.get(sector_id, [])]
 
     def _covered_paths(self, path_groups: tuple[tuple[str, ...], ...]) -> set[str]:
-        return set(self._existing_paths(*(path for group in path_groups for path in group)))
+        return set(
+            self._existing_paths(*(path for group in path_groups for path in group))
+        )
 
     def _configured_subsectors(
         self,
@@ -861,7 +875,10 @@ class ReviewOrchestrator:
                 and target.value.id == "self"
             ):
                 continue
-            if not (isinstance(stmt.value, ast.Call) and isinstance(stmt.value.func, ast.Name)):
+            if not (
+                isinstance(stmt.value, ast.Call)
+                and isinstance(stmt.value.func, ast.Name)
+            ):
                 continue
             func_name = stmt.value.func.id
             if not (func_name[0].isupper() and func_name not in ALLOWED_CONSTRUCTORS):
@@ -931,7 +948,9 @@ class ReviewOrchestrator:
         relative_path: str,
         module: str,
     ) -> Issue | None:
-        if relative_path.startswith("src/bioetl/domain/") and module.startswith("bioetl.infrastructure"):
+        if relative_path.startswith("src/bioetl/domain/") and module.startswith(
+            "bioetl.infrastructure"
+        ):
             return Issue(
                 rule_id="ARCH-001",
                 rule_name="Import Boundary Violation",
@@ -944,7 +963,9 @@ class ReviewOrchestrator:
                 verification="importlinter",
                 category="Architecture",
             )
-        if relative_path.startswith("src/bioetl/application/") and module.startswith("bioetl.infrastructure"):
+        if relative_path.startswith("src/bioetl/application/") and module.startswith(
+            "bioetl.infrastructure"
+        ):
             return Issue(
                 rule_id="ARCH-001",
                 rule_name="Import Boundary Violation",
@@ -1149,7 +1170,9 @@ class ReviewOrchestrator:
         if "tests/" in str(file_path):
             return
         for i, line in enumerate(content.splitlines(), start=1):
-            if re.search(r"(password|api_key|secret)\s*=\s*[\"\']", line, re.IGNORECASE):
+            if re.search(
+                r"(password|api_key|secret)\s*=\s*[\"\']", line, re.IGNORECASE
+            ):
                 issues.append(
                     Issue(
                         rule_id="AP-005",

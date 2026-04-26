@@ -30,6 +30,7 @@ TEST_PREFIX = "test_"
 TEST_SUFFIX = "_test.py"
 PYC_EXTENSIONS = {".pyc", ".pyo"}
 
+
 @dataclass(frozen=True)
 class TermViolation:
     """Represents a terminology violation."""
@@ -186,9 +187,7 @@ def _mask_non_code_segments(content: str) -> list[str]:
     return masked_lines
 
 
-def _mask_token_if_needed(
-    masked_lines: list[str], token: tokenize.TokenInfo
-) -> None:
+def _mask_token_if_needed(masked_lines: list[str], token: tokenize.TokenInfo) -> None:
     """Mask one token when it represents non-code text."""
     if token.type not in (tokenize.STRING, tokenize.COMMENT):
         return

@@ -216,7 +216,10 @@ def _collect_targets(args: argparse.Namespace, repo_root: Path) -> list[Path]:
     if args.file or args.dir:
         return _deduplicate_targets(
             [
-                *(_resolve_target_path(repo_root, file_path) for file_path in args.file or []),
+                *(
+                    _resolve_target_path(repo_root, file_path)
+                    for file_path in args.file or []
+                ),
                 *(
                     path
                     for directory in args.dir or []

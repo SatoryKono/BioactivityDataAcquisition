@@ -23,21 +23,24 @@ DEPRECATED_MAPPING = {
     "DataSourceCreatorPort": "DataSourceCreatorProtocol",
 }
 
-def find_deprecated_usage(root_dir: Path, pattern: str = "**.py") -> dict[str, list[tuple[int, str]]]:
+
+def find_deprecated_usage(
+    root_dir: Path, pattern: str = "**.py"
+) -> dict[str, list[tuple[int, str]]]:
     """Find all usages of deprecated class names in Python files."""
 
     results = {}
 
     for py_file in root_dir.rglob(pattern):
         try:
-            with open(py_file, 'r', encoding='utf-8') as f:
+            with open(py_file, "r", encoding="utf-8") as f:
                 lines = f.readlines()
 
             found_uses = []
             for line_num, line in enumerate(lines, 1):
                 for deprecated_name in DEPRECATED_MAPPING:
                     # Look for import statements or instantiations
-                    if re.search(rf'\b{deprecated_name}\b', line):
+                    if re.search(rf"\b{deprecated_name}\b", line):
                         found_uses.append((line_num, line.strip()))
                         break
 
@@ -47,6 +50,7 @@ def find_deprecated_usage(root_dir: Path, pattern: str = "**.py") -> dict[str, l
             continue
 
     return results
+
 
 def main():
     """Main function to find and report deprecated class usage."""
@@ -89,6 +93,7 @@ def main():
         print("2. Manually update each file using the mapping:")
         for old, new in DEPRECATED_MAPPING.items():
             print(f"   - Replace '{old}' with '{new}'")
+
 
 if __name__ == "__main__":
     main()

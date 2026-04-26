@@ -52,7 +52,9 @@ def _generated_at() -> str:
 
 def collect_cards(family: str) -> list[Path]:
     family_dir = DESCRIPTION_ROOT / family
-    return sorted(path for path in family_dir.glob("*.md") if path.name != INDEX_FILENAME)
+    return sorted(
+        path for path in family_dir.glob("*.md") if path.name != INDEX_FILENAME
+    )
 
 
 def _link_from(index_path: Path, target_path: Path) -> str:
@@ -151,7 +153,9 @@ def build_root_index_markdown(cards_by_family: dict[str, list[Path]]) -> str:
     lines.append("")
     lines.append("## Class Diagram Cards")
     lines.append("")
-    lines.append(f"- Dedicated family index: [class/{INDEX_FILENAME}]({CLASS_INDEX_LINK})")
+    lines.append(
+        f"- Dedicated family index: [class/{INDEX_FILENAME}]({CLASS_INDEX_LINK})"
+    )
     lines.append(
         "- Narrative map for class-diagram families: [class-summary.md](./class-summary.md)"
     )

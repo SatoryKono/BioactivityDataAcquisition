@@ -48,7 +48,9 @@ def parse_args() -> argparse.Namespace:
 
 
 def _load_pdf_page(doc: fitz.Document, page_idx: int) -> fitz.Page:
-    return doc.load_page(page_idx) if hasattr(doc, "load_page") else doc.loadPage(page_idx)
+    return (
+        doc.load_page(page_idx) if hasattr(doc, "load_page") else doc.loadPage(page_idx)
+    )
 
 
 def _page_content_dict(page: fitz.Page) -> dict[str, object]:

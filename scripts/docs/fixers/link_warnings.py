@@ -65,7 +65,9 @@ def _parse_subgraphs(lines: list[str]) -> dict[str, str]:
     return node_sg
 
 
-def _assign_nodes_to_subgraphs(line: str, stack: list[str], node_sg: dict[str, str]) -> None:
+def _assign_nodes_to_subgraphs(
+    line: str, stack: list[str], node_sg: dict[str, str]
+) -> None:
     """Assign nodes to their respective subgraphs based on the current stack."""
     for nm in NODE_DEF_RE.finditer(line):
         nid = nm.group(1)
@@ -178,7 +180,7 @@ def _collect_linkstyle_entries(lines: list[str]) -> list[tuple[int, int, str, st
 
 
 def _group_linkstyles_by_style(
-    entries: list[tuple[int, int, str, str]]
+    entries: list[tuple[int, int, str, str]],
 ) -> dict[str, list[int]]:
     """Group linkStyle entries by their style."""
     by_style: dict[str, list[int]] = defaultdict(list)
@@ -259,9 +261,7 @@ def _collect_edge_info(lines: list[str]) -> list[tuple[int, str]]:
     return edge_info
 
 
-def _check_arrow_types(
-    edge_info: list[tuple[int, str]]
-) -> tuple[bool, bool, bool]:
+def _check_arrow_types(edge_info: list[tuple[int, str]]) -> tuple[bool, bool, bool]:
     """Check the types of arrows present in the edge lines."""
     has_solid = any("-->" in ln for _, ln in edge_info)
     has_dashed = any("-.->" in ln for _, ln in edge_info)

@@ -49,7 +49,9 @@ def _repo_relative_path(path: Path) -> Path:
 def _normalize_repo_relative_path(path: Path) -> Path:
     """Normalize and validate a repository-relative path."""
     if path.is_absolute():
-        raise ValueError(f"expected repository-relative path, got absolute path: {path}")
+        raise ValueError(
+            f"expected repository-relative path, got absolute path: {path}"
+        )
 
     normalized_parts: list[str] = []
     for part in path.parts:
@@ -418,9 +420,7 @@ def main() -> int:
         registry,
         src_root=Path(args.src_root),
     )
-    ratchet_violations, scoped_ratchet_counts = validate_measured_only_ratchet(
-        registry
-    )
+    ratchet_violations, scoped_ratchet_counts = validate_measured_only_ratchet(registry)
     rendered = render_snapshot(
         registry,
         discovered_docstring_modules=discovered,

@@ -90,7 +90,9 @@ def _print_inventory(
 
     sys.stdout.write("Solo files (can be migrated safely):\n")
     for source, target in solo:
-        sys.stdout.write(f"  - {source.relative_to(ROOT)} -> {target.relative_to(ROOT)}\n")
+        sys.stdout.write(
+            f"  - {source.relative_to(ROOT)} -> {target.relative_to(ROOT)}\n"
+        )
 
 
 def _apply_migration(

@@ -156,9 +156,7 @@ def _validate_silver_runtime_format(sink: dict[str, Any]) -> list[str]:
     silver_format = silver_cfg.get("format")
     if silver_format == "delta":
         return []
-    return [
-        f"sink.silver.format must be 'delta' for runtime (got: {silver_format!r})"
-    ]
+    return [f"sink.silver.format must be 'delta' for runtime (got: {silver_format!r})"]
 
 
 def _validate_enabled_sink_layer(layer: str, layer_cfg: Any) -> list[str]:
@@ -265,7 +263,9 @@ def _process_entity_config(
         errors.append(f"{config_path}: entity config must be a YAML mapping")
         return
     _append_prefixed(errors, config_path, _validate_entity_config_sections(payload))
-    _append_prefixed(errors, config_path, _validate_provider_entity_consistency(payload))
+    _append_prefixed(
+        errors, config_path, _validate_provider_entity_consistency(payload)
+    )
     pipeline_payload = payload.get("pipeline")
     if not isinstance(pipeline_payload, dict):
         errors.append(f"{config_path}: missing or invalid 'pipeline' section")
@@ -287,7 +287,9 @@ def _process_entity_config(
             config_path,
             _validate_runtime_normalized_invariants(normalized_payload),
         )
-    _append_prefixed(warnings, config_path, _validate_sink_paths_and_sort(normalized_payload))
+    _append_prefixed(
+        warnings, config_path, _validate_sink_paths_and_sort(normalized_payload)
+    )
 
 
 def _process_composite_config(

@@ -7,7 +7,8 @@ from collections.abc import Callable
 from typing import cast
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+
 
 def test_enum_unification():
     """Test that all pipelines use unified enum configurations."""
@@ -40,6 +41,7 @@ def test_enum_unification():
 
     print("✅ Enum unification tests passed!")
 
+
 def test_case_normalization():
     """Test cross-pipeline case normalization (CROSS-002)."""
     from bioetl.domain.normalization.profiles.chembl_activity import (
@@ -61,33 +63,34 @@ def test_case_normalization():
 
     # Test the normalizer
     test_cases = [
-        ('ic50', 'IC50'),
-        ('EC50', 'EC50'),
-        ('ki', 'KI'),
-        ('  mixed_case  ', 'MIXED_CASE'),
+        ("ic50", "IC50"),
+        ("EC50", "EC50"),
+        ("ki", "KI"),
+        ("  mixed_case  ", "MIXED_CASE"),
     ]
 
     for input_val, expected in test_cases:
         result = standard_type_rule.normalizer(input_val)
-        assert result == expected, f'Expected {expected}, got {result}'
+        assert result == expected, f"Expected {expected}, got {result}"
 
     print("✓ Activity profile case normalization working")
 
     # Test standard_relation
     standard_relation_rule = CHEMBL_ACTIVITY_PROFILE.field_rules["standard_relation"]
     test_cases = [
-        ('=', '='),
-        ('<', '<'),
-        ('<=', '<='),
-        ('  >  ', '>'),
+        ("=", "="),
+        ("<", "<"),
+        ("<=", "<="),
+        ("  >  ", ">"),
     ]
 
     for input_val, expected in test_cases:
         result = standard_relation_rule.normalizer(input_val)
-        assert result == expected, f'Expected {expected}, got {result}'
+        assert result == expected, f"Expected {expected}, got {result}"
 
     print("✓ Standard relation case normalization working")
     print("✅ Case normalization tests passed!")
+
 
 def test_ontology_ids():
     """Test ontology ID normalization."""
@@ -118,6 +121,7 @@ def test_ontology_ids():
 
     print("✅ Ontology ID tests passed!")
 
+
 def test_cross_pipeline_consistency():
     """Test consistency across multiple pipelines."""
     from bioetl.domain.config.enum_loader import get_chembl_enum_set
@@ -142,6 +146,7 @@ def test_cross_pipeline_consistency():
 
     print("✅ Cross-pipeline consistency tests passed!")
 
+
 def test_edge_cases():
     """Test edge cases and error handling."""
     from bioetl.domain.normalization.identifiers import normalize_ontology_id
@@ -150,12 +155,18 @@ def test_edge_cases():
     print("\n=== Testing Edge Cases ===")
 
     # Case normalization edge cases
-    normalize_case = cast(Callable[[object, str], object], normalize_cross_pipeline_case)
+    normalize_case = cast(
+        Callable[[object, str], object], normalize_cross_pipeline_case
+    )
     normalize_ontology = cast(Callable[[object], object], normalize_ontology_id)
     assert normalize_case(None, "uppercase") is None
     assert normalize_case(123, "uppercase") is None
-    assert normalize_cross_pipeline_case("", "uppercase") is None  # Empty string becomes None
-    assert normalize_cross_pipeline_case("  ", "uppercase") is None  # Whitespace becomes None
+    assert (
+        normalize_cross_pipeline_case("", "uppercase") is None
+    )  # Empty string becomes None
+    assert (
+        normalize_cross_pipeline_case("  ", "uppercase") is None
+    )  # Whitespace becomes None
     print("✓ Case normalization edge cases handled")
 
     # Ontology ID edge cases
@@ -166,6 +177,7 @@ def test_edge_cases():
     print("✓ Ontology ID edge cases handled")
 
     print("✅ Edge case tests passed!")
+
 
 if __name__ == "__main__":
     try:
@@ -186,5 +198,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

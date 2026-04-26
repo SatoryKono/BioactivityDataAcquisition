@@ -189,9 +189,7 @@ def _import_targets_from_relative_import_from(
     if node.module:
         return [".".join([*base_parts, node.module])]
     return [
-        ".".join([*base_parts, alias.name])
-        for alias in node.names
-        if alias.name != "*"
+        ".".join([*base_parts, alias.name]) for alias in node.names if alias.name != "*"
     ]
 
 

@@ -204,7 +204,9 @@ def _clean_inventory_bucket_values(bucket_value: object) -> object:
         cleaned: dict[str, object] = {}
         for key, value in bucket_value.items():
             if isinstance(value, list):
-                cleaned[key] = _sorted_unique(item for item in value if _path_exists(item))
+                cleaned[key] = _sorted_unique(
+                    item for item in value if _path_exists(item)
+                )
             elif isinstance(value, str) and _path_exists(value):
                 cleaned[key] = value.replace("\\", "/")
         return cleaned
@@ -352,10 +354,14 @@ def main(argv: list[str] | None = None) -> int:
 
     if write_mode:
         POLICY_PATH.write_text(rendered, encoding="utf-8")
-        print("[sync-integration-vcr-policy] rewrote configs/quality/integration_vcr_policy.yaml")
+        print(
+            "[sync-integration-vcr-policy] rewrote configs/quality/integration_vcr_policy.yaml"
+        )
         return 0
 
-    print("[sync-integration-vcr-policy] drift detected in configs/quality/integration_vcr_policy.yaml")
+    print(
+        "[sync-integration-vcr-policy] drift detected in configs/quality/integration_vcr_policy.yaml"
+    )
     return 1
 
 

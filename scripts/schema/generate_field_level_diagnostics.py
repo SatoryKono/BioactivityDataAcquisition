@@ -272,7 +272,14 @@ def _layer_row(
 
 def _unified_row_payload(
     unified_row: dict[str, str],
-) -> tuple[str, str, list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, dict[str, Any]]]:
+) -> tuple[
+    str,
+    str,
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    dict[str, dict[str, Any]],
+]:
     provider = unified_row["provider"]
     entity = unified_row["entity"]
     bronze_groups = json.loads(unified_row["bronze_column_groups_json"])

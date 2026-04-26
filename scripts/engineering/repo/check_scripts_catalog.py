@@ -184,7 +184,12 @@ def _lifecycle_manifest_and_registry_paths(
 
 
 def _load_lifecycle_payloads(
-    *, manifest_path: Path, registry_path: Path, manifest_rel: str, registry_rel: str, violations: list[str]
+    *,
+    manifest_path: Path,
+    registry_path: Path,
+    manifest_rel: str,
+    registry_rel: str,
+    violations: list[str],
 ) -> tuple[dict[str, object], dict[str, object]] | None:
     manifest_payload = _load_json_object_with_retry(manifest_path)
     registry_payload = _load_json_object_with_retry(registry_path)
@@ -211,7 +216,9 @@ def _check_deprecated_lifecycle_fields(
 
     replacement = entry.get("replacement")
     if isinstance(replacement, str) and replacement.strip() == path:
-        violations.append(f"{path}: replacement must differ from deprecated script path")
+        violations.append(
+            f"{path}: replacement must differ from deprecated script path"
+        )
 
     sunset_date = entry.get("sunset_date")
     if isinstance(sunset_date, str) and sunset_date.strip():

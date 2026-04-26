@@ -42,7 +42,9 @@ def _check_function_complexity(content: str, file_issues: dict[str, int]) -> Non
 
 
 def _check_function_length(lines: list[str], file_issues: dict[str, int]) -> None:
-    function_lines = [line for line in lines if line.strip() and not line.strip().startswith("#")]
+    function_lines = [
+        line for line in lines if line.strip() and not line.strip().startswith("#")
+    ]
     if len(function_lines) > 50:
         file_issues["long_functions"] += 1
 
@@ -52,14 +54,21 @@ def _check_docstring_presence(content: str, file_issues: dict[str, int]) -> None
         file_issues["missing_docstrings"] += 1
 
 
-def _check_function_quality(content: str, lines: list[str], file_issues: dict[str, int]) -> None:
+def _check_function_quality(
+    content: str, lines: list[str], file_issues: dict[str, int]
+) -> None:
     _check_function_complexity(content, file_issues)
     _check_function_length(lines, file_issues)
     _check_docstring_presence(content, file_issues)
 
 
 def _merge_file_issues(target: dict[str, int], source: dict[str, int]) -> None:
-    for key in ("complex_functions", "long_functions", "missing_docstrings", "total_lines"):
+    for key in (
+        "complex_functions",
+        "long_functions",
+        "missing_docstrings",
+        "total_lines",
+    ):
         target[key] += source[key]
 
 
@@ -126,7 +135,9 @@ def analyze_code_structure() -> dict[str, set[str]]:
     return structure
 
 
-def _render_quality_relevance(quality_score: float, quality_issues: dict[str, int]) -> None:
+def _render_quality_relevance(
+    quality_score: float, quality_issues: dict[str, int]
+) -> None:
     print("\n🎯 Sonar Remediation Issues Relevance:")
 
     if quality_score >= 90:

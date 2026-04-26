@@ -63,7 +63,10 @@ def build_provider_contract_drift_report() -> dict[str, Any]:
         summary["probe_count"] += 1
         severity = cast(str, report["severity"])
         summary[f"{severity}_count"] += 1
-        if _SEVERITY_RANK[severity] > _SEVERITY_RANK[cast(str, summary["max_severity"])]:
+        if (
+            _SEVERITY_RANK[severity]
+            > _SEVERITY_RANK[cast(str, summary["max_severity"])]
+        ):
             summary["max_severity"] = severity
 
     max_severity = "benign"

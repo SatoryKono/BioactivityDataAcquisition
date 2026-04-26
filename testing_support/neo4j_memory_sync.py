@@ -360,9 +360,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert gold_assay.properties["valid_from_column"] == "_valid_from"
     assert gold_assay.properties["valid_to_column"] == "_valid_to"
 
-    shared_activity = snapshot.nodes[
-        NodeKey("storage_surface", SILVER_CHEMBL_ACTIVITY)
-    ]
+    shared_activity = snapshot.nodes[NodeKey("storage_surface", SILVER_CHEMBL_ACTIVITY)]
     assert sorted(shared_activity.properties["storage_roles"]) == [
         "composite_seed_input",
         "entity_layer_output",
@@ -474,9 +472,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
             NodeKey("module_surface", RUN_MANIFEST_MODULE_PATH),
         )
     ]
-    assert (
-        docs_drift_relation.properties["doc_reference"] == RUN_MANIFEST_MODULE_PATH
-    )
+    assert docs_drift_relation.properties["doc_reference"] == RUN_MANIFEST_MODULE_PATH
     assert docs_drift_relation.properties["evidence_kind"] == "direct_path"
     assert docs_drift_relation.properties["confidence"] == "high"
     assert isinstance(docs_drift_relation.properties["line_number"], int)
@@ -766,7 +762,11 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         SILVER_COMPOSITE_ACTIVITY,
     ),
     (
-        "storage_surface", SILVER_COMPOSITE_ACTIVITY, "PROMOTES_TO", "storage_surface", "gold/composite/activity"
+        "storage_surface",
+        SILVER_COMPOSITE_ACTIVITY,
+        "PROMOTES_TO",
+        "storage_surface",
+        "gold/composite/activity",
     ),
     (
         "package_family",
@@ -1940,7 +1940,9 @@ def test_storage_ref_from_output_path_normalizes_data_output_prefix() -> None:
         _storage_ref_from_output_path(f"data/output/{SILVER_COMPOSITE_ACTIVITY}")
         == SILVER_COMPOSITE_ACTIVITY
     )
-    assert _storage_ref_from_output_path(SILVER_CHEMBL_ACTIVITY) == SILVER_CHEMBL_ACTIVITY
+    assert (
+        _storage_ref_from_output_path(SILVER_CHEMBL_ACTIVITY) == SILVER_CHEMBL_ACTIVITY
+    )
 
 
 def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_links() -> (
@@ -2060,9 +2062,7 @@ def test_filtered_snapshot_workflow_graph_preserves_job_gate_and_run_targets() -
     assert (
         "workflow_artifact_surface",
         "tests::coverage-data-${{ matrix.test-group.name }}",
-    ) in {
-        (key.label, key.name) for key in filtered.nodes
-    }
+    ) in {(key.label, key.name) for key in filtered.nodes}
     assert (
         "workflow_job_surface",
         "tests::governance-preflight",
@@ -2117,7 +2117,9 @@ def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
         key.name
         for key in filtered.nodes
         if key.label == "doc_claim_surface"
-        and key.name.startswith("docs/04-reference/pipelines/chembl/05-activity-spec.md#L")
+        and key.name.startswith(
+            "docs/04-reference/pipelines/chembl/05-activity-spec.md#L"
+        )
     }
 
     assert ("doc_artifact", RUN_MANIFEST_LEDGER_DOC_PATH) in {

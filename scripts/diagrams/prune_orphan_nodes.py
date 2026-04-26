@@ -69,7 +69,9 @@ def _ensure_repo_path(path: Path) -> Path:
     resolved_root = REPO_ROOT.resolve()
     resolved_path = path.resolve()
     if resolved_root != resolved_path and resolved_root not in resolved_path.parents:
-        raise ValueError(f"refusing to process path outside {resolved_root}: {resolved_path}")
+        raise ValueError(
+            f"refusing to process path outside {resolved_root}: {resolved_path}"
+        )
     return resolved_path
 
 
@@ -563,7 +565,9 @@ def fix_flowchart_lines(
             new_lines.append(ln)
             continue
 
-        rewritten_line = _rewrite_flowchart_class_directive(ln, class_directive, orphan_ids)
+        rewritten_line = _rewrite_flowchart_class_directive(
+            ln, class_directive, orphan_ids
+        )
         if rewritten_line is not None:
             new_lines.append(rewritten_line)
 
@@ -577,7 +581,9 @@ def _rewrite_flowchart_class_directive(
 ) -> str | None:
     raw_ids, class_name = class_directive
     node_ids = [node_id.strip() for node_id in re.split(NODE_ID_SPLIT_PATTERN, raw_ids)]
-    surviving = [node_id for node_id in node_ids if node_id and node_id not in orphan_ids]
+    surviving = [
+        node_id for node_id in node_ids if node_id and node_id not in orphan_ids
+    ]
     if not surviving:
         return None
     if len(surviving) == len(node_ids):
@@ -709,7 +715,11 @@ def _is_supported_input_file(path: Path) -> bool:
 
 
 def _is_discoverable_diagram_file(path: Path) -> bool:
-    return _is_supported_input_file(path) and "svg" not in path.parts and "png" not in path.parts
+    return (
+        _is_supported_input_file(path)
+        and "svg" not in path.parts
+        and "png" not in path.parts
+    )
 
 
 def _iter_discoverable_files(target: Path) -> list[Path]:

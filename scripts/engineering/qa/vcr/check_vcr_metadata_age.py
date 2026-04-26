@@ -84,7 +84,9 @@ def _validate_sidecar(
     provider = cassette_path.relative_to(vcr_root).parts[0]
     expected_rel_path = cassette_path.relative_to(ROOT).as_posix()
     expected_sha = hashlib.sha256(cassette_path.read_bytes()).hexdigest()
-    recorded_at = _parse_recorded_at(payload.get("recorded_at"), metadata_path=metadata_path)
+    recorded_at = _parse_recorded_at(
+        payload.get("recorded_at"), metadata_path=metadata_path
+    )
     age_days = (today - recorded_at).days
 
     if payload.get("schema_version") != 1:

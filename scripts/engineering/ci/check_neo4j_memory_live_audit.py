@@ -75,9 +75,7 @@ def _live_payload_issues(live: dict[str, object]) -> list[str]:
 def _has_non_zero_delta(entries: object) -> bool:
     """Return True when diff payload contains a non-zero delta entry."""
     return isinstance(entries, list) and any(
-        int(entry.get("delta", 0)) != 0
-        for entry in entries
-        if isinstance(entry, dict)
+        int(entry.get("delta", 0)) != 0 for entry in entries if isinstance(entry, dict)
     )
 
 

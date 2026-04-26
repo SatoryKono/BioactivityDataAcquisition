@@ -137,7 +137,9 @@ LIFECYCLE_REGISTRY_DEFAULT: Final[str] = (
 )
 SCHEMA_VERSION: Final[str] = "1.0"
 MAX_SEARCH_FILE_BYTES: Final[int] = 512 * 1024
-STRONG_ACTIVE_GROUPS: Final[frozenset[str]] = frozenset({"ci", "build", "skills", "agents"})
+STRONG_ACTIVE_GROUPS: Final[frozenset[str]] = frozenset(
+    {"ci", "build", "skills", "agents"}
+)
 LEGACY_MANUAL_OPS_SCRIPTS: Final[frozenset[str]] = frozenset(
     {
         "scripts/ops/maintenance/github/close_superseded_prs.sh",
@@ -209,7 +211,10 @@ def _iter_script_files_in_base(base: Path) -> list[Path]:
             file_path = current_path / filename
             if not file_path.is_file():
                 continue
-            if file_path.suffix not in SCRIPT_EXTENSIONS or file_path.name == "__init__.py":
+            if (
+                file_path.suffix not in SCRIPT_EXTENSIONS
+                or file_path.name == "__init__.py"
+            ):
                 continue
             scripts.append(file_path)
     return scripts
@@ -409,7 +414,8 @@ def _discover_basename_refs(
         rel=rel, line_no=line_no, raw_line=raw_line, source_group=source_group
     )
     basenames = {
-        match.group(0) for match in BASENAME_REF_CANDIDATE_PATTERN.finditer(normalized_line)
+        match.group(0)
+        for match in BASENAME_REF_CANDIDATE_PATTERN.finditer(normalized_line)
     }
     for basename in basenames:
         for candidate_path in _resolve_basename_candidates(
@@ -665,9 +671,7 @@ def _write_text_atomic(path: Path, content: str) -> None:
     """Write text atomically to avoid readers observing partial files."""
 
     path.parent.mkdir(parents=True, exist_ok=True)
-    temp_path = path.parent / (
-        f".{path.name}.tmp.{os.getpid()}.{time.time_ns()}"
-    )
+    temp_path = path.parent / (f".{path.name}.tmp.{os.getpid()}.{time.time_ns()}")
     try:
         with temp_path.open("w", encoding="utf-8") as handle:
             handle.write(content)

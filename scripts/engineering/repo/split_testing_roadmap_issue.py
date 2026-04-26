@@ -230,7 +230,9 @@ def _require_token(token_env: str) -> str:
     return token
 
 
-def _request_headers(token: str, payload: dict[str, object] | None) -> tuple[dict[str, str], bytes | None]:
+def _request_headers(
+    token: str, payload: dict[str, object] | None
+) -> tuple[dict[str, str], bytes | None]:
     headers = {
         "Accept": "application/vnd.github+json",
         "Authorization": f"Bearer {token}",
@@ -330,7 +332,9 @@ def _github_request(
                 body = _decode_response_body(response)
                 return body, dict(response.headers.items())
         except urllib.error.HTTPError as exc:  # pragma: no cover - CLI path
-            if _maybe_retry_http_error(exc=exc, attempt=attempt, method=method, url=url):
+            if _maybe_retry_http_error(
+                exc=exc, attempt=attempt, method=method, url=url
+            ):
                 continue
             detail = _http_error_detail(exc)
             raise RuntimeError(f"GitHub API {method} {url} failed: {detail}") from exc
