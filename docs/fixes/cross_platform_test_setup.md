@@ -7,6 +7,7 @@ Tests are failing with `ModuleNotFoundError: No module named 'respx'` when run f
 ## Root Cause
 
 The project supports both Windows and WSL environments, but they require separate setup:
+
 - **Windows PowerShell**: Uses `.venv-win` and Windows-specific scripts
 - **WSL/Linux**: Uses external venv at `~/.venvs/bioetl` and bash scripts
 
@@ -41,6 +42,7 @@ bash scripts/engineering/dev/setup_env_wsl.sh
 ## Environment Activation
 
 ### Windows
+
 ```powershell
 # Activate Windows venv
 .\.venv-win\Scripts\Activate.ps1
@@ -50,6 +52,7 @@ python -m pytest tests\unit\infrastructure\adapters\uniprot\test_adapter.py -v -
 ```
 
 ### WSL/Linux
+
 ```bash
 # Activate WSL venv
 source ~/.venvs/bioetl/bin/activate
@@ -60,13 +63,13 @@ python -m pytest tests/unit/infrastructure/adapters/uniprot/test_adapter.py -v -
 
 ## Key Differences
 
-| Aspect | Windows | WSL/Linux |
-|--------|----------|------------|
-| **Environment location** | `.venv-win` (project-local) | `~/.venvs/bioetl` (external) |
-| **Setup script** | `setup_env_windows.ps1` | `setup_env_wsl.sh` |
-| **Activation** | `.\.venv-win\Scripts\Activate.ps1` | `source ~/.venvs/bioetl/bin/activate` |
-| **Python path** | `.\.venv-win\Scripts\python.exe` | `~/.venvs/bioetl/bin/python` |
-| **Test runner** | `.\scripts\engineering\dev\run_pytest.ps1` | `bash scripts/engineering/dev/run_pytest.sh` |
+| Aspect                   | Windows                                    | WSL/Linux                                    |
+| ------------------------ | ------------------------------------------ | -------------------------------------------- |
+| **Environment location** | `.venv-win` (project-local)                | `~/.venvs/bioetl` (external)                 |
+| **Setup script**         | `setup_env_windows.ps1`                    | `setup_env_wsl.sh`                           |
+| **Activation**           | `.\.venv-win\Scripts\Activate.ps1`         | `source ~/.venvs/bioetl/bin/activate`        |
+| **Python path**          | `.\.venv-win\Scripts\python.exe`           | `~/.venvs/bioetl/bin/python`                 |
+| **Test runner**          | `.\scripts\engineering\dev\run_pytest.ps1` | `bash scripts/engineering/dev/run_pytest.sh` |
 
 ## Common Issues
 
@@ -75,6 +78,7 @@ python -m pytest tests/unit/infrastructure/adapters/uniprot/test_adapter.py -v -
 **Cause:** Running tests without activating the correct virtual environment.
 
 **Solution:**
+
 - Windows: Activate `.venv-win` first
 - WSL: Activate `~/.venvs/bioetl` first
 
@@ -93,6 +97,7 @@ python -m pytest tests/unit/infrastructure/adapters/uniprot/test_adapter.py -v -
 ## Recommended Workflow
 
 ### For Windows Development
+
 ```powershell
 # One-time setup
 .\scripts\engineering\dev\setup_env_windows.ps1
@@ -103,6 +108,7 @@ python -m pytest tests\... -v --asyncio-mode=auto
 ```
 
 ### For WSL Development
+
 ```bash
 # One-time setup
 bash scripts/engineering/dev/setup_env_wsl.sh
@@ -115,26 +121,30 @@ python -m pytest tests/... -v --asyncio-mode=auto
 ## Mixed Environment Considerations
 
 If you work in both Windows and WSL:
+
 1. **Keep environments separate** - Don't share `.venv` between OS
-2. **Use OS-appropriate scripts** - Windows: `.ps1`, WSL: `.sh`
-3. **Check current environment** - `uname -a` (WSL) vs `$env:OS` (Windows)
-4. **File path differences** - Windows: `E:\...`, WSL: `/mnt/e/...`
+1. **Use OS-appropriate scripts** - Windows: `.ps1`, WSL: `.sh`
+1. **Check current environment** - `uname -a` (WSL) vs `$env:OS` (Windows)
+1. **File path differences** - Windows: `E:\...`, WSL: `/mnt/e/...`
 
 ## Verification Commands
 
 ### Check active environment (Windows)
+
 ```powershell
 python -c "import sys; print(sys.executable)"
 # Should show: .\.venv-win\Scripts\python.exe
 ```
 
 ### Check active environment (WSL)
+
 ```bash
 python -c "import sys; print(sys.executable)"
 # Should show: /home/fedor/.venvs/bioetl/bin/python
 ```
 
 ### Verify respx installation
+
 ```bash
 python -c "import respx; print('respx version:', respx.__version__)"
 # Should show version without errors
@@ -145,10 +155,10 @@ python -c "import respx; print('respx version:', respx.__version__)"
 ### If tests still fail after setup:
 
 1. **Verify activation:** Check that virtual environment is active
-2. **Check Python path:** Ensure you're using venv Python, not system Python
-3. **Reinstall dependencies:** Run setup script again
-4. **Check file paths:** Ensure you're in correct OS environment
-5. **Clean cache:** Remove `.pytest_cache` and `__pycache__` directories
+1. **Check Python path:** Ensure you're using venv Python, not system Python
+1. **Reinstall dependencies:** Run setup script again
+1. **Check file paths:** Ensure you're in correct OS environment
+1. **Clean cache:** Remove `.pytest_cache` and `__pycache__` directories
 
 ### Common Windows-specific issues:
 

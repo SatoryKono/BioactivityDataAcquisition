@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 0.3.0
 Status: draft
 Class: repo-only
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last synchronized: '2026-04-08'
----
+  Last synchronized: '2026-04-08'
+
+______________________________________________________________________
 
 # D-07 Observability Specification (Draft Sync Note)
 
@@ -41,11 +44,11 @@ D-07 сохраняется как draft-рамка для будущего cons
 ## План синхронизации D-07
 
 1. Держать в D-07 только карту canonical observability surfaces и их назначение.
-2. Не дублировать списки метрик и alert rules из `contracts/observability.md` и monitoring/runbook документов.
-3. Все runtime-facing утверждения (SLO, alert thresholds, triage order) обновлять сначала в канонических документах, затем отражать в D-07 как summary.
+1. Не дублировать списки метрик и alert rules из `contracts/observability.md` и monitoring/runbook документов.
+1. Все runtime-facing утверждения (SLO, alert thresholds, triage order) обновлять сначала в канонических документах, затем отражать в D-07 как summary.
 
 ## Критерии промоушена в future published handbook
 
 1. Единый observability терминологический словарь согласован между contracts, guides и runbooks.
-2. D-07 не содержит дублируемых таблиц метрик/алертов и не конфликтует с Grafana/Prometheus rollout.
-3. Любое утверждение в D-07 трассируется к published source и проверяемому runtime artifact.
+1. D-07 не содержит дублируемых таблиц метрик/алертов и не конфликтует с Grafana/Prometheus rollout.
+1. Любое утверждение в D-07 трассируется к published source и проверяемому runtime artifact.

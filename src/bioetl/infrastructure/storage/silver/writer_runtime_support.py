@@ -171,7 +171,7 @@ def _resolve_runtime_services_for_writer(
         base_path=base_path,
         pipeline_name=writer._pipeline_name,
     )
-    return build_silver_writer_runtime_services(request=resolved_request)
+    return build_silver_writer_runtime_services(resolved_request)
 
 
 def _assign_runtime_services(

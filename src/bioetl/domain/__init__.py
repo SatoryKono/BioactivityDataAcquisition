@@ -28,10 +28,11 @@ from importlib import import_module as _import_module
 _RUNTIME_OBSERVABILITY_PUBLICATION_CONTRACT_MODULE = (
     "bioetl.domain.runtime_observability_publication_contract"
 )
+_OBSERVABILITY_EVENT_MAPPING_MODULE = "bioetl.domain.observability_event_mapping"
 
 _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
     "DomainEventObservabilityEnvelope": (
-        "bioetl.domain.observability_event_mapping",
+        _OBSERVABILITY_EVENT_MAPPING_MODULE,
         "DomainEventObservabilityEnvelope",
     ),
     "PipelineEvent": ("bioetl.domain.events", "PipelineEvent"),
@@ -52,7 +53,7 @@ _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
         "observability_contract",
     ),
     "observability_event_mapping": (
-        "bioetl.domain.observability_event_mapping",
+        _OBSERVABILITY_EVENT_MAPPING_MODULE,
         "observability_event_mapping",
     ),
     "observability_metric_names": (
@@ -72,7 +73,7 @@ _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
         "is_canonical_runtime_observability_emitter",
     ),
     "map_domain_event_to_observability_event": (
-        "bioetl.domain.observability_event_mapping",
+        _OBSERVABILITY_EVENT_MAPPING_MODULE,
         "map_domain_event_to_observability_event",
     ),
     "types_config_validation": (

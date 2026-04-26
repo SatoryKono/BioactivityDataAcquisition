@@ -6,13 +6,14 @@
 **Status**: Active
 **Owner**: @bioetl-architecture
 
----
+______________________________________________________________________
 
 ## Enhanced Script Analysis Prompt
 
 ### Analysis Objectives
 
 **Primary Goals:**
+
 - Identify obsolete scripts safe for removal
 - Find duplicate scripts suitable for consolidation
 - Detect suboptimal scripts needing refactoring
@@ -20,17 +21,19 @@
 - Provide actionable cleanup recommendations
 
 **Scope:**
+
 - All scripts in `scripts/` directory
 - Scripts in `src/tools/` directory
 - Script references in workflows, agents, and documentation
 
----
+______________________________________________________________________
 
 ## 1. Obsolete Scripts (Deprecation Candidates)
 
 ### Identification Criteria
 
 **Technical Indicators:**
+
 - ✅ No references in `.github/workflows/*` files
 - ✅ No usage in `.codex/skills/*` or agent documentation
 - ✅ Marked as "legacy" or "orphan" in `scripts_inventory_manifest.json`
@@ -39,6 +42,7 @@
 - ✅ No git commits in past 12 months
 
 **Governance Indicators:**
+
 - ✅ No owner specified in lifecycle registry
 - ✅ No documentation in README files
 - ✅ No tests covering the script
@@ -47,6 +51,7 @@
 ### Analysis Questions
 
 **Usage Evidence:**
+
 ```bash
 # Check workflow references
 grep -r "script_name" .github/workflows/
@@ -59,6 +64,7 @@ grep -r "script_name" tests/
 ```
 
 **Safety Assessment:**
+
 - What's the last known usage in git history?
 - Are there hidden dependencies in configs or documentation?
 - What's the rollback plan if removal causes issues?
@@ -73,13 +79,14 @@ grep -r "script_name" tests/
 - [ ] Remove from inventory manifest
 - [ ] Document removal rationale
 
----
+______________________________________________________________________
 
 ## 2. Duplicate Scripts (Consolidation Candidates)
 
 ### Identification Criteria
 
 **Code-Level Duplication:**
+
 - ✅ Same functionality with different extensions (`.sh` vs `.py`)
 - ✅ Wrapper scripts that only delegate (`exec "$SCRIPT_DIR/..."`)
 - ✅ Cross-platform duplicates (Windows `.ps1` vs Unix `.sh`)
@@ -87,6 +94,7 @@ grep -r "script_name" tests/
 - ✅ Multiple scripts with identical help text
 
 **Functional Duplication:**
+
 - ✅ Different scripts solving same problem
 - ✅ Overlapping command-line interfaces
 - ✅ Redundant error handling patterns
@@ -96,23 +104,25 @@ grep -r "script_name" tests/
 
 **Decision Matrix:**
 
-| Factor | Weight | Canonical Choice Criteria |
-|--------|--------|--------------------------|
-| **Usage Frequency** | 40% | Most frequently called in workflows |
-| **Documentation** | 25% | Best documented version |
-| **Code Quality** | 20% | Best error handling, logging |
-| **Platform Support** | 15% | Cross-platform compatibility |
+| Factor               | Weight | Canonical Choice Criteria           |
+| -------------------- | ------ | ----------------------------------- |
+| **Usage Frequency**  | 40%    | Most frequently called in workflows |
+| **Documentation**    | 25%    | Best documented version             |
+| **Code Quality**     | 20%    | Best error handling, logging        |
+| **Platform Support** | 15%    | Cross-platform compatibility        |
 
 **Migration Path:**
+
 1. Identify canonical version
-2. Update all callers (workflows, docs, agents)
-3. Add deprecation warnings to old versions
-4. Monitor usage during transition period
-5. Remove deprecated versions
+1. Update all callers (workflows, docs, agents)
+1. Add deprecation warnings to old versions
+1. Monitor usage during transition period
+1. Remove deprecated versions
 
 ### Common Duplication Patterns
 
 **Test Runners:**
+
 ```bash
 # Before: Multiple runners
 scripts/engineering/dev/run_pytest.sh
@@ -124,6 +134,7 @@ scripts/engineering/ci/run_pytest_resilient.py
 ```
 
 **Cross-Platform Wrappers:**
+
 ```bash
 # Before: Platform-specific duplicates
 scripts/ai/mcp/mcp_wrapper.ps1
@@ -133,13 +144,14 @@ scripts/ai/mcp/mcp_wrapper.sh
 scripts/ai/mcp/mcp_wrapper.sh  # Canonical
 ```
 
----
+______________________________________________________________________
 
 ## 3. Suboptimal Scripts (Refactoring Candidates)
 
 ### Identification Criteria
 
 **Code Quality Issues:**
+
 - ✅ >8 command-line parameters (complex interface)
 - ✅ No error handling (`set -e` missing, no try/catch)
 - ✅ No logging or minimal logging
@@ -148,6 +160,7 @@ scripts/ai/mcp/mcp_wrapper.sh  # Canonical
 - ✅ Missing documentation (no `--help`, no README)
 
 **Architecture Issues:**
+
 - ✅ Script does multiple unrelated things
 - ✅ Violates separation of concerns
 - ✅ Mixes I/O with business logic
@@ -158,41 +171,47 @@ scripts/ai/mcp/mcp_wrapper.sh  # Canonical
 ### Refactoring Priorities
 
 **Critical (Do Now):**
+
 - Add proper error handling and logging
 - Extract configuration to separate files
 - Add input validation
 - Implement consistent exit codes
 
 **High (Next Sprint):**
+
 - Add type hints and docstrings
 - Split complex scripts into modules
 - Implement proper argument parsing
 - Add comprehensive tests
 
 **Medium (Backlog):**
+
 - Improve performance bottlenecks
 - Add metrics/telemetry
 - Enhance documentation
 - Add examples to README
 
----
+______________________________________________________________________
 
 ## 4. Governance Violations (Policy Candidates)
 
 ### Identification Criteria
 
 **Location Violations:**
+
 - ✅ Scripts not in canonical roots (`scripts/engineering/repo/catalog.yaml`)
 - ✅ Scripts in wrong directory for their purpose
 - ✅ Scripts violating layer boundaries
 
 **Documentation Violations:**
+
 - ✅ No README entry for script group
 - ✅ Missing from inventory manifest
 - ✅ No owner in lifecycle registry
 - ✅ Undocumented parameters or behavior
 
 **Quality Violations:**
+
 - ✅ No tests for critical scripts
 - ✅ Bypassing established patterns
 - ✅ Inconsistent naming conventions
@@ -201,6 +220,7 @@ scripts/ai/mcp/mcp_wrapper.sh  # Canonical
 ### Policy Actions
 
 **Immediate Fixes:**
+
 ```bash
 # Move to canonical location
 mv scripts/misc/important.sh scripts/engineering/qa/important.sh
@@ -213,18 +233,20 @@ vim configs/quality/scripts_lifecycle_registry.json
 ```
 
 **Preventive Measures:**
+
 - Add governance checks to CI
 - Create script location linter
 - Document canonical patterns
 - Add script creation template
 
----
+______________________________________________________________________
 
 ## Analysis Methodology
 
 ### Step 1: Data Collection
 
 **Inventory Analysis:**
+
 ```bash
 # Get comprehensive script inventory
 python3 -m scripts.engineering.repo sync-inventory --write
@@ -234,6 +256,7 @@ python3 -m scripts.engineering.repo check-inventory --json > inventory.json
 ```
 
 **Reference Analysis:**
+
 ```bash
 # Check workflow references
 grep -r "scripts/" .github/workflows/ | sort | uniq -c
@@ -246,6 +269,7 @@ grep -r "scripts/" tests/ | grep -v ".pyc"
 ```
 
 **Quality Analysis:**
+
 ```bash
 # Shell script quality
 shellcheck scripts/**/*.sh
@@ -270,13 +294,14 @@ pylint scripts/**/*.py
 
 **Risk Assessment Framework:**
 
-| Risk Level | Criteria | Example |
-|------------|----------|---------|
-| **Low** | No references, archived, documented replacement | Legacy migration scripts |
-| **Medium** | Some references, needs migration, has replacement | Deprecated test runners |
-| **High** | Active usage, no clear replacement, complex dependencies | Core CI scripts |
+| Risk Level | Criteria                                                 | Example                  |
+| ---------- | -------------------------------------------------------- | ------------------------ |
+| **Low**    | No references, archived, documented replacement          | Legacy migration scripts |
+| **Medium** | Some references, needs migration, has replacement        | Deprecated test runners  |
+| **High**   | Active usage, no clear replacement, complex dependencies | Core CI scripts          |
 
 **Validation Strategy:**
+
 ```bash
 # Test CI still works
 act -j tests
@@ -316,11 +341,12 @@ python3 -m scripts.engineering.repo check-inventory --check
 - [ ] Train team on governance rules
 ```
 
----
+______________________________________________________________________
 
 ## Expected Output Format
 
 ### Executive Summary
+
 ```
 ✅ **Analysis Complete**: [Date]
 📊 **Total Scripts Analyzed**: 316
@@ -335,32 +361,32 @@ python3 -m scripts.engineering.repo check-inventory --check
 
 #### 1. Obsolete Scripts (High Confidence for Removal)
 
-| Script | Last Commit | References | Removal Risk | Savings | Notes |
-|--------|-------------|------------|--------------|---------|-------|
-| `scripts/ops/archive/old_migration.py` | 2023-05-15 | None | Low | 1 script | Historical only |
-| `scripts/ai/legacy_bot.sh` | 2023-08-20 | None | Low | 1 script | Replaced by skills |
-| `scripts/tmp/setup_temp.sh` | 2023-11-01 | None | Low | 1 script | Temporary setup |
+| Script                                 | Last Commit | References | Removal Risk | Savings  | Notes              |
+| -------------------------------------- | ----------- | ---------- | ------------ | -------- | ------------------ |
+| `scripts/ops/archive/old_migration.py` | 2023-05-15  | None       | Low          | 1 script | Historical only    |
+| `scripts/ai/legacy_bot.sh`             | 2023-08-20  | None       | Low          | 1 script | Replaced by skills |
+| `scripts/tmp/setup_temp.sh`            | 2023-11-01  | None       | Low          | 1 script | Temporary setup    |
 
 **Total Obsolete**: 15 scripts = **4.7%** of inventory
 
 #### 2. Duplicate Scripts (Consolidation Opportunities)
 
-| Group ID | Scripts | Canonical Candidate | Savings | Complexity |
-|----------|---------|---------------------|---------|------------|
-| TR-001 | `run_pytest.sh`, `run_pytest.ps1`, `run_pytest_resilient.py` | `run_pytest_resilient.py` | 2 scripts | Medium |
-| MCP-001 | `mcp_wrapper.ps1`, `mcp_wrapper.sh` | `mcp_wrapper.sh` | 1 script | Low |
-| QA-001 | `check_arch.py`, `validate_arch.py` | `validate_arch.py` | 1 script | High |
+| Group ID | Scripts                                                      | Canonical Candidate       | Savings   | Complexity |
+| -------- | ------------------------------------------------------------ | ------------------------- | --------- | ---------- |
+| TR-001   | `run_pytest.sh`, `run_pytest.ps1`, `run_pytest_resilient.py` | `run_pytest_resilient.py` | 2 scripts | Medium     |
+| MCP-001  | `mcp_wrapper.ps1`, `mcp_wrapper.sh`                          | `mcp_wrapper.sh`          | 1 script  | Low        |
+| QA-001   | `check_arch.py`, `validate_arch.py`                          | `validate_arch.py`        | 1 script  | High       |
 
 **Total Duplicate Groups**: 8 = **24 scripts** = **7.6%** of inventory
 **Consolidation Potential**: 16 scripts = **5.1%** savings
 
 #### 3. Suboptimal Scripts (Refactoring Needed)
 
-| Script | Issue Type | Severity | Effort | Impact |
-|--------|------------|----------|--------|--------|
-| `critical_process.sh` | No error handling | High | Medium | High |
-| `complex_etl.py` | 12 parameters | High | High | Medium |
-| `config_loader.sh` | Hardcoded paths | Medium | Low | High |
+| Script                | Issue Type        | Severity | Effort | Impact |
+| --------------------- | ----------------- | -------- | ------ | ------ |
+| `critical_process.sh` | No error handling | High     | Medium | High   |
+| `complex_etl.py`      | 12 parameters     | High     | High   | Medium |
+| `config_loader.sh`    | Hardcoded paths   | Medium   | Low    | High   |
 
 **Top 10 Refactoring Candidates**: 10 scripts = **3.2%**
 **Medium Priority**: 20 scripts = **6.3%**
@@ -368,28 +394,30 @@ python3 -m scripts.engineering.repo check-inventory --check
 
 #### 4. Governance Violations
 
-| Script | Violation Type | Fix Required | Owner |
-|--------|----------------|--------------|-------|
+| Script                      | Violation Type | Fix Required                    | Owner         |
+| --------------------------- | -------------- | ------------------------------- | ------------- |
 | `scripts/misc/important.sh` | Wrong location | Move to scripts/engineering/qa/ | @architecture |
-| `scripts/undocumented.py` | No README | Add documentation | @docs |
-| `scripts/untested.sh` | No tests | Add test coverage | @qa |
+| `scripts/undocumented.py`   | No README      | Add documentation               | @docs         |
+| `scripts/untested.sh`       | No tests       | Add test coverage               | @qa           |
 
 **Critical Violations**: 4
 **Major Violations**: 6
 **Minor Violations**: 2
 
----
+______________________________________________________________________
 
 ## Recommendations
 
 ### Immediate Actions (Next 2 Weeks)
 
 1. **Remove Obsolete Scripts**
+
    - Remove 15 legacy scripts (4.7% reduction)
    - Update lifecycle registry
    - Expected savings: 15 scripts
 
-2. **Consolidate Test Runners**
+1. **Consolidate Test Runners**
+
    - Standardize on `run_pytest_resilient.py`
    - Remove duplicate wrappers
    - Expected savings: 2 scripts
@@ -397,11 +425,13 @@ python3 -m scripts.engineering.repo check-inventory --check
 ### Short-Term (Next Month)
 
 3. **Cross-Platform Consolidation**
+
    - Review PS1/SH pairs
    - Standardize on SH versions
    - Expected savings: 8 scripts
 
-4. **Critical Refactoring**
+1. **Critical Refactoring**
+
    - Add error handling to top 5 scripts
    - Extract hardcoded configurations
    - Expected improvement: 5 scripts
@@ -409,72 +439,83 @@ python3 -m scripts.engineering.repo check-inventory --check
 ### Long-Term (Next Quarter)
 
 5. **Governance Enforcement**
+
    - Add CI checks for script locations
    - Create quality gates
    - Document patterns
 
-6. **Comprehensive Refactoring**
+1. **Comprehensive Refactoring**
+
    - Address mediumpriority issues
    - Improve documentation
    - Add test coverage
 
----
+______________________________________________________________________
 
 ## Implementation Roadmap
 
 ### Phase 1: Safe Cleanup (Week 1-2)
+
 **Objective**: Remove low-risk obsolete scripts
 **Actions**:
+
 - Remove 15 legacy scripts
 - Update lifecycle registry
 - Verify CI/CD pipelines
 - Document changes
-**Success Criteria**:
+  **Success Criteria**:
 - CI still passes
 - No breaking changes
 - 4.7% inventory reduction
 
 ### Phase 2: Consolidation (Week 3-4)
+
 **Objective**: Merge duplicate functionality
 **Actions**:
+
 - Consolidate test runners
 - Unify cross-platform wrappers
 - Update all callers
 - Add deprecation warnings
-**Success Criteria**:
+  **Success Criteria**:
 - All workflows updated
 - 5.1% inventory reduction
 - No duplicate functionality
 
 ### Phase 3: Quality Improvement (Week 5-8)
+
 **Objective**: Refactor suboptimal scripts
 **Actions**:
+
 - Add error handling
 - Extract configurations
 - Improve documentation
 - Add tests
-**Success Criteria**:
+  **Success Criteria**:
 - Top 10 scripts refactored
 - Code quality metrics improved
 - Better maintainability
 
 ### Phase 4: Governance (Ongoing)
+
 **Objective**: Prevent regression
 **Actions**:
+
 - Add CI checks
 - Document patterns
 - Team training
 - Regular audits
-**Success Criteria**:
+  **Success Criteria**:
 - No new violations
 - Governance automated
 - Team compliance
 
----
+______________________________________________________________________
 
 ## Tools and Commands
 
 ### Inventory Analysis
+
 ```bash
 # Sync inventory
 python3 -m scripts.engineering.repo sync-inventory --write
@@ -487,6 +528,7 @@ python3 -m scripts.engineering.repo check-inventory --json > analysis.json
 ```
 
 ### Reference Analysis
+
 ```bash
 # Find script references in workflows
 grep -r "scripts/" .github/workflows/ | sort | uniq -c > workflow_refs.txt
@@ -499,6 +541,7 @@ grep -r "scripts/" tests/ | grep -v ".pyc" > test_refs.txt
 ```
 
 ### Quality Analysis
+
 ```bash
 # Check shell scripts
 shellcheck scripts/**/*.sh | tee shellcheck_results.txt
@@ -512,27 +555,30 @@ find scripts/ -name "*.py" | wc -l
 find scripts/ -name "*.ps1" | wc -l
 ```
 
----
+______________________________________________________________________
 
 ## Success Metrics
 
 ### Quantitative Goals
+
 - **Inventory Reduction**: 12-15% (38-47 scripts)
 - **Legacy Reduction**: 50%+ reduction
 - **Duplicate Elimination**: 80%+ consolidation
 - **Code Quality**: 20% improvement in linting scores
 
 ### Qualitative Goals
+
 - **Maintainability**: Easier to understand and modify
 - **Discoverability**: Clearer script purposes and locations
 - **Reliability**: Better error handling and logging
 - **Governance**: Automated compliance checking
 
----
+______________________________________________________________________
 
 ## Appendix: Common Patterns
 
 ### Healthy Script Characteristics
+
 ```markdown
 ✅ Clear single responsibility
 ✅ Proper error handling and logging
@@ -547,6 +593,7 @@ find scripts/ -name "*.ps1" | wc -l
 ```
 
 ### Problematic Script Characteristics
+
 ```markdown
 ❌ Multiple responsibilities
 ❌ No error handling
@@ -560,12 +607,13 @@ find scripts/ -name "*.ps1" | wc -l
 ❌ Complex interfaces
 ```
 
----
+______________________________________________________________________
 
 **Document Status**: Active
 **Review Cycle**: Quarterly
 **Next Review**: 2024-07-14
 **Change Log**:
+
 - 2024-04-14: Initial version based on cleanup analysis
 - 2024-04-14: Added governance violation section
 - 2024-04-14: Enhanced methodology with specific commands

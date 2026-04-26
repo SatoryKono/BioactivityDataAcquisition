@@ -9,10 +9,10 @@
 ## Research Questions
 
 1. Is `RF-01` still a broad governance-baseline task, or has it narrowed to one red gate?
-2. Which `RF-04` composition seams remain materially open after the recent regression-net and helper-seam work?
-3. Does the current code and architecture policy still justify `RF-06` as an implementation refactor?
-4. Does the current code/test/governance surface still justify `RF-07` as an active migration task?
-5. Which RF tasks remain active implementation work vs. documentation/governance watchpoints?
+1. Which `RF-04` composition seams remain materially open after the recent regression-net and helper-seam work?
+1. Does the current code and architecture policy still justify `RF-06` as an implementation refactor?
+1. Does the current code/test/governance surface still justify `RF-07` as an active migration task?
+1. Which RF tasks remain active implementation work vs. documentation/governance watchpoints?
 
 ## Evidence Gate
 

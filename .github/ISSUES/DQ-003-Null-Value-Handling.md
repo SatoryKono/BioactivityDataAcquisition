@@ -12,19 +12,21 @@ Strings like "N/A", "None", "-", and "." are not systematically converted to pro
 ## 🔍 Root Cause
 
 1. **Inconsistent Null Handling**: Pseudo-null strings remain as strings
-2. **Missing Rules**: No explicit normalization for null-like values
-3. **Analysis Issues**: String nulls affect data quality metrics
-4. **Validation Gaps**: Pandera doesn't catch pseudo-nulls
+1. **Missing Rules**: No explicit normalization for null-like values
+1. **Analysis Issues**: String nulls affect data quality metrics
+1. **Validation Gaps**: Pandera doesn't catch pseudo-nulls
 
 ## 📋 Scope
 
 **Affected Components:**
+
 - `src/bioetl/domain/normalization/profiles/chembl_activity.py` - Add null rules
 - `src/bioetl/domain/normalization/rules.py` - Implement null handling
 - Test files - Validate null normalization
 - Documentation - Update null handling specs
 
 **Impact Analysis:**
+
 ```bash
 # Find pseudo-null values
 grep -rn "N/A\|None\|-" src/bioetl/domain/ --include="*.py" | head -5
@@ -35,23 +37,21 @@ grep -rn "N/A\|None\|-" src/bioetl/domain/ --include="*.py" | head -5
 ### Phase 1: Rule Definition (2 days)
 
 1. **Define Null Patterns**
+
    ```python
    # src/bioetl/domain/normalization/rules.py
    NULL_PATTERNS = ["N/A", "None", "-", ".", "null", ""]
    ```
 
-2. **Add Null Rule**
+1. **Add Null Rule**
+
    ```python
    # src/bioetl/domain/normalization/profiles/chembl_activity.py
-   FIELD_RULES = {
-       "standard_value": {
-           "type": "float",
-           "null_patterns": NULL_PATTERNS
-       }
-   }
+   FIELD_RULES = {"standard_value": {"type": "float", "null_patterns": NULL_PATTERNS}}
    ```
 
-3. **Update Normalizer**
+1. **Update Normalizer**
+
    ```python
    # src/bioetl/domain/normalization/normalizer.py
    def normalize_null_value(value: str) -> Any:
@@ -62,6 +62,7 @@ grep -rn "N/A\|None\|-" src/bioetl/domain/ --include="*.py" | head -5
 ### Phase 2: Implementation (3 days)
 
 1. **Apply Null Normalization**
+
    ```python
    # src/bioetl/domain/normalization/normalizer.py
    def normalize_field(field_value: str, field_name: str) -> Any:
@@ -70,19 +71,19 @@ grep -rn "N/A\|None\|-" src/bioetl/domain/ --include="*.py" | head -5
        return field_value
    ```
 
-2. **Update Pandera Schema**
+1. **Update Pandera Schema**
+
    ```python
    # src/bioetl/domain/schemas/activity.py
    import pandera as pa
 
+
    class ActivitySchema(pa.DataFrameModel):
-       standard_value: pa.typing.Series[pa.Float] = pa.Field(
-           nullable=True,
-           allow_na=True
-       )
+       standard_value: pa.typing.Series[pa.Float] = pa.Field(nullable=True, allow_na=True)
    ```
 
-3. **Add Validation Tests**
+1. **Add Validation Tests**
+
    ```python
    # tests/unit/domain/test_normalization.py
    def test_null_normalization():
@@ -93,16 +94,19 @@ grep -rn "N/A\|None\|-" src/bioetl/domain/ --include="*.py" | head -5
 ### Phase 3: Validation (2 days)
 
 1. **Test Null Handling**
+
    ```bash
    pytest tests/unit/domain/test_normalization.py -v
    ```
 
-2. **Validate Data Quality**
+1. **Validate Data Quality**
+
    ```bash
    python scripts/validate_data_quality.py --null-check
    ```
 
-3. **Monitor Production**
+1. **Monitor Production**
+
    ```bash
    # Check null handling logs
    grep "null" logs/production.log
@@ -136,17 +140,20 @@ mypy src/bioetl/domain/normalization/ --strict
 ## 📈 Impact Assessment
 
 ### Positive Impacts
+
 - **Data Quality**: Consistent null handling
 - **Analysis**: Reduced null-related errors
 - **Validation**: Comprehensive null checks
 - **Documentation**: Clear null rules
 
 ### Potential Risks
+
 - **Breaking Changes**: Existing null strings become None
 - **Performance**: Additional null processing
 - **Complexity**: More rules to maintain
 
 ### Mitigation Strategies
+
 - **Backward Compatibility**: Support both formats temporarily
 - **Gradual Rollout**: Deploy in stages
 - **Comprehensive Testing**: Validate all scenarios

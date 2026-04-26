@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-12'
----
+  Last verified: '2026-04-12'
+
+______________________________________________________________________
 
 # Neo4j Project Memory - Example Q&A Pairs
 
@@ -17,6 +20,7 @@ A: BioETL uses Hexagonal Architecture with Ports and Adapters, Medallion Archite
 
 **Q: What are the architectural invariants in BioETL?**
 A: Key invariants:
+
 - Domain must not perform I/O
 - Application must not import infrastructure
 - Composition is the composition root
@@ -41,6 +45,7 @@ A: Username: `neo4j`, Password: `bioetl_secure_password` (from `NEO4J_AUTH=neo4j
 
 **Q: How to verify Neo4j MCP setup?**
 A: Run:
+
 ```bash
 codex mcp get neo4j-memory
 bash scripts/ai/mcp/check_neo4j_memory.sh
@@ -72,6 +77,7 @@ A: `infrastructure.config` is the canonical owner for YAML loading and normaliza
 
 **Q: How to start Neo4j backend?**
 A:
+
 ```bash
 docker run -d --name bioetl-neo4j \
   -p 7474:7474 -p 7687:7687 \
@@ -84,6 +90,7 @@ A: http://localhost:7474/browser/ with credentials neo4j/bioetl_secure_password
 
 **Q: What environment variables does the MCP wrapper use?**
 A:
+
 - `NEO4J_URI` (default: bolt://localhost:7687)
 - `NEO4J_USERNAME` (parsed from NEO4J_AUTH)
 - `NEO4J_PASSWORD` (parsed from NEO4J_AUTH)
@@ -96,6 +103,7 @@ A: Ports, value_objects, entities, aggregates, services, schemas, validation, ma
 
 **Q: What are the core aggregates?**
 A:
+
 - PipelineRun (execution lifecycle)
 - RunManifest (immutable provenance)
 - RunLedgerEntry (control-plane events)
@@ -109,6 +117,7 @@ A: ChemblId, DOI, PubMedId, OpenAlexId, SemanticScholarId, PubChemCid, UniProtId
 
 **Q: How to test Neo4j memory retrieval?**
 A: Example prompts:
+
 ```
 @neo4j-memory что ты знаешь про архитектуру BioETL?
 @neo4j-memory как в BioETL собирается runtime для PipelineRunner?
@@ -118,6 +127,7 @@ A: Example prompts:
 
 **Q: What are the memory update rules?**
 A:
+
 - Save only long-lived facts
 - Don't store transient logs/errors
 - Update memory after merge, not during experiments

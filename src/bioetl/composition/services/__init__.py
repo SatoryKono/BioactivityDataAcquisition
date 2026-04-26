@@ -20,11 +20,13 @@ from bioetl.composition.services.versioning import (
     get_pipeline_version,
 )
 
+_DOMAIN_PORTS_MODULE = "bioetl.domain.ports"
+
 _LAZY_EXPORTS: dict[str, tuple[str, str]] = {
-    "BronzeMetadataInput": ("bioetl.domain.ports", "BronzeMetadataInput"),
-    "GoldMetadataInput": ("bioetl.domain.ports", "GoldMetadataInput"),
+    "BronzeMetadataInput": (_DOMAIN_PORTS_MODULE, "BronzeMetadataInput"),
+    "GoldMetadataInput": (_DOMAIN_PORTS_MODULE, "GoldMetadataInput"),
     "MetadataCoordinator": ("bioetl.composition._services", "MetadataCoordinator"),
-    "SilverMetadataInput": ("bioetl.domain.ports", "SilverMetadataInput"),
+    "SilverMetadataInput": (_DOMAIN_PORTS_MODULE, "SilverMetadataInput"),
 }
 
 __all__ = [

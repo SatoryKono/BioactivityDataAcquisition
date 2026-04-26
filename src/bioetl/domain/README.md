@@ -5,17 +5,17 @@ no concrete I/O, no framework bootstrapping, and no dependency creation.
 
 ## Main Families
 
-| Package | Responsibility |
-| --- | --- |
-| `ports/` | Protocol-based dependency boundaries imported via the facade |
-| `value_objects/` | Immutable domain primitives and typed semantic wrappers |
-| `entities/` | Provider- and entity-level domain records |
-| `aggregates/` | Aggregate roots and invariants |
-| `services/` | Domain services that express business rules without I/O |
-| `schemas/` | Pandera schema models and schema-related contracts |
-| `validation/` | Validation helpers and semantic checks |
-| `mapping/` | Canonical field and classification mappings |
-| `config/`, `types/`, `exceptions/`, `registry/`, `filtering/`, `transformations/` | Supporting semantic families |
+| Package                                                                           | Responsibility                                               |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `ports/`                                                                          | Protocol-based dependency boundaries imported via the facade |
+| `value_objects/`                                                                  | Immutable domain primitives and typed semantic wrappers      |
+| `entities/`                                                                       | Provider- and entity-level domain records                    |
+| `aggregates/`                                                                     | Aggregate roots and invariants                               |
+| `services/`                                                                       | Domain services that express business rules without I/O      |
+| `schemas/`                                                                        | Pandera schema models and schema-related contracts           |
+| `validation/`                                                                     | Validation helpers and semantic checks                       |
+| `mapping/`                                                                        | Canonical field and classification mappings                  |
+| `config/`, `types/`, `exceptions/`, `registry/`, `filtering/`, `transformations/` | Supporting semantic families                                 |
 
 ## Root-Level Modules
 

@@ -39,6 +39,7 @@ _RUN_CONTEXT_ALL_FIELDS = (
     *_RUN_CONTEXT_REQUIRED_FIELDS,
     *_RUN_CONTEXT_OPTIONAL_DEFAULTS.keys(),
 )
+_OPTIONAL_STR_ANNOTATION = "str | None"
 
 
 def _coerce_transform_steps(value: object) -> tuple[str, ...]:
@@ -127,24 +128,34 @@ def coerce_run_context_create_input(
         started_at=cast(datetime, values["started_at"]),
         provider=cast(str, values["provider"]),
         entity=cast(str, values["entity"]),
-        transform_version=cast("str | None", values["transform_version"]),
+        transform_version=cast(_OPTIONAL_STR_ANNOTATION, values["transform_version"]),
         transform_steps=cast("tuple[str, ...]", values["transform_steps"]),
-        pipeline_version=cast("str | None", values["pipeline_version"]),
-        git_commit=cast("str | None", values["git_commit"]),
-        config_hash=cast("str | None", values["config_hash"]),
-        resolved_config_hash=cast("str | None", values["resolved_config_hash"]),
-        effective_config_hash=cast("str | None", values["effective_config_hash"]),
-        manifest_id=cast("str | None", values["manifest_id"]),
-        contract_ref=cast("str | None", values["contract_ref"]),
-        contract_version=cast("str | None", values["contract_version"]),
-        contract_schema_hash=cast("str | None", values["contract_schema_hash"]),
-        dq_policy_ref=cast("str | None", values["dq_policy_ref"]),
-        rule_bundle_version=cast("str | None", values["rule_bundle_version"]),
+        pipeline_version=cast(_OPTIONAL_STR_ANNOTATION, values["pipeline_version"]),
+        git_commit=cast(_OPTIONAL_STR_ANNOTATION, values["git_commit"]),
+        config_hash=cast(_OPTIONAL_STR_ANNOTATION, values["config_hash"]),
+        resolved_config_hash=cast(
+            _OPTIONAL_STR_ANNOTATION, values["resolved_config_hash"]
+        ),
+        effective_config_hash=cast(
+            _OPTIONAL_STR_ANNOTATION, values["effective_config_hash"]
+        ),
+        manifest_id=cast(_OPTIONAL_STR_ANNOTATION, values["manifest_id"]),
+        contract_ref=cast(_OPTIONAL_STR_ANNOTATION, values["contract_ref"]),
+        contract_version=cast(_OPTIONAL_STR_ANNOTATION, values["contract_version"]),
+        contract_schema_hash=cast(
+            _OPTIONAL_STR_ANNOTATION, values["contract_schema_hash"]
+        ),
+        dq_policy_ref=cast(_OPTIONAL_STR_ANNOTATION, values["dq_policy_ref"]),
+        rule_bundle_version=cast(
+            _OPTIONAL_STR_ANNOTATION, values["rule_bundle_version"]
+        ),
         dq_contract_compatibility_hash=cast(
-            "str | None", values["dq_contract_compatibility_hash"]
+            _OPTIONAL_STR_ANNOTATION, values["dq_contract_compatibility_hash"]
         ),
         effective_config_artifact_id=cast(
-            "str | None", values["effective_config_artifact_id"]
+            _OPTIONAL_STR_ANNOTATION, values["effective_config_artifact_id"]
         ),
-        execution_fingerprint=cast("str | None", values["execution_fingerprint"]),
+        execution_fingerprint=cast(
+            _OPTIONAL_STR_ANNOTATION, values["execution_fingerprint"]
+        ),
     )

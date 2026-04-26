@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-011: Отказ от механизма Watermark
 
@@ -17,6 +20,7 @@ Last verified: '2026-03-30'
 ## Context
 
 Механизм Watermark был реализован для поддержки инкрементальной загрузки данных:
+
 - `Watermark` value object в domain слое для хранения позиции (timestamp, offset, ID)
 - `extract-watermark()` метод в каждом пайплайне
 - Отдельные классы `*WatermarkExtractor` для каждого типа сущности
@@ -26,37 +30,37 @@ Last verified: '2026-03-30'
 ### Проблемы текущего подхода
 
 1. **Избыточная сложность**: Каждый новый пайплайн требует создания отдельного WatermarkExtractor класса
-2. **Дублирование логики**: Экстракторы содержат повторяющуюся логику обработки полей
-3. **Привязка к инкрементальной модели**: Watermark предполагает наличие монотонно возрастающего ключа, что не всегда доступно
-4. **Смешение ответственностей**: Checkpoint должен сохранять состояние пайплайна, а не специфичную позицию в данных
+1. **Дублирование логики**: Экстракторы содержат повторяющуюся логику обработки полей
+1. **Привязка к инкрементальной модели**: Watermark предполагает наличие монотонно возрастающего ключа, что не всегда доступно
+1. **Смешение ответственностей**: Checkpoint должен сохранять состояние пайплайна, а не специфичную позицию в данных
 
 ### Альтернативные подходы
 
 1. **Cursor-based pagination**: API провайдеров (ChEMBL, UniProt) используют встроенную пагинацию
-2. **Full reload**: Для небольших датасетов (< 1M записей) полная перезагрузка эффективнее
-3. **Content-based deduplication**: Delta Lake merge по `content-hash` автоматически обрабатывает дубликаты
+1. **Full reload**: Для небольших датасетов (< 1M записей) полная перезагрузка эффективнее
+1. **Content-based deduplication**: Delta Lake merge по `content-hash` автоматически обрабатывает дубликаты
 
 ## Decision
 
 **Удаление механизма Watermark** из проекта:
 
 1. Удаление `Watermark` value object из domain/types.py
-2. Удаление параметра `watermark` из `DataSourcePort.fetch()`
-3. Удаление метода `extract-watermark()` из `BasePipeline`
-4. Удаление всех `*WatermarkExtractor` классов
-5. Удаление поля `watermark-field` из конфигурации
-6. Упрощение `CheckpointPort` - хранение только метаданных запуска
+1. Удаление параметра `watermark` из `DataSourcePort.fetch()`
+1. Удаление метода `extract-watermark()` из `BasePipeline`
+1. Удаление всех `*WatermarkExtractor` классов
+1. Удаление поля `watermark-field` из конфигурации
+1. Упрощение `CheckpointPort` - хранение только метаданных запуска
 
 ## Justification
 
 ### 1. Упрощение пайплайнов
 
-| До | После |
-|---|---|
+| До                                 | После                        |
+| ---------------------------------- | ---------------------------- |
 | BasePipeline + extract-watermark() | BasePipeline (без watermark) |
-| *WatermarkExtractor классы | Удалены |
-| watermark-field в config | Удалено |
-| Watermark value object | Удалён |
+| \*WatermarkExtractor классы        | Удалены                      |
+| watermark-field в config           | Удалено                      |
+| Watermark value object             | Удалён                       |
 
 ### 2. Уменьшение кода
 
@@ -67,6 +71,7 @@ Last verified: '2026-03-30'
 ### 3. Соответствие реальным use cases
 
 Анализ показал:
+
 - Большинство загрузок выполняются как полный rebuild
 - Инкрементальная загрузка редко используется
 - Content-based deduplication через Delta Lake merge эффективнее
@@ -74,6 +79,7 @@ Last verified: '2026-03-30'
 ### 4. Упрощение добавления новых пайплайнов
 
 Новый пайплайн требует только:
+
 - `transform-bronze-to-silver()` — основная логика
 - `should-write-gold()` — опциональная фильтрация
 
@@ -88,8 +94,8 @@ def fetch(
     entity_type: str,
     watermark: Watermark | None = None,
     limit: int | None = None,
-) -> AsyncIterator[dict[str, Any]]:
-    ...
+) -> AsyncIterator[dict[str, Any]]: ...
+
 
 # Стало
 def fetch(
@@ -97,8 +103,7 @@ def fetch(
     entity_type: str,
     limit: int | None = None,
     query: str | None = None,
-) -> AsyncIterator[dict[str, Any]]:
-    ...
+) -> AsyncIterator[dict[str, Any]]: ...
 ```
 
 ### CheckpointPort
@@ -146,20 +151,20 @@ class BasePipeline(ABC):
 ### Positive
 
 1. **Простота**: Меньше кода, меньше абстракций
-2. **Поддерживаемость**: Проще добавлять новые пайплайны
-3. **Понятность**: Новые разработчики быстрее разбираются в коде
-4. **Надёжность**: Меньше точек отказа
+1. **Поддерживаемость**: Проще добавлять новые пайплайны
+1. **Понятность**: Новые разработчики быстрее разбираются в коде
+1. **Надёжность**: Меньше точек отказа
 
 ### Negative
 
 1. **Нет инкрементальной загрузки**: Все запуски — полный reload
-2. **Потенциально больше API вызовов**: При больших датасетах
+1. **Потенциально больше API вызовов**: При больших датасетах
 
 ### Mitigation
 
 1. **Content-based deduplication**: Delta Lake merge по `content-hash` предотвращает дубликаты
-2. **Limit параметр**: Ограничение количества записей для тестирования
-3. **Фильтрация на стороне API**: Использование query параметра для ограничения данных
+1. **Limit параметр**: Ограничение количества записей для тестирования
+1. **Фильтрация на стороне API**: Использование query параметра для ограничения данных
 
 ## References
 
@@ -173,19 +178,20 @@ class BasePipeline(ABC):
 ## Rollout
 
 При обновлении:
+
 1. Удалить поле `watermark-field` из конфигов пайплайнов
-2. Удалить метод `extract-watermark()` из кастомных пайплайнов
-3. Обновить тесты, использующие Watermark
+1. Удалить метод `extract-watermark()` из кастомных пайплайнов
+1. Обновить тесты, использующие Watermark
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-011-remove-watermark-mechanism.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                                |
+| ------------ | -------------------------------------------------------------------------- | ------ | --------------------------------------- |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-011-remove-watermark-mechanism.md` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                              |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                        |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria`    |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                            |
 
 ## Rollback
 
