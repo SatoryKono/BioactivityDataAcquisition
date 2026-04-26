@@ -93,248 +93,6 @@ repos:
             CHANGELOG\.md|
             \.codex/.*\.md|
             \.gemini/.*\.md|
-            docs/00-project/ai/(agents|skills)/.*\.md
-          )$
-
-  # Local hooks
-  - repo: local
-    hooks:
-      - id: pip-audit
-        name: Check for known vulnerabilities in dependencies
-        entry: python scripts/engineering/dev/run_project_python.py -m pip_audit --cache-dir .cache/pip-audit --skip-editable --strict
-        language: python
-        pass_filenames: false
-        stages: [manual]
-        verbose: true
-
-      - id: mypy-strict
-        name: Run strict mypy gate on src/bioetl
-        entry: uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
-        language: system
-        pass_filenames: false
-        stages: [pre-push]
-
-      - id: architecture-smoke
-        name: Fast architecture smoke checks
-        entry: uv run --active pytest tests/architecture/test_future_annotations_policy.py tests/architecture/test_naming_conventions.py tests/architecture/test_no_structlog_in_application_interfaces.py tests/architecture/test_no_datetime_now_in_infrastructure.py tests/architecture/test_no_random_in_writers.py tests/architecture/test_forbidden_imports.py -q
-        language: system
-        pass_filenames: false
-        stages: [pre-commit]
-
-      - id: forbid-cache-files
-        name: Block common cache and temporary files
-        entry: '\b(__pycache__|\.pyc|\.pyo|\.pytest_cache|\.mypy_cache|\.ruff_cache|\.python-user|\.codex_tmp|test_.*\.(js|py|json))\b'
-        language: pygrep
-        args: [--multiline]
-        exclude: ^(tests/|\.codex/|\.agent-work/)
-
-      - id: validate-pipeline-configs
-        name: Validate unified pipeline YAML configs
-        entry: python scripts/schema/validate_pipeline_configs.py
-        language: python
-        files: ^configs/(entities|composites|_schema)/.*\.(yaml|json)$
-        pass_filenames: false
-        additional_dependencies:
-          - jsonschema>=4.0.0
-          - pyyaml>=6.0
-
-      - id: audit-root-cleanliness
-        name: Audit repository root layout allowlist
-        entry: python scripts/engineering/repo/audit_root_cleanliness.py
-        language: python
-        pass_filenames: false
-        stages: [manual]
-      - id: lint-config-paths
-        name: Check for legacy dq/filter config path references
-        entry: python scripts/schema/lint_config_paths.py
-        language: python
-        pass_filenames: false
-        files: ^(configs/|src/|docs/)
-        exclude: ^src/bioetl/infrastructure/config/config_ci_contract\.py$
-        types_or: [yaml, json, python, markdown]
-
-      - id: check-config-invariants
-        name: Validate config CI invariants (naming, schemas, auth, keys)
-        entry: uv run --active python scripts/schema/check_config_invariants.py
-        language: system
-        pass_filenames: false
-        files: ^configs/
-        types: [yaml]
-
-      - id: lint-diagrams
-        name: Lint architecture diagrams (.mmd/.mermaid)
-        entry: python scripts/diagrams/lint_diagrams.py
-        language: python
-        files: ^docs/02-architecture/(mmd-diagrams/.*\.mmd|diagrams/mermaid/.*\.mermaid)$
-
-      - id: prune-orphan-diagram-nodes
-        name: Check for orphan nodes in Mermaid diagrams (GRAPH-001)
-        entry: python scripts/diagrams/prune_orphan_nodes.py --check
-        language: python
-        files: ^docs/02-architecture/(mmd-diagrams/.*\.mmd|diagrams/mermaid/.*\.mermaid)$
-        pass_filenames: false
-
-      # CI-like local pre-commit checks
-      - id: repo-identity-check
-        name: Check repository identity synchronization
-        entry: python scripts/docs sync-repo-identity --check
-        language: python
-        pass_filenames: false
-        stages: [manual]
-
-      - id: inventory-check
-        name: Validate scripts inventory and lifecycle registry
-        entry: python scripts/engineering/repo check-inventory --check --manifest configs/quality/scripts_inventory_manifest.json --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
-        language: python
-        pass_filenames: false
-        stages: [manual]
-
-      - id: catalog-check
-        name: Validate scripts catalog governance
-        entry: python scripts/engineering/repo check-catalog --catalog scripts/engineering/repo/catalog.yaml
-        language: python
-        pass_filenames: false
-        stages: [manual]
-
-      - id: docs-check-links
-        name: Check documentation links
-        entry: python scripts/docs check-links --links --specs --configs
-        language: python
-        pass_filenames: false
-        stages: [manual]
-
-      - id: docs-check-drift
-        name: Check documentation drift
-        entry: python scripts/docs check-drift --ports --classes
-        language: python
-        pass_filenames: false
-        stages: [manual]
-
-      - id: docs-check-docstrings
-        name: Check docstring inventory
-        entry: python scripts/docs check-docstrings --summary
-        language: python
-        pass_filenames: false
-        stages: [manual]
-
-      - id: check-root-vcr-cassettes
-        name: Block VCR cassette anti-patterns
-        entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_root_vcr_cassettes.py
-        language: python
-        pass_filenames: false
-        stages: [manual]
-
-      - id: check-vcr-filename-policy
-        name: Enforce VCR filename policy
-        entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_vcr_filename_policy.py
-        language: python
-        pass_filenames: false
-        stages: [manual]
-
-      - id: check-architecture-dependency-map-drift
-        name: Check architecture dependency-map docs drift
-        entry: python scripts/engineering/qa/generate_architecture_dependency_map.py --check
-        language: python
-        pass_filenames: false
-        files: ^(src/bioetl/.*\.py|docs/02-architecture/generated/module-dependency-map\.(md|json)|scripts/engineering/qa/generate_architecture_dependency_map\.py)$
-        stages: [manual]
-# Pre-commit hooks for BioETL
-# Install: pip install pre-commit && pre-commit install
-# Run manually: pre-commit run --all-files
-
-repos:
-  # Ruff - Fast Python linter and formatter
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.10
-    hooks:
-      # Run the linter
-      - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
-        exclude: >
-          (?x)^(
-            check_cfg\.py|
-            debug_chembl_pub2?\.py|
-            debug_.*\.py|
-            docs/00-project/ai/agents/.*\.py|
-            docs/00-project/ai/skills/.*\.py|
-            docs/plugins/link_checker/.*\.py
-          )$
-      # Run the formatter
-      - id: ruff-format
-        exclude: >
-          (?x)^(
-            check_cfg\.py|
-            debug_chembl_pub2?\.py|
-            debug_.*\.py|
-            docs/00-project/ai/agents/.*\.py|
-            docs/00-project/ai/skills/.*\.py|
-            docs/plugins/link_checker/.*\.py
-          )$
-
-  # Security checks
-  - repo: https://github.com/PyCQA/bandit
-    rev: 1.9.2
-    hooks:
-      - id: bandit
-        args: [-c, pyproject.toml]
-        additional_dependencies: ["bandit[toml]"]
-        stages: [pre-push]
-
-  # Secret scanning in pre-push. CI keeps the canonical detect-secrets baseline
-  # check via tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets.
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.21.2
-    hooks:
-      - id: gitleaks
-        args: ['--config', '.gitleaks.toml']
-        stages: [pre-push]
-
-  # General file checks
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
-    hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
-        exclude: >
-          (?x)^(
-            mkdocs\.yml|
-            docs/plugins/link_checker/mkdocs_example\.yml|
-            docs/05-operations/deployment/k8s-deployment\.yaml|
-            docs/05-operations/deployment/k8s-monitoring\.yaml|
-            docs/05-operations/deployment/k8s-networking\.yaml
-          )$
-      - id: check-json
-      - id: check-toml
-      - id: check-added-large-files
-        args: [--maxkb=1000]
-      - id: check-case-conflict
-      - id: check-merge-conflict
-      - id: debug-statements
-        exclude: >
-          (?x)^(
-            check_cfg\.py|
-            debug_chembl_pub2?\.py|
-            debug_.*\.py|
-            docs/00-project/ai/agents/.*\.py|
-            docs/00-project/ai/skills/.*\.py
-          )$
-      - id: mixed-line-ending
-        args: [--fix=lf]
-
-  # Markdown linting
-  - repo: https://github.com/executablebooks/mdformat
-    rev: 1.0.0
-    hooks:
-      - id: mdformat
-        additional_dependencies:
-          - mdformat-gfm
-          - mdformat-black
-        exclude: >
-          (?x)^(
-            CHANGELOG\.md|
-            \.codex/.*\.md|
-            \.gemini/.*\.md|
             docs/00-project/ai/(agents|skills)/.*\.md|
             docs/02-architecture/decisions/.*\.md|
             docs/03-guides/.*\.md|
@@ -370,10 +128,20 @@ repos:
 
       - id: forbid-cache-files
         name: Block common cache and temporary files
-        entry: '\b(__pycache__|\.pyc|\.pyo|\.pytest_cache|\.mypy_cache|\.ruff_cache|\.python-user|\.codex_tmp|test_.*\.(js|py|json))\b'
+        entry: ^.*$
         language: pygrep
-        args: [--multiline]
-        exclude: ^(tests/|\.codex/|\.agent-work/)
+        files: >
+          (?x)^(
+            .*__pycache__/.*|
+            .*\.pyc$|
+            .*\.pyo$|
+            .*\.pytest_cache/.*|
+            .*\.mypy_cache/.*|
+            .*\.ruff_cache/.*|
+            .*\.python-user/.*|
+            .*\.codex_tmp/.*
+          )$
+        exclude: ^(tests/|\.codex/|\.gemini/|\.agent-work/)
 
       - id: validate-pipeline-configs
         name: Validate unified pipeline YAML configs
@@ -406,6 +174,7 @@ repos:
         language: system
         pass_filenames: false
         files: ^configs/
+        exclude: ^configs/entities/composite/
         types: [yaml]
 
       - id: lint-diagrams

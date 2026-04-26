@@ -113,7 +113,7 @@ consistency, а этот документ задаёт правила публи
 
 AI runtime ownership note:
 
-- `.codex/**` and `.claude/**` remain runtime-owned trees and are not
+- `.codex/**` and `ai/claude/**` remain runtime-owned trees and are not
   reclassified by docs publication policy.
 - `docs/00-project/ai/**` is the published/internal mirror surface for AI
   guidance and discoverability.

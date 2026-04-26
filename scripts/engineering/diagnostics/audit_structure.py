@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 ALLOWED_ROOT_DIRS: set[str] = {
     ".ai",
     ".aiassistant",
-    ".claude",
+    "ai",
     ".codex",
     ".codex_tmp",
     ".cursor",

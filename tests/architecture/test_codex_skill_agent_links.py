@@ -11,7 +11,7 @@ def _project_root() -> Path:
 
 
 def _skill_files(root: Path) -> list[Path]:
-    return sorted((root / ".codex" / "skills").glob("*/SKILL.md"))
+    return sorted((root / "ai" / "claude" / "skills").glob("*/SKILL.md"))
 
 
 def test_codex_skills_must_not_reference_removed_codex_agents_dir() -> None:
@@ -31,10 +31,10 @@ def test_codex_skills_must_not_reference_removed_codex_agents_dir() -> None:
 
 
 def test_codex_skills_claude_agent_links_must_exist() -> None:
-    """Every `.claude/agents/*.md` path mentioned in skills must resolve."""
+    """Every `ai/claude/agents/*.md` path mentioned in skills must resolve."""
     root = _project_root()
     missing: list[str] = []
-    pattern = re.compile(r"`([^`\n]{1,512}\.claude/agents/[^`\n]{1,512}\.md)`")
+    pattern = re.compile(r"`([^`\n]{1,512}ai/claude/agents/[^`\n]{1,512}\.md)`")
 
     for skill_path in _skill_files(root):
         content = skill_path.read_text(encoding="utf-8")
@@ -45,4 +45,4 @@ def test_codex_skills_claude_agent_links_must_exist() -> None:
                     f"{skill_path.relative_to(root).as_posix()} -> {rel_ref}"
                 )
 
-    assert missing == [], "Broken `.claude/agents` references: " + ", ".join(missing)
+    assert missing == [], "Broken `ai/claude/agents` references: " + ", ".join(missing)

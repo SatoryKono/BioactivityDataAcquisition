@@ -37,7 +37,7 @@ n$pathIgnoreList = @(
 n  "docs/**",
 n  "*.md",
 n  ".ai/**",
-n  ".claude/**",
+n  "ai/claude/**",
 n  ".github/workflows/**",
 n  "LICENSE"
 n)

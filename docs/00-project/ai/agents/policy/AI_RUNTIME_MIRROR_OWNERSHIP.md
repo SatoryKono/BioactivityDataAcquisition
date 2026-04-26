@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-12'
+  Last verified: '2026-04-26'
 
 ______________________________________________________________________
 
@@ -23,13 +23,13 @@ ______________________________________________________________________
 | Surface                 | Primary role                      | Source-of-truth status                | Editable for behavior                  | Expected content                                                                                |
 | ----------------------- | --------------------------------- | ------------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `.codex/**`             | Codex runtime surface             | Canonical for Codex runtime behavior  | Yes                                    | live agent registry, skills, Codex-specific orchestration, runtime settings                     |
-| `.claude/**`            | Claude runtime surface            | Canonical for Claude runtime behavior | Yes                                    | Claude-specific agent registry, commands, skills, project context, runtime settings             |
+| `ai/claude/**`          | Claude runtime surface            | Canonical for Claude runtime behavior | Yes                                    | Claude-specific agent registry, rules, skills, project context, runtime settings                |
 | `docs/00-project/ai/**` | Published/internal mirror surface | Not canonical for runtime behavior    | Only for mirror/index/guidance updates | curated mirrors, navigation, contributor guidance, memory entrypoints, prompt and skill indexes |
 
 ## Source-of-Truth Rules
 
 1. `.codex/**` is the authoritative source for Codex runtime behavior.
-1. `.claude/**` is the authoritative source for Claude runtime behavior.
+1. `ai/claude/**` is the authoritative source for Claude runtime behavior.
 1. `docs/00-project/ai/**` is a repo-only or internal-published mirror layer for
    discoverability and contributor guidance; it MUST NOT redefine runtime
    behavior on its own.
@@ -42,7 +42,7 @@ ______________________________________________________________________
 
 Default sync direction is:
 
-1. runtime tree changes first (`.codex/**` or `.claude/**`)
+1. runtime tree changes first (`.codex/**` or `ai/claude/**`)
 1. published/internal mirror refresh second (`docs/00-project/ai/**`)
 1. governance/index refresh third, if the mirror contract changed
 
@@ -58,7 +58,7 @@ This means:
 
 The following divergence is intentional and not a bug by itself:
 
-- `.codex/**` and `.claude/**` may have different orchestration mechanics
+- `.codex/**` and `ai/claude/**` may have different orchestration mechanics
 - runtime-specific commands, wrappers, and settings may differ between runtimes
 - docs mirrors may summarize or normalize runtime concepts for navigation
   purposes instead of reproducing every runtime file verbatim
@@ -73,7 +73,7 @@ The following divergence is not acceptable:
 ## Edit Rules
 
 - Change runtime behavior:
-  edit `.codex/**` or `.claude/**` first, depending on the target runtime.
+  edit `.codex/**` or `ai/claude/**` first, depending on the target runtime.
 - Change published navigation or contributor guidance:
   edit `docs/00-project/ai/**`.
 - Change project-wide rules:
@@ -82,9 +82,9 @@ The following divergence is not acceptable:
 ## Practical Routing
 
 - Agent orchestration behavior for Codex -> `.codex/agents/**`
-- Agent orchestration behavior for Claude -> `.claude/agents/**`
+- Agent orchestration behavior for Claude -> `ai/claude/agents/**`
 - Skill trigger/runtime behavior for Codex -> `.codex/skills/**`
-- Claude-specific commands and task surfaces -> `.claude/commands/**`
+- Claude-specific runtime rules and task surfaces -> `ai/claude/rules/**`
 - Human-readable indexes, mirrors, and onboarding pointers -> `docs/00-project/ai/**`
 
 ## Related Entry Points

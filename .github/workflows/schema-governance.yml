@@ -6,7 +6,7 @@ on:
       - 'docs/**'
       - '*.md'
       - '.ai/**'
-      - '.claude/**'
+      - 'ai/claude/**'
       - '.github/workflows/**'
       - 'LICENSE'
     branches: [main, master]
@@ -28,7 +28,7 @@ on:
       - 'docs/**'
       - '*.md'
       - '.ai/**'
-      - '.claude/**'
+      - 'ai/claude/**'
       - '.github/workflows/**'
       - 'LICENSE'
     paths:

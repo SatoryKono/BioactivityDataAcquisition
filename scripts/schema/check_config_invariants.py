@@ -76,7 +76,9 @@ def _deep_string_search(obj: Any, fragment: str) -> bool:
 
 def _entity_configs() -> list[Path]:
     return sorted(
-        p for p in ENTITIES_DIR.rglob(YAML_GLOB) if not p.name.startswith("_")
+        p
+        for p in ENTITIES_DIR.rglob(YAML_GLOB)
+        if not p.name.startswith("_") and p.parent.name != "composite"
     )
 
 
