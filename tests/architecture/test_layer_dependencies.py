@@ -211,8 +211,14 @@ def _is_orphan_directory(
     source_content_cache: dict[Path, str],
 ) -> str | None:
     """Return the relative orphan path when a leaf directory has only an empty __init__.py."""
-    py_files = list(dir_path.glob("*.py"))
-    subdirs = [child for child in dir_path.iterdir() if child.is_dir()]
+    # Mounted/parallel test runs can prune transient cache dirs between discovery and scan.
+    if not dir_path.exists():
+        return None
+    try:
+        py_files = list(dir_path.glob("*.py"))
+        subdirs = [child for child in dir_path.iterdir() if child.is_dir()]
+    except FileNotFoundError:
+        return None
     if subdirs or not py_files:
         return None
 
