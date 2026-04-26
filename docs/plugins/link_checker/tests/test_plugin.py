@@ -14,7 +14,7 @@ from docs.plugins.link_checker.plugin import LinkCheckerPlugin
 
 
 class TestLinkCheckerPlugin:
-    """Test cases for LinkCheckerPlugin class.""
+    """Test cases for LinkCheckerPlugin class."""
 
     def setup_method(self):
         """Setup test environment."""
