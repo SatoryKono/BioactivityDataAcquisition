@@ -55,6 +55,7 @@ runs:
       env:
         EXTRAS: ${{ inputs.uv-extras }}
         SYNC_ARGS: ${{ inputs.uv-sync-args }}
+        UV_PYTHON: ${{ inputs.python-version }}
       run: |
         CMD="uv sync ${SYNC_ARGS}"
         for extra in $EXTRAS; do

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Codex is an AI-powered code assistant that helps analyze, refactor, and improve your codebase. This guide explains how to use it in the BioactivityDataAcquisition2 project.
+Codex is an AI-powered code assistant that helps analyze, refactor, and improve your codebase. This guide explains how to use it in the BioactivityDataAcquisition project.
 
 ## Prerequisites
 
@@ -19,7 +19,7 @@ Codex is an AI-powered code assistant that helps analyze, refactor, and improve 
 Run from PowerShell in the project root:
 
 ```powershell
-cd e:\g-drive\05_AI\github\BioactivityDataAcquisition2
+cd e:\g-drive\05_AI\github\BioactivityDataAcquisition
 .\scripts\engineering\dev\.setup_wsl_codex.sh
 ```
 
@@ -152,5 +152,5 @@ Install with: `npm install -g @openai/codex`
 ## Notes
 
 - Codex preserves terminal scrollback (no alternate screen by default)
-- All commands run in the BioactivityDataAcquisition2 root directory context
+- All commands run in the BioactivityDataAcquisition root directory context
 - WSL2 VPN configuration is required for OpenAI API access

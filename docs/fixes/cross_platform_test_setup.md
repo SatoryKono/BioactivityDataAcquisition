@@ -19,7 +19,7 @@ The error occurs when trying to run Windows tests without the Windows environmen
 
 ```powershell
 # Navigate to project root
-cd E:\g-drive\05_AI\github\BioactivityDataAcquisition2
+cd E:\g-drive\05_AI\github\BioactivityDataAcquisition
 
 # Set up Windows environment
 .\scripts\engineering\dev\setup_env_windows.ps1
@@ -31,7 +31,7 @@ cd E:\g-drive\05_AI\github\BioactivityDataAcquisition2
 
 ```bash
 # Navigate to project root
-cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
+cd <YOUR_WSL_REPO_PATH>
 
 # Set up WSL environment
 bash scripts/engineering/dev/setup_env_wsl.sh
@@ -125,7 +125,7 @@ If you work in both Windows and WSL:
 1. **Keep environments separate** - Don't share `.venv` between OS
 1. **Use OS-appropriate scripts** - Windows: `.ps1`, WSL: `.sh`
 1. **Check current environment** - `uname -a` (WSL) vs `$env:OS` (Windows)
-1. **File path differences** - Windows: `E:\...`, WSL: `/mnt/e/...`
+1. **File path differences** - Windows: `E:\...`, WSL: `<WSL_MOUNT>/e/...`
 
 ## Verification Commands
 
@@ -169,5 +169,5 @@ python -c "import respx; print('respx version:', respx.__version__)"
 ### Common WSL-specific issues:
 
 - **Permission errors:** Use `chmod` to fix file permissions
-- **Windows file access:** Use `/mnt/e/...` paths instead of `E:\...`
+- **Windows file access:** Use `<WSL_MOUNT>/e/...` paths instead of `E:\...`
 - **Locale warnings:** Set `export LC_ALL=C.UTF-8` if needed

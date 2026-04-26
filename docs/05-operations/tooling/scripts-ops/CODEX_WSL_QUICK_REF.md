@@ -15,7 +15,7 @@ curl -I https://api.openai.com  # Test
 
 ```powershell
 # Navigate to project
-cd e:\g-drive\05_AI\github\BioactivityDataAcquisition2
+cd e:\g-drive\05_AI\github\BioactivityDataAcquisition
 
 # Interactive mode (new WSL wrapper)
 .\scripts\ops\codex-wsl.bat
@@ -33,7 +33,7 @@ cd e:\g-drive\05_AI\github\BioactivityDataAcquisition2
 
 ```bash
 # Navigate to project
-cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
+cd <YOUR_WSL_REPO_PATH>
 
 # Interactive
 ./scripts/ops/launchers/codex/codex.sh

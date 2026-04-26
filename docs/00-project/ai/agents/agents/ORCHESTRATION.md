@@ -530,7 +530,7 @@ ______________________________________________________________________
 - **PLATFORM**: Адаптация для Claude Code CLI (ранее Codex/Claude.ai)
 - **CHANGED**: Все субагенты переименованы: `pyXxxBot` → `py-xxx-bot` (для `subagent_type` в Task tool)
 - **CHANGED**: 8 старых Claude Code агентов заменены на 7 унифицированных: `py-audit-bot`, `py-plan-bot`, `py-test-bot`, `py-code-bot`, `py-config-bot`, `py-debug-bot`, `py-doc-bot`
-- **CHANGED**: Навыки из `/mnt/skills/` инлайнированы в файлы субагентов (секция `## Инлайнированные знания`)
+- **CHANGED**: Навыки из skills directory инлайнированы в файлы субагентов (секция `## Инлайнированные знания`)
 - **REMOVED**: `google_drive_search`, `message_compose`, `ask_user_input` (недоступны в CLI)
 - **CHANGED**: `web_search` / `web_fetch` → `WebSearch` / `WebFetch` (встроенные инструменты Claude Code)
 - **CHANGED**: MCP инструменты доступны через `ToolSearch` (deferred loading)
