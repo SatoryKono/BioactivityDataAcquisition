@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: T201
 """
 OpenAI YAML Generator - Creates agents/openai.yaml for a skill folder.
 
