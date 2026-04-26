@@ -337,7 +337,7 @@ class TestHealthServer:
 class TestHealthServerHTTP:
     """Tests for HTTP request handling via actual connections."""
 
-    @pytest_asyncio.fixture(loop_scope="function")
+    @pytest_asyncio.fixture(loop_scope="module")
     async def running_server(self) -> AsyncGenerator[HealthServer, None]:
         """Create and start a health server."""
         server = HealthServer(host="127.0.0.1", port=0)
@@ -389,7 +389,7 @@ class TestHealthServerHTTP:
             writer.close()
             await writer.wait_closed()
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_http_health_endpoint(self, running_server: HealthServer) -> None:
         """Test /health endpoint via HTTP."""
         port = self._get_server_port(running_server)
@@ -400,7 +400,7 @@ class TestHealthServerHTTP:
         assert data["status"] == "healthy"
         assert "server" in data["checks"]
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_http_healthz_endpoint(self, running_server: HealthServer) -> None:
         """Test /healthz endpoint via HTTP."""
         port = self._get_server_port(running_server)
@@ -410,7 +410,7 @@ class TestHealthServerHTTP:
         data = json.loads(body)
         assert data["status"] == "healthy"
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_http_liveness_endpoint(self, running_server: HealthServer) -> None:
         """Test /health/live endpoint via HTTP."""
         port = self._get_server_port(running_server)
@@ -421,7 +421,7 @@ class TestHealthServerHTTP:
         assert data["status"] == "healthy"
         assert "server" in data["checks"]
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_http_readiness_endpoint(self, running_server: HealthServer) -> None:
         """Test /health/ready endpoint via HTTP."""
         port = self._get_server_port(running_server)
@@ -431,7 +431,7 @@ class TestHealthServerHTTP:
         data = json.loads(body)
         assert data["status"] == "healthy"
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_http_providers_endpoint(self, running_server: HealthServer) -> None:
         """Test /health/providers endpoint via HTTP."""
         port = self._get_server_port(running_server)
@@ -443,7 +443,7 @@ class TestHealthServerHTTP:
         data = json.loads(body)
         assert data["status"] == "healthy"
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_http_404_not_found(self, running_server: HealthServer) -> None:
         """Test 404 response for unknown path."""
         port = self._get_server_port(running_server)
@@ -456,7 +456,7 @@ class TestHealthServerHTTP:
         data = json.loads(body)
         assert data["error"] == "Not Found"
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_http_405_method_not_allowed(
         self, running_server: HealthServer
     ) -> None:
@@ -471,7 +471,7 @@ class TestHealthServerHTTP:
         data = json.loads(body)
         assert data["error"] == "Method Not Allowed"
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_http_bad_request(self, running_server: HealthServer) -> None:
         """Test 400 response for malformed request."""
         port = self._get_server_port(running_server)
@@ -491,7 +491,7 @@ class TestHealthServerHTTP:
             writer.close()
             await writer.wait_closed()
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_http_query_string_stripped(
         self, running_server: HealthServer
     ) -> None:
@@ -503,7 +503,7 @@ class TestHealthServerHTTP:
         data = json.loads(body)
         assert data["status"] == "healthy"
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_http_empty_request(self, running_server: HealthServer) -> None:
         """Test handling of empty request."""
         port = self._get_server_port(running_server)
@@ -521,7 +521,7 @@ class TestHealthServerHTTP:
 class TestHealthServerQuarantineExplorer:
     """Tests for /ops/quarantine/* explorer endpoints."""
 
-    @pytest_asyncio.fixture(loop_scope="function")
+    @pytest_asyncio.fixture(loop_scope="module")
     async def running_server_without_quarantine(
         self,
     ) -> AsyncGenerator[HealthServer, None]:
@@ -531,7 +531,7 @@ class TestHealthServerQuarantineExplorer:
         yield server
         await server.stop()
 
-    @pytest_asyncio.fixture(loop_scope="function")
+    @pytest_asyncio.fixture(loop_scope="module")
     async def running_server_with_quarantine(
         self,
     ) -> AsyncGenerator[tuple[HealthServer, MagicMock], None]:
@@ -611,7 +611,7 @@ class TestHealthServerQuarantineExplorer:
             writer.close()
             await writer.wait_closed()
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_records_endpoint_requires_quarantine_service(
         self,
         running_server_without_quarantine: HealthServer,
@@ -628,7 +628,7 @@ class TestHealthServerQuarantineExplorer:
         assert status_text == "Quarantine explorer unavailable"
         assert "Quarantine explorer unavailable" in body
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_records_endpoint_requires_pipeline_scope(
         self,
         running_server_with_quarantine: tuple[HealthServer, MagicMock],
@@ -647,7 +647,7 @@ class TestHealthServerQuarantineExplorer:
         assert "Missing required query parameter: pipeline" in body
         service.list_filtered_records.assert_not_awaited()
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_records_endpoint_delegates_to_quarantine_service(
         self,
         running_server_with_quarantine: tuple[HealthServer, MagicMock],
@@ -682,7 +682,7 @@ class TestHealthServerQuarantineExplorer:
             sort="ingestion_ts_desc",
         )
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_stats_endpoint_requires_pipeline_scope(
         self,
         running_server_with_quarantine: tuple[HealthServer, MagicMock],
@@ -702,7 +702,7 @@ class TestHealthServerQuarantineExplorer:
         assert "Missing required query parameter: pipeline" in body
         service.get_filtered_stats.assert_not_awaited()
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_filter_options_endpoint_requires_pipeline_scope(
         self,
         running_server_with_quarantine: tuple[HealthServer, MagicMock],
@@ -722,7 +722,7 @@ class TestHealthServerQuarantineExplorer:
         assert "Missing required query parameter: pipeline" in body
         service.get_filtered_filter_options.assert_not_awaited()
 
-    @pytest.mark.asyncio
+    @pytest.mark.asyncio(loop_scope="module")
     async def test_record_detail_endpoint_returns_404(
         self,
         running_server_with_quarantine: tuple[HealthServer, MagicMock],
