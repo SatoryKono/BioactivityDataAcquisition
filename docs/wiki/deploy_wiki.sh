@@ -13,12 +13,14 @@ set -euo pipefail
 REPO_URL="https://github.com/SatoryKono/BioactivityDataAcquisition.wiki.git"
 WIKI_SRC="docs/wiki"
 TMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TMP_DIR"' EXIT
 
 echo "Клонирование Wiki-репозитория..."
 git clone "$REPO_URL" "$TMP_DIR"
 
 echo "Копирование Wiki-страниц..."
 for f in "$WIKI_SRC"/*.md; do
+    [ "$(basename "$f")" = "README.md" ] && continue
     cp "$f" "$TMP_DIR/"
 done
 
@@ -30,4 +32,3 @@ git push origin master
 echo "Wiki-страницы успешно развёрнуты!"
 echo "https://github.com/SatoryKono/BioactivityDataAcquisition/wiki"
 
-rm -rf "$TMP_DIR"
