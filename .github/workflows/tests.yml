@@ -451,7 +451,7 @@ jobs:
                 run: |
                     mkdir -p reports/coverage
                     mkdir -p reports/test-telemetry
-                    COVERAGE_FILE=reports/coverage/.coverage.${{ matrix.test-group.name }} \
+                    export COVERAGE_FILE=reports/coverage/.coverage.${{ matrix.test-group.name }}
                     uv run pytest ${{ matrix.test-group.path }} \
                       -m "not serial and not memory" \
                       -n auto --dist loadscope --max-worker-restart=0 \
