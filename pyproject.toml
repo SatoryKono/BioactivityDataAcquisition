@@ -62,9 +62,9 @@ export = [
 ]
 tests = [
     # Testing frameworks
-    "pytest>=8.0",
+    "pytest>=9.0.3",
     "pytest-cov>=4.0",
-    "pytest-asyncio>=0.23,<1.0",
+    "pytest-asyncio>=0.24",
     "pytest-xdist>=3.5",
     "pytest-timeout>=2.3",  # Catch stuck tests (prevents CI hangs)
     "syrupy>=4.0",
@@ -86,9 +86,9 @@ tests = [
     "detect-secrets>=1.4",
 ]
 dev = [
-    "pytest>=8.0",
+    "pytest>=9.0.3",
     "pytest-cov>=4.0",
-    "pytest-asyncio>=0.23,<1.0",
+    "pytest-asyncio>=0.24",
     "pytest-xdist>=3.5",
     "pytest-timeout>=2.3",  # Catch stuck tests (prevents CI hangs)
     "pytest-benchmark>=4.0",

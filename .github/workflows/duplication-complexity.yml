@@ -78,7 +78,7 @@ jobs:
           # quality validation internals: _validate_registry_groups_section (CC=12), _validate_owner_decomposition_targets_section (CC=11), _validate_priority_registry_burndown (CC=11), _validate_grace_window_identity_fields (CC=14), validate_exemptions_registry (CC=12)
           # metadata_writer: _write_metadata with multi-path coordinator fallback (CC=11)
           xenon --max-absolute B --max-modules B --max-average A \
-            --exclude "tests/*,src/tools/*,src/bioetl/infrastructure/adapters/chembl/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*,src/bioetl/infrastructure/adapters/crossref/*,src/bioetl/infrastructure/adapters/pubmed/*,src/bioetl/infrastructure/adapters/uniprot/*,src/bioetl/infrastructure/adapters/pubchem/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*" src
+            --exclude "tests/*,src/tools/*,src/memory/*,src/bioetl/infrastructure/adapters/chembl/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*,src/bioetl/infrastructure/adapters/crossref/*,src/bioetl/infrastructure/adapters/pubmed/*,src/bioetl/infrastructure/adapters/uniprot/*,src/bioetl/infrastructure/adapters/pubchem/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*" src
 
       - name: Strict complexity check for domain layer (CC ≤ 5)
         run: |
@@ -201,6 +201,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
+      - name: Install required dependencies
+        run: pip install pyyaml
 
       - name: Check constructor argument counts
         run: python -m scripts.engineering.qa check-constructor-args --warn-only

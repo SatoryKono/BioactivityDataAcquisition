@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-26T15:10:27.088625+00:00",
+  "generated_at": "2026-04-26T16:16:04.707235+00:00",
   "summary": {
-    "total_scripts": 445,
+    "total_scripts": 443,
     "status_counts": {
-      "active": 313,
+      "active": 312,
       "legacy": 15,
-      "orphan": 104,
+      "orphan": 103,
       "unknown": 13
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 1,
       "ci": 56,
-      "docs": 117,
-      "scripts": 295,
+      "docs": 116,
+      "scripts": 294,
       "skills": 8,
       "tests": 134
     }
@@ -1128,16 +1128,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 61,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/github-mcp-wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 61,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/github-mcp-wrapper.sh\""
@@ -1169,16 +1163,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 112,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 112,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
@@ -1204,16 +1192,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 142,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_chembl_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 142,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_chembl_wrapper.sh\""
@@ -1233,16 +1215,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 82,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_context7_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 82,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_context7_wrapper.sh\""
@@ -1268,16 +1244,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 76,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 76,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
@@ -1303,16 +1273,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 70,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 70,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_wrapper.sh\""
@@ -1338,16 +1302,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 94,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 94,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
@@ -1373,16 +1331,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 106,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 106,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
@@ -1408,16 +1360,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 160,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 160,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
@@ -1437,16 +1383,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 136,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_needle_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 136,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_needle_wrapper.sh\""
@@ -1472,16 +1412,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 124,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 124,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
@@ -1507,7 +1441,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 22,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -1572,16 +1506,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 88,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 88,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
@@ -1607,16 +1535,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 100,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 100,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
@@ -1642,16 +1564,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 148,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubchem_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 148,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubchem_wrapper.sh\""
@@ -1671,16 +1587,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 154,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubmed_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 154,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubmed_wrapper.sh\""
@@ -1700,16 +1610,10 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 118,
-          "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
-        },
-        {
-          "path": "scripts/ai/.vscode/mcp.json",
           "line": 118,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
@@ -3994,7 +3898,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 41,
+      "reference_count": 42,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -4021,6 +3925,12 @@
           "text": "entry: python scripts/diagrams/lint_diagrams.py"
         },
         {
+          "path": ".pre-commit-config.yaml",
+          "line": 413,
+          "source_group": "ci",
+          "text": "entry: python scripts/diagrams/lint_diagrams.py"
+        },
+        {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
           "line": 103,
           "source_group": "docs",
@@ -4037,12 +3947,6 @@
           "line": 176,
           "source_group": "docs",
           "text": "`scripts/diagrams/lint_diagrams.py` проверяет оба каталога:"
-        },
-        {
-          "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-          "line": 249,
-          "source_group": "docs",
-          "text": "**CI Rules (lint_diagrams.py):**"
         }
       ]
     },
@@ -4090,11 +3994,17 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 23,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
           "line": 172,
+          "source_group": "ci",
+          "text": "entry: python scripts/diagrams/prune_orphan_nodes.py --check"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 419,
           "source_group": "ci",
           "text": "entry: python scripts/diagrams/prune_orphan_nodes.py --check"
         },
@@ -4133,12 +4043,6 @@
           "line": 484,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --check"
-        },
-        {
-          "path": "docs/02-architecture/diagrams/README.md",
-          "line": 487,
-          "source_group": "docs",
-          "text": "python scripts/diagrams/prune_orphan_nodes.py --check --json"
         }
       ]
     },
@@ -4564,13 +4468,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 259,
+          "line": 254,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs export-matrix-structural-contract --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 268,
+          "line": 263,
           "source_group": "ci",
           "text": "uv run python -m scripts.docs sync-matrix-structural-policy --check --input \"$workbook\" --output \"$workbook\""
         },
@@ -5662,13 +5566,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 162,
+          "line": 157,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.ci neo4j-memory"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 225,
+          "line": 220,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -5824,13 +5728,13 @@
       "references": [
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 67,
+          "line": 69,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 146,
+          "line": 148,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
@@ -5869,7 +5773,7 @@
       "references": [
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 78,
+          "line": 80,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/ci/check_e2e_rerun_stability.py \\"
         },
@@ -6004,7 +5908,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 638,
+          "line": 633,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -6183,63 +6087,6 @@
       "references": []
     },
     {
-      "path": "scripts/engineering/dev/.setup_wsl_codex.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 11,
-      "references": [
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 228,
-          "source_group": "docs",
-          "text": "**Layer 1: DNS** (`scripts/engineering/dev/.setup_wsl_codex.sh`)"
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 241,
-          "source_group": "docs",
-          "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\""
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 267,
-          "source_group": "docs",
-          "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\" 2>/dev/null"
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 323,
-          "source_group": "docs",
-          "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\""
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_QUICK_REF.md",
-          "line": 7,
-          "source_group": "docs",
-          "text": ".\\scripts\\engineering\\dev\\.setup_wsl_codex.sh"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_QUICK_REF.md",
-          "line": 71,
-          "source_group": "docs",
-          "text": "| `OpenAI timeout`    | Run setup: `.\\scripts\\engineering\\dev\\.setup_wsl_codex.sh`                               |"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
-          "line": 23,
-          "source_group": "docs",
-          "text": ".\\scripts\\engineering\\dev\\.setup_wsl_codex.sh"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
-          "line": 125,
-          "source_group": "docs",
-          "text": "- Re-run VPN setup: `.\\scripts\\engineering\\dev\\.setup_wsl_codex.sh`"
-        }
-      ]
-    },
-    {
       "path": "scripts/engineering/dev/.wsl-vpn-fix.ps1",
       "type": "ps1",
       "status": "active",
@@ -6310,14 +6157,6 @@
           "text": "uv run python -m scripts.engineering.dev setup-mcp"
         }
       ]
-    },
-    {
-      "path": "scripts/engineering/dev/bash/.setup_wsl_codex.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/engineering/dev/bash/.wsl_proxy_env.sh",
@@ -6915,7 +6754,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 8,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
@@ -6932,6 +6771,24 @@
         {
           "path": ".pre-commit-config.yaml",
           "line": 229,
+          "source_group": "ci",
+          "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 351,
+          "source_group": "ci",
+          "text": "entry: python scripts/engineering/dev/run_project_python.py -m pip_audit --cache-dir .cache/pip-audit --skip-editable --strict"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 469,
+          "source_group": "ci",
+          "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 476,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
         },
@@ -7736,7 +7593,7 @@
       "references": [
         {
           "path": ".github/workflows/duplication-complexity.yml",
-          "line": 206,
+          "line": 209,
           "source_group": "ci",
           "text": "run: python -m scripts.engineering.qa check-constructor-args --warn-only"
         },
@@ -7766,19 +7623,19 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 165,
+          "line": 160,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.qa report-family-baseline --active-only --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 705,
+          "line": 700,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 714,
+          "line": 709,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         }
@@ -7931,7 +7788,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 277,
+          "line": 272,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/check_docs_drift.py"
         }
@@ -7946,7 +7803,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 168,
+          "line": 163,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/check_naming_package_consistency.py --check"
         },
@@ -8003,7 +7860,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 140,
+          "line": 135,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/check_quality_exemptions.py \\"
         },
@@ -8077,7 +7934,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 26,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -8099,13 +7956,19 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 274,
+          "line": 269,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": ".pre-commit-config.yaml",
           "line": 236,
+          "source_group": "ci",
+          "text": "entry: python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 483,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -8120,12 +7983,6 @@
           "line": 71,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --check"
-        },
-        {
-          "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
-          "line": 72,
-          "source_group": "docs",
-          "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         }
       ]
     },
@@ -8201,7 +8058,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 558,
+          "line": 553,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -8646,13 +8503,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 171,
+          "line": 166,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/validate_dq_consistency.py"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 341,
+          "line": 336,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/validate_dq_consistency.py"
         }
@@ -8720,7 +8577,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -8731,6 +8588,12 @@
         {
           "path": ".pre-commit-config.yaml",
           "line": 222,
+          "source_group": "ci",
+          "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 469,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"
         },
@@ -8771,7 +8634,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -8782,6 +8645,12 @@
         {
           "path": ".pre-commit-config.yaml",
           "line": 229,
+          "source_group": "ci",
+          "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 476,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
         },
@@ -8933,7 +8802,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 16,
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -8950,6 +8819,12 @@
         {
           "path": ".pre-commit-config.yaml",
           "line": 143,
+          "source_group": "ci",
+          "text": "entry: python scripts/engineering/repo/audit_root_cleanliness.py"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 390,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/repo/audit_root_cleanliness.py"
         },
@@ -8976,12 +8851,6 @@
           "line": 201,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py"
-        },
-        {
-          "path": "docs/03-guides/cleanup-policy.md",
-          "line": 269,
-          "source_group": "docs",
-          "text": "- CI **MUST** run `scripts/engineering/repo/audit_root_cleanliness.py`; this"
         }
       ]
     },
@@ -8994,7 +8863,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 159,
+          "line": 154,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/repo/check_scripts_catalog.py --catalog scripts/engineering/repo/catalog.yaml"
         },
@@ -9033,7 +8902,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 151,
+          "line": 146,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/repo/check_scripts_inventory.py \\"
         },
@@ -11237,13 +11106,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 253,
+          "line": 248,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema check-required-fields --verbose"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 256,
+          "line": 251,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema audit-optionality --check"
         },
@@ -11311,17 +11180,23 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 250,
+          "line": 245,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/check_config_invariants.py"
         },
         {
           "path": ".pre-commit-config.yaml",
           "line": 158,
+          "source_group": "ci",
+          "text": "entry: uv run --active python scripts/schema/check_config_invariants.py"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 405,
           "source_group": "ci",
           "text": "entry: uv run --active python scripts/schema/check_config_invariants.py"
         },
@@ -11558,7 +11433,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 271,
+          "line": 266,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/generate_pipeline_schema.py --check"
         },
@@ -11692,11 +11567,17 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
           "line": 149,
+          "source_group": "ci",
+          "text": "entry: python scripts/schema/lint_config_paths.py"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 396,
           "source_group": "ci",
           "text": "entry: python scripts/schema/lint_config_paths.py"
         },
@@ -11719,17 +11600,23 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 247,
+          "line": 242,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/validate_pipeline_configs.py"
         },
         {
           "path": ".pre-commit-config.yaml",
           "line": 133,
+          "source_group": "ci",
+          "text": "entry: python scripts/schema/validate_pipeline_configs.py"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 380,
           "source_group": "ci",
           "text": "entry: python scripts/schema/validate_pipeline_configs.py"
         },
@@ -11762,12 +11649,6 @@
           "line": 16,
           "source_group": "scripts",
           "text": "- `scripts/schema/validate_pipeline_configs.py` is an officially supported compatibility wrapper around the canonical validator in `docs/00-project/ai/agents/scripts/py-config-bot-2.py`."
-        },
-        {
-          "path": "scripts/schema/README.md",
-          "line": 35,
-          "source_group": "scripts",
-          "text": "| `validate-configs`           | `scripts/schema/validate_pipeline_configs.py`                          | Validate unified pipeline YAML configs against JSON Schema                             |"
         }
       ]
     },

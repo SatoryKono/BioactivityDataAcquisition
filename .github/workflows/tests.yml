@@ -51,8 +51,8 @@ jobs:
             -   name: Checkout code
                 uses: actions/checkout@v6
 
-            -   name: Set up Python 3.11
-                uses: actions/setup-python@v5
+            -   name: Install uv + cache + dependencies
+                uses: ./.github/actions/setup-python-uv
                 with:
                     python-version: "3.11"
 
@@ -73,11 +73,6 @@ jobs:
 
             -   name: Validate version consistency
                 run: python scripts/engineering/repo/check_version_consistency.py
-
-            -   name: Install uv + cache + dependencies
-                uses: ./.github/actions/setup-python-uv
-                with:
-                    python-version: "3.11"
 
             -   name: Smoke check (dependencies + core imports)
                 run: |
