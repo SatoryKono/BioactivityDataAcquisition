@@ -2,8 +2,21 @@
 
 from __future__ import annotations
 
+import re
+
 import pytest
 from click.testing import CliRunner
+
+
+_ANSI_ESCAPE_RE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
+
+
+def _normalize_cli_output(raw: str) -> str:
+    """Normalize CLI text for stable snapshot comparisons across environments."""
+    without_ansi = _ANSI_ESCAPE_RE.sub("", raw)
+    normalized_newlines = without_ansi.replace("\r\n", "\n")
+    trimmed_lines = "\n".join(line.rstrip() for line in normalized_newlines.split("\n"))
+    return trimmed_lines.rstrip("\n") + "\n"
 
 
 @pytest.fixture
@@ -30,10 +43,15 @@ class TestListPipelinesCommandSnapshot:
 
         from bioetl.interfaces.cli.main import cli
 
-        result = cli_runner.invoke(cli, ["config", "list-pipelines"])
+        result = cli_runner.invoke(
+            cli,
+            ["config", "list-pipelines"],
+            color=False,
+            env={"NO_COLOR": "1", "CLICOLOR": "0", "CLICOLOR_FORCE": "0"},
+        )
 
         assert result.exit_code == 0, f"Command failed: {result.output}"
-        assert result.output == snapshot
+        assert _normalize_cli_output(result.output) == snapshot
 
     def test_list_pipelines_output_format(
         self,
@@ -42,7 +60,12 @@ class TestListPipelinesCommandSnapshot:
         """CLI output should retain the expected human-readable format."""
         from bioetl.interfaces.cli.main import cli
 
-        result = cli_runner.invoke(cli, ["config", "list-pipelines"])
+        result = cli_runner.invoke(
+            cli,
+            ["config", "list-pipelines"],
+            color=False,
+            env={"NO_COLOR": "1", "CLICOLOR": "0", "CLICOLOR_FORCE": "0"},
+        )
 
         assert result.exit_code == 0
         assert "Available pipelines:" in result.output
