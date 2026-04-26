@@ -15,7 +15,7 @@ from docs.plugins.link_checker.plugin import LinkCheckerPlugin
 
 class TestLinkCheckerPlugin:
     """Test cases for LinkCheckerPlugin class.""
-    
+
     def setup_method(self):
         """Setup test environment."""
         self.plugin = LinkCheckerPlugin()
@@ -27,7 +27,7 @@ class TestLinkCheckerPlugin:
             "report_dir": "reports/links",
             "fail_on_error": False
         }
-        
+
     def test_initialization(self):
         """Test plugin initialization."""
         assert self.plugin.links_checked == 0
@@ -35,7 +35,7 @@ class TestLinkCheckerPlugin:
         assert self.plugin.broken_links == 0
         assert self.plugin.redirect_links == 0
         assert len(self.plugin.link_results) == 0
-    
+
     def test_find_html_files(self):
         """Test finding HTML files in directory."""
         # Create temporary directory with HTML files
@@ -44,18 +44,18 @@ class TestLinkCheckerPlugin:
             for i in range(3):
                 with open(os.path.join(temp_dir, f"page{i}.html"), "w") as f:
                     f.write(f"<html><body>Page {i}</body></html>")
-            
+
             # Create subdirectory with HTML file
             subdir = os.path.join(temp_dir, "subdir")
             os.makedirs(subdir)
             with open(os.path.join(subdir, "subpage.html"), "w") as f:
                 f.write("<html><body>Sub page</body></html>")
-            
+
             # Test finding files
             html_files = self.plugin._find_html_files(temp_dir)
             assert len(html_files) == 4
             assert all(f.endswith(".html") for f in html_files)
-    
+
     def test_check_internal_link_valid(self):
         """Test checking valid internal link."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -63,7 +63,7 @@ class TestLinkCheckerPlugin:
             target_file = os.path.join(temp_dir, "target.html")
             with open(target_file, "w") as f:
                 f.write("<html><body>Target</body></html>")
-            
+
             # Test valid internal link
             result = self.plugin._check_link(
                 "target.html",
@@ -71,12 +71,12 @@ class TestLinkCheckerPlugin:
                 "index.html",
                 os.path.join(temp_dir, "index.html")
             )
-            
+
             assert result is not None
             assert result["status"] == "valid"
             assert result["is_internal"] is True
             assert result["error"] is None
-    
+
     def test_check_internal_link_broken(self):
         """Test checking broken internal link."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -87,12 +87,12 @@ class TestLinkCheckerPlugin:
                 "index.html",
                 os.path.join(temp_dir, "index.html")
             )
-            
+
             assert result is not None
             assert result["status"] == "broken"
             assert result["is_internal"] is True
             assert result["error"] == "File not found"
-    
+
     @patch("requests.Session.get")
     def test_check_external_link_valid(self, mock_get):
         """Test checking valid external link."""
@@ -101,20 +101,20 @@ class TestLinkCheckerPlugin:
         mock_response.status_code = 200
         mock_response.history = []
         mock_get.return_value = mock_response
-        
+
         result = self.plugin._check_link(
             "https://example.com",
             "Example",
             "index.html",
             "/path/to/index.html"
         )
-        
+
         assert result is not None
         assert result["status"] == "valid"
         assert result["is_internal"] is False
         assert result["http_code"] == 200
         assert len(result["redirect_chain"]) == 0
-    
+
     @patch("requests.Session.get")
     def test_check_external_link_broken(self, mock_get):
         """Test checking broken external link."""
@@ -123,19 +123,19 @@ class TestLinkCheckerPlugin:
         mock_response.status_code = 404
         mock_response.history = []
         mock_get.return_value = mock_response
-        
+
         result = self.plugin._check_link(
             "https://example.com/broken",
             "Broken",
             "index.html",
             "/path/to/index.html"
         )
-        
+
         assert result is not None
         assert result["status"] == "broken"
         assert result["is_internal"] is False
         assert result["http_code"] == 404
-    
+
     @patch("requests.Session.get")
     def test_check_external_link_redirect(self, mock_get):
         """Test checking external link with redirect."""
@@ -143,25 +143,25 @@ class TestLinkCheckerPlugin:
         mock_redirect = MagicMock()
         mock_redirect.status_code = 301
         mock_redirect.url = "https://example.com/redirect"
-        
+
         mock_final = MagicMock()
         mock_final.status_code = 200
         mock_final.history = [mock_redirect]
-        
+
         mock_get.return_value = mock_final
-        
+
         result = self.plugin._check_link(
             "https://example.com/original",
             "Original",
             "index.html",
             "/path/to/index.html"
         )
-        
+
         assert result is not None
         assert result["status"] == "redirect"
         assert result["is_internal"] is False
         assert len(result["redirect_chain"]) == 1
-    
+
     def test_ignore_patterns(self):
         """Test that ignored patterns are respected."""
         result = self.plugin._check_link(
@@ -170,9 +170,9 @@ class TestLinkCheckerPlugin:
             "index.html",
             "/path/to/index.html"
         )
-        
+
         assert result is None  # Should be ignored
-    
+
     def test_generate_json_report(self):
         """Test JSON report generation."""
         # Add some test results
@@ -187,16 +187,16 @@ class TestLinkCheckerPlugin:
                 "is_internal": False
             }
         ]
-        
+
         report = self.plugin._generate_json_report()
-        
+
         assert report["version"] == "1.0"
         assert report["summary"]["total_links"] == 5
         assert report["summary"]["valid_links"] == 4
         assert report["summary"]["broken_links"] == 1
         assert report["summary"]["health_score"] == 80.0
         assert len(report["details"]) == 1
-    
+
     def test_generate_badge(self):
         """Test badge generation."""
         # Test different health scores
@@ -205,13 +205,13 @@ class TestLinkCheckerPlugin:
             (85, "#dbab09", "warning"),
             (75, "#e05d44", "failing")
         ]
-        
+
         for health_score, expected_color, expected_status in test_cases:
             self.plugin.valid_links = health_score
             self.plugin.links_checked = 100
-            
+
             badge = self.plugin._generate_badge()
-            
+
             assert f"{expected_color}" in badge
             assert f"{health_score}%" in badge
             assert f"{expected_status}" in badge
@@ -222,11 +222,11 @@ class TestLinkCheckerPlugin:
 def test_plugin_config_scheme():
     """Test plugin configuration scheme."""
     plugin = LinkCheckerPlugin()
-    
+
     # Test default configuration
     assert plugin.config_scheme is not None
     assert len(plugin.config_scheme) == 6
-    
+
     # Test configuration types
     config_options = dict(plugin.config_scheme)
     assert config_options["enabled"] is not None
@@ -240,10 +240,10 @@ def test_plugin_config_scheme():
 def test_plugin_integration():
     """Test basic plugin integration."""
     plugin = LinkCheckerPlugin()
-    
+
     # Test that plugin can be initialized
     assert plugin is not None
-    
+
     # Test that required methods exist
     assert hasattr(plugin, "on_startup")
     assert hasattr(plugin, "on_post_build")

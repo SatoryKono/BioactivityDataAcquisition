@@ -14,7 +14,7 @@
 
 **Primary Goals:**
 - Identify obsolete scripts safe for removal
-- Find duplicate scripts suitable for consolidation  
+- Find duplicate scripts suitable for consolidation
 - Detect suboptimal scripts needing refactoring
 - Uncover governance violations
 - Provide actionable cleanup recommendations
@@ -51,7 +51,7 @@
 # Check workflow references
 grep -r "script_name" .github/workflows/
 
-# Check agent/skill usage  
+# Check agent/skill usage
 grep -r "script_name" .codex/ docs/00-project/ai/agents/
 
 # Check test coverage
@@ -116,7 +116,7 @@ grep -r "script_name" tests/
 ```bash
 # Before: Multiple runners
 scripts/engineering/dev/run_pytest.sh
-scripts/engineering/dev/run_pytest.ps1  
+scripts/engineering/dev/run_pytest.ps1
 scripts/engineering/ci/run_pytest_resilient.py
 
 # After: Single canonical
@@ -250,7 +250,7 @@ grep -r "scripts/" tests/ | grep -v ".pyc"
 # Shell script quality
 shellcheck scripts/**/*.sh
 
-# Python script quality  
+# Python script quality
 pylint scripts/**/*.py
 
 # Code duplication detection
@@ -375,7 +375,7 @@ python3 -m scripts.engineering.repo check-inventory --check
 | `scripts/untested.sh` | No tests | Add test coverage | @qa |
 
 **Critical Violations**: 4
-**Major Violations**: 6  
+**Major Violations**: 6
 **Minor Violations**: 2
 
 ---

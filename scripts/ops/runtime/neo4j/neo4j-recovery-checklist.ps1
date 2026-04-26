@@ -116,7 +116,7 @@ try {
         Write-Host "⚠️  HTTP port 7474 not responding yet"
         Write-Host "   Waiting 30 more seconds..."
         Start-Sleep -Seconds 30
-        
+
         $response = curl.exe -s -w "%{http_code}" -o $null http://localhost:7474/ 2>&1
         if ($response -match "200|302|404") {
             Write-Host "✅ HTTP port now responding (HTTP $response)"

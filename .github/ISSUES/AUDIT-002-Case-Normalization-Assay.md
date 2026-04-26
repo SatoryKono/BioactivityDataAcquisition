@@ -1,8 +1,8 @@
 # Implement Case Normalization and Canonicalization for ChEMBL Assay Fields
 
-**Status**: Open   
-**Priority**: P1 (High)   
-**Labels**: `normalization`, `data-quality`, `audit`, `chembl_assay`   
+**Status**: Open
+**Priority**: P1 (High)
+**Labels**: `normalization`, `data-quality`, `audit`, `chembl_assay`
 **Epic**: Assay Normalization Improvements 2024Q3
 
 ## 🎯 Problem
@@ -163,8 +163,8 @@ mypy src/bioetl/domain/normalization/profiles/chembl_assay.py --strict
 
 ## ⏳ Time Estimate
 
-**Total**: 7 days   
-**Start Date**: 2024-07-16   
+**Total**: 7 days
+**Start Date**: 2024-07-16
 **Target Completion**: 2024-07-30
 
 ## 👥 Assignee

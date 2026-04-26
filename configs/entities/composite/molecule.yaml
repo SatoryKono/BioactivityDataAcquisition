@@ -79,21 +79,21 @@ quality:
     - composite_molecule_id
     - smiles
     - molecular_weight
-  
+
 # Loading strategy
 loading:
   strategy: incremental
   batch_size: 500
-  
+
 # Field mapping and resolution rules
 field_resolution:
   smiles:
     strategy: priority
     sources: [chembl, pubchem]
-    
+
   molecular_weight:
     strategy: average
-    
+
   iupac_name:
     strategy: priority
     sources: [chembl, pubchem]
@@ -103,11 +103,11 @@ dq_rules:
   - field: composite_molecule_id
     rule: not_null
     severity: critical
-  
+
   - field: smiles
     rule: valid_smiles
     severity: critical
-    
+
   - field: molecular_weight
     rule: range
     min: 10

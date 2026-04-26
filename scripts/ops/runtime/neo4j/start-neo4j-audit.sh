@@ -22,10 +22,10 @@ case "${1:-}" in
   *)
     echo "Starting Neo4j audit instance (1024m heap)..."
     docker compose -f "$COMPOSE_FILE" up -d
-    
+
     echo "Waiting for startup (45 seconds)..."
     sleep 45
-    
+
     if docker ps | grep -q "$CONTAINER_NAME.*healthy"; then
       echo "✅ Audit instance started successfully"
       echo ""

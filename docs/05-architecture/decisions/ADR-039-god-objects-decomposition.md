@@ -34,7 +34,7 @@ classDiagram
         +_log_operation()
         +_emit_metrics()
     }
-    
+
     class Observer {
         +observe_execution()
         +_trace_operation()
@@ -68,26 +68,26 @@ classDiagram
         +write_dataframe()
         +manage_lifecycle()
     }
-    
+
     class ArrowConverter {
         +convert_to_arrow()
         +validate_schema()
     }
-    
+
     class DeltaMerger {
         +merge_delta()
         +handle_conflicts()
     }
-    
+
     class MaintenanceTask {
         +run_maintenance()
         +optimize_tables()
     }
-    
+
     SilverWriter --> ArrowConverter : uses
     SilverWriter --> DeltaMerger : uses
     SilverWriter --> MaintenanceTask : uses
-    
+
     %% Observer Decomposition
     class CompositeObserver {
         -observers: Observer[]
@@ -95,27 +95,27 @@ classDiagram
         +add_observer()
         +remove_observer()
     }
-    
+
     class Observer {
         <<interface>>
         +update()
     }
-    
+
     class TracingObserver {
         +update()
         +trace_operation()
     }
-    
+
     class MetricsObserver {
         +update()
         +record_metrics()
     }
-    
+
     class LoggingObserver {
         +update()
         +log_event()
     }
-    
+
     CompositeObserver --> Observer : manages
     Observer <|-- TracingObserver
     Observer <|-- MetricsObserver
@@ -175,15 +175,15 @@ classDiagram
 ```python
 class ArrowConverter:
     """Responsible for Arrow data conversion and validation."""
-    
+
     def __init__(self, schema_validator: SchemaValidator):
         self._schema_validator = schema_validator
-    
+
     def convert_to_arrow(self, dataframe: pl.DataFrame) -> pa.Table:
         """Convert Polars DataFrame to Arrow table with validation."""
         self._validate_schema(dataframe)
         return dataframe.to_arrow()
-    
+
     def _validate_schema(self, dataframe: pl.DataFrame) -> None:
         """Validate dataframe schema."""
         # Schema validation logic
@@ -193,14 +193,14 @@ class ArrowConverter:
 ```python
 class DeltaMerger:
     """Responsible for Delta Lake merge operations."""
-    
+
     def __init__(self, delta_client: DeltaClient):
         self._delta_client = delta_client
-    
+
     def merge_delta(self, table_path: str, new_data: pa.Table) -> None:
         """Perform Delta Lake merge operation."""
         # Merge logic using delta_client
-    
+
     def handle_conflicts(self, strategy: ConflictStrategy) -> None:
         """Configure conflict resolution strategy."""
         # Conflict handling logic
@@ -210,19 +210,19 @@ class DeltaMerger:
 ```python
 class MaintenanceTask:
     """Responsible for maintenance operations."""
-    
+
     def __init__(self, delta_client: DeltaClient):
         self._delta_client = delta_client
-    
+
     def run_maintenance(self, table_path: str) -> None:
         """Run maintenance operations on Delta table."""
         self._optimize_table(table_path)
         self._cleanup_resources()
-    
+
     def _optimize_table(self, table_path: str) -> None:
         """Optimize Delta table."""
         # Optimization logic
-    
+
     def _cleanup_resources(self) -> None:
         """Clean up temporary resources."""
         # Cleanup logic
@@ -232,21 +232,21 @@ class MaintenanceTask:
 ```python
 class SilverWriter:
     """Main class with focused responsibility: orchestrate writing operations."""
-    
-    def __init__(self, arrow_converter: ArrowConverter, 
-                 delta_merger: DeltaMerger, 
+
+    def __init__(self, arrow_converter: ArrowConverter,
+                 delta_merger: DeltaMerger,
                  maintenance_task: MaintenanceTask):
         self._arrow_converter = arrow_converter
         self._delta_merger = delta_merger
         self._maintenance_task = maintenance_task
-    
-    def write_dataframe(self, dataframe: pl.DataFrame, 
+
+    def write_dataframe(self, dataframe: pl.DataFrame,
                        table_path: str) -> None:
         """Orchestrate the complete write operation."""
         arrow_table = self._arrow_converter.convert_to_arrow(dataframe)
         self._delta_merger.merge_delta(table_path, arrow_table)
         self._maintenance_task.run_maintenance(table_path)
-    
+
     def manage_lifecycle(self, operation: str) -> None:
         """Manage the lifecycle of write operations."""
         # Lifecycle management logic
@@ -270,7 +270,7 @@ class ExecutionEvent:
 
 class Observer(ABC):
     """Base observer interface."""
-    
+
     @abstractmethod
     def update(self, event: ExecutionEvent) -> None:
         """Handle execution event."""
@@ -281,10 +281,10 @@ class Observer(ABC):
 ```python
 class TracingObserver(Observer):
     """Responsible for tracing operations."""
-    
+
     def __init__(self, tracer: TracingPort):
         self._tracer = tracer
-    
+
     def update(self, event: ExecutionEvent) -> None:
         """Trace the execution event."""
         span = self._tracer.start_span(event.operation)\n        try:
@@ -299,10 +299,10 @@ class TracingObserver(Observer):
 ```python
 class MetricsObserver(Observer):
     """Responsible for metrics collection."""
-    
+
     def __init__(self, metrics: MetricsPort):
         self._metrics = metrics
-    
+
     def update(self, event: ExecutionEvent) -> None:
         """Record metrics for the execution event."""
         labels = {
@@ -324,10 +324,10 @@ class MetricsObserver(Observer):
 ```python
 class LoggingObserver(Observer):
     """Responsible for logging operations."""
-    
+
     def __init__(self, logger: LoggerPort):
         self._logger = logger
-    
+
     def update(self, event: ExecutionEvent) -> None:
         """Log the execution event."""
         self._logger.info(
@@ -343,18 +343,18 @@ class LoggingObserver(Observer):
 ```python
 class CompositeObserver(Observer):
     """Composite pattern for managing multiple observers."""
-    
+
     def __init__(self):
         self._observers: list[Observer] = []
-    
+
     def add_observer(self, observer: Observer) -> None:
         """Add observer to composition."""
         self._observers.append(observer)
-    
+
     def remove_observer(self, observer: Observer) -> None:
         """Remove observer from composition."""
         self._observers.remove(observer)
-    
+
     def update(self, event: ExecutionEvent) -> None:
         """Notify all observers about the event."""
         for observer in self._observers:
@@ -408,13 +408,13 @@ flowchart TD
     E --> F[Extract MaintenanceTask]
     F --> G[Refactor SilverWriter]
     G --> H[Write Unit Tests]
-    
+
     I[Create Observer Interface] --> J[Implement TracingObserver]
     J --> K[Implement MetricsObserver]
     K --> L[Implement LoggingObserver]
     L --> M[Create CompositeObserver]
     M --> N[Write Unit Tests]
-    
+
     O[Integrate Changes] --> P[Run Regression Tests]
     P --> Q[Performance Benchmark]
     Q --> R[Code Review]
@@ -432,20 +432,20 @@ gantt
     section Approval & Planning
     Get Approval :active, 2024-07-31, 2024-08-02
     Create ADR :active, 2024-08-01, 2024-08-02
-    
+
     section SilverWriter Refactoring
     ArrowConverter : 2024-08-05, 2024-08-09
     DeltaMerger : 2024-08-12, 2024-08-16
     MaintenanceTask : 2024-08-19, 2024-08-23
     SilverWriter Integration : 2024-08-26, 2024-08-30
-    
+
     section Observer Refactoring
     Observer Interface : 2024-08-05, 2024-08-09
     TracingObserver : 2024-08-12, 2024-08-16
     MetricsObserver : 2024-08-19, 2024-08-23
     LoggingObserver : 2024-08-26, 2024-08-30
     CompositeObserver : 2024-09-02, 2024-09-06
-    
+
     section Testing & Deployment
     Unit Testing : 2024-09-02, 2024-09-12
     Integration Testing : 2024-09-13, 2024-09-19
@@ -470,7 +470,7 @@ quadrantChart
     quadrant-2 "We should address"
     quadrant-3 "We need to monitor"
     quadrant-4 "We need to act"
-    
+
     Delta Lake Regression: [0.6, 0.7]
     Performance Degradation: [0.3, 0.4]
     Integration Issues: [0.5, 0.5]

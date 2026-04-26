@@ -257,7 +257,7 @@ while [[ $attempt -lt $max_attempts ]]; do
     ok "Neo4j is ready"
     break
   fi
-  
+
   if "${DOCKER_BIN}" logs bioetl-neo4j 2>/dev/null | grep -q "ERROR"; then
     fail "Neo4j startup error detected"
     "${DOCKER_BIN}" logs bioetl-neo4j 2>&1 | grep ERROR >&2
@@ -265,7 +265,7 @@ while [[ $attempt -lt $max_attempts ]]; do
     "${DOCKER_BIN}" rm bioetl-neo4j >/dev/null 2>&1 || true
     exit 1
   fi
-  
+
   printf "."
   sleep 1
   attempt=$((attempt + 1))

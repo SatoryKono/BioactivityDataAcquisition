@@ -1,8 +1,8 @@
 # Implement Case Normalization and Unit Canonicalization
 
-**Status**: Completed ✅  
-**Priority**: P1 (High)  
-**Labels**: `normalization`, `DQ`, `refactoring`  
+**Status**: Completed ✅
+**Priority**: P1 (High)
+**Labels**: `normalization`, `DQ`, `refactoring`
 **Epic**: Data Quality Improvements 2024Q2
 
 ## 🎯 Problem
@@ -92,7 +92,7 @@ grep -rn "standard_units" src/bioetl/domain/ --include="*.py" | head -5
    # tests/unit/domain/test_normalization.py
    def test_case_normalization():
        assert normalize_case("inhibitor", ["INHIBITOR"]) == "INHIBITOR"
-   
+
    def test_unit_canonicalization():
        assert normalize_unit("NM") == "nM"
    ```
@@ -166,8 +166,8 @@ mypy src/bioetl/domain/normalization/ --strict
 
 ## ⏳ Time Estimate
 
-**Total**: 7 days  
-**Start Date**: 2024-05-27  
+**Total**: 7 days
+**Start Date**: 2024-05-27
 **Target Completion**: 2024-06-07
 
 ## 👥 Assignee

@@ -106,7 +106,7 @@ Entry (run-*.ps1/sh)
              ├─ Install Python3
              ├─ Install pip packages
              └─ Verify API key
-         
+
          └─ run-*-impl.sh
              ├─ Load .env file
              ├─ Verify API key

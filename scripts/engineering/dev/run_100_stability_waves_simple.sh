@@ -12,7 +12,7 @@ for i in $(seq 1 "$WAVES"); do
     WAVE_ID="$(printf "%s-%03d" "$RUN_BASE" "$i")"
     WAVE_DIR="$JUNIT_ROOT/$WAVE_ID"
     mkdir -p "$WAVE_DIR"
-    
+
     echo "Running wave $i..."
     python3 -m pytest \
         tests/architecture/test_config_ci_invariants.py::TestSilverRequiredFieldsCoverage::test_explicit_required_fields_are_covered_by_silver_filters \

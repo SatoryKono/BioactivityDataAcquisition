@@ -26,7 +26,7 @@ classDiagram
     EnrichmentCoordinatorService "1" *-- "1" EnrichmentCoordinatorResultMixin : inherits
     EnrichmentCoordinatorService "1" *-- "1" asyncio.Semaphore : uses
     EnrichmentCoordinatorService "1" *-- "*" EnricherConfig : orchestrates
-    
+
     class EnrichmentCoordinatorService {
         +run_enrichers()
         -_run_single_enricher()
@@ -154,7 +154,7 @@ class _EnricherExecutionContext:
     enricher: EnricherConfig
     records_input: int
     started_at: datetime
-    
+
     @property
     def timeout_seconds(self) -> float:
         return self.enricher.timeout_seconds
@@ -286,13 +286,13 @@ sequenceDiagram
     participant Semaphore
     participant Enricher
     participant Runner
-    
+
     Coordinator->>Semaphore: acquire()
     Semaphore-->>Coordinator: granted
-    
+
     Coordinator->>Coordinator: _start_enricher_execution()
     Coordinator->>Runner: runner_factory()
-    
+
     alt Success
         Runner->>Runner: run()
         Runner-->>Coordinator: completed

@@ -88,7 +88,7 @@ MAX_RETRIES=2
 # Try pipx first (preferred)
 if timeout 10 bash -c "command -v pipx >/dev/null 2>&1"; then
     log_info "Using pipx to install vibe"
-    
+
     # Check if already installed
     if timeout 10 pipx list 2>/dev/null | grep -q mistral-vibe 2>/dev/null; then
         log_info "Upgrading existing mistral-vibe installation"
@@ -120,7 +120,7 @@ if timeout 10 bash -c "command -v pipx >/dev/null 2>&1"; then
             fi
         done
     fi
-    
+
     if [[ $INSTALL_SUCCESS -eq 0 ]]; then
         log_error "pipx installation failed after $MAX_RETRIES attempts"
         log_info "Trying fallback: pip --user..."
@@ -166,7 +166,7 @@ if [[ -d "${LOCAL_BIN}" ]]; then
         log_success "vibe command is accessible in PATH"
     else
         log_warn "Adding ~/.local/bin to PATH"
-        
+
         # Update bashrc
         if [[ -f "${HOME}/.bashrc" ]] && ! timeout 5 grep -q '.local/bin' "${HOME}/.bashrc" 2>/dev/null; then
             echo "" >> "${HOME}/.bashrc"
@@ -174,7 +174,7 @@ if [[ -d "${LOCAL_BIN}" ]]; then
             echo "export PATH=\"${HOME}/.local/bin:\${PATH}\"" >> "${HOME}/.bashrc"
             log_success "Updated ~/.bashrc"
         fi
-        
+
         # Update zshrc if exists
         if [[ -f "${HOME}/.zshrc" ]] && ! timeout 5 grep -q '.local/bin' "${HOME}/.zshrc" 2>/dev/null; then
             echo "" >> "${HOME}/.zshrc"
@@ -182,7 +182,7 @@ if [[ -d "${LOCAL_BIN}" ]]; then
             echo "export PATH=\"${HOME}/.local/bin:\${PATH}\"" >> "${HOME}/.zshrc"
             log_success "Updated ~/.zshrc"
         fi
-        
+
         # Apply to current session
         export PATH="${LOCAL_BIN}:${PATH}"
     fi

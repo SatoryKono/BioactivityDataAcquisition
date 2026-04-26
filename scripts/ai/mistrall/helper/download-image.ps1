@@ -37,12 +37,12 @@ $imageFile = Join-Path $RootDir "ollama-image.tar.gz"
 if (Test-Path $imageFile) {
     Write-Info "Found pre-downloaded image: $imageFile"
     Write-Host ""
-    
+
     Write-Info "Loading image (this may take 2-5 minutes)..."
     $fileSize = (Get-Item $imageFile).Length / 1GB
     Write-Info "Size: $([math]::Round($fileSize, 2)) GB"
     Write-Host ""
-    
+
     try {
         Get-Content $imageFile -AsByteStream | docker load 2>&1
         if ($LASTEXITCODE -eq 0) {
@@ -71,17 +71,17 @@ $success = $false
 while ($retryCount -lt $maxRetries -and -not $success) {
     $retryCount++
     Write-Info "Attempt $retryCount/$maxRetries..."
-    
+
     try {
         # Pull with progress
         docker pull ollama/ollama:latest 2>&1
-        
+
         if ($LASTEXITCODE -eq 0) {
             Write-Success "Image pulled successfully"
             $success = $true
         } else {
             Write-Warn "Pull failed with exit code: $($LASTEXITCODE)"
-            
+
             if ($retryCount -lt $maxRetries) {
                 $backoff = [math]::Min([math]::Pow(2, $retryCount - 1) * 10, 60)
                 Write-Info "Waiting $backoff seconds before retry..."
@@ -90,7 +90,7 @@ while ($retryCount -lt $maxRetries -and -not $success) {
         }
     } catch {
         Write-Warn "Error during pull: $_"
-        
+
         if ($retryCount -lt $maxRetries) {
             $backoff = [math]::Min([math]::Pow(2, $retryCount - 1) * 10, 60)
             Write-Info "Waiting $backoff seconds before retry..."

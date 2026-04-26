@@ -138,11 +138,11 @@ try {
     } -ArgumentList $tempFile
 
     $result = Wait-Job -Job $job -Timeout 300
-    
+
     if ($result) {
         $output = Receive-Job -Job $job
         $output | Write-Host
-        
+
         if ($output -match "success") {
             Write-Success "Mistral Vibe installation completed"
         } elseif ($output -match "error") {

@@ -196,27 +196,27 @@ extra_javascript:
 #     runs-on: ubuntu-latest
 #     steps:
 #       - uses: actions/checkout@v3
-#       
+#
 #       - name: Set up Python
 #         uses: actions/setup-python@v4
 #         with:
 #           python-version: '3.11'
-#       
+#
 #       - name: Install dependencies
 #         run: pip install mkdocs mkdocs-material
-#       
+#
 #       - name: Install link checker plugin
 #         run: pip install -e docs/plugins/link_checker
-#       
+#
 #       - name: Build documentation with link checking
 #         run: mkdocs build --strict
-#       
+#
 #       - name: Upload link health report
 #         uses: actions/upload-artifact@v3
 #         with:
 #           name: link-health-report
 #           path: site/reports/links/
-#       
+#
 #       - name: Deploy to GitHub Pages
 #         if: github.ref == 'refs/heads/main'
 #         run: mkdocs gh-deploy

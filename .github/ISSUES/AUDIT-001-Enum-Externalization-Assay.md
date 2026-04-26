@@ -1,8 +1,8 @@
 # Externalize Enum Configurations for ChEMBL Assay Fields
 
-**Status**: Open   
-**Priority**: P1 (High)   
-**Labels**: `normalization`, `configuration`, `audit`, `chembl_assay`   
+**Status**: Open
+**Priority**: P1 (High)
+**Labels**: `normalization`, `configuration`, `audit`, `chembl_assay`
 **Epic**: Assay Normalization Improvements 2024Q3
 
 ## 🎯 Problem
@@ -63,10 +63,10 @@ grep -rn "assay_type\|relationship_type\|assay_category" src/bioetl/domain/ --in
    ```python
    # src/bioetl/domain/normalization/profiles/chembl_assay.py
    from bioetl.domain.config.enum_loader import get_enum_config
-   
+
    ASSAY_TYPES = frozenset(get_enum_config("assay", "types"))
    RELATIONSHIP_TYPES = frozenset(get_enum_config("assay", "relationship_types"))
-   
+
    CHEMBL_ASSAY_PROFILE = build_standard_profile(
        enum_fields={
            "assay_type": ASSAY_TYPES,
@@ -161,8 +161,8 @@ mypy src/bioetl/domain/normalization/profiles/chembl_assay.py --strict
 
 ## ⏳ Time Estimate
 
-**Total**: 7 days   
-**Start Date**: 2024-07-01   
+**Total**: 7 days
+**Start Date**: 2024-07-01
 **Target Completion**: 2024-07-15
 
 ## 👥 Assignee

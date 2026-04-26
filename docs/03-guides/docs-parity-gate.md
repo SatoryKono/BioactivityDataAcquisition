@@ -25,21 +25,21 @@ on:
 jobs:
   docs-parity-check:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.12'
-        
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pyyaml
-        
+
     - name: Run documentation parity check
       run: bash scripts/ci_check_docs_parity.sh
 ```
@@ -49,15 +49,15 @@ jobs:
 ```yaml
 stages:
   - test
-  
+
 docs_parity_check:
   stage: test
   image: python:3.12
-  
+
   script:
     - pip install pyyaml
     - bash scripts/ci_check_docs_parity.sh
-  
+
   artifacts:
     when: always
     paths:

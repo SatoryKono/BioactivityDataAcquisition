@@ -37,7 +37,7 @@ flowchart TD
     A --> C[_ENRICHER_EXECUTION_ERRORS]
     A --> D[BioETLError]
     A --> E[Other Exceptions]
-    
+
     B --> F[_handle_enricher_timeout]
     C --> G[_handle_enricher_execution_error]
     D --> G
@@ -126,7 +126,7 @@ async def _run_single_enricher(
     async with self._semaphore:
         # Initialize execution context
         execution_context = self._initialize_execution(enricher, keys)
-        
+
         # Execute with unified error handling
         return await self._execute_with_error_handling(
             execution_context=execution_context,
@@ -164,7 +164,7 @@ class _SimplifiedExecutionContext:
     enricher: EnricherConfig
     records_input: int
     started_at: datetime
-    
+
     @property
     def timeout_seconds(self) -> float:
         return self.enricher.timeout_seconds
