@@ -281,7 +281,7 @@ def test_file_store_fails_closed_on_truncated_index_tail(tmp_path) -> None:
     index_path = store._run_index_path(str(run_id))
     index_path.parent.mkdir(parents=True, exist_ok=True)
     index_path.write_text(
-        '{"fragment_id":"fragment-1","key":"%s"}' % run_id,
+        f'{{"fragment_id":"fragment-1","key":"{run_id}"}}',
         encoding="utf-8",
     )
 

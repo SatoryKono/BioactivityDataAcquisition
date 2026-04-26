@@ -32,9 +32,6 @@ class FakeMetrics:
         # Intentionally left blank: metrics are not collected in benchmarks.
         return None
 
-    def increment_counter(self, *args: Any, **kwargs: Any) -> None:
-        return None
-
 
 class FakeLogger:
     """Minimal fake logger for benchmarks."""

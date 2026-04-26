@@ -139,7 +139,7 @@ def test_metadata_lineage_bundle_rejects_preexisting_artifact_id_mismatch() -> N
 
     with pytest.raises(
         ValueError,
-        match="Sidecar output.artifact_id does not match lineage fragment produced artifact",
+        match=r"Sidecar output\.artifact_id does not match lineage fragment produced artifact",
     ):
         MetadataLineageBundle(metadata=metadata, lineage_fragment=fragment)
 
@@ -175,6 +175,6 @@ def test_metadata_lineage_bundle_rejects_preexisting_fragment_id_mismatch() -> N
 
     with pytest.raises(
         ValueError,
-        match="Sidecar output.lineage_fragment_id does not match lineage fragment fragment_id",
+        match=r"Sidecar output\.lineage_fragment_id does not match lineage fragment fragment_id",
     ):
         MetadataLineageBundle(metadata=metadata, lineage_fragment=fragment)

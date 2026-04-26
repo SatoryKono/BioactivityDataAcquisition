@@ -50,12 +50,15 @@ runs:
         restore-keys: |
           uv-${{ runner.os }}-py${{ inputs.python-version }}-
 
+    - name: Pin UV_PYTHON for subsequent steps
+      shell: bash
+      run: echo "UV_PYTHON=${{ inputs.python-version }}" >> "$GITHUB_ENV"
+
     - name: Install dependencies
       shell: bash
       env:
         EXTRAS: ${{ inputs.uv-extras }}
         SYNC_ARGS: ${{ inputs.uv-sync-args }}
-        UV_PYTHON: ${{ inputs.python-version }}
       run: |
         CMD="uv sync ${SYNC_ARGS}"
         for extra in $EXTRAS; do
