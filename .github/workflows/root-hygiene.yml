@@ -30,5 +30,8 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install required dependencies
+        run: pip install pyyaml
+
       - name: Validate repository root allowlist
         run: python scripts/engineering/repo/audit_root_cleanliness.py
