@@ -12,14 +12,15 @@ Fields like `assay_type`, `relationship_type`, and other enum-like fields in ChE
 ## 🔍 Root Cause Analysis
 
 1. **Inconsistent Case**: Enum fields use mixed case (e.g., "binding" vs "BINDING")
-2. **No Canonicalization**: Missing standardized representation rules
-3. **Analysis Issues**: Inconsistent data affects downstream processing
-4. **Validation Gaps**: Case variations not properly handled
-5. **DQ Rule Mismatch**: Filters expect specific case but normalization doesn't enforce it
+1. **No Canonicalization**: Missing standardized representation rules
+1. **Analysis Issues**: Inconsistent data affects downstream processing
+1. **Validation Gaps**: Case variations not properly handled
+1. **DQ Rule Mismatch**: Filters expect specific case but normalization doesn't enforce it
 
 ## 📋 Scope
 
 **Affected Components:**
+
 - `src/bioetl/domain/normalization/profiles/chembl_assay.py` - Add normalization rules
 - `src/bioetl/domain/normalization/rules.py` - Extend case/unit rules
 - `src/bioetl/domain/schemas/assay.py` - Update validation
@@ -27,6 +28,7 @@ Fields like `assay_type`, `relationship_type`, and other enum-like fields in ChE
 - Documentation - Update normalization specs
 
 **Impact Analysis:**
+
 ```bash
 # Check current case variations
 grep -rn "assay_type\|relationship_type" src/bioetl/domain/ --include="*.py" | head -5
@@ -37,6 +39,7 @@ grep -rn "assay_type\|relationship_type" src/bioetl/domain/ --include="*.py" | h
 ### Phase 1: Rule Definition (2 days)
 
 1. **Define Case Rules for Assay Fields**
+
    ```python
    # src/bioetl/domain/normalization/rules.py
    def normalize_assay_case(value: str, enum_values: list) -> str:
@@ -44,7 +47,8 @@ grep -rn "assay_type\|relationship_type" src/bioetl/domain/ --include="*.py" | h
        return value.upper() if value in enum_values else value
    ```
 
-2. **Update Normalization Profile**
+1. **Update Normalization Profile**
+
    ```python
    # src/bioetl/domain/normalization/profiles/chembl_assay.py
    CHEMBL_ASSAY_PROFILE = build_standard_profile(
@@ -58,9 +62,10 @@ grep -rn "assay_type\|relationship_type" src/bioetl/domain/ --include="*.py" | h
    )
    ```
 
-3. **Add Special Rules for BAO Fields**
+1. **Add Special Rules for BAO Fields**
+
    ```python
-   special_rules={
+   special_rules = {
        "bao_format": (normalize_bao_identifier, "Canonical BAO format"),
        "bao_label": (normalize_bao_label, "Canonical BAO label"),
    }
@@ -69,6 +74,7 @@ grep -rn "assay_type\|relationship_type" src/bioetl/domain/ --include="*.py" | h
 ### Phase 2: Implementation (3 days)
 
 1. **Apply Case Normalization**
+
    ```python
    # src/bioetl/domain/normalization/normalizer.py
    def normalize_assay_field(field_value: str, field_name: str) -> str:
@@ -77,16 +83,17 @@ grep -rn "assay_type\|relationship_type" src/bioetl/domain/ --include="*.py" | h
        return field_value
    ```
 
-2. **Update Pandera Schema**
+1. **Update Pandera Schema**
+
    ```python
    # src/bioetl/domain/schemas/assay.py
    assay_type: Series[str] = pa.Field(
-       str_matches=r"^[A-Z]+$",  # Uppercase only
-       nullable=False
+       str_matches=r"^[A-Z]+$", nullable=False  # Uppercase only
    )
    ```
 
-3. **Add Validation Tests**
+1. **Add Validation Tests**
+
    ```python
    # tests/unit/domain/test_assay_normalization.py
    def test_case_normalization():
@@ -97,16 +104,19 @@ grep -rn "assay_type\|relationship_type" src/bioetl/domain/ --include="*.py" | h
 ### Phase 3: Validation (2 days)
 
 1. **Test Case Normalization**
+
    ```bash
    pytest tests/unit/domain/test_assay_normalization.py -v
    ```
 
-2. **Validate Data Quality**
+1. **Validate Data Quality**
+
    ```bash
    python scripts/validate_data_quality.py --assay-case-check
    ```
 
-3. **Monitor Production**
+1. **Monitor Production**
+
    ```bash
    grep "normalize.*case" logs/production.log
    ```
@@ -139,17 +149,20 @@ mypy src/bioetl/domain/normalization/profiles/chembl_assay.py --strict
 ## 📈 Impact Assessment
 
 ### Positive Impacts
+
 - **Consistency**: Uniform field representation across pipeline
 - **Accuracy**: Reduced analysis errors from case variations
 - **DQ Alignment**: Normalization matches filter expectations
 - **Maintainability**: Clear case handling rules
 
 ### Potential Risks
+
 - **Breaking Changes**: Existing case variations will be standardized
 - **Performance**: Additional case processing overhead
 - **Data Migration**: Case changes affect content hashes
 
 ### Mitigation Strategies
+
 - **Backward Compatibility**: Support both cases temporarily
 - **Gradual Rollout**: Deploy in stages
 - **Comprehensive Testing**: Validate all case scenarios

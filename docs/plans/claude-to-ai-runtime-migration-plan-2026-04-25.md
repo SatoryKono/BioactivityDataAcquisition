@@ -21,11 +21,11 @@
 ## Фаза 1. Миграция с обратной совместимостью
 
 1. Создать целевые директории `ai/claude/agents`, `ai/claude/rules`, `ai/claude/skills`.
-2. Перенести содержимое `.claude/*` в `ai/claude/*`.
-3. Оставить `.claude/*` как compatibility-layer на один релиз:
+1. Перенести содержимое `.claude/*` в `ai/claude/*`.
+1. Оставить `.claude/*` как compatibility-layer на один релиз:
    - либо через дубли/stub-файлы с указанием нового пути;
    - либо через временное сохранение копий (предпочтительно для кроссплатформенности).
-4. Обновить runtime-ссылки в `.codex/skills/*/SKILL.md`, где встречается `../../../.claude/...`.
+1. Обновить runtime-ссылки в `.codex/skills/*/SKILL.md`, где встречается `../../../.claude/...`.
 
 ### Критерий выхода Фазы 1
 
@@ -38,7 +38,7 @@
    - `tests/architecture/test_runtime_orchestration_surfaces.py`
    - `tests/architecture/test_codex_skill_agent_links.py`
    - `tests/architecture/test_architecture_debt_agent_surface.py`
-2. Исправить утилиты/диагностику/CI, где захардкожен `.claude`:
+1. Исправить утилиты/диагностику/CI, где захардкожен `.claude`:
    - `scripts/engineering/repo/preflight_cleanup.sh`
    - `scripts/engineering/repo/audit_root_cleanliness.py`
    - `scripts/engineering/diagnostics/audit_structure.py`
@@ -58,8 +58,8 @@
    - `docs/00-project/ai/skills/README.md`
    - `docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`
    - `README.md` и governance-документы при необходимости.
-2. В `CHANGELOG.md` добавить запись о миграции путей.
-3. Исторические упоминания старого пути не переписывать, если это описания прошлого состояния.
+1. В `CHANGELOG.md` добавить запись о миграции путей.
+1. Исторические упоминания старого пути не переписывать, если это описания прошлого состояния.
 
 ### Критерий выхода Фазы 3
 
@@ -68,9 +68,9 @@
 ## Фаза 4. Деактивация и удаление `.claude`
 
 1. Удалить compatibility-layer `.claude/*`.
-2. Проверить отсутствие живых ссылок:
+1. Проверить отсутствие живых ссылок:
    - `rg -n "\.claude/" .`
-3. При необходимости оставить только архивную ссылку в документации (без runtime-зависимости).
+1. При необходимости оставить только архивную ссылку в документации (без runtime-зависимости).
 
 ### Критерий выхода Фазы 4
 
@@ -79,13 +79,12 @@
 ## Проверочный чек-лист (после каждой фазы)
 
 1. `pytest tests/architecture -q`
-2. `python -m mypy --strict src/bioetl/`
-3. `pytest -q` (или штатный shard/xdist pipeline проекта)
-4. `rg -n "\.claude/" .` и ревью всех найденных вхождений
+1. `python -m mypy --strict src/bioetl/`
+1. `pytest -q` (или штатный shard/xdist pipeline проекта)
+1. `rg -n "\.claude/" .` и ревью всех найденных вхождений
 
 ## Стратегия внедрения
 
 - Рекомендуется выполнить в двух PR:
   - PR1: перенос + compatibility-layer + обновление ссылок/тестов/скриптов;
   - PR2: удаление `.claude/*` после стабилизации и прохождения CI.
-

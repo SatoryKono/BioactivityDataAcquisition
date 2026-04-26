@@ -83,9 +83,9 @@ bash run-codex.sh device-login    # Device auth login
 ## 🔧 What run-codex does
 
 1. **Quick check** (~2 sec) - Validates WSL, Node.js, npm, Codex CLI, and MCP config
-2. **Setup** (if needed) - Installs missing components and syncs MCP configuration
-3. **MCP sync before launch** - Regenerates `.mcp.json`, `.vscode/mcp.json`, and the Codex-native `~/.codex/config.toml` MCP block
-4. **Launch** - Runs Codex from the repo root with the managed Codex CLI
+1. **Setup** (if needed) - Installs missing components and syncs MCP configuration
+1. **MCP sync before launch** - Regenerates `.mcp.json`, `.vscode/mcp.json`, and the Codex-native `~/.codex/config.toml` MCP block
+1. **Launch** - Runs Codex from the repo root with the managed Codex CLI
 
 Codex does not read the workspace `.mcp.json` directly. The launcher keeps `~/.codex/config.toml` synchronized so Codex starts with the repository MCP servers configured.
 
@@ -112,6 +112,7 @@ Get API key from: https://platform.openai.com/api-keys
 ```
 
 This will:
+
 - Check all dependencies
 - Install missing components in background (if any)
 - Synchronize MCP configuration for Codex
@@ -141,13 +142,15 @@ Node.js and npm are auto-installed if missing.
 See **[SETUP_HANG_FIX.md](./SETUP_HANG_FIX.md)** for detailed diagnostics.
 
 Quick diagnostics:
+
 ```powershell
 .\helper\diagnose-hang.ps1
 ```
 
 This will identify exactly where the hang occurs:
+
 - [1/5] WSL connectivity
-- [2/5] Bash execution  
+- [2/5] Bash execution
 - [3/5] apt-get update ← Usually hangs here
 - [4/5] Node.js check
 - [5/5] npm install
@@ -167,11 +170,13 @@ Make sure you have `OPENAI_API_KEY=sk-...` with valid key.
 ### "Node.js not found"
 
 Run setup (now non-blocking!):
+
 ```powershell
 .\run-codex.ps1 setup
 ```
 
 Or install manually in WSL:
+
 ```bash
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo bash
 sudo apt-get install -y nodejs
@@ -180,6 +185,7 @@ sudo apt-get install -y nodejs
 ### "WSL not available"
 
 Install WSL2:
+
 ```powershell
 wsl --install
 ```
@@ -208,10 +214,10 @@ All logic is in `helper/` folder:
 Get from: https://platform.openai.com/api-keys
 
 1. Create account on OpenAI
-2. Go to API keys section
-3. Create new secret key
-4. Copy (starts with `sk-`)
-5. Paste into `.env.codex`
+1. Go to API keys section
+1. Create new secret key
+1. Copy (starts with `sk-`)
+1. Paste into `.env.codex`
 
 ## ✅ Ready!
 
@@ -222,6 +228,7 @@ Just run:
 ```
 
 ✨ **What happens**:
+
 - Checks components (2 sec)
 - If setup needed → starts in background (non-blocking)
 - Launches Codex immediately

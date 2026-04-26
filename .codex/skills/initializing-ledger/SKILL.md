@@ -1,9 +1,6 @@
----
-name: initializing-ledger
-description: Use when starting a new product development project that needs traceable evidence and explicit decisions. Creates workspace structure from a project brief.
-context: fork
-agent: general-purpose
----
+______________________________________________________________________
+
+## name: initializing-ledger description: Use when starting a new product development project that needs traceable evidence and explicit decisions. Creates workspace structure from a project brief. context: fork agent: general-purpose
 
 # Ledger Initialization
 
@@ -47,13 +44,13 @@ Use TodoWrite to track these mandatory steps:
 
 Extract from the user's input:
 
-| Component | Description | Required |
-|-----------|-------------|----------|
-| **Core idea** | What is being built (1-2 sentences) | Yes |
-| **Target users** | Who will use this | Yes |
-| **Key goals** | What success looks like | Yes |
-| **Constraints** | What's explicitly out of scope | Recommended |
-| **Context** | Any domain-specific information | Optional |
+| Component        | Description                         | Required    |
+| ---------------- | ----------------------------------- | ----------- |
+| **Core idea**    | What is being built (1-2 sentences) | Yes         |
+| **Target users** | Who will use this                   | Yes         |
+| **Key goals**    | What success looks like             | Yes         |
+| **Constraints**  | What's explicitly out of scope      | Recommended |
+| **Context**      | Any domain-specific information     | Optional    |
 
 If the brief is too vague, use AskUserQuestion to clarify:
 
@@ -69,12 +66,12 @@ Options:
 
 Check that the brief supports downstream work:
 
-| Check | Pass Criteria |
-|-------|---------------|
-| Scope clarity | Can identify what's in/out |
-| User clarity | Can describe target users |
-| Goal measurability | At least one goal is falsifiable |
-| Constraint presence | At least one constraint stated |
+| Check               | Pass Criteria                    |
+| ------------------- | -------------------------------- |
+| Scope clarity       | Can identify what's in/out       |
+| User clarity        | Can describe target users        |
+| Goal measurability  | At least one goal is falsifiable |
+| Constraint presence | At least one constraint stated   |
 
 If validation fails, prompt for missing information before proceeding.
 
@@ -93,6 +90,7 @@ mkdir -p ledger/{03-synthesis,04-decisions,05-risks,06-prd,07-architecture,08-pl
 Write the parsed brief to `00-brief/BRIEF.md` using the template in [references/brief-template.md](references/brief-template.md).
 
 **Critical constraints:**
+
 - Maximum 5 sentences for core description
 - Goals must be specific and measurable where possible
 - Constraints must be explicit exclusions, not vague limitations
@@ -102,10 +100,11 @@ Write the parsed brief to `00-brief/BRIEF.md` using the template in [references/
 Create `01-pillars/PILLARS.md` with:
 
 1. List of all 8 pillars (see [references/pillar-definitions.md](references/pillar-definitions.md))
-2. Priority ranking based on brief analysis
-3. Any pillar-specific scope notes
+1. Priority ranking based on brief analysis
+1. Any pillar-specific scope notes
 
 **Priority assignment logic:**
+
 - If brief mentions market/pricing → Market pillar = high
 - If brief mentions specific users → Users pillar = high
 - If brief mentions technical constraints → Tech pillar = high
@@ -115,6 +114,7 @@ Create `01-pillars/PILLARS.md` with:
 ### Step 6: Confirm Initialization
 
 Output summary:
+
 - Workspace path
 - Brief summary (2-3 sentences)
 - Pillar priorities
@@ -125,6 +125,7 @@ Output summary:
 Use the **AskUserQuestion tool** when:
 
 ### Brief is ambiguous
+
 ```
 Question: "Your brief could be interpreted multiple ways. Which is closest?"
 Options:
@@ -134,6 +135,7 @@ Options:
 ```
 
 ### Missing critical information
+
 ```
 Question: "I couldn't identify [goals/constraints/users] from your brief. Can you specify?"
 Options:
@@ -143,6 +145,7 @@ Options:
 ```
 
 ### Pillar prioritization unclear
+
 ```
 Question: "Based on your brief, which areas are most critical to research first?"
 Options:
@@ -153,6 +156,7 @@ Options:
 ```
 
 ### Custom workspace path needed
+
 ```
 Question: "Where should I create the ledger workspace?"
 Options:

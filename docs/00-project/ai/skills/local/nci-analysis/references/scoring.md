@@ -33,8 +33,8 @@ Unless a stricter calibration is introduced later, use an equal-weight average i
 ## Overall Score
 
 1. Compute each composite factor on the `1-5` scale.
-2. Compute the weighted average of the five factors.
-3. Convert to `0-100`:
+1. Compute the weighted average of the five factors.
+1. Convert to `0-100`:
 
 ```text
 overall_score = (weighted_avg - 1) * 25
@@ -56,4 +56,3 @@ Trigger verification when any of the following is true:
 - Authority Issues `> 3`
 - Cherry-Picking `> 3`
 - Historical Parallels `> 2`
-

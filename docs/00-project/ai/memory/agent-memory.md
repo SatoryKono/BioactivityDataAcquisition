@@ -150,20 +150,20 @@ bash scripts/engineering/dev/run_mypy.sh
 `.venv-win` в PowerShell и `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` в WSL.
 При активированном подходящем окружении допускается и прямой `python -m ...`.
 
-| Group                 | Entry Point                            | Назначение                                 |
-| --------------------- | -------------------------------------- | ------------------------------------------ |
-| `scripts.engineering.qa`          | `uv run python -m scripts.engineering.qa`          | Quality checks: naming, C901, terminology  |
-| `scripts.engineering.ci`          | `uv run python -m scripts.engineering.ci`          | CI pipeline: pytest runner, quality gates  |
+| Group                             | Entry Point                                        | Назначение                                  |
+| --------------------------------- | -------------------------------------------------- | ------------------------------------------- |
+| `scripts.engineering.qa`          | `uv run python -m scripts.engineering.qa`          | Quality checks: naming, C901, terminology   |
+| `scripts.engineering.ci`          | `uv run python -m scripts.engineering.ci`          | CI pipeline: pytest runner, quality gates   |
 | `scripts.engineering.baselines`   | `uv run python -m scripts.engineering.baselines`   | Baseline maintenance for engineering checks |
-| `scripts.schema`      | `uv run python -m scripts.schema`      | Schema/config validation и генерация       |
-| `scripts.ops.data`    | `uv run python -m scripts.ops.data`    | Data integrity: checksums, delta, data dir |
-| `scripts.engineering.qa.vcr` | `uv run python -m scripts.engineering.qa.vcr` | VCR governance: placement, naming, secrets |
-| `scripts.docs`        | `uv run python -m scripts.docs`        | Documentation: links, drift, docstrings    |
-| `scripts.diagrams`    | `uv run python -m scripts.diagrams`    | Diagram lint, check, fix, render           |
-| `scripts.engineering.repo`        | `uv run python -m scripts.engineering.repo`        | Repo hygiene: inventory, catalog, versions |
-| `scripts.ops`         | `uv run python -m scripts.ops`         | Ops: salt rotation, Grafana, deploy        |
-| `scripts.engineering.dev`         | `uv run python -m scripts.engineering.dev`         | Dev setup, test runner, mock metrics       |
-| `scripts.engineering.diagnostics` | `uv run python -m scripts.engineering.diagnostics` | Debug: cleanup, pandera, storage           |
+| `scripts.schema`                  | `uv run python -m scripts.schema`                  | Schema/config validation и генерация        |
+| `scripts.ops.data`                | `uv run python -m scripts.ops.data`                | Data integrity: checksums, delta, data dir  |
+| `scripts.engineering.qa.vcr`      | `uv run python -m scripts.engineering.qa.vcr`      | VCR governance: placement, naming, secrets  |
+| `scripts.docs`                    | `uv run python -m scripts.docs`                    | Documentation: links, drift, docstrings     |
+| `scripts.diagrams`                | `uv run python -m scripts.diagrams`                | Diagram lint, check, fix, render            |
+| `scripts.engineering.repo`        | `uv run python -m scripts.engineering.repo`        | Repo hygiene: inventory, catalog, versions  |
+| `scripts.ops`                     | `uv run python -m scripts.ops`                     | Ops: salt rotation, Grafana, deploy         |
+| `scripts.engineering.dev`         | `uv run python -m scripts.engineering.dev`         | Dev setup, test runner, mock metrics        |
+| `scripts.engineering.diagnostics` | `uv run python -m scripts.engineering.diagnostics` | Debug: cleanup, pandera, storage            |
 
 Каждая группа поддерживает `--help` и `<command> --help`. Скрипты также доступны напрямую: `python scripts/engineering/qa/naming_audit.py`.
 

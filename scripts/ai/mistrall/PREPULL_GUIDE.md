@@ -44,6 +44,7 @@ docker pull ollama/ollama:latest
 Instead of full `ollama/ollama:latest` (~3.5GB):
 
 **Edit `.env.mistrall`:**
+
 ```bash
 MISTRALL_MODEL=phi:latest        # ~2.7GB (fastest)
 # or

@@ -16,25 +16,25 @@ AI-конфигурация и runtime-поведение аудитируютс
 
 ## Рекомендуемый состав агентов
 
-| # | Агент | Surface | Роль |
-|---|-------|---------|------|
-| A1 | Cross-Reference Auditor | `documentation-audit` | Битые ссылки, nav, orphan docs |
-| A2 | Code-Docs Sync Checker | `py-doc-bot` | Соответствие docs ↔ code/configs |
-| A3 | ADR Auditor | `py-audit-bot` | ADR completeness, status, conflicts |
-| A4 | Diagram Validator | `py-doc-bot` + `technical-designer-mermaid` | Mermaid syntax, ADR-040, code sync |
-| A5 | Content Freshness Analyzer | `documentation-cascade-audit` | Freshness, drift, archive candidates |
+| #   | Агент                      | Surface                                     | Роль                                 |
+| --- | -------------------------- | ------------------------------------------- | ------------------------------------ |
+| A1  | Cross-Reference Auditor    | `documentation-audit`                       | Битые ссылки, nav, orphan docs       |
+| A2  | Code-Docs Sync Checker     | `py-doc-bot`                                | Соответствие docs ↔ code/configs     |
+| A3  | ADR Auditor                | `py-audit-bot`                              | ADR completeness, status, conflicts  |
+| A4  | Diagram Validator          | `py-doc-bot` + `technical-designer-mermaid` | Mermaid syntax, ADR-040, code sync   |
+| A5  | Content Freshness Analyzer | `documentation-cascade-audit`               | Freshness, drift, archive candidates |
 
 ## Рекомендуемые режимы
 
-| Сценарий | Агенты | Порядок |
-|----------|--------|---------|
-| Быстрый pre-PR аудит | A2 + A4 | Параллельно |
-| Полный аудит | A1 -> (A2, A3, A4) -> A5 | A1 блокирующий, затем параллельно |
-| Только диаграммы | A4 | Один агент |
-| Только ADR | A3 | Один агент |
-| Post-refactoring sync | A2 + A4 + A5 | Параллельно |
+| Сценарий              | Агенты                   | Порядок                           |
+| --------------------- | ------------------------ | --------------------------------- |
+| Быстрый pre-PR аудит  | A2 + A4                  | Параллельно                       |
+| Полный аудит          | A1 -> (A2, A3, A4) -> A5 | A1 блокирующий, затем параллельно |
+| Только диаграммы      | A4                       | Один агент                        |
+| Только ADR            | A3                       | Один агент                        |
+| Post-refactoring sync | A2 + A4 + A5             | Параллельно                       |
 
----
+______________________________________________________________________
 
 ## Готовый промт
 
@@ -71,6 +71,7 @@ README.md                          # root-level doc entrypoint
 ```
 
 Исключения:
+
 - `docs/00-project/ai/`
 - `docs/exports/`
 - `docs/reports/`
@@ -102,6 +103,7 @@ uv run python -m scripts.docs check-links --links --specs --configs
 ### 1.2. Навигация MkDocs
 
 Проверь:
+
 - все publishable `.md` файлы из scope включены в `mkdocs.yml` nav либо
   осознанно исключены;
 - нет dead entries в nav;
@@ -113,6 +115,7 @@ uv run python -m scripts.docs check-links --links --specs --configs
 ### 1.3. Orphan docs
 
 Найди `.md` файлы в scope, которые:
+
 - не включены в `mkdocs.yml`;
 - не referenced из других `.md`;
 - не являются `README.md`, `INDEX.md`, `index.md`;
@@ -124,15 +127,16 @@ uv run python -m scripts.docs check-links --links --specs --configs
 
 Проверь соответствие между layer docs и кодом:
 
-| Doc | Code |
-|-----|------|
-| `docs/02-architecture/01-domain-layer.md` | `src/bioetl/domain/` |
-| `docs/02-architecture/02-application-layer.md` | `src/bioetl/application/` |
+| Doc                                               | Code                         |
+| ------------------------------------------------- | ---------------------------- |
+| `docs/02-architecture/01-domain-layer.md`         | `src/bioetl/domain/`         |
+| `docs/02-architecture/02-application-layer.md`    | `src/bioetl/application/`    |
 | `docs/02-architecture/03-infrastructure-layer.md` | `src/bioetl/infrastructure/` |
-| `docs/02-architecture/04-interfaces-layer.md` | `src/bioetl/interfaces/` |
-| `docs/02-architecture/05-composition-layer.md` | `src/bioetl/composition/` |
+| `docs/02-architecture/04-interfaces-layer.md`     | `src/bioetl/interfaces/`     |
+| `docs/02-architecture/05-composition-layer.md`    | `src/bioetl/composition/`    |
 
 Для каждого файла проверь:
+
 - упомянутые классы и модули существуют;
 - новые значимые модули отражены в docs;
 - import paths и package names корректны;
@@ -143,6 +147,7 @@ uv run python -m scripts.docs check-links --links --specs --configs
 Сравни фактический API surface с reference docs.
 
 Особое внимание:
+
 - `docs/04-reference/api/domain/ports.md`
 - `docs/04-reference/api/domain/*.md`
 - `docs/04-reference/api/application/*.md`
@@ -153,15 +158,18 @@ uv run python -m scripts.docs check-links --links --specs --configs
 `docs/04-reference/api/domain.md`; используй подфайлы как primary surface.
 
 Для портов сравни с:
+
 - `src/bioetl/domain/ports/**/*.py`
 
 ### 2.3. Pipeline docs
 
 Аудируй обе формы layout:
+
 - `docs/04-reference/pipelines/*.md`
 - `docs/04-reference/pipelines/*/*.md`
 
 Для каждого pipeline/doc entry проверь:
+
 - связанный config path существует (`configs/entities/`, `configs/composites/`,
   либо provider-specific config where applicable);
 - entity/pipeline naming совпадает с текущим кодом и config topology;
@@ -173,12 +181,15 @@ uv run python -m scripts.docs check-links --links --specs --configs
 Проверь `docs/04-reference/contracts/gold-schemas.md`.
 
 Source of truth:
+
 - `src/bioetl/domain/contracts/gold/`
 
 Дополнительно проверь:
+
 - `docs/04-reference/contracts/gold/*.json`
 
 Нужно проверить:
+
 - актуальность contract inventory;
 - версии, `Last verified`, linked ADRs;
 - согласованность полей и contract grouping с кодом.
@@ -191,6 +202,7 @@ Source of truth:
 ### 3.1. Полнота ADR
 
 Для live ADR set в `docs/02-architecture/decisions/ADR-*.md` проверь:
+
 - наличие базовой структуры: Title, Status, Context, Decision, Consequences;
 - валидность ссылок на code/config/docs;
 - отсутствие конфликтующих решений;
@@ -199,6 +211,7 @@ Source of truth:
 ### 3.2. Missing ADRs
 
 Проверь, есть ли архитектурно значимые решения в коде/документации без ADR:
+
 - новые стабильные patterns;
 - явные `ADR` references в комментариях/текстах без соответствующего ADR;
 - крупные governance decisions, описанные только в code/docs.
@@ -209,6 +222,7 @@ Source of truth:
 superseded ADR туда.
 
 Если такого каталога нет:
+
 - не считать это ошибкой само по себе;
 - проверить, как помечены superseded ADR в live tree;
 - перечислить archive candidates и inconsistencies в status/links.
@@ -232,11 +246,13 @@ bash scripts/diagrams/validate_mermaid_syntax.sh
 ### 4.2. ADR-040 compliance
 
 Проверяй относительно:
+
 - `docs/02-architecture/decisions/ADR-040-diagram-governance.md`
 - связанных policy/guidance файлов в `docs/02-architecture/diagrams/`
 - текущих diagram tooling rules в `scripts/diagrams/`
 
 Для диаграмм проверь:
+
 - обязательные metadata markers;
 - naming и file placement;
 - palette/style consistency;
@@ -246,6 +262,7 @@ bash scripts/diagrams/validate_mermaid_syntax.sh
 ### 4.3. Code-Diagram Sync
 
 Для ключевых diagram families проверь:
+
 - referenced modules/classes существуют;
 - relationships не противоречат реальным imports/dependencies;
 - новые значимые компоненты отражены там, где диаграмма должна быть canonical.
@@ -257,6 +274,7 @@ bash scripts/diagrams/validate_mermaid_syntax.sh
 
 Найди `.mmd` / `.mermaid` файлы, на которые не ссылается ни один publishable
 `.md`, и раздели их на:
+
 - canonical but indirectly consumed;
 - generated/support artifacts;
 - true orphan candidates.
@@ -266,6 +284,7 @@ bash scripts/diagrams/validate_mermaid_syntax.sh
 ### 5.1. Drift detection
 
 Для каждого docs-файла в scope оцени:
+
 - last meaningful update via git history;
 - drift score (`LOW`, `MEDIUM`, `HIGH`);
 - factual drift vs editorial/style debt.
@@ -273,6 +292,7 @@ bash scripts/diagrams/validate_mermaid_syntax.sh
 ### 5.2. Archive candidates
 
 Отдельно выдели кандидатов на перенос в `docs/99-archive/`:
+
 - завершённые migration docs;
 - устаревшие планы из `docs/plans/`;
 - stale verification/runbook support docs, если они больше не operationally
@@ -283,6 +303,7 @@ bash scripts/diagrams/validate_mermaid_syntax.sh
 ### 5.3. Glossary sync
 
 Проверь `docs/00-project/glossary.md`:
+
 - ключевые термины из active docs и rules присутствуют;
 - определения не устарели;
 - нет лишних deprecated terms without note.
@@ -359,6 +380,7 @@ python -m scripts.docs build-site --strict
 ### Быстрый pre-PR аудит
 
 Проведи только:
+
 - Фаза 2: Code-Docs Sync
 - Фаза 4: Diagram Validation
 
@@ -381,19 +403,22 @@ python -m scripts.docs build-site --strict
 ### Post-refactoring sync
 
 После рефакторинга слоя `src/bioetl/{layer}/`:
+
 1. Обнови layer docs и API reference.
-2. Обнови затронутые диаграммы.
-3. Отметь обновлённые docs как re-verified.
+1. Обнови затронутые диаграммы.
+1. Отметь обновлённые docs как re-verified.
 
 ## Оркестрация
 
 Если агентная среда поддерживает subagents:
+
 - сначала выполни A1;
 - затем параллельно A2, A3, A4;
 - после этого выполни A5;
 - затем нормализуй findings в один consolidated summary.
 
 Если subagents недоступны:
+
 - выполни те же фазы последовательно в том же порядке.
 
 ---END---

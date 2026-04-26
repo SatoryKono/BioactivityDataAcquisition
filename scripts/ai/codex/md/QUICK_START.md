@@ -76,9 +76,9 @@ cd script-codex
 https://platform.openai.com/api-keys
 
 1. Откройте ссылку
-2. "Create new secret key"
-3. Скопируйте (начинается с `sk-`)
-4. Вставьте в `.env.codex`
+1. "Create new secret key"
+1. Скопируйте (начинается с `sk-`)
+1. Вставьте в `.env.codex`
 
 ## Готово! 🚀
 

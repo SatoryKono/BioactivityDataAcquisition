@@ -73,18 +73,18 @@ if docker ps -a --format "table {{.Names}}" | grep -q "^bioetl-neo4j$"; then
   fi
 else
   section "Starting Neo4j Container"
-  
+
   info "Launching: docker run -d --name bioetl-neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/bioetl_secure_password neo4j:5.15-community"
-  
+
   if docker run -d --name bioetl-neo4j \
     -p 7474:7474 -p 7687:7687 \
     -e NEO4J_AUTH=neo4j/bioetl_secure_password \
     neo4j:5.15-community >/dev/null 2>&1; then
     ok "Container created successfully"
-    
+
     info "Waiting for Neo4j to start (this takes ~10-15 seconds)..."
     sleep 3
-    
+
     # Wait for Bolt port to be ready
     max_attempts=30
     attempt=0
@@ -93,17 +93,17 @@ else
         ok "Neo4j started successfully"
         break
       fi
-      
+
       if docker logs bioetl-neo4j 2>/dev/null | grep -q "ERROR"; then
         fail "Neo4j startup error detected"
         docker logs bioetl-neo4j | grep ERROR >&2
         exit 1
       fi
-      
+
       sleep 1
       attempt=$((attempt + 1))
     done
-    
+
     if [[ $attempt -ge $max_attempts ]]; then
       warn "Timeout waiting for Neo4j to start, continuing anyway..."
     fi
@@ -132,10 +132,10 @@ fi
 # Check MCP registration (if Codex available)
 if command -v codex >/dev/null 2>&1; then
   section "MCP Registration"
-  
+
   if codex mcp list 2>/dev/null | grep -q "neo4j-memory"; then
     ok "neo4j-memory MCP server is registered"
-    
+
     config=$(codex mcp get neo4j-memory 2>/dev/null || echo "")
     if grep -q "mcp_neo4j_memory_wrapper" <<<"$config"; then
       ok "neo4j-memory uses correct wrapper script"

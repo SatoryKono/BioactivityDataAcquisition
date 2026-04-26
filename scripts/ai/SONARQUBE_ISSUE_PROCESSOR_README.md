@@ -9,12 +9,14 @@ notes or manual screenshots.
 The canonical workflow now has two parts:
 
 1. `scripts/ai/sonar_issue_processor.py`
+
    - parses `sonar-project.properties`
    - measures the active `sonar.exclusions` quarantine
    - attempts a live SonarCloud / SonarQube unresolved-issues query
    - emits a JSON baseline report
 
-2. `scripts/ai/check_sonar_issues.py`
+1. `scripts/ai/check_sonar_issues.py`
+
    - prints a concise audit summary
    - highlights whether the historical near-zero Sonar status should be treated
      as stale

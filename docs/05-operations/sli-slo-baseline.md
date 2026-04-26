@@ -1,13 +1,16 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-04-10'
----
+  Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+  Last verified: '2026-04-10'
+
+______________________________________________________________________
 
 # SLI / SLO Baseline
 
@@ -36,16 +39,16 @@ This baseline is an internal operations target, not an external customer SLA.
 
 ## Canonical SLI Set
 
-| SLI | Metric source | Window | Target baseline | Alert / runbook linkage |
-| --- | --- | --- | --- | --- |
-| Pipeline terminal success rate | `bioetl_pipeline_runs_total{status=~"success|failed"}` | 7d rolling | `>= 95%` success per `pipeline,run_type` | `BioETLPipelineRunFailed` -> `runbooks/pipeline-failure-critical.md` |
-| Control-plane write success ratio | `bioetl_control_plane_manifest_writes_total`, `bioetl_control_plane_ledger_appends_total` | 7d rolling | `>= 99%` successful writes per `pipeline` | `BioETLControlPlaneManifestWriteFailed`, `BioETLRunLedgerAppendFailed` -> `runbooks/run-manifest-inspection.md` |
-| Control-plane read success ratio | `bioetl_control_plane_reads_total` | 24h rolling | `>= 99%` successful reads per `store,operation` | `BioETLControlPlaneReadFailureRate` -> `runbooks/observability-checklist.md` |
-| Provider health completion ratio | `bioetl_health_check_success_total`, `bioetl_health_check_degraded_total`, `bioetl_health_check_failures_total` | 24h rolling | `>= 95%` successful or degraded completions per `provider` | `BioETLProviderHealthCheckFailuresDetected`, `BioETLProviderFailureRateHigh` -> `runbooks/incident-response.md` |
-| Retry exhaustion containment | `bioetl_data_source_retry_exhausted_total` | 1h rolling | `< 3` exhaustions per `provider,operation` | `BioETLProviderRetriesExhausted`, `BioETLProviderRetriesExhaustedPersistent` -> `runbooks/incident-response.md` |
-| DQ quarantine ratio | `bioetl_dq_records_quarantined_total` vs `bioetl_records_processed_total{stage="bronze"}` | 24h rolling | `<= 5%` per `pipeline,run_type` when `bronze >= 20` | `BioETLDQQuarantineRateHigh`, `BioETLDQQuarantineRateCritical` -> `runbooks/dq-failure-investigation.md` |
-| DQ validation health | `bioetl_dq_validation_failures_total`, `bioetl_dq_anomaly_detected`, `bioetl_dq_validation_score` | 24h rolling | no hard-fail validation failures; investigate any critical anomalies immediately | `BioETLDQValidationFailuresCritical`, `BioETLDQCriticalAnomaliesDetected` -> `runbooks/dq-failure-investigation.md` |
-| Data freshness lag | `bioetl_data_freshness_seconds` | continuous / 24h review | `<= 24h` lag for active pipelines; `> 72h` is critical | `BioETLDataFreshnessLagHigh`, `BioETLDataFreshnessLagCritical` -> `runbooks/dq-failure-investigation.md` |
+| SLI                               | Metric source                                                                                                   | Window                  | Target baseline                                                                  | Alert / runbook linkage                                                                                             |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Pipeline terminal success rate    | \`bioetl_pipeline_runs_total{status=~"success                                                                   | failed"}\`              | 7d rolling                                                                       | `>= 95%` success per `pipeline,run_type`                                                                            |
+| Control-plane write success ratio | `bioetl_control_plane_manifest_writes_total`, `bioetl_control_plane_ledger_appends_total`                       | 7d rolling              | `>= 99%` successful writes per `pipeline`                                        | `BioETLControlPlaneManifestWriteFailed`, `BioETLRunLedgerAppendFailed` -> `runbooks/run-manifest-inspection.md`     |
+| Control-plane read success ratio  | `bioetl_control_plane_reads_total`                                                                              | 24h rolling             | `>= 99%` successful reads per `store,operation`                                  | `BioETLControlPlaneReadFailureRate` -> `runbooks/observability-checklist.md`                                        |
+| Provider health completion ratio  | `bioetl_health_check_success_total`, `bioetl_health_check_degraded_total`, `bioetl_health_check_failures_total` | 24h rolling             | `>= 95%` successful or degraded completions per `provider`                       | `BioETLProviderHealthCheckFailuresDetected`, `BioETLProviderFailureRateHigh` -> `runbooks/incident-response.md`     |
+| Retry exhaustion containment      | `bioetl_data_source_retry_exhausted_total`                                                                      | 1h rolling              | `< 3` exhaustions per `provider,operation`                                       | `BioETLProviderRetriesExhausted`, `BioETLProviderRetriesExhaustedPersistent` -> `runbooks/incident-response.md`     |
+| DQ quarantine ratio               | `bioetl_dq_records_quarantined_total` vs `bioetl_records_processed_total{stage="bronze"}`                       | 24h rolling             | `<= 5%` per `pipeline,run_type` when `bronze >= 20`                              | `BioETLDQQuarantineRateHigh`, `BioETLDQQuarantineRateCritical` -> `runbooks/dq-failure-investigation.md`            |
+| DQ validation health              | `bioetl_dq_validation_failures_total`, `bioetl_dq_anomaly_detected`, `bioetl_dq_validation_score`               | 24h rolling             | no hard-fail validation failures; investigate any critical anomalies immediately | `BioETLDQValidationFailuresCritical`, `BioETLDQCriticalAnomaliesDetected` -> `runbooks/dq-failure-investigation.md` |
+| Data freshness lag                | `bioetl_data_freshness_seconds`                                                                                 | continuous / 24h review | `<= 24h` lag for active pipelines; `> 72h` is critical                           | `BioETLDataFreshnessLagHigh`, `BioETLDataFreshnessLagCritical` -> `runbooks/dq-failure-investigation.md`            |
 
 ## PromQL Reference
 

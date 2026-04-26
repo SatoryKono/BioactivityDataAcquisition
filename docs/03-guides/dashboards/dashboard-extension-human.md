@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-13'
----
+  Last verified: '2026-04-13'
+
+______________________________________________________________________
 
 # Dashboard Extension Guide (Human)
 

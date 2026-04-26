@@ -84,5 +84,5 @@
 ## Top Insights
 
 1. The project’s architecture is already executable governance, not just architecture prose. (EV-enforcement-dependency-map-shows-zero-layer-violations, EV-enforcement-layer-dependency-suite-passes-baseline, EV-enforcement-bootstrap-and-composition-boundaries-pass, EV-enforcement-interface-and-adapter-di-guards-pass)
-2. The strongest enforcement emphasis is around DI and assembly seams, which matches the project’s real structural risk profile. (EV-enforcement-bootstrap-and-composition-boundaries-pass, EV-enforcement-interface-and-adapter-di-guards-pass)
-3. The main remaining enforcement problem is policy clarity, not policy absence. (EV-enforcement-import-matrix-is-docs-as-code)
+1. The strongest enforcement emphasis is around DI and assembly seams, which matches the project’s real structural risk profile. (EV-enforcement-bootstrap-and-composition-boundaries-pass, EV-enforcement-interface-and-adapter-di-guards-pass)
+1. The main remaining enforcement problem is policy clarity, not policy absence. (EV-enforcement-import-matrix-is-docs-as-code)

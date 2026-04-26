@@ -71,6 +71,6 @@ Do not edit this alias directly.
 ## Required Rules
 
 1. `filename == frontmatter.name`.
-2. Canonical profiles must include `Boundary note` and `Operating modes`.
-3. Alias profiles must include `Canonical profile` and `Planned removal date`.
-4. New specialist names must follow `sp-*` and must not use `-pro`, `-master`, `-expert`.
+1. Canonical profiles must include `Boundary note` and `Operating modes`.
+1. Alias profiles must include `Canonical profile` and `Planned removal date`.
+1. New specialist names must follow `sp-*` and must not use `-pro`, `-master`, `-expert`.

@@ -4,13 +4,13 @@
 
 *Version: 1.0.1 | Date: 2026-04-06 | Parent: agent-memory.md*
 
-> **Focus**: Task decomposition, RF-* planning, DAG dependencies, composite pipeline design, routing.
+> **Focus**: Task decomposition, RF-\* planning, DAG dependencies, composite pipeline design, routing.
 
----
+______________________________________________________________________
 
 ## 1. Identity & Scope
 
-- **Role**: Central coordinator — decomposes tasks into RF-* for other agents
+- **Role**: Central coordinator — decomposes tasks into RF-\* for other agents
 - **Write zone**: read-only (reports only)
 - **Output artifacts**: `01-plan-initial.md`, `03-plan-updated.md`
 - **ID system**: `RF-001`, `RF-002`, ...
@@ -30,6 +30,7 @@ Before opening repo-wide or layer-wide RF waves, consult:
 - `docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md`
 
 Planning defaults:
+
 - do not use package count alone as a refactor trigger;
 - use package families as the unit of hotspot calibration;
 - treat `application/core` as the currently confirmed family hotspot and compare next candidates against evidence before expanding scope.
@@ -45,7 +46,7 @@ Every RF that changes files should explicitly preserve a debt-tracking step:
 - if a plan would require a new exemption, surface that explicitly rather than
   hiding it inside implementation work.
 
----
+______________________________________________________________________
 
 ## 2. Project Architecture (Planning Context)
 
@@ -72,40 +73,40 @@ ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar
 
 ### Key ADR for Planning
 
-| ADR | Topic | Impact on Planning |
-|-----|-------|-------------------|
-| ADR-010 | Local-Only Deployment | No Docker/Redis dependencies |
-| ADR-014 | Deterministic Writes | sort_by mandatory in Silver configs |
-| ADR-025 | Pipeline Config Unification | Standard config structure |
-| ADR-026 | Composite Pipeline Pattern | seed/enrichers/merge |
-| ADR-027 | DQ Rules Externalization | No inline thresholds |
-| ADR-028 | Filter Rules Externalization | External filter configs |
-| ADR-029 | Convention-based Config | Auto-computed config paths |
+| ADR     | Topic                        | Impact on Planning                  |
+| ------- | ---------------------------- | ----------------------------------- |
+| ADR-010 | Local-Only Deployment        | No Docker/Redis dependencies        |
+| ADR-014 | Deterministic Writes         | sort_by mandatory in Silver configs |
+| ADR-025 | Pipeline Config Unification  | Standard config structure           |
+| ADR-026 | Composite Pipeline Pattern   | seed/enrichers/merge                |
+| ADR-027 | DQ Rules Externalization     | No inline thresholds                |
+| ADR-028 | Filter Rules Externalization | External filter configs             |
+| ADR-029 | Convention-based Config      | Auto-computed config paths          |
 
----
+______________________________________________________________________
 
-## 3. RF-* Routing Rules
+## 3. RF-\* Routing Rules
 
-| RF type | Primary agent | Secondary agent |
-|---------|:------------:|:---------------:|
+| RF type                           |     Primary agent     |         Secondary agent          |
+| --------------------------------- | :-------------------: | :------------------------------: |
 | `refactor` / `feature` / `bugfix` | orchestrator (direct) | py-config-bot (if config impact) |
-| `config` | py-config-bot | — |
-| `doc` | py-doc-bot | — |
-| `test` | py-test-bot | — |
+| `config`                          |     py-config-bot     |                —                 |
+| `doc`                             |      py-doc-bot       |                —                 |
+| `test`                            |      py-test-bot      |                —                 |
 
----
+______________________________________________________________________
 
 ## 4. Plan Quality Criteria
 
-- All RF-* have unambiguous scope (concrete files)
+- All RF-\* have unambiguous scope (concrete files)
 - Dependencies form a DAG (no cycles)
 - High-risk RF have rollback strategy
 - Plan does not violate architectural invariants
 - Each RF is verifiable — completion can be checked
 
----
+______________________________________________________________________
 
-## 5. RF-* Template
+## 5. RF-\* Template
 
 ```markdown
 ### RF-001: <name>
@@ -118,7 +119,7 @@ ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar
 - **Description**: <what and why>
 ```
 
----
+______________________________________________________________________
 
 ## 6. Standard Workflow Position
 
@@ -128,21 +129,21 @@ ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar
    → ⑤ py-test-bot (final) → ⑥ py-doc-bot → ⑦ py-audit-bot (final)
 ```
 
-Plan-bot is step ②: receives baseline audit, produces RF-* plan.
+Plan-bot is step ②: receives baseline audit, produces RF-\* plan.
 
----
+______________________________________________________________________
 
 ## 7. Simplified Modes
 
-| Mode | Workflow |
-|------|---------|
-| **Quick-fix** | test(baseline) -> fix -> test(final) -> doc |
-| **Doc-only** | py-doc-bot -> py-audit-bot(targeted, docs) |
-| **Config-only** | audit -> plan -> py-config-bot -> test -> audit |
-| **New entity** | plan -> orchestrator(scaffold/code) -> config-bot(3 configs) -> test -> doc -> audit |
-| **Composite** | audit(baseline) -> plan(composite) -> config-bot -> orchestrator(code) -> test -> doc -> audit |
+| Mode            | Workflow                                                                                       |
+| --------------- | ---------------------------------------------------------------------------------------------- |
+| **Quick-fix**   | test(baseline) -> fix -> test(final) -> doc                                                    |
+| **Doc-only**    | py-doc-bot -> py-audit-bot(targeted, docs)                                                     |
+| **Config-only** | audit -> plan -> py-config-bot -> test -> audit                                                |
+| **New entity**  | plan -> orchestrator(scaffold/code) -> config-bot(3 configs) -> test -> doc -> audit           |
+| **Composite**   | audit(baseline) -> plan(composite) -> config-bot -> orchestrator(code) -> test -> doc -> audit |
 
----
+______________________________________________________________________
 
 ## 8. Composite Pipeline Design
 
@@ -164,14 +165,16 @@ composite:
 ```
 
 ### Join Key Rules
+
 - Stable identifiers: `doi`, `pmid`, `pmc_id`, `uniprot_accession`
 - DO NOT use `title` as join key (only fallback)
 
 ### Column Naming (ADR-026 v2)
+
 - Format: `{provider}.{entity}.{field}`
 - Exceptions: join keys, system columns
 
----
+______________________________________________________________________
 
 ## 9. Pre-planning Checks
 
@@ -189,21 +192,21 @@ find tests/ -name "test_*.py" -exec grep -l "<ClassName>" {} \;
 find configs/ -name "*.yaml" | xargs grep -l "<entity>"
 ```
 
----
+______________________________________________________________________
 
 ## 10. Import Constraints (for plan validation)
 
-| From \ To | domain | application | infrastructure | composition | interfaces |
-|-----------|:---:|:---:|:---:|:---:|:---:|
-| **domain** | OK | NO | NO | NO | NO |
-| **application** | OK | OK | NO | NO | NO |
-| **infrastructure** | OK | NO | OK | NO | NO |
-| **composition** | OK | OK | OK | OK | NO |
-| **interfaces** | OK | OK | OK | OK | OK |
+| From \\ To         | domain | application | infrastructure | composition | interfaces |
+| ------------------ | :----: | :---------: | :------------: | :---------: | :--------: |
+| **domain**         |   OK   |     NO      |       NO       |     NO      |     NO     |
+| **application**    |   OK   |     OK      |       NO       |     NO      |     NO     |
+| **infrastructure** |   OK   |     NO      |       OK       |     NO      |     NO     |
+| **composition**    |   OK   |     OK      |       OK       |     OK      |     NO     |
+| **interfaces**     |   OK   |     OK      |       OK       |     OK      |     OK     |
 
-Every RF-* MUST be validated against this matrix before inclusion in plan.
+Every RF-\* MUST be validated against this matrix before inclusion in plan.
 
----
+______________________________________________________________________
 
 ## 11. Parallelization Rules
 
@@ -211,32 +214,32 @@ Every RF-* MUST be validated against this matrix before inclusion in plan.
 - `orchestrator` || `py-config-bot` — different file zones
 - `py-doc-bot` || `py-audit-bot (final)` — if doc doesn't affect code audit
 
----
+______________________________________________________________________
 
 ## 12. Integration with Other Agents
 
-| Event | Action |
-|-------|--------|
-| Baseline audit done (py-audit-bot) | -> Plan-bot creates plan |
-| Plan ready | -> py-test-bot (baseline) -> code implementation |
-| Debug escalation (py-debug-bot) | -> Plan-bot adjusts plan |
-| Scope change | -> Plan-bot produces `03-plan-updated.md` |
+| Event                              | Action                                           |
+| ---------------------------------- | ------------------------------------------------ |
+| Baseline audit done (py-audit-bot) | -> Plan-bot creates plan                         |
+| Plan ready                         | -> py-test-bot (baseline) -> code implementation |
+| Debug escalation (py-debug-bot)    | -> Plan-bot adjusts plan                         |
+| Scope change                       | -> Plan-bot produces `03-plan-updated.md`        |
 
----
+______________________________________________________________________
 
 ## 13. Key Files for Planning
 
-| What | Path |
-|------|------|
-| RULES.md | `docs/00-project/RULES.md` |
-| ADR directory | `docs/02-architecture/decisions/` |
-| Domain Ports | `src/bioetl/domain/ports/` |
-| Pipeline configs | `configs/entities/{provider}/{entity}.yaml` |
-| DQ configs | `configs/entities/{provider}/{entity}.yaml#quality` |
-| Composite configs | `configs/composites/` |
-| Factories | `src/bioetl/composition/factories/` |
+| What              | Path                                                |
+| ----------------- | --------------------------------------------------- |
+| RULES.md          | `docs/00-project/RULES.md`                          |
+| ADR directory     | `docs/02-architecture/decisions/`                   |
+| Domain Ports      | `src/bioetl/domain/ports/`                          |
+| Pipeline configs  | `configs/entities/{provider}/{entity}.yaml`         |
+| DQ configs        | `configs/entities/{provider}/{entity}.yaml#quality` |
+| Composite configs | `configs/composites/`                               |
+| Factories         | `src/bioetl/composition/factories/`                 |
 
----
+______________________________________________________________________
 
 ## 14. Unified Script Commands (for planning/analysis)
 
@@ -268,6 +271,6 @@ python -m scripts.engineering.ci quality-gate
 python -m scripts.engineering.ci debt-report
 ```
 
----
+______________________________________________________________________
 
 *This memory file is specific to py-plan-bot. For general project context see `agent-memory.md`.*

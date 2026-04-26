@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-05'
----
+  Last verified: '2026-04-05'
+
+______________________________________________________________________
 
 # Docs Verification
 
@@ -246,23 +249,23 @@ Run this checklist for recurring documentation maintenance:
    - Top-level CLI help text
    - Published CLI reference
    - Runbook command examples
-2. `make` / `uv` / bootstrap commands
+1. `make` / `uv` / bootstrap commands
    - `README.md`
    - `docs/03-guides/getting-started.md`
    - `docs/03-guides/quick-start.md`
    - `docs/00-project/RULES.md`
-3. Provider/entity inventory parity
+1. Provider/entity inventory parity
    - `configs/providers/*.yaml`
    - `configs/entities/{provider}/*.yaml`
    - `docs/04-reference/providers/**`
    - `README.md` supported-provider table
-4. Contract export parity
+1. Contract export parity
    - `src/bioetl/domain/contracts/**`
    - `src/bioetl/domain/control_plane/**`
    - `docs/04-reference/contracts/**`
-5. ADR cross-links
+1. ADR cross-links
    - Confirm ADR-010 / ADR-014 / ADR-017 references remain accurate where runtime behavior is described
-6. Published vs repo-only boundaries
+1. Published vs repo-only boundaries
    - `docs/00-05` stays normative
    - `docs/99-archive`, `docs/plans`, `docs/reports`, `reports` remain clearly non-normative
 

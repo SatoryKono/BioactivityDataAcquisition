@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Historical deep schema.
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-24'
----
+  Last verified: '2026-04-24'
+
+______________________________________________________________________
 
 **⚠️ HISTORICAL CONTENT - ARCHIVED**
 
@@ -29,10 +32,12 @@ This page is kept as an archived schema note. It reflects a pre-normalization co
 ## Historical Context
 
 Canonical sources:
+
 - [ChEMBL assay provider reference](../../../../04-reference/providers/chembl/assay.md)
 - `configs/entities/chembl/assay.yaml`
 
 Current canonical summary:
+
 - Active configs and schema checks use snake_case names.
 - Publication and target relationships are represented through the current entity config and provider implementation, not through the legacy dashed names shown in older material.
 - Use the provider reference and live config for current assay contract details.

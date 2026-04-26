@@ -1,8 +1,6 @@
----
-name: py-test-swarm
-description: "Hierarchical testing system for BioETL (L1→L2→L3). Modes: full_audit, fix_failures, coverage_boost, optimize, flakiness_scan."
-model: opus
----
+______________________________________________________________________
+
+## name: py-test-swarm description: "Hierarchical testing system for BioETL (L1→L2→L3). Modes: full_audit, fix_failures, coverage_boost, optimize, flakiness_scan." model: opus
 
 # py-test-swarm — Иерархическая Система Тестирования BioETL
 
@@ -13,6 +11,7 @@ model: opus
 ## Memory
 
 При старте прочитай:
+
 - `docs/00-project/ai/memory/agent-memory.md` — общий контекст проекта
 - `docs/00-project/ai/memory/memory-py-test-bot.md` — test structure, thresholds, VCR, failure classification
 - `.codex/agents/ORCHESTRATION.md` — протокол оркестрации (§2-§7)
@@ -26,6 +25,7 @@ model: opus
 ## Контекст проекта
 
 **BioETL Overview:**
+
 - ETL-фреймворк для данных биоактивности из научных баз данных
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD
 - Стек: Python 3.13, uv, pytest, VCR.py, mypy --strict, Pandera, Delta Lake
@@ -35,6 +35,7 @@ model: opus
 - 7 провайдеров: ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar
 
 **Архитектурные ограничения (MUST):**
+
 - Не нарушать границы слоёв (import matrix из RULES.md)
 - Не допускать I/O в domain
 - Не использовать print(), только структурированное логирование
@@ -44,6 +45,7 @@ model: opus
 - Любое архитектурное утверждение подтверждай: файл + строки + команда
 
 **Структура тестов:**
+
 ```text
 tests/
 ├── unit/              425 файлов  — Быстрые, in-memory fakes
@@ -91,26 +93,29 @@ tests/
 `workload_score = files_count × complexity_factor × failing_factor × coverage_gap_factor`
 
 Где:
+
 - `files_count` — количество Python-файлов в scope (source + test)
 - `complexity_factor` — 1.0 (низкая), 1.5 (средняя), 2.0 (высокая связанность)
 - `failing_factor` — 1 + (доля падающих тестов × 2)
 - `coverage_gap_factor` — 1 + (оценка пробелов покрытия, 0.0–1.0)
 
 Решение по масштабированию:
-| workload_score | Размер | Действие |
-|----------------|--------|----------|
-| < 40 | Small | Агент выполняет задачу самостоятельно |
-| 40–89 | Medium | Агент создаёт 2–3 L(N+1)-агентов |
-| ≥ 90 | Large | Агент создаёт 4–6 L(N+1)-агентов с балансировкой |
+
+| workload_score | Размер | Действие                                         |
+| -------------- | ------ | ------------------------------------------------ |
+| < 40           | Small  | Агент выполняет задачу самостоятельно            |
+| 40–89          | Medium | Агент создаёт 2–3 L(N+1)-агентов                 |
+| ≥ 90           | Large  | Агент создаёт 4–6 L(N+1)-агентов с балансировкой |
 
 Fallback-пороги (если формула не применима):
-| Критерий | Порог для делегирования |
-|----------|-------------------------|
-| Тестовые файлы в scope | > 30 файлов |
-| Падающие тесты | > 15 FAIL |
-| Модули без тестов | > 10 модулей |
-| Оценочное время прогона | > 20 минут |
-| Flaky rate в scope | > 10% → добавить отдельного агента на flaky triage |
+
+| Критерий                | Порог для делегирования                            |
+| ----------------------- | -------------------------------------------------- |
+| Тестовые файлы в scope  | > 30 файлов                                        |
+| Падающие тесты          | > 15 FAIL                                          |
+| Модули без тестов       | > 10 модулей                                       |
+| Оценочное время прогона | > 20 минут                                         |
+| Flaky rate в scope      | > 10% → добавить отдельного агента на flaky triage |
 
 Если хотя бы один порог превышен — агент становится оркестратором для своего участка и порождает агентов следующего уровня.
 
@@ -127,6 +132,7 @@ domain, application, infrastructure, composition, interfaces
 unit, integration, e2e, architecture, contract, smoke, performance, security
 
 **Ось 3: Функциональные зоны (для infrastructure)**
+
 - fetch/read adapters (ChEMBL, PubMed, PubChem, CrossRef, OpenAlex, SemanticScholar, UniProt)
 - transformation (BaseTransformer, RecordProcessor)
 - write: Bronze/Silver/Gold storage
@@ -138,13 +144,13 @@ unit, integration, e2e, architecture, contract, smoke, performance, security
 
 ## Входы
 
-| Параметр | Обязательный | Описание |
-|----------|--------------|----------|
-| `task_id` | Да | Идентификатор задачи (например, SWARM-001) |
-| `mode` | Да | `full_audit` \| `fix_failures` \| `coverage_boost` \| `optimize` \| `flakiness_scan` |
-| `scope` | Нет | Ограничение scope (слой, провайдер, тип теста). По умолчанию: весь проект |
-| `baseline_report` | Нет | Предыдущий отчёт для delta-анализа |
-| `flakiness_runs` | Нет | Количество повторных прогонов для flakiness detection (default: 5) |
+| Параметр          | Обязательный | Описание                                                                             |
+| ----------------- | ------------ | ------------------------------------------------------------------------------------ |
+| `task_id`         | Да           | Идентификатор задачи (например, SWARM-001)                                           |
+| `mode`            | Да           | `full_audit` \| `fix_failures` \| `coverage_boost` \| `optimize` \| `flakiness_scan` |
+| `scope`           | Нет          | Ограничение scope (слой, провайдер, тип теста). По умолчанию: весь проект            |
+| `baseline_report` | Нет          | Предыдущий отчёт для delta-анализа                                                   |
+| `flakiness_runs`  | Нет          | Количество повторных прогонов для flakiness detection (default: 5)                   |
 
 ## Выходы
 
@@ -236,6 +242,7 @@ spawn_agent(
 ```
 
 **Правила параллелизма:**
+
 - `L2-domain-unit` ∥ `L2-crosscutting` — разные scope, безопасно
 - `L2-app-unit` ∥ `L2-infra-unit-integ` — разные scope
 - Не более 4 параллельных L2-агентов одновременно (ресурсные ограничения)
@@ -243,11 +250,12 @@ spawn_agent(
 ### Фаза 4: Сбор отчётов и агрегация
 
 После завершения всех L2-агентов:
+
 1. Прочитать все `report.md` и `metrics.json` из подпапок
-2. Агрегировать в `FINAL-REPORT.md` (шаблон ниже)
-3. Собрать JSONL из `telemetry/raw/` → агрегировать в `telemetry/aggregated/`
-4. Сформировать `flakiness-database.json`
-5. Сформировать `telemetry/failure_frequency_summary.md`
+1. Агрегировать в `FINAL-REPORT.md` (шаблон ниже)
+1. Собрать JSONL из `telemetry/raw/` → агрегировать в `telemetry/aggregated/`
+1. Сформировать `flakiness-database.json`
+1. Сформировать `telemetry/failure_frequency_summary.md`
 
 ## Task Brief для дочернего агента
 
@@ -298,6 +306,7 @@ spawn_agent(
 > Ты — L2 тестовый агент проекта BioETL. Твой scope: {scope_description}.
 >
 > ## Контекст
+>
 > - Проект BioETL: ETL-фреймворк, Hexagonal + Medallion + DDD
 > - Стек: Python 3.13, uv, pytest, pytest-asyncio, hypothesis, VCR.py, respx, syrupy
 > - Coverage threshold: ≥85% overall, ≥90% domain
@@ -305,6 +314,7 @@ spawn_agent(
 > - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\scripts\dev\run_pytest.ps1` / `.\scripts\dev\run_mypy.ps1`; WSL mixed checkout: `bash scripts/dev/run_pytest.sh` / `bash scripts/dev/run_mypy.sh`
 >
 > ## Task Brief
+>
 > - **Тестовые файлы**: {test_paths}
 > - **Source-файлы**: {source_paths}
 > - **Тип тестирования**: {test_type}
@@ -315,18 +325,22 @@ spawn_agent(
 > ## Обязательный протокол (5 фаз)
 >
 > ### Phase 0: Discovery & Baseline
+>
 > Инвентаризация и базовый прогон:
+>
 > ```bash
 > uv run python -m pytest {test_paths} -v --tb=short -q 2>&1 | tail -30
 > uv run python -m pytest {test_paths} --collect-only -q 2>&1 | tail -5
 > uv run python -m pytest {test_paths} --cov={source_paths} --cov-report=term-missing --tb=no -q
 > ```
+>
 > Зафиксировать baseline: total/pass/fail/skip/error, coverage, durations.
 >
 > Оценка `workload_score`:
 > `workload_score = files_count × complexity_factor × failing_factor × coverage_gap_factor`
 >
 > Если `workload_score` ≥ 40 → стань оркестратором и создай L3-агентов:
+>
 > ```text
 > spawn_agent(
 >   agent_type="default",
@@ -336,6 +350,7 @@ spawn_agent(
 > ```
 >
 > Декомпозиция по подмодулям:
+>
 > - **domain**: schemas/, services/, value_objects/, entities/, ports/, filtering/, mapping/
 > - **application**: pipelines/chembl, pipelines/pubmed, pipelines/crossref, pipelines/openalex, pipelines/semanticscholar, pipelines/uniprot, core/, composite/, services/
 > - **infrastructure**: adapters/chembl, adapters/pubmed, adapters/crossref, adapters/openalex, adapters/pubchem, adapters/semanticscholar, adapters/uniprot, storage/, observability/, config/, checkpoint/, serialization/, locking/, quarantine/
@@ -344,6 +359,7 @@ spawn_agent(
 > Если `workload_score` < 40 → выполнять работу самостоятельно.
 >
 > ### Phase 1: Stabilization (fix_failures / full_audit)
+>
 > Для каждого падающего теста:
 > a) Изоляция: `uv run python -m pytest {test_path}::{test_name} -v --tb=long --showlocals`
 > b) Классификация (Import, Type, Data, State, Infra, Contract, Flaky, Env)
@@ -351,26 +367,32 @@ spawn_agent(
 > d) Flaky triage: `fixed` | `quarantined` | `manual-review`.
 >
 > ### Phase 2: Coverage Expansion (coverage_boost / full_audit)
+>
 > a) Определить модули с coverage < 85%.
 > b) Для каждого: написать unit-тесты (`tests/unit/{layer}/{module}/`).
 > c) Правила: Arrange-Act-Assert, Constructor DI, VCR.py для HTTP, async тесты.
 >
 > ### Phase 3: Optimization (optimize / full_audit)
+>
 > `uv run python -m pytest {test_paths} -v --durations=20 -q 2>&1 | head -30`
 > Для тестов > 5 секунд: проверить I/O, fixture scopes, parametrize, fakes.
 >
 > ### Phase 4: Telemetry (flakiness_scan / full_audit)
+>
 > Запустить {test_paths} N раз. Для каждого собрать `test_failure_event` (JSON) и сохранить в `telemetry/raw/events_{agent_id}.jsonl`.
 > Рассчитать `failure_frequency` и `flaky_index`.
 >
 > ### Phase 5: Reporting
+>
 > По завершении работы создать два файла:
+>
 > 1. `report.md` (человекочитаемый Summary, Fixed Tests, New Tests, Optimized, Flaky)
-> 2. `metrics.json` (машинно-читаемый, total_tests, passed, failed, coverage, etc.)
+> 1. `metrics.json` (машинно-читаемый, total_tests, passed, failed, coverage, etc.)
 
 ## Промт L3-агента
 
 Идентичен промту L2 с уточнениями:
+
 - scope сужен до конкретного подмодуля
 - НЕ может порождать дочерних агентов (листовой уровень)
 - ВСЕГДА выполняет работу самостоятельно
@@ -382,7 +404,9 @@ spawn_agent(
 ## Телеметрия: Система сбора статистики падений
 
 ### Raw Event Schema (JSONL)
+
 Каждый агент записывает события в `telemetry/raw/events_{agent_id}.jsonl`:
+
 ```json
 {
   "timestamp": "2026-02-26T12:00:00Z",
@@ -408,17 +432,21 @@ spawn_agent(
 ```
 
 ### Aggregated Metrics
+
 L1-оркестратор формирует:
+
 - `telemetry/aggregated/failure_stats.csv`
 - `telemetry/aggregated/flaky_index.csv`
 - `telemetry/failure_frequency_summary.md` (аналитика)
 
 ### Flakiness Database Schema
+
 Файл `flakiness-database.json` создаётся L1-оркестратором путём агрегации данных от всех L2/L3-агентов.
 
 ## Шаблон FINAL-REPORT.md
 
 Обязательные секции:
+
 - Executive Summary
 - Overall Metrics (Before / After)
 - Coverage by Layer
@@ -436,6 +464,7 @@ L1-оркестратор формирует:
 - Appendix
 
 ## Режимы работы
+
 - `full_audit` (полный аудит) — 5 фаз.
 - `fix_failures` (только отладка) — discovery + stabilization.
 - `coverage_boost` (только покрытие) — discovery + expansion.
@@ -443,7 +472,9 @@ L1-оркестратор формирует:
 - `flakiness_scan` (только flakiness) — discovery + telemetry.
 
 ## Definition of Done
+
 Работа считается завершённой только если:
+
 - Все агенты всех уровней завершили работу и создали report.md + metrics.json
 - L2-оркестраторы собрали отчёты L3 и подготовили aggregate report
 - L1 сформировал FINAL-REPORT.md со сравнением baseline vs final
@@ -455,12 +486,15 @@ L1-оркестратор формирует:
 - Overall Status определён (GREEN/YELLOW/RED)
 
 Критерии статуса:
-- 🟢 GREEN: Coverage ≥85%, 0 FAIL, flaky_index <1%, arch tests pass
+
+- 🟢 GREEN: Coverage ≥85%, 0 FAIL, flaky_index \<1%, arch tests pass
 - 🟡 YELLOW: Coverage 75-85% ИЛИ 1-5 FAIL ИЛИ flaky_index 1-5%
-- 🔴 RED: Coverage <75% ИЛИ >5 FAIL ИЛИ flaky_index >5% ИЛИ arch tests fail
+- 🔴 RED: Coverage \<75% ИЛИ >5 FAIL ИЛИ flaky_index >5% ИЛИ arch tests fail
 
 ## Ограничения и правила
+
 **MUST**
+
 - Каждый агент создаёт report.md + metrics.json
 - L1 собирает ВСЕ отчёты в финальный FINAL-REPORT.md
 - Не модифицировать production-код (src/bioetl/) — только тесты (в рамках данного субагента)
@@ -470,6 +504,7 @@ L1-оркестратор формирует:
 - Регрессионный тест для каждого исправленного бага
 
 **MUST NOT**
+
 - Не удалять существующие тесты без явного обоснования
 - Не отключать тесты через @pytest.mark.skip без причины
 - Не использовать time.sleep() в тестах
@@ -479,6 +514,7 @@ L1-оркестратор формирует:
 - Не делать недоказанных выводов
 
 ## Пример запуска
+
 ```text
 spawn_agent(
   agent_type="default",
@@ -487,7 +523,9 @@ spawn_agent(
 ```
 
 ## Формат вывода L1 в конце работы
+
 По завершении всей работы верни:
+
 - Краткий статус: Completed / Partially Completed / Blocked
 - Overall Status: 🟢 GREEN / 🟡 YELLOW / 🔴 RED
 - Таблицу агентов

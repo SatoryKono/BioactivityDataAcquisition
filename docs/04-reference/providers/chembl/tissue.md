@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Пайплайн: ChEMBL Tissue
 
@@ -15,7 +18,7 @@ Last verified: '2026-03-30'
 **Сущность:** `tissue`
 **Версия схемы:** 1.0.0
 
----
+______________________________________________________________________
 
 ## 1. Описание
 
@@ -23,27 +26,27 @@ Last verified: '2026-03-30'
 
 **Источник данных:** ChEMBL REST API, эндпоинт `/tissue`
 
----
+______________________________________________________________________
 
 ## 2. Ключевые поля
 
 ### Идентификаторы
 
-| Поле | Тип | Описание |
-|------|-----|----------|
+| Поле        | Тип   | Описание                                            |
+| ----------- | ----- | --------------------------------------------------- |
 | `tissue_id` | `str` | Уникальный ChEMBL ID ткани (PK, формат `CHEMBL\d+`) |
-| `pref_name` | `str` | Предпочтительное название ткани |
+| `pref_name` | `str` | Предпочтительное название ткани                     |
 
 ### Онтологические ссылки
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `bto_id` | `str` | Brenda Tissue Ontology ID (формат: `BTO:0000000`) |
-| `caloha_id` | `str` | CALIPHO tissue ID (формат: `TS-0000`) |
-| `efo_id` | `str` | EFO ontology ID (формат: `EFO:0000000`) |
+| Поле        | Тип   | Описание                                              |
+| ----------- | ----- | ----------------------------------------------------- |
+| `bto_id`    | `str` | Brenda Tissue Ontology ID (формат: `BTO:0000000`)     |
+| `caloha_id` | `str` | CALIPHO tissue ID (формат: `TS-0000`)                 |
+| `efo_id`    | `str` | EFO ontology ID (формат: `EFO:0000000`)               |
 | `uberon_id` | `str` | UBERON anatomy ontology ID (формат: `UBERON:0000000`) |
 
----
+______________________________________________________________________
 
 ## 3. Трансформация
 
@@ -61,27 +64,27 @@ Last verified: '2026-03-30'
 entity_id = f"chembl:{tissue_id}"
 ```
 
----
+______________________________________________________________________
 
 ## 4. Валидация
 
 ### DQ-правила
 
 1. **`tissue_id`** — обязательное, формат `^CHEMBL\d+$`
-2. **`pref_name`** — обязательное, длина 1-200 символов
-3. **`bto_id`** — если указан, формат `^BTO:\d{7}$`
-4. **`caloha_id`** — если указан, формат `^TS-\d{4}$`
-5. **`efo_id`** — если указан, формат `^EFO:\d{7}$`
-6. **`uberon_id`** — если указан, формат `^UBERON:\d{7}$`
+1. **`pref_name`** — обязательное, длина 1-200 символов
+1. **`bto_id`** — если указан, формат `^BTO:\d{7}$`
+1. **`caloha_id`** — если указан, формат `^TS-\d{4}$`
+1. **`efo_id`** — если указан, формат `^EFO:\d{7}$`
+1. **`uberon_id`** — если указан, формат `^UBERON:\d{7}$`
 
 ### Пороги ошибок
 
-| Порог | Условие | Действие |
-|-------|---------|----------|
-| Soft | > 5% ошибок | WARNING |
-| Hard | > 20% ошибок | FAIL BATCH |
+| Порог | Условие      | Действие   |
+| ----- | ------------ | ---------- |
+| Soft  | > 5% ошибок  | WARNING    |
+| Hard  | > 20% ошибок | FAIL BATCH |
 
----
+______________________________________________________________________
 
 ## 5. Использование CLI
 
@@ -96,18 +99,18 @@ bioetl run --pipeline chembl_tissue --limit 500
 bioetl run --pipeline chembl_tissue --run-type rebuild
 ```
 
----
+______________________________________________________________________
 
 ## 6. Связанные файлы
 
-| Компонент | Путь |
-|-----------|------|
-| Конфигурация | `configs/entities/chembl/tissue.yaml` |
-| DQ Rules | `configs/entities/chembl/tissue.yaml#quality` |
-| Схема | `configs/entities/chembl/tissue.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/tissue_transformer.py` |
+| Компонент    | Путь                                                            |
+| ------------ | --------------------------------------------------------------- |
+| Конфигурация | `configs/entities/chembl/tissue.yaml`                           |
+| DQ Rules     | `configs/entities/chembl/tissue.yaml#quality`                   |
+| Схема        | `configs/entities/chembl/tissue.yaml`                           |
+| Трансформер  | `src/bioetl/application/pipelines/chembl/tissue_transformer.py` |
 
----
+______________________________________________________________________
 
 ## 7. Связи с другими сущностями
 
@@ -117,7 +120,7 @@ Tissue (tissue_id)
         └── Activity [1:N]
 ```
 
----
+______________________________________________________________________
 
 ## 8. Примеры данных
 
@@ -139,28 +142,28 @@ normalized contract publishes this field as `tissue_id`.
 
 ### Silver (нормализованный)
 
-| tissue_id | pref_name | bto_id | uberon_id |
-|-----------|-----------|--------|-----------|
-| CHEMBL3638186 | Liver | BTO:0000759 | UBERON:0002107 |
+| tissue_id     | pref_name | bto_id      | uberon_id      |
+| ------------- | --------- | ----------- | -------------- |
+| CHEMBL3638186 | Liver     | BTO:0000759 | UBERON:0002107 |
 
----
+______________________________________________________________________
 
 ## Contract References
 
-| Артефакт | Ссылка |
-| --- | --- |
-| Gold contract export | [chembl_tissue_v1.0.json](../../contracts/gold/chembl_tissue_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Артефакт             | Ссылка                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Gold contract export | [chembl_tissue_v1.0.json](../../contracts/gold/chembl_tissue_v1.0.json)                  |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
 ## Compliance
 
-| Контроль | Статус | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Runtime alignment | Pass | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
-| Contract linkage | Pass | [chembl_tissue_v1.0.json](../../contracts/gold/chembl_tissue_v1.0.json) |
-| API governance | Pass | См. [API Compliance](#api-compliance) |
+| Контроль          | Статус | Evidence                                                                                                       |
+| ----------------- | ------ | -------------------------------------------------------------------------------------------------------------- |
+| Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`                       |
+| Runtime alignment | Pass   | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
+| Contract linkage  | Pass   | [chembl_tissue_v1.0.json](../../contracts/gold/chembl_tissue_v1.0.json)                                        |
+| API governance    | Pass   | См. [API Compliance](#api-compliance)                                                                          |
 
 ## API Compliance
 

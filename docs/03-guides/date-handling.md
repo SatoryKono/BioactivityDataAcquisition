@@ -1,45 +1,49 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Date Handling Guide
 
 This guide documents how dates are processed, normalized, and validated across BioETL pipelines.
 
----
+______________________________________________________________________
 
 ## Overview
 
 BioETL normalizes all publication dates to **ISO 8601 format (YYYY-MM-DD)** for consistency across
 providers. Partial dates (year-only or year-month) are normalized using the **end-of-period** strategy.
 
----
+______________________________________________________________________
 
 ## End-of-Period Normalization Strategy
 
 When a date has incomplete precision (e.g., only year or year-month), BioETL normalizes to the
 **end of the period**:
 
-| Input | Output | Rationale |
-|-------|--------|-----------|
-| `2024-03-15` | `2024-03-15` | Full date, unchanged |
-| `2024-03` | `2024-03-30` | End of month (day 30 for simplicity) |
-| `2024` | `2024-12-31` | End of year |
+| Input        | Output       | Rationale                            |
+| ------------ | ------------ | ------------------------------------ |
+| `2024-03-15` | `2024-03-15` | Full date, unchanged                 |
+| `2024-03`    | `2024-03-30` | End of month (day 30 for simplicity) |
+| `2024`       | `2024-12-31` | End of year                          |
 
 **Why end-of-period?**
 
 End-of-period normalization ensures that:
-1. Date range queries include all records from partial periods
-2. Publications from "2024" appear in queries for "dates ≤ 2024-12-31"
-3. Sorting by date places partial dates at the end of their period
 
----
+1. Date range queries include all records from partial periods
+1. Publications from "2024" appear in queries for "dates ≤ 2024-12-31"
+1. Sorting by date places partial dates at the end of their period
+
+______________________________________________________________________
 
 ## Core Functions
 
@@ -100,7 +104,7 @@ service.normalize-partial-date("2024")        # → "2024-12-31"
 service.normalize-partial-date(None)          # → None
 ```
 
----
+______________________________________________________________________
 
 ## Provider-Specific Implementations
 
@@ -109,18 +113,20 @@ service.normalize-partial-date(None)          # → None
 **Date Extractor**: `src/bioetl/application/pipelines/pubmed/extractors/date.py`
 
 Extracts dates from PubMed XML:
+
 - `publication-date` (unified, normalized)
 - `pub-date`, `epub-date` (original dates)
 - `accepted-date`, `received-date`, `revised-date` (history dates)
 
 **Date Priority** (`-compute-publication-date`):
+
 1. `epub-date` (electronic publication)
-2. `pub-date` (print publication)
-3. Year from article metadata
+1. `pub-date` (print publication)
+1. Year from article metadata
 
 ```python
 # Priority chain for publication-date
-publication-date = epub-date or pub-date or f"{year}-12-31"
+publication - date = epub - date or pub - date or f"{year}-12-31"
 ```
 
 ### CrossRef
@@ -128,13 +134,18 @@ publication-date = epub-date or pub-date or f"{year}-12-31"
 **Extractors**: `src/bioetl/application/pipelines/crossref/extractors.py`
 
 Uses `format-date-parts()` for date normalization:
+
 - `published-print`, `published-online` (from API date-parts)
 - `publication-date` (unified: prefers print over online)
 
 ```python
 # Date normalization in extractor
-published-print = format-date-parts(record.get("published-print", {}).get("date-parts"))
-published-online = format-date-parts(record.get("published-online", {}).get("date-parts"))
+published - print = (
+    format - date - parts(record.get("published-print", {}).get("date-parts"))
+)
+published - online = (
+    format - date - parts(record.get("published-online", {}).get("date-parts"))
+)
 ```
 
 ### OpenAlex
@@ -168,13 +179,13 @@ ChEMBL only provides year information. Uses start-of-year convention:
 
 ```python
 # Year only → YYYY-01-01 (differs from other pipelines)
-publication-date = f"{year}-01-01"
+publication - date = f"{year}-01-01"
 ```
 
 **Note**: This differs from the end-of-period strategy used by other pipelines.
 ChEMBL publication data focuses on journal metadata where precise dates are unavailable.
 
----
+______________________________________________________________________
 
 ## Adding Date Handling to New Pipelines
 
@@ -249,7 +260,7 @@ class TestNewProviderDateHandling:
         assert transformer.-normalize-partial-date(None) is None
 ```
 
----
+______________________________________________________________________
 
 ## Content Hash and Dates
 
@@ -262,7 +273,7 @@ When computing content hash for deduplication, dates are normalized to ISO forma
 
 **Excluded from hash**: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*` (technical metadata)
 
----
+______________________________________________________________________
 
 ## Testing
 
@@ -280,7 +291,7 @@ pytest tests/integration/pipelines/test_pubmed_date_normalization.py -v
 pytest tests/integration/pipelines/test_crossref_date_normalization.py -v
 ```
 
----
+______________________________________________________________________
 
 ## Related Documentation
 

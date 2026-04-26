@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: internal (repo-only entrypoint; excluded from MkDocs)
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # AI Documentation Surface
 
@@ -42,11 +45,11 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 При чтении AI docs используй такой приоритет:
 
 1. runtime source в `.codex/agents/` и parallel runtime registries
-2. canonical governance docs:
+1. canonical governance docs:
    - `docs/00-project/RULES.md`
    - `docs/01-requirements/REQUIREMENTS.md`
    - accepted ADRs in `docs/02-architecture/decisions/`
-3. AI docs under `docs/00-project/ai/` and their published/internal mirrors
+1. AI docs under `docs/00-project/ai/` and their published/internal mirrors
 
 Если published AI docs расходятся с runtime source или canonical governance,
 приоритет у runtime source и canonical governance.

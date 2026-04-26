@@ -58,6 +58,7 @@ classDiagram
 **Total Files**: 24 files in `runner_pkg/`
 
 **Core Mixins**:
+
 - `runner_control_plane_mixin.py` - Locking and control
 - `runner_support_mixin.py` - Runtime support
 - `runner_observability_mixin.py` - Metrics and logging
@@ -65,6 +66,7 @@ classDiagram
 - `runner_merge_stage_mixin.py` - Merge functionality
 
 **Support Files**:
+
 - `runner_stage_enrichment_mixin.py` - Enrichment stage support
 - `runner_stage_support_mixin.py` - Stage support utilities
 - `runner_stage_dependency_flow.py` - Dependency flow logic
@@ -76,21 +78,25 @@ classDiagram
 ### Strengths of Current Design ✅
 
 1. **Clear Separation of Concerns**
+
    - Each mixin handles a specific aspect of runner functionality
    - Control plane vs. execution vs. observability separation
    - Follows Single Responsibility Principle
 
-2. **Proper Abstraction Level**
+1. **Proper Abstraction Level**
+
    - Mixins provide focused functionality without excessive indirection
    - Appropriate complexity for the problem domain
    - Clean boundaries between components
 
-3. **Testability**
+1. **Testability**
+
    - Mixins can be tested independently
    - Easy to mock specific aspects
    - Good separation for unit testing
 
-4. **Extensibility**
+1. **Extensibility**
+
    - Easy to add new mixins for additional functionality
    - Can compose different combinations for different runner types
    - Follows Open/Closed Principle
@@ -98,16 +104,19 @@ classDiagram
 ### Potential Improvement Areas 🟡
 
 1. **Documentation Gaps**
+
    - Architecture not well documented
    - Mixin relationships could be clearer
    - Decision rationale missing
 
-2. **Consistency Opportunities**
+1. **Consistency Opportunities**
+
    - Some naming inconsistencies between mixins
    - Error handling patterns vary slightly
    - Logging patterns could be more consistent
 
-3. **Minor Complexity Reduction**
+1. **Minor Complexity Reduction**
+
    - A few helper methods could be consolidated
    - Some state management could be simplified
    - Minor duplication in error handling
@@ -119,6 +128,7 @@ classDiagram
 **File**: `runner_stage_mixin.py` (150+ lines)
 
 **Responsibilities**:
+
 - Seed phase execution
 - Dependency phase orchestration
 - Enrichment phase coordination
@@ -127,6 +137,7 @@ classDiagram
 **Complexity**: Medium (appropriate for orchestration)
 
 **Key Methods**:
+
 - `_execute_seed_phase()` - Seed execution with resume support
 - `_execute_dependencies_phase()` - Dependency orchestration
 - `_execute_enrichment_phase()` - Enrichment coordination
@@ -140,6 +151,7 @@ classDiagram
 **File**: `runner_merge_stage_mixin.py` (100+ lines)
 
 **Responsibilities**:
+
 - Merge phase execution
 - Merge result handling
 - Finalization logic
@@ -147,6 +159,7 @@ classDiagram
 **Complexity**: Medium (appropriate for merge complexity)
 
 **Key Methods**:
+
 - `_execute_merge_phase()` - Main merge execution
 - `_finalize_merge()` - Merge completion
 - `_build_merge_result()` - Result construction
@@ -158,6 +171,7 @@ classDiagram
 **Files**: Various support mixins (50-100 lines each)
 
 **Responsibilities**:
+
 - Dependency coordination
 - State flow management
 - Enrichment utilities
@@ -169,13 +183,13 @@ classDiagram
 
 ### Quantitative Analysis
 
-| Mixin | Lines | Methods | Responsibility | Complexity Score |
-|-------|-------|---------|----------------|------------------|
-| ControlPlane | ~80 | 5 | Locking/control | 6/10 |
-| Support | ~100 | 8 | Runtime support | 7/10 |
-| Observability | ~60 | 4 | Metrics/logging | 5/10 |
-| Stage | ~150 | 12 | Stage execution | 8/10 |
-| MergeStage | ~100 | 8 | Merge operations | 7/10 |
+| Mixin         | Lines | Methods | Responsibility   | Complexity Score |
+| ------------- | ----- | ------- | ---------------- | ---------------- |
+| ControlPlane  | ~80   | 5       | Locking/control  | 6/10             |
+| Support       | ~100  | 8       | Runtime support  | 7/10             |
+| Observability | ~60   | 4       | Metrics/logging  | 5/10             |
+| Stage         | ~150  | 12      | Stage execution  | 8/10             |
+| MergeStage    | ~100  | 8       | Merge operations | 7/10             |
 
 ### Qualitative Assessment
 
@@ -192,6 +206,7 @@ classDiagram
 ### ✅ Keep Current Architecture
 
 **Rationale**:
+
 - Mixin pattern is **appropriate** for this domain
 - Complexity is **justified** by the orchestration requirements
 - Architecture follows **best practices** for separation of concerns
@@ -200,16 +215,19 @@ classDiagram
 ### 🟡 Minor Improvements (Optional)
 
 1. **Document Architecture**
+
    - Create architecture decision record (ADR)
    - Add sequence diagrams for key flows
    - Document mixin relationships
 
-2. **Consolidate Error Handling**
+1. **Consolidate Error Handling**
+
    - Standardize error handling patterns
    - Reduce minor duplication
    - Improve consistency
 
-3. **Enhance Observability**
+1. **Enhance Observability**
+
    - Add more detailed metrics
    - Improve logging consistency
    - Add execution duration tracking
@@ -217,6 +235,7 @@ classDiagram
 ### ❌ Avoid Unnecessary Changes
 
 **Do NOT**:
+
 - Restructure mixin architecture (not needed)
 - Consolidate mixins (would reduce clarity)
 - Change composition pattern (working well)
@@ -233,37 +252,43 @@ classDiagram
 ## Implementation Plan
 
 ### Phase 1: Documentation (Issue #6)
+
 1. Create formal ADR for runner architecture
-2. Add sequence diagrams to architecture docs
-3. Document design rationale and trade-offs
-4. Update developer onboarding materials
+1. Add sequence diagrams to architecture docs
+1. Document design rationale and trade-offs
+1. Update developer onboarding materials
 
 ### Phase 2: Minor Enhancements (Optional)
+
 1. Standardize error handling patterns
-2. Improve logging consistency
-3. Add execution metrics
-4. Consolidate minor duplicates
+1. Improve logging consistency
+1. Add execution metrics
+1. Consolidate minor duplicates
 
 ### Phase 3: Observability (Future)
+
 1. Add detailed execution duration metrics
-2. Enhance state transition logging
-3. Add pipeline performance monitoring
+1. Enhance state transition logging
+1. Add pipeline performance monitoring
 
 ## Risk Assessment
 
 ### Low Risk
+
 - Adding documentation
 - Improving logging consistency
 - Adding metrics
 - Minor error handling standardization
 
 ### Medium Risk (Avoid)
+
 - Restructuring mixin architecture
 - Changing composition patterns
 - Consolidating major mixins
 - Altering state management
 
 ### High Risk (Avoid)
+
 - Changing public APIs
 - Modifying FSM behavior
 - Altering checkpoint semantics
@@ -276,6 +301,7 @@ classDiagram
 **✅ Current runner mixin architecture is SOUND and APPROPRIATE**
 
 **No major refactoring needed** - the mixin-based architecture represents:
+
 - Proper separation of concerns
 - Appropriate complexity for the domain
 - Good testability and maintainability
@@ -284,9 +310,9 @@ classDiagram
 ### Recommendations
 
 1. **📝 Document the architecture** (Issue #6)
-2. **🔧 Minor consistency improvements** (optional)
-3. **📊 Enhance observability** (future)
-4. **🚫 Avoid unnecessary restructuring** (would add complexity)
+1. **🔧 Minor consistency improvements** (optional)
+1. **📊 Enhance observability** (future)
+1. **🚫 Avoid unnecessary restructuring** (would add complexity)
 
 ### Success Metrics
 
@@ -305,10 +331,10 @@ classDiagram
 ## Next Steps
 
 1. ✅ **Complete architecture analysis** (This document)
-2. ⏳ **Create formal ADR** (Issue #6)
-3. ⏳ **Add architecture diagrams to main docs** (Issue #6)
-4. ⏳ **Document design rationale** (Issue #6)
-5. ⏳ **Update architecture decision log** (Issue #6)
+1. ⏳ **Create formal ADR** (Issue #6)
+1. ⏳ **Add architecture diagrams to main docs** (Issue #6)
+1. ⏳ **Document design rationale** (Issue #6)
+1. ⏳ **Update architecture decision log** (Issue #6)
 
 ## Final Verdict
 

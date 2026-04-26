@@ -1,9 +1,6 @@
----
-name: synthesizing-pillars
-description: Use when evidence collection is complete for a pillar and need to extract actionable insights. Transforms raw evidence into structured synthesis with patterns and contradictions identified.
-context: fork
-agent: general-purpose
----
+______________________________________________________________________
+
+## name: synthesizing-pillars description: Use when evidence collection is complete for a pillar and need to extract actionable insights. Transforms raw evidence into structured synthesis with patterns and contradictions identified. context: fork agent: general-purpose
 
 # Pillar Synthesis
 
@@ -32,6 +29,7 @@ Use TodoWrite to track these mandatory steps:
 Read all `EV-<pillar>-*.yaml` files from `02-evidence/<pillar>/`.
 
 For each evidence object, extract:
+
 - Claim
 - Confidence
 - Assumptions
@@ -42,11 +40,13 @@ Build a working set of all claims.
 ### Step 2: Identify Patterns
 
 Group evidence by theme:
+
 - What claims cluster together?
 - What topics have multiple evidence points?
 - What themes emerge across sources?
 
 **Pattern identification:**
+
 ```
 Theme: Pricing
 ├── EV-market-pricing-smb-wtp (0.75) - SMB WTP $29
@@ -61,10 +61,10 @@ Insight: Pricing flexibility needed for multi-segment
 For contradictory evidence:
 
 1. **Note the contradiction explicitly**
-2. **Assess confidence delta** - Higher confidence wins if large gap
-3. **Check recency** - More recent may supersede older
-4. **Check authority** - More authoritative source wins
-5. **If unresolved** - Document both, flag for decision-making
+1. **Assess confidence delta** - Higher confidence wins if large gap
+1. **Check recency** - More recent may supersede older
+1. **Check authority** - More authoritative source wins
+1. **If unresolved** - Document both, flag for decision-making
 
 ```markdown
 ### Contradiction: User Segment Priority
@@ -81,10 +81,11 @@ For contradictory evidence:
 For each theme, formulate 1-3 key insights:
 
 **Insight structure:**
+
 - **Observation:** What the evidence shows
 - **Implication:** What this means for the product
 - **Confidence:** How confident we are (based on evidence)
-- **Evidence:** Which EV-* IDs support this
+- **Evidence:** Which EV-\* IDs support this
 
 <good-example>
 ```yaml
@@ -121,11 +122,12 @@ evidence: []
 Write `03-synthesis/SYN-<pillar>.md` using template from [references/synthesis-template.md](references/synthesis-template.md).
 
 **Required sections:**
+
 1. Executive Summary (3-5 bullet points)
-2. Key Insights (with evidence citations)
-3. Contradictions and Resolutions
-4. Gaps and Uncertainties
-5. Recommended Decisions (what needs explicit DEC-*)
+1. Key Insights (with evidence citations)
+1. Contradictions and Resolutions
+1. Gaps and Uncertainties
+1. Recommended Decisions (what needs explicit DEC-\*)
 
 ### Step 6: Link to Evidence
 
@@ -146,6 +148,7 @@ or enterprise-focused features.
 Use the **AskUserQuestion tool** when:
 
 ### Contradiction resolution needed
+
 ```
 Question: "Evidence conflicts on [topic]. How should I resolve?"
 Options:
@@ -156,6 +159,7 @@ Options:
 ```
 
 ### Insight interpretation unclear
+
 ```
 Question: "Evidence suggests [X]. Is this interpretation correct?"
 Options:
@@ -165,6 +169,7 @@ Options:
 ```
 
 ### Gap identification
+
 ```
 Question: "Synthesis reveals gap in [area]. How to handle?"
 Options:

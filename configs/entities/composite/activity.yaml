@@ -78,22 +78,22 @@ quality:
     - assay_id
     - molecule_id
     - standard_value
-  
+
 # Loading strategy
 loading:
   strategy: incremental
   batch_size: 1000
-  
+
 # Field mapping and resolution rules
 field_resolution:
   standard_value:
     strategy: priority
     sources: [chembl]
-    
+
   standard_units:
     strategy: priority
     sources: [chembl]
-    
+
   activity_type:
     strategy: priority
     sources: [chembl]
@@ -103,15 +103,15 @@ dq_rules:
   - field: composite_activity_id
     rule: not_null
     severity: critical
-  
+
   - field: assay_id
     rule: not_null
     severity: high
-    
+
   - field: molecule_id
     rule: not_null
     severity: high
-    
+
   - field: standard_value
     rule: numeric
     severity: medium

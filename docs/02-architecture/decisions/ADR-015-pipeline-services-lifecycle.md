@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-015: Pipeline Services Lifecycle Management
 
@@ -19,9 +22,9 @@ Last verified: '2026-03-30'
 BioETL pipelines use multiple infrastructure components (data sources, storage, locks, checkpoints, metrics, tracing) that require proper initialization and cleanup. Without unified lifecycle management:
 
 1. Resources may leak if exceptions occur during pipeline execution
-2. Metrics and traces may not be flushed before process exit
-3. Distributed locks may not be released, blocking other workers
-4. Each component manages its own lifecycle independently
+1. Metrics and traces may not be flushed before process exit
+1. Distributed locks may not be released, blocking other workers
+1. Each component manages its own lifecycle independently
 
 ## Decision
 
@@ -69,26 +72,26 @@ class PipelineServices:
 
 ### 2. Port Lifecycle Contracts
 
-| Port Type | Lifecycle Method | Sync/Async | Notes |
-|-----------|------------------|------------|-------|
-| DataSourcePort | `aclose()` | async | Also supports `--aenter--`/`--aexit--` |
-| StoragePort | `aclose()` | async | MUST release Delta table locks |
-| LockPort | `aclose()` | async | MUST release held locks |
-| CheckpointPort | `aclose()` | async | MUST flush pending writes |
-| QuarantinePort | `aclose()` | async | MUST flush buffer |
-| MetricsPort | `close()` | sync | Flush pending metrics |
-| TracingPort | `close()` | sync | Flush pending spans |
-| LoggerPort | - | - | No lifecycle (managed externally) |
+| Port Type      | Lifecycle Method | Sync/Async | Notes                                  |
+| -------------- | ---------------- | ---------- | -------------------------------------- |
+| DataSourcePort | `aclose()`       | async      | Also supports `--aenter--`/`--aexit--` |
+| StoragePort    | `aclose()`       | async      | MUST release Delta table locks         |
+| LockPort       | `aclose()`       | async      | MUST release held locks                |
+| CheckpointPort | `aclose()`       | async      | MUST flush pending writes              |
+| QuarantinePort | `aclose()`       | async      | MUST flush buffer                      |
+| MetricsPort    | `close()`        | sync       | Flush pending metrics                  |
+| TracingPort    | `close()`        | sync       | Flush pending spans                    |
+| LoggerPort     | -                | -          | No lifecycle (managed externally)      |
 
 ### 3. Graceful Shutdown Integration
 
 When SIGTERM/SIGINT is received (see ADR-008):
 
 1. `PipelineRunner` catches signal
-2. Stops extracting new records
-3. Waits for current batch to complete
-4. Calls `services.aclose()` to cleanup all resources
-5. Exits with code 0
+1. Stops extracting new records
+1. Waits for current batch to complete
+1. Calls `services.aclose()` to cleanup all resources
+1. Exits with code 0
 
 ### 4. Error Handling During Cleanup
 
@@ -156,13 +159,13 @@ class TestObservabilityPortLifecycle:
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-015-pipeline-services-lifecycle.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                                 |
+| ------------ | -------------------------------------------------------------------------- | ------ | ---------------------------------------- |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-015-pipeline-services-lifecycle.md` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                               |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                         |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria`     |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                             |
 
 ## Rollout
 

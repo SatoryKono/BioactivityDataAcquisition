@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Data Quality Configuration
 
@@ -17,11 +20,13 @@ This guide describes how to configure Data Quality (DQ) rules in BioETL.
 ## Overview
 
 DQ rules are organized in a hierarchical configuration structure that enables:
+
 - **Reusability**: Share validations across pipelines
 - **Override flexibility**: Entity-specific rules without affecting others
 - **DRY principle**: Global thresholds defined once
 
 Current implementation details:
+
 - Provider and entity layers are loaded from the unified `quality:` section when present.
 - For backward compatibility, `DQConfigLoader` still accepts flat fallback keys when a YAML file has no `quality:` section.
 - Inline overrides are resolved from `pipeline.dq_overrides` in the validated pipeline config.
@@ -39,14 +44,15 @@ configs/
 
 Configurations are merged in order (later wins):
 
-| Level | File | Scope |
-|-------|------|-------|
-| 1 | `base/quality.yaml` | All pipelines |
-| 2 | `providers/{provider}.yaml` (`quality`) | All entities of provider |
-| 3 | `entities/{provider}/{entity}.yaml` (`quality`) | Specific entity |
-| 4 | Inline `pipeline.dq_overrides` in pipeline YAML | Override for exceptions |
+| Level | File                                            | Scope                    |
+| ----- | ----------------------------------------------- | ------------------------ |
+| 1     | `base/quality.yaml`                             | All pipelines            |
+| 2     | `providers/{provider}.yaml` (`quality`)         | All entities of provider |
+| 3     | `entities/{provider}/{entity}.yaml` (`quality`) | Specific entity          |
+| 4     | Inline `pipeline.dq_overrides` in pipeline YAML | Override for exceptions  |
 
 **Merge rules**:
+
 - Scalars: Override (later value wins)
 - Validation lists (`*-validations`): Concatenate with deduplication by `name`/`field`
 - Nested dicts: Recursive merge
@@ -55,10 +61,10 @@ Configurations are merged in order (later wins):
 
 BioETL uses two-level error thresholds (RULES.md §3.1.2):
 
-| Threshold | Default | Behavior |
-|-----------|---------|----------|
-| `soft_fail` | 0.05 (5%) | Warning emitted, pipeline continues |
-| `hard_fail` | 0.20 (20%) | Batch fails, records quarantined |
+| Threshold   | Default    | Behavior                            |
+| ----------- | ---------- | ----------------------------------- |
+| `soft_fail` | 0.05 (5%)  | Warning emitted, pipeline continues |
+| `hard_fail` | 0.20 (20%) | Batch fails, records quarantined    |
 
 Configure in `configs/base/quality.yaml`:
 
@@ -72,20 +78,20 @@ thresholds:
 
 ## Complete `base/quality.yaml` Key Reference
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| `version` | string | `"1.0.0"` | Schema version of the DQ config |
-| `thresholds.soft_fail` | float | `0.05` | Error rate (>5%) that triggers a warning |
-| `thresholds.hard_fail` | float | `0.20` | Error rate (>20%) that fails the batch |
-| `strict_validation` | bool | `false` | Runtime flag for stricter validation/error-handling paths |
-| `invalid_record_policy` | string | `"quarantine"` | How to handle invalid records: `quarantine`, `skip`, or `fail` |
-| `report.enabled` | bool | `true` | Enable DQ report generation |
-| `report.format` | string | `"json"` | Report format: `json`, `yaml`, or `csv` |
-| `report.include-sample-failures` | bool | `true` | Include sample of failed records in report |
-| `report.sample-size` | int | `10` | Number of failed records to include in sample |
-| `report.output-path` | string | `null` | Custom output path (null = pipeline output dir) |
-| `common_field_validations` | list | see below | Field validations applied to ALL entities |
-| `common_cross_field_validations` | list | `[]` | Cross-field validations applied to ALL entities |
+| Key                              | Type   | Default        | Description                                                    |
+| -------------------------------- | ------ | -------------- | -------------------------------------------------------------- |
+| `version`                        | string | `"1.0.0"`      | Schema version of the DQ config                                |
+| `thresholds.soft_fail`           | float  | `0.05`         | Error rate (>5%) that triggers a warning                       |
+| `thresholds.hard_fail`           | float  | `0.20`         | Error rate (>20%) that fails the batch                         |
+| `strict_validation`              | bool   | `false`        | Runtime flag for stricter validation/error-handling paths      |
+| `invalid_record_policy`          | string | `"quarantine"` | How to handle invalid records: `quarantine`, `skip`, or `fail` |
+| `report.enabled`                 | bool   | `true`         | Enable DQ report generation                                    |
+| `report.format`                  | string | `"json"`       | Report format: `json`, `yaml`, or `csv`                        |
+| `report.include-sample-failures` | bool   | `true`         | Include sample of failed records in report                     |
+| `report.sample-size`             | int    | `10`           | Number of failed records to include in sample                  |
+| `report.output-path`             | string | `null`         | Custom output path (null = pipeline output dir)                |
+| `common_field_validations`       | list   | see below      | Field validations applied to ALL entities                      |
+| `common_cross_field_validations` | list   | `[]`           | Cross-field validations applied to ALL entities                |
 
 ## Current Traceability Surface
 
@@ -108,7 +114,7 @@ Those items should be documented as planned control-plane/governance work, not a
 Two validations are applied globally to all entities:
 
 1. **`_content_hash` required** — Content hash must be present after transform (for deduplication)
-2. **`_ingestion_ts` pattern** — Ingestion timestamp must match ISO 8601 format (`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}`)
+1. **`_ingestion_ts` pattern** — Ingestion timestamp must match ISO 8601 format (`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}`)
 
 ## Adding DQ Rules for New Entity
 
@@ -171,13 +177,13 @@ pipeline:
 
 ### Field Validations
 
-| Type | Parameters | Description |
-|------|------------|-------------|
-| `required` | `nullable` | Field must be present (unless nullable=true) |
-| `range` | `min`, `max` | Numeric bounds check |
-| `pattern` | `pattern` | Regex match |
-| `enum` | `allowed` | Value must be in whitelist |
-| `custom` | `validator` | Custom validator function name |
+| Type       | Parameters   | Description                                  |
+| ---------- | ------------ | -------------------------------------------- |
+| `required` | `nullable`   | Field must be present (unless nullable=true) |
+| `range`    | `min`, `max` | Numeric bounds check                         |
+| `pattern`  | `pattern`    | Regex match                                  |
+| `enum`     | `allowed`    | Value must be in whitelist                   |
+| `custom`   | `validator`  | Custom validator function name               |
 
 **Examples:**
 
@@ -217,13 +223,13 @@ entity_field_validations:
 
 ### Cross-Field Validations
 
-| Condition | Description |
-|-----------|-------------|
-| `all-present` | All specified fields must have values |
-| `any-present` | At least one field must have value |
-| `mutually-exclusive` | Only one field can have value |
+| Condition              | Description                                          |
+| ---------------------- | ---------------------------------------------------- |
+| `all-present`          | All specified fields must have values                |
+| `any-present`          | At least one field must have value                   |
+| `mutually-exclusive`   | Only one field can have value                        |
 | `conditional-required` | `required_field` needed when `trigger_field` present |
-| `custom` | Custom validator function |
+| `custom`               | Custom validator function                            |
 
 **Examples:**
 
@@ -253,12 +259,12 @@ entity_cross_field_validations:
 
 Apply validations only when a condition is met.
 
-| Parameter | Description |
-|-----------|-------------|
-| `condition_field` | Field to check for condition |
-| `condition_value` | Value(s) that trigger the validation |
+| Parameter            | Description                                                             |
+| -------------------- | ----------------------------------------------------------------------- |
+| `condition_field`    | Field to check for condition                                            |
+| `condition_value`    | Value(s) that trigger the validation                                    |
 | `condition_operator` | Comparison operator: `eq`, `ne`, `in`, `not-in`, `gt`, `lt`, `ge`, `le` |
-| `then_validations` | List of validations to apply when condition is true |
+| `then_validations`   | List of validations to apply when condition is true                     |
 
 **Example:**
 
@@ -414,9 +420,10 @@ FileNotFoundError: Required DQ defaults file not found: configs/base/quality.yam
 ### Validation not applied
 
 **Check**:
+
 1. Is `quality` section present in `configs/entities/{provider}/{entity}.yaml`?
-2. Is field name spelled correctly in validation?
-3. Is validation type correct for the field data type?
+1. Is field name spelled correctly in validation?
+1. Is validation type correct for the field data type?
 
 ## References
 

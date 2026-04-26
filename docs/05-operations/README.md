@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-09'
----
+  Last verified: '2026-04-09'
+
+______________________________________________________________________
 
 # Operations Documentation
 
@@ -28,16 +31,16 @@ standard runbook path.
 
 ## Navigation
 
-| Section | Description |
-|---------|-------------|
-| [Monitoring Guide](01-monitoring-guide.md) | Dashboard interpretation, alert-backed signals, and monitoring workflow |
-| [SLI/SLO Baseline](sli-slo-baseline.md) | Operational service-level indicators and target baselines for the local runtime |
-| [Runbooks](runbooks/index.md) | Operational playbooks for incident response |
-| [Performance Baselines](performance-baselines.md) | Expected performance metrics |
-| [VACUUM Retention](vacuum-retention.md) | Delta Lake vacuum retention policies |
+| Section                                               | Description                                                                                     |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| [Monitoring Guide](01-monitoring-guide.md)            | Dashboard interpretation, alert-backed signals, and monitoring workflow                         |
+| [SLI/SLO Baseline](sli-slo-baseline.md)               | Operational service-level indicators and target baselines for the local runtime                 |
+| [Runbooks](runbooks/index.md)                         | Operational playbooks for incident response                                                     |
+| [Performance Baselines](performance-baselines.md)     | Expected performance metrics                                                                    |
+| [VACUUM Retention](vacuum-retention.md)               | Delta Lake vacuum retention policies                                                            |
 | [Control-Plane Lifecycle](control-plane-lifecycle.md) | Dry-run/apply cleanup for manifests, ledgers, checkpoints, lineage, and cached Bronze snapshots |
-| [Operations Archive Index](archive-index.md) | Archive-only operational material, including historical release and verification evidence |
-| [Deployment & Tooling Extras](deployment/README.md) | Internal / Extended material for experimental Kubernetes and auxiliary Neo4j/MCP setup notes |
+| [Operations Archive Index](archive-index.md)          | Archive-only operational material, including historical release and verification evidence       |
+| [Deployment & Tooling Extras](deployment/README.md)   | Internal / Extended material for experimental Kubernetes and auxiliary Neo4j/MCP setup notes    |
 
 ## Quick Links
 

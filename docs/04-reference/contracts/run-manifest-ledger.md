@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
-  - BioETL Team
-Last verified: "2026-04-23"
----
+
+- BioETL Team
+  Last verified: "2026-04-23"
+
+______________________________________________________________________
 
 # Run Manifest and Run Ledger Contract
 
@@ -63,19 +66,19 @@ and provenance artifact at the same time.
 
 File-backed control-plane persistence uses the following canonical paths:
 
-| Artifact                             | Path                                                              |
-| ------------------------------------ | ----------------------------------------------------------------- |
-| Manifest payload                     | `data/output/control/run_manifest/{manifest_id}.json`             |
-| Manifest run-id index                | `data/output/control/run_manifest/_by_run_id/{run_id}.txt`        |
-| Ledger payload                       | `data/output/control/run_ledger/{manifest_id}.jsonl`              |
-| Ledger run-id index                  | `data/output/control/run_ledger/_by_run_id/{run_id}.txt`          |
-| Effective config semantic artifact   | `data/output/control/effective_config/{artifact_id}.json`         |
-| Effective config occurrence envelope | `data/output/control/effective_config/_occurrences/{run_id}.json` |
-| Effective config run-id index        | `data/output/control/effective_config/_by_run_id/{run_id}.txt`    |
+| Artifact                             | Path                                                               |
+| ------------------------------------ | ------------------------------------------------------------------ |
+| Manifest payload                     | `data/output/control/run_manifest/{manifest_id}.json`              |
+| Manifest run-id index                | `data/output/control/run_manifest/_by_run_id/{run_id}.txt`         |
+| Ledger payload                       | `data/output/control/run_ledger/{manifest_id}.jsonl`               |
+| Ledger run-id index                  | `data/output/control/run_ledger/_by_run_id/{run_id}.txt`           |
+| Effective config semantic artifact   | `data/output/control/effective_config/{artifact_id}.json`          |
+| Effective config occurrence envelope | `data/output/control/effective_config/_occurrences/{run_id}.json`  |
+| Effective config run-id index        | `data/output/control/effective_config/_by_run_id/{run_id}.txt`     |
 | Lineage fragment payload             | `data/output/control/lineage/fragments/{stable_fragment_key}.json` |
-| Lineage lookup indexes               | `data/output/control/lineage/_by_*/*.jsonl`                       |
-| Checkpoint payloads                  | `data/output/checkpoints/**/*.json`                               |
-| Cached Bronze input snapshots        | `data/output/bronze/**/*`                                         |
+| Lineage lookup indexes               | `data/output/control/lineage/_by_*/*.jsonl`                        |
+| Checkpoint payloads                  | `data/output/checkpoints/**/*.json`                                |
+| Cached Bronze input snapshots        | `data/output/bronze/**/*`                                          |
 
 `run_manifest` and `run_ledger` stores are bootstrapped from
 `Path(settings.data_dir) / "output" / "control" / <leaf>` and are therefore
@@ -127,12 +130,12 @@ The control-plane runtime is governed by the runtime object path
 `PipelineSettings.ControlPlaneSettings` in
 `src/bioetl/infrastructure/config/_base.py`.
 
-| Setting                           |     Default | Effect                                                                                            |
-| --------------------------------- | ----------: | ------------------------------------------------------------------------------------------------- |
+| Setting                           |               Default | Effect                                                                                                                         |
+| --------------------------------- | --------------------: | ------------------------------------------------------------------------------------------------------------------------------ |
 | `required_persistence_profile`    | `degraded_observable` | Minimum control-plane persistence contract required for this runtime (`degraded_observable`, `replay_ready`, `forensic_grade`) |
-| `run_manifest_enabled`            |      `true` | Create immutable manifest before runner assembly / execution starts                               |
-| `run_ledger_enabled`              |      `true` | Append lifecycle and inspection events keyed by `manifest_id`                                     |
-| `checkpoint_compatibility_policy` | `soft_fail` | Resume behavior when checkpoint identity mismatches runtime (`observe`, `soft_fail`, `hard_fail`, `legacy_observe`) |
+| `run_manifest_enabled`            |                `true` | Create immutable manifest before runner assembly / execution starts                                                            |
+| `run_ledger_enabled`              |                `true` | Append lifecycle and inspection events keyed by `manifest_id`                                                                  |
+| `checkpoint_compatibility_policy` |           `soft_fail` | Resume behavior when checkpoint identity mismatches runtime (`observe`, `soft_fail`, `hard_fail`, `legacy_observe`)            |
 
 Current rollout semantics:
 
@@ -171,12 +174,12 @@ CheckpointCompatibilityPolicy = Literal[
 
 ### Policy Semantics
 
-| Policy | Behavior | Use Case | Default |
-|--------|----------|----------|---------|
-| `observe` | Resume only after non-identity compatibility warnings; canonical execution-identity mismatch still blocks resume | Operator-aware degraded mode outside strict replay | ❌ Manual |
-| `soft_fail` | Block resume on incompatibility without aborting the whole process | Default fail-closed resume behavior | ✅ Default |
-| `hard_fail` | Halt pipeline by raising on incompatibility | Critical integrity and exact replay | ✅ Exact replay |
-| `legacy_observe` | Legacy degraded mode for migration periods; may tolerate non-identity degradation but still blocks when identity continuity is unproven | Temporary migration periods only | ❌ Manual |
+| Policy           | Behavior                                                                                                                                | Use Case                                           | Default         |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | --------------- |
+| `observe`        | Resume only after non-identity compatibility warnings; canonical execution-identity mismatch still blocks resume                        | Operator-aware degraded mode outside strict replay | ❌ Manual       |
+| `soft_fail`      | Block resume on incompatibility without aborting the whole process                                                                      | Default fail-closed resume behavior                | ✅ Default      |
+| `hard_fail`      | Halt pipeline by raising on incompatibility                                                                                             | Critical integrity and exact replay                | ✅ Exact replay |
+| `legacy_observe` | Legacy degraded mode for migration periods; may tolerate non-identity degradation but still blocks when identity continuity is unproven | Temporary migration periods only                   | ❌ Manual       |
 
 ### Decision Flow
 
@@ -207,22 +210,26 @@ runtime:
 ### Policy Selection Guide
 
 **Use `observe` when:**
+
 - Non-critical validation scenarios
 - Development/testing environments
 - Graceful degradation is acceptable
 
 **Use `soft_fail` when:**
+
 - Default operator-facing fail-closed resume behavior
 - Recovery scenarios where incompatibility should block resume without aborting
   the whole process
 - Strict persistence profiles below `exact_replay` minimum coercion
 
 **Use `hard_fail` when:**
+
 - Critical integrity requirements
 - Production steady-state
 - Exact replay requirements
 
 **Use `legacy_observe` when:**
+
 - A temporary migration window still needs legacy checkpoint compatibility
   diagnostics
 - Mixed-version or mixed-format recovery is being retired in a controlled way
@@ -231,10 +238,10 @@ runtime:
 ### Migration Procedure
 
 1. **Prepare**: Set `legacy_observe` in configuration
-2. **Upgrade**: Roll out new version nodes incrementally
-3. **Validate**: Monitor validation warnings in logs
-4. **Remove**: Switch to standard modes after full upgrade
-5. **Cleanup**: Remove legacy mode from configurations
+1. **Upgrade**: Roll out new version nodes incrementally
+1. **Validate**: Monitor validation warnings in logs
+1. **Remove**: Switch to standard modes after full upgrade
+1. **Cleanup**: Remove legacy mode from configurations
 
 ## Supported Resume Modes
 
@@ -361,24 +368,24 @@ following score is an operator-facing evidence summary; it does not override
 
 | Score | Label                 | Required evidence                                                                 |
 | ----: | --------------------- | --------------------------------------------------------------------------------- |
-|     0 | `not_observable`      | No manifest can be resolved for the run or manifest identifier                     |
-|    25 | `manifest_observable` | Manifest resolves and exposes execution identity plus runtime/config provenance    |
-|    50 | `ledger_observable`   | Manifest plus append-only ledger history are available and corruption-visible      |
-|    75 | `replay_ready`        | Immutable input snapshots and effective-config artifact anchors support replay     |
+|     0 | `not_observable`      | No manifest can be resolved for the run or manifest identifier                    |
+|    25 | `manifest_observable` | Manifest resolves and exposes execution identity plus runtime/config provenance   |
+|    50 | `ledger_observable`   | Manifest plus append-only ledger history are available and corruption-visible     |
+|    75 | `replay_ready`        | Immutable input snapshots and effective-config artifact anchors support replay    |
 |   100 | `forensic_grade`      | Replay-ready evidence plus lineage/artifact closure inside the supported boundary |
 
 Evidence matrix:
 
 | Evidence surface                   | Degraded observable | Replay ready | Forensic grade |
 | ---------------------------------- | ------------------: | -----------: | -------------: |
-| Manifest payload                   | required            | required     | required       |
-| Execution fingerprint              | required            | required     | required       |
-| Effective-config semantic artifact | optional            | required     | required       |
-| Immutable input snapshot refs      | optional            | required     | required       |
-| Append-only ledger                 | optional            | optional     | required       |
-| Artifact linkage diagnostics       | optional            | optional     | required       |
-| Lineage closure boundary           | optional            | optional     | required       |
-| Supported reproducibility family   | optional            | required     | required       |
+| Manifest payload                   |            required |     required |       required |
+| Execution fingerprint              |            required |     required |       required |
+| Effective-config semantic artifact |            optional |     required |       required |
+| Immutable input snapshot refs      |            optional |     required |       required |
+| Append-only ledger                 |            optional |     optional |       required |
+| Artifact linkage diagnostics       |            optional |     optional |       required |
+| Lineage closure boundary           |            optional |     optional |       required |
+| Supported reproducibility family   |            optional |     required |       required |
 
 Evidence scoring is conservative: a missing mandatory surface caps the score
 at the highest lower tier whose evidence is complete, and unsupported lineage
@@ -430,26 +437,26 @@ degraded without inspecting the full checkpoint blob first.
 `RunManifest` is immutable and captures launch-time intent plus reproducibility
 provenance.
 
-| Field                   | Type       | Required | Notes                                            |
-| ----------------------- | ---------- | -------: | ------------------------------------------------ |
-| `manifest_id`           | `str`      |      yes | Stable identifier of the manifest record         |
+| Field                   | Type       | Required | Notes                                                                                                                                                                         |
+| ----------------------- | ---------- | -------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `manifest_id`           | `str`      |      yes | Stable identifier of the manifest record                                                                                                                                      |
 | `execution_fingerprint` | `str`      |      yes | Canonical execution-identity fingerprint derived from normalized semantic anchors; occurrence-only values such as `manifest_id` and ledger history are intentionally excluded |
-| `schema_version`        | `str`      |      yes | Control-plane schema version                     |
-| `created_at`            | `datetime` |      yes | Manifest creation timestamp                      |
-| `run_id`                | `uuid`     |      yes | Execution run identifier                         |
-| `run_type`              | `str`      |      yes | `incremental`, `backfill`, `rebuild`             |
-| `pipeline_name`         | `str`      |      yes | Canonical pipeline ID                            |
-| `provider`              | `str`      |      yes | Source provider                                  |
-| `entity`                | `str`      |      yes | Domain entity                                    |
-| `launch_context`        | `object`   |      yes | Launch options relevant to execution             |
-| `runtime_config`        | `object`   |      yes | Runtime-only settings snapshot                   |
-| `resolved_config`       | `object`   |      yes | Effective resolved pipeline config               |
-| `code_provenance`       | `object`   |      yes | See the full `RunCodeProvenance` field set below |
-| `replay_capability`     | `str`      |      yes | Replay classification: `exact_replay_supported`, `resume_only`, or `rebuild_only` |
-| `replay_of_run_id`      | `str`      |       no | Parent run anchor when this manifest is an exact replay of a prior run |
-| `replay_of_manifest_id` | `str`      |       no | Parent manifest anchor when this manifest is an exact replay of a prior manifest |
-| `source_refs`           | `array`    |       no | Canonical input/source references                |
-| `planned_artifacts`     | `array`    |       no | Intended output locations by layer               |
+| `schema_version`        | `str`      |      yes | Control-plane schema version                                                                                                                                                  |
+| `created_at`            | `datetime` |      yes | Manifest creation timestamp                                                                                                                                                   |
+| `run_id`                | `uuid`     |      yes | Execution run identifier                                                                                                                                                      |
+| `run_type`              | `str`      |      yes | `incremental`, `backfill`, `rebuild`                                                                                                                                          |
+| `pipeline_name`         | `str`      |      yes | Canonical pipeline ID                                                                                                                                                         |
+| `provider`              | `str`      |      yes | Source provider                                                                                                                                                               |
+| `entity`                | `str`      |      yes | Domain entity                                                                                                                                                                 |
+| `launch_context`        | `object`   |      yes | Launch options relevant to execution                                                                                                                                          |
+| `runtime_config`        | `object`   |      yes | Runtime-only settings snapshot                                                                                                                                                |
+| `resolved_config`       | `object`   |      yes | Effective resolved pipeline config                                                                                                                                            |
+| `code_provenance`       | `object`   |      yes | See the full `RunCodeProvenance` field set below                                                                                                                              |
+| `replay_capability`     | `str`      |      yes | Replay classification: `exact_replay_supported`, `resume_only`, or `rebuild_only`                                                                                             |
+| `replay_of_run_id`      | `str`      |       no | Parent run anchor when this manifest is an exact replay of a prior run                                                                                                        |
+| `replay_of_manifest_id` | `str`      |       no | Parent manifest anchor when this manifest is an exact replay of a prior manifest                                                                                              |
+| `source_refs`           | `array`    |       no | Canonical input/source references                                                                                                                                             |
+| `planned_artifacts`     | `array`    |       no | Intended output locations by layer                                                                                                                                            |
 
 `launch_context` is also the persisted support-boundary surface for exact replay:
 

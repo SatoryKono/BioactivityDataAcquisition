@@ -34,4 +34,3 @@ jobs:
           stale-issue-label: "stale"
           exempt-pr-labels: "pinned,work-in-progress"
           exempt-issue-labels: "pinned,work-in-progress"
-

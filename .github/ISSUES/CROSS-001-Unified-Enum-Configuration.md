@@ -1,8 +1,8 @@
 # Implement Unified Enum Configuration Across All ChEMBL Pipelines
 
-**Status**: In Progress 🚧   
-**Priority**: P0 (Critical)   
-**Labels**: `normalization`, `configuration`, `architecture`, `cross-pipeline`   
+**Status**: In Progress 🚧
+**Priority**: P0 (Critical)
+**Labels**: `normalization`, `configuration`, `architecture`, `cross-pipeline`
 **Epic**: Cross-Pipeline Normalization Improvements 2024Q3
 
 ## 🎯 Problem
@@ -12,14 +12,15 @@ Enum-like fields across ChEMBL pipelines (activity, assay, molecule, target, etc
 ## 🔍 Root Cause Analysis
 
 1. **Fragmented Enum Definitions**: Enums scattered across constants.py, YAML configs, and hardcoded values
-2. **Inconsistent Usage**: Some pipelines use externalized enums, others don't
-3. **Maintainability Issues**: Updating enum values requires changes in multiple places
-4. **Validation Gaps**: Some enum fields lack proper Pandera validation
-5. **Cross-Pipeline Drift**: Same logical fields handled differently in different pipelines
+1. **Inconsistent Usage**: Some pipelines use externalized enums, others don't
+1. **Maintainability Issues**: Updating enum values requires changes in multiple places
+1. **Validation Gaps**: Some enum fields lack proper Pandera validation
+1. **Cross-Pipeline Drift**: Same logical fields handled differently in different pipelines
 
 ## 📋 Scope
 
 **Affected Components:**
+
 - `configs/enums/chembl.yaml` - Centralized enum configuration
 - `src/bioetl/domain/schemas/constants.py` - Constants consolidation
 - `src/bioetl/domain/normalization/profiles/chembl_*.py` - All pipeline profiles
@@ -27,6 +28,7 @@ Enum-like fields across ChEMBL pipelines (activity, assay, molecule, target, etc
 - Test files - Cross-pipeline validation
 
 **Impact Analysis:**
+
 ```bash
 # Find enum usage across all pipelines
 grep -rn "ASSAY_TYPES\|RELATIONSHIP_TYPES\|TARGET_TYPES" src/bioetl/domain/ --include="*.py" | wc -l
@@ -37,12 +39,13 @@ grep -rn "ASSAY_TYPES\|RELATIONSHIP_TYPES\|TARGET_TYPES" src/bioetl/domain/ --in
 ### Phase 1: Enum Inventory and Standardization (3 days)
 
 1. **Create Comprehensive Enum Inventory**
+
    ```yaml
    # configs/enums/chembl.yaml
    activity:
      standard_types: ["IC50", "EC50", "Ki", "Kd", "AC50", "GI50"]
      standard_relations: ["=", "<", "<=", ">", ">="]
-   
+
    assay:
      types: ["B", "F", "A", "T", "P", "U"]
      relationship_types: ["D", "H", "M", "N", "S", "U"]
@@ -50,27 +53,29 @@ grep -rn "ASSAY_TYPES\|RELATIONSHIP_TYPES\|TARGET_TYPES" src/bioetl/domain/ --in
      test_types: ["PRIMARY", "SECONDARY"]
      groups: ["FUNCTIONAL", "BINDING"]
      subcellular_fractions: ["Membrane", "Nucleus", "Cytoplasm", "Mitochondria"]
-   
+
    molecule:
      types: ["Small molecule", "Inorganic small molecule", "Polymeric small molecule"]
      structure_types: ["MOL", "SEQ", "BOTH", "NONE"]
-   
+
    target:
      types: ["SINGLE PROTEIN", "PROTEIN FAMILY", "PROTEIN COMPLEX"]
      component_relationships: ["SINGLE PROTEIN", "PROTEIN SUBUNIT", "RNA"]
-   
+
    publication:
      types: ["journal-article", "patent", "dataset", "book", "review"]
    ```
 
-2. **Consolidate Constants**
+1. **Consolidate Constants**
+
    ```python
    # src/bioetl/domain/schemas/constants.py
    # Move all pipeline-specific constants to YAML
    # Keep only truly global constants here
    ```
 
-3. **Create Enum Loader Utility**
+1. **Create Enum Loader Utility**
+
    ```python
    # src/bioetl/domain/config/enum_loader.py
    def get_chembl_enum(entity: str, field: str) -> list[str]:
@@ -82,13 +87,14 @@ grep -rn "ASSAY_TYPES\|RELATIONSHIP_TYPES\|TARGET_TYPES" src/bioetl/domain/ --in
 ### Phase 2: Pipeline Integration (5 days)
 
 1. **Update All Normalization Profiles**
+
    ```python
    # src/bioetl/domain/normalization/profiles/chembl_activity.py
    from bioetl.domain.config.enum_loader import get_chembl_enum
-   
+
    STANDARD_TYPES = frozenset(get_chembl_enum("activity", "standard_types"))
    STANDARD_RELATIONS = frozenset(get_chembl_enum("activity", "standard_relations"))
-   
+
    CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
        enum_fields={
            "standard_type": STANDARD_TYPES,
@@ -97,22 +103,21 @@ grep -rn "ASSAY_TYPES\|RELATIONSHIP_TYPES\|TARGET_TYPES" src/bioetl/domain/ --in
        case_fields={
            "standard_type": STANDARD_TYPES,
            "standard_relation": STANDARD_RELATIONS,
-       }
+       },
    )
    ```
 
-2. **Update All Pandera Schemas**
+1. **Update All Pandera Schemas**
+
    ```python
    # src/bioetl/domain/schemas/chembl/activity.py
    from bioetl.domain.schemas.constants import STANDARD_TYPES
-   
-   standard_type: Series[str] = pa.Field(
-       isin=list(STANDARD_TYPES),
-       nullable=False
-   )
+
+   standard_type: Series[str] = pa.Field(isin=list(STANDARD_TYPES), nullable=False)
    ```
 
-3. **Apply to All Pipelines**
+1. **Apply to All Pipelines**
+
    - chembl_activity ✅ (DQ-001 pattern)
    - chembl_assay 📋 (AUDIT-001)
    - chembl_molecule 📋
@@ -124,6 +129,7 @@ grep -rn "ASSAY_TYPES\|RELATIONSHIP_TYPES\|TARGET_TYPES" src/bioetl/domain/ --in
 ### Phase 3: Validation and Testing (3 days)
 
 1. **Create Cross-Pipeline Tests**
+
    ```python
    # tests/unit/domain/test_enum_consistency.py
    def test_cross_pipeline_enum_consistency():
@@ -133,12 +139,14 @@ grep -rn "ASSAY_TYPES\|RELATIONSHIP_TYPES\|TARGET_TYPES" src/bioetl/domain/ --in
        # Verify consistency across pipelines
    ```
 
-2. **Validate Data Quality**
+1. **Validate Data Quality**
+
    ```bash
    python scripts/validate_data_quality.py --cross-pipeline-enum-check
    ```
 
-3. **Monitor Production**
+1. **Monitor Production**
+
    ```bash
    grep "enum" logs/production.log | grep -E "activity|assay|molecule|target"
    ```
@@ -172,18 +180,21 @@ mypy src/bioetl/domain/normalization/profiles/ --strict
 ## 📈 Impact Assessment
 
 ### Positive Impacts
+
 - **Consistency**: Uniform enum handling across all pipelines
 - **Maintainability**: Single source of truth for all enum values
 - **Validation**: Improved cross-pipeline data quality
 - **Scalability**: Easy to add new enum fields
 
 ### Potential Risks
+
 - **Breaking Changes**: Existing enum values may need updates
 - **Migration Complexity**: Multiple pipelines affected
 - **Performance**: Additional enum validation overhead
 - **Content Hash Changes**: Enum standardization affects hashes
 
 ### Mitigation Strategies
+
 - **Backward Compatibility**: Support both old and new enum values temporarily
 - **Gradual Rollout**: Deploy pipeline by pipeline
 - **Comprehensive Testing**: Validate all enum scenarios
@@ -198,8 +209,8 @@ mypy src/bioetl/domain/normalization/profiles/ --strict
 
 ## ⏳ Time Estimate
 
-**Total**: 11 days   
-**Start Date**: 2024-08-01   
+**Total**: 11 days
+**Start Date**: 2024-08-01
 **Target Completion**: 2024-08-20
 
 ## 👥 Assignee
@@ -221,23 +232,27 @@ mypy src/bioetl/domain/normalization/profiles/ --strict
 ## 🎯 Progress Update
 
 ### ✅ Completed (Phase 1 - 3/3 days)
+
 - **Day 1-2**: Created comprehensive enum inventory and extended YAML configuration
 - **Day 3**: Enhanced enum loader with new functions (`get_chembl_enum`, `get_chembl_enum_set`)
 - Added missing enum sections: `assay_groups`, `subcellular_fractions`, `confidence_descriptions`
 - All enum loader tests passing
 
 ### ✅ Completed (Phase 2 - 2/5 days)
+
 - **Day 4**: Updated assay profile to use externalized enums
 - **Day 5**: Configured enum and case fields for assay pipeline
 - All assay profile integration tests passing
 - Cross-pipeline consistency verified
 
 ### 📋 In Progress (Phase 2 - 3/5 days)
+
 - **Day 6-8**: Update remaining pipelines (molecule, target, cell_line, tissue, publication)
 - Apply same pattern to all pipelines
 - Create comprehensive cross-pipeline tests
 
 ### 📋 Remaining (Phase 3 - 3/3 days)
+
 - **Day 9-11**: Final validation and testing
 - Update Pandera schemas for all pipelines
 - Create cross-pipeline consistency tests

@@ -1,6 +1,7 @@
 # ADR 037: Runner Stage Mixin Architecture
 
 ## Status
+
 **Accepted** ✅
 
 ## Context
@@ -14,6 +15,7 @@ After comprehensive analysis, we **confirm the current mixin architecture is sou
 ### Architecture Assessment
 
 **Complexity Metrics**:
+
 - **Total files**: 24 in `runner_pkg/`
 - **Core mixins**: 5
 - **Support files**: 19
@@ -33,20 +35,20 @@ classDiagram
     CompositePipelineRunner --|> CompositeRunnerObservabilityMixin
     CompositePipelineRunner --|> CompositeRunnerStageMixin
     CompositePipelineRunner --|> CompositeRunnerMergeStageMixin
-    
+
     CompositeRunnerStageMixin --|> _CompositeRunnerStageEnrichmentMixin
     CompositeRunnerStageMixin --|> _CompositeRunnerStageSupportMixin
 ```
 
 ### Component Responsibilities
 
-| Mixin | Responsibility | Complexity | Lines |
-|-------|---------------|------------|-------|
-| ControlPlane | Locking & control | 6/10 | ~80 |
-| Support | Runtime support | 7/10 | ~100 |
-| Observability | Metrics & logging | 5/10 | ~60 |
-| Stage | Stage execution | 8/10 | ~150 |
-| MergeStage | Merge operations | 7/10 | ~100 |
+| Mixin         | Responsibility    | Complexity | Lines |
+| ------------- | ----------------- | ---------- | ----- |
+| ControlPlane  | Locking & control | 6/10       | ~80   |
+| Support       | Runtime support   | 7/10       | ~100  |
+| Observability | Metrics & logging | 5/10       | ~60   |
+| Stage         | Stage execution   | 8/10       | ~150  |
+| MergeStage    | Merge operations  | 7/10       | ~100  |
 
 ### Execution Flow
 
@@ -58,7 +60,7 @@ sequenceDiagram
     participant Observability
     participant Stage
     participant MergeStage
-    
+
     Runner->>Support: _validate_can_start()
     Runner->>ControlPlane: _acquire_lock()
     Runner->>Stage: _execute_seed_phase()
@@ -74,6 +76,7 @@ sequenceDiagram
 ### Why Mixin Architecture is Excellent
 
 1. **Proper Separation of Concerns**
+
    ```python
    # Each mixin handles one specific aspect
    class CompositeRunnerControlPlaneMixin:  # Locking only
@@ -81,17 +84,20 @@ sequenceDiagram
    class CompositeRunnerStageMixin:         # Execution only
    ```
 
-2. **Pythonic Composition**
+1. **Pythonic Composition**
+
    - Follows Python mixin best practices
    - Clean method resolution order
    - No diamond problem issues
 
-3. **Excellent Testability**
+1. **Excellent Testability**
+
    - Each mixin can be tested independently
    - Easy to mock specific aspects
    - Clear boundaries for unit tests
 
-4. **Great Extensibility**
+1. **Great Extensibility**
+
    - Easy to add new mixins
    - Can compose different combinations
    - Follows Open/Closed Principle
@@ -99,21 +105,25 @@ sequenceDiagram
 ### Strengths of Current Design
 
 1. **Appropriate Complexity**
+
    - Complexity matches problem domain
    - No unnecessary abstraction
    - Proper level of indirection
 
-2. **Maintainability**
+1. **Maintainability**
+
    - Clear method organization
    - Good naming conventions
    - Consistent patterns
 
-3. **Robustness**
+1. **Robustness**
+
    - Proper error handling
    - Good state management
    - Reliable execution flows
 
-4. **Performance**
+1. **Performance**
+
    - Minimal runtime overhead
    - Efficient method dispatch
    - No unnecessary indirection
@@ -138,16 +148,19 @@ src/bioetl/application/composite/runner_pkg/
 ### Design Patterns Used
 
 1. **Mixin Composition** ✅
+
    - Proper Python mixin usage
    - Clean separation of concerns
    - No inheritance conflicts
 
-2. **Strategy Pattern** ✅
+1. **Strategy Pattern** ✅
+
    - Different stage implementations
    - Configurable behavior
    - Extensible architecture
 
-3. **Template Method** ✅
+1. **Template Method** ✅
+
    - Execution flow templates
    - Customizable steps
    - Consistent interfaces
@@ -156,22 +169,22 @@ src/bioetl/application/composite/runner_pkg/
 
 ### Architecture Quality Indicators
 
-| Metric | Target | Actual | Status |
-|--------|-------|-------|--------|
-| Separation of concerns | Excellent | Excellent | ✅ |
-| Testability | High | High | ✅ |
-| Maintainability | High | High | ✅ |
-| Extensibility | High | High | ✅ |
-| Performance | Good | Good | ✅ |
+| Metric                 | Target    | Actual    | Status |
+| ---------------------- | --------- | --------- | ------ |
+| Separation of concerns | Excellent | Excellent | ✅     |
+| Testability            | High      | High      | ✅     |
+| Maintainability        | High      | High      | ✅     |
+| Extensibility          | High      | High      | ✅     |
+| Performance            | Good      | Good      | ✅     |
 
 ### Code Quality Metrics
 
-| Metric | Target | Actual | Status |
-|--------|-------|-------|--------|
-| Cyclomatic complexity | ≤10 | 7-8 | ✅ |
-| Method length | ≤50 lines | 20-40 avg | ✅ |
-| Test coverage | 90%+ | 92% | ✅ |
-| Documentation | Comprehensive | Comprehensive | ✅ |
+| Metric                | Target        | Actual        | Status |
+| --------------------- | ------------- | ------------- | ------ |
+| Cyclomatic complexity | ≤10           | 7-8           | ✅     |
+| Method length         | ≤50 lines     | 20-40 avg     | ✅     |
+| Test coverage         | 90%+          | 92%           | ✅     |
+| Documentation         | Comprehensive | Comprehensive | ✅     |
 
 ## Migration Plan
 
@@ -182,35 +195,43 @@ src/bioetl/application/composite/runner_pkg/
 ### Optional Enhancements (Future)
 
 1. **Documentation Improvements**
+
    ```python
    # Add more detailed docstrings
    def _execute_seed_phase(self, state: CompositeCheckpointState) -> tuple[...]:
        """
        Execute the seed phase with FSM state transitions.
-       
+
        Args:
            state: Current checkpoint state
-           
+
        Returns:
            Tuple of updated state and seed result
-           
+
        Raises:
            BioETLError: On execution failures
            InvalidStateError: On invalid state transitions
        """
    ```
 
-2. **Observability Enhancements**
+1. **Observability Enhancements**
+
    ```python
-   def _log_stage_transition(self, from_state: CompositePipelineState, to_state: CompositePipelineState) -> None:
-       self._metrics.increment("bioetl_runner_state_transitions", {
-           "from": from_state.value,
-           "to": to_state.value,
-           "composite": self._config.name,
-       })
+   def _log_stage_transition(
+       self, from_state: CompositePipelineState, to_state: CompositePipelineState
+   ) -> None:
+       self._metrics.increment(
+           "bioetl_runner_state_transitions",
+           {
+               "from": from_state.value,
+               "to": to_state.value,
+               "composite": self._config.name,
+           },
+       )
    ```
 
-3. **Consistency Improvements**
+1. **Consistency Improvements**
+
    - Standardize error handling patterns
    - Unify logging formats
    - Consolidate minor duplicates
@@ -218,6 +239,7 @@ src/bioetl/application/composite/runner_pkg/
 ## Backward Compatibility
 
 ✅ **100% Backward Compatible**
+
 - No breaking changes
 - Same public API
 - Identical behavior
@@ -226,28 +248,36 @@ src/bioetl/application/composite/runner_pkg/
 ## Alternatives Considered
 
 ### ❌ Restructure to Monolithic Class
+
 **Rejected because**:
+
 - Would reduce separation of concerns
 - Harder to test and maintain
 - Less extensible
 - Higher complexity
 
 ### ❌ Consolidate Mixins
+
 **Rejected because**:
+
 - Would reduce clarity
 - Harder to understand
 - Less testable
 - No significant benefit
 
 ### ❌ Add More Abstraction Layers
+
 **Rejected because**:
+
 - Would add unnecessary complexity
 - No clear benefit
 - Harder to maintain
 - Violates YAGNI principle
 
 ### ✅ Keep Current Architecture
+
 **Selected because**:
+
 - Proper separation of concerns
 - Excellent testability
 - Good maintainability
@@ -287,7 +317,7 @@ stateDiagram-v2
     DependencyExecution --> EnrichmentExecution: dependencies_ready
     EnrichmentExecution --> MergeExecution: enrichment_completed
     MergeExecution --> [*]: merge_completed
-    
+
     SeedExecution --> SeedResume: resumed
     DependencyExecution --> DependencyResume: resumed
     EnrichmentExecution --> EnrichmentResume: resumed
@@ -300,18 +330,21 @@ stateDiagram-v2
 The `CompositePipelineRunner` mixin architecture represents:
 
 1. **Proper Software Engineering**
+
    - Follows SOLID principles
    - Good separation of concerns
    - Appropriate complexity
    - Excellent testability
 
-2. **Python Best Practices**
+1. **Python Best Practices**
+
    - Proper mixin usage
    - Clean composition
    - No inheritance issues
    - Good type hints
 
-3. **Production-Ready Quality**
+1. **Production-Ready Quality**
+
    - High test coverage
    - Good documentation
    - Robust error handling
@@ -320,16 +353,19 @@ The `CompositePipelineRunner` mixin architecture represents:
 ### Recommendations
 
 ✅ **Keep current architecture unchanged**
+
 - No major refactoring needed
 - Architecture is sound and appropriate
 - Complexity is justified by requirements
 
 🟡 **Optional minor enhancements**
+
 - Add more detailed documentation
 - Enhance observability metrics
 - Improve consistency in patterns
 
 ❌ **Avoid unnecessary changes**
+
 - Don't restructure working architecture
 - Don't add abstraction layers
 - Don't consolidate mixins

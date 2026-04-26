@@ -13,6 +13,7 @@ This document describes the internal provider registration mechanisms and config
 **Purpose**: Internal provider config builders that handle the detailed configuration and setup of individual providers.
 
 **Key Modules**:
+
 - `registration_chembl`
 - `registration_crossref`
 - `registration_openalex`
@@ -21,6 +22,7 @@ This document describes the internal provider registration mechanisms and config
 - `registration_uniprot`
 
 **Public Counterpart**:
+
 - `composition.providers.registration` (public orchestration layer)
 
 ### Registration Flow
@@ -31,7 +33,7 @@ sequenceDiagram
     participant Registration as registration
     participant Internal as registration_*
     participant Provider as Provider
-    
+
     Public->>Registration: ensure_providers_loaded()
     Registration->>Internal: build_config(provider)
     Internal->>Provider: create_adapter()
@@ -59,10 +61,11 @@ def build_chembl_config(raw_config: dict) -> ChemblProviderConfig:
 ```python
 class ProviderRegistrationContext:
     """Internal: Context for provider registration operations."""
+
     def __init__(self, registry: ProviderRegistry):
         self.registry = registry
         self.configured_providers = set()
-    
+
     def register_provider(self, provider_name: str, config: dict):
         """Internal: Register a single provider."""
         # Internal registration logic
@@ -72,8 +75,8 @@ class ProviderRegistrationContext:
 ## Usage Guidelines
 
 1. **Access Pattern**: Always use the public `composition.providers.registration` module rather than importing `registration_*` modules directly.
-2. **Configuration**: Provider configuration should be done through the public API, not by manipulating internal builders.
-3. **Extensibility**: To add new providers, extend the public registration system rather than modifying internal builders.
+1. **Configuration**: Provider configuration should be done through the public API, not by manipulating internal builders.
+1. **Extensibility**: To add new providers, extend the public registration system rather than modifying internal builders.
 
 ## Related Documentation
 

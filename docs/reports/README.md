@@ -2,6 +2,7 @@
 
 This folder now focuses on **curated internal evidence and report artifacts**.
 Content here is **non-normative**; authoritative guidance remains in:
+
 - docs/02-architecture (ADRs, policies, diagrams)
 - docs/03-guides (implementation and operations guides)
 - docs/04-reference (pipelines, providers, contracts)
@@ -15,16 +16,20 @@ Content here is **non-normative**; authoritative guidance remains in:
   evidence packs, synthesis, decisions, risks, and roadmaps.
 
 Primary retained surface:
+
 - [`evidence/`](evidence/)
 - `audits/`
 
 Planning material that is still active should live in:
+
 - [`docs/plans/`](../plans/)
 
 Historical planning/baseline material should live in:
+
 - [`docs/99-archive/README.md`](../99-archive/README.md)
 
 Difference from top-level [`reports/`](../../reports/README.md):
+
 - `docs/reports/` contains curated repo-only artifacts kept for traceability.
 - top-level `reports/` contains generated or working outputs that do not
   automatically become part of the retained documentation surface.

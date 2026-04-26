@@ -34,7 +34,7 @@ Migrate root-level `testing_support/` into `tests/testing_support/` without brea
 Use two-step delivery for safety:
 
 1. PR-1: Move + compatibility shim + import migration.
-2. PR-2: Remove shim + finalize governance cleanup.
+1. PR-2: Remove shim + finalize governance cleanup.
 
 This reduces risk and keeps each PR easy to review and revert.
 
@@ -44,24 +44,26 @@ This reduces risk and keeps each PR easy to review and revert.
 
 1. Create branch:
    - `git checkout -b chore/migrate-testing-support`
-2. Capture references:
+1. Capture references:
    - `rg -n "testing_support" .`
-3. Record baseline checks:
+1. Record baseline checks:
    - `uv run ruff check src tests`
    - `PYTHONPYCACHEPREFIX=/tmp/pycache .venv/bin/pytest tests/unit/scripts/repo/test_audit_root_cleanliness.py -q`
 
 Exit criteria:
+
 - Baseline status captured before edits.
 
 ### Phase 2: Introduce New Package Location
 
 1. Create package:
    - `tests/testing_support/__init__.py`
-2. Copy/move support modules:
+1. Copy/move support modules:
    - `testing_support/bronze_writer.py` -> `tests/testing_support/bronze_writer.py`
    - `testing_support/neo4j_memory_sync.py` -> `tests/testing_support/neo4j_memory_sync.py`
 
 Exit criteria:
+
 - New package imports cleanly in test environment.
 
 ### Phase 3: Compatibility Layer (PR-1)
@@ -72,19 +74,22 @@ Keep root-level `testing_support` as temporary shim:
 - `testing_support/neo4j_memory_sync.py` re-exports from `tests.testing_support.neo4j_memory_sync`
 
 Purpose:
+
 - Preserve compatibility while import migration lands.
 
 Exit criteria:
+
 - Both old and new import paths resolve.
 
 ### Phase 4: Update Test Imports
 
 1. Replace imports in tests:
    - `from testing_support...` -> `from tests.testing_support...`
-2. Verify no stale usage:
+1. Verify no stale usage:
    - `rg -n "from testing_support\\.|import testing_support\\." tests`
 
 Exit criteria:
+
 - No test files import root-level `testing_support`.
 
 ### Phase 5: Governance and Policy Updates
@@ -93,13 +98,14 @@ Update all policy surfaces to the new canonical location:
 
 1. `configs/quality/repo_structure_catalog.yaml`
    - move approved root-level test support entry to reflect `tests/testing_support` policy.
-2. `docs/00-project/governance/03-file-policy.md`
+1. `docs/00-project/governance/03-file-policy.md`
    - update wording from root-level allowance to test-tree allowance.
-3. `tests/unit/scripts/repo/test_audit_root_cleanliness.py`
+1. `tests/unit/scripts/repo/test_audit_root_cleanliness.py`
    - update assertions for approved roots accordingly.
-4. If needed, update `.github/root-allowlist.txt` references.
+1. If needed, update `.github/root-allowlist.txt` references.
 
 Exit criteria:
+
 - Structure/audit policy is consistent with new path.
 
 ### Phase 6: Remove Shim (PR-2)
@@ -107,10 +113,11 @@ Exit criteria:
 After Phase 5 is merged and stable:
 
 1. Delete root-level `testing_support/`.
-2. Re-run repo-wide reference search:
+1. Re-run repo-wide reference search:
    - `rg -n "testing_support" .`
 
 Exit criteria:
+
 - No active dependency on root-level package remains.
 
 ## Validation Matrix
@@ -119,22 +126,22 @@ Run after PR-1 and PR-2:
 
 1. Lint and imports:
    - `uv run ruff check src tests`
-2. Focused test suites using migrated helpers:
+1. Focused test suites using migrated helpers:
    - `PYTHONPYCACHEPREFIX=/tmp/pycache .venv/bin/pytest tests/unit/infrastructure/storage/bronze_writer -q`
    - `PYTHONPYCACHEPREFIX=/tmp/pycache .venv/bin/pytest tests/unit/scripts/ops/neo4j_memory_sync -q`
-3. Structure governance:
+1. Structure governance:
    - `PYTHONPYCACHEPREFIX=/tmp/pycache .venv/bin/pytest tests/unit/scripts/repo/test_audit_root_cleanliness.py -q`
-4. Optional full architecture/quality gate used by CI.
+1. Optional full architecture/quality gate used by CI.
 
 ## Risks and Mitigations
 
 1. Import path regressions.
    - Mitigation: temporary shim in PR-1.
-2. Governance mismatch (policy vs filesystem).
+1. Governance mismatch (policy vs filesystem).
    - Mitigation: update catalog, docs, and audit tests in same migration window.
-3. Hidden references outside tests.
+1. Hidden references outside tests.
    - Mitigation: global `rg` search before and after shim removal.
-4. Large diff review complexity.
+1. Large diff review complexity.
    - Mitigation: two PRs with clear boundaries.
 
 ## Rollback Plan
@@ -142,8 +149,8 @@ Run after PR-1 and PR-2:
 If regressions occur:
 
 1. Revert PR-2 (shim removal) first.
-2. If needed, revert PR-1 and keep root-level package.
-3. Re-run baseline checks to confirm recovery.
+1. If needed, revert PR-1 and keep root-level package.
+1. Re-run baseline checks to confirm recovery.
 
 ## Deliverables
 
@@ -151,8 +158,7 @@ If regressions occur:
    - new `tests/testing_support/*`
    - migrated test imports
    - temporary root-level shim
-2. PR-2:
+1. PR-2:
    - root-level `testing_support/` removed
    - governance and audit surfaces finalized
    - all checks green
-

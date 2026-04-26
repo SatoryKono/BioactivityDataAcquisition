@@ -17,12 +17,14 @@ This document provides comprehensive documentation for the complex components id
 **Component**: `src/bioetl/infrastructure/adapters/chembl/fetch_paging_mixin.py`
 
 **Documentation**:
+
 - **Refactoring**: Completed in initial round
 - **Complexity Reduction**: 7 branches → 5 branches, 4 nesting → 3 nesting
 - **ADR**: Architecture decisions documented in refactoring commit
 - **Tests**: 14 comprehensive unit tests added
 
 **Key Improvements**:
+
 ```python
 # Extracted method to reduce complexity
 def _calculate_page_limit(self, total_records: int, page_size: int) -> int:
@@ -35,18 +37,18 @@ def _calculate_page_limit(self, total_records: int, page_size: int) -> int:
 **Component**: `src/bioetl/infrastructure/adapters/http/client_retry_mixin.py`
 
 **Documentation**:
+
 - **Refactoring**: Completed with test suite
 - **Complexity Reduction**: Extracted `_should_continue_retry()` method
 - **Tests**: 6 comprehensive unit tests (all passing)
 - **ADR**: Implicit in refactoring pattern
 
 **Key Improvements**:
+
 ```python
 # Extracted method for better separation of concerns
 def _should_continue_retry(
-    self,
-    result: _RequestAttemptOutcome,
-    retry_state: _RetryRequestState
+    self, result: _RequestAttemptOutcome, retry_state: _RetryRequestState
 ) -> bool:
     """Determine if retry should continue based on attempt outcome."""
     if isinstance(result, httpx.Response):
@@ -60,12 +62,14 @@ def _should_continue_retry(
 **Component**: `src/bioetl/application/composite/checkpoint/state.py`
 
 **Documentation**:
+
 - **ADR**: `docs/05-architecture/decisions/ADR-035-composite-checkpoint-state-analysis.md`
 - **Analysis**: Comprehensive usage analysis across 12+ files
 - **Decision**: Active infrastructure, not technical debt
 - **Architecture**: State machine with proper separation
 
 **Key Architecture**:
+
 ```mermaid
 stateDiagram-v2
     [*] --> NOT_STARTED
@@ -81,12 +85,14 @@ stateDiagram-v2
 **Component**: `src/bioetl/application/composite/coordinator.py`
 
 **Documentation**:
+
 - **Analysis**: `docs/05-architecture/analysis/COORDINATOR_COMPLEXITY_ANALYSIS.md`
 - **Complexity**: 314 lines, 12+ private methods, 8+ exception types
 - **Recommendation**: Targeted refactoring opportunities identified
 - **Risk**: Low for incremental improvements
 
 **Architecture Diagrams**:
+
 ```mermaid
 flowchart TD
     A[run_enrichers] --> B[build_enricher_tasks]
@@ -101,12 +107,14 @@ flowchart TD
 **Component**: `src/bioetl/application/composite/runner_pkg/`
 
 **Documentation**:
+
 - **Analysis**: `docs/05-architecture/analysis/RUNNER_MIXIN_ARCHITECTURE_ANALYSIS.md`
 - **Architecture**: 5 core mixins with proper separation of concerns
 - **Decision**: Sound architecture, no major refactoring needed
 - **Complexity**: 7/10 (appropriate for domain)
 
 **Mixin Composition**:
+
 ```mermaid
 classDiagram
     CompositePipelineRunner --|> CompositeRunnerControlPlaneMixin
@@ -128,16 +136,19 @@ classDiagram
 ### Planned ADRs (Issue #6 Deliverables)
 
 2. **ADR-036**: Enrichment Coordinator Architecture
+
    - **Status**: ⏳ Planned
    - **Purpose**: Document coordinator design rationale
    - **Content**: Mixin patterns, error handling, orchestration
 
-3. **ADR-037**: Runner Stage Mixin Architecture
+1. **ADR-037**: Runner Stage Mixin Architecture
+
    - **Status**: ⏳ Planned
    - **Purpose**: Document runner composition patterns
    - **Content**: Separation of concerns, testability, extensibility
 
-4. **ADR-038**: HTTP Client Retry Patterns
+1. **ADR-038**: HTTP Client Retry Patterns
+
    - **Status**: ⏳ Planned
    - **Purpose**: Document retry architecture decisions
    - **Content**: Backoff strategies, circuit breakers, observability
@@ -151,7 +162,7 @@ sequenceDiagram
     participant Client
     participant PagingMixin
     participant ChEMBLAPI
-    
+
     Client->>PagingMixin: fetch_with_paging()
     PagingMixin->>PagingMixin: _calculate_page_limit()
     PagingMixin->>PagingMixin: _page_iterator()
@@ -170,7 +181,7 @@ sequenceDiagram
     participant Client
     participant RetryMixin
     participant HTTPClient
-    
+
     Client->>RetryMixin: _request_with_retry()
     RetryMixin->>RetryMixin: start_request_span()
     loop Retry Attempts
@@ -198,23 +209,23 @@ sequenceDiagram
     participant StageMixin
     participant Coordinator
     participant Checkpoint
-    
+
     Runner->>StageMixin: _execute_seed_phase()
     StageMixin->>Checkpoint: with_seed_completed()
     Checkpoint-->>StageMixin: updated_state
-    
+
     Runner->>StageMixin: _execute_dependencies_phase()
     StageMixin->>Coordinator: run_dependencies()
     Coordinator->>Checkpoint: with_dependency_completed()
     Checkpoint-->>Coordinator: updated_state
     Coordinator-->>StageMixin: dependency_results
-    
+
     Runner->>StageMixin: _execute_enrichment_phase()
     StageMixin->>Coordinator: run_enrichers()
     Coordinator->>Checkpoint: with_enricher_completed()
     Checkpoint-->>Coordinator: updated_state
     Coordinator-->>StageMixin: enrichment_results
-    
+
     Runner->>Runner: _execute_merge_phase()
     Runner->>Checkpoint: with_merge_completed()
     Checkpoint-->>Runner: final_state
@@ -225,6 +236,7 @@ sequenceDiagram
 ### ChEMBL Paging Mixin
 
 **Why Mixin Pattern?**
+
 - ✅ Separation of concerns (paging logic vs. API client)
 - ✅ Reusability across multiple ChEMBL adapters
 - ✅ Testability in isolation
@@ -235,6 +247,7 @@ sequenceDiagram
 ### HTTP Client Retry
 
 **Why Complex Retry Logic?**
+
 - ✅ Robust error handling for unreliable APIs
 - ✅ Configurable backoff strategies
 - ✅ Comprehensive observability
@@ -245,6 +258,7 @@ sequenceDiagram
 ### Composite Checkpoint State
 
 **Why Immutable State?**
+
 - ✅ Thread safety in concurrent environments
 - ✅ Predictable state transitions
 - ✅ Easier debugging and testing
@@ -255,6 +269,7 @@ sequenceDiagram
 ### Enrichment Coordinator
 
 **Why Multiple Exception Handlers?**
+
 - ✅ Precise error handling for different failure modes
 - ✅ Different behaviors for required vs. optional enrichers
 - ✅ Better observability and debugging
@@ -265,6 +280,7 @@ sequenceDiagram
 ### Runner Stage Mixins
 
 **Why Mixin Composition?**
+
 - ✅ Clear separation of concerns
 - ✅ Better testability
 - ✅ Easier to extend
@@ -277,6 +293,7 @@ sequenceDiagram
 ### 1. Proper Abstraction Levels
 
 **Good Example** (Runner Mixins):
+
 ```python
 # Proper abstraction - each mixin handles one concern
 class CompositeRunnerStageMixin:  # Stage execution
@@ -287,6 +304,7 @@ class CompositeRunnerControlPlaneMixin:  # Locking/control
 ### 2. Separation of Concerns
 
 **Good Example** (Checkpoint State):
+
 ```python
 # State vs. Transitions separation
 class CompositeCheckpointState:  # Immutable state
@@ -296,6 +314,7 @@ class CompositeCheckpointService:  # State transitions
 ### 3. Testability Patterns
 
 **Good Example** (Extract Helper Methods):
+
 ```python
 # Extract complex logic for better testability
 def _calculate_page_limit(self, total_records: int, page_size: int) -> int:
@@ -306,6 +325,7 @@ def _calculate_page_limit(self, total_records: int, page_size: int) -> int:
 ### 4. Observability Integration
 
 **Good Example** (Retry Metrics):
+
 ```python
 # Integrated observability
 def _request_with_retry(self, method: str, url: str, **kwargs) -> httpx.Response:
@@ -352,6 +372,7 @@ def _request_with_retry(self, method: str, url: str, **kwargs) -> httpx.Response
 ## Success Metrics
 
 ### Documentation Quality
+
 - ✅ **Comprehensive**: All major components documented
 - ✅ **Accurate**: Reflects current architecture
 - ✅ **Maintainable**: Easy to update
@@ -359,6 +380,7 @@ def _request_with_retry(self, method: str, url: str, **kwargs) -> httpx.Response
 - ⏳ **Accessible**: Developer onboarding updates needed
 
 ### Architecture Understanding
+
 - ✅ **Clear component boundaries** documented
 - ✅ **Design rationale** explained
 - ✅ **Trade-offs** identified
@@ -368,32 +390,37 @@ def _request_with_retry(self, method: str, url: str, **kwargs) -> httpx.Response
 ## Next Steps
 
 ### High Priority
+
 1. ✅ **Complete component analysis** (Issues #3-#5)
-2. ⏳ **Create formal ADRs** for remaining components
-3. ⏳ **Add diagrams to main architecture docs**
-4. ⏳ **Update developer onboarding materials**
+1. ⏳ **Create formal ADRs** for remaining components
+1. ⏳ **Add diagrams to main architecture docs**
+1. ⏳ **Update developer onboarding materials**
 
 ### Medium Priority
+
 5. ⏳ **Create architecture decision log**
-6. ⏳ **Add interactive architecture diagrams**
-7. ⏳ **Document performance characteristics**
+1. ⏳ **Add interactive architecture diagrams**
+1. ⏳ **Document performance characteristics**
 
 ### Low Priority
+
 8. ⏳ **Add failure mode analysis**
-9. ⏳ **Document scalability limits**
-10. ⏳ **Create component relationship maps**
+1. ⏳ **Document scalability limits**
+1. ⏳ **Create component relationship maps**
 
 ## Conclusion
 
 ### Documentation Status: 75% Complete
 
 **Completed**:
+
 - All major component analyses
 - Architecture diagrams and sequence flows
 - Design rationale and trade-offs
 - Complexity assessments
 
 **Remaining**:
+
 - Formal ADRs for coordinator and runner
 - Developer onboarding updates
 - Architecture decision log
@@ -402,12 +429,14 @@ def _request_with_retry(self, method: str, url: str, **kwargs) -> httpx.Response
 ### Quality Assessment
 
 **Strengths**:
+
 - ✅ Comprehensive component coverage
 - ✅ Clear architecture diagrams
 - ✅ Well-documented design rationale
 - ✅ Practical trade-off analysis
 
 **Opportunities**:
+
 - 🟡 Formalize ADRs for consistency
 - 🟡 Add more interactive diagrams
 - 🟡 Enhance developer onboarding
@@ -416,6 +445,7 @@ def _request_with_retry(self, method: str, url: str, **kwargs) -> httpx.Response
 ### Recommendation
 
 **✅ Documentation is in excellent shape** and provides a solid foundation for:
+
 - Developer onboarding
 - Architecture understanding
 - Future evolution

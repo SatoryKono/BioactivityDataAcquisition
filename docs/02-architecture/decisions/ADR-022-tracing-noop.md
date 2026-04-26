@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-022: NoOp Tracing for Local-Only Deployment
 
@@ -22,16 +25,17 @@ for a local ETL process.
 
 ### Current Tracing Needs
 
-| Use Case | Local Solution |
-|----------|---------------|
-| Request correlation | `run-id` in structured logs |
-| Performance debugging | Prometheus histograms (`pipeline-duration-seconds`) |
-| Error tracking | Structured error logs with `run-id`, `stage`, `error-type` |
-| Batch traceability | `run-id` + `batch-id` in logs and metrics |
+| Use Case              | Local Solution                                             |
+| --------------------- | ---------------------------------------------------------- |
+| Request correlation   | `run-id` in structured logs                                |
+| Performance debugging | Prometheus histograms (`pipeline-duration-seconds`)        |
+| Error tracking        | Structured error logs with `run-id`, `stage`, `error-type` |
+| Batch traceability    | `run-id` + `batch-id` in logs and metrics                  |
 
 ### Distributed Tracing Overhead
 
 Implementing real OpenTelemetry would require:
+
 - Additional dependencies (`opentelemetry-api`, `opentelemetry-sdk`, exporters)
 - Running infrastructure (Jaeger/Zipkin/Tempo collector)
 - Context propagation between components
@@ -51,11 +55,11 @@ This overhead provides no benefit for single-process local execution.
 
 1. **Industry standard** — OTel is the CNCF-graduated vendor-neutral tracing API.
    Adopting its surface avoids inventing a bespoke abstraction.
-2. **Zero-cost migration** — switching from `NoOpTracing` to `OpenTelemetryTracer`
+1. **Zero-cost migration** — switching from `NoOpTracing` to `OpenTelemetryTracer`
    requires only a composition wiring change; application code stays the same.
-3. **Ecosystem compatibility** — any OTel-compatible backend (Jaeger, Zipkin, Tempo,
+1. **Ecosystem compatibility** — any OTel-compatible backend (Jaeger, Zipkin, Tempo,
    OTLP Collector) can be plugged in without modifying the port contract.
-4. **`Any` return type** — `get-tracer()` returns `Any` to avoid a hard dependency
+1. **`Any` return type** — `get-tracer()` returns `Any` to avoid a hard dependency
    on the `opentelemetry` package in the domain layer while preserving the OTel
    calling convention in all implementations.
 
@@ -97,6 +101,7 @@ All structured logs include `run-id`:
 ```
 
 This enables:
+
 - Log aggregation: `grep run-id=<uuid> reports/logs/*.jsonl`
 - Metrics correlation: labels include `run-id` where appropriate
 - Batch tracing: `run-id` + `batch-id` for granular tracking
@@ -130,6 +135,7 @@ class TracingPort(Protocol):
 ### 3. OpenTelemetry Ready
 
 `OpenTelemetryTracer` class exists in `tracing.py` for future use:
+
 - Supports OTLP export (production) and Console export (debug)
 - Graceful shutdown with span flushing
 - Compatible with TracingPort interface
@@ -137,18 +143,19 @@ class TracingPort(Protocol):
 ### 4. Consistency with ADR-010
 
 Local-Only Deployment principle:
+
 - No external infrastructure dependencies
 - Single-process execution model
 - File-based storage (Bronze/Silver/Gold)
 
 ## Implementation Files
 
-| File | Purpose |
-|------|---------|
-| `domain/ports/observability.py` | TracingPort protocol (OTel facade contract) |
-| `domain/ports/noop.py` | NoOpTracing, -NoOpOtelTracer, -NoOpSpan (default) |
-| `infrastructure/observability/tracing.py` | OpenTelemetryTracer (real OTel adapter) + NoOpTracing re-export |
-| `composition/bootstrap/runtime/observability.py` | DI wiring (`bootstrap-tracer-port`) |
+| File                                             | Purpose                                                         |
+| ------------------------------------------------ | --------------------------------------------------------------- |
+| `domain/ports/observability.py`                  | TracingPort protocol (OTel facade contract)                     |
+| `domain/ports/noop.py`                           | NoOpTracing, -NoOpOtelTracer, -NoOpSpan (default)               |
+| `infrastructure/observability/tracing.py`        | OpenTelemetryTracer (real OTel adapter) + NoOpTracing re-export |
+| `composition/bootstrap/runtime/observability.py` | DI wiring (`bootstrap-tracer-port`)                             |
 
 ## Consequences
 
@@ -170,20 +177,23 @@ Local-Only Deployment principle:
 If distributed deployment becomes necessary:
 
 1. Install OpenTelemetry dependencies:
+
    ```bash
    pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp
    ```
 
-2. Enable tracing via environment variable:
+1. Enable tracing via environment variable:
+
    ```bash
    export BIOETL_OBSERVABILITY__TRACING_ENABLED=true
    ```
+
    The bootstrap in `composition/bootstrap/runtime/observability.py` will
    automatically return `OpenTelemetryTracer` instead of `NoOpTracing`.
 
-3. Deploy OpenTelemetry Collector or Jaeger
+1. Deploy OpenTelemetry Collector or Jaeger
 
-4. This ADR should be revisited and potentially superseded
+1. This ADR should be revisited and potentially superseded
 
 ## References
 
@@ -193,13 +203,13 @@ If distributed deployment becomes necessary:
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-022-tracing-noop.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                             |
+| ------------ | -------------------------------------------------------------------------- | ------ | ------------------------------------ |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-022-tracing-noop.md`            |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                           |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                     |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria` |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                         |
 
 ## Rollout
 

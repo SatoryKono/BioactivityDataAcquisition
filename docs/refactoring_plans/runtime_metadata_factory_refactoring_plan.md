@@ -7,21 +7,25 @@ This plan addresses naming inconsistencies where "Factory" aliases exist for Pro
 ## Current Issues Identified
 
 ### 1. RuntimeMetadataFactory/RuntimeMetadataProtocol
+
 - **Problem:** `RuntimeMetadataProtocol` exists but no `RuntimeMetadataFactory` class
 - **Issue:** Parameter named `runtime_metadata_factory` suggests factory pattern
 - **Location:** `src/bioetl/application/services/lineage/metadata_assemblers_helpers.py`
 
 ### 2. PipelineMetadataFactory/PipelineMetadataProtocol
-- **Problem:** `PipelineMetadataProtocol` exists but no `PipelineMetadataFactory` class  
+
+- **Problem:** `PipelineMetadataProtocol` exists but no `PipelineMetadataFactory` class
 - **Issue:** Parameter named `pipeline_metadata_factory` suggests factory pattern
 - **Location:** `src/bioetl/application/services/lineage/metadata_assemblers_helpers.py`
 
 ### 3. DomainEventEmitter/DomainEventEmitterPort
+
 - **Problem:** Only `DomainEventEmitterPort` exists, no alias
 - **Issue:** Inconsistent with other Port implementations
 - **Location:** `src/bioetl/application/observability/domain_event_emitter.py`
 
 ### 4. RunExecutionRequest/RunExecutionContext
+
 - **Problem:** Both classes exist with confusing naming
 - **Issue:** `RunExecutionRequest` is alias for `RunExecutionContext`
 - **Location:** `src/bioetl/application/services/execution/cli_run_orchestration_models.py`
@@ -33,17 +37,19 @@ This plan addresses naming inconsistencies where "Factory" aliases exist for Pro
 **Objective:** Rename protocols to use "Port" suffix and update parameter names
 
 **Files to modify:**
+
 - `src/bioetl/application/services/lineage/metadata_assemblers_helpers.py`
 - `src/bioetl/application/services/lineage/metadata_assemblers.py`
 
 **Specific changes:**
+
 1. Rename `RuntimeMetadataProtocol` → `RuntimeMetadataPort`
-2. Rename `PipelineMetadataProtocol` → `PipelineMetadataPort`
-3. Update parameter names:
+1. Rename `PipelineMetadataProtocol` → `PipelineMetadataPort`
+1. Update parameter names:
    - `runtime_metadata_factory` → `runtime_metadata_port`
    - `pipeline_metadata_factory` → `pipeline_metadata_port`
-4. Update `__all__` exports
-5. Update docstrings
+1. Update `__all__` exports
+1. Update docstrings
 
 **Rationale:** Follows established pattern of using "Port" suffix for protocols/interfaces, removes misleading "Factory" implication.
 
@@ -52,13 +58,15 @@ This plan addresses naming inconsistencies where "Factory" aliases exist for Pro
 **Objective:** Ensure consistent usage of DomainEventEmitterPort
 
 **Files to modify:**
+
 - `src/bioetl/application/observability/domain_event_emitter.py`
 - All files importing domain event emitter
 
 **Specific changes:**
+
 1. Verify no `DomainEventEmitter` alias exists
-2. Ensure all imports use `DomainEventEmitterPort`
-3. Update type hints if needed
+1. Ensure all imports use `DomainEventEmitterPort`
+1. Update type hints if needed
 
 **Rationale:** Enforces consistent Port suffix usage.
 
@@ -67,14 +75,16 @@ This plan addresses naming inconsistencies where "Factory" aliases exist for Pro
 **Objective:** Standardize on single, semantically accurate name
 
 **Files to modify:**
+
 - `src/bioetl/application/services/execution/cli_run_orchestration_models.py`
 - All files importing these classes
 
 **Specific changes:**
+
 1. Remove `RunExecutionRequest` alias
-2. Rename `RunExecutionContext` → `RunExecutionRequest`
-3. Update all imports and type hints
-4. Update `__all__` export
+1. Rename `RunExecutionContext` → `RunExecutionRequest`
+1. Update all imports and type hints
+1. Update `__all__` export
 
 **Rationale:** `RunExecutionRequest` better describes CLI execution request semantics.
 
@@ -83,16 +93,17 @@ This plan addresses naming inconsistencies where "Factory" aliases exist for Pro
 **Objective:** Apply consistent naming patterns across similar cases
 
 **Patterns to standardize:**
+
 1. **CompositeRunnerDependencies/CompositeRunnerDependencyGroup** → Use plural form consistently
-2. **CompositePipelineFinalizationRequest/CompositePipelineFinalizationContext** → Choose consistent suffix
-3. **PolarsJoinAdapter/JoinExecutorService** → Remove misleading adapter alias or implement real adapter
+1. **CompositePipelineFinalizationRequest/CompositePipelineFinalizationContext** → Choose consistent suffix
+1. **PolarsJoinAdapter/JoinExecutorService** → Remove misleading adapter alias or implement real adapter
 
 ## Implementation Checklist
 
 ```markdown
 - [ ] Phase 1: Rename protocols to use "Port" suffix
   - [ ] Rename RuntimeMetadataProtocol → RuntimeMetadataPort
-  - [ ] Rename PipelineMetadataProtocol → PipelineMetadataPort  
+  - [ ] Rename PipelineMetadataProtocol → PipelineMetadataPort
   - [ ] Update parameter names (factory → port)
   - [ ] Update __all__ exports
   - [ ] Update docstrings
@@ -116,16 +127,19 @@ This plan addresses naming inconsistencies where "Factory" aliases exist for Pro
 ## Verification Steps
 
 1. **Static Analysis:**
+
    ```bash
    mypy --strict src/bioetl/
    ```
 
-2. **Testing:**
+1. **Testing:**
+
    ```bash
    pytest tests/ -x -q
    ```
 
-3. **Import Verification:**
+1. **Import Verification:**
+
    - Check no import errors
    - Verify all references updated
    - Confirm naming follows conventions
@@ -133,15 +147,16 @@ This plan addresses naming inconsistencies where "Factory" aliases exist for Pro
 ## Expected Benefits
 
 1. **Clarity:** Names accurately reflect actual implementation
-2. **Consistency:** Uniform use of "Port" suffix for protocols
-3. **Maintainability:** Reduced cognitive load from misleading aliases
-4. **Standards Compliance:** Aligns with project naming conventions
+1. **Consistency:** Uniform use of "Port" suffix for protocols
+1. **Maintainability:** Reduced cognitive load from misleading aliases
+1. **Standards Compliance:** Aligns with project naming conventions
 
 ## Risk Assessment
 
 **Risk Level:** Low
 
 **Mitigation:**
+
 - Changes are primarily renaming without behavior changes
 - Follows existing patterns in codebase
 - Comprehensive testing coverage
@@ -150,7 +165,7 @@ This plan addresses naming inconsistencies where "Factory" aliases exist for Pro
 ## Timeline Estimate
 
 - **Phase 1:** 1-2 hours
-- **Phase 2:** 30 minutes  
+- **Phase 2:** 30 minutes
 - **Phase 3:** 1-2 hours
 - **Phase 4:** 2-3 hours
 - **Total:** 5-7 hours

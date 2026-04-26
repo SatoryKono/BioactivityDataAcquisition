@@ -52,6 +52,7 @@ Rebaseline note: the current repo still supports stopping at the named runtime b
 ### Tension 1: Explicit instance threading is successful elsewhere, so should runtime adopt it too?
 
 **Evidence in tension**
+
 - `EV-provider-registry-explicit-instance-threading-already-pays-off-in-local-factory-seams`
 - `EV-provider-registry-runtime-callers-do-not-yet-own-provider-instance-lifecycle`
 
@@ -60,6 +61,7 @@ Rebaseline note: the current repo still supports stopping at the named runtime b
 ### Tension 2: If the default registry compatibility layer still exists, has the runtime problem really been solved?
 
 **Evidence in tension**
+
 - `EV-provider-registry-runtime-bootstrap-now-flows-through-named-seam`
 - `EV-provider-registry-runtime-ratchet-already-prevents-raw-regression`
 
@@ -84,5 +86,5 @@ Rebaseline note: the current repo still supports stopping at the named runtime b
 ## Top Insights
 
 1. The major runtime dependency problem has already been reduced to a visible, injectable seam. (`EV-provider-registry-runtime-bootstrap-now-flows-through-named-seam`)
-2. Tests and architecture guards now make that seam enforceable, not just descriptive. (`EV-provider-registry-runtime-tests-now-bind-to-the-named-bootstrap-seam`, `EV-provider-registry-runtime-ratchet-already-prevents-raw-regression`)
-3. Explicit `ProviderRegistry` instance ownership is currently a strong local-factory pattern, not yet a justified runtime/bootstrap pattern. (`EV-provider-registry-explicit-instance-threading-already-pays-off-in-local-factory-seams`, `EV-provider-registry-runtime-callers-do-not-yet-own-provider-instance-lifecycle`)
+1. Tests and architecture guards now make that seam enforceable, not just descriptive. (`EV-provider-registry-runtime-tests-now-bind-to-the-named-bootstrap-seam`, `EV-provider-registry-runtime-ratchet-already-prevents-raw-regression`)
+1. Explicit `ProviderRegistry` instance ownership is currently a strong local-factory pattern, not yet a justified runtime/bootstrap pattern. (`EV-provider-registry-explicit-instance-threading-already-pays-off-in-local-factory-seams`, `EV-provider-registry-runtime-callers-do-not-yet-own-provider-instance-lifecycle`)

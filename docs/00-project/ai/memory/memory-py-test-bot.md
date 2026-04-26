@@ -6,7 +6,7 @@
 
 > **Focus**: Test execution, coverage analysis, VCR management, failure classification, baseline/final/retest.
 
----
+______________________________________________________________________
 
 ## 1. Identity & Scope
 
@@ -38,7 +38,7 @@ When tests are added or changed alongside code:
   `configs/quality/debt_scorecard.yaml` and
   `configs/quality/architecture_metric_exemptions.yaml` semantics aligned.
 
----
+______________________________________________________________________
 
 ## 2. Test Directory Structure
 
@@ -61,33 +61,33 @@ tests/
         └── ...
 ```
 
----
+______________________________________________________________________
 
 ## 3. Quality Thresholds
 
-| Metric | Threshold | Action on Violation |
-|--------|:---------:|---------------------|
-| Coverage (overall) | >= 85% | MUST: add tests |
-| Coverage (domain) | >= 90% | MUST: add tests |
-| mypy errors | 0 | MUST: fix |
-| Architecture tests | 100% pass | MUST: fix |
-| New code without tests | 0 | MUST: add tests |
+| Metric                 | Threshold | Action on Violation |
+| ---------------------- | :-------: | ------------------- |
+| Coverage (overall)     |  >= 85%   | MUST: add tests     |
+| Coverage (domain)      |  >= 90%   | MUST: add tests     |
+| mypy errors            |     0     | MUST: fix           |
+| Architecture tests     | 100% pass | MUST: fix           |
+| New code without tests |     0     | MUST: add tests     |
 
----
+______________________________________________________________________
 
 ## 4. Test Selection Strategy
 
-| Changed Files | Tests to Run |
-|---------------|--------------|
-| `domain/**` | `tests/unit/domain/` + `tests/architecture/` |
-| `application/**` | `tests/unit/application/` + related integration |
+| Changed Files                         | Tests to Run                                                                       |
+| ------------------------------------- | ---------------------------------------------------------------------------------- |
+| `domain/**`                           | `tests/unit/domain/` + `tests/architecture/`                                       |
+| `application/**`                      | `tests/unit/application/` + related integration                                    |
 | `infrastructure/adapters/{provider}/` | `tests/unit/infrastructure/adapters/{provider}/` + `tests/integration/{provider}/` |
-| `composition/**` | `tests/unit/composition/` + `tests/architecture/` |
-| `interfaces/**` | `tests/unit/interfaces/` |
-| `configs/**` | `tests/integration/` (config validation) |
-| Any Python file | `make lint` first |
+| `composition/**`                      | `tests/unit/composition/` + `tests/architecture/`                                  |
+| `interfaces/**`                       | `tests/unit/interfaces/`                                                           |
+| `configs/**`                          | `tests/integration/` (config validation)                                           |
+| Any Python file                       | `make lint` first                                                                  |
 
----
+______________________________________________________________________
 
 ## 5. Execution Commands
 
@@ -114,7 +114,7 @@ mypy src/bioetl/path/to/module.py --strict
 make lint
 ```
 
----
+______________________________________________________________________
 
 ## 6. VCR.py Cassette Management
 
@@ -133,21 +133,21 @@ pytest tests/integration/ --vcr-record=none -v
 - Sanitize secrets in `before_record` callback
 - Re-record when API contract changes
 
----
+______________________________________________________________________
 
 ## 7. Failure Classification
 
-| Error Type | Diagnosis | Action |
-|------------|-----------|--------|
-| `AssertionError` | Logic bug, check expected vs actual | -> py-debug-bot |
-| `ImportError` | Missing dependency or circular import | Check layer boundaries |
-| `AttributeError` | API change or typo | Check signatures |
-| `TypeError` | Signature mismatch | Check type hints |
-| `ValidationError` | Schema violation (Pandera/Pydantic) | Check schema drift |
-| `ConnectionError` | Network/VCR cassette issue | Check VCR setup |
-| `TimeoutError` | Async timeout | Check async patterns |
+| Error Type        | Diagnosis                             | Action                 |
+| ----------------- | ------------------------------------- | ---------------------- |
+| `AssertionError`  | Logic bug, check expected vs actual   | -> py-debug-bot        |
+| `ImportError`     | Missing dependency or circular import | Check layer boundaries |
+| `AttributeError`  | API change or typo                    | Check signatures       |
+| `TypeError`       | Signature mismatch                    | Check type hints       |
+| `ValidationError` | Schema violation (Pandera/Pydantic)   | Check schema drift     |
+| `ConnectionError` | Network/VCR cassette issue            | Check VCR setup        |
+| `TimeoutError`    | Async timeout                         | Check async patterns   |
 
----
+______________________________________________________________________
 
 ## 8. Baseline Report Template
 
@@ -177,52 +177,55 @@ pytest tests/integration/ --vcr-record=none -v
 - **Status**: forwarded to py-debug-bot
 ```
 
----
+______________________________________________________________________
 
 ## 9. Test Writing Conventions
 
 ### Unit Tests
+
 - Arrange-Act-Assert pattern
 - No I/O, mock via DI (inject fakes)
 - Test edge cases and error paths
 - Use `pytest.mark.parametrize` for variants
 
 ### Integration Tests
+
 - VCR.py for HTTP (MANDATORY)
 - One cassette per test function
 - Test pagination, rate limiting, error responses
 
 ### Architecture Tests
+
 - Verify import boundaries
 - 1392 collected tests in `tests/architecture/`
 - Run after any layer boundary changes
 
----
+______________________________________________________________________
 
 ## 10. Integration with Other Agents
 
-| Event | Action |
-|-------|--------|
-| Plan ready (py-plan-bot) | -> test-bot (phase=baseline) |
-| Baseline FAIL | -> py-debug-bot with FAIL-* report |
-| Code complete (orchestrator/direct) | -> test-bot (phase=final) |
-| Final FAIL | -> py-debug-bot with FAIL-* report |
-| Fix applied (py-debug-bot) | -> test-bot (phase=retest) |
-| All tests pass | -> py-doc-bot + py-audit-bot (final) |
+| Event                               | Action                               |
+| ----------------------------------- | ------------------------------------ |
+| Plan ready (py-plan-bot)            | -> test-bot (phase=baseline)         |
+| Baseline FAIL                       | -> py-debug-bot with FAIL-\* report  |
+| Code complete (orchestrator/direct) | -> test-bot (phase=final)            |
+| Final FAIL                          | -> py-debug-bot with FAIL-\* report  |
+| Fix applied (py-debug-bot)          | -> test-bot (phase=retest)           |
+| All tests pass                      | -> py-doc-bot + py-audit-bot (final) |
 
----
+______________________________________________________________________
 
 ## 11. Key Files for Testing
 
-| What | Path |
-|------|------|
-| Test configuration | `pyproject.toml` (pytest section) |
-| Conftest (root) | `tests/conftest.py` |
-| VCR fixtures | `tests/fixtures/vcr/` |
-| Architecture tests | `tests/architecture/` |
+| What                | Path                                    |
+| ------------------- | --------------------------------------- |
+| Test configuration  | `pyproject.toml` (pytest section)       |
+| Conftest (root)     | `tests/conftest.py`                     |
+| VCR fixtures        | `tests/fixtures/vcr/`                   |
+| Architecture tests  | `tests/architecture/`                   |
 | Config gap analysis | `scripts/schema/config_gap_analysis.py` |
 
----
+______________________________________________________________________
 
 ## 12. Unified Script Commands (test & CI)
 
@@ -247,6 +250,6 @@ python -m scripts.engineering.dev run-tests                # Local test runner
 python -m scripts.engineering.dev test-changed             # Tests for changed files only
 ```
 
----
+______________________________________________________________________
 
 *This memory file is specific to py-test-bot. For general project context see `agent-memory.md`.*

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 0.3.0
 Status: draft
 Class: repo-only
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last synchronized: '2026-04-08'
----
+  Last synchronized: '2026-04-08'
+
+______________________________________________________________________
 
 # D-01 Governance & Style Guide (Draft Sync Note)
 
@@ -33,6 +36,5 @@ Last synchronized: '2026-04-08'
 ## Критерии промоушена в future published handbook
 
 1. Утверждён единый формат для всей серии D-01..D-06.
-2. Убрано дублирование норматива из D-серии; остаются только cross-source summary и decision-ready дельты.
-3. Для каждого раздела D-01 есть прямые ссылки на актуальные governance/policy страницы.
-
+1. Убрано дублирование норматива из D-серии; остаются только cross-source summary и decision-ready дельты.
+1. Для каждого раздела D-01 есть прямые ссылки на актуальные governance/policy страницы.

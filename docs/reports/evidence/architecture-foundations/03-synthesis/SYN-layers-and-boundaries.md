@@ -83,5 +83,5 @@
 ## Top Insights
 
 1. The repo still has a real five-layer architecture, not just a nominal one. (EV-layers-domain-pure-business-logic-no-io, EV-layers-application-owns-orchestration-and-services, EV-layers-infrastructure-hosts-adapters-storage-observability, EV-layers-composition-is-separate-di-root, EV-layers-interfaces-are-driving-adapters)
-2. `composition` is the key architectural hinge because it keeps assembly concerns out of application and interfaces. (EV-layers-composition-is-separate-di-root)
-3. The only meaningful policy ambiguity in the current layer model is how strict the project truly wants to be about interface-to-infrastructure coupling. (EV-layers-interfaces-are-driving-adapters, EV-layers-composition-is-separate-di-root)
+1. `composition` is the key architectural hinge because it keeps assembly concerns out of application and interfaces. (EV-layers-composition-is-separate-di-root)
+1. The only meaningful policy ambiguity in the current layer model is how strict the project truly wants to be about interface-to-infrastructure coupling. (EV-layers-interfaces-are-driving-adapters, EV-layers-composition-is-separate-di-root)

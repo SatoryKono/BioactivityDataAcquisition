@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.1.0
 Status: active
 Class: published
 Owner: Architecture / Domain
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-22'
----
+  Last verified: '2026-04-22'
+
+______________________________________________________________________
 
 # Normalization Plan P0-P6
 
@@ -47,15 +50,15 @@ The plan does not cover:
 These rules are mandatory for all phases.
 
 1. Normalize before hashing and before persistence.
-2. Canonical JSON is the only byte representation allowed before hashing.
-3. Canonical JSON uses `sort_keys=True` and `separators=(",", ":")`.
-4. Control-plane datetimes normalize to UTC ISO-8601 with trailing `Z`.
-5. SHA-256 fingerprints and content hashes serialize as lowercase hex strings.
-6. UUID values normalize to canonical string form.
-7. Domain normalization code remains pure: no I/O, no pandas, no HTTP, no hidden clock access.
-8. Order-sensitive lists preserve order by default.
-9. Only fields explicitly marked `set_like` are permutation-invariant for hashing.
-10. Technical meta fields do not participate in `content_hash`.
+1. Canonical JSON is the only byte representation allowed before hashing.
+1. Canonical JSON uses `sort_keys=True` and `separators=(",", ":")`.
+1. Control-plane datetimes normalize to UTC ISO-8601 with trailing `Z`.
+1. SHA-256 fingerprints and content hashes serialize as lowercase hex strings.
+1. UUID values normalize to canonical string form.
+1. Domain normalization code remains pure: no I/O, no pandas, no HTTP, no hidden clock access.
+1. Order-sensitive lists preserve order by default.
+1. Only fields explicitly marked `set_like` are permutation-invariant for hashing.
+1. Technical meta fields do not participate in `content_hash`.
 
 ## 2026-04-21 Data Normalization Audit Closure
 
@@ -181,19 +184,19 @@ UUID-like values normalize through canonical string conversion.
 
 ## Current Main Seams
 
-| Concern | Current seam | Current behavior on `main` |
-| --- | --- | --- |
-| Control-plane domain normalization | [control_plane.py](../../src/bioetl/domain/normalization/control_plane.py) | Pure helpers for manifest specs, ledger payloads, UUIDs, datetimes, set-like collections, canonical execution identity, and degraded runtime anchors |
-| Hash-identity domain normalization | [hash_identity.py](../../src/bioetl/domain/normalization/hash_identity.py) | Pure helpers for `content_hash` and content-aware dedup identity, including the current date-only datetime contract |
-| Manifest fingerprint | [run_manifest_service.py](../../src/bioetl/application/services/control_plane/run_manifest_service.py) | Calls `normalize_run_manifest_spec()`, then canonical JSON, then SHA-256 |
-| Ledger persist payload | [run_ledger_service.py](../../src/bioetl/application/services/control_plane/run_ledger_service.py) | Calls `normalize_run_ledger_payload()` before append |
-| Record-level normalization | [record_normalization_processor.py](../../src/bioetl/application/core/record_normalization_processor.py) | Uses `NormalizationProfile` when available, otherwise falls back to legacy heuristics |
-| Profile framework | [base.py](../../src/bioetl/domain/normalization/profiles/base.py) | Defines `FieldRule` and `NormalizationProfile` with `include_in_hash` and `set_like` |
-| Shipped profile registry | [registry.py](../../src/bioetl/domain/normalization/profiles/registry.py) | Registers shipped profiles for `chembl.activity`, `chembl.assay`, `chembl.assay_parameters`, `chembl.cell_line`, `chembl.compound_record`, `chembl.molecule`, `chembl.protein_class`, `chembl.publication`, `chembl.publication_similarity`, `chembl.publication_term`, `chembl.subcellular_fraction`, `chembl.target`, `chembl.target_component`, `chembl.tissue`, `crossref.publication`, `openalex.publication`, `pubchem.compound`, `pubmed.publication`, `semanticscholar.publication`, `uniprot.idmapping`, and `uniprot.protein` |
-| Join-key domain policies | [join_keys.py](../../src/bioetl/domain/normalization/join_keys.py) | Pure scalar join-key policies for canonical trim/casing behavior |
-| Join-key application adapters | [join_key_normalization.py](../../src/bioetl/application/composite/join_key_normalization.py) | Applies canonical join-key policies to composite runtime/config and DataFrame-oriented flows |
-| Matrix generation | [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py) | Deterministically emits multi-pipeline CSV and MD artifacts from schemas, profiles, fallback rules, and join-key seams |
-| Fallback inventory | [report_normalization_fallback_inventory.py](../../scripts/engineering/qa/report_normalization_fallback_inventory.py) | Reports `fallback_business` vs `fallback_technical_passthrough` debt from the published matrix for governance and ratchets |
+| Concern                            | Current seam                                                                                                          | Current behavior on `main`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Control-plane domain normalization | [control_plane.py](../../src/bioetl/domain/normalization/control_plane.py)                                            | Pure helpers for manifest specs, ledger payloads, UUIDs, datetimes, set-like collections, canonical execution identity, and degraded runtime anchors                                                                                                                                                                                                                                                                                                                                                                                    |
+| Hash-identity domain normalization | [hash_identity.py](../../src/bioetl/domain/normalization/hash_identity.py)                                            | Pure helpers for `content_hash` and content-aware dedup identity, including the current date-only datetime contract                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Manifest fingerprint               | [run_manifest_service.py](../../src/bioetl/application/services/control_plane/run_manifest_service.py)                | Calls `normalize_run_manifest_spec()`, then canonical JSON, then SHA-256                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Ledger persist payload             | [run_ledger_service.py](../../src/bioetl/application/services/control_plane/run_ledger_service.py)                    | Calls `normalize_run_ledger_payload()` before append                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Record-level normalization         | [record_normalization_processor.py](../../src/bioetl/application/core/record_normalization_processor.py)              | Uses `NormalizationProfile` when available, otherwise falls back to legacy heuristics                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Profile framework                  | [base.py](../../src/bioetl/domain/normalization/profiles/base.py)                                                     | Defines `FieldRule` and `NormalizationProfile` with `include_in_hash` and `set_like`                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Shipped profile registry           | [registry.py](../../src/bioetl/domain/normalization/profiles/registry.py)                                             | Registers shipped profiles for `chembl.activity`, `chembl.assay`, `chembl.assay_parameters`, `chembl.cell_line`, `chembl.compound_record`, `chembl.molecule`, `chembl.protein_class`, `chembl.publication`, `chembl.publication_similarity`, `chembl.publication_term`, `chembl.subcellular_fraction`, `chembl.target`, `chembl.target_component`, `chembl.tissue`, `crossref.publication`, `openalex.publication`, `pubchem.compound`, `pubmed.publication`, `semanticscholar.publication`, `uniprot.idmapping`, and `uniprot.protein` |
+| Join-key domain policies           | [join_keys.py](../../src/bioetl/domain/normalization/join_keys.py)                                                    | Pure scalar join-key policies for canonical trim/casing behavior                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Join-key application adapters      | [join_key_normalization.py](../../src/bioetl/application/composite/join_key_normalization.py)                         | Applies canonical join-key policies to composite runtime/config and DataFrame-oriented flows                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Matrix generation                  | [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py) | Deterministically emits multi-pipeline CSV and MD artifacts from schemas, profiles, fallback rules, and join-key seams                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Fallback inventory                 | [report_normalization_fallback_inventory.py](../../scripts/engineering/qa/report_normalization_fallback_inventory.py) | Reports `fallback_business` vs `fallback_technical_passthrough` debt from the published matrix for governance and ratchets                                                                                                                                                                                                                                                                                                                                                                                                              |
 
 ## Hash Boundaries
 
@@ -206,9 +209,9 @@ Canonical manifest path:
 Current algorithm on `main`:
 
 1. build primitive manifest payload
-2. call `normalize_run_manifest_spec(...)`
-3. call `serialize_json_canonical(...)`
-4. compute `hashlib.sha256(...).hexdigest()`
+1. call `normalize_run_manifest_spec(...)`
+1. call `serialize_json_canonical(...)`
+1. compute `hashlib.sha256(...).hexdigest()`
 
 Current payload scope includes:
 
@@ -251,11 +254,11 @@ Canonical record path:
 Current algorithm on `main`:
 
 1. normalize record through profile or fallback rules
-2. resolve include/exclude policy
-3. pass `set_like_fields` from the profile when present
-4. normalize hash identity through the explicit domain seam in `hash_identity.py`
-5. canonicalize record for hashing through the same hash-identity contract
-6. compute `sha256(provider + canonical_json(normalized_record)).hexdigest()`
+1. resolve include/exclude policy
+1. pass `set_like_fields` from the profile when present
+1. normalize hash identity through the explicit domain seam in `hash_identity.py`
+1. canonicalize record for hashing through the same hash-identity contract
+1. compute `sha256(provider + canonical_json(normalized_record)).hexdigest()`
 
 Hash-identity note:
 
@@ -363,17 +366,17 @@ Generated inventory contract:
 
 Governed field-family visibility:
 
-| Family | Profile source | Schema/DQ visibility | Hash/migration note |
-| --- | --- | --- | --- |
-| ChEMBL strict enum and operator fields | `enum_fields`, special enum/operator rules, and `configs/enums/chembl.yaml` | `tests/contract/test_chembl_enum_normalization_policy.py` verifies profile/schema/DQ/filter alignment for strict ChEMBL enum fields | Invalid values collapse before `content_hash`; canonical enum casing may change hashes for previously dirty values |
-| Derived publication term enums | `PUBLICATION_TERM_TYPES`, `configs/enums/chembl.yaml`, and `CHEMBL_PUBLICATION_TERM_PROFILE` | `tests/unit/domain/normalization/profiles/test_chembl_publication_term.py` verifies valid/lowercase/whitespace/invalid `term_type`; matrix rows expose schema and DQ coverage | `term_type` casing and invalid-value collapse can change hashes for previously dirty derived publication-term rows |
-| ChEMBL activity flags | `flag_fields` on `chembl.activity` | `tests/contract/test_chembl_activity_flag_policy.py` verifies profile/schema/DQ range alignment for `standard_flag`, `potential_duplicate`, and `manual_curation_flag` | Persisted canonical values are integer `0`/`1`; molecule binary-like fields remain separately governed by their current profile/schema contracts |
-| DOI/PMID/PMC identifiers | `doi_fields`, `pmid_fields`, and `pmc_id_fields` | `tests/contract/test_normalization_cross_layer_contracts.py` verifies helper, value-object, schema, profile, and processor convergence for publication identifiers | Canonical identifier cleanup can change hashes for dirty casing, URL prefixes, leading zeros, or PMC prefix variants |
-| JSON/list canonicalization | `json_string_fields` plus `set_like_fields` | Matrix `hash_ordering` exposes `set_like` versus `order_sensitive`; cross-layer tests verify set-like hash invariance | Only explicit `set_like` fields are permutation-invariant; order-sensitive lists continue to affect `content_hash` |
-| Boolean, flag, operator, and unit families | `boolean_fields`, `flag_fields`, `operator_fields`, and `unit_fields` | Matrix `strictness`, `schema_coverage`, and `dq_coverage` expose whether schema/DQ also validates the field | Invalid operational values either collapse to `None` before hashing or are rejected by schema/DQ where configured |
-| Ontology identifiers and BAO fields | `ontology_id_fields` plus BAO-specific profile rules | Matrix rows expose `domain.normalization.ontology_id_prefixes` as the vocabulary seam | OBO IRIs, lowercase prefixes, BAO colon forms, and numeric suffix variants canonicalize before hashing |
-| Composite-sensitive source fields | Composite matrix inventory and `COMPOSITE_SENSITIVE_SOURCE_FIELDS` | `tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py` verifies join-key policy coverage and source-profile coverage for propagated control fields | Composite outputs inherit source-profile canonical forms; source normalization changes can affect merged records and hashes for dirty upstream values |
-| Pseudo-null collapse | provider pseudo-null field sets | Matrix `strictness=normalization_only` and field notes identify collapse-to-`None` behavior | Collapsing sentinel values to `None` changes hashes only for records that previously carried pseudo-null text |
+| Family                                     | Profile source                                                                               | Schema/DQ visibility                                                                                                                                                          | Hash/migration note                                                                                                                                   |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ChEMBL strict enum and operator fields     | `enum_fields`, special enum/operator rules, and `configs/enums/chembl.yaml`                  | `tests/contract/test_chembl_enum_normalization_policy.py` verifies profile/schema/DQ/filter alignment for strict ChEMBL enum fields                                           | Invalid values collapse before `content_hash`; canonical enum casing may change hashes for previously dirty values                                    |
+| Derived publication term enums             | `PUBLICATION_TERM_TYPES`, `configs/enums/chembl.yaml`, and `CHEMBL_PUBLICATION_TERM_PROFILE` | `tests/unit/domain/normalization/profiles/test_chembl_publication_term.py` verifies valid/lowercase/whitespace/invalid `term_type`; matrix rows expose schema and DQ coverage | `term_type` casing and invalid-value collapse can change hashes for previously dirty derived publication-term rows                                    |
+| ChEMBL activity flags                      | `flag_fields` on `chembl.activity`                                                           | `tests/contract/test_chembl_activity_flag_policy.py` verifies profile/schema/DQ range alignment for `standard_flag`, `potential_duplicate`, and `manual_curation_flag`        | Persisted canonical values are integer `0`/`1`; molecule binary-like fields remain separately governed by their current profile/schema contracts      |
+| DOI/PMID/PMC identifiers                   | `doi_fields`, `pmid_fields`, and `pmc_id_fields`                                             | `tests/contract/test_normalization_cross_layer_contracts.py` verifies helper, value-object, schema, profile, and processor convergence for publication identifiers            | Canonical identifier cleanup can change hashes for dirty casing, URL prefixes, leading zeros, or PMC prefix variants                                  |
+| JSON/list canonicalization                 | `json_string_fields` plus `set_like_fields`                                                  | Matrix `hash_ordering` exposes `set_like` versus `order_sensitive`; cross-layer tests verify set-like hash invariance                                                         | Only explicit `set_like` fields are permutation-invariant; order-sensitive lists continue to affect `content_hash`                                    |
+| Boolean, flag, operator, and unit families | `boolean_fields`, `flag_fields`, `operator_fields`, and `unit_fields`                        | Matrix `strictness`, `schema_coverage`, and `dq_coverage` expose whether schema/DQ also validates the field                                                                   | Invalid operational values either collapse to `None` before hashing or are rejected by schema/DQ where configured                                     |
+| Ontology identifiers and BAO fields        | `ontology_id_fields` plus BAO-specific profile rules                                         | Matrix rows expose `domain.normalization.ontology_id_prefixes` as the vocabulary seam                                                                                         | OBO IRIs, lowercase prefixes, BAO colon forms, and numeric suffix variants canonicalize before hashing                                                |
+| Composite-sensitive source fields          | Composite matrix inventory and `COMPOSITE_SENSITIVE_SOURCE_FIELDS`                           | `tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py` verifies join-key policy coverage and source-profile coverage for propagated control fields         | Composite outputs inherit source-profile canonical forms; source normalization changes can affect merged records and hashes for dirty upstream values |
+| Pseudo-null collapse                       | provider pseudo-null field sets                                                              | Matrix `strictness=normalization_only` and field notes identify collapse-to-`None` behavior                                                                                   | Collapsing sentinel values to `None` changes hashes only for records that previously carried pseudo-null text                                         |
 
 Verification commands for this closure:
 

@@ -31,11 +31,11 @@ $wt = Get-Command wt -ErrorAction SilentlyContinue
 if ($wt) {
     Write-Host "[i] Opening Windows Terminal with Vibe..."
     Write-Host ""
-    
+
     # Open new tab with wsl and run vibe
     $cmd = "wsl -d $WslDistro -e bash -i -c 'cd $ScriptPathWSL && bash run-vibe.sh start'"
     & wt -w 0 nt -d $ScriptDir pwsh -NoExit -Command $cmd
-    
+
     exit $LASTEXITCODE
 }
 
@@ -53,7 +53,7 @@ try {
         -ArgumentList "-d", $WslDistro, "-e", "bash", "-i", "-c", "cd '$ScriptPathWSL' && bash run-vibe.sh start" `
         -NoNewWindow `
         -PassThru
-    
+
     $process.WaitForExit()
     exit $process.ExitCode
 } catch {

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-26'
----
+  Last verified: '2026-03-26'
+
+______________________________________________________________________
 
 # Composite Validation Service
 
@@ -46,17 +49,20 @@ Returns `CompositeValidationReport` with:
 ## Validation flow
 
 1. Structural validation
+
 - schema shape checks for required top-level fields:
   - `sources`
   - `merge_strategy`
   - `output_schema`
 
 2. Deep preflight validation
+
 - aggregation config validation via `AggregationValidator`
 - cross-validation config validation via `CrossValidationValidator`
 - field priorities and lineage config checks
 
 3. Governance application
+
 - apply configured governance policy to produced validation report
 - return final `execution_decision`
 

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Data Quality Contract System
 
@@ -45,42 +48,47 @@ graph TD
 ### 1. DQ Contract Types
 
 #### DQDisposition
+
 Defines how data quality violations should be handled:
 
 ```python
 class DQDisposition(StrEnum):
-    FAIL = "fail"          # Pipeline fails on violation
-    WARN = "warn"          # Log warning but continue processing
+    FAIL = "fail"  # Pipeline fails on violation
+    WARN = "warn"  # Log warning but continue processing
     QUARANTINE = "quarantine"  # Isolate problematic data for review
 ```
 
 #### DQViolationKind
+
 Categorizes types of data quality violations:
 
 ```python
 class DQViolationKind(StrEnum):
-    SCHEMA = "schema"      # Structural validation failures
-    CONTENT = "content"    # Data quality rule violations
+    SCHEMA = "schema"  # Structural validation failures
+    CONTENT = "content"  # Data quality rule violations
     CONSISTENCY = "consistency"  # Cross-source inconsistencies
     PROVENANCE = "provenance"  # Lineage/tracking issues
 ```
 
 #### DQPolicyRef
+
 References specific DQ policies:
 
 ```python
 class DQPolicyRef(NamedTuple):
-    contract_id: str        # Unique contract identifier
-    version: str            # Contract version
+    contract_id: str  # Unique contract identifier
+    version: str  # Contract version
     severity: DQDisposition = DQDisposition.FAIL  # Default disposition
 ```
 
 ### 2. Contract Validation Layers
 
 #### Schema Validation
+
 - **Purpose**: Validate data structure against JSON Schema
 - **Rules**: Required fields, data types, nested structures
 - **Example**:
+
 ```yaml
 schema_validation:
   version: "2.1"
@@ -93,9 +101,11 @@ schema_validation:
 ```
 
 #### Content Validation
+
 - **Purpose**: Validate data quality and business rules
 - **Rules**: Range checks, pattern matching, enumerations
 - **Example**:
+
 ```yaml
 content_validation:
   version: "1.3"
@@ -110,9 +120,11 @@ content_validation:
 ```
 
 #### Consistency Validation
+
 - **Purpose**: Validate data consistency across sources
 - **Rules**: Cross-source comparisons, tolerance thresholds
 - **Example**:
+
 ```yaml
 consistency_validation:
   version: "1.0"
@@ -125,9 +137,11 @@ consistency_validation:
 ```
 
 #### Provenance Validation
+
 - **Purpose**: Validate data lineage and audit trails
 - **Rules**: Source tracking, transformation history
 - **Example**:
+
 ```yaml
 provenance_validation:
   version: "1.0"
@@ -152,23 +166,22 @@ Global Fallback Policy
 ```
 
 **Example:**
+
 ```python
 from bioetl.domain.services.dq_policy_resolver import DQPolicyResolver
 
 resolver = DQPolicyResolver()
 policy = resolver.resolve_policy(
-    contract_ref=DQPolicyRef(
-        contract_id="molecule_schema_validation",
-        version="2.1"
-    ),
+    contract_ref=DQPolicyRef(contract_id="molecule_schema_validation", version="2.1"),
     entity_type="molecule",
-    pipeline_context={"provider": "chembl", "environment": "production"}
+    pipeline_context={"provider": "chembl", "environment": "production"},
 )
 ```
 
 ### 4. Configuration Runtime Artifacts
 
 #### EffectiveConfigArtifact
+
 Immutable snapshot of complete pipeline configuration:
 
 ```yaml
@@ -191,6 +204,7 @@ effective_config:
 ```
 
 **Usage:**
+
 ```python
 from bioetl.domain.services.effective_config_service import EffectiveConfigService
 
@@ -210,8 +224,7 @@ config_hash = config_artifact.compute_hash()
 
 # Check compatibility
 compatible = service.is_checkpoint_compatible(
-    saved_hash="a1b2c3...",
-    current_config=current_config
+    saved_hash="a1b2c3...", current_config=current_config
 )
 ```
 
@@ -220,7 +233,9 @@ compatible = service.is_checkpoint_compatible(
 Manages backward compatibility during breaking changes:
 
 ```python
-from bioetl.domain.services.phased_migration_support import PhasedMigrationSupportService
+from bioetl.domain.services.phased_migration_support import (
+    PhasedMigrationSupportService,
+)
 
 service = PhasedMigrationSupportService()
 
@@ -231,15 +246,12 @@ print(f"Current version: {status.current_version}")
 
 # Check backward compatibility
 compatibility = service.check_backward_compatibility(
-    config={"aggregation": {"group_by": ["field1"]}},
-    target_phase="v1.1"
+    config={"aggregation": {"group_by": ["field1"]}}, target_phase="v1.1"
 )
 
 # Apply migration fallbacks
 modified_config, warnings = service.apply_migration_fallback(
-    config={"aggregation": {}},
-    target_phase="v1.0",
-    fallback_behavior="warn"
+    config={"aggregation": {}}, target_phase="v1.0", fallback_behavior="warn"
 )
 
 # Get migration guide
@@ -268,8 +280,8 @@ config = CompositeValidationConfig(
     composite_config={
         "sources": ["chembl", "pubchem"],
         "merge_strategy": "prioritize",
-        "dq_contracts": contracts
-    }
+        "dq_contracts": contracts,
+    },
 )
 
 # Run validation
@@ -328,70 +340,79 @@ dq_contracts:
 ### Optimization Techniques
 
 1. **Caching**: Policy resolution results cached for repeated calls
-2. **Parallel Validation**: Independent validations run concurrently
-3. **Lazy Loading**: DQ contracts loaded only when needed
-4. **Incremental Validation**: Only changed data re-validated
+1. **Parallel Validation**: Independent validations run concurrently
+1. **Lazy Loading**: DQ contracts loaded only when needed
+1. **Incremental Validation**: Only changed data re-validated
 
 ### Performance Metrics
 
-| Operation | Typical Time | Optimization Potential |
-|-----------|--------------|-----------------------|
-| Policy Resolution | 5-10ms | Caching, batching |
-| Schema Validation | 10-50ms | Parallel processing |
-| Content Validation | 20-100ms | Rule optimization |
-| Consistency Validation | 50-200ms | Indexing, caching |
-| Configuration Serialization | 1-5ms | Efficient encoding |
+| Operation                   | Typical Time | Optimization Potential |
+| --------------------------- | ------------ | ---------------------- |
+| Policy Resolution           | 5-10ms       | Caching, batching      |
+| Schema Validation           | 10-50ms      | Parallel processing    |
+| Content Validation          | 20-100ms     | Rule optimization      |
+| Consistency Validation      | 50-200ms     | Indexing, caching      |
+| Configuration Serialization | 1-5ms        | Efficient encoding     |
 
 ## Troubleshooting
 
 ### Common Issues
 
 #### DQ Policy Not Found
+
 **Symptoms**: `PolicyNotFoundError` during pipeline execution
 
 **Solutions**:
+
 1. Verify contract exists in registry
-2. Check version compatibility
-3. Review fallback policies
-4. Update configuration files
+1. Check version compatibility
+1. Review fallback policies
+1. Update configuration files
 
 #### Configuration Hash Mismatch
+
 **Symptoms**: Checkpoint compatibility failures
 
 **Solutions**:
+
 1. Regenerate configuration artifacts
-2. Check for uncommitted config changes
-3. Review migration status
-4. Update checkpoint references
+1. Check for uncommitted config changes
+1. Review migration status
+1. Update checkpoint references
 
 #### Performance Degradation
+
 **Symptoms**: Slow pipeline execution
 
 **Solutions**:
+
 1. Enable caching for policy resolution
-2. Review validation rules complexity
-3. Check for redundant validations
-4. Optimize cross-source comparisons
+1. Review validation rules complexity
+1. Check for redundant validations
+1. Optimize cross-source comparisons
 
 ## Best Practices
 
 ### Contract Design
+
 1. **Start Simple**: Begin with basic schema validation
-2. **Add Gradually**: Introduce content and consistency rules incrementally
-3. **Version Carefully**: Use semantic versioning for contracts
-4. **Document Thoroughly**: Include examples and rationale
+1. **Add Gradually**: Introduce content and consistency rules incrementally
+1. **Version Carefully**: Use semantic versioning for contracts
+1. **Document Thoroughly**: Include examples and rationale
 
 ### Configuration Management
+
 1. **Use Source Control**: Track all configuration changes
-2. **Version Configurations**: Maintain history of config changes
-3. **Test Configurations**: Validate before deployment
-4. **Monitor Performance**: Track validation overhead
+1. **Version Configurations**: Maintain history of config changes
+1. **Test Configurations**: Validate before deployment
+1. **Monitor Performance**: Track validation overhead
 
 ### Migration Strategy
+
 1. **Plan Ahead**: Schedule migrations during low-traffic periods
-2. **Test Thoroughly**: Validate backward compatibility
-3. **Monitor Closely**: Watch for unexpected issues
-4. **Communicate Clearly**: Notify all stakeholders
+1. **Test Thoroughly**: Validate backward compatibility
+1. **Monitor Closely**: Watch for unexpected issues
+1. **Communicate Clearly**: Notify all stakeholders
 
 ## Related Components
 

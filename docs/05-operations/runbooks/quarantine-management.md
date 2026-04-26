@@ -1,14 +1,17 @@
----
+______________________________________________________________________
+
 Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Priority: P2
-Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-04-05'
----
+  Priority: P2
+  Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+  Last verified: '2026-04-05'
+
+______________________________________________________________________
 
 # Quarantine Management
 
@@ -38,12 +41,15 @@ Last verified: '2026-04-05'
 ### Routine Tasks (Weekly)
 
 ### 1. Inspect Quarantine
+
 - Review new errors to identify systemic issues.
+
 ```bash
 bioetl quarantine inspect --pipeline {pipeline-name} --limit 50
 ```
 
 - For Silver-only triage, start with:
+
 ```bash
 bioetl quarantine stats --pipeline {pipeline-name} --silver-filter-only
 bioetl quarantine stats --pipeline {pipeline-name} --silver-filter-only --group-by reason-code-field
@@ -52,12 +58,14 @@ bioetl quarantine inspect --pipeline {pipeline-name} --silver-filter-only --limi
 
 - If you are investigating one concrete run and need a trustworthy Bronze denominator,
   use run-scoped mode:
+
 ```bash
 bioetl quarantine stats --pipeline {pipeline-name} --silver-filter-only --run-id {run-id}
 bioetl quarantine inspect --pipeline {pipeline-name} --silver-filter-only --run-id {run-id} --limit 20
 ```
 
 - `stats --silver-filter-only` is the fastest way to see:
+
   - total Silver rejects;
   - top `reason_code`;
   - top rejected `field`;
@@ -73,6 +81,7 @@ bioetl quarantine inspect --pipeline {pipeline-name} --silver-filter-only --run-
   written after the provenance update.
 
 - Если нужен один операторский pivot без визуального шума, используйте:
+
   - `--group-by reason-code`
   - `--group-by field`
   - `--group-by rule-type`
@@ -90,22 +99,29 @@ bioetl quarantine inspect --pipeline {pipeline-name} --silver-filter-only --run-
   `field`, `operator`, `expected`, `actual`, and the original payload.
 
 ### 2. Triage Errors
+
 - **Systemic Error**: Bug in parser or schema. -> **Fix Code**.
 - **Data Error**: Source data is bad. -> **Contact Provider** or **Ignore**.
 - **Transient Error**: Network glitch during validation. -> **Replay**.
 
 ### 3. Replay Records
+
 - After fixing a bug, replay quarantined records.
+
 ```bash
 bioetl quarantine replay --pipeline {pipeline-name}
 ```
+
 - *Note: Replay targets records with `dq_status='NEW'` and marks processed records as `REPROCESSED`.*
 
 ### 4. Purge Garbage
+
 - Remove records that cannot be recovered.
+
 ```bash
 bioetl quarantine purge --pipeline {pipeline-name}
 ```
+
 - *Note: Purge deletes old records from the Delta quarantine table.*
 
 ### Metrics
@@ -128,10 +144,10 @@ bioetl quarantine purge --pipeline {pipeline-name}
 
 1. Open `1. Overview` or `2. Runtime` and confirm that `Silver Filter Rejects`
    is actually spiking in the active Grafana time window.
-2. Pivot to `4. Data Quality` and inspect `Top Silver Reject Reasons` plus
+1. Pivot to `4. Data Quality` and inspect `Top Silver Reject Reasons` plus
    `Top Silver Reject Fields` to reduce the issue to a bounded cause summary.
-3. Open `5. Silver Reject Explorer` for exact record-level evidence and selected-record context.
-4. Run `bioetl quarantine inspect ... --silver-filter-only` /
+1. Open `5. Silver Reject Explorer` for exact record-level evidence and selected-record context.
+1. Run `bioetl quarantine inspect ... --silver-filter-only` /
    `bioetl quarantine resolve ...` when you need operator action in CLI.
 
 ### Retention

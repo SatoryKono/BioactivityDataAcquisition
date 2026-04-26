@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-12'
----
+  Last verified: '2026-04-12'
+
+______________________________________________________________________
 
 # Audit Instance - Implementation & Verification
 
@@ -15,22 +18,26 @@ Last verified: '2026-04-12'
 ### Files
 
 1. ✅ **docker-compose.neo4j-audit.yml**
+
    - Separate Neo4j instance for audit workload
    - Memory: 512m initial, 1024m max (4x MCP instance)
    - Ports: 7475 (HTTP), 7688 (Bolt)
    - Auth: neo4j / audit_secure_password
 
-2. ✅ **scripts/ops/runtime/neo4j/start-neo4j-audit.ps1**
+1. ✅ **scripts/ops/runtime/neo4j/start-neo4j-audit.ps1**
+
    - PowerShell script to manage audit instance
    - Start: `.\scripts\ops\start-neo4j-audit.ps1`
    - Stop: `.\scripts\ops\start-neo4j-audit.ps1 -Stop`
    - Logs: `.\scripts\ops\start-neo4j-audit.ps1 -Logs`
 
-3. ✅ **scripts/ops/runtime/neo4j/start-neo4j-audit.sh**
+1. ✅ **scripts/ops/runtime/neo4j/start-neo4j-audit.sh**
+
    - Bash version for WSL/Linux
    - Same functionality as PowerShell version
 
-4. ✅ **src/tools/neo4j_audit.py**
+1. ✅ **src/tools/neo4j_audit.py**
+
    - Helper functions for context-aware Neo4j connection
    - Automatically uses audit instance if LIVE_AUDIT_MODE=1
    - Functions:
@@ -39,12 +46,13 @@ Last verified: '2026-04-12'
      - `is_audit_mode()` - Check if in audit mode
      - `get_heap_info()` - Get memory info
 
-5. ✅ **NEO4J_AUDIT_INSTANCE_GUIDE.md**
+1. ✅ **NEO4J_AUDIT_INSTANCE_GUIDE.md**
+
    - Complete user guide for audit instance
    - Step-by-step instructions
    - Troubleshooting
 
----
+______________________________________________________________________
 
 ## Implementation Checklist
 
@@ -59,21 +67,21 @@ Last verified: '2026-04-12'
 If Neo4j is used in live audit code:
 
 **Before**:
+
 ```python
-driver = neo4j.driver('bolt://localhost:7687', auth=(...))
+driver = neo4j.driver("bolt://localhost:7687", auth=(...))
 ```
 
 **After**:
+
 ```python
 from src.tools.neo4j_audit import get_neo4j_uri, get_neo4j_auth
 
-driver = neo4j.driver(
-    get_neo4j_uri(),
-    neo4j.auth.basic(*get_neo4j_auth())
-)
+driver = neo4j.driver(get_neo4j_uri(), neo4j.auth.basic(*get_neo4j_auth()))
 ```
 
 Search for Neo4j connection code and update:
+
 ```bash
 grep -r "bolt://localhost:7687" src/
 grep -r "neo4j.driver" src/
@@ -82,11 +90,13 @@ grep -r "neo4j.driver" src/
 ### Testing (15 minutes)
 
 1. **Start audit instance**:
+
    ```powershell
    .\scripts\ops\start-neo4j-audit.ps1
    ```
 
-2. **Run test query**:
+1. **Run test query**:
+
    ```powershell
    $body = @{statements = @(@{statement = "RETURN 1 as test"})} | ConvertTo-Json
    curl.exe -u neo4j:audit_secure_password -X POST `
@@ -94,27 +104,33 @@ grep -r "neo4j.driver" src/
      -d $body `
      http://localhost:7475/db/neo4j/tx
    ```
+
    Expected: JSON response with result
 
-3. **Run live validation**:
+1. **Run live validation**:
+
    ```bash
    set LIVE_AUDIT_MODE=1
    live --apply --only-complexity-layer --batch-size 5
    ```
+
    Expected: Completes without OOMKilled
 
-4. **Verify no OOMKilled**:
+1. **Verify no OOMKilled**:
+
    ```powershell
    docker inspect bioetl-neo4j-audit --format='{{json .State.OOMKilled}}'
    ```
+
    Expected: false
 
-5. **Stop instance**:
+1. **Stop instance**:
+
    ```powershell
    .\scripts\ops\start-neo4j-audit.ps1 -Stop
    ```
 
----
+______________________________________________________________________
 
 ## Performance Expectations
 
@@ -138,7 +154,7 @@ Query execution:        ~1-2s
 Total:                  ~165-170s per audit run
 ```
 
----
+______________________________________________________________________
 
 ## Two-Instance Architecture
 
@@ -159,7 +175,7 @@ Total:                  ~165-170s per audit run
          Snapshot + graph operations
 ```
 
----
+______________________________________________________________________
 
 ## Failure Modes & Recovery
 
@@ -203,17 +219,19 @@ echo $env:LIVE_AUDIT_MODE  # Should be: 1
 # (not hardcoded localhost:7687)
 ```
 
----
+______________________________________________________________________
 
 ## Monitoring During Live Validation
 
 ### Terminal 1: Run Live Validation
+
 ```bash
 set LIVE_AUDIT_MODE=1
 live --report-fast
 ```
 
 ### Terminal 2: Monitor Memory
+
 ```powershell
 # Continuous stats
 docker stats bioetl-neo4j-audit --interval 1
@@ -223,20 +241,23 @@ docker stats bioetl-neo4j-audit --no-stream
 ```
 
 ### Terminal 3: Tail Logs
+
 ```powershell
 .\scripts\ops\start-neo4j-audit.ps1 -Logs
 ```
 
----
+______________________________________________________________________
 
 ## Integration with Issue #2795
 
 ### Current Status
+
 - ✅ Python code optimized (98s snapshot, 1.8-15s analysis)
 - ❌ Previous: OOMKilled on first Neo4j query
 - ✅ Solution: Separate 1024m audit instance
 
 ### Expected Outcome After Integration
+
 ```
 live --report-fast
 # ... build_snapshot: 98s ...
@@ -251,33 +272,33 @@ live --report-fast
 
 "Python sync code is optimized. Live validation now reaches snapshot building (98s) and analysis operations (1.8-15s). Previous OOMKilled failures were due to container memory limits. Solution: Use separate neo4j-audit instance with 1024m heap for heavy workload. See NEO4J_AUDIT_INSTANCE_GUIDE.md for setup."
 
----
+______________________________________________________________________
 
 ## Next Steps
 
 1. **Code review**: Check if Neo4j connection code needs updates
-2. **Test**: Run `start-neo4j-audit.ps1` and verify basic connectivity
-3. **Integration**: Update live audit code to use `get_neo4j_uri()`
-4. **Validation**: Run live validation with LIVE_AUDIT_MODE=1
-5. **Verification**: Confirm no OOMKilled errors
-6. **Commit**: Add files to repo and document in #2795
+1. **Test**: Run `start-neo4j-audit.ps1` and verify basic connectivity
+1. **Integration**: Update live audit code to use `get_neo4j_uri()`
+1. **Validation**: Run live validation with LIVE_AUDIT_MODE=1
+1. **Verification**: Confirm no OOMKilled errors
+1. **Commit**: Add files to repo and document in #2795
 
----
+______________________________________________________________________
 
 ## Files Summary
 
-| File | Purpose | Status |
-|------|---------|--------|
-| docker-compose.neo4j-audit.yml | Container config | ✅ Ready |
+| File                                            | Purpose                        | Status   |
+| ----------------------------------------------- | ------------------------------ | -------- |
+| docker-compose.neo4j-audit.yml                  | Container config               | ✅ Ready |
 | scripts/ops/runtime/neo4j/start-neo4j-audit.ps1 | Start/stop script (PowerShell) | ✅ Ready |
-| scripts/ops/runtime/neo4j/start-neo4j-audit.sh | Start/stop script (Bash) | ✅ Ready |
-| src/tools/neo4j_audit.py | Connection helper | ✅ Ready |
-| NEO4J_AUDIT_INSTANCE_GUIDE.md | User guide | ✅ Ready |
-| This file | Implementation guide | ✅ Ready |
+| scripts/ops/runtime/neo4j/start-neo4j-audit.sh  | Start/stop script (Bash)       | ✅ Ready |
+| src/tools/neo4j_audit.py                        | Connection helper              | ✅ Ready |
+| NEO4J_AUDIT_INSTANCE_GUIDE.md                   | User guide                     | ✅ Ready |
+| This file                                       | Implementation guide           | ✅ Ready |
 
 All files created and ready for use. No further development needed.
 
----
+______________________________________________________________________
 
 **Status**: ✅ READY FOR INTEGRATION
 **Expected outcome**: Live validation completes without OOMKilled errors

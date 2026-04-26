@@ -140,7 +140,7 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a narrow stdin-driven Sonar issue grouping helper for historical remediation triage; remove it once issue-wave analysis is fully folded into the canonical quality tooling."
     },
-    
+
     "scripts/ai/mcp/mcp_brave_search_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",

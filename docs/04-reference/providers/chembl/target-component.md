@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Пайплайн: ChEMBL Target Component
 
@@ -15,45 +18,45 @@ Last verified: '2026-03-30'
 **Сущность:** `target_component`
 **Версия схемы:** 1.2.0
 
----
+______________________________________________________________________
 
 ## 1. Описание
 
 Пайплайн извлекает данные о компонентах мишеней из API ChEMBL. Компоненты мишеней — это отдельные белки или субъединицы, входящие в состав сложных мишеней.
 
----
+______________________________________________________________________
 
 ## 2. Ключевые поля
 
 ### Идентификаторы
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `component_id` | `int` | Уникальный ID компонента |
-| `accession` | `str` | UniProt accession |
+| Поле             | Тип   | Описание                       |
+| ---------------- | ----- | ------------------------------ |
+| `component_id`   | `int` | Уникальный ID компонента       |
+| `accession`      | `str` | UniProt accession              |
 | `component_type` | `str` | Тип компонента (PROTEIN, etc.) |
 
 ### Описание
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `description` | `str` | Описание компонента |
-| `sequence` | `str` | Аминокислотная последовательность |
+| Поле          | Тип   | Описание                          |
+| ------------- | ----- | --------------------------------- |
+| `description` | `str` | Описание компонента               |
+| `sequence`    | `str` | Аминокислотная последовательность |
 
 ### Таксономия
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `organism` | `str` | Организм |
+| Поле          | Тип   | Описание         |
+| ------------- | ----- | ---------------- |
+| `organism`    | `str` | Организм         |
 | `taxonomy_id` | `int` | NCBI Taxonomy ID |
 
 ### Классификация белков
 
-| Поле | Тип | Описание |
-|------|-----|----------|
+| Поле                      | Тип          | Описание                |
+| ------------------------- | ------------ | ----------------------- |
 | `protein_classifications` | `list[dict]` | Классификация по ChEMBL |
 
----
+______________________________________________________________________
 
 ## 3. Трансформация
 
@@ -65,7 +68,7 @@ Last verified: '2026-03-30'
 entity_id = f"chembl:{component_id}"
 ```
 
----
+______________________________________________________________________
 
 ## 4. Использование CLI
 
@@ -77,33 +80,33 @@ bioetl run --pipeline chembl_target_component
 bioetl run --pipeline chembl_target_component --limit 500
 ```
 
----
+______________________________________________________________________
 
 ## 5. Связанные файлы
 
-| Компонент | Путь |
-|-----------|------|
-| Конфигурация | `configs/entities/chembl/target_component.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/target_component_transformer.py` |
+| Компонент    | Путь                                                                      |
+| ------------ | ------------------------------------------------------------------------- |
+| Конфигурация | `configs/entities/chembl/target_component.yaml`                           |
+| Трансформер  | `src/bioetl/application/pipelines/chembl/target_component_transformer.py` |
 
----
+______________________________________________________________________
 
 ## Contract References
 
-| Артефакт | Ссылка |
-| --- | --- |
+| Артефакт             | Ссылка                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------- |
 | Gold contract export | [chembl_target_component_v1.0.json](../../contracts/gold/chembl_target_component_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                          |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md)    |
 
 ## Compliance
 
-| Контроль | Статус | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Runtime alignment | Pass | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
-| Contract linkage | Pass | [chembl_target_component_v1.0.json](../../contracts/gold/chembl_target_component_v1.0.json) |
-| API governance | Pass | См. [API Compliance](#api-compliance) |
+| Контроль          | Статус | Evidence                                                                                                       |
+| ----------------- | ------ | -------------------------------------------------------------------------------------------------------------- |
+| Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`                       |
+| Runtime alignment | Pass   | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
+| Contract linkage  | Pass   | [chembl_target_component_v1.0.json](../../contracts/gold/chembl_target_component_v1.0.json)                    |
+| API governance    | Pass   | См. [API Compliance](#api-compliance)                                                                          |
 
 ## API Compliance
 

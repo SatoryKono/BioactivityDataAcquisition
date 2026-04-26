@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 0.3.0
 Status: draft
 Class: repo-only
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last synchronized: '2026-04-08'
----
+  Last synchronized: '2026-04-08'
+
+______________________________________________________________________
 
 # D-06 Data Quality and Quarantine Handbook (Draft Sync Note)
 
@@ -40,13 +43,12 @@ D-06 фиксирует структуру будущего consolidated handboo
 ## План синхронизации D-06
 
 1. Держать в D-06 только summary и map на канонические документы.
-2. Не дублировать command tables из `docs/04-reference/cli.md`.
-3. Не дублировать инцидентные процедуры из `docs/05-operations/runbooks/*`.
-4. При изменении DQ/quarantine behavior обновлять D-06 только после синхронизации канонических источников.
+1. Не дублировать command tables из `docs/04-reference/cli.md`.
+1. Не дублировать инцидентные процедуры из `docs/05-operations/runbooks/*`.
+1. При изменении DQ/quarantine behavior обновлять D-06 только после синхронизации канонических источников.
 
 ## Критерии промоушена в future published handbook
 
 1. Утверждён единый owner workflow для DQ/quarantine docs cascade.
-2. В D-06 отсутствует нормативное дублирование CLI/runbook.
-3. Все statements в D-06 трассируются к каноническим docs и проверяемым runtime surfaces.
-
+1. В D-06 отсутствует нормативное дублирование CLI/runbook.
+1. Все statements в D-06 трассируются к каноническим docs и проверяемым runtime surfaces.

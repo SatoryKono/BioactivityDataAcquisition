@@ -9,6 +9,7 @@
 ## Current State Analysis
 
 ### Complexity Metrics
+
 - **File size**: 314 lines
 - **Main class**: `EnrichmentCoordinatorService`
 - **Public methods**: 1 (primary orchestration)
@@ -19,6 +20,7 @@
 ### Architectural Patterns Identified
 
 #### 1. **Orchestration Complexity**
+
 ```mermaid
 flowchart TD
     A[run_enrichers] --> B[build_enricher_tasks]
@@ -31,6 +33,7 @@ flowchart TD
 ```
 
 #### 2. **Error Handling Complexity**
+
 ```mermaid
 flowchart TD
     A[Exception Handling] --> B[TimeoutError]
@@ -47,6 +50,7 @@ flowchart TD
 ### Specific Complexity Issues
 
 #### 1. **Nested Exception Handling**
+
 ```python
 # Current complex pattern in _run_single_enricher
 try:
@@ -63,11 +67,13 @@ except BioETLError as e:
 ```
 
 #### 2. **State Management Complexity**
+
 - `_EnricherExecutionContext` dataclass tracks execution state
 - Multiple timestamp capture points
 - Complex result building with multiple parameters
 
 #### 3. **Result Building Fragmentation**
+
 - `_complete_enricher_execution`
 - `_build_enricher_result`
 - `_build_timeout_result`
@@ -81,12 +87,14 @@ except BioETLError as e:
 #### Target: `_run_single_enricher` Method
 
 **Current Complexity**:
+
 - 4 exception handlers
 - 5+ method calls
 - Complex nested control flow
 - Multiple state transitions
 
 **Refactoring Goal**:
+
 - Reduce exception handlers from 4 to 2
 - Consolidate error handling logic
 - Simplify state management
@@ -97,6 +105,7 @@ except BioETLError as e:
 **Target**: Result building methods in `EnrichmentCoordinatorResultMixin`
 
 **Refactoring Goal**:
+
 - Unify result construction patterns
 - Reduce method count by 30%
 - Improve type safety
@@ -106,6 +115,7 @@ except BioETLError as e:
 **Target**: Add metrics and logging
 
 **Refactoring Goal**:
+
 - Add execution duration metrics
 - Enhance error logging
 - Add state transition tracking
@@ -131,7 +141,7 @@ async def _run_single_enricher(
         return await self._execute_with_error_handling(
             execution_context=execution_context,
             keys=keys,
-            runner_factory=runner_factory
+            runner_factory=runner_factory,
         )
 ```
 
@@ -161,6 +171,7 @@ async def _execute_with_error_handling(
 @dataclass(frozen=True, slots=True)
 class _SimplifiedExecutionContext:
     """Simplified execution context with essential state only."""
+
     enricher: EnricherConfig
     records_input: int
     started_at: datetime
@@ -173,24 +184,29 @@ class _SimplifiedExecutionContext:
 ## Acceptance Criteria Progress
 
 - ✅ **Identify and extract complex orchestration logic**
+
   - Analyzed `_run_single_enricher` complexity
   - Identified error handling consolidation opportunities
   - Documented state management simplification targets
 
 - ✅ **Reduce indirection patterns where possible**
+
   - Identified unnecessary method indirection
   - Proposed consolidated error handling approach
   - Simplified execution context design
 
 - ✅ **Maintain identical coordination behavior**
+
   - All refactoring proposals maintain same external interface
   - Error handling preserves same failure semantics
   - Result building maintains same output formats
 
 - ❌ **Update sequence diagrams in architecture docs**
+
   - Will be completed in Issue #6 (Documentation)
 
 - ✅ **Verify all pipeline types work correctly**
+
   - Refactoring maintains backward compatibility
   - All existing tests will continue to pass
   - No breaking changes to public API
@@ -198,16 +214,19 @@ class _SimplifiedExecutionContext:
 ## Risk Assessment
 
 ### Low Risk Changes
+
 - Extracting helper methods from complex functions
 - Consolidating similar error handling paths
 - Simplifying internal data structures
 
 ### Medium Risk Changes
+
 - Changing exception handling hierarchy
 - Modifying state management patterns
 - Refactoring result building logic
 
 ### High Risk Changes (Avoid)
+
 - Changing public API signatures
 - Modifying failure semantics
 - Altering concurrency patterns
@@ -215,13 +234,15 @@ class _SimplifiedExecutionContext:
 ## Recommended Approach
 
 ### Incremental Refactoring
+
 1. **Extract helper methods** from `_run_single_enricher`
-2. **Consolidate error handling** into unified method
-3. **Simplify state management** with cleaner context
-4. **Add comprehensive tests** for refactored components
-5. **Iterate based on feedback**
+1. **Consolidate error handling** into unified method
+1. **Simplify state management** with cleaner context
+1. **Add comprehensive tests** for refactored components
+1. **Iterate based on feedback**
 
 ### Testing Strategy
+
 - Maintain 100% test coverage
 - Add property-based tests for error scenarios
 - Verify all pipeline types continue to work
@@ -230,10 +251,10 @@ class _SimplifiedExecutionContext:
 ## Next Steps
 
 1. ✅ **Complete complexity analysis** (This document)
-2. ⏳ **Implement targeted refactoring** (In progress)
-3. ⏳ **Add unit tests for refactored components**
-4. ⏳ **Update architecture documentation** (Issue #6)
-5. ⏳ **Verify with integration tests**
+1. ⏳ **Implement targeted refactoring** (In progress)
+1. ⏳ **Add unit tests for refactored components**
+1. ⏳ **Update architecture documentation** (Issue #6)
+1. ⏳ **Verify with integration tests**
 
 ## Related Issues
 

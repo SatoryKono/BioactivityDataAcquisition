@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Слой Interfaces (Интерфейсы)
 
@@ -34,35 +37,35 @@ Last verified: '2026-03-29'
 
 **Доступные команды и support/compat модули в `commands/` (снимок синхронизирован на 2026-03-24):**
 
-| Команда         | Модуль                       | Описание                                |
-| --------------- | ---------------------------- | --------------------------------------- |
-| `run`           | `run.py`                     | Public CLI seam; canonical implementation lives in `domains/run/command.py` |
-| `run-all`       | `run_all.py`                 | Public CLI seam; canonical implementation lives in `domains/run_all/command.py` |
-| `run-composite` | `run_composite.py`           | Public CLI seam; canonical implementation lives in `domains/composite/command.py` |
-| `run-manifest`  | `run_manifest.py`            | Inspect immutable manifest payloads and append-only ledger history |
-| `export`        | `export.py`                  | Экспорт данных из Gold                  |
-| `quarantine`    | `quarantine.py`              | Public CLI seam; canonical implementation lives in `domains/quarantine/command.py` |
-| `health`        | `health.py`                  | Public CLI seam; canonical implementation lives in `domains/health/command.py` |
-| `config`        | `config.py`                  | Просмотр и валидация конфигураций       |
-| `checkpoint`    | `checkpoint.py`              | Управление checkpoint-ами               |
-| `lock`          | `lock.py`                    | Управление блокировками                 |
-| `vacuum`        | `vacuum.py`                  | Public CLI seam; canonical implementation lives in `domains/maintenance/vacuum.py` |
-| `cleanup`       | `cleanup.py`                 | Public CLI seam; canonical implementation lives in `domains/maintenance/cleanup.py` |
-| `maintenance`   | `maintenance.py`             | Public CLI seam; canonical implementation lives in `domains/maintenance/command.py` |
-| `archive`       | `archive.py`                 | Public CLI seam; canonical implementation lives in `domains/maintenance/archive.py` |
-| `adr`           | `adr.py`                     | Управление ADR (Architecture Decisions) |
-| `debug`         | `debug.py`                   | Диагностические утилиты                 |
+| Команда         | Модуль             | Описание                                                                            |
+| --------------- | ------------------ | ----------------------------------------------------------------------------------- |
+| `run`           | `run.py`           | Public CLI seam; canonical implementation lives in `domains/run/command.py`         |
+| `run-all`       | `run_all.py`       | Public CLI seam; canonical implementation lives in `domains/run_all/command.py`     |
+| `run-composite` | `run_composite.py` | Public CLI seam; canonical implementation lives in `domains/composite/command.py`   |
+| `run-manifest`  | `run_manifest.py`  | Inspect immutable manifest payloads and append-only ledger history                  |
+| `export`        | `export.py`        | Экспорт данных из Gold                                                              |
+| `quarantine`    | `quarantine.py`    | Public CLI seam; canonical implementation lives in `domains/quarantine/command.py`  |
+| `health`        | `health.py`        | Public CLI seam; canonical implementation lives in `domains/health/command.py`      |
+| `config`        | `config.py`        | Просмотр и валидация конфигураций                                                   |
+| `checkpoint`    | `checkpoint.py`    | Управление checkpoint-ами                                                           |
+| `lock`          | `lock.py`          | Управление блокировками                                                             |
+| `vacuum`        | `vacuum.py`        | Public CLI seam; canonical implementation lives in `domains/maintenance/vacuum.py`  |
+| `cleanup`       | `cleanup.py`       | Public CLI seam; canonical implementation lives in `domains/maintenance/cleanup.py` |
+| `maintenance`   | `maintenance.py`   | Public CLI seam; canonical implementation lives in `domains/maintenance/command.py` |
+| `archive`       | `archive.py`       | Public CLI seam; canonical implementation lives in `domains/maintenance/archive.py` |
+| `adr`           | `adr.py`           | Управление ADR (Architecture Decisions)                                             |
+| `debug`         | `debug.py`         | Диагностические утилиты                                                             |
 
 **Вспомогательные модули в `commands/`:**
 
-| Модуль                          | Назначение                              |
-| ------------------------------- | --------------------------------------- |
-| `health_rendering.py`           | Retained support seam; canonical implementation lives in `domains/health/rendering.py` |
-| `health_server_integration.py`  | Retained support seam; canonical implementation lives in `domains/health/server_integration.py` |
+| Модуль                          | Назначение                                                                                              |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `health_rendering.py`           | Retained support seam; canonical implementation lives in `domains/health/rendering.py`                  |
+| `health_server_integration.py`  | Retained support seam; canonical implementation lives in `domains/health/server_integration.py`         |
 | `metrics_server_integration.py` | Retained support seam; canonical implementation lives in `domains/health/metrics_server_integration.py` |
-| `quarantine_execution.py`       | Retained support seam; canonical implementation lives in `domains/quarantine/execution.py` |
-| `quarantine_rendering.py`       | Retained support seam; canonical implementation lives in `domains/quarantine/rendering.py` |
-| `quarantine_support.py`         | Retained support seam; canonical implementation lives in `domains/quarantine/support.py` |
+| `quarantine_execution.py`       | Retained support seam; canonical implementation lives in `domains/quarantine/execution.py`              |
+| `quarantine_rendering.py`       | Retained support seam; canonical implementation lives in `domains/quarantine/rendering.py`              |
+| `quarantine_support.py`         | Retained support seam; canonical implementation lives in `domains/quarantine/support.py`                |
 
 **Примеры использования:**
 
@@ -105,7 +108,7 @@ Graceful shutdown обрабатывается непосредственно в
 - `interfaces/cli/commands/domains/composite/command.py`
   Shutdown логика вынесена в `application/core/lifecycle/shutdown.py`.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 Для подробной информации о том, как собираются компоненты системы, см. [Слой Composition](05-composition-layer.md).
 
@@ -115,7 +118,7 @@ Graceful shutdown обрабатывается непосредственно в
 - **Единственная ответственность:** Единственная ответственность этого слоя — запуск приложения и управление его жизненным циклом на самом верхнем уровне.
 - **Импорт из всех слоёв:** Это единственный слой, которому разрешено импортировать модули из `domain`, `application` и `infrastructure` для того, чтобы "собрать" приложение воедино.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 4. Связанные Материалы
 
@@ -127,19 +130,19 @@ Graceful shutdown обрабатывается непосредственно в
 
 ### Связанные Диаграммы
 
-| Диаграмма               | Файл                                                                                               | Описание                              |
-| ----------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| Five Layer Architecture | [01-high-level.mermaid](diagrams/foundation/01-high-level.mmd)                                   | Полная архитектура с Interfaces слоем |
-| Layers Interaction      | [05-layers-interaction.mermaid](diagrams/foundation/05-layers-interaction.mmd)                    | Взаимодействие слоёв                  |
-| Graceful Shutdown       | [05-pipeline-lifecycle-states.mermaid](diagrams/foundation/05-pipeline-lifecycle-states.mmd)      | Sequence diagram graceful shutdown    |
+| Диаграмма               | Файл                                                                                         | Описание                              |
+| ----------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------- |
+| Five Layer Architecture | [01-high-level.mermaid](diagrams/foundation/01-high-level.mmd)                               | Полная архитектура с Interfaces слоем |
+| Layers Interaction      | [05-layers-interaction.mermaid](diagrams/foundation/05-layers-interaction.mmd)               | Взаимодействие слоёв                  |
+| Graceful Shutdown       | [05-pipeline-lifecycle-states.mermaid](diagrams/foundation/05-pipeline-lifecycle-states.mmd) | Sequence diagram graceful shutdown    |
 
 ### Связанные ADR
 
-| ADR                                                        | Тема                                |
-| ---------------------------------------------------------- | ----------------------------------- |
-| [ADR-008](decisions/ADR-008-graceful-shutdown-strategy.md) | Graceful Shutdown Strategy          |
-| [ADR-026](decisions/ADR-026-composite-pipeline-pattern.md) | Composite Pipeline — расширения CLI |
-| [ADR-044](decisions/ADR-044-run-manifest-ledger-control-plane.md) | Control-plane inspection CLI |
+| ADR                                                               | Тема                                |
+| ----------------------------------------------------------------- | ----------------------------------- |
+| [ADR-008](decisions/ADR-008-graceful-shutdown-strategy.md)        | Graceful Shutdown Strategy          |
+| [ADR-026](decisions/ADR-026-composite-pipeline-pattern.md)        | Composite Pipeline — расширения CLI |
+| [ADR-044](decisions/ADR-044-run-manifest-ledger-control-plane.md) | Control-plane inspection CLI        |
 
 ### Смежные Разделы Документации
 

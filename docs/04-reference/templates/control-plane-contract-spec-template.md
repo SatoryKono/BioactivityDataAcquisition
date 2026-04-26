@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.1.0
 Status: template
 Class: internal
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-01'
----
+  Last verified: '2026-04-01'
+
+______________________________________________________________________
 
 # Control-Plane Contract Specification: <Surface Name>
 
@@ -27,18 +30,18 @@ Last verified: '2026-04-01'
 
 ## Storage layout
 
-| Artifact | Path | Lookup / ownership notes |
-|---|---|---|
-| `<artifact_a>` | `<path>` | `<notes>` |
-| `<artifact_b>` | `<path>` | `<notes>` |
+| Artifact       | Path     | Lookup / ownership notes |
+| -------------- | -------- | ------------------------ |
+| `<artifact_a>` | `<path>` | `<notes>`                |
+| `<artifact_b>` | `<path>` | `<notes>`                |
 
 - Storage layout MUST list canonical lookup paths.
 - Sidecars, indexes, and correlation anchors SHOULD be identified explicitly.
 
 ## Rollout flags
 
-| Setting | Default | Effect | Constraints |
-|---|---:|---|---|
+| Setting                                  |   Default | Effect     | Constraints            |
+| ---------------------------------------- | --------: | ---------- | ---------------------- |
 | `<settings.pipeline.control_plane.flag>` | `<value>` | `<effect>` | `<compatibility rule>` |
 | `<settings.pipeline.control_plane.flag>` | `<value>` | `<effect>` | `<compatibility rule>` |
 
@@ -50,17 +53,17 @@ Last verified: '2026-04-01'
 
 ### <Artifact A>
 
-| Field | Type | Required | Notes |
-|---|---|---:|---|
-| `<field_name>` | `<type>` | `<true|false>` | `<meaning>` |
-| `<field_name>` | `<type>` | `<true|false>` | `<meaning>` |
+| Field          | Type     | Required | Notes    |
+| -------------- | -------- | -------: | -------- |
+| `<field_name>` | `<type>` | \`\<true | false>\` |
+| `<field_name>` | `<type>` | \`\<true | false>\` |
 
 ### <Artifact B>
 
-| Field | Type | Required | Notes |
-|---|---|---:|---|
-| `<field_name>` | `<type>` | `<true|false>` | `<meaning>` |
-| `<field_name>` | `<type>` | `<true|false>` | `<meaning>` |
+| Field          | Type     | Required | Notes    |
+| -------------- | -------- | -------: | -------- |
+| `<field_name>` | `<type>` | \`\<true | false>\` |
+| `<field_name>` | `<type>` | \`\<true | false>\` |
 
 ## Current event set / inspection surface
 
@@ -78,8 +81,8 @@ bioetl <command> <args>
 ## Invariants
 
 1. `<immutable or append-only guarantee>`
-2. `<identity lookup guarantee>`
-3. `<cross-artifact correlation guarantee>`
+1. `<identity lookup guarantee>`
+1. `<cross-artifact correlation guarantee>`
 
 ## Compatibility / escalation
 

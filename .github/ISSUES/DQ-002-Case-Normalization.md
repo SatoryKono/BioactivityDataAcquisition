@@ -12,19 +12,21 @@ Fields like `standard_units`, `assay_type`, and `standard_type` lack consistent 
 ## 🔍 Root Cause
 
 1. **Inconsistent Case**: Enum fields use mixed case (e.g., "INHIBITOR" vs "inhibitor")
-2. **Unit Variations**: Units appear in different formats (nM, NM, nm)
-3. **No Canonicalization**: Missing standardized representation rules
-4. **Analysis Issues**: Inconsistent data affects downstream processing
+1. **Unit Variations**: Units appear in different formats (nM, NM, nm)
+1. **No Canonicalization**: Missing standardized representation rules
+1. **Analysis Issues**: Inconsistent data affects downstream processing
 
 ## 📋 Scope
 
 **Affected Components:**
+
 - `src/bioetl/domain/normalization/profiles/chembl_activity.py` - Add normalization rules
 - `src/bioetl/domain/normalization/rules.py` - Implement case/unit rules
 - Test files - Validate normalization
 - Documentation - Update normalization specs
 
 **Impact Analysis:**
+
 ```bash
 # Check current unit variations
 grep -rn "standard_units" src/bioetl/domain/ --include="*.py" | head -5
@@ -35,6 +37,7 @@ grep -rn "standard_units" src/bioetl/domain/ --include="*.py" | head -5
 ### Phase 1: Rule Definition (2 days)
 
 1. **Define Case Rules**
+
    ```python
    # src/bioetl/domain/normalization/rules.py
    def normalize_case(value: str, enum_values: list) -> str:
@@ -42,37 +45,27 @@ grep -rn "standard_units" src/bioetl/domain/ --include="*.py" | head -5
        return value.upper() if value in enum_values else value
    ```
 
-2. **Define Unit Mapping**
+1. **Define Unit Mapping**
+
    ```python
    # src/bioetl/domain/normalization/rules.py
-   UNIT_MAPPING = {
-       "nM": "nM",
-       "NM": "nM",
-       "nm": "nM",
-       "uM": "uM",
-       "UM": "uM",
-       "µM": "uM"
-   }
+   UNIT_MAPPING = {"nM": "nM", "NM": "nM", "nm": "nM", "uM": "uM", "UM": "uM", "µM": "uM"}
    ```
 
-3. **Update Profile**
+1. **Update Profile**
+
    ```python
    # src/bioetl/domain/normalization/profiles/chembl_activity.py
    FIELD_RULES = {
-       "assay_type": {
-           "type": "enum",
-           "case": "upper"
-       },
-       "standard_units": {
-           "type": "unit",
-           "mapping": UNIT_MAPPING
-       }
+       "assay_type": {"type": "enum", "case": "upper"},
+       "standard_units": {"type": "unit", "mapping": UNIT_MAPPING},
    }
    ```
 
 ### Phase 2: Implementation (3 days)
 
 1. **Apply Case Normalization**
+
    ```python
    # src/bioetl/domain/normalization/normalizer.py
    def normalize_field(field_value: str, field_name: str) -> str:
@@ -81,17 +74,20 @@ grep -rn "standard_units" src/bioetl/domain/ --include="*.py" | head -5
        return field_value
    ```
 
-2. **Apply Unit Canonicalization**
+1. **Apply Unit Canonicalization**
+
    ```python
    def normalize_unit(unit_value: str) -> str:
        return UNIT_MAPPING.get(unit_value, unit_value)
    ```
 
-3. **Update Tests**
+1. **Update Tests**
+
    ```python
    # tests/unit/domain/test_normalization.py
    def test_case_normalization():
        assert normalize_case("inhibitor", ["INHIBITOR"]) == "INHIBITOR"
+
 
    def test_unit_canonicalization():
        assert normalize_unit("NM") == "nM"
@@ -100,16 +96,19 @@ grep -rn "standard_units" src/bioetl/domain/ --include="*.py" | head -5
 ### Phase 3: Validation (2 days)
 
 1. **Test Normalization**
+
    ```bash
    pytest tests/unit/domain/test_normalization.py -v
    ```
 
-2. **Validate Data Quality**
+1. **Validate Data Quality**
+
    ```bash
    python scripts/validate_data_quality.py --case-check
    ```
 
-3. **Monitor Production**
+1. **Monitor Production**
+
    ```bash
    # Check normalization logs
    grep "normalize" logs/production.log
@@ -143,17 +142,20 @@ mypy src/bioetl/domain/normalization/ --strict
 ## 📈 Impact Assessment
 
 ### Positive Impacts
+
 - **Consistency**: Uniform field representation
 - **Accuracy**: Reduced analysis errors
 - **Maintainability**: Clear normalization rules
 - **Documentation**: Improved specs
 
 ### Potential Risks
+
 - **Breaking Changes**: Existing data format changes
 - **Performance**: Additional processing overhead
 - **Complexity**: More rules to maintain
 
 ### Mitigation Strategies
+
 - **Backward Compatibility**: Support both formats temporarily
 - **Gradual Rollout**: Deploy in stages
 - **Comprehensive Testing**: Validate all scenarios

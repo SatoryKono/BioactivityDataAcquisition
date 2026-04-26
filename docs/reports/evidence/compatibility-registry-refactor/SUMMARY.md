@@ -5,7 +5,6 @@
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-
 Примечание о rebaseline: parent refactor posture по-прежнему соответствует текущему состоянию репозитория; выводы остаются откалиброванными под модель `YAML-ledger + generated snapshot`.
 
 Примечание о follow-up: после `RF-011` compatibility snapshot `--check`
@@ -15,8 +14,8 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 ## Shard-пакеты
 
 1. [compatibility-registry-curated-ssot-drift](../compatibility-registry-curated-ssot-drift/SUMMARY.md) — `6` объектов evidence, gate `PASSED`, synthesis `complete`
-2. [compatibility-registry-snapshot-automation-drift](../compatibility-registry-snapshot-automation-drift/SUMMARY.md) — `5` объектов evidence, gate `PASSED`, synthesis `complete`
-3. [compatibility-registry-policy-history-mixing](../compatibility-registry-policy-history-mixing/SUMMARY.md) — `7` объектов evidence, gate `PASSED`, synthesis `complete`
+1. [compatibility-registry-snapshot-automation-drift](../compatibility-registry-snapshot-automation-drift/SUMMARY.md) — `5` объектов evidence, gate `PASSED`, synthesis `complete`
+1. [compatibility-registry-policy-history-mixing](../compatibility-registry-policy-history-mixing/SUMMARY.md) — `7` объектов evidence, gate `PASSED`, synthesis `complete`
 
 ## Итоги
 

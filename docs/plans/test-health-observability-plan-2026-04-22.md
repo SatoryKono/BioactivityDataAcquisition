@@ -62,8 +62,7 @@ PYTHONPATH=src bash scripts/engineering/dev/run_pytest_sharded.sh --stream --kee
   `run_pytest_sharded.sh`, добавляет JUnit artifacts и пишет JSON summary.
 - Для мягкой CI-миграции добавлен `summarize-junit`, который агрегирует уже
   существующие JUnit XML jobs в тот же JSON summary format.
-- Этап 4 начат минимально: `python -m scripts.engineering.qa test-health
-  --last 30` читает JSON summaries и показывает run/failure/skip rollup, top
+- Этап 4 начат минимально: `python -m scripts.engineering.qa test-health --last 30` читает JSON summaries и показывает run/failure/skip rollup, top
   failing nodeids, flaky candidates и новые падения. Эта же команда может
   принять `--suite ... --junit-glob ...` и сначала агрегировать JUnit XML в JSON
   summary, чтобы прямые `run_pytest_sharded.sh --junit-dir ...` запуски сразу
@@ -264,10 +263,10 @@ Merge-blocking остается обычный pytest exit code + quality gate. 
 
 1. Сначала fixing setup/collection/VCR errors, потому что они портят доверие к
    результатам.
-2. Потом snapshot/artifact drift, потому что это часто governance debt.
-3. Потом flaky tests по top frequency.
-4. Потом слишком медленные tests и serial bottlenecks.
-5. Потом coverage gaps по `configs/quality/test_matrix.yaml`.
+1. Потом snapshot/artifact drift, потому что это часто governance debt.
+1. Потом flaky tests по top frequency.
+1. Потом слишком медленные tests и serial bottlenecks.
+1. Потом coverage gaps по `configs/quality/test_matrix.yaml`.
 
 ## Критерии готовности
 

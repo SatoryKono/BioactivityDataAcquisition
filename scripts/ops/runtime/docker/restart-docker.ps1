@@ -32,7 +32,7 @@ if (Test-Path $dockerPath) {
     Write-Host ""
     Write-Host "⏳ Waiting for Docker daemon to initialize (60 seconds)..." -ForegroundColor Cyan
     Start-Sleep -Seconds 60
-    
+
     # Test connectivity
     Write-Host ""
     Write-Host "Testing Docker daemon..." -ForegroundColor Yellow

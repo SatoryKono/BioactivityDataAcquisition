@@ -14,9 +14,9 @@ with metadata, status tracking, and navigation aids.
 ### For Developers
 
 1. **Browse ADRs**: Start with `index.md` for the complete registry
-2. **Check Status**: Use `status-dashboard.md` for health metrics
-3. **Find Decisions**: Use browser search (Ctrl+F) to find relevant ADRs
-4. **Understand Context**: Each ADR entry includes context and relationships
+1. **Check Status**: Use `status-dashboard.md` for health metrics
+1. **Find Decisions**: Use browser search (Ctrl+F) to find relevant ADRs
+1. **Understand Context**: Each ADR entry includes context and relationships
 
 ### For Tooling
 
@@ -76,6 +76,7 @@ python3 scripts/generate_adr_registry.py
 ```
 
 The registry should be regenerated whenever:
+
 - New ADRs are added
 - Existing ADRs are updated
 - ADR status changes
@@ -86,9 +87,9 @@ The registry should be regenerated whenever:
 The ADR registry integrates with:
 
 1. **Project Navigator**: Linked from main documentation index
-2. **CI/CD Pipeline**: Automated generation on documentation builds
-3. **Architecture Reviews**: Used for ADR health monitoring
-4. **Onboarding**: Helps new team members understand architectural context
+1. **CI/CD Pipeline**: Automated generation on documentation builds
+1. **Architecture Reviews**: Used for ADR health monitoring
+1. **Onboarding**: Helps new team members understand architectural context
 
 ## Related
 

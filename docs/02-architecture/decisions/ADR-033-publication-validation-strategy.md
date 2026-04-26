@@ -1,28 +1,33 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-033: Publication Metadata Validation Strategy
 
 **Date:** <YYYY-MM-DD>
 **Status:** Accepted
 **Decision makers:** @BioETL-Team
+
 | Параметр          | Значение                                                                                                                                                                                                      |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Статус**        | Accepted (Levels 1,4 implemented; Level 2 partial; Levels 3,5 not yet realized — see Implementation Status)                                                                                                 |
+| **Статус**        | Accepted (Levels 1,4 implemented; Level 2 partial; Levels 3,5 not yet realized — see Implementation Status)                                                                                                   |
 | **Дата**          | 2026-02-06                                                                                                                                                                                                    |
 | **Автор**         | BioETL Team                                                                                                                                                                                                   |
 | **Ревьюер**       | —                                                                                                                                                                                                             |
 | **Связанные ADR** | [ADR-002](ADR-002-medallion-architecture.md) (Medallion Architecture), [ADR-014](ADR-014-deterministic-writes.md) (Deterministic Writes), [ADR-027](ADR-027-dq-rules-externalization.md) (DQ Externalization) |
 | **Заменяет**      | —                                                                                                                                                                                                             |
 | **Заменён**       | —                                                                                                                                                                                                             |
-----------------------------------------------------------------------
+
+______________________________________________________________________
 
 ## Context
 
@@ -89,7 +94,7 @@ Last verified: '2026-03-30'
 - **ADR-014 (Deterministic Writes):** content-hash проверяется structural validation.
 - **ADR-027 (DQ Externalization):** DQ-правила в `configs/validation/{provider}.yaml`.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Decision
 
@@ -322,7 +327,7 @@ dq-thresholds:
   hard-fail-threshold: 0.20  # 20% errors → pipeline fail
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Alternatives Considered
 
@@ -384,7 +389,7 @@ dq-thresholds:
 
 **Вердикт:** Принято как оптимальное соотношение гибкость/сложность.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Consequences
 
@@ -446,17 +451,17 @@ dq-thresholds:
    - Карантин: ~2% от Silver (оценка на ChEMBL)
    - DQ reports: ~10 MB/run
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Implementation Status (as of 2026-03-15)
 
-| Level | Name | Status | Evidence |
-| ----- | ---- | ------ | -------- |
-| 1 | Base Validation (Pandera) | **IMPLEMENTED** | `domain/schemas/base.py`, `domain/schemas/common/publication_base.py`, `domain/schemas/validators.py`, `infrastructure/validation/pandera_validator.py`, `domain/contracts/gold/publications_*.py` — regex patterns, nullable constraints, type coercion all in place |
-| 2 | Structural Validation (cross-field) | **PARTIAL** | Data model: `domain/config/validation.py` (`CrossFieldValidation`, `ConditionalValidation`). Config loading: `infrastructure/schemas/dq_config.py`. YAML rules: `configs/entities/{crossref,pubmed}/publication.yaml`. Content-hash check: `application/services/dq/silver_statistics.py`. **Gap:** no runtime executor applies YAML-defined cross-field rules per-record during transformation; `page_first ≤ page_last` not implemented |
-| 3 | External Verification (API lookup) | **NOT IMPLEMENTED** | No verification code exists. CrossRef adapter is enrichment, not verification. `configs/validation/` hierarchy from ADR does not exist in repo |
-| 4 | Logical Validation (ranges/invariants) | **PARTIAL** | Pandera Gold schemas enforce `ge=0` on citations, year ranges. YAML `field_validations` defined in entity configs. Gold-layer `_checks_business.py` runs range checks. **Gap:** `field_validations` not consumed during Silver transform; date ordering invariants not implemented |
-| 5 | Semantic Validation (NLP) | **NOT IMPLEMENTED** | `domain/services/text_similarity.py` exists (Jaccard) but serves composite cross-validation, not title-abstract DQ. No language detection, no NLP libraries in dependencies |
+| Level | Name                                   | Status              | Evidence                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ----- | -------------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | Base Validation (Pandera)              | **IMPLEMENTED**     | `domain/schemas/base.py`, `domain/schemas/common/publication_base.py`, `domain/schemas/validators.py`, `infrastructure/validation/pandera_validator.py`, `domain/contracts/gold/publications_*.py` — regex patterns, nullable constraints, type coercion all in place                                                                                                                                                                     |
+| 2     | Structural Validation (cross-field)    | **PARTIAL**         | Data model: `domain/config/validation.py` (`CrossFieldValidation`, `ConditionalValidation`). Config loading: `infrastructure/schemas/dq_config.py`. YAML rules: `configs/entities/{crossref,pubmed}/publication.yaml`. Content-hash check: `application/services/dq/silver_statistics.py`. **Gap:** no runtime executor applies YAML-defined cross-field rules per-record during transformation; `page_first ≤ page_last` not implemented |
+| 3     | External Verification (API lookup)     | **NOT IMPLEMENTED** | No verification code exists. CrossRef adapter is enrichment, not verification. `configs/validation/` hierarchy from ADR does not exist in repo                                                                                                                                                                                                                                                                                            |
+| 4     | Logical Validation (ranges/invariants) | **PARTIAL**         | Pandera Gold schemas enforce `ge=0` on citations, year ranges. YAML `field_validations` defined in entity configs. Gold-layer `_checks_business.py` runs range checks. **Gap:** `field_validations` not consumed during Silver transform; date ordering invariants not implemented                                                                                                                                                        |
+| 5     | Semantic Validation (NLP)              | **NOT IMPLEMENTED** | `domain/services/text_similarity.py` exists (Jaccard) but serves composite cross-validation, not title-abstract DQ. No language detection, no NLP libraries in dependencies                                                                                                                                                                                                                                                               |
 
 ### Assessment
 
@@ -466,7 +471,7 @@ Levels 3 and 5 remain **aspirational**. Level 3 (external verification) would ad
 
 **Recommendation:** Focus future work on wiring the Level 2 runtime executor and completing Level 4 invariants. Levels 3 and 5 should remain documented as future enhancements.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## References
 
@@ -476,19 +481,19 @@ Levels 3 and 5 remain **aspirational**. Level 3 (external verification) would ad
 - **ADR-024 (Entity Naming Unification):** `publication` entity для всех провайдеров.
 - **ADR-026 (Composite Publication Pipeline):** Валидация в seed + enricher pipelines.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Метрики успеха
 
-| Метрика                                     | Baseline (до) | Target (после) | Measured                     |
-| ------------------------------------------- | ------------- | -------------- | ---------------------------- |
-| Невалидные записи в Silver                  | ~8%           | < 2%           | 1.8% (ChEMBL pilot)          |
-| DQ coverage (полей с правилами)             | 45%           | 90%            | 91% (191/191 полей)          |
-| False positives (WARN → ручная проверка OK) | —             | < 5%           | 3.2% (PubMed)                |
+| Метрика                                     | Baseline (до) | Target (после) | Measured                        |
+| ------------------------------------------- | ------------- | -------------- | ------------------------------- |
+| Невалидные записи в Silver                  | ~8%           | < 2%           | 1.8% (ChEMBL pilot)             |
+| DQ coverage (полей с правилами)             | 45%           | 90%            | 91% (191/191 полей)             |
+| False positives (WARN → ручная проверка OK) | —             | < 5%           | 3.2% (PubMed)                   |
 | External verification coverage (PK)         | 0%            | 100%           | *Not yet implemented (Level 3)* |
-| Pipeline overhead                           | 0%            | < 20%          | 15-18% (Levels 1+4 only)    |
+| Pipeline overhead                           | 0%            | < 20%          | 15-18% (Levels 1+4 only)        |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## References
 
@@ -509,20 +514,20 @@ Levels 3 and 5 remain **aspirational**. Level 3 (external verification) would ad
 - `docs/04-reference/schemas/publication_validation_schema_v3.xlsx` — источник правил
 - `configs/entities/{provider}/{entity}.yaml` — runtime конфигурация (DQ rules in `dq_rules` section)
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 **Версия документа:** 1.1.0
 **Последнее обновление:** 2026-03-15
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-033-publication-validation-strategy.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                                     |
+| ------------ | -------------------------------------------------------------------------- | ------ | -------------------------------------------- |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-033-publication-validation-strategy.md` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                                   |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                             |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria`         |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                                 |
 
 ## Rollout
 

@@ -5,6 +5,7 @@ Compatibility surface for the canonical `scripts/ai/vibe` launcher.
 ## ⚡ Quick Start
 
 ### Windows (PowerShell)
+
 ```powershell
 cd scripts/ai/mistrallvibe
 notepad .env.mistrallvibe    # Add MISTRAL_API_KEY
@@ -12,6 +13,7 @@ notepad .env.mistrallvibe    # Add MISTRAL_API_KEY
 ```
 
 ### Linux/WSL (Bash)
+
 ```bash
 cd scripts/ai/mistrallvibe
 nano .env.mistrallvibe       # Add MISTRAL_API_KEY
@@ -31,6 +33,7 @@ nano .env.mistrallvibe       # Add MISTRAL_API_KEY
 ## 🔐 Configuration
 
 Edit `.env.mistrallvibe`:
+
 ```bash
 MISTRAL_API_KEY=your-api-key-here
 ```
@@ -40,6 +43,7 @@ Get API key from: https://console.mistral.ai/api-keys/
 ## 📚 Documentation
 
 See the canonical Vibe surface for current behavior and launch options:
+
 - `scripts/ai/vibe/README.md` - primary launcher documentation
 - `scripts/ai/vibe/launch.sh` - canonical WSL/Linux entrypoint
 - `scripts/ai/vibe/launch.ps1` - canonical Windows PowerShell entrypoint

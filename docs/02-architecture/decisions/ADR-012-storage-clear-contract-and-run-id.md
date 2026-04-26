@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-012: Storage Clear Contract and Run ID Consistency
 
@@ -112,6 +115,7 @@ async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
     """Clear Silver layer data for a specific table."""
     ...
 
+
 async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
     """Clear Gold layer data for a specific table."""
     ...
@@ -136,11 +140,11 @@ assert policy.should_clear_silver == (runtime.run_type is not RunType.INCREMENTA
 assert policy.should_clear_gold == (runtime.run_type is not RunType.INCREMENTAL)
 ```
 
-| Run Type | Очистка | Обоснование |
-|----------|---------|-------------|
-| `incremental` | НЕТ | Merge/upsert по content-hash |
-| `backfill` | ДА | Заполнение исторических данных |
-| `rebuild` | ДА | Полная перестройка таблицы |
+| Run Type      | Очистка | Обоснование                    |
+| ------------- | ------- | ------------------------------ |
+| `incremental` | НЕТ     | Merge/upsert по content-hash   |
+| `backfill`    | ДА      | Заполнение исторических данных |
+| `rebuild`     | ДА      | Полная перестройка таблицы     |
 
 В текущем runner flow эти инварианты применяются через pre-run вызов
 `PipelineRunner.run()` -> `MedallionLifecycleService.prepare_for_run()`.
@@ -166,10 +170,10 @@ Post-run maintenance идёт отдельным путём:
 
 ### Risks
 
-| Риск | Вероятность | Митигация |
-|------|-------------|-----------|
-| Чекпоинты со старым форматом | Низкая | `load()` игнорирует `run_id` в файле |
-| Дубликаты при incremental | Средняя | Merge по `content_hash` предотвращает дубли |
+| Риск                         | Вероятность | Митигация                                   |
+| ---------------------------- | ----------- | ------------------------------------------- |
+| Чекпоинты со старым форматом | Низкая      | `load()` игнорирует `run_id` в файле        |
+| Дубликаты при incremental    | Средняя     | Merge по `content_hash` предотвращает дубли |
 
 ## References
 
@@ -184,13 +188,13 @@ Post-run maintenance идёт отдельным путём:
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-012-storage-clear-contract-and-run-id.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                                       |
+| ------------ | -------------------------------------------------------------------------- | ------ | ---------------------------------------------- |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-012-storage-clear-contract-and-run-id.md` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                                     |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                               |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria`           |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                                   |
 
 ## Rollout
 

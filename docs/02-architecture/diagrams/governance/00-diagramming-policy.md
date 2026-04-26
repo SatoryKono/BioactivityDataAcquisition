@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Historical Diagramming Policy
 
@@ -21,7 +24,7 @@ Last verified: '2026-03-29'
 
 This document defines standards for creating, maintaining, and versioning architecture diagrams in the BioETL project.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 1. General Principles
 
@@ -43,7 +46,7 @@ This document defines standards for creating, maintaining, and versioning archit
 - Follow naming conventions from RULES.md §2
 - Reference RULES.md sections where applicable
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 2. File Organization
 
@@ -84,7 +87,7 @@ docs/02-architecture/diagrams/     # Единый корень диаграмм
 - есть запись в `diagrams-index.md` или `README.md`;
 - есть контекстный абзац со ссылкой в `docs/02-architecture/*.md`.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 3. Format Standards
 
@@ -136,7 +139,7 @@ Use for:
 └─────────┘     └─────────┘     └─────────┘
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 4. Content Guidelines
 
@@ -196,7 +199,7 @@ class ContextManagerPort {
 }
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 5. Maintenance
 
@@ -222,7 +225,7 @@ Update diagrams when:
 - Mark outdated diagrams with `<!-- NEEDS UPDATE -->`
 - Track in `../../00-map.md`
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 6. Tools
 
@@ -242,7 +245,7 @@ Update diagrams when:
   run: npx @mermaid-js/mermaid-cli -i docs/**/*.mmd
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 7. Diagram Catalog
 
@@ -256,7 +259,7 @@ Update diagrams when:
 | 06  | Class Diagram           | Mermaid  | Domain Objects    |
 | 07  | Deployment              | Mermaid  | §5.6 Environments |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 8. Examples
 
@@ -306,7 +309,7 @@ Worker -> MemoryLock: release lock
 @enduml
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Related Documents
 

@@ -12,20 +12,22 @@ Enum-like fields in ChEMBL assay normalization (assay_type, relationship_type, a
 ## 🔍 Root Cause Analysis
 
 1. **Hardcoded Values**: Enum values scattered across code files
-2. **Limited Validation**: Some enum fields lack proper validation
-3. **Maintainability Issues**: Updating enum values requires changes in multiple places
-4. **Inconsistent Handling**: Different fields use different approaches
-5. **Missing Externalization**: No YAML config for assay-specific enums
+1. **Limited Validation**: Some enum fields lack proper validation
+1. **Maintainability Issues**: Updating enum values requires changes in multiple places
+1. **Inconsistent Handling**: Different fields use different approaches
+1. **Missing Externalization**: No YAML config for assay-specific enums
 
 ## 📋 Scope
 
 **Affected Components:**
+
 - `configs/enums/chembl.yaml` - Extend with assay-specific enums
 - `src/bioetl/domain/normalization/profiles/chembl_assay.py` - Update to use external enums
 - `src/bioetl/domain/schemas/assay.py` - Add Pandera validation
 - Test files - Update to reflect new enum handling
 
 **Impact Analysis:**
+
 ```bash
 # Find current enum usage in assay
 grep -rn "assay_type\|relationship_type\|assay_category" src/bioetl/domain/ --include="*.py" | wc -l
@@ -36,6 +38,7 @@ grep -rn "assay_type\|relationship_type\|assay_category" src/bioetl/domain/ --in
 ### Phase 1: Enum Inventory (2 days)
 
 1. **Identify Enum Fields**
+
    - assay_type: "B", "F" (ChEMBL assay types)
    - relationship_type: "D", "E", etc.
    - assay_category: "B", "F", etc.
@@ -44,7 +47,8 @@ grep -rn "assay_type\|relationship_type\|assay_category" src/bioetl/domain/ --in
    - confidence_description: "Likely active", "Active", etc.
    - assay_subcellular_fraction: "Membrane", "Nucleus", etc.
 
-2. **Create Enum Configuration**
+1. **Create Enum Configuration**
+
    ```yaml
    # configs/enums/chembl.yaml
    assay:
@@ -60,6 +64,7 @@ grep -rn "assay_type\|relationship_type\|assay_category" src/bioetl/domain/ --in
 ### Phase 2: Implementation (3 days)
 
 1. **Update Normalization Profile**
+
    ```python
    # src/bioetl/domain/normalization/profiles/chembl_assay.py
    from bioetl.domain.config.enum_loader import get_enum_config
@@ -76,36 +81,38 @@ grep -rn "assay_type\|relationship_type\|assay_category" src/bioetl/domain/ --in
    )
    ```
 
-2. **Add Enum Normalization Rules**
+1. **Add Enum Normalization Rules**
+
    ```python
-   case_fields={
+   case_fields = {
        "assay_type": ASSAY_TYPES,
        "relationship_type": RELATIONSHIP_TYPES,
    }
    ```
 
-3. **Update Pandera Schema**
+1. **Update Pandera Schema**
+
    ```python
    # src/bioetl/domain/schemas/assay.py
-   assay_type: Series[str] = pa.Field(
-       isin=list(ASSAY_TYPES),
-       nullable=False
-   )
+   assay_type: Series[str] = pa.Field(isin=list(ASSAY_TYPES), nullable=False)
    ```
 
 ### Phase 3: Validation (2 days)
 
 1. **Test Enum Normalization**
+
    ```bash
    pytest tests/unit/domain/test_assay_normalization.py -v
    ```
 
-2. **Validate Data Quality**
+1. **Validate Data Quality**
+
    ```bash
    python scripts/validate_data_quality.py --assay-enum-check
    ```
 
-3. **Monitor Production**
+1. **Monitor Production**
+
    ```bash
    grep "enum" logs/production.log
    ```
@@ -138,17 +145,20 @@ mypy src/bioetl/domain/normalization/profiles/chembl_assay.py --strict
 ## 📈 Impact Assessment
 
 ### Positive Impacts
+
 - **Maintainability**: Single source of truth for enum values
 - **Consistency**: Uniform enum handling across pipeline
 - **Validation**: Improved data quality checks
 - **Documentation**: Clear enum definitions
 
 ### Potential Risks
+
 - **Breaking Changes**: Existing enum values may need updates
 - **Performance**: Additional enum validation overhead
 - **Complexity**: More enum configurations to maintain
 
 ### Mitigation Strategies
+
 - **Backward Compatibility**: Support both old and new enum values temporarily
 - **Gradual Rollout**: Deploy enum changes in stages
 - **Comprehensive Testing**: Validate all enum scenarios

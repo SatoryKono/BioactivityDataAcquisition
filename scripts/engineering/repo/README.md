@@ -11,15 +11,15 @@ python -m scripts.engineering.repo <command> [args...]
 
 ## Commands
 
-| Command                 | Script                           | Description                                                      |
-| ----------------------- | -------------------------------- | ---------------------------------------------------------------- |
-| `check-inventory`       | `check_scripts_inventory.py`     | Check scripts inventory drift against manifest                   |
-| `check-catalog`         | `check_scripts_catalog.py`       | Validate catalog governance policy                               |
-| `check-versions`        | `check_version_consistency.py`   | Check version consistency across project files                   |
-| `check-cleanliness`     | `audit_root_cleanliness.py`      | Audit repository root layout allowlist                           |
-| `split-testing-roadmap` | `split_testing_roadmap_issue.py` | Preview or create child issues for testing roadmap issue `#2511` |
+| Command                 | Script                           | Description                                                           |
+| ----------------------- | -------------------------------- | --------------------------------------------------------------------- |
+| `check-inventory`       | `check_scripts_inventory.py`     | Check scripts inventory drift against manifest                        |
+| `check-catalog`         | `check_scripts_catalog.py`       | Validate catalog governance policy                                    |
+| `check-versions`        | `check_version_consistency.py`   | Check version consistency across project files                        |
+| `check-cleanliness`     | `audit_root_cleanliness.py`      | Audit repository root layout allowlist                                |
+| `split-testing-roadmap` | `split_testing_roadmap_issue.py` | Preview or create child issues for testing roadmap issue `#2511`      |
 | `sync-docs-issues`      | `sync_docs_issues.py`            | Preview or apply labels, milestone, and comments for docs-sync issues |
-| `all`                   | *(all above)*                    | Run all checks sequentially                                      |
+| `all`                   | *(all above)*                    | Run all checks sequentially                                           |
 
 ## Shell Wrapper
 
@@ -42,20 +42,20 @@ branches.
 
 ## When to Use
 
-| Command                 | When                                                                    | Trigger                      |
-| ----------------------- | ----------------------------------------------------------------------- | ---------------------------- |
-| `check-inventory`       | After adding/removing/renaming scripts                                  | Manual or CI drift check     |
-| `check-catalog`         | After modifying `scripts/engineering/repo/catalog.yaml` or adding new script directories | CI gate (`architecture.yml`) |
-| `check-versions`        | Before release or after bumping version in any file                     | CI gate (`docs.yml`)         |
-| `check-cleanliness`     | After adding files to repository root                                   | Pre-commit hook              |
-| `split-testing-roadmap` | When converting a roadmap issue into executable GitHub child issues     | Manual maintenance workflow  |
-| `sync-docs-issues`      | When applying the documentation-sync issue package metadata and execution-order comments | Manual maintenance workflow  |
-| `cleanup-branch-candidates` | When applying the agreed local-branch cleanup set with optional remote deletion | Manual maintenance workflow  |
-| `all`                   | Quick local sanity check before PR                                      | Manual                       |
+| Command                     | When                                                                                     | Trigger                      |
+| --------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------- |
+| `check-inventory`           | After adding/removing/renaming scripts                                                   | Manual or CI drift check     |
+| `check-catalog`             | After modifying `scripts/engineering/repo/catalog.yaml` or adding new script directories | CI gate (`architecture.yml`) |
+| `check-versions`            | Before release or after bumping version in any file                                      | CI gate (`docs.yml`)         |
+| `check-cleanliness`         | After adding files to repository root                                                    | Pre-commit hook              |
+| `split-testing-roadmap`     | When converting a roadmap issue into executable GitHub child issues                      | Manual maintenance workflow  |
+| `sync-docs-issues`          | When applying the documentation-sync issue package metadata and execution-order comments | Manual maintenance workflow  |
+| `cleanup-branch-candidates` | When applying the agreed local-branch cleanup set with optional remote deletion          | Manual maintenance workflow  |
+| `all`                       | Quick local sanity check before PR                                                       | Manual                       |
 
 ## Other Files
 
-| File                   | Description               |
-| ---------------------- | ------------------------- |
-| `preflight_cleanup.sh` | Pre-commit cleanup helper |
+| File                           | Description                                               |
+| ------------------------------ | --------------------------------------------------------- |
+| `preflight_cleanup.sh`         | Pre-commit cleanup helper                                 |
 | `cleanup_branch_candidates.sh` | Dry-run/apply cleanup for the curated branch deletion set |

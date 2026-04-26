@@ -222,10 +222,10 @@ utility_tags:
 Recommended staged rollout:
 
 1. Allow the fields in note parsing and validation.
-2. Show the fields in `review_curated` output when present.
-3. Add `mark_reviewed` tooling to update review metadata consistently.
-4. Require `last_reviewed` only for notes that have passed a formal review.
-5. Consider requiring `utility_tags` for new curated notes after adoption.
+1. Show the fields in `review_curated` output when present.
+1. Add `mark_reviewed` tooling to update review metadata consistently.
+1. Require `last_reviewed` only for notes that have passed a formal review.
+1. Consider requiring `utility_tags` for new curated notes after adoption.
 
 ## Tooling Plan
 
@@ -386,11 +386,10 @@ This wave is complete when:
 ## Recommended MVP
 
 1. Extend `promotion.yaml` with utility and rejection rules.
-2. Extend `review_curated` with density signals and health metrics.
-3. Add `mark_reviewed` tooling.
-4. Update `REVIEW_LOOP.md` with outcomes and thresholds.
-5. Add tests for low-density, archive-candidate, and merge-candidate notes.
+1. Extend `review_curated` with density signals and health metrics.
+1. Add `mark_reviewed` tooling.
+1. Update `REVIEW_LOOP.md` with outcomes and thresholds.
+1. Add tests for low-density, archive-candidate, and merge-candidate notes.
 
 This MVP improves useful governance without adding expensive infrastructure or
 pretending that content judgment can be fully automated.
-

@@ -47,7 +47,7 @@ program. После closeout `RF-024` и завершения `RF-023` follow-up
 pressure теперь удерживается в двух режимах:
 
 1. `watch-mode governance refresh` для hotspot families и bounded ratchets
-2. `topology watchpoints / conservative follow-up`
+1. `topology watchpoints / conservative follow-up`
 
 Текущий size snapshot для закрытых/guarded shared adapter seams:
 
@@ -301,11 +301,11 @@ Current measured state after `Wave 1` / `Wave 2` / `Wave 3` / `Wave 4`:
 
 1. зафиксировать `registry_manifest.py` как assembly-manifest и не допускать
    роста config semantics внутри него;
-2. уточнить разделение `read / normalize / validate / map` внутри
+1. уточнить разделение `read / normalize / validate / map` внутри
    `infrastructure/config`;
-3. не открывать новую broad migration в `domain/config`, если evidence не
+1. не открывать новую broad migration в `domain/config`, если evidence не
    показывает реальный drift.
-4. удерживать ownership story через architecture ratchet в
+1. удерживать ownership story через architecture ratchet в
    `tests/architecture/test_p1_config_topology_closeout.py`.
 
 Закрытые structural slices:
@@ -542,11 +542,11 @@ Execution note:
 ## Рекомендуемый порядок
 
 1. `Wave 0`, затем `Wave 1`
-2. затем `Wave 2`, если нужен быстрый выигрыш в `application` readability
-3. потом `Wave 3`, потому что storage topology уже подготовлена для точечной
+1. затем `Wave 2`, если нужен быстрый выигрыш в `application` readability
+1. потом `Wave 3`, потому что storage topology уже подготовлена для точечной
    работы внутри существующих families
-4. затем `Wave 4` как отдельный bounded typing experiment
-5. `Wave 5` вести параллельно после baseline и обновлять после каждой волны
+1. затем `Wave 4` как отдельный bounded typing experiment
+1. `Wave 5` вести параллельно после baseline и обновлять после каждой волны
 
 ## Контроль после каждой волны
 

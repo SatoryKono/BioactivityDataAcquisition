@@ -1,9 +1,6 @@
----
-name: nci-analysis
-description: Use when asked to analyze content for manipulation, propaganda, disinformation patterns, or when user provides a URL or text asking "is this manipulative?", "analyze this for bias", "check for propaganda", or similar requests. Detects emotional manipulation, suspicious timing, uniform messaging, tribal division, and missing information across 20 categories.
-context: fork
-agent: general-purpose
----
+______________________________________________________________________
+
+## name: nci-analysis description: Use when asked to analyze content for manipulation, propaganda, disinformation patterns, or when user provides a URL or text asking "is this manipulative?", "analyze this for bias", "check for propaganda", or similar requests. Detects emotional manipulation, suspicious timing, uniform messaging, tribal division, and missing information across 20 categories. context: fork agent: general-purpose
 
 # NCI Manipulation Analysis
 
@@ -24,30 +21,32 @@ Use TodoWrite to track these mandatory steps:
 ## Quick Start
 
 ### For Text Content
+
 1. Read the content provided by user
-2. Apply 20-category analysis (see [references/categories.md](references/categories.md))
-3. Calculate composite factors and overall score (see [references/scoring.md](references/scoring.md))
-4. **Check deep research triggers** - if score > 40 or key categories elevated, verify claims
-5. Generate dual perspectives
-6. Output report in requested format
+1. Apply 20-category analysis (see [references/categories.md](references/categories.md))
+1. Calculate composite factors and overall score (see [references/scoring.md](references/scoring.md))
+1. **Check deep research triggers** - if score > 40 or key categories elevated, verify claims
+1. Generate dual perspectives
+1. Output report in requested format
 
 ### For URLs
+
 1. Use `WebFetch` to retrieve content from URL
-2. Extract main article/post text
-3. Proceed with text analysis workflow
-4. Note source metadata (publication, date, author)
-5. **If triggers met**: Use `fact-checker` agent to verify key claims
+1. Extract main article/post text
+1. Proceed with text analysis workflow
+1. Note source metadata (publication, date, author)
+1. **If triggers met**: Use `fact-checker` agent to verify key claims
 
 ## First Principles (Summary)
 
 The NCI Protocol is grounded in these principles (see `agents/perspective-generator.md` for full version):
 
 1. **Evidence over authority** - Evaluate patterns in content, not source reputation
-2. **Steel-man interpretation** - Present strongest version of each perspective
-3. **Atomic decomposition** - Break claims into smallest verifiable units
-4. **Source agnosticism** - Apply identical standards regardless of source alignment
-5. **Bidirectional beneficiary analysis** - Ask who benefits if believed AND if dismissed
-6. **Pattern vs. Intent** - Focus on techniques; deep research evidence can inform motives
+1. **Steel-man interpretation** - Present strongest version of each perspective
+1. **Atomic decomposition** - Break claims into smallest verifiable units
+1. **Source agnosticism** - Apply identical standards regardless of source alignment
+1. **Bidirectional beneficiary analysis** - Ask who benefits if believed AND if dismissed
+1. **Pattern vs. Intent** - Focus on techniques; deep research evidence can inform motives
 
 These principles ensure fair, consistent analysis across all content regardless of political or ideological alignment.
 
@@ -56,6 +55,7 @@ These principles ensure fair, consistent analysis across all content regardless 
 ### Step 1: Input Processing
 
 **For direct text, record:**
+
 ```
 INPUT TYPE: Text
 LENGTH: [word count]
@@ -63,6 +63,7 @@ CONTEXT PROVIDED: [any user context]
 ```
 
 **For URLs:**
+
 ```
 INPUT TYPE: URL
 URL: [url]
@@ -71,6 +72,7 @@ EXTRACTED: [article title, publication, date if available]
 ```
 
 When processing URLs, also check:
+
 - Publication reputation
 - Author credentials (if available)
 - Publication date and timeliness
@@ -78,6 +80,7 @@ When processing URLs, also check:
 ### Step 2: Score All 20 Categories
 
 For each category, provide:
+
 ```
 CATEGORY #[N]: [Name]
 Score: [1-5]
@@ -89,14 +92,14 @@ See [references/categories.md](references/categories.md) for detailed category d
 
 **Detection signals to look for:**
 
-| Signal Type | Examples |
-|------------|----------|
-| Emotional vocabulary | fear, outrage, danger, threat, shocking |
-| Urgency language | immediately, urgent, now, before it's too late |
-| Tribal markers | we/they asymmetry, us vs them, real patriots |
-| Dehumanizing terms | animals, vermin, horde, infestation |
-| Attribution asymmetry | stated/confirmed vs claimed/alleged |
-| Logical fallacies | whataboutism, false equivalence, ad hominem |
+| Signal Type           | Examples                                       |
+| --------------------- | ---------------------------------------------- |
+| Emotional vocabulary  | fear, outrage, danger, threat, shocking        |
+| Urgency language      | immediately, urgent, now, before it's too late |
+| Tribal markers        | we/they asymmetry, us vs them, real patriots   |
+| Dehumanizing terms    | animals, vermin, horde, infestation            |
+| Attribution asymmetry | stated/confirmed vs claimed/alleged            |
+| Logical fallacies     | whataboutism, false equivalence, ad hominem    |
 
 ### Step 3: Calculate Composite Factors
 
@@ -148,9 +151,13 @@ TRIGGERS MET: [N] → If > 0, proceed to verification
 **If Triggers Met:**
 
 1. **Extract Key Claims**: Identify 3-5 most impactful factual assertions
-2. **Invoke Claim Verifier**: Use `fact-checker` agent or `/decipon:verify`
-3. **Apply Deep Research**: Use `../deep-research/SKILL.md` methodology
-4. **Track Results**:
+
+1. **Invoke Claim Verifier**: Use `fact-checker` agent or `/decipon:verify`
+
+1. **Apply Deep Research**: Use `../deep-research/SKILL.md` methodology
+
+1. **Track Results**:
+
    ```
    CLAIM: [Statement]
    STATUS: [VERIFIED / PARTIALLY VERIFIED / UNVERIFIED / CONTRADICTED]
@@ -159,7 +166,8 @@ TRIGGERS MET: [N] → If > 0, proceed to verification
    NCI IMPACT: [How this affects scores]
    ```
 
-5. **Adjust Scores If Needed**:
+1. **Adjust Scores If Needed**:
+
    - Verified claims → May reduce Authority Issues, Cherry-Picking scores
    - Contradicted claims → Increase relevant category scores
    - Document adjustments in final report
@@ -240,6 +248,7 @@ Deep Research: [Yes/No] - [N] claims verified
 ```
 
 **Severity Indicators (NCI Protocol v1.0):**
+
 - 0-25: `[·]` Low manipulation risk
 - 26-50: `[!]` Moderate - some concerning patterns
 - 51-75: `[!!]` High - strong manipulation patterns
@@ -253,13 +262,13 @@ This plugin includes the deep-research skill for fact-checking and claim verific
 
 Deep research is recommended when NCI analysis shows:
 
-| Trigger | Threshold | Verification Focus |
-|---------|-----------|-------------------|
-| Overall NCI Score | > 40 (upper Moderate) | Verify key claims |
-| Suspicious Timing | > 3 | Correlate events, check timeline |
-| Authority Issues | > 3 | Verify credentials, expertise claims |
-| Cherry-Picking | > 3 | Find omitted context, full data |
-| Historical Parallels | > 2 | Research precedent campaigns |
+| Trigger              | Threshold             | Verification Focus                   |
+| -------------------- | --------------------- | ------------------------------------ |
+| Overall NCI Score    | > 40 (upper Moderate) | Verify key claims                    |
+| Suspicious Timing    | > 3                   | Correlate events, check timeline     |
+| Authority Issues     | > 3                   | Verify credentials, expertise claims |
+| Cherry-Picking       | > 3                   | Find omitted context, full data      |
+| Historical Parallels | > 2                   | Research precedent campaigns         |
 
 ### Workflow Integration
 
@@ -279,45 +288,48 @@ NCI + DEEP RESEARCH WORKFLOW:
 ### Using the Claim Verifier
 
 After NCI analysis, invoke the claim-verifier agent:
+
 - See `../agents/claim-verifier.md` for verification workflow
 - Uses source evaluation from `../deep-research/references/source-evaluation.md`
 - Applies critique framework from `../deep-research/references/critique-framework.md`
 
 ### Verification Commands
 
-| Command | Purpose |
-|---------|---------|
-| `/decipon:analyze` | Pattern analysis (this skill) |
-| `/decipon:verify` | Fact-check claims with deep research |
-| `/decipon:report` | Combined analysis + verification report |
+| Command            | Purpose                                 |
+| ------------------ | --------------------------------------- |
+| `/decipon:analyze` | Pattern analysis (this skill)           |
+| `/decipon:verify`  | Fact-check claims with deep research    |
+| `/decipon:report`  | Combined analysis + verification report |
 
 ### Source Evaluation Integration
 
 When assessing sources during NCI analysis, apply confidence scoring:
 
-| Source Type | Confidence | NCI Consideration |
-|-------------|------------|-------------------|
-| Official documentation | 85-95 | Reduces Authority Issues if verified |
-| Government/institutional | 75-90 | Check for political context |
-| Major news (AP, Reuters) | 70-85 | Generally reliable baseline |
-| Partisan outlets | 40-60 | Note bias, affects Tribal Division |
-| Anonymous/undated | 10-30 | Increases Missing Information |
+| Source Type              | Confidence | NCI Consideration                    |
+| ------------------------ | ---------- | ------------------------------------ |
+| Official documentation   | 85-95      | Reduces Authority Issues if verified |
+| Government/institutional | 75-90      | Check for political context          |
+| Major news (AP, Reuters) | 70-85      | Generally reliable baseline          |
+| Partisan outlets         | 40-60      | Note bias, affects Tribal Division   |
+| Anonymous/undated        | 10-30      | Increases Missing Information        |
 
 See `../deep-research/references/source-evaluation.md` for detailed scoring.
 
 ### Contradiction Handling
 
 When sources disagree during verification:
+
 1. Note the contradiction explicitly
-2. Apply confidence scoring to each source
-3. Research additional sources to resolve
-4. If unresolved, present both perspectives in report
+1. Apply confidence scoring to each source
+1. Research additional sources to resolve
+1. If unresolved, present both perspectives in report
 
 See `../deep-research/references/critique-framework.md` for resolution protocol.
 
 ## Examples
 
 See [references/examples.md](references/examples.md) for historical case studies including:
+
 - Nayirah Testimony (1990) - Score: 88
 - Tobacco Industry Campaign - Score: 82
 - Modern examples with full category breakdowns
@@ -325,6 +337,7 @@ See [references/examples.md](references/examples.md) for historical case studies
 ## When to Use
 
 **Use NCI Analysis:**
+
 - Content claiming urgent action needed
 - Viral stories with strong emotional triggers
 - Content creating clear us-vs-them dynamics
@@ -332,6 +345,7 @@ See [references/examples.md](references/examples.md) for historical case studies
 - Content from unknown or questionable sources
 
 **Don't Use:**
+
 - Simple factual lookups (use fact-checking)
 - Opinion pieces clearly labeled as such
 - Personal correspondence
@@ -360,6 +374,7 @@ Use the **AskUserQuestion tool** at key decision points throughout the NCI analy
 ### Example Invocations
 
 **Content type clarification (Step 1):**
+
 ```
 Content could be satire, opinion, or news
 → Use AskUserQuestion tool:
@@ -372,6 +387,7 @@ Content could be satire, opinion, or news
 ```
 
 **Deep research trigger (Step 5):**
+
 ```
 NCI Score: 52, Authority Issues: 4, Cherry-Picking: 3
 → Use AskUserQuestion tool:
@@ -383,6 +399,7 @@ NCI Score: 52, Authority Issues: 4, Cherry-Picking: 3
 ```
 
 **Perspective disagreement (Step 6):**
+
 ```
 Manipulative confidence: 68%, Legitimate confidence: 42%
 → Use AskUserQuestion tool:
@@ -394,6 +411,7 @@ Manipulative confidence: 68%, Legitimate confidence: 42%
 ```
 
 **Output format (Step 7):**
+
 ```
 Analysis complete, ready for output
 → Use AskUserQuestion tool:

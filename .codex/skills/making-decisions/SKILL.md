@@ -1,9 +1,6 @@
----
-name: making-decisions
-description: Use when transforming synthesis insights into explicit decisions with documented trade-offs. Guides interactive decision-making and risk identification.
-context: fork
-agent: general-purpose
----
+______________________________________________________________________
+
+## name: making-decisions description: Use when transforming synthesis insights into explicit decisions with documented trade-offs. Guides interactive decision-making and risk identification. context: fork agent: general-purpose
 
 # Decision Ledger
 
@@ -32,6 +29,7 @@ Use TodoWrite to track these mandatory steps:
 ### Step 1: Load Decision Candidates
 
 Read `03-synthesis/CROSS-SYNTHESIS.md` to extract:
+
 - Decision topics needing resolution
 - Supporting evidence from each pillar
 - Identified options
@@ -39,7 +37,8 @@ Read `03-synthesis/CROSS-SYNTHESIS.md` to extract:
 ### Step 2: Gather Evidence per Decision
 
 For each decision candidate:
-- Collect all relevant EV-* IDs
+
+- Collect all relevant EV-\* IDs
 - Summarize what evidence supports each option
 - Note confidence levels
 
@@ -60,6 +59,7 @@ decision_candidate:
 ### Step 3: Present Trade-offs
 
 For each decision, present:
+
 - Options with evidence support
 - What you win with each option
 - What you lose with each option
@@ -128,6 +128,7 @@ Write entry to `04-decisions/DECISIONS.yaml` using schema from [references/decis
 ### Step 5: Identify Created Risks
 
 Each decision may create risks. For each identified risk:
+
 - Create entry in `05-risks/RISKS.yaml`
 - Link back to creating decision
 - Document triggers and mitigations
@@ -137,17 +138,20 @@ See [references/risk-ledger-schema.md](references/risk-ledger-schema.md) for sch
 ### Step 6: Generate Ledger Files
 
 Write complete files:
+
 - `04-decisions/DECISIONS.yaml`
 - `05-risks/RISKS.yaml`
 
 ### Step 7: Validate Quality Gates
 
 **Decision quality gate:**
+
 - Every decision cites ≥2 evidence IDs
 - Every decision lists ≥1 alternative considered
 - Every decision documents wins AND loses
 
 **Risk quality gate:**
+
 - Every risk links to creating decision
 - Every risk has severity and likelihood
 - Every risk has ≥1 mitigation
@@ -157,6 +161,7 @@ Write complete files:
 Use the **AskUserQuestion tool** for every decision:
 
 ### Decision prompt
+
 ```
 Question: "Decision needed: [topic]"
 Options:
@@ -167,6 +172,7 @@ Options:
 ```
 
 ### Trade-off confirmation
+
 ```
 Question: "You chose [option]. Confirming trade-offs:"
 Options:
@@ -176,6 +182,7 @@ Options:
 ```
 
 ### Decision status
+
 ```
 Question: "Should this decision be marked as:"
 Options:
@@ -185,6 +192,7 @@ Options:
 ```
 
 ### Risk severity
+
 ```
 Question: "This decision creates risk: [risk]. How severe?"
 Options:

@@ -14,7 +14,7 @@ $WslDistro = if ($env:BIOETL_WSL_DISTRO) { $env:BIOETL_WSL_DISTRO } else { "Ubun
 # Convert Windows path to WSL path
 function ConvertTo-WslPath {
     param([string]$WindowsPath)
-    
+
     $drive = $WindowsPath.Substring(0, 1).ToLower()
     $rest = $WindowsPath.Substring(2) -replace '\\', '/'
     return "/mnt/$drive$rest"

@@ -31,11 +31,11 @@ $wt = Get-Command wt -ErrorAction SilentlyContinue
 if ($wt) {
     Write-Host "[i] Opening Windows Terminal with Codex..."
     Write-Host ""
-    
+
     # Open new tab with wsl and run codex
     $cmd = "wsl -d $WslDistro -e bash -i -c 'cd $ScriptPathWSL && bash run-codex.sh start'"
     & wt -w 0 nt -d $ScriptDir powershell -NoExit -Command $cmd
-    
+
     exit $LASTEXITCODE
 }
 

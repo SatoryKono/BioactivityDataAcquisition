@@ -1,9 +1,6 @@
----
-name: create-pr
-description: "Creates GitHub PRs with Conventional Commits titles adapted for BioETL project."
-context: none
-agent: general-purpose
----
+______________________________________________________________________
+
+## name: create-pr description: "Creates GitHub PRs with Conventional Commits titles adapted for BioETL project." context: none agent: general-purpose
 
 # Create Pull Request
 
@@ -17,21 +14,22 @@ Creates GitHub PRs with Conventional Commits titles adapted for BioETL project.
 
 ### Types (required)
 
-| Type       | Description                          | Changelog |
-|------------|--------------------------------------|-----------|
-| `feat`     | New feature / pipeline / adapter     | Yes       |
-| `fix`      | Bug fix                              | Yes       |
-| `perf`     | Performance improvement              | Yes       |
-| `refactor` | Code change (no bug fix or feature)  | No        |
-| `test`     | Adding/correcting tests              | No        |
-| `docs`     | Documentation only                   | No        |
-| `build`    | Build system or dependencies         | No        |
-| `ci`       | CI configuration / workflows         | No        |
-| `chore`    | Routine tasks, maintenance           | No        |
+| Type       | Description                         | Changelog |
+| ---------- | ----------------------------------- | --------- |
+| `feat`     | New feature / pipeline / adapter    | Yes       |
+| `fix`      | Bug fix                             | Yes       |
+| `perf`     | Performance improvement             | Yes       |
+| `refactor` | Code change (no bug fix or feature) | No        |
+| `test`     | Adding/correcting tests             | No        |
+| `docs`     | Documentation only                  | No        |
+| `build`    | Build system or dependencies        | No        |
+| `ci`       | CI configuration / workflows        | No        |
+| `chore`    | Routine tasks, maintenance          | No        |
 
 ### Scopes (optional but recommended)
 
 **By provider:**
+
 - `chembl` - ChEMBL adapter/pipeline
 - `pubchem` - PubChem adapter/pipeline
 - `pubmed` - PubMed adapter/pipeline
@@ -39,6 +37,7 @@ Creates GitHub PRs with Conventional Commits titles adapted for BioETL project.
 - `fda` - FDA adapter/pipeline
 
 **By layer:**
+
 - `domain` - Domain layer (ports, entities, types)
 - `application` - Application layer (services, use cases)
 - `infrastructure` - Infrastructure layer (adapters, storage)
@@ -46,6 +45,7 @@ Creates GitHub PRs with Conventional Commits titles adapted for BioETL project.
 - `interfaces` - CLI, API interfaces
 
 **By feature:**
+
 - `tests` - Test infrastructure
 - `configs` - YAML configurations
 - `schemas` - Pandera schemas (Silver/Gold)
@@ -64,30 +64,35 @@ Creates GitHub PRs with Conventional Commits titles adapted for BioETL project.
 ## Steps
 
 1. **Check current state**:
+
    ```bash
    git status
    git diff --stat
    git log origin/main..HEAD --oneline
    ```
 
-2. **Analyze changes** to determine:
+1. **Analyze changes** to determine:
+
    - Type: What kind of change is this?
    - Scope: Which provider/layer/feature is affected?
    - Summary: What does the change do?
 
-3. **Run checks before PR**:
+1. **Run checks before PR**:
+
    ```bash
    make lint
    make test
    pytest tests/architecture/ -v
    ```
 
-4. **Push branch if needed**:
+1. **Push branch if needed**:
+
    ```bash
    git push -u origin HEAD
    ```
 
-5. **Create PR** using gh CLI:
+1. **Create PR** using gh CLI:
+
    ```bash
    gh pr create --draft --title "<type>(<scope>): <summary>" --body "$(cat <<'EOF'
    ## Summary
@@ -114,51 +119,61 @@ Creates GitHub PRs with Conventional Commits titles adapted for BioETL project.
 ## Examples
 
 ### New pipeline
+
 ```
 feat(chembl): add mechanism pipeline with Silver/Gold schemas
 ```
 
 ### Bug fix in adapter
+
 ```
 fix(pubchem): handle rate limit 429 response
 ```
 
 ### Refactoring infrastructure
+
 ```
 refactor(infrastructure): extract common HTTP retry logic
 ```
 
 ### Schema changes
+
 ```
 feat(schemas): add PublicationBaseSchema for cross-provider fields
 ```
 
 ### Config updates
+
 ```
 chore(configs): update DQ rules for pubmed publication dates
 ```
 
 ### Performance optimization
+
 ```
 perf(storage): optimize Delta Lake merge for large datasets
 ```
 
 ### Documentation
+
 ```
 docs: update architecture diagrams for medallion flow
 ```
 
 ### Tests
+
 ```
 test(chembl): add VCR cassettes for activity endpoint
 ```
 
 ### Breaking change
+
 ```
 feat(domain)!: redesign DataSourcePort async generator interface
 ```
 
 ### No scope (affects multiple areas)
+
 ```
 refactor: standardize error handling across all adapters
 ```
@@ -166,11 +181,13 @@ refactor: standardize error handling across all adapters
 ## Validation
 
 The PR title must match this pattern:
+
 ```
 ^(feat|fix|perf|test|docs|refactor|build|ci|chore|revert)(\([a-zA-Z0-9_]+\))?!?: .+[^.]$
 ```
 
 Key validation rules:
+
 - Type must be one of the allowed types
 - Scope is optional but must be in parentheses if present
 - Exclamation mark for breaking changes goes before the colon

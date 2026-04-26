@@ -1,13 +1,14 @@
 # Neo4j Memory MCP Documentation Index
 
-**Last Updated**: 2026-04-08  
+**Last Updated**: 2026-04-08
 **Status**: MCP Registered, Backend Ready to Start
 
----
+______________________________________________________________________
 
 ## 📚 Documentation Map
 
 ### Getting Started
+
 1. **[NEO4J-MCP-SESSION-SUMMARY.md](NEO4J-MCP-SESSION-SUMMARY.md)** ⭐ **START HERE**
    - What was completed in this session
    - What remains (quick backend startup)
@@ -17,13 +18,15 @@
 ### Implementation Guides
 
 2. **[NEO4J-STARTUP-GUIDE.md](NEO4J-STARTUP-GUIDE.md)**
+
    - Step-by-step backend startup instructions
    - Docker Compose alternative
    - Container management commands
    - Environment variable configuration
    - Troubleshooting guide
 
-3. **[NEO4J-COMPLETION-GUIDE.md](NEO4J-COMPLETION-GUIDE.md)**
+1. **[NEO4J-COMPLETION-GUIDE.md](NEO4J-COMPLETION-GUIDE.md)**
+
    - Why MCP needs a running backend
    - Verification commands
    - Integration with Codex
@@ -39,19 +42,20 @@
 
 ### Project Configuration Files
 
-| File | Purpose | Status |
-|------|---------|--------|
-| `.mcp.json` | Codex CLI MCP servers | ✅ Configured |
-| `.vscode/mcp.json` | VS Code Copilot MCP | ✅ Configured |
-| `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` | MCP wrapper script | ✅ Ready |
-| `scripts/engineering/dev/setup_copilot_codex_mcp.py` | MCP setup automation | ✅ Updated |
-| `.env.example` | Environment template | ✅ Updated |
+| File                                                 | Purpose               | Status        |
+| ---------------------------------------------------- | --------------------- | ------------- |
+| `.mcp.json`                                          | Codex CLI MCP servers | ✅ Configured |
+| `.vscode/mcp.json`                                   | VS Code Copilot MCP   | ✅ Configured |
+| `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh`         | MCP wrapper script    | ✅ Ready      |
+| `scripts/engineering/dev/setup_copilot_codex_mcp.py` | MCP setup automation  | ✅ Updated    |
+| `.env.example`                                       | Environment template  | ✅ Updated    |
 
----
+______________________________________________________________________
 
 ## 🚀 Quick Start (Copy-Paste)
 
 ### Step 1: Start Neo4j Backend
+
 ```bash
 docker run -d --name bioetl-neo4j \
   -p 7474:7474 -p 7687:7687 \
@@ -60,6 +64,7 @@ docker run -d --name bioetl-neo4j \
 ```
 
 ### Step 2: Verify MCP Connection
+
 ```bash
 # Check Codex registration
 codex mcp get neo4j-memory
@@ -72,6 +77,7 @@ bash scripts/ops/runtime/neo4j/neo4j_quick_start.sh
 ```
 
 ### Step 3: Access Neo4j Browser
+
 ```
 http://localhost:7474/browser/
 Username: neo4j
@@ -79,22 +85,24 @@ Password: bioetl_secure_password
 ```
 
 ### Step 4: Use in Codex
+
 ```bash
 codex interactive
 # Then use @neo4j-memory in prompts
 ```
 
----
+______________________________________________________________________
 
 ## 📋 Verification Scripts
 
-| Script | Location | Purpose |
-|--------|----------|---------|
-| **check.sh** | `scripts/ai/mcp/` | General MCP validation across registered servers |
-| **check_neo4j_memory.sh** | `scripts/ai/mcp/` | Full Neo4j Memory MCP + backend health check |
-| **neo4j_quick_start.sh** | `scripts/ops/` | One-command startup & verification |
+| Script                    | Location          | Purpose                                          |
+| ------------------------- | ----------------- | ------------------------------------------------ |
+| **check.sh**              | `scripts/ai/mcp/` | General MCP validation across registered servers |
+| **check_neo4j_memory.sh** | `scripts/ai/mcp/` | Full Neo4j Memory MCP + backend health check     |
+| **neo4j_quick_start.sh**  | `scripts/ops/`    | One-command startup & verification               |
 
 ### Run checks:
+
 ```bash
 # General MCP validation
 bash scripts/ai/mcp/check.sh
@@ -106,7 +114,7 @@ bash scripts/ai/mcp/check_neo4j_memory.sh
 bash scripts/ops/runtime/neo4j/neo4j_quick_start.sh
 ```
 
----
+______________________________________________________________________
 
 ## 🔧 Environment Variables
 
@@ -128,11 +136,12 @@ NEO4J_AUTH_PASSWORD=bioetl_secure_password
 ```
 
 Set via:
+
 - `.env` file (recommended)
 - Shell `export` (overrides `.env`)
 - Docker `-e` flag (for container)
 
----
+______________________________________________________________________
 
 ## 🏗️ Architecture
 
@@ -166,7 +175,7 @@ Set via:
         └──────────────────────────┘
 ```
 
----
+______________________________________________________________________
 
 ## ✅ Status Checklist
 
@@ -178,6 +187,7 @@ Set via:
 - [ ] **Neo4j backend running** ← You are here
 
 **To activate MCP:**
+
 ```bash
 # 1. Start backend
 docker run -d --name bioetl-neo4j \
@@ -189,7 +199,7 @@ docker run -d --name bioetl-neo4j \
 bash scripts/ai/mcp/check_neo4j_memory.sh
 ```
 
----
+______________________________________________________________________
 
 ## 🔗 Related Resources
 
@@ -199,37 +209,41 @@ bash scripts/ai/mcp/check_neo4j_memory.sh
 - **Project MCP Config**: `scripts/engineering/dev/setup_copilot_codex_mcp.py`
 - **Codex Documentation**: https://docs.docker.com/ai/docker-agent/
 
----
+______________________________________________________________________
 
 ## 🆘 Troubleshooting
 
 **Problem**: `codex mcp get neo4j-memory` fails
+
 - Solution: Run `docker start bioetl-neo4j`
 
 **Problem**: "Port 7687 already in use"
+
 - Solution: `docker stop $(docker ps -q)` or use different port
 
 **Problem**: "Connection refused" when accessing MCP
+
 - Solution: Check `docker logs bioetl-neo4j` for startup errors
 
 **Problem**: Neo4j takes too long to start
+
 - Solution: Normal — Neo4j 5.15 takes 10-15 seconds. Be patient.
 
 See [NEO4J-STARTUP-GUIDE.md](NEO4J-STARTUP-GUIDE.md) for more troubleshooting.
 
----
+______________________________________________________________________
 
 ## 📝 Files in This Directory
 
-| File | Purpose |
-|------|---------|
-| `NEO4J-MCP-SESSION-SUMMARY.md` | Session summary & next steps |
-| `NEO4J-STARTUP-GUIDE.md` | Step-by-step startup instructions |
-| `NEO4J-COMPLETION-GUIDE.md` | What's left to do |
-| `neo4j-memory-setup.md` | Memory configuration (existing) |
-| `README.md` | General deployment docs (existing) |
-| **This file** | Documentation index |
+| File                           | Purpose                            |
+| ------------------------------ | ---------------------------------- |
+| `NEO4J-MCP-SESSION-SUMMARY.md` | Session summary & next steps       |
+| `NEO4J-STARTUP-GUIDE.md`       | Step-by-step startup instructions  |
+| `NEO4J-COMPLETION-GUIDE.md`    | What's left to do                  |
+| `neo4j-memory-setup.md`        | Memory configuration (existing)    |
+| `README.md`                    | General deployment docs (existing) |
+| **This file**                  | Documentation index                |
 
----
+______________________________________________________________________
 
 **Next Step**: Follow [NEO4J-STARTUP-GUIDE.md](NEO4J-STARTUP-GUIDE.md) to start Neo4j backend on your machine.

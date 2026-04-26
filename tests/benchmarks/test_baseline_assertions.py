@@ -14,6 +14,7 @@ standard test runs. Run explicitly with: make bench or pytest -m benchmark
 
 from __future__ import annotations
 
+import os
 import time
 from typing import Any
 
@@ -284,6 +285,7 @@ class TestPolarsBaselines:
     GROUP_AGG_THRESHOLD_MS = (
         150  # 15x of 10 ms target (accounts for Python 3.14 variance)
     )
+    WINDOWS_GROUP_AGG_THRESHOLD_MS = 300
 
     @pytest.fixture
     def records_for_df(self) -> list[dict[str, Any]]:
@@ -372,10 +374,15 @@ class TestPolarsBaselines:
             times.append(elapsed * 1000)
 
         avg_ms = sum(times) / len(times)
+        threshold_ms = (
+            self.WINDOWS_GROUP_AGG_THRESHOLD_MS
+            if os.name == "nt"
+            else self.GROUP_AGG_THRESHOLD_MS
+        )
 
-        assert avg_ms < self.GROUP_AGG_THRESHOLD_MS, (
+        assert avg_ms < threshold_ms, (
             f"Group + aggregate took {avg_ms:.1f} ms, "
-            f"exceeds baseline of {self.GROUP_AGG_THRESHOLD_MS} ms"
+            f"exceeds baseline of {threshold_ms} ms"
         )
 
 

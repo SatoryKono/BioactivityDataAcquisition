@@ -28,12 +28,12 @@ if not defined REPO_WSL (
         set "DRIVE=%%A:="
         set "DRIVE=!DRIVE:~0,1!"
     )
-    
+
     REM Convert to lowercase
     for %%A in (a b c d e f g h i j k l m n o p q r s t u v w x y z) do (
         if /i "!DRIVE!"=="%%A" set "DRIVE=%%A"
     )
-    
+
     REM Build path
     set "PATHPART=%REPO_WIN:~2%"
     set "PATHPART=!PATHPART:\=/!"

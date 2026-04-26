@@ -17,8 +17,8 @@ repeatable knowledge that remains helpful across future tasks.
 For each non-`keep` record in the report:
 
 1. Confirm the cited `source_refs` still represent the same reality.
-2. Check whether the note still captures repeatable knowledge instead of one-off context.
-3. Decide whether to:
+1. Check whether the note still captures repeatable knowledge instead of one-off context.
+1. Decide whether to:
    - keep the note and refresh `last_verified`,
    - improve the note body/summary,
    - merge it with another curated note,

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Пайплайн: ChEMBL Compound Record
 
@@ -15,7 +18,7 @@ Last verified: '2026-03-30'
 **Сущность:** `compound_record`
 **Версия схемы:** 1.2.0
 
----
+______________________________________________________________________
 
 ## 1. Описание
 
@@ -23,33 +26,33 @@ Last verified: '2026-03-30'
 
 **Назначение:** Сопоставление молекул с публикациями и отслеживание оригинальных наименований соединений в научной литературе.
 
----
+______________________________________________________________________
 
 ## 2. Ключевые поля
 
 ### Первичный ключ
 
-| Поле | Тип | Описание |
-|------|-----|----------|
+| Поле        | Тип   | Описание                                                  |
+| ----------- | ----- | --------------------------------------------------------- |
 | `record_id` | `int` | Уникальный идентификатор записи (суррогатный ключ ChEMBL) |
 
 ### Внешние ключи
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `molecule_id` | `str` | FK → Molecule (например, `CHEMBL25`) |
+| Поле             | Тип   | Описание                                     |
+| ---------------- | ----- | -------------------------------------------- |
+| `molecule_id`    | `str` | FK → Molecule (например, `CHEMBL25`)         |
 | `publication_id` | `str` | FK → Publication (например, `CHEMBL1121421`) |
-| `src_id` | `int` | FK → Source (источник данных) |
+| `src_id`         | `int` | FK → Source (источник данных)                |
 
 ### Данные из источника
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `compound_key` | `str \| None` | Оригинальный ключ соединения в документе |
-| `compound_name` | `str \| None` | Оригинальное название соединения в документе |
-| `src_compound_id` | `str \| None` | ID соединения в исходной базе данных |
+| Поле              | Тип           | Описание                                     |
+| ----------------- | ------------- | -------------------------------------------- |
+| `compound_key`    | `str \| None` | Оригинальный ключ соединения в документе     |
+| `compound_name`   | `str \| None` | Оригинальное название соединения в документе |
+| `src_compound_id` | `str \| None` | ID соединения в исходной базе данных         |
 
----
+______________________________________________________________________
 
 ## 3. Связи с другими сущностями
 
@@ -60,10 +63,11 @@ Compound Record (M:1) → Source
 ```
 
 **Граф зависимостей:**
+
 - Для полного анализа рекомендуется сначала загрузить `chembl_molecule` и `chembl_publication`
 - `src_id` ссылается на источник данных ChEMBL (1 = ChEMBL)
 
----
+______________________________________________________________________
 
 ## 4. Трансформация
 
@@ -72,8 +76,8 @@ Compound Record (M:1) → Source
 ### Логика трансформации
 
 1. **Primary ID:** `record_id` (int, обязательный)
-2. **Нормализация строк:** Все строковые поля обрабатываются через `normalize_to_string()` — trim whitespace, NULL для пустых строк
-3. **Преобразование типов:** `record_id` и `src_id` преобразуются через `safe_int()`
+1. **Нормализация строк:** Все строковые поля обрабатываются через `normalize_to_string()` — trim whitespace, NULL для пустых строк
+1. **Преобразование типов:** `record_id` и `src_id` преобразуются через `safe_int()`
 
 ### Entity ID
 
@@ -81,27 +85,27 @@ Compound Record (M:1) → Source
 entity_id = f"chembl:{record_id}"
 ```
 
----
+______________________________________________________________________
 
 ## 5. Валидация
 
 ### DQ-правила
 
-| Поле | Правило | Описание |
-|------|---------|----------|
-| `record_id` | `>= 1` | Положительное целое число |
-| `molecule_id` | `^CHEMBL\d+$` | Regex для формата ChEMBL ID |
+| Поле             | Правило       | Описание                    |
+| ---------------- | ------------- | --------------------------- |
+| `record_id`      | `>= 1`        | Положительное целое число   |
+| `molecule_id`    | `^CHEMBL\d+$` | Regex для формата ChEMBL ID |
 | `publication_id` | `^CHEMBL\d+$` | Regex для формата ChEMBL ID |
-| `src_id` | `>= 1` | Положительное целое число |
+| `src_id`         | `>= 1`        | Положительное целое число   |
 
 ### Пороги ошибок
 
-| Порог | Условие | Действие |
-|-------|---------|----------|
-| Soft | > 5% ошибок | WARNING |
-| Hard | > 20% ошибок | FAIL BATCH |
+| Порог | Условие      | Действие   |
+| ----- | ------------ | ---------- |
+| Soft  | > 5% ошибок  | WARNING    |
+| Hard  | > 20% ошибок | FAIL BATCH |
 
----
+______________________________________________________________________
 
 ## 6. Использование CLI
 
@@ -119,13 +123,14 @@ bioetl run --pipeline chembl_compound_record --run-type rebuild
 bioetl run --pipeline chembl_compound_record --dry-run
 ```
 
----
+______________________________________________________________________
 
 ## 7. Фильтрация по Gold
 
 ### Обязательные поля для Gold
 
 Записи проходят в Gold слой только при наличии:
+
 - `molecule_id`
 - `publication_id`
 
@@ -138,37 +143,37 @@ gold_filters:
     - publication_id
 ```
 
----
+______________________________________________________________________
 
 ## 8. Сортировка
 
 ### Silver
 
-| Столбец | Порядок |
-|---------|---------|
-| `record_id` | ASC |
+| Столбец     | Порядок |
+| ----------- | ------- |
+| `record_id` | ASC     |
 
 ### Gold
 
-| Столбец | Порядок |
-|---------|---------|
-| `molecule_id` | ASC |
-| `publication_id` | ASC |
-| `record_id` | ASC |
+| Столбец          | Порядок |
+| ---------------- | ------- |
+| `molecule_id`    | ASC     |
+| `publication_id` | ASC     |
+| `record_id`      | ASC     |
 
----
+______________________________________________________________________
 
 ## 9. Связанные файлы
 
-| Компонент | Путь |
-|-----------|------|
-| Конфигурация | `configs/entities/chembl/compound_record.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/compound_record_transformer.py` |
-| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
-| Сущность | `src/bioetl/domain/entities/chembl_compound_record.py` |
-| Схема | `src/bioetl/domain/schemas/chembl/compound_record.py` |
+| Компонент     | Путь                                                                     |
+| ------------- | ------------------------------------------------------------------------ |
+| Конфигурация  | `configs/entities/chembl/compound_record.yaml`                           |
+| Трансформер   | `src/bioetl/application/pipelines/chembl/compound_record_transformer.py` |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`                  |
+| Сущность      | `src/bioetl/domain/entities/chembl_compound_record.py`                   |
+| Схема         | `src/bioetl/domain/schemas/chembl/compound_record.py`                    |
 
----
+______________________________________________________________________
 
 ## 10. Примеры данных
 
@@ -191,28 +196,28 @@ gold_filters:
 
 ### Silver (нормализованные данные)
 
-| record_id | molecule_id | publication_id | compound_key | compound_name | src_id |
-|-----------|-------------|----------------|--------------|---------------|--------|
-| 1234567 | CHEMBL25 | CHEMBL1121421 | Aspirin | acetylsalicylic acid | 1 |
+| record_id | molecule_id | publication_id | compound_key | compound_name        | src_id |
+| --------- | ----------- | -------------- | ------------ | -------------------- | ------ |
+| 1234567   | CHEMBL25    | CHEMBL1121421  | Aspirin      | acetylsalicylic acid | 1      |
 
----
+______________________________________________________________________
 
 ## Contract References
 
-| Артефакт | Ссылка |
-| --- | --- |
+| Артефакт             | Ссылка                                                                                    |
+| -------------------- | ----------------------------------------------------------------------------------------- |
 | Gold contract export | [chembl_compound_record_v1.0.json](../../contracts/gold/chembl_compound_record_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                        |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md)  |
 
 ## Compliance
 
-| Контроль | Статус | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Runtime alignment | Pass | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
-| Contract linkage | Pass | [chembl_compound_record_v1.0.json](../../contracts/gold/chembl_compound_record_v1.0.json) |
-| API governance | Pass | См. [API Compliance](#api-compliance) |
+| Контроль          | Статус | Evidence                                                                                                       |
+| ----------------- | ------ | -------------------------------------------------------------------------------------------------------------- |
+| Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`                       |
+| Runtime alignment | Pass   | Активный config/runtime surface задокументирован в разделах `Конфигурация`, `Трансформация`, `Связанные файлы` |
+| Contract linkage  | Pass   | [chembl_compound_record_v1.0.json](../../contracts/gold/chembl_compound_record_v1.0.json)                      |
+| API governance    | Pass   | См. [API Compliance](#api-compliance)                                                                          |
 
 ## API Compliance
 

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 0.3.0
 Status: draft
 Class: repo-only
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last synchronized: '2026-04-08'
----
+  Last synchronized: '2026-04-08'
+
+______________________________________________________________________
 
 # D-09 Requirements Traceability (Draft Sync Note)
 
@@ -42,13 +45,12 @@ D-09 фиксирует рамку будущего consolidated handbook по �
 ## План синхронизации D-09
 
 1. Использовать D-09 как карту существующих traceability anchors, без дублирования нормативных требований.
-2. Если вводится отдельный traceability registry (например, matrix/report), сначала ratify его через governance policy и docs workflow.
-3. Любые CI-изменения по traceability согласовывать с действующими workflow boundaries (`tests.yml` vs `docs.yml`) и фиксировать в published guides.
-4. После утверждения целевого traceability процесса перенести нормативный текст в `docs/01-requirements/` как published surface, а D-09 оставить кратким pointer-note.
+1. Если вводится отдельный traceability registry (например, matrix/report), сначала ratify его через governance policy и docs workflow.
+1. Любые CI-изменения по traceability согласовывать с действующими workflow boundaries (`tests.yml` vs `docs.yml`) и фиксировать в published guides.
+1. После утверждения целевого traceability процесса перенести нормативный текст в `docs/01-requirements/` как published surface, а D-09 оставить кратким pointer-note.
 
 ## Критерии промоушена в future published handbook
 
 1. Определён единый published source для requirements traceability (без параллельных реестров).
-2. Термины и статусы трассируемости согласованы между `REQUIREMENTS`, ADR и testing governance.
-3. Процесс traceability проверяется CI и имеет воспроизводимые команды в published docs.
-
+1. Термины и статусы трассируемости согласованы между `REQUIREMENTS`, ADR и testing governance.
+1. Процесс traceability проверяется CI и имеет воспроизводимые команды в published docs.

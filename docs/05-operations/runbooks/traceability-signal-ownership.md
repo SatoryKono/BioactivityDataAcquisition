@@ -97,14 +97,14 @@ ______________________________________________________________________
 
 ### Signal Ownership Matrix
 
-| Signal                           | Trigger                                                       | Primary Owner          | Backup Owner           | First Command                                     | Escalation                     |
-| -------------------------------- | ------------------------------------------------------------- | ---------------------- | ---------------------- | ------------------------------------------------- | ------------------------------ |
-| DQ failure rate spike            | P1/P2 DQ alert, repeated `run_failed` with DQ context         | Data Quality Owner     | Pipeline Owner         | `bioetl run-manifest show <run-id> --format json` | Tech Lead after 30m unresolved |
-| Lineage gap                      | missing lineage fragments or sidecar mismatch                 | Metadata/Lineage Owner | Pipeline Owner         | `bioetl run-manifest show <run-id> --format json` | Tech Lead after 45m unresolved |
-| Manifest missing                 | run exists but no manifest resolution by `run_id`             | Control Plane Owner    | On-call Engineer       | `bioetl run-manifest show <run-id>`               | Immediate P1 escalation        |
+| Signal                           | Trigger                                                                                                                   | Primary Owner          | Backup Owner           | First Command                                     | Escalation                     |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------------------- | ---------------------- | ------------------------------------------------- | ------------------------------ |
+| DQ failure rate spike            | P1/P2 DQ alert, repeated `run_failed` with DQ context                                                                     | Data Quality Owner     | Pipeline Owner         | `bioetl run-manifest show <run-id> --format json` | Tech Lead after 30m unresolved |
+| Lineage gap                      | missing lineage fragments or sidecar mismatch                                                                             | Metadata/Lineage Owner | Pipeline Owner         | `bioetl run-manifest show <run-id> --format json` | Tech Lead after 45m unresolved |
+| Manifest missing                 | run exists but no manifest resolution by `run_id`                                                                         | Control Plane Owner    | On-call Engineer       | `bioetl run-manifest show <run-id>`               | Immediate P1 escalation        |
 | Checkpoint resume blocked        | resume fails on compatibility policy (`soft_fail/hard_fail`) or `observe_blocked_identity` on canonical identity mismatch | Execution Owner        | Control Plane Owner    | `bioetl run-manifest show <run-id> --format json` | Tech Lead after 30m unresolved |
-| Artifact publish linkage error   | `artifact_published` exists but missing dataset/lineage links | Storage/Metadata Owner | Metadata/Lineage Owner | `bioetl run-manifest show <run-id> --format json` | Tech Lead after 30m unresolved |
-| Composite dependency degradation | composite enrichment/cross-validation degradation signal      | Composite Owner        | Data Quality Owner     | `bioetl run-manifest show <run-id> --format json` | Tech Lead after 45m unresolved |
+| Artifact publish linkage error   | `artifact_published` exists but missing dataset/lineage links                                                             | Storage/Metadata Owner | Metadata/Lineage Owner | `bioetl run-manifest show <run-id> --format json` | Tech Lead after 30m unresolved |
+| Composite dependency degradation | composite enrichment/cross-validation degradation signal                                                                  | Composite Owner        | Data Quality Owner     | `bioetl run-manifest show <run-id> --format json` | Tech Lead after 45m unresolved |
 
 ### Control-plane aggregate telemetry
 

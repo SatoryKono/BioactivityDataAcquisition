@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-03'
----
+  Last verified: '2026-04-03'
+
+______________________________________________________________________
 
 # BioETL Pipeline Documentation
 
@@ -16,13 +19,14 @@ This directory contains the active pipeline reference surface for BioETL,
 including composite pipelines.
 
 > Reference boundary:
+>
 > - canonical current contract: provider reference pages, unified entity configs
 >   in `configs/entities/`, composite configs in `configs/composites/`, and
 >   in-page status banners on individual pipeline pages;
 > - canonical compact summaries: retained here when a shorter published page is
 >   clearer than duplicating the full provider reference and config contract.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Pipeline Index
 
@@ -68,14 +72,14 @@ Composite pipeline pages document the current active composite pipeline specific
 | 25  | `composite_activity`    | Composite | activity    | [Spec](composite/04-activity-spec.md)    |
 | 26  | `composite_assay`       | Composite | assay       | [Spec](composite/05-assay-spec.md)       |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Provider Summary
 
 | Provider             | Pipelines | Rate Limit                 | Auth               |
 | -------------------- | --------- | -------------------------- | ------------------ |
 | **ChEMBL**           | 14        | 3 req/sec                  | Public             |
-| **UniProt**          | 2         | 10 req/sec (100 with key) | API Key (optional) |
+| **UniProt**          | 2         | 10 req/sec (100 with key)  | API Key (optional) |
 | **PubChem**          | 1         | 5 req/sec                  | Public             |
 | **PubMed**           | 1         | 3 req/sec (10 with key)    | API Key            |
 | **CrossRef**         | 1         | Polite pool                | mailto header      |
@@ -83,7 +87,7 @@ Composite pipeline pages document the current active composite pipeline specific
 | **Semantic Scholar** | 1         | 0.1 req/sec (1.0 with key) | API Key            |
 | **Composite**        | 5         | N/A (local merge)          | N/A                |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Documentation Structure
 
@@ -102,19 +106,19 @@ Current deep specs usually include:
 Compact published summaries may intentionally provide only a short active-state
 overview plus links to the current provider reference and config files.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Cross-Provider ID Mapping
 
-| ID Type       | ChEMBL                         | UniProt      | PubChem     | PubMed | CrossRef | OpenAlex | S2     |
-| ------------- | ------------------------------ | ------------ | ----------- | ------ | -------- | -------- | ------ |
-| **InChI Key** | `structure-standard-inchi-key` | -            | `inchi-key` | -      | -        | -        | -      |
-| **DOI**       | `publication_doi`             | -            | -           | `doi`  | `publication_doi` | `publication_doi` | `doi`  |
-| **PubMed ID** | `publication_pmid`            | -            | -           | `pmid` | -        | -        | `pmid` |
-| **UniProt**   | `target-component.accession`   | `accession`  | -           | -      | -        | -        | -      |
-| **ChEMBL**    | ID                             | `chembl-ids` | -           | -      | -        | -        | -      |
+| ID Type       | ChEMBL                         | UniProt      | PubChem     | PubMed | CrossRef          | OpenAlex          | S2     |
+| ------------- | ------------------------------ | ------------ | ----------- | ------ | ----------------- | ----------------- | ------ |
+| **InChI Key** | `structure-standard-inchi-key` | -            | `inchi-key` | -      | -                 | -                 | -      |
+| **DOI**       | `publication_doi`              | -            | -           | `doi`  | `publication_doi` | `publication_doi` | `doi`  |
+| **PubMed ID** | `publication_pmid`             | -            | -           | `pmid` | -                 | -                 | `pmid` |
+| **UniProt**   | `target-component.accession`   | `accession`  | -           | -      | -                 | -                 | -      |
+| **ChEMBL**    | ID                             | `chembl-ids` | -           | -      | -                 | -                 | -      |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Schema Files
 
@@ -123,34 +127,34 @@ For standard pipelines, schema definition is stored in the same unified entity f
 Composite pipelines keep merge schema in `configs/composites/{entity}.yaml`
 (section `composite.merge.column-groups`).
 
-| Pipeline config                                        | Schema config                                        |
-| ------------------------------------------------------ | ---------------------------------------------------- |
-| `configs/entities/chembl/activity.yaml`               | `schema` section in same file                        |
-| `configs/entities/chembl/assay.yaml`                  | `schema` section in same file                        |
-| `configs/entities/chembl/assay_parameters.yaml`       | `schema` section in same file                        |
-| `configs/entities/chembl/cell_line.yaml`              | `schema` section in same file                        |
-| `configs/entities/chembl/compound_record.yaml`        | `schema` section in same file                        |
-| `configs/entities/chembl/molecule.yaml`               | `schema` section in same file                        |
-| `configs/entities/chembl/protein_class.yaml`          | `schema` section in same file                        |
-| `configs/entities/chembl/publication.yaml`            | `schema` section in same file                        |
-| `configs/entities/chembl/publication_similarity.yaml` | `schema` section in same file                        |
-| `configs/entities/chembl/publication_term.yaml`       | `schema` section in same file                        |
-| `configs/entities/chembl/subcellular_fraction.yaml`   | `schema` section in same file                        |
-| `configs/entities/chembl/target.yaml`                 | `schema` section in same file                        |
-| `configs/entities/chembl/target_component.yaml`       | `schema` section in same file                        |
-| `configs/entities/chembl/tissue.yaml`                 | `schema` section in same file                        |
-| `configs/entities/crossref/publication.yaml`          | `schema` section in same file                        |
-| `configs/entities/openalex/publication.yaml`          | `schema` section in same file                        |
-| `configs/entities/pubchem/compound.yaml`              | `schema` section in same file                        |
-| `configs/entities/pubmed/publication.yaml`            | `schema` section in same file                        |
-| `configs/entities/semanticscholar/publication.yaml`   | `schema` section in same file                        |
-| `configs/entities/uniprot/idmapping.yaml`             | `schema` section in same file                        |
-| `configs/entities/uniprot/protein.yaml`               | `schema` section in same file                        |
+| Pipeline config                                       | Schema config                 |
+| ----------------------------------------------------- | ----------------------------- |
+| `configs/entities/chembl/activity.yaml`               | `schema` section in same file |
+| `configs/entities/chembl/assay.yaml`                  | `schema` section in same file |
+| `configs/entities/chembl/assay_parameters.yaml`       | `schema` section in same file |
+| `configs/entities/chembl/cell_line.yaml`              | `schema` section in same file |
+| `configs/entities/chembl/compound_record.yaml`        | `schema` section in same file |
+| `configs/entities/chembl/molecule.yaml`               | `schema` section in same file |
+| `configs/entities/chembl/protein_class.yaml`          | `schema` section in same file |
+| `configs/entities/chembl/publication.yaml`            | `schema` section in same file |
+| `configs/entities/chembl/publication_similarity.yaml` | `schema` section in same file |
+| `configs/entities/chembl/publication_term.yaml`       | `schema` section in same file |
+| `configs/entities/chembl/subcellular_fraction.yaml`   | `schema` section in same file |
+| `configs/entities/chembl/target.yaml`                 | `schema` section in same file |
+| `configs/entities/chembl/target_component.yaml`       | `schema` section in same file |
+| `configs/entities/chembl/tissue.yaml`                 | `schema` section in same file |
+| `configs/entities/crossref/publication.yaml`          | `schema` section in same file |
+| `configs/entities/openalex/publication.yaml`          | `schema` section in same file |
+| `configs/entities/pubchem/compound.yaml`              | `schema` section in same file |
+| `configs/entities/pubmed/publication.yaml`            | `schema` section in same file |
+| `configs/entities/semanticscholar/publication.yaml`   | `schema` section in same file |
+| `configs/entities/uniprot/idmapping.yaml`             | `schema` section in same file |
+| `configs/entities/uniprot/protein.yaml`               | `schema` section in same file |
 
 Domain schema contracts remain in `src/bioetl/domain/schemas/` and Gold contracts in `src/bioetl/domain/contracts/gold/`.
 JSON contract exports are in `docs/04-reference/contracts/gold/`.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Configuration Files
 
@@ -175,7 +179,7 @@ configs/
     └── target.yaml
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## Related Documentation
 

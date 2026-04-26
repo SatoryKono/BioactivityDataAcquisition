@@ -343,7 +343,7 @@ class LinkCheckerPlugin(BasePlugin):
                 <p><strong>Redirect Links:</strong> <span class="status-redirect">{summary["redirect_links"]}</span></p>
                 <p><strong>Health Score:</strong> <span class="health-score">{summary["health_score"]}%</span></p>
             </div>
-            
+
             <h2>Details</h2>
             <table>
                 <thead>

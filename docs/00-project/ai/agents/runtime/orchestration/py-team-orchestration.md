@@ -3,9 +3,10 @@
 > **DEPRECATED (2026-02-25):** Этот файл — устаревшая адаптированная копия для Codex/Jules.
 > Published docs mirror: `docs/00-project/ai/agents/agents/ORCHESTRATION.md`
 > Runtime copies:
+>
 > - Parallel runtime orchestration copy: runtime-specific orchestration registry
 > - Codex: `.codex/agents/ORCHESTRATION.md`
-> При расхождении приоритет у published mirror и runtime-реестров; этот файл сохраняется только как legacy alias.
+>   При расхождении приоритет у published mirror и runtime-реестров; этот файл сохраняется только как legacy alias.
 >
 > **Historical note:** дальнейшее содержимое ниже сохранено как архивный снимок ранней orchestration-модели и может содержать устаревшие роли вроде `pyCodeBot` и `pyDiagramBot`. Для текущего процесса использовать только published mirror / runtime copies выше.
 
@@ -15,18 +16,18 @@
 
 Для выполнения задач в проекте BioETL используется команда из **8 субагентов** (7 core + 1 специализированный diagram агент). Основной агент (Codex/Jules) оркестрирует их работу, делегируя задачи в строго определённом порядке.
 
-|  #  | Субагент        | Роль                                             | Артефакт                                    |
-| :-: | --------------- | ------------------------------------------------ | ------------------------------------------- |
-|  I  | **pyAuditBot**  | Baseline/final аудит (Hexagonal, Medallion, ADR) | `00-audit-baseline.md`, `07-audit-final.md` |
-| II  | **pyPlanBot**   | Планирование, декомпозиция (RF-id)               | `01-plan-initial.md`, `03-plan-updated.md`  |
-| III | **pyTestBot**   | Тестирование (pytest, VCR, coverage)             | `02-test-baseline.md`, `05-test-final.md`   |
-| IV  | **pyCodeBot**   | Production-код (Domain, App, Infra, Composition) | `04-refactoring-log.md`                     |
-|  V  | **pyConfigBot** | Конфигурации (pipeline, DQ, filter, composite)   | `04a-config-log.md`                         |
-| VI  | **pyDebugBot**  | Отладка (DBG-id)                                 | `04-refactoring-log.md` (debug-секции)      |
-| VII | **pyDocBot**    | Документация (Johnny.Decimal, docstrings)        | `06-doc-update-log.md`                      |
-| VIII | **pyDiagramBot** | Mermaid diagrams, render pipeline, docx/pdf bundles | `06-doc-update-log.md` (diagram sections) |
+|  #   | Субагент         | Роль                                                | Артефакт                                    |
+| :--: | ---------------- | --------------------------------------------------- | ------------------------------------------- |
+|  I   | **pyAuditBot**   | Baseline/final аудит (Hexagonal, Medallion, ADR)    | `00-audit-baseline.md`, `07-audit-final.md` |
+|  II  | **pyPlanBot**    | Планирование, декомпозиция (RF-id)                  | `01-plan-initial.md`, `03-plan-updated.md`  |
+| III  | **pyTestBot**    | Тестирование (pytest, VCR, coverage)                | `02-test-baseline.md`, `05-test-final.md`   |
+|  IV  | **pyCodeBot**    | Production-код (Domain, App, Infra, Composition)    | `04-refactoring-log.md`                     |
+|  V   | **pyConfigBot**  | Конфигурации (pipeline, DQ, filter, composite)      | `04a-config-log.md`                         |
+|  VI  | **pyDebugBot**   | Отладка (DBG-id)                                    | `04-refactoring-log.md` (debug-секции)      |
+| VII  | **pyDocBot**     | Документация (Johnny.Decimal, docstrings)           | `06-doc-update-log.md`                      |
+| VIII | **pyDiagramBot** | Mermaid diagrams, render pipeline, docx/pdf bundles | `06-doc-update-log.md` (diagram sections)   |
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 2. Стандартный workflow задачи
 
@@ -40,7 +41,7 @@ Workflow следует принципу "Safe-by-Design":
 1. **Documentation**: Обновление `docs/` и докстрингов.
 1. **Audit (Final)**: Финальный гейткипер перед завершением задачи.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 3. Инструментарий верификации (BioETL Stack)
 
@@ -53,7 +54,7 @@ Workflow следует принципу "Safe-by-Design":
 - **Конфиги**: `python docs/00-project/ai/agents/scripts/py-config-bot-2.py`, `python docs/00-project/ai/agents/scripts/py-config-bot-1.py`.
 - **Терминология**: `python docs/00-project/ai/agents/scripts/py-team-orchestration.py`.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 4. Expected outputs (BioETL v6.0.0)
 
@@ -72,7 +73,7 @@ reports/<task-id>/
 └── 07-audit-final.md
 ```
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 5. Системы идентификаторов (IDs)
 
@@ -82,7 +83,7 @@ reports/<task-id>/
 - `DOC-NNN`: Изменение в документации.
 - `CFG-NNN`: Изменение в конфигурационных файлах.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 6. Гарантии BioETL
 
@@ -92,7 +93,7 @@ reports/<task-id>/
 1. **Config Compliance**: `py-config-bot-1.py` должен иметь 0 критических замечаний.
 1. **Zone Isolation**: Код в `src/`, конфиги в `configs/`, доки в `docs/`.
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 ## 7. Compatibility notes
 

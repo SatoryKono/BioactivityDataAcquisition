@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-29'
----
+  Last verified: '2026-03-29'
+
+______________________________________________________________________
 
 # Infrastructure Layer API Reference
 
@@ -17,46 +20,46 @@ HTTP adapters for external APIs, storage writers for the Medallion architecture
 (Bronze/Silver/Gold via Delta Lake), observability implementations, configuration
 loading, and cross-cutting infrastructure concerns. It depends only on the Domain layer.
 
----
+______________________________________________________________________
 
 ## Package Structure
 
-| Subpackage | Description | Key Public Symbols |
-|---|---|---|
-| `infrastructure.adapters` | HTTP client adapters for external APIs | `ChemblAdapter`, `PubChemAdapter`, `CrossRefAdapter` |
-| `infrastructure.storage` | Medallion layer writers (Delta Lake) | `BronzeWriter`, `SilverWriter`, `GoldWriter` |
-| `infrastructure.observability` | Logging, metrics, tracing implementations | `StructlogLogger`, `PrometheusMetrics`, `OpenTelemetryTracer` |
-| `infrastructure.config` | Settings and config loading from YAML/env | `Settings`, `PipelineConfigLoader`, `DQConfigLoader` |
-| `infrastructure.locking` | Lock implementations | `MemoryLock` |
-| `infrastructure.checkpoint` | Checkpoint persistence | `LocalCheckpoint` |
-| `infrastructure.validation` | Pandera schema validators | `PanderaSilverValidator`, `PanderaGoldValidator` |
-| `infrastructure.quarantine` | Quarantine storage | `UnifiedQuarantine` |
-| `infrastructure.serialization` | JSON encoders | `StdLibJsonEncoder`, `OrjsonEncoder` |
-| `infrastructure.security` | PII hashing | `Sha256PiiHasher` |
-| `infrastructure.audit` | Audit trail persistence | `FileAuditAdapter` |
-| `infrastructure.adr` | ADR document management | `FsAdrService` |
-| `infrastructure.export` | Data export (CSV, DQ reports) | `CsvExporter`, `DQReportWriter` |
-| `infrastructure.errors` | Error mapping utilities | `DomainInfraExceptionMapper` |
-| `infrastructure.schemas` | Pydantic config schemas for YAML validation | `BaseDQConfig`, `BaseApiConfig` |
-| `infrastructure.system` | System utilities | `MemoryMonitor` |
-| `infrastructure.quality` | Technical debt tracking | `DebtScorecardEvaluation`, `ExemptionInventory` |
-| `infrastructure.time` | Time utilities | Clock implementations |
+| Subpackage                     | Description                                 | Key Public Symbols                                            |
+| ------------------------------ | ------------------------------------------- | ------------------------------------------------------------- |
+| `infrastructure.adapters`      | HTTP client adapters for external APIs      | `ChemblAdapter`, `PubChemAdapter`, `CrossRefAdapter`          |
+| `infrastructure.storage`       | Medallion layer writers (Delta Lake)        | `BronzeWriter`, `SilverWriter`, `GoldWriter`                  |
+| `infrastructure.observability` | Logging, metrics, tracing implementations   | `StructlogLogger`, `PrometheusMetrics`, `OpenTelemetryTracer` |
+| `infrastructure.config`        | Settings and config loading from YAML/env   | `Settings`, `PipelineConfigLoader`, `DQConfigLoader`          |
+| `infrastructure.locking`       | Lock implementations                        | `MemoryLock`                                                  |
+| `infrastructure.checkpoint`    | Checkpoint persistence                      | `LocalCheckpoint`                                             |
+| `infrastructure.validation`    | Pandera schema validators                   | `PanderaSilverValidator`, `PanderaGoldValidator`              |
+| `infrastructure.quarantine`    | Quarantine storage                          | `UnifiedQuarantine`                                           |
+| `infrastructure.serialization` | JSON encoders                               | `StdLibJsonEncoder`, `OrjsonEncoder`                          |
+| `infrastructure.security`      | PII hashing                                 | `Sha256PiiHasher`                                             |
+| `infrastructure.audit`         | Audit trail persistence                     | `FileAuditAdapter`                                            |
+| `infrastructure.adr`           | ADR document management                     | `FsAdrService`                                                |
+| `infrastructure.export`        | Data export (CSV, DQ reports)               | `CsvExporter`, `DQReportWriter`                               |
+| `infrastructure.errors`        | Error mapping utilities                     | `DomainInfraExceptionMapper`                                  |
+| `infrastructure.schemas`       | Pydantic config schemas for YAML validation | `BaseDQConfig`, `BaseApiConfig`                               |
+| `infrastructure.system`        | System utilities                            | `MemoryMonitor`                                               |
+| `infrastructure.quality`       | Technical debt tracking                     | `DebtScorecardEvaluation`, `ExemptionInventory`               |
+| `infrastructure.time`          | Time utilities                              | Clock implementations                                         |
 
----
+______________________________________________________________________
 
 ## Adapters (`infrastructure.adapters`)
 
 ### Provider Adapters
 
-| Adapter | Base Class | Implements | Provider |
-|---|---|---|---|
-| `ChemblAdapter` | `BaseHttpAdapter` | `DataSourcePort`, `FilterableDataSourcePort` | ChEMBL |
-| `CrossRefAdapter` | `BaseHttpAdapter` | `DataSourcePort`, `FilterableDataSourcePort` | CrossRef |
-| `PubChemAdapter` | `BaseSyncAdapter` | `DataSourcePort` | PubChem |
-| `PubMedAdapter` | (mixins) | `DataSourcePort`, `FilterableDataSourcePort` | PubMed |
-| `OpenAlexAdapter` | `BaseHttpAdapter` | `DataSourcePort` | OpenAlex |
-| `SemanticScholarAdapter` | (mixins) | `DataSourcePort`, `FilterableDataSourcePort` | Semantic Scholar |
-| `UniProtAdapter` | `BaseHttpAdapter` | `DataSourcePort`, `FilterableDataSourcePort` | UniProt |
+| Adapter                  | Base Class        | Implements                                   | Provider         |
+| ------------------------ | ----------------- | -------------------------------------------- | ---------------- |
+| `ChemblAdapter`          | `BaseHttpAdapter` | `DataSourcePort`, `FilterableDataSourcePort` | ChEMBL           |
+| `CrossRefAdapter`        | `BaseHttpAdapter` | `DataSourcePort`, `FilterableDataSourcePort` | CrossRef         |
+| `PubChemAdapter`         | `BaseSyncAdapter` | `DataSourcePort`                             | PubChem          |
+| `PubMedAdapter`          | (mixins)          | `DataSourcePort`, `FilterableDataSourcePort` | PubMed           |
+| `OpenAlexAdapter`        | `BaseHttpAdapter` | `DataSourcePort`                             | OpenAlex         |
+| `SemanticScholarAdapter` | (mixins)          | `DataSourcePort`, `FilterableDataSourcePort` | Semantic Scholar |
+| `UniProtAdapter`         | `BaseHttpAdapter` | `DataSourcePort`, `FilterableDataSourcePort` | UniProt          |
 
 ### Retained Adapter Entrypoint Policy
 
@@ -96,49 +99,50 @@ and lifecycle governance in
 
 ### Base Adapter
 
-| Class | Description |
-|---|---|
+| Class             | Description                                                                                                                                        |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `BaseHttpAdapter` | Base class for all HTTP-based data source adapters. Implements `DataSourcePort`, provides health check, context manager, and common HTTP patterns. |
 
 ### HTTP Infrastructure
 
-| Class | Description |
-|---|---|
-| `UnifiedHTTPClient` | Central HTTP client with retry, rate limiting, circuit breaking |
-| `CircuitBreaker` | Circuit breaker pattern implementation |
-| `TokenBucket` | Token bucket rate limiter |
-| `ProviderHealthMonitor` | Provider health state tracking and adaptive configuration |
-| `ProviderHealthTracker` | Health state persistence |
-| `PaginatedFetcherMixin` | Generic paginated fetch logic |
+| Class                   | Description                                                     |
+| ----------------------- | --------------------------------------------------------------- |
+| `UnifiedHTTPClient`     | Central HTTP client with retry, rate limiting, circuit breaking |
+| `CircuitBreaker`        | Circuit breaker pattern implementation                          |
+| `TokenBucket`           | Token bucket rate limiter                                       |
+| `ProviderHealthMonitor` | Provider health state tracking and adaptive configuration       |
+| `ProviderHealthTracker` | Health state persistence                                        |
+| `PaginatedFetcherMixin` | Generic paginated fetch logic                                   |
 
 ### Adapter Decorators
 
-| Class | Description |
-|---|---|
+| Class                               | Description                               |
+| ----------------------------------- | ----------------------------------------- |
 | `CircuitBreakerDataSourceDecorator` | Wraps DataSourcePort with circuit breaker |
-| `RetryingDataSourceDecorator` | Wraps DataSourcePort with retry logic |
+| `RetryingDataSourceDecorator`       | Wraps DataSourcePort with retry logic     |
 
 ### Common Adapter Utilities
 
-| Class | Description |
-|---|---|
-| `BaseTitleFallbackHandler` | Base class for title-based fallback search |
-| `ComposableFallbackDecorator` | Composable fallback fetch decorator |
-| `FallbackFetchOrchestratorService` | Orchestrates primary + fallback fetch |
-| `FallbackPolicyMixin` | Mixin for fallback policy support |
-| `APIRequestCollector` | Collects API request metrics |
-| `CachedBronzeDataSource` | Data source reading from cached Bronze layer |
+| Class                              | Description                                  |
+| ---------------------------------- | -------------------------------------------- |
+| `BaseTitleFallbackHandler`         | Base class for title-based fallback search   |
+| `ComposableFallbackDecorator`      | Composable fallback fetch decorator          |
+| `FallbackFetchOrchestratorService` | Orchestrates primary + fallback fetch        |
+| `FallbackPolicyMixin`              | Mixin for fallback policy support            |
+| `APIRequestCollector`              | Collects API request metrics                 |
+| `CachedBronzeDataSource`           | Data source reading from cached Bronze layer |
 
 ### Input Adapters
 
-| Class | Description |
-|---|---|
-| `CsvFilterReader` | Reads filter IDs from CSV files |
+| Class                       | Description                       |
+| --------------------------- | --------------------------------- |
+| `CsvFilterReader`           | Reads filter IDs from CSV files   |
 | `IDMappingCsvReaderAdapter` | Reads UniProt ID mapping from CSV |
 
 ### Provider-Specific Models (Pydantic)
 
 Each provider has its own `models.py` with API response models:
+
 - ChEMBL: entity mapper, deduplication, constants
 - CrossRef: `CrossRefPublicationRecord`, `CrossRefMessage`, query builder, response mapper
 - PubChem: `PubchemMoleculeApiRecord`, `PubChemBioactivityRecord`, entity mapper
@@ -147,76 +151,76 @@ Each provider has its own `models.py` with API response models:
 - Semantic Scholar: response models
 - UniProt: response models
 
----
+______________________________________________________________________
 
 ## Storage (`infrastructure.storage`)
 
 ### Writers
 
-| Class | Implements | Description |
-|---|---|---|
-| `BronzeWriter` | `BronzeStoragePort` | Writes raw API data to Bronze layer as JSONL + zstd |
-| `SilverWriter` | `SilverStoragePort` | Writes transformed data to Silver layer (Delta Lake) |
-| `GoldWriter` | `GoldStoragePort` | Writes validated data to Gold layer (Delta Lake, SCD2 support) |
-| `BaseDeltaWriter` | -- | Shared Delta Lake write logic |
+| Class             | Implements          | Description                                                    |
+| ----------------- | ------------------- | -------------------------------------------------------------- |
+| `BronzeWriter`    | `BronzeStoragePort` | Writes raw API data to Bronze layer as JSONL + zstd            |
+| `SilverWriter`    | `SilverStoragePort` | Writes transformed data to Silver layer (Delta Lake)           |
+| `GoldWriter`      | `GoldStoragePort`   | Writes validated data to Gold layer (Delta Lake, SCD2 support) |
+| `BaseDeltaWriter` | --                  | Shared Delta Lake write logic                                  |
 
 ### Readers
 
-| Class | Implements | Description |
-|---|---|---|
+| Class         | Implements        | Description             |
+| ------------- | ----------------- | ----------------------- |
 | `DeltaReader` | `DeltaReaderPort` | Reads Delta Lake tables |
 
 ### Metadata
 
-| Class | Description |
-|---|---|
+| Class            | Description                        |
+| ---------------- | ---------------------------------- |
 | `MetadataWriter` | Writes metadata sidecar YAML files |
 
 ### Maintenance
 
-| Class | Description |
-|---|---|
-| `RetentionPolicy` | Delta table retention, VACUUM, optimize, and maintenance policy enforcement |
-| `AdaptiveRetryPolicy` | Adaptive retry for write operations |
-| `ArrowDataConverter` | Pandas/Arrow data type conversion |
+| Class                 | Description                                                                 |
+| --------------------- | --------------------------------------------------------------------------- |
+| `RetentionPolicy`     | Delta table retention, VACUUM, optimize, and maintenance policy enforcement |
+| `AdaptiveRetryPolicy` | Adaptive retry for write operations                                         |
+| `ArrowDataConverter`  | Pandas/Arrow data type conversion                                           |
 
----
+______________________________________________________________________
 
 ## Observability (`infrastructure.observability`)
 
-| Class | Implements | Description |
-|---|---|---|
-| `StructlogLogger` | `LoggerPort` | Structured logging via structlog |
-| `UnifiedLogger` | `LoggerPort` | Unified logger with context binding |
-| `NoOpLogger` | `LoggerPort` | Silent logger for testing |
-| `PrometheusMetrics` | `MetricsPort` | Prometheus metrics collection |
-| `MetricsCollector` | -- | Metrics aggregation |
-| `MetricsServerAdapter` | `MetricsServerPort` | Prometheus HTTP metrics server |
-| `OpenTelemetryTracer` | `TracingPort` | OpenTelemetry distributed tracing |
-| `DataQualityMonitor` | `DQMonitorPort` | DQ anomaly detection and alerting |
-| `AnomalyDetector` | -- | Statistical anomaly detection |
-| `ZScoreDetector` | `DetectorStrategy` | Z-score based anomaly detection |
+| Class                  | Implements          | Description                         |
+| ---------------------- | ------------------- | ----------------------------------- |
+| `StructlogLogger`      | `LoggerPort`        | Structured logging via structlog    |
+| `UnifiedLogger`        | `LoggerPort`        | Unified logger with context binding |
+| `NoOpLogger`           | `LoggerPort`        | Silent logger for testing           |
+| `PrometheusMetrics`    | `MetricsPort`       | Prometheus metrics collection       |
+| `MetricsCollector`     | --                  | Metrics aggregation                 |
+| `MetricsServerAdapter` | `MetricsServerPort` | Prometheus HTTP metrics server      |
+| `OpenTelemetryTracer`  | `TracingPort`       | OpenTelemetry distributed tracing   |
+| `DataQualityMonitor`   | `DQMonitorPort`     | DQ anomaly detection and alerting   |
+| `AnomalyDetector`      | --                  | Statistical anomaly detection       |
+| `ZScoreDetector`       | `DetectorStrategy`  | Z-score based anomaly detection     |
 
----
+______________________________________________________________________
 
 ## Configuration (`infrastructure.config`)
 
 ### Settings (Pydantic BaseSettings)
 
-| Class | Description |
-|---|---|
-| `Settings` | Root application settings (env + YAML) |
-| `PipelineSettings` | Pipeline-specific settings |
-| `ObservabilitySettings` | Observability configuration |
+| Class                   | Description                            |
+| ----------------------- | -------------------------------------- |
+| `Settings`              | Root application settings (env + YAML) |
+| `PipelineSettings`      | Pipeline-specific settings             |
+| `ObservabilitySettings` | Observability configuration            |
 
 ### Config Loaders
 
-| Class | Description |
-|---|---|
-| `PipelineConfigLoader` | Loads pipeline configs from YAML |
-| `DQConfigLoader` | Loads DQ configs from YAML |
-| `FilterConfigLoader` | Loads filter configs from YAML |
-| `BaseConfigLoader` | Abstract base for config loaders |
+| Class                                 | Description                            |
+| ------------------------------------- | -------------------------------------- |
+| `PipelineConfigLoader`                | Loads pipeline configs from YAML       |
+| `DQConfigLoader`                      | Loads DQ configs from YAML             |
+| `FilterConfigLoader`                  | Loads filter configs from YAML         |
+| `BaseConfigLoader`                    | Abstract base for config loaders       |
 | `PublicationTypeClassificationLoader` | Loads publication type classifications |
 
 Pipeline/source config loading is canonical through `bioetl.infrastructure.config`,
@@ -224,126 +228,126 @@ Pipeline/source config loading is canonical through `bioetl.infrastructure.confi
 submodules under `bioetl.infrastructure.config`. New normalization helpers should land
 in those config submodules instead of reintroducing a top-level compatibility shim.
 
----
+______________________________________________________________________
 
 ## Validation (`infrastructure.validation`)
 
-| Class | Implements | Description |
-|---|---|---|
+| Class                    | Implements            | Description                                |
+| ------------------------ | --------------------- | ------------------------------------------ |
 | `PanderaSilverValidator` | `SilverValidatorPort` | Pandera schema validation for Silver layer |
-| `PanderaGoldValidator` | `GoldValidatorPort` | Pandera schema validation for Gold layer |
-| `BasePanderaValidator` | -- | Shared Pandera validation logic |
-| `NoOpValidator` | -- | No-op validator for testing |
+| `PanderaGoldValidator`   | `GoldValidatorPort`   | Pandera schema validation for Gold layer   |
+| `BasePanderaValidator`   | --                    | Shared Pandera validation logic            |
+| `NoOpValidator`          | --                    | No-op validator for testing                |
 
----
+______________________________________________________________________
 
 ## Quarantine (`infrastructure.quarantine`)
 
-| Class | Implements | Description |
-|---|---|---|
+| Class               | Implements       | Description                                   |
+| ------------------- | ---------------- | --------------------------------------------- |
 | `UnifiedQuarantine` | `QuarantinePort` | Persists quarantined records to local storage |
 
----
+______________________________________________________________________
 
 ## Locking (`infrastructure.locking`)
 
-| Class | Implements | Description |
-|---|---|---|
+| Class        | Implements | Description                                                       |
+| ------------ | ---------- | ----------------------------------------------------------------- |
 | `MemoryLock` | `LockPort` | In-memory lock (sufficient for local-only deployment per ADR-010) |
 
----
+______________________________________________________________________
 
 ## Checkpoint (`infrastructure.checkpoint`)
 
-| Class | Implements | Description |
-|---|---|---|
+| Class             | Implements       | Description                       |
+| ----------------- | ---------------- | --------------------------------- |
 | `LocalCheckpoint` | `CheckpointPort` | File-based checkpoint persistence |
 
----
+______________________________________________________________________
 
 ## Serialization (`infrastructure.serialization`)
 
-| Class | Implements | Description |
-|---|---|---|
-| `StdLibJsonEncoder` | `JsonEncoderPort` | Standard library JSON encoder |
-| `OrjsonEncoder` | `JsonEncoderPort` | High-performance orjson encoder |
+| Class               | Implements        | Description                     |
+| ------------------- | ----------------- | ------------------------------- |
+| `StdLibJsonEncoder` | `JsonEncoderPort` | Standard library JSON encoder   |
+| `OrjsonEncoder`     | `JsonEncoderPort` | High-performance orjson encoder |
 
----
+______________________________________________________________________
 
 ## Security (`infrastructure.security`)
 
-| Class | Implements | Description |
-|---|---|---|
-| `Sha256PiiHasher` | `PiiHasherPort` | SHA-256 based PII field hashing |
-| `SaltConfig` | -- | Salt configuration for PII hashing |
+| Class             | Implements      | Description                        |
+| ----------------- | --------------- | ---------------------------------- |
+| `Sha256PiiHasher` | `PiiHasherPort` | SHA-256 based PII field hashing    |
+| `SaltConfig`      | --              | Salt configuration for PII hashing |
 
----
+______________________________________________________________________
 
 ## Audit (`infrastructure.audit`)
 
-| Class | Implements | Description |
-|---|---|---|
+| Class              | Implements  | Description            |
+| ------------------ | ----------- | ---------------------- |
 | `FileAuditAdapter` | `AuditPort` | File-based audit trail |
 
----
+______________________________________________________________________
 
 ## ADR (`infrastructure.adr`)
 
-| Class | Implements | Description |
-|---|---|---|
+| Class          | Implements       | Description                     |
+| -------------- | ---------------- | ------------------------------- |
 | `FsAdrService` | `AdrServicePort` | Filesystem-based ADR management |
 
----
+______________________________________________________________________
 
 ## Export (`infrastructure.export`)
 
-| Class | Description |
-|---|---|
-| `CsvExporter` | Exports Gold data to CSV format |
+| Class            | Description                     |
+| ---------------- | ------------------------------- |
+| `CsvExporter`    | Exports Gold data to CSV format |
 | `DQReportWriter` | Writes DQ reports to filesystem |
 
----
+______________________________________________________________________
 
 ## Errors (`infrastructure.errors`)
 
-| Class | Description |
-|---|---|
+| Class                        | Description                                         |
+| ---------------------------- | --------------------------------------------------- |
 | `DomainInfraExceptionMapper` | Maps infrastructure exceptions to domain exceptions |
-| `DomainErrorMappingInput` | Error mapping input specification |
-| `InfraErrorDisposition` | Error handling disposition |
+| `DomainErrorMappingInput`    | Error mapping input specification                   |
+| `InfraErrorDisposition`      | Error handling disposition                          |
 
----
+______________________________________________________________________
 
 ## Schemas (`infrastructure.schemas`)
 
 Pydantic models for YAML configuration validation:
 
-| Class | Description |
-|---|---|
-| `BaseDQConfig` | DQ configuration schema |
-| `BaseDQThresholds` | DQ threshold schema |
-| `BaseApiConfig` | API configuration schema |
-| `BaseClientConfig` | HTTP client configuration schema |
+| Class                      | Description                          |
+| -------------------------- | ------------------------------------ |
+| `BaseDQConfig`             | DQ configuration schema              |
+| `BaseDQThresholds`         | DQ threshold schema                  |
+| `BaseApiConfig`            | API configuration schema             |
+| `BaseClientConfig`         | HTTP client configuration schema     |
 | `BaseCircuitBreakerConfig` | Circuit breaker configuration schema |
-| `BaseRateLimitConfig` | Rate limit configuration schema |
-| `BaseCsvExportConfig` | CSV export configuration schema |
-| `BaseMaintenanceConfig` | Maintenance configuration schema |
-| `BaseInputFilterConfig` | Input filter configuration schema |
-| `BaseGoldFiltersConfig` | Gold filter configuration schema |
+| `BaseRateLimitConfig`      | Rate limit configuration schema      |
+| `BaseCsvExportConfig`      | CSV export configuration schema      |
+| `BaseMaintenanceConfig`    | Maintenance configuration schema     |
+| `BaseInputFilterConfig`    | Input filter configuration schema    |
+| `BaseGoldFiltersConfig`    | Gold filter configuration schema     |
 
----
+______________________________________________________________________
 
 ## System (`infrastructure.system`)
 
-| Class | Implements | Description |
-|---|---|---|
+| Class           | Implements          | Description                    |
+| --------------- | ------------------- | ------------------------------ |
 | `MemoryMonitor` | `MemoryMonitorPort` | System memory usage monitoring |
 
----
+______________________________________________________________________
 
 ## Quality (`infrastructure.quality`)
 
-| Class | Description |
-|---|---|
-| `DebtScorecardEvaluation` | Technical debt scorecard evaluation |
-| `ExemptionInventory` | Exemption tracking for quality rules |
+| Class                     | Description                          |
+| ------------------------- | ------------------------------------ |
+| `DebtScorecardEvaluation` | Technical debt scorecard evaluation  |
+| `ExemptionInventory`      | Exemption tracking for quality rules |

@@ -2,7 +2,7 @@
 # Helper: Setup missing components WITHOUT apt-get
 # Skips apt if it's hanging, installs from binaries instead
 
-set -u  
+set -u
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"

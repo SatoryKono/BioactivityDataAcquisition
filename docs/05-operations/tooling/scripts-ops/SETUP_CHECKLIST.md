@@ -3,6 +3,7 @@
 ## What Was Done
 
 ### ✅ Analysis Phase
+
 - [x] Examined existing `codex.bat` scripts
 - [x] Analyzed Windows batch launchers
 - [x] Reviewed existing WSL proxy setup
@@ -10,6 +11,7 @@
 - [x] Understood Codex CLI requirements
 
 ### ✅ Script Creation Phase
+
 - [x] Created `codex.sh` - WSL bash launcher
 - [x] Created `codex-exec.sh` - WSL auto-exec launcher
 - [x] Created `script-codex/helper/setup-wsl.sh` - Installation script
@@ -17,6 +19,7 @@
 - [x] Created `codex-wsl.bat` - Modern Windows wrapper
 
 ### ✅ Documentation Phase
+
 - [x] Written `CODEX_WSL_SETUP.md` - Comprehensive guide
 - [x] Written `CODEX_WSL_QUICK_REF.md` - Quick reference
 - [x] Written `INDEX.md` - File index & reference
@@ -47,16 +50,19 @@ scripts/ops/
 Before using Codex, ensure you have:
 
 - [x] WSL2 installed with Debian distro
+
   ```powershell
   wsl -l -v
   ```
 
 - [x] Access to project directory from WSL
+
   ```bash
   ls /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
   ```
 
 - [x] Internet connectivity from WSL
+
   ```bash
   ping google.com
   # or behind proxy: curl -I https://api.openai.com
@@ -67,6 +73,7 @@ Before using Codex, ensure you have:
 Run these in order:
 
 ### Step 1: Run Setup Script
+
 ```bash
 # From WSL:
 bash ./script-codex/helper/setup-wsl.sh
@@ -76,6 +83,7 @@ wsl -d Debian -- bash ./script-codex/helper/setup-wsl.sh
 ```
 
 Progress checklist:
+
 - [ ] Package manager updated
 - [ ] Node.js installed (or verified)
 - [ ] npm installed (or verified)
@@ -84,11 +92,13 @@ Progress checklist:
 - [ ] Script completes with ✓ Setup Complete
 
 ### Step 2: Verify Installation
+
 ```bash
 bash ./script-codex/helper/verify-setup.sh
 ```
 
 Verification checklist:
+
 - [ ] WSL environment detected
 - [ ] Node.js version shown
 - [ ] npm version shown
@@ -97,11 +107,13 @@ Verification checklist:
 - [ ] Final status: ✓ Setup verification successful
 
 ### Step 3: Test Codex
+
 ```bash
 ./scripts/ops/launchers/codex/codex.sh --version
 ```
 
 Test checklist:
+
 - [ ] Command executes
 - [ ] Version shown
 - [ ] No errors
@@ -109,33 +121,39 @@ Test checklist:
 ## Usage Checklist
 
 ### First Use - Interactive Mode
+
 ```bash
 ./scripts/ops/launchers/codex/codex.sh
 ```
 
 Expected behavior:
+
 - [ ] Codex TUI appears
 - [ ] Can type prompts
 - [ ] Can navigate with arrow keys
 - [ ] Can exit with Ctrl+C
 
 ### Second Use - With Prompt
+
 ```bash
 ./scripts/ops/launchers/codex/codex.sh "analyze this codebase"
 ```
 
 Expected behavior:
+
 - [ ] Prompt is sent to Codex
 - [ ] Analysis starts immediately
 - [ ] Output is displayed
 - [ ] Session completes normally
 
 ### Third Use - Auto-Execute
+
 ```bash
 ./scripts/ops/launchers/codex/codex-exec.sh "add docstrings to all functions"
 ```
 
 Expected behavior:
+
 - [ ] Codex runs in full-auto mode
 - [ ] Changes are applied automatically
 - [ ] No confirmation prompts
@@ -172,27 +190,32 @@ Test these commands to familiarize yourself:
 If something doesn't work:
 
 ### "Codex not found"
+
 - [ ] Run: `bash ./script-codex/helper/setup-wsl.sh`
 - [ ] Run: `bash ./script-codex/helper/verify-setup.sh`
 - [ ] Check: `which codex`
 - [ ] Check: `npm list -g @openai/codex`
 
 ### "OpenAI timeout"
+
 - [ ] Check: `curl -I https://api.openai.com`
 - [ ] If fails, run: `source .wsl_proxy_env.sh`
 - [ ] If still fails: Start proxy from Windows: `.\scripts\ops\start-wsl-proxy.bat`
 - [ ] Then retry: `curl -I https://api.openai.com`
 
 ### "WSL distro not found"
+
 - [ ] Run: `wsl -l -v`
 - [ ] If Debian missing: `wsl --install -d Debian`
 - [ ] Set default: `wsl -s Debian`
 
 ### "Permission denied"
+
 - [ ] Check file is executable (in WSL, bash ignores permissions from Windows)
 - [ ] Try explicit: `bash ./scripts/ops/launchers/codex/codex.sh`
 
 ### "Path not found"
+
 - [ ] Verify project path exists in WSL:
   ```bash
   ls -d /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
@@ -233,23 +256,27 @@ bash ./script-codex/helper/verify-setup.sh
 Read documentation in this order:
 
 - [ ] **00_START_HERE.md** (5 min)
+
   - Visual overview
   - Quick start guide
   - Common examples
 
 - [ ] **CODEX_WSL_SETUP.md** (20 min)
+
   - Detailed prerequisites
   - Step-by-step setup
   - Comprehensive troubleshooting
   - Best practices
 
 - [ ] **CODEX_WSL_QUICK_REF.md** (5 min)
+
   - Commands cheat sheet
   - Common prompts
   - Shortcuts
   - Quick troubleshooting
 
 - [ ] **INDEX.md** (5 min)
+
   - File reference
   - Improvements summary
   - Architecture overview
@@ -257,25 +284,30 @@ Read documentation in this order:
 ## Next Steps
 
 1. **Start setup immediately**
+
    ```bash
    bash ./script-codex/helper/setup-wsl.sh
    ```
 
-2. **Verify after setup**
+1. **Verify after setup**
+
    ```bash
    bash ./script-codex/helper/verify-setup.sh
    ```
 
-3. **Try first command**
+1. **Try first command**
+
    ```bash
    ./scripts/ops/launchers/codex/codex.sh "what does this project do?"
    ```
 
-4. **Read documentation**
+1. **Read documentation**
+
    - Start with: `00_START_HERE.md`
    - Deep dive: `CODEX_WSL_SETUP.md`
 
-5. **Integrate into workflow**
+1. **Integrate into workflow**
+
    - Use for code analysis
    - Use for refactoring
    - Use for generating tests
@@ -298,12 +330,12 @@ You'll know it's working when:
 If you get stuck:
 
 1. **Quick help**: See `CODEX_WSL_QUICK_REF.md` § Troubleshooting Checklist
-2. **Detailed help**: See `CODEX_WSL_SETUP.md` § Troubleshooting
-3. **File overview**: See `INDEX.md` for file purposes
-4. **Getting started**: See `00_START_HERE.md` for visual guide
-5. **Run diagnostics**: `bash ./script-codex/helper/verify-setup.sh`
+1. **Detailed help**: See `CODEX_WSL_SETUP.md` § Troubleshooting
+1. **File overview**: See `INDEX.md` for file purposes
+1. **Getting started**: See `00_START_HERE.md` for visual guide
+1. **Run diagnostics**: `bash ./script-codex/helper/verify-setup.sh`
 
----
+______________________________________________________________________
 
 **Status**: ✅ All files created and ready to use
 

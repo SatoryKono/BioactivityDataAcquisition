@@ -5,7 +5,6 @@
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-
 Примечание о follow-up: cleanup wave 2026-03-26 архивировала stray root-level
 working docs и перевела merged export artifacts в generated-on-demand режим.
 Это слегка упростило repo surface, но не изменило базовую интерпретацию пакета:
@@ -19,11 +18,11 @@ working docs и перевела merged export artifacts в generated-on-demand 
 ## Созданные объекты evidence
 
 1. `EV-project-file-structure-top-level-repo-is-organized-into-seven-primary-zones`
-2. `EV-project-file-structure-src-bioetl-is-partitioned-into-five-main-runtime-layers`
-3. `EV-project-file-structure-configs-separate-schema-base-provider-entity-composite-and-quality-assets`
-4. `EV-project-file-structure-tests-are-partitioned-by-test-purpose-and-scope`
-5. `EV-project-file-structure-docs-separate-active-archive-plans-and-evidence-spaces`
-6. `EV-project-file-structure-scripts-are-grouped-by-operational-function-with-an-archive-subtree`
+1. `EV-project-file-structure-src-bioetl-is-partitioned-into-five-main-runtime-layers`
+1. `EV-project-file-structure-configs-separate-schema-base-provider-entity-composite-and-quality-assets`
+1. `EV-project-file-structure-tests-are-partitioned-by-test-purpose-and-scope`
+1. `EV-project-file-structure-docs-separate-active-archive-plans-and-evidence-spaces`
+1. `EV-project-file-structure-scripts-are-grouped-by-operational-function-with-an-archive-subtree`
 
 ## Проверка gate
 

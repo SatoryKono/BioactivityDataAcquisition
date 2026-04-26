@@ -1,8 +1,8 @@
 # Handle Pseudo-Null Values in Activity Fields
 
-**Status**: Completed ✅  
-**Priority**: P2 (Medium)  
-**Labels**: `normalization`, `DQ`, `data-quality`  
+**Status**: Completed ✅
+**Priority**: P2 (Medium)
+**Labels**: `normalization`, `DQ`, `data-quality`
 **Epic**: Data Quality Improvements 2024Q2
 
 ## 🎯 Problem
@@ -74,7 +74,7 @@ grep -rn "N/A\|None\|-" src/bioetl/domain/ --include="*.py" | head -5
    ```python
    # src/bioetl/domain/schemas/activity.py
    import pandera as pa
-   
+
    class ActivitySchema(pa.DataFrameModel):
        standard_value: pa.typing.Series[pa.Float] = pa.Field(
            nullable=True,
@@ -159,8 +159,8 @@ mypy src/bioetl/domain/normalization/ --strict
 
 ## ⏳ Time Estimate
 
-**Total**: 7 days  
-**Start Date**: 2024-06-03  
+**Total**: 7 days
+**Start Date**: 2024-06-03
 **Target Completion**: 2024-06-14
 
 ## 👥 Assignee

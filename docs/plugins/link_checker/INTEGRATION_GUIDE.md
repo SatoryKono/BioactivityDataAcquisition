@@ -94,14 +94,14 @@ plugins:
 
 ### Configuration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `enabled` | bool | `true` | Enable/disable the plugin |
-| `timeout` | int | `10` | HTTP request timeout in seconds |
-| `max_redirects` | int | `5` | Maximum number of redirects to follow |
-| `ignore_patterns` | list | `['localhost', '127.0.0.1']` | URL patterns to ignore |
-| `report_dir` | str | `'reports/links'` | Directory to save reports |
-| `fail_on_error` | bool | `false` | Fail build if broken links found |
+| Option            | Type | Default                      | Description                           |
+| ----------------- | ---- | ---------------------------- | ------------------------------------- |
+| `enabled`         | bool | `true`                       | Enable/disable the plugin             |
+| `timeout`         | int  | `10`                         | HTTP request timeout in seconds       |
+| `max_redirects`   | int  | `5`                          | Maximum number of redirects to follow |
+| `ignore_patterns` | list | `['localhost', '127.0.0.1']` | URL patterns to ignore                |
+| `report_dir`      | str  | `'reports/links'`            | Directory to save reports             |
+| `fail_on_error`   | bool | `false`                      | Fail build if broken links found      |
 
 ## 🚀 Usage
 
@@ -176,6 +176,7 @@ Machine-readable report with complete link inventory:
 ### 2. HTML Report (`link-health.html`)
 
 Interactive web report with:
+
 - Summary statistics
 - Color-coded status indicators
 - Sortable/filterable table
@@ -184,9 +185,10 @@ Interactive web report with:
 ### 3. SVG Badge (`link-badge.svg`)
 
 Visual status indicator showing health score:
+
 - **Green** (≥95%): Passing
 - **Yellow** (80-95%): Warning
-- **Red** (<80%): Failing
+- **Red** (\<80%): Failing
 
 ## 🤖 CI/CD Integration
 
@@ -203,29 +205,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      
+
       - name: Install dependencies
         run: |
           pip install mkdocs mkdocs-material
           pip install beautifulsoup4 requests
-      
+
       - name: Install link checker plugin
         run: pip install -e docs/plugins/link_checker
-      
+
       - name: Build documentation with link checking
         run: mkdocs build --strict
-      
+
       - name: Upload link health report
         uses: actions/upload-artifact@v3
         with:
           name: link-health-report
           path: site/reports/links/
-      
+
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/main'
         run: mkdocs gh-deploy
@@ -267,34 +269,38 @@ deploy_docs:
 ### Configuration Tips
 
 1. **Start with fail_on_error: false** during development
-2. **Use ignore_patterns** for local/development URLs
-3. **Set reasonable timeouts** (10-15 seconds)
-4. **Monitor report_dir** for performance metrics
-5. **Review reports regularly** to catch link rot early
+1. **Use ignore_patterns** for local/development URLs
+1. **Set reasonable timeouts** (10-15 seconds)
+1. **Monitor report_dir** for performance metrics
+1. **Review reports regularly** to catch link rot early
 
 ### Performance Optimization
 
 1. **Use ignore_patterns** to skip unnecessary checks
-2. **Increase timeout** for slow external services
-3. **Run in CI/CD** to avoid local delays
-4. **Use fail_on_error: false** during active development
-5. **Monitor health score** trends over time
+1. **Increase timeout** for slow external services
+1. **Run in CI/CD** to avoid local delays
+1. **Use fail_on_error: false** during active development
+1. **Monitor health score** trends over time
 
 ### Troubleshooting
 
 **Issue: Plugin not loading**
+
 - Solution: Ensure plugin path is correct and dependencies are installed
 - Check: `python3 -c "from docs.plugins.link_checker.plugin import LinkCheckerPlugin"`
 
 **Issue: Slow link checking**
+
 - Solution: Increase timeout or reduce max_workers
 - Check: Monitor `duration_seconds` in JSON report
 
 **Issue: False positives**
+
 - Solution: Add patterns to `ignore_patterns`
 - Check: Review `details` section in JSON report
 
 **Issue: Build fails due to broken links**
+
 - Solution: Set `fail_on_error: false` or fix broken links
 - Check: Look for `"status": "broken"` in JSON report
 
@@ -351,17 +357,17 @@ plugins:
 import json
 
 # Load the JSON report
-with open('site/reports/links/link-health.json') as f:
+with open("site/reports/links/link-health.json") as f:
     report = json.load(f)
 
 # Analyze results
-health_score = report['summary']['health_score']
-broken_links = report['summary']['broken_links']
+health_score = report["summary"]["health_score"]
+broken_links = report["summary"]["broken_links"]
 
 if health_score < 90:
     print(f"⚠️  Link health low: {health_score}%")
-    for link in report['details']:
-        if link['status'] == 'broken':
+    for link in report["details"]:
+        if link["status"] == "broken":
             print(f"  Broken: {link['link_url']} in {link['source_file']}")
 else:
     print(f"✅ Link health good: {health_score}%")
@@ -374,11 +380,7 @@ from docs.plugins.link_checker.plugin import LinkCheckerPlugin
 
 # Create plugin instance
 plugin = LinkCheckerPlugin()
-plugin.config = {
-    'enabled': True,
-    'timeout': 10,
-    'fail_on_error': False
-}
+plugin.config = {"enabled": True, "timeout": 10, "fail_on_error": False}
 
 # Use plugin methods programmatically
 # (Note: This requires MkDocs context for full functionality)
@@ -395,9 +397,9 @@ plugin.config = {
 ### Getting Help
 
 1. **Check the FAQ** in `README.md`
-2. **Review examples** in this guide
-3. **Consult the test suite** for usage patterns
-4. **Open an issue** for bugs or feature requests
+1. **Review examples** in this guide
+1. **Consult the test suite** for usage patterns
+1. **Open an issue** for bugs or feature requests
 
 ### Contributing
 
@@ -427,9 +429,9 @@ Contributions are welcome! See `CONTRIBUTING.md` for guidelines.
 The BioETL Link Checker Plugin provides comprehensive link validation for your documentation. By following this integration guide, you can:
 
 1. **Automate link checking** during documentation builds
-2. **Improve documentation quality** with health metrics
-3. **Catch broken links early** before users encounter them
-4. **Integrate with CI/CD** for automated quality gates
-5. **Monitor link health** over time with detailed reports
+1. **Improve documentation quality** with health metrics
+1. **Catch broken links early** before users encounter them
+1. **Integrate with CI/CD** for automated quality gates
+1. **Monitor link health** over time with detailed reports
 
 For more information, refer to the complete documentation in `README.md` or consult the test suite for advanced usage examples.

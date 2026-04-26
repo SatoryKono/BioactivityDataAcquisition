@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-12'
----
+  Last verified: '2026-04-12'
+
+______________________________________________________________________
 
 # Neo4j Audit Instance - Live Validation Setup
 
@@ -19,6 +22,7 @@ Last verified: '2026-04-12'
 ```
 
 **Output**:
+
 ```
 ✅ Audit instance started successfully
 
@@ -47,16 +51,16 @@ live --report-fast
 .\scripts\ops\start-neo4j-audit.ps1 -Stop
 ```
 
----
+______________________________________________________________________
 
 ## How It Works
 
 ### Separate Instances
 
-| Instance | Purpose | Memory | Port HTTP | Port Bolt | Password |
-|----------|---------|--------|-----------|-----------|----------|
-| **bioetl-neo4j** | MCP (Codex) | 256m heap | 7474 | 7687 | bioetl_secure_password |
-| **bioetl-neo4j-audit** | Live audit | 1024m heap | 7475 | 7688 | audit_secure_password |
+| Instance               | Purpose     | Memory     | Port HTTP | Port Bolt | Password               |
+| ---------------------- | ----------- | ---------- | --------- | --------- | ---------------------- |
+| **bioetl-neo4j**       | MCP (Codex) | 256m heap  | 7474      | 7687      | bioetl_secure_password |
+| **bioetl-neo4j-audit** | Live audit  | 1024m heap | 7475      | 7688      | audit_secure_password  |
 
 ### Automatic Routing
 
@@ -73,13 +77,14 @@ auth = get_neo4j_auth()
 
 Code automatically connects to the audit instance.
 
----
+______________________________________________________________________
 
 ## Configuration
 
 ### docker-compose.neo4j-audit.yml
 
 **Memory allocation** (tuned for live audit workload):
+
 ```yaml
 NEO4J_server_memory_heap_initial__size: 512m    # Initial
 NEO4J_server_memory_heap_max__size: 1024m       # Max (4x MCP instance)
@@ -89,6 +94,7 @@ cpus: "2.0"                                      # 2 CPU cores
 ```
 
 **Why**:
+
 - MCP instance: 256m heap (minimal, for conversation memory)
 - Audit instance: 1024m heap (aggressive, for heavy graph operations)
 - Separate instances prevent resource contention
@@ -96,6 +102,7 @@ cpus: "2.0"                                      # 2 CPU cores
 ### src/tools/neo4j_audit.py
 
 Helper functions:
+
 ```python
 # Get URI for current context
 uri = get_neo4j_uri()
@@ -108,26 +115,25 @@ if is_audit_mode():
     print("Running in audit mode (high memory)")
 ```
 
----
+______________________________________________________________________
 
 ## Usage in Code
 
 ### Before (hardcoded)
+
 ```python
-driver = neo4j.driver('bolt://localhost:7687', auth=...)
+driver = neo4j.driver("bolt://localhost:7687", auth=...)
 ```
 
 ### After (context-aware)
+
 ```python
 from src.tools.neo4j_audit import get_neo4j_uri, get_neo4j_auth
 
-driver = neo4j.driver(
-    get_neo4j_uri(),
-    neo4j.auth.basic(*get_neo4j_auth())
-)
+driver = neo4j.driver(get_neo4j_uri(), neo4j.auth.basic(*get_neo4j_auth()))
 ```
 
----
+______________________________________________________________________
 
 ## Live Validation Workflow
 
@@ -156,11 +162,12 @@ docker stats bioetl-neo4j-audit --no-stream
 .\scripts\ops\start-neo4j-audit.ps1 -Stop
 ```
 
----
+______________________________________________________________________
 
 ## Expected Results
 
 ### Before (OOMKilled)
+
 ```
 live --report-fast
 # ... after 98s snapshot ...
@@ -169,6 +176,7 @@ live --report-fast
 ```
 
 ### After (Successful)
+
 ```
 set LIVE_AUDIT_MODE=1
 live --report-fast
@@ -178,7 +186,7 @@ live --report-fast
 ✅ PASS
 ```
 
----
+______________________________________________________________________
 
 ## Monitoring
 
@@ -190,6 +198,7 @@ docker stats bioetl-neo4j-audit --no-stream --interval 1
 ```
 
 **Look for**:
+
 - Memory Usage: should peak around 1.5-1.8g
 - Should NOT exceed 2g (hard limit)
 - CPU: will spike during writes, then drop
@@ -206,7 +215,7 @@ docker inspect bioetl-neo4j-audit --format='{{json .State.ExitCode}}'
 # Should return: 0
 ```
 
----
+______________________________________________________________________
 
 ## Troubleshooting
 
@@ -246,26 +255,27 @@ echo $env:LIVE_AUDIT_MODE
 # Should show: 1
 ```
 
----
+______________________________________________________________________
 
 ## Two Instances, One Codebase
 
 This setup allows:
+
 - ✅ **Codex (MCP)**: Uses bioetl-neo4j (256m, lightweight)
 - ✅ **Live audit**: Uses bioetl-neo4j-audit (1024m, heavy)
 - ✅ Both run simultaneously if needed
 - ✅ No code changes: just set LIVE_AUDIT_MODE=1
 
----
+______________________________________________________________________
 
 ## Summary
 
-| Scenario | Instance | Command |
-|----------|----------|---------|
-| Use @neo4j-memory in Codex | bioetl-neo4j | `docker compose -f docker-compose.neo4j.yml up -d` |
-| Run live validation | bioetl-neo4j-audit | `.\scripts\ops\start-neo4j-audit.ps1` |
-| Both simultaneously | Both | Start both, set LIVE_AUDIT_MODE for audit code |
+| Scenario                   | Instance           | Command                                            |
+| -------------------------- | ------------------ | -------------------------------------------------- |
+| Use @neo4j-memory in Codex | bioetl-neo4j       | `docker compose -f docker-compose.neo4j.yml up -d` |
+| Run live validation        | bioetl-neo4j-audit | `.\scripts\ops\start-neo4j-audit.ps1`              |
+| Both simultaneously        | Both               | Start both, set LIVE_AUDIT_MODE for audit code     |
 
----
+______________________________________________________________________
 
 **Status**: Audit instance ready. Use `start-neo4j-audit.ps1` before running live validation. Expected: No OOMKilled errors.

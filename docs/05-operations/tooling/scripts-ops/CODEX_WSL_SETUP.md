@@ -5,6 +5,7 @@ This guide explains how to run Codex AI assistant from Windows Subsystem for Lin
 ## Overview
 
 Codex is an AI-powered code assistant. Running it from WSL provides:
+
 - Native Linux environment compatibility
 - Easier dependency management
 - Direct file system access
@@ -13,11 +14,13 @@ Codex is an AI-powered code assistant. Running it from WSL provides:
 ## Prerequisites
 
 ✅ Required:
+
 - WSL2 with Ubuntu distro installed
 - Windows 10/11 with WSL2 support
 - Docker Desktop (optional, for some features)
 
 ⚠️ Network Access:
+
 - OpenAI API access (requires internet/VPN)
 - For corporate VPN: Windows proxy needs to be bridged to WSL
 
@@ -26,11 +29,13 @@ Codex is an AI-powered code assistant. Running it from WSL provides:
 ### 1.1 Verify WSL2 is installed
 
 From PowerShell:
+
 ```powershell
 wsl -l -v
 ```
 
 You should see Ubuntu with version 2. If not:
+
 ```powershell
 # Install WSL2 (if not present)
 wsl --install -d Ubuntu
@@ -64,10 +69,11 @@ bash ./script-codex/helper/setup-wsl.sh
 ```
 
 This script will:
+
 1. Update package manager
-2. Install Node.js + npm (if missing)
-3. Install Codex CLI globally
-4. Configure WSL proxy for API access
+1. Install Node.js + npm (if missing)
+1. Install Codex CLI globally
+1. Configure WSL proxy for API access
 
 ### Option B: Manual Setup
 
@@ -92,6 +98,7 @@ codex --version
 If you have direct internet in WSL, Codex will work automatically.
 
 Test:
+
 ```bash
 curl -I https://api.openai.com
 ```
@@ -129,11 +136,13 @@ export https_proxy=http://$(ip route show default | awk '{print $3}'):3128
 ```
 
 To make this permanent, add to `~/.bashrc`:
+
 ```bash
 echo "source /path/to/repo/.wsl_proxy_env.sh" >> ~/.bashrc
 ```
 
 Test connectivity:
+
 ```bash
 curl -I https://api.openai.com
 # Should return HTTP/1.1 200 OK
@@ -195,21 +204,22 @@ cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 
 ## Script Files Explained
 
-| File | Purpose | Platform |
-|------|---------|----------|
-| `codex.bat` | Original launcher (via WSL2) | Windows PowerShell |
-| `codex.sh` | WSL bash launcher | WSL2 (bash) |
-| `codex-exec.sh` | Auto-execution launcher | WSL2 (bash) |
-| `codex-exec.bat` | Original auto-exec launcher | Windows PowerShell |
-| `codex-wsl.bat` | Modern WSL wrapper | Windows PowerShell |
-| `script-codex/helper/setup-wsl.sh` | Installation script | WSL2 (bash) |
-| `wsl_proxy.py` | HTTP proxy bridge | Windows (Python) |
-| `start-wsl-proxy.bat` | Proxy launcher | Windows PowerShell |
-| `.wsl_proxy_env.sh` | Proxy environment setup | WSL2 (bash) |
+| File                               | Purpose                      | Platform           |
+| ---------------------------------- | ---------------------------- | ------------------ |
+| `codex.bat`                        | Original launcher (via WSL2) | Windows PowerShell |
+| `codex.sh`                         | WSL bash launcher            | WSL2 (bash)        |
+| `codex-exec.sh`                    | Auto-execution launcher      | WSL2 (bash)        |
+| `codex-exec.bat`                   | Original auto-exec launcher  | Windows PowerShell |
+| `codex-wsl.bat`                    | Modern WSL wrapper           | Windows PowerShell |
+| `script-codex/helper/setup-wsl.sh` | Installation script          | WSL2 (bash)        |
+| `wsl_proxy.py`                     | HTTP proxy bridge            | Windows (Python)   |
+| `start-wsl-proxy.bat`              | Proxy launcher               | Windows PowerShell |
+| `.wsl_proxy_env.sh`                | Proxy environment setup      | WSL2 (bash)        |
 
 ## Common Usage Examples
 
 ### Code Analysis
+
 ```bash
 ./scripts/ops/launchers/codex/codex.sh "explain the data transformation pipeline"
 ./scripts/ops/launchers/codex/codex.sh "identify performance bottlenecks in the ETL"
@@ -217,6 +227,7 @@ cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 ```
 
 ### Refactoring & Optimization
+
 ```bash
 ./scripts/ops/launchers/codex/codex.sh "refactor ChemBL extractor for vectorized operations"
 ./scripts/ops/launchers/codex/codex.sh "optimize database queries in bioetl/database.py"
@@ -224,6 +235,7 @@ cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 ```
 
 ### Code Generation
+
 ```bash
 ./scripts/ops/launchers/codex/codex.sh "generate Pydantic models for bronze layer"
 ./scripts/ops/launchers/codex/codex.sh "create comprehensive unit tests for ChemBLExtractor"
@@ -231,6 +243,7 @@ cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 ```
 
 ### Debugging
+
 ```bash
 ./scripts/ops/launchers/codex/codex.sh "debug the gold_sink_disabled warning"
 ./scripts/ops/launchers/codex/codex.sh "fix the health_check_degraded issue during startup"
@@ -238,6 +251,7 @@ cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 ```
 
 ### With Auto-Execution
+
 ```bash
 ./scripts/ops/launchers/codex/codex-exec.sh "fix all TODO comments in the codebase"
 ./scripts/ops/launchers/codex/codex-exec.sh "add type hints to bioetl module"
@@ -262,6 +276,7 @@ npm list -g @openai/codex
 ### "OpenAI API unreachable" or timeout
 
 Check proxy configuration:
+
 ```bash
 # Test Windows host connectivity
 ping $(ip route show default | awk '{print $3}')
@@ -276,6 +291,7 @@ timeout 2 bash -c "echo > /dev/tcp/$(ip route show default | awk '{print $3}')/3
 ### "Permission denied" on scripts
 
 Make scripts executable:
+
 ```bash
 chmod +x ./scripts/ops/launchers/codex/codex.sh
 chmod +x ./scripts/ops/launchers/codex/codex-exec.sh
@@ -314,6 +330,7 @@ npm cache clean --force
 Codex scripts auto-detect the Windows repo path and convert to WSL format (`/mnt/e/...`).
 
 If paths don't work:
+
 ```bash
 # Verify WSL can access project
 ls -la /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
@@ -366,19 +383,19 @@ no_alternate_screen = true
 ## Best Practices
 
 1. **Start simple**: Test with basic analysis before complex refactoring
-2. **Use read-only first**: Explore unfamiliar code with `-s read-only`
-3. **Review before applying**: Always check Codex output before accepting changes
-4. **Test after changes**: Run unit tests after Codex modifies code
-5. **Use version control**: Commit before running Codex, easy to revert if needed
-6. **Keep sessions focused**: Ask related follow-ups in same session
-7. **Document decisions**: Save important Codex outputs/reasoning
+1. **Use read-only first**: Explore unfamiliar code with `-s read-only`
+1. **Review before applying**: Always check Codex output before accepting changes
+1. **Test after changes**: Run unit tests after Codex modifies code
+1. **Use version control**: Commit before running Codex, easy to revert if needed
+1. **Keep sessions focused**: Ask related follow-ups in same session
+1. **Document decisions**: Save important Codex outputs/reasoning
 
 ## Next Steps
 
 1. Run setup: `bash ./script-codex/helper/setup-wsl.sh`
-2. Test: `./scripts/ops/launchers/codex/codex.sh "explain this pipeline"`
-3. Explore: Try the examples in Common Usage Examples section
-4. Integrate: Add Codex to your workflow for code reviews, refactoring, etc.
+1. Test: `./scripts/ops/launchers/codex/codex.sh "explain this pipeline"`
+1. Explore: Try the examples in Common Usage Examples section
+1. Integrate: Add Codex to your workflow for code reviews, refactoring, etc.
 
 ## Files Modified by This Setup
 
@@ -388,11 +405,12 @@ no_alternate_screen = true
 - `script-codex/helper/setup-wsl.sh` (new) - Installation script
 
 Original files remain unchanged:
+
 - `scripts/ops/launchers/codex/codex.bat` - Original Windows launcher
 - `scripts/ops/launchers/codex/codex-exec.bat` - Original auto-exec
 - `scripts/ops/runtime/wsl/wsl_proxy.py` - HTTP proxy bridge
 - `.wsl_proxy_env.sh` - Proxy environment config
 
----
+______________________________________________________________________
 
 **For more info:** See `CODEX_SETUP.md` and `CODEX_QUICK_REF.md` in `scripts/ops/`

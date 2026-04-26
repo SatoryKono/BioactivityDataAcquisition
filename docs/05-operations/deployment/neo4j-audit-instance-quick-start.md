@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-12'
----
+  Last verified: '2026-04-12'
+
+______________________________________________________________________
 
 # Neo4j Audit Instance - Quick Reference
 
@@ -15,29 +18,35 @@ Last verified: '2026-04-12'
 All files are ready to use. No additional setup needed.
 
 ### Configuration
+
 - **docker-compose.neo4j-audit.yml** — Audit instance definition (1024m heap, port 7688)
 
 ### Scripts
+
 - **scripts/ops/runtime/neo4j/start-neo4j-audit.ps1** — PowerShell: start/stop/logs
 - **scripts/ops/runtime/neo4j/start-neo4j-audit.sh** — Bash: start/stop/logs (WSL)
 
 ### Code Integration
+
 - **src/tools/neo4j_audit.py** — Helper functions for context-aware connections
 
 ### Documentation
+
 - **NEO4J_AUDIT_INSTANCE_GUIDE.md** — Full user guide
 - **AUDIT_INSTANCE_IMPLEMENTATION.md** — Implementation checklist
 
----
+______________________________________________________________________
 
 ## How to Use
 
 ### Start Audit Instance (PowerShell)
+
 ```powershell
 .\scripts\ops\start-neo4j-audit.ps1
 ```
 
 Expected output:
+
 ```
 ✅ Audit instance started successfully
 
@@ -48,6 +57,7 @@ Connection details:
 ```
 
 ### Start Audit Instance (WSL/Bash)
+
 ```bash
 chmod +x scripts/ops/runtime/neo4j/start-neo4j-audit.sh
 ./scripts/ops/runtime/neo4j/start-neo4j-audit.sh
@@ -79,7 +89,7 @@ or
 ./scripts/ops/runtime/neo4j/start-neo4j-audit.sh --stop
 ```
 
----
+______________________________________________________________________
 
 ## Architecture
 
@@ -100,15 +110,15 @@ bioetl-neo4j          bioetl-neo4j-audit
 from src.tools.neo4j_audit import get_neo4j_uri, get_neo4j_auth
 
 # If LIVE_AUDIT_MODE=1:
-get_neo4j_uri()        # → bolt://localhost:7688 (audit)
-get_neo4j_auth()       # → ('neo4j', 'audit_secure_password')
+get_neo4j_uri()  # → bolt://localhost:7688 (audit)
+get_neo4j_auth()  # → ('neo4j', 'audit_secure_password')
 
 # If LIVE_AUDIT_MODE not set:
-get_neo4j_uri()        # → bolt://host.docker.internal:7687 (MCP)
-get_neo4j_auth()       # → ('neo4j', 'bioetl_secure_password')
+get_neo4j_uri()  # → bolt://host.docker.internal:7687 (MCP)
+get_neo4j_auth()  # → ('neo4j', 'bioetl_secure_password')
 ```
 
----
+______________________________________________________________________
 
 ## Integration Checklist
 
@@ -120,11 +130,12 @@ get_neo4j_auth()       # → ('neo4j', 'bioetl_secure_password')
 - [ ] Verify: `docker inspect bioetl-neo4j-audit --format='{{json .State.OOMKilled}}'` returns false
 - [ ] Stop: `.\scripts\ops\start-neo4j-audit.ps1 -Stop`
 
----
+______________________________________________________________________
 
 ## Expected Results
 
 ### Before (with 256m heap)
+
 ```
 live --report-fast
 ... build_snapshot: 98s ...
@@ -132,6 +143,7 @@ live --report-fast
 ```
 
 ### After (with 1024m heap)
+
 ```
 export LIVE_AUDIT_MODE=1
 live --report-fast
@@ -142,31 +154,35 @@ live --report-fast
 Memory: 1.8g / 2g limit
 ```
 
----
+______________________________________________________________________
 
 ## Monitoring During Audit
 
 ### Terminal 1: Run Audit
+
 ```bash
 export LIVE_AUDIT_MODE=1
 live --report-fast
 ```
 
 ### Terminal 2: Watch Memory
+
 ```powershell
 docker stats bioetl-neo4j-audit --no-stream --interval 1
 ```
 
 ### Terminal 3: View Logs
+
 ```powershell
 .\scripts\ops\start-neo4j-audit.ps1 -Logs
 ```
 
----
+______________________________________________________________________
 
 ## Troubleshooting
 
 ### Instance won't start
+
 ```powershell
 # Check if ports 7475/7688 are available
 netstat -an | findstr "7475\|7688"
@@ -176,6 +192,7 @@ docker compose -f docker-compose.neo4j.yml down
 ```
 
 ### OOMKilled during audit
+
 ```powershell
 # Check if memory exceeded limit
 docker stats bioetl-neo4j-audit --no-stream
@@ -186,6 +203,7 @@ docker stats bioetl-neo4j-audit --no-stream
 ```
 
 ### Connection refused
+
 ```bash
 # Verify instance running
 docker ps | grep neo4j-audit
@@ -196,7 +214,7 @@ echo $LIVE_AUDIT_MODE  # Should be: 1
 # Verify code uses get_neo4j_uri() (not hardcoded)
 ```
 
----
+______________________________________________________________________
 
 ## Status
 
@@ -207,7 +225,7 @@ echo $LIVE_AUDIT_MODE  # Should be: 1
 
 **Next**: Run `.\scripts\ops\start-neo4j-audit.ps1` and test live validation.
 
----
+______________________________________________________________________
 
 **For detailed setup**: See NEO4J_AUDIT_INSTANCE_GUIDE.md
 **For implementation checklist**: See AUDIT_INSTANCE_IMPLEMENTATION.md

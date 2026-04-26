@@ -1,11 +1,13 @@
 # ADR 035: Composite Checkpoint State Analysis
 
 ## Status
+
 **Accepted** ✅
 
 ## Context
 
 During technical debt analysis (Issue #3), `CompositeCheckpointState` was flagged as potentially deprecated due to:
+
 - Neo4j analysis showing `compat` markers
 - No explicit runtime usage metrics
 - Methods marked as legacy in some contexts
@@ -17,17 +19,20 @@ After comprehensive analysis, we determine that `CompositeCheckpointState` is **
 ### Evidence of Active Usage
 
 1. **Core Composite Pipeline Infrastructure**
+
    - Used by `CompositeCheckpointService` (modern facade)
    - Integral to composite pipeline state management
    - Handles seed, dependency, enrichment, and merge phases
 
-2. **Extensive Runtime Usage**
+1. **Extensive Runtime Usage**
+
    - `src/bioetl/application/composite/runner_pkg/runner.py:230` - Run state preparation
    - `src/bioetl/application/composite/runner_pkg/runner_execution_orchestrator.py` - Execution orchestration
    - `src/bioetl/application/composite/fsm_helper.py:169` - Finite state machine transitions
    - `src/bioetl/application/composite/checkpoint/persistence_service.py` - State persistence
 
-3. **Architectural Role**
+1. **Architectural Role**
+
    - Immutable state management for composite pipelines
    - Supports resumability and fault tolerance
    - Critical for checkpoint/restore functionality
@@ -44,7 +49,7 @@ graph TD
     A --> D[Enrichment Phase]
     A --> E[Merge Phase]
     A --> F[Resume Capability]
-    
+
     B --> G[SeedResult tracking]
     C --> H[DependencyResult tracking]
     D --> I[EnrichmentResult tracking]
@@ -60,7 +65,7 @@ classDiagram
     CompositeRunner "1" *-- "1" CompositeCheckpointState : uses
     CompositeFSMHelper "1" *-- "1" CompositeCheckpointState : transitions
     CompositeCheckpointPersistence "1" *-- "1" CompositeCheckpointState : stores/loads
-    
+
     CompositeCheckpointState : +with_seed_completed()
     CompositeCheckpointState : +with_dependency_completed()
     CompositeCheckpointState : +with_enricher_completed()
@@ -74,18 +79,21 @@ classDiagram
 ### Why This is Not Technical Debt
 
 1. **Active Development Pattern**
+
    - Follows modern immutable state management patterns
    - Uses dataclasses with frozen=True for thread safety
    - Clean separation of state transitions via support helpers
 
-2. **Critical Functionality**
+1. **Critical Functionality**
+
    - Without this, composite pipelines cannot:
      - Resume from failures
      - Track progress across phases
      - Maintain consistency during long-running operations
      - Support fault tolerance
 
-3. **Proper Abstraction Level**
+1. **Proper Abstraction Level**
+
    - Appropriate complexity for the problem domain
    - Clear separation of concerns between state and transitions
    - Support helpers maintain single responsibility principle
@@ -95,6 +103,7 @@ classDiagram
 **Current State**: ✅ **Active and Healthy**
 
 ### Usage Metrics
+
 - **Files using CompositeCheckpointState**: 12+ core files
 - **Methods depending on it**: 50+ across the codebase
 - **Pipeline types supported**: All composite pipelines
@@ -105,21 +114,27 @@ classDiagram
 ### Recommended Improvements
 
 1. **Add Runtime Metrics**
+
    ```python
    # Add to CompositeCheckpointService
    def _instrument_state_transitions(self, state: CompositeCheckpointState) -> None:
-       self._metrics.increment("bioetl_checkpoint_state_transitions", {
-           "state": state.state.value,
-           "composite": state.composite_name,
-       })
+       self._metrics.increment(
+           "bioetl_checkpoint_state_transitions",
+           {
+               "state": state.state.value,
+               "composite": state.composite_name,
+           },
+       )
    ```
 
-2. **Enhanced Observability**
+1. **Enhanced Observability**
+
    - Add state transition logging
    - Track checkpoint duration metrics
    - Monitor resumability patterns
 
-3. **Documentation Updates**
+1. **Documentation Updates**
+
    - Add architecture diagrams to developer docs
    - Create state transition sequence diagrams
    - Document fault tolerance patterns
@@ -131,9 +146,9 @@ classDiagram
 ## Success Metrics
 
 1. **Maintain 100% test coverage** on state transitions
-2. **Zero production incidents** related to state management
-3. **Document all state transition paths** in architecture docs
-4. **Add runtime metrics** for state usage patterns
+1. **Zero production incidents** related to state management
+1. **Document all state transition paths** in architecture docs
+1. **Add runtime metrics** for state usage patterns
 
 ## Related Issues
 
@@ -158,7 +173,7 @@ classDiagram
 - **1.1**: Added architecture diagrams (2024-07-21)
 - **1.2**: Added future enhancement recommendations (2024-07-22)
 
----
+______________________________________________________________________
 
 ## Appendix: State Transition Flow
 
@@ -170,7 +185,7 @@ stateDiagram-v2
     DEPENDENCIES_RUNNING --> ENRICHING: with_enricher_completed()
     ENRICHING --> MERGING: with_merge_completed()
     MERGING --> COMPLETED
-    
+
     SEED_COMPLETED --> SEED_COMPLETED: Resume from seed
     DEPENDENCIES_RUNNING --> DEPENDENCIES_RUNNING: Resume from dependencies
     ENRICHING --> ENRICHING: Resume from enrichment

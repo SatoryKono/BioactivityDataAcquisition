@@ -5,7 +5,6 @@
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-
 Примечание о follow-up: после `RF-011` verify-sensitive documentation surfaces
 тоже были повторно подтверждены на актуальном дереве. Это не снимает
 documentation debt, но переводит parent pack из режима broad freshness concern
@@ -19,9 +18,9 @@ default git-surface и переведён в generated-on-demand policy. Это 
 ## Shard-пакеты
 
 1. [project-and-ai-doc-drift](../project-and-ai-doc-drift/SUMMARY.md) — `6` объектов evidence, gate `PASSED`
-2. [architecture-doc-drift](../architecture-doc-drift/SUMMARY.md) — `5` объектов evidence, gate `PASSED`
-3. [reference-guide-doc-drift](../reference-guide-doc-drift/SUMMARY.md) — `5` объектов evidence, gate `PASSED`
-4. [operations-generated-doc-drift](../operations-generated-doc-drift/SUMMARY.md) — `6` объектов evidence, gate `PASSED`
+1. [architecture-doc-drift](../architecture-doc-drift/SUMMARY.md) — `5` объектов evidence, gate `PASSED`
+1. [reference-guide-doc-drift](../reference-guide-doc-drift/SUMMARY.md) — `5` объектов evidence, gate `PASSED`
+1. [operations-generated-doc-drift](../operations-generated-doc-drift/SUMMARY.md) — `6` объектов evidence, gate `PASSED`
 
 ## Итоги
 

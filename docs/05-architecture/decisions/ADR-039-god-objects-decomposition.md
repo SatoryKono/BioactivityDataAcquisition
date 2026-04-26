@@ -1,11 +1,13 @@
 # ADR 039: God Objects Decomposition
 
 ## Status
+
 **Proposed** ⏳
 
 ## Context
 
 During the technical debt analysis, two large "God Object" classes were identified:
+
 - `src/bioetl/infrastructure/storage/silver_writer.py` (539 LOC)
 - `src/bioetl/application/observability/observer.py` (490 LOC)
 
@@ -50,6 +52,7 @@ classDiagram
 ```
 
 **Problems**:
+
 - Multiple responsibilities per class
 - High cyclomatic complexity
 - Difficult to test in isolation
@@ -123,6 +126,7 @@ classDiagram
 ```
 
 **Benefits**:
+
 - Each class has single responsibility
 - Loose coupling via composition
 - Easy to test in isolation
@@ -134,21 +138,25 @@ classDiagram
 ### Why Decomposition is Necessary
 
 1. **Single Responsibility Principle Violation**
+
    - Current classes handle multiple unrelated concerns
    - Changes affect many parts of the system
    - High risk of unintended side effects
 
-2. **Testability Challenges**
+1. **Testability Challenges**
+
    - Difficult to mock specific behaviors
    - Complex setup for unit tests
    - Integration tests required for basic coverage
 
-3. **Maintenance Difficulties**
+1. **Maintenance Difficulties**
+
    - High cognitive load for developers
    - Changes require understanding entire class
    - Fear of breaking existing functionality
 
-4. **Extensibility Issues**
+1. **Extensibility Issues**
+
    - Adding new features requires modifying large classes
    - Risk of increasing complexity further
    - Difficult to add new observation types
@@ -156,12 +164,14 @@ classDiagram
 ### Why Composition Over Inheritance
 
 **Inheritance Problems**:
+
 - Tight coupling between base and derived classes
 - Difficult to modify behavior at runtime
 - Multiple inheritance complexities
 - Inflexible architecture
 
 **Composition Benefits**:
+
 - Loose coupling between components
 - Easy to modify behavior at runtime
 - Single responsibility for each class
@@ -172,6 +182,7 @@ classDiagram
 ### Phase 1: SilverWriter Decomposition
 
 **Step 1: Extract ArrowConverter**
+
 ```python
 class ArrowConverter:
     """Responsible for Arrow data conversion and validation."""
@@ -190,6 +201,7 @@ class ArrowConverter:
 ```
 
 **Step 2: Extract DeltaMerger**
+
 ```python
 class DeltaMerger:
     """Responsible for Delta Lake merge operations."""
@@ -207,6 +219,7 @@ class DeltaMerger:
 ```
 
 **Step 3: Extract MaintenanceTask**
+
 ```python
 class MaintenanceTask:
     """Responsible for maintenance operations."""
@@ -229,19 +242,22 @@ class MaintenanceTask:
 ```
 
 **Step 4: Refactor SilverWriter**
+
 ```python
 class SilverWriter:
     """Main class with focused responsibility: orchestrate writing operations."""
 
-    def __init__(self, arrow_converter: ArrowConverter,
-                 delta_merger: DeltaMerger,
-                 maintenance_task: MaintenanceTask):
+    def __init__(
+        self,
+        arrow_converter: ArrowConverter,
+        delta_merger: DeltaMerger,
+        maintenance_task: MaintenanceTask,
+    ):
         self._arrow_converter = arrow_converter
         self._delta_merger = delta_merger
         self._maintenance_task = maintenance_task
 
-    def write_dataframe(self, dataframe: pl.DataFrame,
-                       table_path: str) -> None:
+    def write_dataframe(self, dataframe: pl.DataFrame, table_path: str) -> None:
         """Orchestrate the complete write operation."""
         arrow_table = self._arrow_converter.convert_to_arrow(dataframe)
         self._delta_merger.merge_delta(table_path, arrow_table)
@@ -255,18 +271,22 @@ class SilverWriter:
 ### Phase 2: Observer Decomposition
 
 **Step 1: Create Observer Interface**
+
 ```python
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
+
 @dataclass(frozen=True)
 class ExecutionEvent:
     """Immutable event data."""
+
     operation: str
     status: str
     duration: float
     timestamp: datetime
     metadata: dict
+
 
 class Observer(ABC):
     """Base observer interface."""
@@ -278,6 +298,7 @@ class Observer(ABC):
 ```
 
 **Step 2: Implement TracingObserver**
+
 ```python
 class TracingObserver(Observer):
     """Responsible for tracing operations."""
@@ -296,6 +317,7 @@ class TracingObserver(Observer):
 ```
 
 **Step 3: Implement MetricsObserver**
+
 ```python
 class MetricsObserver(Observer):
     """Responsible for metrics collection."""
@@ -305,22 +327,15 @@ class MetricsObserver(Observer):
 
     def update(self, event: ExecutionEvent) -> None:
         """Record metrics for the execution event."""
-        labels = {
-            "operation": event.operation,
-            "status": event.status
-        }
+        labels = {"operation": event.operation, "status": event.status}
         self._metrics.observe_histogram(
-            "bioetl_operation_duration_seconds",
-            event.duration,
-            labels
+            "bioetl_operation_duration_seconds", event.duration, labels
         )
-        self._metrics.increment(
-            "bioetl_operation_count",
-            labels
-        )
+        self._metrics.increment("bioetl_operation_count", labels)
 ```
 
 **Step 4: Implement LoggingObserver**
+
 ```python
 class LoggingObserver(Observer):
     """Responsible for logging operations."""
@@ -335,11 +350,12 @@ class LoggingObserver(Observer):
             operation=event.operation,
             status=event.status,
             duration=event.duration,
-            metadata=event.metadata
+            metadata=event.metadata,
         )
 ```
 
 **Step 5: Create CompositeObserver**
+
 ```python
 class CompositeObserver(Observer):
     """Composite pattern for managing multiple observers."""
@@ -365,32 +381,36 @@ class CompositeObserver(Observer):
 
 ### Quantitative Goals
 
-| Metric | Current | Target | Improvement |
-|--------|---------|-------|-------------|
-| Lines of Code | 539/490 | <300 | 44% reduction |
-| Method Count | 25/20 | 10-12 | 50% reduction |
-| Cyclomatic Complexity | 15/12 | 8/6 | 47% reduction |
-| Test Coverage | 80% | 95% | 19% improvement |
-| Class Count | 2 | 6-8 | 300-400% increase |
+| Metric                | Current | Target | Improvement       |
+| --------------------- | ------- | ------ | ----------------- |
+| Lines of Code         | 539/490 | \<300  | 44% reduction     |
+| Method Count          | 25/20   | 10-12  | 50% reduction     |
+| Cyclomatic Complexity | 15/12   | 8/6    | 47% reduction     |
+| Test Coverage         | 80%     | 95%    | 19% improvement   |
+| Class Count           | 2       | 6-8    | 300-400% increase |
 
 ### Qualitative Goals
 
 1. **Maintainability**: +40%
+
    - Smaller, focused classes
    - Clearer responsibilities
    - Easier to modify
 
-2. **Testability**: +35%
+1. **Testability**: +35%
+
    - Isolated components
    - Mockable dependencies
    - Comprehensive unit tests
 
-3. **Developer Experience**: +45%
+1. **Developer Experience**: +45%
+
    - More enjoyable to work with
    - Lower cognitive load
    - Clearer architecture
 
-4. **Code Reviews**: +30%
+1. **Code Reviews**: +30%
+
    - Faster review process
    - More focused feedback
    - Easier to understand
@@ -481,30 +501,35 @@ quadrantChart
 ### Mitigation Strategies
 
 1. **Delta Lake Regression**
+
    - Comprehensive regression test suite
    - VCR.py cassettes for API interactions
    - Staging environment testing
    - Gradual rollout with feature flags
 
-2. **Performance Degradation**
+1. **Performance Degradation**
+
    - Performance benchmarking before/after
    - Load testing in staging
    - Monitoring in production
    - Rollback plan ready
 
-3. **Integration Issues**
+1. **Integration Issues**
+
    - Gradual integration
    - Feature flags for new components
    - Backward compatibility maintained
    - Comprehensive integration tests
 
-4. **Test Coverage Gaps**
+1. **Test Coverage Gaps**
+
    - Property-based testing for converters
    - Edge case coverage
    - Mutation testing
    - Code review focus on tests
 
-5. **Team Adoption**
+1. **Team Adoption**
+
    - Internal documentation
    - Team training session
    - Pair programming
@@ -515,31 +540,37 @@ quadrantChart
 ### Acceptance Criteria
 
 1. ✅ **Code Size Reduction**
-   - SilverWriter: <300 LOC (from 539)
-   - Observer: <300 LOC (from 490)
 
-2. ✅ **Single Responsibility Principle**
+   - SilverWriter: \<300 LOC (from 539)
+   - Observer: \<300 LOC (from 490)
+
+1. ✅ **Single Responsibility Principle**
+
    - Each class has one clear responsibility
    - No god objects remain
    - Clear separation of concerns
 
-3. ✅ **Test Coverage**
+1. ✅ **Test Coverage**
+
    - Unit test coverage ≥95%
    - Integration test coverage ≥90%
    - Regression tests pass 100%
 
-4. ✅ **No Regressions**
+1. ✅ **No Regressions**
+
    - All existing tests pass
    - Delta Lake operations work correctly
    - Performance not degraded (>95% of baseline)
 
-5. ✅ **Documentation**
+1. ✅ **Documentation**
+
    - ADR created and approved
    - Class diagrams updated
    - Usage examples provided
    - Migration guide included
 
-6. ✅ **Production Ready**
+1. ✅ **Production Ready**
+
    - Staging deployment successful
    - Monitoring shows no issues
    - Team trained on new architecture
@@ -583,10 +614,10 @@ quadrantChart
 The proposed decomposition of SilverWriter and Observer classes represents a **high-value architectural improvement** that will:
 
 1. ✅ **Restore Single Responsibility Principle**
-2. ✅ **Improve Testability Significantly** (+35%)
-3. ✅ **Enhance Maintainability** (+40%)
-4. ✅ **Reduce Cognitive Complexity** (44% LOC reduction)
-5. ✅ **Establish Better Patterns** for future development
+1. ✅ **Improve Testability Significantly** (+35%)
+1. ✅ **Enhance Maintainability** (+40%)
+1. ✅ **Reduce Cognitive Complexity** (44% LOC reduction)
+1. ✅ **Establish Better Patterns** for future development
 
 **Risk Level**: **Medium** (manageable with proper testing and gradual rollout)
 **ROI**: **High** (significant long-term benefits outweigh short-term costs)
@@ -595,6 +626,7 @@ The proposed decomposition of SilverWriter and Observer classes represents a **h
 ### Implementation Confidence
 
 **Strengths**:
+
 - Clear separation of concerns
 - Composition over inheritance
 - Comprehensive testing strategy
@@ -602,6 +634,7 @@ The proposed decomposition of SilverWriter and Observer classes represents a **h
 - Backward compatibility maintained
 
 **Addressed Concerns**:
+
 - Regression risk mitigated by comprehensive testing
 - Performance impact minimized by benchmarking
 - Team adoption supported by training

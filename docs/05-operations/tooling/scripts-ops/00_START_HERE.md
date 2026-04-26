@@ -7,7 +7,7 @@ Your project has existing Windows-based Codex scripts:
 ```
 ./scripts/ops/
 ├── codex.bat           ← Original Windows launcher
-├── codex-exec.bat      ← Original auto-exec launcher  
+├── codex-exec.bat      ← Original auto-exec launcher
 ├── start-codex.bat     ← Quick start wrapper
 ├── start-wsl-proxy.bat ← Proxy launcher
 ├── wsl_proxy.py        ← HTTP proxy bridge
@@ -76,14 +76,14 @@ bash ./script-codex/helper/verify-setup.sh
 
 ## 📊 Usage Comparison
 
-| Scenario | Command | Platform |
-|----------|---------|----------|
-| **Interactive Analysis** | `./codex.sh` | WSL |
-| **One-Shot Analysis** | `./codex.sh "analyze code"` | WSL |
-| **Auto-Apply Changes** | `./codex-exec.sh "refactor"` | WSL |
-| **Windows Interactive** | `.\codex-wsl.bat` | PowerShell |
-| **Windows One-Shot** | `.\codex-wsl.bat "analyze"` | PowerShell |
-| **Original Windows** | `.\codex.bat` | PowerShell |
+| Scenario                 | Command                      | Platform   |
+| ------------------------ | ---------------------------- | ---------- |
+| **Interactive Analysis** | `./codex.sh`                 | WSL        |
+| **One-Shot Analysis**    | `./codex.sh "analyze code"`  | WSL        |
+| **Auto-Apply Changes**   | `./codex-exec.sh "refactor"` | WSL        |
+| **Windows Interactive**  | `.\codex-wsl.bat`            | PowerShell |
+| **Windows One-Shot**     | `.\codex-wsl.bat "analyze"`  | PowerShell |
+| **Original Windows**     | `.\codex.bat`                | PowerShell |
 
 ## 📚 Documentation Map
 
@@ -115,53 +115,58 @@ Where to find what:
 
 ### Bash Scripts (Run from WSL)
 
-| Script | Purpose | Complexity |
-|--------|---------|-----------|
-| `codex.sh` | Launch Codex interactively or with prompt | Simple |
-| `codex-exec.sh` | Auto-execute changes (full-auto mode) | Simple |
-| `script-codex/helper/setup-wsl.sh` | Install all dependencies & configure | Medium |
-| `script-codex/helper/verify-setup.sh` | Check installation & connectivity | Medium |
+| Script                                | Purpose                                   | Complexity |
+| ------------------------------------- | ----------------------------------------- | ---------- |
+| `codex.sh`                            | Launch Codex interactively or with prompt | Simple     |
+| `codex-exec.sh`                       | Auto-execute changes (full-auto mode)     | Simple     |
+| `script-codex/helper/setup-wsl.sh`    | Install all dependencies & configure      | Medium     |
+| `script-codex/helper/verify-setup.sh` | Check installation & connectivity         | Medium     |
 
 ### Batch Scripts (Run from PowerShell)
 
-| Script | Purpose | Use Case |
-|--------|---------|----------|
-| `codex-wsl.bat` | Modern wrapper for WSL scripts | Recommended |
-| `codex.bat` | Original Windows launcher | Legacy (still works) |
-| `codex-exec.bat` | Original auto-exec launcher | Legacy (still works) |
+| Script           | Purpose                        | Use Case             |
+| ---------------- | ------------------------------ | -------------------- |
+| `codex-wsl.bat`  | Modern wrapper for WSL scripts | Recommended          |
+| `codex.bat`      | Original Windows launcher      | Legacy (still works) |
+| `codex-exec.bat` | Original auto-exec launcher    | Legacy (still works) |
 
 ### Documentation (Read)
 
-| Document | Length | Best For |
-|----------|--------|----------|
-| `CODEX_WSL_SETUP.md` | ~9000 chars | Complete setup & troubleshooting |
-| `CODEX_WSL_QUICK_REF.md` | ~3000 chars | Quick commands & examples |
-| `INDEX.md` | ~5700 chars | File reference & reading order |
-| `WSL_SETUP_SUMMARY.md` | ~6700 chars | This session overview |
+| Document                 | Length      | Best For                         |
+| ------------------------ | ----------- | -------------------------------- |
+| `CODEX_WSL_SETUP.md`     | ~9000 chars | Complete setup & troubleshooting |
+| `CODEX_WSL_QUICK_REF.md` | ~3000 chars | Quick commands & examples        |
+| `INDEX.md`               | ~5700 chars | File reference & reading order   |
+| `WSL_SETUP_SUMMARY.md`   | ~6700 chars | This session overview            |
 
 ## 🔧 Key Features
 
 ✅ **One-Command Setup**
+
 ```bash
 bash ./script-codex/helper/setup-wsl.sh
 ```
 
 ✅ **Automatic Verification**
+
 ```bash
 bash ./script-codex/helper/verify-setup.sh
 ```
 
 ✅ **Multiple Execution Modes**
+
 - Interactive (type prompts in TUI)
 - Prompt-based (one-shot analysis)
 - Auto-exec (full-auto with changes)
 
 ✅ **VPN/Proxy Support**
+
 - Auto-detection of Windows proxy
 - WSL proxy configuration
 - Corporate firewall compatible
 
 ✅ **Better Error Messages**
+
 - Clear diagnostics
 - Actionable fixes
 - Helpful suggestions
@@ -205,30 +210,35 @@ $ bash ./script-codex/helper/verify-setup.sh
 ## 🎓 Common Usage Examples
 
 ### Analyze Code
+
 ```bash
 ./scripts/ops/launchers/codex/codex.sh "explain the ChemBL data extraction pipeline"
 ./scripts/ops/launchers/codex/codex.sh "identify performance bottlenecks in ETL"
 ```
 
 ### Generate Code
+
 ```bash
 ./scripts/ops/launchers/codex/codex.sh "create Pydantic models for bronze layer"
 ./scripts/ops/launchers/codex/codex.sh "generate unit tests for transformer classes"
 ```
 
 ### Refactor Code
+
 ```bash
 ./scripts/ops/launchers/codex/codex.sh "optimize database queries in bioetl/database.py"
 ./scripts/ops/launchers/codex/codex.sh "refactor compound transformer for vectorization"
 ```
 
 ### Debug Issues
+
 ```bash
 ./scripts/ops/launchers/codex/codex.sh "debug the gold_sink_disabled warning"
 ./scripts/ops/launchers/codex/codex.sh "explain why health_check_degraded occurs"
 ```
 
 ### Auto-Apply Changes
+
 ```bash
 ./scripts/ops/launchers/codex/codex-exec.sh "add type hints to all modules"
 ./scripts/ops/launchers/codex/codex-exec.sh "fix all TODO comments"
@@ -254,12 +264,15 @@ $ bash ./script-codex/helper/verify-setup.sh
 ## ⚙️ Configuration
 
 ### Default Configuration
+
 - Works out-of-the-box for most setups
 - Auto-detects Windows proxy if present
 - No manual config needed (usually)
 
 ### Custom Configuration
+
 If needed, edit `~/.codex/config.toml`:
+
 ```toml
 [openai]
 model = "gpt-4"
@@ -272,21 +285,25 @@ policy = "read-only"  # or "workspace-write"
 ## 🆘 If Something Goes Wrong
 
 1. **Run the verifier first**
+
    ```bash
    bash ./script-codex/helper/verify-setup.sh
    ```
 
-2. **Check the quick troubleshooting**
+1. **Check the quick troubleshooting**
+
    ```
    See: CODEX_WSL_QUICK_REF.md § Troubleshooting Checklist
    ```
 
-3. **Read the detailed guide**
+1. **Read the detailed guide**
+
    ```
    See: CODEX_WSL_SETUP.md § Troubleshooting
    ```
 
-4. **Get diagnostics**
+1. **Get diagnostics**
+
    ```bash
    which codex              # Where is Codex?
    codex --version          # Does it work?
@@ -296,52 +313,60 @@ policy = "read-only"  # or "workspace-write"
 ## 🎯 Next Steps
 
 1. **Read documentation** (5 minutes)
+
    - Quick Read: `CODEX_WSL_QUICK_REF.md`
    - Full Read: `CODEX_WSL_SETUP.md`
 
-2. **Run setup** (2 minutes)
+1. **Run setup** (2 minutes)
+
    ```bash
    bash ./script-codex/helper/setup-wsl.sh
    ```
 
-3. **Verify installation** (1 minute)
+1. **Verify installation** (1 minute)
+
    ```bash
    bash ./script-codex/helper/verify-setup.sh
    ```
 
-4. **Try it out** (1 minute)
+1. **Try it out** (1 minute)
+
    ```bash
    ./scripts/ops/launchers/codex/codex.sh "what is this project about?"
    ```
 
-5. **Explore examples** (5-10 minutes)
+1. **Explore examples** (5-10 minutes)
+
    - Use examples from `CODEX_WSL_QUICK_REF.md`
    - Try different analysis types
    - Get familiar with the interface
 
 ## 📝 Summary
 
-| Aspect | Status |
-|--------|--------|
-| **Analysis Complete** | ✅ Yes |
-| **Scripts Created** | ✅ 5 new scripts |
-| **Documentation Written** | ✅ 4 detailed guides |
-| **Ready to Use** | ✅ Yes |
+| Aspect                    | Status                                      |
+| ------------------------- | ------------------------------------------- |
+| **Analysis Complete**     | ✅ Yes                                      |
+| **Scripts Created**       | ✅ 5 new scripts                            |
+| **Documentation Written** | ✅ 4 detailed guides                        |
+| **Ready to Use**          | ✅ Yes                                      |
 | **Installation Required** | ✅ Yes (`script-codex/helper/setup-wsl.sh`) |
 
----
+______________________________________________________________________
 
 **Everything is ready. Start with:**
+
 ```bash
 bash ./script-codex/helper/setup-wsl.sh
 ```
 
 **Then verify with:**
+
 ```bash
 bash ./script-codex/helper/verify-setup.sh
 ```
 
 **Then use it:**
+
 ```bash
 ./scripts/ops/launchers/codex/codex.sh "analyze the pipeline"
 ```

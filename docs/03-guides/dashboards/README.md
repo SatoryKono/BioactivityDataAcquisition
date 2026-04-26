@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-13'
----
+  Last verified: '2026-04-13'
+
+______________________________________________________________________
 
 # Dashboards Docs Index
 
@@ -23,10 +26,12 @@ Last verified: '2026-04-13'
 - `dashboard-v2-updates.md` — что именно проверено и исправлено в JSON.
 
 Текущий shipped Explore handoff:
+
 - Loki использует безопасный baseline `{job="bioetl"}`.
 - Tempo использует contextual TraceQL filters по текущему dashboard scope (`pipeline/run_type` или `provider`).
 
 Текущая навигационная модель:
+
 - `1. Overview` -> `2. Runtime` / `Control Plane v1` / `3. Provider Health` / `4. Data Quality`
 - `2. Runtime` -> `Back to Overview` / `Control Plane v1` / `4. Data Quality`
 - `3. Provider Health` -> `Back to Overview` / `2. Runtime`

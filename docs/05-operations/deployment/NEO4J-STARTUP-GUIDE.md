@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-08'
----
+  Last verified: '2026-04-08'
+
+______________________________________________________________________
 
 # Neo4j Backend Startup Guide
 
@@ -24,6 +27,7 @@ docker run -d --name bioetl-neo4j \
 ```
 
 **Параметры:**
+
 - `-d`: Запуск в фоне (detached mode)
 - `--name bioetl-neo4j`: Имя контейнера для идентификации
 - `-p 7474:7474`: HTTP UI (Neo4j Browser)
@@ -88,6 +92,7 @@ codex mcp get neo4j-memory
 ```
 
 **Ожидаемый результат:**
+
 ```
 neo4j-memory: scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh
 Status: registered
@@ -100,6 +105,7 @@ bash scripts/ai/mcp/check.sh
 ```
 
 **Ожидаемые результаты:**
+
 - ✅ Server 'neo4j-memory' is registered
 - ✅ neo4j-memory is routed through the project wrapper
 - Все остальные серверы также должны быть в статусе OK
@@ -141,18 +147,18 @@ NEO4J_URI=bolt://localhost:7687
 Скрипт `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` автоматически:
 
 1. Загружает переменные из `.env`
-2. Парсит `NEO4J_AUTH` в username/password
-3. Устанавливает `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`
-4. Запускает MCP сервер @knowall-ai/mcp-neo4j-agent-memory
+1. Парсит `NEO4J_AUTH` в username/password
+1. Устанавливает `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`
+1. Запускает MCP сервер @knowall-ai/mcp-neo4j-agent-memory
 
 **Переменные окружения, которые использует wrapper:**
 
-| Переменная | Источник | По умолчанию |
-|------------|----------|--------------|
-| `NEO4J_URI` | `.env` или переменная | `bolt://localhost:7687` |
-| `NEO4J_USERNAME` | `NEO4J_AUTH` или `NEO4J_AUTH_USERNAME` | `neo4j` |
+| Переменная       | Источник                               | По умолчанию             |
+| ---------------- | -------------------------------------- | ------------------------ |
+| `NEO4J_URI`      | `.env` или переменная                  | `bolt://localhost:7687`  |
+| `NEO4J_USERNAME` | `NEO4J_AUTH` или `NEO4J_AUTH_USERNAME` | `neo4j`                  |
 | `NEO4J_PASSWORD` | `NEO4J_AUTH` или `NEO4J_AUTH_PASSWORD` | `bioetl_secure_password` |
-| `NEO4J_DATABASE` | `.env` | `neo4j` |
+| `NEO4J_DATABASE` | `.env`                                 | `neo4j`                  |
 
 ## Troubleshooting
 
@@ -188,6 +194,7 @@ docker run -d --name bioetl-neo4j \
 ### Ошибка: "Invalid memory configuration"
 
 Если используется docker-compose и видна ошибка памяти:
+
 - Уменьшить значения в `NEO4J_HEAP_MAX`, `NEO4J_PAGECACHE`
 - Проверить доступную память на хосте: `free -h` (Linux) или Task Manager (Windows)
 
@@ -207,9 +214,9 @@ docker inspect bioetl-neo4j
 ## Next Steps
 
 1. ✅ Запустить Neo4j: `docker run -d --name bioetl-neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/bioetl_secure_password neo4j:5.15-community`
-2. ✅ Проверить статус: `codex mcp get neo4j-memory`
-3. ✅ Запустить тест: `bash scripts/ai/mcp/check.sh`
-4. ✅ Открыть Neo4j Browser: http://localhost:7474/browser/
+1. ✅ Проверить статус: `codex mcp get neo4j-memory`
+1. ✅ Запустить тест: `bash scripts/ai/mcp/check.sh`
+1. ✅ Открыть Neo4j Browser: http://localhost:7474/browser/
 
 ## Связанные Документы
 

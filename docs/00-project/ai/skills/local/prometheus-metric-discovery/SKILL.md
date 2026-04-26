@@ -1,7 +1,6 @@
----
-name: prometheus-metric-discovery
-description: Discover real Prometheus metrics, labels, label values, and metric metadata before writing PromQL or editing dashboards and alerts. Use when tasks touch Prometheus-backed Grafana panels, alert rules, recording rules, query debugging, or datasource investigation.
----
+______________________________________________________________________
+
+## name: prometheus-metric-discovery description: Discover real Prometheus metrics, labels, label values, and metric metadata before writing PromQL or editing dashboards and alerts. Use when tasks touch Prometheus-backed Grafana panels, alert rules, recording rules, query debugging, or datasource investigation.
 
 # Prometheus Metric Discovery
 

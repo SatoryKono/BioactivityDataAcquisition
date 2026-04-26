@@ -17,12 +17,12 @@ Memory remains **source-first**:
 Use this sequence for normal task work:
 
 1. `pre-task` workflow
-2. inspect retrieved context
-3. confirm against canonical source files
-4. perform the engineering change or audit
-5. `post-task` workflow
-6. promote only durable lessons or incidents
-7. on a regular cadence run `review-curated` and archive superseded curated notes
+1. inspect retrieved context
+1. confirm against canonical source files
+1. perform the engineering change or audit
+1. `post-task` workflow
+1. promote only durable lessons or incidents
+1. on a regular cadence run `review-curated` and archive superseded curated notes
 
 The intended retrieval order is:
 

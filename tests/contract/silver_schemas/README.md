@@ -6,22 +6,24 @@
 **Created:** 2026-02-10
 **Related:** RULES.md §2.2 (Silver Layer Validation), ADR-018 (Gold Strict Validation)
 
----
+______________________________________________________________________
 
 ## Overview
 
 These tests protect against acmolecule_idental schema changes that would break:
+
 - Downstream consumers (Gold layer, analytics, reports)
 - Data contracts with external teams
 - Historical data compatibility
 
 **Test Categories:**
-1. **Schema Stability** — Snapshot tests for field structure
-2. **Field Types** — Type safety and consistency
-3. **Validations** — Regex, range, enum checks
-4. **Naming Conventions** — snake_case, prefixes, consistency
 
----
+1. **Schema Stability** — Snapshot tests for field structure
+1. **Field Types** — Type safety and consistency
+1. **Validations** — Regex, range, enum checks
+1. **Naming Conventions** — snake_case, prefixes, consistency
+
+______________________________________________________________________
 
 ## Running Tests
 
@@ -69,7 +71,7 @@ pytest tests/contract/silver_schemas/test_naming_conventions.py -v
 pytest tests/contract/silver_schemas/ -v -k chembl_activity
 ```
 
----
+______________________________________________________________________
 
 ## Snapshot Tests
 
@@ -78,10 +80,11 @@ Snapshot tests detect ANY schema change: field additions, deletions, type change
 ### How Snapshots Work
 
 1. **First run:** Creates initial snapshot JSON in `snapshots/`
-2. **Subsequent runs:** Compares current schema against snapshot
-3. **On mismatch:** Test fails with detailed diff
+1. **Subsequent runs:** Compares current schema against snapshot
+1. **On mismatch:** Test fails with detailed diff
 
 **Example snapshot:** `snapshots/chembl_activity_schema.json`
+
 ```json
 {
   "activity_id": {
@@ -112,28 +115,30 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 ```
 
 **IMPORTANT:** Only update snapshots after:
-1. Reviewing impact on downstream consumers
-2. Updating Gold contracts (`docs/04-reference/contracts/gold/`)
-3. Creating migration guide (if breaking change)
-4. Notifying data consumers
 
----
+1. Reviewing impact on downstream consumers
+1. Updating Gold contracts (`docs/04-reference/contracts/gold/`)
+1. Creating migration guide (if breaking change)
+1. Notifying data consumers
+
+______________________________________________________________________
 
 ## Test Coverage
 
-| Test File | Tests | Schemas Covered | Purpose |
-|-----------|-------|-----------------|---------|
-| `test_schema_stability.py` | ~60 | All 18 | Snapshot tests for field structure |
-| `test_field_types.py` | ~50 | All 18 | Type safety (str, int, float, datetime) |
-| `test_validations.py` | ~40 | All 18 | Validation consistency (regex, range, enum) |
-| `test_naming_conventions.py` | ~35 | All 18 | Naming consistency (snake_case, conventions) |
-| **Total** | **~185** | **18 schemas** | **Full contract coverage** |
+| Test File                    | Tests    | Schemas Covered | Purpose                                      |
+| ---------------------------- | -------- | --------------- | -------------------------------------------- |
+| `test_schema_stability.py`   | ~60      | All 18          | Snapshot tests for field structure           |
+| `test_field_types.py`        | ~50      | All 18          | Type safety (str, int, float, datetime)      |
+| `test_validations.py`        | ~40      | All 18          | Validation consistency (regex, range, enum)  |
+| `test_naming_conventions.py` | ~35      | All 18          | Naming consistency (snake_case, conventions) |
+| **Total**                    | **~185** | **18 schemas**  | **Full contract coverage**                   |
 
----
+______________________________________________________________________
 
 ## Schemas Tested
 
 ### ChEMBL (12 schemas)
+
 - `chembl_activity` — Bioactivity measurements
 - `chembl_assay` — Assay protocols
 - `chembl_assay_parameters` — Assay parameters
@@ -148,20 +153,23 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 - `chembl_target_component` — Target components
 
 ### PubChem (1 schema)
+
 - `pubchem_compound` — Chemical compounds
 
 ### UniProt (2 schemas)
+
 - `uniprot_protein` — Protein sequences
 - `uniprot_idmapping` — ID mappings
 
 ### Publications (5 schemas)
+
 - `pubmed_publication` — PubMed articles
 - `crossref_publication` — CrossRef works
 - `openalex_publication` — OpenAlex publications
 - `semanticscholar_publication` — Semantic Scholar papers
 - `chembl_publication` — ChEMBL documents
 
----
+______________________________________________________________________
 
 ## Test Details
 
@@ -170,6 +178,7 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 **What:** Snapshot-based regression tests
 
 **Detects:**
+
 - ✅ Field additions
 - ✅ Field deletions (BREAKING)
 - ✅ Type changes (BREAKING)
@@ -177,6 +186,7 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 - ✅ Validation rule changes
 
 **Example:**
+
 ```python
 def test_schema_fields_unchanged(schema_name: str):
     """Prevents acmolecule_idental schema modifications."""
@@ -185,13 +195,14 @@ def test_schema_fields_unchanged(schema_name: str):
     assert current == snapshot  # Fails if ANY difference
 ```
 
----
+______________________________________________________________________
 
 ### 2. Field Type Tests
 
 **What:** Type safety and consistency checks
 
 **Validates:**
+
 - ✅ ID fields are `str` (not `int`)
 - ✅ Nullable numerics use `Series[float] | None`
 - ✅ Boolean fields use `bool` type
@@ -200,6 +211,7 @@ def test_schema_fields_unchanged(schema_name: str):
 - ✅ No `object` dtype without justification
 
 **Example:**
+
 ```python
 def test_id_fields_are_strings(schema_name: str):
     """ID fields MUST be string type."""
@@ -208,13 +220,14 @@ def test_id_fields_are_strings(schema_name: str):
         assert fields[field]["dtype"] == "str"
 ```
 
----
+______________________________________________________________________
 
 ### 3. Validation Tests
 
 **What:** Validation rule consistency
 
 **Validates:**
+
 - ✅ ChEMBL IDs match `^CHEMBL[0-9]+$`
 - ✅ PMIDs match `^[1-9][0-9]*$`
 - ✅ Year fields have range checks (1500-2100)
@@ -224,6 +237,7 @@ def test_id_fields_are_strings(schema_name: str):
 - ✅ Cross-provider consistency (DOI, year)
 
 **Example:**
+
 ```python
 def test_chembl_id_pattern_consistent(schema_name: str):
     """ChEMBL IDs MUST use CHEMBL_ID_PATTERN."""
@@ -232,13 +246,14 @@ def test_chembl_id_pattern_consistent(schema_name: str):
         assert has_regex_check(field, "^CHEMBL[0-9]+$")
 ```
 
----
+______________________________________________________________________
 
 ### 4. Naming Convention Tests
 
 **What:** Field naming consistency
 
 **Validates:**
+
 - ✅ All fields use `snake_case`
 - ✅ No `camelCase` or `PascalCase`
 - ✅ Boolean fields start with `is_`, `has_`, `can_`
@@ -248,6 +263,7 @@ def test_chembl_id_pattern_consistent(schema_name: str):
 - ✅ No legacy field names (e.g., `citation_count` → `citations_received`)
 
 **Example:**
+
 ```python
 def test_field_names_are_snake_case(schema_name: str):
     """All fields MUST use snake_case."""
@@ -256,7 +272,7 @@ def test_field_names_are_snake_case(schema_name: str):
         assert pattern.match(field), f"{field} not snake_case"
 ```
 
----
+______________________________________________________________________
 
 ## CI/CD Integration
 
@@ -270,47 +286,48 @@ These tests run as part of the contract test suite:
 
 **On failure:** Pipeline blocks until schema change is intentional and snapshots updated.
 
----
+______________________________________________________________________
 
 ## Maintenance
 
 ### Adding New Schema
 
 1. Add schema class to `conftest.py::SILVER_SCHEMAS`
-2. Run tests to create snapshot:
+1. Run tests to create snapshot:
    ```bash
    pytest tests/contract/silver_schemas/ -k new_schema_name
    ```
-3. Verify snapshot in `snapshots/new_schema_name_schema.json`
-4. Commit snapshot with schema code
+1. Verify snapshot in `snapshots/new_schema_name_schema.json`
+1. Commit snapshot with schema code
 
 ### Updating Existing Schema
 
 1. Modify Pandera schema class
-2. Run tests — they WILL fail:
+1. Run tests — they WILL fail:
    ```bash
    pytest tests/contract/silver_schemas/test_schema_stability.py -k schema_name
    ```
-3. Review failure diff carefully
-4. Update Gold contracts if needed
-5. Update snapshots:
+1. Review failure diff carefully
+1. Update Gold contracts if needed
+1. Update snapshots:
    ```bash
    UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py -k schema_name
    ```
-6. Commit schema + snapshot together
+1. Commit schema + snapshot together
 
 ### Deprecating Field
 
 **NEVER delete fields directly** — breaking change!
 
 Process:
-1. Add new field with correct name
-2. Mark old field as deprecated in description
-3. Update transformers to populate both fields
-4. Update documentation
-5. After 1-2 releases: Remove old field + update snapshot
 
----
+1. Add new field with correct name
+1. Mark old field as deprecated in description
+1. Update transformers to populate both fields
+1. Update documentation
+1. After 1-2 releases: Remove old field + update snapshot
+
+______________________________________________________________________
 
 ## FAQ
 
@@ -323,33 +340,36 @@ Process:
 ### What if I just want to add a field?
 
 Adding fields is usually safe (non-breaking), but:
+
 1. Run tests — they'll fail showing new field
-2. Review that field name follows conventions
-3. Update snapshot: `UPDATE_SNAPSHOTS=1 pytest ...`
+1. Review that field name follows conventions
+1. Update snapshot: `UPDATE_SNAPSHOTS=1 pytest ...`
 
 ### What about removing fields?
 
 **STOP!** Field removal is a BREAKING CHANGE.
 
 1. Check if field is used by Gold layer contracts
-2. Check if field is used by downstream consumers
-3. Create deprecation plan
-4. Update documentation
-5. THEN remove + update snapshot
+1. Check if field is used by downstream consumers
+1. Create deprecation plan
+1. Update documentation
+1. THEN remove + update snapshot
 
 ### Tests fail but I didn't change schemas?
 
 **Causes:**
+
 - Dependency update changed Pandera behavior
 - Python version change
 - Upstream schema inheritance change
 
 **Fix:**
-1. Investigate root cause
-2. If legitimate: Update snapshots
-3. If bug: Fix and keep snapshots unchanged
 
----
+1. Investigate root cause
+1. If legitimate: Update snapshots
+1. If bug: Fix and keep snapshots unchanged
+
+______________________________________________________________________
 
 ## References
 
@@ -359,7 +379,7 @@ Adding fields is usually safe (non-breaking), but:
 - **ADR-027**: DQ Rules Externalization
 - **docs/glossary.md**: Ubiquitous Language
 
----
+______________________________________________________________________
 
 ## Statistics
 

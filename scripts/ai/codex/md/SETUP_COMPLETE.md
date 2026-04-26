@@ -67,14 +67,14 @@ cd script-codex
 
 ## ✨ Key Features
 
-✅ **Single Entry Point** - Just run `run-codex.ps1`  
-✅ **Automatic Checks** - Verifies environment on startup  
-✅ **Auto-Setup** - Installs missing components automatically  
-✅ **Modular** - Helper scripts separated and reusable  
-✅ **Cross-Platform** - Works on Windows (PowerShell) and WSL  
-✅ **No Manual Config** - Handles everything automatically  
-✅ **Clear Messages** - Status, errors, and guidance  
-✅ **Portable** - Copy entire folder to any machine  
+✅ **Single Entry Point** - Just run `run-codex.ps1`
+✅ **Automatic Checks** - Verifies environment on startup
+✅ **Auto-Setup** - Installs missing components automatically
+✅ **Modular** - Helper scripts separated and reusable
+✅ **Cross-Platform** - Works on Windows (PowerShell) and WSL
+✅ **No Manual Config** - Handles everything automatically
+✅ **Clear Messages** - Status, errors, and guidance
+✅ **Portable** - Copy entire folder to any machine
 
 ## 🚀 Quick Start
 
@@ -101,21 +101,21 @@ All in `helper/` folder:
 
 ## 📊 Component Responsibility
 
-| Component | Responsibility |
-|-----------|-----------------|
-| run-codex.ps1 | Main entry, command routing, error handling |
-| check-env.ps1 | Verify setup is complete |
-| check-env.sh | Same for WSL/Bash |
-| setup-env.sh | Install missing components |
-| run-codex-impl.sh | Actually launch Codex |
+| Component         | Responsibility                              |
+| ----------------- | ------------------------------------------- |
+| run-codex.ps1     | Main entry, command routing, error handling |
+| check-env.ps1     | Verify setup is complete                    |
+| check-env.sh      | Same for WSL/Bash                           |
+| setup-env.sh      | Install missing components                  |
+| run-codex-impl.sh | Actually launch Codex                       |
 
 ## 💡 Tested & Working
 
-✓ Help command works  
-✓ Check command works  
-✓ Detects missing Codex CLI  
-✓ Shows clear status messages  
-✓ Ready to setup on first run  
+✓ Help command works
+✓ Check command works
+✓ Detects missing Codex CLI
+✓ Shows clear status messages
+✓ Ready to setup on first run
 
 ## 📝 Configuration
 
@@ -136,7 +136,7 @@ run-codex.ps1 (dispatcher)
   ├─→ check-env.ps1 (verify)
   ├─→ setup-env.sh (WSL: install)
   └─→ run-codex-impl.sh (launch)
-  
+
 User sees:
 - Clear status messages
 - Automatic fixes
@@ -151,19 +151,21 @@ cd script-codex
 ```
 
 That's it! Codex will:
+
 1. Check environment
-2. Setup if needed
-3. Launch automatically
+1. Setup if needed
+1. Launch automatically
 
 ## 📦 Everything in One Folder
 
 Now `script-codex` is completely self-contained:
+
 - All scripts needed ✓
 - All configuration ✓
 - All helpers ✓
 - Can copy to any machine ✓
 
----
+______________________________________________________________________
 
 **Status**: ✅ Complete, tested, and ready!
 

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-10'
----
+  Last verified: '2026-04-10'
+
+______________________________________________________________________
 
 # Engineering Documentation
 
@@ -21,8 +24,8 @@ service files, ADRs, and config fragments.
 
 ## Current entry points
 
-| Document | Purpose |
-| --- | --- |
+| Document                                                | Purpose                                                                                                                                                        |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [Normalization Plan P0–P6](normalization_plan_P0_P6.md) | Canonical engineering plan for RunManifest, RunLedger, runtime anchors, shipped normalization profiles, join-key normalization, and generated matrix artifacts |
 
 ## Related published surfaces

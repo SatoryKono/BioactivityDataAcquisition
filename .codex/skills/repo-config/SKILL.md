@@ -1,10 +1,6 @@
----
-name: repo-config
-description: Use when needing to get the default branch, detect repository settings, fetch available labels, get repo info for API calls, or when any gh-workflow command needs dynamic repository configuration instead of hardcoded values.
-allowed-tools: Bash, Read
-context: fork
-agent: Explore
----
+______________________________________________________________________
+
+## name: repo-config description: Use when needing to get the default branch, detect repository settings, fetch available labels, get repo info for API calls, or when any gh-workflow command needs dynamic repository configuration instead of hardcoded values. allowed-tools: Bash, Read context: fork agent: Explore
 
 # Repository Configuration
 
@@ -66,6 +62,7 @@ git log --oneline -20 | head -20
 ### Default Branch
 
 Always detect dynamically:
+
 ```bash
 DEFAULT_BRANCH=$(gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name')
 ```
@@ -98,24 +95,24 @@ gh label list
 
 Detect from existing branches or use defaults:
 
-| Type | Pattern | Example |
-|------|---------|---------|
+| Type    | Pattern                    | Example                      |
+| ------- | -------------------------- | ---------------------------- |
 | Feature | `feature/issue-{N}-{desc}` | `feature/issue-42-add-login` |
-| Fix | `fix/issue-{N}-{desc}` | `fix/issue-13-typo` |
-| Docs | `docs/issue-{N}-{desc}` | `docs/issue-7-readme` |
+| Fix     | `fix/issue-{N}-{desc}`     | `fix/issue-13-typo`          |
+| Docs    | `docs/issue-{N}-{desc}`    | `docs/issue-7-readme`        |
 
 ### Commit Conventions
 
 Detect or default to conventional commits:
 
-| Prefix | Usage |
-|--------|-------|
-| `feat:` | New features |
-| `fix:` | Bug fixes |
-| `docs:` | Documentation |
+| Prefix      | Usage            |
+| ----------- | ---------------- |
+| `feat:`     | New features     |
+| `fix:`      | Bug fixes        |
+| `docs:`     | Documentation    |
 | `refactor:` | Code refactoring |
-| `test:` | Test changes |
-| `chore:` | Maintenance |
+| `test:`     | Test changes     |
+| `chore:`    | Maintenance      |
 
 ## Usage in Commands
 
@@ -162,10 +159,11 @@ gh issue create --label "selected-label"
 ## Integration Points
 
 All gh-workflow commands should:
+
 1. Reference this skill for configuration patterns
-2. Use dynamic detection instead of hardcoded values
-3. Fall back to sensible defaults if detection fails
-4. Use the **AskUserQuestion tool** when user input is needed
+1. Use dynamic detection instead of hardcoded values
+1. Fall back to sensible defaults if detection fails
+1. Use the **AskUserQuestion tool** when user input is needed
 
 ## Grep Patterns
 
@@ -185,6 +183,7 @@ grep -r "gh repo\|gh issue\|gh pr" --include="*.md" plugins/
 ## Error Handling
 
 If `gh` commands fail, check:
+
 - Is the user authenticated? `gh auth status`
 - Is this a git repository? `git rev-parse --git-dir`
 - Does the repository have a GitHub remote? `git remote -v`

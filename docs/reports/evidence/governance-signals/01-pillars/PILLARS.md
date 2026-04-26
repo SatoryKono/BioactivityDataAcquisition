@@ -7,8 +7,8 @@ Priority: high
 Collect traceable repository evidence for three governance questions:
 
 1. What is the current enforceable `C901` state?
-2. How are size hotspots ratcheted today, and how does that differ from the raw hotspot tail?
-3. What current duplication signal exists in `composition` and `application`, and is it governed by an enforceable trend gate?
+1. How are size hotspots ratcheted today, and how does that differ from the raw hotspot tail?
+1. What current duplication signal exists in `composition` and `application`, and is it governed by an enforceable trend gate?
 
 ## In Scope
 
@@ -32,7 +32,7 @@ Collect traceable repository evidence for three governance questions:
 ## Research Questions
 
 1. Is the current `C901` budget green against the enforceable baseline?
-2. Does the size ratchet track all large files, or only exemption registries?
-3. Has the file-size ratchet tightened relative to the historical baseline?
-4. Which subsystem is explicitly prioritized by named hotspot budgets?
-5. Is duplication in `composition` and `application` part of an enforceable governance trend, or only visible through ad hoc scans?
+1. Does the size ratchet track all large files, or only exemption registries?
+1. Has the file-size ratchet tightened relative to the historical baseline?
+1. Which subsystem is explicitly prioritized by named hotspot budgets?
+1. Is duplication in `composition` and `application` part of an enforceable governance trend, or only visible through ad hoc scans?

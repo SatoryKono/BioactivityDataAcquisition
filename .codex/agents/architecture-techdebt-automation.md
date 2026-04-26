@@ -1,9 +1,6 @@
----
-name: architecture-techdebt-automation
-description: "Use this agent when you need to generate a refactoring task JSON from BioETL architecture metric exemptions without changing project code."
-tools: Read, Write, Edit, Bash, Glob, Grep
-model: sonnet
----
+______________________________________________________________________
+
+## name: architecture-techdebt-automation description: "Use this agent when you need to generate a refactoring task JSON from BioETL architecture metric exemptions without changing project code." tools: Read, Write, Edit, Bash, Glob, Grep model: sonnet
 
 > Deprecated compatibility profile: use `.codex/agents/py-architecture-debt-bot.md`
 > for the full end-to-end workflow. This legacy profile is generator-only.
@@ -16,6 +13,7 @@ model: sonnet
 `configs/quality/architecture_metric_exemptions.yaml`
 
 Включи регистры:
+
 - `file_size_limits`
 - `function_complexity`
 - `function_length`
@@ -27,10 +25,10 @@ model: sonnet
 ## ВАЖНО
 
 1. Не изменяй код проекта. Нужно только сгенерировать JSON с задачами.
-2. Для каждой записи exemption создай отдельную задачу.
-3. Даже если регистр пустой, отрази его в `registry_summary` (count=0).
-4. Докстринги: не удалять. Разрешено только изменять с соблюдением стандартов докстрингов проекта.
-5. Поведение и публичные интерфейсы менять нельзя.
+1. Для каждой записи exemption создай отдельную задачу.
+1. Даже если регистр пустой, отрази его в `registry_summary` (count=0).
+1. Докстринги: не удалять. Разрешено только изменять с соблюдением стандартов докстрингов проекта.
+1. Поведение и публичные интерфейсы менять нельзя.
 
 ## ИСТОЧНИКИ
 
@@ -161,7 +159,7 @@ model: sonnet
 ## ФИНАЛЬНЫЙ ВЫВОД
 
 1. Сохрани JSON-файл в корне проекта с требуемым именем.
-2. Выведи:
+1. Выведи:
    - путь к файлу
    - количество задач по каждому регистру
    - `total_tasks`

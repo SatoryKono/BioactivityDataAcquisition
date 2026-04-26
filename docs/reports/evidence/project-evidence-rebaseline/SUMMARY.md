@@ -5,7 +5,6 @@
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-
 Примечание о follow-up: после исходного evidence rebaseline был отдельно
 закрыт `RF-011`, поэтому quality/health, import-governance и generated-artifact
 packs теперь дополнительно зафиксированы на свежем full-verify baseline.
@@ -23,14 +22,14 @@ freshness note, а полный estate-level статус зафиксирова
 
 ## Шарды
 
-| Shard | Владелец | Статус | Примечания |
-|---|---|---|---|
-| `evidence-rebaseline-naming` | `Copernicus` | завершено | RAW/EV rebaseline выполнен в naming families; закрытые seams теперь читаются как historical triggers, а не как текущий drift |
-| `evidence-rebaseline-documentation` | `Volta` | завершено | active-source doc packs теперь читаются как current baseline; остаточный active debt сузился до architecture и generated-doc lag |
-| `evidence-rebaseline-compatibility-governance` | `Tesla` | завершено | compatibility и ownership packs обновлены; baseline по-прежнему описывается как managed governance с локализованными hotspots |
-| `evidence-rebaseline-structure-topology` | `Chandrasekhar` | завершено | recursive topology packs заново проверены по текущему дереву без material topology reversal |
-| `evidence-rebaseline-architecture-diagrams` | `Halley` | завершено | diagram и architecture packs пере-проверены; core claims сохранились, были обновлены RAW и summary layers |
-| `evidence-rebaseline-quality-health` | `Bohr` | завершено | quality/debt/test-health packs обновлены на диске и локально проверены по gate, хотя делегированный closeout note не успел вернуться |
+| Shard                                          | Владелец        | Статус    | Примечания                                                                                                                           |
+| ---------------------------------------------- | --------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `evidence-rebaseline-naming`                   | `Copernicus`    | завершено | RAW/EV rebaseline выполнен в naming families; закрытые seams теперь читаются как historical triggers, а не как текущий drift         |
+| `evidence-rebaseline-documentation`            | `Volta`         | завершено | active-source doc packs теперь читаются как current baseline; остаточный active debt сузился до architecture и generated-doc lag     |
+| `evidence-rebaseline-compatibility-governance` | `Tesla`         | завершено | compatibility и ownership packs обновлены; baseline по-прежнему описывается как managed governance с локализованными hotspots        |
+| `evidence-rebaseline-structure-topology`       | `Chandrasekhar` | завершено | recursive topology packs заново проверены по текущему дереву без material topology reversal                                          |
+| `evidence-rebaseline-architecture-diagrams`    | `Halley`        | завершено | diagram и architecture packs пере-проверены; core claims сохранились, были обновлены RAW и summary layers                            |
+| `evidence-rebaseline-quality-health`           | `Bohr`          | завершено | quality/debt/test-health packs обновлены на диске и локально проверены по gate, хотя делегированный closeout note не успел вернуться |
 
 ## Закрытие волны
 

@@ -258,11 +258,11 @@ python -m memory.tooling.archive_note --source src/memory/curated/lessons/exampl
 Canonical daily sequence for agents and engineers:
 
 1. run `python -m memory.tooling.workflow pre-task ...`
-2. inspect `catalog -> graph -> rag -> source`
-3. update canonical source files
-4. run `python -m memory.tooling.workflow post-task ...`
-5. promote only durable lessons, incidents, decisions, or domain knowledge
-6. run `python -m memory.tooling.workflow review-curated` on a regular cadence to review due/stale curated notes
+1. inspect `catalog -> graph -> rag -> source`
+1. update canonical source files
+1. run `python -m memory.tooling.workflow post-task ...`
+1. promote only durable lessons, incidents, decisions, or domain knowledge
+1. run `python -m memory.tooling.workflow review-curated` on a regular cadence to review due/stale curated notes
 
 `pre-task` auto-refreshes rebuild-only RAG and timeline artifacts if manifests
 are missing, so the workflow remains usable even when `src/memory/` does not

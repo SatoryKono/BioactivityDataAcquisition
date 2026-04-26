@@ -11,6 +11,7 @@
 This roadmap turns the provisional governance decisions into an execution sequence with minimal ambiguity and low regression risk.
 
 It is intentionally staged:
+
 - first stabilize metric semantics and preserve clean complexity baseline,
 - then add non-blocking visibility where governance is currently blind,
 - only then expand enforceable hotspot programs.
@@ -24,20 +25,23 @@ It is intentionally staged:
 ## Ordering Logic
 
 1. `DEC-governance-c901-zero-new-debt-baseline` stays active across all waves as the clean regression floor.
-2. `DEC-governance-file-size-report-dual-track` should come before any new hotspot expansion, otherwise new budgets will be built on ambiguous semantics.
-3. `DEC-governance-duplication-expand-report-only-baseline` should happen before any blocking duplication ratchet, because current `R0801` output is too noisy to promote directly.
-4. `DEC-governance-expand-named-hotspot-programs-after-calibration` should be last, because it depends on improved visibility from the previous two waves.
+1. `DEC-governance-file-size-report-dual-track` should come before any new hotspot expansion, otherwise new budgets will be built on ambiguous semantics.
+1. `DEC-governance-duplication-expand-report-only-baseline` should happen before any blocking duplication ratchet, because current `R0801` output is too noisy to promote directly.
+1. `DEC-governance-expand-named-hotspot-programs-after-calibration` should be last, because it depends on improved visibility from the previous two waves.
 
 ## Wave 1: Preserve Baseline And Clarify Metrics
 
 **Primary decisions**
+
 - `DEC-governance-c901-zero-new-debt-baseline`
 - `DEC-governance-file-size-report-dual-track`
 
 **Goal**
+
 - Keep complexity governance clean and make file-size reporting semantically honest.
 
 **Scope**
+
 - Preserve `C901` as zero-new-debt blocking baseline.
 - Introduce a documented dual-track size view:
   - enforceable exemption debt
@@ -45,6 +49,7 @@ It is intentionally staged:
 - Make dashboard/report wording explicit so green file-size status is not read as “no large-file debt exists”.
 
 **Deliverables**
+
 - One governance doc or report section that explicitly defines:
   - `exemption debt`
   - `hotspot inventory`
@@ -52,16 +57,19 @@ It is intentionally staged:
 - Updated governance/report text wherever file-size status is surfaced.
 
 **Out of scope**
+
 - New blocking budgets for raw hotspot counts.
 - New hotspot program creation.
 - Duplication gate changes.
 
 **Verification gates**
+
 - `./.venv/Scripts/python.exe -m scripts.engineering.qa check-c901`
 - `./.venv/Scripts/python.exe -m pytest -q tests/architecture/test_regression_metrics.py`
 - `./.venv/Scripts/python.exe -m pytest -q tests/architecture/test_documentation_sync.py`
 
 **Exit criteria**
+
 - `C901` remains green.
 - File-size reporting clearly distinguishes ratcheted debt from raw inventory.
 - No new ambiguity remains in governance docs or summaries.
@@ -69,12 +77,15 @@ It is intentionally staged:
 ## Wave 2: Add Duplication Visibility Without Enforcement
 
 **Primary decision**
+
 - `DEC-governance-duplication-expand-report-only-baseline`
 
 **Goal**
+
 - Create a stable, non-blocking baseline for duplication in `composition` and `application`.
 
 **Scope**
+
 - Add report-only duplication scans for:
   - `src/bioetl/composition`
   - `src/bioetl/application`
@@ -86,22 +97,26 @@ It is intentionally staged:
   - compatibility shims
 
 **Deliverables**
+
 - A repeatable command or script wrapper for report-only duplication baseline collection.
 - A baseline snapshot artifact for `composition` and `application`.
 - A short normalization note for known noisy duplication classes.
 
 **Out of scope**
+
 - Blocking duplication budgets.
 - Mandatory fail-on-duplication CI gate for `composition` or `application`.
 - Large-scale duplicate removal refactors.
 
 **Verification gates**
+
 - Existing default duplication check remains intact.
 - New report-only duplication workflow completes within an acceptable time budget.
 - `./.venv/Scripts/python.exe -m pytest -q tests/architecture/test_regression_metrics.py`
 - Any touched workflow/docs syntax checks remain green.
 
 **Exit criteria**
+
 - `composition` and `application` duplication are visible in a repeatable baseline artifact.
 - The team has a reviewed list of noisy-but-expected duplicate classes.
 - No merge-blocking duplication ratchet has been introduced yet.
@@ -109,12 +124,15 @@ It is intentionally staged:
 ## Wave 3: Calibrate And Expand Named Hotspot Programs
 
 **Primary decision**
+
 - `DEC-governance-expand-named-hotspot-programs-after-calibration`
 
 **Goal**
+
 - Decide whether additional named hotspot programs should be created beyond `application/core`, using calibrated evidence rather than generic file-size counts.
 
 **Scope**
+
 - Compare current `application/core` hotspot program against candidate seams in:
   - `application`
   - `composition`
@@ -125,21 +143,25 @@ It is intentionally staged:
 - Select at most 1-2 new named hotspot programs in this wave if the evidence is strong.
 
 **Deliverables**
+
 - A calibration memo ranking candidate seams.
 - A decision on whether to keep, extend, or revise named hotspot coverage.
 - If approved, scorecard updates for new named hotspot programs with explicit rationale and budgets.
 
 **Out of scope**
+
 - Repo-wide hotspot budgeting.
 - Immediate repo-wide blocking gates on raw hotspot counts.
 - Broad structural rewrites of all identified large files.
 
 **Verification gates**
+
 - `./.venv/Scripts/python.exe -m pytest -q tests/architecture/test_regression_metrics.py`
 - Any scorecard/exemption synchronization checks affected by the change
 - Architecture regression slices if the hotspot-program changes touch governance scripts or policy docs
 
 **Exit criteria**
+
 - New named hotspot programs, if added, are justified by calibrated evidence rather than convenience.
 - Governance still remains understandable: targeted budgets, not uncontrolled metric sprawl.
 - The repo has a clearer path from raw hotspot visibility to enforceable, focused burn-down work.
@@ -153,10 +175,10 @@ It is intentionally staged:
 
 ## Suggested Minimal Verification Matrix Per Wave
 
-| Wave | Must stay green |
-|------|-----------------|
-| Wave 1 | `check-c901`, `test_regression_metrics.py`, `test_documentation_sync.py` |
-| Wave 2 | existing duplication check, `test_regression_metrics.py`, touched workflow/doc checks |
+| Wave   | Must stay green                                                                             |
+| ------ | ------------------------------------------------------------------------------------------- |
+| Wave 1 | `check-c901`, `test_regression_metrics.py`, `test_documentation_sync.py`                    |
+| Wave 2 | existing duplication check, `test_regression_metrics.py`, touched workflow/doc checks       |
 | Wave 3 | `test_regression_metrics.py`, scorecard sync checks, relevant architecture/governance tests |
 
 ## Recommended Immediate Next Action

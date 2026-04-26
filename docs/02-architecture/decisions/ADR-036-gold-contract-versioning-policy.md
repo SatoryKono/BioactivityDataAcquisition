@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-036: Gold Contract Versioning Policy
 
@@ -32,21 +35,21 @@ Schema audits (2026-02-17) выявили множественные потен�
 
 ### Классификация изменений
 
-| Тип изменения | Version bump | Примеры |
-|---------------|-------------|---------|
-| Добавление nullable колонки | minor | Новое аналитическое поле |
-| Добавление metadata/docs | patch (no bump) | Комментарии, описания |
-| Переименование колонки | **major** | `tissue-chembl-id` → `tissue-id` |
-| Удаление колонки | **major** | Удаление legacy journal fields |
-| Изменение типа колонки | **major** | `string` → `float` для taxonomy |
-| Изменение семантики колонки | **major** | `doi` означает разное |
-| Перегруппировка (column order) | minor | Перемещение полей между группами |
+| Тип изменения                  | Version bump    | Примеры                          |
+| ------------------------------ | --------------- | -------------------------------- |
+| Добавление nullable колонки    | minor           | Новое аналитическое поле         |
+| Добавление metadata/docs       | patch (no bump) | Комментарии, описания            |
+| Переименование колонки         | **major**       | `tissue-chembl-id` → `tissue-id` |
+| Удаление колонки               | **major**       | Удаление legacy journal fields   |
+| Изменение типа колонки         | **major**       | `string` → `float` для taxonomy  |
+| Изменение семантики колонки    | **major**       | `doi` означает разное            |
+| Перегруппировка (column order) | minor           | Перемещение полей между группами |
 
 ### Обязательные артефакты для major bump
 
 1. **ADR** с decision, migration plan, rollback criteria
-2. **CHANGELOG** entry с old→new mapping и датой cutover
-3. **Migration notes** с dual-service периодом и rollback triggers
+1. **CHANGELOG** entry с old→new mapping и датой cutover
+1. **Migration notes** с dual-service периодом и rollback triggers
 
 ### Dual-service policy для breaking changes
 
@@ -57,6 +60,7 @@ Schema audits (2026-02-17) выявили множественные потен�
 ### Rollback criteria
 
 Breaking change откатывается если:
+
 - Contract validation failures > baseline + 30%
 - Critical BI dashboards fail smoke tests
 - DQ hard-fail rate > 5% батчей
@@ -98,13 +102,13 @@ Breaking change откатывается если:
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-036-gold-contract-versioning-policy.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                                     |
+| ------------ | -------------------------------------------------------------------------- | ------ | -------------------------------------------- |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-036-gold-contract-versioning-policy.md` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                                   |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                             |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria`         |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                                 |
 
 ## Rollout
 

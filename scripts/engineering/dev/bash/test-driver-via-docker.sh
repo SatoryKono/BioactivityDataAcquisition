@@ -9,7 +9,7 @@ echo ""
 docker run --rm -i node:18-alpine bash -c '
   echo "[1/3] Installing neo4j-driver..."
   npm install neo4j-driver --no-save -q 2>/dev/null
-  
+
   echo "[2/3] Testing Bolt connection to host.docker.internal:7687..."
   node -e "
     const neo4j = require(\"neo4j-driver\");
@@ -18,7 +18,7 @@ docker run --rm -i node:18-alpine bash -c '
       neo4j.auth.basic(\"neo4j\", \"bioetl_secure_password\"),
       { encryption: \"ENCRYPTION_OFF\", maxConnectionPoolSize: 5 }
     );
-    
+
     driver.verifyConnectivity()
       .then(() => {
         console.log(\"\");
@@ -31,7 +31,7 @@ docker run --rm -i node:18-alpine bash -c '
         process.exit(1);
       });
   "
-  
+
   exit_code=$?
   if [ $exit_code -eq 0 ]; then
     echo "[3/3] Success!"

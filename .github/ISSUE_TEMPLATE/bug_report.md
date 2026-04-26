@@ -1,8 +1,6 @@
----
-name: Bug Report
-about: Report a bug in BioETL
-labels: bug
----
+______________________________________________________________________
+
+## name: Bug Report about: Report a bug in BioETL labels: bug
 
 ## Description
 
@@ -11,8 +9,8 @@ labels: bug
 ## Steps to Reproduce
 
 1.
-2.
-3.
+1.
+1.
 
 ## Expected Behavior
 

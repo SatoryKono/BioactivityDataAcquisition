@@ -11,9 +11,9 @@
 ### Research Questions
 
 1. Which seams already expose an explicit interface contract for adapter and data-source creation?
-2. Where are helper dependencies such as `fallback_fetch_service`, `error_handler`, and `adapter_metrics` synthesized?
-3. Which seams rely on implicit runtime kwargs instead of an explicit protocol?
-4. How do concrete HTTP adapters express mandatory collaborator requirements?
-5. Which tests encode the intended public surface for provider-bound creators?
-6. How do non-bibliographic creators assemble specialized collaborators when they do not use the generic HTTP helper path?
-7. How do composite runtime creators keep public interfaces stable while hiding helper-only bootstrap details?
+1. Where are helper dependencies such as `fallback_fetch_service`, `error_handler`, and `adapter_metrics` synthesized?
+1. Which seams rely on implicit runtime kwargs instead of an explicit protocol?
+1. How do concrete HTTP adapters express mandatory collaborator requirements?
+1. Which tests encode the intended public surface for provider-bound creators?
+1. How do non-bibliographic creators assemble specialized collaborators when they do not use the generic HTTP helper path?
+1. How do composite runtime creators keep public interfaces stable while hiding helper-only bootstrap details?

@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Пайплайн: ChEMBL Target
 
@@ -14,7 +17,7 @@ Last verified: '2026-03-30'
 **Провайдер:** `chembl`
 **Сущность:** `target`
 
----
+______________________________________________________________________
 
 ## 1. Что делает пайплайн
 
@@ -28,7 +31,7 @@ Source of truth:
 - `src/bioetl/domain/schemas/chembl/target.py`
 - `src/bioetl/infrastructure/schemas/silver_chembl_core.py`
 
----
+______________________________________________________________________
 
 ## 2. Конфигурация
 
@@ -48,7 +51,7 @@ Source of truth:
   - `target_type = SINGLE PROTEIN`
   - list-based checks for `component_accessions`, `component_ids`, `component_types`
 
----
+______________________________________________________________________
 
 ## 3. Silver surface
 
@@ -56,11 +59,11 @@ Source of truth:
 
 Current Silver contract требует:
 
-| Поле | Где закреплено |
-|------|----------------|
+| Поле        | Где закреплено                  |
+| ----------- | ------------------------------- |
 | `target_id` | YAML required + Arrow + Pandera |
 | `pref_name` | YAML required + Arrow + Pandera |
-| `organism` | YAML required + Arrow + Pandera |
+| `organism`  | YAML required + Arrow + Pandera |
 
 `target_type` участвует в filters/partition semantics, но остаётся nullable в
 Arrow/Pandera и не считается обязательным полем записи на уровне текущего
@@ -94,7 +97,7 @@ Silver schema.
 Документация не фиксирует literal-формулу `entity_id`; identity/content hash
 вычисляются базовым ChEMBL transformer/runtime слоем.
 
----
+______________________________________________________________________
 
 ## 4. Валидация
 
@@ -111,7 +114,7 @@ Silver Pandera schema определяется в
 
 Обе схемы отражают строковый contract для component/xref/synonym payloads.
 
----
+______________________________________________________________________
 
 ## 5. CLI
 
@@ -121,34 +124,34 @@ bioetl run --pipeline chembl_target --limit 500
 bioetl run --pipeline chembl_target --run-type rebuild
 ```
 
----
+______________________________________________________________________
 
 ## 6. Связанные файлы
 
-| Компонент | Путь |
-|-----------|------|
-| Конфигурация | `configs/entities/chembl/target.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/target_transformer.py` |
-| Сущность | `src/bioetl/domain/entities/chembl_structures_foundation.py` |
-| Arrow schema | `src/bioetl/infrastructure/schemas/silver_chembl_core.py` |
-| Pandera schema | `src/bioetl/domain/schemas/chembl/target.py` |
+| Компонент      | Путь                                                            |
+| -------------- | --------------------------------------------------------------- |
+| Конфигурация   | `configs/entities/chembl/target.yaml`                           |
+| Трансформер    | `src/bioetl/application/pipelines/chembl/target_transformer.py` |
+| Сущность       | `src/bioetl/domain/entities/chembl_structures_foundation.py`    |
+| Arrow schema   | `src/bioetl/infrastructure/schemas/silver_chembl_core.py`       |
+| Pandera schema | `src/bioetl/domain/schemas/chembl/target.py`                    |
 
 ## Contract References
 
-| Артефакт | Ссылка |
-| --- | --- |
-| Gold contract export | [chembl_target_v1.0.json](../../contracts/gold/chembl_target_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Артефакт             | Ссылка                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Gold contract export | [chembl_target_v1.0.json](../../contracts/gold/chembl_target_v1.0.json)                  |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
 ## Compliance
 
-| Контроль | Статус | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Runtime alignment | Pass | Config/schema/transformer paths задокументированы в разделах `Конфигурация`, `Валидация`, `Связанные файлы` |
-| Contract linkage | Pass | [chembl_target_v1.0.json](../../contracts/gold/chembl_target_v1.0.json) |
-| API governance | Pass | См. [API Compliance](#api-compliance) |
+| Контроль          | Статус | Evidence                                                                                                    |
+| ----------------- | ------ | ----------------------------------------------------------------------------------------------------------- |
+| Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`                    |
+| Runtime alignment | Pass   | Config/schema/transformer paths задокументированы в разделах `Конфигурация`, `Валидация`, `Связанные файлы` |
+| Contract linkage  | Pass   | [chembl_target_v1.0.json](../../contracts/gold/chembl_target_v1.0.json)                                     |
+| API governance    | Pass   | См. [API Compliance](#api-compliance)                                                                       |
 
 ## API Compliance
 

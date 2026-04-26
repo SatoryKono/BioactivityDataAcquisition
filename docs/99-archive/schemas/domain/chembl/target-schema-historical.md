@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-24'
----
+  Last verified: '2026-04-24'
+
+______________________________________________________________________
 
 **⚠️ HISTORICAL CONTENT - ARCHIVED**
 
@@ -31,16 +34,16 @@ This page has been moved to the archive section and is no longer part of the act
 
 ## Current Canonical Contract Summary
 
-| Parameter | Value |
-|-----------|-------|
-| Pipeline ID | `chembl_target` |
-| Provider | `chembl` |
-| Entity | `target` |
+| Parameter             | Value           |
+| --------------------- | --------------- |
+| Pipeline ID           | `chembl_target` |
+| Provider              | `chembl`        |
+| Entity                | `target`        |
 | Business Primary Keys | `["target_id"]` |
-| Silver Partition Key | `target_type` |
-| Silver Format | `delta` |
-| Gold Format | `delta` |
-| Gold Mode | `scd2` |
+| Silver Partition Key  | `target_type`   |
+| Silver Format         | `delta`         |
+| Gold Format           | `delta`         |
+| Gold Mode             | `scd2`          |
 
 ## Notes
 

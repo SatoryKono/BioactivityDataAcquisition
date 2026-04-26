@@ -1,8 +1,8 @@
 # Ensure Type Consistency for Flags and Boolean Fields
 
-**Status**: Completed ✅  
-**Priority**: P1 (High)  
-**Labels**: `normalization`, `DQ`, `type-safety`  
+**Status**: Completed ✅
+**Priority**: P1 (High)
+**Labels**: `normalization`, `DQ`, `type-safety`
 **Epic**: Data Quality Improvements 2024Q2
 
 ## 🎯 Problem
@@ -12,19 +12,21 @@ Boolean flag fields like `manual_curation_flag` are currently treated as floats 
 ## 🔍 Root Cause
 
 1. **Type Mismatch**: Flags defined as float vs. int
-2. **Profile Inconsistency**: manual_curation_flag in FLOAT_FIELDS
-3. **Validation Gaps**: Pandera expects float, schema allows both
-4. **Analysis Issues**: Type inconsistencies affect data processing
+1. **Profile Inconsistency**: manual_curation_flag in FLOAT_FIELDS
+1. **Validation Gaps**: Pandera expects float, schema allows both
+1. **Analysis Issues**: Type inconsistencies affect data processing
 
 ## 📋 Scope
 
 **Affected Components:**
+
 - `src/bioetl/domain/normalization/profiles/chembl_activity.py` - Fix type definitions
 - `src/bioetl/domain/schemas/activity.py` - Update Pandera schema
 - Test files - Validate type consistency
 - Documentation - Update type handling
 
 **Impact Analysis:**
+
 ```bash
 # Check current flag types
 grep -rn "manual_curation_flag" src/bioetl/domain/ --include="*.py" | head -5
@@ -35,18 +37,21 @@ grep -rn "manual_curation_flag" src/bioetl/domain/ --include="*.py" | head -5
 ### Phase 1: Analysis (2 days)
 
 1. **Review Current Types**
+
    ```bash
    # Check profile vs. schema types
    grep -A5 "manual_curation_flag" src/bioetl/domain/normalization/profiles/chembl_activity.py
    ```
 
-2. **Identify Inconsistencies**
+1. **Identify Inconsistencies**
+
    ```bash
    # Compare with domain model
    grep -A5 "manual_curation_flag" src/bioetl/domain/schemas/activity.py
    ```
 
-3. **Document Findings**
+1. **Document Findings**
+
    ```markdown
    # Create type consistency report
    reports/type-consistency-analysis.md
@@ -55,26 +60,21 @@ grep -rn "manual_curation_flag" src/bioetl/domain/ --include="*.py" | head -5
 ### Phase 2: Implementation (3 days)
 
 1. **Fix Profile Types**
+
    ```python
    # src/bioetl/domain/normalization/profiles/chembl_activity.py
-   INT_FIELDS = [
-       "manual_curation_flag",
-       "potential_duplicate",
-       "original_activity_id"
-   ]
+   INT_FIELDS = ["manual_curation_flag", "potential_duplicate", "original_activity_id"]
    ```
 
-2. **Update Pandera Schema**
+1. **Update Pandera Schema**
+
    ```python
    # src/bioetl/domain/schemas/activity.py
-   manual_curation_flag: pa.typing.Series[pa.Int64] = pa.Field(
-       ge=0,
-       le=1,
-       nullable=True
-   )
+   manual_curation_flag: pa.typing.Series[pa.Int64] = pa.Field(ge=0, le=1, nullable=True)
    ```
 
-3. **Add Validation Tests**
+1. **Add Validation Tests**
+
    ```python
    # tests/unit/domain/test_normalization.py
    def test_flag_types():
@@ -84,16 +84,19 @@ grep -rn "manual_curation_flag" src/bioetl/domain/ --include="*.py" | head -5
 ### Phase 3: Validation (2 days)
 
 1. **Test Type Consistency**
+
    ```bash
    pytest tests/unit/domain/test_normalization.py -v
    ```
 
-2. **Validate Data Quality**
+1. **Validate Data Quality**
+
    ```bash
    python scripts/validate_data_quality.py --type-check
    ```
 
-3. **Monitor Production**
+1. **Monitor Production**
+
    ```bash
    # Check type validation logs
    grep "type" logs/production.log
@@ -127,17 +130,20 @@ mypy src/bioetl/domain/normalization/ --strict
 ## 📈 Impact Assessment
 
 ### Positive Impacts
+
 - **Type Safety**: Consistent flag types
 - **Validation**: Improved data quality
 - **Maintainability**: Clear type definitions
 - **Documentation**: Updated type specs
 
 ### Potential Risks
+
 - **Breaking Changes**: Existing float flags become int
 - **Performance**: Type conversion overhead
 - **Complexity**: More type rules
 
 ### Mitigation Strategies
+
 - **Backward Compatibility**: Support both types temporarily
 - **Gradual Rollout**: Deploy in stages
 - **Comprehensive Testing**: Validate all scenarios
@@ -150,8 +156,8 @@ mypy src/bioetl/domain/normalization/ --strict
 
 ## ⏳ Time Estimate
 
-**Total**: 7 days  
-**Start Date**: 2024-06-10  
+**Total**: 7 days
+**Start Date**: 2024-06-10
 **Target Completion**: 2024-06-21
 
 ## 👥 Assignee

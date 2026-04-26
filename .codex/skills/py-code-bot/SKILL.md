@@ -1,21 +1,23 @@
----
-name: py-code-bot
-description: Deprecated compatibility profile retained only to interpret historical py-code-bot references.
----
+______________________________________________________________________
+
+## name: py-code-bot description: Deprecated compatibility profile retained only to interpret historical py-code-bot references.
 
 # py-code-bot
 
 *Status: deprecated-compatibility*
 
 ## Objective
+
 Historical compatibility entry retained only to interpret older references to `py-code-bot`.
 
 ## Source Of Truth
+
 - Current orchestration: `../../agents/ORCHESTRATION.md`
 - Historical mirror context: `../../../docs/00-project/ai/skills/global/py-code-bot/SKILL.md`
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`
 
 ## Workflow
+
 1. Treat `py-code-bot` as a deprecated compatibility reference, not as the current production-code workflow.
-2. Use `../../agents/ORCHESTRATION.md` for the active implementation path, where production code is written directly by the orchestrator.
-3. Use this page only to interpret historical notes, mirrors, or workflow artifacts that still mention `py-code-bot`.
+1. Use `../../agents/ORCHESTRATION.md` for the active implementation path, where production code is written directly by the orchestrator.
+1. Use this page only to interpret historical notes, mirrors, or workflow artifacts that still mention `py-code-bot`.

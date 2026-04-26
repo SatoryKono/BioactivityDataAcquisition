@@ -5,7 +5,6 @@
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-
 > This summary is a repo-only evidence surface for technical-debt
 > interpretation and prioritization. It should guide investigation and
 > sequencing, but it does not replace canonical architecture or governance
@@ -26,12 +25,12 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 
 ## Gate Status
 
-| Pillar | Gate | Notes |
-|---|---|---|
-| `dependency-hotspots` | `PASSED` | 7 semantic EV objects created |
-| `duplication-dead-code` | `PASSED` | 7 semantic EV objects created |
+| Pillar                          | Gate     | Notes                          |
+| ------------------------------- | -------- | ------------------------------ |
+| `dependency-hotspots`           | `PASSED` | 7 semantic EV objects created  |
+| `duplication-dead-code`         | `PASSED` | 7 semantic EV objects created  |
 | `ownership-compatibility-seams` | `PASSED` | 6+ semantic EV objects created |
-| `complexity-hotspots` | `PASSED` | 8 semantic EV objects created |
+| `complexity-hotspots`           | `PASSED` | 8 semantic EV objects created  |
 
 ## Pillar Outputs
 
@@ -50,11 +49,11 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 ## Strongest Technical Debt Findings
 
 1. Dependency debt is concentrated less in policy violations and more in dense, allowed seams, especially inside `src/bioetl/interfaces/cli/commands`, storage, and selected application seams.
-2. The strongest historical reducible duplication hotspot in this pack was provider-registry resolution and provider-family registration assembly scaffolding, but the live repo now treats that area as a guarded compatibility/watchlist seam rather than an active duplication wave.
-3. Several apparent dead-code candidates are actually sanctioned compatibility surfaces, including `batch_execution_*` wrappers and `dependency_join_support.py`.
-4. Ownership debt is now concentrated in retained convenience seams and mirrored registry access as watchlist topology rather than waiver-backed cleanup, especially around `PipelineConfigLoader`, `registration.py`, and default `ProviderRegistry` access paths.
-5. Complexity debt is now more about preventing new hotspots than carrying active waiver inventory; some earlier hotspot candidates in this pack should now be read as historical trigger evidence rather than the live next split target.
-6. Report/test disagreement is now mostly soft governance debt, not hard breakage: tests often enforce decoupling while some evidence interpretations age faster than the underlying code.
+1. The strongest historical reducible duplication hotspot in this pack was provider-registry resolution and provider-family registration assembly scaffolding, but the live repo now treats that area as a guarded compatibility/watchlist seam rather than an active duplication wave.
+1. Several apparent dead-code candidates are actually sanctioned compatibility surfaces, including `batch_execution_*` wrappers and `dependency_join_support.py`.
+1. Ownership debt is now concentrated in retained convenience seams and mirrored registry access as watchlist topology rather than waiver-backed cleanup, especially around `PipelineConfigLoader`, `registration.py`, and default `ProviderRegistry` access paths.
+1. Complexity debt is now more about preventing new hotspots than carrying active waiver inventory; some earlier hotspot candidates in this pack should now be read as historical trigger evidence rather than the live next split target.
+1. Report/test disagreement is now mostly soft governance debt, not hard breakage: tests often enforce decoupling while some evidence interpretations age faster than the underlying code.
 
 ## Contradictions And Tensions
 
@@ -73,8 +72,8 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 ## Recommended Next Steps
 
 1. Use [CROSS-SYNTHESIS.md](03-synthesis/CROSS-SYNTHESIS.md) as the current cross-pillar interpretation baseline.
-2. Use [TECHNICAL-DEBT-ROADMAP.md](04-decisions/TECHNICAL-DEBT-ROADMAP.md) as the recommended priority order for the next refactor waves.
-3. Use [TECHNICAL-DEBT-EXECUTION-PLAN.md](05-execution-plan/TECHNICAL-DEBT-EXECUTION-PLAN.md) as the current implementation sequence.
-4. Treat `duplication-dead-code` evidence as a cleanup candidate ledger, not as blanket delete authorization.
-5. Use [complexity-hotspots/SUMMARY.md](complexity-hotspots/SUMMARY.md) as historical trigger evidence for the completed CrossRef hotspot wave unless a fresh evidence pass reopens that seam.
-6. Use [../residual-test-ci-debt/06-backlog/BACKLOG-residual-test-ci-debt-implementation-2026-04-01.md](../residual-test-ci-debt/06-backlog/BACKLOG-residual-test-ci-debt-implementation-2026-04-01.md) together with [../../../../configs/quality/test_structural_watchlist_map.yaml](../../../../configs/quality/test_structural_watchlist_map.yaml) as the current ranked queue and family-level bridge for CI/test hardening work.
+1. Use [TECHNICAL-DEBT-ROADMAP.md](04-decisions/TECHNICAL-DEBT-ROADMAP.md) as the recommended priority order for the next refactor waves.
+1. Use [TECHNICAL-DEBT-EXECUTION-PLAN.md](05-execution-plan/TECHNICAL-DEBT-EXECUTION-PLAN.md) as the current implementation sequence.
+1. Treat `duplication-dead-code` evidence as a cleanup candidate ledger, not as blanket delete authorization.
+1. Use [complexity-hotspots/SUMMARY.md](complexity-hotspots/SUMMARY.md) as historical trigger evidence for the completed CrossRef hotspot wave unless a fresh evidence pass reopens that seam.
+1. Use [../residual-test-ci-debt/06-backlog/BACKLOG-residual-test-ci-debt-implementation-2026-04-01.md](../residual-test-ci-debt/06-backlog/BACKLOG-residual-test-ci-debt-implementation-2026-04-01.md) together with [../../../../configs/quality/test_structural_watchlist_map.yaml](../../../../configs/quality/test_structural_watchlist_map.yaml) as the current ranked queue and family-level bridge for CI/test hardening work.

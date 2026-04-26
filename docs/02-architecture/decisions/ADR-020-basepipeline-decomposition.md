@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted (Implemented 2025-12-16)
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # ADR-020: Декомпозиция BasePipeline
 
@@ -44,14 +47,14 @@ def __init__(
 
 1. **God Object Anti-pattern**: 13 параметров конструктора смешивают конфигурацию, runtime параметры и I/O порты
 
-2. **Риск циклических зависимостей**: сборка менеджеров внутри `BasePipeline`
+1. **Риск циклических зависимостей**: сборка менеджеров внутри `BasePipeline`
    приводит к self-ссылкам (менеджеры получают `pipeline` целиком)
 
-3. **Нарушение SRP**: Класс отвечает за хранение конфигурации И координацию выполнения
+1. **Нарушение SRP**: Класс отвечает за хранение конфигурации И координацию выполнения
 
-4. **Сложность тестирования**: Требуется мокать все 13 зависимостей для unit-тестов
+1. **Сложность тестирования**: Требуется мокать все 13 зависимостей для unit-тестов
 
-5. **Отсутствие lifecycle management**: Нет централизованного механизма закрытия I/O ресурсов
+1. **Отсутствие lifecycle management**: Нет централизованного механизма закрытия I/O ресурсов
 
 ### Затронутые файлы
 
@@ -78,14 +81,15 @@ def __init__(
 @dataclass(frozen=True)
 class PipelineConfig:
     """Static pipeline configuration."""
-    pipeline-name: str
+
+    pipeline - name: str
     provider: str
     entity_type: str
-    primary-keys: list[str]
-    silver-table: str
-    gold-table: str | None = None
-    batch-size: int = 100
-    checkpoint-interval: int = 1000
+    primary - keys: list[str]
+    silver - table: str
+    gold - table: str | None = None
+    batch - size: int = 100
+    checkpoint - interval: int = 1000
 ```
 
 #### RuntimeConfig (immutable dataclass)
@@ -94,10 +98,11 @@ class PipelineConfig:
 @dataclass(frozen=True)
 class RuntimeConfig:
     """Runtime execution parameters."""
-    run-type: RunType
+
+    run - type: RunType
     resume: bool = False
     limit: int | None = None
-    skip-gold: bool = False  # Skip Gold writes (composite sub-pipelines)
+    skip - gold: bool = False  # Skip Gold writes (composite sub-pipelines)
 ```
 
 #### PipelineServices (immutable dataclass with lifecycle)
@@ -163,7 +168,7 @@ self.runner = PipelineRunner(self)  # circular ref!
 
 # Стало:
 pipeline = ChEMBLActivityPipeline.create(
-    run-id=run-id,
+    run - id=run - id,
     runtime=runtime,
     services=services,
     config=config,
@@ -174,14 +179,14 @@ runner = PipelineRunner(
     runtime=pipeline.runtime,
     services=pipeline.services,
     context=pipeline.context,
-    executor=batch-executor,
-    checkpoint-manager=checkpoint-manager,
-    shutdown-signal=pipeline.shutdown-signal,
+    executor=batch - executor,
+    checkpoint - manager=checkpoint - manager,
+    shutdown - signal=pipeline.shutdown - signal,
     logger=logger,
-    lock-manager=lock-manager,
+    lock - manager=lock - manager,
     preflight=preflight,
     postrun=postrun,
-    lifecycle-service=lifecycle-service,
+    lifecycle - service=lifecycle - service,
     observer=observer,
     pipeline=pipeline,
     tracer=tracer,
@@ -207,21 +212,21 @@ finally:
 ### Положительные
 
 1. **Ясное разделение ответственности**: Config, Runtime, Services - три чётких категории
-2. **Улучшенная тестируемость**: Можно мокать только нужные части
-3. **Устранение циклических зависимостей**: Менеджеры не ссылаются на весь pipeline
-4. **Иммутабельность конфигурации**: Все dataclass frozen
-5. **Переиспользование**: `PipelineServices` можно шарить между пайплайнами
-6. **Lifecycle management**: Централизованное закрытие I/O ресурсов через `aclose()`
+1. **Улучшенная тестируемость**: Можно мокать только нужные части
+1. **Устранение циклических зависимостей**: Менеджеры не ссылаются на весь pipeline
+1. **Иммутабельность конфигурации**: Все dataclass frozen
+1. **Переиспользование**: `PipelineServices` можно шарить между пайплайнами
+1. **Lifecycle management**: Централизованное закрытие I/O ресурсов через `aclose()`
 
 ### Отрицательные
 
 1. **Breaking change**: Требуется миграция всех наследников `BasePipeline`
-2. **Рефакторинг тестов**: Нужно обновить test fixtures
+1. **Рефакторинг тестов**: Нужно обновить test fixtures
 
 ### Риски
 
 | Риск                | Митигация                             | Статус |
-|---------------------|---------------------------------------|--------|
+| ------------------- | ------------------------------------- | ------ |
 | Пропуск зависимости | Dependency map + полный тест coverage | Закрыт |
 | Регрессии           | Baseline metrics + integration tests  | Закрыт |
 | Resource leaks      | `PipelineServices.aclose()` в finally | Закрыт |
@@ -330,13 +335,13 @@ finally:
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-020-basepipeline-decomposition.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted (Implemented 2025-12-16)` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                                |
+| ------------ | -------------------------------------------------------------------------- | ------ | --------------------------------------- |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-020-basepipeline-decomposition.md` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted (Implemented 2025-12-16)`     |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                        |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria`    |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                            |
 
 ## Rollback
 

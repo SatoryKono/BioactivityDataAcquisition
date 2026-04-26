@@ -6,6 +6,7 @@ The path `scripts/ai/mistral` is available as a thin compatibility alias.
 ## Quick Start
 
 ### Linux/WSL
+
 ```bash
 chmod +x scripts/ai/mistrall/*.sh scripts/ai/mistrall/helper/*.sh
 bash scripts/ai/mistrall/run-mistrall.sh daemon  # Start in background
@@ -15,6 +16,7 @@ bash scripts/ai/mistrall/run-mistrall.sh logs    # View logs
 ```
 
 ### Windows (PowerShell)
+
 ```powershell
 .\run-mistrall.ps1 daemon
 .\run-mistrall.ps1 pull
@@ -24,18 +26,18 @@ bash scripts/ai/mistrall/run-mistrall.sh logs    # View logs
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `start` | Start Mistral in foreground (interactive) |
-| `daemon` | Start Mistral as background service |
-| `stop` | Stop running Mistral service |
-| `status` | Check if Mistral is running |
-| `logs` | View Mistral service logs |
-| `shell` | Access Mistral container shell |
-| `pull` | Pull latest Mistral model |
-| `check` | Check environment setup |
-| `setup` | Setup missing components (Docker, Ollama) |
-| `help` | Show help |
+| Command  | Description                               |
+| -------- | ----------------------------------------- |
+| `start`  | Start Mistral in foreground (interactive) |
+| `daemon` | Start Mistral as background service       |
+| `stop`   | Stop running Mistral service              |
+| `status` | Check if Mistral is running               |
+| `logs`   | View Mistral service logs                 |
+| `shell`  | Access Mistral container shell            |
+| `pull`   | Pull latest Mistral model                 |
+| `check`  | Check environment setup                   |
+| `setup`  | Setup missing components (Docker, Ollama) |
+| `help`   | Show help                                 |
 
 ## Environment Variables
 
@@ -86,16 +88,21 @@ curl -X POST http://localhost:11434/api/generate \
 ## Troubleshooting
 
 ### Port already in use
+
 Change `MISTRALL_PORT` in `scripts/ai/mistrall/.env.mistrall`:
+
 ```bash
 MISTRALL_PORT=11435
 ```
 
 ### Model not pulling
+
 Models require internet. For offline use, pre-pull the model on a connected machine.
 
 ### Out of memory
+
 Adjust `MISTRALL_MEMORY` in `scripts/ai/mistrall/.env.mistrall` and Docker resource limits.
 
 ### Docker not found
+
 Ensure Docker is installed and running. On Windows, start Docker Desktop first.

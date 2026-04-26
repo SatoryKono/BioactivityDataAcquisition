@@ -5,7 +5,6 @@
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-
 > Это summary — repo-only evidence layer для package-topology
 > интерпретации. Он помогает калибровать structural observations, но не
 > заменяет canonical architecture guidance в `docs/00-project/` и
@@ -14,11 +13,11 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 ## Созданные объекты evidence
 
 1. `EV-project-package-topology-top-level-repo-zones-are-separated`
-2. `EV-project-package-topology-application-layer-has-five-subpackages`
-3. `EV-project-package-topology-composition-layer-has-five-subpackages`
-4. `EV-project-package-topology-domain-layer-has-seventeen-subpackages`
-5. `EV-project-package-topology-infrastructure-layer-has-eighteen-subpackages`
-6. `EV-project-package-topology-interfaces-layer-has-three-subpackages`
+1. `EV-project-package-topology-application-layer-has-five-subpackages`
+1. `EV-project-package-topology-composition-layer-has-five-subpackages`
+1. `EV-project-package-topology-domain-layer-has-seventeen-subpackages`
+1. `EV-project-package-topology-infrastructure-layer-has-eighteen-subpackages`
+1. `EV-project-package-topology-interfaces-layer-has-three-subpackages`
 
 ## Проверка gate
 

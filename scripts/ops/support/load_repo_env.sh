@@ -26,7 +26,7 @@ load_repo_env_if_present() {
   # Try Python-based loading first (most reliable)
   local python_bin
   python_bin="$(command -v python3 || command -v python || true)"
-  
+
   if [[ -n "${python_bin}" ]]; then
     # Python version (original)
     while IFS= read -r -d '' key && IFS= read -r -d '' value; do
@@ -84,20 +84,20 @@ PY
   else
     # Fallback: Pure bash parsing (no Python required)
     local -A env_vars
-    
+
     # Load .env first
     if [[ -f "${env_file}" ]]; then
       while IFS='=' read -r key value; do
         key="${key##*( )}"      # Trim leading whitespace
         key="${key%%*( )}"      # Trim trailing whitespace
-        
+
         # Skip empty lines and comments
         [[ -z "${key}" || "${key}" == "#"* ]] && continue
-        
+
         # Trim value
         value="${value##*( )}"
         value="${value%%*( )}"
-        
+
         # Remove quotes if present
         if [[ "${value}" =~ ^['\"](.*)['\"']$ ]]; then
           value="${BASH_REMATCH[1]}"
@@ -106,33 +106,33 @@ PY
           value="${value%% #*}"
           value="${value%%*( )}"
         fi
-        
+
         env_vars["${key}"]="${value}"
       done < "${env_file}"
     fi
-    
+
     # Load .env.local (overrides .env)
     if [[ -f "${env_local_file}" ]]; then
       while IFS='=' read -r key value; do
         key="${key##*( )}"
         key="${key%%*( )}"
-        
+
         [[ -z "${key}" || "${key}" == "#"* ]] && continue
-        
+
         value="${value##*( )}"
         value="${value%%*( )}"
-        
+
         if [[ "${value}" =~ ^['\"](.*)['\"']$ ]]; then
           value="${BASH_REMATCH[1]}"
         else
           value="${value%% #*}"
           value="${value%%*( )}"
         fi
-        
+
         env_vars["${key}"]="${value}"
       done < "${env_local_file}"
     fi
-    
+
     # Export all loaded variables
     for key in "${!env_vars[@]}"; do
       if [[ -z "${!key:-}" ]]; then

@@ -1,17 +1,17 @@
----
-name: py-review-orchestrator
-description: "Hierarchical Code Review Agent for BioETL"
-model: sonnet
----
+______________________________________________________________________
+
+## name: py-review-orchestrator description: "Hierarchical Code Review Agent for BioETL" model: sonnet
 
 # py-review-orchestrator — Hierarchical Code Review Agent
+
 *Версия: 1.0.0 | Совместимо с RULES.md v5.23 (2026-02-24)*
 
 > Runtime note: если ниже встречается legacy-нотация `Task(...)` или `subagent_type`, используй native Codex вызов `spawn_agent(...)` согласно `.codex/agents/CODEX-RUNTIME.md`.
 
----
+______________________________________________________________________
 
 ## 1. Миссия
+
 Провести **исчерпывающее ревью** кода, документации, конфигураций и тестов
 проекта BioETL через иерархическую систему агентов с автоматическим
 масштабированием глубины анализа.
@@ -28,7 +28,7 @@ Orchestrator Level-2 (L2) и делегирует подзоны агентам 
 `reports/review/...` ниже трактуй как логические теги, но физический путь
 должен соответствовать этому шаблону.
 
----
+______________________________________________________________________
 
 ## 2. Архитектура агентов
 
@@ -55,18 +55,20 @@ Orchestrator Level-2 (L2) и делегирует подзоны агентам 
 ```
 
 ### Роли
-| Роль | Описание |
-|------|----------|
-| **L1 Orchestrator** | Единственная точка входа. Планирует секторы, запускает агентов, собирает финальный отчёт |
-| **L2 Orchestrator / Sector Reviewer** | Получает сектор. Если объём ≤ порога — ревьюит сам. Если > порога — становится L2-оркестратором и делегирует подзоны |
-| **L3 Worker** | Ревьюит конкретную подзону. Всегда выполняет работу сам, никогда не делегирует |
 
----
+| Роль                                  | Описание                                                                                                             |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **L1 Orchestrator**                   | Единственная точка входа. Планирует секторы, запускает агентов, собирает финальный отчёт                             |
+| **L2 Orchestrator / Sector Reviewer** | Получает сектор. Если объём ≤ порога — ревьюит сам. Если > порога — становится L2-оркестратором и делегирует подзоны |
+| **L3 Worker**                         | Ревьюит конкретную подзону. Всегда выполняет работу сам, никогда не делегирует                                       |
+
+______________________________________________________________________
 
 ## 3. Промт для L1 Orchestrator
+
 > **Как использовать:** Передайте этот профиль в native Codex agent (`default`) или запустите напрямую. L1 сам вызывает дочерних агентов через `spawn_agent(...)`, используя logical profiles как часть prompt contract.
 
-```markdown
+````markdown
 # ЗАДАЧА: Исчерпывающее иерархическое ревью проекта BioETL
 
 Ты — **L1 Review Orchestrator**. Твоя задача — организовать полное ревью
@@ -297,7 +299,8 @@ Orchestrator Level-2 (L2) и делегирует подзоны агентам 
 - **Code**:
   ```python
   # Текущий код
-  ```
+````
+
 - **Fix**:
   ```python
   # Предлагаемое исправление
@@ -305,90 +308,105 @@ Orchestrator Level-2 (L2) и делегирует подзоны агентам 
 - **Verification**: `{bash command to verify fix}`
 
 ## High Issues
+
 {same format}
 
 ## Medium Issues
+
 {same format}
 
 ## Low Issues
+
 {same format}
 
 ## Positive Observations
+
 - {Что сделано хорошо — patterns, conventions followed}
 
 ## Scoring Calculation
-| Category | Weight | Raw Score | Deductions | Weighted |
-|----------|--------|-----------|------------|----------|
-| Architecture | 30% | 10 | -{X} | {X.X} |
-| Anti-Patterns | 25% | 10 | -{X} | {X.X} |
-| DI Violations | 20% | 10 | -{X} | {X.X} |
-| Naming | 10% | 10 | -{X} | {X.X} |
-| Types | 10% | 10 | -{X} | {X.X} |
-| Testing | 5% | 10 | -{X} | {X.X} |
-| **FINAL** | **100%** | | | **{X.X}** |
+
+| Category      | Weight   | Raw Score | Deductions | Weighted  |
+| ------------- | -------- | --------- | ---------- | --------- |
+| Architecture  | 30%      | 10        | -{X}       | {X.X}     |
+| Anti-Patterns | 25%      | 10        | -{X}       | {X.X}     |
+| DI Violations | 20%      | 10        | -{X}       | {X.X}     |
+| Naming        | 10%      | 10        | -{X}       | {X.X}     |
+| Types         | 10%      | 10        | -{X}       | {X.X}     |
+| Testing       | 5%       | 10        | -{X}       | {X.X}     |
+| **FINAL**     | **100%** |           |            | **{X.X}** |
 
 Deduction rules: CRITICAL = -2.0, HIGH = -1.0, MEDIUM = -0.5, LOW = -0.25
 Status: PASS ≥ 8.0 | WARN 6.0-7.9 | FAIL < 6.0
+
 ```
 ```
 
----
+______________________________________________________________________
 
 ## ШАГ 2B: РЕЖИМ L2 ORCHESTRATOR (большой объём)
+
 Если объём > порога, стань оркестратором второго уровня:
 
 ### 2B.1. Раздели зону на подзоны
+
 Используй логическое деление по модулям/подпакетам.
 Примеры разбиения:
 
 **Для S1 (Domain, 190 файлов):**
-| Подзона | Scope | Файлов |
-|---------|-------|--------|
-| S1.1 | domain/ports/ + domain/contracts/ | ~34 |
-| S1.2 | domain/entities/ + domain/value_objects/ | ~38 |
-| S1.3 | domain/schemas/ | ~37 |
-| S1.4 | domain/services/ + domain/filtering/ + domain/mapping/ | ~30 |
-| S1.5 | domain/config/ + domain/composite/ + domain/aggregates/ + domain/registry/ + domain/models/ + domain/exceptions/ + root files | ~51 |
+
+| Подзона | Scope                                                                                                                         | Файлов |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------- | ------ |
+| S1.1    | domain/ports/ + domain/contracts/                                                                                             | ~34    |
+| S1.2    | domain/entities/ + domain/value_objects/                                                                                      | ~38    |
+| S1.3    | domain/schemas/                                                                                                               | ~37    |
+| S1.4    | domain/services/ + domain/filtering/ + domain/mapping/                                                                        | ~30    |
+| S1.5    | domain/config/ + domain/composite/ + domain/aggregates/ + domain/registry/ + domain/models/ + domain/exceptions/ + root files | ~51    |
 
 **Для S2 (Application, 133 файла):**
-| Подзона | Scope | Файлов |
-|---------|-------|--------|
-| S2.1 | application/pipelines/chembl/ + application/pipelines/common/ | ~20 |
-| S2.2 | application/pipelines/pubmed/ + application/pipelines/crossref/ + application/pipelines/openalex/ | ~19 |
-| S2.3 | application/pipelines/pubchem/ + application/pipelines/semanticscholar/ + application/pipelines/uniprot/ | ~17 |
-| S2.4 | application/core/ | ~31 |
-| S2.5 | application/composite/ + application/services/ + application/observability/ | ~43 |
+
+| Подзона | Scope                                                                                                    | Файлов |
+| ------- | -------------------------------------------------------------------------------------------------------- | ------ |
+| S2.1    | application/pipelines/chembl/ + application/pipelines/common/                                            | ~20    |
+| S2.2    | application/pipelines/pubmed/ + application/pipelines/crossref/ + application/pipelines/openalex/        | ~19    |
+| S2.3    | application/pipelines/pubchem/ + application/pipelines/semanticscholar/ + application/pipelines/uniprot/ | ~17    |
+| S2.4    | application/core/                                                                                        | ~31    |
+| S2.5    | application/composite/ + application/services/ + application/observability/                              | ~43    |
 
 **Для S3 (Infrastructure, 140 файлов):**
-| Подзона | Scope | Файлов |
-|---------|-------|--------|
-| S3.1 | infrastructure/adapters/chembl/ + .../pubmed/ + .../crossref/ | ~23 |
-| S3.2 | infrastructure/adapters/pubchem/ + .../openalex/ + .../semanticscholar/ + .../uniprot/ | ~18 |
-| S3.3 | infrastructure/adapters/ (base, http, common, decorators, input) | ~25 |
-| S3.4 | infrastructure/storage/ + infrastructure/config/ + infrastructure/schemas/ | ~31 |
-| S3.5 | infrastructure/observability/ + остальные модули | ~43 |
+
+| Подзона | Scope                                                                                  | Файлов |
+| ------- | -------------------------------------------------------------------------------------- | ------ |
+| S3.1    | infrastructure/adapters/chembl/ + .../pubmed/ + .../crossref/                          | ~23    |
+| S3.2    | infrastructure/adapters/pubchem/ + .../openalex/ + .../semanticscholar/ + .../uniprot/ | ~18    |
+| S3.3    | infrastructure/adapters/ (base, http, common, decorators, input)                       | ~25    |
+| S3.4    | infrastructure/storage/ + infrastructure/config/ + infrastructure/schemas/             | ~31    |
+| S3.5    | infrastructure/observability/ + остальные модули                                       | ~43    |
 
 **Для S6 (Tests, ~620 файлов):**
-| Подзона | Scope | Файлов |
-|---------|-------|--------|
-| S6.1 | tests/architecture/ | ~57 |
-| S6.2 | tests/unit/domain/ | ~104 |
-| S6.3 | tests/unit/application/ | ~120 |
-| S6.4 | tests/unit/infrastructure/ | ~115 |
-| S6.5 | tests/unit/composition/ + tests/unit/interfaces/ + tests/unit/cli/ + tests/unit/contracts/ + tests/unit/pipelines/ | ~75 |
-| S6.6 | tests/integration/ + tests/e2e/ + tests/contract/ + tests/security/ + tests/smoke/ + tests/performance/ + tests/benchmarks/ | ~117 |
+
+| Подзона | Scope                                                                                                                       | Файлов |
+| ------- | --------------------------------------------------------------------------------------------------------------------------- | ------ |
+| S6.1    | tests/architecture/                                                                                                         | ~57    |
+| S6.2    | tests/unit/domain/                                                                                                          | ~104   |
+| S6.3    | tests/unit/application/                                                                                                     | ~120   |
+| S6.4    | tests/unit/infrastructure/                                                                                                  | ~115   |
+| S6.5    | tests/unit/composition/ + tests/unit/interfaces/ + tests/unit/cli/ + tests/unit/contracts/ + tests/unit/pipelines/          | ~75    |
+| S6.6    | tests/integration/ + tests/e2e/ + tests/contract/ + tests/security/ + tests/smoke/ + tests/performance/ + tests/benchmarks/ | ~117   |
 
 **Для S8 (Documentation, ~600 файлов):**
-| Подзона | Scope | Файлов |
-|---------|-------|--------|
-| S8.1 | docs/00-project/ + docs/01-requirements/ | ~20 |
-| S8.2 | docs/02-architecture/ (decisions, policies) | ~50 |
-| S8.3 | docs/04-reference/ | ~148 |
-| S8.4 | docs/03-guides/ + docs/05-operations/ + docs/03-data-model/ | ~87 |
+
+| Подзона | Scope                                                       | Файлов |
+| ------- | ----------------------------------------------------------- | ------ |
+| S8.1    | docs/00-project/ + docs/01-requirements/                    | ~20    |
+| S8.2    | docs/02-architecture/ (decisions, policies)                 | ~50    |
+| S8.3    | docs/04-reference/                                          | ~148   |
+| S8.4    | docs/03-guides/ + docs/05-operations/ + docs/03-data-model/ | ~87    |
 
 ### 2B.2. Запусти L3-агентов
+
 Для каждой подзоны запусти отдельный native Codex agent (`spawn_agent(...)`)
 используя тот же шаблон промта Sector Reviewer, но:
+
 - Установи `{SECTOR_ID}` = `{PARENT_SECTOR_ID}.{N}` (например S1.1)
 - Установи `{SCOPE_PATHS}` = конкретный путь подзоны
 - L3 агенты **НЕ делегируют** — всегда работают как Worker
@@ -396,6 +414,7 @@ Status: PASS ≥ 8.0 | WARN 6.0-7.9 | FAIL < 6.0
 Запускай L3-агентов **параллельно** (все подзоны одного сектора независимы).
 
 ### 2B.3. Собери отчёт сектора
+
 Когда все L3 завершатся, прочитай их отчёты из
 `reports/{LLM}/review_py-review-orchestrator_{YYYYMMDD}_{HHMM}_S{X}.{N}-*.md`
 и создай консолидированный отчёт сектора
@@ -429,18 +448,21 @@ Status: PASS ≥ 8.0 | WARN 6.0-7.9 | FAIL < 6.0
 1. ...
 ```
 
----
+______________________________________________________________________
 
 ## ШАГ 3: L1 — СБОРКА ФИНАЛЬНОГО ОТЧЁТА
+
 Когда ВСЕ секторные агенты завершились, L1 Orchestrator:
 
 ### 3.1. Прочитай все секторные отчёты
+
 Прочитай файлы `reports/{LLM}/review_py-review-orchestrator_{YYYYMMDD}_{HHMM}_S*-*.md` (8 отчётов).
 
 ### 3.2. Сформируй финальный отчёт
+
 Создай файл `reports/{LLM}/review_py-review-orchestrator_{YYYYMMDD}_{HHMM}_FINAL.md`:
 
-```markdown
+````markdown
 # BioETL — Full Project Review Report
 **Date**: {YYYY-MM-DD}
 **RULES.md Version**: 5.23
@@ -560,18 +582,20 @@ pytest --cov=src/bioetl --cov-fail-under=85
 
 # Full lint
 make lint
-```
+````
 
----
+______________________________________________________________________
 
 ## Appendix: Agent Execution Log
-| Agent | Level | Sector | Duration | Files | Status |
-|-------|-------|--------|----------|-------|--------|
-| L1 Orchestrator | 1 | All | {T} | — | — |
-| S1 Reviewer | 2 | Domain | {T} | {N} | {S} |
-| S1.1 Worker | 3 | Ports+Contracts | {T} | {N} | {S} |
-| ... | ... | ... | ... | ... | ... |
-```
+
+| Agent           | Level | Sector          | Duration | Files | Status |
+| --------------- | ----- | --------------- | -------- | ----- | ------ |
+| L1 Orchestrator | 1     | All             | {T}      | —     | —      |
+| S1 Reviewer     | 2     | Domain          | {T}      | {N}   | {S}    |
+| S1.1 Worker     | 3     | Ports+Contracts | {T}      | {N}   | {S}    |
+| ...             | ...   | ...             | ...      | ...   | ...    |
+
+````
 
 ---
 
@@ -588,7 +612,7 @@ deductions:
   HIGH:     -1.0 per issue
   MEDIUM:   -0.5 per issue
   LOW:      -0.25 per issue
-```
+````
 
 ### Формула оценки сектора (L2 Orchestrator)
 
@@ -616,43 +640,43 @@ sector_weights:
 
 ### Status thresholds (все уровни)
 
-| Score | Status |
-|-------|--------|
-| ≥ 8.0 | **PASS** |
+| Score     | Status   |
+| --------- | -------- |
+| ≥ 8.0     | **PASS** |
 | 6.0 – 7.9 | **WARN** |
-| < 6.0 | **FAIL** |
+| < 6.0     | **FAIL** |
 
----
+______________________________________________________________________
 
 ## 5. Правила выполнения
 
 ### 5.1. Для L1 Orchestrator
 
 1. **MUST** создать директорию `reports/{LLM}/` перед запуском агентов
-2. **MUST** запускать секторные агенты через native Codex agent runtime (`spawn_agent(...)`)
-3. **SHOULD** запускать независимые секторы параллельно (Волна 1 → Волна 2)
-4. **MUST** дождаться завершения ВСЕХ агентов перед сборкой финального отчёта
-5. **MUST NOT** проводить ревью самостоятельно — только оркестрация и агрегация
-6. **MUST** включить в финальный отчёт ВСЕ critical и high issues из всех секторов
+1. **MUST** запускать секторные агенты через native Codex agent runtime (`spawn_agent(...)`)
+1. **SHOULD** запускать независимые секторы параллельно (Волна 1 → Волна 2)
+1. **MUST** дождаться завершения ВСЕХ агентов перед сборкой финального отчёта
+1. **MUST NOT** проводить ревью самостоятельно — только оркестрация и агрегация
+1. **MUST** включить в финальный отчёт ВСЕ critical и high issues из всех секторов
 
 ### 5.2. Для Sector Reviewer / L2 Orchestrator
 
 1. **MUST** первым шагом оценить объём (файлы + LOC)
-2. **MUST** делегировать при превышении порога (>40 файлов ИЛИ >3000 LOC)
-3. **MUST NOT** делегировать более 2 уровней (L3 — финальный)
-4. **MUST** учитывать все исключения EXC-001..015 перед флагом нарушения
-5. **MUST** создать отчёт в `reports/{LLM}/review_py-review-orchestrator_{YYYYMMDD}_{HHMM}_{SECTOR_ID}-*.md`
-6. **SHOULD** отмечать positive observations, не только проблемы
+1. **MUST** делегировать при превышении порога (>40 файлов ИЛИ >3000 LOC)
+1. **MUST NOT** делегировать более 2 уровней (L3 — финальный)
+1. **MUST** учитывать все исключения EXC-001..015 перед флагом нарушения
+1. **MUST** создать отчёт в `reports/{LLM}/review_py-review-orchestrator_{YYYYMMDD}_{HHMM}_{SECTOR_ID}-*.md`
+1. **SHOULD** отмечать positive observations, не только проблемы
 
 ### 5.3. Для L3 Worker
 
 1. **MUST** прочитать КАЖДЫЙ файл в scope (не выборочно)
-2. **MUST NOT** делегировать — всегда выполнять работу самостоятельно
-3. **MUST** создать отчёт в `reports/{LLM}/review_py-review-orchestrator_{YYYYMMDD}_{HHMM}_{SECTOR_ID}-*.md`
-4. **SHOULD** использовать `Grep` для системной проверки паттернов
-5. **MUST** проверить все применимые правила из ai-selfreview-rules.md
+1. **MUST NOT** делегировать — всегда выполнять работу самостоятельно
+1. **MUST** создать отчёт в `reports/{LLM}/review_py-review-orchestrator_{YYYYMMDD}_{HHMM}_{SECTOR_ID}-*.md`
+1. **SHOULD** использовать `Grep` для системной проверки паттернов
+1. **MUST** проверить все применимые правила из ai-selfreview-rules.md
 
----
+______________________________________________________________________
 
 ## 6. Запуск
 
@@ -675,7 +699,7 @@ spawn_agent(
 )
 ```
 
----
+______________________________________________________________________
 
 ## 7. Пример выполнения
 
@@ -700,7 +724,7 @@ L1 запускает:
 L1 собирает все → FINAL-REVIEW.md
 ```
 
----
+______________________________________________________________________
 
 ## 8. References
 

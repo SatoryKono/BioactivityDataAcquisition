@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-24'
----
+  Last verified: '2026-04-24'
+
+______________________________________________________________________
 
 # ADR-026: Composite Pipeline Pattern
 
@@ -17,31 +20,33 @@ Last verified: '2026-04-24'
 ## Context
 
 BioETL uses Hexagonal Architecture + Medallion (Bronze→Silver→Gold) for ETL biоактивных данных. Current pipelines operate independently:
+
 - `chembl_activity`
 - `chembl_publication`
 - `pubchem_compound`
 
 A common use case requires combining data from multiple sources:
+
 1. **Seed Pipeline** extracts primary entities (e.g., publications from ChEMBL)
-2. **Enrichment Pipelines** fetch additional data from other sources (CrossRef, OpenAlex, PubMed, SemanticScholar)
-3. **Merge Step** combines all enrichments into a unified Gold entity
+1. **Enrichment Pipelines** fetch additional data from other sources (CrossRef, OpenAlex, PubMed, SemanticScholar)
+1. **Merge Step** combines all enrichments into a unified Gold entity
 
 ### Problem Statement
 
 1. **Manual orchestration** - Users currently must run pipelines sequentially and manually join results
-2. **No lineage tracking** - No way to trace which source contributed which fields
-3. **Error handling complexity** - Partial enrichment failures require manual recovery
-4. **Duplicated configuration** - Join keys and merge logic must be specified repeatedly
+1. **No lineage tracking** - No way to trace which source contributed which fields
+1. **Error handling complexity** - Partial enrichment failures require manual recovery
+1. **Duplicated configuration** - Join keys and merge logic must be specified repeatedly
 
 ### Constraints
 
-| Constraint | Source | Impact |
-|------------|--------|--------|
-| Local-Only Deployment | ADR-010 | No distributed orchestration (Airflow, Prefect) |
-| MemoryLock | ADR-003 | Single-process execution only |
-| Medallion Architecture | ADR-002 | Must preserve Bronze/Silver/Gold semantics |
-| Content Hash Deduplication | RULES.md §3.1 | Silver merge must use content-hash |
-| DQ Thresholds | RULES.md §4.1 | Soft >5%, Hard >20% apply per-enricher |
+| Constraint                 | Source        | Impact                                          |
+| -------------------------- | ------------- | ----------------------------------------------- |
+| Local-Only Deployment      | ADR-010       | No distributed orchestration (Airflow, Prefect) |
+| MemoryLock                 | ADR-003       | Single-process execution only                   |
+| Medallion Architecture     | ADR-002       | Must preserve Bronze/Silver/Gold semantics      |
+| Content Hash Deduplication | RULES.md §3.1 | Silver merge must use content-hash              |
+| DQ Thresholds              | RULES.md §4.1 | Soft >5%, Hard >20% apply per-enricher          |
 
 ## Decision
 
@@ -87,19 +92,21 @@ The original ADR specified CrossRef as a required enricher (`required: true`). H
 ```
 
 **Rationale:**
+
 - **Sequential seed-first**: Seed must complete before enrichers can query
 - **Fan-out enrichers**: Independent API calls can run in parallel (async)
 - **Sequential merge**: Must wait for all enrichers to complete
 
 ### 2. Data Passing Mechanism: File-Based (Silver Tables)
 
-| Option | Pros | Cons | Decision |
-|--------|------|------|----------|
-| In-Memory | Fast, no I/O | Memory limits, no resume | ❌ |
-| File-Based | Durable, resumable, auditable | Slower, disk I/O | ✅ |
-| Hybrid | Best of both | Complexity | Future enhancement |
+| Option     | Pros                          | Cons                     | Decision           |
+| ---------- | ----------------------------- | ------------------------ | ------------------ |
+| In-Memory  | Fast, no I/O                  | Memory limits, no resume | ❌                 |
+| File-Based | Durable, resumable, auditable | Slower, disk I/O         | ✅                 |
+| Hybrid     | Best of both                  | Complexity               | Future enhancement |
 
 **Implementation:**
+
 ```
 1. Seed writes → Silver/chembl/publication/
 2. Extract keys → In-memory DataFrame (small)
@@ -109,10 +116,10 @@ The original ADR specified CrossRef as a required enricher (`required: true`). H
 
 ### 3. Join Strategy: Configurable per Enricher
 
-| Enricher Type | Join | Behavior on Not Found |
-|---------------|------|----------------------|
-| Required | INNER | Composite fails |
-| Optional | LEFT | Null fields, continue |
+| Enricher Type | Join  | Behavior on Not Found |
+| ------------- | ----- | --------------------- |
+| Required      | INNER | Composite fails       |
+| Optional      | LEFT  | Null fields, continue |
 
 **Default**: LEFT JOIN (optional enrichers)
 
@@ -120,14 +127,14 @@ The original ADR specified CrossRef as a required enricher (`required: true`). H
 
 ### 4. Failure Handling
 
-| Scenario | Behavior | Recovery |
-|----------|----------|----------|
-| Seed fails | Composite fails (Critical) | Re-run composite |
-| Required enricher fails | Composite fails | Re-run composite |
-| Optional enricher fails | Log warning, continue | Re-run with `--enrich-only <name>` |
-| Enricher >20% DQ failures | Depends on `required` flag | Review DQ report |
-| Network timeout | Retry with backoff (3x) | Automatic |
-| Partial completion | Checkpoint saved | `--resume` flag |
+| Scenario                  | Behavior                   | Recovery                           |
+| ------------------------- | -------------------------- | ---------------------------------- |
+| Seed fails                | Composite fails (Critical) | Re-run composite                   |
+| Required enricher fails   | Composite fails            | Re-run composite                   |
+| Optional enricher fails   | Log warning, continue      | Re-run with `--enrich-only <name>` |
+| Enricher >20% DQ failures | Depends on `required` flag | Review DQ report                   |
+| Network timeout           | Retry with backoff (3x)    | Automatic                          |
+| Partial completion        | Checkpoint saved           | `--resume` flag                    |
 
 ### 4.1. Dependency Pipelines
 
@@ -148,11 +155,11 @@ pipelines to populate Silver tables.
 
 #### Use Cases
 
-| Use Case | Example |
-|----------|---------|
-| Reference tables | `protein-class` hierarchy (~1.5K records) |
+| Use Case         | Example                                            |
+| ---------------- | -------------------------------------------------- |
+| Reference tables | `protein-class` hierarchy (~1.5K records)          |
 | Derived entities | `publication-term` (MeSH terms from /document API) |
-| Chained data | `protein-class` using IDs from `target-component` |
+| Chained data     | `protein-class` using IDs from `target-component`  |
 
 #### Chained Dependencies (key-source)
 
@@ -180,15 +187,15 @@ dependencies:
 
 #### Configuration Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `pipeline` | string | Dependency pipeline name |
-| `join-keys` | list[string] | Column names to extract from key source |
-| `key-source` | string? | Source of keys: `null`/`"seed"` = seed, or pipeline name |
-| `filter-field` | string? | API filter field (if differs from join-key) |
-| `required` | bool | If true, failure stops composite |
-| `timeout-seconds` | int | Per-dependency timeout |
-| `silver-table` | string? | Path to Silver table |
+| Field             | Type         | Description                                              |
+| ----------------- | ------------ | -------------------------------------------------------- |
+| `pipeline`        | string       | Dependency pipeline name                                 |
+| `join-keys`       | list[string] | Column names to extract from key source                  |
+| `key-source`      | string?      | Source of keys: `null`/`"seed"` = seed, or pipeline name |
+| `filter-field`    | string?      | API filter field (if differs from join-key)              |
+| `required`        | bool         | If true, failure stops composite                         |
+| `timeout-seconds` | int          | Per-dependency timeout                                   |
+| `silver-table`    | string?      | Path to Silver table                                     |
 
 #### Implementation
 
@@ -223,6 +230,7 @@ lock:composite_publication              # Parent lock (exclusive)
 ```
 
 **Rationale:**
+
 - Parent lock prevents concurrent composite runs
 - Child locks allow inspection of individual pipelines
 - No deadlock risk (single-threaded execution)
@@ -230,6 +238,7 @@ lock:composite_publication              # Parent lock (exclusive)
 ### 6. Lineage Metadata
 
 Every Gold record includes:
+
 ```python
 {
     "-composite_run_id": "uuid-of-composite-run",
@@ -299,12 +308,12 @@ src/bioetl/
 
 ### Import Rules
 
-| From | To | Allowed |
-|------|------|---------|
-| domain/composite | domain/* | ✅ |
-| application/composite | domain/*, application/core | ✅ |
-| composition/composite | all layers | ✅ |
-| application/composite | infrastructure | ❌ (via ports only) |
+| From                  | To                          | Allowed             |
+| --------------------- | --------------------------- | ------------------- |
+| domain/composite      | domain/\*                   | ✅                  |
+| application/composite | domain/\*, application/core | ✅                  |
+| composition/composite | all layers                  | ✅                  |
+| application/composite | infrastructure              | ❌ (via ports only) |
 
 ### Finite State Machine (FSM) Pattern
 
@@ -352,22 +361,22 @@ This ensures predictable execution flow and prevents invalid operations.
 
 #### Layer Separation for FSM
 
-| Component | Layer | Responsibility |
-|-----------|-------|----------------|
-| `CompositePipelineState` (Enum) | **domain** | Defines states, transition rules, validation |
-| `can-transition()`, `validate-transition()` | **domain** | Pure functions for transition logic |
-| `CompositeCheckpointState.state` field | **application** | Persists FSM state for resume |
-| `CompositePipelineRunner` | **application** | Executes transitions, manages lifecycle |
-| `EnrichmentCoordinator` | **application** | No FSM knowledge (delegated service) |
-| `MergeService` | **application** | No FSM knowledge (delegated service) |
+| Component                                   | Layer           | Responsibility                               |
+| ------------------------------------------- | --------------- | -------------------------------------------- |
+| `CompositePipelineState` (Enum)             | **domain**      | Defines states, transition rules, validation |
+| `can-transition()`, `validate-transition()` | **domain**      | Pure functions for transition logic          |
+| `CompositeCheckpointState.state` field      | **application** | Persists FSM state for resume                |
+| `CompositePipelineRunner`                   | **application** | Executes transitions, manages lifecycle      |
+| `EnrichmentCoordinator`                     | **application** | No FSM knowledge (delegated service)         |
+| `MergeService`                              | **application** | No FSM knowledge (delegated service)         |
 
 **Key Principle:** Domain layer defines *what transitions are valid*, Application layer
 executes *when transitions happen*. This separation allows:
 
 1. **Testability**: FSM rules can be unit-tested in isolation
-2. **Predictability**: Invalid transitions raise `InvalidStateError` immediately
-3. **Observability**: Every transition is logged with from/to states
-4. **Resumability**: `is-resumable` property enables checkpoint-based recovery
+1. **Predictability**: Invalid transitions raise `InvalidStateError` immediately
+1. **Observability**: Every transition is logged with from/to states
+1. **Resumability**: `is-resumable` property enables checkpoint-based recovery
 
 #### FSM in Domain Layer (`domain/composite/state.py`)
 
@@ -496,17 +505,20 @@ class EnrichmentStatus(str, Enum):
 ```python
 class MergeStrategy(str, Enum):
     """Strategy for merging enriched data."""
-    LEFT-OUTER = "left-outer"  # All seed records, nullable enrichments
-    INNER = "inner"            # Only records found in ALL required enrichers
-    UNION = "union"            # All records from any source (with dedup)
+
+    LEFT - OUTER = "left-outer"  # All seed records, nullable enrichments
+    INNER = "inner"  # Only records found in ALL required enrichers
+    UNION = "union"  # All records from any source (with dedup)
+
 
 class ConflictResolution(str, Enum):
     """Strategy for resolving field conflicts between sources."""
-    SEED-PRIORITY = "seed-priority"    # Seed value wins
-    ENRICHER-PRIORITY = "enricher"     # Enricher value wins
-    LATEST-TIMESTAMP = "latest"        # Most recent value wins
-    EXPLICIT-RULES = "explicit"        # Use field-priorities mapping
-    COALESCE = "coalesce"              # First non-null value
+
+    SEED - PRIORITY = "seed-priority"  # Seed value wins
+    ENRICHER - PRIORITY = "enricher"  # Enricher value wins
+    LATEST - TIMESTAMP = "latest"  # Most recent value wins
+    EXPLICIT - RULES = "explicit"  # Use field-priorities mapping
+    COALESCE = "coalesce"  # First non-null value
 ```
 
 ## Column Naming Convention
@@ -520,49 +532,53 @@ class ConflictResolution(str, Enum):
 стратегиями prefix (provider/entity/both), что приводило к:
 
 1. Неконсистентности: seed колонки без prefix, enricher — с prefix
-2. Сложной логике определения стратегии
-3. Трудностям при coalesce из-за разных форматов
+1. Сложной логике определения стратегии
+1. Трудностям при coalesce из-за разных форматов
 
 ### Decision
 
 **Все** бизнес-колонки (seed и enricher) переименовываются в единый формат:
+
 ```
 {provider}.{entity}.{field}
 ```
 
 **Примеры**:
-| Source | Original | Qualified |
-|--------|----------|-----------|
-| chembl_publication (seed) | title | chembl.publication.title |
-| crossref_publication (enricher) | title | crossref.publication.title |
+
+| Source                          | Original       | Qualified                           |
+| ------------------------------- | -------------- | ----------------------------------- |
+| chembl_publication (seed)       | title          | chembl.publication.title            |
+| crossref_publication (enricher) | title          | crossref.publication.title          |
 | crossref_publication (enricher) | citation-count | crossref.publication.citation-count |
 
 **Исключения** (НЕ переименовываются):
+
 1. **Join keys**: `doi`, `pmid`, `pmc-id` — для совместимости с join операциями
-2. **System columns**: колонки с prefix `-` (`_run_id`, `_ingestion_ts`, etc.)
-3. **Entity ID columns**: `entity-id`, `content-hash` — системные идентификаторы
+1. **System columns**: колонки с prefix `-` (`_run_id`, `_ingestion_ts`, etc.)
+1. **Entity ID columns**: `entity-id`, `content-hash` — системные идентификаторы
 
 ### Column Ordering
 
 Колонки в output упорядочены по семантическим группам:
 
-| Order | Group | Examples |
-|-------|-------|----------|
-| 1 | System | entity-id, content-hash, _run_id, _ingestion_ts |
-| 2 | Identifiers | doi, pmid, pmc-id, document-chembl-id |
-| 3 | Title | title, chembl.publication.title, crossref.publication.title |
-| 4 | Abstract | abstract, chembl.publication.abstract |
-| 5 | Authors | authors, first-author, affiliations |
-| 6 | Journal | journal, publisher, volume, issue |
-| 7 | Dates | publication-date, year, created-at |
-| 8 | Metrics | citation-count, reference-count |
-| 9 | Classification | mesh-terms, keywords, subjects |
-| 10 | URLs | url, pdf-url, landing-page |
-| 11 | Other | All remaining fields |
+| Order | Group          | Examples                                                    |
+| ----- | -------------- | ----------------------------------------------------------- |
+| 1     | System         | entity-id, content-hash, \_run_id, \_ingestion_ts           |
+| 2     | Identifiers    | doi, pmid, pmc-id, document-chembl-id                       |
+| 3     | Title          | title, chembl.publication.title, crossref.publication.title |
+| 4     | Abstract       | abstract, chembl.publication.abstract                       |
+| 5     | Authors        | authors, first-author, affiliations                         |
+| 6     | Journal        | journal, publisher, volume, issue                           |
+| 7     | Dates          | publication-date, year, created-at                          |
+| 8     | Metrics        | citation-count, reference-count                             |
+| 9     | Classification | mesh-terms, keywords, subjects                              |
+| 10    | URLs           | url, pdf-url, landing-page                                  |
+| 11    | Other          | All remaining fields                                        |
 
 Внутри каждой группы колонки упорядочены по:
+
 1. Provider priority: chembl → crossref → pubmed → openalex
-2. Alphabetically для одного провайдера
+1. Alphabetically для одного провайдера
 
 ### Implementation
 
@@ -574,6 +590,7 @@ class ConflictResolution(str, Enum):
 ### Consequences
 
 **Positive**:
+
 - Единообразный формат всех колонок
 - Явная атрибуция источника данных
 - Устранение конфликтов имён без сложной логики
@@ -581,6 +598,7 @@ class ConflictResolution(str, Enum):
 - Улучшенная читаемость для downstream consumers
 
 **Negative**:
+
 - **Breaking change** для downstream consumers
 - Более длинные имена колонок (3 компонента вместо 1)
 - Требуется миграция существующих Silver/Gold таблиц
@@ -607,8 +625,8 @@ However, some use cases require access to **all** provider values for comparison
 Add `preserve-all-sources: bool = False` to `MergeConfig`. When enabled:
 
 1. **Skip coalescing** - MergeService does not apply conflict resolution
-2. **Keep all qualified columns** - All `{provider}.{entity}.{field}` columns are retained
-3. **Full traceability** - Downstream consumers can see exactly what each provider returned
+1. **Keep all qualified columns** - All `{provider}.{entity}.{field}` columns are retained
+1. **Full traceability** - Downstream consumers can see exactly what each provider returned
 
 ### Configuration
 
@@ -622,10 +640,10 @@ merge:
 
 ### Behavior Comparison
 
-| Mode | Output Columns | Use Case |
-|------|----------------|----------|
-| `preserve-all-sources: false` (default) | `title` (single coalesced column) | Production views with "best" value |
-| `preserve-all-sources: true` | `chembl.publication.title`, `crossref.publication.title`, etc. | Data quality analysis, ML features |
+| Mode                                    | Output Columns                                                 | Use Case                           |
+| --------------------------------------- | -------------------------------------------------------------- | ---------------------------------- |
+| `preserve-all-sources: false` (default) | `title` (single coalesced column)                              | Production views with "best" value |
+| `preserve-all-sources: true`            | `chembl.publication.title`, `crossref.publication.title`, etc. | Data quality analysis, ML features |
 
 ### Implementation
 
@@ -637,28 +655,30 @@ merge:
 
 ```python
 # preserve-all-sources: false (default)
-df.columns = ['entity-id', 'title', 'abstract', 'citation-count', ...]
+df.columns = ["entity-id", "title", "abstract", "citation-count", ...]
 
 # preserve-all-sources: true
 df.columns = [
-    'entity-id',
-    'chembl.publication.title',
-    'crossref.publication.title',
-    'openalex.publication.title',
-    'pubmed.publication.title',
-    'chembl.publication.abstract',
-    ...
+    "entity-id",
+    "chembl.publication.title",
+    "crossref.publication.title",
+    "openalex.publication.title",
+    "pubmed.publication.title",
+    "chembl.publication.abstract",
+    ...,
 ]
 ```
 
 ### Consequences
 
 **Positive**:
+
 - Full data visibility for QA and analysis
 - No information loss during merge
 - Enables cross-provider comparison
 
 **Negative**:
+
 - Wider tables (more columns)
 - Downstream consumers must handle multiple columns per field
 - Breaking change for consumers expecting coalesced columns
@@ -670,8 +690,8 @@ When `preserve-all-sources: true` is enabled, the number of columns grows signif
 ### Purpose
 
 1. **Gold Filtering**: Automatically exclude TRASH-group fields (e.g., `content-hash`, `language`) from Gold output
-2. **Column Ordering**: Sort output columns by semantic group (ID-AND-STATUS first, TRASH last) and provider priority
-3. **Validation**: Identify unmapped columns for data quality checks
+1. **Column Ordering**: Sort output columns by semantic group (ID-AND-STATUS first, TRASH last) and provider priority
+1. **Validation**: Identify unmapped columns for data quality checks
 
 ### Domain Models
 
@@ -725,13 +745,13 @@ If no YAML config exists for a composite pipeline, bootstrap continues without t
 
 ### Files
 
-| Layer | File | Description |
-|-------|------|-------------|
-| Domain | `domain/composite/field_groups.py` | Models: FieldMapping, FieldGroupDefinition, FieldGroupRegistry |
-| Infrastructure | `infrastructure/config/field_group_loader.py` | YAML → domain object loader |
-| Config | `configs/composites/field_groups/publication.yaml` | 8 groups, 94 fields |
-| Composition | `composition/bootstrap/runtime/composite.py` | Bootstrap integration |
-| Application | `application/composite/merger.py` | Gold filtering integration |
+| Layer          | File                                               | Description                                                    |
+| -------------- | -------------------------------------------------- | -------------------------------------------------------------- |
+| Domain         | `domain/composite/field_groups.py`                 | Models: FieldMapping, FieldGroupDefinition, FieldGroupRegistry |
+| Infrastructure | `infrastructure/config/field_group_loader.py`      | YAML → domain object loader                                    |
+| Config         | `configs/composites/field_groups/publication.yaml` | 8 groups, 94 fields                                            |
+| Composition    | `composition/bootstrap/runtime/composite.py`       | Bootstrap integration                                          |
+| Application    | `application/composite/merger.py`                  | Gold filtering integration                                     |
 
 ## Application Layer
 
@@ -1277,32 +1297,33 @@ def run_composite_command(composite: str, enrich_only: str | None, required_only
 ### Positive
 
 1. **Unified data enrichment** - Single command to run multi-source pipelines
-2. **Graceful degradation** - Optional enricher failures don't block composite
-3. **Full lineage** - Every field traceable to source
-4. **Resume capability** - Checkpoint-based recovery from failures
-5. **Configurable flexibility** - YAML-based orchestration without code changes
-6. **No redundant Gold writes** - Sub-pipelines run with `skip-gold=True`,
+1. **Graceful degradation** - Optional enricher failures don't block composite
+1. **Full lineage** - Every field traceable to source
+1. **Resume capability** - Checkpoint-based recovery from failures
+1. **Configurable flexibility** - YAML-based orchestration without code changes
+1. **No redundant Gold writes** - Sub-pipelines run with `skip-gold=True`,
    writing only Bronze+Silver; the composite merge phase produces the unified Gold output
 
 ### Negative
 
 1. **Increased complexity** - New components (Coordinator, Merger, etc.)
-2. **Configuration learning curve** - YAML schema is more complex
-3. **Debugging difficulty** - Multi-source issues harder to trace
-4. **Storage overhead** - Intermediate Silver tables for each enricher
+1. **Configuration learning curve** - YAML schema is more complex
+1. **Debugging difficulty** - Multi-source issues harder to trace
+1. **Storage overhead** - Intermediate Silver tables for each enricher
 
 ### Risks
 
-| Risk | Mitigation |
-|------|------------|
+| Risk                                    | Mitigation                               |
+| --------------------------------------- | ---------------------------------------- |
 | Memory pressure from parallel enrichers | `max-concurrency` limit, adaptive sizing |
-| Lock contention with many enrichers | Hierarchical lock strategy |
-| Inconsistent data on partial failures | Checkpoint + resume mechanism |
-| Configuration errors | Schema validation via Pydantic |
+| Lock contention with many enrichers     | Hierarchical lock strategy               |
+| Inconsistent data on partial failures   | Checkpoint + resume mechanism            |
+| Configuration errors                    | Schema validation via Pydantic           |
 
 ## Rollout
 
 ### Phase 1: Foundation (v1.0)
+
 - [ ] Domain models (CompositeConfig, EnrichmentResult, MergeStrategy)
 - [ ] CompositePipelineRunner basic implementation
 - [ ] EnrichmentCoordinator with sequential execution
@@ -1310,17 +1331,20 @@ def run_composite_command(composite: str, enrich_only: str | None, required_only
 - [ ] CLI extensions for composite pipelines
 
 ### Phase 2: Parallelism (v1.1)
+
 - [ ] Parallel enricher execution (asyncio.gather)
 - [ ] Timeout handling per enricher
 - [ ] CompositeCheckpointManager for resume
 
 ### Phase 3: Advanced Features (v1.2)
+
 - [ ] All merge strategies (INNER, UNION)
 - [ ] All conflict resolution strategies
 - [ ] Field-level lineage tracking
 - [ ] `--enrich-only` and `--required-only` CLI options
 
 ### Phase 4: Optimization (v1.3)
+
 - [ ] Adaptive batch sizing for enrichers
 - [ ] Caching of enrichment results
 - [ ] Incremental composite runs (delta mode)
@@ -1356,19 +1380,20 @@ def run_composite_command(composite: str, enrich_only: str | None, required_only
 - RULES.md v6.1 §3.3 (Concurrency & Locks)
 
 **Current Composite Configurations**:
+
 - `configs/composites/publication.yaml` (shows `required: false` for CrossRef)
 - `configs/composites/target.yaml` (reference for dependency chaining)
 - `configs/composites/field_groups/publication.yaml` (field group registry)
 
 ## Compliance
 
-| Control | Requirement | Status | Evidence |
-|---|---|---|---|
-| Format | ADR MUST use standard metadata and normalized section headings | `pass` | `ADR-026-composite-pipeline-pattern.md` |
-| Status | ADR status MUST be explicit and consistent | `pass` | `Accepted` |
-| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a` | `metadata block` |
-| Verification | Implementation and validation expectations MUST be documented | `pass` | `Verification / Acceptance Criteria` |
-| References | Related ADRs, docs, or artifacts SHOULD be linked | `pass` | `References` |
+| Control      | Requirement                                                                | Status | Evidence                                |
+| ------------ | -------------------------------------------------------------------------- | ------ | --------------------------------------- |
+| Format       | ADR MUST use standard metadata and normalized section headings             | `pass` | `ADR-026-composite-pipeline-pattern.md` |
+| Status       | ADR status MUST be explicit and consistent                                 | `pass` | `Accepted`                              |
+| Supersession | Superseded or superseding ADRs SHOULD be linked explicitly when applicable | `n/a`  | `metadata block`                        |
+| Verification | Implementation and validation expectations MUST be documented              | `pass` | `Verification / Acceptance Criteria`    |
+| References   | Related ADRs, docs, or artifacts SHOULD be linked                          | `pass` | `References`                            |
 
 ## Rollback
 

@@ -1,10 +1,6 @@
----
-name: suggest-users
-description: Use when creating PRs to suggest reviewers, when creating issues to suggest assignees, or when re-requesting review after addressing comments. Ranks users by CODEOWNERS match, file expertise, recent activity, and workload balancing.
-allowed-tools: Bash, Read
-context: fork
-agent: Explore
----
+______________________________________________________________________
+
+## name: suggest-users description: Use when creating PRs to suggest reviewers, when creating issues to suggest assignees, or when re-requesting review after addressing comments. Ranks users by CODEOWNERS match, file expertise, recent activity, and workload balancing. allowed-tools: Bash, Read context: fork agent: Explore
 
 # Suggest Users
 
@@ -13,6 +9,7 @@ This skill provides intelligent user suggestions for PRs (reviewers) and issues 
 ## Purpose
 
 Instead of manually picking reviewers or assignees, this skill analyzes:
+
 - CODEOWNERS file for explicit ownership
 - Recent PR activity for active contributors
 - File-specific commit history for expertise
@@ -62,24 +59,24 @@ gh api repos/$REPO/teams --jq '.[].slug' 2>/dev/null
 
 ### For Reviewers (PR Context)
 
-| Signal | Points | Rationale |
-|--------|--------|-----------|
-| CODEOWNERS match | +50 | Explicit ownership declaration |
-| Commits to changed files (last 30d) | +10 per match | File-level expertise |
-| Recent PR reviews | +5 per review (max 25) | Active reviewer |
-| Recent PR authorship | +3 per PR (max 15) | Active contributor |
-| Same team membership | +10 | Team context |
-| Open review load | -3 per open review | Workload balancing |
-| Is PR author | -100 | Cannot self-review |
+| Signal                              | Points                 | Rationale                      |
+| ----------------------------------- | ---------------------- | ------------------------------ |
+| CODEOWNERS match                    | +50                    | Explicit ownership declaration |
+| Commits to changed files (last 30d) | +10 per match          | File-level expertise           |
+| Recent PR reviews                   | +5 per review (max 25) | Active reviewer                |
+| Recent PR authorship                | +3 per PR (max 15)     | Active contributor             |
+| Same team membership                | +10                    | Team context                   |
+| Open review load                    | -3 per open review     | Workload balancing             |
+| Is PR author                        | -100                   | Cannot self-review             |
 
 ### For Assignees (Issue Context)
 
-| Signal | Points | Rationale |
-|--------|--------|-----------|
-| Recent issues with same label | +10 per issue | Domain expertise |
-| Recent commits to related files | +5 per commit | Code familiarity |
-| Current open issue count | -2 per issue | Workload balancing |
-| Explicit @mention in issue | +20 | Stakeholder indication |
+| Signal                          | Points        | Rationale              |
+| ------------------------------- | ------------- | ---------------------- |
+| Recent issues with same label   | +10 per issue | Domain expertise       |
+| Recent commits to related files | +5 per commit | Code familiarity       |
+| Current open issue count        | -2 per issue  | Workload balancing     |
+| Explicit @mention in issue      | +20           | Stakeholder indication |
 
 ## Usage Workflow
 
@@ -156,6 +153,7 @@ Based on file ownership, recent activity, and current workload:
 ```
 
 Then invoke AskUserQuestion:
+
 - **Option 1**: "@alice (Recommended)" - Top ranked reviewer
 - **Option 2**: "@bob" - Active reviewer
 - **Option 3**: "@carol" - File expertise
@@ -254,26 +252,30 @@ Apply penalty: `-3 points per open review`
 ### No CODEOWNERS File
 
 Fall back to:
+
 1. Recent file contributors
-2. Recent PR reviewers
-3. All collaborators (alphabetical)
+1. Recent PR reviewers
+1. All collaborators (alphabetical)
 
 ### No Recent Activity
 
 If no commits or PRs in last 30 days:
+
 1. Extend window to 90 days
-2. Fall back to all collaborators
+1. Fall back to all collaborators
 
 ### Private Repository / API Limits
 
 If API calls fail:
+
 1. Use git log for local contributor data
-2. Present collaborator list from gh api
-3. Allow manual input
+1. Present collaborator list from gh api
+1. Allow manual input
 
 ### Single Contributor Repository
 
 Skip suggestion and note:
+
 ```markdown
 **Note**: Single contributor detected. Self-review checklist recommended instead of external reviewer.
 ```
@@ -311,8 +313,8 @@ Based on scoring, **@{user1}** is the recommended {reviewer/assignee} because:
 ## Best Practices
 
 1. **Always check CODEOWNERS first** - Explicit ownership trumps heuristics
-2. **Balance workload** - Don't always suggest the most active reviewer
-3. **Show reasoning** - Users should understand why suggestions were made
-4. **Allow override** - Always provide "Someone else" option
-5. **Cache results** - Don't re-fetch data within same session
-6. **Handle failures gracefully** - API errors shouldn't block workflow
+1. **Balance workload** - Don't always suggest the most active reviewer
+1. **Show reasoning** - Users should understand why suggestions were made
+1. **Allow override** - Always provide "Someone else" option
+1. **Cache results** - Don't re-fetch data within same session
+1. **Handle failures gracefully** - API errors shouldn't block workflow

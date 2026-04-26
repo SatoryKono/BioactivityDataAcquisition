@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-03-30'
----
+  Last verified: '2026-03-30'
+
+______________________________________________________________________
 
 # Пайплайн: PubMed Publication
 
@@ -15,58 +18,58 @@ Last verified: '2026-03-30'
 **Сущность:** `publication`
 **Версия схемы:** 1.0.0
 
----
+______________________________________________________________________
 
 ## 1. Описание
 
 Пайплайн извлекает метаданные научных публикаций из API PubMed (NCBI E-utilities). Используется для обогащения биоактивных данных ссылками на первоисточники.
 
----
+______________________________________________________________________
 
 ## 2. Ключевые поля
 
 ### Идентификаторы
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `pmid` | `str` | PubMed ID (уникальный) |
-| `doi` | `str` | Digital Object Identifier |
-| `pmc_id` | `str` | PubMed Central ID |
+| Поле     | Тип   | Описание                  |
+| -------- | ----- | ------------------------- |
+| `pmid`   | `str` | PubMed ID (уникальный)    |
+| `doi`    | `str` | Digital Object Identifier |
+| `pmc_id` | `str` | PubMed Central ID         |
 
 ### Метаданные статьи
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `title` | `str` | Название статьи |
-| `abstract` | `str` | Аннотация |
-| `authors` | `list[str]` | Список авторов |
-| `journal` | `str` | Название журнала |
-| `publication_date` | `str` | Дата публикации |
-| `volume` | `str` | Том журнала |
-| `issue` | `str` | Выпуск |
-| `page_range` | `str` | Страницы |
+| Поле               | Тип         | Описание         |
+| ------------------ | ----------- | ---------------- |
+| `title`            | `str`       | Название статьи  |
+| `abstract`         | `str`       | Аннотация        |
+| `authors`          | `list[str]` | Список авторов   |
+| `journal`          | `str`       | Название журнала |
+| `publication_date` | `str`       | Дата публикации  |
+| `volume`           | `str`       | Том журнала      |
+| `issue`            | `str`       | Выпуск           |
+| `page_range`       | `str`       | Страницы         |
 
 ### Авторы и аффилиации
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `author_keys` | `str \| None` | Нормализованные ключи авторов в формате `Surname-F`, разделённые `\|` |
-| `affiliation_list` | `str \| None` | JSON-массив уникальных аффилиаций |
-| `authors_with_affiliations` | `str \| None` | JSON-массив: автор → аффилиации |
-| `affiliation_structured` | `str \| None` | JSON-массив с ROR/GRID идентификаторами |
+| Поле                        | Тип           | Описание                                                              |
+| --------------------------- | ------------- | --------------------------------------------------------------------- |
+| `author_keys`               | `str \| None` | Нормализованные ключи авторов в формате `Surname-F`, разделённые `\|` |
+| `affiliation_list`          | `str \| None` | JSON-массив уникальных аффилиаций                                     |
+| `authors_with_affiliations` | `str \| None` | JSON-массив: автор → аффилиации                                       |
+| `affiliation_structured`    | `str \| None` | JSON-массив с ROR/GRID идентификаторами                               |
 
 ### Классификация
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `publication_class` | `str` | Класс публикации: EXP, REV, PEER |
-| `publication_subclass` | `str \| None` | Подкласс (L2): ~16 групп |
+| Поле                       | Тип           | Описание                               |
+| -------------------------- | ------------- | -------------------------------------- |
+| `publication_class`        | `str`         | Класс публикации: EXP, REV, PEER       |
+| `publication_subclass`     | `str \| None` | Подкласс (L2): ~16 групп               |
 | `publication_type_unified` | `str \| None` | Унифицированный тип (L3): 214 значений |
-| `subject_mesh` | `list[str]` | MeSH термины |
-| `subject_keywords` | `list[str]` | Ключевые слова |
-| `publication_types` | `list[str]` | Типы публикации |
+| `subject_mesh`             | `list[str]`   | MeSH термины                           |
+| `subject_keywords`         | `list[str]`   | Ключевые слова                         |
+| `publication_types`        | `list[str]`   | Типы публикации                        |
 
----
+______________________________________________________________________
 
 ## 3. Трансформация
 
@@ -84,23 +87,24 @@ PubMed API возвращает данные в XML формате. Трансф
 entity_id = f"pubmed:{pmid}"
 ```
 
----
+______________________________________________________________________
 
 ## 4. Особенности
 
 ### Rate Limiting
 
 PubMed API имеет строгие лимиты:
+
 - Без API key: 3 запроса/сек
 - С API key: 10 запросов/сек
 
 ### Рекомендации
 
 1. Используйте API key для production
-2. Устанавливайте `limit` при тестировании
-3. Используйте `--dry-run` для проверки конфигурации
+1. Устанавливайте `limit` при тестировании
+1. Используйте `--dry-run` для проверки конфигурации
 
----
+______________________________________________________________________
 
 ## 5. Использование CLI
 
@@ -115,39 +119,39 @@ bioetl run --pipeline pubmed_publication --limit 100
 bioetl run --pipeline pubmed_publication --run-type rebuild
 ```
 
----
+______________________________________________________________________
 
 ## 6. Связанные файлы
 
-| Компонент | Путь |
-|-----------|------|
-| Конфигурация | `configs/entities/pubmed/publication.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/pubmed/transformer.py` |
-| XML Parser | `src/bioetl/application/pipelines/pubmed/xml_parser.py` |
-| Extractors | `src/bioetl/application/pipelines/pubmed/extractors/` |
+| Компонент    | Путь                                                     |
+| ------------ | -------------------------------------------------------- |
+| Конфигурация | `configs/entities/pubmed/publication.yaml`               |
+| Трансформер  | `src/bioetl/application/pipelines/pubmed/transformer.py` |
+| XML Parser   | `src/bioetl/application/pipelines/pubmed/xml_parser.py`  |
+| Extractors   | `src/bioetl/application/pipelines/pubmed/extractors/`    |
 
----
+______________________________________________________________________
 
 ## Contract References
 
-| Артефакт | Ссылка |
-| --- | --- |
-| Gold contract export | [pubmed_publication_v1.0.json](../../contracts/gold/pubmed_publication_v1.0.json) |
-| Gold schemas index | [gold-schemas.md](../../contracts/gold-schemas.md) |
-| Versioning policy | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
+| Артефакт             | Ссылка                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Gold contract export | [pubmed_publication_v1.0.json](../../contracts/gold/pubmed_publication_v1.0.json)        |
+| Gold schemas index   | [gold-schemas.md](../../contracts/gold-schemas.md)                                       |
+| Versioning policy    | [ADR-036](../../../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) |
 
----
+______________________________________________________________________
 
 ## Compliance
 
-| Контроль | Статус | Evidence |
-| --- | --- | --- |
-| Metadata | Pass | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified` |
-| Runtime alignment | Pass | Активный config/runtime surface описан в разделах `Конфигурация`, `Особенности`, `Связанные файлы` |
-| Contract linkage | Pass | [pubmed_publication_v1.0.json](../../contracts/gold/pubmed_publication_v1.0.json) |
-| API governance | Pass | См. [API Compliance](#api-compliance) |
+| Контроль          | Статус | Evidence                                                                                           |
+| ----------------- | ------ | -------------------------------------------------------------------------------------------------- |
+| Metadata          | Pass   | YAML header содержит `Version`, `Status`, `Class`, `Owner`, `Reviewers`, `Last verified`           |
+| Runtime alignment | Pass   | Активный config/runtime surface описан в разделах `Конфигурация`, `Особенности`, `Связанные файлы` |
+| Contract linkage  | Pass   | [pubmed_publication_v1.0.json](../../contracts/gold/pubmed_publication_v1.0.json)                  |
+| API governance    | Pass   | См. [API Compliance](#api-compliance)                                                              |
 
----
+______________________________________________________________________
 
 ## API Compliance
 

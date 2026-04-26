@@ -32,31 +32,31 @@ ______________________________________________________________________
 
 ## Quick Links
 
-| Need to...                        | Go to                                                                                  |
-| --------------------------------- | -------------------------------------------------------------------------------------- |
-| Understand the rules              | [RULES.md](RULES.md)                                                                   |
-| Look up terminology               | [glossary.md](glossary.md)                                                             |
-| Find tool commands                | [TOOLS.md](TOOLS.md)                                                                   |
-| Verify docs quality gates         | [docs-verification.md](../03-guides/docs-verification.md)                              |
-| Check entity config parity        | [docs-parity-gate.md](../03-guides/docs-parity-gate.md)                                |
+| Need to...                         | Go to                                                                                  |
+| ---------------------------------- | -------------------------------------------------------------------------------------- |
+| Understand the rules               | [RULES.md](RULES.md)                                                                   |
+| Look up terminology                | [glossary.md](glossary.md)                                                             |
+| Find tool commands                 | [TOOLS.md](TOOLS.md)                                                                   |
+| Verify docs quality gates          | [docs-verification.md](../03-guides/docs-verification.md)                              |
+| Check entity config parity         | [docs-parity-gate.md](../03-guides/docs-parity-gate.md)                                |
 | Review structure / retention rules | [03-file-policy.md](governance/03-file-policy.md)                                      |
-| Govern documentation              | [D-01](governance/01-documentation-governance-style-guide.md)                          |
-| Create a new pipeline             | [governance/04-extending-bioetl.md](governance/04-extending-bioetl.md)                 |
-| Review a pipeline                 | [pipeline-review-checklist.md](../04-reference/templates/pipeline-review-checklist.md) |
-| Browse published reference docs   | [index.md](../04-reference/index.md)                                                   |
-| Find doc templates                | [templates/index.md](../04-reference/templates/index.md)                               |
-| Inspect run traceability          | [run-manifest-ledger.md](../04-reference/contracts/run-manifest-ledger.md)             |
-| Use inspection CLI                | [cli.md](../04-reference/cli.md)                                                       |
-| Run control-plane triage          | [run-manifest-inspection.md](../05-operations/runbooks/run-manifest-inspection.md)     |
-| Understand control-plane decision | [ADR-044](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)   |
-| Understand rollout / DQ decision  | [ADR-045](../02-architecture/decisions/ADR-045-dq-contract-system.md)                  |
-| Handle a prod error               | [runbooks/index.md](../05-operations/runbooks/index.md)                                |
-| Browse historical ops material    | [archive-index.md](../05-operations/archive-index.md)                                  |
-| Understand architecture           | [00-overview.md](../02-architecture/00-overview.md)                                    |
-| Check data contracts              | [chembl_activity-v1.0.json](../04-reference/contracts/gold/chembl_activity_v1.0.json)  |
-| Check DQ contracts                | [dq-contracts.md](../04-reference/contracts/dq-contracts.md)                                |
-| Browse ADR registry               | [adr-registry.md](../02-architecture/adr-registry.md)                                  |
-| Need historical context           | Repository path `docs/99-archive/README.md` *(non-canonical)*                          |
+| Govern documentation               | [D-01](governance/01-documentation-governance-style-guide.md)                          |
+| Create a new pipeline              | [governance/04-extending-bioetl.md](governance/04-extending-bioetl.md)                 |
+| Review a pipeline                  | [pipeline-review-checklist.md](../04-reference/templates/pipeline-review-checklist.md) |
+| Browse published reference docs    | [index.md](../04-reference/index.md)                                                   |
+| Find doc templates                 | [templates/index.md](../04-reference/templates/index.md)                               |
+| Inspect run traceability           | [run-manifest-ledger.md](../04-reference/contracts/run-manifest-ledger.md)             |
+| Use inspection CLI                 | [cli.md](../04-reference/cli.md)                                                       |
+| Run control-plane triage           | [run-manifest-inspection.md](../05-operations/runbooks/run-manifest-inspection.md)     |
+| Understand control-plane decision  | [ADR-044](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)   |
+| Understand rollout / DQ decision   | [ADR-045](../02-architecture/decisions/ADR-045-dq-contract-system.md)                  |
+| Handle a prod error                | [runbooks/index.md](../05-operations/runbooks/index.md)                                |
+| Browse historical ops material     | [archive-index.md](../05-operations/archive-index.md)                                  |
+| Understand architecture            | [00-overview.md](../02-architecture/00-overview.md)                                    |
+| Check data contracts               | [chembl_activity-v1.0.json](../04-reference/contracts/gold/chembl_activity_v1.0.json)  |
+| Check DQ contracts                 | [dq-contracts.md](../04-reference/contracts/dq-contracts.md)                           |
+| Browse ADR registry                | [adr-registry.md](../02-architecture/adr-registry.md)                                  |
+| Need historical context            | Repository path `docs/99-archive/README.md` *(non-canonical)*                          |
 
 ______________________________________________________________________
 
@@ -218,8 +218,8 @@ ______________________________________________________________________
 | -------- | -------- | ------------------------------------------------------------------------------ | -------- |
 | ChEMBL   | Activity | [activity-schema.md](../04-reference/schemas/domain/chembl/activity-schema.md) | §2.8     |
 | ChEMBL   | Molecule | [molecule-schema.md](../04-reference/schemas/domain/chembl/molecule-schema.md) | §2.8     |
-| ChEMBL   | Target   | [target-schema.md](../04-reference/schemas/domain/chembl/target-schema.md) | §2.8     |
-| ChEMBL   | Assay    | [assay-schema.md](../04-reference/schemas/domain/chembl/assay-schema.md) | §2.8     |
+| ChEMBL   | Target   | [target-schema.md](../04-reference/schemas/domain/chembl/target-schema.md)     | §2.8     |
+| ChEMBL   | Assay    | [assay-schema.md](../04-reference/schemas/domain/chembl/assay-schema.md)       | §2.8     |
 
 ### Operations
 
@@ -552,9 +552,9 @@ ______________________________________________________________________
 
 ### CI/CD & GitHub
 
-| Topic         | Document                                                                                                       | RULES.md |
-| ------------- | -------------------------------------------------------------------------------------------------------------- | -------- |
-| GitHub Policy | [05-github-policy.md](governance/05-github-policy.md)                                                          | §4, §5   |
+| Topic         | Document                                                                                                      | RULES.md |
+| ------------- | ------------------------------------------------------------------------------------------------------------- | -------- |
+| GitHub Policy | [05-github-policy.md](governance/05-github-policy.md)                                                         | §4, §5   |
 | Contributing  | [CONTRIBUTING.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/CONTRIBUTING.md) | —        |
 | Security      | [SECURITY.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/SECURITY.md)         | §5.4     |
 

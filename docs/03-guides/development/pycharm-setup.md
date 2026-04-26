@@ -6,6 +6,7 @@
 
 Рекомендуется использовать Python 3.13. Для Windows настроен SDK, указывающий на `.venv-win`.
 Если вы используете другую ОС или путь к виртуальному окружению отличается:
+
 - Зайдите в **Settings** > **Project: BioactivityDataAcquisition2** > **Python Interpreter**.
 - Выберите интерпретатор из вашего `.venv` (созданного через `uv sync`).
 
@@ -14,6 +15,7 @@
 Доступны следующие группы конфигураций (кнопка в верхней панели или `Shift+F10`):
 
 ### Пайплайны (Pipelines)
+
 - **BioETL: Run molecule (Limit 10)** — быстрый запуск пайплайна молекул.
 - **BioETL: Run assay (Limit 10)** — запуск пайплайна анализов.
 - **BioETL: Run target (Limit 10)** — запуск пайплайна мишеней.
@@ -22,6 +24,7 @@
 - **BioETL Run chembl_molecule** — полный запуск ChEMBL Molecule.
 
 ### Качество и Документация (QA & Docs)
+
 - **Scripts: QA (Check)** — запуск `scripts.engineering.qa check` (линтеры, типы).
 - **Scripts: Schema (Validate)** — проверка всех YAML конфигов.
 - **Scripts: Docs (Check Links)** — проверка ссылок и спецификаций в документации.
@@ -29,6 +32,7 @@
 - **uv QA Check** — запуск полной проверки через uv.
 
 ### Тестирование (Testing)
+
 - **Pytest All** — все тесты.
 - **Pytest Unit** — только юниты.
 - **Pytest Integration** — интеграционные тесты.
@@ -37,6 +41,7 @@
 ## 3. Области видимости (Scopes)
 
 Для удобства навигации по гексагональной архитектуре созданы Shared Scopes:
+
 - **Domain** — `src/bioetl/domain/`
 - **Application** — `src/bioetl/application/`
 - **Infrastructure** — `src/bioetl/infrastructure/`

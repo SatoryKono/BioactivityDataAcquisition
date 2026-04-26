@@ -1,14 +1,17 @@
----
+______________________________________________________________________
+
 Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Priority: P2
-Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-Last verified: '2026-04-02'
----
+  Priority: P2
+  Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+  Last verified: '2026-04-02'
+
+______________________________________________________________________
 
 # Traceability Tabletop Drills
 
@@ -56,15 +59,23 @@ Last verified: '2026-04-02'
 ### Drill Template
 
 1. Facilitator announces synthetic alert and gives `run_id`.
-2. Operator runs:
+1. Operator runs:
+
 - `bioetl run-manifest show <run-id> --format json`
+
 3. Operator extracts:
+
 - `manifest_id`, `latest_status`, `latest_event_type`, `event_family_counts`,
   `artifact_refs`, `artifact_refs[*].artifact_id`, `missing_artifact_links`.
+
 4. Operator classifies incident type:
+
 - control-plane, DQ, lineage, checkpoint, or composite degradation.
+
 5. Operator proposes decision:
+
 - retry, quarantine, rollback, monitor, escalate.
+
 6. Facilitator records timing and evidence completeness.
 
 ### Scenarios
@@ -73,7 +84,7 @@ Last verified: '2026-04-02'
 
 - Injected symptom: `run-manifest show <run-id>` not found.
 - Expected operator decision: immediate control-plane escalation.
-- Pass criteria: escalation decision in <= 10 minutes with explicit `run_id`.
+- Pass criteria: escalation decision in \<= 10 minutes with explicit `run_id`.
 
 ### Scenario B: Artifact Linkage Regression
 
@@ -96,21 +107,26 @@ Last verified: '2026-04-02'
 - Score each drill from 0 to 2 per category:
 
 - Identification speed (time-to-first-diagnosis)
+
 - Evidence completeness (all required anchors captured)
+
 - Correct routing (owner/escalation path)
+
 - Decision quality (safe and policy-consistent)
 
 - Total score:
 
 - 7-8: pass
+
 - 5-6: conditional pass with action items
-- <=4: fail, follow-up coaching required
+
+- \<=4: fail, follow-up coaching required
 
 ### Post-Drill Actions
 
 - Record one improvement item per failed/conditional category.
 - Update related runbook sections if diagnostic steps were ambiguous.
-- Re-run the same scenario within 7 days if score <= 6.
+- Re-run the same scenario within 7 days if score \<= 6.
 
 ## Compliance
 

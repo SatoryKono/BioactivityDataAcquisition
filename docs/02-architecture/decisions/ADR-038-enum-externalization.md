@@ -1,12 +1,15 @@
----
+______________________________________________________________________
+
 Version: 1.0.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
+
 - BioETL Team
-Last verified: '2026-04-23'
----
+  Last verified: '2026-04-23'
+
+______________________________________________________________________
 
 # ADR-038: ChEMBL Enum Values Externalization to YAML
 
@@ -21,9 +24,9 @@ etc.) were defined in three places:
 
 1. **Python frozensets** in `domain/schemas/constants.py` — used by Pandera schema
    validation (`pa.Field(isin=list(...))`)
-2. **Filter YAML sections** in `configs/entities/chembl/*.yaml#filters` — hardcoded
+1. **Filter YAML sections** in `configs/entities/chembl/*.yaml#filters` — hardcoded
    subsets in `columns:` and `extraction-params:`
-3. **DQ YAML sections** in `configs/entities/chembl/*.yaml#quality` — hardcoded
+1. **DQ YAML sections** in `configs/entities/chembl/*.yaml#quality` — hardcoded
    `allowed:` lists
 
 No single source of truth existed. Updating to a new ChEMBL DB version required
@@ -51,12 +54,13 @@ configs/enums/
 constant matches the corresponding YAML value exactly.
 
 **Workflow for ChEMBL version or governed-vocabulary update:**
+
 1. Update `configs/enums/chembl.yaml` (bump version, add/remove values)
-2. Run tests — sync tests fail, showing exactly which constants diverge
-3. Update `constants.py` to match
-4. Update DQ/filter/profile surfaces that consume the vocabulary
-5. Regenerate normalization matrix artifacts when profile or DQ semantics change
-6. Tests pass
+1. Run tests — sync tests fail, showing exactly which constants diverge
+1. Update `constants.py` to match
+1. Update DQ/filter/profile surfaces that consume the vocabulary
+1. Regenerate normalization matrix artifacts when profile or DQ semantics change
+1. Tests pass
 
 ### What is NOT externalized
 
@@ -76,12 +80,14 @@ constant matches the corresponding YAML value exactly.
 ### A. Runtime YAML loading in constants.py
 
 Load YAML at module import time via `@functools.cache`. Rejected because:
+
 - Violates ARCH-002 (domain purity — no I/O in domain layer)
 - `open()` in domain detected by architecture tests
 
 ### B. Keep hardcoded Python only (status quo)
 
 Rejected because:
+
 - No declared SSOT for ChEMBL DB version upgrades
 - Duplication across Python and YAML configs with no validation
 
@@ -89,6 +95,7 @@ Rejected because:
 
 Would require rewriting all Pandera schemas to use factory functions instead of
 class-level `pa.Field(isin=...)`. Rejected because:
+
 - High migration cost (13 schema files)
 - Lose type safety at class definition time
 - Pandera class-level validators are idiomatic
@@ -96,6 +103,7 @@ class-level `pa.Field(isin=...)`. Rejected because:
 ### D. Build-time codegen (YAML -> Python)
 
 Generate `constants.py` from YAML via template. Rejected because:
+
 - Adds build step complexity
 - Generated files harder to debug
 - Overkill for ~80 lines of config
@@ -128,15 +136,15 @@ Generate `constants.py` from YAML via template. Rejected because:
 
 ## Compliance
 
-| Requirement | Status | Notes |
-|-------------|--------|-------|
-| Domain purity (ARCH-002) | PASS | No I/O in `constants.py` |
-| Public API unchanged | PASS | All `__all__` exports identical |
-| Types preserved | PASS | `frozenset[str]`, `tuple[float, ...]` |
-| Sync enforcement | PASS | Sync tests in `test_constants_yaml.py` |
-| DQ/filter subset governance | PASS | Covered by `test_chembl_enum_parity.py` |
-| Observed-value governance | PASS | Covered by `test_chembl_observed_value_fixtures.py` |
-| Derived publication taxonomy | PASS | Raw provider values preserved; derived fields validated through `publication_type_classification.csv` |
+| Requirement                  | Status | Notes                                                                                                 |
+| ---------------------------- | ------ | ----------------------------------------------------------------------------------------------------- |
+| Domain purity (ARCH-002)     | PASS   | No I/O in `constants.py`                                                                              |
+| Public API unchanged         | PASS   | All `__all__` exports identical                                                                       |
+| Types preserved              | PASS   | `frozenset[str]`, `tuple[float, ...]`                                                                 |
+| Sync enforcement             | PASS   | Sync tests in `test_constants_yaml.py`                                                                |
+| DQ/filter subset governance  | PASS   | Covered by `test_chembl_enum_parity.py`                                                               |
+| Observed-value governance    | PASS   | Covered by `test_chembl_observed_value_fixtures.py`                                                   |
+| Derived publication taxonomy | PASS   | Raw provider values preserved; derived fields validated through `publication_type_classification.csv` |
 
 ## References
 

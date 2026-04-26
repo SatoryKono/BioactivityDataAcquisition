@@ -55,14 +55,14 @@ GEMINI_API_KEY=your-api-key-here
 
 ## Codex Comparison
 
-| Area | Codex | Gemini |
-| --- | --- | --- |
-| Runtime | Managed npm CLI | Managed npm CLI |
-| Package | `@openai/codex` | `@google/gemini-cli` |
-| Install root | `.cache/tools/codex-cli` | `.cache/tools/gemini-cli` |
-| Entrypoint | `run-codex.sh` / `.ps1` | `run-gemini.sh` / `.ps1` |
-| Key | `OPENAI_API_KEY` | `GEMINI_API_KEY` |
-| Interactive mode | `codex -C <repo>` | `gemini` from repo root |
-| Headless mode | `codex exec --full-auto` | `gemini --prompt ... --approval-mode yolo` |
+| Area             | Codex                    | Gemini                                     |
+| ---------------- | ------------------------ | ------------------------------------------ |
+| Runtime          | Managed npm CLI          | Managed npm CLI                            |
+| Package          | `@openai/codex`          | `@google/gemini-cli`                       |
+| Install root     | `.cache/tools/codex-cli` | `.cache/tools/gemini-cli`                  |
+| Entrypoint       | `run-codex.sh` / `.ps1`  | `run-gemini.sh` / `.ps1`                   |
+| Key              | `OPENAI_API_KEY`         | `GEMINI_API_KEY`                           |
+| Interactive mode | `codex -C <repo>`        | `gemini` from repo root                    |
+| Headless mode    | `codex exec --full-auto` | `gemini --prompt ... --approval-mode yolo` |
 
 Both launchers are now thin wrappers around managed coding-agent CLIs.

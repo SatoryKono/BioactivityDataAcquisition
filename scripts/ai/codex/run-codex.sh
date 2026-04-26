@@ -130,14 +130,14 @@ while [[ $RETRY_COUNT -lt $MAX_RETRIES ]]; do
     if bash "${HELPER_DIR}/check-env.sh" 2>/dev/null; then
         break
     fi
-    
+
     RETRY_COUNT=$((RETRY_COUNT + 1))
-    
+
     if [[ $RETRY_COUNT -lt $MAX_RETRIES ]]; then
         log_warn "Some components missing (attempt $RETRY_COUNT/$MAX_RETRIES)"
         log_info "Running setup to install missing components..."
         echo ""
-        
+
         if ! bash "${HELPER_DIR}/setup-env.sh"; then
             log_error "Setup failed on attempt $RETRY_COUNT"
             exit 1
@@ -181,7 +181,7 @@ case "$COMMAND" in
     start|"")
         bash "${HELPER_DIR}/run-codex-impl.sh" "$@"
         ;;
-    
+
     exec)
         if [[ $# -eq 0 ]]; then
             log_error "exec mode requires a prompt"
@@ -189,7 +189,7 @@ case "$COMMAND" in
         fi
         bash "${HELPER_DIR}/run-codex-impl.sh" exec --full-auto "$@"
         ;;
-    
+
     login)
         CODEX_LOGIN_BIN="$(resolve_codex_bin || true)"
         if [[ -z "${CODEX_LOGIN_BIN}" ]]; then
@@ -199,7 +199,7 @@ case "$COMMAND" in
         fi
         "${CODEX_LOGIN_BIN}" login
         ;;
-    
+
     device-login)
         CODEX_LOGIN_BIN="$(resolve_codex_bin || true)"
         if [[ -z "${CODEX_LOGIN_BIN}" ]]; then
@@ -209,7 +209,7 @@ case "$COMMAND" in
         fi
         "${CODEX_LOGIN_BIN}" login --device-auth
         ;;
-    
+
     *)
         # Treat as prompt
         bash "${HELPER_DIR}/run-codex-impl.sh" "$COMMAND" "$@"

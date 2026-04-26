@@ -153,14 +153,14 @@ All whitelist patterns **MUST** be in `.gitignore`.
 
 Основной путь очистки — цели в `Makefile`:
 
-| Command                                        | Behavior                                                            |
-| ---------------------------------------------- | ------------------------------------------------------------------- |
-| `make clean`                                   | Удаляет Python-кэш, coverage-артефакты, build/dist                  |
-| `make clean-local-artifacts DRY_RUN=1`         | Preview очистки локальных артефактов                                |
-| `make clean-local-artifacts`                   | Применяет локальную очистку (без удаления `.worktrees/.rollback`)   |
-| `make clean-local-artifacts PURGE_WORKTREES=1` | Дополнительно очищает локальные `.worktrees/.rollback`              |
+| Command                                        | Behavior                                                                        |
+| ---------------------------------------------- | ------------------------------------------------------------------------------- |
+| `make clean`                                   | Удаляет Python-кэш, coverage-артефакты, build/dist                              |
+| `make clean-local-artifacts DRY_RUN=1`         | Preview очистки локальных артефактов                                            |
+| `make clean-local-artifacts`                   | Применяет локальную очистку (без удаления `.worktrees/.rollback`)               |
+| `make clean-local-artifacts PURGE_WORKTREES=1` | Дополнительно очищает локальные `.worktrees/.rollback`                          |
 | `make clean-preflight DRY_RUN=1`               | Preview preflight-очистки через `scripts/engineering/repo/preflight_cleanup.sh` |
-| `make clean-all`                               | `clean` + удаление логов/временных файлов                           |
+| `make clean-all`                               | `clean` + удаление логов/временных файлов                                       |
 
 ### 4.3. Delta Lake VACUUM (MUST)
 
@@ -186,12 +186,12 @@ bioetl quarantine purge --pipeline chembl_activity
 
 ### 5.1. Post-Cleanup Validation
 
-| Check                  | Command                                                             |
-| ---------------------- | ------------------------------------------------------------------- |
-| Tests pass             | `pytest -q` (without network)                                       |
-| Smoke tests green      | `pytest tests/smoke/ -q`                                            |
+| Check                  | Command                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------- |
+| Tests pass             | `pytest -q` (without network)                                                   |
+| Smoke tests green      | `pytest tests/smoke/ -q`                                                        |
 | Structure policy green | `python3 scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked` |
-| Smoke run              | One pipeline, identical artifacts                                   |
+| Smoke run              | One pipeline, identical artifacts                                               |
 
 ### 5.2. Structural Verification
 

@@ -11,8 +11,8 @@
 ### Research Questions
 
 1. What does the current dependency map say about layer-policy violations and cross-layer pressure?
-2. How many source files exceed `10 KB`?
-3. How many source files exceed `350 LOC`?
-4. How much overlap is there between the `>10 KB` and `>350 LOC` sets?
-5. Which layers and packages dominate the hotspot inventory?
-6. Which individual files lead the hotspot tail by size and by LOC?
+1. How many source files exceed `10 KB`?
+1. How many source files exceed `350 LOC`?
+1. How much overlap is there between the `>10 KB` and `>350 LOC` sets?
+1. Which layers and packages dominate the hotspot inventory?
+1. Which individual files lead the hotspot tail by size and by LOC?
