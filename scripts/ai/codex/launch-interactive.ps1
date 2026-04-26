@@ -47,15 +47,10 @@ Write-Host "To get full interactive support, install Windows Terminal:"
 Write-Host "  https://www.microsoft.com/store/productId/9N0DX20HK701"
 Write-Host ""
 
-# Try to launch directly
+# Launch directly in the current terminal to preserve interactive TTY.
 try {
-    $process = Start-Process -FilePath "wsl" `
-        -ArgumentList "-d", $WslDistro, "-e", "bash", "-i", "-c", "cd '$ScriptPathWSL' && bash run-codex.sh start" `
-        -NoNewWindow `
-        -PassThru
-    
-    $process.WaitForExit()
-    exit $process.ExitCode
+    & wsl -d $WslDistro -e bash -i -c "cd '$ScriptPathWSL' && bash run-codex.sh start"
+    exit $LASTEXITCODE
 } catch {
     Write-Host "[!] Error launching Codex: $_"
     exit 1

@@ -1,9 +1,9 @@
 #!/usr/bin/env pwsh
 # Codex - Main Entry Point
-# Supports: check, setup, start, exec, login, mcp-check, mcp-setup, help
+# Supports: start (default), check, setup, exec, login, mcp-check, mcp-setup, help
 
 param(
-    [string]$Command = "check",
+    [string]$Command = "start",
     [string[]]$Prompt = @()
 )
 
@@ -22,6 +22,28 @@ function ConvertTo-WslPath {
 
 $LauncherWSL = ConvertTo-WslPath $ScriptDir
 $LauncherWSL = "$LauncherWSL/run-codex.sh"
+
+function Resolve-CodexInWsl {
+    param([string]$DistroName = "Ubuntu")
+    try {
+        $cmd = @'
+if [ -x "$HOME/.npm-global/bin/codex" ]; then
+  echo "$HOME/.npm-global/bin/codex"
+elif command -v codex >/dev/null 2>&1; then
+  command -v codex
+else
+  exit 1
+fi
+'@
+        $resolved = (wsl -d $DistroName -e bash -lc $cmd 2>$null | Select-Object -First 1)
+        if ($resolved) {
+            return $resolved.ToString().Trim()
+        }
+        return $null
+    } catch {
+        return $null
+    }
+}
 
 # Build arguments
 $args_list = @($Command)
@@ -81,8 +103,13 @@ if ($Command -eq "check") {
     # Check npm
     Write-Host "[i] Checking npm..."
     if (Get-Command npm -ErrorAction SilentlyContinue) {
-        $ver = npm --version
-        Write-Host "[+] npm: $ver"
+        $ver = npm --version 2>$null
+        if ($LASTEXITCODE -eq 0 -and $ver) {
+            Write-Host "[+] npm: $ver"
+        } else {
+            Write-Host "[-] npm found but failed to report version"
+            $allOk = $false
+        }
     } else {
         Write-Host "[-] npm not found"
         $allOk = $false
@@ -115,21 +142,11 @@ if ($Command -eq "check") {
 
     # Check Codex CLI in WSL
     Write-Host "[i] Checking Codex CLI in WSL..."
-    try {
-        $timeout_job = Start-Job -ScriptBlock {
-            wsl -d Ubuntu bash -c "command -v codex >/dev/null 2>&1 && echo 'found' || echo 'not found'"
-        }
-        $result = Wait-Job -Job $timeout_job -Timeout 10 | Receive-Job
-        Remove-Job -Job $timeout_job -Force 2>$null
-
-        if ($result -like "*found*") {
-            Write-Host "[+] Codex CLI found in WSL"
-        } else {
-            Write-Host "[!] Codex CLI not found in WSL"
-            $allOk = $false
-        }
-    } catch {
-        Write-Host "[!] Could not check Codex CLI"
+    $codexPath = Resolve-CodexInWsl -DistroName $WslDistro
+    if ($codexPath) {
+        Write-Host "[+] Codex CLI found in WSL: $codexPath"
+    } else {
+        Write-Host "[!] Codex CLI not found in WSL"
         $allOk = $false
     }
 
@@ -152,26 +169,22 @@ if ($Command -eq "setup") {
     Write-Host "=================================================="
     Write-Host ""
 
-    # Check if Node.js and npm exist
-    if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-        Write-Host "[-] Node.js not found"
-        Write-Host "[!] Please install Node.js from https://nodejs.org"
-        exit 1
-    }
+    Write-Host "[i] Installing Codex CLI inside WSL user prefix (~/.npm-global)..."
 
-    if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
-        Write-Host "[-] npm not found"
-        Write-Host "[!] Please reinstall Node.js"
-        exit 1
-    }
-
-    Write-Host "[+] Node.js and npm are installed"
-    Write-Host ""
-    Write-Host "[i] Installing Codex CLI globally..."
-    
     try {
-        npm install -g @openai/codex 2>&1 | Write-Host
-        Write-Host "[+] Codex CLI installed"
+        $setupCmd = @'
+set -euo pipefail
+mkdir -p "$HOME/.npm-global/bin"
+npm config --location=user set prefix "$HOME/.npm-global"
+npm install -g @openai/codex --prefix "$HOME/.npm-global"
+'@
+        wsl -d $WslDistro -e bash -lc $setupCmd 2>&1 | Write-Host
+        $codexPath = Resolve-CodexInWsl -DistroName $WslDistro
+        if (-not $codexPath) {
+            Write-Host "[-] Codex installation finished but binary not found in WSL PATH"
+            exit 1
+        }
+        Write-Host "[+] Codex CLI installed in WSL: $codexPath"
     } catch {
         Write-Host "[-] Failed to install Codex"
         exit 1
@@ -205,7 +218,7 @@ if ($Command -eq "start") {
     Write-Host "    bash run-codex.sh start"
     Write-Host ""
     Write-Host "  Option 3: WSL one-liner"
-    Write-Host "    wsl -d Ubuntu bash -i -c 'cd $LauncherWSL && bash run-codex.sh start'"
+    Write-Host "    wsl -d Ubuntu bash -i -c 'cd $(Split-Path -Parent $LauncherWSL) && bash run-codex.sh start'"
     Write-Host ""
     exit 0
 }
