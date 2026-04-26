@@ -51,7 +51,7 @@ ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
     {
         ".ai",
         ".aiassistant",
-        ".claude",
+        "ai",
         ".codex",
         ".codex_tmp",
         ".gemini",

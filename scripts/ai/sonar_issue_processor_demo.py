@@ -6,7 +6,7 @@ Demo version of SonarQube issue processor - simulates the workflow without real 
 import json
 import os
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from dotenv import load_dotenv
 

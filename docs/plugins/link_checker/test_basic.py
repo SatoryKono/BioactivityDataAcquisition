@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
+# ruff: noqa: T201
 """
 Basic functionality test for Link Checker Plugin
 
 Tests core plugin functionality without requiring external dependencies.
 """
 
-import os
 import sys
 import tempfile
+from pathlib import Path
 
 # Add plugin to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 
 def test_basic_plugin_structure():
     """Test that plugin has correct structure and can be imported."""
     try:
-        from plugin import LinkCheckerPlugin, on_config
+        from plugin import LinkCheckerPlugin
 
         print("✅ Plugin imported successfully")
 
@@ -133,7 +134,7 @@ def test_html_file_discovery():
             ]
 
             for filename, content in test_files:
-                with open(os.path.join(temp_dir, filename), "w") as f:
+                with Path(temp_dir, filename).open("w", encoding="utf-8") as f:
                     f.write(content)
 
             # Test file discovery
@@ -142,10 +143,10 @@ def test_html_file_discovery():
             # Verify results
             assert len(found_files) == 3
             assert all(f.endswith(".html") for f in found_files)
-            assert all(os.path.exists(f) for f in found_files)
+            assert all(Path(f).exists() for f in found_files)
 
             # Verify specific files found
-            found_filenames = [os.path.basename(f) for f in found_files]
+            found_filenames = [Path(f).name for f in found_files]
             for filename, _ in test_files:
                 assert filename in found_filenames
 

@@ -44,7 +44,7 @@ IGNORED_REVIEW_DIRS = {
     ".ruff_cache",
     ".mypy_cache",
     "__pycache__",
-    ".claude",
+    "ai",
     ".codex",
     "playwright",
     "reports",

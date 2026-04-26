@@ -37,7 +37,7 @@ $pathIgnoreList = @(
   "docs/**",
   "*.md",
   ".ai/**",
-  ".claude/**",
+  "ai/claude/**",
   ".github/workflows/**",
   "LICENSE"
 )

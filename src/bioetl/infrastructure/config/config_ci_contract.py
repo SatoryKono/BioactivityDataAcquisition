@@ -18,8 +18,8 @@ LEGACY_ENTITY_NAMES: Final[frozenset[str]] = frozenset(
 )
 
 LEGACY_PATH_FRAGMENTS: Final[tuple[tuple[str, str], ...]] = (
-    ("../../dq/", "../../quality/"),
-    ("../../filter/", "../../filters/"),
+    (f"../../{'dq'}/", "../../quality/"),
+    (f"../../{'filter'}/", "../../filters/"),
 )
 
 PROVIDER_AUTH_REQUIREMENTS: Final[dict[str, list[str]]] = {

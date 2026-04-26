@@ -8,13 +8,13 @@ on:
     paths-ignore:
       - 'docs/**'
       - '.ai/**'
-      - '.claude/**'
+      - 'ai/claude/**'
       - 'LICENSE'
   push:
     paths-ignore:
       - 'docs/**'
       - '.ai/**'
-      - '.claude/**'
+      - 'ai/claude/**'
       - 'LICENSE'
 
 jobs:

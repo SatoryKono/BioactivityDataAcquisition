@@ -4,13 +4,14 @@
 from __future__ import annotations
 
 import sys
+from importlib import import_module
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-import scripts.ai.code_quality_analysis as _impl
+_impl = import_module("scripts.ai.code_quality_analysis")
 
 main = _impl.main
 __all__ = getattr(

@@ -21,7 +21,7 @@ Before executing workflows, discover what tools are available so commands can:
 
 ```bash
 # Project-level Claude agents (preferred source of truth)
-ls .claude/agents/*.md 2>/dev/null | xargs -I {} basename {} .md
+ls ai/claude/agents/*.md 2>/dev/null | xargs -I {} basename {} .md
 
 # Plugin agents
 ls plugins/*/agents/*.md 2>/dev/null | while read f; do
@@ -41,7 +41,7 @@ ls .codex/skills/*/SKILL.md 2>/dev/null | while read f; do
 done
 
 # Legacy Claude skills (fallback only)
-ls .claude/skills/*/SKILL.md 2>/dev/null | while read f; do
+ls ai/claude/skills/*/SKILL.md 2>/dev/null | while read f; do
   skill=$(dirname $f | xargs basename)
   echo "$skill"
 done
@@ -58,7 +58,7 @@ done
 
 ```bash
 # Project-level commands
-ls .claude/commands/*.md 2>/dev/null | xargs -I {} basename {} .md
+ls ai/claude/commands/*.md 2>/dev/null | xargs -I {} basename {} .md
 
 # Plugin commands
 ls plugins/*/commands/*.md 2>/dev/null | while read f; do
@@ -81,7 +81,7 @@ sed -n '1,120p' .codex/config.toml 2>/dev/null
 sed -n '1,220p' .codex/settings.json 2>/dev/null
 
 # Legacy fallback
-grep -E "^(lint|test|check|format|typecheck|build):" .claude/CLAUDE.md 2>/dev/null
+grep -E "^(lint|test|check|format|typecheck|build):" ai/claude/CLAUDE.md 2>/dev/null
 ```
 
 ### Step 5: Detect Tech Stack
@@ -146,7 +146,7 @@ Based on capabilities:
 
 Before implementation:
 1. Invoke capability-discovery skill
-2. Note available `.claude/agents` and `.codex/skills`
+2. Note available `ai/claude/agents` and `.codex/skills`
 3. Note quality commands for Phase 3
 4. Store tech stack and Codex runtime constraints for appropriate tooling
 ```

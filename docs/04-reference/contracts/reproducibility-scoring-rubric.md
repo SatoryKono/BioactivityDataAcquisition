@@ -26,6 +26,10 @@ Category score is the sum of its five criteria, so each category scores from
 0 to 10. Reviewers MUST cite evidence for every non-zero score. Missing
 evidence MUST be recorded explicitly instead of inferred.
 
+Canonical score labels used by drift checks:
+| 0 | Absent, unsafe, fail-open, or not evidenced |
+| 2 | Implemented, documented, and test-backed |
+
 ## Criteria
 
 ### Determinism

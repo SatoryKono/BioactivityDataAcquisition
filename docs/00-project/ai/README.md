@@ -33,7 +33,7 @@ supporting internal artifacts.
 ## Ownership Contract
 
 - `.codex/**` is the runtime source of truth for Codex behavior.
-- `.claude/**` is the runtime source of truth for Claude behavior.
+- `ai/claude/**` is the runtime source of truth for Claude behavior.
 - `docs/00-project/ai/**` is the published/internal mirror and contributor
   guidance surface; it does not redefine runtime behavior by itself.
 - Default sync direction is runtime tree first, docs mirror second.
@@ -44,7 +44,7 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 
 При чтении AI docs используй такой приоритет:
 
-1. runtime source в `.codex/agents/` и parallel runtime registries
+1. runtime source в `.codex/agents/` и `ai/claude/` runtime registries
 1. canonical governance docs:
    - `docs/00-project/RULES.md`
    - `docs/01-requirements/REQUIREMENTS.md`

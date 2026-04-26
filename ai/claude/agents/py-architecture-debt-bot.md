@@ -19,7 +19,7 @@ ______________________________________________________________________
 - Runtime generator: `python -m scripts.engineering.qa generate-debt-tasks`
 - Runtime planner: `python -m scripts.engineering.qa reduce-architecture-debt`
 - Registry verification gate: `python -m scripts.qa check-exemptions --mode auto --growth-mode auto --trend-report off`
-- Orchestration map: `.claude/agents/ORCHESTRATION.md`
+- Orchestration map: `ai/claude/agents/ORCHESTRATION.md`
 - Runtime map: `.codex/agents/CODEX-RUNTIME.md`
 - Historical references:
   - `docs/00-project/ai/prompts/architecture_metric_exemptions_tasks_json_prompt.md`

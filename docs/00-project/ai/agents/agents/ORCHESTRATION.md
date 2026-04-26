@@ -406,7 +406,7 @@ ______________________________________________________________________
 | Документ                                               | Описание                                 |
 | ------------------------------------------------------ | ---------------------------------------- |
 | `.codex/agents/py-*.md`                                | Спецификации субагентов для Codex CLI    |
-| `.claude/rules/ai-selfreview-rules.md`                 | Правила автоматической самопроверки кода |
+| `ai/claude/rules/agent-orchestration-rules.md`         | Claude runtime orchestration compatibility rules |
 | `docs/00-project/RULES.md`                             | Архитектурные правила проекта            |
 | `docs/02-architecture/decisions/`                      | ADR-001..ADR-043                         |
 | `docs/00-project/glossary.md`                          | Терминология                             |

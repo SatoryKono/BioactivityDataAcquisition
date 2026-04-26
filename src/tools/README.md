@@ -128,9 +128,11 @@ are listed but not traversed recursively.
 
 ```
 ./
-├── .claude/
-│   ├── prompts/
-│   └── PROJECT_CONTEXT.md
+├── ai/
+│   └── claude/
+│       ├── agents/
+│       ├── rules/
+│       └── skills/
 ├── configs/
 │   └── pipelines/
 └── src/

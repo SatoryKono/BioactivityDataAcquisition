@@ -31,7 +31,7 @@ This directory stores published documentation for BioETL AI skills across suppor
 ## Canonical Source
 
 - Canonical Codex runtime skill source: `.codex/skills/`
-- Claude runtime-specific skill helpers remain under `.claude/skills/` for
+- Claude runtime-specific skill helpers remain under `ai/claude/skills/` for
   Claude-only behavior and workflow support.
 - `docs/00-project/ai/skills/local/` is a published mirror layer and may retain
   compatibility entries for navigation

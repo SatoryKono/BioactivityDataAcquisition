@@ -9,9 +9,9 @@ Issue #3094: Expose Link-Check Results as Published
 """
 
 import logging
-import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
@@ -52,7 +52,7 @@ class LinkCheckerPlugin(BasePlugin):
         self.start_time = 0
         self.end_time = 0
 
-    def on_startup(self, command, dirty):
+    def on_startup(self, _command, _dirty):
         """Initialize plugin when MkDocs starts."""
         if not self.config["enabled"]:
             log.info("Link checker plugin is disabled")
@@ -61,7 +61,7 @@ class LinkCheckerPlugin(BasePlugin):
         log.info("Link checker plugin initialized")
         self.start_time = time.time()
 
-    def on_post_build(self, config, **kwargs):
+    def on_post_build(self, config, **_kwargs):
         """Check all links after documentation build is complete."""
         if not self.config["enabled"]:
             return
@@ -90,12 +90,7 @@ class LinkCheckerPlugin(BasePlugin):
 
     def _find_html_files(self, site_dir: str) -> list[str]:
         """Find all HTML files in the built site directory."""
-        html_files = []
-        for root, dirs, files in os.walk(site_dir):
-            for file in files:
-                if file.endswith(".html"):
-                    html_files.append(os.path.join(root, file))
-        return html_files
+        return [str(path) for path in Path(site_dir).rglob("*.html")]
 
     def _check_links_in_files(self, html_files: list[str], site_dir: str):
         """Check all links in HTML files using thread pool for parallel processing."""
@@ -105,7 +100,7 @@ class LinkCheckerPlugin(BasePlugin):
             futures = []
 
             for html_file in html_files:
-                relative_path = os.path.relpath(html_file, site_dir)
+                relative_path = str(Path(html_file).relative_to(Path(site_dir)))
                 futures.append(
                     executor.submit(
                         self._check_links_in_file, html_file, base_url, relative_path
@@ -118,13 +113,13 @@ class LinkCheckerPlugin(BasePlugin):
                 self.link_results.extend(file_results)
 
     def _check_links_in_file(
-        self, html_file: str, base_url: str, relative_path: str
+        self, html_file: str, _base_url: str, relative_path: str
     ) -> list[dict]:
         """Check all links in a single HTML file."""
         file_results = []
 
         try:
-            with open(html_file, encoding="utf-8") as f:
+            with Path(html_file).open(encoding="utf-8") as f:
                 content = f.read()
 
             soup = BeautifulSoup(content, "html.parser")
@@ -195,10 +190,8 @@ class LinkCheckerPlugin(BasePlugin):
                 clean_href = href.split("#")[0]
                 if clean_href.endswith(".html"):
                     # Check if HTML file exists
-                    target_path = os.path.join(
-                        os.path.dirname(source_path), clean_href.lstrip("/")
-                    )
-                    if os.path.exists(target_path):
+                    target_path = Path(source_path).parent / clean_href.lstrip("/")
+                    if target_path.exists():
                         result["status"] = "valid"
                     else:
                         result["status"] = "broken"
@@ -253,27 +246,27 @@ class LinkCheckerPlugin(BasePlugin):
 
     def _generate_reports(self, site_dir: str):
         """Generate link check reports in various formats."""
-        report_dir = os.path.join(site_dir, self.config["report_dir"])
-        os.makedirs(report_dir, exist_ok=True)
+        report_dir = Path(site_dir) / self.config["report_dir"]
+        report_dir.mkdir(parents=True, exist_ok=True)
 
         # Generate JSON report
         json_report = self._generate_json_report()
-        json_path = os.path.join(report_dir, "link-health.json")
-        with open(json_path, "w", encoding="utf-8") as f:
+        json_path = report_dir / "link-health.json"
+        with json_path.open("w", encoding="utf-8") as f:
             import json
 
             json.dump(json_report, f, indent=2)
 
         # Generate HTML report
         html_report = self._generate_html_report()
-        html_path = os.path.join(report_dir, "link-health.html")
-        with open(html_path, "w", encoding="utf-8") as f:
+        html_path = report_dir / "link-health.html"
+        with html_path.open("w", encoding="utf-8") as f:
             f.write(html_report)
 
         # Generate badge
         badge = self._generate_badge()
-        badge_path = os.path.join(report_dir, "link-badge.svg")
-        with open(badge_path, "w", encoding="utf-8") as f:
+        badge_path = report_dir / "link-badge.svg"
+        with badge_path.open("w", encoding="utf-8") as f:
             f.write(badge)
 
         log.info(f"Reports generated in {report_dir}")
@@ -400,6 +393,7 @@ class LinkCheckerPlugin(BasePlugin):
             color = "#e05d44"
             status = "failing"
 
+        font_family = "Verdana, DejaVu Sans, sans-serif"
         return f"""
         <svg xmlns="http://www.w3.org/2000/svg" width="120" height="20">
             <linearGradient id="b" x2="0" y2="100%">
@@ -408,9 +402,14 @@ class LinkCheckerPlugin(BasePlugin):
             <rect rx="3" width="120" height="20" fill="{color}"/>
             <rect rx="3" x="70" width="50" height="20" fill="url(#b)"/>
             <path d="M70 0h50v20H70z" fill="url(#b)"/>
-            <text x="10" y="14" fill="#fff" font-size="11" font-family="Verdana, DejaVu Sans, sans-serif">Link Health</text>
-            <text x="75" y="14" fill="#fff" font-size="11" font-family="Verdana, DejaVu Sans, sans-serif" text-anchor="middle">{health_score}%</text>
-            <text x="110" y="14" fill="#fff" font-size="11" font-family="Verdana, DejaVu Sans, sans-serif" text-anchor="end">{status}</text>
+            <text x="10" y="14" fill="#fff" font-size="11"
+                font-family="{font_family}">Link Health</text>
+            <text x="75" y="14" fill="#fff" font-size="11"
+                font-family="{font_family}" text-anchor="middle">
+                {health_score}%
+            </text>
+            <text x="110" y="14" fill="#fff" font-size="11"
+                font-family="{font_family}" text-anchor="end">{status}</text>
         </svg>
         """
 

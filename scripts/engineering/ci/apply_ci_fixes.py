@@ -667,7 +667,7 @@ on:
       - 'docs/**'
       - '*.md'
       - '.ai/**'
-      - '.claude/**'
+      - 'ai/claude/**'
       - '.github/workflows/**'
       - 'LICENSE'
     branches: [ main, master, develop ]
@@ -681,7 +681,7 @@ on:
       - 'docs/**'
       - '*.md'
       - '.ai/**'
-      - '.claude/**'
+      - 'ai/claude/**'
       - '.github/workflows/**'
       - 'LICENSE'
     branches: [ main, master, develop ]
@@ -936,7 +936,7 @@ CI06_OLD_PUSH = """\
       - 'docs/**'
       - '*.md'
       - '.ai/**'
-      - '.claude/**'
+      - 'ai/claude/**'
       - '.github/workflows/**'
       - 'LICENSE'
     branches: [ main, master, develop ]
@@ -961,7 +961,7 @@ CI06_OLD_PR = """\
       - 'docs/**'
       - '*.md'
       - '.ai/**'
-      - '.claude/**'
+      - 'ai/claude/**'
       - '.github/workflows/**'
       - 'LICENSE'
     branches: [ main, master, develop ]
@@ -1114,7 +1114,7 @@ CI12_OLD_PATHS_IGNORE = """\
       - 'docs/**'
       - '*.md'
       - '.ai/**'
-      - '.claude/**'
+      - 'ai/claude/**'
       - '.github/workflows/**'
       - 'LICENSE'"""
 
@@ -1123,7 +1123,7 @@ CI12_NEW_PATHS_IGNORE = """\
       - 'docs/**'
       - '*.md'
       - '.ai/**'
-      - '.claude/**'
+      - 'ai/claude/**'
       - 'LICENSE'"""
 
 

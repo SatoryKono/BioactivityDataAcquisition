@@ -624,7 +624,8 @@ Only approved top-level entries are allowed.
 - Build/configuration: `pyproject.toml`, `uv.lock`, `Makefile`, `.pre-commit-config.yaml`, `.github/`
 - Operational/project assets: `configs/`, `scripts/`, `assets/`, `data/`, `reports/`, `grafana/`
 - Shared AI/editor tooling surfaces approved by policy:
-  `.ai/`, `.aiassistant/`, `.claude/`, `.codex/`, `.codex_tmp/`,
+  `.ai/`, `.aiassistant/`, `ai/claude/` (runtime),
+  `.codex/`, `.codex_tmp/`,
   `.cursor/`, `.gemini/`, `.idea/`, `.jules/`, `.junie/`, `.sonarlint/`,
   `.vibe/`, `.vscode/`
 - Explicit exceptions listed in `.github/root-allowlist.txt`

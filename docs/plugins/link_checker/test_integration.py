@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
+# ruff: noqa: T201
 """
 Integration test for Link Checker Plugin
 
 Tests that the plugin can be properly imported, initialized, and configured.
 """
 
-import os
 import sys
 import tempfile
+from pathlib import Path
 
 # Add the plugin directory to Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 
 def test_plugin_import():
@@ -18,6 +19,7 @@ def test_plugin_import():
     try:
         from docs.plugins.link_checker.plugin import LinkCheckerPlugin
 
+        assert LinkCheckerPlugin is not None
         print("✅ Plugin imported successfully")
         return True
     except ImportError as e:
@@ -139,7 +141,7 @@ def test_html_file_discovery():
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create some HTML files
             for i in range(3):
-                with open(os.path.join(temp_dir, f"page{i}.html"), "w") as f:
+                with Path(temp_dir, f"page{i}.html").open("w", encoding="utf-8") as f:
                     f.write(f"<html><body>Page {i}</body></html>")
 
             # Test finding files
@@ -147,7 +149,7 @@ def test_html_file_discovery():
 
             assert len(html_files) == 3
             assert all(f.endswith(".html") for f in html_files)
-            assert all(os.path.exists(f) for f in html_files)
+            assert all(Path(f).exists() for f in html_files)
 
         print("✅ HTML file discovery verified")
         return True
