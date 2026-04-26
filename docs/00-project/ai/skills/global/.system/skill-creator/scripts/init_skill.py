@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: T201, E501
 """
 Skill Initializer - Creates a new skill from template
 

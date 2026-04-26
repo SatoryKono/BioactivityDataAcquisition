@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-26T14:20:47.257456+00:00",
+  "generated_at": "2026-04-26T14:29:10.003391+00:00",
   "summary": {
     "total_scripts": 445,
     "status_counts": {
@@ -8111,7 +8111,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1426,
+          "line": 1429,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
