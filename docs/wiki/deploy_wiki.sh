@@ -26,7 +26,8 @@ done
 
 cd "$TMP_DIR"
 git add -A
-git commit -m "Обновление Wiki-страниц проекта BioETL" || { echo "Нет изменений."; exit 0; }
+git diff --cached --quiet && { echo "Нет изменений."; exit 0; }
+git commit -m "Обновление Wiki-страниц проекта BioETL"
 git push origin master
 
 echo "Wiki-страницы успешно развёрнуты!"
