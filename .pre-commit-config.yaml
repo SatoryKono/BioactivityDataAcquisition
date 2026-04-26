@@ -47,12 +47,6 @@ repos:
       - id: debug-statements
       - id: mixed-line-ending
         args: [--fix=lf]
-      - id: forbid-cache-files
-        name: Block common cache and temporary files
-        entry: '\b(__pycache__|\.pyc|\.pyo|\.pytest_cache|\.mypy_cache|\.ruff_cache|\.python-user|\.codex_tmp|test_.*\.(js|py|json))\b'
-        language: pygrep
-        args: [--multiline]
-        exclude: ^tests/
 
   # Markdown linting
   - repo: https://github.com/executablebooks/mdformat
@@ -88,6 +82,13 @@ repos:
         language: system
         pass_filenames: false
         stages: [pre-commit]
+
+      - id: forbid-cache-files
+        name: Block common cache and temporary files
+        entry: '\b(__pycache__|\.pyc|\.pyo|\.pytest_cache|\.mypy_cache|\.ruff_cache|\.python-user|\.codex_tmp|test_.*\.(js|py|json))\b'
+        language: pygrep
+        args: [--multiline]
+        exclude: ^tests/
 
       - id: validate-pipeline-configs
         name: Validate unified pipeline YAML configs
