@@ -87,7 +87,7 @@ class TestRunContext:
             RunContext.create(
                 run_id=RunID(uuid4()),
                 run_type=RunType.INCREMENTAL,
-                started_at=datetime.now(),  # Naive datetime
+                started_at=datetime(2025, 1, 1, 12, 0),  # Naive datetime
                 provider="chembl",
                 entity="activity",
             )

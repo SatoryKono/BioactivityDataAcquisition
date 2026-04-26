@@ -56,7 +56,7 @@ def _aggregate_tree(aggregates_dir: Path, file_path: Path) -> ast.Module | None:
     if not content:
         return None
     try:
-        return ast.parse(content)
+        return ast.parse(content, filename=str(file_path))
     except SyntaxError:
         return None
 
@@ -68,14 +68,6 @@ def _iter_aggregate_files(aggregates_dir: Path) -> list[Path]:
         if py_file.name not in ("__init__.py", "events.py")
         and not py_file.name.startswith("_")
     ]
-
-
-def _aggregate_tree(aggregates_dir: Path, py_file: Path) -> ast.AST | None:
-    full_content = _read_aggregate_content(aggregates_dir, py_file.name)
-    try:
-        return ast.parse(full_content, filename=str(py_file))
-    except SyntaxError:
-        return None
 
 
 def _current_aggregate_class(py_file: Path) -> str | None:
