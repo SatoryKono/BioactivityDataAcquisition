@@ -8,9 +8,18 @@ ttl_days: 14
 confidence: episodic
 source_refs:
 
-- <add-source-ref>
+- 'Title: Configure CI Local Precommit in Run/Debug configuration'
+- 'Retrieval query: Configure CI Local Precommit in Run/Debug configuration by integrating
+  relevant CI checks into pre-commit hooks.'
+- 'Catalog hits: 0'
+- 'RAG hits: 0'
+- 'Timeline hits: 0'
+- Replace with current findings
+  summary: 'Active task session context. query: Configure CI Local Precommit in Run/Debug
+  configuration by integrating relevant CI checks into pre-commit hooks.'
+  kind: episodic
 
-## summary: "Active task session context. query: Configure CI Local Precommit in Run/Debug configuration by integrating relevant CI checks into pre-commit hooks."
+______________________________________________________________________
 
 # Session note
 
