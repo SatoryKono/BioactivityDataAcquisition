@@ -13,17 +13,6 @@ repos:
       # Run the formatter
       - id: ruff-format
 
-  # Type checking with mypy
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.19.1
-    hooks:
-      - id: mypy
-        additional_dependencies:
-          - pydantic>=2.0
-          - types-redis
-        args: [--strict, --ignore-missing-imports]
-        exclude: ^tests/
-
   # Security checks
   - repo: https://github.com/PyCQA/bandit
     rev: 1.9.2
@@ -31,15 +20,16 @@ repos:
       - id: bandit
         args: [-c, pyproject.toml]
         additional_dependencies: ["bandit[toml]"]
+        stages: [pre-push]
 
-  # Secret scanning (gitleaks — same tool as CI for consistency)
-  # Note: detect-secrets baseline (.secrets.baseline) is still used in CI
-  # via tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets
+  # Secret scanning in pre-push. CI keeps the canonical detect-secrets baseline
+  # check via tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets.
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.21.2
     hooks:
       - id: gitleaks
         args: ['--config', '.gitleaks.toml']
+        stages: [pre-push]
 
   # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -59,7 +49,7 @@ repos:
         args: [--fix=lf]
       - id: forbid-cache-files
         name: Block common cache and temporary files
-        entry: "\b(__pycache__|\.pyc|\.pyo|\.pytest_cache|\.mypy_cache|\.ruff_cache|\.python-user|\.codex_tmp|test_.*\.(js|py|json))\b"
+        entry: '\b(__pycache__|\.pyc|\.pyo|\.pytest_cache|\.mypy_cache|\.ruff_cache|\.python-user|\.codex_tmp|test_.*\.(js|py|json))\b'
         language: pygrep
         args: [--multiline]
         exclude: ^tests/
@@ -82,9 +72,22 @@ repos:
         entry: python scripts/engineering/dev/run_project_python.py -m pip_audit --cache-dir .cache/pip-audit --skip-editable --strict
         language: python
         pass_filenames: false
-        # Only run on commit, not on every file change
-        stages: [pre-commit]
+        stages: [manual]
         verbose: true
+
+      - id: mypy-strict
+        name: Run strict mypy gate on src/bioetl
+        entry: uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: architecture-smoke
+        name: Fast architecture smoke checks
+        entry: uv run pytest tests/architecture/test_future_annotations_policy.py tests/architecture/test_naming_conventions.py tests/architecture/test_no_structlog_in_application_interfaces.py tests/architecture/test_no_datetime_now_in_infrastructure.py tests/architecture/test_no_random_in_writers.py tests/architecture/test_forbidden_imports.py -q
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
 
       - id: validate-pipeline-configs
         name: Validate unified pipeline YAML configs
@@ -101,7 +104,7 @@ repos:
         entry: python scripts/engineering/repo/audit_root_cleanliness.py
         language: python
         pass_filenames: false
-        stages: [pre-commit]
+        stages: [manual]
       - id: lint-config-paths
         name: Check for legacy dq/filter config path references
         entry: python scripts/schema/lint_config_paths.py
@@ -139,48 +142,56 @@ repos:
         entry: python scripts/docs sync-repo-identity --check
         language: python
         pass_filenames: false
+        stages: [manual]
 
       - id: inventory-check
         name: Validate scripts inventory and lifecycle registry
         entry: python scripts/engineering/repo check-inventory --check --manifest configs/quality/scripts_inventory_manifest.json --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
         language: python
         pass_filenames: false
+        stages: [manual]
 
       - id: catalog-check
         name: Validate scripts catalog governance
         entry: python scripts/engineering/repo check-catalog --catalog scripts/engineering/repo/catalog.yaml
         language: python
         pass_filenames: false
+        stages: [manual]
 
       - id: docs-check-links
         name: Check documentation links
         entry: python scripts/docs check-links --links --specs --configs
         language: python
         pass_filenames: false
+        stages: [manual]
 
       - id: docs-check-drift
         name: Check documentation drift
         entry: python scripts/docs check-drift --ports --classes
         language: python
         pass_filenames: false
+        stages: [manual]
 
       - id: docs-check-docstrings
         name: Check docstring inventory
         entry: python scripts/docs check-docstrings --summary
         language: python
         pass_filenames: false
+        stages: [manual]
 
       - id: check-root-vcr-cassettes
         name: Block VCR cassette anti-patterns
         entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_root_vcr_cassettes.py
         language: python
         pass_filenames: false
+        stages: [manual]
 
       - id: check-vcr-filename-policy
         name: Enforce VCR filename policy
         entry: python scripts/engineering/dev/run_project_python.py scripts/engineering/qa/vcr/check_vcr_filename_policy.py
         language: python
         pass_filenames: false
+        stages: [manual]
 
       - id: check-architecture-dependency-map-drift
         name: Check architecture dependency-map docs drift
@@ -188,3 +199,4 @@ repos:
         language: python
         pass_filenames: false
         files: ^(src/bioetl/.*\.py|docs/02-architecture/generated/module-dependency-map\.(md|json)|scripts/engineering/qa/generate_architecture_dependency_map\.py)$
+        stages: [manual]
