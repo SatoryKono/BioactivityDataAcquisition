@@ -53,7 +53,7 @@ import json
 import os
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from fnmatch import fnmatch
 from functools import cache
 from pathlib import Path
@@ -183,9 +183,7 @@ DRIFT_RULES = (
     ),
     DriftRule(
         name="old_run_syntax",
-        pattern=re.compile(
-            r"\bbioetl\s+run\s+(?!--pipeline\b)([\w][\w-]*)"
-        ),
+        pattern=re.compile(r"\bbioetl\s+run\s+(?!--pipeline\b)([\w][\w-]*)"),
     ),
     DriftRule(
         name="removed_run_flag",
@@ -447,7 +445,9 @@ def _control_plane_contract_spec_files() -> list[Path]:
         if not _is_published_doc(frontmatter):
             continue
         stem = md_file.stem.casefold()
-        if any(token in stem for token in ("run-manifest", "run-ledger", "control-plane")):
+        if any(
+            token in stem for token in ("run-manifest", "run-ledger", "control-plane")
+        ):
             control_plane_files.append(md_file)
     return control_plane_files
 
@@ -460,7 +460,9 @@ def _append_missing_last_verified_violation(
 ) -> None:
     last_verified = frontmatter.get(LAST_VERIFIED_LABEL)
     if not isinstance(last_verified, str) or not last_verified.strip():
-        violations.append((md_file, f"{label}: missing {LAST_VERIFIED_LABEL} frontmatter"))
+        violations.append(
+            (md_file, f"{label}: missing {LAST_VERIFIED_LABEL} frontmatter")
+        )
 
 
 def _append_invalid_version_violation(
@@ -472,7 +474,9 @@ def _append_invalid_version_violation(
     version = frontmatter.get("Version")
     version_str = str(version).strip() if version is not None else ""
     if not SEMVER_RE.fullmatch(version_str):
-        violations.append((md_file, f"{label}: invalid Version SemVer: {version_str!r}"))
+        violations.append(
+            (md_file, f"{label}: invalid Version SemVer: {version_str!r}")
+        )
 
 
 def _append_governance_metadata_violations(
@@ -494,10 +498,14 @@ def _append_runbook_section_violations(
         if section == "Rollback/Recovery":
             if _has_any_heading(headings, "Rollback", "Recovery"):
                 continue
-            violations.append((md_file, "runbook: missing required section 'Rollback/Recovery'"))
+            violations.append(
+                (md_file, "runbook: missing required section 'Rollback/Recovery'")
+            )
             continue
         if not _has_heading(headings, section):
-            violations.append((md_file, f"runbook: missing required section '{section}'"))
+            violations.append(
+                (md_file, f"runbook: missing required section '{section}'")
+            )
 
 
 def _append_control_plane_section_violations(
@@ -510,12 +518,18 @@ def _append_control_plane_section_violations(
             if _has_any_heading(headings, "Inspection Surface", "CLI Inspection"):
                 continue
             violations.append(
-                (md_file, "control-plane contract-spec: missing required section 'Inspection surface'")
+                (
+                    md_file,
+                    "control-plane contract-spec: missing required section 'Inspection surface'",
+                )
             )
             continue
         if not _has_heading(headings, section):
             violations.append(
-                (md_file, f"control-plane contract-spec: missing required section '{section}'")
+                (
+                    md_file,
+                    f"control-plane contract-spec: missing required section '{section}'",
+                )
             )
 
 
@@ -554,7 +568,9 @@ def check_runbook_governance() -> list[tuple[Path, str]]:
         if "compliance" not in " ".join(headings):
             violations.append((md_file, "runbook: missing Compliance heading"))
 
-        _append_governance_metadata_violations(violations, md_file, frontmatter, "runbook")
+        _append_governance_metadata_violations(
+            violations, md_file, frontmatter, "runbook"
+        )
 
     return violations
 
@@ -604,7 +620,11 @@ def _iter_markdown_targets(
         line_for_links = INLINE_CODE_RE.sub("", line)
         for match in MD_LINK_RE.finditer(line_for_links):
             raw_target = match.group(2).strip()
-            if not raw_target or raw_target.startswith("*") or raw_target.startswith("{"):
+            if (
+                not raw_target
+                or raw_target.startswith("*")
+                or raw_target.startswith("{")
+            ):
                 continue
             targets.append(
                 (
@@ -641,7 +661,9 @@ def check_broken_links(root: Path) -> list[tuple[Path, int, str, str]]:
 @cache
 def _load_nav_docs() -> list[Path]:
     nav_paths = _load_mkdocs_path_block("nav")
-    return [DOCS_DIR / rel_path for rel_path in nav_paths if not rel_path.startswith("/")]
+    return [
+        DOCS_DIR / rel_path for rel_path in nav_paths if not rel_path.startswith("/")
+    ]
 
 
 @cache
@@ -690,7 +712,9 @@ def _iter_markdown_files(root: Path) -> list[Path]:
 
     for current_root, dirnames, filenames in os.walk(root):
         current_path = Path(current_root)
-        dirnames[:] = [dirname for dirname in dirnames if not _should_skip(current_path / dirname)]
+        dirnames[:] = [
+            dirname for dirname in dirnames if not _should_skip(current_path / dirname)
+        ]
 
         for filename in filenames:
             if not filename.endswith(".md"):
@@ -728,7 +752,11 @@ def get_not_in_nav_docs(root: Path = DOCS_DIR) -> list[str]:
 
 
 def _filter_not_in_nav_growth_scope(paths: set[str]) -> set[str]:
-    return {path for path in paths if not path.startswith(NOT_IN_NAV_GROWTH_EXCLUDED_PREFIXES)}
+    return {
+        path
+        for path in paths
+        if not path.startswith(NOT_IN_NAV_GROWTH_EXCLUDED_PREFIXES)
+    }
 
 
 def _load_not_in_nav_baseline(
@@ -814,7 +842,9 @@ def _collect_file_drift_violations(
     )
     violations.extend(
         (md_file, line_no, rule_name, matched_text)
-        for line_no, rule_name, matched_text in _check_path_contracts_for_file(md_file, lines)
+        for line_no, rule_name, matched_text in _check_path_contracts_for_file(
+            md_file, lines
+        )
     )
     return violations
 
@@ -832,7 +862,9 @@ def _check_path_contracts_for_file(
         source_file, lines
     ):
         if resolved.name == "REQUIREMENTS.md" and resolved != canonical_requirements:
-            violations.append((line_no, "requirements_path_contract", normalized_target))
+            violations.append(
+                (line_no, "requirements_path_contract", normalized_target)
+            )
 
         if not re.search(r"(^|/)governance/", normalized_target):
             continue
@@ -841,7 +873,9 @@ def _check_path_contracts_for_file(
             _ = resolved.relative_to(canonical_governance)
         except ValueError:
             if docs_root in resolved.parents:
-                violations.append((line_no, "governance_path_contract", normalized_target))
+                violations.append(
+                    (line_no, "governance_path_contract", normalized_target)
+                )
 
     return violations
 
@@ -894,11 +928,18 @@ def check_config_existence() -> list[tuple[str, str]]:
 
         for section in ("pipeline", "schema", "quality", "filters", "contracts"):
             if section not in payload:
-                missing.append((f"{provider}/{entity}", f"configs/entities/{provider}/{entity}.yaml::{section}"))
+                missing.append(
+                    (
+                        f"{provider}/{entity}",
+                        f"configs/entities/{provider}/{entity}.yaml::{section}",
+                    )
+                )
 
         provider_config = providers_dir / f"{provider}.yaml"
         if not provider_config.exists():
-            missing.append((f"{provider}/{entity}", f"configs/providers/{provider}.yaml"))
+            missing.append(
+                (f"{provider}/{entity}", f"configs/providers/{provider}.yaml")
+            )
 
     return missing
 
@@ -907,7 +948,11 @@ def check_gold_contract_index() -> tuple[list[str], list[str]]:
     if not GOLD_SCHEMAS_DOC.exists() or not GOLD_CONTRACTS_DIR.exists():
         return [], []
 
-    documented = set(GOLD_CONTRACT_RE.findall(GOLD_SCHEMAS_DOC.read_text(encoding="utf-8", errors="replace")))
+    documented = set(
+        GOLD_CONTRACT_RE.findall(
+            GOLD_SCHEMAS_DOC.read_text(encoding="utf-8", errors="replace")
+        )
+    )
     exported = {path.name for path in GOLD_CONTRACTS_DIR.glob("*.json")}
 
     return sorted(exported - documented), sorted(documented - exported)
@@ -925,10 +970,14 @@ def check_chembl_provider_overview() -> tuple[list[str], list[str]]:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Check documentation links and spec files")
+    parser = argparse.ArgumentParser(
+        description="Check documentation links and spec files"
+    )
     parser.add_argument("--links", action="store_true", help="Only check broken links")
     parser.add_argument("--specs", action="store_true", help="Only check spec files")
-    parser.add_argument("--configs", action="store_true", help="Only check config existence")
+    parser.add_argument(
+        "--configs", action="store_true", help="Only check config existence"
+    )
     parser.add_argument(
         "--contracts-index",
         action="store_true",
@@ -1028,8 +1077,7 @@ def _report_local_skill_nav_classification(
         return 0
 
     _print_section_header(
-        "LOCAL SKILL NAV CLASSIFICATION VIOLATIONS "
-        f"({len(rel_paths)} found)"
+        f"LOCAL SKILL NAV CLASSIFICATION VIOLATIONS ({len(rel_paths)} found)"
     )
     for rel_path in rel_paths:
         print(f"  docs/{rel_path}")
@@ -1065,9 +1113,7 @@ def _run_links_checks() -> int:
     )
 
     unclassified_local_skill_docs = check_local_skill_nav_classification()
-    violations += _report_local_skill_nav_classification(
-        unclassified_local_skill_docs
-    )
+    violations += _report_local_skill_nav_classification(unclassified_local_skill_docs)
 
     return violations
 
@@ -1163,7 +1209,9 @@ def _run_doc_governance_check() -> int:
 
 
 def _run_not_in_nav_growth_check() -> int:
-    current_count, baseline_count, added, removed, baseline_exists = check_not_in_nav_growth()
+    current_count, baseline_count, added, removed, baseline_exists = (
+        check_not_in_nav_growth()
+    )
     if not baseline_exists:
         _print_section_header("NOT IN NAV BASELINE MISSING")
         rel = NOT_IN_NAV_BASELINE_FILE.relative_to(PROJECT_ROOT)
@@ -1185,8 +1233,7 @@ def _run_not_in_nav_growth_check() -> int:
         return growth
 
     print(
-        "Not-in-nav growth: OK "
-        f"(current {current_count} <= baseline {baseline_count})"
+        f"Not-in-nav growth: OK (current {current_count} <= baseline {baseline_count})"
     )
     if added and removed:
         print(
@@ -1219,7 +1266,7 @@ def _write_json_report(
         report_path if report_path.is_absolute() else PROJECT_ROOT / report_path
     )
     report = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "status": "pass" if total_violations == 0 else "fail",
         "total_violations": total_violations,
         "checks_run": checks_run,
@@ -1229,7 +1276,9 @@ def _write_json_report(
         },
     }
     resolved_report_path.parent.mkdir(parents=True, exist_ok=True)
-    resolved_report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    resolved_report_path.write_text(
+        json.dumps(report, indent=2) + "\n", encoding="utf-8"
+    )
     rel = resolved_report_path.relative_to(PROJECT_ROOT)
     print(f"JSON report written to: {rel}")
 

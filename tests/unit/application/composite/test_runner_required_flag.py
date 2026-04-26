@@ -11,7 +11,6 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Optional
 from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID, uuid4
 
@@ -75,9 +74,9 @@ class MockCompositeConfig:
         soft_fail_threshold: float = 0.05
         hard_fail_threshold: float = 0.20
 
-    seed: Optional[SeedConfig] = None
-    merge: Optional[MergeConfig] = None
-    dq: Optional[DQConfig] = None
+    seed: SeedConfig | None = None
+    merge: MergeConfig | None = None
+    dq: DQConfig | None = None
     enrichers: tuple[MockEnricherConfig, ...] = ()
     dependencies: tuple = ()
 

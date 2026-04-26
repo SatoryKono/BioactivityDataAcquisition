@@ -40,7 +40,7 @@ def _load_module(module_name: str, *, include_src: bool):
 def load_main(module_name: str, *, include_src: bool = True) -> Any:
     """Return ``main`` from the packaged implementation module."""
     module = _load_module(module_name, include_src=include_src)
-    return getattr(module, "main")
+    return module.main
 
 
 def load_public_api(
