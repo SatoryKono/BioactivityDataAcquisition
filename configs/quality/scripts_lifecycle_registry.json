@@ -459,12 +459,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded shared path helper while governed scripts still depend on repository-root resolution; fold it into broader canonical helper surfaces once the remaining bootstrap helpers converge."
     },
-    "scripts/engineering/dev/bash/.setup_wsl_codex.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded WSL Codex setup helper while mixed Windows/WSL setup flows remain operator-maintained; remove it once the bootstrap path is stable."
-    },
     "scripts/engineering/dev/bash/WSL_COMMANDS.sh": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
