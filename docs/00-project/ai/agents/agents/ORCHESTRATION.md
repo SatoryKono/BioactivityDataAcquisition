@@ -65,14 +65,10 @@ spawn_agent(
 
 Перед repo-wide structural выводами, hotspot-программами и package-reorg инициативами сверяйся с текущими evidence packs:
 
-- [Project File Structure Summary](../../docs/reports/evidence/project-file-structure/SUMMARY.md)
-- [Project File Structure Decisions](../../docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
-- [Project Package Topology Summary](../../docs/reports/evidence/project-package-topology/SUMMARY.md)
-- [Project Package Topology Synthesis](../../docs/reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md)
-- [Topology vs Governance Cross-Synthesis](../../docs/reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md)
-- [Project Package Topology Decisions](../../docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
-- [Governance Signals Summary](../../docs/reports/evidence/governance-signals/SUMMARY.md)
-- [Governance Signals Decisions](../../docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md)
+- [Project File Structure Summary](../../../../reports/evidence/project-file-structure/SUMMARY.md)
+- [Project Package Topology Summary](../../../../reports/evidence/project-package-topology/SUMMARY.md)
+- [Governance Signals Summary](../../../../reports/evidence/governance-signals/SUMMARY.md)
+- [Governance Signals Decisions](../../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md)
 
 Operational defaults:
 
