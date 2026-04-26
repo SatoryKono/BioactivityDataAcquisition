@@ -144,7 +144,7 @@ section "Docker Container Status"
 
 if command -v docker >/dev/null 2>&1; then
   info "Checking Docker containers..."
-  
+
   if docker ps | grep -q "$NEO4J_CONTAINER_NAME"; then
     ok "Neo4j container is RUNNING"
     docker ps | grep "$NEO4J_CONTAINER_NAME" | sed "$INDENT_SED"

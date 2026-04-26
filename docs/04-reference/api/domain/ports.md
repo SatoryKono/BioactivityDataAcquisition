@@ -31,7 +31,7 @@ This document provides a comprehensive reference for all ports in the BioETL dom
 #### Storage Ports
 - **`StoragePort`** (`storage/`) - Base storage interface
 - **`BronzeStoragePort`** (`storage/bronze_port.py`) - Bronze layer storage
-- **`SilverStoragePort`** (`storage/silver_port.py`) - Silver layer storage  
+- **`SilverStoragePort`** (`storage/silver_port.py`) - Silver layer storage
 - **`GoldStoragePort`** (`storage/gold_port.py`) - Gold layer storage
 - **`StorageMaintenancePort`** (`storage_maintenance.py`) - Storage maintenance operations
 
@@ -77,7 +77,7 @@ This document provides a comprehensive reference for all ports in the BioETL dom
 **Purpose**: Base interface for all storage operations
 **Implementations**:
 - `BronzeStoragePort` - Raw data storage
-- `SilverStoragePort` - Normalized data storage  
+- `SilverStoragePort` - Normalized data storage
 - `GoldStoragePort` - Aggregated data storage
 
 **Key Methods**:
@@ -131,7 +131,7 @@ from bioetl.infrastructure.adapters import DeltaLakeAdapter
 class DeltaStorage(StoragePort):
     def __init__(self, adapter: DeltaLakeAdapter):
         self.adapter = adapter
-    
+
     def write(self, data: DataFrame, partition_spec: Dict) -> WriteResult:
         # Implementation using Delta Lake
         pass

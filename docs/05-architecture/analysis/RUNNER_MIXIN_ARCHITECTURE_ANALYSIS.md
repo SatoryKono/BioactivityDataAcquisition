@@ -17,36 +17,36 @@ classDiagram
     CompositePipelineRunner --|> CompositeRunnerObservabilityMixin
     CompositePipelineRunner --|> CompositeRunnerStageMixin
     CompositePipelineRunner --|> CompositeRunnerMergeStageMixin
-    
+
     CompositeRunnerStageMixin --|> _CompositeRunnerStageEnrichmentMixin
     CompositeRunnerStageMixin --|> _CompositeRunnerStageSupportMixin
-    
+
     class CompositePipelineRunner {
         +run()
         +_prepare_run_state()
     }
-    
+
     class CompositeRunnerControlPlaneMixin {
         +_acquire_lock()
         +_release_lock()
     }
-    
+
     class CompositeRunnerSupportMixin {
         +_resolve_run_id()
         +_validate_can_start()
     }
-    
+
     class CompositeRunnerObservabilityMixin {
         +_emit_metrics()
         +_log_progress()
     }
-    
+
     class CompositeRunnerStageMixin {
         +_execute_seed_phase()
         +_execute_dependencies_phase()
         +_execute_enrichment_phase()
     }
-    
+
     class CompositeRunnerMergeStageMixin {
         +_execute_merge_phase()
         +_finalize_merge()

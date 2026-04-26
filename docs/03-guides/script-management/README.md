@@ -47,7 +47,7 @@ The script management guides provide:
 **Owner**: @bioetl-architecture
 **Last Updated**: 2024-04-14
 
-**Contributing**: 
+**Contributing**:
 - Follow existing format and structure
 - Update change log in documents
 - Ensure cross-references are maintained

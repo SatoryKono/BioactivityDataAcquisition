@@ -45,7 +45,7 @@ gantt
     section Round 1 (Completed)
     Issue #1 :done, 2024-07-01, 2024-07-05
     Issue #2 :done, 2024-07-06, 2024-07-10
-    
+
     section Round 2 (Current)
     Issue #3 :done, 2024-07-15, 2024-07-18
     Issue #4 :active, 2024-07-19, 2024-07-25
@@ -273,7 +273,7 @@ quadrantChart
     quadrant-2 "We should address"
     quadrant-3 "We need to monitor"
     quadrant-4 "We need to act"
-    
+
     Issue #1: [0.3, 0.7]
     Issue #2: [0.4, 0.6]
     Issue #3: [0.2, 0.5]
@@ -305,15 +305,15 @@ gantt
     dateFormat  YYYY-MM-DD
     section Analysis
     Issue Analysis :done, 2024-07-15, 2024-07-20
-    
+
     section Development
     Refactoring :done, 2024-07-21, 2024-07-24
     Testing :active, 2024-07-25, 2024-07-28
-    
+
     section Documentation
     ADRs :active, 2024-07-23, 2024-07-27
     Diagrams :done, 2024-07-20, 2024-07-24
-    
+
     section Observability
     Dashboard :active, 2024-07-25, 2024-07-30
     Metrics : 2024-07-28, 2024-07-31

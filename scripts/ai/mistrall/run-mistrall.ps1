@@ -103,46 +103,46 @@ switch -Regex ($Command) {
     "^help|^-h|^--help$" {
         exit 0
     }
-    
+
     "^start$|^$" {
         Write-Info "Starting Mistral in foreground..."
         Write-Host ""
         & "$HelperDir\run-mistrall-impl.ps1" start @Args
     }
-    
+
     "^daemon$" {
         Write-Info "Starting Mistral as daemon..."
         Write-Host ""
         & "$HelperDir\run-mistrall-impl.ps1" daemon @Args
     }
-    
+
     "^stop$" {
         Write-Info "Stopping Mistral..."
         & "$HelperDir\run-mistrall-impl.ps1" stop @Args
     }
-    
+
     "^status$" {
         Write-Info "Checking Mistral status..."
         & "$HelperDir\run-mistrall-impl.ps1" status @Args
     }
-    
+
     "^logs$" {
         Write-Info "Viewing Mistral logs..."
         & "$HelperDir\run-mistrall-impl.ps1" logs @Args
     }
-    
+
     "^shell$" {
         Write-Info "Opening Mistral container shell..."
         Write-Host ""
         & "$HelperDir\run-mistrall-impl.ps1" shell @Args
     }
-    
+
     "^pull$" {
         Write-Info "Pulling latest Mistral model..."
         Write-Host ""
         & "$HelperDir\run-mistrall-impl.ps1" pull @Args
     }
-    
+
     default {
         Write-Error "Unknown command: $Command"
         Write-Info "Use '.\run-mistrall.ps1 help' for usage"

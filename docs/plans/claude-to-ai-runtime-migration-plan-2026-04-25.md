@@ -1,7 +1,7 @@
 # План миграции `.claude/*` → `ai/claude/*`
 
-Дата: 2026-04-25  
-Статус: Draft  
+Дата: 2026-04-25
+Статус: Draft
 Владелец: Engineering / Architecture
 
 ## Цель

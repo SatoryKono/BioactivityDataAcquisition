@@ -10,16 +10,16 @@ with open("src/bioetl/domain/normalization/profiles/chembl_assay.py", "r") as f:
 # Add the helper function before the profile definition
 helper_function = '''def create_case_normalizer(strategy: str = "uppercase"):
     """Create a case normalizer function for profile use.
-    
+
     Args:
         strategy: Case strategy ("uppercase", "lowercase", or "preserve")
-        
+
     Returns:
         Normalizer function suitable for profile special_rules
     """
     def normalizer(value):
         return normalize_cross_pipeline_case(value, strategy)
-    
+
     return normalizer
 
 '''

@@ -17,7 +17,7 @@ This document describes extended ports that provide additional functionality bey
 ```python
 class FilterableDataSourcePort(DataSourcePort, Protocol):
     """Extended port with server-side filtering capabilities."""
-    
+
     async def fetch_filtered(
         self,
         filters: list[FilterSpec],
@@ -25,7 +25,7 @@ class FilterableDataSourcePort(DataSourcePort, Protocol):
     ) -> list[dict]:
         """Fetch records with server-side filtering."""
         ...
-    
+
     async def fetch_multi_filtered(
         self,
         filter_groups: list[list[FilterSpec]],
@@ -33,7 +33,7 @@ class FilterableDataSourcePort(DataSourcePort, Protocol):
     ) -> list[dict]:
         """Fetch records with multi-group filtering (OR between groups, AND within group)."""
         ...
-    
+
     async def fetch_filtered_with_fallback(
         self,
         filters: list[FilterSpec],

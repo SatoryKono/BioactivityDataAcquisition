@@ -102,7 +102,7 @@ if ! bash "${HELPER_DIR}/check-env.sh" 2>/dev/null; then
     log_warn "Some components missing"
     log_info "Running setup to install/configure missing components..."
     echo ""
-    
+
     if ! bash "${HELPER_DIR}/setup-env.sh"; then
         log_error "Setup failed"
         exit 1
@@ -121,31 +121,31 @@ case "$COMMAND" in
     start|"")
         bash "${HELPER_DIR}/run-mistrall-impl.sh" start "$@"
         ;;
-    
+
     daemon)
         bash "${HELPER_DIR}/run-mistrall-impl.sh" daemon "$@"
         ;;
-    
+
     stop)
         bash "${HELPER_DIR}/run-mistrall-impl.sh" stop "$@"
         ;;
-    
+
     status)
         bash "${HELPER_DIR}/run-mistrall-impl.sh" status "$@"
         ;;
-    
+
     logs)
         bash "${HELPER_DIR}/run-mistrall-impl.sh" logs "$@"
         ;;
-    
+
     shell)
         bash "${HELPER_DIR}/run-mistrall-impl.sh" shell "$@"
         ;;
-    
+
     pull)
         bash "${HELPER_DIR}/run-mistrall-impl.sh" pull "$@"
         ;;
-    
+
     *)
         log_error "Unknown command: $COMMAND"
         log_info "Use './run-mistrall.sh help' for usage"

@@ -14,7 +14,7 @@ Last verified: '2026-04-12'
 
 Your container is running:
 ```
-1e1951e98e45   neo4j:5.15-community   
+1e1951e98e45   neo4j:5.15-community
 Status: Up 33 minutes (healthy)
 Ports: 0.0.0.0:7474->7474/tcp, 0.0.0.0:7687->7687/tcp
 ```
@@ -77,11 +77,11 @@ docker ps | findstr neo4j
 
 ## What's Ready
 
-✅ Neo4j container running  
-✅ Ports 7474 (HTTP) and 7687 (Bolt) open  
-✅ MCP wrapper configured  
-✅ Codex integration ready  
-✅ No further setup needed  
+✅ Neo4j container running
+✅ Ports 7474 (HTTP) and 7687 (Bolt) open
+✅ MCP wrapper configured
+✅ Codex integration ready
+✅ No further setup needed
 
 ---
 
@@ -116,6 +116,6 @@ For help, see:
 
 ---
 
-**Status**: 🟢 OPERATIONAL  
-**Ready**: YES  
+**Status**: 🟢 OPERATIONAL
+**Ready**: YES
 **Next**: Open browser or use Codex

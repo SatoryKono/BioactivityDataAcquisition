@@ -73,7 +73,7 @@ open site/reports/links/link-health.html
 # .github/workflows/docs.yml
 - name: Build and check links
   run: mkdocs build --strict
-  
+
 - name: Upload link report
   uses: actions/upload-artifact@v3
   with:
@@ -136,7 +136,7 @@ Visual status badge showing health score:
 
 Badge colors:
 - **Green** (≥95%): Passing
-- **Yellow** (80-95%): Warning  
+- **Yellow** (80-95%): Warning
 - **Red** (<80%): Failing
 
 ## Examples
@@ -181,27 +181,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      
+
       - name: Install dependencies
         run: pip install mkdocs mkdocs-material
-      
+
       - name: Install link checker plugin
         run: pip install -e docs/plugins/link_checker
-      
+
       - name: Build documentation
         run: mkdocs build --strict
-      
+
       - name: Upload link report
         uses: actions/upload-artifact@v3
         with:
           name: link-health-report
           path: site/reports/links/
-      
+
       - name: Deploy
         if: github.ref == 'refs/heads/main'
         run: mkdocs gh-deploy
