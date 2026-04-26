@@ -25,21 +25,21 @@ class MockLoggerPort:
     def __init__(self) -> None:
         self.logs = []
 
-    def error(self, message: str = None, **kwargs: dict) -> None:
+    def error(self, message: str | None = None, **kwargs: dict) -> None:
         # Handle both styles: error("msg") and error(message="msg", ...)
         actual_message = message or kwargs.get("message", "")
         # Remove 'message' from kwargs to avoid duplication
         log_kwargs = {k: v for k, v in kwargs.items() if k != "message"}
         self.logs.append(("ERROR", actual_message, log_kwargs))
 
-    def warning(self, message: str = None, **kwargs: dict) -> None:
+    def warning(self, message: str | None = None, **kwargs: dict) -> None:
         # Handle both styles: warning("msg") and warning(message="msg", ...)
         actual_message = message or kwargs.get("message", "")
         # Remove 'message' from kwargs to avoid duplication
         log_kwargs = {k: v for k, v in kwargs.items() if k != "message"}
         self.logs.append(("WARNING", actual_message, log_kwargs))
 
-    def info(self, message: str = None, **kwargs: dict) -> None:
+    def info(self, message: str | None = None, **kwargs: dict) -> None:
         # Handle both styles: info("msg") and info(message="msg", ...)
         actual_message = message or kwargs.get("message", "")
         # Remove 'message' from kwargs to avoid duplication
@@ -53,7 +53,7 @@ class MockMetricsPort:
     def __init__(self) -> None:
         self.metrics = []
 
-    def increment(self, metric_name: str, tags: dict = None) -> None:
+    def increment(self, metric_name: str, tags: dict | None = None) -> None:
         self.metrics.append((metric_name, tags or {}))
 
 

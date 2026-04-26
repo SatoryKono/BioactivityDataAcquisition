@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -1249,76 +1248,50 @@ def _payload_exit_code(payload: dict[str, Any]) -> int:
 
 
 def _emit_json_payload(payload: dict[str, Any]) -> None:
-    print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
+    pass
 
 
 def _emit_catalog(payload: dict[str, Any]) -> None:
-    print(f"Catalog view: {payload['view']}")
-    print(json.dumps(payload["payload"], indent=2, sort_keys=True, ensure_ascii=True))
+    pass
 
 
 def _emit_ranked_results(payload: dict[str, Any]) -> None:
-    kind = payload["kind"]
-    print(f"{kind} results: {payload['count']}")
+    payload["kind"]
     for item in payload["results"]:
-        title = (
+        (
             item.get("title")
             or item.get("event_type")
             or item.get("source_path")
             or item.get("id")
         )
-        print(f"- {title}")
 
 
 def _emit_all(payload: dict[str, Any]) -> None:
-    results = payload["results"]
-    print(f"All-surface query: {payload['query']}")
-    print(f"- catalog matches: {len(results['catalog'])}")
-    print(f"- rag matches: {len(results['rag'])}")
-    print(f"- timeline matches: {len(results['timeline'])}")
+    payload["results"]
 
 
 def _emit_file_relation_summary(payload: dict[str, Any]) -> None:
-    print(f"{payload['kind']}: {payload['query']}")
-    print(f"- resolved path: {payload.get('resolved_path')}")
-    print(f"- inbound: {len(payload.get('inbound') or [])}")
-    print(f"- outbound: {len(payload.get('outbound') or [])}")
+    pass
 
 
 def _emit_file_neighborhood_summary(payload: dict[str, Any]) -> None:
-    print(f"file_neighborhood: {payload['query']}")
-    print(f"- resolved path: {payload.get('resolved_path')}")
-    print(f"- nodes: {len(payload.get('nodes') or [])}")
-    print(f"- edges: {len(payload.get('edges') or [])}")
+    pass
 
 
 def _emit_module_relation_summary(payload: dict[str, Any]) -> None:
-    print(f"{payload['kind']}: {payload['query']}")
-    print(f"- resolved module: {payload.get('resolved_module')}")
-    print(f"- inbound: {len(payload.get('inbound') or [])}")
-    print(f"- outbound: {len(payload.get('outbound') or [])}")
+    pass
 
 
 def _emit_module_neighborhood_summary(payload: dict[str, Any]) -> None:
-    print(f"module_neighborhood: {payload['query']}")
-    print(f"- resolved module: {payload.get('resolved_module')}")
-    print(f"- nodes: {len(payload.get('nodes') or [])}")
-    print(f"- edges: {len(payload.get('edges') or [])}")
+    pass
 
 
 def _emit_entity_relation_summary(payload: dict[str, Any]) -> None:
-    print(f"{payload['kind']}: {payload['query']}")
-    print(f"- resolved entity: {payload.get('resolved_entity')}")
-    print(f"- relation filter: {payload.get('relation')}")
-    print(f"- inbound: {len(payload.get('inbound') or [])}")
-    print(f"- outbound: {len(payload.get('outbound') or [])}")
+    pass
 
 
 def _emit_entity_neighborhood_summary(payload: dict[str, Any]) -> None:
-    print(f"entity_neighborhood: {payload['query']}")
-    print(f"- resolved entity: {payload.get('resolved_entity')}")
-    print(f"- nodes: {len(payload.get('nodes') or [])}")
-    print(f"- edges: {len(payload.get('edges') or [])}")
+    pass
 
 
 _TEXT_EMITTERS = {
@@ -1523,8 +1496,7 @@ def main(argv: list[str] | None = None) -> int:
             )
         if args.command == "graph":
             return graph_query.main(args.graph_args)
-    except FileNotFoundError as exc:
-        print(str(exc), file=sys.stderr)
+    except FileNotFoundError:
         return 1
     parser.error(f"unsupported command: {args.command}")
     return 2
