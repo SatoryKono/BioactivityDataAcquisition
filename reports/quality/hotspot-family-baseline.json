@@ -37,9 +37,9 @@
       ],
       "duplication_clusters": 0,
       "files": 36,
-      "total_loc": 4762,
+      "total_loc": 4749,
       "files_ge_250_loc": 3,
-      "helper_function_ratio": 0.357,
+      "helper_function_ratio": 0.352,
       "max_internal_fan_in": 7,
       "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.composite_support_services_factory",
       "bounded_growth_budgets": {

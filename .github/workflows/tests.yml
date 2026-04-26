@@ -448,10 +448,11 @@ jobs:
                     pytest-cache-fingerprint: ${{ hashFiles(matrix.test-group.cache_glob, 'tests/conftest.py', 'pyproject.toml') }}
 
             -   name: Run Tests (${{ matrix.test-group.name }} on Python ${{ matrix.python-version }})
+                env:
+                    COVERAGE_FILE: reports/coverage/.coverage.${{ matrix.test-group.name }}
                 run: |
                     mkdir -p reports/coverage
                     mkdir -p reports/test-telemetry
-                    export COVERAGE_FILE=reports/coverage/.coverage.${{ matrix.test-group.name }}
                     uv run pytest ${{ matrix.test-group.path }} \
                       -m "not serial and not memory" \
                       -n auto --dist loadscope --max-worker-restart=0 \
