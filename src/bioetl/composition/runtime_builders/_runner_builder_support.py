@@ -167,15 +167,13 @@ def bind_manifest_logger_context(
     )
     if rebound_observability is observability:
         return inputs
-    if isinstance(inputs, _RunnerInputs):
-        return cast(
-            "_RunnerInputs",
-            replace(
-                inputs,
-                observability=cast(ObservabilityBundle, rebound_observability),
-            ),
-        )
-    return inputs
+    return cast(
+        "_RunnerInputs",
+        replace(
+            inputs,
+            observability=cast(ObservabilityBundle, rebound_observability),
+        ),
+    )
 
 
 def _rebind_observability_logger(
