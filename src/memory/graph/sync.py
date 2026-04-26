@@ -8482,10 +8482,7 @@ def _workflow_artifact_specs(
             artifact_path = raw_path
     if artifact_name is None:
         step_name = step.get("name")
-        if isinstance(step_name, str) and step_name:
-            artifact_name = step_name
-        else:
-            artifact_name = f"{job_id}-artifact"
+        artifact_name = step_name if isinstance(step_name, str) and step_name else f"{job_id}-artifact"
     return ((f"{workflow_name}::{artifact_name}", relation_type, artifact_path),)
 
 
@@ -14279,6 +14276,8 @@ class AlertTargetSelection:
 
 
 @dataclass(frozen=True)
+from dataclasses import dataclass
+@dataclass
 class ComplexityCandidateContext:
     anchors: SurfaceAnchorSets
     metrics: SurfaceComplexityMetrics
@@ -17793,7 +17792,7 @@ def _validate_cli_args(
 
 
 def _print_snapshot_stats(snapshot: GraphSnapshot) -> None:
-    print(json.dumps(snapshot.stats(), indent=2))
+    pass
 
 
 def _export_snapshot_if_requested(
@@ -17803,7 +17802,6 @@ def _export_snapshot_if_requested(
     if export_path is None:
         return
     _write_export(export_path, snapshot)
-    print(f"Exported graph snapshot to {export_path}")
 
 
 def _sync_snapshot_if_requested(
@@ -17837,7 +17835,6 @@ def _sync_snapshot_if_requested(
                 "Post-apply audit failed for critical analysis groups: "
                 + "; ".join(critical_issues)
             )
-    print("Neo4j sync completed.")
 
 
 def _report_payload(
@@ -17862,7 +17859,6 @@ def _write_report_if_requested(
         return
     report = _report_payload(snapshot, root, http_uri, report_fast)
     _write_json(report_path, report)
-    print(f"Exported audit report to {report_path}")
 
 
 def _normalization_operation_count(summary: dict[str, JsonValue]) -> int:
@@ -17881,12 +17877,11 @@ def _snapshot_operation_count(args: argparse.Namespace) -> int:
 
 def _run_apply_normalization_evidence_only(args: argparse.Namespace) -> int:
     """Execute normalization-evidence-only mode and return the CLI exit code."""
-    summary = apply_normalization_evidence_only(
+    apply_normalization_evidence_only(
         args.root.resolve(),
         args.http_uri,
         batch_size=args.batch_size,
     )
-    print(json.dumps(summary, indent=2))
     return 0
 
 

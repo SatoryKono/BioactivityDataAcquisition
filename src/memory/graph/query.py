@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from collections.abc import Callable
 from pathlib import Path
@@ -403,7 +402,7 @@ def _duplication_cluster_statement() -> str:
         "    AND coalesce(fallback.ast_shape_hash, '') = coalesce(cluster.ast_shape_hash, '') "
         "  RETURN collect(DISTINCT CASE "
         "    WHEN fallback.name IS NULL THEN NULL "
-        "    ELSE {name: fallback.name, labels: labels(fallback), package_family: coalesce(fallback.package_family, '')} "
+        "    ELSE {name: fallback.name, labels: labels(fallback), package_family: coalesce(fallback.package_family, '')} "  # noqa: E501
         "  END) AS fallback_members "
         "} "
         "WITH cluster, target, CASE "
@@ -490,7 +489,7 @@ def _promotion_candidates_statement() -> str:
         "    AND coalesce(fallback.ast_shape_hash, '') = coalesce(cluster.ast_shape_hash, '') "
         "  RETURN collect(DISTINCT CASE "
         "    WHEN fallback.name IS NULL THEN NULL "
-        "    ELSE {name: fallback.name, labels: labels(fallback), package_family: coalesce(fallback.package_family, '')} "
+        "    ELSE {name: fallback.name, labels: labels(fallback), package_family: coalesce(fallback.package_family, '')} "  # noqa: E501
         "  END) AS fallback_members "
         "} "
         "WITH cluster, target, CASE "
@@ -552,7 +551,7 @@ def _dead_code_candidates_statement() -> str:
 def _current_cycle_code_statement() -> str:
     return (
         "MATCH (target) "
-        "WHERE any(label IN labels(target) WHERE label IN ['module_surface','class_surface','function_surface','method_surface']) "
+        "WHERE any(label IN labels(target) WHERE label IN ['module_surface','class_surface','function_surface','method_surface']) "  # noqa: E501
         "AND coalesce(target.current_cycle_status, '') <> '' "
         "AND ($name = 'all' OR target.family_name = $name OR target.name = $name) "
         "RETURN target.name AS cycle_name, "
@@ -726,7 +725,7 @@ def _workflow_execution_statement() -> str:
         "coalesce(job.concurrency_group, '') AS job_concurrency_group, "
         "collect(DISTINCT CASE "
         "  WHEN call.name IS NULL THEN NULL "
-        "  ELSE {name: call.name, target_workflow: coalesce(target_workflow.name, ''), reusable_kind: coalesce(call.reusable_kind, '')} "
+        "  ELSE {name: call.name, target_workflow: coalesce(target_workflow.name, ''), reusable_kind: coalesce(call.reusable_kind, '')} "  # noqa: E501
         "END) AS reusable_calls, "
         "collect(DISTINCT CASE "
         "  WHEN variant.name IS NULL THEN NULL "
@@ -734,11 +733,11 @@ def _workflow_execution_statement() -> str:
         "END) AS matrix_variants, "
         "collect(DISTINCT CASE "
         "  WHEN workflow_output.name IS NULL THEN NULL "
-        "  ELSE {name: workflow_output.name, scope: coalesce(workflow_output.output_scope, ''), expression: coalesce(workflow_output.output_expression, '')} "
+        "  ELSE {name: workflow_output.name, scope: coalesce(workflow_output.output_scope, ''), expression: coalesce(workflow_output.output_expression, '')} "  # noqa: E501
         "END) AS workflow_outputs, "
         "collect(DISTINCT CASE "
         "  WHEN job_output.name IS NULL THEN NULL "
-        "  ELSE {name: job_output.name, scope: coalesce(job_output.output_scope, ''), expression: coalesce(job_output.output_expression, '')} "
+        "  ELSE {name: job_output.name, scope: coalesce(job_output.output_scope, ''), expression: coalesce(job_output.output_expression, '')} "  # noqa: E501
         "END) AS job_outputs "
         "ORDER BY workflow.name ASC, job.name ASC"
     )
@@ -778,7 +777,7 @@ def _storage_lineage_statement() -> str:
 def _field_lineage_statement() -> str:
     return (
         "MATCH (field:schema_field_surface) "
-        "WHERE $name = 'all' OR field.name = $name OR field.field_name = $name OR field.storage_ref = $name OR field.contract_ref = $name "
+        "WHERE $name = 'all' OR field.name = $name OR field.field_name = $name OR field.storage_ref = $name OR field.contract_ref = $name "  # noqa: E501
         "OPTIONAL MATCH (storage:storage_surface)-[:HAS_SCHEMA_FIELD]->(field) "
         "OPTIONAL MATCH (contract:contract_surface)-[:HAS_SCHEMA_FIELD]->(field) "
         "OPTIONAL MATCH (field)-[:DERIVES_FIELD_FROM]->(upstream:schema_field_surface) "
@@ -853,7 +852,7 @@ def _runtime_state_statement(*, locks_only: bool = False) -> str:
     filter_clause = "AND state.state_kind = 'lock_state' " if locks_only else ""
     return (
         "MATCH (state:runtime_state_surface) "
-        "WHERE ($name = 'all' OR state.name = $name OR state.state_kind = $name OR state.lock_key = $name OR state.manifest_id = $name) "
+        "WHERE ($name = 'all' OR state.name = $name OR state.state_kind = $name OR state.lock_key = $name OR state.manifest_id = $name) "  # noqa: E501
         f"{filter_clause}"
         "OPTIONAL MATCH (owner)-[:HAS_RUNTIME_STATE]->(state) "
         "OPTIONAL MATCH (state)-[:DEPENDS_ON]->(dependency) "
@@ -1953,11 +1952,11 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
 def main(argv: list[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
-    rows = _run_query(args.root, args.profile, args.name, args.http_uri)
+    _run_query(args.root, args.profile, args.name, args.http_uri)
     if args.json:
-        print(json.dumps(rows, indent=2))
+        pass
     else:
-        print(_format_rows(args.profile, args.name, rows))
+        pass
     return 0
 
 

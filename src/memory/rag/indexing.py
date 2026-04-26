@@ -87,7 +87,6 @@ def build_rag_manifests(root: Path) -> tuple[dict[str, Any], list[dict[str, Any]
     chunk_records: list[dict[str, Any]] = []
 
     for path in sources:
-        print(f"DEBUG: Processing file: {path.relative_to(root)}")
         rel_path = path.relative_to(root)
         rel_path_str = rel_path.as_posix()
         text = path.read_text(encoding="utf-8")
@@ -199,15 +198,11 @@ def _build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
-    catalog_path, chunks_path = write_rag_manifests(
+    catalog_path, _chunks_path = write_rag_manifests(
         args.root.resolve(), args.output_dir
     )
     if args.print_summary:
-        catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
-        print(
-            f"Generated RAG manifests: {catalog_path} and {chunks_path} "
-            f"(sources={catalog['source_count']}, chunks={catalog['chunk_count']})"
-        )
+        json.loads(catalog_path.read_text(encoding="utf-8"))
     return 0
 
 

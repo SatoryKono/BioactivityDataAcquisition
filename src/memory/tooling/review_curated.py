@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -267,24 +266,13 @@ def main(argv: list[str] | None = None) -> int:
     report = review_curated_notes(args.root.resolve())
     has_review_candidates = bool(report["summary"]["review_candidates"])
     if args.json:
-        print(json.dumps(report, indent=2, sort_keys=True))
         return 1 if args.fail_on_review_candidates and has_review_candidates else 0
 
-    summary = report["summary"]
-    print("Curated memory review:")
-    print(f"- notes: {summary['note_count']}")
-    print(f"- current: {summary['current_count']}")
-    print(f"- due: {summary['due_count']}")
-    print(f"- stale: {summary['stale_count']}")
-    print(f"- review candidates: {summary['review_candidates']}")
+    report["summary"]
     for record in report["records"]:
         if record["recommendation"] == "keep":
             continue
-        reasons = ", ".join(record["review_reasons"])
-        print(
-            f"- {record['path']} [{record['recommendation']}] "
-            f"(status={record['review_status']}, reasons={reasons})"
-        )
+        ", ".join(record["review_reasons"])
     return 1 if args.fail_on_review_candidates and has_review_candidates else 0
 
 

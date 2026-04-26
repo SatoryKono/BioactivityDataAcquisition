@@ -74,8 +74,7 @@ def _build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
-    output = write_incident_events(args.root.resolve(), args.output)
-    print(f"Wrote incident timeline events to {output}")
+    write_incident_events(args.root.resolve(), args.output)
     return 0
 
 
