@@ -73,13 +73,13 @@ class PreflightGovernanceService:
         return CompositeValidationReport(
             structural_result=rebuild_validation_result(
                 report.structural_result,
-                ValidationLayer.STRUCTURAL,
-                config,
+                layer=ValidationLayer.STRUCTURAL,
+                config=config,
             ),
             deep_preflight_result=rebuild_validation_result(
                 report.deep_preflight_result,
-                ValidationLayer.DEEP_PREFLIGHT,
-                config,
+                layer=ValidationLayer.DEEP_PREFLIGHT,
+                config=config,
             ),
             runtime_guard_result=self._runtime_result_with_overrides(
                 report.runtime_guard_result,

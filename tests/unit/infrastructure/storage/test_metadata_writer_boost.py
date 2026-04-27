@@ -8,6 +8,7 @@ from __future__ import annotations
 import errno
 from collections.abc import Callable
 from datetime import UTC, datetime
+from typing import cast
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
@@ -62,8 +63,8 @@ def _retry_once_atomic_write_text(
     on_retry: Callable[[int, float, OSError], None],
 ) -> None:
     del path, content, retry_policy
-    assert callable(on_retry)
-    on_retry(1, 0.001, OSError(errno.EBUSY, "busy"))
+    retry_callback = cast(Callable[[int, float, OSError], None], on_retry)
+    retry_callback(1, 0.001, OSError(errno.EBUSY, "busy"))
 
 
 def _make_runtime() -> RuntimeMetadata:
