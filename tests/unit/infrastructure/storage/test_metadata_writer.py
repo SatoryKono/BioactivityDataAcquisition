@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import errno
-from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import cast
+from typing import Protocol
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -40,6 +39,10 @@ BRONZE_BASE_PATH = "/virtual/bronze"
 SILVER_TABLE_PATH = "/virtual/silver/test/table"
 SILVER_BASE_PATH = "/virtual/silver"
 GOLD_BASE_PATH = "/virtual/gold"
+
+
+class _RetryCallback(Protocol):
+    def __call__(self, attempt: int, delay_seconds: float, error: OSError) -> None: ...
 
 
 @pytest.fixture
@@ -230,14 +233,10 @@ class TestMetadataWriter:
             content: object,
             *,
             retry_policy: object,
-            on_retry: Callable[[int, float, OSError], None],
+            on_retry: _RetryCallback,
         ) -> None:
             del path, content, retry_policy
-            retry_callback = cast(
-                Callable[[int, float, OSError], None],
-                on_retry,
-            )
-            retry_callback(1, 0.01, OSError(errno.EBUSY, "Device or resource busy"))
+            on_retry(1, 0.01, OSError(errno.EBUSY, "Device or resource busy"))
 
         with patch(
             "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",

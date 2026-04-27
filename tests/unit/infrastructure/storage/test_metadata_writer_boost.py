@@ -6,10 +6,9 @@ Targets uncovered lines: 53, 94, 118, 136, 263, 306-315.
 from __future__ import annotations
 
 import errno
-from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import cast
 from pathlib import Path
+from typing import Protocol
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
@@ -45,12 +44,16 @@ from bioetl.infrastructure.storage.metadata_writer import (
 from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy
 
 
+class _RetryCallback(Protocol):
+    def __call__(self, attempt: int, delay_seconds: float, error: OSError) -> None: ...
+
+
 def _fake_atomic_write_text(
     path: object,
     content: object,
     *,
     retry_policy: object,
-    on_retry: Callable[[int, float, OSError], None],
+    on_retry: _RetryCallback,
 ) -> None:
     del path, content, retry_policy, on_retry
 
@@ -60,11 +63,10 @@ def _retry_once_atomic_write_text(
     content: object,
     *,
     retry_policy: object,
-    on_retry: Callable[[int, float, OSError], None],
+    on_retry: _RetryCallback,
 ) -> None:
     del path, content, retry_policy
-    retry_callback = cast(Callable[[int, float, OSError], None], on_retry)
-    retry_callback(1, 0.001, OSError(errno.EBUSY, "busy"))
+    on_retry(1, 0.001, OSError(errno.EBUSY, "busy"))
 
 
 def _make_runtime() -> RuntimeMetadata:

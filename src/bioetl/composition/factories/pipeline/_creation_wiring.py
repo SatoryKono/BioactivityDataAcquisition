@@ -215,6 +215,7 @@ def _create_pipeline_with_services_impl(
         services=services,
         config=domain_config,
         shutdown_signal=ShutdownSignal(),
+        started_at=request.started_at,
         transformer=transformer,
     )
 
