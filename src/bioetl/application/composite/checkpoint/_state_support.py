@@ -150,7 +150,9 @@ def _replace_checkpoint_state(
         CompositeCheckpointState,
         replace(
             checkpoint_state,
-            state=cast(CompositePipelineState, _resolved(checkpoint_state.state, state)),
+            state=cast(
+                CompositePipelineState, _resolved(checkpoint_state.state, state)
+            ),
             seed_completed=cast(
                 bool,
                 _resolved(checkpoint_state.seed_completed, seed_completed),
