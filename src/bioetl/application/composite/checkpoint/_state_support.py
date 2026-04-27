@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, TypeVar, cast
 
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.context import current_utc_time
@@ -148,7 +148,13 @@ def _replace_checkpoint_state(
     def _resolved(current: T, override: T | None) -> T:
         return current if override is None else override
 
-    return checkpoint_state.__class__(
+    from bioetl.application.composite.checkpoint.state import (
+        CompositeCheckpointState,
+    )
+
+    return cast(
+        TCheckpointState,
+        CompositeCheckpointState(
         composite_name=checkpoint_state.composite_name,
         run_id=checkpoint_state.run_id,
         state=_resolved(checkpoint_state.state, state),
@@ -187,4 +193,5 @@ def _replace_checkpoint_state(
         last_event_occurred_at=checkpoint_state.last_event_occurred_at,
         created_at=checkpoint_state.created_at,
         updated_at=updated_at or _current_utc_now(clock),
+        ),
     )

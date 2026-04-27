@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import replace
 from typing import Protocol, cast
 
 from bioetl.composition.observability import ObservabilityBundle
@@ -169,9 +168,13 @@ def bind_manifest_logger_context(
         return inputs
     if not isinstance(rebound_observability, ObservabilityBundle):
         return inputs
-    return cast(
-        _RunnerInputs,
-        replace(inputs, observability=rebound_observability),
+    return _RunnerInputs(
+        settings=inputs.settings,
+        yaml_config=inputs.yaml_config,
+        observability=rebound_observability,
+        runtime_config=inputs.runtime_config,
+        filter_config=inputs.filter_config,
+        cached_bronze=inputs.cached_bronze,
     )
 
 
