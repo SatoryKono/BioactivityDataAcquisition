@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, replace
-from typing import TYPE_CHECKING, Any, NoReturn
+from typing import TYPE_CHECKING, Any, NoReturn, cast
 
 import pyarrow as pa
 from deltalake.exceptions import DeltaError, SchemaMismatchError
@@ -239,11 +239,14 @@ async def _evolve_delta_schema_with_empty_append(
 ) -> _DeltaWriteRequest:
     """Pre-evolve an existing Delta table schema without writing extra rows."""
     loop = asyncio.get_running_loop()
-    empty_request: _DeltaWriteRequest = replace(
-        request,
-        validated_mode=SilverWriteMode.APPEND,
-        arrow_data=request.arrow_data.slice(0, 0),
-        schema_mode="merge",
+    empty_request: _DeltaWriteRequest = cast(  # type: ignore[redundant-cast]
+        _DeltaWriteRequest,
+        replace(
+            request,
+            validated_mode=SilverWriteMode.APPEND,
+            arrow_data=request.arrow_data.slice(0, 0),
+            schema_mode="merge",
+        ),
     )
     await loop.run_in_executor(
         None,
@@ -255,7 +258,10 @@ async def _evolve_delta_schema_with_empty_append(
             )
         ),
     )
-    updated_request: _DeltaWriteRequest = replace(request, merge_schema=False)
+    updated_request: _DeltaWriteRequest = cast(  # type: ignore[redundant-cast]
+        _DeltaWriteRequest,
+        replace(request, merge_schema=False),
+    )
     return updated_request
 
 

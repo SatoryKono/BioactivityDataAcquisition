@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from typing import cast
 
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import ValidationIssue, ValidationResult
@@ -59,7 +60,10 @@ def apply_issue_override(
     """Return issue with overridden severity when configuration requires it."""
     if override is None:
         return issue
-    overridden_issue: ValidationIssue = replace(issue, severity=override)
+    overridden_issue: ValidationIssue = cast(  # type: ignore[redundant-cast]
+        ValidationIssue,
+        replace(issue, severity=override),
+    )
     return overridden_issue
 
 
