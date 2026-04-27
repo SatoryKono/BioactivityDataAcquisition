@@ -645,8 +645,9 @@ jobs:
                       uv run python -m coverage report --show-missing --fail-under=85
                       uv run python -m coverage xml -o reports/coverage/coverage.xml
                     else
-                      echo "⚠ No coverage shards found; skipping combine step."
+                      echo "::error::No coverage shards found — 85% gate cannot be verified."
                       echo "Coverage shards were not uploaded by test-matrix jobs." >> "$GITHUB_STEP_SUMMARY"
+                      exit 1
                     fi
 
             -   name: Upload Coverage Report
