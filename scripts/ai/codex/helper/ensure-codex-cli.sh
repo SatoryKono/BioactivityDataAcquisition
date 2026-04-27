@@ -13,6 +13,7 @@ CODEX_BIN="${CODEX_NPM_PREFIX}/bin/codex"
 USER_CODEX_PREFIX_DEFAULT="${HOME}/.npm-global"
 USER_CODEX_BIN_DEFAULT="${USER_CODEX_PREFIX_DEFAULT}/bin/codex"
 
+MODE_UPDATE="update"
 MODE="ensure"
 PRINT_BIN=0
 PRINT_PREFIX=0
@@ -24,7 +25,7 @@ for arg in "$@"; do
             MODE="ensure"
             ;;
         --update)
-            MODE="update"
+            MODE="${MODE_UPDATE}"
             ;;
         --print-bin)
             PRINT_BIN=1
@@ -76,7 +77,7 @@ if ! command -v npm >/dev/null 2>&1; then
     exit 1
 fi
 
-if [[ "${MODE}" != "update" ]]; then
+if [[ "${MODE}" != "${MODE_UPDATE}" ]]; then
     resolve_existing_codex || true
 fi
 
@@ -92,12 +93,12 @@ export npm_config_cache="${CODEX_NPM_CACHE}"
 export PATH="${CODEX_NPM_PREFIX}/bin:${PATH}"
 
 need_install=0
-if [[ "${MODE}" == "update" || ! -x "${CODEX_BIN}" ]]; then
+if [[ "${MODE}" == "${MODE_UPDATE}" || ! -x "${CODEX_BIN}" ]]; then
     need_install=1
 fi
 
 if [[ "${need_install}" -eq 1 && "${ALLOW_INSTALL}" -eq 1 ]]; then
-    if [[ "${MODE}" == "update" ]]; then
+    if [[ "${MODE}" == "${MODE_UPDATE}" ]]; then
         echo "[ensure-codex] Updating Codex in ${CODEX_NPM_PREFIX}..." >&2
     else
         echo "[ensure-codex] Installing Codex in ${CODEX_NPM_PREFIX}..." >&2

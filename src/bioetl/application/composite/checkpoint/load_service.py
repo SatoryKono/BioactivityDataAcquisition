@@ -317,7 +317,9 @@ class CompositeCheckpointLoadService:
             self._emit_checkpoint_load_status("incompatible")
             raise
         merged_state = merge_expected_anchors(state, self._expected_context)
-        replayed_state = self._replay_checkpoint_suffix(merged_state)
+        replayed_state: CompositeCheckpointState = self._replay_checkpoint_suffix(
+            merged_state
+        )
         warn_if_checkpoint_stale(
             logger=self._logger,
             composite_name=self._composite_name,
@@ -360,7 +362,7 @@ class CompositeCheckpointLoadService:
             return state
 
         replay_projection = project_run_ledger_replay(replay_entries)
-        replayed_state = replace(
+        replayed_state: CompositeCheckpointState = replace(
             state,
             state=(
                 replay_projection.state

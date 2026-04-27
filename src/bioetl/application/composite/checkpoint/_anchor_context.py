@@ -121,7 +121,7 @@ def merge_expected_anchors(
     merged = normalize_runtime_anchor_payload(
         _build_merged_anchor_payload(state=state, anchors=anchors)
     )
-    updated_state = replace(
+    updated_state: CompositeCheckpointState = replace(
         state,
         effective_config_hash=merged["effective_config_hash"] or "",
         effective_config_artifact_id=(merged["effective_config_artifact_id"] or ""),
@@ -132,7 +132,7 @@ def merge_expected_anchors(
         manifest_id=merged["manifest_id"] or "",
         composite_run_identity=merged["composite_run_identity"] or "",
     )
-    return updated_state  # type: ignore[return-value]
+    return updated_state
 
 
 def fresh_checkpoint_state(
