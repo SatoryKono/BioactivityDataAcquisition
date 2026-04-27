@@ -81,24 +81,15 @@ class PreflightGovernanceService:
                 layer=ValidationLayer.DEEP_PREFLIGHT,
                 config=config,
             ),
-            runtime_guard_result=self._runtime_result_with_overrides(
-                report.runtime_guard_result,
-                config,
+            runtime_guard_result=(
+                rebuild_validation_result(
+                    report.runtime_guard_result,
+                    layer=ValidationLayer.RUNTIME_GUARD,
+                    config=config,
+                )
+                if report.runtime_guard_result is not None
+                else None
             ),
-        )
-
-    def _runtime_result_with_overrides(
-        self,
-        runtime_result: ValidationResult | None,
-        config: PreflightGovernanceConfig,
-    ) -> ValidationResult | None:
-        """Apply overrides to runtime-guard result when present."""
-        if runtime_result is None:
-            return None
-        return rebuild_validation_result(
-            runtime_result,
-            layer=ValidationLayer.RUNTIME_GUARD,
-            config=config,
         )
 
     def _determine_execution_decision(

@@ -2589,6 +2589,7 @@ def test_build_fast_analysis_audit_report_uses_bulk_count_queries(monkeypatch) -
             *,
             context: str | None = None,
         ) -> list[dict[str, object]]:
+            del statement, parameters
             query_calls.append(context or "")
             if "UNWIND $labels AS label" in statement:
                 labels = (
@@ -2775,7 +2776,7 @@ def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(
             *,
             context=None,
         ) -> list[dict[str, object]]:
-            del context
+            del _statement, _parameters, context
             return []
 
     monkeypatch.setattr(
