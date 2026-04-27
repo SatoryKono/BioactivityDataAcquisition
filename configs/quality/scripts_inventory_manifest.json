@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-27T08:22:17.385259+00:00",
+  "generated_at": "2026-04-27T08:26:24.959787+00:00",
   "summary": {
     "total_scripts": 443,
     "status_counts": {
@@ -5908,7 +5908,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 629,
+          "line": 633,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -7611,13 +7611,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 696,
+          "line": 700,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 705,
+          "line": 709,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         }
@@ -8040,7 +8040,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 549,
+          "line": 553,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },
