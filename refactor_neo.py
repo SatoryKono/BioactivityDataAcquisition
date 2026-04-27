@@ -1,11 +1,8 @@
 import os
 
-def refactor_neo4j_sync():
-    file_path = 'testing_support/neo4j_memory_sync.py'
-    with open(file_path, 'r', encoding='utf-8') as f:
-        text = f.read()
 
-    replacements = {
+def _build_replacements() -> dict[str, str]:
+    return {
         '".github"': 'REPO_ZONE_GITHUB',
         '"chembl.activity"': 'CONTRACT_CHEMBL_ACTIVITY',
         '"run_manifest::json"': 'ARTIFACT_RUN_MANIFEST',
@@ -40,6 +37,40 @@ def refactor_neo4j_sync():
         '"application/composite"': 'FAMILY_APP_COMPOSITE',
     }
 
+
+def _rewrite_stub_signatures(lines: list[str]) -> None:
+    """Normalize the stub signatures after bulk string replacement."""
+    for index, line in enumerate(lines):
+        if 'def execute(self, statements, *, context=None)' in line:
+            lines[index] = line.replace('statements', '_statements')
+            continue
+        if 'def query(self, statement, parameters=None, *, context=None)' in line:
+            lines[index] = line.replace('statement, parameters=None', '_statement, _parameters=None')
+            continue
+
+        if 'def query(' not in line:
+            continue
+
+        window = lines[max(0, index - 4) : index]
+        if any('StubClient' in previous for previous in window):
+            next_one = lines[index + 1] if index + 1 < len(lines) else ''
+            next_two = lines[index + 2] if index + 2 < len(lines) else ''
+            if 'statement: str,' in next_one:
+                lines[index + 1] = next_one.replace('statement: str,', '_statement: str,')
+            if 'parameters: dict[str, object] | None = None,' in next_two:
+                lines[index + 2] = next_two.replace(
+                    'parameters: dict[str, object] | None = None,',
+                    '_parameters: dict[str, object] | None = None,',
+                )
+
+
+def refactor_neo4j_sync():
+    file_path = 'testing_support/neo4j_memory_sync.py'
+    with open(file_path, 'r', encoding='utf-8') as f:
+        text = f.read()
+
+    replacements = _build_replacements()
+
     constants_def = "\n".join([f"{v} = {k}" for k, v in replacements.items()]) + "\n\n"
 
     for k, v in replacements.items():
@@ -51,17 +82,7 @@ def refactor_neo4j_sync():
 
     # Remove unused parameters logic
     lines = text.split('\n')
-    for i, line in enumerate(lines):
-        if 'def query(' in line and 'StubClient' in lines[i-1] or 'StubClient' in lines[i-2] or 'StubClient' in lines[i-3] or 'StubClient' in lines[i-4]:
-            if 'statement: str,' in lines[i+1]:
-                lines[i+1] = lines[i+1].replace('statement: str,', '_statement: str,')
-            if 'parameters: dict[str, object] | None = None,' in lines[i+2]:
-                lines[i+2] = lines[i+2].replace('parameters: dict[str, object] | None = None,', '_parameters: dict[str, object] | None = None,')
-        if 'def execute(self, statements, *, context=None)' in line:
-            lines[i] = line.replace('statements', '_statements')
-        if 'def query(self, statement, parameters=None, *, context=None)' in line:
-            lines[i] = line.replace('statement, parameters=None', '_statement, _parameters=None')
-
+    _rewrite_stub_signatures(lines)
     # Re-assemble
     text = '\n'.join(lines)
 
