@@ -2367,19 +2367,19 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_anchor_grap
     )
     snapshot.add_relation(project, "CONTAINS", complexity_candidate)
     snapshot.add_relation(class_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
+    filtered = _filtered_snapshot(snapshot, only_complexity_layer=True)
 
-    def query(
-        self,
-        _statement: str,
-        parameters: dict[str, object] | None = None,
-        *,
-        context: str | None = None,
-    ) -> list[dict[str, object]]:
-        assert context == "complexity-layer targeted sync prerequisite anchor check"
-        assert parameters is not None
-        return [{"label": label, "count": 0} for label in parameters["labels"]]
-
-        assert context == "complexity-layer targeted sync prerequisite anchor check"
+    class StubClient:
+        def query(
+            self,
+            _statement: str,
+            parameters: dict[str, object] | None = None,
+            *,
+            context: str | None = None,
+        ) -> list[dict[str, object]]:
+            assert (
+                context == "complexity-layer targeted sync prerequisite anchor check"
+            )
             assert parameters is not None
             return [{"label": label, "count": 0} for label in parameters["labels"]]
 
