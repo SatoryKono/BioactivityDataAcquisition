@@ -81,15 +81,16 @@ def test_is_metrics_port_like_true() -> None:
 def test_is_metrics_port_like_false_missing_method() -> None:
     """is_metrics_port_like returns False when a method is missing."""
 
-    def _observe_histogram() -> None:
-        return None
+    @dataclass
+    class _IncompleteMetricsPort:
+        def observe_histogram(self, *args: object, **kwargs: object) -> None:
+            return None
 
-    def _increment_counter() -> None:
-        return None
+        def increment_counter(self, *args: object, **kwargs: object) -> None:
+            return None
 
-    candidate = SimpleNamespace(
-        observe_histogram=_observe_histogram,
-        increment_counter=_increment_counter,
-        # missing set_gauge, etc.
-    )
+        def close(self) -> None:
+            return None
+
+    candidate = _IncompleteMetricsPort()
     assert is_metrics_port_like(candidate) is False

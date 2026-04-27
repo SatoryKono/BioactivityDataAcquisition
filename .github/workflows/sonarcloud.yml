@@ -52,7 +52,7 @@ jobs:
 
       - name: Run SonarCloud scan
         if: steps.sonar-token.outputs.available == 'true'
-        uses: SonarSource/sonarqube-scan-action@v6
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602
         with:
           args: >
             -Dsonar.sources=src/bioetl

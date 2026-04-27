@@ -18,6 +18,8 @@ from bioetl.domain.control_plane import (
 )
 from bioetl.interfaces.cli.main import cli
 
+CONTROL_PLANE_MANIFEST_PATH = "reports/control/run_manifest/manifest-old.json"
+
 
 def _plan(*, dry_run: bool) -> ControlPlaneArtifactLifecyclePlan:
     generated_at = datetime(2026, 4, 22, tzinfo=UTC)
@@ -28,7 +30,7 @@ def _plan(*, dry_run: bool) -> ControlPlaneArtifactLifecyclePlan:
         artifacts=(
             ControlPlaneArtifactRef(
                 surface=ControlPlaneArtifactSurface.RUN_MANIFEST,
-                path="/tmp/control/run_manifest/manifest-old.json",
+                path=CONTROL_PLANE_MANIFEST_PATH,
                 artifact_id="manifest-old",
                 decision=ControlPlaneArtifactLifecycleDecision.DELETE,
                 reason="retention_expired",
@@ -70,7 +72,7 @@ def test_control_plane_lifecycle_apply_json_outputs_deleted_paths() -> None:
     store.plan.return_value = plan
     store.apply.return_value = ControlPlaneArtifactLifecycleApplyResult(
         plan=plan,
-        deleted_paths=("/tmp/control/run_manifest/manifest-old.json",),
+        deleted_paths=(CONTROL_PLANE_MANIFEST_PATH,),
     )
 
     with patch(
@@ -95,7 +97,7 @@ def test_control_plane_lifecycle_apply_json_outputs_deleted_paths() -> None:
     assert result.exit_code == 0, result.output
     payload = json.loads(result.output)
     assert payload["dry_run"] is False
-    assert payload["deleted_paths"] == ["/tmp/control/run_manifest/manifest-old.json"]
+    assert payload["deleted_paths"] == [CONTROL_PLANE_MANIFEST_PATH]
     policy = store.plan.call_args.args[0]
     assert policy.protected_run_ids == frozenset({"run-1"})
     assert policy.protected_input_snapshot_ids == frozenset({"sha256:abc"})

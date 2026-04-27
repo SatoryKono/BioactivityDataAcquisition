@@ -254,8 +254,31 @@ def test_create_and_persist_effective_config_artifact_forwards_required_profile(
 ) -> None:
     captured: dict[str, object] = {}
 
-    def _fake_payload(**kwargs: object) -> tuple[str, str, str, str]:
-        captured.update(kwargs)
+    def _fake_payload(
+        *,
+        pipeline_name: str,
+        pipeline_kind: str,
+        resolved_config: object,
+        runtime_overrides: dict[str, object],
+        provider: str,
+        entity: str,
+        required_persistence_profile: str,
+        settings: Settings,
+        logger: object,
+        run_id: RunID,
+    ) -> tuple[str, str, str, str]:
+        captured.update(
+            pipeline_name=pipeline_name,
+            pipeline_kind=pipeline_kind,
+            resolved_config=resolved_config,
+            runtime_overrides=runtime_overrides,
+            provider=provider,
+            entity=entity,
+            required_persistence_profile=required_persistence_profile,
+            settings=settings,
+            logger=logger,
+            run_id=run_id,
+        )
         return ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
 
     monkeypatch.setattr(
@@ -303,8 +326,31 @@ def test_create_and_persist_composite_effective_config_artifact_forwards_require
 ) -> None:
     captured: dict[str, object] = {}
 
-    def _fake_payload(**kwargs: object) -> tuple[str, str, str, str]:
-        captured.update(kwargs)
+    def _fake_payload(
+        *,
+        pipeline_name: str,
+        pipeline_kind: str,
+        resolved_config: object,
+        runtime_overrides: dict[str, object],
+        provider: str,
+        entity: str,
+        required_persistence_profile: str,
+        settings: Settings,
+        logger: object,
+        run_id: RunID,
+    ) -> tuple[str, str, str, str]:
+        captured.update(
+            pipeline_name=pipeline_name,
+            pipeline_kind=pipeline_kind,
+            resolved_config=resolved_config,
+            runtime_overrides=runtime_overrides,
+            provider=provider,
+            entity=entity,
+            required_persistence_profile=required_persistence_profile,
+            settings=settings,
+            logger=logger,
+            run_id=run_id,
+        )
         return ("artifact-2", "resolved-hash", "effective-hash", "dq-hash")
 
     monkeypatch.setattr(

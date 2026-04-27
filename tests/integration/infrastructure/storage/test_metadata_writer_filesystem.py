@@ -37,9 +37,6 @@ from bioetl.infrastructure.storage.metadata_writer import (
 
 pytestmark = pytest.mark.integration
 
-SILVER_DQ_REPORT_PATH = "/tmp/dq/silver-report.json"
-GOLD_DQ_REPORT_PATH = "/tmp/dq/gold-report.json"
-
 
 @pytest.fixture
 def metadata_writer(noop_logger: NoOpLogger) -> MetadataWriter:
@@ -340,11 +337,12 @@ async def test_finalize_silver_metadata_updates_existing_sidecar(
     base_path = tmp_path / "silver"
     base_path.mkdir(parents=True)
     await metadata_writer.write_silver_metadata(base_path, silver_metadata)
+    dq_report_path = str(tmp_path / "dq" / "silver-report.json")
 
     completed_at = datetime(2025, 1, 16, 12, 0, 0, tzinfo=UTC)
     result = await metadata_writer.finalize_silver_metadata(
         base_path,
-        dq_report_path=SILVER_DQ_REPORT_PATH,
+        dq_report_path=dq_report_path,
         completed_at=completed_at,
         delta_version_after=99,
     )
@@ -352,7 +350,7 @@ async def test_finalize_silver_metadata_updates_existing_sidecar(
     content = yaml.safe_load((base_path / METADATA_FILENAME).read_text())
     expected_completed_at = completed_at.isoformat().replace("+00:00", "Z")
     assert result == str((base_path / METADATA_FILENAME).resolve())
-    assert content["dq_report_path"] == SILVER_DQ_REPORT_PATH
+    assert content["dq_report_path"] == dq_report_path
     assert content["runtime"]["completed_at_utc"] == expected_completed_at
     assert content["output"]["write_completed_at"] == expected_completed_at
     assert content["delta"]["version_after"] == 99
@@ -369,18 +367,19 @@ async def test_finalize_gold_metadata_updates_existing_sidecar(
     base_path = tmp_path / "gold"
     base_path.mkdir(parents=True)
     await metadata_writer.write_gold_metadata(base_path, gold_metadata)
+    dq_report_path = str(tmp_path / "dq" / "gold-report.json")
 
     completed_at = datetime(2025, 1, 16, 12, 5, 0, tzinfo=UTC)
     result = await metadata_writer.finalize_gold_metadata(
         base_path,
-        dq_report_path=GOLD_DQ_REPORT_PATH,
+        dq_report_path=dq_report_path,
         completed_at=completed_at,
     )
 
     content = yaml.safe_load((base_path / METADATA_FILENAME).read_text())
     expected_completed_at = completed_at.isoformat().replace("+00:00", "Z")
     assert result == str((base_path / METADATA_FILENAME).resolve())
-    assert content["dq_report_path"] == GOLD_DQ_REPORT_PATH
+    assert content["dq_report_path"] == dq_report_path
     assert content["runtime"]["completed_at_utc"] == expected_completed_at
     assert content["output"]["write_completed_at"] == expected_completed_at
 

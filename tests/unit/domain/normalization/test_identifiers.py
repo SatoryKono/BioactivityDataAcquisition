@@ -185,7 +185,7 @@ class TestNormalizeOntologyID:
             == "BTO_0000089"
         )
         assert (
-            normalize_ontology_id("http://purl.obolibrary.org/obo/BAO_0000190")
+            normalize_ontology_id("https://purl.obolibrary.org/obo/BAO_0000190")
             == "BAO_0000190"
         )
 
