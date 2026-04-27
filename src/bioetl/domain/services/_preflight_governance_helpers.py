@@ -11,6 +11,7 @@ from bioetl.domain.types.validation_severity import (
     ValidationLayer,
     ValidationSeverity,
 )
+from bioetl.domain.services.validation_result_envelopes import build_validation_result
 
 from ._preflight_governance_types import GovernancePolicy, PreflightGovernanceConfig
 
@@ -31,7 +32,7 @@ def rebuild_validation_result(
     config: PreflightGovernanceConfig,
 ) -> ValidationResult:
     """Rebuild one validation result after applying issue overrides."""
-    return ValidationResult(
+    return build_validation_result(
         issues=apply_overrides_to_issues(result.issues, config),
         validation_layer=layer,
         execution_context=result.execution_context,

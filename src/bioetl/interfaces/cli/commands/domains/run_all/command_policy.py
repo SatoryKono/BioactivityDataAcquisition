@@ -15,7 +15,7 @@ from bioetl.interfaces.cli.commands.domains.run_all.support import (
     resolve_run_all_execution_plan,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    finalize_cli_execution,
+    execute_prepared_cli_flow,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     handle_cli_failure as handle_cli_execution_failure,
@@ -234,7 +234,7 @@ def run_all_command_flow(
         pipelines=pipelines,
         dry_run=cli_input.dry_run,
     )
-    finalize_cli_execution(
+    execute_prepared_cli_flow(
         health_info_presenter=lambda: health_info_presenter(
             cli_input.health_server,
             cli_input.health_port,
