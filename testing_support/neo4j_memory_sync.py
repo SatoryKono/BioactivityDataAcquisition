@@ -141,9 +141,23 @@ class _TargetedApplyPrereqStubClient:
         *,
         context: str | None = None,
     ) -> list[dict[str, object]]:
-        assert context == CONTEXT_COMPLEXITY_PREREQ
         assert parameters is not None
-        return [{"label": label, "count": 0} for label in parameters["labels"]]
+        if context == "complexity-layer targeted sync prerequisite anchor check":
+            labels = parameters["labels"]
+            assert isinstance(labels, list)
+            return [{"label": label, "count": 0} for label in labels]
+        if context == CONTEXT_COMPLEXITY_PREREQ:
+            anchors = parameters["anchors"]
+            assert isinstance(anchors, list)
+            return [
+                {
+                    "label": anchor["label"],
+                    "name": anchor["name"],
+                    "count": 0,
+                }
+                for anchor in anchors
+            ]
+        raise AssertionError(f"Unexpected context: {context}")
 
 
 def _repo_root() -> Path:
