@@ -24,14 +24,15 @@ SEMANTIC_GRAPH_EDGE_RELATIONS = {
     "reads_from": "reads_from",
     "orchestrates": "orchestrates",
 }
-PATH_REF_PATTERN = re.compile(
-    r"\b(?:src|configs|tests|docs)/(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+"
-)
 ADR_REF_PATTERN = re.compile(r"\bADR-(\d{3})\b", re.IGNORECASE)
 ADR_LIFECYCLE_FIELDS = ("supersedes", "superseded by", "amends", "amended by")
 RUNBOOK_EXCLUDED_STEMS = frozenset({"index"})
 CONFIGS_DIR_PREFIX = "configs/"
 ADR_DOC_GLOB = "ADR-*.md"
+_PATH_REF_PREFIXES = ("src/", "configs/", "tests/", "docs/")
+_PATH_REF_CHARS = frozenset(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-/"
+)
 
 
 def default_expanded_graph_path(root: Path) -> Path:
@@ -776,7 +777,25 @@ def _pipeline_doc_paths(source_node: dict[str, Any], repo_root: Path) -> list[st
 
 
 def _explicit_path_refs(text: str) -> set[str]:
-    return {match.group(0).rstrip(".,);]") for match in PATH_REF_PATTERN.finditer(text)}
+    refs: set[str] = set()
+    for line in text.splitlines():
+        for prefix in _PATH_REF_PREFIXES:
+            start = 0
+            while True:
+                index = line.find(prefix, start)
+                if index == -1:
+                    break
+                if index > 0 and (line[index - 1].isalnum() or line[index - 1] in "_/"):
+                    start = index + 1
+                    continue
+                end = index + len(prefix)
+                while end < len(line) and line[end] in _PATH_REF_CHARS:
+                    end += 1
+                candidate = line[index:end].rstrip(".,);]")
+                if candidate:
+                    refs.add(candidate)
+                start = index + 1
+    return refs
 
 
 def _explicit_config_path_refs(text: str) -> set[str]:
@@ -859,7 +878,17 @@ def _failure_mode_name(title: str, fallback_stem: str) -> str:
 
 
 def _slugify(value: str) -> str:
-    slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    slug_parts: list[str] = []
+    previous_was_dash = False
+    for char in value.lower():
+        if char.isalnum():
+            slug_parts.append(char)
+            previous_was_dash = False
+            continue
+        if not previous_was_dash:
+            slug_parts.append("-")
+            previous_was_dash = True
+    slug = "".join(slug_parts).strip("-")
     return slug or "unknown"
 
 
