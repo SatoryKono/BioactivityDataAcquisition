@@ -55,12 +55,10 @@ def _extra_commands(
     return [cmd for cmd in doc_commands if cmd not in registry_commands]
 
 
-def extract_cli_commands_from_registry() -> dict[str, str]:
-    """Extract CLI commands from the _LAZY_COMMAND_SPECS dictionary."""
-    registry_content = Path(CLI_REGISTRY_FILE).read_text()
-    commands: dict[str, str] = {}
+def _iter_registry_spec_lines(registry_content: str) -> list[str]:
+    """Return only the lines inside the lazy command spec mapping."""
+    spec_lines: list[str] = []
     in_specs = False
-
     for line in registry_content.split("\n"):
         stripped = line.strip()
         if stripped.startswith("_LAZY_COMMAND_SPECS:"):
@@ -70,10 +68,24 @@ def extract_cli_commands_from_registry() -> dict[str, str]:
             continue
         if stripped == "},":
             break
+        spec_lines.append(line)
+    return spec_lines
 
+
+def _collect_registry_commands(spec_lines: list[str]) -> dict[str, str]:
+    """Collect CLI commands from the registry block."""
+    commands: dict[str, str] = {}
+    for line in spec_lines:
         command_name = _extract_command_name(line)
         if command_name is not None:
             commands[command_name] = command_name
+    return commands
+
+
+def extract_cli_commands_from_registry() -> dict[str, str]:
+    """Extract CLI commands from the _LAZY_COMMAND_SPECS dictionary."""
+    registry_content = Path(CLI_REGISTRY_FILE).read_text()
+    commands = _collect_registry_commands(_iter_registry_spec_lines(registry_content))
 
     if not commands:
         print("❌ Could not find any CLI commands in registry")

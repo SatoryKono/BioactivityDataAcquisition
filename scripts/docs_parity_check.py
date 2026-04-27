@@ -103,22 +103,22 @@ class DocumentationParityChecker:
             return []
         return list(entity_docs_dir.glob("*.md"))
 
+    def _config_entity(self, config_file: Path, *, entity_type: str) -> ConfigEntity:
+        """Build a ConfigEntity from one config file."""
+        return ConfigEntity(
+            name=config_file.stem,
+            type=entity_type,
+            path=str(config_file.relative_to(self.configs_dir)),
+        )
+
     def find_config_files(self) -> list[ConfigEntity]:
         """Find all configuration files that should have documentation."""
         config_entities = [
-            ConfigEntity(
-                name=config_file.stem,
-                type="entity",
-                path=str(config_file.relative_to(self.configs_dir)),
-            )
+            self._config_entity(config_file, entity_type="entity")
             for config_file in self._iter_entity_config_files()
         ]
         config_entities.extend(
-            ConfigEntity(
-                name=config_file.stem,
-                type="composite",
-                path=str(config_file.relative_to(self.configs_dir)),
-            )
+            self._config_entity(config_file, entity_type="composite")
             for config_file in self._iter_composite_config_files()
         )
         return config_entities
