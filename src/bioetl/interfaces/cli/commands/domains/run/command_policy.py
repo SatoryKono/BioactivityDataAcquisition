@@ -19,7 +19,7 @@ from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
     ExecutionFailureReasonCodes,
     execute_with_cli_failure_policy,
-    finalize_cli_execution,
+    execute_prepared_cli_flow,
     map_run_status_to_exit_code,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
@@ -272,7 +272,7 @@ def run_command_flow(
         command_input=cli_input,
         exit_func=exit_func,
     )
-    finalize_cli_execution(
+    execute_prepared_cli_flow(
         health_info_presenter=lambda: health_info_presenter(request),
         execute=lambda: execute_run_step(
             request=request,

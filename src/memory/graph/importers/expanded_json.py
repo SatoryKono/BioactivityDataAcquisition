@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-
 from memory.resources import MEMORY_ROOT
 
 GENERATOR_VERSION = 1
@@ -29,10 +28,7 @@ PATH_REF_PATTERN = re.compile(
     r"\b(?:src|configs|tests|docs)/(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+"
 )
 ADR_REF_PATTERN = re.compile(r"\bADR-(\d{3})\b", re.IGNORECASE)
-ADR_LIFECYCLE_FIELD_PATTERN = re.compile(
-    r"^\s*[*_`#>\-\s]*(supersedes|superseded by|amends|amended by)\s*:",
-    re.IGNORECASE,
-)
+ADR_LIFECYCLE_FIELDS = ("supersedes", "superseded by", "amends", "amended by")
 RUNBOOK_EXCLUDED_STEMS = frozenset({"index"})
 CONFIGS_DIR_PREFIX = "configs/"
 ADR_DOC_GLOB = "ADR-*.md"
@@ -821,13 +817,23 @@ def _adr_number(path: Path) -> str | None:
     return match.group(1) if match else None
 
 
+def _extract_adr_lifecycle_field(line: str) -> str | None:
+    line_stripped = line.lstrip(" *_`#>-")
+    lower_line = line_stripped.lower()
+    for keyword in ADR_LIFECYCLE_FIELDS:
+        if lower_line.startswith(keyword):
+            remainder = lower_line[len(keyword) :].lstrip()
+            if remainder.lstrip(" *_`#>-").startswith(":"):
+                return keyword
+    return None
+
+
 def _iter_adr_lifecycle_refs(text: str) -> list[tuple[str, str]]:
     refs: list[tuple[str, str]] = []
     for line in text.splitlines():
-        field_match = ADR_LIFECYCLE_FIELD_PATTERN.search(line)
-        if field_match is None:
+        field = _extract_adr_lifecycle_field(line)
+        if field is None:
             continue
-        field = field_match.group(1).lower()
         for target_match in ADR_REF_PATTERN.finditer(line):
             refs.append((field, target_match.group(1)))
     return refs
@@ -842,8 +848,13 @@ def _markdown_title(text: str) -> str:
 
 
 def _failure_mode_name(title: str, fallback_stem: str) -> str:
-    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", title).strip()
-    cleaned = re.sub(r"\s+runbook\s*$", "", cleaned, flags=re.IGNORECASE).strip()
+    cleaned = title.strip()
+    if cleaned.endswith(")"):
+        start_paren = cleaned.rfind("(")
+        if start_paren != -1:
+            cleaned = cleaned[:start_paren].strip()
+    if cleaned.lower().endswith(" runbook"):
+        cleaned = cleaned[:-8].strip()
     return cleaned or fallback_stem.replace("-", " ")
 
 

@@ -25,7 +25,7 @@ class TestGetBiblioProviderConfigs:
     """Tests for bibliographic ProviderConfig registry entries."""
 
     @patch(
-        "bioetl.composition.providers.registration_biblio._get_rate_limits_from_config"
+        "bioetl.composition.providers._config_helpers._get_rate_limits_from_config"
     )
     def test_contains_expected_provider_keys(
         self,
@@ -48,7 +48,7 @@ class TestGetBiblioProviderConfigs:
         }
 
     @patch(
-        "bioetl.composition.providers.registration_biblio._get_rate_limits_from_config"
+        "bioetl.composition.providers._config_helpers._get_rate_limits_from_config"
     )
     def test_pubmed_provider_config_has_pubmed_api_key_rate_override(
         self,
@@ -68,7 +68,7 @@ class TestGetBiblioProviderConfigs:
         assert pubmed.http_config.rate_overrides == {"pubmed_api_key": 10.0}
 
     @patch(
-        "bioetl.composition.providers.registration_biblio._get_rate_limits_from_config"
+        "bioetl.composition.providers._config_helpers._get_rate_limits_from_config"
     )
     def test_crossref_provider_config_uses_crossref_adapter_factory(
         self,
@@ -89,7 +89,7 @@ class TestGetBiblioProviderConfigs:
         assert crossref.requires_logger is True
 
     @patch(
-        "bioetl.composition.providers.registration_biblio._get_rate_limits_from_config"
+        "bioetl.composition.providers._config_helpers._get_rate_limits_from_config"
     )
     def test_openalex_and_pubmed_use_composition_local_custom_creators(
         self,
@@ -110,7 +110,7 @@ class TestGetBiblioProviderConfigs:
         )
 
     @patch(
-        "bioetl.composition.providers.registration_biblio._get_rate_limits_from_config"
+        "bioetl.composition.providers._config_helpers._get_rate_limits_from_config"
     )
     def test_data_source_creators_capture_same_injected_support_instance(
         self,
