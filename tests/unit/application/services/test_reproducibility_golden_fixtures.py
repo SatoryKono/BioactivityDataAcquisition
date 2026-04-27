@@ -53,27 +53,14 @@ from bioetl.domain.ports import (
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.run_context import RunContext
+from tests.helpers.control_plane import InMemoryRunManifestStore
 
 FIXTURE_DIR = Path("tests/fixtures/golden/reproducibility")
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 _FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
 
 
-class _InMemoryRunManifestStore:
-    def __init__(self) -> None:
-        self._items: dict[str, RunManifest] = {}
-        self._by_run_id: dict[str, str] = {}
-
-    def save(self, manifest: RunManifest) -> None:
-        self._items[manifest.manifest_id] = manifest
-        self._by_run_id[str(manifest.run_id)] = manifest.manifest_id
-
-    def get(self, manifest_id: str) -> RunManifest | None:
-        return self._items.get(manifest_id)
-
-    def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
-        manifest_id = self._by_run_id.get(str(run_id))
-        return None if manifest_id is None else self._items.get(manifest_id)
+_InMemoryRunManifestStore = InMemoryRunManifestStore
 
 
 def _save_fixture(name: str, payload: dict[str, object]) -> None:

@@ -18,8 +18,9 @@ from bioetl.domain.lineage import (
     LineageNodeType,
     TransformRef,
 )
-from bioetl.domain.ports import LineageStorePort, RunManifestPort
+from bioetl.domain.ports import LineageStorePort
 from bioetl.domain.types import RunID, RunType
+from tests.helpers.control_plane import InMemoryRunManifestStore
 
 
 class _InMemoryLineageStore(LineageStorePort):
@@ -48,21 +49,7 @@ class _InMemoryLineageStore(LineageStorePort):
         ]
 
 
-class _InMemoryRunManifestStore(RunManifestPort):
-    def __init__(self) -> None:
-        self._items: dict[str, RunManifest] = {}
-        self._by_run_id: dict[str, str] = {}
-
-    def save(self, manifest: RunManifest) -> None:
-        self._items[manifest.manifest_id] = manifest
-        self._by_run_id[str(manifest.run_id)] = manifest.manifest_id
-
-    def get(self, manifest_id: str) -> RunManifest | None:
-        return self._items.get(manifest_id)
-
-    def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
-        manifest_id = self._by_run_id.get(str(run_id))
-        return None if manifest_id is None else self._items.get(manifest_id)
+_InMemoryRunManifestStore = InMemoryRunManifestStore
 
 
 def _make_manifest(*, manifest_id: str, run_id: RunID) -> RunManifest:

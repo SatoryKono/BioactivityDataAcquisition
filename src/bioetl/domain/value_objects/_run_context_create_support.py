@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, TypeAlias, cast
 
 from bioetl.domain.types import RunID, RunType
 
@@ -39,7 +39,7 @@ _RUN_CONTEXT_ALL_FIELDS = (
     *_RUN_CONTEXT_REQUIRED_FIELDS,
     *_RUN_CONTEXT_OPTIONAL_DEFAULTS.keys(),
 )
-_OPTIONAL_STR_ANNOTATION = "str | None"
+_OPTIONAL_STR_ANNOTATION: TypeAlias = "str | None"
 
 
 def _coerce_transform_steps(value: object) -> tuple[str, ...]:

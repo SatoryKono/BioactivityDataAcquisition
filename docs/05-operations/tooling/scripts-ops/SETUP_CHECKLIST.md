@@ -58,7 +58,7 @@ Before using Codex, ensure you have:
 - [x] Access to project directory from WSL
 
   ```bash
-  ls /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
+  ls <YOUR_WSL_REPO_PATH>
   ```
 
 - [x] Internet connectivity from WSL
@@ -218,7 +218,7 @@ If something doesn't work:
 
 - [ ] Verify project path exists in WSL:
   ```bash
-  ls -d /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
+  ls -d <YOUR_WSL_REPO_PATH>
   ```
 - [ ] Ensure running from project directory:
   ```bash

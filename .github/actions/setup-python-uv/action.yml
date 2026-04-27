@@ -7,7 +7,7 @@ inputs:
   python-version:
     description: Python version to install
     required: false
-    default: "3.11"
+    default: "3.12"
   uv-extras:
     description: "Space-separated uv extras to install (e.g. 'dev tracing performance')"
     required: false
@@ -49,6 +49,10 @@ runs:
         key: uv-${{ runner.os }}-py${{ inputs.python-version }}-${{ hashFiles('uv.lock') }}
         restore-keys: |
           uv-${{ runner.os }}-py${{ inputs.python-version }}-
+
+    - name: Pin UV_PYTHON for subsequent steps
+      shell: bash
+      run: echo "UV_PYTHON=${{ inputs.python-version }}" >> "$GITHUB_ENV"
 
     - name: Install dependencies
       shell: bash
