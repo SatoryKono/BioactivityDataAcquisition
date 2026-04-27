@@ -64,6 +64,9 @@ def _test_internal_http_uri(host: str, port: int) -> str:
 LOCALHOST_HTTP_URI = _test_internal_http_uri("localhost", 7474)
 LOCALHOST_AUDIT_HTTP_URI = _test_internal_http_uri("localhost", 7475)
 HOST_DOCKER_INTERNAL_HTTP_URI = _test_internal_http_uri("host.docker.internal", 7474)
+HOST_DOCKER_INTERNAL_AUDIT_HTTP_URI = _test_internal_http_uri(
+    "host.docker.internal", 7475
+)
 CHEMBL_ACTIVITY_CONFIG_PATH = "configs/entities/chembl/activity.yaml"
 RUN_MANIFEST_LEDGER_DOC_PATH = "docs/04-reference/contracts/run-manifest-ledger.md"
 RUN_MANIFEST_MODULE_PATH = "src/bioetl/domain/control_plane/run_manifest.py"
@@ -2364,18 +2367,19 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_anchor_grap
     )
     snapshot.add_relation(project, "CONTAINS", complexity_candidate)
     snapshot.add_relation(class_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
-    filtered = _filtered_snapshot(snapshot, only_complexity_layer=True)
 
-    class StubClient:
-        def query(
-            self,
-            _statement: str,
-            parameters: dict[str, object] | None = None,
-            *,
-            context: str | None = None,
-        ) -> list[dict[str, object]]:
-            del statement
-            assert context == "complexity-layer targeted sync prerequisite anchor check"
+    def query(
+        self,
+        _statement: str,
+        parameters: dict[str, object] | None = None,
+        *,
+        context: str | None = None,
+    ) -> list[dict[str, object]]:
+        assert context == "complexity-layer targeted sync prerequisite anchor check"
+        assert parameters is not None
+        return [{"label": label, "count": 0} for label in parameters["labels"]]
+
+        assert context == "complexity-layer targeted sync prerequisite anchor check"
             assert parameters is not None
             return [{"label": label, "count": 0} for label in parameters["labels"]]
 
@@ -2737,7 +2741,7 @@ def test_verify_expected_group_counts_uses_sync_run_for_targeted_relation_checks
             if context == "post-apply node group verification":
                 return []
             if context == "post-apply relation group verification":
-                assert "coalesce(r.sync_run, '') = $sync_run" in _statement
+                assert "coalesce(r.sync_run, '') = $sync_run" in statement
                 assert parameters["sync_run"] == "run-123"
                 return [{"relation_type": "CANDIDATE_FOR_REMOVAL", "count": 2}]
             raise AssertionError(f"Unexpected query context: {context}")
