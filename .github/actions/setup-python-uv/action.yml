@@ -52,7 +52,16 @@ runs:
 
     - name: Pin UV_PYTHON for subsequent steps
       shell: bash
-      run: echo "UV_PYTHON=${{ inputs.python-version }}" >> "$GITHUB_ENV"
+      env:
+        INPUT_PYTHON_VERSION: ${{ inputs.python-version }}
+      run: |
+        case "$INPUT_PYTHON_VERSION" in
+          ''|*[!0-9.]*)
+            echo "Invalid python-version input: $INPUT_PYTHON_VERSION" >&2
+            exit 1
+            ;;
+        esac
+        printf 'UV_PYTHON=%s\n' "$INPUT_PYTHON_VERSION" >> "$GITHUB_ENV"
 
     - name: Install dependencies
       shell: bash
