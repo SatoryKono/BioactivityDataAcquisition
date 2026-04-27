@@ -152,9 +152,7 @@ def _replace_checkpoint_state(
         CompositeCheckpointState,
     )
 
-    return cast(
-        TCheckpointState,
-        CompositeCheckpointState(
+    checkpoint_state_copy = CompositeCheckpointState(
         composite_name=checkpoint_state.composite_name,
         run_id=checkpoint_state.run_id,
         state=_resolved(checkpoint_state.state, state),
@@ -193,5 +191,5 @@ def _replace_checkpoint_state(
         last_event_occurred_at=checkpoint_state.last_event_occurred_at,
         created_at=checkpoint_state.created_at,
         updated_at=updated_at or _current_utc_now(clock),
-        ),
     )
+    return cast(TCheckpointState, checkpoint_state_copy)
