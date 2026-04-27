@@ -237,6 +237,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.agentbridge" />
       <excludeFolder url="file://$MODULE_DIR$/docs/99-archive/root-status-artifacts/ai-runtime-setup" />
       <excludeFolder url="file://$MODULE_DIR$/.agent-work/tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/.agent-work" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.13 (BioactivityDataAcquisition2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
