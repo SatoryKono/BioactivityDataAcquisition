@@ -2442,7 +2442,7 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_specific_an
     class StubClient:
         def query(
             self,
-            statement: str,
+            _statement: str,
             parameters: dict[str, object] | None = None,
             *,
             context: str | None = None,
@@ -2737,7 +2737,7 @@ def test_verify_expected_group_counts_uses_sync_run_for_targeted_relation_checks
             if context == "post-apply node group verification":
                 return []
             if context == "post-apply relation group verification":
-                assert "coalesce(r.sync_run, '') = $sync_run" in statement
+                assert "coalesce(r.sync_run, '') = $sync_run" in _statement
                 assert parameters["sync_run"] == "run-123"
                 return [{"relation_type": "CANDIDATE_FOR_REMOVAL", "count": 2}]
             raise AssertionError(f"Unexpected query context: {context}")
