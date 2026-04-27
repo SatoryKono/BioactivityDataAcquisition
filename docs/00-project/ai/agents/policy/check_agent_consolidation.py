@@ -1,3 +1,4 @@
+# ruff: noqa: T201
 #!/usr/bin/env python3
 """Validate specialist agent profiles in the docs mirror.
 
