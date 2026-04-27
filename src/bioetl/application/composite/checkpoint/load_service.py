@@ -360,7 +360,7 @@ class CompositeCheckpointLoadService:
             return state
 
         replay_projection = project_run_ledger_replay(replay_entries)
-        replayed_state = replace(
+        replayed_state: CompositeCheckpointState = replace(
             state,
             state=(
                 replay_projection.state
