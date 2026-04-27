@@ -17,6 +17,7 @@ Behavior:
   - Skips missing branches and refuses to delete the current branch.
   - Skips protected branches and branches that are still attached to a worktree.
 EOF
+  return 0
 }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -109,6 +110,7 @@ PROTECTED_BRANCHES=(
 branch_exists() {
   local branch="$1"
   git show-ref --verify --quiet "refs/heads/${branch}"
+  return 0
 }
 
 remote_branch_exists() {
@@ -119,12 +121,14 @@ remote_branch_exists() {
 archive_tag_for() {
   local branch="$1"
   printf 'archive/%s-%s' "${branch//\//-}" "${ARCHIVE_DATE}"
+  return 0
 }
 
 log_action() {
   local action="$1"
   local subject="$2"
   printf '[%s] %s\n' "${action}" "${subject}"
+  return 0
 }
 
 is_protected_branch() {

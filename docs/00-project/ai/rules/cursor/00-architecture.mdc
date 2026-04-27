@@ -1,0 +1,56 @@
+---
+description: BioETL Architecture — Layers, Ports & Adapters, Import Matrix
+globs: ["src/**/*.py", "tests/**/*.py"]
+---
+
+# Layer Architecture (Clean / Ports & Adapters)
+
+**Philosophy**: "Pragmatic engineering" — avoid over-engineering, accelerate time-to-market.
+
+**Layers** (`src/bioetl/`):
+- **domain/**: Pure business logic, Protocols (typing.Protocol), NO I/O
+- **application/**: Orchestration, use cases
+- **infrastructure/**: Adapters, concrete implementations
+- **composition/**: DI wiring — ONLY place knowing ALL layers
+- **interfaces/**: CLI, may import from all
+
+## Import Matrix (MUST follow)
+
+| From ↓ / To → | domain | app | infra | comp | iface |
+|---------------|--------|-----|-------|--------|-------|
+| domain        | ✅ | ❌ | ❌ | ❌ | ❌ |
+| application   | ✅ | ✅ | ❌ | ❌ | ❌ |
+| infrastructure| ✅ | ❌ | ✅ | ❌ | ❌ |
+| composition   | ✅ | ✅ | ✅ | ✅ | ❌ |
+| interfaces    | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+## Ports & Protocols
+
+- Define in `domain/ports/` via `typing.Protocol`
+- Import: `from bioetl.domain.ports import ...` (facade, not internal modules)
+- `*Port` suffix = cross-layer contract in `domain/ports/`
+- `*Protocol` suffix = layer-internal structural typing (allowed)
+- Critical ports MUST be `@runtime_checkable`: DataSourcePort, FilterableDataSourcePort, HealthCheckPort, StoragePort
+
+## Required Methods
+
+**Health Check** (ALL adapters):
+```python
+async def health_check(self) -> HealthStatus:
+    # Returns: HEALTHY, DEGRADED, or UNHEALTHY
+    # MUST be async, MUST NOT raise exceptions
+```
+
+**Resource Cleanup** (ALL services/adapters):
+```python
+async def aclose(self) -> None:
+    # Idempotent, MUST NOT raise, SHOULD: self._client = None
+```
+
+## Architecture Verification
+
+```bash
+uv run python -m scripts.engineering.qa check-exemptions
+uv run python -m pytest tests/architecture/test_quality_debt_scorecard.py -q
+uv run python -m pytest tests/architecture/test_regression_metrics.py -q
+```

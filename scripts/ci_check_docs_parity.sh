@@ -14,7 +14,7 @@ python3 scripts/check_entity_config_parity.py
 # Capture exit code
 EXIT_CODE=$?
 
-if [ $EXIT_CODE -eq 0 ]; then
+if [[ $EXIT_CODE -eq 0 ]]; then
     echo "✅ Documentation parity check passed"
     exit 0
 else
