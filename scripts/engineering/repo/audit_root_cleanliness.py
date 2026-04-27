@@ -415,6 +415,21 @@ def _collect_src_policy_violations(
         )
 
 
+def _collect_blocked_cleanup_violations(
+    repo_root: Path,
+    catalog: dict[str, Any],
+    violations: list[str],
+) -> None:
+    """Append violations for blocked cleanup zones missing on disk."""
+    blocked_cleanup_entries = catalog["blocked_cleanup_zones"]
+    blocked_cleanup_paths = _collect_cataloged_paths(blocked_cleanup_entries)
+    for path in sorted(blocked_cleanup_paths):
+        if not (repo_root / path).exists():
+            violations.append(
+                f"{path}: blocked cleanup zone declared in catalog but missing"
+            )
+
+
 def _collect_structure_policy_violations(
     repo_root: Path,
     tracked_paths: list[str],
@@ -426,14 +441,7 @@ def _collect_structure_policy_violations(
     _collect_docs_policy_violations(tracked_paths, catalog, violations)
     _collect_plan_policy_violations(tracked_paths, catalog, violations)
     _collect_src_policy_violations(tracked_paths, catalog, violations)
-
-    blocked_cleanup_entries = catalog["blocked_cleanup_zones"]
-    blocked_cleanup_paths = _collect_cataloged_paths(blocked_cleanup_entries)
-    for path in sorted(blocked_cleanup_paths):
-        if not (repo_root / path).exists():
-            violations.append(
-                f"{path}: blocked cleanup zone declared in catalog but missing"
-            )
+    _collect_blocked_cleanup_violations(repo_root, catalog, violations)
 
     return violations
 

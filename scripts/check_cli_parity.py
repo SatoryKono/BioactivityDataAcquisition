@@ -39,6 +39,22 @@ def _extract_command_name(line: str) -> str | None:
     return command_name if _is_cli_command_name(command_name) else None
 
 
+def _missing_commands(
+    registry_commands: dict[str, str],
+    doc_commands: set[str],
+) -> list[str]:
+    """Return commands present in code but absent from docs."""
+    return [cmd for cmd in registry_commands if cmd not in doc_commands]
+
+
+def _extra_commands(
+    registry_commands: dict[str, str],
+    doc_commands: set[str],
+) -> list[str]:
+    """Return commands documented but not present in code."""
+    return [cmd for cmd in doc_commands if cmd not in registry_commands]
+
+
 def extract_cli_commands_from_registry() -> dict[str, str]:
     """Extract CLI commands from the _LAZY_COMMAND_SPECS dictionary."""
     registry_content = Path(CLI_REGISTRY_FILE).read_text()
@@ -85,17 +101,12 @@ def check_cli_parity() -> tuple[list[str], list[str], int, int]:
     """Check parity between CLI registry and documentation."""
     registry_commands = extract_cli_commands_from_registry()
     doc_commands = extract_cli_commands_from_docs()
-
-    # Find missing commands in documentation
-    missing_in_docs = [cmd for cmd in registry_commands if cmd not in doc_commands]
-
-    # Find commands in docs but not in registry (shouldn't happen, but good to check)
-    extra_in_docs = [cmd for cmd in doc_commands if cmd not in registry_commands]
-
-    registry_count = len(registry_commands)
-    doc_count = len(doc_commands)
-
-    return missing_in_docs, extra_in_docs, registry_count, doc_count
+    return (
+        _missing_commands(registry_commands, doc_commands),
+        _extra_commands(registry_commands, doc_commands),
+        len(registry_commands),
+        len(doc_commands),
+    )
 
 
 def main() -> int:
