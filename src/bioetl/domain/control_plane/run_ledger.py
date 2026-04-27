@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, replace
 from datetime import datetime
-from typing import TypedDict
+from typing import TypedDict, cast
 from uuid import UUID
 
 from bioetl.domain.composite.state import CompositePipelineState
@@ -162,7 +162,10 @@ def _project_stage_completed(
     update = _STAGE_COMPLETION_UPDATES.get(stage)
     if update is None:
         return projection
-    updated_projection: RunLedgerReplayProjection = replace(projection, **update)
+    updated_projection: RunLedgerReplayProjection = cast(  # type: ignore[redundant-cast]
+        RunLedgerReplayProjection,
+        replace(projection, **update),
+    )
     return updated_projection
 
 
@@ -170,23 +173,32 @@ def _apply_replay_entry(
     projection: RunLedgerReplayProjection,
     entry: RunLedgerEntry,
 ) -> RunLedgerReplayProjection:
-    replayed: RunLedgerReplayProjection = replace(
-        projection,
-        last_event_id=entry.entry_id,
-        last_event_occurred_at=entry.occurred_at,
+    replayed: RunLedgerReplayProjection = cast(  # type: ignore[redundant-cast]
+        RunLedgerReplayProjection,
+        replace(
+            projection,
+            last_event_id=entry.entry_id,
+            last_event_occurred_at=entry.occurred_at,
+        ),
     )
     if entry.event_type == STAGE_COMPLETED_EVENT:
         return _project_stage_completed(replayed, entry)
     if entry.event_type == RUN_FINISHED_EVENT:
-        completed_projection: RunLedgerReplayProjection = replace(
-            replayed,
-            state=CompositePipelineState.COMPLETED,
+        completed_projection: RunLedgerReplayProjection = cast(  # type: ignore[redundant-cast]
+            RunLedgerReplayProjection,
+            replace(
+                replayed,
+                state=CompositePipelineState.COMPLETED,
+            ),
         )
         return completed_projection
     if entry.event_type == RUN_FAILED_EVENT:
-        failed_projection: RunLedgerReplayProjection = replace(
-            replayed,
-            state=CompositePipelineState.FAILED,
+        failed_projection: RunLedgerReplayProjection = cast(  # type: ignore[redundant-cast]
+            RunLedgerReplayProjection,
+            replace(
+                replayed,
+                state=CompositePipelineState.FAILED,
+            ),
         )
         return failed_projection
     return replayed
