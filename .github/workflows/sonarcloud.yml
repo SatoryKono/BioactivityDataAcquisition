@@ -53,6 +53,10 @@ jobs:
       - name: Run SonarCloud scan
         if: steps.sonar-token.outputs.available == 'true'
         uses: SonarSource/sonarqube-scan-action@v6
+        with:
+          args: >
+            -Dsonar.sources=src/bioetl
+            -Dsonar.inclusions=src/bioetl/**/*.py
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
