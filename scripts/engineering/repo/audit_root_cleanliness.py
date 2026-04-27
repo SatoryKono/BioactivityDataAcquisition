@@ -360,13 +360,34 @@ def _collect_plan_policy_violations(
 ) -> None:
     """Append plan catalog policy violations."""
     tracked_set = set(tracked_paths)
-    plans_readme = catalog["plans"].get("readme")
+    plans = catalog["plans"]
+    plans_readme = plans.get("readme")
     if not isinstance(plans_readme, str) or not plans_readme:
         raise RuntimeError("Structure catalog plans.readme must be a non-empty path")
+    _collect_plans_readme_violation(plans_readme, tracked_set, violations)
+    _collect_plans_catalog_violations(tracked_paths, plans, plans_readme, tracked_set, violations)
+    _collect_plans_lifecycle_violation(plans, violations)
+
+
+def _collect_plans_readme_violation(
+    plans_readme: str,
+    tracked_set: set[str],
+    violations: list[str],
+) -> None:
+    """Ensure the plans readme exists in tracked files."""
     if plans_readme not in tracked_set:
         violations.append(f"{plans_readme}: plans readme required by structure catalog")
 
-    cataloged_plan_paths = _collect_cataloged_paths(catalog["plans"]["allowed_files"])
+
+def _collect_plans_catalog_violations(
+    tracked_paths: list[str],
+    plans: dict[str, Any],
+    plans_readme: str,
+    tracked_set: set[str],
+    violations: list[str],
+) -> None:
+    """Ensure tracked plans match the catalog allowlist."""
+    cataloged_plan_paths = _collect_cataloged_paths(plans["allowed_files"])
     actual_plan_paths = {
         path
         for path in tracked_paths
@@ -381,11 +402,17 @@ def _collect_plan_policy_violations(
     for path in sorted(cataloged_plan_paths - tracked_set):
         violations.append(f"{path}: cataloged plan file is missing from tracked tree")
 
-    plan_entries = catalog["plans"]["allowed_files"]
+
+def _collect_plans_lifecycle_violation(
+    plans: dict[str, Any],
+    violations: list[str],
+) -> None:
+    """Ensure the active backlog count matches the catalog constraint."""
+    plan_entries = plans["allowed_files"]
     active_backlog_count = sum(
         1 for entry in plan_entries if entry.get("lifecycle") == "active_backlog"
     )
-    max_active_backlog = catalog["plans"].get("max_active_backlog")
+    max_active_backlog = plans.get("max_active_backlog")
     if not isinstance(max_active_backlog, int) or max_active_backlog < 1:
         raise RuntimeError("Structure catalog plans.max_active_backlog must be >= 1")
     if active_backlog_count != max_active_backlog:

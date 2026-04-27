@@ -142,25 +142,34 @@ def _collect_quality_validation_types(
                 _collect_field_validation_rule_types(quality[section], rule_types)
 
 
+def _collect_config_structure(
+    config_path: Path,
+    validation_types: set[str],
+    rule_types: set[str],
+) -> None:
+    """Process one config file and collect its quality structure."""
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+    except yaml.YAMLError as e:
+        print(f"⚠️  Warning: Could not parse {config_path}: {e}")
+        return
+
+    if isinstance(config, dict) and "quality" in config:
+        _collect_quality_validation_types(
+            config["quality"],
+            validation_types,
+            rule_types,
+        )
+
+
 def analyze_config_structure(configs: list[Path]) -> dict[str, Any]:
     """Analyze the actual config structure to ensure comprehensive coverage."""
     validation_types = set()
     rule_types = set()
 
     for config_path in configs:
-        try:
-            with open(config_path, "r", encoding="utf-8") as f:
-                config = yaml.safe_load(f)
-
-            if "quality" in config:
-                _collect_quality_validation_types(
-                    config["quality"],
-                    validation_types,
-                    rule_types,
-                )
-
-        except yaml.YAMLError as e:
-            print(f"⚠️  Warning: Could not parse {config_path}: {e}")
+        _collect_config_structure(config_path, validation_types, rule_types)
 
     return {
         "validation_types": sorted(validation_types),

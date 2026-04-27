@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-27T16:33:02.247740+00:00",
+  "generated_at": "2026-04-27T17:12:37.976658+00:00",
   "summary": {
     "total_scripts": 445,
     "status_counts": {
@@ -5809,7 +5809,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 194,
+          "line": 209,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"apply_ci_fixes.py\""
         }
@@ -5956,7 +5956,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 122,
+          "line": 137,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"quality_integral_gate.py\""
         }
@@ -6067,7 +6067,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 75,
+          "line": 90,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_identity.py\","
         }
@@ -6088,7 +6088,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 76,
+          "line": 91,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_registry.py\","
         }
@@ -6129,7 +6129,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 77,
+          "line": 92,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py\","
         }
@@ -6168,7 +6168,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 78,
+          "line": 93,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_schema_classifier_gate.py\","
         }
@@ -8066,7 +8066,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 278,
+          "line": 293,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         }
@@ -8370,7 +8370,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 281,
+          "line": 296,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         }
@@ -9816,8 +9816,14 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 29,
+      "reference_count": 30,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 1,
+          "source_group": "docs",
+          "text": "scripts\\codex-exec.bat"
+        },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 67,
@@ -9859,12 +9865,6 @@
           "line": 16,
           "source_group": "docs",
           "text": "| `codex-exec.bat \"prompt\"` | Auto-execute (full-auto)  | Auto        |"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
-          "line": 51,
-          "source_group": "docs",
-          "text": ".\\scripts\\ops\\codex-exec.bat \"fix all TODO comments in the codebase\""
         }
       ]
     },
@@ -10010,8 +10010,14 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 77,
+      "reference_count": 78,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 2,
+          "source_group": "docs",
+          "text": "scripts\\codex.bat"
+        },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 66,
@@ -10053,12 +10059,6 @@
           "line": 130,
           "source_group": "docs",
           "text": "| `codex.bat`      | Original Windows launcher      | Legacy (still works) |"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 253,
-          "source_group": "docs",
-          "text": "├─ codex.bat (legacy) ─────────────────│ All routes to WSL2"
         }
       ]
     },
@@ -10693,7 +10693,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 166,
+          "line": 181,
           "source_group": "tests",
           "text": "/ \"rerender_grafana_screenshots.py\""
         }
@@ -10952,8 +10952,14 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 22,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 3,
+          "source_group": "docs",
+          "text": "scripts\\start-wsl-proxy.bat"
+        },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 65,
@@ -10995,12 +11001,6 @@
           "line": 216,
           "source_group": "docs",
           "text": "| `start-wsl-proxy.bat`              | Proxy launcher               | Windows PowerShell |"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 288,
-          "source_group": "docs",
-          "text": "# PowerShell: .\\scripts\\ops\\start-wsl-proxy.bat"
         }
       ]
     },
@@ -11642,7 +11642,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 74,
+          "line": 89,
           "source_group": "tests",
           "text": "\"scripts/schema/generate_schema_artifacts.py\","
         },
@@ -12071,7 +12071,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 73,
+          "line": 88,
           "source_group": "tests",
           "text": "\"src/tools/generate_docs_export.py\","
         }

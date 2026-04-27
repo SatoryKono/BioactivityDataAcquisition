@@ -203,6 +203,28 @@ def _read_text_cache_entries(cache_paths: list[Path], max_workers: int) -> dict[
     return _read_text_cache_entries_threaded(cache_paths, max_workers)
 
 
+def _load_disk_cached_payload(
+    cache_name: str,
+    cache_paths: list[Path],
+) -> dict[Path, str] | dict[Path, ast.Module] | None:
+    """Load a persisted cache snapshot when available."""
+    cached_payload = _load_disk_cache(cache_name, cache_paths)
+    if isinstance(cached_payload, dict):
+        return cached_payload
+    return None
+
+
+def _write_disk_cached_payload(
+    cache_name: str,
+    cache_paths: list[Path],
+    payload: dict[Path, str] | dict[Path, ast.Module],
+    use_disk_cache: bool,
+) -> None:
+    """Persist the computed cache payload when disk caching is enabled."""
+    if use_disk_cache:
+        _store_disk_cache(cache_name, cache_paths, payload)
+
+
 def _parse_ast_cache_entry(item: tuple[Path, str]) -> tuple[Path, ast.Module | None]:
     """Parse a single source file into an AST tree when possible."""
     path, content = item
@@ -241,15 +263,13 @@ def _build_text_cache(
         cache_name_or_paths,
         paths,
     )
-    if use_disk_cache:
-        cached_payload = _load_disk_cache(cache_name, cache_paths)
-        if isinstance(cached_payload, dict):
-            return cached_payload
+    cached_payload = _load_disk_cached_payload(cache_name, cache_paths)
+    if cached_payload is not None:
+        return cached_payload
 
     max_workers = _cache_worker_count(len(cache_paths))
     result = _read_text_cache_entries(cache_paths, max_workers)
-    if use_disk_cache:
-        _store_disk_cache(cache_name, cache_paths, result)
+    _write_disk_cached_payload(cache_name, cache_paths, result, use_disk_cache)
     return result
 
 
@@ -263,16 +283,14 @@ def _build_ast_cache(
         text_cache,
     )
     cache_paths = list(cached_text)
-    if use_disk_cache:
-        cached_payload = _load_disk_cache(cache_name, cache_paths)
-        if isinstance(cached_payload, dict):
-            return cached_payload
+    cached_payload = _load_disk_cached_payload(cache_name, cache_paths)
+    if cached_payload is not None:
+        return cached_payload
 
     max_workers = _cache_worker_count(len(cache_paths))
     result = _read_ast_cache_entries(cached_text, max_workers)
 
-    if use_disk_cache:
-        _store_disk_cache(cache_name, cache_paths, result)
+    _write_disk_cached_payload(cache_name, cache_paths, result, use_disk_cache)
     return result
 
 
