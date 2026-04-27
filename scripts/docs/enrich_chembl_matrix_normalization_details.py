@@ -16,6 +16,7 @@ _IMPL = load_public_api(
     globals(),
     "scripts.docs.matrix.enrich_normalization_details",
 )
+main = _IMPL.main
 
 
 if __name__ == "__main__":

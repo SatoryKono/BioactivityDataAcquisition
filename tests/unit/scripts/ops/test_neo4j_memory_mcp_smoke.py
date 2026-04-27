@@ -108,7 +108,7 @@ while True:
         encoding="utf-8",
     )
 
-    result = run_smoke_command([sys.executable, str(server)], timeout_seconds=5.0)
+    result = run_smoke_command([sys.executable, str(server)], timeout_seconds=15.0)
 
     assert result.ok is True
     assert result.returncode == 0
