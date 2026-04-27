@@ -361,8 +361,7 @@ class CompositeCheckpointLoadService:
             return state
 
         replay_projection = project_run_ledger_replay(replay_entries)
-        replayed_state: CompositeCheckpointState = cast(  # type: ignore[redundant-cast]
-            CompositeCheckpointState,
+        replayed_state: CompositeCheckpointState = replace(
             replace(
                 state,
                 state=(
