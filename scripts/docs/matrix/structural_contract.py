@@ -18,15 +18,17 @@ else:
 
 ensure_repo_imports(include_src=True)
 
-from bioetl.application.core.base_transformer._structural_policy_contracts import (
+from bioetl.application.core.base_transformer._structural_policy_contracts import (  # noqa: E402
     resolve_field_contracts,
     resolve_pandera_schema,
 )
-from bioetl.application.core.base_transformer.field_policy import FieldPolicyResolver
-from bioetl.composition.factories.pipeline._registry_manifest_chembl import (
+from bioetl.application.core.base_transformer.field_policy import (  # noqa: E402
+    FieldPolicyResolver,
+)
+from bioetl.composition.factories.pipeline._registry_manifest_chembl import (  # noqa: E402
     CHEMBL_PIPELINE_CONFIGS,
 )
-from bioetl.infrastructure.config.domain_config_resolver import (
+from bioetl.infrastructure.config.domain_config_resolver import (  # noqa: E402
     load_domain_pipeline_config,
 )
 

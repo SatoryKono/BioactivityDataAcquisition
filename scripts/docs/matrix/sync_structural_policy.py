@@ -20,7 +20,7 @@ else:
 
 ensure_repo_imports(include_src=True)
 
-from scripts.docs.common.xlsx import (
+from scripts.docs.common.xlsx import (  # noqa: E402
     MAIN_NS,
     NS,
     cell_text,
@@ -29,7 +29,7 @@ from scripts.docs.common.xlsx import (
     set_cell_text,
     sheet_target_paths,
 )
-from scripts.docs.matrix.structural_contract import (
+from scripts.docs.matrix.structural_contract import (  # noqa: E402
     DEFAULT_CONTRACT_EXPORT,
     INVALID_TYPE_TO_NULL,
     NOT_APPLICABLE,

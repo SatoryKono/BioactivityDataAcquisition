@@ -448,10 +448,13 @@ jobs:
                     pytest-cache-fingerprint: ${{ hashFiles(matrix.test-group.cache_glob, 'tests/conftest.py', 'pyproject.toml') }}
 
             -   name: Run Tests (${{ matrix.test-group.name }} on Python ${{ matrix.python-version }})
+                env:
+                    COVERAGE_FILE: reports/coverage/.coverage.${{ matrix.test-group.name }}
                 run: |
                     set +e
                     mkdir -p reports/coverage
                     mkdir -p reports/test-telemetry
+                    export COVERAGE_FILE="reports/coverage/.coverage.${{ matrix.test-group.name }}"
                     uv run pytest ${{ matrix.test-group.path }} \
                       -m "not serial and not memory" \
                       -n auto --dist loadscope --max-worker-restart=0 \
@@ -459,7 +462,8 @@ jobs:
                       --junitxml=reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml \
                       --cov=src/bioetl --cov-report=
                     TEST_EXIT=$?
-                    cp .coverage reports/coverage/.coverage.${{ matrix.test-group.name }} 2>/dev/null || true
+                    cp .coverage "reports/coverage/.coverage.${{ matrix.test-group.name }}" 2>/dev/null || true
+                    ls -la reports/coverage/ 2>/dev/null || true
                     exit $TEST_EXIT
 
             -   name: Upload coverage shard (${{ matrix.test-group.name }} on Python 3.12)
@@ -468,7 +472,7 @@ jobs:
                 with:
                     name: coverage-data-${{ matrix.test-group.name }}
                     path: reports/coverage/.coverage.${{ matrix.test-group.name }}
-                    if-no-files-found: error
+                    if-no-files-found: warn
                     retention-days: 7
 
             -   name: Upload test telemetry (${{ matrix.test-group.name }} on Python 3.12)

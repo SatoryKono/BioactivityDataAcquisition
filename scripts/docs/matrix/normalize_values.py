@@ -23,7 +23,7 @@ else:
 
 ensure_repo_imports()
 
-from scripts.docs.common.xlsx import (
+from scripts.docs.common.xlsx import (  # noqa: E402
     MAIN_NS,
     NS,
     cell_text,
@@ -288,16 +288,34 @@ SILVER_VALIDATION_MAP: Final[dict[str, str]] = {
     ),
     "enum; allowed=B,F,A,T,P,U; non-null": ("pandera:enum:{B,F,A,T,P,U}; not_null"),
     "enum; allowed=D,H,M,N,S,U": "pandera:enum:{D,H,M,N,S,U}",
-    "enum; allowed=MESH_HEADING,KEYWORD,AUTHOR,INSTITUTION; cross-field: term_completeness; key_nullability: partition not nullable": (
+    (
+        "enum; allowed=MESH_HEADING,KEYWORD,AUTHOR,INSTITUTION; "
+        "cross-field: term_completeness; "
+        "key_nullability: partition not nullable"
+    ): (
         "pandera:enum:{MESH_HEADING,KEYWORD,AUTHOR,INSTITUTION}; cross_field:term_completeness; key_not_null:partition"
     ),
     "enum; allowed=MOL,SEQ,NONE,BOTH": "pandera:enum:{MOL,SEQ,NONE,BOTH}",
     "enum; allowed=PROTEIN,DNA,RNA": "pandera:enum:{PROTEIN,DNA,RNA}",
-    "enum; allowed=SINGLE PROTEIN,PROTEIN COMPLEX,PROTEIN FAMILY,SELECTIVITY GROUP,ORGANISM,TISSUE,CELL-LINE,SUBCELLULAR,UNKNOWN,CHIMERIC PROTEIN,PROTEIN-PROTEIN INTERACTION,NUCLEIC-ACID,METAL,LIPID,MACROMOLECULE,PHENOTYPE,ADMET; key_nullability: partition not nullable": (
-        "pandera:enum:{SINGLE PROTEIN,PROTEIN COMPLEX,PROTEIN FAMILY,SELECTIVITY GROUP,ORGANISM,TISSUE,CELL-LINE,SUBCELLULAR,UNKNOWN,CHIMERIC PROTEIN,PROTEIN-PROTEIN INTERACTION,NUCLEIC-ACID,METAL,LIPID,MACROMOLECULE,PHENOTYPE,ADMET}; key_not_null:partition"
+    (
+        "enum; allowed=SINGLE PROTEIN,PROTEIN COMPLEX,PROTEIN FAMILY,"
+        "SELECTIVITY GROUP,ORGANISM,TISSUE,CELL-LINE,SUBCELLULAR,UNKNOWN,"
+        "CHIMERIC PROTEIN,PROTEIN-PROTEIN INTERACTION,NUCLEIC-ACID,METAL,"
+        "LIPID,MACROMOLECULE,PHENOTYPE,ADMET; "
+        "key_nullability: partition not nullable"
+    ): (
+        "pandera:enum:{SINGLE PROTEIN,PROTEIN COMPLEX,PROTEIN FAMILY,"
+        "SELECTIVITY GROUP,ORGANISM,TISSUE,CELL-LINE,SUBCELLULAR,UNKNOWN,"
+        "CHIMERIC PROTEIN,PROTEIN-PROTEIN INTERACTION,NUCLEIC-ACID,METAL,"
+        "LIPID,MACROMOLECULE,PHENOTYPE,ADMET}; key_not_null:partition"
     ),
-    "enum; allowed=Small molecule,Protein,Antibody,Oligosaccharide,Oligonucleotide,Cell,Enzyme,Unknown; key_nullability: partition not nullable": (
-        "pandera:enum:{Small molecule,Protein,Antibody,Oligosaccharide,Oligonucleotide,Cell,Enzyme,Unknown}; key_not_null:partition"
+    (
+        "enum; allowed=Small molecule,Protein,Antibody,Oligosaccharide,"
+        "Oligonucleotide,Cell,Enzyme,Unknown; "
+        "key_nullability: partition not nullable"
+    ): (
+        "pandera:enum:{Small molecule,Protein,Antibody,Oligosaccharide,"
+        "Oligonucleotide,Cell,Enzyme,Unknown}; key_not_null:partition"
     ),
     "enum; allowed=journal-article,book,dataset,patent; non-null": (
         "pandera:enum:{journal-article,book,dataset,patent}; not_null"

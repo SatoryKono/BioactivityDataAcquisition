@@ -16,7 +16,7 @@ else:
 
 ensure_repo_imports(include_src=True)
 
-from scripts.docs.matrix.structural_contract import (
+from scripts.docs.matrix.structural_contract import (  # noqa: E402
     DEFAULT_CONTRACT_EXPORT,
     build_runtime_contract_rows,
     serialize_runtime_contract_rows,
