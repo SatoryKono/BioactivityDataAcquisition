@@ -31,7 +31,6 @@ def extract_cli_commands_from_registry() -> dict[str, str]:
         stripped = line.strip()
         if stripped.startswith("_LAZY_COMMAND_SPECS:"):
             in_specs = True
-            continue
         elif in_specs and stripped == "},":
             break
         elif in_specs and '"' in line and ":" in line:
