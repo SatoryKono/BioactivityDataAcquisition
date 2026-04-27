@@ -42,6 +42,17 @@ _REPEATS_FAST = 7
 _REPEATS_IO = 5
 _OBS_OUT_ENV = "BIOETL_PERF_OBS_OUT"
 _P95_EPSILON_MS = 0.005
+_WINDOWS_REGRESSION_OVERRIDES = {
+    "silver_write_append_600": 0.50,
+    "silver_write_merge_600": 0.70,
+    "crossref_batch_fetch_200": 1.50,
+}
+_WINDOWS_P95_OVERRIDES = {
+    "atomic_write_group_50": 800.0,
+    "crossref_batch_fetch_200": 0.35,
+    "silver_write_append_600": 600.0,
+    "silver_write_merge_600": 600.0,
+}
 
 
 @dataclass(frozen=True)
@@ -201,13 +212,8 @@ def _platform_regression_pct(
     """Return the effective regression budget for the active platform."""
     if os.name != "nt":
         return max_regression_pct
-    if benchmark_key == "silver_write_append_600":
-        return max(max_regression_pct, 0.50)
-    if benchmark_key == "silver_write_merge_600":
-        return max(max_regression_pct, 0.70)
-    if benchmark_key == "crossref_batch_fetch_200":
-        return max(max_regression_pct, 1.50)
-    return max_regression_pct
+    override = _WINDOWS_REGRESSION_OVERRIDES.get(benchmark_key)
+    return max(max_regression_pct, override) if override is not None else max_regression_pct
 
 
 def _platform_p95_ceiling(
@@ -217,13 +223,8 @@ def _platform_p95_ceiling(
     """Return the effective P95 ceiling for the active platform."""
     if os.name != "nt":
         return max_p95_ms
-    if benchmark_key == "atomic_write_group_50":
-        return max(max_p95_ms, 800.0)
-    if benchmark_key == "crossref_batch_fetch_200":
-        return max(max_p95_ms, 0.35)
-    if benchmark_key in {"silver_write_append_600", "silver_write_merge_600"}:
-        return max(max_p95_ms, 600.0)
-    return max_p95_ms
+    override = _WINDOWS_P95_OVERRIDES.get(benchmark_key)
+    return max(max_p95_ms, override) if override is not None else max_p95_ms
 
 
 def _assert_latency_and_throughput_budget(

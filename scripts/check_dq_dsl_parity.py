@@ -78,6 +78,42 @@ def check_current_patterns(docs_content: str) -> list[str]:
     return issues
 
 
+def _load_docs_and_configs() -> tuple[str, list[Path]]:
+    return load_documentation(), find_entity_configs()
+
+
+def _print_config_analysis(config_analysis: dict[str, Any]) -> None:
+    print(
+        f"📊 Found validation types: {', '.join(config_analysis['validation_types'])}"
+    )
+    print(f"📊 Found rule types: {', '.join(config_analysis['rule_types'])}")
+
+
+def _collect_parity_issues(
+    docs_content: str,
+    config_analysis: dict[str, Any],
+) -> list[str]:
+    issues = []
+    issues.extend(check_outdated_patterns(docs_content))
+    issues.extend(check_current_patterns(docs_content))
+    issues.extend(check_documentation_coverage(docs_content, config_analysis))
+    return issues
+
+
+def _print_parity_report(all_issues: list[str]) -> None:
+    print("\n" + "=" * 50)
+    if all_issues:
+        print("❌ DQ DSL Parity Issues Found:")
+        for issue in all_issues:
+            print(f"  {issue}")
+        print(f"\n📈 Total issues: {len(all_issues)}")
+        return
+    print("✅ DQ DSL Parity Check Passed!")
+    print("📋 All validation structures are properly documented")
+    print("📋 No outdated patterns found")
+    print("📋 Documentation covers all config structures")
+
+
 def _collect_field_validation_rule_types(
     validations: list[dict[str, Any]], rule_types: set[str]
 ) -> None:
@@ -160,49 +196,15 @@ def main() -> int:
     print("🔍 DQ DSL Parity Check")
     print("=" * 50)
 
-    # Load documentation
-    docs_content = load_documentation()
-
-    # Find config files
-    config_files = find_entity_configs()
+    docs_content, config_files = _load_docs_and_configs()
     print(f"📁 Found {len(config_files)} entity configuration files")
 
-    # Analyze config structure
     config_analysis = analyze_config_structure(config_files)
-    print(
-        f"📊 Found validation types: {', '.join(config_analysis['validation_types'])}"
-    )
-    print(f"📊 Found rule types: {', '.join(config_analysis['rule_types'])}")
-
-    # Run checks
-    all_issues = []
-
-    print("\n🔎 Checking for outdated patterns...")
-    outdated_issues = check_outdated_patterns(docs_content)
-    all_issues.extend(outdated_issues)
-
-    print("🔎 Checking for current patterns...")
-    current_issues = check_current_patterns(docs_content)
-    all_issues.extend(current_issues)
-
-    print("🔎 Checking documentation coverage...")
-    coverage_issues = check_documentation_coverage(docs_content, config_analysis)
-    all_issues.extend(coverage_issues)
-
-    # Report results
-    print("\n" + "=" * 50)
-    if all_issues:
-        print("❌ DQ DSL Parity Issues Found:")
-        for issue in all_issues:
-            print(f"  {issue}")
-        print(f"\n📈 Total issues: {len(all_issues)}")
-        return 1
-    else:
-        print("✅ DQ DSL Parity Check Passed!")
-        print("📋 All validation structures are properly documented")
-        print("📋 No outdated patterns found")
-        print("📋 Documentation covers all config structures")
-        return 0
+    _print_config_analysis(config_analysis)
+    print("\n🔎 Checking parity...")
+    all_issues = _collect_parity_issues(docs_content, config_analysis)
+    _print_parity_report(all_issues)
+    return 1 if all_issues else 0
 
 
 if __name__ == "__main__":

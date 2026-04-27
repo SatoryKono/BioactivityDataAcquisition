@@ -176,6 +176,11 @@ def _read_stderr_chunks(
         chunks.put((channel, chunk))
 
 
+def _read_stdout_chunk(stream: Any) -> bytes:
+    """Read one stdout chunk from the stream."""
+    return stream.read1(65536) if hasattr(stream, "read1") else stream.read(65536)
+
+
 def _read_stdout_chunks(
     stream: Any,
     channel: str,
@@ -184,7 +189,7 @@ def _read_stdout_chunks(
     """Read stdout in large chunks and forward them to the queue."""
     while True:
         try:
-            chunk = stream.read1(65536) if hasattr(stream, "read1") else stream.read(65536)
+            chunk = _read_stdout_chunk(stream)
         except OSError:
             chunk = b""
         if not chunk:
@@ -411,6 +416,40 @@ def _create_result(
     )
 
 
+def _build_invalid_transport_result(
+    *,
+    process: subprocess.Popen[bytes],
+    responses: dict[int, dict[str, Any]],
+    stderr_buffer: bytearray,
+    ready_seen: bool,
+    handshake_sent: bool,
+    message: str,
+) -> SmokeResult:
+    return SmokeResult(
+        ok=False,
+        summary=message,
+        responses=tuple(responses.values()),
+        stderr=stderr_buffer.decode("utf-8", errors="replace"),
+        returncode=process.returncode,
+        ready_seen=ready_seen,
+        handshake_sent=handshake_sent,
+    )
+
+
+def _shutdown_smoke_process(
+    process: subprocess.Popen[bytes],
+    readers: list[threading.Thread],
+) -> None:
+    process.terminate()
+    try:
+        process.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait(timeout=5)
+    for reader in readers:
+        reader.join(timeout=1.0)
+
+
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -542,13 +581,11 @@ def run_smoke_command(
     handshake_timeout_seconds: float,
 ) -> SmokeResult:
     """Run the SonarQube MCP smoke test with proper process management and I/O handling."""
-    # Setup process and validate stdio pipes
     process, pipes_ok, error_msg = _setup_process_and_validation(command)
     if not pipes_ok:
         process.kill()
         return SmokeResult(ok=False, summary=error_msg)
 
-    # Initialize smoke test state
     stdout_buffer = bytearray()
     stderr_buffer = bytearray()
     responses: dict[int, dict[str, Any]] = {}
@@ -556,11 +593,9 @@ def run_smoke_command(
     ready_seen = False
     handshake_sent = False
 
-    # Start I/O threads
     readers = _start_io_threads(process, chunks)
 
     try:
-        # Run the smoke test loop
         ready_seen, handshake_sent, _, _ = _run_smoke_test_loop(
             process,
             startup_timeout_seconds,
@@ -571,25 +606,19 @@ def run_smoke_command(
             chunks,
         )
     except ValueError as exc:
-        return SmokeResult(
-            ok=False,
-            summary=f"sonarqube MCP smoke received invalid stdout transport output: {exc}",
-            responses=tuple(responses.values()),
-            stderr=stderr_buffer.decode("utf-8", errors="replace"),
-            returncode=process.returncode,
+        return _build_invalid_transport_result(
+            process=process,
+            responses=responses,
+            stderr_buffer=stderr_buffer,
             ready_seen=ready_seen,
             handshake_sent=handshake_sent,
+            message=(
+                "sonarqube MCP smoke received invalid stdout transport output: "
+                f"{exc}"
+            ),
         )
     finally:
-        # Cleanup process and threads
-        process.terminate()
-        try:
-            process.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.wait(timeout=5)
-        for reader in readers:
-            reader.join(timeout=1.0)
+        _shutdown_smoke_process(process, readers)
 
     try:
         ready_seen = _drain_pending_chunks_after_shutdown(
@@ -600,17 +629,18 @@ def run_smoke_command(
             ready_seen=ready_seen,
         )
     except ValueError as exc:
-        return SmokeResult(
-            ok=False,
-            summary=f"sonarqube MCP smoke received invalid stdout transport output: {exc}",
-            responses=tuple(responses.values()),
-            stderr=stderr_buffer.decode("utf-8", errors="replace"),
-            returncode=process.returncode,
+        return _build_invalid_transport_result(
+            process=process,
+            responses=responses,
+            stderr_buffer=stderr_buffer,
             ready_seen=ready_seen,
             handshake_sent=handshake_sent,
+            message=(
+                "sonarqube MCP smoke received invalid stdout transport output: "
+                f"{exc}"
+            ),
         )
 
-    # Create final result
     return _create_result(
         process,
         startup_timeout_seconds,

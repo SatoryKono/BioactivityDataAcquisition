@@ -109,9 +109,9 @@ def recalibrate(
     return budgets, changed
 
 
-def _write_updated_budgets(payload: dict[str, Any]) -> None:
+def _write_updated_budgets(path: Path, payload: dict[str, Any]) -> None:
     """Write recalibrated hotspot budgets back to disk."""
-    HOTSPOT_BUDGETS_PATH.write_text(
+    path.write_text(
         json.dumps(payload, ensure_ascii=True, indent=2) + "\n",
         encoding="utf-8",
     )
@@ -173,7 +173,7 @@ def main() -> int:
         print("No matching observations found for configured benchmarks.")
         return 1
 
-    _write_updated_budgets(updated)
+    _write_updated_budgets(budgets_path, updated)
     print(f"Updated {len(changed)} benchmark baselines:")
     for key in changed:
         print(f"- {key}")

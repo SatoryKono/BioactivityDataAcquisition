@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
-from typing import cast
+from dataclasses import fields
 
 from bioetl.application.composite.checkpoint._anchor_context import (
     ExpectedCheckpointContext,
@@ -28,11 +27,13 @@ from bioetl.domain.control_plane.run_ledger import project_run_ledger_replay
 from bioetl.domain.exceptions import CheckpointConflictError
 
 
-def _replace_checkpoint_state(
+def _copy_checkpoint_state(
     state: CompositeCheckpointState, /, **changes: object
 ) -> CompositeCheckpointState:
     """Return a checkpoint state with the requested field updates applied."""
-    return cast(CompositeCheckpointState, replace(state, **changes))
+    payload = {field.name: getattr(state, field.name) for field in fields(state)}
+    payload.update(changes)
+    return CompositeCheckpointState(**payload)
 
 
 def _contract_ref_mismatch(
@@ -370,7 +371,7 @@ class CompositeCheckpointLoadService:
             return state
 
         replay_projection = project_run_ledger_replay(replay_entries)
-        replayed_state: CompositeCheckpointState = _replace_checkpoint_state(
+        replayed_state = _copy_checkpoint_state(
             state,
             state=(
                 replay_projection.state

@@ -5,13 +5,13 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import cast
 
+from bioetl.domain.services.validation_result_envelopes import build_validation_result
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import ValidationIssue, ValidationResult
 from bioetl.domain.types.validation_severity import (
     ValidationLayer,
     ValidationSeverity,
 )
-from bioetl.domain.services.validation_result_envelopes import build_validation_result
 
 from ._preflight_governance_types import GovernancePolicy, PreflightGovernanceConfig
 

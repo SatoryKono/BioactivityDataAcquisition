@@ -147,6 +147,31 @@ def _resolve_checkpoint_policy(
     return requested_policy or "observe"
 
 
+def _resume_contract_layout(
+    manifest: RunManifest,
+) -> tuple[str, str, str | None]:
+    """Return the execution context, resume mode, and occurrence anchor."""
+    is_composite = _manifest_execution_context(manifest) == "composite"
+    return (
+        "composite" if is_composite else "ordinary",
+        "checkpoint_snapshot_plus_ledger_suffix"
+        if is_composite
+        else "checkpoint_snapshot_only",
+        "composite_run_identity" if is_composite else None,
+    )
+
+
+def _strict_replay_requested(
+    requested_exact_replay: bool,
+    required_profile: str,
+) -> bool:
+    """Return whether the manifest is asking for strict replay semantics."""
+    return requested_exact_replay or required_profile in {
+        "replay_ready",
+        "forensic_grade",
+    }
+
+
 def _expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
     requested_exact_replay = bool(manifest.launch_context.get("exact_replay"))
     required_profile = str(
@@ -167,11 +192,13 @@ def _expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
         contract_ref=manifest.code_provenance.contract_ref,
         execution_context=_manifest_execution_context(manifest),
     )
-    is_composite = _manifest_execution_context(manifest) == "composite"
-    strict_replay_requested = requested_exact_replay or required_profile in {
-        "replay_ready",
-        "forensic_grade",
-    }
+    execution_context, resume_mode, occurrence_identity_anchor = _resume_contract_layout(
+        manifest
+    )
+    strict_replay_requested = _strict_replay_requested(
+        requested_exact_replay,
+        required_profile,
+    )
     return {
         "resume_requested": bool(manifest.launch_context.get("resume")),
         "requested_exact_replay": requested_exact_replay,
@@ -183,16 +210,10 @@ def _expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
             and profile.strict_exact_replay_supported
             and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
         ),
-        "execution_context": "composite" if is_composite else "ordinary",
-        "resume_mode": (
-            "checkpoint_snapshot_plus_ledger_suffix"
-            if is_composite
-            else "checkpoint_snapshot_only"
-        ),
+        "execution_context": execution_context,
+        "resume_mode": resume_mode,
         "semantic_identity_anchor": "execution_fingerprint",
-        "occurrence_identity_anchor": (
-            "composite_run_identity" if is_composite else None
-        ),
+        "occurrence_identity_anchor": occurrence_identity_anchor,
     }
 
 
