@@ -18,35 +18,46 @@ CLI_REGISTRY_FILE = "src/bioetl/interfaces/cli/main.py"
 CLI_DOC_FILE = "docs/04-reference/cli.md"
 
 
+def _is_cli_command_name(command_name: str) -> bool:
+    """Return whether a registry entry looks like a real CLI command."""
+    return (
+        command_name.replace("-", "").isalpha()
+        and command_name.islower()
+        and not command_name.startswith("__")
+        and command_name not in {"name", "Commands"}
+    )
+
+
+def _extract_command_name(line: str) -> str | None:
+    """Extract a command name from a registry line when present."""
+    if '"' not in line or ":" not in line:
+        return None
+    parts = line.split('"')
+    if len(parts) < 2:
+        return None
+    command_name = parts[1]
+    return command_name if _is_cli_command_name(command_name) else None
+
+
 def extract_cli_commands_from_registry() -> dict[str, str]:
     """Extract CLI commands from the _LAZY_COMMAND_SPECS dictionary."""
     registry_content = Path(CLI_REGISTRY_FILE).read_text()
-
-    # Simple approach: look for all lines that start with "    "command_name":"
-    commands = {}
-    lines = registry_content.split("\n")
+    commands: dict[str, str] = {}
     in_specs = False
 
-    for line in lines:
+    for line in registry_content.split("\n"):
         stripped = line.strip()
         if stripped.startswith("_LAZY_COMMAND_SPECS:"):
             in_specs = True
-        elif in_specs and stripped == "},":
+            continue
+        if not in_specs:
+            continue
+        if stripped == "},":
             break
-        elif in_specs and '"' in line and ":" in line:
-            # Extract command name from "command_name": pattern
-            if '"' in line and ":" in line:
-                parts = line.split('"')
-                if len(parts) >= 2:
-                    command_name = parts[1]
-                    # Only include if it looks like a real CLI command (lowercase, no underscores except hyphens)
-                    if (
-                        command_name.replace("-", "").isalpha()
-                        and command_name.islower()
-                        and not command_name.startswith("__")
-                        and command_name not in ["name", "Commands"]
-                    ):
-                        commands[command_name] = command_name
+
+        command_name = _extract_command_name(line)
+        if command_name is not None:
+            commands[command_name] = command_name
 
     if not commands:
         print("❌ Could not find any CLI commands in registry")

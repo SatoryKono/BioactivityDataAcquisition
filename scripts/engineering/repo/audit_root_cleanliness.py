@@ -332,15 +332,13 @@ def _collect_cataloged_paths(
     return cataloged
 
 
-def _collect_structure_policy_violations(
-    repo_root: Path,
+def _collect_docs_policy_violations(
     tracked_paths: list[str],
     catalog: dict[str, Any],
-) -> list[str]:
-    """Return policy violations beyond the root allowlist."""
+    violations: list[str],
+) -> None:
+    """Append documentation placement policy violations."""
     tracked_set = set(tracked_paths)
-    violations: list[str] = []
-
     docs_drafts = _collect_cataloged_paths(catalog["docs_drafts"]["allowed_files"])
     actual_docs_drafts = {
         path
@@ -354,6 +352,14 @@ def _collect_structure_policy_violations(
     for path in sorted(docs_drafts - tracked_set):
         violations.append(f"{path}: cataloged legacy doc is missing from tracked tree")
 
+
+def _collect_plan_policy_violations(
+    tracked_paths: list[str],
+    catalog: dict[str, Any],
+    violations: list[str],
+) -> None:
+    """Append plan catalog policy violations."""
+    tracked_set = set(tracked_paths)
     plans_readme = catalog["plans"].get("readme")
     if not isinstance(plans_readme, str) or not plans_readme:
         raise RuntimeError("Structure catalog plans.readme must be a non-empty path")
@@ -388,6 +394,13 @@ def _collect_structure_policy_violations(
             f"{max_active_backlog} active_backlog file(s), found {active_backlog_count}"
         )
 
+
+def _collect_src_policy_violations(
+    tracked_paths: list[str],
+    catalog: dict[str, Any],
+    violations: list[str],
+) -> None:
+    """Append src family approval policy violations."""
     approved_src_roots = _collect_cataloged_paths(
         catalog["src_sidecars"]["approved_roots"]
     )
@@ -400,6 +413,19 @@ def _collect_structure_policy_violations(
         violations.append(
             f"{path}: new src top-level family requires explicit structure catalog approval"
         )
+
+
+def _collect_structure_policy_violations(
+    repo_root: Path,
+    tracked_paths: list[str],
+    catalog: dict[str, Any],
+) -> list[str]:
+    """Return policy violations beyond the root allowlist."""
+    violations: list[str] = []
+
+    _collect_docs_policy_violations(tracked_paths, catalog, violations)
+    _collect_plan_policy_violations(tracked_paths, catalog, violations)
+    _collect_src_policy_violations(tracked_paths, catalog, violations)
 
     blocked_cleanup_entries = catalog["blocked_cleanup_zones"]
     blocked_cleanup_paths = _collect_cataloged_paths(blocked_cleanup_entries)

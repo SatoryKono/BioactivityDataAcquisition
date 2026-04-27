@@ -29,6 +29,7 @@ from bioetl.composition.providers._registration_biblio_profiles import (
 from bioetl.composition.providers._registration_contracts import (
     HttpProviderConfigSpec,
     ProviderAssemblySupport,
+    build_http_provider_config_spec,
 )
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
@@ -249,7 +250,7 @@ def _build_biblio_http_provider_specs(
     semanticscholar = rate_limits["semanticscholar"]
 
     return (
-        HttpProviderConfigSpec(
+        build_http_provider_config_spec(
             provider_name="pubmed",
             adapter_class=PubMedAdapter,
             rate=pubmed.rate,
@@ -258,7 +259,7 @@ def _build_biblio_http_provider_specs(
             custom_creator=_create_pubmed_adapter_from_settings,
             data_source_creator=_create_pubmed_data_source,
         ),
-        HttpProviderConfigSpec(
+        build_http_provider_config_spec(
             provider_name="crossref",
             adapter_class=CrossRefAdapter,
             rate=crossref.rate,
@@ -266,7 +267,7 @@ def _build_biblio_http_provider_specs(
             custom_creator=create_crossref_adapter,
             data_source_creator=_create_crossref_data_source,
         ),
-        HttpProviderConfigSpec(
+        build_http_provider_config_spec(
             provider_name="openalex",
             adapter_class=OpenAlexAdapter,
             rate=openalex.rate,
@@ -274,7 +275,7 @@ def _build_biblio_http_provider_specs(
             custom_creator=_create_openalex_adapter_from_settings,
             data_source_creator=_create_openalex_data_source,
         ),
-        HttpProviderConfigSpec(
+        build_http_provider_config_spec(
             provider_name="semanticscholar",
             adapter_class=SemanticScholarAdapter,
             rate=semanticscholar.rate,

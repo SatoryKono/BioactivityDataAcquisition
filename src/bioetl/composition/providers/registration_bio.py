@@ -32,6 +32,7 @@ from bioetl.composition.providers._registration_contracts import (
     HttpProviderConfigSpec,
     ProviderAssemblySupport,
     build_data_source_provider_config,
+    build_http_provider_config_spec,
     resolve_provider_assembly_support,
 )
 from bioetl.domain.models.filter import ExtractionParams
@@ -255,14 +256,14 @@ def _build_bio_http_provider_specs(
     uniprot = rate_limits["uniprot"]
 
     return (
-        HttpProviderConfigSpec(
+        build_http_provider_config_spec(
             provider_name="chembl",
             adapter_class=ChemblAdapter,
             rate=chembl.rate,
             capacity=chembl.capacity,
             data_source_creator=_create_chembl_data_source,
         ),
-        HttpProviderConfigSpec(
+        build_http_provider_config_spec(
             provider_name="uniprot",
             adapter_class=UniProtAdapter,
             rate=uniprot.rate,
@@ -270,7 +271,7 @@ def _build_bio_http_provider_specs(
             rate_overrides={"uniprot_api_key": 100.0},
             data_source_creator=_create_uniprot_data_source,
         ),
-        HttpProviderConfigSpec(
+        build_http_provider_config_spec(
             provider_name="uniprot_idmapping",
             adapter_class=IDMappingDataSource,
             rate=uniprot.rate,

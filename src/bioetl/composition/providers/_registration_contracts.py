@@ -91,6 +91,28 @@ class HttpProviderConfigSpec:
     custom_creator: AdapterCreator | None = None
 
 
+def build_http_provider_config_spec(
+    *,
+    provider_name: str,
+    adapter_class: type[DataSourcePort],
+    rate: float,
+    capacity: int,
+    data_source_creator: SupportAwareDataSourceCreatorProtocol,
+    rate_overrides: dict[str, float] | None = None,
+    custom_creator: AdapterCreator | None = None,
+) -> HttpProviderConfigSpec:
+    """Build one declarative HTTP provider spec from compact family inputs."""
+    return HttpProviderConfigSpec(
+        provider_name=provider_name,
+        adapter_class=adapter_class,
+        rate=rate,
+        capacity=capacity,
+        data_source_creator=data_source_creator,
+        rate_overrides=rate_overrides,
+        custom_creator=custom_creator,
+    )
+
+
 def _create_http_client_for_provider(
     provider: str,
     settings: ProviderSettingsProtocol | None = None,
