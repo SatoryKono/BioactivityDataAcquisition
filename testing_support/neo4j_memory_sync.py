@@ -2587,7 +2587,6 @@ def test_build_fast_analysis_audit_report_uses_bulk_count_queries(monkeypatch) -
             *,
             context: str | None = None,
         ) -> list[dict[str, object]]:
-            del statement, parameters
             query_calls.append(context or "")
             if "UNWIND $labels AS label" in statement:
                 labels = (
@@ -2651,13 +2650,10 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
 
         def query(
             self,
-            *args: object,
+            statement: str,
+            parameters: dict[str, object] | None = None,
             context: str | None = None,
         ) -> list[dict[str, object]]:
-            statement = args[0] if len(args) > 0 and isinstance(args[0], str) else ""
-            parameters = (
-                args[1] if len(args) > 1 and isinstance(args[1], dict) else None
-            )
             query_calls.append(context or "")
             if context == "full audit label summary":
                 return [
@@ -2697,12 +2693,8 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
                     },
                     {"label": "complexity_candidate", "count": 0, "samples": []},
                 ]
-            if statement:
-                raise AssertionError(
-                    f"Unexpected query context: {context}, statement={statement}"
-                )
             raise AssertionError(
-                f"Unexpected query context: {context}, parameters={parameters}"
+                f"Unexpected query context: {context}, statement={statement}"
             )
 
     monkeypatch.setattr(NEO4J_HTTP_CLIENT_PATH, StubClient)
