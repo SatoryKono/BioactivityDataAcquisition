@@ -18,12 +18,26 @@ def _load_routing() -> dict[str, Any]:
     return payload
 
 
-def _is_safe_output_path(path: str, forbidden_roots: tuple[str, ...]) -> bool:
+def _allowed_output_roots(payload: dict[str, Any]) -> tuple[str, ...]:
+    allowed_roots = payload.get("allowed_output_roots") or {}
+    assert isinstance(allowed_roots, dict), "allowed_output_roots must be a mapping"
+
+    flattened_roots: list[str] = []
+    for roots in allowed_roots.values():
+        assert isinstance(roots, list), "allowed output roots must be lists"
+        flattened_roots.extend(root for root in roots if isinstance(root, str))
+
+    return tuple(flattened_roots)
+
+
+def _is_safe_output_path(
+    path: str,
+    allowed_roots: tuple[str, ...],
+    forbidden_roots: tuple[str, ...],
+) -> bool:
     if not path or path.startswith("../") or "/../" in path:
         return False
-    if path.startswith("/tmp/"):
-        return True
-    if Path(path).is_absolute():
+    if not any(path.startswith(root) for root in allowed_roots):
         return False
     if "/" not in path and path.endswith(FORBIDDEN_ROOT_OUTPUT_SUFFIXES):
         return False
@@ -37,6 +51,7 @@ def test_generated_artifact_routing_inventory_is_valid() -> None:
     assert payload["schema_version"] == 1
     routes = payload.get("routes")
     assert isinstance(routes, list) and routes, "routes must be a non-empty list"
+    allowed_roots = _allowed_output_roots(payload)
     forbidden_roots = tuple(payload.get("forbidden_output_roots") or ())
     assert forbidden_roots, "forbidden_output_roots must be declared"
 
@@ -58,7 +73,7 @@ def test_generated_artifact_routing_inventory_is_valid() -> None:
         assert isinstance(outputs, list) and outputs, f"{route_id}: outputs required"
         for output in outputs:
             assert isinstance(output, str), f"{route_id}: output must be a string"
-            assert _is_safe_output_path(output, forbidden_roots), (
+            assert _is_safe_output_path(output, allowed_roots, forbidden_roots), (
                 f"{route_id}: unsafe generated artifact output path: {output}"
             )
 

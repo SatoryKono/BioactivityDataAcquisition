@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -167,7 +168,7 @@ async def test_prepare_finalization_context_passes_explicit_validation_context()
         context = await ops._prepare_silver_write_finalization_context(
             table_name="chembl.activity",
             records=[{"activity_id": "A1"}, {"activity_id": "A2"}],
-            table_path="/tmp/chembl/activity",
+            table_path=str(Path("reports") / "tmp" / "chembl" / "activity"),
             primary_keys=["activity_id"],
             validated_mode=SilverWriteMode.MERGE,
             quarantined_count=1,

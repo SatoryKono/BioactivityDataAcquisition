@@ -92,8 +92,8 @@ def test_chembl_activity_qudt_units_has_explicit_unit_normalization_rule() -> No
 
     assert qudt_rule is not None
     assert qudt_rule.normalizer(" uM ") == "µM"
-    assert qudt_rule.normalizer("http://qudt.org/vocab/unit/NanoM") == (
-        "http://qudt.org/vocab/unit/NanoM"
+    assert qudt_rule.normalizer("https://qudt.org/vocab/unit/NanoM") == (
+        "https://qudt.org/vocab/unit/NanoM"
     )
     assert "Canonicalize units" in (qudt_rule.notes or "")
     assert units_rule is not None
