@@ -136,24 +136,6 @@ def _resolve_memory_text_cache_request(
     return "ad-hoc-text", cache_name_or_paths
 
 
-def _resolve_text_cache_request(
-    cache_name_or_paths: str | list[Path],
-    paths: list[Path] | None,
-) -> tuple[str, list[Path], bool]:
-    """Normalize text-cache inputs and report whether disk caching is enabled."""
-    use_disk_cache = isinstance(cache_name_or_paths, str)
-    if use_disk_cache:
-        cache_name, cache_paths = _resolve_disk_text_cache_request(
-            cache_name_or_paths,
-            paths,
-        )
-    else:
-        cache_name, cache_paths = _resolve_memory_text_cache_request(
-            cache_name_or_paths
-        )
-    return cache_name, cache_paths, use_disk_cache
-
-
 def _resolve_ast_cache_request(
     cache_name_or_text_cache: str | dict[Path, str],
     text_cache: dict[Path, str] | None,
@@ -194,13 +176,6 @@ def _read_text_cache_entries_threaded(
             if text is not None:
                 result[path] = text
     return result
-
-
-def _read_text_cache_entries(cache_paths: list[Path], max_workers: int) -> dict[Path, str]:
-    """Read text cache entries with optional threading."""
-    if max_workers == 1:
-        return _read_text_cache_entries_single_threaded(cache_paths)
-    return _read_text_cache_entries_threaded(cache_paths, max_workers)
 
 
 def _load_disk_cached_payload(
@@ -259,16 +234,25 @@ def _build_text_cache(
     paths: list[Path] | None = None,
 ) -> dict[Path, str]:
     """Read each file once and share the in-memory cache across the session."""
-    cache_name, cache_paths, use_disk_cache = _resolve_text_cache_request(
-        cache_name_or_paths,
-        paths,
-    )
+    use_disk_cache = isinstance(cache_name_or_paths, str)
+    if use_disk_cache:
+        cache_name, cache_paths = _resolve_disk_text_cache_request(
+            cache_name_or_paths,
+            paths,
+        )
+    else:
+        cache_name, cache_paths = _resolve_memory_text_cache_request(
+            cache_name_or_paths
+        )
     cached_payload = _load_disk_cached_payload(cache_name, cache_paths)
     if cached_payload is not None:
         return cached_payload
 
     max_workers = _cache_worker_count(len(cache_paths))
-    result = _read_text_cache_entries(cache_paths, max_workers)
+    if max_workers == 1:
+        result = _read_text_cache_entries_single_threaded(cache_paths)
+    else:
+        result = _read_text_cache_entries_threaded(cache_paths, max_workers)
     _write_disk_cached_payload(cache_name, cache_paths, result, use_disk_cache)
     return result
 
