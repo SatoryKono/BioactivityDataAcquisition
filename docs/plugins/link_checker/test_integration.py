@@ -10,6 +10,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+import pytest
+
 # Add the plugin directory to Python path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
@@ -200,7 +202,7 @@ def test_report_generation():
         assert json_report["summary"]["total_links"] == 10
         assert json_report["summary"]["valid_links"] == 8
         assert json_report["summary"]["broken_links"] == 2
-        assert json_report["summary"]["health_score"] == 80.0
+        assert json_report["summary"]["health_score"] == pytest.approx(80.0)
         assert len(json_report["details"]) == 2
 
         # Test HTML report generation

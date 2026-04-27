@@ -116,4 +116,4 @@ class TestVcrMetadataInventory:
             assert provider_summary["cassette_count"] == expected_count
             assert provider_summary["metadata_sidecar_count"] == expected_count
             assert provider_summary["without_metadata_count"] == 0
-            assert provider_summary["metadata_coverage_percent"] == 100.0
+            assert provider_summary["metadata_coverage_percent"] == pytest.approx(100.0)

@@ -1,0 +1,86 @@
+# BioETL AI Rules — Unified
+
+## Architecture (Clean / Ports & Adapters)
+
+**Layers** (dependency direction: domain → application → infrastructure):
+- **domain/**: Pure logic, Ports (typing.Protocol), NO I/O
+- **application/**: Orchestration, use cases  
+- **infrastructure/**: Adapters, concrete implementations
+- **composition/**: DI wiring, ONLY place knowing all layers
+- **interfaces/**: CLI, may import from all
+
+**Import Matrix:**
+| From ↓ To → | domain | app | infra | comp | iface |
+|-------------|--------|-----|-------|--------|-------|
+| domain      | ✅ | ❌ | ❌ | ❌ | ❌ |
+| application | ✅ | ✅ | ❌ | ❌ | ❌ |
+| infrastructure| ✅ | ❌ | ✅ | ❌ | ❌ |
+| composition | ✅ | ✅ | ✅ | ✅ | ❌ |
+| interfaces  | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+## Code Standards
+
+**Every .py file MUST start with:**
+```python
+from __future__ import annotations
+```
+
+**Type hints:** `list[str]`, `X | None`, `X | Y`  
+**Lint:** `mypy --strict`, `ruff`  
+**Coverage:** ≥85%
+
+## Data Architecture (Medallion)
+
+| Layer  | Format | Validation | Idempotency |
+|--------|--------|------------|-------------|
+| Bronze | JSONL+zstd | Minimal | Append-only |
+| Silver | Delta Lake | Soft (drift) | Merge/Upsert |
+| Gold   | Delta Lake | Strict | SCD Type 2 |
+
+**Gold Modes:** `overwrite` (aggregates), `append` (facts), `scd2` (history)  
+**VACUUM:** Weekly, 7 days retention  
+**Quarantine:** Single table, 30 days retention
+
+## Critical Rules
+
+1. **NO `random` in writers** — determinism required
+2. **NO `datetime.now()` in infrastructure** — use `PipelineContext.started_at`
+3. **JSON fields:** `Series[str]` with canonical JSON (NOT `Series[object]`)
+4. **All adapters MUST have:** `async def health_check(self) -> HealthStatus`
+5. **All services MUST have:** `async def aclose(self) -> None` (idempotent)
+6. **Content Hash:** `sha256(provider + canonical_json(record)).hexdigest()`
+7. **Secrets:** `BIOETL_{PROVIDER}_{KEY}` from env, NO hardcode
+8. **PII in Silver:** Salted `sha256(lowercase(value) + SALT)`
+
+## Testing
+
+- **Unit:** Domain only, in-memory fakes
+- **Integration:** VCR.py cassettes, sanitize secrets
+- **E2E:** `@pytest.mark.e2e`, local-only
+- **Architecture tests:** Layer boundaries, no random/datetime in wrong layers
+
+## Adapter Pattern
+
+```python
+from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+
+class NewAdapter(BaseHttpAdapter):
+    def __init__(self, http_client: UnifiedHTTPClient, logger: LoggerPort):
+        super().__init__(http_client, logger)
+        self.provider_name = "new-provider"
+```
+
+## Config Location
+
+`configs/entities/{provider}/{entity}.yaml` — unified format (ADR-039)
+
+## Verification Commands
+
+```bash
+uv run python -m scripts.engineering.qa check-exemptions
+uv run python -m pytest tests/architecture/test_quality_debt_scorecard.py -q
+uv run python -m pytest tests/architecture/test_regression_metrics.py -q
+make test  # local suite with coverage
+make lint  # ruff + mypy
+```
