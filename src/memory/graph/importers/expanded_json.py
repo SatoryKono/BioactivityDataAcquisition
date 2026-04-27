@@ -868,12 +868,12 @@ def _markdown_title(text: str) -> str:
 
 def _failure_mode_name(title: str, fallback_stem: str) -> str:
     cleaned = title.strip()
+    if cleaned.lower().endswith(" runbook"):
+        cleaned = cleaned[:-8].strip()
     if cleaned.endswith(")"):
         start_paren = cleaned.rfind("(")
         if start_paren != -1:
             cleaned = cleaned[:start_paren].strip()
-    if cleaned.lower().endswith(" runbook"):
-        cleaned = cleaned[:-8].strip()
     return cleaned or fallback_stem.replace("-", " ")
 
 
