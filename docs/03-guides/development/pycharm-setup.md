@@ -7,7 +7,7 @@
 Рекомендуется использовать Python 3.13. Для Windows настроен SDK, указывающий на `.venv-win`.
 Если вы используете другую ОС или путь к виртуальному окружению отличается:
 
-- Зайдите в **Settings** > **Project: BioactivityDataAcquisition2** > **Python Interpreter**.
+- Зайдите в **Settings** > **Project: BioactivityDataAcquisition** > **Python Interpreter**.
 - Выберите интерпретатор из вашего `.venv` (созданного через `uv sync`).
 
 ## 2. Общие конфигурации запуска (Shared Run Configurations)

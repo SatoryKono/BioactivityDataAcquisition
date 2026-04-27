@@ -127,7 +127,8 @@ def test_collect_structure_policy_violations_rejects_uncataloged_legacy_doc(
     )
 
     assert violations == [
-        "docs/D-02 Provider Integration Handbook.md: legacy flat doc must be cataloged in configs/quality/repo_structure_catalog.yaml"
+        "docs/D-02 Provider Integration Handbook.md: legacy flat doc must be"
+        " cataloged in configs/quality/repo_structure_catalog.yaml"
     ]
 
 

@@ -84,8 +84,8 @@ def test_surface_coverage_ratchet_reports_surface_specific_regression() -> None:
     with pytest.raises(
         AssertionError,
         match=(
-            "normalization surface coverage regressed: "
-            "composite_join_key=75.00% below budget 100.00%"
+            r"normalization surface coverage regressed: "
+            r"composite_join_key=75\.00% below budget 100\.00%"
         ),
     ):
         _assert_surface_coverage_budgets(
@@ -105,8 +105,8 @@ def test_profile_semantic_ratchet_reports_named_regression() -> None:
     with pytest.raises(
         AssertionError,
         match=(
-            "normalization profile semantic invariants regressed: "
-            "shipped_profile_meta_passthrough_pct=95.00% below budget 100.00%"
+            r"normalization profile semantic invariants regressed: "
+            r"shipped_profile_meta_passthrough_pct=95\.00% below budget 100\.00%"
         ),
     ):
         _assert_profile_semantic_budgets(

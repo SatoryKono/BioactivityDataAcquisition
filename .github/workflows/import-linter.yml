@@ -155,7 +155,7 @@ jobs:
                 uses: ./.github/actions/setup-python-uv
 
             -   name: Run canonical full architecture gate
-                run: make qa-arch-full
+                run: uv run pytest tests/architecture/ -m "not slow and not benchmark and not memory"
 
     checks-complete:
         needs:

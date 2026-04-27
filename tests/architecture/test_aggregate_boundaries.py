@@ -50,6 +50,17 @@ def _read_aggregate_content(aggregates_dir: Path, filename: str) -> str:
     return content
 
 
+def _aggregate_tree(aggregates_dir: Path, file_path: Path) -> ast.Module | None:
+    """Parse the aggregate file (and sub-modules for facades) into one AST."""
+    content = _read_aggregate_content(aggregates_dir, file_path.name)
+    if not content:
+        return None
+    try:
+        return ast.parse(content, filename=str(file_path))
+    except SyntaxError:
+        return None
+
+
 def _iter_aggregate_files(aggregates_dir: Path) -> list[Path]:
     return [
         py_file
@@ -57,14 +68,6 @@ def _iter_aggregate_files(aggregates_dir: Path) -> list[Path]:
         if py_file.name not in ("__init__.py", "events.py")
         and not py_file.name.startswith("_")
     ]
-
-
-def _aggregate_tree(aggregates_dir: Path, py_file: Path) -> ast.AST | None:
-    full_content = _read_aggregate_content(aggregates_dir, py_file.name)
-    try:
-        return ast.parse(full_content, filename=str(py_file))
-    except SyntaxError:
-        return None
 
 
 def _current_aggregate_class(py_file: Path) -> str | None:
@@ -373,9 +376,10 @@ class TestAggregateInvariantProtection:
             pytest.skip("Aggregates directory not found")
         violations = _immutable_property_violations(aggregates_dir)
 
-        # Note: This is a soft check - existing code returns tuples correctly
-        if violations:
-            pytest.skip(f"Found potential issues: {violations}")
+        assert not violations, (
+            "Aggregate properties returning collections should return immutable types.\n"
+            + "\n".join(f"  - {v}" for v in violations)
+        )
 
 
 class TestDomainEventsForCoordination:
@@ -385,12 +389,13 @@ class TestDomainEventsForCoordination:
         """Aggregates should emit domain events for state changes.
 
         REQ-ARCH-024: Cross-aggregate coordination via Domain Events.
+        Uses AST to detect event class instantiations or references.
         """
         aggregates_dir = src_dir / "bioetl" / "domain" / "aggregates"
         if not aggregates_dir.exists():
             pytest.skip("Aggregates directory not found")
 
-        required_patterns = {
+        required_events: dict[str, list[str]] = {
             "batch.py": ["BatchCreated", "BatchSealed", "BatchWritten"],
             "pipeline_run.py": ["PipelineCompleted", "PipelineFailed"],
             "quarantine_entry.py": [
@@ -399,13 +404,24 @@ class TestDomainEventsForCoordination:
             ],
         }
 
-        for py_file, events in required_patterns.items():
-            content = _read_aggregate_content(aggregates_dir, py_file)
-            if not content:
+        for py_file, events in required_events.items():
+            tree = _aggregate_tree(aggregates_dir, Path(aggregates_dir / py_file))
+            if tree is None:
                 continue
 
+            referenced_names: set[str] = set()
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Call):
+                    func = node.func
+                    if isinstance(func, ast.Name):
+                        referenced_names.add(func.id)
+                    elif isinstance(func, ast.Attribute):
+                        referenced_names.add(func.attr)
+                elif isinstance(node, ast.Name):
+                    referenced_names.add(node.id)
+
             for event in events:
-                assert event in content, (
+                assert event in referenced_names, (
                     f"{py_file} should emit {event} domain event "
                     "for cross-aggregate coordination"
                 )
@@ -414,6 +430,7 @@ class TestDomainEventsForCoordination:
         """All aggregates should have collect_events() method.
 
         REQ-ARCH-025: Events must be collectable for publishing.
+        Uses AST to find method definitions with the expected name.
         """
         aggregates_dir = src_dir / "bioetl" / "domain" / "aggregates"
         if not aggregates_dir.exists():
@@ -422,11 +439,15 @@ class TestDomainEventsForCoordination:
         aggregate_files = ["batch.py", "pipeline_run.py", "quarantine_entry.py"]
 
         for filename in aggregate_files:
-            content = _read_aggregate_content(aggregates_dir, filename)
-            if not content:
+            tree = _aggregate_tree(aggregates_dir, Path(aggregates_dir / filename))
+            if tree is None:
                 continue
 
-            assert "def collect_events(self)" in content, (
+            has_collect_events = any(
+                isinstance(node, ast.FunctionDef) and node.name == "collect_events"
+                for node in ast.walk(tree)
+            )
+            assert has_collect_events, (
                 f"{filename} should have collect_events() method "
                 "for domain event collection"
             )

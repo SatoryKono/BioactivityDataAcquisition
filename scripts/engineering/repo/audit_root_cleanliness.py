@@ -15,6 +15,7 @@ ALLOWLIST_FILE = Path(".github/root-allowlist.txt")
 STRUCTURE_CATALOG_FILE = Path("configs/quality/repo_structure_catalog.yaml")
 CANONICAL_ROOT_TEXT_FILES: frozenset[str] = frozenset(
     {
+        "AGENTS.md",
         "CHANGELOG.md",
         "GEMINI.md",
         "README.md",
@@ -76,6 +77,7 @@ ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
         "scripts",
         "src",
         "tests",
+        "tools",
     }
 )
 

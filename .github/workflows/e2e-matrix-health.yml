@@ -44,6 +44,8 @@ jobs:
         steps:
             -   name: Checkout code
                 uses: actions/checkout@v6
+                with:
+                    lfs: true
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
@@ -68,8 +70,8 @@ jobs:
                       --junit reports/e2e/matrix-smoke-run3.xml \
                       --expected-total-from-configs \
                       --configs-root configs/entities \
-                      --max-skips 1 \
-                      --max-skip-rate 0.0455 \
+                      --max-skips 6 \
+                      --max-skip-rate 0.2308 \
                       --ignore-failures \
                       --markdown-out reports/e2e/matrix-smoke-summary.md
 

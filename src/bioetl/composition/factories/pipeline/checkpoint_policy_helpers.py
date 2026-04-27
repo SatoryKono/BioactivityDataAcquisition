@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, cast
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
@@ -36,7 +36,7 @@ def _resolve_requested_checkpoint_compatibility_policy(
         isinstance(raw_policy, str)
         and raw_policy in _ALLOWED_CHECKPOINT_COMPATIBILITY_POLICIES
     ):
-        return cast(CheckpointCompatibilityPolicy, raw_policy)
+        return raw_policy
     if raw_policy is not None:
         logger_port.warning(
             "Unsupported checkpoint compatibility policy in settings; "

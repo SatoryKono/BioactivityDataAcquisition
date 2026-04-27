@@ -24,6 +24,11 @@ MagicMock/
 .env.codex
 .env.gemini
 .env.mistrallvibe
+git_out.txt
+/memory/
+/check_cfg.py
+/debug_*.py
+/TODO.md
 
 # Prevent root-level test scripts
 /test_*.js
@@ -87,12 +92,17 @@ log_test.txt
 /reports/*
 !/reports/review/
 !/reports/review/**
+!/reports/quality/
+/reports/quality/*
+!/reports/quality/hotspot-family-baseline.json
+!/reports/quality/hotspot-family-baseline.md
 /reports/Codex/review_documentation-cascade-audit_*.md
 /reports/Codex/review_py-test-swarm_*.md
 
 # IDE / Editors
 .idea/
 .vscode/
+.agent-work/
 .agentbridge/
 .cursor/
 .sonarlint/

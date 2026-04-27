@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
+
+if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
 
 ACTION_TYPE_DESCRIPTION = "Compound that inhibits target activity"
 ACTION_TYPE_PARENT_TYPE = "NEGATIVE MODULATOR"

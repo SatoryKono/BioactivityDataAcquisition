@@ -393,23 +393,29 @@
       "boolean_true_values": [],
       "coercion_policy": "default",
       "empty_as_missing": null,
-      "filter_fail_sink": "not_applicable",
+      "filter_fail_sink": "quarantine",
       "is_framework_field": false,
       "logical_type": "string",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "silver_required_fields"
       ],
       "physical_type": "str",
       "pipeline": "chembl_activity",
       "silver_column": "assay_type",
-      "silver_filter_tokens": [],
+      "silver_filter_tokens": [
+        "structural_presence_guard"
+      ],
       "silver_normalisation_tokens": [],
-      "silver_validation_tokens": [],
+      "silver_validation_tokens": [
+        "structural:presence_required"
+      ],
       "source_db": "ChEMBL",
       "source_table": "activity",
-      "validation_fail_action_prefixes": []
+      "validation_fail_action_prefixes": [
+        "quarantine_filter_rejection"
+      ]
     },
     {
       "boolean_false_values": [],
@@ -825,13 +831,13 @@
       "empty_as_missing": null,
       "filter_fail_sink": "not_applicable",
       "is_framework_field": false,
-      "logical_type": "float",
+      "logical_type": "integer",
       "nullable": true,
       "optional": true,
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "float64",
+      "physical_type": "Int64",
       "pipeline": "chembl_activity",
       "silver_column": "manual_curation_flag",
       "silver_filter_tokens": [
@@ -995,26 +1001,26 @@
       "is_framework_field": false,
       "logical_type": "integer",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "silver_required_fields"
       ],
       "physical_type": "int64",
       "pipeline": "chembl_activity",
       "silver_column": "potential_duplicate",
       "silver_filter_tokens": [
+        "structural_presence_guard",
         "structural_type_guard"
       ],
-      "silver_normalisation_tokens": [
-        "proposed_null_then_quarantine"
-      ],
+      "silver_normalisation_tokens": [],
       "silver_validation_tokens": [
-        "structural:type_proposed_null_warn_error_then_quarantine"
+        "structural:presence_required",
+        "structural:type_strict"
       ],
       "source_db": "ChEMBL",
       "source_table": "activity",
       "validation_fail_action_prefixes": [
-        "propose_null_warn_error_then_quarantine"
+        "quarantine_filter_rejection"
       ]
     },
     {
@@ -1296,23 +1302,29 @@
       "boolean_true_values": [],
       "coercion_policy": "default",
       "empty_as_missing": null,
-      "filter_fail_sink": "not_applicable",
+      "filter_fail_sink": "quarantine",
       "is_framework_field": false,
       "logical_type": "string",
       "nullable": false,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "silver_required_fields"
       ],
       "physical_type": "str",
       "pipeline": "chembl_activity",
       "silver_column": "standard_relation",
-      "silver_filter_tokens": [],
+      "silver_filter_tokens": [
+        "structural_presence_guard"
+      ],
       "silver_normalisation_tokens": [],
-      "silver_validation_tokens": [],
+      "silver_validation_tokens": [
+        "structural:presence_required"
+      ],
       "source_db": "ChEMBL",
       "source_table": "activity",
-      "validation_fail_action_prefixes": []
+      "validation_fail_action_prefixes": [
+        "quarantine_filter_rejection"
+      ]
     },
     {
       "boolean_false_values": [],
@@ -1539,13 +1551,13 @@
       "empty_as_missing": null,
       "filter_fail_sink": "quarantine",
       "is_framework_field": false,
-      "logical_type": "float",
+      "logical_type": "integer",
       "nullable": false,
       "optional": false,
       "optionality_sources": [
         "silver_required_fields"
       ],
-      "physical_type": "float64",
+      "physical_type": "Int64",
       "pipeline": "chembl_activity",
       "silver_column": "target_taxonomy_id",
       "silver_filter_tokens": [
@@ -2189,13 +2201,13 @@
       "empty_as_missing": null,
       "filter_fail_sink": "not_applicable",
       "is_framework_field": false,
-      "logical_type": "float",
+      "logical_type": "integer",
       "nullable": true,
       "optional": true,
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "float64",
+      "physical_type": "Int64",
       "pipeline": "chembl_assay",
       "silver_column": "assay_taxonomy_id",
       "silver_filter_tokens": [
@@ -2423,13 +2435,13 @@
       "empty_as_missing": null,
       "filter_fail_sink": "quarantine",
       "is_framework_field": false,
-      "logical_type": "integer",
+      "logical_type": "float",
       "nullable": false,
       "optional": false,
       "optionality_sources": [
         "silver_required_fields"
       ],
-      "physical_type": "int64",
+      "physical_type": "float64",
       "pipeline": "chembl_assay",
       "silver_column": "confidence_score",
       "silver_filter_tokens": [
@@ -2670,7 +2682,7 @@
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "int64",
+      "physical_type": "Int64",
       "pipeline": "chembl_assay",
       "silver_column": "src_id",
       "silver_filter_tokens": [
@@ -2885,13 +2897,13 @@
       "empty_as_missing": null,
       "filter_fail_sink": "not_applicable",
       "is_framework_field": false,
-      "logical_type": "float",
+      "logical_type": "integer",
       "nullable": true,
       "optional": true,
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "float64",
+      "physical_type": "Int64",
       "pipeline": "chembl_assay",
       "silver_column": "variant_taxonomy_id",
       "silver_filter_tokens": [
@@ -3720,13 +3732,13 @@
       "empty_as_missing": null,
       "filter_fail_sink": "not_applicable",
       "is_framework_field": false,
-      "logical_type": "float",
+      "logical_type": "integer",
       "nullable": true,
       "optional": true,
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "float64",
+      "physical_type": "Int64",
       "pipeline": "chembl_cell_line",
       "silver_column": "cell_source_taxonomy_id",
       "silver_filter_tokens": [
@@ -6307,9 +6319,9 @@
       "is_framework_field": false,
       "logical_type": "string",
       "nullable": true,
-      "optional": true,
+      "optional": false,
       "optionality_sources": [
-        "default_optional"
+        "silver_required_fields"
       ],
       "physical_type": "str",
       "pipeline": "chembl_protein_class",
@@ -9199,13 +9211,13 @@
       "empty_as_missing": null,
       "filter_fail_sink": "not_applicable",
       "is_framework_field": false,
-      "logical_type": "float",
+      "logical_type": "integer",
       "nullable": true,
       "optional": true,
       "optionality_sources": [
         "default_optional"
       ],
-      "physical_type": "float64",
+      "physical_type": "Int64",
       "pipeline": "chembl_target",
       "silver_column": "taxonomy_id",
       "silver_filter_tokens": [

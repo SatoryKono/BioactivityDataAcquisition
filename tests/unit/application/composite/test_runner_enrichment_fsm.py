@@ -35,6 +35,10 @@ from tests.unit.application.composite import runner_test_support as support
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from bioetl.application.composite.checkpoint.state import (
+        CompositeCheckpointState,
+    )
+
 
 @pytest.fixture
 def mock_logger() -> MagicMock:

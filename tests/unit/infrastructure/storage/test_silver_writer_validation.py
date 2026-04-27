@@ -18,7 +18,7 @@ import pytest
 PYTHON_314 = sys.version_info >= (3, 14)
 
 from bioetl.domain.exceptions import SchemaViolationError
-from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.medallion import SilverWriteMode, WriteMode
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.validation.pandera_validator import (
     NoOpValidator,

@@ -62,7 +62,7 @@ From your project root in WSL:
 wsl
 
 # Navigate to your project
-cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
+cd <YOUR_WSL_REPO_PATH>
 
 # Run the setup script
 bash ./script-codex/helper/setup-wsl.sh
@@ -111,7 +111,7 @@ If behind a proxy, configure the WSL proxy bridge:
 
 ```powershell
 # From project root in PowerShell
-cd e:\g-drive\05_AI\github\BioactivityDataAcquisition2
+cd e:\g-drive\05_AI\github\BioactivityDataAcquisition
 
 # Option A: Use pre-built proxy
 .\scripts\ops\start-wsl-proxy.bat
@@ -164,7 +164,7 @@ codex --help
 
 ```powershell
 # Navigate to project
-cd e:\g-drive\05_AI\github\BioactivityDataAcquisition2
+cd e:\g-drive\05_AI\github\BioactivityDataAcquisition
 
 # Interactive mode
 .\scripts\ops\codex.bat
@@ -180,7 +180,7 @@ cd e:\g-drive\05_AI\github\BioactivityDataAcquisition2
 
 ```bash
 # Navigate to project
-cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
+cd <YOUR_WSL_REPO_PATH>
 
 # Interactive mode
 ./scripts/ops/launchers/codex/codex.sh
@@ -327,13 +327,13 @@ npm cache clean --force
 
 ### Path issues in WSL
 
-Codex scripts auto-detect the Windows repo path and convert to WSL format (`/mnt/e/...`).
+Codex scripts auto-detect the Windows repo path and convert to WSL format (`<WSL_MOUNT>/e/...`).
 
 If paths don't work:
 
 ```bash
 # Verify WSL can access project
-ls -la /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
+ls -la <YOUR_WSL_REPO_PATH>
 
 # Check current directory
 pwd

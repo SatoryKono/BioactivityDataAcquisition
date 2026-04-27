@@ -69,7 +69,7 @@
 | ------------------- | ---------------------------------------------------------------------------------------- |
 | `Codex not found`   | Run: `npm install -g @openai/codex`                                                      |
 | `OpenAI timeout`    | Run setup: `.\scripts\engineering\dev\.setup_wsl_codex.sh`                               |
-| `WSL path error`    | Ensure running in project root: `cd e:\g-drive\05_AI\github\BioactivityDataAcquisition2` |
+| `WSL path error`    | Ensure running in project root: `cd e:\g-drive\05_AI\github\BioactivityDataAcquisition` |
 | `Permission denied` | Check WSL distro is running: `wsl -l -v`                                                 |
 
 ## Advanced Usage

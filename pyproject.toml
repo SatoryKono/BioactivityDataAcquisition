@@ -7,10 +7,9 @@ name = "bioetl"
 version = "6.1.0"
 description = "BioETL: Bioactivity data acquisition and processing pipeline"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: MIT License",
@@ -62,9 +61,9 @@ export = [
 ]
 tests = [
     # Testing frameworks
-    "pytest>=8.0",
+    "pytest>=9.0.3",
     "pytest-cov>=4.0",
-    "pytest-asyncio>=0.23,<1.0",
+    "pytest-asyncio>=0.24",
     "pytest-xdist>=3.5",
     "pytest-timeout>=2.3",  # Catch stuck tests (prevents CI hangs)
     "syrupy>=4.0",
@@ -86,9 +85,9 @@ tests = [
     "detect-secrets>=1.4",
 ]
 dev = [
-    "pytest>=8.0",
+    "pytest>=9.0.3",
     "pytest-cov>=4.0",
-    "pytest-asyncio>=0.23,<1.0",
+    "pytest-asyncio>=0.24",
     "pytest-xdist>=3.5",
     "pytest-timeout>=2.3",  # Catch stuck tests (prevents CI hangs)
     "pytest-benchmark>=4.0",
@@ -262,7 +261,7 @@ precision = 2
 # - Checks Awaitable[T] type annotations are properly awaited
 # Architecture tests in tests/test_architecture.py provide additional validation.
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 strict = true
 incremental = false  # Work around unstable cache/build-graph crashes in compiled mypy on large graphs.
 warn_return_any = true
@@ -412,6 +411,8 @@ known-first-party = ["bioetl", "tests"]
 "src/bioetl/composition/**/*.py" = ["ARG001", "ARG002", "ARG004", "ARG005", "E402"]
 # Interfaces layer
 "src/bioetl/interfaces/**/*.py" = ["ARG001", "ARG002"]
+# Memory graph module is a standalone tool; print() is expected, line lengths are relaxed
+"src/memory/**/*.py" = ["T201", "E501", "F821", "B008"]
 
 # ============ MUTMUT (Mutation Testing) ============
 [tool.mutmut]

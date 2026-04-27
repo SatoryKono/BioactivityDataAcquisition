@@ -1,0 +1,1686 @@
+{
+  "schema_version": 1,
+  "catalog_kind": "vcr_metadata_catalog",
+  "vcr_root": "tests/fixtures/vcr",
+  "totals": {
+    "cassette_count": 203,
+    "metadata_sidecar_count": 203,
+    "provider_count": 8
+  },
+  "providers": {
+    "chembl": {
+      "cassette_count": 58,
+      "metadata_sidecar_count": 58,
+      "without_metadata_count": 0,
+      "metadata_coverage_percent": 100.0
+    },
+    "crossref": {
+      "cassette_count": 24,
+      "metadata_sidecar_count": 24,
+      "without_metadata_count": 0,
+      "metadata_coverage_percent": 100.0
+    },
+    "multi_provider": {
+      "cassette_count": 1,
+      "metadata_sidecar_count": 1,
+      "without_metadata_count": 0,
+      "metadata_coverage_percent": 100.0
+    },
+    "openalex": {
+      "cassette_count": 25,
+      "metadata_sidecar_count": 25,
+      "without_metadata_count": 0,
+      "metadata_coverage_percent": 100.0
+    },
+    "pubchem": {
+      "cassette_count": 32,
+      "metadata_sidecar_count": 32,
+      "without_metadata_count": 0,
+      "metadata_coverage_percent": 100.0
+    },
+    "pubmed": {
+      "cassette_count": 24,
+      "metadata_sidecar_count": 24,
+      "without_metadata_count": 0,
+      "metadata_coverage_percent": 100.0
+    },
+    "semanticscholar": {
+      "cassette_count": 24,
+      "metadata_sidecar_count": 24,
+      "without_metadata_count": 0,
+      "metadata_coverage_percent": 100.0
+    },
+    "uniprot": {
+      "cassette_count": 15,
+      "metadata_sidecar_count": 15,
+      "without_metadata_count": 0,
+      "metadata_coverage_percent": 100.0
+    }
+  },
+  "cassettes": [
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_all_chembl_pipelines_chain.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_all_chembl_pipelines_chain_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_backfill_clears_silver_only.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_backfill_clears_silver_only_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_activity_full_cycle.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_activity_full_cycle_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_activity_full_run.root.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_activity_full_run.root_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_activity_full_run.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_activity_full_run_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_and_uniprot_sequential_run.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_and_uniprot_sequential_run_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_assay_confidence_score.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_assay_confidence_score_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_assay_full_cycle.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_assay_full_cycle_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_assay_metadata_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_assay_metadata_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_molecule_full_cycle.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_molecule_full_cycle_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_molecule_structural_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_molecule_structural_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_molecule_then_activity_chain.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_molecule_then_activity_chain_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_publication_full_cycle.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_publication_full_cycle_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_publication_metadata_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_publication_metadata_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_publication_term_full_cycle.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_publication_term_full_cycle_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_publication_term_mesh_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_publication_term_mesh_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_publication_term_types.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_publication_term_types_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_subcellular_fraction_full_cycle.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_subcellular_fraction_full_cycle_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_target_cross_references.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_target_cross_references_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_target_full_cycle.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_target_full_cycle_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_chembl_target_then_activity_chain.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_chembl_target_then_activity_chain_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_failed_run_preserves_partial_data.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_failed_run_preserves_partial_data_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_multiple_chembl_entities_parallel_safe.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_multiple_chembl_entities_parallel_safe_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_parallel_independent_pipelines.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_parallel_independent_pipelines_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_idempotency.root.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_idempotency.root_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_idempotency.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_idempotency_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_isolation.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_isolation_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_assay_parameters.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_assay_parameters_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_protein_class.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_protein_class_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_publication_similarity.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_publication_similarity_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_publication_term.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_publication_term_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_subcellular_fraction.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_subcellular_fraction_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_tissue.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_tissue_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_resume_after_failure.root.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_resume_after_failure.root_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_resume_after_failure.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_resume_after_failure_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_resume_from_checkpoint.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pipeline_resume_from_checkpoint_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_pubchem_compound_pipeline.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_pubchem_compound_pipeline_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_rebuild_clears_existing_data.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_rebuild_clears_existing_data_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_rerun_same_pipeline_twice.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_rerun_same_pipeline_twice_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_vacuum_respects_retention_days.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_vacuum_respects_retention_days_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/test_vacuum_runs_after_successful_pipeline.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/test_vacuum_runs_after_successful_pipeline_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestActivityExtractionParams.test_filtered_api_request.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestActivityExtractionParams.test_filtered_api_request_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestAssayExtractionParams.test_assay_filtered_api_request.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestAssayExtractionParams.test_assay_filtered_api_request_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblActivityPipeline.test_chembl_activity_error_handling.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChemblActivityPipeline.test_chembl_activity_error_handling_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblActivityPipeline.test_chembl_activity_happy_path.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChemblActivityPipeline.test_chembl_activity_happy_path_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblAdapter.test_fetch_activities.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChemblAdapter.test_fetch_activities_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblAdapter.test_get_entity_count.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChemblAdapter.test_get_entity_count_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblAdapter.test_health_check.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChemblAdapter.test_health_check_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblCellLinePipeline.test_chembl_cell_line_happy_path.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChemblCellLinePipeline.test_chembl_cell_line_happy_path_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblCellLinePipeline.test_chembl_cell_line_source_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChemblCellLinePipeline.test_chembl_cell_line_source_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblCompoundRecordPipeline.test_chembl_compound_record_error_handling.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChemblCompoundRecordPipeline.test_chembl_compound_record_error_handling_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblCompoundRecordPipeline.test_chembl_compound_record_happy_path.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChemblCompoundRecordPipeline.test_chembl_compound_record_happy_path_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChEMBLIntegration.test_chembl_extract_transform_load.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChEMBLIntegration.test_chembl_extract_transform_load_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChEMBLPipelineE2E.test_chembl_activity_full_run.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChEMBLPipelineE2E.test_chembl_activity_full_run_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestChemblTargetComponentPipeline.test_chembl_target_component_happy_path.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestChemblTargetComponentPipeline.test_chembl_target_component_happy_path_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestMoleculeExtractionParams.test_molecule_filtered_api_request.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestMoleculeExtractionParams.test_molecule_filtered_api_request_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestPublicationExtractionParams.test_publication_filtered_api_request.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestPublicationExtractionParams.test_publication_filtered_api_request_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "chembl",
+      "cassette_rel_path": "tests/fixtures/vcr/chembl/TestTargetExtractionParams.test_target_filtered_api_request.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/chembl/TestTargetExtractionParams.test_target_filtered_api_request_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/provider_contract_agency_lookup_for_doi.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/provider_contract_agency_lookup_for_doi_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_01.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_01_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_02.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_02_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_03.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_03_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_04.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_04_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_05.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_05_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_06.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_06_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_07.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_07_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_08.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_08_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_09.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_09_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_10.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_10_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_11.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_11_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_12.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_12_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_13.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_13_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_14.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_14_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_15.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/rf013_crossref_health_case_15_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_batch_fetch.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/test_crossref_batch_fetch_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_fetch_by_doi.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/test_crossref_fetch_by_doi_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_health_check.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/test_crossref_health_check_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_publication_citation_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/test_crossref_publication_citation_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_publication_full_cycle.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/test_crossref_publication_full_cycle_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_publication_metadata_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/test_crossref_publication_metadata_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/test_crossref_search_by_title.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/test_crossref_search_by_title_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "crossref",
+      "cassette_rel_path": "tests/fixtures/vcr/crossref/works_batch.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/crossref/works_batch_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "multi_provider",
+      "cassette_rel_path": "tests/fixtures/vcr/multi_provider/test_chembl_and_uniprot_sequential_run.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/multi_provider/test_chembl_and_uniprot_sequential_run_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_01.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_01_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_02.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_02_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_03.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_03_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_04.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_04_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_05.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_05_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_06.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_06_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_07.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_07_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_08.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_08_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_09.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_09_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_10.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_10_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_11.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_11_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_12.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_12_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_13.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_13_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_14.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_14_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_15.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/rf013_openalex_health_case_15_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/test_openalex_publication_citation_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/test_openalex_publication_citation_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/test_openalex_publication_full_cycle.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/test_openalex_publication_full_cycle_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/test_openalex_publication_metadata_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/test_openalex_publication_metadata_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_batch_dois.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_batch_dois_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_by_doi.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_by_doi_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_with_fallback.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_filtered_with_fallback_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_with_query.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_fetch_with_query_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_health_check.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_health_check_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_title_only_lookup.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterIntegration.test_title_only_lookup_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "openalex",
+      "cassette_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterRateLimiting.test_rate_limiting_not_exceeded.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/openalex/TestOpenAlexAdapterRateLimiting.test_rate_limiting_not_exceeded_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/provider_contract_compound_property_endpoint.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/provider_contract_compound_property_endpoint_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/provider_contract_smiles_search.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/provider_contract_smiles_search_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_full_cycle.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_full_cycle_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_pipeline.root.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_pipeline.root_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_pipeline.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_pipeline_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_query_filter.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_query_filter_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_structural_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/test_pubchem_compound_structural_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_returns_empty_list.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_returns_empty_list_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_single_page_response.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_cid_single_page_response_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_name_http_503_is_handled.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_name_http_503_is_handled_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_smiles_http_503_is_handled.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemErrorPaths.test_fetch_by_smiles_http_503_is_handled_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_aspirin.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_aspirin_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_caffeine.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_caffeine_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_water.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_water_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_nonexistent_name.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_nonexistent_name_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_with_limit.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_with_limit_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_cid.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_cid_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_smiles.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchDelegation.test_fetch_delegates_to_fetch_filtered_for_smiles_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_batch.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_batch_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_invalid_skipped.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_invalid_skipped_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_single.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_single_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_with_limit.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_with_limit_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_aspirin.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_aspirin_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_multiple.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByInchikey.test_fetch_filtered_by_inchikey_multiple_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_empty_skipped.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_empty_skipped_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_ethanol.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_ethanol_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_multiple.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_multiple_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_with_limit.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_with_limit_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health_check_returns_healthy.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health_check_returns_healthy_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health_check_uses_water_compound.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health_check_uses_water_compound_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_physicochemical_properties.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_physicochemical_properties_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubchem",
+      "cassette_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_structural_identifiers.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_structural_identifiers_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/provider_contract_einfo_database_list.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/provider_contract_einfo_database_list_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/provider_contract_esummary_endpoint.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/provider_contract_esummary_endpoint_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_01.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_01_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_02.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_02_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_03.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_03_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_04.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_04_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_05.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_05_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_06.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_06_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_07.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_07_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_08.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_08_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_09.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_09_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_10.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_10_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_11.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_11_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_12.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_12_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_13.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_13_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_14.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_14_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_15.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_15_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_fetch_publications.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/test_fetch_publications_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_health_check.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/test_health_check_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_pubmed_publication_classification_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/test_pubmed_publication_classification_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_pubmed_publication_date_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/test_pubmed_publication_date_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_pubmed_publication_full_cycle.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/test_pubmed_publication_full_cycle_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_pubmed_publication_identifier_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/test_pubmed_publication_identifier_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "pubmed",
+      "cassette_rel_path": "tests/fixtures/vcr/pubmed/test_pubmed_publication_journal_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/pubmed/test_pubmed_publication_journal_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_01.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_01_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_02.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_02_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_03.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_03_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_04.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_04_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_05.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_05_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_06.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_06_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_07.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_07_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_08.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_08_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_09.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_09_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_10.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_10_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_11.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_11_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_12.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_12_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_13.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_13_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_14.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_14_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_15.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_15_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/test_semanticscholar_publication_citation_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/test_semanticscholar_publication_citation_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/test_semanticscholar_publication_full_cycle.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/test_semanticscholar_publication_full_cycle_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/test_semanticscholar_publication_metadata_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/test_semanticscholar_publication_metadata_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_batch_dois.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_batch_dois_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_by_doi.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_by_doi_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_filtered_with_fallback.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_filtered_with_fallback_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_with_query.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_fetch_with_query_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_health_check.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_health_check_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "semanticscholar",
+      "cassette_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_title_only_lookup.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapterIntegration.test_title_only_lookup_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "uniprot",
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/provider_contract_specific_protein_lookup.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/uniprot/provider_contract_specific_protein_lookup_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "uniprot",
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/provider_contract_taxonomy_endpoint.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/uniprot/provider_contract_taxonomy_endpoint_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "uniprot",
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/test_parallel_independent_pipelines.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/uniprot/test_parallel_independent_pipelines_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "uniprot",
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/test_uniprot_protein_full_cycle.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/uniprot/test_uniprot_protein_full_cycle_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "uniprot",
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/test_uniprot_protein_metadata_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/uniprot/test_uniprot_protein_metadata_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "uniprot",
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/test_uniprot_protein_sequence_fields.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/uniprot/test_uniprot_protein_sequence_fields_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "uniprot",
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_fetch_proteins.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_fetch_proteins_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "uniprot",
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_health_check.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_health_check_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "uniprot",
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_fetch_proteins.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_fetch_proteins_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "uniprot",
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_health_check.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_health_check_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "uniprot",
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_health_check.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_health_check_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "uniprot",
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_mixed_results.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_mixed_results_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "uniprot",
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_multiple_ids.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_multiple_ids_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "uniprot",
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_not_found_id.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_not_found_id_meta.yaml",
+      "metadata_status": "managed_inventory"
+    },
+    {
+      "provider": "uniprot",
+      "cassette_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_single_id.yaml",
+      "cassette_extension": ".yaml",
+      "has_metadata_sidecar": true,
+      "metadata_rel_path": "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_map_single_id_meta.yaml",
+      "metadata_status": "managed_inventory"
+    }
+  ]
+}

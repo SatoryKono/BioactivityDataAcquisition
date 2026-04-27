@@ -3,6 +3,7 @@
 .dockerignore
 .editorconfig
 .env.example
+.npmrc
 .gitattributes
 .gitignore
 .gitleaks.toml
@@ -13,6 +14,7 @@
 .python-version
 .secrets.baseline
 .wsl_proxy_env.sh
+AGENTS.md
 CHANGELOG.md
 GEMINI.md
 LICENSE

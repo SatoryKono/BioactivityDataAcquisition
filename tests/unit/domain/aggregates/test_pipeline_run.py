@@ -67,8 +67,8 @@ class TestStageResultInvariants:
             StageResult(
                 stage="",
                 status=StageStatus.SUCCESS,
-                started_at=datetime.now(UTC),
-                completed_at=datetime.now(UTC),
+                started_at=_ts(),
+                completed_at=_ts(),
             )
 
     def test_failed_stage_must_have_error(self) -> None:
@@ -77,8 +77,8 @@ class TestStageResultInvariants:
             StageResult(
                 stage="test",
                 status=StageStatus.FAILED,
-                started_at=datetime.now(UTC),
-                completed_at=datetime.now(UTC),
+                started_at=_ts(),
+                completed_at=_ts(),
                 error=None,  # Missing error
             )
 
@@ -88,7 +88,7 @@ class TestStageResultInvariants:
             StageResult(
                 stage="test",
                 status=StageStatus.SUCCESS,
-                started_at=datetime.now(UTC),
+                started_at=_ts(),
                 completed_at=None,  # Missing timestamp
             )
 
@@ -98,14 +98,14 @@ class TestStageResultInvariants:
             StageResult(
                 stage="test",
                 status=StageStatus.SUCCESS,
-                started_at=datetime.now(UTC),
-                completed_at=datetime.now(UTC),
+                started_at=_ts(),
+                completed_at=_ts(),
                 records_processed=-1,
             )
 
     def test_valid_stage_result_creation(self) -> None:
         """Valid StageResult should be created successfully."""
-        now = datetime.now(UTC)
+        now = _ts()
         stage = StageResult(
             stage="preflight",
             status=StageStatus.SUCCESS,
@@ -119,7 +119,7 @@ class TestStageResultInvariants:
 
     def test_stage_result_is_immutable(self) -> None:
         """StageResult should be frozen (immutable)."""
-        now = datetime.now(UTC)
+        now = _ts()
         stage = StageResult(
             stage="test",
             status=StageStatus.SUCCESS,

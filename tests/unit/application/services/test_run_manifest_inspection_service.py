@@ -29,8 +29,8 @@ from bioetl.domain.control_plane import (
     RunLedgerEntry,
     RunManifest,
 )
-from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID, RunType
+from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 from bioetl.domain.control_plane.reproducibility_profiles import (
@@ -43,6 +43,7 @@ from bioetl.domain.normalization import (
     compute_execution_identity_fingerprint,
 )
 
+_FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
 _VALID_CONFIG_HASH = "a" * 64
 _VALID_RESOLVED_CONFIG_HASH = "b" * 64
 _VALID_EFFECTIVE_CONFIG_HASH = "c" * 64
@@ -219,48 +220,8 @@ def _expected_replay_family_contract(manifest: RunManifest) -> dict[str, object]
     )
 
 
-class _InMemoryRunManifestStore(RunManifestPort):
-    def __init__(self) -> None:
-        self._items: dict[str, RunManifest] = {}
-        self._by_run_id: dict[str, str] = {}
-
-    def save(self, manifest: RunManifest) -> None:
-        self._items[manifest.manifest_id] = manifest
-        self._by_run_id[str(manifest.run_id)] = manifest.manifest_id
-
-    def get(self, manifest_id: str) -> RunManifest | None:
-        return self._items.get(manifest_id)
-
-    def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
-        manifest_id = self._by_run_id.get(str(run_id))
-        return None if manifest_id is None else self._items.get(manifest_id)
-
-
-class _InMemoryRunLedgerStore(RunLedgerPort):
-    def __init__(self) -> None:
-        self._items: list[RunLedgerEntry] = []
-
-    def append(self, entry: RunLedgerEntry) -> None:
-        self._items.append(entry)
-
-    def list_entries(self, manifest_id: str) -> list[RunLedgerEntry]:
-        return [item for item in self._items if item.manifest_id == manifest_id]
-
-    def list_entries_by_run_id(self, run_id: RunID) -> list[RunLedgerEntry]:
-        return [item for item in self._items if item.run_id == run_id]
-
-    def list_entries_after(
-        self,
-        manifest_id: str,
-        after_entry_id: str | None,
-    ) -> list[RunLedgerEntry]:
-        entries = self.list_entries(manifest_id)
-        if after_entry_id is None:
-            return entries
-        for index, item in enumerate(entries):
-            if item.entry_id == after_entry_id:
-                return entries[index + 1 :]
-        raise ValueError(f"missing watermark {after_entry_id!r}")
+_InMemoryRunManifestStore = InMemoryRunManifestStore
+_InMemoryRunLedgerStore = InMemoryRunLedgerStore
 
 
 def _make_manifest(
@@ -280,7 +241,7 @@ def _make_manifest(
         manifest_id=manifest_id,
         execution_fingerprint=execution_fingerprint or f"fingerprint-{manifest_id}",
         schema_version="1.0",
-        created_at=created_at or datetime.now(UTC),
+        created_at=created_at or _FIXED_TIME,
         run_id=run_id,
         run_type=run_type,
         pipeline_name="chembl_activity",
@@ -341,7 +302,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         event_type="run_finished",
-        occurred_at=datetime.now(UTC),
+        occurred_at=_FIXED_TIME,
         status="success",
     )
     ledger_store.append(ledger_entry)
@@ -769,7 +730,7 @@ def test_show_surfaces_persisted_resume_diagnostics() -> None:
             run_id=run_id,
             event_type="checkpoint_resume_rejected",
             event_family="pipeline.lifecycle",
-            occurred_at=datetime.now(UTC),
+            occurred_at=_FIXED_TIME,
             status="rejected",
             details={
                 "compatibility_disposition": "hard_fail",
@@ -951,7 +912,7 @@ def test_show_collects_artifact_diagnostic_links() -> None:
             manifest_id="manifest-2",
             run_id=run_id,
             event_type="artifact_published",
-            occurred_at=datetime.now(UTC),
+            occurred_at=_FIXED_TIME,
             status="published",
             stage="silver",
             dataset_ref="silver:chembl.activity@1",
@@ -1020,7 +981,7 @@ def test_show_marks_artifact_linkage_gap_signal() -> None:
             manifest_id="manifest-3",
             run_id=run_id,
             event_type="artifact_published",
-            occurred_at=datetime.now(UTC),
+            occurred_at=_FIXED_TIME,
             status="published",
             stage="silver",
             details={"artifact_path": SILVER_ARTIFACT_PATH},
@@ -1077,7 +1038,7 @@ def test_show_distinguishes_partial_artifact_anchor_gaps(
             manifest_id="manifest-partial-gap",
             run_id=run_id,
             event_type="artifact_published",
-            occurred_at=datetime.now(UTC),
+            occurred_at=_FIXED_TIME,
             status="published",
             stage="silver",
             dataset_ref=dataset_ref,
@@ -1109,7 +1070,7 @@ def test_show_collects_dq_trace_anchors() -> None:
             manifest_id="manifest-dq",
             run_id=run_id,
             event_type="dq_policy_applied",
-            occurred_at=datetime.now(UTC),
+            occurred_at=_FIXED_TIME,
             event_family="dq",
             status="failed",
             stage="gold",
@@ -1432,7 +1393,7 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
         ledger_port=ledger_store,
         manifest_id=manifest.manifest_id,
         run_id=run_id,
-        _entry_id_factory=lambda: f"entry-smoke-{len(ledger_store._items) + 1}",
+        _entry_id_factory=lambda: f"entry-smoke-{len(ledger_store.items) + 1}",
     )
     ledger_service.record_manifest_created(manifest)
     ledger_service.record_run_started()
@@ -1718,7 +1679,7 @@ def test_show_surfaces_cross_validation_traceability_in_diagnostics() -> None:
             manifest_id="manifest-cv",
             run_id=run_id,
             event_type="dq_policy_applied",
-            occurred_at=datetime.now(UTC),
+            occurred_at=_FIXED_TIME,
             event_family="dq",
             status="failed",
             stage="cross_validation",

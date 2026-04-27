@@ -24,7 +24,7 @@ on:
         type: boolean
 
 env:
-  PYTHON_VERSION: "3.11"
+  PYTHON_VERSION: "3.12"
   # Contract tests require network access
   BIOETL_LIVE_API_TESTS: "true"
   BIOETL_NETWORK_TESTS: "true"

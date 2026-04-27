@@ -111,7 +111,7 @@ def get_audit_service() -> AuditInspectionService:
     """Get an audit inspection service for operator diagnostics operations."""
     _ensure_registrations()
     bootstrap = _resolve_bootstrap_callable("bootstrap_audit_inspection_service")
-    return bootstrap()
+    return cast("AuditInspectionService", bootstrap())
 
 
 def get_quarantine_service() -> QuarantineService:
@@ -197,14 +197,14 @@ def get_run_manifest_service() -> RunManifestInspectionService:
     """Get a run-manifest inspection service for control-plane operations."""
     _ensure_registrations()
     bootstrap = _resolve_bootstrap_callable("bootstrap_run_manifest_service")
-    return bootstrap()
+    return cast("RunManifestInspectionService", bootstrap())
 
 
 def get_lineage_service() -> LineageInspectionService:
     """Get a lineage inspection service for traceability operations."""
     _ensure_registrations()
     bootstrap = _resolve_bootstrap_callable("bootstrap_lineage_service")
-    return bootstrap()
+    return cast("LineageInspectionService", bootstrap())
 
 
 def get_health_service() -> HealthService:
@@ -217,7 +217,7 @@ def get_observability_workflow_service() -> ObservabilityWorkflowService:
     """Get workflow-level observability diagnostics helpers."""
     _ensure_registrations()
     bootstrap = _resolve_bootstrap_callable("bootstrap_observability_workflow_service")
-    return bootstrap()
+    return cast("ObservabilityWorkflowService", bootstrap())
 
 
 def get_health_server_dependencies() -> HealthServerDependenciesProtocol:

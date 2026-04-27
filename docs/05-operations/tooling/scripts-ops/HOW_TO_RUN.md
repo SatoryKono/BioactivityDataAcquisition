@@ -23,7 +23,7 @@ wsl
 Then run Codex:
 
 ```bash
-cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
+cd <YOUR_WSL_REPO_PATH>
 codex
 ```
 
@@ -81,7 +81,7 @@ wsl -- bash -c "source .wsl_proxy_env.sh && codex"
 
 1. **Open PowerShell** in project root
 1. **Start WSL**: `wsl`
-1. **Navigate to project**: `cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2`
+1. **Navigate to project**: `cd <YOUR_WSL_REPO_PATH>`
 1. **Start Codex**: `codex`
 1. **Type your prompt** and press Enter
 1. **Review the output**

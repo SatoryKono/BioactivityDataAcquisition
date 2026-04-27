@@ -58,6 +58,12 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/наблюдаемость.md
       lifecycle: supporting_context
+    - path: docs/plans/claude-to-ai-runtime-migration-plan-2026-04-25.md
+      lifecycle: supporting_context
+    - path: docs/plans/memory-shim-removal-migration-plan.md
+      lifecycle: supporting_context
+    - path: docs/plans/testing-support-migration-plan-2026-04-25.md
+      lifecycle: supporting_context
 
 src_sidecars:
   path_prefix: src/

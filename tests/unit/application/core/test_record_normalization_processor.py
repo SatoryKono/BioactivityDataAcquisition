@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import cast
+from typing import TYPE_CHECKING, cast
 from unittest.mock import MagicMock
 
 import pytest
@@ -20,6 +20,9 @@ from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
 from bioetl.domain.transformations import generate_content_hash
+
+if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
 
 
 @pytest.mark.unit
@@ -1111,7 +1114,7 @@ def test_chembl_publication_profile_makes_content_hash_invariant_for_equivalent_
 
 
 @pytest.mark.unit
-def test_semanticscholar_publication_profile_makes_content_hash_invariant_for_equivalent_identifier_and_date_forms() -> (
+def test_semanticscholar_pub_content_hash_invariant_for_equivalent_id_and_date_forms() -> (
     None
 ):
     processor = RecordNormalizationProcessor(
@@ -1268,7 +1271,7 @@ def test_pubmed_publication_profile_stabilizes_identifier_and_partial_dates() ->
 
 
 @pytest.mark.unit
-def test_pubmed_publication_profile_makes_content_hash_invariant_for_equivalent_identifier_date_and_set_like_forms() -> (
+def test_pubmed_pub_content_hash_invariant_for_equivalent_id_date_and_set_forms() -> (
     None
 ):
     processor = RecordNormalizationProcessor(

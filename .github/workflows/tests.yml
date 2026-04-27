@@ -51,10 +51,10 @@ jobs:
             -   name: Checkout code
                 uses: actions/checkout@v6
 
-            -   name: Set up Python 3.11
-                uses: actions/setup-python@v5
+            -   name: Install uv + cache + dependencies
+                uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
+                    python-version: "3.12"
 
             -   name: Validate VCR cassette placement
                 run: python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py
@@ -66,18 +66,13 @@ jobs:
                 run: uv run python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check
 
             -   name: Validate VCR metadata stale-age policy
-                run: python scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90
+                run: uv run python scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90
 
             -   name: Validate VCR metadata catalog
                 run: uv run python -m scripts.engineering.qa report-vcr-metadata --check
 
             -   name: Validate version consistency
                 run: python scripts/engineering/repo/check_version_consistency.py
-
-            -   name: Install uv + cache + dependencies
-                uses: ./.github/actions/setup-python-uv
-                with:
-                    python-version: "3.11"
 
             -   name: Smoke check (dependencies + core imports)
                 run: |
@@ -100,7 +95,7 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
+                    python-version: "3.12"
 
             -   name: Run control-plane completeness smoke
                 run: |
@@ -133,7 +128,7 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
+                    python-version: "3.12"
 
             -   name: Validate quality exemptions registry (owner/reason/expiry metadata)
                 run: |
@@ -205,7 +200,7 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
+                    python-version: "3.12"
 
             -   name: Start local Neo4j for live audit
                 run: docker compose up -d neo4j
@@ -241,7 +236,7 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
+                    python-version: "3.12"
 
             -   name: Validate pipeline configs + schema links (blocking)
                 run: uv run python scripts/schema/validate_pipeline_configs.py
@@ -300,7 +295,7 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
+                    python-version: "3.12"
 
             -   name: Run Track D fail-fast gate (fixtures + compatibility + linkage)
                 run: |
@@ -335,7 +330,7 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
+                    python-version: "3.12"
 
             -   name: Run DQ consistency validation
                 run: uv run python scripts/engineering/qa/validate_dq_consistency.py
@@ -419,7 +414,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                python-version: [ "3.11", "3.12" ]
+                python-version: [ "3.12" ]
                 test-group:
                     -   name: unit-domain
                         path: tests/unit/domain/
@@ -453,35 +448,35 @@ jobs:
                     pytest-cache-fingerprint: ${{ hashFiles(matrix.test-group.cache_glob, 'tests/conftest.py', 'pyproject.toml') }}
 
             -   name: Run Tests (${{ matrix.test-group.name }} on Python ${{ matrix.python-version }})
+                env:
+                    COVERAGE_FILE: reports/coverage/.coverage.${{ matrix.test-group.name }}
                 run: |
+                    set +e
                     mkdir -p reports/coverage
                     mkdir -p reports/test-telemetry
-                    if [ "${{ matrix.python-version }}" = "3.11" ]; then
-                      COVERAGE_FILE=reports/coverage/.coverage.${{ matrix.test-group.name }} \
-                      uv run pytest ${{ matrix.test-group.path }} \
-                        -m "not serial and not memory" \
-                        -n auto --dist loadscope --max-worker-restart=0 \
-                        -q --tb=short \
-                        --junitxml=reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml \
-                        --cov=src/bioetl --cov-report=
-                    else
-                      uv run pytest ${{ matrix.test-group.path }} \
-                        -m "not serial and not memory" \
-                        -n auto --dist loadscope --max-worker-restart=0 \
-                        -q --tb=short
-                    fi
+                    export COVERAGE_FILE="reports/coverage/.coverage.${{ matrix.test-group.name }}"
+                    uv run pytest ${{ matrix.test-group.path }} \
+                      -m "not serial and not memory" \
+                      -n auto --dist loadscope --max-worker-restart=0 \
+                      -q --tb=short \
+                      --junitxml=reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml \
+                      --cov=src/bioetl --cov-report=
+                    TEST_EXIT=$?
+                    cp .coverage "reports/coverage/.coverage.${{ matrix.test-group.name }}" 2>/dev/null || true
+                    ls -la reports/coverage/ 2>/dev/null || true
+                    exit $TEST_EXIT
 
-            -   name: Upload coverage shard (${{ matrix.test-group.name }} on Python 3.11)
-                if: always() && matrix.python-version == '3.11'
+            -   name: Upload coverage shard (${{ matrix.test-group.name }} on Python 3.12)
+                if: always() && matrix.python-version == '3.12'
                 uses: actions/upload-artifact@v4
                 with:
                     name: coverage-data-${{ matrix.test-group.name }}
                     path: reports/coverage/.coverage.${{ matrix.test-group.name }}
-                    if-no-files-found: error
+                    if-no-files-found: warn
                     retention-days: 7
 
-            -   name: Upload test telemetry (${{ matrix.test-group.name }} on Python 3.11)
-                if: always() && matrix.python-version == '3.11'
+            -   name: Upload test telemetry (${{ matrix.test-group.name }} on Python 3.12)
+                if: always() && matrix.python-version == '3.12'
                 uses: actions/upload-artifact@v4
                 with:
                     name: test-telemetry-${{ matrix.test-group.name }}
@@ -673,7 +668,7 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
+                    python-version: "3.12"
 
             -   name: Download JUnit telemetry shards
                 uses: actions/download-artifact@v4

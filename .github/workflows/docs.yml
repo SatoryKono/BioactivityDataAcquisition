@@ -39,7 +39,7 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Run docs-governance architecture tests
         run: |

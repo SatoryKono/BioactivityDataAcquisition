@@ -65,14 +65,14 @@ spawn_agent(
 
 Перед repo-wide structural выводами, hotspot-программами и package-reorg инициативами сверяйся с текущими evidence packs:
 
-- [Project File Structure Summary](../../docs/reports/evidence/project-file-structure/SUMMARY.md)
-- [Project File Structure Decisions](../../docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
-- [Project Package Topology Summary](../../docs/reports/evidence/project-package-topology/SUMMARY.md)
-- [Project Package Topology Synthesis](../../docs/reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md)
-- [Topology vs Governance Cross-Synthesis](../../docs/reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md)
-- [Project Package Topology Decisions](../../docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
-- [Governance Signals Summary](../../docs/reports/evidence/governance-signals/SUMMARY.md)
-- [Governance Signals Decisions](../../docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md)
+- [Project File Structure Summary](../../../../reports/evidence/project-file-structure/SUMMARY.md)
+- [Project File Structure Decisions](../../../../reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
+- [Project Package Topology Summary](../../../../reports/evidence/project-package-topology/SUMMARY.md)
+- [Project Package Topology Synthesis](../../../../reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md)
+- [Topology vs Governance Cross-Synthesis](../../../../reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md)
+- [Project Package Topology Decisions](../../../../reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
+- [Governance Signals Summary](../../../../reports/evidence/governance-signals/SUMMARY.md)
+- [Governance Signals Decisions](../../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md)
 
 Operational defaults:
 
@@ -530,7 +530,7 @@ ______________________________________________________________________
 - **PLATFORM**: Адаптация для Claude Code CLI (ранее Codex/Claude.ai)
 - **CHANGED**: Все субагенты переименованы: `pyXxxBot` → `py-xxx-bot` (для `subagent_type` в Task tool)
 - **CHANGED**: 8 старых Claude Code агентов заменены на 7 унифицированных: `py-audit-bot`, `py-plan-bot`, `py-test-bot`, `py-code-bot`, `py-config-bot`, `py-debug-bot`, `py-doc-bot`
-- **CHANGED**: Навыки из `/mnt/skills/` инлайнированы в файлы субагентов (секция `## Инлайнированные знания`)
+- **CHANGED**: Навыки из skills directory инлайнированы в файлы субагентов (секция `## Инлайнированные знания`)
 - **REMOVED**: `google_drive_search`, `message_compose`, `ask_user_input` (недоступны в CLI)
 - **CHANGED**: `web_search` / `web_fetch` → `WebSearch` / `WebFetch` (встроенные инструменты Claude Code)
 - **CHANGED**: MCP инструменты доступны через `ToolSearch` (deferred loading)

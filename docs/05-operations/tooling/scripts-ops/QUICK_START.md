@@ -9,7 +9,7 @@ Codex is fully installed and working in your WSL Ubuntu environment.
 ### Step 1: Open PowerShell in Project Root
 
 ```powershell
-cd E:\g-drive\05_AI\github\BioactivityDataAcquisition2
+cd E:\g-drive\05_AI\github\BioactivityDataAcquisition
 ```
 
 ### Step 2: Launch WSL

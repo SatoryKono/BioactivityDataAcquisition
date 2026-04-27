@@ -44,7 +44,7 @@ from bioetl.domain.lineage import (
     LineageNodeRef,
     LineageNodeType,
 )
-from bioetl.domain.ports import RunManifestPort
+from tests.helpers.control_plane import InMemoryRunManifestStore
 from bioetl.domain.ports.metadata.coordinator import (
     BronzeMetadataInput,
     GoldMetadataInput,
@@ -78,21 +78,7 @@ class _ManifestIdentity:
 _DEFAULT_MANIFEST_IDENTITY = _ManifestIdentity()
 
 
-class _InMemoryRunManifestStore(RunManifestPort):
-    def __init__(self) -> None:
-        self._items: dict[str, RunManifest] = {}
-        self._by_run_id: dict[str, str] = {}
-
-    def save(self, manifest: RunManifest) -> None:
-        self._items[manifest.manifest_id] = manifest
-        self._by_run_id[str(manifest.run_id)] = manifest.manifest_id
-
-    def get(self, manifest_id: str) -> RunManifest | None:
-        return self._items.get(manifest_id)
-
-    def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
-        manifest_id = self._by_run_id.get(str(run_id))
-        return None if manifest_id is None else self._items.get(manifest_id)
+_InMemoryRunManifestStore = InMemoryRunManifestStore
 
 
 class _InMemoryRunLedgerStore:

@@ -20,7 +20,7 @@ All components installed and verified successfully.
 
 ```powershell
 # Navigate to project
-cd e:\g-drive\05_AI\github\BioactivityDataAcquisition2
+cd e:\g-drive\05_AI\github\BioactivityDataAcquisition
 
 # Interactive mode
 .\scripts\ops\codex-wsl.bat
@@ -36,7 +36,7 @@ cd e:\g-drive\05_AI\github\BioactivityDataAcquisition2
 
 ```bash
 # Navigate to project
-cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
+cd <YOUR_WSL_REPO_PATH>
 
 # Interactive mode
 ./scripts/ops/launchers/codex/codex.sh
