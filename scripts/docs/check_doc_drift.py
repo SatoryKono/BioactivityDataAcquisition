@@ -13,6 +13,10 @@ else:
     from ._compat_shim import load_public_api
 
 _IMPL = load_public_api(globals(), "scripts.docs.checks.check_drift")
+main = _IMPL.main
+DriftReport = _IMPL.DriftReport
+check_freshness = _IMPL.check_freshness
+check_runtime_mirrors = _IMPL.check_runtime_mirrors
 
 __all__ = [
     "DriftReport",

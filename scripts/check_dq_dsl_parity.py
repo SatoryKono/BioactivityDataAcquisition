@@ -17,7 +17,7 @@ Exit Codes:
 import glob
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import yaml
 
@@ -111,8 +111,8 @@ def analyze_config_structure(configs: list[Path]) -> dict[str, Any]:
             print(f"⚠️  Warning: Could not parse {config_path}: {e}")
 
     return {
-        "validation_types": sorted(list(validation_types)),
-        "rule_types": sorted(list(rule_types)),
+        "validation_types": sorted(validation_types),
+        "rule_types": sorted(rule_types),
     }
 
 

@@ -55,7 +55,9 @@ for raw_line in sys.stdin:
     adapter = Path("scripts/ai/mcp/neo4j_memory_mcp_adapter.py").resolve()
     result = run_smoke_command(
         [sys.executable, str(adapter), "--", sys.executable, str(server)],
-        timeout_seconds=5.0,
+        # Windows CI runners can exhibit higher process startup/jitter near the
+        # tail of long suites; this test validates transport bridging semantics.
+        timeout_seconds=15.0,
     )
 
     assert result.ok is True
