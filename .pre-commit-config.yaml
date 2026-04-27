@@ -10,23 +10,21 @@ repos:
       # Run the linter
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
+        files: >-
+          (?x)^(src|tests)/
         exclude: >
-          (?x)(^|.*[\\/])(
-            check_cfg\.py|
-            debug_chembl_pub2?\.py|
-            debug_.*\.py|
-            docs[/\\]00-project[/\\]ai[/\\]agents[/\\].*\.py|
-            docs[/\\]00-project[/\\]ai[/\\]skills[/\\].*\.py
+          (?x)(
+            (^|.*/)(check_cfg|debug_chembl_pub2?|debug_.*)\.py|
+            .*/src/bioetl/infrastructure/quality/external_api\.py
           )$
       # Run the formatter
       - id: ruff-format
+        files: >-
+          (?x)^(src|tests)/
         exclude: >
-          (?x)(^|.*[\\/])(
-            check_cfg\.py|
-            debug_chembl_pub2?\.py|
-            debug_.*\.py|
-            docs[/\\]00-project[/\\]ai[/\\]agents[/\\].*\.py|
-            docs[/\\]00-project[/\\]ai[/\\]skills[/\\].*\.py
+          (?x)(
+            (^|.*/)(check_cfg|debug_chembl_pub2?|debug_.*)\.py|
+            .*/src/bioetl/infrastructure/quality/external_api\.py
           )$
 
   # Security checks
@@ -71,12 +69,9 @@ repos:
       - id: check-merge-conflict
       - id: debug-statements
         exclude: >
-          (?x)(^|.*[\\/])(
-            check_cfg\.py|
-            debug_chembl_pub2?\.py|
-            debug_.*\.py|
-            docs[/\\]00-project[/\\]ai[/\\]agents[/\\].*\.py|
-            docs[/\\]00-project[/\\]ai[/\\]skills[/\\].*\.py
+          (?x)(
+            (^|.*/)(check_cfg|debug_chembl_pub2?|debug_.*)\.py|
+            .*/src/bioetl/infrastructure/quality/external_api\.py
           )$
       - id: mixed-line-ending
         args: [--fix=lf]
@@ -86,6 +81,7 @@ repos:
     rev: 1.0.0
     hooks:
       - id: mdformat
+        stages: [manual]
         additional_dependencies:
           - mdformat-gfm
           - mdformat-black

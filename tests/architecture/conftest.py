@@ -183,14 +183,28 @@ def _build_ast_cache(
             return cached_payload
 
     result: dict[Path, ast.Module] = {}
+    max_workers = _cache_worker_count(len(cache_paths))
 
-    for path, content in cached_text.items():
+    def _parse_ast_cache_entry(
+        item: tuple[Path, str],
+    ) -> tuple[Path, ast.Module | None]:
+        path, content = item
         try:
-            tree = ast.parse(content)
+            return path, ast.parse(content)
         except SyntaxError:
-            continue
+            return path, None
 
-        result[path] = tree
+    if max_workers == 1:
+        for path, content in cached_text.items():
+            parsed_path, tree = _parse_ast_cache_entry((path, content))
+            if tree is not None:
+                result[parsed_path] = tree
+    else:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            for path, tree in executor.map(_parse_ast_cache_entry, cached_text.items()):
+                if tree is not None:
+                    result[path] = tree
+
     if use_disk_cache:
         _store_disk_cache(cache_name, cache_paths, result)
     return result
