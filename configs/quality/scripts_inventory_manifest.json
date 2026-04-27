@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-27T09:42:38.792641+00:00",
+  "generated_at": "2026-04-27T09:50:19.894610+00:00",
   "summary": {
     "total_scripts": 443,
     "status_counts": {
@@ -7611,13 +7611,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 706,
+          "line": 707,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 715,
+          "line": 716,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         }
