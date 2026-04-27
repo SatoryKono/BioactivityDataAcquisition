@@ -17,6 +17,9 @@ import math
 from pathlib import Path
 from typing import Any
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+ALLOWED_BUDGETS_ROOT = (REPO_ROOT / "tests" / "performance").resolve()
+
 
 def _percentile(values: list[float], q: float) -> float:
     """Return percentile with linear interpolation."""
@@ -113,6 +116,18 @@ def _write_updated_budgets(path: Path, payload: dict[str, Any]) -> None:
     )
 
 
+def _validate_budgets_path(path: Path) -> Path:
+    """Validate budget path to avoid writing outside performance budget scope."""
+    resolved = path.resolve()
+    if not resolved.is_relative_to(ALLOWED_BUDGETS_ROOT):
+        raise ValueError(
+            "Budgets path must stay under tests/performance for safe recalibration."
+        )
+    if resolved.suffix != ".json":
+        raise ValueError("Budgets path must be a JSON file.")
+    return resolved
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Recalibrate tests/performance/hotspot_budgets.json from JSONL observations."
@@ -142,9 +157,14 @@ def main() -> int:
         help="Throughput percentile for baseline (default: 0.0 for CI-stable min observed).",
     )
     args = parser.parse_args()
+    try:
+        budgets_path = _validate_budgets_path(args.budgets)
+    except ValueError as error:
+        print(f"Invalid budgets path: {error}")
+        return 2
 
     updated, changed = recalibrate(
-        args.budgets,
+        budgets_path,
         args.observations,
         latency_q=args.latency_q,
         throughput_q=args.throughput_q,
@@ -154,7 +174,7 @@ def main() -> int:
         print("No matching observations found for configured benchmarks.")
         return 1
 
-    _write_updated_budgets(args.budgets, updated)
+    _write_updated_budgets(budgets_path, updated)
     print(f"Updated {len(changed)} benchmark baselines:")
     for key in changed:
         print(f"- {key}")

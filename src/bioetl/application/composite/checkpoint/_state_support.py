@@ -146,57 +146,61 @@ def _replace_checkpoint_state(
     def _resolved(current: object, override: object) -> object:
         return current if override is None else override
 
-    updated_state: CompositeCheckpointState = replace(
-        checkpoint_state,
-        state=cast(CompositePipelineState, _resolved(checkpoint_state.state, state)),
-        seed_completed=cast(
-            bool,
-            _resolved(checkpoint_state.seed_completed, seed_completed),
-        ),
-        seed_result=cast(
-            SeedResult | None,
-            _resolved(checkpoint_state.seed_result, seed_result),
-        ),
-        completed_dependencies=(
-            cast(
-                frozenset[str],
-                _resolved(
-                    checkpoint_state.completed_dependencies,
-                    completed_dependencies,
-                ),
-            )
-        ),
-        dependency_results=(
-            cast(
-                dict[str, DependencyResult],
-                _resolved(checkpoint_state.dependency_results, dependency_results),
-            )
-        ),
-        completed_enrichers=(
-            cast(
-                frozenset[str],
-                _resolved(
-                    checkpoint_state.completed_enrichers,
-                    completed_enrichers,
-                ),
-            )
-        ),
-        enrichment_results=(
-            cast(
-                dict[str, EnrichmentResult],
-                _resolved(checkpoint_state.enrichment_results, enrichment_results),
-            )
-        ),
-        merge_completed=(
-            cast(
+    return cast(
+        "CompositeCheckpointState",
+        replace(
+            checkpoint_state,
+            state=cast(
+                CompositePipelineState, _resolved(checkpoint_state.state, state)
+            ),
+            seed_completed=cast(
                 bool,
-                _resolved(checkpoint_state.merge_completed, merge_completed),
-            )
+                _resolved(checkpoint_state.seed_completed, seed_completed),
+            ),
+            seed_result=cast(
+                SeedResult | None,
+                _resolved(checkpoint_state.seed_result, seed_result),
+            ),
+            completed_dependencies=(
+                cast(
+                    frozenset[str],
+                    _resolved(
+                        checkpoint_state.completed_dependencies,
+                        completed_dependencies,
+                    ),
+                )
+            ),
+            dependency_results=(
+                cast(
+                    dict[str, DependencyResult],
+                    _resolved(checkpoint_state.dependency_results, dependency_results),
+                )
+            ),
+            completed_enrichers=(
+                cast(
+                    frozenset[str],
+                    _resolved(
+                        checkpoint_state.completed_enrichers,
+                        completed_enrichers,
+                    ),
+                )
+            ),
+            enrichment_results=(
+                cast(
+                    dict[str, EnrichmentResult],
+                    _resolved(checkpoint_state.enrichment_results, enrichment_results),
+                )
+            ),
+            merge_completed=(
+                cast(
+                    bool,
+                    _resolved(checkpoint_state.merge_completed, merge_completed),
+                )
+            ),
+            merge_result=cast(
+                JsonDict | None,
+                _resolved(checkpoint_state.merge_result, merge_result),
+            ),
+            updated_at=updated_at or _current_utc_now(clock),
         ),
-        merge_result=cast(
-            JsonDict | None,
-            _resolved(checkpoint_state.merge_result, merge_result),
-        ),
-        updated_at=updated_at or _current_utc_now(clock),
     )
-    return updated_state
