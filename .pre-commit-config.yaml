@@ -11,22 +11,22 @@ repos:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
         exclude: >
-          (?x)^(
+          (?x)(^|.*[\\/])(
             check_cfg\.py|
             debug_chembl_pub2?\.py|
             debug_.*\.py|
-            docs/00-project/ai/agents/.*\.py|
-            docs/00-project/ai/skills/.*\.py
+            docs[/\\]00-project[/\\]ai[/\\]agents[/\\].*\.py|
+            docs[/\\]00-project[/\\]ai[/\\]skills[/\\].*\.py
           )$
       # Run the formatter
       - id: ruff-format
         exclude: >
-          (?x)^(
+          (?x)(^|.*[\\/])(
             check_cfg\.py|
             debug_chembl_pub2?\.py|
             debug_.*\.py|
-            docs/00-project/ai/agents/.*\.py|
-            docs/00-project/ai/skills/.*\.py
+            docs[/\\]00-project[/\\]ai[/\\]agents[/\\].*\.py|
+            docs[/\\]00-project[/\\]ai[/\\]skills[/\\].*\.py
           )$
 
   # Security checks
@@ -55,12 +55,13 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
         exclude: >
-          (?x)^(
+          (?x)(^|.*[\\/])(
             mkdocs\.yml|
-            docs/plugins/link_checker/mkdocs_example\.yml|
-            docs/05-operations/deployment/k8s-deployment\.yaml|
-            docs/05-operations/deployment/k8s-monitoring\.yaml|
-            docs/05-operations/deployment/k8s-networking\.yaml
+            docs[/\\]plugins[/\\]link_checker[/\\]mkdocs_example\.yml|
+            docs[/\\]05-operations[/\\]deployment[/\\]k8s-deployment\.yaml|
+            docs[/\\]05-operations[/\\]deployment[/\\]k8s-monitoring\.yaml|
+            docs[/\\]05-operations[/\\]deployment[/\\]k8s-networking\.yaml|
+            docs[/\\].*\.ya?ml
           )$
       - id: check-json
       - id: check-toml
@@ -70,12 +71,12 @@ repos:
       - id: check-merge-conflict
       - id: debug-statements
         exclude: >
-          (?x)^(
+          (?x)(^|.*[\\/])(
             check_cfg\.py|
             debug_chembl_pub2?\.py|
             debug_.*\.py|
-            docs/00-project/ai/agents/.*\.py|
-            docs/00-project/ai/skills/.*\.py
+            docs[/\\]00-project[/\\]ai[/\\]agents[/\\].*\.py|
+            docs[/\\]00-project[/\\]ai[/\\]skills[/\\].*\.py
           )$
       - id: mixed-line-ending
         args: [--fix=lf]
@@ -89,16 +90,16 @@ repos:
           - mdformat-gfm
           - mdformat-black
         exclude: >
-          (?x)^(
+          (?x)(^|.*[\\/])(
             CHANGELOG\.md|
-            \.codex/.*\.md|
-            \.gemini/.*\.md|
-            docs/00-project/ai/(agents|skills)/.*\.md|
-            docs/02-architecture/decisions/.*\.md|
-            docs/03-guides/.*\.md|
-            docs/05-architecture/.*\.md|
-            docs/05-operations/runbooks/.*\.md|
-            grafana/README\.md
+            \.codex[/\\].*\.md|
+            \.gemini[/\\].*\.md|
+            docs[/\\]00-project[/\\]ai[/\\](agents|skills)[/\\].*\.md|
+            docs[/\\]02-architecture[/\\]decisions[/\\].*\.md|
+            docs[/\\]03-guides[/\\].*\.md|
+            docs[/\\]05-architecture[/\\].*\.md|
+            docs[/\\]05-operations[/\\]runbooks[/\\].*\.md|
+            grafana[/\\]README\.md
           )$
 
   # Local hooks
