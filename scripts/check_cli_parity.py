@@ -121,6 +121,42 @@ def check_cli_parity() -> tuple[list[str], list[str], int, int]:
     )
 
 
+def _print_cli_parity_report(
+    missing_commands: list[str],
+    extra_commands: list[str],
+    registry_count: int,
+    doc_count: int,
+) -> None:
+    print(f"📊 Registry Commands: {registry_count}")
+    print(f"📚 Documented Commands: {doc_count}")
+    print()
+
+    if missing_commands:
+        print("❌ Missing commands in documentation:")
+        for cmd in sorted(missing_commands):
+            print(f"  - {cmd}")
+        print()
+    else:
+        print("✅ All registry commands are documented")
+        print()
+
+    if extra_commands:
+        print("⚠️  Extra commands in documentation (not in registry):")
+        for cmd in sorted(extra_commands):
+            print(f"  - {cmd}")
+        print()
+    else:
+        print("✅ No extra commands in documentation")
+        print()
+
+    print("📋 Summary:")
+    print(f"  • Registry commands: {registry_count}")
+    print(f"  • Documented commands: {doc_count}")
+    print(f"  • Missing in docs: {len(missing_commands)}")
+    print(f"  • Extra in docs: {len(extra_commands)}")
+    print()
+
+
 def main() -> int:
     """Main entry point for CLI parity check."""
     print("🔍 CLI Documentation Parity Check")
@@ -128,36 +164,12 @@ def main() -> int:
 
     try:
         missing_commands, extra_commands, registry_count, doc_count = check_cli_parity()
-
-        print(f"📊 Registry Commands: {registry_count}")
-        print(f"📚 Documented Commands: {doc_count}")
-        print()
-
-        if missing_commands:
-            print("❌ Missing commands in documentation:")
-            for cmd in sorted(missing_commands):
-                print(f"  - {cmd}")
-            print()
-        else:
-            print("✅ All registry commands are documented")
-            print()
-
-        if extra_commands:
-            print("⚠️  Extra commands in documentation (not in registry):")
-            for cmd in sorted(extra_commands):
-                print(f"  - {cmd}")
-            print()
-        else:
-            print("✅ No extra commands in documentation")
-            print()
-
-        # Summary
-        print("📋 Summary:")
-        print(f"  • Registry commands: {registry_count}")
-        print(f"  • Documented commands: {doc_count}")
-        print(f"  • Missing in docs: {len(missing_commands)}")
-        print(f"  • Extra in docs: {len(extra_commands)}")
-        print()
+        _print_cli_parity_report(
+            missing_commands,
+            extra_commands,
+            registry_count,
+            doc_count,
+        )
 
         if missing_commands:
             print(

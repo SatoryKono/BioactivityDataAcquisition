@@ -38,6 +38,33 @@ def _build_replacements() -> dict[str, str]:
     }
 
 
+def _load_file_text(file_path: str) -> str:
+    with open(file_path, "r", encoding="utf-8") as handle:
+        return handle.read()
+
+
+def _apply_replacements(text: str, replacements: dict[str, str]) -> str:
+    for needle, replacement in replacements.items():
+        text = text.replace(needle, replacement)
+    return text
+
+
+def _insert_constants_after_imports(text: str, constants_def: str) -> str:
+    insert_pos = text.find("def ")
+    return text[:insert_pos] + constants_def + text[insert_pos:]
+
+
+def _split_and_rewrite_stub_signatures(text: str) -> str:
+    lines = text.split("\n")
+    _rewrite_stub_signatures(lines)
+    return "\n".join(lines)
+
+
+def _write_file_text(file_path: str, text: str) -> None:
+    with open(file_path, "w", encoding="utf-8") as handle:
+        handle.write(text)
+
+
 def _rewrite_stub_signatures(lines: list[str]) -> None:
     """Normalize the stub signatures after bulk string replacement."""
     for index, line in enumerate(lines):
@@ -66,27 +93,12 @@ def _rewrite_stub_signatures(lines: list[str]) -> None:
 
 def refactor_neo4j_sync():
     file_path = 'testing_support/neo4j_memory_sync.py'
-    with open(file_path, 'r', encoding='utf-8') as f:
-        text = f.read()
-
     replacements = _build_replacements()
-
     constants_def = "\n".join([f"{v} = {k}" for k, v in replacements.items()]) + "\n\n"
-
-    for k, v in replacements.items():
-        text = text.replace(k, v)
-
-    # Insert constants after imports
-    insert_pos = text.find('def ')
-    text = text[:insert_pos] + constants_def + text[insert_pos:]
-
-    # Remove unused parameters logic
-    lines = text.split('\n')
-    _rewrite_stub_signatures(lines)
-    # Re-assemble
-    text = '\n'.join(lines)
-
-    with open(file_path, 'w', encoding='utf-8') as f:
-        f.write(text)
+    text = _load_file_text(file_path)
+    text = _apply_replacements(text, replacements)
+    text = _insert_constants_after_imports(text, constants_def)
+    text = _split_and_rewrite_stub_signatures(text)
+    _write_file_text(file_path, text)
 
 refactor_neo4j_sync()

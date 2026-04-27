@@ -776,6 +776,9 @@ nav:
                 -   "Diagram Regression Test Plan": 02-architecture/diagrams/governance/diagram-regression-test-plan.md
             -   "Prompts":
                     -   "Diagram Docs Orchestrator Agent": 00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md
+            -   "AI Rules":
+                    -   "Overview": 00-project/ai/rules/README.md
+                    -   "Unified Rules": 00-project/ai/rules/bioetl-ai-rules.md
             -   "Skills":
                 -   "Overview": 00-project/ai/skills/README.md
                 -   "Practical Index": 00-project/ai/skills/SKILLS-PRACTICAL-INDEX.md

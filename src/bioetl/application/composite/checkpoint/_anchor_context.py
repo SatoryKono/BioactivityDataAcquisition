@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, fields
 from datetime import datetime
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
@@ -113,11 +113,13 @@ def _build_merged_anchor_payload(
     }
 
 
-def _replace_checkpoint_state(
+def _copy_checkpoint_state(
     state: CompositeCheckpointState, /, **changes: object
 ) -> CompositeCheckpointState:
     """Return a checkpoint state with the requested field updates applied."""
-    return cast(CompositeCheckpointState, replace(state, **changes))
+    payload = {field.name: getattr(state, field.name) for field in fields(state)}
+    payload.update(changes)
+    return CompositeCheckpointState(**payload)
 
 
 def merge_expected_anchors(
@@ -128,7 +130,7 @@ def merge_expected_anchors(
     merged = normalize_runtime_anchor_payload(
         _build_merged_anchor_payload(state=state, anchors=anchors)
     )
-    updated_state: CompositeCheckpointState = _replace_checkpoint_state(
+    updated_state = _copy_checkpoint_state(
         state,
         effective_config_hash=merged["effective_config_hash"] or "",
         effective_config_artifact_id=(merged["effective_config_artifact_id"] or ""),

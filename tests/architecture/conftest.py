@@ -120,6 +120,22 @@ def _store_disk_cache(
         temp_path.unlink(missing_ok=True)
 
 
+def _resolve_disk_text_cache_request(
+    cache_name: str,
+    paths: list[Path] | None,
+) -> tuple[str, list[Path]]:
+    if paths is None:
+        msg = "paths must be provided when cache_name is passed explicitly"
+        raise TypeError(msg)
+    return cache_name, paths
+
+
+def _resolve_memory_text_cache_request(
+    cache_name_or_paths: list[Path],
+) -> tuple[str, list[Path]]:
+    return "ad-hoc-text", cache_name_or_paths
+
+
 def _resolve_text_cache_request(
     cache_name_or_paths: str | list[Path],
     paths: list[Path] | None,
@@ -127,14 +143,14 @@ def _resolve_text_cache_request(
     """Normalize text-cache inputs and report whether disk caching is enabled."""
     use_disk_cache = isinstance(cache_name_or_paths, str)
     if use_disk_cache:
-        cache_name = cache_name_or_paths
-        if paths is None:
-            msg = "paths must be provided when cache_name is passed explicitly"
-            raise TypeError(msg)
-        cache_paths = paths
+        cache_name, cache_paths = _resolve_disk_text_cache_request(
+            cache_name_or_paths,
+            paths,
+        )
     else:
-        cache_name = "ad-hoc-text"
-        cache_paths = cache_name_or_paths
+        cache_name, cache_paths = _resolve_memory_text_cache_request(
+            cache_name_or_paths
+        )
     return cache_name, cache_paths, use_disk_cache
 
 
@@ -156,21 +172,35 @@ def _resolve_ast_cache_request(
     return cache_name, cached_text, use_disk_cache
 
 
-def _read_text_cache_entries(cache_paths: list[Path], max_workers: int) -> dict[Path, str]:
-    """Read text cache entries with optional threading."""
+def _read_text_cache_entries_single_threaded(
+    cache_paths: list[Path],
+) -> dict[Path, str]:
     result: dict[Path, str] = {}
-    if max_workers == 1:
-        for path in cache_paths:
-            _, text = _read_text_cache_entry(path)
-            if text is not None:
-                result[path] = text
-        return result
+    for path in cache_paths:
+        _, text = _read_text_cache_entry(path)
+        if text is not None:
+            result[path] = text
+    return result
+
+
+def _read_text_cache_entries_threaded(
+    cache_paths: list[Path],
+    max_workers: int,
+) -> dict[Path, str]:
+    result: dict[Path, str] = {}
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         for path, text in executor.map(_read_text_cache_entry, cache_paths):
             if text is not None:
                 result[path] = text
     return result
+
+
+def _read_text_cache_entries(cache_paths: list[Path], max_workers: int) -> dict[Path, str]:
+    """Read text cache entries with optional threading."""
+    if max_workers == 1:
+        return _read_text_cache_entries_single_threaded(cache_paths)
+    return _read_text_cache_entries_threaded(cache_paths, max_workers)
 
 
 def _parse_ast_cache_entry(item: tuple[Path, str]) -> tuple[Path, ast.Module | None]:

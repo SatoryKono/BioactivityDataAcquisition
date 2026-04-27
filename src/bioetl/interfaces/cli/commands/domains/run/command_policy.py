@@ -18,8 +18,8 @@ from bioetl.interfaces.cli.commands.domains.run.support import (
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
     ExecutionFailureReasonCodes,
-    execute_with_cli_failure_policy,
     execute_prepared_cli_flow,
+    execute_with_cli_failure_policy,
     map_run_status_to_exit_code,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (

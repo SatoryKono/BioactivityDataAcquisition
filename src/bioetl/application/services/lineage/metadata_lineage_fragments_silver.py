@@ -5,11 +5,11 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.lineage.metadata_lineage_composite import (
-    _build_dataset_composite_lineage_components,
-)
 from bioetl.application.services.lineage._fragment_finalization import (
     finalize_lineage_fragment,
+)
+from bioetl.application.services.lineage.metadata_lineage_composite import (
+    _build_dataset_composite_lineage_components,
 )
 from bioetl.application.services.lineage.metadata_lineage_nodes import (
     bronze_batch_nodes_for_silver,
