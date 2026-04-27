@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-27T17:17:35.487998+00:00",
+  "generated_at": "2026-04-27T17:41:14.458060+00:00",
   "summary": {
     "total_scripts": 445,
     "status_counts": {
@@ -9816,14 +9816,8 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 30,
+      "reference_count": 29,
       "references": [
-        {
-          "path": "docs/03-guides/development/codex-paths.md",
-          "line": 1,
-          "source_group": "docs",
-          "text": "scripts\\codex-exec.bat"
-        },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 67,
@@ -9865,6 +9859,12 @@
           "line": 16,
           "source_group": "docs",
           "text": "| `codex-exec.bat \"prompt\"` | Auto-execute (full-auto)  | Auto        |"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
+          "line": 51,
+          "source_group": "docs",
+          "text": ".\\scripts\\ops\\codex-exec.bat \"fix all TODO comments in the codebase\""
         }
       ]
     },
@@ -10010,14 +10010,8 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 78,
+      "reference_count": 77,
       "references": [
-        {
-          "path": "docs/03-guides/development/codex-paths.md",
-          "line": 2,
-          "source_group": "docs",
-          "text": "scripts\\codex.bat"
-        },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 66,
@@ -10059,6 +10053,12 @@
           "line": 130,
           "source_group": "docs",
           "text": "| `codex.bat`      | Original Windows launcher      | Legacy (still works) |"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 253,
+          "source_group": "docs",
+          "text": "├─ codex.bat (legacy) ─────────────────│ All routes to WSL2"
         }
       ]
     },
@@ -10952,14 +10952,8 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 21,
       "references": [
-        {
-          "path": "docs/03-guides/development/codex-paths.md",
-          "line": 3,
-          "source_group": "docs",
-          "text": "scripts\\start-wsl-proxy.bat"
-        },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 65,
@@ -11001,6 +10995,12 @@
           "line": 216,
           "source_group": "docs",
           "text": "| `start-wsl-proxy.bat`              | Proxy launcher               | Windows PowerShell |"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
+          "line": 288,
+          "source_group": "docs",
+          "text": "# PowerShell: .\\scripts\\ops\\start-wsl-proxy.bat"
         }
       ]
     },
