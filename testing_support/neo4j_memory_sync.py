@@ -2377,9 +2377,7 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_anchor_grap
             *,
             context: str | None = None,
         ) -> list[dict[str, object]]:
-            assert (
-                context == "complexity-layer targeted sync prerequisite anchor check"
-            )
+            assert context == "complexity-layer targeted sync prerequisite anchor check"
             assert parameters is not None
             return [{"label": label, "count": 0} for label in parameters["labels"]]
 

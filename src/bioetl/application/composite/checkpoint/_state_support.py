@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import datetime
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, TypeVar, cast
 
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.context import current_utc_time
@@ -28,6 +28,7 @@ else:
     from bioetl.domain.types import JsonDict
 
 T = TypeVar("T")
+TCheckpointState = TypeVar("TCheckpointState", bound="CompositeCheckpointState")
 
 
 def _current_utc_now(clock: ClockPort | None = None) -> datetime:
@@ -131,7 +132,7 @@ def is_resumable(checkpoint_state: CompositeCheckpointState) -> bool:
 
 
 def _replace_checkpoint_state(
-    checkpoint_state: CompositeCheckpointState,
+    checkpoint_state: TCheckpointState,
     *,
     clock: ClockPort | None = None,
     updated_at: datetime | None = None,
@@ -144,32 +145,35 @@ def _replace_checkpoint_state(
     enrichment_results: dict[str, EnrichmentResult] | None = None,
     merge_completed: bool | None = None,
     merge_result: JsonDict | None = None,
-) -> CompositeCheckpointState:
+) -> TCheckpointState:
     def _resolved(current: T, override: T | None) -> T:
         return current if override is None else override
 
-    return replace(
-        checkpoint_state,
-        state=_resolved(checkpoint_state.state, state),
-        seed_completed=_resolved(checkpoint_state.seed_completed, seed_completed),
-        seed_result=_resolved(checkpoint_state.seed_result, seed_result),
-        completed_dependencies=_resolved(
-            checkpoint_state.completed_dependencies,
-            completed_dependencies,
+    return cast(
+        TCheckpointState,
+        replace(
+            checkpoint_state,
+            state=_resolved(checkpoint_state.state, state),
+            seed_completed=_resolved(checkpoint_state.seed_completed, seed_completed),
+            seed_result=_resolved(checkpoint_state.seed_result, seed_result),
+            completed_dependencies=_resolved(
+                checkpoint_state.completed_dependencies,
+                completed_dependencies,
+            ),
+            dependency_results=_resolved(
+                checkpoint_state.dependency_results,
+                dependency_results,
+            ),
+            completed_enrichers=_resolved(
+                checkpoint_state.completed_enrichers,
+                completed_enrichers,
+            ),
+            enrichment_results=_resolved(
+                checkpoint_state.enrichment_results,
+                enrichment_results,
+            ),
+            merge_completed=_resolved(checkpoint_state.merge_completed, merge_completed),
+            merge_result=_resolved(checkpoint_state.merge_result, merge_result),
+            updated_at=updated_at or _current_utc_now(clock),
         ),
-        dependency_results=_resolved(
-            checkpoint_state.dependency_results,
-            dependency_results,
-        ),
-        completed_enrichers=_resolved(
-            checkpoint_state.completed_enrichers,
-            completed_enrichers,
-        ),
-        enrichment_results=_resolved(
-            checkpoint_state.enrichment_results,
-            enrichment_results,
-        ),
-        merge_completed=_resolved(checkpoint_state.merge_completed, merge_completed),
-        merge_result=_resolved(checkpoint_state.merge_result, merge_result),
-        updated_at=updated_at or _current_utc_now(clock),
     )
