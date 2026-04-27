@@ -214,35 +214,40 @@ _CANDIDATE_LABEL_SUFFIX_TOKENS = frozenset(
     }
 )
 _EXPLICIT_NAME_FAMILIES = {
-    "pubchemmolecule": "pubchem:molecule",
-    "pubchemcompound": "pubchem:molecule",
-    "pubchemcompoundpipeline": "pubchem:molecule",
-    "pubchemcompoundtransformer": "pubchem:molecule",
-    "pubchemcompoundgoldschema": "pubchem:molecule",
-    "pubchem_compound": "pubchem:molecule",
-    "uniprottarget": "uniprot:target",
-    "uniprotprotein": "uniprot:target",
-    "uniprotproteinpipeline": "uniprot:target",
-    "uniprotproteintransformer": "uniprot:target",
-    "uniprotproteingoldschema": "uniprot:target",
-    "uniprot_protein": "uniprot:target",
-    "chemblpublication": "chembl:publication",
-    "chemblpublicationsimilarity": "chembl:publication",
-    "chemblpublicationterm": "chembl:publication",
-    "chembl_publication": "chembl:publication",
-    "chembl_publication_similarity": "chembl:publication",
-    "chembl_publication_term": "chembl:publication",
-    "document": "chembl:publication",
-    "documentsimilarity": "chembl:publication",
-    "documentterm": "chembl:publication",
-    "document_id": "chembl:publication",
-    "documentchemblid": "chembl:publication",
-    "document_chembl_id": "chembl:publication",
-    "compound": "pubchem:molecule",
-    "protein": "uniprot:target",
+FAMILY_PUBCHEM = "pubchem:molecule"
+FAMILY_UNIPROT = "uniprot:target"
+FAMILY_CHEMBL = "chembl:publication"
+
+_EXPLICIT_NAME_FAMILIES = {
+    "pubchemmolecule": FAMILY_PUBCHEM,
+    "pubchemcompound": FAMILY_PUBCHEM,
+    "pubchemcompoundpipeline": FAMILY_PUBCHEM,
+    "pubchemcompoundtransformer": FAMILY_PUBCHEM,
+    "pubchemcompoundgoldschema": FAMILY_PUBCHEM,
+    "pubchem_compound": FAMILY_PUBCHEM,
+    "uniprottarget": FAMILY_UNIPROT,
+    "uniprotprotein": FAMILY_UNIPROT,
+    "uniprotproteinpipeline": FAMILY_UNIPROT,
+    "uniprotproteintransformer": FAMILY_UNIPROT,
+    "uniprotproteingoldschema": FAMILY_UNIPROT,
+    "uniprot_protein": FAMILY_UNIPROT,
+    "chemblpublication": FAMILY_CHEMBL,
+    "chemblpublicationsimilarity": FAMILY_CHEMBL,
+    "chemblpublicationterm": FAMILY_CHEMBL,
+    "chembl_publication": FAMILY_CHEMBL,
+    "chembl_publication_similarity": FAMILY_CHEMBL,
+    "chembl_publication_term": FAMILY_CHEMBL,
+    "document": FAMILY_CHEMBL,
+    "documentsimilarity": FAMILY_CHEMBL,
+    "documentterm": FAMILY_CHEMBL,
+    "document_id": FAMILY_CHEMBL,
+    "documentchemblid": FAMILY_CHEMBL,
+    "document_chembl_id": FAMILY_CHEMBL,
+    "compound": FAMILY_PUBCHEM,
+    "protein": FAMILY_UNIPROT,
 }
 _EXPLICIT_OK_FAMILY_MEMBERS = {
-    "pubchem:molecule": frozenset(
+    FAMILY_PUBCHEM: frozenset(
         {
             "PubchemMolecule",
             "pubchem_compound",
@@ -251,7 +256,7 @@ _EXPLICIT_OK_FAMILY_MEMBERS = {
             "PubChemCompoundGoldSchema",
         }
     ),
-    "uniprot:target": frozenset(
+    FAMILY_UNIPROT: frozenset(
         {
             "UniprotTarget",
             "uniprot_protein",
@@ -260,7 +265,7 @@ _EXPLICIT_OK_FAMILY_MEMBERS = {
             "UniProtProteinGoldSchema",
         }
     ),
-    "chembl:publication": frozenset(
+    FAMILY_CHEMBL: frozenset(
         {
             "ChemblPublication",
             "ChemblPublicationSimilarity",
@@ -280,8 +285,9 @@ _EXPLICIT_OK_FAMILY_MEMBERS = {
 def _normalize_doc_excluded_subpath(subpath: str) -> str:
     """Normalize configured docs exclusion prefixes to docs-root-relative paths."""
     normalized = subpath.replace("\\", "/").strip("/")
-    if normalized.startswith("docs/"):
-        normalized = normalized.removeprefix("docs/")
+    DOCS_PREFIX = "docs/"
+    if normalized.startswith(DOCS_PREFIX):
+        normalized = normalized.removeprefix(DOCS_PREFIX)
     return normalized
 
 
@@ -669,31 +675,39 @@ def _class_surface_kind(py_file: Path, class_name: str) -> str | None:
     return None
 
 
+def _is_valid_class_node(node: ast.AST) -> bool:
+    if not isinstance(node, ast.ClassDef):
+        return False
+    if node.name.startswith("_"):
+        return False
+    return not _is_support_surface(node.name)
+
+def _build_symbol_surface(py_file: Path, node_name: str) -> SymbolSurface | None:
+    kind = _class_surface_kind(py_file, node_name)
+    if kind is None:
+        return None
+    semantic_family = _resolve_semantic_family(
+        node_name
+    ) or _lexical_semantic_family(node_name)
+    if semantic_family is None:
+        return None
+    return SymbolSurface(
+        name=node_name,
+        kind=kind,
+        location=str(py_file),
+        semantic_family=semantic_family,
+        source="code",
+    )
+
 def _iter_class_symbol_surfaces(src_path: Path) -> Iterator[SymbolSurface]:
     """Discover relevant class surfaces from code."""
     for py_file, tree in _iter_python_modules_with_trees(src_path):
         for node in ast.walk(tree):
-            if not isinstance(node, ast.ClassDef):
+            if not _is_valid_class_node(node):
                 continue
-            if node.name.startswith("_"):
-                continue
-            if _is_support_surface(node.name):
-                continue
-            kind = _class_surface_kind(py_file, node.name)
-            if kind is None:
-                continue
-            semantic_family = _resolve_semantic_family(
-                node.name
-            ) or _lexical_semantic_family(node.name)
-            if semantic_family is None:
-                continue
-            yield SymbolSurface(
-                name=node.name,
-                kind=kind,
-                location=str(py_file),
-                semantic_family=semantic_family,
-                source="code",
-            )
+            surface = _build_symbol_surface(py_file, node.name)
+            if surface:
+                yield surface
 
 
 def _iter_domain_export_surfaces(
@@ -926,8 +940,9 @@ def _doc_relative_parts(
 def _normalize_doc_exception_path(value: str) -> str:
     """Normalize docs exception paths to docs-root-relative slash form."""
     normalized = value.replace("\\", "/").strip("/")
-    if normalized.startswith("docs/"):
-        normalized = normalized.removeprefix("docs/")
+    DOCS_PREFIX = "docs/"
+    if normalized.startswith(DOCS_PREFIX):
+        normalized = normalized.removeprefix(DOCS_PREFIX)
     return normalized
 
 
