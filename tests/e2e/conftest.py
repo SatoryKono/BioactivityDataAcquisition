@@ -474,6 +474,7 @@ def assert_bronze_files_exist(data_dir: Path, provider: str, entity: str) -> lis
         data files, but falls back to Bronze metadata sidecars when the runtime
         path only materializes metadata for the current execution mode.
     """
+
     def _find_artifacts(root: Path) -> list[Path]:
         files = list(root.rglob("*.jsonl.zst"))
         if files:

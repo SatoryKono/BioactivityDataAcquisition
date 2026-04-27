@@ -24,9 +24,7 @@ def _rate_limit(rate: float, capacity: int) -> SimpleNamespace:
 class TestGetBiblioProviderConfigs:
     """Tests for bibliographic ProviderConfig registry entries."""
 
-    @patch(
-        "bioetl.composition.providers._config_helpers._get_rate_limits_from_config"
-    )
+    @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")
     def test_contains_expected_provider_keys(
         self,
         mock_get_rate_limits: MagicMock,
@@ -47,9 +45,7 @@ class TestGetBiblioProviderConfigs:
             "semanticscholar",
         }
 
-    @patch(
-        "bioetl.composition.providers._config_helpers._get_rate_limits_from_config"
-    )
+    @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")
     def test_pubmed_provider_config_has_pubmed_api_key_rate_override(
         self,
         mock_get_rate_limits: MagicMock,
@@ -67,9 +63,7 @@ class TestGetBiblioProviderConfigs:
         assert pubmed.http_config is not None
         assert pubmed.http_config.rate_overrides == {"pubmed_api_key": 10.0}
 
-    @patch(
-        "bioetl.composition.providers._config_helpers._get_rate_limits_from_config"
-    )
+    @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")
     def test_crossref_provider_config_uses_crossref_adapter_factory(
         self,
         mock_get_rate_limits: MagicMock,
@@ -88,9 +82,7 @@ class TestGetBiblioProviderConfigs:
         assert crossref.requires_http_client is True
         assert crossref.requires_logger is True
 
-    @patch(
-        "bioetl.composition.providers._config_helpers._get_rate_limits_from_config"
-    )
+    @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")
     def test_openalex_and_pubmed_use_composition_local_custom_creators(
         self,
         mock_get_rate_limits: MagicMock,
@@ -109,9 +101,7 @@ class TestGetBiblioProviderConfigs:
             configs["openalex"].custom_creator is _create_openalex_adapter_from_settings
         )
 
-    @patch(
-        "bioetl.composition.providers._config_helpers._get_rate_limits_from_config"
-    )
+    @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")
     def test_data_source_creators_capture_same_injected_support_instance(
         self,
         mock_get_rate_limits: MagicMock,

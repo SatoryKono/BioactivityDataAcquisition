@@ -192,8 +192,8 @@ def _expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
         contract_ref=manifest.code_provenance.contract_ref,
         execution_context=_manifest_execution_context(manifest),
     )
-    execution_context, resume_mode, occurrence_identity_anchor = _resume_contract_layout(
-        manifest
+    execution_context, resume_mode, occurrence_identity_anchor = (
+        _resume_contract_layout(manifest)
     )
     strict_replay_requested = _strict_replay_requested(
         requested_exact_replay,
