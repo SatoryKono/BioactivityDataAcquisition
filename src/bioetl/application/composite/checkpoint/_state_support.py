@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
 from datetime import datetime
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar
 
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.context import current_utc_time
@@ -149,31 +148,43 @@ def _replace_checkpoint_state(
     def _resolved(current: T, override: T | None) -> T:
         return current if override is None else override
 
-    return cast(
-        TCheckpointState,
-        replace(
-            checkpoint_state,
-            state=_resolved(checkpoint_state.state, state),
-            seed_completed=_resolved(checkpoint_state.seed_completed, seed_completed),
-            seed_result=_resolved(checkpoint_state.seed_result, seed_result),
-            completed_dependencies=_resolved(
-                checkpoint_state.completed_dependencies,
-                completed_dependencies,
-            ),
-            dependency_results=_resolved(
-                checkpoint_state.dependency_results,
-                dependency_results,
-            ),
-            completed_enrichers=_resolved(
-                checkpoint_state.completed_enrichers,
-                completed_enrichers,
-            ),
-            enrichment_results=_resolved(
-                checkpoint_state.enrichment_results,
-                enrichment_results,
-            ),
-            merge_completed=_resolved(checkpoint_state.merge_completed, merge_completed),
-            merge_result=_resolved(checkpoint_state.merge_result, merge_result),
-            updated_at=updated_at or _current_utc_now(clock),
+    return checkpoint_state.__class__(
+        composite_name=checkpoint_state.composite_name,
+        run_id=checkpoint_state.run_id,
+        state=_resolved(checkpoint_state.state, state),
+        seed_completed=_resolved(checkpoint_state.seed_completed, seed_completed),
+        seed_result=_resolved(checkpoint_state.seed_result, seed_result),
+        completed_dependencies=_resolved(
+            checkpoint_state.completed_dependencies,
+            completed_dependencies,
         ),
+        dependency_results=_resolved(
+            checkpoint_state.dependency_results,
+            dependency_results,
+        ),
+        completed_enrichers=_resolved(
+            checkpoint_state.completed_enrichers,
+            completed_enrichers,
+        ),
+        enrichment_results=_resolved(
+            checkpoint_state.enrichment_results,
+            enrichment_results,
+        ),
+        merge_completed=_resolved(checkpoint_state.merge_completed, merge_completed),
+        merge_result=_resolved(checkpoint_state.merge_result, merge_result),
+        checkpoint_schema_version=checkpoint_state.checkpoint_schema_version,
+        effective_config_hash=checkpoint_state.effective_config_hash,
+        effective_config_artifact_id=checkpoint_state.effective_config_artifact_id,
+        execution_fingerprint=checkpoint_state.execution_fingerprint,
+        dq_contract_compatibility_hash=(
+            checkpoint_state.dq_contract_compatibility_hash
+        ),
+        contract_ref=checkpoint_state.contract_ref,
+        contract_version=checkpoint_state.contract_version,
+        manifest_id=checkpoint_state.manifest_id,
+        composite_run_identity=checkpoint_state.composite_run_identity,
+        last_event_id=checkpoint_state.last_event_id,
+        last_event_occurred_at=checkpoint_state.last_event_occurred_at,
+        created_at=checkpoint_state.created_at,
+        updated_at=updated_at or _current_utc_now(clock),
     )
