@@ -48,10 +48,11 @@ def load_public_api(
     module_name: str,
     *,
     include_src: bool = True,
-) -> Path:
+) -> Any:
     """Expose the packaged module public surface through a compatibility shim."""
     _ensure_repo_imports(include_src=include_src)
-    spec = find_spec(module_name)
+    module = _load_module(module_name, include_src=include_src)
+    spec = module.__spec__
     if spec is None or spec.origin is None:
         raise ModuleNotFoundError(module_name)
 
@@ -73,4 +74,4 @@ def load_public_api(
 
     if "__all__" in target_globals:
         target_globals["__all__"] = list(target_globals["__all__"])
-    return impl_path
+    return module

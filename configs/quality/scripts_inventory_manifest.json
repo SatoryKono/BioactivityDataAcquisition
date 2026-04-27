@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-27T05:36:24.100531+00:00",
+  "generated_at": "2026-04-27T07:25:56.894510+00:00",
   "summary": {
     "total_scripts": 445,
     "status_counts": {
@@ -1755,7 +1755,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py",
-          "line": 70,
+          "line": 72,
           "source_group": "tests",
           "text": "assert \"scripts/ai/mcp/neo4j_memory_mcp_adapter.py\" in wrapper"
         }
