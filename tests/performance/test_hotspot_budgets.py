@@ -226,23 +226,20 @@ def _platform_p95_ceiling(
     return max_p95_ms
 
 
-def _assert_budget(
+def _assert_latency_and_throughput_budget(
     benchmark_key: str,
     budget: HotspotBudget,
-    result: BenchmarkResult,
-    processed_records: int,
+    *,
+    latency_ms: float,
+    throughput_rps: float,
 ) -> None:
-    latency_ms = result.median_latency_s * 1000.0
-    throughput_rps = processed_records / result.median_latency_s
-
+    """Assert median latency and throughput budget gates."""
     max_regression_pct = _platform_regression_pct(
         benchmark_key,
         budget.max_regression_pct,
     )
-
     max_latency_ms = budget.baseline_latency_ms * (1.0 + max_regression_pct)
     min_throughput_rps = budget.baseline_throughput_rps * (1.0 - max_regression_pct)
-
     assert latency_ms <= max_latency_ms, (
         f"{benchmark_key}: median latency regression "
         f"(actual={latency_ms:.2f}ms, allowed<={max_latency_ms:.2f}ms; "
@@ -254,17 +251,46 @@ def _assert_budget(
         f"baseline={budget.baseline_throughput_rps:.2f}r/s, budget={budget.max_regression_pct:.0%})"
     )
 
-    if budget.p95_latency_ms > 0:
-        p95_ms = result.p95_latency_s * 1000.0
-        max_p95_ms = _platform_p95_ceiling(
-            benchmark_key,
-            budget.p95_latency_ms * (1.0 + budget.max_p95_regression_pct),
-        )
-        assert p95_ms <= (max_p95_ms + _P95_EPSILON_MS), (
-            f"{benchmark_key}: P95 latency regression "
-            f"(actual={p95_ms:.2f}ms, allowed<={max_p95_ms:.2f}ms; "
-            f"baseline={budget.p95_latency_ms:.2f}ms, budget={budget.max_p95_regression_pct:.0%})"
-        )
+
+def _assert_p95_budget(
+    benchmark_key: str,
+    budget: HotspotBudget,
+    *,
+    p95_ms: float,
+) -> None:
+    """Assert P95 budget gate when it is configured."""
+    if budget.p95_latency_ms <= 0:
+        return
+    max_p95_ms = _platform_p95_ceiling(
+        benchmark_key,
+        budget.p95_latency_ms * (1.0 + budget.max_p95_regression_pct),
+    )
+    assert p95_ms <= (max_p95_ms + _P95_EPSILON_MS), (
+        f"{benchmark_key}: P95 latency regression "
+        f"(actual={p95_ms:.2f}ms, allowed<={max_p95_ms:.2f}ms; "
+        f"baseline={budget.p95_latency_ms:.2f}ms, budget={budget.max_p95_regression_pct:.0%})"
+    )
+
+
+def _assert_budget(
+    benchmark_key: str,
+    budget: HotspotBudget,
+    result: BenchmarkResult,
+    processed_records: int,
+) -> None:
+    latency_ms = result.median_latency_s * 1000.0
+    throughput_rps = processed_records / result.median_latency_s
+    _assert_latency_and_throughput_budget(
+        benchmark_key,
+        budget,
+        latency_ms=latency_ms,
+        throughput_rps=throughput_rps,
+    )
+    _assert_p95_budget(
+        benchmark_key,
+        budget,
+        p95_ms=result.p95_latency_s * 1000.0,
+    )
 
 
 def _record_observation(
