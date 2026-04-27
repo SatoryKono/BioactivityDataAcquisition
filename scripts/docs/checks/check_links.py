@@ -1325,6 +1325,23 @@ def _build_check_runners(
     )
 
 
+def _run_check_runner(
+    check_name: str,
+    runner: Callable[[], int],
+    checks_run: list[dict[str, object]],
+) -> int:
+    """Execute one selected check and append its status."""
+    check_violations = runner()
+    checks_run.append(
+        {
+            "check": check_name,
+            "status": "pass" if check_violations == 0 else "fail",
+            "violations": check_violations,
+        }
+    )
+    return check_violations
+
+
 def _run_selected_checks(
     check_runners: tuple[tuple[str, bool, Callable[[], int]], ...]
 ) -> tuple[int, list[dict[str, object]]]:
@@ -1333,15 +1350,7 @@ def _run_selected_checks(
     for check_name, should_run, runner in check_runners:
         if not should_run:
             continue
-        check_violations = runner()
-        violations += check_violations
-        checks_run.append(
-            {
-                "check": check_name,
-                "status": "pass" if check_violations == 0 else "fail",
-                "violations": check_violations,
-            }
-        )
+        violations += _run_check_runner(check_name, runner, checks_run)
     return violations, checks_run
 
 

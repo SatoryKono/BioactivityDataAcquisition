@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime
-from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -138,9 +137,9 @@ async def test_compute_dq_metrics_passes_explicit_validation_context() -> None:
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_prepare_finalization_context_passes_explicit_validation_context() -> (
-    None
-):
+async def test_prepare_finalization_context_passes_explicit_validation_context(
+    tmp_path,
+) -> None:
     """Finalization prep should forward validation context into DQ resolution."""
     started_at = datetime(2025, 1, 15, 12, 0, tzinfo=UTC)
     dq_metrics = BatchDQMetrics(
@@ -168,7 +167,7 @@ async def test_prepare_finalization_context_passes_explicit_validation_context()
         context = await ops._prepare_silver_write_finalization_context(
             table_name="chembl.activity",
             records=[{"activity_id": "A1"}, {"activity_id": "A2"}],
-            table_path=str(Path("reports") / "tmp" / "chembl" / "activity"),
+            table_path=str(tmp_path / "chembl" / "activity"),
             primary_keys=["activity_id"],
             validated_mode=SilverWriteMode.MERGE,
             quarantined_count=1,
