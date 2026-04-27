@@ -54,8 +54,8 @@
 ## Measured-Only Ratchet
 
 - Max measured-only modules: `0`
-- `src/bioetl/application/services/` \<= `0` measured-only modules
-- `src/bioetl/interfaces/cli/commands/` \<= `0` measured-only modules
+- `src/bioetl/application/services/` <= `0` measured-only modules
+- `src/bioetl/interfaces/cli/commands/` <= `0` measured-only modules
 
 ### Live Ratchet Counts
 

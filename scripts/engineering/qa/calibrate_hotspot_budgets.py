@@ -110,7 +110,8 @@ def recalibrate(
 
 def _write_updated_budgets(path: Path, payload: dict[str, Any]) -> None:
     """Write recalibrated hotspot budgets back to disk."""
-    path.write_text(
+    validated_path = _validate_budgets_path(path)
+    validated_path.write_text(
         json.dumps(payload, ensure_ascii=True, indent=2) + "\n",
         encoding="utf-8",
     )
