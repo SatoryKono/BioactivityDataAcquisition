@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
-from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
@@ -12,6 +11,8 @@ import pytest
 from bioetl.application.services.effective_config_service import (
     create_effective_config_service,
 )
+from bioetl.composition.observability import ObservabilityBundle
+from bioetl.composition.runtime_builders.inputs_resolver import RunnerInputs
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     _build_effective_config_source_refs,
     create_and_persist_composite_effective_config_artifact,
@@ -20,7 +21,15 @@ from bioetl.composition.runtime_builders.effective_config_artifact_builder impor
 from bioetl.domain.control_plane.config_source_hashing import (
     compute_canonical_yaml_sha256,
 )
+from bioetl.domain.context import PipelineRunContext
+from bioetl.domain.context_cached_bronze import CachedBronzeContext
+from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.types import RunID
+from bioetl.domain.types import RunType
+from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 def test_build_effective_config_source_refs_persists_semantic_and_raw_source_hashes(
@@ -254,38 +263,33 @@ def test_create_and_persist_effective_config_artifact_forwards_required_profile(
         _fake_payload,
     )
 
+    settings = Settings(data_dir=Path("data"))
+    observability = ObservabilityBundle.create(
+        logger=NoOpLogger(),
+        metrics=NoOpMetrics(),
+        tracer=NoOpTracing(),
+        audit=NoOpAudit(),
+    )
+    inputs = RunnerInputs(
+        settings=settings,
+        yaml_config=PipelineYamlConfig(
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity_type="activity",
+        ),
+        observability=observability,
+        runtime_config=RuntimeConfig(run_type=RunType.INCREMENTAL),
+        filter_config=None,
+        cached_bronze=CachedBronzeContext.disabled(),
+    )
+
     result = create_and_persist_effective_config_artifact(
-        ctx=SimpleNamespace(
+        ctx=PipelineRunContext(
             pipeline_name="chembl_activity",
             run_id=RunID(uuid4()),
-            run_type="incremental",
-            resume=False,
-            dry_run=False,
-            limit=None,
-            query=None,
-            start_offset=None,
-            log_level="INFO",
-            ignore_yaml_filter=False,
-            skip_gold=False,
-            exact_replay=False,
-            input_filter=None,
-            cached_bronze=None,
-            vacuum=None,
-            replay_of_run_id=None,
-            replay_of_manifest_id=None,
-            execution_context="isolated",
+            run_type=RunType.INCREMENTAL,
         ),
-        inputs=SimpleNamespace(
-            yaml_config=SimpleNamespace(),
-            settings=SimpleNamespace(
-                pipeline=SimpleNamespace(
-                    control_plane=SimpleNamespace(
-                        required_persistence_profile="replay_ready"
-                    )
-                )
-            ),
-            observability=SimpleNamespace(logger=SimpleNamespace()),
-        ),
+        inputs=inputs,
         provider="chembl",
         entity="activity",
     )
@@ -310,11 +314,15 @@ def test_create_and_persist_composite_effective_config_artifact_forwards_require
 
     result = create_and_persist_composite_effective_config_artifact(
         pipeline_name="composite_publication",
-        config=SimpleNamespace(),
-        runtime_config=SimpleNamespace(),
+        config=PipelineYamlConfig(
+            pipeline_name="composite_publication",
+            provider="composite",
+            entity_type="publication",
+        ),
+        runtime_config=RuntimeConfig(run_type=RunType.INCREMENTAL),
         required_persistence_profile="forensic_grade",
-        settings=SimpleNamespace(),
-        logger=SimpleNamespace(),
+        settings=Settings(data_dir=Path("data")),
+        logger=NoOpLogger(),
         run_id=RunID(uuid4()),
     )
 

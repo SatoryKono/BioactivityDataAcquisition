@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import errno
+from collections.abc import Callable
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
@@ -228,7 +229,7 @@ class TestMetadataWriter:
             content: object,
             *,
             retry_policy: object,
-            on_retry: object,
+            on_retry: Callable[[int, float, OSError], None],
         ) -> None:
             del path, content, retry_policy
             assert callable(on_retry)

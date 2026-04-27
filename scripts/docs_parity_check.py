@@ -67,40 +67,43 @@ class DocumentationParityChecker:
         self.entity_configs_dir = self.configs_dir / "entities"
         self.composite_configs_dir = self.configs_dir / "composites"
 
+    def _iter_entity_config_files(self) -> list[Path]:
+        config_files: list[Path] = []
+        if not self.entity_configs_dir.exists():
+            return config_files
+        for provider_dir in sorted(self.entity_configs_dir.iterdir()):
+            if not provider_dir.is_dir():
+                continue
+            config_files.extend(
+                config_file
+                for config_file in sorted(provider_dir.glob("*.yaml"))
+                if not config_file.name.startswith("_")
+            )
+        return config_files
+
+    def _iter_composite_config_files(self) -> list[Path]:
+        if not self.composite_configs_dir.exists():
+            return []
+        return list(self.composite_configs_dir.glob("*.yaml"))
+
     def find_config_files(self) -> list[ConfigEntity]:
         """Find all configuration files that should have documentation."""
-
-        config_entities = []
-
-        # Entity configs
-        if self.entity_configs_dir.exists():
-            for provider_dir in sorted(self.entity_configs_dir.iterdir()):
-                if not provider_dir.is_dir():
-                    continue
-                for config_file in sorted(provider_dir.glob("*.yaml")):
-                    if config_file.name.startswith("_"):
-                        continue
-                    entity_name = config_file.stem
-                    config_entities.append(
-                        ConfigEntity(
-                            name=entity_name,
-                            type="entity",
-                            path=str(config_file.relative_to(self.configs_dir)),
-                        )
-                    )
-
-        # Composite configs
-        if self.composite_configs_dir.exists():
-            for config_file in self.composite_configs_dir.glob("*.yaml"):
-                composite_name = config_file.stem
-                config_entities.append(
-                    ConfigEntity(
-                        name=composite_name,
-                        type="composite",
-                        path=str(config_file.relative_to(self.configs_dir)),
-                    )
-                )
-
+        config_entities = [
+            ConfigEntity(
+                name=config_file.stem,
+                type="entity",
+                path=str(config_file.relative_to(self.configs_dir)),
+            )
+            for config_file in self._iter_entity_config_files()
+        ]
+        config_entities.extend(
+            ConfigEntity(
+                name=config_file.stem,
+                type="composite",
+                path=str(config_file.relative_to(self.configs_dir)),
+            )
+            for config_file in self._iter_composite_config_files()
+        )
         return config_entities
 
     def find_documentation_files(self) -> list[Path]:
