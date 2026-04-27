@@ -93,7 +93,7 @@ class TestChEMBLPipelineE2E:
 
         # Patch StorageFactory to return our test storage context
         with patch(
-            "bioetl.composition.factories.services.factory.StorageFactory.create",
+            "bioetl.composition.factories.storage.StorageFactory.create",
             return_value=storage_context,
         ):
             ctx = create_test_context("chembl_activity", limit=e2e_pipeline_limit)
@@ -175,7 +175,7 @@ async def test_pubchem_compound_pipeline(
 
     # Patch StorageFactory
     with patch(
-        "bioetl.composition.factories.services.factory.StorageFactory.create",
+        "bioetl.composition.factories.storage.StorageFactory.create",
         return_value=storage_context,
     ):
         ctx = create_test_context(
@@ -255,7 +255,7 @@ async def test_pipeline_resume_after_failure(
 
     # First run: Process 5 records
     with patch(
-        "bioetl.composition.factories.services.factory.StorageFactory.create",
+        "bioetl.composition.factories.storage.StorageFactory.create",
         return_value=storage_context,
     ):
         ctx = create_test_context("chembl_activity", limit=5)
@@ -275,7 +275,7 @@ async def test_pipeline_resume_after_failure(
     # Second run: Resume with same run_id (would typically continue from checkpoint)
     # For this E2E test, we verify that running again doesn't cause errors
     with patch(
-        "bioetl.composition.factories.services.factory.StorageFactory.create",
+        "bioetl.composition.factories.storage.StorageFactory.create",
         return_value=storage_context,
     ):
         ctx = create_test_context("chembl_activity", limit=5)
@@ -346,7 +346,7 @@ async def test_pipeline_idempotency(
 
     # Run 1: Initial load
     with patch(
-        "bioetl.composition.factories.services.factory.StorageFactory.create",
+        "bioetl.composition.factories.storage.StorageFactory.create",
         return_value=storage_context,
     ):
         ctx = create_test_context("chembl_activity", limit=5)
@@ -367,7 +367,7 @@ async def test_pipeline_idempotency(
 
         # Run 2: Same data on append-mode pipeline
         with patch(
-            "bioetl.composition.factories.services.factory.StorageFactory.create",
+            "bioetl.composition.factories.storage.StorageFactory.create",
             return_value=storage_context,
         ):
             ctx = create_test_context("chembl_activity", limit=5)

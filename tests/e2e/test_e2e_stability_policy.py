@@ -127,3 +127,10 @@ def test_build_e2e_fail_reason_is_deterministic() -> None:
     )
     assert reason.startswith("E2E_FAIL[CODE_REGRESSION] pipeline=")
     assert "chembl_activity" in reason
+    assert "error_type=RuntimeError; boom" in reason
+
+
+def test_create_test_context_initializes_started_at() -> None:
+    """E2E test contexts must not inherit the sentinel runtime timestamp."""
+    context = create_test_context("chembl_activity", limit=1)
+    assert context.started_at.year >= 2000
