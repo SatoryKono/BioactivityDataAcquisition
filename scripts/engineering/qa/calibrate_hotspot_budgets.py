@@ -111,21 +111,22 @@ def recalibrate(
 
 def _write_validated_budgets(path: Path, payload: dict[str, Any]) -> None:
     """Write recalibrated hotspot budgets back to the validated budget path."""
-    _validate_budgets_path(path)
     path.write_text(
         json.dumps(payload, ensure_ascii=True, indent=2) + "\n",
         encoding="utf-8",
     )
 
 
-def _validate_budgets_path(path: Path) -> Path:
+def _validate_budgets_path(path: Path) -> None:
     """Validate budget path to avoid writing outside performance budget scope."""
-    resolved = path.resolve()
-    if resolved != HOTSPOT_BUDGETS_PATH:
+    try:
+        matches = path.samefile(HOTSPOT_BUDGETS_PATH)
+    except OSError:
+        matches = False
+    if not matches:
         raise ValueError(
             "Budgets path must resolve to tests/performance/hotspot_budgets.json."
         )
-    return resolved
 
 
 def main() -> int:
@@ -158,13 +159,13 @@ def main() -> int:
     )
     args = parser.parse_args()
     try:
-        budgets_path = _validate_budgets_path(args.budgets)
+        _validate_budgets_path(args.budgets)
     except ValueError as error:
         print(f"Invalid budgets path: {error}")
         return 2
 
     updated, changed = recalibrate(
-        budgets_path,
+        args.budgets,
         args.observations,
         latency_q=args.latency_q,
         throughput_q=args.throughput_q,
@@ -174,7 +175,7 @@ def main() -> int:
         print("No matching observations found for configured benchmarks.")
         return 1
 
-    _write_validated_budgets(budgets_path, updated)
+    _write_validated_budgets(args.budgets, updated)
     print(f"Updated {len(changed)} benchmark baselines:")
     for key in changed:
         print(f"- {key}")

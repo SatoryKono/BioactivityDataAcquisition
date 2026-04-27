@@ -780,22 +780,32 @@ def _explicit_path_refs(text: str) -> set[str]:
     refs: set[str] = set()
     for line in text.splitlines():
         for prefix in _PATH_REF_PREFIXES:
-            start = 0
-            while True:
-                index = line.find(prefix, start)
-                if index == -1:
-                    break
-                if index > 0 and (line[index - 1].isalnum() or line[index - 1] in "_/"):
-                    start = index + 1
-                    continue
-                end = index + len(prefix)
-                while end < len(line) and line[end] in _PATH_REF_CHARS:
-                    end += 1
-                candidate = line[index:end].rstrip(".,);]")
-                if candidate:
-                    refs.add(candidate)
-                start = index + 1
+            refs.update(_extract_path_refs_for_prefix(line, prefix))
     return refs
+
+
+def _extract_path_refs_for_prefix(line: str, prefix: str) -> set[str]:
+    refs: set[str] = set()
+    start = 0
+    while True:
+        index = line.find(prefix, start)
+        if index == -1:
+            break
+        if index > 0 and (line[index - 1].isalnum() or line[index - 1] in "_/"):
+            start = index + 1
+            continue
+        candidate = _collect_path_ref_candidate(line, index, prefix)
+        if candidate:
+            refs.add(candidate)
+        start = index + 1
+    return refs
+
+
+def _collect_path_ref_candidate(line: str, start_index: int, prefix: str) -> str:
+    end = start_index + len(prefix)
+    while end < len(line) and line[end] in _PATH_REF_CHARS:
+        end += 1
+    return line[start_index:end].rstrip(".,);]")
 
 
 def _explicit_config_path_refs(text: str) -> set[str]:

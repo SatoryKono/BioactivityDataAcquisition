@@ -74,30 +74,45 @@ def _insert_constants(text: str, constants_def: str) -> str:
     return _insert_constants_after_imports(text, constants_def)
 
 
+def _rewrite_direct_stub_signature(line: str) -> str | None:
+    if 'def execute(self, statements, *, context=None)' in line:
+        return line.replace('statements', '_statements')
+    if 'def query(self, statement, parameters=None, *, context=None)' in line:
+        return line.replace(
+            'statement, parameters=None',
+            '_statement, _parameters=None',
+        )
+    return None
+
+
+def _rewrite_stubclient_signature(lines: list[str], index: int) -> None:
+    window = lines[max(0, index - 4) : index]
+    if not any('StubClient' in previous for previous in window):
+        return
+
+    next_one = lines[index + 1] if index + 1 < len(lines) else ''
+    next_two = lines[index + 2] if index + 2 < len(lines) else ''
+    if 'statement: str,' in next_one:
+        lines[index + 1] = next_one.replace('statement: str,', '_statement: str,')
+    if 'parameters: dict[str, object] | None = None,' in next_two:
+        lines[index + 2] = next_two.replace(
+            'parameters: dict[str, object] | None = None,',
+            '_parameters: dict[str, object] | None = None,',
+        )
+
+
 def _rewrite_stub_signatures(lines: list[str]) -> None:
     """Normalize the stub signatures after bulk string replacement."""
     for index, line in enumerate(lines):
-        if 'def execute(self, statements, *, context=None)' in line:
-            lines[index] = line.replace('statements', '_statements')
-            continue
-        if 'def query(self, statement, parameters=None, *, context=None)' in line:
-            lines[index] = line.replace('statement, parameters=None', '_statement, _parameters=None')
+        rewritten = _rewrite_direct_stub_signature(line)
+        if rewritten is not None:
+            lines[index] = rewritten
             continue
 
         if 'def query(' not in line:
             continue
 
-        window = lines[max(0, index - 4) : index]
-        if any('StubClient' in previous for previous in window):
-            next_one = lines[index + 1] if index + 1 < len(lines) else ''
-            next_two = lines[index + 2] if index + 2 < len(lines) else ''
-            if 'statement: str,' in next_one:
-                lines[index + 1] = next_one.replace('statement: str,', '_statement: str,')
-            if 'parameters: dict[str, object] | None = None,' in next_two:
-                lines[index + 2] = next_two.replace(
-                    'parameters: dict[str, object] | None = None,',
-                    '_parameters: dict[str, object] | None = None,',
-                )
+        _rewrite_stubclient_signature(lines, index)
 
 
 def refactor_neo4j_sync():

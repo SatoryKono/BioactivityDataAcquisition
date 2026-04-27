@@ -2369,7 +2369,7 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_anchor_grap
     class StubClient:
         def query(
             self,
-            statement: str,
+            _statement: str,
             parameters: dict[str, object] | None = None,
             *,
             context: str | None = None,
@@ -2398,7 +2398,7 @@ def test_missing_managed_anchor_keys_reports_specific_nodes() -> None:
     class StubClient:
         def query(
             self,
-            statement: str,
+            _statement: str,
             parameters: dict[str, object] | None = None,
             *,
             context: str | None = None,
@@ -2650,8 +2650,8 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
 
         def query(
             self,
-            statement: str,
-            parameters: dict[str, object] | None = None,
+            _statement: str,
+            _parameters: dict[str, object] | None = None,
             context: str | None = None,
         ) -> list[dict[str, object]]:
             query_calls.append(context or "")
@@ -2694,7 +2694,7 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
                     {"label": "complexity_candidate", "count": 0, "samples": []},
                 ]
             raise AssertionError(
-                f"Unexpected query context: {context}, statement={statement}"
+                f"Unexpected query context: {context}"
             )
 
     monkeypatch.setattr(NEO4J_HTTP_CLIENT_PATH, StubClient)

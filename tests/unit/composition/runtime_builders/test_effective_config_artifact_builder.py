@@ -105,22 +105,6 @@ def _build_pipeline_run_context() -> PipelineRunContext:
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
     )
-    assert [ref.raw_source_hash for ref in refs] == [
-        hashlib.sha256(base_config.read_bytes()).hexdigest(),
-        hashlib.sha256(base_quality.read_bytes()).hexdigest(),
-        hashlib.sha256(provider_config.read_bytes()).hexdigest(),
-        hashlib.sha256(entity_config.read_bytes()).hexdigest(),
-        hashlib.sha256(entity_quality.read_bytes()).hexdigest(),
-        hashlib.sha256(contract_registry.read_bytes()).hexdigest(),
-    ]
-    assert [ref.source_hash_strategy for ref in refs] == [
-        "canonical_yaml",
-        "canonical_yaml",
-        "canonical_yaml",
-        "canonical_yaml",
-        "canonical_yaml",
-        "canonical_yaml",
-    ]
 
 
 def test_build_effective_config_source_refs_is_stable_across_equivalent_calls(
