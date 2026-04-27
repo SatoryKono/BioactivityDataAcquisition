@@ -28,7 +28,7 @@ from scripts.docs.common.xlsx import (
     column_index,
     iter_sheet_targets,
     load_shared_strings,
-)
+)  # noqa: E402
 
 DEFAULT_WORKBOOK: Final[Path] = (
     PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
