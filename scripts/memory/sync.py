@@ -16,7 +16,9 @@ for path in (REPO_ROOT, SRC_ROOT):
 _impl = importlib.import_module("memory.graph.sync")
 
 main = _impl.main
-globals().update({name: value for name, value in vars(_impl).items() if name != "__name__"})
+globals().update(
+    {name: value for name, value in vars(_impl).items() if name != "__name__"}
+)
 __all__ = [name for name in vars(_impl) if not name.startswith("__")]
 sys.modules[__name__] = _impl
 
