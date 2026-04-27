@@ -45,11 +45,14 @@ def _factory() -> RunContextFactory:
 
 def test_run_context_factory_preserves_distinct_config_hash_surfaces() -> None:
     """Legacy, resolved, and effective config hashes are independent anchors."""
-    context = _factory().create(
+    factory = _factory()
+    runtime = _runtime()
+    yaml_config = _yaml_config()
+    context = factory.create(
         run_id=RunID(uuid4()),
-        runtime=_runtime(),
+        runtime=runtime,
         started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
-        yaml_config=_yaml_config(),
+        yaml_config=yaml_config,
         config_hash="legacy-config-hash",
         resolved_config_hash="resolved-config-hash",
         effective_config_hash="effective-config-hash",
@@ -62,11 +65,14 @@ def test_run_context_factory_preserves_distinct_config_hash_surfaces() -> None:
 
 def test_run_context_factory_does_not_alias_missing_effective_hash() -> None:
     """Missing effective hash remains explicit instead of falling back to config_hash."""
-    context = _factory().create(
+    factory = _factory()
+    runtime = _runtime()
+    yaml_config = _yaml_config()
+    context = factory.create(
         run_id=RunID(uuid4()),
-        runtime=_runtime(),
+        runtime=runtime,
         started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
-        yaml_config=_yaml_config(),
+        yaml_config=yaml_config,
         config_hash="legacy-config-hash",
         resolved_config_hash="resolved-config-hash",
         effective_config_hash=None,
@@ -80,6 +86,8 @@ def test_run_context_factory_does_not_alias_missing_effective_hash() -> None:
 def test_run_context_factory_uses_explicit_started_at_anchor() -> None:
     """RunContext timestamps must come from the caller-provided runtime anchor."""
     started_at = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
+    runtime = _runtime()
+    yaml_config = _yaml_config()
     factory = RunContextFactory(
         pipeline_name="chembl_activity",
         provider="chembl",
@@ -89,9 +97,9 @@ def test_run_context_factory_uses_explicit_started_at_anchor() -> None:
 
     context = factory.create(
         run_id=RunID(uuid4()),
-        runtime=_runtime(),
+        runtime=runtime,
         started_at=started_at,
-        yaml_config=_yaml_config(),
+        yaml_config=yaml_config,
     )
 
     assert context.started_at == started_at

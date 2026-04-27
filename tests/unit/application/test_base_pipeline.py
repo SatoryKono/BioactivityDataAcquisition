@@ -14,7 +14,7 @@ from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
-from bioetl.domain.context import PipelineContext
+from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP, PipelineContext
 from bioetl.domain.types import RunID, RunType
 from tests.helpers.transformer_dependencies import (
     build_test_transformer_dependencies,
@@ -102,6 +102,7 @@ def test_base_pipeline_initialization(mock_pipeline):
     assert mock_pipeline.resume is False
     assert mock_pipeline.context.run_id is not None
     assert mock_pipeline.context.logger is not None
+    assert mock_pipeline.context.started_at == MISSING_RUNTIME_TIMESTAMP
 
 
 def test_base_pipeline_accepts_five_params():
@@ -263,6 +264,44 @@ def test_base_pipeline_uses_injected_shutdown_signal():
     )
 
     assert pipeline.shutdown_signal is injected_signal
+
+
+def test_base_pipeline_preserves_explicit_started_at() -> None:
+    """Explicit runtime anchor should propagate into PipelineContext."""
+    config = PipelineConfig(
+        pipeline_name="test_pipeline",
+        provider="test_provider",
+        entity_type="test_entity",
+        table=TableConfig(
+            primary_keys=["id"],
+            silver_table="test_provider.test_entity",
+        ),
+    )
+    runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
+    mock_logger = MagicMock()
+    mock_logger.bind = MagicMock(return_value=mock_logger)
+    services = PipelineService(
+        data_source=AsyncMock(),
+        storage=AsyncMock(),
+        lock=AsyncMock(),
+        checkpoint=AsyncMock(),
+        quarantine=AsyncMock(),
+        metrics=MagicMock(),
+        tracing=MagicMock(),
+        logger=mock_logger,
+    )
+    started_at = datetime(2026, 4, 27, 17, 7, 21, tzinfo=UTC)
+
+    pipeline = ConcretePipeline.create(
+        run_id=uuid4(),
+        runtime=runtime,
+        services=services,
+        config=config,
+        shutdown_signal=ShutdownSignal(),
+        started_at=started_at,
+    )
+
+    assert pipeline.context.started_at == started_at
 
 
 def test_exact_replay_pipeline_context_uses_deterministic_replay_anchor() -> None:

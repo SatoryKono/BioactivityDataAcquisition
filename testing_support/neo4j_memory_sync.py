@@ -2369,11 +2369,12 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_anchor_grap
     class StubClient:
         def query(
             self,
-            _statement: str,
-            _parameters: dict[str, object] | None = None,
+            statement: str,
+            parameters: dict[str, object] | None = None,
             *,
             context: str | None = None,
         ) -> list[dict[str, object]]:
+            del statement
             assert context == "complexity-layer targeted sync prerequisite anchor check"
             assert parameters is not None
             return [{"label": label, "count": 0} for label in parameters["labels"]]
@@ -2397,15 +2398,12 @@ def test_missing_managed_anchor_keys_reports_specific_nodes() -> None:
     class StubClient:
         def query(
             self,
-            _statement: str,
-            _parameters: dict[str, object] | None = None,
+            statement: str,
+            parameters: dict[str, object] | None = None,
             *,
             context: str | None = None,
         ) -> list[dict[str, object]]:
-            assert (
-                context
-                == CONTEXT_COMPLEXITY_PREREQ
-            )
+            assert context == CONTEXT_COMPLEXITY_PREREQ
             assert parameters is not None
             assert parameters["anchors"] == [
                 {"label": "class_surface", "name": CLASS_PKG_EXAMPLE},
@@ -2444,8 +2442,8 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_specific_an
     class StubClient:
         def query(
             self,
-            _statement: str,
-            _parameters: dict[str, object] | None = None,
+            statement: str,
+            parameters: dict[str, object] | None = None,
             *,
             context: str | None = None,
         ) -> list[dict[str, object]]:
@@ -2478,8 +2476,8 @@ def test_live_managed_count_helpers_batch_labels_and_relations() -> None:
     class StubClient:
         def query(
             self,
-            _statement: str,
-            _parameters: dict[str, object] | None = None,
+            statement: str,
+            parameters: dict[str, object] | None = None,
             *,
             context: str | None = None,
         ) -> list[dict[str, object]]:

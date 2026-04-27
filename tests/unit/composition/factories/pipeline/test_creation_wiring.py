@@ -272,6 +272,7 @@ class TestCreatePipelineWithServicesImpl:
         create_kwargs = pipeline_cls.create.call_args.kwargs
         assert create_kwargs["services"] is services
         assert create_kwargs["config"] is domain_config
+        assert create_kwargs["started_at"] == _STARTED_AT
         assert create_kwargs["transformer"] is transformer
 
     @patch(

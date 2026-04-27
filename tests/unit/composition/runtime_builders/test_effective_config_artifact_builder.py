@@ -306,12 +306,13 @@ def test_create_and_persist_effective_config_artifact_forwards_required_profile(
         cached_bronze=CachedBronzeContext.disabled(),
     )
 
+    ctx = PipelineRunContext(
+        pipeline_name="chembl_activity",
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+    )
     result = create_and_persist_effective_config_artifact(
-        ctx=PipelineRunContext(
-            pipeline_name="chembl_activity",
-            run_id=RunID(uuid4()),
-            run_type=RunType.INCREMENTAL,
-        ),
+        ctx=ctx,
         inputs=inputs,
         provider="chembl",
         entity="activity",

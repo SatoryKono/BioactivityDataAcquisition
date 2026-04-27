@@ -60,6 +60,7 @@ class BasePipeline(ABC):  # noqa: B024
         services: PipelineService,
         config: PipelineConfig,
         shutdown_signal: ShutdownSignal,
+        started_at: datetime | None = None,
         transformer: BaseTransformer | None = None,
     ) -> Self:
         """Create pipeline instance.
@@ -72,6 +73,7 @@ class BasePipeline(ABC):  # noqa: B024
             services: Injected services (ports).
             config: Pipeline configuration.
             shutdown_signal: Injected shutdown signal instance.
+            started_at: Explicit runtime anchor captured by the caller.
             transformer: Injected transformer for Bronze→Silver transformation (DI).
                 If provided, the pipeline will use this transformer instead of
                 creating one internally. This is the preferred DI approach.
@@ -85,6 +87,7 @@ class BasePipeline(ABC):  # noqa: B024
             services,
             run_id,
             shutdown_signal=shutdown_signal,
+            started_at=started_at,
             transformer=transformer,
         )
 
@@ -95,6 +98,7 @@ class BasePipeline(ABC):  # noqa: B024
         services: PipelineService,
         run_id: RunID,
         shutdown_signal: ShutdownSignal,
+        started_at: datetime | None = None,
         transformer: BaseTransformer | None = None,
     ) -> None:
         """Initialize pipeline definition.
@@ -106,6 +110,7 @@ class BasePipeline(ABC):  # noqa: B024
             run_id: Unique identifier for this pipeline run.
                     MUST be passed from CLI/orchestrator to ensure consistency.
             shutdown_signal: Injected shutdown signal instance for graceful stop.
+            started_at: Explicit runtime anchor captured by the caller.
             transformer: Injected transformer for Bronze→Silver transformation.
                 MUST be provided via DI from GenericPipelineFactory.
                 If None, transform_bronze_to_silver() will raise NotImplementedError.
@@ -127,6 +132,7 @@ class BasePipeline(ABC):  # noqa: B024
             run_id=self._run_id,
             run_type=runtime.run_type,
             logger=self._logger,
+            started_at=started_at,
             replay_timestamp_anchor=replay_timestamp_anchor,
         )
         self._shutdown_signal = shutdown_signal

@@ -109,6 +109,7 @@ PROTECTED_BRANCHES=(
 branch_exists() {
   local branch="$1"
   git show-ref --verify --quiet "refs/heads/${branch}"
+  return $?
 }
 
 remote_branch_exists() {
