@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
-from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
@@ -16,6 +16,12 @@ from bioetl.composition.factories.services.port_factories import (
     is_metrics_port_like,
 )
 from bioetl.domain.ports import CheckpointPort, LockPort, MetricsPort, QuarantinePort
+from bioetl.infrastructure.config import Settings
+
+
+@dataclass(frozen=True, slots=True)
+class _StorageContext:
+    checkpoints_path: Path
 
 
 @pytest.mark.unit
@@ -28,32 +34,32 @@ def test_create_lock_returns_lock_port() -> None:
 @pytest.mark.unit
 def test_create_checkpoint_returns_checkpoint_port(tmp_path: Path) -> None:
     """create_checkpoint returns an instance satisfying CheckpointPort."""
-    storage_ctx = SimpleNamespace(checkpoints_path=tmp_path)
-    checkpoint = create_checkpoint(storage_ctx)  # type: ignore[arg-type]
+    storage_ctx = _StorageContext(checkpoints_path=tmp_path)
+    checkpoint = create_checkpoint(storage_ctx)
     assert isinstance(checkpoint, CheckpointPort)
 
 
 @pytest.mark.unit
 def test_create_quarantine_returns_quarantine_port(tmp_path: Path) -> None:
     """create_quarantine returns an instance satisfying QuarantinePort."""
-    settings = SimpleNamespace(quarantine_path=tmp_path)
-    quarantine = create_quarantine(settings)  # type: ignore[arg-type]
+    settings = Settings(data_dir=tmp_path)
+    quarantine = create_quarantine(settings)
     assert isinstance(quarantine, QuarantinePort)
 
 
 @pytest.mark.unit
 def test_create_metrics_with_prometheus_enabled() -> None:
     """create_metrics returns PrometheusMetrics when enabled."""
-    settings = SimpleNamespace(metrics_enabled=True)
-    metrics = create_metrics(settings)  # type: ignore[arg-type]
+    settings = Settings(metrics_enabled=True)
+    metrics = create_metrics(settings)
     assert isinstance(metrics, MetricsPort)
 
 
 @pytest.mark.unit
 def test_create_metrics_with_noop() -> None:
     """create_metrics returns NoOpMetrics when disabled."""
-    settings = SimpleNamespace(metrics_enabled=False)
-    metrics = create_metrics(settings)  # type: ignore[arg-type]
+    settings = Settings(metrics_enabled=False)
+    metrics = create_metrics(settings)
     assert isinstance(metrics, MetricsPort)
 
 

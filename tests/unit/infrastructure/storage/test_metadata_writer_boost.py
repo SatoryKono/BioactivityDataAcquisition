@@ -6,6 +6,7 @@ Targets uncovered lines: 53, 94, 118, 136, 263, 306-315.
 from __future__ import annotations
 
 import errno
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -48,7 +49,7 @@ def _fake_atomic_write_text(
     content: object,
     *,
     retry_policy: object,
-    on_retry: object,
+    on_retry: Callable[[int, float, OSError], None],
 ) -> None:
     del path, content, retry_policy, on_retry
 
@@ -58,7 +59,7 @@ def _retry_once_atomic_write_text(
     content: object,
     *,
     retry_policy: object,
-    on_retry: object,
+    on_retry: Callable[[int, float, OSError], None],
 ) -> None:
     del path, content, retry_policy
     assert callable(on_retry)

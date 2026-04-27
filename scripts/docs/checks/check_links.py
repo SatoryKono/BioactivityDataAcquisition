@@ -53,6 +53,7 @@ import json
 import os
 import re
 import sys
+from collections.abc import Callable
 from datetime import UTC, datetime, timezone
 from fnmatch import fnmatch
 from functools import cache
@@ -1287,26 +1288,12 @@ def _write_json_report(
     print(f"JSON report written to: {rel}")
 
 
-def main() -> int:
-    parser = _build_parser()
-    args = parser.parse_args()
-
-    explicit_checks = (
-        args.links
-        or args.specs
-        or args.configs
-        or args.contracts_index
-        or args.provider_overview
-        or args.doc_governance
-        or args.not_in_nav_growth
-        or args.legacy_paths
-        or args.legacy_paths_all
-    )
-    run_all = not explicit_checks
-    violations = 0
-    checks_run: list[dict[str, object]] = []
-
-    check_runners = (
+def _build_check_runners(
+    *,
+    run_all: bool,
+    args: argparse.Namespace,
+) -> tuple[tuple[str, bool, Callable[[], int]], ...]:
+    return (
         ("links", run_all or args.links, lambda: _run_links_checks()),
         ("specs", run_all or args.specs, lambda: _run_specs_check()),
         ("configs", run_all or args.configs, lambda: _run_configs_check()),
@@ -1337,17 +1324,46 @@ def main() -> int:
         ),
     )
 
+
+def _run_selected_checks(
+    check_runners: tuple[tuple[str, bool, Callable[[], int]], ...]
+) -> tuple[int, list[dict[str, object]]]:
+    violations = 0
+    checks_run: list[dict[str, object]] = []
     for check_name, should_run, runner in check_runners:
-        if should_run:
-            check_violations = runner()
-            violations += check_violations
-            checks_run.append(
-                {
-                    "check": check_name,
-                    "status": "pass" if check_violations == 0 else "fail",
-                    "violations": check_violations,
-                }
-            )
+        if not should_run:
+            continue
+        check_violations = runner()
+        violations += check_violations
+        checks_run.append(
+            {
+                "check": check_name,
+                "status": "pass" if check_violations == 0 else "fail",
+                "violations": check_violations,
+            }
+        )
+    return violations, checks_run
+
+
+def main() -> int:
+    parser = _build_parser()
+    args = parser.parse_args()
+
+    explicit_checks = (
+        args.links
+        or args.specs
+        or args.configs
+        or args.contracts_index
+        or args.provider_overview
+        or args.doc_governance
+        or args.not_in_nav_growth
+        or args.legacy_paths
+        or args.legacy_paths_all
+    )
+    run_all = not explicit_checks
+    violations, checks_run = _run_selected_checks(
+        _build_check_runners(run_all=run_all, args=args)
+    )
 
     if args.report_json:
         _write_json_report(

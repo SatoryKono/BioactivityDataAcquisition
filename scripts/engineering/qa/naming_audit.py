@@ -213,7 +213,6 @@ _CANDIDATE_LABEL_SUFFIX_TOKENS = frozenset(
         "id",
     }
 )
-_EXPLICIT_NAME_FAMILIES = {
 FAMILY_PUBCHEM = "pubchem:molecule"
 FAMILY_UNIPROT = "uniprot:target"
 FAMILY_CHEMBL = "chembl:publication"
@@ -461,10 +460,9 @@ def load_naming_registry(
     )
 
 
-def validate_naming_registry(registry: NamingRegistry) -> list[str]:
-    """Return consistency errors for the loaded naming registry."""
-    errors: list[str] = []
-
+def _validate_registry_forbidden_alias_overlap(
+    registry: NamingRegistry, errors: list[str]
+) -> None:
     overlap = {
         alias.legacy_name for alias in registry.forbidden_domain_entity_aliases
     } & set(registry.class_suffix_exceptions)
@@ -475,11 +473,16 @@ def validate_naming_registry(registry: NamingRegistry) -> list[str]:
             f"{joined}"
         )
 
+
+def _validate_registry_required_pipeline_ids(
+    registry: NamingRegistry, errors: list[str]
+) -> None:
     stable_id_names = {entry.name for entry in registry.stable_pipeline_ids}
     if not stable_id_names:
         errors.append(
             "stable_public_surface.pipeline_ids must declare at least one entry"
         )
+        return
 
     for required in ("pubchem_compound", "uniprot_protein"):
         if required not in stable_id_names:
@@ -487,6 +490,10 @@ def validate_naming_registry(registry: NamingRegistry) -> list[str]:
                 f"stable_public_surface.pipeline_ids is missing required entry: {required}"
             )
 
+
+def _validate_registry_backward_compatibility(
+    registry: NamingRegistry, errors: list[str]
+) -> None:
     forbidden_aliases_by_surface: dict[str, set[str]] = {}
     for alias in registry.forbidden_domain_entity_aliases:
         forbidden_aliases_by_surface.setdefault(alias.export_surface, set()).add(
@@ -514,6 +521,13 @@ def validate_naming_registry(registry: NamingRegistry) -> list[str]:
                 f"{surface.module} reintroduces forbidden legacy aliases: {joined}"
             )
 
+
+def validate_naming_registry(registry: NamingRegistry) -> list[str]:
+    """Return consistency errors for the loaded naming registry."""
+    errors: list[str] = []
+    _validate_registry_forbidden_alias_overlap(registry, errors)
+    _validate_registry_required_pipeline_ids(registry, errors)
+    _validate_registry_backward_compatibility(registry, errors)
     return errors
 
 
@@ -838,6 +852,62 @@ def _compatibility_alias_index(registry: NamingRegistry) -> set[str]:
     return aliases
 
 
+def _forbidden_alias_group_rationale() -> str:
+    return (
+        "Forbidden ADR-024 alias surfaced on an active export without an "
+        "explicit compatibility decision."
+    )
+
+
+def _compatibility_alias_group_rationale() -> str:
+    return (
+        "Exact compatibility alias is registered in ADR-024 backward "
+        "compatibility metadata."
+    )
+
+
+def _duplicate_group_rationale(unresolved_summary: str) -> str:
+    return (
+        "Overlap family has active surfaces without registry-backed "
+        f"distinction: {unresolved_summary}"
+    )
+
+
+def _classify_forbidden_alias_group(
+    normalized_stem: str, symbols: tuple[SymbolSurface, ...]
+) -> AmbiguityGroup:
+    return AmbiguityGroup(
+        normalized_stem=normalized_stem,
+        symbols=symbols,
+        classification=AmbiguityClassification.CONFLICT,
+        rationale=_forbidden_alias_group_rationale(),
+    )
+
+
+def _classify_compat_alias_group(
+    normalized_stem: str, symbols: tuple[SymbolSurface, ...]
+) -> AmbiguityGroup:
+    return AmbiguityGroup(
+        normalized_stem=normalized_stem,
+        symbols=symbols,
+        classification=AmbiguityClassification.COMPAT,
+        rationale=_compatibility_alias_group_rationale(),
+    )
+
+
+def _classify_duplicate_group(
+    normalized_stem: str,
+    symbols: tuple[SymbolSurface, ...],
+    unresolved_summary: str,
+) -> AmbiguityGroup:
+    return AmbiguityGroup(
+        normalized_stem=normalized_stem,
+        symbols=symbols,
+        classification=AmbiguityClassification.DUPLICATE,
+        rationale=_duplicate_group_rationale(unresolved_summary),
+    )
+
+
 def classify_ambiguity_group(
     normalized_stem: str,
     symbols: tuple[SymbolSurface, ...],
@@ -848,27 +918,11 @@ def classify_ambiguity_group(
         sorted(symbols, key=lambda symbol: (symbol.name, symbol.kind, symbol.location))
     )
     if any(symbol.kind == "forbidden_alias" for symbol in ordered_symbols):
-        return AmbiguityGroup(
-            normalized_stem=normalized_stem,
-            symbols=ordered_symbols,
-            classification=AmbiguityClassification.CONFLICT,
-            rationale=(
-                "Forbidden ADR-024 alias surfaced on an active export without an "
-                "explicit compatibility decision."
-            ),
-        )
+        return _classify_forbidden_alias_group(normalized_stem, ordered_symbols)
 
     exact_compat_aliases = _compatibility_alias_index(registry)
     if any(symbol.name in exact_compat_aliases for symbol in ordered_symbols):
-        return AmbiguityGroup(
-            normalized_stem=normalized_stem,
-            symbols=ordered_symbols,
-            classification=AmbiguityClassification.COMPAT,
-            rationale=(
-                "Exact compatibility alias is registered in ADR-024 backward "
-                "compatibility metadata."
-            ),
-        )
+        return _classify_compat_alias_group(normalized_stem, ordered_symbols)
 
     allowlisted_names = _stable_registry_name_index(registry) | set(
         _EXPLICIT_OK_FAMILY_MEMBERS.get(normalized_stem, frozenset())
@@ -880,14 +934,10 @@ def classify_ambiguity_group(
         unresolved_summary = ", ".join(
             sorted(f"{symbol.name}:{symbol.kind}" for symbol in unresolved)
         )
-        return AmbiguityGroup(
-            normalized_stem=normalized_stem,
-            symbols=ordered_symbols,
-            classification=AmbiguityClassification.DUPLICATE,
-            rationale=(
-                "Overlap family has active surfaces without registry-backed "
-                f"distinction: {unresolved_summary}"
-            ),
+        return _classify_duplicate_group(
+            normalized_stem,
+            ordered_symbols,
+            unresolved_summary,
         )
 
     return AmbiguityGroup(
@@ -913,18 +963,26 @@ def build_ambiguity_groups(
     groups: list[AmbiguityGroup] = []
     for semantic_family in sorted(grouped):
         symbols = tuple(grouped[semantic_family].values())
-        if semantic_family.startswith("candidate:"):
-            labels = {_candidate_family_label(symbol.name) for symbol in symbols}
-            if len(labels) < 2 and not any(
-                symbol.kind == "forbidden_alias" for symbol in symbols
-            ):
-                continue
-        if len(symbols) < 2 and not any(
-            symbol.kind == "forbidden_alias" for symbol in symbols
-        ):
+        if _should_skip_ambiguity_group(semantic_family, symbols):
             continue
         groups.append(classify_ambiguity_group(semantic_family, symbols, registry))
     return groups
+
+
+def _should_skip_ambiguity_group(
+    semantic_family: str,
+    symbols: tuple[SymbolSurface, ...],
+) -> bool:
+    if len(symbols) < 2 and not any(
+        symbol.kind == "forbidden_alias" for symbol in symbols
+    ):
+        return True
+    if not semantic_family.startswith("candidate:"):
+        return False
+    labels = {_candidate_family_label(symbol.name) for symbol in symbols}
+    return len(labels) < 2 and not any(
+        symbol.kind == "forbidden_alias" for symbol in symbols
+    )
 
 
 def _doc_relative_parts(
