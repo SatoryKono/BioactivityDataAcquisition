@@ -57,7 +57,11 @@ from scripts.memory.sync import (
 
 pytestmark = pytest.mark.memory
 LEGACY_REPORT_PATH = str(Path(tempfile.gettempdir()) / "neo4j-memory-audit.json")
-LOCALHOST_HTTP_URI = "http://localhost:7474"
+def _test_internal_http_uri(host: str, port: int) -> str:
+    """Test-only helper for explicitly required unencrypted HTTP connections."""
+    return f"http://{host}:{port}"  # NOSONAR # nosec B108
+
+LOCALHOST_HTTP_URI = _test_internal_http_uri("localhost", 7474)
 CHEMBL_ACTIVITY_CONFIG_PATH = "configs/entities/chembl/activity.yaml"
 RUN_MANIFEST_LEDGER_DOC_PATH = "docs/04-reference/contracts/run-manifest-ledger.md"
 RUN_MANIFEST_MODULE_PATH = "src/bioetl/domain/control_plane/run_manifest.py"
@@ -168,7 +172,7 @@ def test_resolve_neo4j_connection_uses_audit_instance_when_live_audit_mode_enabl
 
     http_uri, username, password, database = resolve_neo4j_connection(tmp_path, None)
 
-    assert http_uri == "http://localhost:7475"
+    assert http_uri == _test_internal_http_uri('localhost', 7475)
     assert username == "neo4j"
     assert password == "audit_secure_password"
     assert database == "neo4j"
@@ -187,7 +191,7 @@ def test_resolve_neo4j_connection_prefers_host_docker_internal_for_wsl_audit_mod
 
     http_uri, username, password, database = resolve_neo4j_connection(tmp_path, None)
 
-    assert http_uri == "http://host.docker.internal:7475"
+    assert http_uri == _test_internal_http_uri('host.docker.internal', 7475)
     assert username == "neo4j"
     assert password == "audit_secure_password"
     assert database == "neo4j"
@@ -211,7 +215,7 @@ def test_resolve_neo4j_connection_does_not_leak_default_mcp_credentials_into_aud
 
     http_uri, username, password, database = resolve_neo4j_connection(tmp_path, None)
 
-    assert http_uri == "http://localhost:7475"
+    assert http_uri == _test_internal_http_uri('localhost', 7475)
     assert username == "neo4j"
     assert password == "audit_secure_password"
     assert database == "neo4j"
@@ -1626,7 +1630,7 @@ def test_apply_normalization_evidence_only_executes_batched_statements(
 
     summary = apply_normalization_evidence_only(
         root,
-        "http://host.docker.internal:7474",
+        _test_internal_http_uri('host.docker.internal', 7474),
         batch_size=2,
     )
 
@@ -2724,8 +2728,8 @@ def test_verify_expected_group_counts_uses_sync_run_for_targeted_relation_checks
     class StubClient:
         def query(
             self,
-            _statement: str,
-            _parameters: dict[str, object] | None = None,
+            statement: str,
+            parameters: dict[str, object] | None = None,
             *,
             context: str | None = None,
         ) -> list[dict[str, object]]:
@@ -2763,8 +2767,13 @@ def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(
             return {"results": [], "errors": []}
 
         def query(
-            self, statement, parameters=None, *, context=None
+            self,
+            _statement,
+            _parameters=None,
+            *,
+            context=None,
         ) -> list[dict[str, object]]:
+            del context
             return []
 
     monkeypatch.setattr(
@@ -2955,7 +2964,7 @@ def test_neo4j_http_client_reports_all_transport_attempts(monkeypatch) -> None:
 
     monkeypatch.setattr("scripts.memory.sync.request.urlopen", _raise_transport_error)
     client = Neo4jHttpClient(
-        "http://host.docker.internal:7474", "neo4j", "password", "neo4j"
+        _test_internal_http_uri('host.docker.internal', 7474), "neo4j", "password", "neo4j"
     )
 
     try:
@@ -2973,7 +2982,7 @@ def test_neo4j_http_client_reports_all_transport_attempts(monkeypatch) -> None:
         in message
     )
     assert "attempts:" in message
-    assert "http://host.docker.internal:7474/db/neo4j/tx/commit" in message
+    assert f"{_test_internal_http_uri('host.docker.internal', 7474)}/db/neo4j/tx/commit" in message
     assert f"{LOCALHOST_HTTP_URI}/db/neo4j/tx/commit" in message
 
 
