@@ -61,6 +61,21 @@ def _aggregate_tree(aggregates_dir: Path, file_path: Path) -> ast.Module | None:
         return None
 
 
+def _referenced_names_from_tree(tree: ast.Module) -> set[str]:
+    """Collect all referenced names from an aggregate AST."""
+    referenced_names: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call):
+            func = node.func
+            if isinstance(func, ast.Name):
+                referenced_names.add(func.id)
+            elif isinstance(func, ast.Attribute):
+                referenced_names.add(func.attr)
+        elif isinstance(node, ast.Name):
+            referenced_names.add(node.id)
+    return referenced_names
+
+
 def _iter_aggregate_files(aggregates_dir: Path) -> list[Path]:
     return [
         py_file
@@ -409,17 +424,7 @@ class TestDomainEventsForCoordination:
             if tree is None:
                 continue
 
-            referenced_names: set[str] = set()
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Call):
-                    func = node.func
-                    if isinstance(func, ast.Name):
-                        referenced_names.add(func.id)
-                    elif isinstance(func, ast.Attribute):
-                        referenced_names.add(func.attr)
-                elif isinstance(node, ast.Name):
-                    referenced_names.add(node.id)
-
+            referenced_names = _referenced_names_from_tree(tree)
             for event in events:
                 assert event in referenced_names, (
                     f"{py_file} should emit {event} domain event "

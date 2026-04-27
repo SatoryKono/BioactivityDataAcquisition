@@ -194,6 +194,38 @@ def _merge_payloads(
     return base, merge_records
 
 
+def _platform_regression_pct(
+    benchmark_key: str,
+    max_regression_pct: float,
+) -> float:
+    """Return the effective regression budget for the active platform."""
+    if os.name != "nt":
+        return max_regression_pct
+    if benchmark_key == "silver_write_append_600":
+        return max(max_regression_pct, 0.50)
+    if benchmark_key == "silver_write_merge_600":
+        return max(max_regression_pct, 0.70)
+    if benchmark_key == "crossref_batch_fetch_200":
+        return max(max_regression_pct, 1.50)
+    return max_regression_pct
+
+
+def _platform_p95_ceiling(
+    benchmark_key: str,
+    max_p95_ms: float,
+) -> float:
+    """Return the effective P95 ceiling for the active platform."""
+    if os.name != "nt":
+        return max_p95_ms
+    if benchmark_key == "atomic_write_group_50":
+        return max(max_p95_ms, 800.0)
+    if benchmark_key == "crossref_batch_fetch_200":
+        return max(max_p95_ms, 0.35)
+    if benchmark_key in {"silver_write_append_600", "silver_write_merge_600"}:
+        return max(max_p95_ms, 600.0)
+    return max_p95_ms
+
+
 def _assert_budget(
     benchmark_key: str,
     budget: HotspotBudget,
@@ -203,20 +235,10 @@ def _assert_budget(
     latency_ms = result.median_latency_s * 1000.0
     throughput_rps = processed_records / result.median_latency_s
 
-    max_regression_pct = budget.max_regression_pct
-    if os.name == "nt":
-        if benchmark_key == "silver_write_append_600":
-            # Windows NTFS/AV and scheduler jitter make this path materially
-            # slower than the Linux baseline used to calibrate the generic budget.
-            max_regression_pct = max(max_regression_pct, 0.50)
-        elif benchmark_key == "silver_write_merge_600":
-            # Merge path includes append + merge orchestration, so the Windows
-            # runner needs a wider median/throughput envelope than Linux.
-            max_regression_pct = max(max_regression_pct, 0.70)
-        elif benchmark_key == "crossref_batch_fetch_200":
-            # Sub-millisecond in-memory timings are dominated by timer
-            # quantization on Windows hosts.
-            max_regression_pct = max(max_regression_pct, 1.50)
+    max_regression_pct = _platform_regression_pct(
+        benchmark_key,
+        budget.max_regression_pct,
+    )
 
     max_latency_ms = budget.baseline_latency_ms * (1.0 + max_regression_pct)
     min_throughput_rps = budget.baseline_throughput_rps * (1.0 - max_regression_pct)
@@ -234,28 +256,10 @@ def _assert_budget(
 
     if budget.p95_latency_ms > 0:
         p95_ms = result.p95_latency_s * 1000.0
-        max_p95_ms = budget.p95_latency_ms * (1.0 + budget.max_p95_regression_pct)
-        if os.name == "nt" and benchmark_key == "atomic_write_group_50":
-            # NTFS rename latency on local Windows runners is materially noisier
-            # than the Linux baseline that the generic budget was calibrated on.
-            # Keep enforcing P95, but use an explicit Windows ceiling instead of
-            # failing on host-specific tail spikes unrelated to repo changes.
-            max_p95_ms = max(max_p95_ms, 800.0)
-        if os.name == "nt" and benchmark_key == "crossref_batch_fetch_200":
-            # Very small in-memory adapter timings are sensitive to timer
-            # quantization and scheduler jitter on Windows hosts.
-            max_p95_ms = max(max_p95_ms, 0.35)
-        if os.name == "nt" and benchmark_key == "silver_write_append_600":
-            # Small append writes on local Windows runners occasionally hit
-            # one-off tail spikes from NTFS/AV interaction even when median
-            # latency and throughput remain within budget. Keep the median and
-            # throughput gates strict; widen only the Windows P95 ceiling.
-            max_p95_ms = max(max_p95_ms, 600.0)
-        if os.name == "nt" and benchmark_key == "silver_write_merge_600":
-            # Merge includes append + merge orchestration and exhibits larger
-            # Windows tail spikes than append alone (NTFS/AV + scheduler jitter).
-            # Keep median/throughput budgets enforced; widen only P95 ceiling.
-            max_p95_ms = max(max_p95_ms, 600.0)
+        max_p95_ms = _platform_p95_ceiling(
+            benchmark_key,
+            budget.p95_latency_ms * (1.0 + budget.max_p95_regression_pct),
+        )
         assert p95_ms <= (max_p95_ms + _P95_EPSILON_MS), (
             f"{benchmark_key}: P95 latency regression "
             f"(actual={p95_ms:.2f}ms, allowed<={max_p95_ms:.2f}ms; "

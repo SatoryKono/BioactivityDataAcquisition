@@ -67,6 +67,14 @@ class DocumentationParityChecker:
         self.entity_configs_dir = self.configs_dir / "entities"
         self.composite_configs_dir = self.configs_dir / "composites"
 
+    def _provider_entity_config_files(self, provider_dir: Path) -> list[Path]:
+        """Return visible entity config files for one provider directory."""
+        return [
+            config_file
+            for config_file in sorted(provider_dir.glob("*.yaml"))
+            if not config_file.name.startswith("_")
+        ]
+
     def _iter_entity_config_files(self) -> list[Path]:
         config_files: list[Path] = []
         if not self.entity_configs_dir.exists():
@@ -74,11 +82,7 @@ class DocumentationParityChecker:
         for provider_dir in sorted(self.entity_configs_dir.iterdir()):
             if not provider_dir.is_dir():
                 continue
-            config_files.extend(
-                config_file
-                for config_file in sorted(provider_dir.glob("*.yaml"))
-                if not config_file.name.startswith("_")
-            )
+            config_files.extend(self._provider_entity_config_files(provider_dir))
         return config_files
 
     def _iter_composite_config_files(self) -> list[Path]:

@@ -160,6 +160,38 @@ def _store_response_message(
         responses[message["id"]] = message
 
 
+def _read_stderr_chunks(
+    stream: Any,
+    channel: str,
+    chunks: queue.Queue[tuple[str, bytes | None]],
+) -> None:
+    """Read stderr line-by-line and forward chunks to the queue."""
+    while True:
+        try:
+            chunk = stream.readline()
+        except OSError:
+            chunk = b""
+        if not chunk:
+            return
+        chunks.put((channel, chunk))
+
+
+def _read_stdout_chunks(
+    stream: Any,
+    channel: str,
+    chunks: queue.Queue[tuple[str, bytes | None]],
+) -> None:
+    """Read stdout in large chunks and forward them to the queue."""
+    while True:
+        try:
+            chunk = stream.read1(65536) if hasattr(stream, "read1") else stream.read(65536)
+        except OSError:
+            chunk = b""
+        if not chunk:
+            return
+        chunks.put((channel, chunk))
+
+
 def _pipe_reader(
     stream: Any,
     channel: str,
@@ -167,28 +199,9 @@ def _pipe_reader(
 ) -> None:
     try:
         if channel == "stderr":
-            while True:
-                try:
-                    chunk = stream.readline()
-                except OSError:
-                    chunk = b""
-                if not chunk:
-                    break
-                chunks.put((channel, chunk))
+            _read_stderr_chunks(stream, channel, chunks)
             return
-
-        while True:
-            try:
-                chunk = (
-                    stream.read1(65536)
-                    if hasattr(stream, "read1")
-                    else stream.read(65536)
-                )
-            except OSError:
-                chunk = b""
-            if not chunk:
-                break
-            chunks.put((channel, chunk))
+        _read_stdout_chunks(stream, channel, chunks)
     finally:
         chunks.put((channel, None))
 
