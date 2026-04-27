@@ -53,6 +53,12 @@ _WINDOWS_P95_OVERRIDES = {
     "silver_write_append_600": 600.0,
     "silver_write_merge_600": 600.0,
 }
+_PLATFORM_OVERRIDE_TABLES = {
+    "nt": {
+        "regression_pct": _WINDOWS_REGRESSION_OVERRIDES,
+        "p95_ms": _WINDOWS_P95_OVERRIDES,
+    }
+}
 
 
 @dataclass(frozen=True)
@@ -210,10 +216,13 @@ def _platform_regression_pct(
     max_regression_pct: float,
 ) -> float:
     """Return the effective regression budget for the active platform."""
-    if os.name != "nt":
-        return max_regression_pct
-    override = _WINDOWS_REGRESSION_OVERRIDES.get(benchmark_key)
-    return max(max_regression_pct, override) if override is not None else max_regression_pct
+    platform_overrides = _PLATFORM_OVERRIDE_TABLES.get(os.name, {})
+    override = platform_overrides.get("regression_pct", {}).get(benchmark_key)
+    return (
+        max(max_regression_pct, override)
+        if override is not None
+        else max_regression_pct
+    )
 
 
 def _platform_p95_ceiling(
@@ -221,9 +230,8 @@ def _platform_p95_ceiling(
     max_p95_ms: float,
 ) -> float:
     """Return the effective P95 ceiling for the active platform."""
-    if os.name != "nt":
-        return max_p95_ms
-    override = _WINDOWS_P95_OVERRIDES.get(benchmark_key)
+    platform_overrides = _PLATFORM_OVERRIDE_TABLES.get(os.name, {})
+    override = platform_overrides.get("p95_ms", {}).get(benchmark_key)
     return max(max_p95_ms, override) if override is not None else max_p95_ms
 
 

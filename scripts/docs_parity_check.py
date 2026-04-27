@@ -71,9 +71,17 @@ class DocumentationParityChecker:
         """Return visible entity config files for one provider directory."""
         return [
             config_file
-            for config_file in sorted(provider_dir.glob("*.yaml"))
-            if not config_file.name.startswith("_")
+            for config_file in self._provider_yaml_files(provider_dir)
+            if self._is_visible_config_file(config_file)
         ]
+
+    def _provider_yaml_files(self, provider_dir: Path) -> list[Path]:
+        """Return provider YAML files before visibility filtering."""
+        return sorted(provider_dir.glob("*.yaml"))
+
+    def _is_visible_config_file(self, config_file: Path) -> bool:
+        """Return whether a provider config file participates in parity checks."""
+        return not config_file.name.startswith("_")
 
     def _iter_entity_config_files(self) -> list[Path]:
         config_files: list[Path] = []

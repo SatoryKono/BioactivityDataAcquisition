@@ -1293,36 +1293,34 @@ def _build_check_runners(
     run_all: bool,
     args: argparse.Namespace,
 ) -> tuple[tuple[str, bool, Callable[[], int]], ...]:
-    return (
-        ("links", run_all or args.links, lambda: _run_links_checks()),
-        ("specs", run_all or args.specs, lambda: _run_specs_check()),
-        ("configs", run_all or args.configs, lambda: _run_configs_check()),
+    runner_table = _check_runner_table(args)
+    return tuple(
         (
-            "contracts_index",
-            run_all or args.contracts_index,
-            lambda: _run_contracts_index_check(),
-        ),
-        (
-            "provider_overview",
-            run_all or args.provider_overview,
-            lambda: _run_provider_overview_check(),
-        ),
-        (
-            "doc_governance",
-            run_all or args.doc_governance,
-            lambda: _run_doc_governance_check(),
-        ),
-        (
-            "not_in_nav_growth",
-            run_all or args.not_in_nav_growth,
-            lambda: _run_not_in_nav_growth_check(),
-        ),
-        (
-            "legacy_paths",
-            run_all or args.legacy_paths or args.legacy_paths_all,
+            name,
+            run_all or enabled,
+            runner,
+        )
+        for name, (enabled, runner) in runner_table.items()
+    )
+
+
+def _check_runner_table(
+    args: argparse.Namespace,
+) -> dict[str, tuple[bool, Callable[[], int]]]:
+    """Return a data-driven dispatch table for the selected checks."""
+    return {
+        "links": (args.links, _run_links_checks),
+        "specs": (args.specs, _run_specs_check),
+        "configs": (args.configs, _run_configs_check),
+        "contracts_index": (args.contracts_index, _run_contracts_index_check),
+        "provider_overview": (args.provider_overview, _run_provider_overview_check),
+        "doc_governance": (args.doc_governance, _run_doc_governance_check),
+        "not_in_nav_growth": (args.not_in_nav_growth, _run_not_in_nav_growth_check),
+        "legacy_paths": (
+            args.legacy_paths or args.legacy_paths_all,
             lambda: _run_legacy_paths_check(include_internal=args.legacy_paths_all),
         ),
-    )
+    }
 
 
 def _run_check_runner(

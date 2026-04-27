@@ -337,6 +337,38 @@ def _assert_aggregate_slots(
         )
 
 
+def _assert_aggregate_state_changes_through_methods_only(
+    aggregates_dir: Path,
+) -> None:
+    """Check aggregate files for slot-based state protection."""
+    expected_slots = {
+        "batch.py": "Batch",
+        "pipeline_run.py": "PipelineRun",
+        "quarantine_entry.py": "QuarantineEntry",
+    }
+    _assert_aggregate_slots(aggregates_dir, expected_slots)
+
+
+def _assert_aggregate_invariant_methods(aggregates_dir: Path) -> None:
+    """Check aggregate value objects validate their invariants."""
+    expected_validators = {
+        "batch.py": ["BatchRecord"],
+        "pipeline_run.py": ["StageResult"],
+        "quarantine_entry.py": ["ResolutionInfo"],
+    }
+    for filename, class_names in expected_validators.items():
+        content = _read_aggregate_content(aggregates_dir, filename)
+        if not content:
+            continue
+        for class_name in class_names:
+            if class_name not in content:
+                continue
+            assert "__post_init__" in content or "def _validate" in content, (
+                f"{filename}: {class_name} should validate invariants in "
+                "__post_init__ or _validate_invariants()"
+            )
+
+
 def _assert_aggregate_ids_immutable(
     aggregates_dir: Path,
     id_properties: dict[str, list[str]],
@@ -429,27 +461,7 @@ class TestAggregateInvariantProtection:
         """
         aggregates_dir = src_dir / "bioetl" / "domain" / "aggregates"
         _assert_aggregates_dir_exists(aggregates_dir)
-
-        # Classes that should have invariant validation
-        expected_validators = {
-            "batch.py": ["BatchRecord"],  # Batch validates in _assert_open
-            "pipeline_run.py": ["StageResult"],  # Uses __post_init__
-            "quarantine_entry.py": ["ResolutionInfo"],  # Uses __post_init__
-        }
-
-        # Check that value objects inside aggregates validate in __post_init__
-        for filename in expected_validators:
-            content = _read_aggregate_content(aggregates_dir, filename)
-            if not content:
-                continue
-
-            # Check for __post_init__ in value objects
-            for class_name in expected_validators[filename]:
-                if class_name in content:
-                    assert "__post_init__" in content or "def _validate" in content, (
-                        f"{filename}: {class_name} should validate "
-                        "invariants in __post_init__ or _validate_invariants()"
-                    )
+        _assert_aggregate_invariant_methods(aggregates_dir)
 
     def test_aggregate_properties_return_immutable_collections(
         self, src_dir: Path
@@ -517,15 +529,7 @@ class TestAggregateConsistencyBoundary:
         """
         aggregates_dir = src_dir / "bioetl" / "domain" / "aggregates"
         _assert_aggregates_dir_exists(aggregates_dir)
-
-        # Aggregate classes should use __slots__ to prevent attribute addition
-        expected_slots = {
-            "batch.py": "Batch",
-            "pipeline_run.py": "PipelineRun",
-            "quarantine_entry.py": "QuarantineEntry",
-        }
-
-        _assert_aggregate_slots(aggregates_dir, expected_slots)
+        _assert_aggregate_state_changes_through_methods_only(aggregates_dir)
 
     def test_aggregate_ids_are_immutable(self, src_dir: Path) -> None:
         """Aggregate identifiers should be immutable after creation.

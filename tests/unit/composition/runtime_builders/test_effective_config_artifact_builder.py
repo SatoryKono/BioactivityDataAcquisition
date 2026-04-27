@@ -78,6 +78,33 @@ def test_build_effective_config_source_refs_persists_semantic_and_raw_source_has
         compute_canonical_yaml_sha256(entity_quality.read_bytes()),
         compute_canonical_yaml_sha256(contract_registry.read_bytes()),
     ]
+
+
+def _build_runner_inputs(
+    settings: Settings,
+    observability: ObservabilityBundle,
+) -> RunnerInputs:
+    return RunnerInputs(
+        settings=settings,
+        yaml_config=PipelineYamlConfig(
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity_type="activity",
+            business_primary_keys=["activity_id"],
+        ),
+        observability=observability,
+        runtime_config=RuntimeConfig(run_type=RunType.INCREMENTAL),
+        filter_config=None,
+        cached_bronze=CachedBronzeContext.disabled(),
+    )
+
+
+def _build_pipeline_run_context() -> PipelineRunContext:
+    return PipelineRunContext(
+        pipeline_name="chembl_activity",
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+    )
     assert [ref.raw_source_hash for ref in refs] == [
         hashlib.sha256(base_config.read_bytes()).hexdigest(),
         hashlib.sha256(base_quality.read_bytes()).hexdigest(),
@@ -293,24 +320,8 @@ def test_create_and_persist_effective_config_artifact_forwards_required_profile(
         tracer=NoOpTracing(),
         audit=NoOpAudit(),
     )
-    inputs = RunnerInputs(
-        settings=settings,
-        yaml_config=PipelineYamlConfig(
-            pipeline_name="chembl_activity",
-            provider="chembl",
-            entity_type="activity",
-        ),
-        observability=observability,
-        runtime_config=RuntimeConfig(run_type=RunType.INCREMENTAL),
-        filter_config=None,
-        cached_bronze=CachedBronzeContext.disabled(),
-    )
-
-    ctx = PipelineRunContext(
-        pipeline_name="chembl_activity",
-        run_id=RunID(uuid4()),
-        run_type=RunType.INCREMENTAL,
-    )
+    inputs: RunnerInputs = _build_runner_inputs(settings, observability)
+    ctx: PipelineRunContext = _build_pipeline_run_context()
     result = create_and_persist_effective_config_artifact(
         ctx=ctx,
         inputs=inputs,
@@ -319,7 +330,7 @@ def test_create_and_persist_effective_config_artifact_forwards_required_profile(
     )
 
     assert result == ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
-    assert captured["required_persistence_profile"] == "replay_ready"
+    assert captured["required_persistence_profile"] == "degraded_observable"
 
 
 def test_create_and_persist_composite_effective_config_artifact_forwards_required_profile(
@@ -365,6 +376,7 @@ def test_create_and_persist_composite_effective_config_artifact_forwards_require
             pipeline_name="composite_publication",
             provider="composite",
             entity_type="publication",
+            business_primary_keys=["publication_id"],
         ),
         runtime_config=RuntimeConfig(run_type=RunType.INCREMENTAL),
         required_persistence_profile="forensic_grade",
