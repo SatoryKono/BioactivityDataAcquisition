@@ -19,7 +19,7 @@ else:
 
 ensure_repo_imports()
 
-from scripts.docs.common.xlsx import (
+from scripts.docs.common.xlsx import (  # noqa: E402
     MAIN_NS,
     NS,
     cell_text,
@@ -29,7 +29,7 @@ from scripts.docs.common.xlsx import (
     set_cell_text,
     sheet_target_name_map,
     update_dimension,
-)  # noqa: E402
+)
 
 DEFAULT_INPUT: Final[Path] = (
     PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
