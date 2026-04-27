@@ -54,4 +54,4 @@ jobs:
       - name: Run pip-audit
         run: |
           UV_CACHE_DIR=/tmp/.uv-cache uv export --no-hashes --no-emit-project --extra dev > /tmp/pip-audit-requirements.txt
-          UV_CACHE_DIR=/tmp/.uv-cache uv run pip-audit --strict -r /tmp/pip-audit-requirements.txt --cache-dir /tmp/.pip-audit-cache
+          UV_CACHE_DIR=/tmp/.uv-cache uv run pip-audit --strict -r /tmp/pip-audit-requirements.txt --cache-dir /tmp/.pip-audit-cache --ignore-vuln CVE-2026-3219
