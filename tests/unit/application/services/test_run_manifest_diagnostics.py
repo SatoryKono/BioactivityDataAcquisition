@@ -187,8 +187,8 @@ def _expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
         required_profile=required_profile,
         requested_policy=requested_policy,
     )
-    execution_context, resume_mode, occurrence_identity_anchor = _resume_contract_layout(
-        manifest
+    execution_context, resume_mode, occurrence_identity_anchor = (
+        _resume_contract_layout(manifest)
     )
     profile = resolve_reproducibility_family_profile(
         provider=manifest.provider,

@@ -12,6 +12,7 @@ allowed_output_roots:
   curated_generated_docs:
     - docs/reports/generated/
     - docs/reports/dictionaries/
+    - docs/02-architecture/generated/
   ignored_docs_exports:
     - docs/exports/
   generated_source:

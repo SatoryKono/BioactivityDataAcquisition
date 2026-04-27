@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+
 from memory.resources import MEMORY_ROOT
 
 GENERATOR_VERSION = 1
