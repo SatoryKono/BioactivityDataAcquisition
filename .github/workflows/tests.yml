@@ -449,6 +449,7 @@ jobs:
 
             -   name: Run Tests (${{ matrix.test-group.name }} on Python ${{ matrix.python-version }})
                 run: |
+                    set +e
                     mkdir -p reports/coverage
                     mkdir -p reports/test-telemetry
                     uv run pytest ${{ matrix.test-group.path }} \
@@ -457,7 +458,9 @@ jobs:
                       -q --tb=short \
                       --junitxml=reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml \
                       --cov=src/bioetl --cov-report=
-                    cp .coverage reports/coverage/.coverage.${{ matrix.test-group.name }}
+                    TEST_EXIT=$?
+                    cp .coverage reports/coverage/.coverage.${{ matrix.test-group.name }} 2>/dev/null || true
+                    exit $TEST_EXIT
 
             -   name: Upload coverage shard (${{ matrix.test-group.name }} on Python 3.12)
                 if: always() && matrix.python-version == '3.12'
