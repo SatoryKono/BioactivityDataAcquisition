@@ -68,14 +68,14 @@ else:
 
 ensure_repo_imports()
 
-from scripts.docs.common.markdown import (
+from scripts.docs.common.markdown import (  # noqa: E402
     FENCE_END_RE,
     INLINE_CODE_RE,
     MD_LINK_RE,
     MD_PATH_RE,
     PYTHON_FENCE_START_RE,
     extract_md_heading,
-)  # noqa: E402
+)
 from scripts.docs.common.paths import (  # noqa: E402
     DOCS_DIR,
     PROJECT_ROOT,

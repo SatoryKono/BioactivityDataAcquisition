@@ -19,11 +19,11 @@ else:
 
 ensure_repo_imports(include_src=True)
 
-from bioetl.domain.normalization.profiles import (
+from bioetl.domain.normalization.profiles import (  # noqa: E402
     CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
 )
-from bioetl.infrastructure.schemas.silver_chembl_core import (
+from bioetl.infrastructure.schemas.silver_chembl_core import (  # noqa: E402
     CHEMBL_ACTIVITY_SCHEMA,
 )
 
