@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator
 from pathlib import Path
 from typing import Any
+from typing import Generator
 
 import pytest
 import yaml

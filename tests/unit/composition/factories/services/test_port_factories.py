@@ -21,7 +21,11 @@ from bioetl.infrastructure.config import Settings
 
 @dataclass(frozen=True, slots=True)
 class _StorageContext:
-    checkpoints_path: Path
+    _checkpoints_path: Path
+
+    @property
+    def checkpoints_path(self) -> Path:
+        return self._checkpoints_path
 
 
 @pytest.mark.unit
@@ -34,7 +38,7 @@ def test_create_lock_returns_lock_port() -> None:
 @pytest.mark.unit
 def test_create_checkpoint_returns_checkpoint_port(tmp_path: Path) -> None:
     """create_checkpoint returns an instance satisfying CheckpointPort."""
-    storage_ctx = _StorageContext(checkpoints_path=tmp_path)
+    storage_ctx = _StorageContext(_checkpoints_path=tmp_path)
     checkpoint = create_checkpoint(storage_ctx)
     assert isinstance(checkpoint, CheckpointPort)
 
