@@ -13,6 +13,7 @@ else:
     from ._compat_shim import load_public_api
 
 _IMPL = load_public_api(globals(), "scripts.docs.matrix.generate_field_matrix")
+main = _IMPL.main
 
 
 if __name__ == "__main__":

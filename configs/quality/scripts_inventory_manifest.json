@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-27T08:05:56.853456+00:00",
+  "generated_at": "2026-04-27T08:17:45.987718+00:00",
   "summary": {
     "total_scripts": 443,
     "status_counts": {
@@ -1659,7 +1659,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py",
-          "line": 70,
+          "line": 72,
           "source_group": "tests",
           "text": "assert \"scripts/ai/mcp/neo4j_memory_mcp_adapter.py\" in wrapper"
         }
@@ -5908,7 +5908,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 626,
+          "line": 629,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -7611,13 +7611,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 693,
+          "line": 696,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 702,
+          "line": 705,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         }
@@ -8040,7 +8040,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 546,
+          "line": 549,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },

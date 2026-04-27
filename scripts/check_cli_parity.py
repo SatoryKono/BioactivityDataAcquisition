@@ -12,7 +12,6 @@ Issue #3093: Add CLI Documentation Parity Checks
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
 
 # Constants
 CLI_REGISTRY_FILE = "src/bioetl/interfaces/cli/main.py"

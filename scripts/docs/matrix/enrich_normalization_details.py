@@ -29,7 +29,7 @@ from scripts.docs.common.xlsx import (
     set_cell_text,
     sheet_target_name_map,
     update_dimension,
-)
+)  # noqa: E402
 
 DEFAULT_INPUT: Final[Path] = (
     PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"

@@ -75,8 +75,12 @@ from scripts.docs.common.markdown import (
     MD_PATH_RE,
     PYTHON_FENCE_START_RE,
     extract_md_heading,
+)  # noqa: E402
+from scripts.docs.common.paths import (  # noqa: E402
+    DOCS_DIR,
+    PROJECT_ROOT,
+    is_generated_docs_artifact,
 )
-from scripts.docs.common.paths import DOCS_DIR, PROJECT_ROOT, is_generated_docs_artifact
 
 README_FILENAME = "README.md"
 LAST_VERIFIED_LABEL = "Last verified"
