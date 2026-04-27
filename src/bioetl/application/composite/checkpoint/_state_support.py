@@ -146,7 +146,7 @@ def _replace_checkpoint_state(
     def _resolved(current: object, override: object) -> object:
         return current if override is None else override
 
-    return replace(
+    updated_state: CompositeCheckpointState = replace(
         checkpoint_state,
         state=cast(CompositePipelineState, _resolved(checkpoint_state.state, state)),
         seed_completed=cast(
@@ -199,3 +199,4 @@ def _replace_checkpoint_state(
         ),
         updated_at=updated_at or _current_utc_now(clock),
     )
+    return updated_state

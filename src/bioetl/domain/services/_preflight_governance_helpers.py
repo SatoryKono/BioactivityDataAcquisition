@@ -59,7 +59,8 @@ def apply_issue_override(
     """Return issue with overridden severity when configuration requires it."""
     if override is None:
         return issue
-    return replace(issue, severity=override)
+    overridden_issue: ValidationIssue = replace(issue, severity=override)
+    return overridden_issue
 
 
 def resolve_policy_block_state(
