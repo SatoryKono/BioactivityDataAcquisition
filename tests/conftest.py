@@ -10,8 +10,11 @@ from urllib.parse import parse_qsl, urlparse
 import pytest
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(_PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(_PROJECT_ROOT))
+_SRC_ROOT = _PROJECT_ROOT / "src"
+
+for _path in (str(_SRC_ROOT), str(_PROJECT_ROOT)):
+    if _path not in sys.path:
+        sys.path.insert(0, _path)
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:

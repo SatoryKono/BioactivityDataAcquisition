@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-27T10:39:59.507464+00:00",
+  "generated_at": "2026-04-27T10:36:26.937518+00:00",
   "summary": {
-    "total_scripts": 443,
+    "total_scripts": 445,
     "status_counts": {
-      "active": 312,
+      "active": 313,
       "legacy": 15,
-      "orphan": 103,
+      "orphan": 104,
       "unknown": 13
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 1,
       "ci": 56,
-      "docs": 116,
-      "scripts": 294,
+      "docs": 117,
+      "scripts": 295,
       "skills": 8,
       "tests": 134
     }
@@ -62,7 +62,7 @@
       "references": [
         {
           "path": ".github/workflows/sonarcloud.yml",
-          "line": 82,
+          "line": 80,
           "source_group": "ci",
           "text": "python3 scripts/ai/check_sonar_issues.py \\"
         },
@@ -1128,10 +1128,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
+          "line": 61,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/github-mcp-wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
           "line": 61,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/github-mcp-wrapper.sh\""
@@ -1163,10 +1169,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
+          "line": 112,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
           "line": 112,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
@@ -1192,10 +1204,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
+          "line": 142,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_chembl_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
           "line": 142,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_chembl_wrapper.sh\""
@@ -1215,10 +1233,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
+          "line": 82,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_context7_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
           "line": 82,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_context7_wrapper.sh\""
@@ -1244,10 +1268,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
+          "line": 76,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
           "line": 76,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
@@ -1273,10 +1303,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
+          "line": 70,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
           "line": 70,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_wrapper.sh\""
@@ -1302,10 +1338,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
+          "line": 94,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
           "line": 94,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
@@ -1331,10 +1373,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
+          "line": 106,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
           "line": 106,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
@@ -1360,10 +1408,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
+          "line": 160,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
           "line": 160,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
@@ -1383,10 +1437,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
+          "line": 136,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_needle_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
           "line": 136,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_needle_wrapper.sh\""
@@ -1412,10 +1472,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
+          "line": 124,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
           "line": 124,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
@@ -1441,7 +1507,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 23,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -1506,10 +1572,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
+          "line": 88,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
           "line": 88,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
@@ -1535,10 +1607,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
+          "line": 100,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
           "line": 100,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
@@ -1564,10 +1642,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
+          "line": 148,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubchem_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
           "line": 148,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubchem_wrapper.sh\""
@@ -1587,10 +1671,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
+          "line": 154,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubmed_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
           "line": 154,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_pubmed_wrapper.sh\""
@@ -1610,10 +1700,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
+          "line": 118,
+          "source_group": "scripts",
+          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
           "line": 118,
           "source_group": "scripts",
           "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
@@ -2547,7 +2643,7 @@
       "references": [
         {
           "path": ".github/workflows/sonarcloud.yml",
-          "line": 68,
+          "line": 67,
           "source_group": "ci",
           "text": "python3 scripts/ai/sonar_issue_processor.py --write"
         },
@@ -5908,7 +6004,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 634,
+          "line": 633,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -6087,6 +6183,63 @@
       "references": []
     },
     {
+      "path": "scripts/engineering/dev/.setup_wsl_codex.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 11,
+      "references": [
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 228,
+          "source_group": "docs",
+          "text": "**Layer 1: DNS** (`scripts/engineering/dev/.setup_wsl_codex.sh`)"
+        },
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 241,
+          "source_group": "docs",
+          "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\""
+        },
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 267,
+          "source_group": "docs",
+          "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\" 2>/dev/null"
+        },
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 323,
+          "source_group": "docs",
+          "text": "bash \"$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh\""
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/CODEX_QUICK_REF.md",
+          "line": 7,
+          "source_group": "docs",
+          "text": ".\\scripts\\engineering\\dev\\.setup_wsl_codex.sh"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/CODEX_QUICK_REF.md",
+          "line": 71,
+          "source_group": "docs",
+          "text": "| `OpenAI timeout`    | Run setup: `.\\scripts\\engineering\\dev\\.setup_wsl_codex.sh`                               |"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
+          "line": 23,
+          "source_group": "docs",
+          "text": ".\\scripts\\engineering\\dev\\.setup_wsl_codex.sh"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
+          "line": 125,
+          "source_group": "docs",
+          "text": "- Re-run VPN setup: `.\\scripts\\engineering\\dev\\.setup_wsl_codex.sh`"
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/dev/.wsl-vpn-fix.ps1",
       "type": "ps1",
       "status": "active",
@@ -6157,6 +6310,14 @@
           "text": "uv run python -m scripts.engineering.dev setup-mcp"
         }
       ]
+    },
+    {
+      "path": "scripts/engineering/dev/bash/.setup_wsl_codex.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/engineering/dev/bash/.wsl_proxy_env.sh",
@@ -7611,13 +7772,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 707,
+          "line": 700,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 716,
+          "line": 709,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa summarize-junit \\"
         }
@@ -8040,7 +8201,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 554,
+          "line": 553,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },

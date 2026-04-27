@@ -121,8 +121,7 @@ def merge_expected_anchors(
     merged = normalize_runtime_anchor_payload(
         _build_merged_anchor_payload(state=state, anchors=anchors)
     )
-    merged_state: CompositeCheckpointState = cast(  # type: ignore[redundant-cast]
-        CompositeCheckpointState,
+    merged_state: CompositeCheckpointState = replace(
         replace(
             state,
             effective_config_hash=merged["effective_config_hash"] or "",
