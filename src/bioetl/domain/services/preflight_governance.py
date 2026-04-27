@@ -25,7 +25,6 @@ from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import (
     CompositeValidationReport,
     ValidationIssue,
-    ValidationResult,
 )
 from bioetl.domain.types.validation_severity import ValidationLayer, ValidationSeverity
 
