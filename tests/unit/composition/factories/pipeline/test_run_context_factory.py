@@ -20,6 +20,7 @@ def _yaml_config() -> PipelineYamlConfig:
         pipeline_name="chembl_activity",
         provider="chembl",
         entity_type="activity",
+        business_primary_keys=["activity_id"],
     )
 
 
@@ -48,8 +49,9 @@ def test_run_context_factory_preserves_distinct_config_hash_surfaces() -> None:
     factory = _factory()
     runtime = _runtime()
     yaml_config = _yaml_config()
+    run_id = RunID(uuid4())
     context = factory.create(
-        run_id=RunID(uuid4()),
+        run_id=run_id,
         runtime=runtime,
         started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
         yaml_config=yaml_config,
@@ -68,8 +70,9 @@ def test_run_context_factory_does_not_alias_missing_effective_hash() -> None:
     factory = _factory()
     runtime = _runtime()
     yaml_config = _yaml_config()
+    run_id = RunID(uuid4())
     context = factory.create(
-        run_id=RunID(uuid4()),
+        run_id=run_id,
         runtime=runtime,
         started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
         yaml_config=yaml_config,
@@ -88,6 +91,7 @@ def test_run_context_factory_uses_explicit_started_at_anchor() -> None:
     started_at = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
     runtime = _runtime()
     yaml_config = _yaml_config()
+    run_id = RunID(uuid4())
     factory = RunContextFactory(
         pipeline_name="chembl_activity",
         provider="chembl",
@@ -96,7 +100,7 @@ def test_run_context_factory_uses_explicit_started_at_anchor() -> None:
     )
 
     context = factory.create(
-        run_id=RunID(uuid4()),
+        run_id=run_id,
         runtime=runtime,
         started_at=started_at,
         yaml_config=yaml_config,

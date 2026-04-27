@@ -114,6 +114,25 @@ def _print_parity_report(all_issues: list[str]) -> None:
     print("📋 Documentation covers all config structures")
 
 
+def _load_inputs() -> tuple[str, list[Path]]:
+    return _load_docs_and_configs()
+
+
+def _analyze_inputs(config_files: list[Path]) -> dict[str, Any]:
+    return analyze_config_structure(config_files)
+
+
+def _check_parity(
+    docs_content: str,
+    config_analysis: dict[str, Any],
+) -> list[str]:
+    return _collect_parity_issues(docs_content, config_analysis)
+
+
+def _report_parity(issues: list[str]) -> None:
+    _print_parity_report(issues)
+
+
 def _collect_field_validation_rule_types(
     validations: list[dict[str, Any]], rule_types: set[str]
 ) -> None:
@@ -205,14 +224,14 @@ def main() -> int:
     print("🔍 DQ DSL Parity Check")
     print("=" * 50)
 
-    docs_content, config_files = _load_docs_and_configs()
+    docs_content, config_files = _load_inputs()
     print(f"📁 Found {len(config_files)} entity configuration files")
 
-    config_analysis = analyze_config_structure(config_files)
+    config_analysis = _analyze_inputs(config_files)
     _print_config_analysis(config_analysis)
     print("\n🔎 Checking parity...")
-    all_issues = _collect_parity_issues(docs_content, config_analysis)
-    _print_parity_report(all_issues)
+    all_issues = _check_parity(docs_content, config_analysis)
+    _report_parity(all_issues)
     return 1 if all_issues else 0
 
 

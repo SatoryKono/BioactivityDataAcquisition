@@ -340,6 +340,24 @@ def _collect_docs_policy_violations(
     """Append documentation placement policy violations."""
     tracked_set = set(tracked_paths)
     docs_drafts = _collect_cataloged_paths(catalog["docs_drafts"]["allowed_files"])
+    _collect_docs_draft_policy_violations(
+        tracked_paths=tracked_paths,
+        docs_drafts=docs_drafts,
+        violations=violations,
+    )
+    _collect_docs_missing_policy_violations(
+        tracked_set=tracked_set,
+        docs_drafts=docs_drafts,
+        violations=violations,
+    )
+
+
+def _collect_docs_draft_policy_violations(
+    *,
+    tracked_paths: list[str],
+    docs_drafts: set[str],
+    violations: list[str],
+) -> None:
     actual_docs_drafts = {
         path
         for path in tracked_paths
@@ -349,6 +367,14 @@ def _collect_docs_policy_violations(
         violations.append(
             f"{path}: legacy flat doc must be cataloged in {STRUCTURE_CATALOG_FILE.as_posix()}"
         )
+
+
+def _collect_docs_missing_policy_violations(
+    *,
+    tracked_set: set[str],
+    docs_drafts: set[str],
+    violations: list[str],
+) -> None:
     for path in sorted(docs_drafts - tracked_set):
         violations.append(f"{path}: cataloged legacy doc is missing from tracked tree")
 

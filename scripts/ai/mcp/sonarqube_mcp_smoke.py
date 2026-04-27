@@ -233,20 +233,34 @@ def _start_io_threads(
 ) -> list[threading.Thread]:
     """Start I/O threads for stdin, stdout, and stderr."""
     readers = [
-        threading.Thread(
-            target=_pipe_reader,
-            args=(process.stdout, "stdout", chunks),
-            daemon=True,
-        ),
-        threading.Thread(
-            target=_pipe_reader,
-            args=(process.stderr, "stderr", chunks),
-            daemon=True,
-        ),
+        _start_stdout_reader(process, chunks),
+        _start_stderr_reader(process, chunks),
     ]
     for reader in readers:
         reader.start()
     return readers
+
+
+def _start_stdout_reader(
+    process: subprocess.Popen[bytes],
+    chunks: queue.Queue[tuple[str, bytes | None]],
+) -> threading.Thread:
+    return threading.Thread(
+        target=_pipe_reader,
+        args=(process.stdout, "stdout", chunks),
+        daemon=True,
+    )
+
+
+def _start_stderr_reader(
+    process: subprocess.Popen[bytes],
+    chunks: queue.Queue[tuple[str, bytes | None]],
+) -> threading.Thread:
+    return threading.Thread(
+        target=_pipe_reader,
+        args=(process.stderr, "stderr", chunks),
+        daemon=True,
+    )
 
 
 def _run_smoke_test_loop(
@@ -436,6 +450,34 @@ def _build_invalid_transport_result(
     )
 
 
+def _run_process_smoke_handshake(
+    process: subprocess.Popen[bytes],
+    startup_timeout_seconds: float,
+    handshake_timeout_seconds: float,
+    stdout_buffer: bytearray,
+    stderr_buffer: bytearray,
+    responses: dict[int, dict[str, Any]],
+    chunks: queue.Queue[tuple[str, bytes | None]],
+) -> tuple[bool, bool]:
+    ready_seen, handshake_sent, _, _ = _run_smoke_test_loop(
+        process,
+        startup_timeout_seconds,
+        handshake_timeout_seconds,
+        stdout_buffer,
+        stderr_buffer,
+        responses,
+        chunks,
+    )
+    return ready_seen, handshake_sent
+
+
+def _run_process_smoke_shutdown(
+    process: subprocess.Popen[bytes],
+    readers: list[threading.Thread],
+) -> None:
+    _shutdown_smoke_process(process, readers)
+
+
 def _shutdown_smoke_process(
     process: subprocess.Popen[bytes],
     readers: list[threading.Thread],
@@ -596,7 +638,7 @@ def run_smoke_command(
     readers = _start_io_threads(process, chunks)
 
     try:
-        ready_seen, handshake_sent, _, _ = _run_smoke_test_loop(
+        ready_seen, handshake_sent = _run_process_smoke_handshake(
             process,
             startup_timeout_seconds,
             handshake_timeout_seconds,
@@ -618,7 +660,7 @@ def run_smoke_command(
             ),
         )
     finally:
-        _shutdown_smoke_process(process, readers)
+        _run_process_smoke_shutdown(process, readers)
 
     try:
         ready_seen = _drain_pending_chunks_after_shutdown(

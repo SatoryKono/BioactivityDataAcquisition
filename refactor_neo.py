@@ -49,6 +49,11 @@ def _apply_replacements(text: str, replacements: dict[str, str]) -> str:
     return text
 
 
+def _load_and_apply_replacements(file_path: str) -> tuple[str, dict[str, str]]:
+    replacements = _build_replacements()
+    return _apply_replacements(_load_file_text(file_path), replacements), replacements
+
+
 def _insert_constants_after_imports(text: str, constants_def: str) -> str:
     insert_pos = text.find("def ")
     return text[:insert_pos] + constants_def + text[insert_pos:]
@@ -63,6 +68,10 @@ def _split_and_rewrite_stub_signatures(text: str) -> str:
 def _write_file_text(file_path: str, text: str) -> None:
     with open(file_path, "w", encoding="utf-8") as handle:
         handle.write(text)
+
+
+def _insert_constants(text: str, constants_def: str) -> str:
+    return _insert_constants_after_imports(text, constants_def)
 
 
 def _rewrite_stub_signatures(lines: list[str]) -> None:
@@ -93,11 +102,9 @@ def _rewrite_stub_signatures(lines: list[str]) -> None:
 
 def refactor_neo4j_sync():
     file_path = 'testing_support/neo4j_memory_sync.py'
-    replacements = _build_replacements()
+    text, replacements = _load_and_apply_replacements(file_path)
     constants_def = "\n".join([f"{v} = {k}" for k, v in replacements.items()]) + "\n\n"
-    text = _load_file_text(file_path)
-    text = _apply_replacements(text, replacements)
-    text = _insert_constants_after_imports(text, constants_def)
+    text = _insert_constants(text, constants_def)
     text = _split_and_rewrite_stub_signatures(text)
     _write_file_text(file_path, text)
 

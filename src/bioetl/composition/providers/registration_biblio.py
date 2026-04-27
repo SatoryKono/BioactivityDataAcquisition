@@ -296,5 +296,5 @@ def _get_biblio_provider_configs(
         "openalex",
         "semanticscholar",
         assembly_support=assembly_support,
-        spec_builder=_build_biblio_http_provider_specs,
+        http_spec_builder=_build_biblio_http_provider_specs,
     )

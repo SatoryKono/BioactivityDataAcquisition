@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Generator
 from pathlib import Path
 from typing import Any
-from typing import Generator
 
 import pytest
 import yaml
@@ -30,11 +30,15 @@ def _load_yaml(path: str) -> dict[str, Any]:
     return payload
 
 
-@pytest.fixture(autouse=True)
-def reset_chembl_policy_registry() -> Generator[None, None, None]:
+def _reset_chembl_policy_registry_state() -> Generator[None, None, None]:
     initialize_chembl_policy_registry(DEFAULT_CHEMBL_POLICY_REGISTRY_DATA)
     yield
     initialize_chembl_policy_registry(DEFAULT_CHEMBL_POLICY_REGISTRY_DATA)
+
+
+@pytest.fixture(autouse=True)
+def reset_chembl_policy_registry() -> Generator[None, None, None]:
+    yield from _reset_chembl_policy_registry_state()
 
 
 def test_chembl_policy_surface_points_to_externalized_registry_sources() -> None:
