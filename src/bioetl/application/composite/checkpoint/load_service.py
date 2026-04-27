@@ -28,6 +28,13 @@ from bioetl.domain.control_plane.run_ledger import project_run_ledger_replay
 from bioetl.domain.exceptions import CheckpointConflictError
 
 
+def _replace_checkpoint_state(
+    state: CompositeCheckpointState, /, **changes: object
+) -> CompositeCheckpointState:
+    """Return a checkpoint state with the requested field updates applied."""
+    return cast(CompositeCheckpointState, replace(state, **changes))
+
+
 def _contract_ref_mismatch(
     *,
     state: CompositeCheckpointState,
@@ -363,28 +370,25 @@ class CompositeCheckpointLoadService:
             return state
 
         replay_projection = project_run_ledger_replay(replay_entries)
-        replayed_state: CompositeCheckpointState = cast(
-            CompositeCheckpointState,
-            replace(
-                state,
-                state=(
-                    replay_projection.state
-                    if replay_projection.state is not None
-                    else state.state
-                ),
-                seed_completed=(
-                    replay_projection.seed_completed
-                    if replay_projection.seed_completed is not None
-                    else state.seed_completed
-                ),
-                merge_completed=(
-                    replay_projection.merge_completed
-                    if replay_projection.merge_completed is not None
-                    else state.merge_completed
-                ),
-                last_event_id=replay_projection.last_event_id,
-                last_event_occurred_at=replay_projection.last_event_occurred_at,
+        replayed_state = _replace_checkpoint_state(
+            state,
+            state=(
+                replay_projection.state
+                if replay_projection.state is not None
+                else state.state
             ),
+            seed_completed=(
+                replay_projection.seed_completed
+                if replay_projection.seed_completed is not None
+                else state.seed_completed
+            ),
+            merge_completed=(
+                replay_projection.merge_completed
+                if replay_projection.merge_completed is not None
+                else state.merge_completed
+            ),
+            last_event_id=replay_projection.last_event_id,
+            last_event_occurred_at=replay_projection.last_event_occurred_at,
         )
         self._logger.info(
             "Replayed checkpoint state from run ledger",

@@ -78,6 +78,34 @@ def check_current_patterns(docs_content: str) -> list[str]:
     return issues
 
 
+def _collect_field_validation_rule_types(
+    validations: list[dict[str, Any]], rule_types: set[str]
+) -> None:
+    """Collect the field-validation rule types present in a quality block."""
+    for validation in validations:
+        if "type" in validation:
+            rule_types.add(validation["type"])
+
+
+def _collect_quality_validation_types(
+    quality: dict[str, Any],
+    validation_types: set[str],
+    rule_types: set[str],
+) -> None:
+    """Collect validation sections and field rule types from a quality block."""
+    validation_sections = [
+        "entity_field_validations",
+        "entity_cross_field_validations",
+        "entity_conditional_validations",
+        "key_nullability",
+    ]
+    for section in validation_sections:
+        if section in quality:
+            validation_types.add(section)
+            if section == "entity_field_validations":
+                _collect_field_validation_rule_types(quality[section], rule_types)
+
+
 def analyze_config_structure(configs: list[Path]) -> dict[str, Any]:
     """Analyze the actual config structure to ensure comprehensive coverage."""
     validation_types = set()
@@ -89,23 +117,11 @@ def analyze_config_structure(configs: list[Path]) -> dict[str, Any]:
                 config = yaml.safe_load(f)
 
             if "quality" in config:
-                quality = config["quality"]
-
-                # Check for validation sections
-                for section in [
-                    "entity_field_validations",
-                    "entity_cross_field_validations",
-                    "entity_conditional_validations",
-                    "key_nullability",
-                ]:
-                    if section in quality:
-                        validation_types.add(section)
-
-                        # Collect rule types for field validations
-                        if section == "entity_field_validations":
-                            for validation in quality[section]:
-                                if "type" in validation:
-                                    rule_types.add(validation["type"])
+                _collect_quality_validation_types(
+                    config["quality"],
+                    validation_types,
+                    rule_types,
+                )
 
         except yaml.YAMLError as e:
             print(f"⚠️  Warning: Could not parse {config_path}: {e}")
