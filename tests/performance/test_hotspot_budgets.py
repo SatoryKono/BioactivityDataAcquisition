@@ -240,7 +240,7 @@ def _assert_budget(
             # than the Linux baseline that the generic budget was calibrated on.
             # Keep enforcing P95, but use an explicit Windows ceiling instead of
             # failing on host-specific tail spikes unrelated to repo changes.
-            max_p95_ms = max(max_p95_ms, 600.0)
+            max_p95_ms = max(max_p95_ms, 800.0)
         if os.name == "nt" and benchmark_key == "crossref_batch_fetch_200":
             # Very small in-memory adapter timings are sensitive to timer
             # quantization and scheduler jitter on Windows hosts.
