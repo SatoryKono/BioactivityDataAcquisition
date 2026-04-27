@@ -132,6 +132,20 @@ PATH_SRC_B = "src/b.py"
 PATH_SRC_C = "src/c.py"
 FAMILY_APP_COMPOSITE = "application/composite"
 
+
+class _TargetedApplyPrereqStubClient:
+    def query(
+        self,
+        _statement: str,
+        parameters: dict[str, object] | None = None,
+        *,
+        context: str | None = None,
+    ) -> list[dict[str, object]]:
+        assert context == CONTEXT_COMPLEXITY_PREREQ
+        assert parameters is not None
+        return [{"label": label, "count": 0} for label in parameters["labels"]]
+
+
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
@@ -2369,21 +2383,9 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_anchor_grap
     snapshot.add_relation(class_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
     filtered = _filtered_snapshot(snapshot, only_complexity_layer=True)
 
-    class StubClient:
-        def query(
-            self,
-            _statement: str,
-            parameters: dict[str, object] | None = None,
-            *,
-            context: str | None = None,
-        ) -> list[dict[str, object]]:
-            assert context == "complexity-layer targeted sync prerequisite anchor check"
-            assert parameters is not None
-            return [{"label": label, "count": 0} for label in parameters["labels"]]
-
     try:
         _ensure_targeted_apply_prerequisites(
-            StubClient(),  # type: ignore[arg-type]
+            _TargetedApplyPrereqStubClient(),  # type: ignore[arg-type]
             filtered,
             mode_description="complexity-layer targeted sync",
         )
