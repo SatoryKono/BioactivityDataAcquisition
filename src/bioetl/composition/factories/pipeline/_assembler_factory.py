@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TypeVar, cast
 
 import pyarrow as pa
 
@@ -61,9 +61,6 @@ from bioetl.domain.services import IdentityService
 from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-
-if TYPE_CHECKING:
-    pass
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 

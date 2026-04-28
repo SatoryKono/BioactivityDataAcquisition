@@ -11,7 +11,7 @@ from __future__ import annotations
 import sys
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Protocol, TypeVar
+from typing import Protocol
 
 from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineNotFoundError,
@@ -35,8 +35,6 @@ __all__ = [
     "map_success_flag_to_exit_code",
     "render_failure_context",
 ]
-
-_ResultT = TypeVar("_ResultT")
 
 CLI_ENTRYPOINT_TYPED_ERRORS = (
     OSError,
@@ -171,12 +169,12 @@ def map_success_flag_to_exit_code(
 
 
 def execute_with_cli_failure_policy[ResultT](
-    action: Callable[[], _ResultT],
+    action: Callable[[], ResultT],
     *,
     subject: str,
     reason_codes: ExecutionFailureReasonCodes,
     failure_handler: CliFailureHandler,
-) -> _ResultT | None:
+) -> ResultT | None:
     """Execute one command action with the canonical typed-failure ladder."""
     try:
         return action()
@@ -194,8 +192,8 @@ def execute_with_cli_failure_policy[ResultT](
 def finalize_cli_execution[ResultT](
     *,
     health_info_presenter: Callable[[], None],
-    execute: Callable[[], _ResultT | None],
-    result_finalizer: Callable[[_ResultT], None],
+    execute: Callable[[], ResultT | None],
+    result_finalizer: Callable[[ResultT], None],
 ) -> None:
     """Run the prepared health -> execute -> finalize command shell."""
     health_info_presenter()
@@ -208,8 +206,8 @@ def finalize_cli_execution[ResultT](
 def execute_prepared_cli_flow[ResultT](
     *,
     health_info_presenter: Callable[[], None],
-    execute: Callable[[], _ResultT | None],
-    result_finalizer: Callable[[_ResultT], None],
+    execute: Callable[[], ResultT | None],
+    result_finalizer: Callable[[ResultT], None],
 ) -> None:
     """Execute one prepared CLI flow using the shared execution shell."""
     finalize_cli_execution(

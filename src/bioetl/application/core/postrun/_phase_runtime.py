@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 from collections.abc import Awaitable, Callable
 from contextlib import AbstractContextManager
-from typing import TYPE_CHECKING, Literal, TypeVar
+from typing import TYPE_CHECKING, Literal
 
 from bioetl.application.observability.span_attribute_values import (
     coerce_span_attribute_value,
@@ -27,9 +27,6 @@ PostrunPhaseName = Literal[
     "vacuum",
     "final_metadata",
 ]
-_ResultT = TypeVar("_ResultT")
-
-
 def resolve_postrun_phase_log_level(status: str) -> PostrunLogLevel:
     """Map bounded postrun statuses to structured log levels."""
     if status == "failed":
@@ -88,11 +85,11 @@ async def run_async_postrun_phase[ResultT](
     *,
     span_factory: Callable[[str], AbstractContextManager[Span]],
     phase: PostrunPhaseName,
-    operation: Callable[[], Awaitable[_ResultT]],
+    operation: Callable[[], Awaitable[ResultT]],
     operation_errors: tuple[type[BaseException], ...],
     emit_phase_observability: Callable[..., None],
-    on_success: Callable[[_ResultT], PostrunPhaseCompletion],
-) -> _ResultT:
+    on_success: Callable[[ResultT], PostrunPhaseCompletion],
+) -> ResultT:
     """Run one async postrun phase with consistent tracing and failure handling."""
     start_time = time.perf_counter()
     with span_factory(f"postrun.{phase}") as span:
@@ -124,11 +121,11 @@ def run_sync_postrun_phase[ResultT](
     *,
     span_factory: Callable[[str], AbstractContextManager[Span]],
     phase: PostrunPhaseName,
-    operation: Callable[[], _ResultT],
+    operation: Callable[[], ResultT],
     operation_errors: tuple[type[BaseException], ...],
     emit_phase_observability: Callable[..., None],
-    on_success: Callable[[_ResultT], PostrunPhaseCompletion],
-) -> _ResultT:
+    on_success: Callable[[ResultT], PostrunPhaseCompletion],
+) -> ResultT:
     """Run one sync postrun phase with consistent tracing and failure handling."""
     start_time = time.perf_counter()
     with span_factory(f"postrun.{phase}") as span:

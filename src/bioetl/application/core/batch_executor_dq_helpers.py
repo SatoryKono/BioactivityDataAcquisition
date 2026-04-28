@@ -14,7 +14,7 @@ __all__ = [
 
 import json
 from collections.abc import Callable
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING
 
 from bioetl.domain.context import current_utc_time
 
@@ -32,9 +32,6 @@ _DQ_DATAFRAME_ERRORS: tuple[type[Exception], ...] = (
     TypeError,
     RuntimeError,
 )
-_RecordT = TypeVar("_RecordT", bound=dict[str, object])
-
-
 def dataframe_error_types() -> tuple[type[Exception], ...]:
     """Resolve exception types raised while building Polars dataframes."""
     try:
@@ -54,7 +51,7 @@ def stringify_value(value: object, keys_to_stringify: set[str], key: str) -> obj
 
 
 def normalize_records_for_polars[RecordT: dict[str, object]](
-    records: list[_RecordT],
+    records: list[RecordT],
 ) -> list[dict[str, object]] | None:
     """Normalize mixed nested/string columns to stable string representation."""
     nested_keys: set[str] = set()

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal, TypeVar
+from typing import Literal
 
 from bioetl.domain.exceptions import (
     BioETLError,
@@ -27,10 +27,6 @@ __all__ = [
 _AUTH_STATUS_CODES = frozenset({401, 403})
 _RATE_LIMIT_STATUS_CODE = 429
 _DEFAULT_RETRY_AFTER_SECONDS = 60.0
-_MappedExternalError = TypeVar(
-    "_MappedExternalError",
-    bound=ExternalServiceError,
-)
 type InfrastructureSourceError = (
     OSError | RuntimeError | ValueError | LookupError | AssertionError | BioETLError
 )
@@ -61,10 +57,10 @@ class InfraErrorDisposition:
 
 def _decorate_mapped_error[MappedExternalError: ExternalServiceError](
     *,
-    error: _MappedExternalError,
+    error: MappedExternalError,
     reason_code: str,
     payload: DomainErrorMappingInput,
-) -> _MappedExternalError:
+) -> MappedExternalError:
     """Attach standardized reason code, context, and root cause metadata."""
     error.with_context(
         reason_code=reason_code,
