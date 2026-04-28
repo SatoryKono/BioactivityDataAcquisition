@@ -390,8 +390,8 @@ Use these as anti-hallucination anchors:
 - `scripts/engineering/ci/__main__.py` and `scripts/engineering/qa/__main__.py`
   already act as unified routers.
 - `scripts/docs/README.md` documents top-level `scripts/docs/*.py` mostly as
-  compatibility shims, with `check_doc_links.py` preserved for legacy
-  monkeypatch semantics.
+  compatibility shims, with the historical docs link-check shim preserved for
+  legacy monkeypatch semantics.
 - `scripts/diagrams/README.md` treats bundle wrappers as compatibility surfaces
   around canonical generators.
 - `scripts/engineering/dev/README.md` documents setup facades rather than

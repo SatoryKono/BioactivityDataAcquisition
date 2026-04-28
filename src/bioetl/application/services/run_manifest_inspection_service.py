@@ -5,6 +5,7 @@ from __future__ import annotations
 from bioetl.application.services.control_plane.run_manifest_inspection_service import (
     RunManifestDiffEntry,
     RunManifestDiffResult,
+    RunManifestInspectionCorruptionError,
     RunManifestInspectionResult,
     RunManifestInspectionService,
 )
@@ -12,6 +13,7 @@ from bioetl.application.services.control_plane.run_manifest_inspection_service i
 __all__ = [
     "RunManifestDiffEntry",
     "RunManifestDiffResult",
+    "RunManifestInspectionCorruptionError",
     "RunManifestInspectionResult",
     "RunManifestInspectionService",
 ]

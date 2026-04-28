@@ -6,6 +6,9 @@ from typing import TYPE_CHECKING
 
 import click
 
+from bioetl.application.services.run_manifest_inspection_service import (
+    RunManifestInspectionCorruptionError,
+)
 from bioetl.interfaces.cli.commands._inspection_output import (
     emit_inspection_payload,
 )
@@ -56,6 +59,9 @@ def show_command(identifier: str, output_format: str) -> None:
     service = get_run_manifest_service()
     try:
         result = service.show(identifier)
+    except RunManifestInspectionCorruptionError as exc:
+        echo_error("Run manifest store corruption", str(exc))
+        return
     except ValueError as exc:
         echo_error("Run manifest not found", str(exc))
         return
@@ -80,6 +86,9 @@ def score_command(identifier: str, output_format: str) -> None:
     service = get_run_manifest_service()
     try:
         result = service.show(identifier)
+    except RunManifestInspectionCorruptionError as exc:
+        echo_error("Run manifest store corruption", str(exc))
+        return
     except ValueError as exc:
         echo_error("Run manifest not found", str(exc))
         return
@@ -118,6 +127,9 @@ def diff_command(
     service = get_run_manifest_service()
     try:
         result = service.diff(left_identifier, right_identifier)
+    except RunManifestInspectionCorruptionError as exc:
+        echo_error("Run manifest store corruption", str(exc))
+        return
     except ValueError as exc:
         echo_error("Run manifest diff failed", str(exc))
         return

@@ -118,11 +118,9 @@ def _build_ledger_entries(
     return tuple(store.items)
 
 
-def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> None:
-    manifest = _make_manifest()
-
-    summary = build_diagnostics_summary(manifest, ())
-
+def _assert_provenance_only_score(
+    summary: dict[str, object], manifest: RunManifest
+) -> None:
     score = summary["reproducibility_audit_score"]
     assert score["schema_version"] == "1.0"
     assert score["contract_version"] == "1.2.0"
@@ -168,46 +166,11 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "confidence": "high",
     }
 
-    summary_without_score = {
-        key: value
-        for key, value in summary.items()
-        if key
-        not in {
-            "reproducibility_audit_score",
-            "reproducibility_diagnostics",
-            "reproducibility_policy_assessment",
-        }
-    }
-    assert summary["reproducibility_policy_assessment"] == {
-        "required_persistence_profile": "degraded_observable",
-        "replay_capability": "rebuild_only",
-        "strict_requirement_requested": False,
-        "strict_exact_replay_supported": True,
-        "required_profile_satisfied": True,
-        "blocking_gaps": [],
-        "snapshot_envelope": {
-            "source_count": 0,
-            "sources_with_snapshots": 0,
-            "any_input_snapshots": False,
-            "full_snapshot_envelope": False,
-            "require_full_snapshot_envelope": False,
-        },
-    }
-    assert (
-        summary["reproducibility_diagnostics"]["policy"]["required_persistence_profile"]
-        == "degraded_observable"
-    )
-    assert (
-        summary["reproducibility_diagnostics"]["policy"]["policy_assessment"]
-        == summary["reproducibility_policy_assessment"]
-    )
-    assert (
-        summary["reproducibility_diagnostics"]["semantic_identity"][
-            "execution_fingerprint"
-        ]
-        == manifest.execution_fingerprint
-    )
-    assert summary_without_score == {
+
+def _expected_provenance_only_summary_without_score(
+    manifest: RunManifest,
+) -> dict[str, object]:
+    return {
         "manifest_id": "manifest-diagnostics",
         "manifest_created_at": manifest.created_at.isoformat(),
         "run_id": str(manifest.run_id),
@@ -336,6 +299,61 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
             "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         ],
     }
+
+
+def _assert_provenance_only_policy(summary: dict[str, object], manifest: RunManifest) -> None:
+    assert summary["reproducibility_policy_assessment"] == {
+        "required_persistence_profile": "degraded_observable",
+        "replay_capability": "rebuild_only",
+        "strict_requirement_requested": False,
+        "strict_exact_replay_supported": True,
+        "required_profile_satisfied": True,
+        "blocking_gaps": [],
+        "snapshot_envelope": {
+            "source_count": 0,
+            "sources_with_snapshots": 0,
+            "any_input_snapshots": False,
+            "full_snapshot_envelope": False,
+            "require_full_snapshot_envelope": False,
+        },
+    }
+    assert (
+        summary["reproducibility_diagnostics"]["policy"]["required_persistence_profile"]
+        == "degraded_observable"
+    )
+    assert (
+        summary["reproducibility_diagnostics"]["policy"]["policy_assessment"]
+        == summary["reproducibility_policy_assessment"]
+    )
+    assert (
+        summary["reproducibility_diagnostics"]["semantic_identity"][
+            "execution_fingerprint"
+        ]
+        == manifest.execution_fingerprint
+    )
+
+
+def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> None:
+    manifest = _make_manifest()
+
+    summary = build_diagnostics_summary(manifest, ())
+
+    _assert_provenance_only_score(summary, manifest)
+    _assert_provenance_only_policy(summary, manifest)
+
+    summary_without_score = {
+        key: value
+        for key, value in summary.items()
+        if key
+        not in {
+            "reproducibility_audit_score",
+            "reproducibility_diagnostics",
+            "reproducibility_policy_assessment",
+        }
+    }
+    assert summary_without_score == _expected_provenance_only_summary_without_score(
+        manifest
+    )
 
 
 def test_build_diagnostics_summary_distinguishes_resume_only_runs() -> None:
