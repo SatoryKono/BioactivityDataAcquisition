@@ -28,7 +28,7 @@ MANIFEST_SCHEMA_VERSION = "1.0.0"
 
 
 @dataclass(frozen=True, slots=True)
-class ProviderAttribution:
+class ProviderAttributionRecord:
     """Provider-level data attribution and redistribution metadata."""
 
     provider: str
@@ -41,7 +41,7 @@ class ProviderAttribution:
 
 
 @dataclass(frozen=True, slots=True)
-class ExportSidecarPayloads:
+class ExportSidecarPayloadsRecord:
     """Provenance and licensing payloads for one exported dataset snapshot."""
 
     dataset_bundle_id: str
@@ -49,8 +49,12 @@ class ExportSidecarPayloads:
     licensing_manifest: dict[str, object]
 
 
-_PROVIDER_ATTRIBUTIONS: dict[str, ProviderAttribution] = {
-    "chembl": ProviderAttribution(
+ProviderAttribution = ProviderAttributionRecord
+ExportSidecarPayloads = ExportSidecarPayloadsRecord
+
+
+_PROVIDER_ATTRIBUTIONS: dict[str, ProviderAttributionRecord] = {
+    "chembl": ProviderAttributionRecord(
         provider="chembl",
         source_url="https://www.ebi.ac.uk/chembl/",
         license_name="CC BY-SA 3.0",
@@ -61,7 +65,7 @@ _PROVIDER_ATTRIBUTIONS: dict[str, ProviderAttribution] = {
             "redistributed derived datasets."
         ),
     ),
-    "crossref": ProviderAttribution(
+    "crossref": ProviderAttributionRecord(
         provider="crossref",
         source_url="https://api.crossref.org",
         license_name="Crossref metadata terms",
@@ -72,7 +76,7 @@ _PROVIDER_ATTRIBUTIONS: dict[str, ProviderAttribution] = {
             "carry separate rights."
         ),
     ),
-    "openalex": ProviderAttribution(
+    "openalex": ProviderAttributionRecord(
         provider="openalex",
         source_url="https://openalex.org/",
         license_name="CC0",
@@ -80,7 +84,7 @@ _PROVIDER_ATTRIBUTIONS: dict[str, ProviderAttribution] = {
         attribution_text="OpenAlex data is provided by OurResearch.",
         redistribution_notes="OpenAlex states that its data is licensed as CC0.",
     ),
-    "pubchem": ProviderAttribution(
+    "pubchem": ProviderAttributionRecord(
         provider="pubchem",
         source_url="https://pubchem.ncbi.nlm.nih.gov/",
         license_name="Source-specific / mixed",
@@ -91,7 +95,7 @@ _PROVIDER_ATTRIBUTIONS: dict[str, ProviderAttribution] = {
             "source-specific licensing before redistribution."
         ),
     ),
-    "pubmed": ProviderAttribution(
+    "pubmed": ProviderAttributionRecord(
         provider="pubmed",
         source_url="https://pubmed.ncbi.nlm.nih.gov/",
         license_name="NLM/NCBI terms and source-specific rights",
@@ -102,7 +106,7 @@ _PROVIDER_ATTRIBUTIONS: dict[str, ProviderAttribution] = {
             "source attribution and review NLM policies."
         ),
     ),
-    "semanticscholar": ProviderAttribution(
+    "semanticscholar": ProviderAttributionRecord(
         provider="semanticscholar",
         source_url="https://www.semanticscholar.org/",
         license_name="Semantic Scholar API License Agreement",
@@ -113,7 +117,7 @@ _PROVIDER_ATTRIBUTIONS: dict[str, ProviderAttribution] = {
             "use restrictions for API-derived data."
         ),
     ),
-    "uniprot": ProviderAttribution(
+    "uniprot": ProviderAttributionRecord(
         provider="uniprot",
         source_url="https://www.uniprot.org/",
         license_name="CC BY 4.0",
@@ -226,7 +230,7 @@ def build_export_sidecar_payloads(
             "caveats; it is not legal advice."
         ),
     }
-    return ExportSidecarPayloads(
+    return ExportSidecarPayloadsRecord(
         dataset_bundle_id=dataset_bundle_id,
         provenance_manifest=provenance_manifest,
         licensing_manifest=licensing_manifest,

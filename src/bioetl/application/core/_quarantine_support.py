@@ -96,7 +96,16 @@ async def write_quarantine_request(
     request: QuarantineWriteRequest,
 ) -> None:
     """Write one quarantine request via the injected port."""
-    await quarantine.write(**request)
+    await quarantine.write(
+        pipeline=request["pipeline"],
+        error_code=request["error_code"],
+        payload=request["payload"],
+        bronze_batch_id=request["bronze_batch_id"],
+        run_id=request.get("run_id"),
+        entry_id=request.get("entry_id"),
+        metadata=request.get("metadata"),
+        ingestion_ts=request["ingestion_ts"],
+    )
 
 
 async def write_quarantine_requests(

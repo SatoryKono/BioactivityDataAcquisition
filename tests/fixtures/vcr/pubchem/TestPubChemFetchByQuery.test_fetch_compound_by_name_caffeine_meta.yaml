@@ -3,6 +3,6 @@ provider: pubchem
 cassette_rel_path: tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_caffeine.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: cce67172acc2b15e9bfd200438fc7a0cc4806f0f5b26a89959c79854686f4447
-recorded_at: '2026-04-24'
+cassette_sha256: 338201c5c520902400c201ed734f2699ced744bb1e2a5bbab2f7ce8491fea05e
+recorded_at: '2026-04-28'
 staleness_ready: true

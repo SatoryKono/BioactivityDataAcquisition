@@ -409,6 +409,22 @@ def test_dq_and_provider_alerts_reference_expected_metrics() -> None:
             "bioetl_circuit_breaker_state",
             "docs/05-operations/runbooks/incident-response.md",
         ),
+        "BioETLProviderAdapterLatencyHigh": (
+            "bioetl_adapter_request_duration_seconds_bucket",
+            "docs/05-operations/runbooks/incident-response.md",
+        ),
+        "BioETLProviderHttpErrorRateHigh": (
+            "bioetl_http_request_errors_total",
+            "docs/05-operations/runbooks/incident-response.md",
+        ),
+        "BioETLProviderRateLimiterWaitHigh": (
+            "bioetl_rate_limiter_wait_seconds_bucket",
+            "docs/05-operations/runbooks/incident-response.md",
+        ),
+        "BioETLProviderRateLimiterTokensDepleted": (
+            "bioetl_rate_limiter_tokens_available",
+            "docs/05-operations/runbooks/incident-response.md",
+        ),
     }
 
     missing = [name for name in expected if name not in rule_map]
@@ -447,6 +463,10 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
         "BioETLProviderRetriesExhausted": "warning",
         "BioETLProviderRetriesExhaustedPersistent": "critical",
         "BioETLCircuitBreakerStuckOpen": "warning",
+        "BioETLProviderAdapterLatencyHigh": "warning",
+        "BioETLProviderHttpErrorRateHigh": "warning",
+        "BioETLProviderRateLimiterWaitHigh": "warning",
+        "BioETLProviderRateLimiterTokensDepleted": "warning",
         "BioETLCheckpointLoadFailed": "warning",
         "BioETLCheckpointSaveFailed": "warning",
         "BioETLCheckpointOperatorFailed": "warning",
@@ -527,6 +547,31 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
             "[15m]",
             ">= 2",
         ],
+        "BioETLProviderAdapterLatencyHigh": [
+            "bioetl_adapter_request_duration_seconds_bucket",
+            "histogram_quantile",
+            "[30m]",
+            "> 5",
+        ],
+        "BioETLProviderHttpErrorRateHigh": [
+            "bioetl_http_request_errors_total",
+            "bioetl_http_request_duration_seconds_count",
+            "clamp_min",
+            "[15m]",
+            "> 0.1",
+        ],
+        "BioETLProviderRateLimiterWaitHigh": [
+            "bioetl_rate_limiter_wait_seconds_bucket",
+            "histogram_quantile",
+            "[30m]",
+            "> 1",
+        ],
+        "BioETLProviderRateLimiterTokensDepleted": [
+            "bioetl_rate_limiter_tokens_available",
+            "min_over_time",
+            "[15m]",
+            "< 1",
+        ],
         "BioETLCheckpointLoadFailed": [
             "bioetl_checkpoint_load_events_total",
             'status="failed"',
@@ -594,6 +639,10 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
         "BioETLProviderRetriesExhausted": "5m",
         "BioETLProviderRetriesExhaustedPersistent": "10m",
         "BioETLCircuitBreakerStuckOpen": "10m",
+        "BioETLProviderAdapterLatencyHigh": "15m",
+        "BioETLProviderHttpErrorRateHigh": "10m",
+        "BioETLProviderRateLimiterWaitHigh": "10m",
+        "BioETLProviderRateLimiterTokensDepleted": "10m",
         "BioETLCheckpointLoadFailed": "5m",
         "BioETLCheckpointSaveFailed": "5m",
         "BioETLCheckpointOperatorFailed": "5m",

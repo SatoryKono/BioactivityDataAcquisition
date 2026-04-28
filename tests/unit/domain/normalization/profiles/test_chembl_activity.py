@@ -120,3 +120,32 @@ def test_chembl_activity_mapping_status_rules_are_profile_visible() -> None:
     assert unit_rule is not None
     assert unit_rule.normalizer("MISSING") == "missing"
     assert "mapping-status" in (endpoint_rule.notes or "").lower()
+
+
+def test_chembl_activity_ontology_companion_rules_derive_from_bundle_context() -> None:
+    endpoint_iri_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("bao_endpoint_iri")
+    version_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("bao_ontology_version")
+    qudt_iri_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("qudt_unit_iri")
+    qudt_status_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("qudt_unit_mapping_status")
+
+    record = {
+        "bao_endpoint": "bao:0000357",
+        "bao_format": "BAO_0000219",
+        "uo_units": "uo:0000065",
+        "qudt_units": "uM",
+    }
+
+    assert endpoint_iri_rule is not None
+    assert (
+        endpoint_iri_rule.apply("ignored", record=record)
+        == "http://purl.obolibrary.org/obo/BAO_0000357"
+    )
+    assert version_rule is not None
+    assert version_rule.apply(None, record=record) == "2.8.18a"
+    assert qudt_iri_rule is not None
+    assert (
+        qudt_iri_rule.apply(None, record=record)
+        == "http://qudt.org/vocab/unit/MicroMOL-PER-L"
+    )
+    assert qudt_status_rule is not None
+    assert qudt_status_rule.apply("wrong", record=record) == "mapped"

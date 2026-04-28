@@ -3,11 +3,19 @@
 from __future__ import annotations
 
 import re
+from pathlib import PurePath
 
 from bioetl.domain.observability_contract import normalize_observability_metric_labels
 from bioetl.domain.ports import MetricLabels
 
 OBSERVABILITY_EVENTS_COUNTER_NAME = "bioetl_observability_events_total"
+_SOURCE_FILE_LABEL_METRICS = frozenset(
+    {
+        "bioetl_filter_ids_loaded_total",
+        "bioetl_filter_ids_duplicates_total",
+        "bioetl_filter_combinations_loaded_total",
+    }
+)
 
 _ALLOWED_REASON_LABELS = frozenset(
     {
@@ -190,6 +198,13 @@ def normalize_metric_dispatch_labels(
     """Normalize metric labels for metrics with stricter label contracts."""
     if name == OBSERVABILITY_EVENTS_COUNTER_NAME:
         return normalize_observability_metric_labels(labels)
+    if name in _SOURCE_FILE_LABEL_METRICS:
+        return {
+            **labels,
+            "source_file": normalize_source_file_label(
+                str(labels.get("source_file", "unknown"))
+            ),
+        }
     if name == "bioetl_quarantine_records_total":
         return {
             **labels,
@@ -261,6 +276,21 @@ def normalize_adapter_endpoint_label(endpoint: str) -> str:
     if not normalized_segments:
         return "/"
     return "/" + "/".join(normalized_segments)
+
+
+def normalize_source_file_label(source_file: str) -> str:
+    """Normalize filter source file labels to basename-only bounded values."""
+    stripped = source_file.strip()
+    if not stripped:
+        return "unknown"
+    path_like = stripped.replace("\\", "/")
+    basename = PurePath(path_like).name
+    candidate = basename or path_like
+    normalized = re.sub(r"[^a-zA-Z0-9._-]+", "_", candidate.lower())
+    collapsed = re.sub(r"_+", "_", normalized).strip("._-")
+    if not collapsed:
+        return "unknown"
+    return collapsed[:64]
 
 
 def normalize_quarantine_reason(reason: str) -> str:

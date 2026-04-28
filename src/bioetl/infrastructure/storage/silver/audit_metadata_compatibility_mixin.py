@@ -2,23 +2,21 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from dataclasses import replace
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.storage.silver.metadata_mixin import (
+    _SilverWriterMetadataRuntimeProtocol,
+)
 from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
     _coerce_silver_metadata_audit_request,
     _SilverMetadataAuditSupportRequest,
 )
-from bioetl.infrastructure.storage.silver.metadata_mixin import (
-    _SilverWriterMetadataRuntimeProtocol,
-)
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SilverMetadata
-    from bioetl.infrastructure.storage.silver.metadata_mixin import (
-        SilverWriterMetadataMixin,
-    )
 
 __all__ = ["SilverWriterAuditMetadataCompatibilityMixin"]
 
@@ -63,7 +61,10 @@ class SilverWriterAuditMetadataCompatibilityMixin:
             SilverWriterMetadataMixin,
         )
 
-        await SilverWriterMetadataMixin._log_silver_audit(
+        await cast(
+            "Callable[..., Awaitable[None]]",
+            SilverWriterMetadataMixin._log_silver_audit,
+        )(
             self._as_metadata_mixin(),
             resolved_request.table_name,
             resolved_request.records,
@@ -86,7 +87,10 @@ class SilverWriterAuditMetadataCompatibilityMixin:
             SilverWriterMetadataMixin,
         )
 
-        return SilverWriterMetadataMixin._should_skip_silver_metadata_write(
+        return cast(
+            "Callable[..., bool]",
+            SilverWriterMetadataMixin._should_skip_silver_metadata_write,
+        )(
             self._as_metadata_mixin(),
             records=records,
             table_path=table_path,
@@ -107,7 +111,10 @@ class SilverWriterAuditMetadataCompatibilityMixin:
             SilverWriterMetadataMixin,
         )
 
-        await SilverWriterMetadataMixin._write_silver_metadata_file(
+        await cast(
+            "Callable[..., Awaitable[None]]",
+            SilverWriterMetadataMixin._write_silver_metadata_file,
+        )(
             self._as_metadata_mixin(),
             table_path=table_path,
             metadata=metadata,
@@ -132,7 +139,10 @@ class SilverWriterAuditMetadataCompatibilityMixin:
             SilverWriterMetadataMixin,
         )
 
-        await SilverWriterMetadataMixin._maybe_log_silver_audit(
+        await cast(
+            "Callable[..., Awaitable[None]]",
+            SilverWriterMetadataMixin._maybe_log_silver_audit,
+        )(
             self._as_metadata_mixin(),
             table_name=resolved_request.table_name,
             records=resolved_request.records,
@@ -186,7 +196,10 @@ class SilverWriterAuditMetadataCompatibilityMixin:
             SilverWriterMetadataMixin,
         )
 
-        await SilverWriterMetadataMixin._write_silver_metadata(
+        await cast(
+            "Callable[..., Awaitable[None]]",
+            SilverWriterMetadataMixin._write_silver_metadata,
+        )(
             self._as_metadata_mixin(),
             resolved_request,
         )
@@ -197,6 +210,9 @@ class SilverWriterAuditMetadataCompatibilityMixin:
             SilverWriterMetadataMixin,
         )
 
-        return await SilverWriterMetadataMixin._get_delta_version(
+        return await cast(
+            "Callable[..., Awaitable[int | None]]",
+            SilverWriterMetadataMixin._get_delta_version,
+        )(
             self._as_metadata_mixin(), table_path
         )

@@ -3,6 +3,6 @@ provider: pubchem
 cassette_rel_path: tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredByCid.test_fetch_filtered_by_cid_batch.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 05d30277ebc0e03b551c095be29e3b6247e3a7aa279963a3ce5258f2df5a4dd5
-recorded_at: '2026-04-24'
+cassette_sha256: c7d2c4ebf7032b821efa84b0ced8a1fcfa5e3875e9698ee72aa907dcf650cf38
+recorded_at: '2026-04-28'
 staleness_ready: true

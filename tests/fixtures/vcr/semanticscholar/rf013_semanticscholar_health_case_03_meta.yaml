@@ -3,6 +3,6 @@ provider: semanticscholar
 cassette_rel_path: tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_03.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 1de4546d0c6a105246a6a9c03c003b320fe13f0a71d69bff28cd59ef4dd836b6
-recorded_at: '2026-04-24'
+cassette_sha256: a12fb0a63a419a5961229007f04092b4a1e4999be9225a817b90b8e3ca895b29
+recorded_at: '2026-04-28'
 staleness_ready: true

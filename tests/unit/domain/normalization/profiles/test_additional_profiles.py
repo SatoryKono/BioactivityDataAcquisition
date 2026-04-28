@@ -116,10 +116,18 @@ def test_chembl_publication_profile_normalizes_publication_type_and_open_access(
     None
 ):
     publication_type_rule = CHEMBL_PUBLICATION_PROFILE.rule_for("publication_type")
+    publication_type_raw_rule = CHEMBL_PUBLICATION_PROFILE.rule_for(
+        "publication_type_raw"
+    )
     is_oa_rule = CHEMBL_PUBLICATION_PROFILE.rule_for("is_oa")
     authors_rule = CHEMBL_PUBLICATION_PROFILE.rule_for("authors")
 
     assert publication_type_rule is not None
+    assert publication_type_raw_rule is not None
+    assert publication_type_raw_rule.apply(" publication ") == "PUBLICATION"
+    assert "provider-native uppercase token" in (
+        publication_type_raw_rule.notes or ""
+    )
     assert publication_type_rule.apply(" PUBLICATION ") == "journal-article"
     assert publication_type_rule.apply("BOOK") == "book"
     assert is_oa_rule is not None

@@ -3,6 +3,6 @@ provider: crossref
 cassette_rel_path: tests/fixtures/vcr/crossref/provider_contract_agency_lookup_for_doi.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: a169451f91266205bb3e306f66e84a256b7c13f0b5f26c992d016fb7c613de63
-recorded_at: '2026-04-24'
+cassette_sha256: fd66a1219ce461de2c34ee501c73e33a000946ba8cef833ebd296bb56337dc76
+recorded_at: '2026-04-28'
 staleness_ready: true

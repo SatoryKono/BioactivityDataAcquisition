@@ -9,6 +9,7 @@ from typing import Protocol
 
 from deltalake import DeltaTable
 
+from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
@@ -156,7 +157,7 @@ def _resolve_silver_metadata_bundle(
     table_path: str,
     table_name: str,
     silver_input: SilverMetadataInput,
-) -> tuple[SilverMetadata, object | None]:
+ ) -> tuple[SilverMetadata, LineageGraphFragment | None]:
     """Build the canonical Silver metadata bundle with a shared fallback policy."""
     return resolve_metadata_and_lineage_fragment(
         coordinator=coordinator,

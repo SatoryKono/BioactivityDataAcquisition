@@ -25,6 +25,7 @@ from bioetl.application.composite.merger_io_mixin import MergeIOMixin
 from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
+    MergeWorkflowContext,
     build_merge_execution_request,
     execute_merge_request,
 )
@@ -190,4 +191,4 @@ class MergeService(
         request: MergeExecutionRequest,
     ) -> MergeResult:
         """Execute a canonical merge request envelope."""
-        return await execute_merge_request(cast("MergeWorkflowContext", self), request)
+        return await execute_merge_request(cast(MergeWorkflowContext, self), request)

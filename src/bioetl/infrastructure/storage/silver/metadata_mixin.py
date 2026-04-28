@@ -17,7 +17,11 @@ from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
     AuditPort,
+    LineageStorePort,
     LoggerPort,
+    MetadataCoordinatorPort,
+    MetadataWriterPort,
+    MetricsPort,
 )
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
@@ -61,6 +65,13 @@ class _SilverWriterMetadataRuntimeProtocol(
     _audit: AuditPort | None
     _dq_calculator: DQMetricsCalculator
     _get_table_schema: Callable[[str], Awaitable[pa.Schema | None]]
+    _metadata_coordinator: MetadataCoordinatorPort | None
+    _lineage_store: LineageStorePort | None
+    _metadata_writer: MetadataWriterPort
+    _metrics: MetricsPort | None
+    _flat_structure: bool
+    _transform_version: str | None
+    _transform_steps: tuple[str, ...]
 
     def _should_skip_silver_metadata_write(
         self,
@@ -107,6 +118,18 @@ class _SilverWriterMetadataRuntimeProtocol(
         *args: object,
         **kwargs: object,
     ) -> _PreparedSilverWriteFinalizationContext: ...
+
+    async def _get_delta_version(self, table_path: str) -> int | None: ...
+
+    async def _write_silver_metadata_file(
+        self,
+        *,
+        table_path: str,
+        metadata: SilverMetadata,
+        table_name: str,
+        provider_name: str,
+        entity_name: str,
+    ) -> None: ...
 
 
 class SilverWriterMetadataMixin:
@@ -160,7 +183,10 @@ class SilverWriterMetadataMixin:
             ),
         )
 
-    async def _get_delta_version(self, table_path: str) -> int | None:
+    async def _get_delta_version(
+        self: _SilverWriterMetadataRuntimeProtocol,
+        table_path: str,
+    ) -> int | None:
         """Get current Delta table version, if table exists."""
         try:
             version = await asyncio.to_thread(_read_delta_version, table_path)

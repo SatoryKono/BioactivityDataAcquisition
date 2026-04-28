@@ -9,12 +9,22 @@ __all__ = [
     "ChemblControlledVocabularyFamily",
     "ChemblOntologyPolicyFamily",
     "ChemblPolicyRegistryData",
+    "ChemblStrictScalarFamily",
 ]
 
 
 @dataclass(frozen=True, slots=True)
 class ChemblControlledVocabularyFamily:
     """Immutable controlled-vocabulary policy for one ChEMBL family."""
+
+    family_name: str
+    invalid_value_mode: str
+    fields: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class ChemblStrictScalarFamily:
+    """Immutable strict scalar family for boolean-like and 0/1 flag fields."""
 
     family_name: str
     invalid_value_mode: str
@@ -36,12 +46,45 @@ class ChemblOntologyPolicyFamily:
 class ChemblPolicyRegistryData:
     """Immutable semantic-policy payload consumed by domain normalization."""
 
+    strict_boolean_families: tuple[ChemblStrictScalarFamily, ...]
+    strict_flag_families: tuple[ChemblStrictScalarFamily, ...]
     controlled_vocabularies: tuple[ChemblControlledVocabularyFamily, ...]
     ontology_families: tuple[ChemblOntologyPolicyFamily, ...]
     publication_classification_fields: tuple[str, ...]
 
 
 DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
+    strict_boolean_families=(
+        ChemblStrictScalarFamily(
+            family_name="bool_like",
+            invalid_value_mode="coerce_common_boolean_lexemes",
+            fields=(
+                "chembl_molecule.therapeutic_flag",
+                "chembl_molecule.oral",
+                "chembl_molecule.parenteral",
+                "chembl_molecule.topical",
+                "chembl_molecule.withdrawn_flag",
+                "chembl_publication.is_oa",
+                "chembl_target.species_group_flag",
+                "chembl_target.downgraded",
+            ),
+        ),
+    ),
+    strict_flag_families=(
+        ChemblStrictScalarFamily(
+            family_name="binary_flags",
+            invalid_value_mode="coerce_common_flag_lexemes",
+            fields=(
+                "chembl_activity.standard_flag",
+                "chembl_activity.potential_duplicate",
+                "chembl_activity.manual_curation_flag",
+                "chembl_molecule.black_box_warning",
+                "chembl_molecule.dosed_ingredient",
+                "chembl_molecule.polymer_flag",
+                "chembl_protein_class.downgraded",
+            ),
+        ),
+    ),
     controlled_vocabularies=(
         ChemblControlledVocabularyFamily(
             family_name="units",

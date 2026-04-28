@@ -105,6 +105,9 @@ class ValidationConfig:
 DEFAULT_VALIDATION_CONFIG = ValidationConfig()
 
 
+DQAllowedScalar = str | int | float | bool
+
+
 @dataclass(frozen=True, slots=True)
 class FieldValidation:
     """Configuration for a single field validation rule.
@@ -157,7 +160,7 @@ class FieldValidation:
     # Pattern validation
     pattern: str | None = None
     # Enum validation
-    allowed: tuple[str, ...] = ()
+    allowed: tuple[DQAllowedScalar, ...] = ()
     # Max length validation
     max_length: int | None = None
     # Custom validation

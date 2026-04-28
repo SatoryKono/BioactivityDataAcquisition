@@ -3,6 +3,6 @@ provider: chembl
 cassette_rel_path: tests/fixtures/vcr/chembl/TestChemblCompoundRecordPipeline.test_chembl_compound_record_happy_path.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 3ee6ee166138f15e76c1362e93fc89106fe14b8cfbbc07b2bc15a6ef3fc417e2
-recorded_at: '2026-04-24'
+cassette_sha256: c622a59624b6d57a16b3d1ff7a96fbd273cd5f60c451993e46c142e88a299ff2
+recorded_at: '2026-04-28'
 staleness_ready: true

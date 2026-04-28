@@ -55,6 +55,9 @@ if TYPE_CHECKING:
     type BootstrapRuntimeBasicsTuple = tuple[
         str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort
     ]
+    type BootstrapRuntimeBasicsResult = (
+        BootstrapRuntimeBasicsTuple | CompositeInfrastructureContext
+    )
     type SeedRunnerFactory = Callable[[], PipelineRunner]
     type DataFrameRunnerFactory = Callable[[str, pl.DataFrame], PipelineRunner]
     type RunnerFactoryBundle = tuple[
@@ -93,7 +96,7 @@ class BootstrapRuntimeResources:
 
 def build_bootstrap_runtime_resources(
     *,
-    bootstrap_runtime_basics_fn: Callable[..., BootstrapRuntimeBasicsTuple],
+    bootstrap_runtime_basics_fn: Callable[..., BootstrapRuntimeBasicsResult],
     config: CompositeConfig,
     run_id: str | None,
 ) -> BootstrapRuntimeResources | CompositeInfrastructureContext:
@@ -274,7 +277,10 @@ def build_composite_bootstrap_plan_impl(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     run_id: str | None,
-    bootstrap_runtime_basics_fn: Callable[..., CompositeInfrastructureContext],
+    bootstrap_runtime_basics_fn: Callable[
+        ...,
+        BootstrapRuntimeBasicsResult,
+    ],
     build_runner_factories_fn: Callable[..., RunnerFactoryBundle],
     build_support_services_fn: Callable[..., CompositeSupportServices],
 ) -> CompositeBootstrapPlan:

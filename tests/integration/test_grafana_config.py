@@ -19,6 +19,9 @@ import yaml
 
 pytestmark = pytest.mark.integration
 
+_PROMQL_METRIC_SELECTOR_RE = re.compile(r"([a-zA-Z_:][a-zA-Z0-9_:]*)\{([^{}]*)\}")
+_PROMQL_LABEL_MATCHER_RE = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)\s*(=~|=|!=|!~)\s*"')
+
 
 @cache
 def get_all_valid_metric_names() -> set[str]:
@@ -70,6 +73,42 @@ def get_all_valid_metric_names() -> set[str]:
 
 
 @cache
+def get_metric_label_sets() -> dict[str, frozenset[str]]:
+    """Return the effective label set for shipped metrics and recording rules."""
+    from bioetl.infrastructure.observability.prometheus_metric_registries import (
+        COUNTERS,
+        GAUGES,
+        HISTOGRAMS,
+    )
+
+    label_sets: dict[str, frozenset[str]] = {
+        "up": frozenset({"job", "instance"}),
+    }
+
+    for name, metric in COUNTERS.items():
+        label_sets[name] = frozenset(metric._labelnames)
+    for name, metric in GAUGES.items():
+        label_sets[name] = frozenset(metric._labelnames)
+    for name, metric in HISTOGRAMS.items():
+        base_labels = frozenset(metric._labelnames)
+        label_sets[name] = base_labels
+        label_sets[f"{name}_bucket"] = base_labels | {"le"}
+        label_sets[f"{name}_sum"] = base_labels
+        label_sets[f"{name}_count"] = base_labels
+
+    rules_path = Path("grafana/prometheus-rules/bioetl_observability.yml")
+    rules_payload = yaml.safe_load(rules_path.read_text(encoding="utf-8"))
+    for group in rules_payload.get("groups", []):
+        for rule in group.get("rules", []):
+            record_name = rule.get("record")
+            expr = rule.get("expr")
+            if isinstance(record_name, str) and isinstance(expr, str):
+                label_sets[record_name] = _infer_recording_rule_labels(expr)
+
+    return label_sets
+
+
+@cache
 def get_dashboard_files() -> tuple[Path, ...]:
     """Get all Grafana dashboard JSON files."""
     dashboard_dir = Path("grafana/dashboards")
@@ -111,6 +150,23 @@ def get_panel_expressions(dashboard: dict) -> list[str]:
     return expressions
 
 
+def get_dashboard_prometheus_queries(dashboard: dict) -> list[str]:
+    """Collect Prometheus-backed queries from panels and variables."""
+    queries = get_panel_expressions(dashboard)
+
+    for variable in dashboard.get("templating", {}).get("list", []):
+        datasource = variable.get("datasource")
+        if datasource != "Prometheus":
+            continue
+        query = variable.get("query", {})
+        if isinstance(query, dict):
+            query_text = query.get("query")
+            if isinstance(query_text, str) and query_text:
+                queries.append(query_text)
+
+    return queries
+
+
 def _collect_dashboard_links(dashboard: dict) -> list[dict]:
     """Collect top-level dashboard links and panel data links."""
     links = list(dashboard.get("links", []))
@@ -130,6 +186,25 @@ def _unknown_metrics_for_query(query: str, valid_metrics: set[str]) -> list[str]
         if base not in valid_metrics:
             unknown_metrics.append(metric)
     return unknown_metrics
+
+
+def _infer_recording_rule_labels(expr: str) -> frozenset[str]:
+    """Infer the exported label set for simple recording-rule aggregations."""
+    match = re.search(r"\b(?:sum|max|min|avg|count)\s+by\s*\(([^)]*)\)", expr)
+    if not match:
+        return frozenset()
+    return frozenset(
+        label.strip() for label in match.group(1).split(",") if label.strip()
+    )
+
+
+def _extract_selector_labels(selector_body: str) -> set[str]:
+    labels: set[str] = set()
+    for label_name, _operator in _PROMQL_LABEL_MATCHER_RE.findall(selector_body):
+        if label_name == "__name__":
+            continue
+        labels.add(label_name)
+    return labels
 
 
 def _assert_standard_variable_contract(
@@ -313,6 +388,32 @@ def test_dashboard_metrics_contract(dashboard_path):
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
+def test_dashboard_queries_use_real_metric_label_schemas(dashboard_path: Path) -> None:
+    """PromQL selectors must only use labels that exist on the referenced metric."""
+    dashboard = load_dashboard(dashboard_path)
+    label_sets = get_metric_label_sets()
+    errors: list[str] = []
+
+    for query in get_dashboard_prometheus_queries(dashboard):
+        for metric_name, selector_body in _PROMQL_METRIC_SELECTOR_RE.findall(query):
+            expected_labels = label_sets.get(metric_name)
+            if expected_labels is None:
+                continue
+            selector_labels = _extract_selector_labels(selector_body)
+            unknown_labels = sorted(selector_labels - expected_labels)
+            if unknown_labels:
+                errors.append(
+                    f"metric={metric_name} selector_labels={unknown_labels} "
+                    f"allowed={sorted(expected_labels)} query={query}"
+                )
+
+    assert not errors, (
+        f"Dashboard {dashboard_path.name} uses selectors with nonexistent labels:\n"
+        + "\n".join(errors)
+    )
+
+
+@pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
 def test_dashboard_has_required_variables(dashboard_path):
     """Check dashboard variables match the current contract."""
     expected_vars_by_dashboard = {
@@ -409,6 +510,10 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Pushgateway Up": "or vector(0)",
             "No-Records Processed Runs": "or vector(0)",
             "Replay Not Reconstructable": "or vector(0)",
+            "Phase Duration by Phase (p95)": "or vector(0)",
+            "Postrun Phase Duration by Phase (p95)": "or vector(0)",
+            "Shutdown Initiated by Reason": "or vector(0)",
+            "Shutdown Completed by Reason": "or vector(0)",
             "Log Hygiene Trend": 'label_replace(vector(0), "series",',
         },
         "bioetl-provider-health-v2.json": {
@@ -416,6 +521,10 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Degraded Checks": "or vector(0)",
             "Provider Failure Rate": "or vector(0)",
             "Health Checks Total": "or vector(0)",
+            "Adapter Request Latency by Endpoint (p95)": "or vector(0)",
+            "HTTP Errors by Method / Error Type": "or vector(0)",
+            "Rate Limiter Wait by Provider (p95)": "or vector(0)",
+            "Minimum Rate Limiter Tokens Available": "or vector(0)",
             "Circuit Breaker State (max)": "or vector(0)",
             "Circuit Breaker Trips by Provider": 'or label_replace(vector(0), "adapter",',
         },
@@ -437,6 +546,10 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Replay Not Reconstructable": "or vector(0)",
             "Checkpoint Save Latency (p95)": "or vector(0)",
             "Checkpoint Operator Latency (p95)": "or vector(0)",
+            "Audit Write Outcomes": "or vector(0)",
+            "Audit Query Outcomes": "or vector(0)",
+            "Audit Write Latency (p95)": "or vector(0)",
+            "Audit Query Latency (p95)": "or vector(0)",
         },
     }
 
@@ -496,6 +609,8 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             "Provider Alert Conditions": "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
             "Trace-enabled Runs": "round(",
             "Silver Filter Rejects": "round(",
+            "Shutdown Initiated by Reason": "round(",
+            "Shutdown Completed by Reason": "round(",
         },
     }
 
@@ -581,6 +696,11 @@ def test_selected_range_kpis_do_not_use_raw_counters() -> None:
             "Source Records in Range (Bronze)": ("increase(", "last_over_time("),
             "Clean Records in Range (Gold)": ("increase(", "last_over_time("),
         },
+        "bioetl-runtime.json": {
+            "Silver Filter Rejects": ("increase(",),
+            "Shutdown Initiated by Reason": ("increase(",),
+            "Shutdown Completed by Reason": ("increase(",),
+        },
     }
 
     for dashboard_name, panel_expectations in allowed_panel_snippets.items():
@@ -606,6 +726,10 @@ def test_selected_range_kpis_do_not_use_raw_counters() -> None:
             ), (
                 f"Panel {panel_title!r} in {dashboard_name} must use "
                 f"one of {allowed_snippets!r} rather than raw counter values"
+            )
+            assert all("last_over_time(" not in expr for expr in expressions), (
+                f"Panel {panel_title!r} in {dashboard_name} must not use "
+                "last_over_time() for counter-range KPIs"
             )
 
 
@@ -691,6 +815,54 @@ def test_control_plane_lookup_panels_disclose_global_scope() -> None:
             assert title in panels, (
                 f"{dashboard_name} must expose {title!r} to avoid implying pipeline scope"
             )
+
+
+def test_control_plane_read_panels_do_not_filter_on_missing_pipeline_label() -> None:
+    """Control-plane read panels must not filter global metrics by pipeline."""
+    expectations = {
+        "bioetl-overview-v2.json": (
+            "Global Control-plane Lookup Failures",
+            "Global Control-plane Lookup p95",
+        ),
+        "bioetl-runtime.json": (
+            "Global Control-plane Lookup Outcomes",
+            "Global Control-plane Lookup p95",
+        ),
+        "bioetl-control-plane-v1.json": (
+            "Control-Plane Read Failures",
+            "Control-Plane Reads by Store and Status",
+        ),
+    }
+
+    forbidden_metrics = (
+        "bioetl_control_plane_reads_total",
+        "bioetl_control_plane_read_duration_seconds",
+    )
+
+    for dashboard_name, panel_titles in expectations.items():
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        panels = {
+            panel.get("title"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("title")
+        }
+        for panel_title in panel_titles:
+            panel = panels.get(panel_title)
+            assert panel is not None, (
+                f"{dashboard_name} missing control-plane panel {panel_title!r}"
+            )
+            expressions = [
+                target.get("expr", "")
+                for target in panel.get("targets", [])
+                if isinstance(target.get("expr"), str)
+            ]
+            for expr in expressions:
+                if any(metric in expr for metric in forbidden_metrics):
+                    assert '{pipeline=~"$pipeline"' not in expr, (
+                        f"{dashboard_name} panel {panel_title!r} filters a "
+                        "global control-plane metric by nonexistent pipeline label:\n"
+                        f"{expr}"
+                    )
 
 
 def test_silver_validation_panels_use_explicit_pipeline_label() -> None:
@@ -788,6 +960,10 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
         "bioetl_memory_batch_resize_events_total",
         "bioetl_memory_monitor_fallback_events_total",
         "bioetl_memory_pressure_state",
+        "bioetl_phase_duration_seconds",
+        "bioetl_postrun_phase_duration_seconds",
+        "bioetl_shutdown_initiated",
+        "bioetl_shutdown_completed",
         "bioetl_replay_reconstructability_events_total",
         "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
         "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m",
@@ -802,6 +978,10 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
         "bioetl_runtime_alert_condition_lineage_refs_missing_15m",
         "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
         "bioetl_runtime_alert_condition_provider_retries_exhausted_1h",
+        "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m",
+        "bioetl_runtime_alert_condition_provider_http_error_rate_high_15m",
+        "bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m",
+        "bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m",
         "bioetl_data_freshness_seconds",
         "bioetl_control_plane_reads_total",
         "bioetl_control_plane_read_duration_seconds",
@@ -839,17 +1019,25 @@ def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> Non
         "bioetl_checkpoint_save_duration_seconds_bucket",
         "bioetl_checkpoint_operator_duration_seconds_bucket",
         "bioetl_replay_reconstructability_events_total",
+        "bioetl_audit_write_events_total",
+        "bioetl_audit_query_events_total",
+        "bioetl_audit_write_duration_seconds_bucket",
+        "bioetl_audit_query_duration_seconds_bucket",
     ]
     missing = [metric for metric in required_metrics if metric not in all_expressions]
     assert not missing, f"Control-plane dashboard missing metrics: {missing}"
 
 
-def test_provider_dashboard_contains_circuit_breaker_metrics() -> None:
+def test_provider_dashboard_contains_operator_surface_metrics() -> None:
     dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-provider-health-v2.json")
     )
     all_expressions = "\n".join(get_panel_expressions(dashboard))
     required_metrics = [
+        "bioetl_adapter_request_duration_seconds",
+        "bioetl_http_request_errors_total",
+        "bioetl_rate_limiter_wait_seconds",
+        "bioetl_rate_limiter_tokens_available",
         "bioetl_circuit_breaker_state",
         "bioetl_circuit_breaker_trips_total",
     ]
@@ -994,6 +1182,10 @@ def test_silver_filter_breakdown_panels_use_bounded_breakdown_metric(
         ("Degraded Checks", "[$__range]"),
         ("Provider Failure Rate", "[$__range]"),
         ("Health Checks Total", "[$__range]"),
+        ("Adapter Request Latency by Endpoint (p95)", "[$__interval]"),
+        ("HTTP Errors by Method / Error Type", "[$__interval]"),
+        ("Rate Limiter Wait by Provider (p95)", "[$__interval]"),
+        ("Minimum Rate Limiter Tokens Available", "[$__range]"),
     ],
 )
 def test_provider_health_summary_panels_use_selected_time_range(
@@ -1020,6 +1212,48 @@ def test_provider_health_summary_panels_use_selected_time_range(
     ]
     assert any(expected_snippet in expr for expr in expressions), (
         f"Panel '{panel_title}' must use the selected Grafana time range"
+    )
+
+
+@pytest.mark.parametrize(
+    ("dashboard_file", "panel_title", "expected_snippet"),
+    [
+        ("bioetl-runtime.json", "Phase Duration by Phase (p95)", "[$__interval]"),
+        (
+            "bioetl-runtime.json",
+            "Postrun Phase Duration by Phase (p95)",
+            "[$__interval]",
+        ),
+        ("bioetl-runtime.json", "Shutdown Initiated by Reason", "[$__interval]"),
+        ("bioetl-runtime.json", "Shutdown Completed by Reason", "[$__interval]"),
+        ("bioetl-control-plane-v1.json", "Audit Write Outcomes", "[$__interval]"),
+        ("bioetl-control-plane-v1.json", "Audit Query Outcomes", "[$__interval]"),
+        ("bioetl-control-plane-v1.json", "Audit Write Latency (p95)", "[$__interval]"),
+        ("bioetl-control-plane-v1.json", "Audit Query Latency (p95)", "[$__interval]"),
+    ],
+)
+def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
+    dashboard_file: str, panel_title: str, expected_snippet: str
+) -> None:
+    """Operator observability panels must respect active Grafana time windows."""
+    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == panel_title
+        ),
+        None,
+    )
+    assert panel is not None, f"Panel '{panel_title}' not found in {dashboard_file}"
+
+    expressions = [
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    ]
+    assert any(expected_snippet in expr for expr in expressions), (
+        f"Panel '{panel_title}' in {dashboard_file} must use the active Grafana time window"
     )
 
 
@@ -1111,6 +1345,10 @@ def test_range_aware_summary_panels_use_selected_time_range(
             [
                 "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
                 "bioetl_runtime_alert_condition_provider_retries_exhausted_1h",
+                "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m",
+                "bioetl_runtime_alert_condition_provider_http_error_rate_high_15m",
+                "bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m",
+                "bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m",
             ],
         ),
     ],

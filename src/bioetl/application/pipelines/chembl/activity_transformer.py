@@ -250,7 +250,7 @@ class ActivityTransformer(BaseChemblTransformer):
         for field_name in field_names:
             value = record.get(field_name)
             if value:
-                return value
+                return cast("object", value)
         return None
 
     @classmethod

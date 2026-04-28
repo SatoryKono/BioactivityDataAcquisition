@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from bioetl.domain.normalization.profiles._chembl_policy_registry import (
+    chembl_boolean_family_fields,
+)
 from bioetl.domain.normalization.profiles._publication_classification_rules import (
     publication_classification_rules,
 )
@@ -13,6 +16,7 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_publication_type,
+    normalize_profile_publication_type_raw,
 )
 from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
 from bioetl.domain.schemas.constants import PUBLICATION_TYPES
@@ -68,7 +72,7 @@ _INT_FIELDS = frozenset(
 )
 _SET_LIKE_FIELDS = frozenset({"affiliation_list", "author_orcids"})
 _STRICT_JSON_FIELDS = frozenset({"authors", "affiliation_list", "author_orcids"})
-_BOOLEAN_FIELDS = frozenset({"is_oa"})
+_BOOLEAN_FIELDS = chembl_boolean_family_fields("bool_like", entity="publication")
 
 
 def normalize_profile_publication_type_field(value: object) -> object:
@@ -95,9 +99,17 @@ CHEMBL_PUBLICATION_PROFILE = build_standard_profile(
     boolean_fields=_BOOLEAN_FIELDS,
     special_rules={
         **publication_classification_rules(),
+        "publication_type_raw": (
+            normalize_profile_publication_type_raw,
+            "Preserve the raw provider publication type as a provider-native "
+            "uppercase token; canonical cross-provider analytical semantics "
+            "live in publication_type and publication_type_unified.",
+        ),
         "publication_type": (
             normalize_profile_publication_type_field,
-            "Normalize raw provider publication type to the canonical publication enum registry value.",
+            "Normalize raw provider publication type to the canonical "
+            "publication enum registry value; raw provider semantics are "
+            "retained separately in publication_type_raw.",
         ),
     },
     null_fields=chembl_pseudo_null_fields("publication"),

@@ -625,6 +625,28 @@ def test_chembl_publication_raw_type_sidecar_is_explicitly_profiled() -> None:
     assert normalized["publication_type_raw"] == "PUBLICATION"
 
 
+def test_chembl_publication_raw_type_sidecar_preserves_provider_semantics_separately() -> (
+    None
+):
+    """Raw provider doc types must normalize independently from canonical publication taxonomy."""
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="publication",
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "publication_id": "CHEMBL124",
+            "title": "Example dataset",
+            "publication_type": "DATASET",
+            "publication_type_raw": " dataset ",
+        }
+    )
+
+    assert normalized["publication_type"] == "dataset"
+    assert normalized["publication_type_raw"] == "DATASET"
+
+
 def test_chembl_activity_meta_passthrough_contract_is_aligned_across_profile_matrix_and_processor() -> (
     None
 ):

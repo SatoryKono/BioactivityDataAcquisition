@@ -56,6 +56,7 @@ class QuarantinePort(Protocol):
         payload: BronzeRecord,
         bronze_batch_id: BatchID,
         run_id: RunID | None = None,
+        entry_id: str | None = None,
         metadata: MetaDict | None = None,
         *,
         ingestion_ts: datetime,
@@ -68,6 +69,7 @@ class QuarantinePort(Protocol):
             payload: The record that failed processing.
             bronze_batch_id: The ID of the bronze batch containing the record.
             run_id: Optional ID of the pipeline run for traceability.
+            entry_id: Optional stable quarantine entry identifier.
             metadata: Optional additional metadata (e.g., error_details, bronze_file_uri).
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required.

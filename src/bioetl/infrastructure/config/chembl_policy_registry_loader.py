@@ -11,6 +11,7 @@ from bioetl.domain.normalization.profiles.chembl_policy_registry_data import (
     ChemblControlledVocabularyFamily,
     ChemblOntologyPolicyFamily,
     ChemblPolicyRegistryData,
+    ChemblStrictScalarFamily,
 )
 
 
@@ -27,6 +28,14 @@ class ChemblPolicyRegistryLoader:
         ontology = self._load_yaml(self._ontology_path)
 
         return ChemblPolicyRegistryData(
+            strict_boolean_families=self._load_strict_scalar_families(
+                controlled,
+                registry_key="strict_boolean_families",
+            ),
+            strict_flag_families=self._load_strict_scalar_families(
+                controlled,
+                registry_key="strict_flag_families",
+            ),
             controlled_vocabularies=tuple(
                 ChemblControlledVocabularyFamily(
                     family_name=str(family_name),
@@ -45,6 +54,18 @@ class ChemblPolicyRegistryLoader:
                         str(field_ref)
                         for field_ref in payload.get("code_label_fields", ())
                     ),
+                    iri_fields=tuple(
+                        str(field_ref)
+                        for field_ref in payload.get("companion_fields", {}).get(
+                            "iri", ()
+                        )
+                    ),
+                    version_fields=tuple(
+                        str(field_ref)
+                        for field_ref in payload.get("companion_fields", {}).get(
+                            "version", ()
+                        )
+                    ),
                 )
                 for family_name, payload in ontology["families"].items()
             ),
@@ -53,6 +74,27 @@ class ChemblPolicyRegistryLoader:
                 "publication_subclass",
                 "publication_class",
             ),
+        )
+
+    @staticmethod
+    def _load_strict_scalar_families(
+        payload: dict[str, Any],
+        *,
+        registry_key: str,
+    ) -> tuple[ChemblStrictScalarFamily, ...]:
+        families = payload.get(registry_key, {})
+        if not isinstance(families, dict):
+            raise TypeError(
+                f"{registry_key} must decode to a mapping; got {type(families)!r}"
+            )
+
+        return tuple(
+            ChemblStrictScalarFamily(
+                family_name=str(family_name),
+                invalid_value_mode=str(family_payload["invalid_value_mode"]),
+                fields=tuple(str(field_ref) for field_ref in family_payload["fields"]),
+            )
+            for family_name, family_payload in families.items()
         )
 
     @staticmethod
