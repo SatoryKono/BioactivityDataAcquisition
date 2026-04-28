@@ -10,7 +10,7 @@ Centralizes command-level error handling and exit-code mapping for:
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable, Coroutine, Sequence
+from collections.abc import Callable, Coroutine, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Protocol
 

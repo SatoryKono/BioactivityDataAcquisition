@@ -19,15 +19,15 @@ from bioetl.infrastructure.storage.delta.schema_ops import (
     drop_nondeterministic_persisted_fields,
 )
 from bioetl.infrastructure.storage.silver.merged_request_support import (
-    _build_merged_write_request,
+    _build_merged_write_request_from_mapping,
 )
 
 __all__ = [
-    "_build_merged_silver_write_request",
     "_MergedSilverMetadataWriterProtocol",
     "_MergedSilverWriteExecutorProtocol",
     "_MergedSilverWriteRequest",
     "_PreparedMergedSilverWrite",
+    "_build_merged_silver_write_request",
     "_execute_merged_silver_write_flow",
     "_export_silver_merged_csv",
     "_prepare_merged_silver_write",
@@ -59,14 +59,9 @@ def _build_merged_silver_write_request(
     preserve_column_order: bool = False,
 ) -> _MergedSilverWriteRequest:
     """Build the canonical merged-write request from legacy keyword arguments."""
-    return _build_merged_write_request(
+    return _build_merged_write_request_from_mapping(
         _MergedSilverWriteRequest,
-        table_name=table_name,
-        records=records,
-        primary_keys=primary_keys,
-        completed_at=completed_at,
-        run_id=run_id,
-        sources_used=sources_used,
+        locals(),
         preserve_column_order=preserve_column_order,
     )
 

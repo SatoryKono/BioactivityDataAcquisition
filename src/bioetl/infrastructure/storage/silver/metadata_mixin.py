@@ -183,12 +183,12 @@ class SilverWriterMetadataMixin:
             event_name="silver_merged_metadata_skipped",
         ):
             return
-        request_kwargs = dict(
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-        )
+        request_kwargs = {
+            "table_path": table_path,
+            "table_name": table_name,
+            "records": records,
+            "primary_keys": primary_keys,
+        }
         request_kwargs["completed_at"] = completed_at
         request_kwargs["run_id"] = run_id
         request_kwargs["sources_used"] = sources_used

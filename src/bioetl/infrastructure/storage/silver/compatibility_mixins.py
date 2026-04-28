@@ -234,30 +234,17 @@ class SilverWriterMergedCompatibilityMixin:
         preserve_column_order: bool = False,
     ) -> None:
         """Write merged Silver records through the merged-write service surface."""
-        request_kwargs = {
-            "table_name": table_name,
-            "records": records,
-            "primary_keys": primary_keys,
-            "completed_at": completed_at,
-            "run_id": run_id,
-            "sources_used": sources_used,
-            "preserve_column_order": preserve_column_order,
-        }
-        if self._merged is not None:
-            await _execute_merged_silver_write_flow(
-                self._merged,
-                _build_merged_silver_write_request(**request_kwargs),
-            )
-            return
-
-        from bioetl.infrastructure.storage.silver.merged_mixin import (
-            SilverWriterMergedMixin,
+        request = _build_merged_silver_write_request(
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+            completed_at=completed_at,
+            run_id=run_id,
+            sources_used=sources_used,
+            preserve_column_order=preserve_column_order,
         )
-
-        await SilverWriterMergedMixin.write_silver_merged(
-            self._as_merged_mixin(),
-            **request_kwargs,
-        )
+        target = self._merged if self._merged is not None else self._as_merged_mixin()
+        await _execute_merged_silver_write_flow(target, request)
 
     def _prepare_merged_silver_write(
         self,

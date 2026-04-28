@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-28T09:23:13.296743+00:00",
+  "generated_at": "2026-04-28T10:03:19.150197+00:00",
   "summary": {
-    "total_scripts": 448,
+    "total_scripts": 449,
     "status_counts": {
-      "active": 319,
+      "active": 320,
       "legacy": 15,
       "orphan": 101,
       "unknown": 13
@@ -12,11 +12,11 @@
     "reference_group_coverage": {
       "agents": 4,
       "build": 2,
-      "ci": 56,
+      "ci": 57,
       "docs": 120,
-      "scripts": 304,
+      "scripts": 305,
       "skills": 8,
-      "tests": 145
+      "tests": 146
     }
   },
   "scripts": [
@@ -3905,7 +3905,7 @@
         },
         {
           "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 95,
+          "line": 96,
           "source_group": "scripts",
           "text": "\"scripts/diagrams/generate_architecture_bundle.py\","
         },
@@ -4004,7 +4004,7 @@
         },
         {
           "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 99,
+          "line": 100,
           "source_group": "scripts",
           "text": "\"scripts/diagrams/generate_views_bundle.py\","
         },
@@ -4814,7 +4814,7 @@
         },
         {
           "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 93,
+          "line": 94,
           "source_group": "scripts",
           "text": "Candidate(\"scripts/docs/build_docs_site.sh\", \"shell transport adapter\"),"
         }
@@ -5634,7 +5634,7 @@
         },
         {
           "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 92,
+          "line": 93,
           "source_group": "scripts",
           "text": "Candidate(\"scripts/docs/run_mkdocs_build.py\", \"compatibility shim\"),"
         },
@@ -7424,7 +7424,7 @@
         },
         {
           "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 111,
+          "line": 112,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/setup_copilot_codex_mcp.ps1\","
         },
@@ -7508,7 +7508,7 @@
         },
         {
           "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 107,
+          "line": 108,
           "source_group": "scripts",
           "text": "\"scripts/engineering/dev/setup_copilot_codex_mcp.sh\","
         },
@@ -9128,7 +9128,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 23,
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -9181,6 +9181,33 @@
       ]
     },
     {
+      "path": "scripts/engineering/repo/check_root_hygiene_review_registry.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": ".github/workflows/root-hygiene.yml",
+          "line": 31,
+          "source_group": "ci",
+          "text": "run: python scripts/engineering/repo/check_root_hygiene_review_registry.py"
+        },
+        {
+          "path": "scripts/engineering/repo/__main__.py",
+          "line": 41,
+          "source_group": "scripts",
+          "text": "\"check-root-review-registry\": \"check_root_hygiene_review_registry.py\","
+        },
+        {
+          "path": "tests/architecture/test_root_hygiene_workflow.py",
+          "line": 21,
+          "source_group": "tests",
+          "text": "assert \"check_root_hygiene_review_registry.py\" in workflow"
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/repo/check_scripts_catalog.py",
       "type": "py",
       "status": "active",
@@ -9201,7 +9228,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
           "text": "\"check-catalog\": \"check_scripts_catalog.py\","
         },
@@ -9240,7 +9267,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 34,
+          "line": 35,
           "source_group": "scripts",
           "text": "\"check-inventory\": \"check_scripts_inventory.py\","
         },
@@ -9309,7 +9336,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"check-versions\": \"check_version_consistency.py\","
         }
@@ -9377,7 +9404,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "\"sync-wrapper-caller-matrix\": \"generate_scripts_wrapper_caller_matrix.py\","
         }
@@ -9431,7 +9458,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 40,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"split-testing-roadmap\": \"split_testing_roadmap_issue.py\","
         },
@@ -9485,7 +9512,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 41,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"sync-docs-issues\": \"sync_docs_issues.py\","
         },
@@ -9533,7 +9560,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 35,
+          "line": 36,
           "source_group": "scripts",
           "text": "\"sync-inventory\": \"sync_scripts_inventory.py\","
         }
@@ -10176,9 +10203,9 @@
       "references": [
         {
           "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 116,
+          "line": 118,
           "source_group": "scripts",
-          "text": "Candidate(\"scripts/ops/launchers/codex/codex-headless.sh\", \"compatibility wrapper\"),"
+          "text": "\"scripts/ops/launchers/codex/codex-headless.sh\","
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
@@ -10403,7 +10430,7 @@
         },
         {
           "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 118,
+          "line": 122,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/diagnose-codex-wsl.sh\","
         },
@@ -10424,7 +10451,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 121,
+          "line": 125,
           "source_group": "scripts",
           "text": "Candidate(\"scripts/ops/launchers/codex/setup_agents.sh\", \"compatibility facade\"),"
         },
@@ -10502,7 +10529,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 122,
+          "line": 126,
           "source_group": "scripts",
           "text": "Candidate(\"scripts/ops/launchers/codex/setup_skills.sh\", \"compatibility facade\"),"
         },
