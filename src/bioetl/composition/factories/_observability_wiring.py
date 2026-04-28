@@ -60,6 +60,7 @@ def _create_cached_bronze_data_source(
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
+    metrics: MetricsPort,
     cached_bronze: CachedBronzeContext,
 ) -> DataSourcePort:
     """Create CachedBronzeDataSource for reading from Bronze cache."""
@@ -77,7 +78,7 @@ def _create_cached_bronze_data_source(
     bronze_reader = BronzeWriter(
         base_path=bronze_path,
         logger=logger,
-        metrics=resolve_metrics_port(metrics=None),
+        metrics=resolve_metrics_port(metrics=metrics, settings=settings),
         flat_structure=True,
     )
     return CachedBronzeDataSource(
@@ -120,6 +121,7 @@ def create_data_source_with_observability(
             settings=settings,
             pipeline_config=pipeline_config,
             logger=logger,
+            metrics=shared_metrics,
             cached_bronze=cached_bronze,
         )
         logger.info(

@@ -28,6 +28,8 @@ class ChemblOntologyPolicyFamily:
     family_name: str
     fields: tuple[str, ...]
     code_label_fields: tuple[str, ...] = ()
+    iri_fields: tuple[str, ...] = ()
+    version_fields: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -92,10 +94,17 @@ DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
                 "chembl_assay.bao_format",
             ),
             code_label_fields=("chembl_assay.bao_label",),
+            iri_fields=(
+                "chembl_activity.bao_endpoint_iri",
+                "chembl_activity.bao_format_iri",
+            ),
+            version_fields=("chembl_activity.bao_ontology_version",),
         ),
         ChemblOntologyPolicyFamily(
             family_name="uo",
             fields=("chembl_activity.uo_units",),
+            iri_fields=("chembl_activity.uo_unit_iri",),
+            version_fields=("chembl_activity.uo_ontology_version",),
         ),
         ChemblOntologyPolicyFamily(
             family_name="bto",

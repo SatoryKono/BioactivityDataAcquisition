@@ -203,12 +203,15 @@ def _record_multi_filter_metrics(state: _FilteredDataSourceState) -> None:
         )
 
     for field, ids in state._filter_result.column_ids.items():
+        # Keep the counter aligned with the registered metric schema.
+        # Per-field breakdown is useful, but it cannot be attached here unless the
+        # metric definition is explicitly widened in a coordinated registry change.
+        _ = field
         state._metrics.increment_counter(
             "bioetl_filter_ids_loaded_total",
             len(ids),
             {
                 "pipeline": state._pipeline_name,
                 "source_file": source_file,
-                "filter_field": field,
             },
         )
