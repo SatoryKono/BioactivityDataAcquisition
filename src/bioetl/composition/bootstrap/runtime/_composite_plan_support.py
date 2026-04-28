@@ -59,6 +59,86 @@ class CompositeBootstrapPlan:
     support_services: CompositeSupportServices
 
 
+@dataclass(frozen=True, slots=True)
+class BootstrapRuntimeResources:
+    """Resolved runtime-basics bundle shared by bootstrap orchestration."""
+
+    run_id: str
+    settings: Settings
+    logger: LoggerPort
+    metrics: MetricsPort
+    tracer: TracingPort
+    storage: object
+    lock: LockPort
+
+
+def build_bootstrap_runtime_resources(
+    *,
+    bootstrap_runtime_basics_fn: Callable[
+        ...,
+        tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort],
+    ],
+    config: CompositeConfig,
+    run_id: str | None,
+) -> BootstrapRuntimeResources:
+    """Resolve the canonical runtime-basics resource bundle."""
+    effective_run_id, settings, logger, metrics, tracer, storage, lock = (
+        bootstrap_runtime_basics_fn(
+            config=config,
+            run_id=run_id,
+        )
+    )
+    return BootstrapRuntimeResources(
+        run_id=effective_run_id,
+        settings=settings,
+        logger=logger,
+        metrics=metrics,
+        tracer=tracer,
+        storage=storage,
+        lock=lock,
+    )
+
+
+def build_bootstrap_runner_factories(
+    *,
+    build_runner_factories_fn: Callable[
+        ...,
+        tuple[
+            Callable[[], PipelineRunner],
+            Callable[[str, pl.DataFrame], PipelineRunner],
+            Callable[[str, pl.DataFrame], PipelineRunner],
+        ],
+    ],
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    logger: LoggerPort,
+) -> tuple[
+    Callable[[], PipelineRunner],
+    Callable[[str, pl.DataFrame], PipelineRunner],
+    Callable[[str, pl.DataFrame], PipelineRunner],
+]:
+    """Resolve the canonical runner-factory bundle."""
+    return build_runner_factories_fn(config=config, runtime=runtime, logger=logger)
+
+
+def build_bootstrap_support_services(
+    *,
+    build_support_services_fn: Callable[..., CompositeSupportServices],
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    resources: BootstrapRuntimeResources,
+) -> CompositeSupportServices:
+    """Resolve support services from the shared resource bundle."""
+    return build_support_services_fn(
+        config=config,
+        runtime=runtime,
+        settings=resources.settings,
+        logger=resources.logger,
+        storage=resources.storage,
+        run_id=resources.run_id,
+    )
+
+
 def load_composite_config_impl(
     name: str,
     *,
@@ -184,25 +264,31 @@ def build_composite_bootstrap_plan_impl(
     ],
     build_support_services_fn: Callable[..., CompositeSupportServices],
 ) -> CompositeBootstrapPlan:
-    infra_context = bootstrap_runtime_basics_fn(config=config, run_id=run_id)
+    runtime_resources = build_bootstrap_runtime_resources(
+        bootstrap_runtime_basics_fn=bootstrap_runtime_basics_fn,
+        config=config,
+        run_id=run_id,
+    )
     seed_runner_factory, dependencies_runner_factory, enricher_runner_factory = (
-        build_runner_factories_fn(
+        build_bootstrap_runner_factories(
+            build_runner_factories_fn=build_runner_factories_fn,
             config=config,
             runtime=runtime,
-            logger=infra_context.logger,
+            logger=runtime_resources.logger,
         )
     )
-    support_services = build_support_services_fn(
+    support_services = build_bootstrap_support_services(
+        build_support_services_fn=build_support_services_fn,
         config=config,
         runtime=runtime,
-        infra_context=infra_context,
+        resources=runtime_resources,
     )
     return CompositeBootstrapPlan(
-        run_id=infra_context.run_id,
-        logger=infra_context.logger,
-        metrics=infra_context.metrics,
-        tracer=infra_context.tracer,
-        lock=infra_context.lock,
+        run_id=runtime_resources.run_id,
+        logger=runtime_resources.logger,
+        metrics=runtime_resources.metrics,
+        tracer=runtime_resources.tracer,
+        lock=runtime_resources.lock,
         seed_runner_factory=seed_runner_factory,
         dependencies_runner_factory=dependencies_runner_factory,
         enricher_runner_factory=enricher_runner_factory,
