@@ -301,7 +301,9 @@ def _expected_provenance_only_summary_without_score(
     }
 
 
-def _assert_provenance_only_policy(summary: dict[str, object], manifest: RunManifest) -> None:
+def _assert_provenance_only_policy(
+    summary: dict[str, object], manifest: RunManifest
+) -> None:
     assert summary["reproducibility_policy_assessment"] == {
         "required_persistence_profile": "degraded_observable",
         "replay_capability": "rebuild_only",

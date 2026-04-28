@@ -5,11 +5,11 @@
 
 ## Summary
 
-- Scanned modules: `1728`
-- Internal import edges (raw): `6801`
+- Scanned modules: `1731`
+- Internal import edges (raw): `6827`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `310`
+- Cross-layer module-group edges (total): `309`
 - Cross-layer module-group edges (top 60): `60`
 
 ## Layer Dependency Graph
@@ -21,16 +21,16 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1141 OK| application
-    application -->|1003 OK| domain
-    composition -->|239 OK| application
-    composition -->|528 OK| composition
-    composition -->|367 OK| domain
+    application -->|1142 OK| application
+    application -->|1004 OK| domain
+    composition -->|240 OK| application
+    composition -->|534 OK| composition
+    composition -->|374 OK| domain
     composition -->|299 OK| infrastructure
-    domain -->|1106 OK| domain
-    infrastructure -->|743 OK| domain
+    domain -->|1111 OK| domain
+    infrastructure -->|747 OK| domain
     infrastructure -->|951 OK| infrastructure
-    interfaces -->|68 OK| application
+    interfaces -->|69 OK| application
     interfaces -->|62 OK| composition
     interfaces -->|39 OK| domain
     interfaces -->|5 OK| infrastructure
@@ -41,16 +41,16 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1141 | allowed |
-| `application`    | `domain`         |    1003 | allowed |
-| `composition`    | `application`    |     239 | allowed |
-| `composition`    | `composition`    |     528 | allowed |
-| `composition`    | `domain`         |     367 | allowed |
+| `application`    | `application`    |    1142 | allowed |
+| `application`    | `domain`         |    1004 | allowed |
+| `composition`    | `application`    |     240 | allowed |
+| `composition`    | `composition`    |     534 | allowed |
+| `composition`    | `domain`         |     374 | allowed |
 | `composition`    | `infrastructure` |     299 | allowed |
-| `domain`         | `domain`         |    1106 | allowed |
-| `infrastructure` | `domain`         |     743 | allowed |
+| `domain`         | `domain`         |    1111 | allowed |
+| `infrastructure` | `domain`         |     747 | allowed |
 | `infrastructure` | `infrastructure` |     951 | allowed |
-| `interfaces`     | `application`    |      68 | allowed |
+| `interfaces`     | `application`    |      69 | allowed |
 | `interfaces`     | `composition`    |      62 | allowed |
 | `interfaces`     | `domain`         |      39 | allowed |
 | `interfaces`     | `infrastructure` |       5 | allowed |
@@ -73,7 +73,7 @@ flowchart LR
 | `infrastructure.storage`       | `domain.ports`                  |      61 |
 | `application.services`         | `domain.ports`                  |      57 |
 | `application.services`         | `domain.types`                  |      55 |
-| `interfaces.cli`               | `application.services`          |      46 |
+| `interfaces.cli`               | `application.services`          |      47 |
 | `infrastructure.storage`       | `domain.value_objects`          |      45 |
 | `composition.bootstrap`        | `application.services`          |      42 |
 | `composition.bootstrap`        | `application.composite`         |      41 |
@@ -95,31 +95,31 @@ flowchart LR
 | `composition.factories`        | `application.services`          |      21 |
 | `composition.factories`        | `domain.schemas`                |      21 |
 | `infrastructure.config`        | `domain.types`                  |      21 |
-| `application.services`         | `domain.control_plane`          |      19 |
+| `application.services`         | `domain.control_plane`          |      20 |
 | `composition.providers`        | `infrastructure.adapters`       |      19 |
 | `application.pipelines`        | `domain.value_objects`          |      18 |
 | `application.core`             | `domain.config`                 |      17 |
 | `application.pipelines`        | `domain.ports`                  |      17 |
 | `composition.factories`        | `domain.config`                 |      16 |
 | `application.services`         | `domain.exceptions`             |      15 |
+| `composition.runtime_builders` | `domain.context`                |      15 |
+| `infrastructure.observability` | `domain.ports`                  |      15 |
 | `infrastructure.quality`       | `domain.types`                  |      15 |
 | `interfaces.observability`     | `composition.observability_api` |      15 |
 | `application.core`             | `domain.value_objects`          |      14 |
 | `composition.bootstrap`        | `infrastructure.observability`  |      14 |
-| `composition.runtime_builders` | `domain.context`                |      14 |
 | `infrastructure.schemas`       | `domain.config`                 |      14 |
 | `application.pipelines`        | `domain.context`                |      13 |
 | `application.pipelines`        | `domain.services`               |      13 |
 | `composition._services`        | `application.services`          |      13 |
 | `composition.factories`        | `domain.services`               |      13 |
-| `infrastructure.observability` | `domain.ports`                  |      13 |
 | `application.services`         | `domain.lineage`                |      12 |
+| `application.services`         | `domain.services`               |      12 |
 | `composition.factories`        | `domain.context`                |      12 |
+| `composition.runtime_builders` | `domain.control_plane`          |      12 |
 | `infrastructure.adapters`      | `domain.models`                 |      12 |
 | `application.core`             | `domain.normalization`          |      11 |
 | `application.pipelines`        | `domain.filtering`              |      11 |
-| `application.services`         | `domain.services`               |      11 |
-| `composition.runtime_builders` | `infrastructure.config`         |      11 |
 
 ## Policy Violations
 

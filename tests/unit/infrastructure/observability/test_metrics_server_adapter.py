@@ -10,6 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from bioetl.domain.ports import MetricsServerRuntimeStatus
 from bioetl.infrastructure.observability.metrics_server_adapter import (
     MetricsServerAdapter,
 )
@@ -116,6 +117,20 @@ class TestMetricsServerAdapter:
             assert adapter.is_running() is True
             mock_is_running.assert_called_once_with()
 
+    def test_get_runtime_status_delegates_to_server_module(self) -> None:
+        """Test runtime status metadata is delegated to the server module."""
+        adapter = MetricsServerAdapter()
+        runtime_status = MetricsServerRuntimeStatus(running=True, port=8000)
+
+        with patch(
+            "bioetl.infrastructure.observability.metrics_server_adapter.get_metrics_server_runtime_status"
+        ) as mock_get_status:
+            mock_get_status.return_value = runtime_status
+            result = adapter.get_runtime_status()
+
+        assert result == runtime_status
+        mock_get_status.assert_called_once_with()
+
     def test_is_running_reads_live_server_state(self) -> None:
         """Test is_running reads the current state from the server module."""
         from bioetl.infrastructure.observability import server as obs_server
@@ -125,6 +140,20 @@ class TestMetricsServerAdapter:
             obs_server.start_metrics_server(port=9999)
 
         assert adapter.is_running() is True
+
+    def test_get_runtime_status_reads_live_server_state(self) -> None:
+        """Test runtime status reads the current snapshot from the server module."""
+        from bioetl.infrastructure.observability import server as obs_server
+
+        adapter = MetricsServerAdapter()
+        with patch("bioetl.infrastructure.observability.server.start_http_server"):
+            obs_server.start_metrics_server(port=9999, addr="127.0.0.1")
+
+        status = adapter.get_runtime_status()
+        assert status.running is True
+        assert status.port == 9999
+        assert status.addr == "127.0.0.1"
+        assert status.started_at is not None
 
     def test_reset_calls_reset_server_state(self) -> None:
         """Test reset method calls reset_server_state."""

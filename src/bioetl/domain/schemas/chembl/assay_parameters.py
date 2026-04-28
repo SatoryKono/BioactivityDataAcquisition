@@ -39,15 +39,15 @@ class AssayParametersSchema(ETLRecordSchema):
     )
 
     # === Parameter Type (Optional, may be None if not provided by API) ===
-    type_raw: Series[str] | None = pa.Field(
-        nullable=True,
-        coerce=True,
-        description="Raw provider parameter type before controlled-vocabulary normalization.",
-    )
     type: Series[str] | None = pa.Field(
         nullable=True,
         coerce=True,
         description="Parameter type (e.g., CONC, PH, TEMP, TIME).",
+    )
+    type_raw: Series[str] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        description="Raw provider parameter type before controlled-vocabulary normalization.",
     )
 
     # === Raw Values (Optional) ===

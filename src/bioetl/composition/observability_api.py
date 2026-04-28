@@ -191,6 +191,11 @@ def get_metrics_operator_profile() -> MetricsOperatorProfile:
     settings = get_settings()
     metrics_service = get_metrics_service()
     status = metrics_service.get_status()
+    live_metrics_port = (
+        status.port
+        if status.running and status.port is not None
+        else settings.metrics_port
+    )
     metrics_enabled = bool(settings.observability.metrics_enabled)
     metrics_server_enabled = bool(settings.observability.metrics_server_enabled)
     metrics_endpoint = None
@@ -198,7 +203,7 @@ def get_metrics_operator_profile() -> MetricsOperatorProfile:
         metrics_endpoint = urlunsplit(
             (
                 "http",
-                f"{settings.metrics_addr}:{settings.metrics_port}",
+                f"{settings.metrics_addr}:{live_metrics_port}",
                 "/metrics",
                 "",
                 "",
@@ -217,7 +222,7 @@ def get_metrics_operator_profile() -> MetricsOperatorProfile:
         metrics_enabled=metrics_enabled,
         metrics_server_enabled=metrics_server_enabled,
         metrics_server_running=status.running,
-        metrics_port=settings.metrics_port,
+        metrics_port=live_metrics_port,
         metrics_addr=settings.metrics_addr,
         metrics_started_at=status.started_at,
         metrics_endpoint=metrics_endpoint,

@@ -180,8 +180,8 @@ CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
         pa.field("standard_value", pa.float64()),
         pa.field("text_value", pa.string()),
         # Parameter type
-        pa.field("type_raw", pa.string()),
         pa.field("type", pa.string()),
+        pa.field("type_raw", pa.string()),
         pa.field("units", pa.string()),
         pa.field("value", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===

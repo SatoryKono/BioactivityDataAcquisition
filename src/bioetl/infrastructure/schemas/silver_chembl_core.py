@@ -178,8 +178,8 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("assay_parameters", pa.string()),  # JSON string
         pa.field("assay_pref_name", pa.string()),
         pa.field("assay_strain", pa.string()),
-        pa.field("assay_subcellular_fraction_raw", pa.string()),
         pa.field("assay_subcellular_fraction", pa.string()),
+        pa.field("assay_subcellular_fraction_raw", pa.string()),
         pa.field("assay_taxonomy_id", pa.int64()),
         pa.field("assay_test_type", pa.string()),
         pa.field("assay_tissue", pa.string()),
@@ -319,8 +319,8 @@ CHEMBL_SUBCELLULAR_FRACTION_SCHEMA = pa.schema(
         # === Business fields (alphabetical order) ===
         pa.field("assay_count", pa.int64()),  # Number of assays using this fraction
         pa.field("example_assay_id", pa.string()),  # Example assay ChEMBL ID
-        pa.field("subcellular_fraction_raw", pa.string()),
         pa.field("subcellular_fraction", pa.string()),  # Primary key - fraction name
+        pa.field("subcellular_fraction_raw", pa.string()),
         # === DQ_FIELDS_SUFFIX ===
         *build_silver_dq_suffix_fields(),
     ]

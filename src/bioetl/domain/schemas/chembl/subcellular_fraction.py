@@ -16,16 +16,6 @@ __all__ = [
 class SubcellularFractionSchema(ETLRecordSchema):
     """Subcellular Fraction validation schema for Silver layer."""
 
-    subcellular_fraction_raw: Series[str] | None = pa.Field(
-        nullable=True,
-        str_length={"min_value": 1, "max_value": 200},
-        description="Raw provider subcellular-fraction lexeme before canonical normalization.",
-    )
-    subcellular_fraction: Series[str] = pa.Field(
-        nullable=False,
-        str_length={"min_value": 1, "max_value": 200},
-        description="Normalized subcellular fraction name.",
-    )
     assay_count: Series[float] | None = pa.Field(
         nullable=True,
         ge=0,
@@ -36,6 +26,16 @@ class SubcellularFractionSchema(ETLRecordSchema):
         nullable=True,
         str_matches=CHEMBL_ID_PATTERN,
         description="Example assay ChEMBL identifier.",
+    )
+    subcellular_fraction: Series[str] = pa.Field(
+        nullable=False,
+        str_length={"min_value": 1, "max_value": 200},
+        description="Normalized subcellular fraction name.",
+    )
+    subcellular_fraction_raw: Series[str] | None = pa.Field(
+        nullable=True,
+        str_length={"min_value": 1, "max_value": 200},
+        description="Raw provider subcellular-fraction lexeme before canonical normalization.",
     )
 
     class Config:
