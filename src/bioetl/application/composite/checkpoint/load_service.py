@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import fields
-
 from bioetl.application.composite.checkpoint._anchor_context import (
     ExpectedCheckpointContext,
     fresh_checkpoint_state,
@@ -25,15 +23,6 @@ from bioetl.application.composite.port_types import (
 )
 from bioetl.domain.control_plane.run_ledger import project_run_ledger_replay
 from bioetl.domain.exceptions import CheckpointConflictError
-
-
-def _copy_checkpoint_state(
-    state: CompositeCheckpointState, /, **changes: object
-) -> CompositeCheckpointState:
-    """Return a checkpoint state with the requested field updates applied."""
-    payload = {field.name: getattr(state, field.name) for field in fields(state)}
-    payload.update(changes)
-    return CompositeCheckpointState(**payload)
 
 
 def _contract_ref_mismatch(
@@ -371,8 +360,9 @@ class CompositeCheckpointLoadService:
             return state
 
         replay_projection = project_run_ledger_replay(replay_entries)
-        replayed_state = _copy_checkpoint_state(
-            state,
+        replayed_state = CompositeCheckpointState(
+            composite_name=state.composite_name,
+            run_id=state.run_id,
             state=(
                 replay_projection.state
                 if replay_projection.state is not None
@@ -390,6 +380,15 @@ class CompositeCheckpointLoadService:
             ),
             last_event_id=replay_projection.last_event_id,
             last_event_occurred_at=replay_projection.last_event_occurred_at,
+            effective_config_hash=state.effective_config_hash,
+            effective_config_artifact_id=state.effective_config_artifact_id,
+            execution_fingerprint=state.execution_fingerprint,
+            dq_contract_compatibility_hash=state.dq_contract_compatibility_hash,
+            contract_ref=state.contract_ref,
+            contract_version=state.contract_version,
+            manifest_id=state.manifest_id,
+            composite_run_identity=state.composite_run_identity,
+            created_at=state.created_at,
         )
         self._logger.info(
             "Replayed checkpoint state from run ledger",

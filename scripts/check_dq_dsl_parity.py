@@ -21,6 +21,13 @@ from typing import Any
 
 import yaml
 
+VALIDATION_SECTIONS = {
+    "entity_field_validations",
+    "entity_cross_field_validations",
+    "entity_conditional_validations",
+    "key_nullability",
+}
+
 
 def load_documentation() -> str:
     """Load DQ contracts documentation."""
@@ -148,17 +155,10 @@ def _collect_quality_validation_types(
     rule_types: set[str],
 ) -> None:
     """Collect validation sections and field rule types from a quality block."""
-    validation_sections = [
-        "entity_field_validations",
-        "entity_cross_field_validations",
-        "entity_conditional_validations",
-        "key_nullability",
-    ]
-    for section in validation_sections:
-        if section in quality:
-            validation_types.add(section)
-            if section == "entity_field_validations":
-                _collect_field_validation_rule_types(quality[section], rule_types)
+    for section in VALIDATION_SECTIONS.intersection(quality):
+        validation_types.add(section)
+        if section == "entity_field_validations":
+            _collect_field_validation_rule_types(quality[section], rule_types)
 
 
 def _collect_config_structure(
@@ -200,22 +200,17 @@ def check_documentation_coverage(
     docs_content: str, config_analysis: dict[str, Any]
 ) -> list[str]:
     """Check that all config structures are documented."""
-    issues = []
-
-    # Check validation types
-    for vtype in config_analysis["validation_types"]:
-        if vtype not in docs_content:
-            issues.append(f"❌ Validation type not documented: '{vtype}'")
-
-    # Check rule types - verify they're actually documented in the text
-    for rule_type in config_analysis["rule_types"]:
-        # Look for rule type in examples (type: rule_type) or in documentation (`rule_type`)
-        if (
-            f"type: {rule_type}" not in docs_content
-            and f"`{rule_type}`" not in docs_content
-        ):
-            issues.append(f"❌ Rule type not documented: '{rule_type}'")
-
+    issues = [
+        f"❌ Validation type not documented: '{vtype}'"
+        for vtype in config_analysis["validation_types"]
+        if vtype not in docs_content
+    ]
+    issues.extend(
+        f"❌ Rule type not documented: '{rule_type}'"
+        for rule_type in config_analysis["rule_types"]
+        if f"type: {rule_type}" not in docs_content
+        and f"`{rule_type}`" not in docs_content
+    )
     return issues
 
 

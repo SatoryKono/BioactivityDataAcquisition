@@ -137,6 +137,27 @@ class _SilverPostwriteHostProtocol(Protocol):
     ) -> SilverWriteResult | None: ...
 
 
+class _SilverPostwriteFinalizerProtocol(Protocol):
+    """Keyword-friendly finalization callable shared by mixin and service paths."""
+
+    async def __call__(
+        self,
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        table_path: str,
+        primary_keys: list[str],
+        validated_mode: SilverWriteMode,
+        bronze_refs: list[BronzeWriteResult] | None,
+        partition_cols: list[str] | None,
+        source_batch_id: BatchID | None,
+        quarantined_count: int | None = None,
+        validation_errors: Sequence[str] | None = None,
+        started_at: datetime,
+        start_perf: float,
+    ) -> SilverWriteResult | None: ...
+
+
 class _SilverPostwriteExecutorProtocol(Protocol):
     """Shared postwrite executor contract for mixin and operations implementations."""
 
@@ -180,6 +201,36 @@ async def _complete_silver_write_pipeline_impl(
     return await executor._finalize_postwrite_result(
         ctx=ctx,
         payload=payload,
+    )
+
+
+async def _finalize_silver_postwrite_result(
+    finalizer: _SilverPostwriteFinalizerProtocol,
+    *,
+    ctx: _SilverWritePostwriteContext,
+    payload: _PreparedSilverWritePayload,
+) -> SilverWriteResult | None:
+    """Finalize a postwrite payload using the shared ctx/payload contract."""
+    finalize_kwargs: dict[str, object] = {
+        "table_name": ctx.table_name,
+        "records": payload.records,
+        "table_path": payload.table_path,
+        "primary_keys": ctx.primary_keys,
+        "validated_mode": payload.validated_mode,
+        "bronze_refs": ctx.bronze_refs,
+        "partition_cols": ctx.partition_cols,
+        "source_batch_id": ctx.source_batch_id,
+        "started_at": ctx.started_at,
+        "start_perf": ctx.start_perf,
+    }
+    quarantined_count = getattr(ctx, "quarantined_count", None)
+    if quarantined_count is not None:
+        finalize_kwargs["quarantined_count"] = quarantined_count
+    validation_errors = getattr(ctx, "validation_errors", None)
+    if validation_errors is not None:
+        finalize_kwargs["validation_errors"] = validation_errors
+    return await finalizer(
+        **finalize_kwargs,  # type: ignore[arg-type]
     )
 
 
@@ -252,26 +303,10 @@ class SilverPostwriteOperations:
         payload: _PreparedSilverWritePayload,
     ) -> SilverWriteResult | None:
         """Finalize the postwrite flow after export/audit orchestration."""
-        finalize_kwargs: dict[str, object] = {
-            "table_name": ctx.table_name,
-            "records": payload.records,
-            "table_path": payload.table_path,
-            "primary_keys": ctx.primary_keys,
-            "validated_mode": payload.validated_mode,
-            "bronze_refs": ctx.bronze_refs,
-            "partition_cols": ctx.partition_cols,
-            "source_batch_id": ctx.source_batch_id,
-            "started_at": ctx.started_at,
-            "start_perf": ctx.start_perf,
-        }
-        quarantined_count = getattr(ctx, "quarantined_count", None)
-        if quarantined_count is not None:
-            finalize_kwargs["quarantined_count"] = quarantined_count
-        validation_errors = getattr(ctx, "validation_errors", None)
-        if validation_errors is not None:
-            finalize_kwargs["validation_errors"] = validation_errors
-        return await self._host._finalize_silver_write_result(
-            **finalize_kwargs,  # type: ignore[arg-type]
+        return await _finalize_silver_postwrite_result(
+            self._host._finalize_silver_write_result,
+            ctx=ctx,
+            payload=payload,
         )
 
     async def _complete_silver_write_pipeline(

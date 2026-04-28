@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
 from unittest.mock import MagicMock
 
 import pytest
@@ -20,11 +19,6 @@ from bioetl.domain.ports import CheckpointPort, LockPort, MetricsPort, Quarantin
 from bioetl.infrastructure.config import Settings
 
 
-class _StorageContextLike(Protocol):
-    @property
-    def checkpoints_path(self) -> Path: ...
-
-
 @dataclass(frozen=True, slots=True)
 class _StorageContext:
     _checkpoints_path: Path
@@ -35,7 +29,7 @@ class _StorageContext:
 
 
 @pytest.fixture
-def storage_ctx(tmp_path: Path) -> _StorageContextLike:
+def storage_ctx(tmp_path: Path) -> _StorageContext:
     return _StorageContext(_checkpoints_path=tmp_path)
 
 
@@ -48,7 +42,7 @@ def test_create_lock_returns_lock_port() -> None:
 
 @pytest.mark.unit
 def test_create_checkpoint_returns_checkpoint_port(
-    storage_ctx: _StorageContextLike,
+    storage_ctx: _StorageContext,
 ) -> None:
     """create_checkpoint returns an instance satisfying CheckpointPort."""
     checkpoint = create_checkpoint(storage_ctx)

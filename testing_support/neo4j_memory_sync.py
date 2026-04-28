@@ -2672,6 +2672,7 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
             _parameters: dict[str, object] | None = None,
             context: str | None = None,
         ) -> list[dict[str, object]]:
+            del _statement, _parameters
             query_calls.append(context or "")
             if context == "full audit label summary":
                 return [

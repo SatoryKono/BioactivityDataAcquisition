@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
 from datetime import UTC, datetime
 from uuid import uuid4
 
@@ -141,11 +140,11 @@ def _resolve_checkpoint_policy(
     """Resolve the checkpoint compatibility policy used in expectations."""
     if requested_exact_replay:
         return "hard_fail"
-    if required_profile in {"replay_ready", "forensic_grade"}:
-        if requested_policy in {"observe", "legacy_observe"}:
-            return "soft_fail"
-        return requested_policy or "soft_fail"
-    return requested_policy or "observe"
+    if required_profile not in {"replay_ready", "forensic_grade"}:
+        return requested_policy or "observe"
+    if requested_policy in {"observe", "legacy_observe"}:
+        return "soft_fail"
+    return requested_policy or "soft_fail"
 
 
 def _resume_contract_layout(

@@ -185,18 +185,20 @@ def _build_silver_records(
     count: int, run_id: str, batch_id: str
 ) -> list[dict[str, Any]]:
     ingestion_ts = "2026-03-03T00:00:00Z"
-    return [
-        {
-            "entity_id": f"entity_{i:06d}",
-            "value": float(i) * 0.1,
-            "_content_hash": f"hash_{i:06d}",
-            "_run_id": run_id,
-            "_run_type": "benchmark",
-            "_source_batch_id": batch_id,
-            "_ingestion_ts": ingestion_ts,
-        }
-        for i in range(count)
-    ]
+    records: list[dict[str, Any]] = []
+    for i in range(count):
+        records.append(
+            {
+                "entity_id": f"entity_{i:06d}",
+                "value": float(i) * 0.1,
+                "_content_hash": f"hash_{i:06d}",
+                "_run_id": run_id,
+                "_run_type": "benchmark",
+                "_source_batch_id": batch_id,
+                "_ingestion_ts": ingestion_ts,
+            }
+        )
+    return records
 
 
 def _merge_payloads(

@@ -30,15 +30,13 @@ def _load_yaml(path: str) -> dict[str, Any]:
     return payload
 
 
-def _reset_chembl_policy_registry_state() -> Generator[None, None, None]:
-    initialize_chembl_policy_registry(DEFAULT_CHEMBL_POLICY_REGISTRY_DATA)
-    yield
-    initialize_chembl_policy_registry(DEFAULT_CHEMBL_POLICY_REGISTRY_DATA)
-
-
 @pytest.fixture(autouse=True)
 def reset_chembl_policy_registry() -> Generator[None, None, None]:
-    yield from _reset_chembl_policy_registry_state()
+    initialize_chembl_policy_registry(DEFAULT_CHEMBL_POLICY_REGISTRY_DATA)
+    try:
+        yield
+    finally:
+        initialize_chembl_policy_registry(DEFAULT_CHEMBL_POLICY_REGISTRY_DATA)
 
 
 def test_chembl_policy_surface_points_to_externalized_registry_sources() -> None:

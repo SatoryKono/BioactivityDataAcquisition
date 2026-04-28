@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import errno
+from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import Protocol
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -39,10 +39,6 @@ BRONZE_BASE_PATH = "/virtual/bronze"
 SILVER_TABLE_PATH = "/virtual/silver/test/table"
 SILVER_BASE_PATH = "/virtual/silver"
 GOLD_BASE_PATH = "/virtual/gold"
-
-
-class _RetryCallback(Protocol):
-    def __call__(self, attempt: int, delay_seconds: float, error: OSError) -> None: ...
 
 
 @pytest.fixture
@@ -232,8 +228,8 @@ class TestMetadataWriter:
             path: object,
             content: object,
             *,
-            retry_policy: object,
-            on_retry: _RetryCallback,
+            retry_policy: AdaptiveRetryPolicy,
+            on_retry: Callable[[int, float, OSError], None],
         ) -> None:
             del path, content, retry_policy
             on_retry(1, 0.01, OSError(errno.EBUSY, "Device or resource busy"))

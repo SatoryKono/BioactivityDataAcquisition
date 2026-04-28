@@ -167,13 +167,18 @@ def _read_stderr_chunks(
 ) -> None:
     """Read stderr line-by-line and forward chunks to the queue."""
     while True:
-        try:
-            chunk = stream.readline()
-        except OSError:
-            chunk = b""
+        chunk = _read_stderr_chunk(stream)
         if not chunk:
             return
         chunks.put((channel, chunk))
+
+
+def _read_stderr_chunk(stream: Any) -> bytes:
+    """Read one stderr chunk from the stream."""
+    try:
+        return stream.readline()
+    except OSError:
+        return b""
 
 
 def _read_stdout_chunk(stream: Any) -> bytes:
