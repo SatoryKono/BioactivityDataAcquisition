@@ -672,8 +672,12 @@ def delete_targets(
 
     for target in targets:
         try:
+            if not target.path.exists():
+                continue
             if target.is_dir:
-                shutil.rmtree(target.path)
+                shutil.rmtree(target.path, ignore_errors=True)
+                if target.path.exists():
+                    raise OSError(f"directory still exists after cleanup: {target.path}")
             else:
                 target.path.unlink()
             deleted.append(target)

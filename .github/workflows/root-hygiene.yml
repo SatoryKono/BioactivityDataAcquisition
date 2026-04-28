@@ -28,10 +28,14 @@ jobs:
       - name: Validate root-hygiene review registry
         run: uv run python -m scripts.engineering.repo check-root-review-registry
 
+      - name: Validate structure audit
+        run: uv run python -m scripts.engineering.diagnostics audit-structure --path .
+
       - name: Run root hygiene unit tests
         run: >
           uv run pytest
           tests/unit/scripts/repo/test_audit_root_cleanliness.py
+          tests/unit/scripts/repo/test_audit_structure.py
           tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py
           tests/architecture/test_root_hygiene_workflow.py
           tests/architecture/test_root_hygiene_review_registry.py
