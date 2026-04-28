@@ -67,12 +67,12 @@
     "chembl_activity": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -379,12 +379,12 @@
     "chembl_assay": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -596,12 +596,12 @@
     "chembl_assay_parameters": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -693,12 +693,12 @@
     "chembl_cell_line": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -770,12 +770,12 @@
     "chembl_compound_record": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -837,12 +837,12 @@
     "chembl_molecule": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -1129,12 +1129,12 @@
     "chembl_protein_class": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -1211,12 +1211,12 @@
     "chembl_publication": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -1413,12 +1413,12 @@
     "chembl_publication_similarity": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -1490,12 +1490,12 @@
     "chembl_publication_term": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -1547,12 +1547,12 @@
     "chembl_subcellular_fraction": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -1594,12 +1594,12 @@
     "chembl_target": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -1721,12 +1721,12 @@
     "chembl_target_component": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -1808,12 +1808,12 @@
     "chembl_tissue": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -1870,12 +1870,12 @@
     "composite_activity": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -1907,12 +1907,12 @@
     "composite_assay": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -2033,12 +2033,12 @@
     "composite_target": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -2070,12 +2070,12 @@
     "crossref_publication": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -2312,12 +2312,12 @@
     "openalex_publication": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -2559,12 +2559,12 @@
     "pubchem_compound": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -2574,6 +2574,21 @@
           "nullable": false
         },
         "canonical_smiles": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "chemical_standardization_policy_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "chemical_standardization_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "chemical_standardization_warnings": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -2688,6 +2703,31 @@
           "dtype": "float64",
           "nullable": true
         },
+        "standardized_canonical_smiles": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standardized_inchi": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standardized_inchi_key": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "standardized_isomeric_smiles": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "structure_parent_key": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "tpsa": {
           "description": "",
           "dtype": "float64",
@@ -2721,12 +2761,12 @@
     "pubmed_publication": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -3038,12 +3078,12 @@
     "semanticscholar_publication": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -3265,12 +3305,12 @@
     "uniprot_idmapping": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
@@ -3367,12 +3407,12 @@
     "uniprot_protein": {
       "fields": {
         "_dq_error": {
-          "description": "",
+          "description": "Hard data-quality error flag.",
           "dtype": "bool",
           "nullable": false
         },
         "_dq_warn": {
-          "description": "",
+          "description": "Soft data-quality warning flag.",
           "dtype": "bool",
           "nullable": false
         },
