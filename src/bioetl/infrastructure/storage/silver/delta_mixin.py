@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-__all__ = ["SilverWriterDeltaMixin"]
+__all__ = ["SilverWriterDeltaMixin", "_DeltaWriteRequest"]
 
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.storage.delta.resilience import SilverMergeResiliencePolicy
+from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
 from bioetl.infrastructure.storage.silver.operations.delta_operations import (
     _SilverDeltaOperationFacade,
 )

@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-__all__ = ["SilverWriterValidationMixin", "_PreparedSilverWritePayload"]
+__all__ = [
+    "SilverWriterValidationMixin",
+    "_PreparedSilverWritePayload",
+    "_SilverWritePreparationRequest",
+    "_ValidatedSilverWriteContext",
+]
 
 from collections.abc import Awaitable, Callable
 
@@ -18,9 +23,11 @@ from bioetl.infrastructure.storage.silver.operations.validation_operations impor
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _deduplicate_by_primary_keys_impl,
     _PreparedSilverWritePayload,
+    _SilverWritePreparationRequest,
     _to_policy_write_mode_impl,
     _validate_key_nullability_impl,
     _validate_write_mode_impl,
+    _ValidatedSilverWriteContext,
 )
 
 

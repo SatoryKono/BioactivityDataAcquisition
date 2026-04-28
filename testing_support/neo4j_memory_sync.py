@@ -2544,7 +2544,12 @@ def test_git_last_commit_age_days_bulk_batches_history_lookup(monkeypatch) -> No
 
     calls: list[list[str]] = []
 
-    def _run(cmd: list[str], check: bool, capture_output: bool, text: bool) -> Result:
+    def _run(
+        cmd: list[str],
+        _check: bool,
+        _capture_output: bool,
+        _text: bool,
+    ) -> Result:
         calls.append(cmd)
         return Result(
             "__TS__1712448000\nsrc/a.py\nsrc/b.py\n\n__TS__1712361600\nsrc/c.py\n",
@@ -2781,7 +2786,7 @@ def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(
     captured_verify_sync_runs: list[str | None] = []
 
     class StubClient:
-        def execute(self, _statements, *, context=None) -> dict[str, object]:
+        def execute(self, _statements, *, _context=None) -> dict[str, object]:
             return {"results": [], "errors": []}
 
         def query(
@@ -2794,17 +2799,22 @@ def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(
 
     monkeypatch.setattr(
         "scripts.memory.sync.resolve_neo4j_connection",
-        lambda root, http_uri: (LOCALHOST_HTTP_URI, "neo4j", "password", "neo4j"),
+        lambda _root, _http_uri: (
+            LOCALHOST_HTTP_URI,
+            "neo4j",
+            "password",
+            "neo4j",
+        ),
     )
     monkeypatch.setattr(
-        NEO4J_HTTP_CLIENT_PATH, lambda *args, **kwargs: StubClient()
+        NEO4J_HTTP_CLIENT_PATH, lambda *_args, **_kwargs: StubClient()
     )
     monkeypatch.setattr("scripts.memory.sync._sync_run_id", lambda: "run-123")
 
-    def _retry(*args, **kwargs) -> None:
+    def _retry(*_args, **kwargs) -> None:
         captured_retry_sync_runs.append(kwargs.get("sync_run"))
 
-    def _verify(*args, **kwargs) -> None:
+    def _verify(*_args, **kwargs) -> None:
         captured_verify_sync_runs.append(kwargs.get("sync_run"))
 
     monkeypatch.setattr("scripts.memory.sync._retry_critical_analysis_groups", _retry)
@@ -2829,15 +2839,18 @@ def test_main_skips_global_post_apply_fast_audit_for_targeted_sync(
     snapshot.add_node("retirement_candidate", "retire-me.py")
     called: dict[str, int] = {"sync_snapshot": 0, "build_fast_analysis_audit_report": 0}
 
-    monkeypatch.setattr("scripts.memory.sync.build_snapshot", lambda root: snapshot)
+    monkeypatch.setattr("scripts.memory.sync.build_snapshot", lambda _root: snapshot)
     monkeypatch.setattr(
-        "scripts.memory.sync._filtered_snapshot", lambda current, **kwargs: current
+        "scripts.memory.sync._filtered_snapshot",
+        lambda current, **_kwargs: current,
     )
 
-    def _sync_snapshot(*args, **kwargs) -> None:
+    def _sync_snapshot(*_args, **_kwargs) -> None:
         called["sync_snapshot"] += 1
 
-    def _build_fast_analysis_audit_report(*args, **kwargs) -> dict[str, object]:
+    def _build_fast_analysis_audit_report(
+        *_args, **_kwargs
+    ) -> dict[str, object]:
         called["build_fast_analysis_audit_report"] += 1
         return {}
 
@@ -2896,7 +2909,7 @@ def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing
 
     monkeypatch.setattr(
         "scripts.memory.sync._read_text",
-        lambda path: "merge helper compat policy",
+        lambda _path: "merge helper compat policy",
     )
 
     def _fail_parse(path: Path) -> None:
@@ -2945,7 +2958,7 @@ def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing
 
 
 def test_neo4j_http_client_distinguishes_query_runtime_http_errors(monkeypatch) -> None:
-    def _raise_http_error(req: object, timeout: int = 60) -> object:
+    def _raise_http_error(_req: object, _timeout: int = 60) -> object:
         raise error.HTTPError(
             f"{LOCALHOST_HTTP_URI}/db/neo4j/tx/commit",
             400,
@@ -2975,7 +2988,7 @@ def test_neo4j_http_client_reports_all_transport_attempts(monkeypatch) -> None:
         error.URLError(ConnectionRefusedError(111, "Connection refused")),
     ]
 
-    def _raise_transport_error(req: object, timeout: int = 60) -> object:
+    def _raise_transport_error(_req: object, _timeout: int = 60) -> object:
         raise responses.pop(0)
 
     monkeypatch.setattr("scripts.memory.sync.request.urlopen", _raise_transport_error)
