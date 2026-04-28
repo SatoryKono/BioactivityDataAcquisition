@@ -1,8 +1,7 @@
-"""Application-local default implementation for runtime ClockPort wiring."""
+"""Application-local runtime ClockPort helpers."""
 
 from __future__ import annotations
 
-import time
 from datetime import UTC, datetime
 
 from bioetl.domain.ports import ClockPort
@@ -11,16 +10,21 @@ __all__ = ["RuntimeClock", "resolve_runtime_clock"]
 
 
 class RuntimeClockService(ClockPort):
-    """ClockPort implementation used when legacy application constructors omit one."""
+    """Explicit system ClockPort implementation for runtime wiring."""
 
     def now(self) -> datetime:
         """Return current UTC time through the ClockPort seam."""
-        return datetime.fromtimestamp(time.time(), UTC)
+        return datetime.now(UTC)
 
 
 RuntimeClock = RuntimeClockService
 
 
 def resolve_runtime_clock(clock: ClockPort | None) -> ClockPort:
-    """Return an explicit runtime clock for application services."""
-    return clock or RuntimeClockService()
+    """Return the explicit runtime clock required by application services."""
+    if clock is None:
+        raise RuntimeError(
+            "ClockPort is required for runtime timestamp generation; "
+            "system-time fallbacks are not allowed."
+        )
+    return clock

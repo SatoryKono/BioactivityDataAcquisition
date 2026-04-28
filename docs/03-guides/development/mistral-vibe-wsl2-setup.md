@@ -14,8 +14,9 @@ ______________________________________________________________________
 # Mistral Vibe: Setup and Usage via WSL2
 
 Guide for running Mistral Vibe in this repository from WSL2 or from
-Windows through the canonical launchers in `scripts/ai/vibe/` or the
-compatibility wrappers in `scripts/ai/mistrallvibe/`.
+Windows through the preferred router `python -m scripts.ai vibe`, the
+canonical launchers in `scripts/ai/vibe/`, or the retained compatibility
+wrappers in `scripts/ai/mistrallvibe/`.
 
 ______________________________________________________________________
 
@@ -77,6 +78,14 @@ export MISTRAL_API_KEY="your_mistral_api_key"
 ______________________________________________________________________
 
 ## Launch
+
+Preferred public entrypoint:
+
+```bash
+python -m scripts.ai vibe
+python -m scripts.ai vibe "inspect the failing architecture tests"
+python -m scripts.ai vibe --prompt "fix the failing architecture test" --max-turns 5
+```
 
 From WSL/Linux:
 

@@ -65,7 +65,9 @@ def _load_workspace_mcp_config(
 ) -> tuple[dict[str, object], Path]:
     """Load generated config when backend works, else fall back to committed artifact."""
     result = run_repo_python(
-        "scripts/engineering/dev/setup_copilot_codex_mcp.py",
+        "-m",
+        "scripts.engineering.dev",
+        "setup-mcp",
         "--root",
         str(tmp_path),
         "--skip-codex",

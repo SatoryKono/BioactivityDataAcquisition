@@ -28,21 +28,24 @@ from pathlib import Path
 
 from scripts.engineering.common.cli_dispatch import (
     dispatch_cli,
+    module_command,
     print_help,
     python_command,
     shell_command,
 )
 
-COMMAND_SPECS = {
+_PYTHON_COMMANDS = {
     "install-deps": "install_deps.py",
     "migrate-deprecated-names": "python/migrate_deprecated_names.py",
     "probe-quality": "quality_gate_probe.py",
     "run-tests": "run_tests.py",
     "mock-metrics": "metrics_mock_server.py",
     "mock-quarantine": "quarantine_explorer_mock_server.py",
-    "setup-mcp": "setup_copilot_codex_mcp.py",
 }
-COMMAND_SPECS = {name: python_command(script) for name, script in COMMAND_SPECS.items()}
+COMMAND_SPECS = {
+    name: python_command(script) for name, script in _PYTHON_COMMANDS.items()
+}
+COMMAND_SPECS["setup-mcp"] = module_command("scripts.ai.codex.setup_mcp")
 
 SHELL_COMMANDS = {
     "setup": "dev_setup.sh",

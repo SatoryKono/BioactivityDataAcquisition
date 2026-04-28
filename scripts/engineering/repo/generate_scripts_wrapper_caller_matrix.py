@@ -112,17 +112,39 @@ CANDIDATES: Final[tuple[Candidate, ...]] = (
         "scripts/engineering/dev/setup_copilot_codex_mcp.ps1",
         "PowerShell transport facade",
     ),
+    Candidate(
+        "scripts/ai/mistrallvibe/run-vibe.sh",
+        COMPATIBILITY_WRAPPER_ROLE,
+    ),
+    Candidate(
+        "scripts/ai/mistrallvibe/run-vibe.ps1",
+        COMPATIBILITY_WRAPPER_ROLE,
+    ),
     Candidate("scripts/ops/launchers/codex/codex.sh", "public launcher facade"),
     Candidate("scripts/ops/launchers/codex/codex-exec.sh", "public launcher facade"),
+    Candidate("scripts/ops/launchers/codex/codex-exec.bat", "public launcher facade"),
     Candidate(
         "scripts/ops/launchers/codex/codex-headless.sh",
+        COMPATIBILITY_WRAPPER_ROLE,
+    ),
+    Candidate(
+        "scripts/ops/launchers/codex/codex-headless.ps1",
         COMPATIBILITY_WRAPPER_ROLE,
     ),
     Candidate(
         "scripts/ops/launchers/codex/diagnose-codex-wsl.sh",
         COMPATIBILITY_WRAPPER_ROLE,
     ),
+    Candidate(
+        "scripts/ops/launchers/codex/diagnose-codex-wsl.bat",
+        COMPATIBILITY_WRAPPER_ROLE,
+    ),
+    Candidate(
+        "scripts/ops/launchers/codex/diagnose-codex-wsl.ps1",
+        COMPATIBILITY_WRAPPER_ROLE,
+    ),
     Candidate("scripts/ops/launchers/codex/setup_agents.sh", "compatibility facade"),
+    Candidate("scripts/ops/launchers/codex/setup_plugins.sh", "compatibility facade"),
     Candidate("scripts/ops/launchers/codex/setup_skills.sh", "compatibility facade"),
 )
 

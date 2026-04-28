@@ -251,14 +251,14 @@ workflow.
 control-plane contract docs, MUST быть выполнено:
 
 ```bash
-python scripts/docs/check_doc_links.py
+python -m scripts.docs check-links
 python -m scripts.docs build-site --strict
 ```
 
 Для drift-sensitive documentation surfaces SHOULD дополнительно выполняться:
 
 ```bash
-python scripts/docs/check_doc_drift.py
+python -m scripts.docs check-drift
 ```
 
 Если меняются template entrypoints или governance cross-links, SHOULD

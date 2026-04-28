@@ -9,6 +9,7 @@ from bioetl.application.services._observability_trace_support import (
     build_trace_urls,
     resolve_manifest_provider,
     resolve_manifest_run_type,
+    resolve_primary_composite_run_id,
 )
 from bioetl.application.services._observability_trace_support import (
     trace_links_enabled as _trace_links_enabled,
@@ -158,12 +159,14 @@ def build_traceability_section(
     identity_graph = run_manifest.identity_graph if run_manifest is not None else {}
     provider = resolve_manifest_provider(run_manifest)
     run_type = resolve_manifest_run_type(run_manifest)
+    composite_run_id = resolve_primary_composite_run_id(diagnostics)
     trace_urls = (
         build_trace_urls(
             run_id=run_id,
             pipeline_name=resolve_pipeline_name(run_manifest),
             provider=provider,
             run_type=run_type,
+            composite_run_id=composite_run_id,
             run_manifest=run_manifest,
             audit=audit,
         )
@@ -255,6 +258,8 @@ def collect_traceability_degradation(traceability: dict[str, object]) -> list[st
         degraded.extend(collect_persistence_profile_degradation(persistence_profile))
     if has_correlation_anchor_gaps(traceability):
         degraded.append("correlation_anchor_gaps")
+    if has_composite_correlation_policy_gap(traceability):
+        degraded.append("composite_correlation_policy_gap")
     if not traceability.get("trace_links_available", False):
         degraded.append("trace_links_unavailable")
     return degraded
@@ -282,6 +287,19 @@ def has_correlation_anchor_gaps(traceability: dict[str, object]) -> bool:
     correlation_gaps = traceability.get("correlation_anchor_gaps")
     return isinstance(correlation_gaps, dict) and any(
         isinstance(value, int) and value > 0 for value in correlation_gaps.values()
+    )
+
+
+def has_composite_correlation_policy_gap(traceability: dict[str, object]) -> bool:
+    composite_projection = traceability.get("composite_projection")
+    if not isinstance(composite_projection, dict):
+        return False
+    if composite_projection.get("composite_run_id_consistent") is False:
+        return True
+    correlation_policy = composite_projection.get("correlation_policy")
+    return (
+        isinstance(correlation_policy, dict)
+        and correlation_policy.get("status") not in {None, "satisfied"}
     )
 
 
@@ -333,6 +351,11 @@ def _degraded_evidence_steps(degraded_evidence: tuple[str, ...]) -> tuple[str, .
         steps.append(
             "Use audit, manifest, and lineage sections as the current traceability "
             "fallback."
+        )
+    if "composite_correlation_policy_gap" in degraded_evidence:
+        steps.append(
+            "Repair composite_run_id correlation anchors before using the dossier "
+            "as authoritative composite traceability evidence."
         )
     return tuple(steps)
 

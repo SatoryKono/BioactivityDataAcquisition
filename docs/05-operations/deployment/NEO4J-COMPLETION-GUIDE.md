@@ -9,7 +9,7 @@ Configuration files:
 - `.mcp.json` (Codex CLI)
 - `.vscode/mcp.json` (VS Code Copilot)
 - `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` (wrapper script)
-- `scripts/engineering/dev/setup_copilot_codex_mcp.py` (setup automation)
+- `python -m scripts.engineering.dev setup-mcp` (public setup command)
 
 ⏳ **Pending**: Neo4j backend container startup on your machine.
 
@@ -221,4 +221,4 @@ The MCP server is registered but not responding.
 - Neo4j Docker Hub: https://hub.docker.com/_/neo4j
 - Neo4j Documentation: https://neo4j.com/docs/
 - MCP Specification: https://modelcontextprotocol.io/
-- Project MCP Config: See `setup_copilot_codex_mcp.py` for full automation
+- Project MCP Config: run `python -m scripts.engineering.dev setup-mcp` for full automation

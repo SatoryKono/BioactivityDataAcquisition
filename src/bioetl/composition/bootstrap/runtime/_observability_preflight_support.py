@@ -25,6 +25,14 @@ class _ControlPlaneSettingsFn(Protocol):
 _FORENSIC_GRADE_PROFILE = "forensic_grade"
 
 
+def requires_forensic_grade_observability_evidence(
+    *,
+    required_persistence_profile: str,
+) -> bool:
+    """Return whether runtime preflight must fail closed for observability evidence."""
+    return required_persistence_profile == _FORENSIC_GRADE_PROFILE
+
+
 def _raise_if_noop_in_prod(
     *,
     condition: bool,

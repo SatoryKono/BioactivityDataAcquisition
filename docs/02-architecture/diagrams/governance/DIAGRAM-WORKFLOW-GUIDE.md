@@ -73,14 +73,16 @@ tree `views/*.mermaid`. Файлы в `svg/`, `png/`, `bundles/`, `descriptions/
 `svg/`. Деревья `png/` сохраняются как compatibility/export layer и не должны
 снова трактоваться как единственный обязательный surface для чтения bundle-файлов.
 
-Для Markdown bundle generation каноническим entrypoint теперь считается:
+Для Markdown bundle generation каноническими публичными entrypoints теперь считаются:
 
 ```bash
-python -m scripts.diagrams.generate_all_bundles --collection <name>
+python -m scripts.diagrams render-pdf
+python -m scripts.diagrams render-views
 ```
 
-где `<name>` — одна из коллекций `architecture`, `class-diagrams`,
-`foundation`, `views`.
+Нижележащий backend `python -m scripts.diagrams.generate_all_bundles --collection <name>`
+остаётся canonical leaf implementation, но для обычных пользователей и
+документации следует предпочитать router surface `scripts.diagrams`.
 
 Legacy entrypoints `generate_architecture_bundle.py` и
 `generate_views_bundle.py` поддерживаются как compatibility wrappers и не

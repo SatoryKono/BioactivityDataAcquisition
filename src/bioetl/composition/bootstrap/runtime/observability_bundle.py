@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.composition.bootstrap.runtime._observability_preflight_support import (
+    requires_forensic_grade_observability_evidence,
     validate_control_plane_readiness,
     validate_forensic_grade_observability_evidence,
     validate_prod_noop_components,
@@ -58,7 +59,9 @@ def validate_observability_preflight_impl(
         logger: LoggerPort used to emit structured preflight warning events.
     """
     required_profile = _control_plane_settings(control_plane=control_plane)[0]
-    forensic_grade_required = required_profile == "forensic_grade"
+    forensic_grade_required = requires_forensic_grade_observability_evidence(
+        required_persistence_profile=required_profile,
+    )
     if environment != "prod" and not forensic_grade_required:
         return
     if environment == "prod":

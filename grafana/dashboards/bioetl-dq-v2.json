@@ -698,7 +698,7 @@
             },
             "targets": [
                 {
-                    "expr": "sum by (pipeline) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))",
+                    "expr": "sum by (pipeline) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or label_replace(vector(0), \"pipeline\", \"no_events\", \"\", \"\")",
                     "instant": true,
                     "legendFormat": "{{pipeline}}",
                     "refId": "A"

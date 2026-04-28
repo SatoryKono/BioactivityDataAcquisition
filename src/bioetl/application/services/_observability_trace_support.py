@@ -29,16 +29,24 @@ def build_trace_ids(
     trace_links_available: bool,
 ) -> list[str]:
     explicit_trace_ids = diagnostics.get("trace_ids")
+    composite_run_id = resolve_primary_composite_run_id(diagnostics)
     if isinstance(explicit_trace_ids, list):
         normalized = [
             value.strip()
             for value in explicit_trace_ids
             if isinstance(value, str) and value.strip()
         ]
+        if composite_run_id is not None:
+            normalized.append(composite_run_id)
         if normalized:
             return list(dict.fromkeys(normalized))
+    generated: list[str] = []
     if trace_links_available and run_id:
-        return [run_id]
+        generated.append(run_id)
+    if composite_run_id is not None:
+        generated.append(composite_run_id)
+    if generated:
+        return list(dict.fromkeys(generated))
     return []
 
 
@@ -69,6 +77,7 @@ def build_trace_urls(
     pipeline_name: str | None,
     provider: str | None,
     run_type: str | None,
+    composite_run_id: str | None,
     run_manifest: RunManifestInspectionResult | None,
     audit: AuditInspectionResult,
 ) -> list[str]:
@@ -77,6 +86,7 @@ def build_trace_urls(
         pipeline_name=pipeline_name,
         provider=provider,
         run_type=run_type,
+        composite_run_id=composite_run_id,
     )
     if query is None:
         return []
@@ -102,6 +112,7 @@ def build_traceql_query(
     pipeline_name: str | None,
     provider: str | None,
     run_type: str | None,
+    composite_run_id: str | None,
 ) -> str | None:
     if not run_id:
         return None
@@ -112,7 +123,28 @@ def build_traceql_query(
         filters.append(f'span."bioetl.run_type" = "{run_type}"')
     if provider:
         filters.append(f'span."bioetl.provider" = "{provider}"')
+    if composite_run_id:
+        filters.append(f'span."bioetl.composite_run_id" = "{composite_run_id}"')
     return "{ " + " && ".join(filters) + " }"
+
+
+def resolve_primary_composite_run_id(diagnostics: dict[str, object]) -> str | None:
+    """Return one canonical composite correlation anchor when dossier projection has it."""
+    projection = diagnostics.get("composite_dossier_projection")
+    if not isinstance(projection, dict):
+        return None
+    candidate = projection.get("primary_composite_run_id")
+    if isinstance(candidate, str) and candidate.strip():
+        return candidate.strip()
+    composite_run_ids = projection.get("composite_run_ids")
+    if (
+        isinstance(composite_run_ids, list)
+        and len(composite_run_ids) == 1
+        and isinstance(composite_run_ids[0], str)
+        and composite_run_ids[0].strip()
+    ):
+        return composite_run_ids[0].strip()
+    return None
 
 
 def build_trace_time_window(

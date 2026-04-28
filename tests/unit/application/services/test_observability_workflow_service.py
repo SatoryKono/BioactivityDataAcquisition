@@ -458,3 +458,15 @@ async def test_inspect_run_dossier_surfaces_composite_projection() -> None:
     result = await service.inspect_run_dossier("abc")
 
     assert result.traceability["composite_projection"] == projection
+    assert result.traceability["trace_ids"] == ["abc", "composite-run-1"]
+    trace_url = result.traceability["trace_urls"][0]
+    parsed_query = parse_qs(urlsplit(trace_url).query)
+    assert parsed_query["query"] == [
+        (
+            '{ span."bioetl.run_id" = "abc" && '
+            'span."bioetl.pipeline" = "composite_activity" && '
+            'span."bioetl.run_type" = "incremental" && '
+            'span."bioetl.provider" = "chembl" && '
+            'span."bioetl.composite_run_id" = "composite-run-1" }'
+        )
+    ]

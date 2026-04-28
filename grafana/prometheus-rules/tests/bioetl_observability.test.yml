@@ -173,3 +173,119 @@ tests:
               summary: Provider rate-limiter tokens were depleted
               description: Rate-limiter tokens dropped below 1 for provider=pubchem within the last 15m.
               runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: pipeline-runs-without-processed-records
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: '0+1x50'
+      - series: 'bioetl_records_processed_total{pipeline="chembl",run_type="incremental",stage="gold"}'
+        values: '0x50'
+    alert_rule_test:
+      - eval_time: 40m
+        alertname: BioETLNoRecordsProcessed
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              run_type: incremental
+            exp_annotations:
+              summary: Pipeline runs completed without processing records
+              description: At least one pipeline run was observed for pipeline=chembl run_type=incremental over the last 30m, but bioetl_records_processed_total did not increase.
+              runbook: docs/05-operations/runbooks/pipeline-failure-critical.md
+
+  - name: dq-quarantine-rate-warning
+    interval: 1m
+    input_series:
+      - series: 'bioetl_records_processed_total{pipeline="chembl",run_type="incremental",stage="bronze"}'
+        values: '0+10x50'
+      - series: 'bioetl_dq_records_quarantined_total{pipeline="chembl",run_type="incremental",error_type="schema"}'
+        values: '0+1x50'
+    alert_rule_test:
+      - eval_time: 40m
+        alertname: BioETLDQQuarantineRateHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              run_type: incremental
+            exp_annotations:
+              summary: DQ quarantine rate is elevated
+              description: Quarantine rate stayed between 5% and 20% for pipeline=chembl run_type=incremental over the last 30m, with at least 20 bronze records observed.
+              runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+
+  - name: dq-quarantine-rate-critical
+    interval: 1m
+    input_series:
+      - series: 'bioetl_records_processed_total{pipeline="chembl",run_type="incremental",stage="bronze"}'
+        values: '0+10x30'
+      - series: 'bioetl_dq_records_quarantined_total{pipeline="chembl",run_type="incremental",error_type="schema"}'
+        values: '0+3x30'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLDQQuarantineRateCritical
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+              run_type: incremental
+            exp_annotations:
+              summary: DQ quarantine rate reached hard-fail territory
+              description: Quarantine rate exceeded 20% for pipeline=chembl run_type=incremental over the last 15m, with at least 20 bronze records observed.
+              runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+
+  - name: data-freshness-warning
+    interval: 1m
+    input_series:
+      - series: 'bioetl_data_freshness_seconds{pipeline="chembl",entity="activity"}'
+        values: '-90000x40'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLDataFreshnessLagHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              entity: activity
+            exp_annotations:
+              summary: Data freshness lag is elevated
+              description: time() - bioetl_data_freshness_seconds stayed between 24h and 72h for pipeline=chembl entity=activity.
+              runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+
+  - name: data-freshness-critical
+    interval: 1m
+    input_series:
+      - series: 'bioetl_data_freshness_seconds{pipeline="chembl",entity="activity"}'
+        values: '-260000x40'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLDataFreshnessLagCritical
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+              entity: activity
+            exp_annotations:
+              summary: Data freshness lag is critical
+              description: time() - bioetl_data_freshness_seconds exceeded 72h for pipeline=chembl entity=activity.
+              runbook: docs/05-operations/runbooks/dq-failure-investigation.md
+
+  - name: control-plane-read-failure-rate
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_reads_total{store="manifest",operation="read_latest",status="failed"}'
+        values: '0+2x50'
+      - series: 'bioetl_control_plane_reads_total{store="manifest",operation="read_latest",status="success"}'
+        values: '0+10x50'
+    alert_rule_test:
+      - eval_time: 40m
+        alertname: BioETLControlPlaneReadFailureRate
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              store: manifest
+              operation: read_latest
+            exp_annotations:
+              summary: Control-plane read failure rate is elevated
+              description: Control-plane read failure rate exceeded 5% for store=manifest operation=read_latest in the last 30m.
+              runbook: docs/05-operations/runbooks/observability-checklist.md

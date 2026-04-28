@@ -8,12 +8,14 @@ Tests verify that:
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import polars as pl
 import pytest
 
 from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
+from tests.helpers.clock import FixedClock
 
 
 @pytest.fixture
@@ -53,6 +55,7 @@ def coordinator(mock_logger, mock_dq_config) -> EnrichmentCoordinatorService:
         logger=mock_logger,
         dq_config=mock_dq_config,
         max_concurrency=4,
+        clock=FixedClock(datetime(2026, 4, 28, 12, 0, tzinfo=UTC)),
     )
 
 

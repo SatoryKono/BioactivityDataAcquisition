@@ -96,23 +96,15 @@ def _build_canonical_event_payload(
         default_run_id=_coerce_text(raw_event_data.get("run_id"), fallback="unknown"),
         default_severity=_default_severity(raw_event_data),
     ).context
-    payload: JsonDict = {
-        "event_name": event_name,
-        "event": canonical["event"],
-        "event_family": canonical["event_family"],
-        "event_data": raw_event_data,
-        "timestamp": timestamp.isoformat(),
-        "provider": canonical["provider"],
-        "pipeline": canonical["pipeline"],
-        "run_id": canonical["run_id"],
-        "severity": canonical["severity"],
-        "error_type": canonical["error_type"],
-        "context": canonical,
-    }
+    payload: JsonDict = dict(canonical)
+    payload["recorded_at"] = timestamp.isoformat()
+    payload["context"] = dict(canonical)
+    payload["event_name"] = event_name
+    payload["event_data"] = raw_event_data
+    payload["timestamp"] = payload["recorded_at"]
     for field in _CANONICAL_AUDIT_OPTIONAL_FIELDS:
-        value = canonical.get(field)
-        if value is not None:
-            payload[field] = value
+        if field in canonical and canonical[field] is not None:
+            payload[field] = canonical[field]
     return payload
 
 

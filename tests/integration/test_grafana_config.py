@@ -1472,6 +1472,16 @@ def test_silver_filter_rejects_summary_panels_use_instant_queries(
             "Global Control-plane Lookup Outcomes",
             'label_replace(label_replace(vector(0), "store", "none", "", ""), "status", "none", "", "")',
         ),
+        (
+            "bioetl-control-plane-v1.json",
+            "Checkpoint Compatibility Outcomes by Disposition",
+            'label_replace(vector(0), "disposition", "no_events", "", "")',
+        ),
+        (
+            "bioetl-dq-v2.json",
+            "Silver Filter Rejects by Pipeline",
+            'label_replace(vector(0), "pipeline", "no_events", "", "")',
+        ),
     ],
 )
 def test_empty_state_distribution_panels_use_explicit_placeholder_series(
