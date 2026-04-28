@@ -85,12 +85,8 @@ class TestFixtureGovernanceRollout:
 
         assert fixture_governance.get("root_vcr_policy_enforced") is True
         assert rollout.get("extensionless_filenames") in {"partial", "enforced"}
-        assert (
-            "python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py" in workflow
-        )
-        assert (
-            "python scripts/engineering/qa/vcr/check_vcr_filename_policy.py" in workflow
-        )
+        assert "python -m scripts.engineering.qa.vcr check-placement" in workflow
+        assert "python -m scripts.engineering.qa.vcr check-naming" in workflow
         assert not legacy_dir.exists(), (
             "legacy tests/fixtures/vcr_cassettes directory must stay removed"
         )
@@ -163,7 +159,7 @@ class TestFixtureGovernanceRollout:
                 "enforced cassette stale-age rollout requires *_meta.yaml inventory"
             )
             assert (
-                "python scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90"
+                "python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
                 in workflow
             )
 

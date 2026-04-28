@@ -66,7 +66,7 @@ def test_tests_workflow_routes_coverage_xml_under_reports() -> None:
 def test_tests_workflow_enforces_scripts_lifecycle_governance() -> None:
     """Merge pipeline must validate scripts inventory drift + lifecycle policy."""
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
-    assert "scripts/engineering/repo/check_scripts_inventory.py" in workflow
+    assert "python -m scripts.engineering.repo check-inventory" in workflow
     assert "configs/quality/scripts_inventory_manifest.json" in workflow
     assert "configs/quality/scripts_lifecycle_registry.json" in workflow
     assert "--forbid-evaluate-active" in workflow
@@ -75,7 +75,7 @@ def test_tests_workflow_enforces_scripts_lifecycle_governance() -> None:
 def test_tests_workflow_enforces_scripts_catalog_governance() -> None:
     """Merge pipeline must validate scripts catalog policy."""
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
-    assert "scripts/engineering/repo/check_scripts_catalog.py" in workflow
+    assert "python -m scripts.engineering.repo check-catalog" in workflow
     assert "scripts/engineering/repo/catalog.yaml" in workflow
 
 

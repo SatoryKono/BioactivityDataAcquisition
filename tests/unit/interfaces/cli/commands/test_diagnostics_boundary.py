@@ -16,6 +16,8 @@ def test_diagnostics_group_exposes_expected_commands() -> None:
         "metrics",
         "health",
         "run",
+        "dossier",
+        "contract-checks",
         "checkpoint",
         "manifest",
         "quarantine",
