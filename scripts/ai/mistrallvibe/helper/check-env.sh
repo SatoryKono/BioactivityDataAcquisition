@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Helper: Check Mistral Vibe environment
-# Called by: run-vibe.sh
+# Called by: python -m scripts.ai vibe check
 
 set -euo pipefail
 

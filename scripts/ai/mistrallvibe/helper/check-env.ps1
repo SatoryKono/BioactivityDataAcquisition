@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
 # Helper: Check Mistral Vibe environment on Windows with timeouts
-# Called by: run-vibe.ps1
+# Called by: python -m scripts.ai vibe check
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RootDir = Split-Path -Parent $ScriptDir
@@ -119,6 +119,6 @@ if ($allChecks) {
     Write-Success "All checks passed"
     exit 0
 } else {
-    Write-Warn "Some components need setup - run: .\run-vibe.ps1 setup"
+    Write-Warn "Some components need setup - run: python -m scripts.ai vibe setup"
     exit 1
 }

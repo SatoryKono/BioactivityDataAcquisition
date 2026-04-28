@@ -39,6 +39,10 @@ from bioetl.application.services.control_plane.run_manifest_reproducibility_scor
     build_reproducibility_audit_scoring,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
+from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+    assess_reproducibility_policy,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,6 +93,33 @@ def _resolve_base_summary_replay_context(
         ),
         replay_family_contract=_resolve_replay_family_contract(manifest),
     )
+
+
+def _build_reproducibility_policy_assessment(
+    manifest: RunManifest,
+    replay_context: _BaseSummaryReplayContext,
+) -> dict[str, object]:
+    """Return the canonical replay policy verdict for diagnostics consumers."""
+    replay_family_contract = replay_context.replay_family_contract
+    required_profile = (
+        manifest.launch_context.get("required_persistence_profile")
+        or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+    )
+    assessment = assess_reproducibility_policy(
+        source_refs=manifest.source_refs,
+        required_persistence_profile=required_profile,
+        strict_exact_replay_supported=bool(
+            replay_family_contract.get("strict_exact_replay_supported", False)
+        ),
+        exact_replay_requested=replay_context.requested_exact_replay,
+        resume_requested=replay_context.resume_requested,
+        require_full_snapshot_envelope=(
+            replay_family_contract.get("contract")
+            == "composite_snapshot_backed_exact_replay"
+        ),
+        replay_capability=manifest.replay_capability,
+    )
+    return assessment.to_dict()
 
 
 def _build_base_summary_payload(
@@ -158,6 +189,9 @@ def _build_base_summary_payload(
         ),
         "replay_mode": replay_context.replay_mode,
         "replay_family_contract": replay_context.replay_family_contract,
+        "reproducibility_policy_assessment": (
+            _build_reproducibility_policy_assessment(manifest, replay_context)
+        ),
         "resume_contract": replay_context.resume_contract,
         "resume_diagnostics": None,
         "lineage_closure_boundary": build_lineage_closure_boundary(
@@ -277,6 +311,10 @@ def _build_unified_reproducibility_diagnostics(
                 "exact_replay_support_boundary"
             ),
             "exact_replay_blockers": summary.get("exact_replay_blockers", []),
+            "policy_assessment": summary.get(
+                "reproducibility_policy_assessment",
+                {},
+            ),
         },
         "semantic_identity": {
             "execution_fingerprint": summary.get("execution_fingerprint"),
@@ -372,133 +410,6 @@ def build_diagnostics_summary(
         _build_unified_reproducibility_diagnostics(final_summary)
     )
     return final_summary
-
-
-def _build_artifact_ref(entry: RunLedgerEntry) -> dict[str, object] | None:
-    if entry.event_family != "artifact" and entry.event_type != "artifact_published":
-        return None
-    details = entry.details or {}
-    artifact_path = details.get("artifact_path")
-    artifact_ref: dict[str, object] = {
-        "event_type": entry.event_type,
-        "stage": entry.stage,
-        "artifact_id": entry.dataset_ref,
-        "dataset_ref": entry.dataset_ref,
-        "lineage_fragment_id": entry.lineage_fragment_id,
-        "artifact_path": None if artifact_path is None else str(artifact_path),
-    }
-    for detail_key in (
-        "metadata_path",
-        "artifact_kind",
-        "record_count",
-        "total_bytes",
-        "pipeline_name",
-        "provider",
-        "entity",
-        "run_id",
-        "manifest_id",
-    ):
-        detail_value = details.get(detail_key)
-        if detail_value is not None:
-            artifact_ref[detail_key] = detail_value
-    return artifact_ref
-
-
-def _resolve_policy_value(values: set[str]) -> str | None:
-    """Return one canonical policy value or an explicit mixed-policy marker."""
-    if not values:
-        return None
-    if len(values) == 1:
-        return next(iter(values))
-    return "mixed"
-
-
-def _build_alert_signals(
-    *,
-    latest_status: str | None,
-    artifact_refs: list[dict[str, object]],
-    lineage_fragment_ids: set[str],
-    missing_link_count: int,
-    composite_resume_reconstructability_gap: bool,
-    dq_signal_present: bool,
-    cross_validation_signal_present: bool,
-    replay_ready_missing_requirements: list[str],
-    forensic_grade_missing_requirements: list[str],
-) -> dict[str, bool]:
-    """Map diagnostics summary to alert-oriented boolean signals."""
-    latest_status_normalized = (latest_status or "").strip().lower()
-    artifact_ref_count = len(artifact_refs)
-    has_artifact_refs = artifact_ref_count > 0
-    immutable_input_snapshot_gap = (
-        "immutable_input_snapshots" in replay_ready_missing_requirements
-    )
-    strict_replay_boundary_gap = (
-        "strict_replay_execution_context_support" in replay_ready_missing_requirements
-    )
-    return {
-        "run_failed": latest_status_normalized == "failed",
-        "run_shutdown": latest_status_normalized == "shutdown",
-        "artifact_linkage_gap": missing_link_count > 0,
-        "lineage_gap": has_artifact_refs and not lineage_fragment_ids,
-        "immutable_input_snapshot_gap": immutable_input_snapshot_gap,
-        "strict_replay_boundary_gap": strict_replay_boundary_gap,
-        "composite_resume_reconstructability_gap": (
-            composite_resume_reconstructability_gap
-        ),
-        "replay_ready_gap": bool(replay_ready_missing_requirements),
-        "forensic_grade_gap": bool(forensic_grade_missing_requirements),
-        "dq_signal_present": dq_signal_present,
-        "cross_validation_signal_present": cross_validation_signal_present,
-    }
-
-
-_NEXT_STEP_MAPPING = {
-    "run_failed": "Inspect failure classification and decide retry/quarantine/escalation.",
-    "artifact_linkage_gap": (
-        "Validate artifact publication metadata and repair dataset/lineage links."
-    ),
-    "lineage_gap": "Investigate lineage persistence for published artifacts before restart.",
-    "immutable_input_snapshot_gap": (
-        "Persist immutable cached Bronze input snapshots before treating this run as "
-        "strict exact-replay capable."
-    ),
-    "strict_replay_boundary_gap": (
-        "Treat this execution context as outside the strict exact-replay support "
-        "boundary; use rebuild/resume semantics instead of exact replay."
-    ),
-    "composite_resume_reconstructability_gap": (
-        "Treat composite resume as checkpoint snapshot plus ledger suffix replay "
-        "only; do not expect per-provider result maps or other rich checkpoint "
-        "payloads to be reconstructed."
-    ),
-    "replay_ready_gap": (
-        "Review replay-ready persistence requirements before treating this run as "
-        "exact-replay capable."
-    ),
-    "forensic_grade_gap": (
-        "Review forensic-grade persistence requirements before using this run for "
-        "full trace/debug reconstruction."
-    ),
-    "dq_signal_present": (
-        "Review DQ report artifacts, rule IDs, and contract policy anchors before "
-        "retry or escalation."
-    ),
-    "cross_validation_signal_present": (
-        "Review cross-validation mismatch outcomes and composite policy anchors "
-        "before retry or quarantine changes."
-    ),
-    "run_shutdown": "Confirm graceful shutdown reason and resume policy compatibility.",
-}
-
-
-def _build_next_steps(alert_signals: dict[str, bool]) -> list[str]:
-    """Return operator-oriented next steps based on active alert signals."""
-    steps = [
-        msg for key, msg in _NEXT_STEP_MAPPING.items() if alert_signals.get(key, False)
-    ]
-    if not steps:
-        steps.append("No alert signals detected; continue routine monitoring.")
-    return steps
 
 
 __all__ = ["build_diagnostics_summary"]

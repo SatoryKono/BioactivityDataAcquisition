@@ -517,6 +517,12 @@
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded WSL setup helper for Codex; remove it once terminal setup is standardized."
+    },
+    "scripts/ops/observability/grafana/live_tracing_mode_smoke.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded live Grafana tracing-mode smoke helper for manual observability diagnostics; remove it once tracing-on/off datasource validation is either automated through a governed CI lane or explicitly retired."
     }
   }
 }

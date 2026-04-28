@@ -72,6 +72,42 @@ def normalize_required_persistence_profile(required_profile: object) -> str:
     return profile or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
 
 
+def resolve_effective_required_persistence_profile(
+    *,
+    configured_required_profile: object,
+    family_default_profile: object,
+    exact_replay_requested: bool = False,
+) -> str:
+    """Resolve the effective policy profile for one run launch.
+
+    Default/development launches remain degraded-observable unless explicitly
+    tightened. Exact-replay launches for supported families inherit the family
+    default so the pre-run gate cannot silently run below the published support
+    boundary.
+    """
+    configured = normalize_required_persistence_profile(configured_required_profile)
+    family_default = normalize_required_persistence_profile(family_default_profile)
+    if (
+        exact_replay_requested
+        and configured == DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+        and family_default in STRICT_PERSISTENCE_PROFILES
+    ):
+        return family_default
+    return configured
+
+
+def legacy_config_hash_from_resolved_config_hash(
+    resolved_config_hash: str | None,
+) -> str | None:
+    """Return the documented legacy config_hash compatibility alias.
+
+    New control-plane surfaces carry both resolved_config_hash and
+    effective_config_hash. The legacy config_hash field is intentionally the
+    resolved-config identity while downstream consumers are migrated.
+    """
+    return resolved_config_hash
+
+
 def build_snapshot_envelope_status(
     *,
     source_refs: tuple[RunSourceRef, ...],
@@ -163,6 +199,8 @@ __all__ = [
     "SnapshotEnvelopeStatus",
     "assess_reproducibility_policy",
     "build_snapshot_envelope_status",
+    "legacy_config_hash_from_resolved_config_hash",
     "normalize_required_persistence_profile",
+    "resolve_effective_required_persistence_profile",
     "resolve_replay_capability",
 ]

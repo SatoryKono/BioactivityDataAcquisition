@@ -14,9 +14,8 @@ ______________________________________________________________________
 # Mistral Vibe: Setup and Usage via WSL2
 
 Guide for running Mistral Vibe in this repository from WSL2 or from
-Windows through the preferred router `python -m scripts.ai vibe`, the
-canonical launchers in `scripts/ai/vibe/`, or the retained compatibility
-wrappers in `scripts/ai/mistrallvibe/`.
+Windows through the preferred router `python -m scripts.ai vibe` and the
+canonical launchers in `scripts/ai/vibe/`.
 
 ______________________________________________________________________
 
@@ -25,8 +24,6 @@ ______________________________________________________________________
 - Project-local Vibe config: `.vibe/config.toml`
 - Canonical WSL launcher: `scripts/ai/vibe/launch.sh`
 - Canonical Windows PowerShell launcher: `scripts/ai/vibe/launch.ps1`
-- Compatibility WSL launcher: `scripts/ai/mistrallvibe/run-vibe.sh`
-- Compatibility Windows PowerShell launcher: `scripts/ai/mistrallvibe/run-vibe.ps1`
 - Compatibility setup helper: `scripts/ai/mistrallvibe/helper/setup-env.sh`
 
 The project-local config is discovered automatically by Vibe before
@@ -95,26 +92,11 @@ bash scripts/ai/vibe/launch.sh "inspect the failing architecture tests"
 bash scripts/ai/vibe/launch.sh --prompt "fix the failing architecture test" --max-turns 5
 ```
 
-Compatibility wrapper:
-
-```bash
-bash scripts/ai/mistrallvibe/run-vibe.sh
-bash scripts/ai/mistrallvibe/run-vibe.sh "inspect the failing architecture tests"
-bash scripts/ai/mistrallvibe/run-vibe.sh --prompt "fix the failing architecture test" --max-turns 5
-```
-
 From Windows PowerShell:
 
 ```powershell
 pwsh -File .\scripts\ai\vibe\launch.ps1
 pwsh -File .\scripts\ai\vibe\launch.ps1 "inspect the failing architecture tests"
-```
-
-Compatibility wrapper:
-
-```powershell
-.\scripts\ai\mistrallvibe\run-vibe.ps1
-.\scripts\ai\mistrallvibe\run-vibe.ps1 "inspect the failing architecture tests"
 ```
 
 From Windows CMD:
@@ -124,8 +106,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai\vibe\launch.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai\vibe\launch.ps1 "inspect the failing architecture tests"
 ```
 
-The wrappers pass `--workdir` with the repository root so Vibe starts in
-the correct project context regardless of the current shell directory.
+The canonical launchers pass `--workdir` with the repository root so Vibe
+starts in the correct project context regardless of the current shell
+directory.
 
 If `vibe` is not found in a fresh shell after installation, source the uv
 user-tool environment once:

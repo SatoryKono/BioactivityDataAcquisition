@@ -229,6 +229,14 @@ def _diagnostics_section_items(
         ("correlation_anchor_gaps", diagnostics.get("correlation_anchor_gaps")),
         ("persistence_profile", diagnostics.get("persistence_profile")),
         (
+            "reproducibility_policy_assessment",
+            diagnostics.get("reproducibility_policy_assessment"),
+        ),
+        (
+            "reproducibility_diagnostics",
+            diagnostics.get("reproducibility_diagnostics"),
+        ),
+        (
             "reproducibility_audit_score",
             diagnostics.get("reproducibility_audit_score"),
         ),

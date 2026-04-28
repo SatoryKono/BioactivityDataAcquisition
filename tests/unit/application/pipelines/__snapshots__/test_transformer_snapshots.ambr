@@ -92,6 +92,7 @@
     'assay_pref_name': None,
     'assay_strain': None,
     'assay_subcellular_fraction': None,
+    'assay_subcellular_fraction_raw': None,
     'assay_taxonomy_id': 9606,
     'assay_test_type': None,
     'assay_tissue': None,

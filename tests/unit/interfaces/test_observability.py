@@ -19,13 +19,13 @@ from bioetl.interfaces import observability
 # interfaces.observability is a compatibility facade over composition.observability_api.
 
 
-# Mock `_SERVER_STARTED` to isolate state among test cases.
+# Reset metrics server state to isolate tests.
 @pytest.fixture(autouse=True)
 def reset_server_started():
-    """Reset the `_SERVER_STARTED` before each test."""
-    obs_server._SERVER_STARTED = False  # Ensure isolation
+    """Reset metrics server state before each test."""
+    obs_server.reset_server_state()
     yield
-    obs_server._SERVER_STARTED = False  # Cleanup
+    obs_server.reset_server_state()
 
 
 def test_start_metrics_server_success():

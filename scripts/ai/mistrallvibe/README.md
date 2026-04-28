@@ -8,39 +8,30 @@ Preferred public entrypoint:
 
 ```bash
 python -m scripts.ai vibe --help
+python -m scripts.ai vibe check
+python -m scripts.ai vibe setup
 python -m scripts.ai vibe
 python -m scripts.ai vibe "explain this code"
 ```
 
-Use the compatibility wrappers below only when you intentionally need the
-historical file-path surface.
+This directory is retained for setup helpers and historical context; prefer the
+canonical `scripts.ai.vibe` surface for actual launch commands.
 
-### Windows (PowerShell)
-
-```powershell
-cd scripts/ai/mistrallvibe
-notepad .env.mistrallvibe    # Add MISTRAL_API_KEY
-.\run-vibe.ps1
-```
-
-### Linux/WSL (Bash)
+Edit the compatibility env file, then launch through the canonical surface:
 
 ```bash
-cd scripts/ai/mistrallvibe
-nano .env.mistrallvibe       # Add MISTRAL_API_KEY
-./run-vibe.sh
+nano scripts/ai/mistrallvibe/.env.mistrallvibe
+python -m scripts.ai vibe
 ```
 
 ## 📋 Commands
 
 ```bash
 python -m scripts.ai vibe --help  # Preferred public entrypoint
+python -m scripts.ai vibe check   # Preferred setup verification
+python -m scripts.ai vibe setup   # Preferred installer/bootstrap
 python -m scripts.ai vibe         # Preferred interactive mode
-./run-vibe.sh check                # Verify setup
-./run-vibe.sh setup                # Install/configure Vibe
-./run-vibe.sh                      # Interactive mode
-./run-vibe.sh "explain this code"  # Send prompt
-./run-vibe.sh --help               # Help
+python -m scripts.ai vibe "explain this code"
 ```
 
 ## 🔐 Configuration
@@ -60,11 +51,14 @@ See the canonical Vibe surface for current behavior and launch options:
 - `scripts/ai/vibe/README.md` - primary launcher documentation
 - `scripts/ai/vibe/launch.sh` - canonical WSL/Linux entrypoint
 - `scripts/ai/vibe/launch.ps1` - canonical Windows PowerShell entrypoint
+- `scripts/ai/mistrallvibe/helper/setup-env.sh` - retained compatibility setup helper
+- `scripts/ai/mistrallvibe/helper/setup-env.ps1` - retained compatibility setup helper
 
 ## 🏗️ Structure
 
-`scripts/ai/mistrallvibe/` keeps historical entrypoints, but the actual launch
-path is delegated to `scripts/ai/vibe/launch.sh` and `scripts/ai/vibe/launch.ps1`.
+`scripts/ai/mistrallvibe/` keeps historical setup helpers and compatibility
+context, but the actual launch path is now `scripts/ai/vibe/launch.sh` and
+`scripts/ai/vibe/launch.ps1`.
 
 ## 🚀 Features
 
@@ -83,5 +77,5 @@ execution path.
 ## ✨ Ready!
 
 ```powershell
-.\run-vibe.ps1
+python -m scripts.ai vibe
 ```

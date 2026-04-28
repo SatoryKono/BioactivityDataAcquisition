@@ -208,8 +208,9 @@ echo ""
 log_info "Next steps:"
 echo "  1. Get your API key: https://console.mistral.ai/api-keys/"
 echo "  2. Edit .env.mistrallvibe and add MISTRAL_API_KEY"
-echo "  3. Start Vibe: ./run-vibe.sh"
-echo "  4. Or run with a prompt: ./run-vibe.sh \"inspect the failing tests\""
+echo "  3. Verify setup: python -m scripts.ai vibe check"
+echo "  4. Start Vibe: python -m scripts.ai vibe"
+echo "  5. Or run with a prompt: python -m scripts.ai vibe \"inspect the failing tests\""
 echo ""
 
 if ! timeout 5 bash -c "command -v vibe >/dev/null 2>&1"; then

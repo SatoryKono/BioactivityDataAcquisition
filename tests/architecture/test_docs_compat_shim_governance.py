@@ -21,7 +21,6 @@ DOCS_SHIMS = (
     "scripts/docs/generate_pipeline_normalization_field_matrix.py",
     "scripts/docs/normalize_chembl_matrix_workbook.py",
     "scripts/docs/report_docs_kpi.py",
-    "scripts/docs/run_mkdocs_build.py",
     "scripts/docs/sentence_doc_audit.py",
     "scripts/docs/sync_chembl_matrix_structural_policy.py",
     "scripts/docs/sync_repo_identity.py",

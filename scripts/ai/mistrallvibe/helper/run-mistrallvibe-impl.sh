@@ -110,7 +110,7 @@ status_vibe() {
         log_info "Web UI: http://${VIBE_HOST}:${VIBE_PORT}"
     else
         log_warn "Vibe is NOT running"
-        log_info "Start with: ./run-vibe.sh"
+        log_info "Start with: python -m scripts.ai vibe"
     fi
     return 0
 }

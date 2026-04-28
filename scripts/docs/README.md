@@ -146,5 +146,4 @@ The exported contract now includes runtime-resolved `field_policy` overlays such
 | File                               | Description                                                                                    |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------- |
 | `scripts/docs/build_docs_site.sh`  | Shell compatibility wrapper around the packaged MkDocs build entrypoint; prefer `python -m scripts.docs build-site` |
-| `scripts/docs/run_mkdocs_build.py` | Python compatibility shim for the packaged MkDocs build entrypoint; prefer `python -m scripts.docs build-site`      |
 | `scripts/docs/check_doc_links.py`  | Historical special-case shim that preserves the old monkeypatchable module surface for tests   |

@@ -121,7 +121,8 @@ class TestMetricsServerAdapter:
         from bioetl.infrastructure.observability import server as obs_server
 
         adapter = MetricsServerAdapter()
-        obs_server._SERVER_STARTED = True
+        with patch("bioetl.infrastructure.observability.server.start_http_server"):
+            obs_server.start_metrics_server(port=9999)
 
         assert adapter.is_running() is True
 

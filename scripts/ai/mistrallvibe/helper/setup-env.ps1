@@ -172,10 +172,10 @@ Write-Host "  2. Edit .env.mistrallvibe and add MISTRAL_API_KEY:"
 Write-Host "     notepad .\scripts\ai\mistrallvibe\.env.mistrallvibe"
 Write-Host ""
 Write-Host "  3. Verify installation:"
-Write-Host "     .\scripts\ai\mistrallvibe\run-vibe.ps1 check"
+Write-Host "     python -m scripts.ai vibe check"
 Write-Host ""
 Write-Host "  4. Start Vibe:"
-Write-Host "     .\scripts\ai\mistrallvibe\launch-interactive.ps1"
+Write-Host "     python -m scripts.ai vibe"
 Write-Host ""
 
 exit 0
