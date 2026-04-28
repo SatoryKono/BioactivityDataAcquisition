@@ -9,6 +9,11 @@ from typing import TYPE_CHECKING, cast
 import click
 
 from bioetl.interfaces.cli.commands.checkpoint import _render_checkpoint_payload
+from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
+    add_audit_run_options,
+    add_checkpoint_workflow_options,
+    run_async_inspection_command,
+)
 from bioetl.interfaces.cli.commands.domains.diagnostics.rendering import (
     build_diagnostics_guide_lines,
     build_metrics_profile_lines,
@@ -141,53 +146,24 @@ def diagnostics_metrics(output_json: bool) -> None:
 
 
 @diagnostics.command("run")
-@click.option("--run-id", required=True, help="Pipeline RUN_ID to inspect")
-@click.option("--limit", default=100, show_default=True, help="Maximum audit entries")
-@click.option(
-    "--format",
-    "output_format",
-    type=click.Choice(["text", "json", "yaml"]),
-    default="text",
-    help="Output format",
-)
+@add_audit_run_options
 def diagnostics_run(run_id: str, limit: int, output_format: str) -> None:
     """Inspect one pipeline run as a bounded forensic dossier."""
     bundle = get_observability_diagnostics_bundle()
 
-    async def _inspect() -> None:
-        try:
-            result = await bundle.workflow_service.inspect_run_dossier(
-                run_id,
-                audit_limit=limit,
-            )
-        except ValueError as exc:
-            echo_error("Run diagnostics failed", str(exc))
-            return
-        emit_inspection_payload(
-            result.to_dict(),
-            output_format,
-            text_renderer=render_run_dossier_payload,
-        )
-
-    asyncio.run(_inspect())
+    run_async_inspection_command(
+        lambda: bundle.workflow_service.inspect_run_dossier(
+            run_id,
+            audit_limit=limit,
+        ),
+        error_title="Run diagnostics failed",
+        output_format=output_format,
+        text_renderer=render_run_dossier_payload,
+    )
 
 
 @diagnostics.command("checkpoint")
-@click.option("--pipeline", required=True, help="Pipeline name")
-@click.option("--run-id", default=None, help="Optional RUN_ID override")
-@click.option(
-    "--audit-limit",
-    default=100,
-    show_default=True,
-    help="Maximum audit entries",
-)
-@click.option(
-    "--format",
-    "output_format",
-    type=click.Choice(["text", "json", "yaml"]),
-    default="text",
-    help="Output format",
-)
+@add_checkpoint_workflow_options
 def diagnostics_checkpoint(
     pipeline: str,
     run_id: str | None,
@@ -197,23 +173,16 @@ def diagnostics_checkpoint(
     """Inspect checkpoint state with correlated audit and run-manifest context."""
     bundle = get_observability_diagnostics_bundle()
 
-    async def _inspect() -> None:
-        try:
-            result = await bundle.workflow_service.inspect_checkpoint_workflow(
-                pipeline,
-                run_id=run_id,
-                audit_limit=audit_limit,
-            )
-        except ValueError as exc:
-            echo_error("Checkpoint diagnostics failed", str(exc))
-            return
-        emit_inspection_payload(
-            result.to_dict(),
-            output_format,
-            text_renderer=_render_checkpoint_payload,
-        )
-
-    asyncio.run(_inspect())
+    run_async_inspection_command(
+        lambda: bundle.workflow_service.inspect_checkpoint_workflow(
+            pipeline,
+            run_id=run_id,
+            audit_limit=audit_limit,
+        ),
+        error_title="Checkpoint diagnostics failed",
+        output_format=output_format,
+        text_renderer=_render_checkpoint_payload,
+    )
 
 
 @diagnostics.command("manifest")

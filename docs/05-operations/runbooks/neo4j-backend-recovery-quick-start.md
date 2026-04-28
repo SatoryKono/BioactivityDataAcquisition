@@ -85,13 +85,13 @@ ______________________________________________________________________
 
 | Need                  | File                                   |
 | --------------------- | -------------------------------------- |
-| Automated recovery    | `scripts/neo4j-recovery-checklist.ps1` |
-| Manual Docker restart | `scripts/restart-docker.ps1`           |
-| WSL setup             | `scripts/setup-neo4j-wsl.sh`           |
+| Automated recovery    | `scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1` |
+| Manual Docker restart | `scripts/ops/runtime/docker/restart-docker.ps1` |
+| WSL setup             | `scripts/memory/setup/wsl_startup.sh` |
 | Docker Compose        | `docker-compose.neo4j.yml`             |
-| Bolt test             | `test_neo4j_connection.js` (repo root) |
-| Detailed guide        | `NEO4J_COMPLETE_RECOVERY_GUIDE.md`     |
-| What changed          | `CRITICAL_ISSUES_FIXED.md`             |
+| MCP/backend check     | `scripts/ai/mcp/check_neo4j_memory.sh` |
+| Detailed guide        | `docs/05-operations/runbooks/neo4j-complete-recovery-guide.md` |
+| Memory sync/query     | `scripts/memory/README.md` |
 
 ______________________________________________________________________
 

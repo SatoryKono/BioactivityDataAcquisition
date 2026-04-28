@@ -132,31 +132,44 @@ try {
 }
 
 Write-Host ""
-Write-Host "═ STEP 5: Test Bolt Driver (7687) ═" -ForegroundColor Magenta
+Write-Host "═ STEP 5: Verify MCP and Backend (7687) ═" -ForegroundColor Magenta
 Write-Host ""
-Write-Host "Testing: node test_neo4j_connection.js"
+Write-Host "Testing: bash scripts/ai/mcp/check_neo4j_memory.sh"
 Write-Host ""
 
-if (-not (Test-Path "test_neo4j_connection.js")) {
-    Write-Host "❌ test_neo4j_connection.js not found in repo root"
+if (-not (Test-Path "scripts/ai/mcp/check_neo4j_memory.sh")) {
+    Write-Host "❌ scripts/ai/mcp/check_neo4j_memory.sh not found"
     exit 1
 }
 
 $driverTestPassed = $false
-try {
-    & node test_neo4j_connection.js
-    $driverTestPassed = $LASTEXITCODE -eq 0
-} catch {
-    Write-Host "❌ Error running test: $_"
+if (Get-Command bash -ErrorAction SilentlyContinue) {
+    try {
+        & bash scripts/ai/mcp/check_neo4j_memory.sh
+        $driverTestPassed = $LASTEXITCODE -eq 0
+    } catch {
+        Write-Host "❌ Error running verification: $_"
+        $driverTestPassed = $false
+    }
+} elseif (Get-Command codex -ErrorAction SilentlyContinue) {
+    try {
+        & codex mcp get neo4j-memory
+        $driverTestPassed = $LASTEXITCODE -eq 0
+    } catch {
+        Write-Host "❌ Error checking Codex MCP registration: $_"
+        $driverTestPassed = $false
+    }
+} else {
+    Write-Host "❌ Neither bash nor codex is available for verification"
     $driverTestPassed = $false
 }
 
 if ($driverTestPassed) {
     Write-Host ""
-    Write-Host "✅ Bolt driver connectivity test PASSED"
+    Write-Host "✅ MCP/backend verification PASSED"
 } else {
     Write-Host ""
-    Write-Host "❌ Bolt driver connectivity test FAILED"
+    Write-Host "❌ MCP/backend verification FAILED"
     Write-Host ""
     Write-Host "Detailed container logs:"
     docker logs bioetl-neo4j | Select-Object -Last 100
@@ -184,10 +197,10 @@ Write-Host "1. Verify MCP in Codex:"
 Write-Host "   codex interactive"
 Write-Host "   Type: @neo4j-memory"
 Write-Host ""
-Write-Host "2. Check if seed scripts exist:"
-Write-Host "   ls /tmp/seed_test_docs_memory.js /tmp/query_test_docs_memory.js"
+Write-Host "2. Run deterministic memory audit:"
+Write-Host "   python -m scripts.memory sync --report-fast --report /tmp/neo4j-memory-audit.json"
 Write-Host ""
-Write-Host "3. If seed scripts exist, load data:"
-Write-Host "   node /tmp/seed_test_docs_memory.js"
+Write-Host "3. Apply deterministic memory sync when ready:"
+Write-Host "   python -m scripts.memory sync --apply"
 Write-Host ""
 Write-Host "Backend is now ready for MCP integration! 🎉"

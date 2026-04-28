@@ -44,7 +44,7 @@ if (Test-Path $dockerPath) {
             Write-Host "Next steps:" -ForegroundColor Cyan
             Write-Host "1. docker compose -f docker-compose.neo4j.yml up"
             Write-Host "2. Wait 60 seconds for Neo4j to start"
-            Write-Host "3. node test_neo4j_connection.js"
+            Write-Host "3. bash scripts/ai/mcp/check_neo4j_memory.sh"
         } else {
             Write-Host "❌ Docker daemon still unresponsive. Please try again in 30 seconds." -ForegroundColor Red
         }
