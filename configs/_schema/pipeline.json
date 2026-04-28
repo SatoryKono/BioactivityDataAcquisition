@@ -996,6 +996,10 @@
       "title": "InputFilterYamlConfig",
       "type": "object"
     },
+    "JsonDict": {
+      "additionalProperties": true,
+      "type": "object"
+    },
     "MaintenanceConfig": {
       "description": "Configuration for automated maintenance operations.",
       "properties": {
@@ -1507,16 +1511,14 @@
     "filter_rules": {
       "anyOf": [
         {
-          "additionalProperties": true,
-          "type": "object"
+          "$ref": "#/$defs/JsonDict"
         },
         {
           "type": "null"
         }
       ],
       "default": null,
-      "description": "Inline filter overrides. Applied on top of filter_config_file. Format: {input_filter: {...}, gold_filters: {...}}",
-      "title": "Filter Rules"
+      "description": "Inline filter overrides. Applied on top of filter_config_file. Format: {input_filter: {...}, gold_filters: {...}}"
     },
     "business_primary_keys": {
       "anyOf": [

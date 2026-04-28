@@ -66,6 +66,7 @@ class RunManifestInspectionIdentityGraphMixin:
                 "execution_fingerprint": manifest.execution_fingerprint,
                 "payload": canonical_execution_identity,
             },
+            "exact_replay_anchors": diagnostics.get("exact_replay_anchors", {}),
             "degraded_runtime_anchor": {
                 "compatibility_scope": "legacy_fallback_only",
                 "fingerprint": (
@@ -258,6 +259,10 @@ class RunManifestInspectionIdentityGraphMixin:
                 for artifact in manifest.planned_artifacts
             ],
             "published_artifacts": [],
+            "produced_artifact_trace": diagnostics.get(
+                "produced_artifact_trace",
+                {},
+            ),
             "occurrence_only_diagnostics": diagnostics.get(
                 "occurrence_only_diagnostics", []
             ),

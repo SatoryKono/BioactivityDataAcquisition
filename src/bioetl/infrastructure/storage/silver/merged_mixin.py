@@ -111,15 +111,16 @@ class SilverWriterMergedMixin:
             sources_used: Optional list of source identifiers contributing to the merge.
             preserve_column_order: If True, skip canonical column reordering.
         """
+        request_kwargs = dict(
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+        )
+        request_kwargs["completed_at"] = completed_at
+        request_kwargs["run_id"] = run_id
+        request_kwargs["sources_used"] = sources_used
+        request_kwargs["preserve_column_order"] = preserve_column_order
         await _execute_merged_silver_write_flow(
             self,
-            _build_merged_silver_write_request(
-                table_name=table_name,
-                records=records,
-                primary_keys=primary_keys,
-                completed_at=completed_at,
-                run_id=run_id,
-                sources_used=sources_used,
-                preserve_column_order=preserve_column_order,
-            ),
+            _build_merged_silver_write_request(**request_kwargs),
         )

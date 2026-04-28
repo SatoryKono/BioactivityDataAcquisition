@@ -180,6 +180,7 @@ stringData:
   # These should be rotated regularly and stored in a secrets management system
   BIOETL_PII_SALT_CURRENT: "change_me_to_random_64_char_string_abc123xyz789"
   BIOETL_UNIPROT_API_KEY: "your_uniprot_api_key_here"
+  BIOETL_OPENALEX_API_KEY: "your_openalex_api_key_here"
   BIOETL_OPENALEX_EMAIL: "your_email@example.com"
   BIOETL_SEMANTICSCHOLAR_API_KEY: "your_semantic_scholar_api_key_here"
   BIOETL_PUBMED_API_KEY: "your_ncbi_api_key_here"

@@ -120,6 +120,76 @@ def _expected_degraded_runtime_anchor(manifest: RunManifest) -> dict[str, object
     }
 
 
+def _expected_exact_replay_anchors(
+    manifest: RunManifest,
+    *,
+    published_artifact_ids: list[str] | None = None,
+    published_artifact_paths: list[str] | None = None,
+    lineage_fragment_ids: list[str] | None = None,
+) -> dict[str, object]:
+    return {
+        "semantic_identity_anchor": "execution_fingerprint",
+        "execution_fingerprint": manifest.execution_fingerprint,
+        "pipeline_name": manifest.pipeline_name,
+        "run_type": manifest.run_type.value,
+        "pipeline_version": manifest.code_provenance.pipeline_version,
+        "git_commit": manifest.code_provenance.git_commit,
+        "effective_config_hash": manifest.code_provenance.effective_config_hash,
+        "dq_contract_compatibility_hash": (
+            manifest.code_provenance.dq_contract_compatibility_hash
+        ),
+        "contract_ref": manifest.code_provenance.contract_ref,
+        "contract_version": manifest.code_provenance.contract_version,
+        "effective_config_artifact_id": (
+            manifest.code_provenance.effective_config_artifact_id
+        ),
+        "input_snapshot_identity_fingerprint": None,
+        "input_snapshot_ids": [],
+        "input_snapshot_content_hashes": [],
+        "published_artifact_ids": published_artifact_ids or [],
+        "published_artifact_paths": published_artifact_paths or [],
+        "lineage_fragment_ids": lineage_fragment_ids or [],
+    }
+
+
+def _expected_missing_produced_artifact_trace(
+    manifest: RunManifest,
+) -> dict[str, object]:
+    return {
+        "lookup": "run_ledger_by_manifest_id",
+        "lookup_key": manifest.manifest_id,
+        "manifest_id": manifest.manifest_id,
+        "complete": False,
+        "artifact_count": 0,
+        "artifacts": [],
+        "missing_requirements": [
+            "run_ledger_history",
+            "artifact_publication_event",
+        ],
+    }
+
+
+def _expected_produced_artifact_trace(manifest: RunManifest) -> dict[str, object]:
+    return {
+        "lookup": "run_ledger_by_manifest_id",
+        "lookup_key": manifest.manifest_id,
+        "manifest_id": manifest.manifest_id,
+        "complete": True,
+        "artifact_count": 1,
+        "artifacts": [
+            {
+                "event_type": "artifact_published",
+                "stage": "silver",
+                "artifact_id": "silver:chembl.activity@1",
+                "dataset_ref": "silver:chembl.activity@1",
+                "lineage_fragment_id": "silver:fragment-1",
+                "artifact_path": "data/output/silver/chembl/activity",
+            }
+        ],
+        "missing_requirements": [],
+    }
+
+
 def _manifest_execution_context(manifest: RunManifest) -> str:
     """Return the effective execution context for a manifest."""
     return (
@@ -413,6 +483,13 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "input_snapshots": [],
         "planned_artifacts": [],
         "occurrence_only_diagnostics": [],
+        "artifact_refs": [],
+        "lineage_fragment_ids": [],
+        "published_artifact_count": 0,
+        "exact_replay_anchors": _expected_exact_replay_anchors(manifest),
+        "produced_artifact_trace": _expected_missing_produced_artifact_trace(
+            manifest
+        ),
         "persistence_profile": {
             "attained_profile": "degraded_observable",
             "required_profile": "degraded_observable",
@@ -429,6 +506,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
                 "strict_replay_execution_context_support": True,
                 "immutable_input_snapshots": False,
                 "exact_replay_capability": False,
+                "produced_artifact_trace": False,
                 "run_ledger_history": False,
                 "artifact_lineage_links": True,
                 "lineage_closure_boundary_support": True,
@@ -437,10 +515,12 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
             "replay_ready_missing_requirements": [
                 "exact_replay_capability",
                 "immutable_input_snapshots",
+                "produced_artifact_trace",
             ],
             "forensic_grade_missing_requirements": [
                 "exact_replay_capability",
                 "immutable_input_snapshots",
+                "produced_artifact_trace",
                 "run_ledger_history",
             ],
             "composite_resume_reconstructability": {
@@ -469,6 +549,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
             "immutable_input_snapshot_gap": True,
             "strict_replay_boundary_gap": False,
             "reproducible_semantic_output_mode_gap": False,
+            "produced_artifact_trace_gap": True,
             "lineage_closure_boundary_gap": False,
             "composite_resume_reconstructability_gap": False,
             "required_persistence_profile_gap": False,
@@ -479,6 +560,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         },
         "next_steps": [
             "Persist immutable cached Bronze input snapshots before treating this run as strict exact-replay capable.",
+            "Resolve concrete produced artifacts from the run ledger before claiming replay-ready reproducibility.",
             "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
             "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         ],
@@ -533,10 +615,13 @@ def test_build_diagnostics_summary_surfaces_required_profile_gap() -> None:
     assert summary["persistence_profile"]["required_profile_missing_requirements"] == [
         "exact_replay_capability",
         "immutable_input_snapshots",
+        "produced_artifact_trace",
     ]
     assert summary["alert_signals"]["required_persistence_profile_gap"] is True
+    assert summary["alert_signals"]["produced_artifact_trace_gap"] is True
     assert summary["next_steps"] == [
         "Persist immutable cached Bronze input snapshots before treating this run as strict exact-replay capable.",
+        "Resolve concrete produced artifacts from the run ledger before claiming replay-ready reproducibility.",
         "Current persisted surfaces do not satisfy the declared required persistence profile for this run.",
         "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
         "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
@@ -823,6 +908,12 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "canonical_execution_identity": _expected_canonical_execution_identity(
             manifest
         ),
+        "exact_replay_anchors": _expected_exact_replay_anchors(
+            manifest,
+            published_artifact_ids=["silver:chembl.activity@1"],
+            published_artifact_paths=["data/output/silver/chembl/activity"],
+            lineage_fragment_ids=["silver:fragment-1"],
+        ),
         "degraded_runtime_anchor": _expected_degraded_runtime_anchor(manifest),
         "replay_capability": "rebuild_only",
         "requested_exact_replay": False,
@@ -851,6 +942,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
                 "artifact_path": "data/output/silver/chembl/activity",
             }
         ],
+        "produced_artifact_trace": _expected_produced_artifact_trace(manifest),
         "occurrence_only_diagnostics": [],
     }
     assert summary["persistence_profile"] == {
@@ -869,6 +961,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
             "strict_replay_execution_context_support": True,
             "immutable_input_snapshots": False,
             "exact_replay_capability": False,
+            "produced_artifact_trace": True,
             "run_ledger_history": True,
             "artifact_lineage_links": True,
             "lineage_closure_boundary_support": True,
@@ -909,6 +1002,15 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
     }
     assert summary["cross_validation_signal_present"] is False
     assert summary["occurrence_only_diagnostics"] == []
+    assert summary["exact_replay_anchors"] == _expected_exact_replay_anchors(
+        manifest,
+        published_artifact_ids=["silver:chembl.activity@1"],
+        published_artifact_paths=["data/output/silver/chembl/activity"],
+        lineage_fragment_ids=["silver:fragment-1"],
+    )
+    assert summary["produced_artifact_trace"] == _expected_produced_artifact_trace(
+        manifest
+    )
     alert_signals = summary["alert_signals"]
     assert isinstance(alert_signals, dict)
     assert alert_signals["artifact_linkage_gap"] is False
@@ -916,6 +1018,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
     assert alert_signals["immutable_input_snapshot_gap"] is True
     assert alert_signals["strict_replay_boundary_gap"] is False
     assert alert_signals["reproducible_semantic_output_mode_gap"] is False
+    assert alert_signals["produced_artifact_trace_gap"] is False
     assert alert_signals["lineage_closure_boundary_gap"] is False
     assert alert_signals["composite_resume_reconstructability_gap"] is False
     assert alert_signals["required_persistence_profile_gap"] is False
@@ -1047,6 +1150,19 @@ def test_replay_surfaces_ignore_occurrence_only_manifest_drift() -> None:
         assert summary[key] == summary_drifted[key]
 
 
+def test_exact_replay_anchors_exclude_occurrence_only_identifiers() -> None:
+    manifest = _make_manifest()
+
+    summary = build_diagnostics_summary(manifest, ())
+
+    anchors = summary["exact_replay_anchors"]
+    assert isinstance(anchors, dict)
+    assert anchors["semantic_identity_anchor"] == "execution_fingerprint"
+    assert "manifest_id" not in anchors
+    assert "run_id" not in anchors
+    assert summary["produced_artifact_trace"]["manifest_id"] == manifest.manifest_id
+
+
 def test_build_diagnostics_summary_accepts_legacy_data_contract_version_alias() -> None:
     manifest = _make_manifest()
     entry = RunLedgerEntry(
@@ -1112,6 +1228,7 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
         "strict_replay_execution_context_support": True,
         "immutable_input_snapshots": False,
         "exact_replay_capability": False,
+        "produced_artifact_trace": False,
         "run_ledger_history": False,
         "artifact_lineage_links": True,
         "lineage_closure_boundary_support": False,
@@ -1119,16 +1236,19 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
     assert summary["persistence_profile"]["replay_ready_missing_requirements"] == [
         "exact_replay_capability",
         "immutable_input_snapshots",
+        "produced_artifact_trace",
     ]
     assert summary["persistence_profile"]["forensic_grade_missing_requirements"] == [
         "exact_replay_capability",
         "immutable_input_snapshots",
+        "produced_artifact_trace",
         "run_ledger_history",
         "lineage_closure_boundary_support",
         "composite_rich_replay_projection",
     ]
     assert summary["alert_signals"]["strict_replay_boundary_gap"] is False
     assert summary["alert_signals"]["lineage_closure_boundary_gap"] is True
+    assert summary["alert_signals"]["produced_artifact_trace_gap"] is True
     assert summary["alert_signals"]["composite_resume_reconstructability_gap"] is True
     assert summary["next_steps"] == [
         "Persist immutable cached Bronze input snapshots before treating this run as strict exact-replay capable.",
@@ -1137,6 +1257,7 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
             "lineage closure boundary; do not claim forensic-grade trace/debug "
             "support for it."
         ),
+        "Resolve concrete produced artifacts from the run ledger before claiming replay-ready reproducibility.",
         (
             "Treat composite resume as checkpoint snapshot plus ledger suffix "
             "replay only; do not expect per-provider result maps or other rich "

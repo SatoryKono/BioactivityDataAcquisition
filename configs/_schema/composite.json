@@ -617,6 +617,10 @@
       "title": "FieldComparisonSpecSchema",
       "type": "object"
     },
+    "JsonDict": {
+      "additionalProperties": true,
+      "type": "object"
+    },
     "LineageSchema": {
       "description": "Pydantic schema for lineage tracking configuration.",
       "properties": {
@@ -882,30 +886,26 @@
     "gold_filters": {
       "anyOf": [
         {
-          "additionalProperties": true,
-          "type": "object"
+          "$ref": "#/$defs/JsonDict"
         },
         {
           "type": "null"
         }
       ],
       "default": null,
-      "description": "Optional gold layer filters",
-      "title": "Gold Filters"
+      "description": "Optional gold layer filters"
     },
     "maintenance": {
       "anyOf": [
         {
-          "additionalProperties": true,
-          "type": "object"
+          "$ref": "#/$defs/JsonDict"
         },
         {
           "type": "null"
         }
       ],
       "default": null,
-      "description": "Optional maintenance configuration",
-      "title": "Maintenance"
+      "description": "Optional maintenance configuration"
     }
   },
   "required": [

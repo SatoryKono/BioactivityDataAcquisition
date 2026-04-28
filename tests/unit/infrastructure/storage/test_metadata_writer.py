@@ -9,196 +9,27 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.domain.medallion import Layer
+from tests.helpers.metadata_fixtures import (
+    BRONZE_BASE_PATH,
+    GOLD_BASE_PATH,
+    SILVER_BASE_PATH,
+    SILVER_TABLE_PATH,
+)
+
+pytest_plugins = ("tests.helpers.metadata_fixtures",)
+
 from bioetl.domain.models.metadata import (
-    BaseOutputMetadata,
     BronzeMetadata,
-    BronzeOutputExt,
-    DeltaMetrics,
     DQSummary,
-    EnvironmentMetadata,
-    FileOutputMetadata,
     GoldMetadata,
-    GoldOutputExt,
-    LineageMetadata,
-    PipelineMetadata,
     RuntimeMetadata,
     RunTypeEnum,
-    SchemaMetadata,
     SilverMetadata,
-    SilverOutputExt,
-    SourceMetadata,
 )
 from bioetl.domain.ports.noop import NoOpMetadataWriter
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy
 from bioetl.infrastructure.storage.support.atomic_ops import ReplaceRetryHook
-
-BRONZE_BASE_PATH = "/virtual/bronze"
-SILVER_TABLE_PATH = "/virtual/silver/test/table"
-SILVER_BASE_PATH = "/virtual/silver"
-GOLD_BASE_PATH = "/virtual/gold"
-
-
-@pytest.fixture
-def metadata_writer(noop_logger: NoOpLogger) -> MetadataWriter:
-    """Create MetadataWriter instance."""
-    return MetadataWriter(logger=noop_logger)
-
-
-@pytest.fixture
-def runtime_metadata() -> RuntimeMetadata:
-    """Create sample runtime metadata."""
-    return RuntimeMetadata(
-        run_id=str(uuid4()),
-        run_type=RunTypeEnum.INCREMENTAL,
-        started_at_utc=datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC),
-        completed_at_utc=datetime(2025, 1, 15, 10, 5, 0, tzinfo=UTC),
-        duration_seconds=300.0,
-    )
-
-
-@pytest.fixture
-def pipeline_metadata() -> PipelineMetadata:
-    """Create sample pipeline metadata."""
-    return PipelineMetadata(
-        name="chembl_activity",
-        provider="chembl",
-        entity="activity",
-        version="1.2.0",
-        git_commit="abc123def",
-        config_hash="sha256:xyz789",
-    )
-
-
-@pytest.fixture
-def environment_metadata() -> EnvironmentMetadata:
-    """Create sample environment metadata."""
-    return EnvironmentMetadata(
-        hostname="worker-01",
-        python_version="3.11.5",
-        bioetl_version="5.0.5",
-    )
-
-
-@pytest.fixture
-def bronze_metadata(
-    runtime_metadata: RuntimeMetadata,
-    pipeline_metadata: PipelineMetadata,
-    environment_metadata: EnvironmentMetadata,
-) -> BronzeMetadata:
-    """Create sample Bronze metadata."""
-    return BronzeMetadata(
-        version="1.1",
-        layer=Layer.BRONZE,
-        runtime=runtime_metadata,
-        pipeline=pipeline_metadata,
-        source=SourceMetadata(
-            type="api",
-            url="https://www.ebi.ac.uk/chembl/api/data/activity",
-            api_version="33",
-        ),
-        output=BaseOutputMetadata(
-            record_count=10000,
-            total_bytes=1048576,
-        ),
-        output_ext=BronzeOutputExt(
-            files=[
-                FileOutputMetadata(
-                    path="batch_001.jsonl.zst",
-                    size_bytes=1048576,
-                    record_count=10000,
-                    checksum_blake2="abc123",
-                ),
-            ],
-            format="jsonl+zstd",
-            compression="zstd",
-        ),
-        environment=environment_metadata,
-    )
-
-
-@pytest.fixture
-def silver_metadata(
-    runtime_metadata: RuntimeMetadata,
-    pipeline_metadata: PipelineMetadata,
-    environment_metadata: EnvironmentMetadata,
-) -> SilverMetadata:
-    """Create sample Silver metadata."""
-    return SilverMetadata(
-        version="1.1",
-        layer=Layer.SILVER,
-        runtime=runtime_metadata,
-        pipeline=pipeline_metadata,
-        lineage=LineageMetadata(
-            source_batch_ids=["batch-uuid-001"],
-            bronze_paths=["bronze/v1/chembl/activity/2025-01-15/batch_001.jsonl.zst"],
-            transform_version="1.2.0",
-            transform_steps=["normalize_units", "validate_smiles"],
-        ),
-        delta=DeltaMetrics(
-            table_path="silver/chembl/activity/",
-            operation="merge",
-            primary_key=["activity_id"],
-            version_before=42,
-            version_after=43,
-            rows_inserted=5000,
-            rows_updated=2000,
-        ),
-        dq_summary=DQSummary(
-            total_records=15000,
-            valid_records=14250,
-            error_records=750,
-            error_rate=0.05,
-        ),
-        output=BaseOutputMetadata(
-            record_count=14250,
-            content_hash="sha256:abc123",
-        ),
-        output_ext=SilverOutputExt(
-            delta_version_before=42,
-            delta_version_after=43,
-        ),
-        environment=environment_metadata,
-    )
-
-
-@pytest.fixture
-def gold_metadata(
-    runtime_metadata: RuntimeMetadata,
-    pipeline_metadata: PipelineMetadata,
-    environment_metadata: EnvironmentMetadata,
-) -> GoldMetadata:
-    """Create sample Gold metadata."""
-    return GoldMetadata(
-        version="1.1",
-        layer=Layer.GOLD,
-        runtime=runtime_metadata,
-        pipeline=pipeline_metadata,
-        lineage=LineageMetadata(
-            source_tables={"silver/chembl/activity": 43},
-        ),
-        schema_info=SchemaMetadata(
-            contract_path="docs/contracts/gold/activity_v1.0.json",
-            version="1.0",
-            validation="strict",
-        ),
-        dq_summary=DQSummary(
-            total_records=1250,
-            valid_records=1250,
-            validation_passed=True,
-        ),
-        output=BaseOutputMetadata(
-            record_count=1250,
-            total_bytes=10485760,
-        ),
-        output_ext=GoldOutputExt(
-            partition_count=50,
-            format="delta",
-        ),
-        environment=environment_metadata,
-    )
 
 
 @pytest.mark.unit

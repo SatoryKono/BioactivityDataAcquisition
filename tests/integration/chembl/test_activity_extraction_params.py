@@ -11,7 +11,6 @@ from tests.integration.chembl.extraction_params_support import (
     ExtractionParamsCase,
     assert_build_params,
     assert_extraction_params_logged_at_init,
-    assert_input_filter_field_not_overlapping,
     assert_metadata_records_extraction_params,
     assert_query_string_contains,
     assert_query_string_is_deterministic,

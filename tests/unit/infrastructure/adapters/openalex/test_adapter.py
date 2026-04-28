@@ -324,9 +324,23 @@ class TestFetchFiltered:
 
     @pytest.mark.asyncio
     async def test_fetch_filtered_with_dois(
-        self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
+        self,
+        mock_http_client: MagicMock,
+        logger: NoOpLogger,
     ) -> None:
         """Should fetch works by DOIs."""
+        adapter = OpenAlexAdapter(
+            http_client=mock_http_client,
+            logger=logger,
+            mailto="test@example.com",
+            api_key="openalex-key",
+            batch_size=10,
+            **build_http_adapter_runtime_kwargs(
+                "openalex",
+                logger=logger,
+                include_fallback_service=True,
+            ),
+        )
         mock_response = MagicMock()
         mock_response.json.return_value = {
             "results": [
@@ -350,6 +364,9 @@ class TestFetchFiltered:
 
         assert len(results) == 2
         mock_http_client.get.assert_called_once()
+        params = mock_http_client.get.call_args.kwargs["params"]
+        assert params["api_key"] == "openalex-key"
+        assert params["mailto"] == "test@example.com"
 
     @pytest.mark.asyncio
     async def test_fetch_filtered_respects_limit(

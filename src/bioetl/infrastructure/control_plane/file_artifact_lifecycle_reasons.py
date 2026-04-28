@@ -77,11 +77,17 @@ def _manifest_or_ledger_protected_reasons(
     run_id = _optional_text(payload.get("run_id"))
     if manifest_id in protected_refs.manifest_ids:
         reasons.append(f"manifest:{manifest_id}")
+    if manifest_id in protected_refs.evidence_floor_manifest_ids:
+        reasons.append(f"evidence_floor:manifest:{manifest_id}")
     if run_id in protected_refs.run_ids:
         reasons.append(f"run:{run_id}")
+    if run_id in protected_refs.evidence_floor_run_ids:
+        reasons.append(f"evidence_floor:run:{run_id}")
     indexed_run_id = _indexed_stem(path)
     if indexed_run_id in protected_refs.run_ids:
         reasons.append(f"run:{indexed_run_id}")
+    if indexed_run_id in protected_refs.evidence_floor_run_ids:
+        reasons.append(f"evidence_floor:run:{indexed_run_id}")
     return reasons
 
 
@@ -96,8 +102,12 @@ def _effective_config_protected_reasons(
     run_id = _optional_text(payload.get("run_id")) or _indexed_stem(path)
     if artifact_id in protected_refs.effective_config_artifact_ids:
         reasons.append(f"effective_config:{artifact_id}")
+    if artifact_id in protected_refs.evidence_floor_effective_config_artifact_ids:
+        reasons.append(f"evidence_floor:effective_config:{artifact_id}")
     if run_id in protected_refs.run_ids:
         reasons.append(f"run:{run_id}")
+    if run_id in protected_refs.evidence_floor_run_ids:
+        reasons.append(f"evidence_floor:run:{run_id}")
     return reasons
 
 
@@ -111,6 +121,8 @@ def _lineage_protected_reasons(
     for fragment_id in _lineage_fragment_id_candidates(payload) or (path.stem,):
         if fragment_id in protected_refs.lineage_fragment_ids:
             reasons.append(f"lineage:{fragment_id}")
+        if fragment_id in protected_refs.evidence_floor_lineage_fragment_ids:
+            reasons.append(f"evidence_floor:lineage:{fragment_id}")
     if not _manifest_or_run_is_protected(
         payload,
         manifest_ids=protected_refs.manifest_ids,
@@ -121,8 +133,12 @@ def _lineage_protected_reasons(
     run_id = _optional_text(payload.get("run_id"))
     if manifest_id is not None:
         reasons.append(f"manifest:{manifest_id}")
+        if manifest_id in protected_refs.evidence_floor_manifest_ids:
+            reasons.append(f"evidence_floor:manifest:{manifest_id}")
     if run_id is not None:
         reasons.append(f"run:{run_id}")
+        if run_id in protected_refs.evidence_floor_run_ids:
+            reasons.append(f"evidence_floor:run:{run_id}")
     return reasons
 
 
@@ -137,10 +153,16 @@ def _checkpoint_protected_reasons(
     artifact_id = _payload_text(payload, "effective_config_artifact_id")
     if run_id in protected_refs.run_ids:
         reasons.append(f"run:{run_id}")
+    if run_id in protected_refs.evidence_floor_run_ids:
+        reasons.append(f"evidence_floor:run:{run_id}")
     if manifest_id in protected_refs.manifest_ids:
         reasons.append(f"manifest:{manifest_id}")
+    if manifest_id in protected_refs.evidence_floor_manifest_ids:
+        reasons.append(f"evidence_floor:manifest:{manifest_id}")
     if artifact_id in protected_refs.effective_config_artifact_ids:
         reasons.append(f"effective_config:{artifact_id}")
+    if artifact_id in protected_refs.evidence_floor_effective_config_artifact_ids:
+        reasons.append(f"evidence_floor:effective_config:{artifact_id}")
     return reasons
 
 
@@ -150,6 +172,8 @@ def _cached_bronze_protected_reasons(
     protected_refs: _ProtectedRefs,
 ) -> list[str]:
     snapshot_id = _content_addressed_file_snapshot_id(path)
+    if snapshot_id in protected_refs.evidence_floor_input_snapshot_ids:
+        return [f"snapshot:{snapshot_id}", f"evidence_floor:snapshot:{snapshot_id}"]
     if snapshot_id in protected_refs.input_snapshot_ids:
         return [f"snapshot:{snapshot_id}"]
     return []

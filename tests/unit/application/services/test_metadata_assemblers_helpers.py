@@ -160,10 +160,10 @@ def test_extract_composite_output_ext_defaults_schema_status_when_not_enabled() 
 @pytest.mark.unit
 def test_resolve_source_batch_ids_prefers_explicit_ids() -> None:
     input_data = _make_silver_input(
-        source_batch_ids=["batch-explicit"],
+        source_batch_ids=["batch-b", "batch-a", "batch-b", " "],
         records=[{"_source_batch_id": "batch-record"}],
     )
-    assert _resolve_source_batch_ids(input_data) == ["batch-explicit"]
+    assert _resolve_source_batch_ids(input_data) == ["batch-a", "batch-b"]
 
 
 @pytest.mark.unit
@@ -171,13 +171,13 @@ def test_resolve_source_batch_ids_from_records_deduplicates_missing_values() -> 
     input_data = _make_silver_input(
         source_batch_ids=None,
         records=[
-            {"_source_batch_id": "a"},
             {"_source_batch_id": "b"},
             {"_source_batch_id": "a"},
+            {"_source_batch_id": "b"},
             {},
         ],
     )
-    assert set(_resolve_source_batch_ids(input_data)) == {"a", "b"}
+    assert _resolve_source_batch_ids(input_data) == ["a", "b"]
 
 
 @pytest.mark.unit
@@ -187,6 +187,7 @@ def test_resolve_bronze_paths_handles_none_and_extracts_relative_paths() -> None
 
     refs_input = _make_silver_input(
         bronze_refs=[
+            _make_bronze_ref("chembl/assay/2026-03-17/batch_2.jsonl.zst"),
             _make_bronze_ref("chembl/activity/2026-03-17/batch_1.jsonl.zst"),
             _make_bronze_ref("chembl/assay/2026-03-17/batch_2.jsonl.zst"),
         ]

@@ -10,7 +10,7 @@ citations_made,§3.2,MISSING,MISSING,transformer.py:276,MISSING (inherited base)
 citations_received,§3.2,MISSING,MISSING,transformer.py:255,MISSING (inherited base),publications.py:317,/works/,number,true,false,OK
 doi,§3.2,MISSING,MISSING,transformer.py:221,MISSING (inherited base),publications.py:275,/works/,string,true,false,OK
 fwci,MISSING,MISSING,MISSING,transformer.py:275,openalex.py:61,publications.py:321,/works/,number,true,false,MISSING_DOC
-grants,MISSING,MISSING,MISSING,transformer.py:265,openalex.py:48,publications.py:333,/works/,string,true,false,MISSING_DOC
+grants,§4 Funding Fields,MISSING,MISSING,transformer.py:265,openalex.py:48,publications.py:333,/works/,string,true,false,OK:legacy output populated from awards/funders with grants fallback
 institution_country_codes,MISSING,MISSING,MISSING,transformer.py:231,openalex.py:30,publications.py:337,/works/,object,true,false,MISSING_DOC
 institution_ids,MISSING,MISSING,MISSING,transformer.py:230,openalex.py:29,publications.py:336,/works/,object,true,false,MISSING_DOC
 is_oa,§3.2,MISSING,MISSING,transformer.py:251,MISSING (inherited base),publications.py:310,/works/,boolean,true,false,OK

@@ -67,6 +67,18 @@ _DATASET_CONTENT_HASH_OCCURRENCE_ONLY_FIELDS = frozenset(
 )
 
 
+def _stable_unique_text(values: object) -> list[str]:
+    """Return unique non-empty text values in content-stable order."""
+    if not isinstance(values, (list, tuple, set, frozenset)):
+        return []
+    normalized = {
+        text
+        for value in values
+        if (text := str(value).strip())
+    }
+    return sorted(normalized)
+
+
 def parse_composite_list_metadata(value: object) -> list[str]:
     """Parse composite list metadata stored as list or stringified list."""
     return parse_composite_list(value)
@@ -105,7 +117,7 @@ def extract_composite_output_extension(
 def resolve_source_batch_ids(input_data: SilverMetadataInput) -> list[str]:
     """Resolve source batch IDs from explicit input or embedded records."""
     if input_data.source_batch_ids is not None:
-        return input_data.source_batch_ids
+        return _stable_unique_text(input_data.source_batch_ids)
 
     records = input_data.records or []
     ids = {
@@ -113,7 +125,7 @@ def resolve_source_batch_ids(input_data: SilverMetadataInput) -> list[str]:
         for record in records
         if record.get("_source_batch_id")
     }
-    return list(ids)
+    return sorted(ids)
 
 
 def resolve_bronze_paths(input_data: SilverMetadataInput) -> list[str]:
@@ -121,7 +133,7 @@ def resolve_bronze_paths(input_data: SilverMetadataInput) -> list[str]:
     if input_data.bronze_refs is None:
         return []
     bronze_refs = cast("list[BronzeWriteResult]", input_data.bronze_refs)
-    return [ref.relative_path for ref in bronze_refs]
+    return sorted({ref.relative_path for ref in bronze_refs if ref.relative_path})
 
 
 def resolve_transform_metadata(

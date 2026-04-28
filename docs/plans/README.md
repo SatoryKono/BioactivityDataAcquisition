@@ -1,7 +1,7 @@
 # Plans Directory
 
 *Status: Working planning artifacts (non-normative)*
-*Last updated: 2026-04-24*
+*Last updated: 2026-04-28*
 
 This directory contains implementation plans, corrective roadmaps, migration
 plans, and supporting architecture assessment snapshots.
@@ -118,7 +118,10 @@ The repository file structure remediation plan was added on `2026-04-28` after
 an architecture-strict audit found drift between the published root policy and
 the live GitHub root snapshot. It supersedes the 2026-04-21 live-state claims
 for remediation planning while retaining the older cleanup plan as historical
-baseline and policy context.
+baseline and policy context. Its current execution state is grounded by
+`configs/quality/root_hygiene_review_registry.yaml`, which tracks the
+review-required and blocked cleanup lanes against the current live root
+baseline.
 
 The scripts CLI wrapper caller matrix was added on `2026-04-28` as supporting
 evidence for RF-008 compatibility-wrapper retention decisions. It is generated

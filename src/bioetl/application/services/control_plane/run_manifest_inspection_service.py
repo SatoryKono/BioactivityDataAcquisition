@@ -119,6 +119,20 @@ class RunManifestInspectionService(
             identity_graph=identity_graph,
         )
 
+    def resolve_produced_artifacts(
+        self,
+        identifier: str,
+    ) -> tuple[dict[str, object], ...]:
+        """Resolve concrete produced artifacts from a manifest-id rooted lookup."""
+        result = self.show(identifier)
+        trace = result.diagnostics.get("produced_artifact_trace")
+        if not isinstance(trace, dict):
+            return ()
+        artifacts = trace.get("artifacts")
+        if not isinstance(artifacts, list):
+            return ()
+        return tuple(artifact for artifact in artifacts if isinstance(artifact, dict))
+
     def diff(
         self, left_identifier: str, right_identifier: str
     ) -> RunManifestDiffResult:

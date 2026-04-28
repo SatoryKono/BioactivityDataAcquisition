@@ -31,6 +31,8 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_summary import (
     _build_final_summary,
+    _build_exact_replay_anchors,
+    _build_produced_artifact_trace,
     _FinalSummaryRequest,
 )
 from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring import (
@@ -100,7 +102,7 @@ def _build_base_summary_payload(
         strict_code_provenance_blockers.append("git_commit_missing")
     if str(code_provenance.source_revision_state or "").strip().lower() != "clean":
         strict_code_provenance_blockers.append("source_revision_state_not_clean")
-    return {
+    summary: dict[str, object] = {
         "manifest_id": manifest.manifest_id,
         "manifest_created_at": manifest.created_at.isoformat(),
         "run_id": str(manifest.run_id),
@@ -171,6 +173,21 @@ def _build_base_summary_payload(
         ],
         "occurrence_only_diagnostics": [],
     }
+    summary["artifact_refs"] = []
+    summary["lineage_fragment_ids"] = []
+    summary["published_artifact_count"] = 0
+    summary["exact_replay_anchors"] = _build_exact_replay_anchors(
+        manifest=manifest,
+        summary=summary,
+        artifact_refs=[],
+        lineage_fragment_ids=frozenset(),
+    )
+    summary["produced_artifact_trace"] = _build_produced_artifact_trace(
+        manifest=manifest,
+        ledger_entries_present=False,
+        artifact_refs=[],
+    )
+    return summary
 
 
 def _attach_base_summary_runtime_views(
