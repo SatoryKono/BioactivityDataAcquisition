@@ -249,14 +249,8 @@ class TestIntegrationVcrPolicy:
         assert policy["supported_scopes"]["e2e"]["ci_smoke_target"] in tests_workflow
         assert "VCR_RECORD_MODE=none uv run pytest" in tests_workflow
         assert "--vcr-record=none" in tests_workflow
-        assert (
-            "python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"
-            in tests_workflow
-        )
-        assert (
-            "python scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
-            in tests_workflow
-        )
+        assert "python -m scripts.engineering.qa.vcr check-placement" in tests_workflow
+        assert "python -m scripts.engineering.qa.vcr check-naming" in tests_workflow
         assert "tests/contract/ -v --tb=short --network" in contract_workflow
         assert (
             "github.repository == "

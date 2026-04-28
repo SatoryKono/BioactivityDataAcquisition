@@ -128,6 +128,26 @@ SCRIPT_PATH_ALIASES: Final[dict[str, tuple[str, ...]]] = {
     "scripts/codex.bat": ("scripts/ops/launchers/codex/codex.bat",),
     "scripts/start-wsl-proxy.bat": ("scripts/ops/runtime/wsl/start-wsl-proxy.bat",),
 }
+MODULE_COMMAND_SCRIPT_ALIASES: Final[dict[str, dict[str, str]]] = {
+    "scripts.docs": {
+        "check-links": "scripts/docs/checks/check_links.py",
+    },
+    "scripts.engineering.qa": {
+        "check-c901": "scripts/engineering/qa/check_c901_baseline.py",
+        "check-naming-pkg": (
+            "scripts/engineering/qa/check_naming_package_consistency.py"
+        ),
+    },
+    "scripts.engineering.qa.vcr": {
+        "check-placement": "scripts/engineering/qa/vcr/check_root_vcr_cassettes.py",
+        "check-naming": "scripts/engineering/qa/vcr/check_vcr_filename_policy.py",
+        "check-metadata-age": "scripts/engineering/qa/vcr/check_vcr_metadata_age.py",
+    },
+    "scripts.engineering.repo": {
+        "check-inventory": "scripts/engineering/repo/check_scripts_inventory.py",
+        "check-catalog": "scripts/engineering/repo/check_scripts_catalog.py",
+    },
+}
 MANIFEST_DEFAULT: Final[str] = "configs/quality/scripts_inventory_manifest.json"
 DEPRECATION_REPORT_DEFAULT: Final[str] = (
     "reports/quality/scripts_deprecation_backlog.md"
@@ -456,7 +476,13 @@ def _discover_refs_in_file(
         return []
 
     source_group = _source_group(rel)
-    discovered: list[tuple[str, RefEvidence]] = []
+    discovered = _discover_module_command_refs_in_file(
+        rel=rel,
+        text=text,
+        normalized_text=normalized_text,
+        source_group=source_group,
+        script_set=script_set,
+    )
     original_lines = text.splitlines()
     normalized_lines = normalized_text.splitlines()
     for line_no, (raw_line, normalized_line) in enumerate(
@@ -477,6 +503,75 @@ def _discover_refs_in_file(
             )
         )
     return discovered
+
+
+def _discover_module_command_refs_in_file(
+    *,
+    rel: str,
+    text: str,
+    normalized_text: str,
+    source_group: str,
+    script_set: set[str],
+) -> list[tuple[str, RefEvidence]]:
+    """Resolve dispatcher-style ``python -m scripts.* <command>`` references."""
+    discovered: list[tuple[str, RefEvidence]] = []
+    for module_name, command_map in MODULE_COMMAND_SCRIPT_ALIASES.items():
+        if module_name not in normalized_text:
+            continue
+        for command_name, script_rel in command_map.items():
+            if script_rel not in script_set or rel == script_rel:
+                continue
+            if not _has_module_command_reference(
+                normalized_text=normalized_text,
+                module_name=module_name,
+                command_name=command_name,
+            ):
+                continue
+            line_no, raw_line = _get_first_module_command_line(
+                text=text,
+                module_name=module_name,
+                command_name=command_name,
+            )
+            discovered.append(
+                (
+                    script_rel,
+                    _make_ref_evidence(
+                        rel=rel,
+                        line_no=line_no,
+                        raw_line=raw_line,
+                        source_group=source_group,
+                    ),
+                )
+            )
+    return discovered
+
+
+def _has_module_command_reference(
+    *,
+    normalized_text: str,
+    module_name: str,
+    command_name: str,
+) -> bool:
+    if module_name not in normalized_text:
+        return False
+    command_pattern = rf"(?<![\w-]){re.escape(command_name)}(?![\w-])"
+    return re.search(command_pattern, normalized_text) is not None
+
+
+def _get_first_module_command_line(
+    *,
+    text: str,
+    module_name: str,
+    command_name: str,
+) -> tuple[int, str]:
+    module_line: tuple[int, str] | None = None
+    for line_no, raw_line in enumerate(text.splitlines(), start=1):
+        normalized_line = raw_line.replace("\\", "/")
+        if module_line is None and module_name in normalized_line:
+            module_line = (line_no, raw_line)
+        if command_name in normalized_line:
+            return line_no, raw_line
+    return module_line or (1, "")
 
 
 def _line_has_basename_script_candidate(

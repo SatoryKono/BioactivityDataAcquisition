@@ -43,4 +43,4 @@ def test_docs_workflow_runs_doc_integrity_guardrails() -> None:
     workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
 
     assert "Run documentation integrity guardrails" in workflow
-    assert "uv run python scripts/docs/check_doc_links.py" in workflow
+    assert "uv run python -m scripts.docs check-links" in workflow

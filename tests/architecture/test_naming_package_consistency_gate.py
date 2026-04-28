@@ -77,6 +77,4 @@ def test_tests_workflow_runs_naming_package_consistency_gate() -> None:
     repo_root = Path(__file__).resolve().parents[2]
     workflow = (repo_root / ".github/workflows/tests.yml").read_text(encoding="utf-8")
     assert "Pre-merge naming/package consistency gate" in workflow
-    assert (
-        "scripts/engineering/qa/check_naming_package_consistency.py --check" in workflow
-    )
+    assert "python -m scripts.engineering.qa check-naming-pkg --check" in workflow
