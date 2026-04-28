@@ -173,8 +173,11 @@ class TestCrossRefAndOpenAlexCreators:
 
         settings = MagicMock()
         settings.default_email = "default@example.org"
+        settings.openalex_api_key = MagicMock()
+        settings.openalex_api_key.get_secret_value.return_value = "settings-openalex-key"
         pipeline_config = MagicMock()
         pipeline_config.source.email = ""
+        pipeline_config.source.api_key = ""
 
         result = _create_openalex_data_source(
             settings=settings,
@@ -185,6 +188,7 @@ class TestCrossRefAndOpenAlexCreators:
         )
 
         call_kwargs = mock_create_http_ds.call_args.kwargs
+        assert call_kwargs["extra_kwargs"]["api_key"] == "settings-openalex-key"
         assert call_kwargs["extra_kwargs"]["mailto"] == "default@example.org"
         assert call_kwargs["extra_kwargs"]["batch_size"] == 55
         assert "settings" not in call_kwargs["extra_kwargs"]
@@ -203,9 +207,12 @@ class TestCrossRefAndOpenAlexCreators:
         support = MagicMock(name="assembly_support")
         pipeline_config = MagicMock()
         pipeline_config.source.email = ""
+        pipeline_config.source.api_key = ""
+        settings = MagicMock(default_email="default@example.org")
+        settings.openalex_api_key = None
 
         _create_openalex_data_source(
-            settings=MagicMock(default_email="default@example.org"),
+            settings=settings,
             pipeline_config=pipeline_config,
             logger=MagicMock(),
             assembly_support=support,
@@ -222,6 +229,8 @@ class TestCrossRefAndOpenAlexCreators:
         mock_adapter_cls.return_value = mock_adapter
         settings = MagicMock()
         settings.default_email = "default@example.org"
+        settings.openalex_api_key = MagicMock()
+        settings.openalex_api_key.get_secret_value.return_value = "settings-openalex-key"
 
         result = _create_openalex_adapter_from_settings(
             http_client=MagicMock(),
@@ -232,6 +241,7 @@ class TestCrossRefAndOpenAlexCreators:
 
         mock_adapter_cls.assert_called_once()
         call_kwargs = mock_adapter_cls.call_args.kwargs
+        assert call_kwargs["api_key"] == "settings-openalex-key"
         assert call_kwargs["mailto"] == "default@example.org"
         assert call_kwargs["batch_size"] == 55
         assert call_kwargs["fallback_fetch_service"] is not None

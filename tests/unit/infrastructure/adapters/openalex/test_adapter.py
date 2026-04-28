@@ -86,6 +86,7 @@ class TestOpenAlexAdapter:
         )
         assert adapter.provider_name == "openalex"
         assert adapter.mailto == "test@example.com"
+        assert adapter.api_key is None
         assert adapter.batch_size == 50  # Default
 
     def test_post_init_preserves_injected_base_collaborators(
@@ -218,6 +219,15 @@ class TestOpenAlexAdapter:
     def test_build_base_params(self, adapter: OpenAlexAdapter) -> None:
         """Should include mailto in base params."""
         params = adapter._build_base_params()
+        assert params["mailto"] == "test@example.com"
+
+    def test_build_base_params_includes_api_key(self, adapter: OpenAlexAdapter) -> None:
+        """Should include OpenAlex API key when configured."""
+        adapter.api_key = "openalex-key"
+
+        params = adapter._build_base_params()
+
+        assert params["api_key"] == "openalex-key"
         assert params["mailto"] == "test@example.com"
 
 
@@ -713,13 +723,33 @@ class TestCreateOpenAlexAdapter:
         )
 
         assert adapter.mailto == "test@example.com"
+        assert adapter.api_key is None
         assert adapter.batch_size == 25
 
-    def test_create_adapter_requires_mailto(
+    def test_create_adapter_accepts_api_key_without_mailto(
         self, mock_http_client: MagicMock, logger: NoOpLogger
     ) -> None:
-        """Should raise ValueError when mailto not provided."""
-        with pytest.raises(ValueError, match="requires mailto"):
+        """Should create adapter with API key even when mailto is not provided."""
+        adapter = _create_openalex_adapter(
+            http_client=mock_http_client,
+            logger=logger,
+            settings=None,
+            api_key="openalex-key",
+            **build_http_adapter_runtime_kwargs(
+                "openalex",
+                logger=logger,
+                include_fallback_service=True,
+            ),
+        )
+
+        assert adapter.api_key == "openalex-key"
+        assert adapter.mailto is None
+
+    def test_create_adapter_requires_api_key_or_mailto(
+        self, mock_http_client: MagicMock, logger: NoOpLogger
+    ) -> None:
+        """Should raise ValueError when no OpenAlex credential is provided."""
+        with pytest.raises(ValueError, match="requires api_key or mailto"):
             _create_openalex_adapter(
                 http_client=mock_http_client,
                 logger=logger,

@@ -18,8 +18,13 @@ LEGACY_HTTP_DOI = "http" + "://doi.org/10.1000/xyz"
 
 
 class _OpenAlexHelpersHarness(OpenAlexAdapterHelpersMixin):
-    def __init__(self, mailto: str = "bioetl@example.org") -> None:
+    def __init__(
+        self,
+        mailto: str | None = "bioetl@example.org",
+        api_key: str | None = None,
+    ) -> None:
         self.mailto = mailto
+        self.api_key = api_key
         self._request_collector = APIRequestCollector()
 
 
@@ -56,3 +61,24 @@ def test_health_helpers_return_expected_defaults() -> None:
     assert harness._fallback_health_status() == HealthStatus.UNHEALTHY
     assert harness._get_health_endpoint() == "/works"
     assert harness._build_base_params() == {"mailto": "bioetl@example.org"}
+
+
+def test_build_base_params_prefers_api_key_with_optional_mailto() -> None:
+    harness = _OpenAlexHelpersHarness(
+        mailto="bioetl@example.org",
+        api_key="openalex-key",
+    )
+
+    assert harness._build_base_params() == {
+        "api_key": "openalex-key",
+        "mailto": "bioetl@example.org",
+    }
+
+
+def test_build_headers_without_mailto_uses_generic_user_agent() -> None:
+    harness = _OpenAlexHelpersHarness(mailto=None, api_key="openalex-key")
+
+    headers = harness._build_headers()
+
+    assert headers["User-Agent"] == "BioETL/1.0"
+    assert headers["Accept"] == "application/json"

@@ -13,6 +13,7 @@ from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 
 __all__ = [
+    "_build_silver_merged_metadata_write_request",
     "_PreparedSilverMetadataWriteOperation",
     "_PreparedSilverWriteFinalizationContext",
     "_ResolvedSilverMetadataContext",
@@ -168,6 +169,28 @@ class _SilverMergedMetadataWriteRequest:
     completed_at: datetime | None = None
     run_id: str | None = None
     sources_used: list[str] | None = None
+
+
+def _build_silver_merged_metadata_write_request(
+    *,
+    table_path: str,
+    table_name: str,
+    records: list[BronzeRecord],
+    primary_keys: list[str],
+    completed_at: datetime | None = None,
+    run_id: str | None = None,
+    sources_used: list[str] | None = None,
+) -> _SilverMergedMetadataWriteRequest:
+    """Build the canonical request for merged Silver metadata sidecar writes."""
+    return _SilverMergedMetadataWriteRequest(
+        table_path=table_path,
+        table_name=table_name,
+        records=records,
+        primary_keys=primary_keys,
+        completed_at=completed_at,
+        run_id=run_id,
+        sources_used=sources_used,
+    )
 
 
 @dataclass(frozen=True, slots=True)

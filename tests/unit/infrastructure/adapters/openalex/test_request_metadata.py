@@ -17,6 +17,7 @@ pytestmark = pytest.mark.unit
 class _OpenAlexMetadataHarness(OpenAlexAdapterHelpersMixin):
     def __init__(self, mailto: str = "bioetl@example.org") -> None:
         self.mailto = mailto
+        self.api_key = None
         self._request_collector = APIRequestCollector()
 
 

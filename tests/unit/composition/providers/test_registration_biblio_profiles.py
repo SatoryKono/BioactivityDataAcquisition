@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 
 from bioetl.composition.providers._registration_biblio_profiles import (
     _resolve_mailto_batch_profile,
+    _resolve_openalex_request_profile,
     _resolve_pubmed_request_profile,
     _resolve_semanticscholar_request_profile,
 )
@@ -45,6 +46,26 @@ def test_resolve_mailto_batch_profile_uses_settings_fallback_and_provider_batch(
 
     assert result.mailto == "default@example.org"
     assert result.batch_size == 55
+
+
+def test_resolve_openalex_request_profile_prefers_pipeline_api_key() -> None:
+    settings = MagicMock()
+    settings.default_email = "default@example.org"
+    settings.openalex_api_key = MagicMock()
+    settings.openalex_api_key.get_secret_value.return_value = "settings-openalex-key"
+
+    result = _resolve_openalex_request_profile(
+        settings,
+        _pipeline_config(
+            email="pipeline@example.org",
+            api_key="pipeline-openalex-key",
+        ),
+        batch_size=50,
+    )
+
+    assert result.api_key == "pipeline-openalex-key"
+    assert result.mailto == "pipeline@example.org"
+    assert result.batch_size == 50
 
 
 def test_resolve_semanticscholar_request_profile_uses_empty_key_when_unconfigured() -> (
