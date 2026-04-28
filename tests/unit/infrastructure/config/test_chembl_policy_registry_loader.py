@@ -61,13 +61,9 @@ class TestChemblPolicyRegistryLoader:
         data = ChemblPolicyRegistryLoader(tmp_path).load()
 
         assert data.strict_boolean_families[0].family_name == "bool_like"
-        assert data.strict_boolean_families[0].fields == (
-            "chembl_publication.is_oa",
-        )
+        assert data.strict_boolean_families[0].fields == ("chembl_publication.is_oa",)
         assert data.strict_flag_families[0].family_name == "binary_flags"
-        assert data.strict_flag_families[0].fields == (
-            "chembl_activity.standard_flag",
-        )
+        assert data.strict_flag_families[0].fields == ("chembl_activity.standard_flag",)
         assert data.controlled_vocabularies[0].family_name == "units"
         assert data.controlled_vocabularies[0].fields == ("chembl_activity.units",)
         assert data.ontology_families[0].family_name == "clo"

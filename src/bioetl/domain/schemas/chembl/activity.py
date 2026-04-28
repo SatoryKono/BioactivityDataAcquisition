@@ -23,6 +23,7 @@ __all__ = ["ActivitySchema"]
 
 HTTP_IRI_PATTERN = r"^https?://[^\s]+$"
 
+
 class ActivitySchema(ETLRecordSchema):
     """Activity validation schema for Silver layer."""
 

@@ -75,7 +75,9 @@ def _build_policy_surfaces(
     data: ChemblPolicyRegistryData,
 ) -> Mapping[tuple[str, str], ChemblPolicySurface]:
     surfaces: dict[tuple[str, str], ChemblPolicySurface] = {}
-    _add_strict_scalar_surfaces(surfaces, data.strict_boolean_families, "strict_boolean")
+    _add_strict_scalar_surfaces(
+        surfaces, data.strict_boolean_families, "strict_boolean"
+    )
     _add_strict_scalar_surfaces(surfaces, data.strict_flag_families, "strict_flag")
     _add_controlled_vocabulary_surfaces(surfaces, data)
     _add_ontology_surfaces(surfaces, data)
@@ -117,34 +119,46 @@ def _add_ontology_surfaces(
     data: ChemblPolicyRegistryData,
 ) -> None:
     for ontology_family in data.ontology_families:
-        for field_ref in ontology_family.fields:
-            entity, field_name = _parse_chembl_field_ref(str(field_ref))
-            surfaces[(entity, field_name)] = ChemblPolicySurface(
-                category="ontology_reference_identifier",
-                registry_source=CHEMBL_ONTOLOGY_POLICY_CONFIG,
-                invalid_value_mode="preserve_unknown_lexeme",
-            )
-        for field_ref in ontology_family.code_label_fields:
-            entity, field_name = _parse_chembl_field_ref(str(field_ref))
-            surfaces[(entity, field_name)] = ChemblPolicySurface(
-                category="derived_vocabulary",
-                registry_source=CHEMBL_ONTOLOGY_POLICY_CONFIG,
-                invalid_value_mode="resolve_identifier_backed_label",
-            )
-        for field_ref in ontology_family.iri_fields:
-            entity, field_name = _parse_chembl_field_ref(str(field_ref))
-            surfaces[(entity, field_name)] = ChemblPolicySurface(
-                category="ontology_reference_identifier",
-                registry_source=CHEMBL_ONTOLOGY_POLICY_CONFIG,
-                invalid_value_mode="resolve_identifier_backed_iri",
-            )
-        for field_ref in ontology_family.version_fields:
-            entity, field_name = _parse_chembl_field_ref(str(field_ref))
-            surfaces[(entity, field_name)] = ChemblPolicySurface(
-                category="ontology_reference_metadata",
-                registry_source=CHEMBL_ONTOLOGY_POLICY_CONFIG,
-                invalid_value_mode="resolve_identifier_backed_version",
-            )
+        _register_ontology_family_fields(
+            surfaces,
+            ontology_family.fields,
+            category="ontology_reference_identifier",
+            invalid_value_mode="preserve_unknown_lexeme",
+        )
+        _register_ontology_family_fields(
+            surfaces,
+            ontology_family.code_label_fields,
+            category="derived_vocabulary",
+            invalid_value_mode="resolve_identifier_backed_label",
+        )
+        _register_ontology_family_fields(
+            surfaces,
+            ontology_family.iri_fields,
+            category="ontology_reference_identifier",
+            invalid_value_mode="resolve_identifier_backed_iri",
+        )
+        _register_ontology_family_fields(
+            surfaces,
+            ontology_family.version_fields,
+            category="ontology_reference_metadata",
+            invalid_value_mode="resolve_identifier_backed_version",
+        )
+
+
+def _register_ontology_family_fields(
+    surfaces: dict[tuple[str, str], ChemblPolicySurface],
+    field_refs: tuple[str, ...],
+    *,
+    category: str,
+    invalid_value_mode: str,
+) -> None:
+    for field_ref in field_refs:
+        entity, field_name = _parse_chembl_field_ref(str(field_ref))
+        surfaces[(entity, field_name)] = ChemblPolicySurface(
+            category=category,
+            registry_source=CHEMBL_ONTOLOGY_POLICY_CONFIG,
+            invalid_value_mode=invalid_value_mode,
+        )
 
 
 def _add_publication_classification_surfaces(

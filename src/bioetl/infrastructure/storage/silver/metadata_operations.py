@@ -157,7 +157,7 @@ def _resolve_silver_metadata_bundle(
     table_path: str,
     table_name: str,
     silver_input: SilverMetadataInput,
- ) -> tuple[SilverMetadata, LineageGraphFragment | None]:
+) -> tuple[SilverMetadata, LineageGraphFragment | None]:
     """Build the canonical Silver metadata bundle with a shared fallback policy."""
     return resolve_metadata_and_lineage_fragment(
         coordinator=coordinator,

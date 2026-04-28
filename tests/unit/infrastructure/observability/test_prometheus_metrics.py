@@ -89,7 +89,9 @@ class TestPrometheusMetrics:
                 labels={"label": "value"},
             )
 
-    def test_filter_source_metrics_normalize_source_file_label(self, prometheus_metrics):
+    def test_filter_source_metrics_normalize_source_file_label(
+        self, prometheus_metrics
+    ):
         """Filter-source metrics must not emit raw path labels."""
         with patch.dict(
             COUNTERS,
@@ -108,7 +110,9 @@ class TestPrometheusMetrics:
                 pipeline="chembl_activity",
                 source_file="activity_ids.csv",
             )
-            COUNTERS["bioetl_filter_ids_loaded_total"].labels().inc.assert_called_once_with(7)
+            COUNTERS[
+                "bioetl_filter_ids_loaded_total"
+            ].labels().inc.assert_called_once_with(7)
 
     @pytest.mark.parametrize(
         ("raw_value", "expected"),
