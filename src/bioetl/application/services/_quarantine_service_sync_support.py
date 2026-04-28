@@ -97,17 +97,17 @@ class _QuarantineSyncHost(Protocol):
     ) -> int: ...
 
 
-def _run_traced_sync_operation[T](
+def _run_traced_sync_operation[_T](
     host: _QuarantineSyncHost,
     *,
     span_name: str,
     operation: str,
     pipeline: str | None,
     trace_attributes: dict[str, object],
-    execute: Callable[[datetime, float], T],
-    success_of: Callable[[T], bool],
-    result_extra_of: Callable[[T], dict[str, object]],
-) -> T:
+    execute: Callable[[datetime, float], _T],
+    success_of: Callable[[_T], bool],
+    result_extra_of: Callable[[_T], dict[str, object]],
+) -> _T:
     """Run one sync quarantine operator with optional tracing."""
     started_at, started_monotonic = host._capture_operator_timing_anchor()
     if host.tracer is None:

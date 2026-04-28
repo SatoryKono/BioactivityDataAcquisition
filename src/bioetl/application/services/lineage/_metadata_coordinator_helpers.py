@@ -25,11 +25,13 @@ def validate_records_present(
         raise ValueError(f"Cannot create {layer_name} metadata without records")
 
 
-def create_metadata_bundle[MetadataT: (BronzeMetadata, SilverMetadata, GoldMetadata)](
+def create_metadata_bundle[
+    _MetadataT: (BronzeMetadata, SilverMetadata, GoldMetadata)
+](
     *,
-    metadata: MetadataT,
+    metadata: _MetadataT,
     lineage_fragment: LineageGraphFragment,
-) -> MetadataLineageBundle[MetadataT]:
+) -> MetadataLineageBundle[_MetadataT]:
     """Bundle sidecar metadata with its canonical lineage fragment."""
     return MetadataLineageBundle(
         metadata=metadata,

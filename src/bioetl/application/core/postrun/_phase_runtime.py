@@ -83,15 +83,15 @@ def emit_postrun_phase_observability(
         logger.info("postrun_phase_completed", **log_payload)
 
 
-async def run_async_postrun_phase[ResultT](
+async def run_async_postrun_phase[_ResultT](
     *,
     span_factory: Callable[[str], AbstractContextManager[Span]],
     phase: PostrunPhaseName,
-    operation: Callable[[], Awaitable[ResultT]],
+    operation: Callable[[], Awaitable[_ResultT]],
     operation_errors: tuple[type[BaseException], ...],
     emit_phase_observability: Callable[..., None],
-    on_success: Callable[[ResultT], PostrunPhaseCompletion],
-) -> ResultT:
+    on_success: Callable[[_ResultT], PostrunPhaseCompletion],
+) -> _ResultT:
     """Run one async postrun phase with consistent tracing and failure handling."""
     start_time = time.perf_counter()
     with span_factory(f"postrun.{phase}") as span:
@@ -119,15 +119,15 @@ async def run_async_postrun_phase[ResultT](
         return result
 
 
-def run_sync_postrun_phase[ResultT](
+def run_sync_postrun_phase[_ResultT](
     *,
     span_factory: Callable[[str], AbstractContextManager[Span]],
     phase: PostrunPhaseName,
-    operation: Callable[[], ResultT],
+    operation: Callable[[], _ResultT],
     operation_errors: tuple[type[BaseException], ...],
     emit_phase_observability: Callable[..., None],
-    on_success: Callable[[ResultT], PostrunPhaseCompletion],
-) -> ResultT:
+    on_success: Callable[[_ResultT], PostrunPhaseCompletion],
+) -> _ResultT:
     """Run one sync postrun phase with consistent tracing and failure handling."""
     start_time = time.perf_counter()
     with span_factory(f"postrun.{phase}") as span:
