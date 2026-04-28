@@ -11,6 +11,9 @@ from bioetl.application.services.lineage.metadata_coordinator import MetadataCoo
 from bioetl.composition.factories.pipeline.construction_types import (
     _SchemaBuilder,
 )
+from bioetl.composition.factories.pipeline.control_plane_artifacts import (
+    ControlPlaneArtifacts,
+)
 from bioetl.composition.factories.pipeline.run_context_factory import (
     RunContextFactory,
 )
@@ -95,7 +98,7 @@ class _BuildPipelineServicesFn(Protocol):
 
 
 @dataclass(frozen=True, slots=True)
-class _PipelineCreationRequest:
+class _PipelineCreationRequest(ControlPlaneArtifacts):
     """Shared runtime request bundle for pipeline creation helpers."""
 
     run_id: RunID
@@ -104,13 +107,6 @@ class _PipelineCreationRequest:
     settings: Settings
     logger: LoggerPort
     audit: AuditPort | None = None
-    manifest_id: str | None = None
-    execution_fingerprint: str | None = None
-    config_hash: str | None = None
-    resolved_config_hash: str | None = None
-    effective_config_hash: str | None = None
-    dq_contract_compatibility_hash: str | None = None
-    effective_config_artifact_id: str | None = None
     config: PipelineYamlConfig | None = None
     filter_config: object | None = None
     tracer: TracingPort | None = None

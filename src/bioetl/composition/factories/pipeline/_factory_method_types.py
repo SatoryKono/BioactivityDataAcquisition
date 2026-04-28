@@ -15,6 +15,9 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 from bioetl.composition.factories.pipeline.creation_support import (
     _PipelineCreationRequest,
 )
+from bioetl.composition.factories.pipeline.control_plane_artifacts import (
+    ControlPlaneArtifacts,
+)
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.filtering import InputFilterConfig
@@ -59,21 +62,11 @@ class _BuildFactoryServicesRequest:
 
 
 _CreatePipelineWithServicesRequest = _PipelineCreationRequest
+_ControlPlaneArtifacts = ControlPlaneArtifacts
 
 
 @dataclass(frozen=True, slots=True)
-class _ControlPlaneArtifacts:
-    manifest_id: str | None = None
-    execution_fingerprint: str | None = None
-    config_hash: str | None = None
-    resolved_config_hash: str | None = None
-    effective_config_hash: str | None = None
-    dq_contract_compatibility_hash: str | None = None
-    effective_config_artifact_id: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class _CreateFactoryRunnerRequest:
+class _CreateFactoryRunnerRequest(ControlPlaneArtifacts):
     pipeline_name: str
     silver_schema: pa.Schema | None
     gold_schema: GoldSchemaType
@@ -82,13 +75,6 @@ class _CreateFactoryRunnerRequest:
     started_at: datetime
     settings: Settings
     observability: ObservabilityBundle
-    manifest_id: str | None = None
-    execution_fingerprint: str | None = None
-    config_hash: str | None = None
-    resolved_config_hash: str | None = None
-    effective_config_hash: str | None = None
-    dq_contract_compatibility_hash: str | None = None
-    effective_config_artifact_id: str | None = None
     filter_config: InputFilterConfig | None = None
     config: PipelineYamlConfig | None = None
     cached_bronze: CachedBronzeContext | None = None
