@@ -75,6 +75,7 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [project-memory-layer-issue-pack-2026-04-20.md](project-memory-layer-issue-pack-2026-04-20.md)
 - [repository-file-structure-cleanup-plan-2026-04-20.md](repository-file-structure-cleanup-plan-2026-04-20.md)
 - [repository-file-structure-remediation-plan-2026-04-28.md](repository-file-structure-remediation-plan-2026-04-28.md)
+- [scripts-cli-wrapper-caller-matrix-2026-04-28.md](scripts-cli-wrapper-caller-matrix-2026-04-28.md)
 
 Earlier operational context files such as
 `onboarding-checklist-day-1-2026-03-20.md` and
@@ -118,6 +119,10 @@ an architecture-strict audit found drift between the published root policy and
 the live GitHub root snapshot. It supersedes the 2026-04-21 live-state claims
 for remediation planning while retaining the older cleanup plan as historical
 baseline and policy context.
+
+The scripts CLI wrapper caller matrix was added on `2026-04-28` as supporting
+evidence for RF-008 compatibility-wrapper retention decisions. It is retained
+as operational context for scripts cleanup, not as a second active backlog.
 
 ### Retained Historical Context With Live Evidence References
 

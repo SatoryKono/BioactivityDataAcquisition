@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.base_transformer import BaseTransformer
@@ -14,6 +14,7 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 )
 from bioetl.composition.factories.pipeline.control_plane_artifacts import (
     ControlPlaneArtifacts,
+    build_control_plane_artifacts,
 )
 from bioetl.composition.factories.pipeline.creation_support import (
     _PipelineCreationRequest,

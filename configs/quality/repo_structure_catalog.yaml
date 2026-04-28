@@ -54,6 +54,8 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/repository-file-structure-remediation-plan-2026-04-28.md
       lifecycle: supporting_context
+    - path: docs/plans/scripts-cli-wrapper-caller-matrix-2026-04-28.md
+      lifecycle: supporting_context
     - path: docs/plans/silver-filter-rejects-observability-plan.md
       lifecycle: supporting_context
     - path: docs/plans/test-health-observability-plan-2026-04-22.md
