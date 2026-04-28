@@ -59,7 +59,8 @@ class EnricherDeduplicatorService:
         """Check for duplicates by key columns."""
         if len(df) == 0:
             return False
-        missing_cols = [c for c in key_columns if c not in df.columns]
+        df_columns_set = set(df.columns)
+        missing_cols = [c for c in key_columns if c not in df_columns_set]
         if missing_cols:
             return False
         unique_count: int = df.select(key_columns).n_unique()
@@ -75,7 +76,8 @@ class EnricherDeduplicatorService:
         """Aggregate duplicates by merging differing values."""
 
         records_before = len(df)
-        non_key_columns = [c for c in df.columns if c not in key_columns]
+        key_columns_set = set(key_columns)
+        non_key_columns = [c for c in df.columns if c not in key_columns_set]
 
         if not non_key_columns:
             result = df.select(key_columns).unique(maintain_order=True)
