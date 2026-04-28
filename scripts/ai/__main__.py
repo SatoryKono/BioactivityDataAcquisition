@@ -19,6 +19,7 @@ import sys
 from pathlib import Path
 
 _DIR = Path(__file__).parent
+SURFACES = ("codex", "mcp", "vibe")
 
 
 def _codex_command(rest: list[str]) -> list[str]:
@@ -47,8 +48,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     surface, rest = args[0], args[1:]
-    if surface not in MODULES:
-        available = ", ".join(sorted(MODULES))
+    if surface not in SURFACES:
+        available = ", ".join(sorted(SURFACES))
         print(f"Unknown surface: {surface}", file=sys.stderr)
         print(f"Available: {available}", file=sys.stderr)
         return 2

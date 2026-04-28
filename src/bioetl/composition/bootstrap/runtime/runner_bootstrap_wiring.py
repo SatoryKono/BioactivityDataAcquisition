@@ -7,13 +7,13 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runner_pkg import CompositePipelineRunner
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.domain.composite.config import CompositeConfig
-from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 from bioetl.composition.bootstrap.runtime._composite_plan_support import (
     build_bootstrap_runner_factories,
     build_bootstrap_runtime_resources,
     build_bootstrap_support_services,
 )
+from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
 if TYPE_CHECKING:
     import polars as pl

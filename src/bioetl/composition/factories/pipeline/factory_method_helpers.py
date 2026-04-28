@@ -26,10 +26,10 @@ from bioetl.composition.factories.pipeline._factory_method_types import (
     _PipelineFactoryContext,
 )
 from bioetl.composition.factories.pipeline._factory_method_types import (
-    build_create_pipeline_with_services_request as _build_create_pipeline_with_services_request,
+    build_create_factory_runner_request as _build_create_factory_runner_request,
 )
 from bioetl.composition.factories.pipeline._factory_method_types import (
-    build_create_factory_runner_request as _build_create_factory_runner_request,
+    build_create_pipeline_with_services_request as _build_create_pipeline_with_services_request,
 )
 from bioetl.composition.factories.pipeline._factory_method_types import (
     build_pipeline_factory_context as _build_pipeline_factory_context,
@@ -40,11 +40,11 @@ from bioetl.composition.factories.pipeline._factory_method_types import (
 from bioetl.composition.factories.pipeline._factory_method_types import (
     extract_entity_type as _extract_entity_type_helper,
 )
-from bioetl.composition.factories.pipeline.control_plane_artifacts import (
-    build_control_plane_artifacts,
-)
 from bioetl.composition.factories.pipeline._factory_method_types import (
     resolve_data_source_creator as _resolve_data_source_creator,
+)
+from bioetl.composition.factories.pipeline.control_plane_artifacts import (
+    build_control_plane_artifacts,
 )
 from bioetl.composition.factories.pipeline.transformer_dependencies import (
     build_transformer_dependencies,

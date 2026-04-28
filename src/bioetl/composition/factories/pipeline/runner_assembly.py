@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, cast
 from bioetl.application.services.checkpoint_compatibility_service import (
     CheckpointCompatibilityService,
 )
+from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
 from bioetl.composition.factories.pipeline._runner_assembly_support import (
     RunnerAssemblyContext as _RunnerAssemblyContext,
@@ -27,18 +28,13 @@ from bioetl.composition.factories.pipeline._runner_assembly_support import (
 from bioetl.composition.factories.pipeline._runner_assembly_support import (
     build_runner_constructor_payload as _build_runner_constructor_payload_impl,
 )
-from bioetl.composition.factories.pipeline._runner_assembly_support import (
-    build_postrun_service_for_pipeline as _build_postrun_service_for_pipeline_impl,
-)
-from bioetl.composition.factories.pipeline._runner_assembly_support import (
-    assemble_runner_parts as _assemble_runner_parts_impl,
-)
 from bioetl.composition.factories.pipeline.checkpoint_metadata_helpers import (
     build_current_checkpoint_metadata,
 )
 from bioetl.composition.factories.pipeline.checkpoint_policy_helpers import (
     resolve_checkpoint_compatibility_policy,
 )
+from bioetl.composition.factories.pipeline.postrun_assembly import build_postrun_service
 from bioetl.composition.factories.pipeline.runner_constructor import (
     RunnerAssemblyParts,
     create_pipeline_runner_from_payload,
@@ -151,6 +147,20 @@ def _create_pipeline_runner(
     return create_pipeline_runner_from_payload(payload)
 
 
+def _build_postrun_service(
+    context: _RunnerAssemblyContext,
+    *,
+    lifecycle_service: MedallionLifecycleService,
+) -> PostrunService:
+    return build_postrun_service(
+        pipeline=context.pipeline,
+        logger_port=context.logger_port,
+        lifecycle_service=lifecycle_service,
+        dq_configs=context.dq_configs_extractor(context.yaml_config),
+        tracer=context.observability.tracer,
+    )
+
+
 def _build_runner_constructor_payload(
     *,
     pipeline: BasePipeline,
@@ -167,14 +177,39 @@ def _build_runner_constructor_payload(
 def _assemble_runner_parts(
     context: _RunnerAssemblyContext,
 ) -> RunnerAssemblyParts:
-    return _assemble_runner_parts_impl(
+    checkpoint_manager = _build_checkpoint_manager(
+        pipeline=context.pipeline,
+        logger_port=context.logger_port,
+    )
+    lifecycle_service = MedallionLifecycleService(
+        storage=context.pipeline.services.storage,
+        logger=context.logger_port,
+    )
+    lock_manager = _build_lock_manager(
         context,
-        checkpoint_manager_builder=_build_checkpoint_manager,
-        lock_manager_builder=_build_lock_manager,
-        preflight_service_builder=_build_preflight_service,
-        observer_builder=_build_observer,
-        postrun_service_builder=_build_postrun_service_for_pipeline_impl,
-        batch_executor_builder=_build_batch_executor,
+        checkpoint_manager=checkpoint_manager,
+        context_holder=LockContextHolder(),
+    )
+    preflight_service = _build_preflight_service(context)
+    observer = _build_observer(context)
+    postrun_service = _build_postrun_service(
+        context,
+        lifecycle_service=lifecycle_service,
+    )
+    batch_executor = _build_batch_executor(
+        context,
+        checkpoint_manager=checkpoint_manager,
+        lock_manager=lock_manager,
+        observer=observer,
+    )
+    return RunnerAssemblyParts(
+        checkpoint_manager=checkpoint_manager,
+        lifecycle_service=lifecycle_service,
+        lock_manager=lock_manager,
+        preflight_service=preflight_service,
+        postrun_service=postrun_service,
+        observer=observer,
+        batch_executor=batch_executor,
     )
 
 

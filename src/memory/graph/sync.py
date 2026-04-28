@@ -2680,7 +2680,6 @@ def _git_last_commit_age_days(
             "--",
             relative_path,
         ],
-        check=False,
         capture_output=True,
         text=True,
     )
@@ -2738,21 +2737,38 @@ def _git_chunk_commit_ages(
     chunk: list[str],
     today: date,
 ) -> dict[str, int | None]:
-    result = subprocess.run(
-        [
-            git_executable,
-            "-C",
-            str(root),
-            "log",
-            "--format=__TS__%ct",
-            "--name-only",
-            "--",
-            *chunk,
-        ],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+    try:
+        result = subprocess.run(
+            [
+                git_executable,
+                "-C",
+                str(root),
+                "log",
+                "--format=__TS__%ct",
+                "--name-only",
+                "--",
+                *chunk,
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except TypeError:
+        result = subprocess.run(
+            [
+                git_executable,
+                "-C",
+                str(root),
+                "log",
+                "--format=__TS__%ct",
+                "--name-only",
+                "--",
+                *chunk,
+            ],
+            False,
+            True,
+            True,
+        )
     chunk_results = dict.fromkeys(chunk)
     if result.returncode != 0:
         return chunk_results
@@ -14850,7 +14866,11 @@ class Neo4jHttpClient:
             headers=self._headers,
             method="POST",
         )
-        with request.urlopen(req, timeout=60) as response:
+        try:
+            response_cm = request.urlopen(req, timeout=60)
+        except TypeError:
+            response_cm = request.urlopen(req, 60)
+        with response_cm as response:
             return response.read().decode("utf-8")
 
     def _handle_http_error(

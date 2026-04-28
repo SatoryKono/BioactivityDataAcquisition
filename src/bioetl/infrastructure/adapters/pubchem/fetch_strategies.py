@@ -1,14 +1,4 @@
-"""PubChem fetch strategy facade.
-
-Thin compatibility facade (P1-5):
-- query/search flow moved to ``_fetch_strategy_search``
-- query building moved to ``query_builder``
-- response mapping moved to ``response_mapper``
-- execution flow moved to ``fetch_flow``
-- loop/policy helpers moved to ``policy_helper``
-
-Public API and import path remain stable.
-"""
+"""Thin PubChem fetch facade; heavy query/search/flow logic lives in helpers."""
 
 from __future__ import annotations
 
@@ -133,15 +123,6 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
         )
         return self._response_mapper.map_compounds(compounds)
 
-    async def _yield_records(
-        self, records: list[BronzeRecord], limit: int | None, fetched: int
-    ) -> AsyncIterator[tuple[BronzeRecord, int]]:
-        for record in records:
-            if is_limit_reached(limit, fetched):
-                break
-            yield record, fetched + 1
-            fetched += 1
-
     def _warn_smiles_fetch_error(self, smiles: str, error: Exception) -> None:
         self._logger.warning(
             "smiles_fetch_failed",
@@ -179,7 +160,10 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
             if is_limit_reached(limit, fetched):
                 break
 
-            chunk = valid_smiles[i : i + batch_size]
+            chunk_end = i + batch_size
+            if limit is not None:
+                chunk_end = i + min(batch_size, max(limit - fetched, 0))
+            chunk = valid_smiles[i:chunk_end]
             async for record in self._iter_smiles_chunk_records(chunk):
                 if is_limit_reached(limit, fetched):
                     return

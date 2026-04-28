@@ -12,11 +12,11 @@ from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )
-from bioetl.composition.factories.pipeline.creation_support import (
-    _PipelineCreationRequest,
-)
 from bioetl.composition.factories.pipeline.control_plane_artifacts import (
     ControlPlaneArtifacts,
+)
+from bioetl.composition.factories.pipeline.creation_support import (
+    _PipelineCreationRequest,
 )
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.context import CachedBronzeContext

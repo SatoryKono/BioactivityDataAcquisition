@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Self
 
-from bioetl.application.core._fetch_forwarding import forward_fetch_records
 from bioetl.application.core import (
     _filtered_data_source_fetch_support as fetch_support,
 )
 from bioetl.application.core import _filtered_data_source_support as lifecycle_support
+from bioetl.application.core._fetch_forwarding import forward_fetch_records
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:

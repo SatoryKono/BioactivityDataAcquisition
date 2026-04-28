@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1710,
-    "total_internal_imports": 6758,
+    "scanned_modules": 1711,
+    "total_internal_imports": 6764,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 308,
@@ -11,13 +11,13 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 1128,
+      "imports": 1127,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 997,
+      "imports": 996,
       "allowed": true
     },
     {
@@ -29,13 +29,13 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 532,
+      "imports": 540,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 368,
+      "imports": 370,
       "allowed": true
     },
     {
@@ -53,13 +53,13 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 748,
+      "imports": 747,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 941,
+      "imports": 940,
       "allowed": true
     },
     {
@@ -107,7 +107,7 @@
     {
       "source": "application.core",
       "target": "domain.types",
-      "imports": 104
+      "imports": 105
     },
     {
       "source": "infrastructure.adapters",
@@ -142,7 +142,7 @@
     {
       "source": "composition.factories",
       "target": "domain.ports",
-      "imports": 62
+      "imports": 63
     },
     {
       "source": "infrastructure.storage",
@@ -152,17 +152,17 @@
     {
       "source": "application.services",
       "target": "domain.types",
-      "imports": 56
+      "imports": 55
     },
     {
       "source": "application.services",
       "target": "domain.ports",
-      "imports": 55
+      "imports": 54
     },
     {
       "source": "infrastructure.storage",
       "target": "domain.value_objects",
-      "imports": 48
+      "imports": 47
     },
     {
       "source": "interfaces.cli",
@@ -182,7 +182,7 @@
     {
       "source": "composition.bootstrap",
       "target": "domain.ports",
-      "imports": 40
+      "imports": 41
     },
     {
       "source": "composition.bootstrap",
