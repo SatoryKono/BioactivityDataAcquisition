@@ -19,6 +19,16 @@ scrape_configs:
       - targets: ['host.docker.internal:8000']
     metrics_path: /metrics
 
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus:9090']
+    metrics_path: /metrics
+
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+    metrics_path: /metrics
+
   - job_name: 'pushgateway'
     honor_labels: true
     static_configs:

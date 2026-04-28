@@ -54,6 +54,9 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_memory_batch_resize_events_total": _metrics.MEMORY_BATCH_RESIZE_EVENTS_TOTAL,
         "bioetl_memory_monitor_fallback_events_total": _metrics.MEMORY_MONITOR_FALLBACK_EVENTS_TOTAL,
         "bioetl_traced_runs_total": _metrics.TRACED_RUNS_TOTAL,
+        "bioetl_replay_reconstructability_events_total": (
+            _metrics.REPLAY_RECONSTRUCTABILITY_EVENTS_TOTAL
+        ),
     },
     gauges={
         "bioetl_memory_pressure_state": _metrics.MEMORY_PRESSURE_STATE,

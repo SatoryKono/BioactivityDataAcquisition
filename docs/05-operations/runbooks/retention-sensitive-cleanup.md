@@ -104,13 +104,13 @@ bioetl maintenance control-plane-lifecycle --retention-days 90
 Repository cleanup outside protected surfaces:
 
 ```bash
-python scripts/ops/support/repo/cleanup_repository.py --dry-run
+python -m scripts.ops.support.repo.cleanup_repository --dry-run
 ```
 
 Root hygiene:
 
 ```bash
-python scripts/engineering/repo/audit_root_cleanliness.py
+python -m scripts.engineering.repo check-cleanliness
 ```
 
 ### 4. Review Gate
@@ -186,4 +186,3 @@ Every retention-sensitive cleanup PR or issue MUST include:
 - reviewed apply/delete list;
 - verification command output;
 - rollback or restore note.
-

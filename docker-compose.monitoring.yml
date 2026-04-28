@@ -88,6 +88,7 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_METRICS_ENABLED=true
       # Grafana 12+ startup plugin installer flag.
       - GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource
       # Backward compatibility with older Grafana container startup scripts.

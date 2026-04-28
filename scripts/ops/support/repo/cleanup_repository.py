@@ -20,12 +20,15 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-from scripts.engineering.repo.audit_root_cleanliness import (
-    _is_forbidden_tracked_artifact,
-)
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+
 from scripts.engineering.repo._root_governance import (
     is_within_blocked_cleanup_zone,
     load_root_governance_policy,
+)
+from scripts.engineering.repo.audit_root_cleanliness import (
+    _is_forbidden_tracked_artifact,
 )
 
 logging.basicConfig(

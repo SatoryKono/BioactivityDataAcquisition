@@ -11,7 +11,7 @@ for arg in "$@"; do
       ;;
     -h|--help)
       cat <<'USAGE'
-Usage: scripts/preflight_cleanup.sh [--dry-run]
+Usage: scripts/engineering/repo/preflight_cleanup.sh [--dry-run]
 
 Removes common Python/build/cache artifacts before release checks.
 

@@ -31,6 +31,9 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
 from scripts.engineering.repo._root_governance import (
     is_within_blocked_cleanup_zone,
     load_root_governance_policy,
