@@ -8,8 +8,18 @@ from pathlib import Path
 TARGET_FILE = Path("testing_support/neo4j_memory_sync.py")
 
 
+def _resolve_target_file() -> Path:
+    repo_root = Path(__file__).resolve().parents[4]
+    resolved_target = (repo_root / TARGET_FILE).resolve()
+    expected_target = (repo_root / "testing_support" / "neo4j_memory_sync.py").resolve()
+    if resolved_target != expected_target:
+        raise RuntimeError(f"Unexpected target file: {resolved_target}")
+    return resolved_target
+
+
 def main() -> int:
-    text = TARGET_FILE.read_text(encoding="utf-8")
+    target_file = _resolve_target_file()
+    text = target_file.read_text(encoding="utf-8")
 
     replacements = {
         '"http://localhost:7474"': "_test_internal_http_uri('localhost', 7474)",
@@ -34,7 +44,7 @@ LOCALHOST_HTTP_URI = _test_internal_http_uri(\"localhost\", 7474)"""
         helper,
     )
 
-    TARGET_FILE.write_text(text, encoding="utf-8")
+    target_file.write_text(text, encoding="utf-8")
     return 0
 
 

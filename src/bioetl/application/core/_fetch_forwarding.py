@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
+
 from bioetl.domain.types import JsonDict
 
 _UNSET_FETCH_ARG = object()

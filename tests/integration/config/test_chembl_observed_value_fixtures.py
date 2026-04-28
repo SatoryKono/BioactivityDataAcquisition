@@ -66,6 +66,26 @@ OBSERVED_VALUE_POLICIES: tuple[ObservedValuePolicy, ...] = (
         ("assay", "subcellular_fractions"),
     ),
     ObservedValuePolicy(
+        "activity",
+        "bao_endpoint_mapping_status",
+        ("activity", "mapping_statuses"),
+    ),
+    ObservedValuePolicy(
+        "activity",
+        "bao_format_mapping_status",
+        ("activity", "mapping_statuses"),
+    ),
+    ObservedValuePolicy(
+        "activity",
+        "qudt_unit_mapping_status",
+        ("activity", "mapping_statuses"),
+    ),
+    ObservedValuePolicy(
+        "activity",
+        "uo_unit_mapping_status",
+        ("activity", "mapping_statuses"),
+    ),
+    ObservedValuePolicy(
         "assay_parameters",
         "standard_type",
         ("assay", "parameter_standard_type_universe"),
@@ -93,7 +113,7 @@ OBSERVED_VALUE_POLICIES: tuple[ObservedValuePolicy, ...] = (
     ObservedValuePolicy(
         "publication",
         "publication_type",
-        ("publication", "native_doc_types"),
+        ("publication", "types"),
     ),
     ObservedValuePolicy(
         "publication_term",

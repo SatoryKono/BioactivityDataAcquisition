@@ -146,14 +146,18 @@ class SilverMetadataOperations:
                 table_name=table_name,
             )
         elif "table_path" in parameters:
-            legacy_write = cast(Any, write_silver_metadata)  # Any: legacy writer accepts historical table_path kwargs
+            legacy_write = cast(
+                Any, write_silver_metadata
+            )  # Any: legacy writer accepts historical table_path kwargs
             await legacy_write(
                 table_path=table_path,
                 metadata=metadata,
                 table_name=table_name,
             )
         else:
-            legacy_write = cast(Any, write_silver_metadata)  # Any: legacy writer may expose a positional signature
+            legacy_write = cast(
+                Any, write_silver_metadata
+            )  # Any: legacy writer may expose a positional signature
             await legacy_write(table_path, metadata, table_name=table_name)
         return None
 

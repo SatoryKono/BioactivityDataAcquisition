@@ -267,7 +267,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("hierarchy_parent_chembl_id", pa.string()),
         ("inchi_key", pa.string()),
         ("inorganic_flag", pa.int64()),
-        ("max_phase", pa.int64()),
+        ("max_phase", pa.float64()),
         ("molecule_id", pa.string()),
         ("molecule_hierarchy", pa.string()),
         ("molecule_properties", pa.string()),

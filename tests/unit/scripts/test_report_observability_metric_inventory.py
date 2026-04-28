@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from scripts.engineering.qa import report_observability_metric_inventory as inventory
 
 
@@ -267,7 +269,7 @@ def test_main_check_exits_nonzero_for_metric_drift(
         },
     )
 
-    try:
+    with pytest.raises(SystemExit) as exc_info:
         inventory.main(
             [
                 "--check",
@@ -278,10 +280,7 @@ def test_main_check_exits_nonzero_for_metric_drift(
                 "missing.yaml",
             ]
         )
-    except SystemExit as exc:
-        assert exc.code == 1
-    else:
-        raise AssertionError("metric drift check should fail closed")
+    assert exc_info.value.code == 1
 
 
 def test_main_check_allows_explicit_baseline(

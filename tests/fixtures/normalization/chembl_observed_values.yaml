@@ -26,6 +26,22 @@ observed_values:
       - mM
       - "%"
       - ug.mL-1
+    bao_endpoint_mapping_status:
+      - mapped
+      - unmapped
+      - missing
+    bao_format_mapping_status:
+      - mapped
+      - unmapped
+      - missing
+    uo_unit_mapping_status:
+      - mapped
+      - unmapped
+      - missing
+    qudt_unit_mapping_status:
+      - mapped
+      - unmapped
+      - missing
     uo_units:
       - UO:0000065
       - UO_0000065
@@ -162,10 +178,10 @@ observed_values:
       - CLO:0003684
   publication:
     publication_type:
-      - PUBLICATION
-      - PATENT
-      - DATASET
-      - BOOK
+      - journal-article
+      - patent
+      - dataset
+      - book
     is_oa:
       - "1"
       - "0"
@@ -235,10 +251,10 @@ policy_values:
       - RNA
   publication:
     publication_type:
-      - PUBLICATION
-      - PATENT
-      - DATASET
-      - BOOK
+      - journal-article
+      - patent
+      - dataset
+      - book
 
 dq_only_subsets:
   activity:

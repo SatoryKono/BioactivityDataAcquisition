@@ -9,7 +9,7 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
-    normalize_profile_governed_uppercase_vocabulary,
+    normalize_profile_assay_parameter_type,
     normalize_profile_operator,
     normalize_profile_text,
 )
@@ -52,6 +52,15 @@ _TYPE_FIELDS = chembl_controlled_family_fields(
     "assay_parameter_types",
     entity="assay_parameters",
 )
+
+
+def normalize_profile_assay_parameter_type_field(value: object) -> object:
+    return normalize_profile_assay_parameter_type(
+        value,
+        allowed_values=ASSAY_PARAMETER_STANDARD_TYPES,
+    )
+
+
 _SPECIAL_RULE_COMPONENTS = {
     "comments": (
         normalize_profile_text,
@@ -66,13 +75,9 @@ _SPECIAL_RULE_COMPONENTS = {
     ),
     **{
         field_name: (
-            lambda value: normalize_profile_governed_uppercase_vocabulary(
-                value,
-                allowed_values=ASSAY_PARAMETER_STANDARD_TYPES,
-                preserve_unknown=True,
-            ),
+            normalize_profile_assay_parameter_type_field,
             (
-                "Normalize governed assay-parameter type values against the shared "
+                "Normalize assay-parameter type as an explicit controlled-vocabulary surface against the shared "
                 "registry, while preserving unknown provider lexemes as uppercase "
                 "for explicit raw-vs-canonical review without rejecting unknown."
             ),

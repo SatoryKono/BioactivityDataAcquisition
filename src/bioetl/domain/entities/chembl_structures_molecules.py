@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from bioetl.domain.entities.base import BaseEntity
+from bioetl.domain.schemas.constants import MAX_PHASE_VALUES
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -15,7 +16,7 @@ class Molecule(BaseEntity):
     pref_name: str | None = None
     molecule_type: str | None = None
     structure_type: str | None = None
-    max_phase: int | None = None
+    max_phase: int | float | None = None
     first_approval: int | None = None
     oral: bool | None = None
     parenteral: bool | None = None
@@ -67,8 +68,10 @@ class Molecule(BaseEntity):
     def _validate_invariants(self) -> None:
         if not self.molecule_id:
             raise ValueError("Molecule ChEMBL ID is required")
-        if self.max_phase is not None and not (0 <= self.max_phase <= 4):
-            raise ValueError(f"max_phase must be 0-4, got {self.max_phase}")
+        if self.max_phase is not None and self.max_phase not in MAX_PHASE_VALUES:
+            raise ValueError(
+                f"max_phase must be one of {MAX_PHASE_VALUES}, got {self.max_phase}"
+            )
 
 
 def _validate_tanimoto(value: float | None, field_name: str) -> None:

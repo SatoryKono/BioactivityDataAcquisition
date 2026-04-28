@@ -467,4 +467,3 @@ def _build_identity_graph_artifact_ref(
 ) -> dict[str, object]:
     """Return the operator-facing artifact shape used inside identity graph."""
     return {key: value for key, value in artifact_ref.items() if key != "artifact_id"}
-

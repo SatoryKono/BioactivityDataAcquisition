@@ -4,17 +4,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.services.audit_inspection_service import AuditInspectionResult
-from bioetl.application.services.checkpoint_service import CheckpointInfo
-from bioetl.application.services.control_plane.run_manifest_inspection_service import (
-    RunManifestInspectionResult,
-)
 from bioetl.application.services._observability_trace_support import (
     build_trace_ids,
     build_trace_urls,
     resolve_manifest_provider,
     resolve_manifest_run_type,
-    trace_links_enabled,
+)
+from bioetl.application.services._observability_trace_support import (
+    trace_links_enabled as _trace_links_enabled,
+)
+from bioetl.application.services.audit_inspection_service import AuditInspectionResult
+from bioetl.application.services.checkpoint_service import CheckpointInfo
+from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+    RunManifestInspectionResult,
 )
 
 if TYPE_CHECKING:
@@ -23,6 +25,19 @@ if TYPE_CHECKING:
     )
 
 _CRITICAL_EVIDENCE_PROFILES = frozenset({"forensic_grade"})
+
+__all__ = [
+    "build_next_steps",
+    "build_status_section",
+    "build_traceability_section",
+    "classify_evidence_status",
+    "enrich_quarantine_summary",
+    "resolve_checkpoint_for_run",
+    "resolve_lineage_for_run",
+    "resolve_pipeline_name",
+    "resolve_run_manifest",
+    "trace_links_enabled",
+]
 
 
 class _CheckpointLookupService(Protocol):
@@ -35,6 +50,10 @@ class _LineageExplainService(Protocol):
 
 class _RunManifestShowService(Protocol):
     def show(self, identifier: str) -> RunManifestInspectionResult: ...
+
+
+def trace_links_enabled(tracer: object | None) -> bool:
+    return _trace_links_enabled(tracer)
 
 
 def resolve_pipeline_name(

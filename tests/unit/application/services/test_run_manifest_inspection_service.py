@@ -23,7 +23,6 @@ from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane import (
     ReplayCapability,
     RunArtifactRef,
-    RunInputSnapshotRef,
     RunSourceRef,
     RunLedgerEntry,
     RunManifest,
@@ -34,6 +33,7 @@ from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 from tests.unit.application.services.run_manifest_test_support import (
     FIXED_TIME as _FIXED_TIME,
+    RunManifestOverrides,
     SNAPSHOT_IDENTITY_FINGERPRINT as _SNAPSHOT_IDENTITY_FINGERPRINT,
     VALID_CONFIG_HASH as _VALID_CONFIG_HASH,
     VALID_EFFECTIVE_CONFIG_HASH as _VALID_EFFECTIVE_CONFIG_HASH,
@@ -90,21 +90,23 @@ def _make_manifest(
         run_id=run_id,
         run_type=run_type,
         config_hash=config_hash,
-        resolved_config_hash=resolved_config_hash,
-        effective_config_hash=effective_config_hash,
         limit=limit,
         execution_fingerprint=execution_fingerprint,
         created_at=created_at or _FIXED_TIME,
-        launch_context={"limit": limit, "exact_replay": True},
-        runtime_config={
-            "run_type": run_type.value,
-            "limit": limit,
-            "exact_replay": True,
-        },
         replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
         source_refs=source_refs
         or build_default_source_refs(
             bronze_batch_uri=BRONZE_BATCH_URI,
+        ),
+        overrides=RunManifestOverrides(
+            resolved_config_hash=resolved_config_hash,
+            effective_config_hash=effective_config_hash,
+            launch_context={"limit": limit, "exact_replay": True},
+            runtime_config={
+                "run_type": run_type.value,
+                "limit": limit,
+                "exact_replay": True,
+            },
         ),
     )
 

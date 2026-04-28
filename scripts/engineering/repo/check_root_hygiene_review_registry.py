@@ -199,11 +199,34 @@ def _validate_candidate_canonical_path(
 def _validate_blocked_lane_against_catalog(
     payload: dict[str, object], catalog: dict[str, object]
 ) -> list[str]:
-    issues: list[str] = []
     lanes = payload.get("review_lanes")
     if not isinstance(lanes, list):
         return ["review_lanes must be a list"]
+    blocked_lane = _find_retention_sensitive_lane(lanes)
+    if blocked_lane is None:
+        return ["Missing review lane: retention_sensitive_boundaries"]
+    blocked_candidates = blocked_lane.get("candidates")
+    if not isinstance(blocked_candidates, list):
+        return ["retention_sensitive_boundaries candidates must be a list"]
+    catalog_zones = catalog.get("blocked_cleanup_zones")
+    if not isinstance(catalog_zones, list):
+        return ["blocked_cleanup_zones must be a list in repo_structure_catalog"]
 
+    issues: list[str] = []
+    lane_paths = _blocked_lane_paths(blocked_candidates)
+    catalog_paths = _catalog_blocked_paths(catalog_zones)
+    if lane_paths != catalog_paths:
+        issues.append(
+            "retention_sensitive_boundaries candidates must match "
+            "configs/quality/repo_structure_catalog.yaml blocked_cleanup_zones"
+        )
+    issues.extend(_blocked_lane_runbook_issues(blocked_candidates, catalog_zones))
+    return issues
+
+
+def _find_retention_sensitive_lane(
+    lanes: list[object],
+) -> dict[str, object] | None:
     blocked_lane = next(
         (
             lane
@@ -213,34 +236,30 @@ def _validate_blocked_lane_against_catalog(
         ),
         None,
     )
-    if not isinstance(blocked_lane, dict):
-        return ["Missing review lane: retention_sensitive_boundaries"]
+    return blocked_lane if isinstance(blocked_lane, dict) else None
 
-    blocked_candidates = blocked_lane.get("candidates")
-    if not isinstance(blocked_candidates, list):
-        return ["retention_sensitive_boundaries candidates must be a list"]
 
-    lane_paths = {
+def _blocked_lane_paths(blocked_candidates: list[object]) -> set[str]:
+    return {
         candidate["path"]
         for candidate in blocked_candidates
         if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
     }
 
-    catalog_zones = catalog.get("blocked_cleanup_zones")
-    if not isinstance(catalog_zones, list):
-        return ["blocked_cleanup_zones must be a list in repo_structure_catalog"]
 
-    catalog_paths = {
+def _catalog_blocked_paths(catalog_zones: list[object]) -> set[str]:
+    return {
         zone["path"]
         for zone in catalog_zones
         if isinstance(zone, dict) and isinstance(zone.get("path"), str)
     }
-    if lane_paths != catalog_paths:
-        issues.append(
-            "retention_sensitive_boundaries candidates must match "
-            "configs/quality/repo_structure_catalog.yaml blocked_cleanup_zones"
-        )
 
+
+def _blocked_lane_runbook_issues(
+    blocked_candidates: list[object],
+    catalog_zones: list[object],
+) -> list[str]:
+    issues: list[str] = []
     catalog_runbooks = {
         zone["path"]: zone.get("cleanup_runbook")
         for zone in catalog_zones

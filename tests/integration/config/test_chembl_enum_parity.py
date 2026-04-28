@@ -36,11 +36,35 @@ ENUM_POLICIES: tuple[EnumPolicy, ...] = (
     EnumPolicy("activity", "assay_type", ("assay", "types")),
     EnumPolicy(
         "activity",
+        "bao_endpoint_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "activity",
+        "bao_format_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "activity",
         "data_validity_comment",
         ("activity", "data_validity_comments"),
         surfaces=frozenset({"quality"}),
     ),
+    EnumPolicy(
+        "activity",
+        "qudt_unit_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
     EnumPolicy("activity", "standard_units", ("activity", "standard_units")),
+    EnumPolicy(
+        "activity",
+        "uo_unit_mapping_status",
+        ("activity", "mapping_statuses"),
+        surfaces=frozenset({"quality"}),
+    ),
     EnumPolicy("assay", "assay_type", ("assay", "types")),
     EnumPolicy("assay", "relationship_type", ("assay", "relationship_types")),
     EnumPolicy("assay", "assay_test_type", ("assay", "test_types")),
@@ -68,6 +92,12 @@ ENUM_POLICIES: tuple[EnumPolicy, ...] = (
         "assay_parameters",
         "standard_units",
         ("activity", "standard_units"),
+        surfaces=frozenset({"quality"}),
+    ),
+    EnumPolicy(
+        "molecule",
+        "max_phase",
+        ("molecule", "max_phase_values"),
         surfaces=frozenset({"quality"}),
     ),
     EnumPolicy(
