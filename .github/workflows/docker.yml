@@ -7,17 +7,17 @@ on:
   push:
     branches: [ main, master, develop ]
     paths:
-      - 'Dockerfile'
+      - 'Dockerfile.bioetl'
+      - 'Dockerfile.warp'
       - 'docker-compose*.yml'
       - '.dockerignore'
-      - 'entrypoint.sh'
   pull_request:
     branches: [ main, master, develop ]
     paths:
-      - 'Dockerfile'
+      - 'Dockerfile.bioetl'
+      - 'Dockerfile.warp'
       - 'docker-compose*.yml'
       - '.dockerignore'
-      - 'entrypoint.sh'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -26,6 +26,11 @@ concurrency:
 jobs:
   docker-lint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dockerfile:
+          - Dockerfile.bioetl
+          - Dockerfile.warp
     steps:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -33,7 +38,7 @@ jobs:
       - name: Run Hadolint (Dockerfile linting)
         uses: hadolint/hadolint-action@2332a7b74a6de0dda2e2221d575162eba76ba5e5 # v3.3.0
         with:
-          dockerfile: Dockerfile
+          dockerfile: ${{ matrix.dockerfile }}
 
   docker-compose-validate:
     runs-on: ubuntu-latest
@@ -71,6 +76,7 @@ jobs:
         uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
         with:
           context: .
+          file: Dockerfile.bioetl
           push: false
           load: true
           tags: "bioetl:${{ github.sha }}"
@@ -128,6 +134,7 @@ jobs:
         uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
         with:
           context: .
+          file: Dockerfile.bioetl
           push: true
           tags: |
             ghcr.io/${{ github.repository }}:latest

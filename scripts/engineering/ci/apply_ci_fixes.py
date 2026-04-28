@@ -672,10 +672,10 @@ on:
       - 'LICENSE'
     branches: [ main, master, develop ]
     paths:
-      - 'Dockerfile'
+      - 'Dockerfile.bioetl'
+      - 'Dockerfile.warp'
       - 'docker-compose*.yml'
       - '.dockerignore'
-      - 'entrypoint.sh'
   pull_request:
     paths-ignore:
       - 'docs/**'
@@ -686,10 +686,10 @@ on:
       - 'LICENSE'
     branches: [ main, master, develop ]
     paths:
-      - 'Dockerfile'
+      - 'Dockerfile.bioetl'
+      - 'Dockerfile.warp'
       - 'docker-compose*.yml'
       - '.dockerignore'
-      - 'entrypoint.sh'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -698,6 +698,11 @@ concurrency:
 jobs:
   docker-lint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dockerfile:
+          - Dockerfile.bioetl
+          - Dockerfile.warp
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -705,7 +710,7 @@ jobs:
       - name: Run Hadolint (Dockerfile linting)
         uses: hadolint/hadolint-action@v3
         with:
-          dockerfile: Dockerfile
+          dockerfile: ${{ matrix.dockerfile }}
 
   docker-compose-validate:
     runs-on: ubuntu-latest
@@ -756,6 +761,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: Dockerfile.bioetl
           # On main push: push temp SHA tag to GHCR so docker-push can retag.
           # On PR/other: load locally for Trivy scan only.
           push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
@@ -941,19 +947,19 @@ CI06_OLD_PUSH = """\
       - 'LICENSE'
     branches: [ main, master, develop ]
     paths:
-      - 'Dockerfile'
+      - 'Dockerfile.bioetl'
+      - 'Dockerfile.warp'
       - 'docker-compose*.yml'
-      - '.dockerignore'
-      - 'entrypoint.sh'"""
+      - '.dockerignore'"""
 
 CI06_NEW_PUSH = """\
   push:
     branches: [ main, master, develop ]
     paths:
-      - 'Dockerfile'
+      - 'Dockerfile.bioetl'
+      - 'Dockerfile.warp'
       - 'docker-compose*.yml'
-      - '.dockerignore'
-      - 'entrypoint.sh'"""
+      - '.dockerignore'"""
 
 CI06_OLD_PR = """\
   pull_request:
@@ -966,19 +972,19 @@ CI06_OLD_PR = """\
       - 'LICENSE'
     branches: [ main, master, develop ]
     paths:
-      - 'Dockerfile'
+      - 'Dockerfile.bioetl'
+      - 'Dockerfile.warp'
       - 'docker-compose*.yml'
-      - '.dockerignore'
-      - 'entrypoint.sh'"""
+      - '.dockerignore'"""
 
 CI06_NEW_PR = """\
   pull_request:
     branches: [ main, master, develop ]
     paths:
-      - 'Dockerfile'
+      - 'Dockerfile.bioetl'
+      - 'Dockerfile.warp'
       - 'docker-compose*.yml'
-      - '.dockerignore'
-      - 'entrypoint.sh'"""
+      - '.dockerignore'"""
 
 
 def apply_ci06(api: GitHubAPI) -> None:
