@@ -10,6 +10,12 @@ from typing import TYPE_CHECKING
 from bioetl.application.services.control_plane.effective_config_service import (
     create_effective_config_service,
 )
+from bioetl.composition.runtime_builders import (
+    _run_manifest_support as _manifest_support,
+)
+from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
+    resolve_manifest_reproducibility_context,
+)
 from bioetl.composition.runtime_builders._run_manifest_refs import (
     control_plane_root as _shared_control_plane_root,
 )
@@ -271,11 +277,15 @@ def create_and_persist_effective_config_artifact(
     entity: str,
 ) -> tuple[str, str, str, str]:
     """Create effective config artifact, persist it, and return provenance fields."""
-    control_plane = getattr(
-        getattr(inputs.settings, "pipeline", None), "control_plane", None
+    contract_ref, _contract_version, _contract_schema_hash, _dq_policy_ref, _rules = (
+        _manifest_support.resolve_contract_identity(provider=provider, entity=entity)
     )
-    required_persistence_profile = str(
-        getattr(control_plane, "required_persistence_profile", "degraded_observable")
+    reproducibility_context = resolve_manifest_reproducibility_context(
+        ctx=ctx,
+        inputs=inputs,
+        provider=provider,
+        entity=entity,
+        contract_ref=contract_ref,
     )
     return _create_and_persist_effective_config_artifact_payload(
         pipeline_name=ctx.pipeline_name,
@@ -284,7 +294,9 @@ def create_and_persist_effective_config_artifact(
         runtime_overrides=_build_runtime_overrides_snapshot(ctx),
         provider=provider,
         entity=entity,
-        required_persistence_profile=required_persistence_profile,
+        required_persistence_profile=(
+            reproducibility_context.required_persistence_profile
+        ),
         settings=inputs.settings,
         logger=inputs.observability.logger,
         run_id=ctx.run_id,

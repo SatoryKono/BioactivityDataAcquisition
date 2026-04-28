@@ -217,7 +217,7 @@ owner: team/individual
 
 **Implementation**:
 
-- `scripts/check_doc_links.py` enhanced
+- `python -m scripts.docs check-links`
 - Runs on PRs and scheduled basis
 - Generates quality report
 
@@ -352,7 +352,7 @@ owner: team/individual
 | **MkDocs**               | Static site generation      | `mkdocs.yml`         |
 | **Material for MkDocs**  | Theme and navigation        | `mkdocs.yml`         |
 | **markdownlint**         | Markdown style checking     | `.markdownlint.json` |
-| **check_doc_links.py**   | Link validation             | Custom script        |
+| **scripts.docs check-links** | Link validation         | Packaged docs CLI    |
 | **docs_parity_check.py** | Config/documentation parity | Custom script        |
 | **GitHub Actions**       | CI/CD pipelines             | `.github/workflows/` |
 
@@ -360,16 +360,18 @@ owner: team/individual
 
 **Required Scripts**:
 
-1. `scripts/check_doc_links.py` - Link validation
+1. `python -m scripts.docs check-links` - Link validation
 1. `scripts/docs_parity_check.py` - Configuration parity
 1. `scripts/generate_adr_registry.py` - ADR metadata generation
 1. `scripts/docs_quality_report.py` - Quality metrics reporting
 
-`check_doc_links.py` is the active published-docs integrity gate. When invoked
-with `--report-json docs/reports/docs-link-check-report.json`, it emits the
-stable repo-only link-quality report used for local reproduction and CI
-artifacts. Exit code `0` means the selected checks passed; exit code `1` means
-violations were found and the docs change must not be treated as clean.
+`python -m scripts.docs check-links` is the active published-docs integrity
+gate. Its canonical implementation lives in
+`scripts/docs/checks/check_links.py`. When invoked with
+`--report-json docs/reports/docs-link-check-report.json`, it emits the stable
+repo-only link-quality report used for local reproduction and CI artifacts.
+Exit code `0` means the selected checks passed; exit code `1` means violations
+were found and the docs change must not be treated as clean.
 
 ## 📋 Compliance and Enforcement
 

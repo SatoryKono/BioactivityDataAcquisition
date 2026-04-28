@@ -179,12 +179,12 @@ class DocumentationGovernanceChecker:
         checks_failed = []
         warnings = []
 
-        # Check if link checking script exists
-        link_check_script = self.scripts_dir / "check_doc_links.py"
+        # Check that the canonical docs link-check implementation is available.
+        link_check_script = self.scripts_dir / "docs" / "checks" / "check_links.py"
         if link_check_script.exists():
-            checks_passed.append("Link checking script available")
+            checks_passed.append("Canonical docs link-check implementation available")
         else:
-            warnings.append("Link checking script not found")
+            warnings.append("Canonical docs link-check implementation not found")
 
         # Check for common broken link patterns
         doc_files = list(self.docs_dir.rglob("*.md"))

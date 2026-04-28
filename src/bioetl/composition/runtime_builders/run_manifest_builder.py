@@ -252,16 +252,17 @@ def create_run_manifest(
             effective_config_artifact_id=effective_config_artifact_id,
         )
     )
-    reproducibility_profile = resolve_reproducibility_family_profile(
+    reproducibility_context = resolve_manifest_reproducibility_context(
+        ctx=ctx,
+        inputs=inputs,
         provider=provider,
         entity=entity,
         contract_ref=contract_ref,
-        execution_context="source",
     )
     _emit_replay_reconstructability_metric(
         request=manifest_create_request,
         strict_exact_replay_supported=(
-            reproducibility_profile.strict_exact_replay_supported
+            reproducibility_context.strict_exact_replay_supported
         ),
         metrics=inputs.observability.metrics,
     )

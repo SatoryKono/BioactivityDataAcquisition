@@ -316,6 +316,78 @@ def test_create_and_persist_effective_config_artifact_forwards_required_profile(
     assert captured["required_persistence_profile"] == "degraded_observable"
 
 
+def test_create_and_persist_effective_config_artifact_uses_effective_replay_profile(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def _fake_payload(
+        *,
+        pipeline_name: str,
+        pipeline_kind: str,
+        resolved_config: object,
+        runtime_overrides: dict[str, object],
+        provider: str,
+        entity: str,
+        required_persistence_profile: str,
+        settings: Settings,
+        logger: object,
+        run_id: RunID,
+    ) -> tuple[str, str, str, str]:
+        captured.update(
+            pipeline_name=pipeline_name,
+            pipeline_kind=pipeline_kind,
+            resolved_config=resolved_config,
+            runtime_overrides=runtime_overrides,
+            provider=provider,
+            entity=entity,
+            required_persistence_profile=required_persistence_profile,
+            settings=settings,
+            logger=logger,
+            run_id=run_id,
+        )
+        return ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
+
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders.effective_config_artifact_builder._create_and_persist_effective_config_artifact_payload",
+        _fake_payload,
+    )
+
+    settings = Settings(
+        data_dir=Path("data"),
+        pipeline={
+            "control_plane": {
+                "run_manifest_enabled": True,
+                "run_ledger_enabled": True,
+                "required_persistence_profile": "degraded_observable",
+            }
+        },
+    )
+    observability = ObservabilityBundle.create(
+        logger=NoOpLogger(),
+        metrics=NoOpMetrics(),
+        tracer=NoOpTracing(),
+        audit=NoOpAudit(),
+    )
+    inputs: RunnerInputs = _build_runner_inputs(settings, observability)
+    ctx = PipelineRunContext(
+        pipeline_name="chembl_activity",
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        exact_replay=True,
+    )
+
+    create_and_persist_effective_config_artifact(
+        ctx=ctx,
+        inputs=inputs,
+        provider="chembl",
+        entity="activity",
+    )
+
+    assert captured["required_persistence_profile"] == "replay_ready"
+    assert captured["runtime_overrides"]["cli"]["exact_replay"] is True
+
+
 def test_create_and_persist_composite_effective_config_artifact_forwards_required_profile(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

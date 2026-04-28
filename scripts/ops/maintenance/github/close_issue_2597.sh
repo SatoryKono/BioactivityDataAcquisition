@@ -83,7 +83,7 @@ Delivered:
 Validation:
 - targeted pure-transformation unit suites: green
 - `tests/architecture/test_domain_unit_test_purity.py`: green
-- `scripts/docs/check_doc_links.py`: green
+- `python -m scripts.docs check-links`: green
 
 This closes the bounded baseline slice for pure transformation logic without expanding into integration/VCR policy work or introducing new runtime surfaces.
 EOF
