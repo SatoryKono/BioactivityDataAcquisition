@@ -30,8 +30,8 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
     _resolve_replay_mode,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_summary import (
-    _build_final_summary,
     _build_exact_replay_anchors,
+    _build_final_summary,
     _build_produced_artifact_trace,
     _FinalSummaryRequest,
 )

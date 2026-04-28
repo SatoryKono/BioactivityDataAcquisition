@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
+from typing import cast
 
 import pyarrow as pa
 
@@ -24,13 +25,8 @@ from bioetl.infrastructure.storage.silver.merged_operations import (
 )
 
 
-@dataclass(slots=True)
-class SilverMergedOperations:
-    """Merged operations service for Silver layer writes.
-
-    This service encapsulates merged write logic previously in SilverWriterMergedMixin,
-    following the composition pattern for better separation of concerns and testability.
-    """
+class _MergedWriteFacade:
+    """Shared merged-write facade used by mixin and composition service paths."""
 
     logger: LoggerPort
     csv_exporter: CsvExporter | None
@@ -42,15 +38,11 @@ class SilverMergedOperations:
         self,
         request: _MergedSilverWriteRequest,
     ) -> _PreparedMergedSilverWrite:
-        """Prepare normalized Arrow payload and resolved table path for merged writes.
-
-        Args:
-            request: Normalized merged write request.
-
-        Returns:
-            Prepared write payload with resolved table path and normalized Arrow table.
-        """
-        return _prepare_merged_silver_write(self, request)
+        """Prepare normalized Arrow payload and resolved table path for merged writes."""
+        return _prepare_merged_silver_write(
+            cast(_SilverWriterMergedHostProtocol, self),
+            request,
+        )
 
     async def _write_silver_merged_delta(
         self,
@@ -58,12 +50,7 @@ class SilverMergedOperations:
         table_path: str,
         arrow_table: pa.Table,
     ) -> None:
-        """Write merged Arrow table into Delta Lake.
-
-        Args:
-            table_path: File system path to the Delta table target.
-            arrow_table: PyArrow Table to write in overwrite mode.
-        """
+        """Write merged Arrow table into Delta Lake."""
         await _write_silver_merged_delta(
             table_path=table_path,
             arrow_table=arrow_table,
@@ -75,14 +62,11 @@ class SilverMergedOperations:
         table_name: str,
         arrow_table: pa.Table,
     ) -> None:
-        """Export merged table to CSV when exporter is configured.
-
-        Args:
-            table_name: Logical table name used as the CSV export target.
-            arrow_table: PyArrow Table containing the merged records to export.
-        """
+        """Export merged table to CSV when exporter is configured."""
         await _export_silver_merged_csv(
-            self, table_name=table_name, arrow_table=arrow_table
+            cast(_SilverWriterMergedHostProtocol, self),
+            table_name=table_name,
+            arrow_table=arrow_table,
         )
 
     async def write_silver_merged(
@@ -96,16 +80,7 @@ class SilverMergedOperations:
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
     ) -> None:
-        """Write merged records to Silver layer without explicit schema.
-
-        Args:
-            table_name: Logical table name for the Silver target.
-            records: List of Bronze record dicts to write.
-            primary_keys: Optional list of column names used for sorting.
-            run_id: Optional run identifier written to metadata sidecar.
-            sources_used: Optional list of source identifiers contributing to the merge.
-            preserve_column_order: If True, skip canonical column reordering.
-        """
+        """Write merged records to Silver layer without explicit schema."""
         request_kwargs = dict(
             table_name=table_name,
             records=records,
@@ -119,3 +94,18 @@ class SilverMergedOperations:
             self,
             _build_merged_silver_write_request(**request_kwargs),
         )
+
+
+@dataclass(slots=True)
+class SilverMergedOperations(_MergedWriteFacade):
+    """Merged operations service for Silver layer writes.
+
+    This service encapsulates merged write logic previously in SilverWriterMergedMixin,
+    following the composition pattern for better separation of concerns and testability.
+    """
+
+    logger: LoggerPort
+    csv_exporter: CsvExporter | None
+    _arrow_converter: ArrowDataConverter
+    _resolve_table_path: Callable[[str], str]
+    _write_silver_merged_metadata: _MergedSilverMetadataWriterProtocol
