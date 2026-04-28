@@ -428,6 +428,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded WSL command reference for operator troubleshooting; remove it once the mixed Windows-WSL workflow is stabilized."
     },
+    "scripts/engineering/dev/bash/entrypoint.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded Bash entrypoint helper for local container or terminal bootstrap experiments; remove it once the dev-shell startup path is standardized."
+    },
     "scripts/engineering/dev/bash/test-driver-via-docker.sh": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
@@ -595,6 +601,12 @@
       "decision": "internal_helper_orphan",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded Codex environment helper while mixed Windows/WSL setup flows still reference helper scripts; remove or consolidate once the Codex setup surface is fully unified."
+    },
+    "scripts/ai/codex/launch-interactive.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded Windows interactive-launch convenience helper while direct PowerShell-to-WSL Codex startup remains operator-oriented; remove it once the canonical launcher contract no longer needs a separate interactive transport."
     },
     "scripts/ai/codex/helper/check-env.sh": {
       "owner": "@bioetl-platform",

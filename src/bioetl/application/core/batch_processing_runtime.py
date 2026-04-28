@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
+
 def get_source_metadata(
     *,
     data_source: object,

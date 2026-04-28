@@ -60,6 +60,8 @@ async def preview_pipeline_cleanup(pipeline: str) -> CleanupPreview:
 
     impl = cast("Callable[[str], Awaitable[CleanupPreview]]", _impl)
     return await impl(pipeline)
+
+
 def _cleanup_policy(
     *,
     reason_prefix: str,

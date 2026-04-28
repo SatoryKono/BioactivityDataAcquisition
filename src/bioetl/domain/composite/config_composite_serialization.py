@@ -25,6 +25,7 @@ __all__ = [
     "composite_to_dict",
 ]
 
+
 def _build_seed_config[ConfigT](
     seed_data: dict[str, object],
     seed_cls: Callable[..., ConfigT],

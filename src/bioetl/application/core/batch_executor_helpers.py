@@ -28,6 +28,7 @@ __all__ = [
     "build_run_statistics",
 ]
 
+
 @dataclass(frozen=True, slots=True)
 class BatchExecutionStateOutcome:
     """Counter deltas and metadata produced by one processed batch."""

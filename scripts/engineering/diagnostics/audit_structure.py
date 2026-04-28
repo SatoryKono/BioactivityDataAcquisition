@@ -42,7 +42,6 @@ ALLOWED_ROOT_DIRS: set[str] = {
     ".aiassistant",
     "ai",
     ".codex",
-    ".codex_tmp",
     ".cursor",
     ".gemini",
     ".github",
@@ -81,6 +80,7 @@ GENERATED_DIRS: set[str] = {
     "output",
     "test-output",
     "MagicMock",
+    ".codex_tmp",
     ".python-user",
 }
 

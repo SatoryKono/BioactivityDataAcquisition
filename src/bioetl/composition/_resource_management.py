@@ -39,6 +39,7 @@ __all__ = [
     "vacuum_table",
 ]
 
+
 class QuarantineManagerProtocol(Protocol):
     """Minimal quarantine-manager contract exposed by resource management APIs."""
 

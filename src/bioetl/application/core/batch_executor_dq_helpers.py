@@ -32,6 +32,8 @@ _DQ_DATAFRAME_ERRORS: tuple[type[Exception], ...] = (
     TypeError,
     RuntimeError,
 )
+
+
 def dataframe_error_types() -> tuple[type[Exception], ...]:
     """Resolve exception types raised while building Polars dataframes."""
     try:
