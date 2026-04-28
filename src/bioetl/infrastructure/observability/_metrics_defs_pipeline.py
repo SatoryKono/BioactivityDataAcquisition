@@ -35,6 +35,7 @@ __all__ = [
     "PIPELINE_RUNS_TOTAL",
     "POSTRUN_PHASE_DURATION_SECONDS",
     "POSTRUN_PHASE_EVENTS_TOTAL",
+    "REPLAY_RECONSTRUCTABILITY_EVENTS_TOTAL",
     "SHUTDOWN_COMPLETED",
     "SHUTDOWN_INITIATED",
     "STORAGE_OPTIMIZATION_TOTAL",
@@ -196,6 +197,12 @@ TRACED_RUNS_TOTAL = Counter(
     "bioetl_traced_runs_total",
     "Total pipeline runs that started with real tracing enabled",
     ["pipeline", "run_type"],
+)
+
+REPLAY_RECONSTRUCTABILITY_EVENTS_TOTAL = Counter(
+    "bioetl_replay_reconstructability_events_total",
+    "Total replay reconstructability observations recorded during manifest assembly",
+    ["pipeline", "replay_capability", "strict_requirement", "status"],
 )
 
 MEMORY_PRESSURE_EVENTS_TOTAL = Counter(

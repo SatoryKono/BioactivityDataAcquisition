@@ -245,6 +245,39 @@ def _validate_required_runtime_persistence_profile(
         )
 
 
+def _emit_replay_reconstructability_metric(
+    *,
+    request: RunManifestCreateSpec,
+    strict_exact_replay_supported: bool,
+    metrics: object,
+) -> None:
+    strict_replay_requested = bool(request.launch_context.get("exact_replay"))
+    required_persistence_profile = str(
+        request.launch_context.get("required_persistence_profile")
+        or "degraded_observable"
+    )
+    strict_requirement = (
+        strict_replay_requested
+        or required_persistence_profile in {"replay_ready", "forensic_grade"}
+    )
+    status = "reconstructable"
+    if strict_requirement and (
+        not strict_exact_replay_supported
+        or request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
+    ):
+        status = "not_reconstructable"
+    metrics.increment_counter(
+        "bioetl_replay_reconstructability_events_total",
+        value=1,
+        labels={
+            "pipeline": request.pipeline_name,
+            "replay_capability": request.replay_capability.value,
+            "strict_requirement": "true" if strict_requirement else "false",
+            "status": status,
+        },
+    )
+
+
 def create_run_manifest(
     *,
     ctx: PipelineRunContext,
@@ -293,6 +326,19 @@ def create_run_manifest(
             dq_contract_compatibility_hash=dq_contract_compatibility_hash,
             effective_config_artifact_id=effective_config_artifact_id,
         )
+    )
+    reproducibility_profile = resolve_reproducibility_family_profile(
+        provider=provider,
+        entity=entity,
+        contract_ref=contract_ref,
+        execution_context="source",
+    )
+    _emit_replay_reconstructability_metric(
+        request=manifest_create_request,
+        strict_exact_replay_supported=(
+            reproducibility_profile.strict_exact_replay_supported
+        ),
+        metrics=inputs.observability.metrics,
     )
 
     manifest = RunManifestService(

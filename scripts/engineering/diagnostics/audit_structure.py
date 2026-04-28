@@ -24,6 +24,9 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
 from scripts.engineering.repo._root_governance import load_root_governance_policy
 
 # Configure logging for CLI output

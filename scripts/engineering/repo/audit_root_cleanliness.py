@@ -9,7 +9,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
 import yaml
+
 from scripts.engineering.repo import _root_governance as root_governance
 
 ALLOWLIST_FILE = root_governance.ALLOWLIST_FILE

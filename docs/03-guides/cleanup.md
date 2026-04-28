@@ -10,35 +10,35 @@ Blanket deletion is prohibited for `data/**`, control-plane artifacts,
 `tests/fixtures/**`, `tests/fixtures/vcr/**`, `docs/reports/**`, `reports/**`,
 and `docs/99-archive/**`.
 
-### 1. Manual Cleanup
+### 1. Deterministic Local Cleanup
 
-For one-time cleanup of existing repository issues:
-
-```bash
-# Remove cache directories
-rm -rf .python-user/ .codex_tmp/ __pycache__/ .pytest_cache/ .mypy_cache/ .ruff_cache/
-
-# Remove temporary files
-rm -f test_*.js test_*.json *.tmp *.log
-
-# Remove orphan files from root
-rm -f test_*.py  # Be careful with this one!
-```
-
-### 2. Automated Cleanup
-
-Use the provided cleanup script:
+Use the maintained deterministic cleanup entrypoints first:
 
 ```bash
-# Dry run (show what would be cleaned)
-python scripts/ops/support/repo/cleanup_repository.py --dry-run
+# Preview local cache/build cleanup
+make clean-local-artifacts DRY_RUN=1
 
-# Actually clean
-python scripts/ops/support/repo/cleanup_repository.py
+# Apply local cache/build cleanup
+make clean-local-artifacts
 
-# Clean specific categories
-python scripts/ops/support/repo/cleanup_repository.py --cache --temp
+# Include local worktree/rollback purge
+make clean-local-artifacts PURGE_WORKTREES=1
 ```
+
+### 2. Repo-Hygiene Review Lane
+
+Use the repo cleanup tool only as an exact candidate discovery lane:
+
+```bash
+# Dry run (show exact review/apply candidates)
+python -m scripts.ops.support.repo.cleanup_repository --dry-run
+
+# Apply only policy-approved local artifact candidates
+python -m scripts.ops.support.repo.cleanup_repository --apply
+```
+
+Tracked policy violations reported by this tool still require explicit git
+review; they are not blanket-deleted by the script.
 
 ### 3. Git LFS Setup
 
@@ -105,13 +105,13 @@ The repository includes pre-commit hooks that prevent cache files from being com
 
 ### Weekly
 
-- Run cleanup script in dry-run mode
+- Run repo-hygiene review lane in dry-run mode
 - Check repository size growth
 - Review CI/CD pipeline results
 
 ### Monthly
 
-- Run full cleanup (if needed)
+- Run local cleanup wave (if needed)
 - Update `.gitignore` patterns
 - Review pre-commit hook effectiveness
 
@@ -138,7 +138,7 @@ The repository includes pre-commit hooks that prevent cache files from being com
 
 ## 🎯 Best Practices
 
-1. **Always use dry-run first**: `python scripts/ops/support/repo/cleanup_repository.py --dry-run`
+1. **Always use dry-run first**: `python -m scripts.ops.support.repo.cleanup_repository --dry-run`
 1. **Commit cleanup changes separately**: Makes reviews easier
 1. **Document exceptions**: If you need to keep a cache file, document why
 1. **Use Git LFS for large files**: Anything >1MB should use LFS
