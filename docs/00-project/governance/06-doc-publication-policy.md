@@ -291,7 +291,7 @@ governance и navigator pages.
 
 ```bash
 uv run python -m scripts.docs check-drift --freshness
-./.venv/Scripts/python.exe scripts/check_doc_drift.py --freshness
+./.venv/Scripts/python.exe -m scripts.docs check-drift --freshness
 ```
 
 ## Минимальный чек-лист перед merge

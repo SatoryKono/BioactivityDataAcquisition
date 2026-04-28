@@ -9,6 +9,7 @@ See ADR-026 for architectural context.
 from __future__ import annotations
 
 import asyncio
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 
@@ -31,6 +32,7 @@ from bioetl.application.composite.dependency_result_mapper import (
 )
 from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.domain.composite.config import DependencyConfig, SeedConfig
+from tests.helpers.clock import FixedClock
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort
@@ -248,6 +250,7 @@ class TestDependencyWithMoleculeFilter:
             progress_service=DependencyProgressService(mock_logger),
             result_service=DependencyResultService(mock_logger),
             delta_reader=mock_delta_reader,
+            clock=FixedClock(datetime(2026, 4, 28, 12, 0, tzinfo=UTC)),
         )
 
         # Get effective keys for compound_record dependency

@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 from bioetl.application.composite.column_service import ColumnOrderService
+from tests.helpers.clock import FixedClock
 
 if TYPE_CHECKING:
     from bioetl.application.composite.aggregator import EnricherAggregator
@@ -150,6 +152,7 @@ def build_merge_service(
         storage=storage,
         logger=logger,
         silver_reader=storage,
+        clock=FixedClock(datetime(2026, 4, 28, 12, 0, tzinfo=UTC)),
         collaborators=MergeCollaboratorGroup(
             deduplicator=deduplicator,
             aggregator=aggregator,

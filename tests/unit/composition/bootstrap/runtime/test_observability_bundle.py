@@ -228,6 +228,42 @@ class TestValidateObservabilityPreflightImpl:
                 ),
             )
 
+    def test_forensic_grade_run_ignores_allow_noop_override_and_still_fails_closed(
+        self,
+    ) -> None:
+        from bioetl.composition.bootstrap.runtime.observability_bundle import (
+            validate_observability_preflight_impl,
+        )
+
+        logger = MagicMock()
+        with pytest.raises(
+            ObservabilityContractError,
+            match="forensic_grade runs require non-noop observability evidence",
+        ):
+            validate_observability_preflight_impl(
+                tracer=NoOpTracing(),
+                metrics=NoOpMetrics(),
+                environment="prod",
+                logger=logger,
+                allow_noop_in_prod=True,
+                audit=NoOpAudit(),
+                control_plane=SimpleNamespace(
+                    required_persistence_profile="forensic_grade",
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=True,
+                ),
+                yaml_config=SimpleNamespace(
+                    sink={
+                        "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                        "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                        "gold": SimpleNamespace(enabled=True, save_metadata=True),
+                    }
+                ),
+            )
+
+        warning_events = [call.args[0] for call in logger.warning.call_args_list]
+        assert "forensic_grade_observability_evidence_unavailable" in warning_events
+
     def test_forensic_grade_run_passes_with_evidence_and_lineage_sidecars(
         self,
     ) -> None:

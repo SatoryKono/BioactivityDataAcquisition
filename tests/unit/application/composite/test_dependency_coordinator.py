@@ -7,6 +7,7 @@ See ADR-026 for architectural context.
 from __future__ import annotations
 
 import asyncio
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 
@@ -29,6 +30,7 @@ from bioetl.application.composite.dependency_result_mapper import (
 )
 from bioetl.domain.composite.config import DependencyConfig
 from bioetl.domain.composite.result import DependencyResult, DependencyStatus
+from tests.helpers.clock import FixedClock
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort
@@ -46,6 +48,7 @@ def _make_coordinator(
         progress_service=DependencyProgressService(logger),
         result_service=DependencyResultService(logger),
         delta_reader=delta_reader,
+        clock=FixedClock(datetime(2026, 4, 28, 12, 0, tzinfo=UTC)),
     )
 
 

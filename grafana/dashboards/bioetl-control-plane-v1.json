@@ -357,7 +357,7 @@
             },
             "targets": [
                 {
-                    "expr": "sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\"}[$__interval]))",
+                    "expr": "sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\"}[$__interval])) or label_replace(vector(0), \"disposition\", \"no_events\", \"\", \"\")",
                     "legendFormat": "{{disposition}}",
                     "refId": "A"
                 }

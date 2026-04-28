@@ -2,20 +2,13 @@
 
 from __future__ import annotations
 
-import importlib.util
+import importlib
 from pathlib import Path
-import sys
 from types import ModuleType
 
 
 def _load_doc_drift_module() -> ModuleType:
-    script = Path("scripts/docs/check_doc_drift.py").resolve()
-    spec = importlib.util.spec_from_file_location("doc_drift_runtime", str(script))
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules["doc_drift_runtime"] = module
-    spec.loader.exec_module(module)
-    return module
+    return importlib.import_module("scripts.docs.checks.check_drift")
 
 
 def _issues_to_text(report: object) -> str:

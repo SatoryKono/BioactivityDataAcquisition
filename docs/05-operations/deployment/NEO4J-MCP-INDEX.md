@@ -47,7 +47,7 @@ ______________________________________________________________________
 | `.mcp.json`                                          | Codex CLI MCP servers | ✅ Configured |
 | `.vscode/mcp.json`                                   | VS Code Copilot MCP   | ✅ Configured |
 | `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh`         | MCP wrapper script    | ✅ Ready      |
-| `scripts/engineering/dev/setup_copilot_codex_mcp.py` | MCP setup automation  | ✅ Updated    |
+| `python -m scripts.engineering.dev setup-mcp`        | Public MCP setup command | ✅ Updated |
 | `.env.example`                                       | Environment template  | ✅ Updated    |
 
 ______________________________________________________________________
@@ -206,7 +206,7 @@ ______________________________________________________________________
 - **Neo4j Official**: https://neo4j.com/docs/
 - **Neo4j Docker**: https://hub.docker.com/_/neo4j
 - **MCP Specification**: https://modelcontextprotocol.io/
-- **Project MCP Config**: `scripts/engineering/dev/setup_copilot_codex_mcp.py`
+- **Project MCP Config**: `python -m scripts.engineering.dev setup-mcp`
 - **Codex Documentation**: https://docs.docker.com/ai/docker-agent/
 
 ______________________________________________________________________

@@ -214,7 +214,7 @@ ______________________________________________________________________
 | File                                                 | Purpose                             |
 | ---------------------------------------------------- | ----------------------------------- |
 | `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh`         | MCP wrapper (tested)                |
-| `scripts/engineering/dev/setup_copilot_codex_mcp.py` | MCP setup automation (not tested)   |
+| `python -m scripts.engineering.dev setup-mcp` | Public MCP setup command (not tested)   |
 | `.vscode/mcp.json`                                   | VS Code Copilot config (not tested) |
 | `.env` or `.env.example`                             | Credentials source (checked)        |
 | `docker-compose.yml`                                 | Optional (alternative startup)      |

@@ -23,7 +23,7 @@ jobs:
 
       - name: Generate docs KPI report
         run: |
-          uv run python scripts/docs/report_docs_kpi.py \
+          uv run python -m scripts.docs check-kpi \
             --kpi-target-not-in-nav 120 \
             --hard-limit-not-in-nav 135 \
             --max-orphans 0 \

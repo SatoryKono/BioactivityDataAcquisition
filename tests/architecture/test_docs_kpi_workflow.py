@@ -18,7 +18,7 @@ def test_docs_kpi_workflow_exists_and_is_scheduled() -> None:
 def test_docs_kpi_workflow_runs_kpi_report_script() -> None:
     workflow = Path(".github/workflows/docs-kpi-weekly.yml").read_text(encoding="utf-8")
 
-    assert "scripts/docs/report_docs_kpi.py" in workflow
+    assert "python -m scripts.docs check-kpi" in workflow
     assert "--kpi-target-not-in-nav 120" in workflow
     assert "--hard-limit-not-in-nav 135" in workflow
     assert "--max-orphans 0" in workflow

@@ -96,7 +96,7 @@ services:
       - GF_LOG_LEVEL=info
       - GF_SERVER_ROOT_URL=http://localhost:3000
       - GF_SERVER_SERVE_FROM_SUB_PATH=false
-      - BIOETL_ENABLE_TRACING_DATASOURCES=${BIOETL_ENABLE_TRACING_DATASOURCES:-true}
+      - BIOETL_ENABLE_TRACING_DATASOURCES=${BIOETL_ENABLE_TRACING_DATASOURCES:-false}
       - BIOETL_QUARANTINE_EXPLORER_URL=${BIOETL_QUARANTINE_EXPLORER_URL:-http://host.docker.internal:8081}
     volumes:
       - grafana-data:/var/lib/grafana

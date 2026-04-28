@@ -32,7 +32,7 @@ Compatibility wrappers are intentionally kept for:
 
 - direct file execution from CI, docs, or local habits such as `python scripts/docs/...`
 - tests that import or monkeypatch historical top-level modules
-- shell-oriented build entrypoints such as `bash scripts/docs/build_docs_site.sh`
+- temporary shell-oriented habits such as `bash scripts/docs/build_docs_site.sh`, though the preferred public entrypoint is `python -m scripts.docs build-site`
 
 The only notable special case is `scripts/docs/check_doc_links.py`: it remains an
 `exec`-based shim so legacy tests can still patch private helpers on the historic
@@ -145,6 +145,6 @@ The exported contract now includes runtime-resolved `field_policy` overlays such
 
 | File                               | Description                                                                                    |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `scripts/docs/build_docs_site.sh`  | Shell wrapper around the packaged MkDocs build entrypoint; kept for docs, CI, and local habits |
-| `scripts/docs/run_mkdocs_build.py` | Python shim for the packaged MkDocs build entrypoint                                           |
+| `scripts/docs/build_docs_site.sh`  | Shell compatibility wrapper around the packaged MkDocs build entrypoint; prefer `python -m scripts.docs build-site` |
+| `scripts/docs/run_mkdocs_build.py` | Python compatibility shim for the packaged MkDocs build entrypoint; prefer `python -m scripts.docs build-site`      |
 | `scripts/docs/check_doc_links.py`  | Historical special-case shim that preserves the old monkeypatchable module surface for tests   |

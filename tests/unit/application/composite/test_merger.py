@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from functools import cache
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
@@ -17,6 +18,7 @@ from bioetl.domain.composite.result import (
 )
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from bioetl.domain.exceptions import BioETLError
+from tests.helpers.clock import FixedClock
 from tests.unit.application.composite.merge_test_support import build_merge_service
 
 if TYPE_CHECKING:
@@ -130,6 +132,7 @@ def test_merge_service_accepts_injected_internal_components(
         merge_config=merge_config,
         storage=mock_storage,
         logger=mock_logger,
+        clock=FixedClock(datetime(2026, 4, 28, 12, 0, tzinfo=UTC)),
         collaborators=_merge_collaborator_group_cls()(
             deduplicator=deduplicator,
             aggregator=aggregator,

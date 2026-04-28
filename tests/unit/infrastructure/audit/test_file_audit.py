@@ -202,7 +202,10 @@ class TestFileAuditAdapter:
         assert data["run_id"] == "unknown"
         assert data["severity"] == "info"
         assert data["error_type"] == "none"
+        assert data["status"] == "success"
         assert data["context"]["pipeline"] == "test_pipeline"
+        assert data["context"]["status"] == "success"
+        assert data["recorded_at"] == "2024-01-15T12:00:00+00:00"
         assert "timestamp" in data
 
     @pytest.mark.asyncio

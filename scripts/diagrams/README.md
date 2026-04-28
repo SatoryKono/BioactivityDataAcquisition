@@ -113,6 +113,7 @@ python -m scripts.diagrams <command> [args...]
 - `scripts/diagrams/run_diagram_checks.sh`, `run_diagram_docs_agent.sh`, `generate_with_descriptions_docx.py`, and `generate_with_descriptions_pdf.py` are the canonical operational entrypoints; legacy `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-*` files are compatibility wrappers only.
 - Markdown bundles prefer `svg/` renders as the primary publication artifact and fall back to `png/` only when an SVG is missing.
 - `scripts/diagrams/generate_description_indexes.py` is the canonical generator for `descriptions/INDEX.md` and `descriptions/class/INDEX.md`.
-- `scripts/diagrams/generate_architecture_bundle.py` and `scripts/diagrams/generate_views_bundle.py` are maintained compatibility wrappers for collection-specific entrypoints.
+- `python -m scripts.diagrams render-pdf` and `python -m scripts.diagrams render-views` are the preferred public entrypoints for collection-specific bundle refresh.
+- `scripts/diagrams/generate_architecture_bundle.py` and `scripts/diagrams/generate_views_bundle.py` remain maintained compatibility wrappers until internal callers reach zero.
 - `visual-smoke.txt` remains the canonical SVG smoke manifest; `png-compatibility.txt` is a smaller curated manifest for PNG compatibility checks.
 - When bundle drift is corrected, prefer regenerating the narrow affected collection via `generate_all_bundles.py --collection <name>` instead of broad refresh of every derived artifact.
