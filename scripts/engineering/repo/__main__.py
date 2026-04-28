@@ -18,11 +18,18 @@ Commands:
 
 from __future__ import annotations
 
-import subprocess
 import sys
 from pathlib import Path
 
-COMMANDS: dict[str, str] = {
+from scripts.engineering.common.cli_dispatch import (
+    dispatch_cli,
+    print_help,
+    print_unknown_command,
+    python_command,
+    run_command,
+)
+
+COMMANDS = {
     "check-inventory": "check_scripts_inventory.py",
     "sync-inventory": "sync_scripts_inventory.py",
     "check-catalog": "check_scripts_catalog.py",
@@ -31,25 +38,16 @@ COMMANDS: dict[str, str] = {
     "split-testing-roadmap": "split_testing_roadmap_issue.py",
     "sync-docs-issues": "sync_docs_issues.py",
 }
+COMMAND_SPECS = {name: python_command(script) for name, script in COMMANDS.items()}
 
 _DIR = Path(__file__).parent
-
-
-def _run_script(name: str, argv: list[str]) -> int:
-    script = _DIR / name
-    result = subprocess.run([sys.executable, str(script), *argv], check=False)
-    return result.returncode
-
-
-def _print_help() -> None:
-    print(__doc__ or "", end="")
 
 
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
 
     if not args or args[0] in ("--help", "-h"):
-        _print_help()
+        print_help(__doc__ or "")
         return 0
 
     cmd, rest = args[0], args[1:]
@@ -59,7 +57,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"\n{'=' * 60}")
             print(f"  {name}")
             print(f"{'=' * 60}\n")
-            rc = _run_script(script, rest)
+            rc = run_command(python_command(script), rest, base_dir=_DIR)
             if rc != 0:
                 print(f"\n[FAIL] {name} exited with code {rc}", file=sys.stderr)
                 return rc
@@ -68,12 +66,16 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{'=' * 60}")
         return 0
 
-    if cmd not in COMMANDS:
-        print(f"Unknown command: {cmd}", file=sys.stderr)
-        print(f"Available: {', '.join(COMMANDS)} | all", file=sys.stderr)
-        return 2
+    if cmd not in COMMAND_SPECS:
+        return print_unknown_command(cmd, COMMAND_SPECS, extra_available=("all",))
 
-    return _run_script(COMMANDS[cmd], rest)
+    return dispatch_cli(
+        [cmd, *rest],
+        help_text=__doc__ or "",
+        commands=COMMAND_SPECS,
+        base_dir=_DIR,
+        extra_available=("all",),
+    )
 
 
 if __name__ == "__main__":

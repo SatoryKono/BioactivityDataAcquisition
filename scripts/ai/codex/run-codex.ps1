@@ -169,15 +169,9 @@ if ($Command -eq "setup") {
     Write-Host "=================================================="
     Write-Host ""
 
-    Write-Host "[i] Installing Codex CLI inside WSL user prefix (~/.npm-global)..."
-
     try {
-        $setupCmd = @'
-set -euo pipefail
-mkdir -p "$HOME/.npm-global/bin"
-npm config --location=user set prefix "$HOME/.npm-global"
-npm install -g @openai/codex --prefix "$HOME/.npm-global"
-'@
+        $helperDirWSL = "$(Split-Path -Parent $LauncherWSL)/helper"
+        $setupCmd = "cd '$helperDirWSL' && bash setup-env.sh"
         wsl -d $WslDistro -e bash -lc $setupCmd 2>&1 | Write-Host
         $codexPath = Resolve-CodexInWsl -DistroName $WslDistro
         if (-not $codexPath) {

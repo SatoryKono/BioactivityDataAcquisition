@@ -35,14 +35,13 @@ Commands:
 
 from __future__ import annotations
 
-import subprocess
-import sys
 from pathlib import Path
 
-CommandTarget = str | tuple[str, str]
+from scripts.engineering.common.cli_dispatch import dispatch_cli, python_command
+
 _TEST_HEALTH_SCRIPT = "test_health.py"
 
-COMMANDS: dict[str, CommandTarget] = {
+COMMAND_SPECS = {
     "check-naming": "naming_audit.py",
     "check-architecture": "check_architecture.py",
     "check-app-deps": "check_application_deps.py",
@@ -65,44 +64,25 @@ COMMANDS: dict[str, CommandTarget] = {
     "report-observability-metric-inventory": "report_observability_metric_inventory.py",
     "analyze-duplicate-functions": "analyze_duplicate_functions.py",
     "calibrate-hotspots": "calibrate_hotspot_budgets.py",
-    "run-tests": (_TEST_HEALTH_SCRIPT, "run-tests"),
-    "summarize-junit": (_TEST_HEALTH_SCRIPT, "summarize-junit"),
-    "test-health": (_TEST_HEALTH_SCRIPT, "test-health"),
+    "run-tests": python_command(_TEST_HEALTH_SCRIPT, "run-tests"),
+    "summarize-junit": python_command(_TEST_HEALTH_SCRIPT, "summarize-junit"),
+    "test-health": python_command(_TEST_HEALTH_SCRIPT, "test-health"),
+}
+COMMAND_SPECS = {
+    name: spec if hasattr(spec, "runner") else python_command(spec)
+    for name, spec in COMMAND_SPECS.items()
 }
 
 _DIR = Path(__file__).parent
 
 
-def _run_script(target: CommandTarget, argv: list[str]) -> int:
-    if isinstance(target, tuple):
-        name, subcommand = target
-        argv = [subcommand, *argv]
-    else:
-        name = target
-    script = _DIR / name
-    result = subprocess.run([sys.executable, str(script), *argv], check=False)
-    return result.returncode
-
-
-def _print_help() -> None:
-    print(__doc__ or "", end="")
-
-
 def main(argv: list[str] | None = None) -> int:
-    args = argv if argv is not None else sys.argv[1:]
-
-    if not args or args[0] in ("--help", "-h"):
-        _print_help()
-        return 0
-
-    cmd, rest = args[0], args[1:]
-
-    if cmd not in COMMANDS:
-        print(f"Unknown command: {cmd}", file=sys.stderr)
-        print(f"Available: {', '.join(COMMANDS)}", file=sys.stderr)
-        return 2
-
-    return _run_script(COMMANDS[cmd], rest)
+    return dispatch_cli(
+        argv,
+        help_text=__doc__ or "",
+        commands=COMMAND_SPECS,
+        base_dir=_DIR,
+    )
 
 
 if __name__ == "__main__":

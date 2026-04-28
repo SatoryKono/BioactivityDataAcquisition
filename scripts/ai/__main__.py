@@ -13,14 +13,31 @@ Surfaces:
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
+from pathlib import Path
 
-MODULES: dict[str, str] = {
-    "codex": "codex",
-    "mcp": "mcp",
-    "vibe": "vibe",
-}
+_DIR = Path(__file__).parent
+
+
+def _codex_command(rest: list[str]) -> list[str]:
+    if os.name == "nt":
+        launcher = _DIR / "codex" / "run-codex.ps1"
+        return [
+            "powershell",
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(launcher),
+            *rest,
+        ]
+    return ["bash", str((_DIR / "codex" / "run-codex.sh").resolve()), *rest]
+
+
+def _module_command(surface: str, rest: list[str]) -> list[str]:
+    return [sys.executable, "-m", f"scripts.ai.{surface}", *rest]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -36,10 +53,12 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Available: {available}", file=sys.stderr)
         return 2
 
-    return subprocess.run(
-        [sys.executable, "-m", f"scripts.ai.{MODULES[surface]}", *rest],
-        check=False,
-    ).returncode
+    if surface == "codex":
+        command = _codex_command(rest)
+    else:
+        command = _module_command(surface, rest)
+
+    return subprocess.run(command, check=False).returncode
 
 
 if __name__ == "__main__":
