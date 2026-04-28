@@ -42,7 +42,13 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
-    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort, TracingPort
+    from bioetl.domain.ports import (
+        ClockPort,
+        LockPort,
+        LoggerPort,
+        MetricsPort,
+        TracingPort,
+    )
     from bioetl.infrastructure.config import Settings
 
 
@@ -70,6 +76,7 @@ class BootstrapRuntimeResources:
     tracer: TracingPort
     storage: object
     lock: LockPort
+    clock: ClockPort | None = None
 
 
 def build_bootstrap_runtime_resources(
@@ -80,14 +87,15 @@ def build_bootstrap_runtime_resources(
     ],
     config: CompositeConfig,
     run_id: str | None,
-) -> BootstrapRuntimeResources:
+) -> BootstrapRuntimeResources | CompositeInfrastructureContext:
     """Resolve the canonical runtime-basics resource bundle."""
-    effective_run_id, settings, logger, metrics, tracer, storage, lock = (
-        bootstrap_runtime_basics_fn(
-            config=config,
-            run_id=run_id,
-        )
+    resolved_bundle = bootstrap_runtime_basics_fn(
+        config=config,
+        run_id=run_id,
     )
+    if not isinstance(resolved_bundle, tuple):
+        return resolved_bundle
+    effective_run_id, settings, logger, metrics, tracer, storage, lock = resolved_bundle
     return BootstrapRuntimeResources(
         run_id=effective_run_id,
         settings=settings,
@@ -132,10 +140,7 @@ def build_bootstrap_support_services(
     return build_support_services_fn(
         config=config,
         runtime=runtime,
-        settings=resources.settings,
-        logger=resources.logger,
-        storage=resources.storage,
-        run_id=resources.run_id,
+        infra_context=resources,
     )
 
 

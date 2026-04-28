@@ -5,9 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports.runtime.runner import (
-    PipelineControlPlaneArtifacts as ControlPlaneArtifacts,
-)
+from bioetl.domain.ports import PipelineControlPlaneArtifacts as ControlPlaneArtifacts
 
 if TYPE_CHECKING:
     from bioetl.application.composite.runtime_wiring_api import (

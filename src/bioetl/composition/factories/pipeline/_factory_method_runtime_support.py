@@ -22,11 +22,11 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.runner import PipelineRunner
-    from bioetl.composition.factories.pipeline.control_plane_artifacts import (
-        ControlPlaneArtifacts as _ControlPlaneArtifacts,
-    )
     from bioetl.composition.factories.pipeline._factory_method_types import (
         _CreatePipelineWithServicesRequest,
+    )
+    from bioetl.composition.factories.pipeline.control_plane_artifacts import (
+        ControlPlaneArtifacts as _ControlPlaneArtifacts,
     )
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig

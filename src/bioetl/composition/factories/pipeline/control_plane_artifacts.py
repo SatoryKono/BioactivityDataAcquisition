@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.ports.runtime.runner import (
-    PipelineControlPlaneArtifacts as ControlPlaneArtifacts,
-)
+from bioetl.domain.ports import PipelineControlPlaneArtifacts as ControlPlaneArtifacts
 
 
 def build_control_plane_artifacts(
