@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-04-28'
 
 ______________________________________________________________________
 
@@ -114,7 +114,9 @@ ______________________________________________________________________
 - **Источник:** UniProt ID Mapping REST API (`https://rest.uniprot.org/idmapping`)
 - **Input:** CSV файл с колонкой `target_id`
 - **Batch Size:** 500 IDs per job
-- **Auth:** public unauthenticated access by default; `BIOETL_UNIPROT_API_KEY` remains optional and only affects configured rate profile selection.
+- **Auth:** `configs/providers/uniprot.yaml` declares `auth_type: public`.
+  `BIOETL_UNIPROT_API_KEY` remains optional and only affects configured rate
+  profile selection.
 - **API Flow:**
   1. `POST /idmapping/run` — submit job, получить `jobId`
   1. `GET /idmapping/status/{jobId}` — poll пока `FINISHED`
@@ -299,4 +301,4 @@ REST API data are protein-centric rather than user-centric. API-specific persona
 - [UniProt copyright page](https://www.uniprot.org/help/copyright)
 - [UniProt RDF void metadata](https://sparql.uniprot.org/.well-known/void)
 
-*Последнее обновление: 2026-03-30*
+*Последнее обновление: 2026-04-28*

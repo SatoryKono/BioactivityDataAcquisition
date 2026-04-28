@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-04'
+  Last verified: '2026-04-28'
 
 ______________________________________________________________________
 
@@ -16,7 +16,7 @@ ______________________________________________________________________
 Руководство по запуску и управлению ETL-пайплайнами в BioETL.
 
 **Версия:** 6.4.0
-**Дата обновления:** 2026-04-04
+**Дата обновления:** 2026-04-28
 
 > **Boundary:** this guide owns execution and runtime control flow. For initial
 > environment bootstrap use [Quick Start](quick-start.md) or
@@ -500,6 +500,12 @@ bioetl export chembl.activity --format xlsx
 # Экспорт Gold слоя
 bioetl export chembl.activity --layer gold
 ```
+
+Каждый успешный export пишет рядом с файлом данных три sidecar JSON-файла:
+`*.provenance-manifest.json`, `*.licensing-manifest.json` и
+`*.checksums-manifest.json`. Они фиксируют dataset bundle ID, provider
+attribution/licensing metadata, sha256 checksums и явное разделение MIT-лицензии
+кода от лицензий выгруженных данных.
 
 ______________________________________________________________________
 

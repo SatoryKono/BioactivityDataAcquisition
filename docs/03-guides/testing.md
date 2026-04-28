@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-02'
+  Last verified: '2026-04-28'
 
 ______________________________________________________________________
 
@@ -461,6 +461,47 @@ uv run coverage html -d reports/coverage/htmlcov
   - `python -m scripts.engineering.qa.vcr check-naming`
   - `python -m scripts.engineering.qa.vcr check-secrets`
   - `python -m scripts.engineering.qa report-vcr-metadata --check`
+
+### 4.4. Provider contract drift runbook
+
+`provider-contract-drift.yml` is a replay/snapshot governance gate, not a live
+API gate. It must stay network-free on pull requests and pushes; live provider
+verification remains isolated in the monthly/manual `contract-tests.yml` path.
+
+Run the same focused gate locally when changing provider adapters, provider
+configs, xwalk files, generated normalization artifacts, or export snapshot
+manifests:
+
+```bash
+uv run python -m pytest \
+  tests/contract/test_provider_contract_drift_helper.py \
+  tests/contract/test_provider_contract_snapshot_registry.py \
+  tests/contract/test_provider_contract_replay_registry.py \
+  tests/contract/test_provider_contract_drift_replay.py \
+  tests/unit/application/services/test_export_manifests.py \
+  -q --tb=short
+uv run python -m scripts.engineering.qa check-xwalk-missing-backlog
+uv run python -m scripts.docs generate-pipeline-normalization-matrix --check
+uv run python -m scripts.engineering.qa report-provider-contract-drift \
+  --output reports/quality/provider-contract-drift-report.json \
+  --fail-on breaking
+```
+
+The governed interoperability surfaces are declared in
+`configs/quality/test_matrix.yaml` under
+`fixture_governance.interoperability_drift_gates`. The current scope covers
+OpenAlex auth/rate/pagination/fallback config, ChEMBL activity publication
+identifiers, PubChem chemical standardization fields, ChEMBL ontology companion
+fields, export provenance/licensing/checksum manifests, xwalk backlog markers,
+and generated normalization matrix drift.
+
+Do not refresh provider contract snapshots as the first response to a failure.
+Investigate the provider documentation/API behavior first, then update the
+adapter, schema, config, docs, xwalk, or generated artifact surface as needed.
+Use `UPDATE_SNAPSHOTS=1` only after the new provider shape is verified as
+intentional. Drift diagnostics must retain provider, entity, probe, path,
+expected type, observed type, severity, and remediation text so failures are
+actionable in CI artifacts.
 
 ### 4.1. Быстрый старт для рекомендуемого локального прогона
 

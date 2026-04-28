@@ -12,6 +12,7 @@ from bioetl.application.composite.lifecycle_observer_service import (
 )
 from bioetl.application.core.lifecycle.heartbeat import HeartbeatTask
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
+from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import LockAcquisitionError, RunnerAlreadyExecutedError
 from bioetl.domain.types import RunID
@@ -133,7 +134,7 @@ def bind_runner_dependencies(host: object, deps: CompositeRunnerDependencies) ->
     runner_host._fsm = deps.fsm_state_helper
     runner_host._manifest_id = deps.manifest_id
     runner_host._run_ledger_service = deps.run_ledger_service
-    runner_host._clock = getattr(deps, "clock", None)
+    runner_host._clock = resolve_runtime_clock(getattr(deps, "clock", None))
 
 
 def initialize_runner_runtime_state(host: object, run_id: str | None) -> None:

@@ -376,7 +376,7 @@ Intentional non-goals for now:
 | pubchem         |      5.0 |    10 | -                |
 | pubmed          |      3.0 |     5 | `10 / 20`        |
 | crossref        |       50 |   100 | polite pool flag |
-| openalex        |       10 |    20 | polite pool flag |
+| openalex        |       10 |    20 | API key / credit model |
 | semanticscholar |      0.1 |     1 | `1.0 / 5`        |
 | uniprot         |     10.0 |    20 | `100 / 200`      |
 

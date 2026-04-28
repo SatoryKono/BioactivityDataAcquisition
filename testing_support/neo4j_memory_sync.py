@@ -1018,7 +1018,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "pubmed.publication",
         "DEPENDS_ON",
         "module_surface",
-        "src/bioetl/domain/schemas/common/publication_base.py",
+        "src/bioetl/domain/contracts/gold/_publication_common_schema.py",
     ),
     (
         "contract_surface",

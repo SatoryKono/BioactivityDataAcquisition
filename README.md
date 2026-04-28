@@ -73,7 +73,7 @@ The domain layer implements Domain-Driven Design patterns:
 | **UniProt ID Mapping** | ID Mapping                                                                                                                                                             | Production | Local job / no external rate limit    |
 | **PubMed**             | Publication                                                                                                                                                            | Production | 3 req/sec (10 req/sec with API key)   |
 | **CrossRef**           | Publication                                                                                                                                                            | Production | Polite pool                           |
-| **OpenAlex**           | Publication                                                                                                                                                            | Production | ~10 req/sec                           |
+| **OpenAlex**           | Publication                                                                                                                                                            | Production | 10 req/sec with API key / credit model |
 | **Semantic Scholar**   | Publication                                                                                                                                                            | Production | 0.1 req/sec (1 req/sec with API key)  |
 
 ## Documentation
@@ -213,7 +213,7 @@ uv sync --extra dev --extra tracing
    cp .env.example .env
    ```
 
-   *Note: Secrets follow the pattern `BIOETL_{PROVIDER}_{KEY}`. For local development, the defaults are usually sufficient.*
+   *Note: Secrets follow the pattern `BIOETL_{PROVIDER}_{KEY}`. UniProt remains public by default and `BIOETL_UNIPROT_API_KEY` is optional. OpenAlex production-like runs should set `BIOETL_OPENALEX_API_KEY`; `BIOETL_OPENALEX_EMAIL` is only contact attribution and does not replace the API key.*
 
    **Environment Variables:**
 
@@ -233,7 +233,7 @@ uv sync --extra dev --extra tracing
    | `BIOETL_UNIPROT_API_KEY`                   | Optional UniProt API key (higher rate limits)               | —                         |
    | `BIOETL_PUBMED_API_KEY`                    | NCBI E-utilities API key                                    | —                         |
    | `BIOETL_PUBMED_EMAIL`                      | Email for NCBI tool identification                          | —                         |
-   | `BIOETL_OPENALEX_API_KEY`                  | OpenAlex API key                                            | —                         |
+   | `BIOETL_OPENALEX_API_KEY`                  | OpenAlex API key for production-like runs                   | —                         |
    | `BIOETL_OPENALEX_EMAIL`                    | Optional OpenAlex contact email for request attribution     | —                         |
    | `BIOETL_SEMANTICSCHOLAR_API_KEY`           | Semantic Scholar API key                                    | —                         |
    | `BIOETL_CROSSREF_EMAIL`                    | Email for Crossref polite pool                              | —                         |
@@ -669,4 +669,7 @@ Please read **[RULES.md](docs/00-project/RULES.md)** before contributing.
 
 ## License
 
-This project is licensed under the MIT License.
+This project code is licensed under the MIT License. Exported or merged datasets
+retain provider-specific data licensing and attribution obligations; export
+sidecars include provenance, licensing, and checksum manifests so dataset
+snapshots are not treated as MIT-licensed solely because the code is MIT.

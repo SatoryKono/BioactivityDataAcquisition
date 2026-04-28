@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 6.1.1
+Version: 6.1.2
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-04'
+  Last verified: '2026-04-28'
 
 ______________________________________________________________________
 
@@ -17,7 +17,7 @@ BioETL command-line interface (CLI) - основной способ взаимо
 Построен на фреймворке **Click** для стабильности и расширяемости.
 
 **Версия:** 6.1.2
-**Дата обновления:** 2026-04-24
+**Дата обновления:** 2026-04-28
 **Статус парадита:** ✅ Все команды документированы
 
 ______________________________________________________________________
@@ -527,6 +527,17 @@ bioetl export [TABLE] [OPTIONS]
 | `--output`, `-o`  | path   | `data/exports` | Директория для экспорта              |
 | `--limit`         | int    | None           | Максимальное количество строк        |
 | `--columns`, `-c` | str    | None           | Колонки для экспорта (через запятую) |
+
+Успешный export создает не только data-файл, но и sidecar manifests:
+
+| Файл | Назначение |
+| ---- | ---------- |
+| `*.provenance-manifest.json` | Dataset bundle ID, BioETL version, source providers, schema fields, row count и data-file checksum |
+| `*.licensing-manifest.json` | Provider attribution/licensing notes и отдельная запись MIT-лицензии кода |
+| `*.checksums-manifest.json` | sha256/size для data-файла и sidecar manifests |
+
+Licensing manifest не является юридическим заключением; он фиксирует known
+provider obligations и не трактует merged outputs как MIT-licensed data.
 
 **Примеры:**
 
@@ -1096,8 +1107,9 @@ ______________________________________________________________________
 
 **API-ключи провайдеров:**
 
-- `BIOETL_UNIPROT_API_KEY`
-- `BIOETL_OPENALEX_EMAIL`
+- `BIOETL_UNIPROT_API_KEY` — optional higher-throughput UniProt profile
+- `BIOETL_OPENALEX_API_KEY` — required for production-like OpenAlex runs
+- `BIOETL_OPENALEX_EMAIL` — optional OpenAlex contact attribution
 - `BIOETL_SEMANTICSCHOLAR_API_KEY`
 
 ______________________________________________________________________

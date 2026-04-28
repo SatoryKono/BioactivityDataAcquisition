@@ -547,6 +547,59 @@ fixture_governance:
       - tests/fixtures/golden/gold/composite_molecule_dq_bundle_v1.json
       - tests/fixtures/golden/gold/composite_publication_dq_bundle_v1.json
       - tests/fixtures/golden/gold/pubmed_publication_dq_bundle_v1.json
+  interoperability_drift_gates:
+    scope: provider_contract_and_export_interoperability_surfaces
+    workflow: .github/workflows/provider-contract-drift.yml
+    fast_path_mode: replay_or_snapshot_only
+    live_network_mode: monthly_contract_tests_only
+    required_gate_commands:
+      - python -m scripts.engineering.qa check-xwalk-missing-backlog
+      - python -m scripts.docs generate-pipeline-normalization-matrix --check
+      - pytest tests/unit/application/services/test_export_manifests.py
+    required_surfaces:
+      openalex_provider_config:
+        evidence:
+          - configs/providers/openalex.yaml
+          - tests/unit/infrastructure/adapters/openalex/test_adapter.py
+        expectations:
+          - auth_type
+          - api_key_env
+          - credit_model
+          - rate_limit_headers
+          - primary_lookup_method
+      chembl_activity_publication_identifiers:
+        evidence:
+          - docs/04-reference/pipelines/chembl/activity-xwalk.csv
+          - tests/unit/application/pipelines/chembl/test_activity_transformer.py
+        expectations:
+          - publication_doi
+          - publication_pmid
+          - publication_pmc_id
+      pubchem_chemical_standardization:
+        evidence:
+          - src/bioetl/domain/services/chemical_standardization.py
+          - tests/unit/domain/services/test_chemical_standardization.py
+        expectations:
+          - chemical_standardization_status
+          - chemical_standardization_policy_version
+          - structure_parent_key
+      chembl_activity_ontology_companions:
+        evidence:
+          - src/bioetl/domain/normalization/chembl.py
+          - tests/unit/domain/normalization/test_chembl_ontology_companions.py
+        expectations:
+          - bao_endpoint_iri
+          - bao_format_iri
+          - uo_unit_iri
+          - qudt_unit_iri
+      export_snapshot_manifests:
+        evidence:
+          - src/bioetl/application/services/export_manifests.py
+          - tests/unit/application/services/test_export_manifests.py
+        expectations:
+          - provenance_manifest
+          - licensing_manifest
+          - checksum_manifest
 
 contract_testing:
   workflow_present: true

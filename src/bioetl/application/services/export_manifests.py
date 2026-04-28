@@ -2,19 +2,26 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
-import hashlib
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from bioetl import __version__ as BIOETL_VERSION
 from bioetl.domain.ports import ExportFileFingerprint
 from bioetl.domain.serialization import serialize_to_json_canonical
 
+if TYPE_CHECKING:
+    import pyarrow as pa
+
+    from bioetl.domain.ports import ExportWriterPort
+
 __all__ = [
     "ExportSidecarPayloads",
     "build_export_checksum_manifest",
     "build_export_sidecar_payloads",
+    "write_export_sidecar_manifests",
 ]
 
 MANIFEST_SCHEMA_VERSION = "1.0.0"
@@ -244,6 +251,63 @@ def build_export_checksum_manifest(
     }
 
 
+def write_export_sidecar_manifests(
+    *,
+    writer: ExportWriterPort,
+    table: pa.Table,
+    table_name: str,
+    layer: str,
+    export_format: str,
+    output_path: Path,
+    row_count: int,
+    generated_at: str | None = None,
+    run_ids: tuple[str, ...] = (),
+    code_revision: str | None = None,
+    strict: bool = False,
+) -> tuple[Path, ...]:
+    """Write deterministic provenance, licensing, and checksum manifests."""
+    data_fingerprint = writer.fingerprint_file(path=output_path)
+    sidecars = build_export_sidecar_payloads(
+        table_name=table_name,
+        layer=layer,
+        export_format=export_format,
+        output_path=output_path,
+        row_count=row_count,
+        columns=tuple(field.name for field in table.schema),
+        data_fingerprint=data_fingerprint,
+        generated_at=generated_at,
+        run_ids=run_ids,
+        code_revision=code_revision,
+        strict=strict,
+    )
+    manifest_prefix = output_path.stem
+    provenance_path = writer.write_manifest(
+        manifest_name=f"{manifest_prefix}.provenance-manifest",
+        payload=sidecars.provenance_manifest,
+        output_dir=output_path.parent,
+    )
+    licensing_path = writer.write_manifest(
+        manifest_name=f"{manifest_prefix}.licensing-manifest",
+        payload=sidecars.licensing_manifest,
+        output_dir=output_path.parent,
+    )
+    checksum_payload = build_export_checksum_manifest(
+        dataset_bundle_id=sidecars.dataset_bundle_id,
+        generated_at=str(sidecars.provenance_manifest["generated_at"]),
+        fingerprints=(
+            data_fingerprint,
+            writer.fingerprint_file(path=provenance_path),
+            writer.fingerprint_file(path=licensing_path),
+        ),
+    )
+    checksums_path = writer.write_manifest(
+        manifest_name=f"{manifest_prefix}.checksums-manifest",
+        payload=checksum_payload,
+        output_dir=output_path.parent,
+    )
+    return (provenance_path, licensing_path, checksums_path)
+
+
 def _providers_for_table(table_name: str) -> tuple[str, ...]:
     if table_name in _COMPOSITE_SOURCES:
         return _COMPOSITE_SOURCES[table_name]
@@ -259,7 +323,9 @@ def _provider_attribution_payload(
     attribution = _PROVIDER_ATTRIBUTIONS.get(provider)
     if attribution is None:
         if strict:
-            raise ValueError(f"Missing provider attribution for export provider: {provider}")
+            raise ValueError(
+                f"Missing provider attribution for export provider: {provider}"
+            )
         return {
             "provider": provider,
             "source_url": None,

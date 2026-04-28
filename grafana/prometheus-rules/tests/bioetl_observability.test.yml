@@ -17,6 +17,10 @@ tests:
               severity: critical
               job: bioetl
               instance: host.docker.internal:8000
+            exp_annotations:
+              summary: BioETL metrics endpoint is unavailable
+              description: Prometheus could not scrape the BioETL /metrics endpoint for instance=host.docker.internal:8000.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
 
   - name: memory-pressure-active
     interval: 1m
@@ -30,6 +34,10 @@ tests:
           - exp_labels:
               severity: warning
               pipeline: chembl
+            exp_annotations:
+              summary: Adaptive memory pressure is active
+              description: bioetl_memory_pressure_state stayed active for pipeline=chembl within the last 15m.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
 
   - name: circuit-breaker-stuck-open
     interval: 1m
@@ -43,6 +51,10 @@ tests:
           - exp_labels:
               severity: warning
               adapter: pubmed
+            exp_annotations:
+              summary: Circuit breaker remained open
+              description: bioetl_circuit_breaker_state stayed open for adapter=pubmed within the last 15m.
+              runbook: docs/05-operations/runbooks/incident-response.md
 
   - name: gold-validation-failures
     interval: 1m
@@ -56,6 +68,10 @@ tests:
           - exp_labels:
               severity: critical
               pipeline: chembl
+            exp_annotations:
+              summary: Gold-stage strict validation failures detected
+              description: bioetl_dq_validation_failures_total increased with stage=gold severity=hard_fail for pipeline=chembl in the last 15m.
+              runbook: docs/05-operations/runbooks/dq-failure-investigation.md
 
   - name: replay-not-reconstructable
     interval: 1m
@@ -71,3 +87,7 @@ tests:
               pipeline: chembl
               replay_capability: resume_only
               strict_requirement: "true"
+            exp_annotations:
+              summary: Replay request cannot be reconstructed safely
+              description: bioetl_replay_reconstructability_events_total recorded not_reconstructable for pipeline=chembl replay_capability=resume_only strict_requirement=true in the last 30m.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md

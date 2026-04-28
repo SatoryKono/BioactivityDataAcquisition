@@ -326,7 +326,7 @@ ______________________________________________________________________
 | -------------------- | -------------------------------------------- | ------------------------------------------------- | ------------------------------------- |
 | **CrossRef**         | https://api.crossref.org/                    | https://status.crossref.org/                      | 50 req/s (polite pool)                |
 | **PubMed**           | https://www.ncbi.nlm.nih.gov/books/NBK25501/ | https://www.ncbi.nlm.nih.gov/home/about/policies/ | 3 req/s (no key), 10 req/s (with key) |
-| **OpenAlex**         | https://docs.openalex.org/                   | https://status.openalex.org/                      | 100,000 req/day (polite pool)         |
+| **OpenAlex**         | https://developers.openalex.org/             | https://status.openalex.org/                      | API key / credit model; BioETL config 10 req/s |
 | **Semantic Scholar** | https://api.semanticscholar.org/             | —                                                 | 100 req/5min                          |
 | **ChEMBL**           | https://www.ebi.ac.uk/chembl/api/data/docs   | —                                                 | No official limit                     |
 

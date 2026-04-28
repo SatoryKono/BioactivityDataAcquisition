@@ -317,8 +317,8 @@ def test_dashboard_has_required_variables(dashboard_path):
     """Check dashboard variables match the current contract."""
     expected_vars_by_dashboard = {
         "bioetl-overview-v2.json": {"pipeline", "run_type"},
-        "bioetl-dq-v2.json": {"pipeline", "run_type"},
-        "bioetl-runtime.json": {"pipeline", "run_type"},
+        "bioetl-dq-v2.json": {"pipeline", "run_type", "stage"},
+        "bioetl-runtime.json": {"pipeline", "run_type", "stage"},
         "bioetl-provider-health-v2.json": {"provider"},
         "bioetl-control-plane-v1.json": {"pipeline", "run_type"},
         "bioetl-silver-reject-explorer.json": {

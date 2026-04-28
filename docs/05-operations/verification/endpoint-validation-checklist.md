@@ -250,9 +250,9 @@ ______________________________________________________________________
 | Parameter         | Value                                             |
 | ----------------- | ------------------------------------------------- |
 | Base URL          | `https://api.openalex.org`                        |
-| Auth Type         | `email` (polite pool via `mailto` parameter)      |
-| Rate Limit        | 10 req/sec (polite pool), burst 20                |
-| Polite Pool       | `true` (requires `BIOETL_OPENALEX_EMAIL` env var) |
+| Auth Type         | API key via `BIOETL_OPENALEX_API_KEY`             |
+| Rate Limit        | 10 req/sec with credit-model headers, burst 20    |
+| Attribution       | `BIOETL_OPENALEX_EMAIL` optional contact metadata |
 | Batch Size        | 50 DOIs per batch                                 |
 | Cursor Pagination | `true`                                            |
 | Timeout           | 30.0 sec                                          |
@@ -265,8 +265,8 @@ ______________________________________________________________________
 - [ ] Response time < 5 sec (>5 sec triggers DEGRADED)
 
 ```bash
-# Health check with polite pool
-curl -s "https://api.openalex.org/works?per-page=1&mailto=your@email.com" | python3 -c "
+# Health check with API key; optional mailto is attribution only
+curl -s "https://api.openalex.org/works?per-page=1&api_key=${BIOETL_OPENALEX_API_KEY}&mailto=${BIOETL_OPENALEX_EMAIL:-}" | python3 -c "
 import json, sys; d=json.load(sys.stdin)
 print('Count:', d.get('meta',{}).get('count'))
 print('Results:', len(d.get('results', [])))
@@ -308,20 +308,20 @@ print('Results:', len(d.get('results', [])))
 
 ```bash
 # 1. Health check
-curl -s "https://api.openalex.org/works?per-page=1&mailto=your@email.com" | python3 -c "
+curl -s "https://api.openalex.org/works?per-page=1&api_key=${BIOETL_OPENALEX_API_KEY}&mailto=${BIOETL_OPENALEX_EMAIL:-}" | python3 -c "
 import json, sys; d=json.load(sys.stdin)
 print('Status OK:', d.get('meta') is not None)
 "
 
 # 2. Batch DOI lookup (pipe-separated)
-curl -s "https://api.openalex.org/works?filter=doi:10.1038/nature12373|10.1126/science.1247005&per-page=10&mailto=your@email.com" | python3 -c "
+curl -s "https://api.openalex.org/works?filter=doi:10.1038/nature12373|10.1126/science.1247005&per-page=10&api_key=${BIOETL_OPENALEX_API_KEY}&mailto=${BIOETL_OPENALEX_EMAIL:-}" | python3 -c "
 import json, sys; d=json.load(sys.stdin)
 for r in d.get('results', []):
     print(r.get('doi'), '-', r.get('title','N/A')[:60])
 "
 
 # 3. Cursor pagination
-curl -s "https://api.openalex.org/works?search=pharmacogenomics&cursor=*&per-page=5&mailto=your@email.com" | python3 -c "
+curl -s "https://api.openalex.org/works?search=pharmacogenomics&cursor=*&per-page=5&api_key=${BIOETL_OPENALEX_API_KEY}&mailto=${BIOETL_OPENALEX_EMAIL:-}" | python3 -c "
 import json, sys; d=json.load(sys.stdin)
 meta = d.get('meta', {})
 print('Results:', len(d.get('results', [])))
@@ -329,7 +329,7 @@ print('Next cursor:', meta.get('next-cursor', 'N/A')[:20], '...')
 "
 
 # 4. Title search
-curl -s "https://api.openalex.org/works?filter=title.search:aspirin+anti+inflammatory&per-page=3&mailto=your@email.com" | python3 -c "
+curl -s "https://api.openalex.org/works?filter=title.search:aspirin+anti+inflammatory&per-page=3&api_key=${BIOETL_OPENALEX_API_KEY}&mailto=${BIOETL_OPENALEX_EMAIL:-}" | python3 -c "
 import json, sys; d=json.load(sys.stdin)
 for r in d.get('results', []):
     print(r.get('title','N/A')[:80])
@@ -342,7 +342,7 @@ for r in d.get('results', []):
 - [ ] Batch DOI filter `filter=doi:id1|id2` returns matched results
 - [ ] Cursor pagination returns `meta.next-cursor` for continuation
 - [ ] Title search via `filter=title.search:...` returns results
-- [ ] Polite pool is activated via `mailto` query parameter
+- [ ] API key is sent via `api_key`; optional `mailto` remains attribution-only
 - [ ] Retry-After header is respected on 429 responses
 
 ______________________________________________________________________
@@ -787,7 +787,7 @@ ______________________________________________________________________
 | ---------------- | --------------------- | ---------------------------------------------- | ---------------- |
 | ChEMBL           | Public                | N/A                                            | N/A              |
 | CrossRef         | Email                 | `BIOETL_CROSSREF_EMAIL`                        | Yes (50 req/sec) |
-| OpenAlex         | Email                 | `BIOETL_OPENALEX_EMAIL`                        | Yes (10 req/sec) |
+| OpenAlex         | API Key               | `BIOETL_OPENALEX_API_KEY` (`BIOETL_OPENALEX_EMAIL` attribution optional) | N/A              |
 | PubChem          | Public                | N/A                                            | N/A              |
 | PubMed           | API Key (optional)    | `BIOETL_PUBMED_API_KEY`, `BIOETL_PUBMED_EMAIL` | N/A              |
 | Semantic Scholar | API Key (recommended) | `BIOETL_SEMANTICSCHOLAR_API_KEY`               | N/A              |
@@ -799,7 +799,7 @@ ______________________________________________________________________
 | ---------------- | --------------------------------- | ------------------------ |
 | ChEMBL           | 3 req/sec                         | N/A                      |
 | CrossRef         | Shared pool (aggressive limiting) | 50 req/sec (polite pool) |
-| OpenAlex         | Shared pool (lower priority)      | 10 req/sec (polite pool) |
+| OpenAlex         | Not a production support boundary | 10 req/sec with API key / credit model |
 | PubChem          | 5 req/sec                         | N/A                      |
 | PubMed           | 3 req/sec                         | 10 req/sec               |
 | Semantic Scholar | 0.1 req/sec (1 per 10s)           | 1 req/sec                |

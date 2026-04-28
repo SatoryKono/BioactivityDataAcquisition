@@ -28,6 +28,7 @@ from bioetl.application.composite.merger_orchestration import (
     build_merge_execution_request,
     execute_merge_request,
 )
+from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.domain.composite.result import (
     DependencyResult,
     EnrichmentResult,
@@ -126,7 +127,7 @@ class MergeService(
         self._field_group_registry = field_group_registry
         self._cross_validator = cross_validator
         self._gold_schema = gold_schema
-        self._clock = clock
+        self._clock = resolve_runtime_clock(clock)
 
         self._deduplicator = collaborators.deduplicator
         self._aggregator = collaborators.aggregator

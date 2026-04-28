@@ -30,6 +30,7 @@ from bioetl.application.composite.coordinator_planning import (
 from bioetl.application.composite.coordinator_result_mixin import (
     EnrichmentCoordinatorResultMixin,
 )
+from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.application.runtime_timestamps import (
     capture_runtime_timing_anchor,
     derive_completion_timestamp,
@@ -108,7 +109,7 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
         self._max_concurrency = max_concurrency
         self._semaphore_factory = semaphore_factory or asyncio.Semaphore
         self._semaphore = self._semaphore_factory(max_concurrency)
-        self._clock = clock
+        self._clock = resolve_runtime_clock(clock)
 
     async def run_enrichers(
         self,

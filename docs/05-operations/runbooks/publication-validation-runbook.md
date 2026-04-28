@@ -898,7 +898,7 @@ ______________________________________________________________________
 | ---------------- | ------------------------------- | ------------------------------------------------- | --------------------------------------------------- |
 | CrossRef         | support@crossref.org            | https://status.crossref.org/                      | 50 req/s (polite pool: mailto in User-Agent)        |
 | PubMed/NCBI      | info@ncbi.nlm.nih.gov           | https://www.ncbi.nlm.nih.gov/home/about/policies/ | 3 req/s without API key, 10 with key                |
-| OpenAlex         | team@openalex.org               | https://status.openalex.org/                      | 100,000 req/day (polite pool: mailto in User-Agent) |
+| OpenAlex         | team@openalex.org               | https://status.openalex.org/                      | API key / credit-model usage; BioETL config uses 10 req/s |
 | Semantic Scholar | semanticscholar-api@allenai.org | https://www.semanticscholar.org/product/api       | 100 req/5min for public API                         |
 | ChEMBL           | chembl-help@ebi.ac.uk           | https://www.ebi.ac.uk/chembl/                     | No official limit (be polite)                       |
 

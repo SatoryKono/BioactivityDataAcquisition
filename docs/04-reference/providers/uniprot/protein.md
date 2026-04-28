@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-04-28'
 
 ______________________________________________________________________
 
@@ -38,7 +38,9 @@ ______________________________________________________________________
 
 - **Источник:** UniProt REST API.
 - **Стратегия:** `incremental` по `accession`.
-- **Auth:** public unauthenticated access by default; `BIOETL_UNIPROT_API_KEY` is optional and only enables the configured higher-throughput profile.
+- **Auth:** `configs/providers/uniprot.yaml` declares `auth_type: public`.
+  `BIOETL_UNIPROT_API_KEY` is optional and only enables the configured
+  higher-throughput profile when present.
 - **Rate Limit:** 10 запросов в секунду по умолчанию, до 100 запросов в секунду с optional API key.
 
 ### 3.2. Transform
@@ -121,4 +123,4 @@ REST API data are protein-centric rather than user-centric. API-specific persona
 - [UniProt copyright page](https://www.uniprot.org/help/copyright)
 - [UniProt RDF void metadata](https://sparql.uniprot.org/.well-known/void)
 
-*Последнее обновление: 2026-03-30*
+*Последнее обновление: 2026-04-28*
