@@ -186,7 +186,7 @@ def create_managed_lock_resources(
     )
 
 
-async def run_with_managed_lock(
+async def run_with_managed_lock[TRunResult](
     *,
     lock_port: LockPort,
     lock_key: str,

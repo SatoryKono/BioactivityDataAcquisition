@@ -15,7 +15,7 @@ See DDD patterns: https://martinfowler.com/bliki/ValueObject.html
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 __all__ = [
     "T",
@@ -26,7 +26,7 @@ __all__ = [
 T = TypeVar("T")
 
 
-class ValueObject(ABC, Generic[T]):
+class ValueObject[T](ABC):
     """Base class for Value Objects with single wrapped value.
 
     Provides immutability, value equality, and validation.

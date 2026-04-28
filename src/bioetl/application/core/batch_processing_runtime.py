@@ -60,7 +60,7 @@ def get_source_metadata(
     return source_metadata
 
 
-async def execute_with_pipeline_failure_policy(
+async def execute_with_pipeline_failure_policy[ResultT](
     *,
     tracing: BatchTracingManagerService,
     span: Span | None,
@@ -74,7 +74,7 @@ async def execute_with_pipeline_failure_policy(
         raise
 
 
-async def execute_with_layer_span(
+async def execute_with_layer_span[ResultT](
     *,
     tracing: BatchTracingManagerService,
     name: str,

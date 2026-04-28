@@ -40,7 +40,7 @@ def resolve_provider_registry(
 
 
 @overload
-def resolve_provider_registry(
+def resolve_provider_registry[RegistryT: ProviderRegistrarProtocol](
     provider_registry: RegistryT,
     *,
     ensure_ready: Literal[False] = False,

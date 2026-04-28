@@ -64,7 +64,7 @@ class GenericPipelineFactory(_GenericPipelineFactory[TPipeline]):
     pass
 
 
-def create_pipeline_factory(
+def create_pipeline_factory[TPipeline: BasePipeline](
     pipeline_name: str,
     pipeline_class: type[TPipeline],
     provider: str,
@@ -132,7 +132,7 @@ __all__ = [
 ]
 
 
-def create_transformer(
+def create_transformer[TPipeline: BasePipeline](
     factory: GenericPipelineFactory[TPipeline],
     *,
     tracer: TracingPort | None = None,

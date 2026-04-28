@@ -7,14 +7,14 @@ with format validation and normalization.
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Generic, Literal, TypeVar
+from typing import TYPE_CHECKING, Literal, TypeVar
 
 from bioetl.domain.validation import validate_smiles
 
 if TYPE_CHECKING:
     _ValueT = TypeVar("_ValueT")
 
-    class _ValueObjectBase(Generic[_ValueT]):
+    class _ValueObjectBase[ValueT]:
         """Typing-only stand-in for ValueObject under skipped imports."""
 
         _value: _ValueT

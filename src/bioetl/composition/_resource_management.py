@@ -102,7 +102,7 @@ class CleanupPreviewProtocol(Protocol):
     total_files: int
 
 
-def _bootstrap_registered_resource(
+def _bootstrap_registered_resource[**P, T](
     bootstrap_fn: Callable[_P, _T],
     /,
     *args: _P.args,

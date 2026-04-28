@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TypeAlias
 
-SpanAttributeValue: TypeAlias = (
+type SpanAttributeValue = (
     str
     | bool
     | int

@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import datetime
-from typing import TYPE_CHECKING, Generic, TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar, cast
 
 import pyarrow as pa
 
@@ -31,7 +30,6 @@ from bioetl.composition.factories.pipeline.assembler_helpers import (
 )
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _BuildFactoryServicesRequest,
-    _CreateFactoryRunnerRequest,
     _CreatePipelineWithServicesRequest,
     build_create_factory_runner_request,
     create_factory_data_source,
@@ -41,7 +39,6 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     extract_entity_type as _extract_entity_type,
 )
-from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.domain.filtering import (
     GoldFilterConfig,
@@ -54,7 +51,6 @@ from bioetl.domain.ports import (
     DataNormalizationPort,
     DataSourcePort,
     DQMonitorPort,
-    ExecutionObservabilityPort,
     LoggerPort,
     MetricsPort,
     PiiHasherPort,
@@ -67,9 +63,7 @@ from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 if TYPE_CHECKING:
-    from bioetl.domain.config import RuntimeConfig
-    from bioetl.domain.context import CachedBronzeContext
-    from bioetl.domain.types import RunID
+    pass
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 
@@ -90,7 +84,7 @@ def _optional_string_kwarg(kwargs: dict[str, object], key: str) -> str | None:
     return cast(str | None, kwargs.get(key))
 
 
-class GenericPipelineFactory(Generic[TPipeline]):
+class GenericPipelineFactory[TPipeline: "BasePipeline"]:
     """Composition-layer factory for assembling pipelines and runners."""
 
     def __init__(

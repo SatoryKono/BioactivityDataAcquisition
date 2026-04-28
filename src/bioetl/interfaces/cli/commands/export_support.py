@@ -85,7 +85,7 @@ def _handle_export_failure(
     )
 
 
-def _run_export_async(
+def _run_export_async[T](
     coro: Coroutine[object, object, _T],
     *,
     table: str,
@@ -132,7 +132,7 @@ def _run_export_async(
     return None
 
 
-def _run_export_sync(
+def _run_export_sync[T](
     fn: Callable[[], _T],
     *,
     table: str,

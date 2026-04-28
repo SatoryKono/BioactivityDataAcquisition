@@ -11,7 +11,7 @@ _CommandParams = ParamSpec("_CommandParams")
 _CommandReturn = TypeVar("_CommandReturn")
 
 
-def _cast_command(
+def _cast_command[**CommandParams, CommandReturn](
     func: Callable[_CommandParams, _CommandReturn],
 ) -> Callable[_CommandParams, _CommandReturn]:
     return func

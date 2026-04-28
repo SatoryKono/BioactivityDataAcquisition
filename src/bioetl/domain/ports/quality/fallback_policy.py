@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
-from typing import runtime_checkable
-
-from typing_extensions import Protocol
+from typing import Protocol, runtime_checkable
 
 from bioetl.domain.types import BronzeRecord
 

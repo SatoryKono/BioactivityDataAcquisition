@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 from bioetl.domain.lineage.models import (
     LineageEdge,
@@ -174,7 +174,7 @@ def _validate_bundle_identity_contract(
 
 
 @dataclass(frozen=True, slots=True)
-class MetadataLineageBundleResult(Generic[MetadataT]):
+class MetadataLineageBundleResult[MetadataT: (BronzeMetadata, SilverMetadata, GoldMetadata)]:
     """Bundle one sidecar metadata payload together with its lineage fragment."""
 
     metadata: MetadataT

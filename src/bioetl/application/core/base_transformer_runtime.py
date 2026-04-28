@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Protocol, TypeAlias, TypeVar, cast
+from typing import TYPE_CHECKING, Protocol, TypeVar, cast
 
 import orjson
 
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="BaseEntity")
 TEntity_co = TypeVar("TEntity_co", bound="BaseEntity", covariant=True)
 ScalarValue = str | int | float | bool | None
-_DICT_STR_OBJECT: TypeAlias = dict[str, object]
+type _DICT_STR_OBJECT = dict[str, object]
 
 
 class _EntityConstructor(Protocol[TEntity_co]):
@@ -157,7 +157,7 @@ def extract_nested(
     return extract_by_path(record=record, keys=path.split("."), default=default)
 
 
-def create_entity(
+def create_entity[T: "BaseEntity"](
     *,
     entity_class: type[T],
     context: PipelineContext,

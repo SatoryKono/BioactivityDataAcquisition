@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Coroutine
 from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass
-from typing import Protocol, TypeAlias
+from typing import Protocol
 
 from bioetl.application.services import (
     PipelineNotFoundError,
@@ -31,7 +31,7 @@ from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
 
 _EnsureMetricsServerStartedFn = Callable[[], object]
 _HealthServerContextFactory = Callable[..., AbstractAsyncContextManager[object]]
-_RunAllFailureHandler: TypeAlias = CliFailureHandler
+type _RunAllFailureHandler = CliFailureHandler
 _RunAllCoroutineRunner = Callable[
     [Coroutine[object, object, BatchRunResult]],
     BatchRunResult,

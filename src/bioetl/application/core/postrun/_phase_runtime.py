@@ -84,7 +84,7 @@ def emit_postrun_phase_observability(
         logger.info("postrun_phase_completed", **log_payload)
 
 
-async def run_async_postrun_phase(
+async def run_async_postrun_phase[ResultT](
     *,
     span_factory: Callable[[str], AbstractContextManager[Span]],
     phase: PostrunPhaseName,
@@ -120,7 +120,7 @@ async def run_async_postrun_phase(
         return result
 
 
-def run_sync_postrun_phase(
+def run_sync_postrun_phase[ResultT](
     *,
     span_factory: Callable[[str], AbstractContextManager[Span]],
     phase: PostrunPhaseName,

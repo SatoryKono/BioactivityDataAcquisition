@@ -77,7 +77,7 @@ def yield_plain_wrapped_fetch_records(
     )
 
 
-def yield_target_records_from_fallback_fetch(
+def yield_target_records_from_fallback_fetch[RecordT](
     filterable: FilterableDataSourcePort,
     *,
     source_entity_type: str,
@@ -103,7 +103,7 @@ def yield_target_records_from_fallback_fetch(
     )
 
 
-async def yield_target_or_delegate_records(
+async def yield_target_or_delegate_records[RecordT](
     *,
     entity_type: str,
     target_entity_type: str,

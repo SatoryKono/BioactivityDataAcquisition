@@ -22,15 +22,15 @@ from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from pathlib import Path
-from typing import TypeAlias, TypeVar, cast
+from typing import TypeVar, cast
 from urllib import error, parse, request
 
 import yaml
 
-JsonScalar: TypeAlias = str | int | float | bool | None
-JsonValue: TypeAlias = JsonScalar | list["JsonValue"] | dict[str, "JsonValue"]
-RelationSpec: TypeAlias = tuple[str, frozenset[str], frozenset[str]]
-ShardFilterSpec: TypeAlias = tuple[frozenset[str], tuple[RelationSpec, ...]]
+type JsonScalar = str | int | float | bool | None
+type JsonValue = JsonScalar | list["JsonValue"] | dict[str, "JsonValue"]
+type RelationSpec = tuple[str, frozenset[str], frozenset[str]]
+type ShardFilterSpec = tuple[frozenset[str], tuple[RelationSpec, ...]]
 T = TypeVar("T")
 BIOETL_METRIC_PATTERN = re.compile(r"\bbioetl_[a-zA-Z0-9_:]+")
 
@@ -15531,7 +15531,7 @@ def sync_snapshot(
     )
 
 
-def _batched(items: list[T], size: int) -> list[list[T]]:
+def _batched[T](items: list[T], size: int) -> list[list[T]]:
     return [items[index : index + size] for index in range(0, len(items), size)]
 
 

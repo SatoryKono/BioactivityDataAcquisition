@@ -110,7 +110,7 @@ def normalize_normalization_profile_coordinates(
 T = TypeVar("T")
 
 
-def _resolve_normalization_profile_value(
+def _resolve_normalization_profile_value[TValue](
     mapping: Mapping[tuple[str, str], TValue],
     provider: str,
     entity_type: str | None,

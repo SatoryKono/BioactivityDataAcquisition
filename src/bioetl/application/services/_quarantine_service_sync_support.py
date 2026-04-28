@@ -99,7 +99,7 @@ class _QuarantineSyncHost(Protocol):
     ) -> int: ...
 
 
-def _run_traced_sync_operation(
+def _run_traced_sync_operation[T](
     host: _QuarantineSyncHost,
     *,
     span_name: str,

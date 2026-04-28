@@ -30,7 +30,7 @@ __all__ = [
 T = TypeVar("T", bound="DataSourcePort")
 
 
-def _register_provider_class(
+def _register_provider_class[T: "DataSourcePort"](
     *,
     cls: type[T],
     name: str,

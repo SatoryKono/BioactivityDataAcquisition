@@ -5,7 +5,7 @@ No I/O operations allowed (REQ-ARCH-003).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, NewType, TypeAlias, TypedDict
+from typing import TYPE_CHECKING, Any, NewType, TypedDict
 from uuid import UUID
 
 if TYPE_CHECKING:
@@ -43,10 +43,10 @@ BatchID = NewType("BatchID", UUID)
 
 # ── Type aliases ──────────────────────────────────────────────────────
 
-ArrowSchema: TypeAlias = "pyarrow.Schema"
+type ArrowSchema = "pyarrow.Schema"
 """PyArrow schema type alias (runtime: pyarrow.Schema, import-time: string)."""
 
-JsonDict: TypeAlias = dict[str, Any]  # Any: JSON payloads have heterogeneous values
+type JsonDict = dict[str, Any]  # Any: JSON payloads have heterogeneous values
 """Type alias for JSON-like dictionaries with string keys and heterogeneous values.
 
 Use instead of ``dict[str, Any]`` for data originating from external APIs,
@@ -54,19 +54,19 @@ configuration files (YAML/JSON), or any other untyped key-value mapping.
 Reduces visual type-debt while preserving semantic clarity.
 """
 
-BronzeRecord: TypeAlias = JsonDict  # raw API JSON has heterogeneous values
+type BronzeRecord = JsonDict  # raw API JSON has heterogeneous values
 """Untyped dictionary representing a raw record from the source."""
 
-GoldRecord: TypeAlias = JsonDict  # heterogeneous scalar types before Pandera coercion
+type GoldRecord = JsonDict  # heterogeneous scalar types before Pandera coercion
 """Record after Silver→Gold transform, before schema validation."""
 
-MetaDict: TypeAlias = JsonDict  # freeform metadata (str|int|float|datetime|None)
+type MetaDict = JsonDict  # freeform metadata (str|int|float|datetime|None)
 """Freeform metadata bag used in aggregates, audit entries, events."""
 
-GoldSchemaType: TypeAlias = "type[_pa.DataFrameModel]"
+type GoldSchemaType = "type[_pa.DataFrameModel]"
 """Pandera DataFrameModel class (not instance). TYPE_CHECKING-only at import time."""
 
-PrimaryId: TypeAlias = str | int
+type PrimaryId = str | int
 """Primary identifier extracted from a Bronze record (e.g., ChEMBL ID string or numeric ID)."""
 
 

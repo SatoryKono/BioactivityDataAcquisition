@@ -152,7 +152,7 @@ def _has_explicit_member(target: object, member_name: str) -> bool:
     )
 
 
-def resolve_metadata_and_lineage_fragment(
+def resolve_metadata_and_lineage_fragment[MetadataT](
     *,
     coordinator: object | None,
     bundle_factory_name: str,

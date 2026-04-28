@@ -49,7 +49,7 @@ class _GaugeMetric(Protocol):
 _MetricT = TypeVar("_MetricT")
 
 
-def _require_registered_metric(
+def _require_registered_metric[MetricT](
     *,
     name: str,
     registry: Mapping[str, _MetricT],

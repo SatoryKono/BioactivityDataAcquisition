@@ -171,7 +171,7 @@ def create_pipeline_instance_with_services(
     )
 
 
-def create_factory_runner(
+def create_factory_runner[TPipeline: "BasePipeline"](
     *,
     request: _CreateFactoryRunnerRequest,
     create_with_services_fn: Callable[..., TPipeline],

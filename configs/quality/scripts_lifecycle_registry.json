@@ -2,6 +2,12 @@
   "schema_version": "1.0",
   "description": "Lifecycle decisions for non-active scripts (orphan/legacy).",
   "entries": {
+    "scripts/engineering/common/cli_dispatch.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the shared CLI dispatch helper for canonical scripts.engineering and adjacent routers; promote it to active inventory once helper modules receive explicit catalog classification."
+    },
     "scripts/ops/data/__main__.py": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",
@@ -97,6 +103,12 @@
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin PowerShell launcher to scripts/ai/codex/headless.ps1 while Windows-side headless entrypoints still reference the scripts.ops path."
+    },
+    "scripts/ops/launchers/codex/codex-headless.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a thin bash launcher to scripts/ai/codex/headless.sh while shell-side headless entrypoints still reference the scripts.ops path."
     },
     "scripts/ops/launchers/codex/diagnose-codex-wsl.bat": {
       "owner": "@bioetl-platform",

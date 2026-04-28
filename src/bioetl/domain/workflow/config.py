@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, fields
-from typing import TYPE_CHECKING, TypeAlias, TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar, cast
 
 from bioetl.domain.types import JsonDict
 from bioetl.domain.workflow.dag import topologically_sorted_step_ids
@@ -27,7 +27,7 @@ _RUN_OPTIONS_FILTER_IDS = "filter_ids"
 _RunOptionValue = TypeVar("_RunOptionValue")
 
 
-def _prefer_override(
+def _prefer_override[RunOptionValue](
     current: _RunOptionValue | None,
     override: _RunOptionValue | None,
 ) -> _RunOptionValue | None:
@@ -170,7 +170,7 @@ class TransformStepConfig:
     config: JsonDict | None = None
 
 
-WorkflowStep: TypeAlias = WorkflowStepConfig | TransformStepConfig
+type WorkflowStep = WorkflowStepConfig | TransformStepConfig
 
 
 @dataclass(frozen=True, slots=True)

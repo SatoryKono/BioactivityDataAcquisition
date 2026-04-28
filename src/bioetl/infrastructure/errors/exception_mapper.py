@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal, TypeAlias, TypeVar
+from typing import Literal, TypeVar
 
 from bioetl.domain.exceptions import (
     BioETLError,
@@ -31,7 +31,7 @@ _MappedExternalError = TypeVar(
     "_MappedExternalError",
     bound=ExternalServiceError,
 )
-InfrastructureSourceError: TypeAlias = (
+type InfrastructureSourceError = (
     OSError | RuntimeError | ValueError | LookupError | AssertionError | BioETLError
 )
 
@@ -59,7 +59,7 @@ class InfraErrorDisposition:
     retryable: bool
 
 
-def _decorate_mapped_error(
+def _decorate_mapped_error[MappedExternalError: ExternalServiceError](
     *,
     error: _MappedExternalError,
     reason_code: str,

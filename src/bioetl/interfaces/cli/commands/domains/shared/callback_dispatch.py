@@ -10,7 +10,7 @@ import click
 _InputT = TypeVar("_InputT")
 
 
-def dispatch_cli_callback(
+def dispatch_cli_callback[InputT](
     click_context: click.Context,
     *,
     build_cli_input: Callable[[], _InputT],

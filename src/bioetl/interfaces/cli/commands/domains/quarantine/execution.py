@@ -55,7 +55,7 @@ def _handle_quarantine_failure(
     )
 
 
-def run_quarantine_async(
+def run_quarantine_async[T](
     coro: Coroutine[object, object, _T],
     *,
     policy: QuarantineExecutionPolicy,
@@ -87,7 +87,7 @@ def run_quarantine_async(
     return None
 
 
-def run_quarantine_sync(
+def run_quarantine_sync[T](
     fn: Callable[[], _T],
     *,
     policy: QuarantineExecutionPolicy,

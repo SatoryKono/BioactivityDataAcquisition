@@ -170,7 +170,7 @@ def map_success_flag_to_exit_code(
     return failure_exit_code
 
 
-def execute_with_cli_failure_policy(
+def execute_with_cli_failure_policy[ResultT](
     action: Callable[[], _ResultT],
     *,
     subject: str,
@@ -191,7 +191,7 @@ def execute_with_cli_failure_policy(
     return None
 
 
-def finalize_cli_execution(
+def finalize_cli_execution[ResultT](
     *,
     health_info_presenter: Callable[[], None],
     execute: Callable[[], _ResultT | None],
@@ -205,7 +205,7 @@ def finalize_cli_execution(
     result_finalizer(result)
 
 
-def execute_prepared_cli_flow(
+def execute_prepared_cli_flow[ResultT](
     *,
     health_info_presenter: Callable[[], None],
     execute: Callable[[], _ResultT | None],
