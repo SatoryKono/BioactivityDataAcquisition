@@ -86,3 +86,17 @@ def test_compatibility_wrappers_delegate_to_existing_canonical_codex_targets() -
     assert (root / "scripts" / "ai" / "codex" / "diagnose_wsl.sh").exists()
     assert (root / "scripts" / "ai" / "codex" / "diagnose_wsl.ps1").exists()
     assert (root / "scripts" / "ai" / "codex" / "diagnose_wsl.bat").exists()
+
+
+def test_powershell_codex_launcher_is_thin_transport_to_canonical_wsl_entrypoint() -> (
+    None
+):
+    """PowerShell launcher must delegate to the canonical WSL/Bash entrypoint."""
+    root = _project_root()
+    launcher_ps1 = (root / "scripts" / "ai" / "codex" / "run-codex.ps1").read_text(
+        encoding="utf-8"
+    )
+
+    assert "run-codex.sh" in launcher_ps1
+    assert "wsl -d $WslDistro -e bash -- $LauncherWSL" in launcher_ps1
+    assert "npm install -g @openai/codex" not in launcher_ps1

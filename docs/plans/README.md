@@ -121,7 +121,8 @@ for remediation planning while retaining the older cleanup plan as historical
 baseline and policy context.
 
 The scripts CLI wrapper caller matrix was added on `2026-04-28` as supporting
-evidence for RF-008 compatibility-wrapper retention decisions. It is retained
+evidence for RF-008 compatibility-wrapper retention decisions. It is generated
+by `python -m scripts.engineering.repo sync-wrapper-caller-matrix` and retained
 as operational context for scripts cleanup, not as a second active backlog.
 
 ### Retained Historical Context With Live Evidence References

@@ -2,18 +2,16 @@
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
 
-from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    CLI_ENTRYPOINT_TYPED_ERRORS,
+    CliBoundaryExecutionPolicy,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    handle_cli_failure as handle_cli_execution_failure,
+    run_async_with_cli_failure_policy,
+    run_sync_with_cli_failure_policy,
 )
-from bioetl.interfaces.cli.exit_codes import ExitCode
 
 __all__ = [
     "QuarantineExecutionPolicy",
@@ -30,24 +28,15 @@ class QuarantineExecutionPolicy:
     domain_error_title: str
     unexpected_error_title: str
     interrupted_message: str = "Quarantine command interrupted by user (Ctrl+C)"
-
-
-def _handle_quarantine_failure(
-    exc: BaseException,
-    *,
-    policy: QuarantineExecutionPolicy,
-    reason_suffix: str,
-) -> None:
-    """Handle quarantine command failures with shared CLI policy."""
-    handle_cli_execution_failure(
-        exc,
-        reason_code=f"{policy.reason_prefix}_{reason_suffix}",
+def _shared_policy(policy: QuarantineExecutionPolicy) -> CliBoundaryExecutionPolicy:
+    """Convert the quarantine policy to the shared CLI boundary policy."""
+    return CliBoundaryExecutionPolicy(
+        reason_prefix=policy.reason_prefix,
         subject_key="pipeline",
         subject_value=policy.pipeline,
         domain_error_title=policy.domain_error_title,
         unexpected_error_title=policy.unexpected_error_title,
         interrupted_message=policy.interrupted_message,
-        default_exit_code=ExitCode.FAIL,
     )
 
 
@@ -57,30 +46,7 @@ def run_quarantine_async[T](
     policy: QuarantineExecutionPolicy,
 ) -> T | None:
     """Run an async quarantine coroutine with typed exception policy."""
-    try:
-        return asyncio.run(coro)
-    except BioETLError as exc:
-        _handle_quarantine_failure(
-            exc,
-            policy=policy,
-            reason_suffix="DOMAIN_ERROR",
-        )
-    except KeyboardInterrupt as exc:
-        _handle_quarantine_failure(
-            exc,
-            policy=policy,
-            reason_suffix="SIGINT",
-        )
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        _handle_quarantine_failure(
-            exc,
-            policy=policy,
-            reason_suffix="UNEXPECTED_ERROR",
-        )
-    finally:
-        if getattr(coro, "cr_frame", None) is not None:
-            coro.close()
-    return None
+    return run_async_with_cli_failure_policy(coro, policy=_shared_policy(policy))
 
 
 def run_quarantine_sync[T](
@@ -89,24 +55,4 @@ def run_quarantine_sync[T](
     policy: QuarantineExecutionPolicy,
 ) -> T | None:
     """Run a synchronous quarantine callable with typed exception policy."""
-    try:
-        return fn()
-    except BioETLError as exc:
-        _handle_quarantine_failure(
-            exc,
-            policy=policy,
-            reason_suffix="DOMAIN_ERROR",
-        )
-    except KeyboardInterrupt as exc:
-        _handle_quarantine_failure(
-            exc,
-            policy=policy,
-            reason_suffix="SIGINT",
-        )
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        _handle_quarantine_failure(
-            exc,
-            policy=policy,
-            reason_suffix="UNEXPECTED_ERROR",
-        )
-    return None
+    return run_sync_with_cli_failure_policy(fn, policy=_shared_policy(policy))

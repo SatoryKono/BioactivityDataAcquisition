@@ -8,17 +8,15 @@ from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    CLI_ENTRYPOINT_TYPED_ERRORS,
+    CliBoundaryExecutionPolicy,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    handle_cli_failure as handle_cli_execution_failure,
+    run_sync_with_cli_failure_policy,
 )
 from bioetl.interfaces.cli.commands.inspection_output import (
     emit_inspection_payload,
 )
-from bioetl.interfaces.cli.exit_codes import ExitCode
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -164,20 +162,15 @@ def _render_plan_payload(payload: dict[str, object]) -> str:
     _append_required_actions(lines, payload.get("required_actions"))
     _append_notes(lines, payload.get("notes"))
     return "\n".join(lines)
-
-
-def _handle_plan_failure(
-    exc: BaseException, *, pipeline: str, reason_code: str
-) -> None:
-    handle_cli_execution_failure(
-        exc,
-        reason_code=reason_code,
+def _plan_policy(pipeline: str) -> CliBoundaryExecutionPolicy:
+    """Build the shared CLI boundary policy for the contract planner."""
+    return CliBoundaryExecutionPolicy(
+        reason_prefix="CLI_MAINTENANCE_PLAN",
         subject_key="pipeline",
         subject_value=pipeline,
         domain_error_title="Contract migration planning failed with domain error",
         unexpected_error_title="Unexpected error during maintenance plan",
         interrupted_message="Maintenance plan interrupted by user (Ctrl+C)",
-        default_exit_code=ExitCode.FAIL,
     )
 
 
@@ -197,28 +190,13 @@ def plan_command(pipeline: str, output_format: str) -> None:
     PIPELINE: Registered pipeline name (for example, ``chembl_activity``).
     """
     service = get_contract_migration_service()
-    try:
+
+    def _run() -> None:
         plan = service.plan_pipeline(pipeline)
         emit_inspection_payload(
             plan.to_payload(),
             output_format,
             text_renderer=_render_plan_payload,
         )
-    except BioETLError as exc:
-        _handle_plan_failure(
-            exc,
-            pipeline=pipeline,
-            reason_code="CLI_MAINTENANCE_PLAN_DOMAIN_ERROR",
-        )
-    except KeyboardInterrupt as exc:
-        _handle_plan_failure(
-            exc,
-            pipeline=pipeline,
-            reason_code="CLI_MAINTENANCE_PLAN_SIGINT",
-        )
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        _handle_plan_failure(
-            exc,
-            pipeline=pipeline,
-            reason_code="CLI_MAINTENANCE_PLAN_UNEXPECTED_ERROR",
-        )
+
+    run_sync_with_cli_failure_policy(_run, policy=_plan_policy(pipeline))

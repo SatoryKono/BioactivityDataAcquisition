@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Callable, Coroutine
 from pathlib import Path
 from typing import Literal, Protocol, cast
@@ -13,12 +12,12 @@ from bioetl.application.services import (
     TableInfo,
     TablePreview,
 )
-from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    CLI_ENTRYPOINT_TYPED_ERRORS,
+    CliBoundaryExecutionPolicy,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    handle_cli_failure as handle_cli_execution_failure,
+    run_async_with_cli_failure_policy,
+    run_sync_with_cli_failure_policy,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
@@ -63,24 +62,21 @@ class _ExportCommandService(Protocol):
         ...
 
 
-def _handle_export_failure(
-    exc: BaseException,
+def _export_policy(
     *,
-    reason_code: str,
     table: str,
+    reason_prefix: str,
     domain_error_title: str,
     unexpected_error_title: str,
-) -> None:
-    """Handle export command failures with shared CLI policy."""
-    handle_cli_execution_failure(
-        exc,
-        reason_code=reason_code,
+) -> CliBoundaryExecutionPolicy:
+    """Build the shared CLI boundary policy for export helpers."""
+    return CliBoundaryExecutionPolicy(
+        reason_prefix=reason_prefix,
         subject_key="table",
         subject_value=table,
         domain_error_title=domain_error_title,
         unexpected_error_title=unexpected_error_title,
         interrupted_message="Export interrupted by user (Ctrl+C)",
-        default_exit_code=ExitCode.FAIL,
     )
 
 
@@ -95,40 +91,23 @@ def _run_export_async[T](
 ) -> T | None:
     """Run an async export coroutine with shared CLI exception handling."""
     try:
-        return asyncio.run(coro)
+        return run_async_with_cli_failure_policy(
+            coro,
+            policy=_export_policy(
+                table=table,
+                reason_prefix=reason_prefix,
+                domain_error_title=domain_error_title,
+                unexpected_error_title=unexpected_error_title,
+            ),
+            passthrough_exception_types=(
+                (FileNotFoundError,) if handle_file_not_found else ()
+            ),
+        )
     except FileNotFoundError as exc:
         if handle_file_not_found:
             echo_error(str(exc))
             raise SystemExit(ExitCode.FAIL) from None
         raise
-    except BioETLError as exc:
-        _handle_export_failure(
-            exc,
-            reason_code=f"{reason_prefix}_DOMAIN_ERROR",
-            table=table,
-            domain_error_title=domain_error_title,
-            unexpected_error_title=unexpected_error_title,
-        )
-    except KeyboardInterrupt as exc:
-        _handle_export_failure(
-            exc,
-            reason_code=f"{reason_prefix}_SIGINT",
-            table=table,
-            domain_error_title=domain_error_title,
-            unexpected_error_title=unexpected_error_title,
-        )
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        _handle_export_failure(
-            exc,
-            reason_code=f"{reason_prefix}_UNEXPECTED_ERROR",
-            table=table,
-            domain_error_title=domain_error_title,
-            unexpected_error_title=unexpected_error_title,
-        )
-    finally:
-        if getattr(coro, "cr_frame", None) is not None:
-            coro.close()
-    return None
 
 
 def _run_export_sync[T](
@@ -140,33 +119,15 @@ def _run_export_sync[T](
     unexpected_error_title: str,
 ) -> T | None:
     """Run a sync export callable with shared CLI exception handling."""
-    try:
-        return fn()
-    except BioETLError as exc:
-        _handle_export_failure(
-            exc,
-            reason_code=f"{reason_prefix}_DOMAIN_ERROR",
+    return run_sync_with_cli_failure_policy(
+        fn,
+        policy=_export_policy(
             table=table,
+            reason_prefix=reason_prefix,
             domain_error_title=domain_error_title,
             unexpected_error_title=unexpected_error_title,
-        )
-    except KeyboardInterrupt as exc:
-        _handle_export_failure(
-            exc,
-            reason_code=f"{reason_prefix}_SIGINT",
-            table=table,
-            domain_error_title=domain_error_title,
-            unexpected_error_title=unexpected_error_title,
-        )
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        _handle_export_failure(
-            exc,
-            reason_code=f"{reason_prefix}_UNEXPECTED_ERROR",
-            table=table,
-            domain_error_title=domain_error_title,
-            unexpected_error_title=unexpected_error_title,
-        )
-    return None
+        ),
+    )
 
 
 def _resolve_list_layer(layer: str) -> str:

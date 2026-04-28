@@ -5,20 +5,17 @@ Implements Bronze layer cleanup per RULES.md retention policy.
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, cast
 
 import click
 
-from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    CLI_ENTRYPOINT_TYPED_ERRORS,
+    CliBoundaryExecutionPolicy,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    handle_cli_failure as handle_cli_execution_failure,
+    run_async_with_cli_failure_policy,
 )
-from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
     echo_cleanup_preview,
     echo_dry_run_prefix,
@@ -63,12 +60,9 @@ async def preview_pipeline_cleanup(pipeline: str) -> CleanupPreview:
 
     impl = cast("Callable[[str], Awaitable[CleanupPreview]]", _impl)
     return await impl(pipeline)
-
-
-def _handle_cleanup_failure(
-    exc: BaseException,
+def _cleanup_policy(
     *,
-    reason_code: str,
+    reason_prefix: str,
     subject_key: str = "target",
     subject_value: str = "bronze",
     domain_error_title: str = "Maintenance bronze-cleanup failed with domain error",
@@ -78,17 +72,15 @@ def _handle_cleanup_failure(
     interrupted_message: str = (
         "Maintenance bronze-cleanup interrupted by user (Ctrl+C)"
     ),
-) -> None:
-    """Handle cleanup command failures with shared CLI policy."""
-    handle_cli_execution_failure(
-        exc,
-        reason_code=reason_code,
+) -> CliBoundaryExecutionPolicy:
+    """Build the shared CLI boundary policy for cleanup commands."""
+    return CliBoundaryExecutionPolicy(
+        reason_prefix=reason_prefix,
         subject_key=subject_key,
         subject_value=subject_value,
         domain_error_title=domain_error_title,
         unexpected_error_title=unexpected_error_title,
         interrupted_message=interrupted_message,
-        default_exit_code=ExitCode.FAIL,
     )
 
 
@@ -133,27 +125,10 @@ def bronze_cleanup_command(retention_days: int, dry_run: bool) -> None:
         )
         echo_info(f"{action} {result.directories_removed} empty directories")
 
-    coro = _run()
-    try:
-        asyncio.run(coro)
-    except BioETLError as exc:
-        _handle_cleanup_failure(
-            exc,
-            reason_code="CLI_MAINTENANCE_BRONZE_CLEANUP_DOMAIN_ERROR",
-        )
-    except KeyboardInterrupt as exc:
-        _handle_cleanup_failure(
-            exc,
-            reason_code="CLI_MAINTENANCE_BRONZE_CLEANUP_SIGINT",
-        )
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        _handle_cleanup_failure(
-            exc,
-            reason_code="CLI_MAINTENANCE_BRONZE_CLEANUP_UNEXPECTED_ERROR",
-        )
-    finally:
-        if getattr(coro, "cr_frame", None) is not None:
-            coro.close()
+    run_async_with_cli_failure_policy(
+        _run(),
+        policy=_cleanup_policy(reason_prefix="CLI_MAINTENANCE_BRONZE_CLEANUP"),
+    )
 
 
 @click.command("cleanup-preview")
@@ -175,39 +150,14 @@ def cleanup_preview_command(pipeline: str) -> None:
         echo_dry_run_prefix(f"Cleanup preview for pipeline: {pipeline}")
         echo_cleanup_preview(preview_result)
 
-    coro = _run()
-    try:
-        asyncio.run(coro)
-    except BioETLError as exc:
-        _handle_cleanup_failure(
-            exc,
-            reason_code="CLI_MAINTENANCE_CLEANUP_PREVIEW_DOMAIN_ERROR",
+    run_async_with_cli_failure_policy(
+        _run(),
+        policy=_cleanup_policy(
+            reason_prefix="CLI_MAINTENANCE_CLEANUP_PREVIEW",
             subject_key="pipeline",
             subject_value=pipeline,
             domain_error_title=_CLEANUP_PREVIEW_DOMAIN_ERROR_TITLE,
             unexpected_error_title=_CLEANUP_PREVIEW_UNEXPECTED_ERROR_TITLE,
             interrupted_message=_CLEANUP_PREVIEW_INTERRUPTED_MESSAGE,
-        )
-    except KeyboardInterrupt as exc:
-        _handle_cleanup_failure(
-            exc,
-            reason_code="CLI_MAINTENANCE_CLEANUP_PREVIEW_SIGINT",
-            subject_key="pipeline",
-            subject_value=pipeline,
-            domain_error_title=_CLEANUP_PREVIEW_DOMAIN_ERROR_TITLE,
-            unexpected_error_title=_CLEANUP_PREVIEW_UNEXPECTED_ERROR_TITLE,
-            interrupted_message=_CLEANUP_PREVIEW_INTERRUPTED_MESSAGE,
-        )
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        _handle_cleanup_failure(
-            exc,
-            reason_code="CLI_MAINTENANCE_CLEANUP_PREVIEW_UNEXPECTED_ERROR",
-            subject_key="pipeline",
-            subject_value=pipeline,
-            domain_error_title=_CLEANUP_PREVIEW_DOMAIN_ERROR_TITLE,
-            unexpected_error_title=_CLEANUP_PREVIEW_UNEXPECTED_ERROR_TITLE,
-            interrupted_message=_CLEANUP_PREVIEW_INTERRUPTED_MESSAGE,
-        )
-    finally:
-        if getattr(coro, "cr_frame", None) is not None:
-            coro.close()
+        ),
+    )
