@@ -303,8 +303,7 @@ repos:
       - id: check-architecture-dependency-map-drift
         name: Check architecture dependency-map docs drift
         entry: >
-          python scripts/engineering/dev/run_project_python.py -m scripts.engineering.qa
-          report-dep-map --check
+          python scripts/engineering/qa/generate_architecture_dependency_map.py --check
         language: system
         pass_filenames: false
         files: ^(src/bioetl/.*\.py|docs/02-architecture/generated/module-dependency-map\.(md|json)|scripts/engineering/qa/generate_architecture_dependency_map\.py)$

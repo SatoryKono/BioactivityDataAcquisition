@@ -107,7 +107,10 @@ ALLOWED_ROOT_PY_FILES: set[str] = {
 CATALOG_ALLOWED_PYTHON_ROOT_SECTIONS: tuple[str, ...] = (
     "root_tooling_roots",
     "test_support_roots",
+    "docs_code_zones",
 )
+CATALOG_DOCS_CODE_ZONE_SECTIONS: tuple[str, ...] = ("docs_code_zones",)
+CATALOG_LOCAL_TOLERATED_ROOT_SECTIONS: tuple[str, ...] = ("local_tolerated_root_dirs",)
 
 # Required layers in src/bioetl (per CLAUDE.md §2)
 REQUIRED_BIOETL_LAYERS: set[str] = {
@@ -254,10 +257,30 @@ def _allowed_python_prefixes(root_policy) -> tuple[str, ...]:
     return tuple(dict.fromkeys(prefixes))
 
 
+def _cataloged_paths(
+    root_policy,
+    section_names: tuple[str, ...],
+) -> frozenset[str]:
+    """Return catalog-ratified paths for specific governance sections."""
+    paths: set[str] = set()
+    for section_name in section_names:
+        section = root_policy.catalog.get(section_name)
+        if not isinstance(section, dict):
+            continue
+        for entry in section.get("approved_roots", []):
+            if not isinstance(entry, dict):
+                continue
+            path = entry.get("path")
+            if isinstance(path, str) and path:
+                paths.add(path.rstrip("/"))
+    return frozenset(paths)
+
+
 def _check_root_directories(
     project_root: Path,
     *,
     approved_root_dirs: frozenset[str],
+    tolerated_local_root_dirs: frozenset[str],
 ) -> Iterator[Violation]:
     """Проверка корневых каталогов против whitelist."""
     for item in project_root.iterdir():
@@ -267,7 +290,7 @@ def _check_root_directories(
         name = item.name
 
         # Local dev/tooling directories are tolerated when untracked.
-        if name in LOCAL_TOLERATED_ROOT_DIRS:
+        if name in LOCAL_TOLERATED_ROOT_DIRS or name in tolerated_local_root_dirs:
             continue
 
         # Skip technical directories
@@ -369,6 +392,11 @@ def _check_no_python_in_docs(project_root: Path) -> Iterator[Violation]:
     if not docs_path.exists():
         return
 
+    root_policy = load_root_governance_policy(project_root)
+    allowed_docs_code_zones = _cataloged_paths(
+        root_policy,
+        CATALOG_DOCS_CODE_ZONE_SECTIONS,
+    )
     tracked_files = _tracked_python_files(project_root)
     python_files = (
         tracked_files
@@ -383,6 +411,11 @@ def _check_no_python_in_docs(project_root: Path) -> Iterator[Violation]:
 
         # Allow scripts in docs/00-project/ai/skills/
         if posix_path.startswith("docs/00-project/ai/skills/"):
+            continue
+        if any(
+            posix_path == zone or posix_path.startswith(f"{zone}/")
+            for zone in allowed_docs_code_zones
+        ):
             continue
 
         yield Violation(
@@ -444,12 +477,20 @@ def run_audit(project_root: Path) -> AuditResult:
     result = AuditResult()
     root_policy = load_root_governance_policy(project_root)
     allowed_python_prefixes = _allowed_python_prefixes(root_policy)
+    tolerated_local_root_dirs = frozenset(
+        Path(path).name
+        for path in _cataloged_paths(
+            root_policy,
+            CATALOG_LOCAL_TOLERATED_ROOT_SECTIONS,
+        )
+    )
 
     # Run all checks
     checks = [
         lambda root: _check_root_directories(
             root,
             approved_root_dirs=root_policy.approved_root_directories,
+            tolerated_local_root_dirs=tolerated_local_root_dirs,
         ),
         lambda root: _check_python_locations(
             root,

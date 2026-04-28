@@ -70,13 +70,13 @@ def test_provider_drift_diagnostics_remain_actionable() -> None:
     ).read_text(encoding="utf-8")
 
     for token in (
-        "\"provider\"",
-        "\"entity\"",
-        "\"probe\"",
-        "\"path\"",
-        "\"expected_type\"",
-        "\"actual_type\"",
-        "\"remediation\"",
+        '"provider"',
+        '"entity"',
+        '"probe"',
+        '"path"',
+        '"expected_type"',
+        '"actual_type"',
+        '"remediation"',
     ):
         assert token in helper_text
     assert "remediation=" in replay_text

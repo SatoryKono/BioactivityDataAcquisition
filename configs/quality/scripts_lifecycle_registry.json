@@ -8,6 +8,18 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the shared root-governance helper consumed by structure auditors and cleanup tooling; fold it into a broader canonical governance helper surface only if root policy loaders are consolidated further."
     },
+    "scripts/engineering/dev/powershell/setup_git_path.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "active",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the canonical Windows-side developer helper for ensuring Git for Windows precedes GitHub Desktop in PATH; keep it under scripts/engineering/dev and avoid reintroducing a root-level copy."
+    },
+    "scripts/engineering/dev/python/fix_neo4j_memory_sync_http_uris.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded rewrite helper for migrating legacy test-only HTTP URI literals inside testing_support/neo4j_memory_sync.py; remove it once no further scripted rewrites are expected."
+    },
     "scripts/engineering/common/cli_dispatch.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

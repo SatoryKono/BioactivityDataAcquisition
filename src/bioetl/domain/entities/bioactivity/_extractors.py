@@ -110,9 +110,7 @@ def _extract_activity_measurement_fields(raw_data: JsonDict) -> dict[str, object
         "pchembl_value": _safe_float(raw_data.get("pchembl_value")),
         "qudt_units": _safe_str(raw_data.get("qudt_units")),
         "qudt_unit_iri": _safe_str(raw_data.get("qudt_unit_iri")),
-        "qudt_unit_mapping_status": _safe_str(
-            raw_data.get("qudt_unit_mapping_status")
-        ),
+        "qudt_unit_mapping_status": _safe_str(raw_data.get("qudt_unit_mapping_status")),
         "qudt_ontology_version": _safe_str(raw_data.get("qudt_ontology_version")),
         "uo_units": _safe_str(raw_data.get("uo_units")),
         "uo_unit_iri": _safe_str(raw_data.get("uo_unit_iri")),

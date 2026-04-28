@@ -15,9 +15,7 @@ def test_resolve_activity_ontology_companion_fields_maps_known_tokens() -> None:
         qudt_units="nanomolar",
     )
 
-    assert companions.bao_endpoint_iri == (
-        "http://purl.obolibrary.org/obo/BAO_0000190"
-    )
+    assert companions.bao_endpoint_iri == ("http://purl.obolibrary.org/obo/BAO_0000190")
     assert companions.bao_endpoint_mapping_status == "mapped"
     assert companions.bao_format_iri == "http://purl.obolibrary.org/obo/BAO_0000218"
     assert companions.bao_format_mapping_status == "mapped"
