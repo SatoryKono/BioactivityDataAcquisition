@@ -226,28 +226,24 @@ async def _dispatch_write_with_domain_errors_impl(
     )
 
 
-@dataclass(slots=True)
-class SilverDeltaOperations:
-    """Delta operations service for Silver layer writes.
-
-    This service encapsulates all Delta Lake write/merge operations previously in SilverWriterDeltaMixin,
-    following the composition pattern for better separation of concerns and testability.
-    """
+class _SilverDeltaOperationFacade:
+    """Shared Delta lifecycle facade for mixin and composition service paths."""
 
     logger: LoggerPort
     _metrics: MetricsPort | None
     _merge_resilience_policy: SilverMergeResiliencePolicy
 
-    def _load_silver_writer_module(self) -> Any:  # Any: return type varies at runtime
-        """Load silver_writer module for backward-compatible patch points."""
-        from bioetl.infrastructure.storage import silver_writer as silver_writer_module
-
-        return silver_writer_module
-
     @property
     def _logger(self) -> LoggerPort:
         """Access logger via private convention for delegation pattern compliance."""
         return self.logger
+
+    @staticmethod
+    def _load_silver_writer_module() -> Any:  # Any: return type varies at runtime
+        """Load silver_writer module for backward-compatible patch points."""
+        from bioetl.infrastructure.storage import silver_writer as silver_writer_module
+
+        return silver_writer_module
 
     async def _write_delete(
         self,
@@ -339,3 +335,16 @@ class SilverDeltaOperations:
             table_name=table_name,
             request=request,
         )
+
+
+@dataclass(slots=True)
+class SilverDeltaOperations(_SilverDeltaOperationFacade):
+    """Delta operations service for Silver layer writes.
+
+    This service encapsulates all Delta Lake write/merge operations previously in SilverWriterDeltaMixin,
+    following the composition pattern for better separation of concerns and testability.
+    """
+
+    logger: LoggerPort
+    _metrics: MetricsPort | None
+    _merge_resilience_policy: SilverMergeResiliencePolicy
