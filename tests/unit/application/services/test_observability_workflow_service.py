@@ -350,8 +350,7 @@ async def test_inspect_run_dossier_degrades_traceability_when_tracing_is_noop() 
     }
     assert (
         "Resolve dossier evidence gaps before marking this critical run "
-        "operationally successful."
-        in result.next_steps
+        "operationally successful." in result.next_steps
     )
     assert (
         "Use audit, manifest, and lineage sections as the current traceability fallback."

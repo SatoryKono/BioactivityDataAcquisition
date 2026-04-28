@@ -28,7 +28,6 @@ jobs:
   type-check:
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    continue-on-error: true
 
     steps:
       - name: Checkout

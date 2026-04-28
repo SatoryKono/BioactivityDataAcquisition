@@ -57,22 +57,22 @@ jobs:
                     python-version: "3.12"
 
             -   name: Validate VCR cassette placement
-                run: python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py
+                run: uv run python -m scripts.engineering.qa.vcr check-placement
 
             -   name: Validate VCR filename policy
-                run: python scripts/engineering/qa/vcr/check_vcr_filename_policy.py
+                run: uv run python -m scripts.engineering.qa.vcr check-naming
 
             -   name: Validate full VCR metadata inventory
                 run: uv run python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check
 
             -   name: Validate VCR metadata stale-age policy
-                run: uv run python scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90
+                run: uv run python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90
 
             -   name: Validate VCR metadata catalog
                 run: uv run python -m scripts.engineering.qa report-vcr-metadata --check
 
             -   name: Validate version consistency
-                run: python scripts/engineering/repo/check_version_consistency.py
+                run: uv run python -m scripts.engineering.repo check-versions
 
             -   name: Smoke check (dependencies + core imports)
                 run: |
@@ -132,7 +132,7 @@ jobs:
 
             -   name: Validate quality exemptions registry (owner/reason/expiry metadata)
                 run: |
-                    uv run python scripts/engineering/qa/check_quality_exemptions.py \
+                    uv run python -m scripts.engineering.qa check-exemptions \
                       --registry "${QUALITY_EXEMPTIONS_REGISTRY}" \
                       --scorecard "${QUALITY_EXEMPTIONS_SCORECARD}" \
                       --mode "${QUALITY_EXEMPTIONS_GATE_MODE}" \
@@ -143,7 +143,7 @@ jobs:
 
             -   name: Validate scripts inventory + lifecycle governance
                 run: |
-                    uv run python scripts/engineering/repo/check_scripts_inventory.py \
+                    uv run python -m scripts.engineering.repo check-inventory \
                       --check \
                       --manifest configs/quality/scripts_inventory_manifest.json \
                       --check-lifecycle \
@@ -151,7 +151,7 @@ jobs:
                       --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
 
             -   name: Validate scripts catalog governance policy
-                run: uv run python scripts/engineering/repo/check_scripts_catalog.py --catalog scripts/engineering/repo/catalog.yaml
+                run: uv run python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml
 
             -   name: Validate deterministic Neo4j memory ontology invariants
                 run: uv run python -m scripts.engineering.ci neo4j-memory
@@ -163,10 +163,10 @@ jobs:
                 run: uv run python -m scripts.engineering.qa check-xwalk-missing-backlog
 
             -   name: Pre-merge naming/package consistency gate
-                run: uv run python scripts/engineering/qa/check_naming_package_consistency.py --check
+                run: uv run python -m scripts.engineering.qa check-naming-pkg --check
 
             -   name: DQ consistency validation (fail-fast)
-                run: uv run python scripts/engineering/qa/validate_dq_consistency.py
+                run: uv run python -m scripts.engineering.qa validate-dq-consistency
 
             -   name: Observability metric inventory drift gate
                 run: uv run python -m scripts.engineering.qa report-observability-metric-inventory --check --json
@@ -245,10 +245,10 @@ jobs:
                     python-version: "3.12"
 
             -   name: Validate pipeline configs + schema links (blocking)
-                run: uv run python scripts/schema/validate_pipeline_configs.py
+                run: uv run python -m scripts.schema validate-configs
 
             -   name: Validate config invariants (blocking)
-                run: uv run python scripts/schema/check_config_invariants.py
+                run: uv run python -m scripts.schema check-invariants
 
             -   name: Validate silver required_fields coverage (blocking)
                 run: uv run python -m scripts.schema check-required-fields --verbose
@@ -269,13 +269,13 @@ jobs:
                     uv run python -m scripts.docs sync-matrix-structural-policy --check --input "$workbook" --output "$workbook"
 
             -   name: Check generated config schemas are up to date
-                run: uv run python scripts/schema/generate_pipeline_schema.py --check
+                run: uv run python -m scripts.schema generate-pipeline --check
 
             -   name: Check architecture dependency docs drift
-                run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check
+                run: uv run python -m scripts.engineering.qa report-dep-map --check
 
             -   name: Check docs drift (forbidden patterns)
-                run: uv run python scripts/engineering/qa/check_docs_drift.py
+                run: uv run python -m scripts.engineering.qa check-docs-drift
 
             -   name: Validate docker-compose.yml syntax
                 run: docker compose config > /dev/null
@@ -339,7 +339,7 @@ jobs:
                     python-version: "3.12"
 
             -   name: Run DQ consistency validation
-                run: uv run python scripts/engineering/qa/validate_dq_consistency.py
+                run: uv run python -m scripts.engineering.qa validate-dq-consistency
 
     quality-metrics-gate:
         runs-on: ubuntu-latest

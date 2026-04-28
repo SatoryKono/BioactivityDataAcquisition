@@ -14,169 +14,46 @@ from bioetl.application.services.run_manifest_diagnostics import (
 )
 from bioetl.domain.control_plane import (
     ReplayCapability,
-    RunCodeProvenance,
     RunInputSnapshotRef,
     RunLedgerEntry,
     RunManifest,
     RunSourceRef,
 )
-from bioetl.domain.control_plane.reproducibility_profiles import (
-    build_lineage_closure_boundary,
-    build_replay_family_contract,
-    resolve_reproducibility_family_profile,
-)
-from bioetl.domain.normalization import (
-    build_execution_identity_payload,
-    compute_execution_identity_fingerprint,
-)
 from bioetl.domain.types import RunID, RunType
 from tests.helpers.control_plane import InMemoryRunLedgerStore
-
-_VALID_CONFIG_HASH = "a" * 64
-_VALID_RESOLVED_CONFIG_HASH = "b" * 64
-_VALID_EFFECTIVE_CONFIG_HASH = "c" * 64
+from tests.unit.application.services.run_manifest_test_support import (
+    VALID_CONFIG_HASH as _VALID_CONFIG_HASH,
+    VALID_EFFECTIVE_CONFIG_HASH as _VALID_EFFECTIVE_CONFIG_HASH,
+    VALID_RESOLVED_CONFIG_HASH as _VALID_RESOLVED_CONFIG_HASH,
+    expected_canonical_execution_identity as _expected_canonical_execution_identity,
+    expected_degraded_runtime_anchor as _expected_degraded_runtime_anchor,
+    expected_exact_replay_anchors as _expected_exact_replay_anchors,
+    expected_lineage_closure_boundary as _expected_lineage_closure_boundary,
+    expected_produced_artifact_trace as _shared_expected_produced_artifact_trace,
+    expected_replay_family_contract as _expected_replay_family_contract,
+    expected_replay_parentage as _expected_replay_parentage,
+    expected_resume_contract as _expected_resume_contract,
+    make_run_manifest as _make_manifest,
+)
 
 
 _InMemoryRunLedgerStore = InMemoryRunLedgerStore
 
 
-def _make_manifest() -> RunManifest:
-    run_id = RunID(uuid4())
-    return RunManifest(
-        manifest_id="manifest-diagnostics",
-        execution_fingerprint="fingerprint-diagnostics",
-        schema_version="1.0",
-        created_at=datetime.now(UTC),
-        run_id=run_id,
-        run_type=RunType.INCREMENTAL,
-        pipeline_name="chembl_activity",
-        provider="chembl",
-        entity="activity",
-        launch_context={"limit": 25},
-        runtime_config={"run_type": "incremental", "limit": 25},
-        resolved_config={"provider": "chembl", "entity_type": "activity"},
-        code_provenance=RunCodeProvenance(
-            pipeline_version="1.0.0",
-            git_commit="abc1234",
-            source_revision_state="clean",
-            config_hash=_VALID_CONFIG_HASH,
-            resolved_config_hash=_VALID_RESOLVED_CONFIG_HASH,
-            effective_config_hash=_VALID_EFFECTIVE_CONFIG_HASH,
-            contract_ref="chembl.activity",
-            contract_version="1.2.0",
-            dq_policy_ref="chembl_activity.gold",
-            rule_bundle_version="2026.03",
-            dq_contract_compatibility_hash="compat-hash-1",
-            effective_config_artifact_id="eca-123",
-        ),
-    )
-
-
-def _expected_canonical_execution_identity(manifest: RunManifest) -> dict[str, object]:
-    payload = build_execution_identity_payload(
-        pipeline_name=manifest.pipeline_name,
-        run_type=manifest.run_type.value,
-        pipeline_version=manifest.code_provenance.pipeline_version,
-        git_commit=manifest.code_provenance.git_commit,
-        effective_config_hash=manifest.code_provenance.effective_config_hash,
-        dq_contract_compatibility_hash=(
-            manifest.code_provenance.dq_contract_compatibility_hash
-        ),
-        contract_ref=manifest.code_provenance.contract_ref,
-        contract_version=manifest.code_provenance.contract_version,
-        effective_config_artifact_id=(
-            manifest.code_provenance.effective_config_artifact_id
-        ),
-        exact_replay=False,
-        input_snapshot_fingerprint=None,
-    )
-    return {
-        "execution_fingerprint": manifest.execution_fingerprint,
-        "payload": payload,
-    }
-
-
-def _expected_degraded_runtime_anchor(manifest: RunManifest) -> dict[str, object]:
-    payload = {
-        "manifest_id": manifest.manifest_id,
-        "effective_config_hash": manifest.code_provenance.effective_config_hash,
-        "contract_ref": manifest.code_provenance.contract_ref,
-        "contract_version": manifest.code_provenance.contract_version,
-        "effective_config_artifact_id": (
-            manifest.code_provenance.effective_config_artifact_id
-        ),
-    }
-    filtered_payload = {
-        key: value for key, value in payload.items() if value is not None
-    }
-    return {
-        "compatibility_scope": "legacy_fallback_only",
-        "fingerprint": (
-            compute_execution_identity_fingerprint(filtered_payload)
-            if filtered_payload
-            else None
-        ),
-        "payload": filtered_payload,
-    }
-
-
-def _expected_exact_replay_anchors(
-    manifest: RunManifest,
-    *,
-    published_artifact_ids: list[str] | None = None,
-    published_artifact_paths: list[str] | None = None,
-    lineage_fragment_ids: list[str] | None = None,
-) -> dict[str, object]:
-    return {
-        "semantic_identity_anchor": "execution_fingerprint",
-        "execution_fingerprint": manifest.execution_fingerprint,
-        "pipeline_name": manifest.pipeline_name,
-        "run_type": manifest.run_type.value,
-        "pipeline_version": manifest.code_provenance.pipeline_version,
-        "git_commit": manifest.code_provenance.git_commit,
-        "effective_config_hash": manifest.code_provenance.effective_config_hash,
-        "dq_contract_compatibility_hash": (
-            manifest.code_provenance.dq_contract_compatibility_hash
-        ),
-        "contract_ref": manifest.code_provenance.contract_ref,
-        "contract_version": manifest.code_provenance.contract_version,
-        "effective_config_artifact_id": (
-            manifest.code_provenance.effective_config_artifact_id
-        ),
-        "input_snapshot_identity_fingerprint": None,
-        "input_snapshot_ids": [],
-        "input_snapshot_content_hashes": [],
-        "published_artifact_ids": published_artifact_ids or [],
-        "published_artifact_paths": published_artifact_paths or [],
-        "lineage_fragment_ids": lineage_fragment_ids or [],
-    }
-
-
 def _expected_missing_produced_artifact_trace(
     manifest: RunManifest,
 ) -> dict[str, object]:
-    return {
-        "lookup": "run_ledger_by_manifest_id",
-        "lookup_key": manifest.manifest_id,
-        "manifest_id": manifest.manifest_id,
-        "complete": False,
-        "artifact_count": 0,
-        "artifacts": [],
-        "missing_requirements": [
-            "run_ledger_history",
-            "artifact_publication_event",
-        ],
-    }
+    return _shared_expected_produced_artifact_trace(
+        manifest,
+        ledger_entries_present=False,
+    )
 
 
 def _expected_produced_artifact_trace(manifest: RunManifest) -> dict[str, object]:
-    return {
-        "lookup": "run_ledger_by_manifest_id",
-        "lookup_key": manifest.manifest_id,
-        "manifest_id": manifest.manifest_id,
-        "complete": True,
-        "artifact_count": 1,
-        "artifacts": [
+    return _shared_expected_produced_artifact_trace(
+        manifest,
+        ledger_entries_present=True,
+        artifacts=[
             {
                 "event_type": "artifact_published",
                 "stage": "silver",
@@ -186,150 +63,6 @@ def _expected_produced_artifact_trace(manifest: RunManifest) -> dict[str, object
                 "artifact_path": "data/output/silver/chembl/activity",
             }
         ],
-        "missing_requirements": [],
-    }
-
-
-def _manifest_execution_context(manifest: RunManifest) -> str:
-    """Return the effective execution context for a manifest."""
-    return (
-        "composite"
-        if (
-            str(manifest.launch_context.get("execution_context") or "") == "composite"
-            or manifest.provider == "composite"
-        )
-        else "source"
-    )
-
-
-def _resolve_checkpoint_policy(
-    *,
-    requested_exact_replay: bool,
-    required_profile: str,
-    requested_policy: str | None,
-) -> str:
-    """Resolve the checkpoint compatibility policy used in expectations."""
-    if requested_exact_replay:
-        return "hard_fail"
-    if required_profile not in {"replay_ready", "forensic_grade"}:
-        return requested_policy or "observe"
-    if requested_policy in {"observe", "legacy_observe"}:
-        return "soft_fail"
-    return requested_policy or "soft_fail"
-
-
-def _resume_contract_layout(
-    manifest: RunManifest,
-) -> tuple[str, str, str | None]:
-    """Return the execution context, resume mode, and occurrence anchor."""
-    is_composite = _manifest_execution_context(manifest) == "composite"
-    return (
-        "composite" if is_composite else "ordinary",
-        "checkpoint_snapshot_plus_ledger_suffix"
-        if is_composite
-        else "checkpoint_snapshot_only",
-        "composite_run_identity" if is_composite else None,
-    )
-
-
-def _strict_replay_requested(
-    requested_exact_replay: bool,
-    required_profile: str,
-) -> bool:
-    """Return whether the manifest is asking for strict replay semantics."""
-    return requested_exact_replay or required_profile in {
-        "replay_ready",
-        "forensic_grade",
-    }
-
-
-def _expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
-    requested_exact_replay = bool(manifest.launch_context.get("exact_replay"))
-    required_profile = str(
-        manifest.launch_context.get("required_persistence_profile")
-        or "degraded_observable"
-    )
-    requested_policy = manifest.launch_context.get("checkpoint_compatibility_policy")
-    if not isinstance(requested_policy, str):
-        requested_policy = None
-    applied_policy = _resolve_checkpoint_policy(
-        requested_exact_replay=requested_exact_replay,
-        required_profile=required_profile,
-        requested_policy=requested_policy,
-    )
-    execution_context, resume_mode, occurrence_identity_anchor = (
-        _resume_contract_layout(manifest)
-    )
-    profile = resolve_reproducibility_family_profile(
-        provider=manifest.provider,
-        entity=manifest.entity,
-        contract_ref=manifest.code_provenance.contract_ref,
-        execution_context=_manifest_execution_context(manifest),
-    )
-    strict_replay_requested = _strict_replay_requested(
-        requested_exact_replay,
-        required_profile,
-    )
-    return {
-        "resume_requested": bool(manifest.launch_context.get("resume")),
-        "requested_exact_replay": requested_exact_replay,
-        "requested_checkpoint_compatibility_policy": requested_policy,
-        "applied_checkpoint_compatibility_policy": applied_policy,
-        "strict_replay_safe": (
-            strict_replay_requested
-            and applied_policy == "hard_fail"
-            and profile.strict_exact_replay_supported
-            and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
-        ),
-        "execution_context": execution_context,
-        "resume_mode": resume_mode,
-        "semantic_identity_anchor": "execution_fingerprint",
-        "occurrence_identity_anchor": occurrence_identity_anchor,
-    }
-
-
-def _expected_replay_parentage(manifest: RunManifest) -> dict[str, object]:
-    return {
-        "is_exact_replay": (
-            manifest.replay_of_run_id is not None
-            or manifest.replay_of_manifest_id is not None
-        ),
-        "replay_of_run_id": manifest.replay_of_run_id,
-        "replay_of_manifest_id": manifest.replay_of_manifest_id,
-    }
-
-
-def _expected_lineage_closure_boundary(manifest: RunManifest) -> dict[str, object]:
-    execution_context = (
-        "composite"
-        if (
-            str(manifest.launch_context.get("execution_context") or "") == "composite"
-            or manifest.provider == "composite"
-        )
-        else "source"
-    )
-    return build_lineage_closure_boundary(
-        provider=manifest.provider,
-        entity=manifest.entity,
-        contract_ref=manifest.code_provenance.contract_ref,
-        execution_context=execution_context,
-    )
-
-
-def _expected_replay_family_contract(manifest: RunManifest) -> dict[str, object]:
-    execution_context = (
-        "composite"
-        if (
-            str(manifest.launch_context.get("execution_context") or "") == "composite"
-            or manifest.provider == "composite"
-        )
-        else "source"
-    )
-    return build_replay_family_contract(
-        provider=manifest.provider,
-        entity=manifest.entity,
-        contract_ref=manifest.code_provenance.contract_ref,
-        execution_context=execution_context,
     )
 
 

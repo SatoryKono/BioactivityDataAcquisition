@@ -159,6 +159,105 @@ class TestValidateObservabilityPreflightImpl:
             logger.warning.call_args[0][0] == "control_plane_readiness_preflight_failed"
         )
 
+    def test_forensic_grade_run_fails_closed_without_observability_evidence(
+        self,
+    ) -> None:
+        from bioetl.composition.bootstrap.runtime.observability_bundle import (
+            validate_observability_preflight_impl,
+        )
+
+        logger = MagicMock()
+        with pytest.raises(
+            ObservabilityContractError,
+            match="forensic_grade runs require non-noop observability evidence",
+        ):
+            validate_observability_preflight_impl(
+                tracer=NoOpTracing(),
+                metrics=NoOpMetrics(),
+                environment="staging",
+                logger=logger,
+                audit=NoOpAudit(),
+                control_plane=SimpleNamespace(
+                    required_persistence_profile="forensic_grade",
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=True,
+                ),
+                yaml_config=SimpleNamespace(
+                    sink={
+                        "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                        "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                        "gold": SimpleNamespace(enabled=True, save_metadata=True),
+                    }
+                ),
+            )
+
+        assert (
+            logger.warning.call_args[0][0]
+            == "forensic_grade_observability_evidence_unavailable"
+        )
+        assert logger.warning.call_args.kwargs["missing_observability_evidence"] == [
+            "tracing",
+            "metrics",
+            "audit",
+        ]
+
+    def test_forensic_grade_run_requires_audit_even_outside_prod(self) -> None:
+        from bioetl.composition.bootstrap.runtime.observability_bundle import (
+            validate_observability_preflight_impl,
+        )
+
+        logger = MagicMock()
+        with pytest.raises(ObservabilityContractError, match="missing: audit"):
+            validate_observability_preflight_impl(
+                tracer=MagicMock(),
+                metrics=MagicMock(),
+                environment="dev",
+                logger=logger,
+                audit=None,
+                control_plane=SimpleNamespace(
+                    required_persistence_profile="forensic_grade",
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=True,
+                ),
+                yaml_config=SimpleNamespace(
+                    sink={
+                        "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                        "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                        "gold": SimpleNamespace(enabled=True, save_metadata=True),
+                    }
+                ),
+            )
+
+    def test_forensic_grade_run_passes_with_evidence_and_lineage_sidecars(
+        self,
+    ) -> None:
+        from bioetl.composition.bootstrap.runtime.observability_bundle import (
+            validate_observability_preflight_impl,
+        )
+
+        logger = MagicMock()
+        validate_observability_preflight_impl(
+            tracer=MagicMock(),
+            metrics=MagicMock(),
+            environment="staging",
+            logger=logger,
+            audit=MagicMock(),
+            control_plane=SimpleNamespace(
+                required_persistence_profile="forensic_grade",
+                run_manifest_enabled=True,
+                run_ledger_enabled=True,
+            ),
+            yaml_config=SimpleNamespace(
+                sink={
+                    "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                    "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                    "gold": SimpleNamespace(enabled=True, save_metadata=True),
+                }
+            ),
+        )
+
+        logger.warning.assert_not_called()
+
     def test_non_prod_environment_silent(self) -> None:
         from bioetl.composition.bootstrap.runtime.observability_bundle import (
             validate_observability_preflight_impl,
