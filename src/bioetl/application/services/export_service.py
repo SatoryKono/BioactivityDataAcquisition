@@ -14,9 +14,15 @@ from bioetl.application.services.export_models import (
     TableInfo,
     TablePreview,
 )
+from bioetl.application.services.export_manifests import (
+    build_export_checksum_manifest,
+    build_export_sidecar_payloads,
+)
 from bioetl.domain.exceptions import BioETLError, StorageError
 
 if TYPE_CHECKING:
+    import pyarrow as pa
+
     from bioetl.domain.ports import (
         DeltaReaderPort,
         ExportCatalogPort,
@@ -185,11 +191,24 @@ class ExportService:
             fmt=options.format,
             output_dir=output_dir,
         )
+        manifest_paths = (
+            self._write_export_manifests(
+                table=table,
+                table_name=table_name,
+                layer=layer,
+                options=options,
+                output_path=output_path,
+                row_count=row_count,
+            )
+            if options.include_manifests
+            else ()
+        )
         self.logger.info(
             "Export completed",
             table=table_name,
             rows=row_count,
             output=str(output_path),
+            manifests=[str(path) for path in manifest_paths],
         )
         return self._create_success_result(
             table_name=table_name,
@@ -197,7 +216,62 @@ class ExportService:
             options=options,
             output_path=output_path,
             row_count=row_count,
+            manifest_paths=manifest_paths,
         )
+
+    def _write_export_manifests(
+        self,
+        *,
+        table: pa.Table,
+        table_name: str,
+        layer: str,
+        options: ExportOptions,
+        output_path: Path,
+        row_count: int,
+    ) -> tuple[Path, ...]:
+        """Write deterministic provenance, licensing, and checksum manifests."""
+        data_fingerprint = self.writer.fingerprint_file(path=output_path)
+        columns = tuple(field.name for field in table.schema)
+        sidecars = build_export_sidecar_payloads(
+            table_name=table_name,
+            layer=layer,
+            export_format=options.format,
+            output_path=output_path,
+            row_count=row_count,
+            columns=columns,
+            data_fingerprint=data_fingerprint,
+            generated_at=options.manifest_generated_at,
+            run_ids=options.run_ids,
+            code_revision=options.code_revision,
+            strict=options.manifest_strict,
+        )
+        manifest_prefix = output_path.stem
+        provenance_path = self.writer.write_manifest(
+            manifest_name=f"{manifest_prefix}.provenance-manifest",
+            payload=sidecars.provenance_manifest,
+            output_dir=output_path.parent,
+        )
+        licensing_path = self.writer.write_manifest(
+            manifest_name=f"{manifest_prefix}.licensing-manifest",
+            payload=sidecars.licensing_manifest,
+            output_dir=output_path.parent,
+        )
+        manifest_generated_at = str(sidecars.provenance_manifest["generated_at"])
+        checksum_payload = build_export_checksum_manifest(
+            dataset_bundle_id=sidecars.dataset_bundle_id,
+            generated_at=manifest_generated_at,
+            fingerprints=(
+                data_fingerprint,
+                self.writer.fingerprint_file(path=provenance_path),
+                self.writer.fingerprint_file(path=licensing_path),
+            ),
+        )
+        checksums_path = self.writer.write_manifest(
+            manifest_name=f"{manifest_prefix}.checksums-manifest",
+            payload=checksum_payload,
+            output_dir=output_path.parent,
+        )
+        return (provenance_path, licensing_path, checksums_path)
 
     def _create_missing_table_result(
         self,
@@ -225,6 +299,7 @@ class ExportService:
         options: ExportOptions,
         output_path: Path,
         row_count: int,
+        manifest_paths: tuple[Path, ...] = (),
     ) -> ExportResult:
         """Build result payload for successful export case."""
         return ExportResult(
@@ -233,6 +308,7 @@ class ExportService:
             format=options.format,
             output_path=output_path,
             row_count=row_count,
+            manifest_paths=manifest_paths,
         )
 
     def _create_failed_result(

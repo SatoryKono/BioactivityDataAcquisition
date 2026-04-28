@@ -9,6 +9,8 @@ import yaml
 
 RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
 SLO_ALERT_CONTRACT_PATH = Path("configs/quality/observability_slo_alert_contract.yaml")
+PROMETHEUS_CONFIG_PATH = Path("grafana/prometheus.yml")
+MONITORING_COMPOSE_PATH = Path("docker-compose.monitoring.yml")
 pytestmark = pytest.mark.integration
 
 
@@ -20,6 +22,18 @@ def _load_rules() -> dict:
 
 def _load_slo_alert_contract() -> dict:
     payload = yaml.safe_load(SLO_ALERT_CONTRACT_PATH.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    return payload
+
+
+def _load_prometheus_config() -> dict:
+    payload = yaml.safe_load(PROMETHEUS_CONFIG_PATH.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    return payload
+
+
+def _load_monitoring_compose() -> dict:
+    payload = yaml.safe_load(MONITORING_COMPOSE_PATH.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
 
@@ -99,11 +113,30 @@ def test_rules_file_contains_control_plane_traceability_group() -> None:
     payload = _load_rules()
     group_names = [group.get("name") for group in payload.get("groups", [])]
     assert "bioetl_runtime_dashboard_recording" in group_names
+    assert "bioetl_monitoring_stack_observability" in group_names
     assert "bioetl_pipeline_runtime_observability" in group_names
     assert "bioetl_control_plane_traceability_observability" in group_names
     assert "bioetl_dq_observability" in group_names
     assert "bioetl_provider_health_observability" in group_names
     assert "bioetl_chembl_assay_observability" not in group_names
+
+
+def test_monitoring_stack_scrape_jobs_and_grafana_metrics_are_enabled() -> None:
+    prometheus_config = _load_prometheus_config()
+    compose = _load_monitoring_compose()
+
+    scrape_jobs = {
+        job.get("job_name")
+        for job in prometheus_config.get("scrape_configs", [])
+        if isinstance(job, dict)
+    }
+    assert {"bioetl", "prometheus", "grafana", "pushgateway"} <= scrape_jobs
+
+    grafana_service = compose.get("services", {}).get("grafana", {})
+    environment = grafana_service.get("environment", [])
+    assert "GF_METRICS_ENABLED=true" in environment, (
+        "Grafana metrics must be enabled so the monitoring stack can self-monitor."
+    )
 
 
 def test_slo_alert_contract_matches_shipped_prometheus_rules() -> None:
@@ -188,6 +221,29 @@ def test_runtime_and_provider_rules_are_fleet_wide_not_chembl_specific() -> None
     )
 
 
+def test_monitoring_stack_alerts_reference_up_metric_and_checklist_runbook() -> None:
+    payload = _load_rules()
+    rule_map = _build_rule_map(payload)
+
+    expected = {
+        "BioETLMetricsEndpointUnavailable": "2m",
+        "BioETLMetricsEndpointScrapeMissing": "1m",
+        "BioETLPrometheusUnavailable": "2m",
+        "BioETLGrafanaUnavailable": "2m",
+        "BioETLPushgatewayUnavailable": "5m",
+    }
+
+    for alert_name, expected_for in expected.items():
+        rule = rule_map[alert_name]
+        expr = rule.get("expr", "")
+        annotations = rule.get("annotations", {})
+        assert "up" in expr
+        assert rule.get("for") == expected_for
+        assert annotations.get("runbook") == (
+            "docs/05-operations/runbooks/observability-checklist.md"
+        )
+
+
 def test_pipeline_runtime_alerts_reference_expected_metrics() -> None:
     payload = _load_rules()
     rule_map = _build_rule_map(payload)
@@ -204,6 +260,14 @@ def test_pipeline_runtime_alerts_reference_expected_metrics() -> None:
         "BioETLPipelineRunFailed": (
             "bioetl_pipeline_runs_total",
             "docs/05-operations/runbooks/pipeline-failure-critical.md",
+        ),
+        "BioETLNoRecordsProcessed": (
+            "bioetl_records_processed_total",
+            "docs/05-operations/runbooks/pipeline-failure-critical.md",
+        ),
+        "BioETLMemoryPressureActive": (
+            "bioetl_memory_pressure_state",
+            "docs/05-operations/runbooks/observability-checklist.md",
         ),
     }
 
@@ -233,6 +297,30 @@ def test_control_plane_traceability_alerts_reference_expected_metrics() -> None:
         ),
         "BioETLCheckpointCompatibilityBlocked": (
             "bioetl_checkpoint_compatibility_events_total",
+            "docs/05-operations/runbooks/checkpoint-debugging.md",
+        ),
+        "BioETLCheckpointLoadFailed": (
+            "bioetl_checkpoint_load_events_total",
+            "docs/05-operations/runbooks/checkpoint-debugging.md",
+        ),
+        "BioETLCheckpointSaveFailed": (
+            "bioetl_checkpoint_save_events_total",
+            "docs/05-operations/runbooks/checkpoint-debugging.md",
+        ),
+        "BioETLCheckpointOperatorFailed": (
+            "bioetl_checkpoint_operator_operations_total",
+            "docs/05-operations/runbooks/checkpoint-debugging.md",
+        ),
+        "BioETLCheckpointSaveLatencyHigh": (
+            "bioetl_checkpoint_save_duration_seconds",
+            "docs/05-operations/runbooks/checkpoint-debugging.md",
+        ),
+        "BioETLCheckpointOperatorLatencyHigh": (
+            "bioetl_checkpoint_operator_duration_seconds",
+            "docs/05-operations/runbooks/checkpoint-debugging.md",
+        ),
+        "BioETLReplayNotReconstructable": (
+            "bioetl_replay_reconstructability_events_total",
             "docs/05-operations/runbooks/checkpoint-debugging.md",
         ),
         "BioETLLineageFragmentPersistenceFailed": (
@@ -281,6 +369,10 @@ def test_dq_and_provider_alerts_reference_expected_metrics() -> None:
             "bioetl_dq_validation_failures_total",
             "docs/05-operations/runbooks/dq-failure-investigation.md",
         ),
+        "BioETLGoldValidationFailuresCritical": (
+            "bioetl_dq_validation_failures_total",
+            "docs/05-operations/runbooks/dq-failure-investigation.md",
+        ),
         "BioETLDQCriticalAnomaliesDetected": (
             "bioetl_dq_anomaly_detected",
             "docs/05-operations/runbooks/dq-failure-investigation.md",
@@ -313,6 +405,10 @@ def test_dq_and_provider_alerts_reference_expected_metrics() -> None:
             "bioetl_data_source_retry_exhausted_total",
             "docs/05-operations/runbooks/incident-response.md",
         ),
+        "BioETLCircuitBreakerStuckOpen": (
+            "bioetl_circuit_breaker_state",
+            "docs/05-operations/runbooks/incident-response.md",
+        ),
     }
 
     missing = [name for name in expected if name not in rule_map]
@@ -331,8 +427,16 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
     rule_map = _build_rule_map(payload)
 
     expected_labels = {
+        "BioETLMetricsEndpointUnavailable": "critical",
+        "BioETLMetricsEndpointScrapeMissing": "critical",
+        "BioETLPrometheusUnavailable": "critical",
+        "BioETLGrafanaUnavailable": "critical",
+        "BioETLPushgatewayUnavailable": "warning",
+        "BioETLNoRecordsProcessed": "warning",
+        "BioETLMemoryPressureActive": "warning",
         "BioETLDQQuarantineRateHigh": "warning",
         "BioETLDQQuarantineRateCritical": "critical",
+        "BioETLGoldValidationFailuresCritical": "critical",
         "BioETLDataFreshnessLagHigh": "warning",
         "BioETLDataFreshnessLagCritical": "critical",
         "BioETLPipelinePreflightDataSourceFailed": "critical",
@@ -342,11 +446,41 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
         "BioETLProviderFailureRateHigh": "warning",
         "BioETLProviderRetriesExhausted": "warning",
         "BioETLProviderRetriesExhaustedPersistent": "critical",
+        "BioETLCircuitBreakerStuckOpen": "warning",
+        "BioETLCheckpointLoadFailed": "warning",
+        "BioETLCheckpointSaveFailed": "warning",
+        "BioETLCheckpointOperatorFailed": "warning",
+        "BioETLCheckpointSaveLatencyHigh": "warning",
+        "BioETLCheckpointOperatorLatencyHigh": "warning",
+        "BioETLReplayNotReconstructable": "critical",
         "BioETLControlPlaneReadFailureRate": "warning",
     }
     expected_expr_fragments = {
+        "BioETLMetricsEndpointUnavailable": ['up{job="bioetl"}', "== 0"],
+        "BioETLMetricsEndpointScrapeMissing": ['up{job="bioetl"}', "absent_over_time"],
+        "BioETLPrometheusUnavailable": ['up{job="prometheus"}', "== 0"],
+        "BioETLGrafanaUnavailable": ['up{job="grafana"}', "== 0"],
+        "BioETLPushgatewayUnavailable": ['up{job="pushgateway"}', "== 0"],
+        "BioETLNoRecordsProcessed": [
+            "bioetl_pipeline_runs_total",
+            "bioetl_records_processed_total",
+            "unless on (pipeline, run_type)",
+            "[30m]",
+        ],
+        "BioETLMemoryPressureActive": [
+            "bioetl_memory_pressure_state",
+            "max_over_time",
+            "[15m]",
+            "> 0",
+        ],
         "BioETLDQQuarantineRateHigh": ["> 0.05", "<= 0.2", ">= 20", "[30m]"],
         "BioETLDQQuarantineRateCritical": ["> 0.2", ">= 20", "[15m]"],
+        "BioETLGoldValidationFailuresCritical": [
+            'stage="gold"',
+            'severity="hard_fail"',
+            "[15m]",
+            "> 0",
+        ],
         "BioETLDataFreshnessLagHigh": [
             "clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds), 0)",
             "> 86400",
@@ -387,6 +521,48 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
         ],
         "BioETLProviderRetriesExhausted": ["> 0", "< 3", "[1h]"],
         "BioETLProviderRetriesExhaustedPersistent": [">= 3", "[1h]"],
+        "BioETLCircuitBreakerStuckOpen": [
+            "bioetl_circuit_breaker_state",
+            "max_over_time",
+            "[15m]",
+            ">= 2",
+        ],
+        "BioETLCheckpointLoadFailed": [
+            "bioetl_checkpoint_load_events_total",
+            'status="failed"',
+            "[15m]",
+            "> 0",
+        ],
+        "BioETLCheckpointSaveFailed": [
+            "bioetl_checkpoint_save_events_total",
+            'status="failed"',
+            "[15m]",
+            "> 0",
+        ],
+        "BioETLCheckpointOperatorFailed": [
+            "bioetl_checkpoint_operator_operations_total",
+            'status="failed"',
+            "[15m]",
+            "> 0",
+        ],
+        "BioETLCheckpointSaveLatencyHigh": [
+            "bioetl_checkpoint_save_duration_seconds_bucket",
+            "histogram_quantile",
+            "[30m]",
+            "> 1",
+        ],
+        "BioETLCheckpointOperatorLatencyHigh": [
+            "bioetl_checkpoint_operator_duration_seconds_bucket",
+            "histogram_quantile",
+            "[30m]",
+            "> 1",
+        ],
+        "BioETLReplayNotReconstructable": [
+            "bioetl_replay_reconstructability_events_total",
+            'status="not_reconstructable"',
+            "[30m]",
+            "> 0",
+        ],
         "BioETLControlPlaneReadFailureRate": [
             "bioetl_control_plane_reads_total",
             "increase",
@@ -398,8 +574,16 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
         ],
     }
     expected_for = {
+        "BioETLMetricsEndpointUnavailable": "2m",
+        "BioETLMetricsEndpointScrapeMissing": "1m",
+        "BioETLPrometheusUnavailable": "2m",
+        "BioETLGrafanaUnavailable": "2m",
+        "BioETLPushgatewayUnavailable": "5m",
+        "BioETLNoRecordsProcessed": "10m",
+        "BioETLMemoryPressureActive": "10m",
         "BioETLDQQuarantineRateHigh": "10m",
         "BioETLDQQuarantineRateCritical": "5m",
+        "BioETLGoldValidationFailuresCritical": "2m",
         "BioETLDataFreshnessLagHigh": "15m",
         "BioETLDataFreshnessLagCritical": "15m",
         "BioETLPipelinePreflightDataSourceFailed": "2m",
@@ -409,6 +593,13 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
         "BioETLProviderFailureRateHigh": "5m",
         "BioETLProviderRetriesExhausted": "5m",
         "BioETLProviderRetriesExhaustedPersistent": "10m",
+        "BioETLCircuitBreakerStuckOpen": "10m",
+        "BioETLCheckpointLoadFailed": "5m",
+        "BioETLCheckpointSaveFailed": "5m",
+        "BioETLCheckpointOperatorFailed": "5m",
+        "BioETLCheckpointSaveLatencyHigh": "15m",
+        "BioETLCheckpointOperatorLatencyHigh": "15m",
+        "BioETLReplayNotReconstructable": "5m",
         "BioETLControlPlaneReadFailureRate": "15m",
     }
 

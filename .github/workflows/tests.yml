@@ -171,6 +171,13 @@ jobs:
             -   name: Observability metric inventory drift gate
                 run: uv run python -m scripts.engineering.qa report-observability-metric-inventory --check --json
 
+            -   name: Prometheus rules syntax + promtool test vectors
+                run: |
+                    docker run --rm -v "$PWD:/workspace" -w /workspace prom/prometheus:v2.54.1 \
+                      promtool check rules grafana/prometheus-rules/bioetl_observability.yml
+                    docker run --rm -v "$PWD:/workspace" -w /workspace prom/prometheus:v2.54.1 \
+                      promtool test rules grafana/prometheus-rules/tests/bioetl_observability.test.yml
+
             -   name: "Quality ratchet (fail-fast: domain)"
                 run: |
                     uv run pytest \

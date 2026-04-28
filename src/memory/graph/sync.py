@@ -3121,9 +3121,18 @@ def _dataframe_model_class_names(path: Path) -> list[str]:
     for node in tree.body:
         if not isinstance(node, ast.ClassDef):
             continue
-        if any(_is_dataframe_model_base(base) for base in node.bases):
+        if _looks_like_dataframe_model_class(node):
             class_names.append(node.name)
     return class_names
+
+
+def _looks_like_dataframe_model_class(node: ast.ClassDef) -> bool:
+    """Return True when a class likely represents a Pandera DataFrameModel schema."""
+    if any(_is_dataframe_model_base(base) for base in node.bases):
+        return True
+    if not node.name.endswith("Schema"):
+        return False
+    return any(isinstance(child, ast.AnnAssign) for child in node.body)
 
 
 def _imported_symbols(path: Path) -> list[tuple[str, str, str]]:

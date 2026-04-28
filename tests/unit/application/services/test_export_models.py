@@ -55,6 +55,11 @@ class TestExportOptionsAndTableModels:
         assert options.output_path is None
         assert options.limit is None
         assert options.columns is None
+        assert options.include_manifests is True
+        assert options.manifest_strict is False
+        assert options.manifest_generated_at is None
+        assert options.run_ids == ()
+        assert options.code_revision is None
 
     def test_preview_and_table_info_preserve_payload(self) -> None:
         preview = TablePreview(

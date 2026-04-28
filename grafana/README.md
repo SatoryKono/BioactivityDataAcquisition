@@ -127,11 +127,11 @@ ______________________________________________________________________
 
 Observability-подсистема BioETL следует принципам Hexagonal Architecture (ADR-017):
 
-- **MetricsPort** (Protocol) определён в domain-слое (`src/bioetl/domain/ports/observability.py`). Это контракт, не знающий о конкретной реализации. MetricsPort предоставляет три метода: `observe_histogram()`, `increment_counter()`, `set_gauge()`.
+- **MetricsPort** (Protocol) определён в domain-слое (`src/bioetl/domain/ports/observability/metrics.py`). Это canonical package-based контракт, не знающий о конкретной реализации. MetricsPort предоставляет методы `observe_histogram()`, `increment_counter()`, `set_gauge()` и `close()`.
 
 - **PrometheusMetrics** (Adapter) реализует MetricsPort в infrastructure-слое (`src/bioetl/infrastructure/observability/prometheus_metrics.py`). Использует библиотеку `prometheus_client` для создания и экспорта метрик.
 
-- **NoOpMetrics** — Null Object реализация MetricsPort (`src/bioetl/infrastructure/observability/noop_metrics.py`). Используется когда метрики отключены (`BIOETL_METRICS_ENABLED=false`). Все вызовы становятся no-op без каких-либо побочных эффектов.
+- **NoOpMetrics** — Null Object реализация MetricsPort (`src/bioetl/domain/ports/noop.py`). Используется когда метрики отключены (`BIOETL_METRICS_ENABLED=false`). Все вызовы становятся no-op без каких-либо побочных эффектов.
 
 - **Composition Root** собирает зависимости в `src/bioetl/composition/bootstrap/runtime/observability.py`. Функция `bootstrap_metrics_port(settings)` создаёт PrometheusMetrics или NoOpMetrics в зависимости от настроек. Функция `maybe_start_metrics_server(settings)` запускает HTTP-сервер для экспорта метрик.
 
@@ -166,13 +166,14 @@ grafana/
 docker-compose.monitoring.yml          # Docker Compose для стека мониторинга
 
 src/bioetl/
-├── domain/ports/observability.py      # MetricsPort, TracingPort, LoggerPort (Protocols)
+├── domain/ports/observability/        # MetricsPort, TracingPort, LoggerPort, DQMonitorPort (Protocols)
 └── infrastructure/observability/
-    ├── metrics.py                     # Определения всех Prometheus метрик (Counter, Histogram, Gauge)
+    ├── metrics.py                     # Runtime-export surface for Prometheus metric objects
+    ├── metrics_definitions.py         # Canonical grouped metric definitions
+    ├── prometheus_metric_registries.py # COUNTERS/GAUGES/HISTOGRAMS + registry inventory
     ├── prometheus_metrics.py          # PrometheusMetrics adapter (реализация MetricsPort)
     ├── server.py                      # HTTP-сервер для /metrics endpoint
-    ├── noop_metrics.py                # NoOpMetrics (Null Object)
-    └── anomaly.py                     # DataQualityMonitor (реализация DQMonitorPort)
+    └── anomaly/                       # DataQualityMonitor implementation family
 ```
 
 ______________________________________________________________________
@@ -181,7 +182,7 @@ ______________________________________________________________________
 
 ### 2.1 Шаг 1: Определение метрик в коде
 
-Все метрики определены как глобальные объекты `prometheus_client` в файле `src/bioetl/infrastructure/observability/metrics.py`. Каждая метрика имеет:
+Шипуемые метрики определяются в `src/bioetl/infrastructure/observability/metrics_definitions.py` и собираются в registry-backed inventory через `src/bioetl/infrastructure/observability/prometheus_metric_registries.py`. Модуль `src/bioetl/infrastructure/observability/metrics.py` остаётся runtime-export surface для готовых Prometheus objects. Каждая метрика имеет:
 
 - **Имя** (с префиксом `bioetl_`) — глобально уникальный идентификатор в формате Prometheus.
 - **Описание** — человекочитаемое описание метрики.
@@ -861,17 +862,19 @@ ______________________________________________________________________
 | 3   | Unstructured Logs              | Stat       | Loki \`count_over_time(...                                                                                        | json                                                                                                                                                                                                                                                                                              |
 | 4   | DQ Alert Conditions            | Stat       | Prometheus                                                                                                        | Суммарный triage-signal по shipped DQ alert families, привязанный к тем же fixed windows, что и rule pack (`15m`/`30m`).                                                                                                                                                                          |
 | 5   | Control-plane Alert Conditions | Stat       | Prometheus                                                                                                        | Failures по manifest writes, ledger appends, checkpoint incompatibility и missing lineage refs, привязанные к shipped alert windows (`15m`/`30m`).                                                                                                                                                |
-| 6   | Provider Alert Conditions      | Stat       | Prometheus                                                                                                        | Provider failure-rate и retry-exhaustion conditions, привязанные к shipped alert windows (`15m` и `1h`).                                                                                                                                                                                          |
+| 6   | Provider Alert Conditions      | Stat       | Prometheus                                                                                                        | Fleet-wide provider failure-rate и retry-exhaustion conditions, привязанные к shipped alert windows (`15m` и `1h`). Панель не фильтрует provider-only recording rules по `pipeline`.                                                                                                           |
 | 7   | Freshness Alert Conditions     | Stat       | Prometheus                                                                                                        | Количество freshness conditions старше 24h.                                                                                                                                                                                                                                                       |
 | 8   | Top Warning Events             | Bar gauge  | Loki                                                                                                              | Наиболее частые warning events за текущее временное окно Grafana.                                                                                                                                                                                                                                 |
 | 9   | Log Hygiene Trend              | Timeseries | Loki                                                                                                              | Тренд warnings против unstructured rows с adaptive bucket size через `$__interval`.                                                                                                                                                                                                               |
-| 18  | Memory Pressure Events         | Stat       | `round(sum(increase(bioetl_memory_pressure_events_total{pipeline=~"$pipeline"}[$__range])) or vector(0))`         | Количество adaptive-memory решений, которые реально увидели pressure внутри выбранного окна.                                                                                                                                                                                                      |
+| 18  | Memory Pressure Events         | Stat       | `round(sum(increase(bioetl_memory_pressure_events_total{pipeline=~"$pipeline",stage=~"$stage"}[$__range])) or vector(0))` | Количество adaptive-memory решений, которые реально увидели pressure внутри выбранного окна; panel уважает first-class `$stage` drill-down.                                                                                                                                                     |
 | 19  | Batch Resize Events            | Stat       | `round(sum(increase(bioetl_memory_batch_resize_events_total{pipeline=~"$pipeline"}[$__range])) or vector(0))`     | Сколько раз runtime менял batch size из-за pressure или recovery-шага.                                                                                                                                                                                                                            |
 | 20  | Fallback Monitor Decisions     | Stat       | `round(sum(increase(bioetl_memory_monitor_fallback_events_total{pipeline=~"$pipeline"}[$__range])) or vector(0))` | Сигнал, что memory decisions шли через bounded fallback monitor modes (`resource`, `estimate`, `unknown`), а не по основному psutil path.                                                                                                                                                         |
-| 21  | Memory Pressure Active         | Stat       | `max(max_over_time(bioetl_memory_pressure_state{pipeline=~"$pipeline"}[$__range])) or vector(0)`                  | Быстрый бинарный индикатор, был ли pressure хотя бы раз за выбранный диапазон.                                                                                                                                                                                                                    |
+| 21  | Memory Pressure Active         | Stat       | `max(max_over_time(bioetl_memory_pressure_state{pipeline=~"$pipeline",stage=~"$stage"}[$__range])) or vector(0)` | Быстрый бинарный индикатор, был ли pressure хотя бы раз за выбранный диапазон, с stage drill-down.                                                                                                                                                                                               |
 | 17  | Silver Filter Rejects          | Stat       | `round(sum(last_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`      | Быстрый triage-signal внутри текущего временного окна, который помогает отличить intentional Silver exclusions от DQ/schema проблем без fractional sparse-counter artefacts. Panel description направляет в `4. Data Quality` для bounded cause breakdown и в quarantine CLI для exact drilldown. |
 
-**Фильтрация:** `$pipeline`, `$run_type`.
+Дополнительно runtime dashboard теперь включает operator-facing stack-health panels (`Metrics Endpoint Up`, `Prometheus Up`, `Grafana Up`, `Pushgateway Up`) и bounded replay signal `Replay Not Reconstructable`.
+
+**Фильтрация:** `$pipeline`, `$run_type`, `$stage`.
 
 **Drilldown:** dashboard links `Back to Overview`, `Control Plane v1`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)` и
 `Explore Traces (Tempo, tracing profile)` плюс data links у `Log Hygiene Trend` ведут в
@@ -1134,7 +1137,7 @@ Prometheus выбран по следующим причинам:
 - **Взаимозаменяемость:** Можно переключиться на StatsD, CloudWatch или любой другой бэкенд без изменения application-кода.
 - **Соблюдение ARCH-001:** Domain и Application слои не зависят от infrastructure-библиотек.
 
-Определение MetricsPort в `src/bioetl/domain/ports/observability.py`:
+Определение MetricsPort в `src/bioetl/domain/ports/observability/metrics.py`:
 
 ```python
 @runtime_checkable
@@ -1582,16 +1585,16 @@ v1 дашборды оптимизированы для историческог
 
 ### Как добавить новую метрику?
 
-1. Определите метрику в `src/bioetl/infrastructure/observability/metrics.py`:
+1. Определите метрику в `src/bioetl/infrastructure/observability/metrics_definitions.py`:
    ```python
    MY_NEW_METRIC = Counter("bioetl_my_new_metric", "Description", ["label1", "label2"])
    ```
-1. Добавьте в словарь `COUNTERS`, `HISTOGRAMS` или `GAUGES` в `prometheus_metrics.py`.
+1. Зарегистрируйте её в `src/bioetl/infrastructure/observability/prometheus_metric_registries.py`.
 1. Вызывайте через MetricsPort в application-коде:
    ```python
    self._metrics.increment_counter("my_new_metric", value=1, labels={"label1": "val"})
    ```
-1. Добавьте панель в JSON-дашборд или через Grafana UI.
+1. Добавьте panel/rule consumers в shipped JSON/YAML surfaces и обновите promtool/python tests.
 
 ### Как метрики переживают перезапуск приложения?
 
@@ -1815,10 +1818,10 @@ RECORDS_PROCESSED_TOTAL = Counter(
 Класс `PrometheusMetrics` реализует `MetricsPort` и содержит три словаря (`COUNTERS`, `HISTOGRAMS`, `GAUGES`), маппящие строковые имена на объекты метрик. Это позволяет application-коду обращаться к метрикам по строковому имени, не импортируя infrastructure-модули:
 
 ```python
-# prometheus_metrics.py
+# prometheus_metric_registries.py
 COUNTERS = {
-    "records_processed_total": RECORDS_PROCESSED_TOTAL,
-    "errors_total": ERRORS_TOTAL,
+    "bioetl_records_processed_total": RECORDS_PROCESSED_TOTAL,
+    "bioetl_errors_total": ERRORS_TOTAL,
     # ...
 }
 
