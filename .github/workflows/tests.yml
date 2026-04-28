@@ -168,6 +168,9 @@ jobs:
             -   name: DQ consistency validation (fail-fast)
                 run: uv run python scripts/engineering/qa/validate_dq_consistency.py
 
+            -   name: Observability metric inventory drift gate
+                run: uv run python -m scripts.engineering.qa report-observability-metric-inventory --check --json
+
             -   name: "Quality ratchet (fail-fast: domain)"
                 run: |
                     uv run pytest \

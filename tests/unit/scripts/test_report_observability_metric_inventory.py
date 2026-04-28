@@ -66,6 +66,7 @@ def test_collect_metric_inventory_classifies_registry_runtime_and_docs(
         "bioetl_doc_only_total",
         "bioetl_rule_only_total",
     ]
+    assert report["runtime_without_registry"] == []
     assert report["registry_only_metrics"] == [
         "bioetl_doc_only_total",
         "bioetl_rule_only_total",
@@ -135,6 +136,7 @@ def test_collect_metric_inventory_detects_keyword_metric_name_emitters(
         "bioetl_circuit_breaker_trips_total"
     ]
     assert report["registered_without_runtime"] == []
+    assert report["runtime_without_registry"] == []
     runtime_emitters = report["runtime_emitters"]
     assert isinstance(runtime_emitters, dict)
     assert runtime_emitters == {}
@@ -191,9 +193,125 @@ def test_collect_metric_inventory_tracks_helper_backed_emitters(
     assert report["direct_live_metrics"] == ["bioetl_direct_live_total"]
     assert report["helper_backed_live_metrics"] == ["bioetl_helper_live_total"]
     assert report["registered_without_runtime"] == ["bioetl_dead_metric_total"]
+    assert report["runtime_without_registry"] == []
     assert report["dead_metrics"] == []
     helper_emitters = report["helper_backed_emitters"]
     assert isinstance(helper_emitters, dict)
     assert helper_emitters["bioetl_helper_live_total"] == [
         "src/bioetl/application/emitters.py"
     ]
+
+
+def test_collect_metric_inventory_detects_runtime_metric_without_registry(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset({"bioetl_registered_total"}),
+    )
+
+    runtime_dir = tmp_path / "src" / "bioetl" / "application"
+    runtime_dir.mkdir(parents=True)
+    (runtime_dir / "emitters.py").write_text(
+        "\n".join(
+            [
+                'metrics.increment_counter("bioetl_registered_total", labels={})',
+                'metrics.increment_counter("bioetl_unregistered_total", labels={})',
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert report["live_metrics"] == ["bioetl_registered_total"]
+    assert report["runtime_without_registry"] == ["bioetl_unregistered_total"]
+
+
+def test_validate_metric_inventory_reports_unallowed_drift() -> None:
+    report = {
+        "registered_without_runtime": ["bioetl_allowed_total", "bioetl_dead_total"],
+        "runtime_without_registry": ["bioetl_runtime_gap_total"],
+        "dead_metrics": [],
+        "documented_without_registry": ["bioetl_doc_gap_total"],
+        "rules_without_registry": [],
+    }
+
+    violations = inventory.validate_metric_inventory(
+        report,
+        allowlist={"registered_without_runtime": {"bioetl_allowed_total"}},
+    )
+
+    assert violations == {
+        "documented_without_registry": ["bioetl_doc_gap_total"],
+        "registered_without_runtime": ["bioetl_dead_total"],
+        "runtime_without_registry": ["bioetl_runtime_gap_total"],
+    }
+
+
+def test_main_check_exits_nonzero_for_metric_drift(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "collect_metric_inventory",
+        lambda _repo_root: {
+            "registered_without_runtime": ["bioetl_dead_total"],
+            "runtime_without_registry": [],
+            "dead_metrics": [],
+            "documented_without_registry": [],
+            "rules_without_registry": [],
+        },
+    )
+
+    try:
+        inventory.main(
+            [
+                "--check",
+                "--json",
+                "--repo-root",
+                str(tmp_path),
+                "--allowlist",
+                "missing.yaml",
+            ]
+        )
+    except SystemExit as exc:
+        assert exc.code == 1
+    else:
+        raise AssertionError("metric drift check should fail closed")
+
+
+def test_main_check_allows_explicit_baseline(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "collect_metric_inventory",
+        lambda _repo_root: {
+            "registered_without_runtime": ["bioetl_allowed_total"],
+            "runtime_without_registry": [],
+            "dead_metrics": [],
+            "documented_without_registry": [],
+            "rules_without_registry": [],
+        },
+    )
+    allowlist = tmp_path / "allowlist.yaml"
+    allowlist.write_text(
+        "allowed:\n  registered_without_runtime:\n    - bioetl_allowed_total\n",
+        encoding="utf-8",
+    )
+
+    inventory.main(
+        [
+            "--check",
+            "--json",
+            "--repo-root",
+            str(tmp_path),
+            "--allowlist",
+            str(allowlist),
+        ]
+    )

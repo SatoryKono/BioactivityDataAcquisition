@@ -2,12 +2,6 @@
   "schema_version": "1.0",
   "description": "Lifecycle decisions for non-active scripts (orphan/legacy).",
   "entries": {
-    "scripts/_command_dispatch.py": {
-      "owner": "@bioetl-platform",
-      "decision": "shared_helper_module",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as the shared top-level scripts package command dispatcher for module routers and helper entrypoints; promote it to active inventory once helper modules receive explicit catalog classification."
-    },
     "scripts/engineering/common/cli_dispatch.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
@@ -307,78 +301,6 @@
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a compatibility-era scripts.ai.src mirror for SonarQube MCP smoke checks while historical module paths remain; remove it once callers converge on the canonical scripts/ai/mcp implementation."
-    },
-    "scripts/ai/scripts/ai/mcp/github-mcp-wrapper.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an orphan compatibility copy of the GitHub MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to scripts/ai/mcp/github-mcp-wrapper.sh."
-    },
-    "scripts/ai/scripts/ai/mcp/mcp_brave_search_wrapper.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an orphan compatibility copy of the Brave Search MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
-    },
-    "scripts/ai/scripts/ai/mcp/mcp_context7_wrapper.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an orphan compatibility copy of the Context7 MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
-    },
-    "scripts/ai/scripts/ai/mcp/mcp_docker_docs_wrapper.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an orphan compatibility copy of the Docker Docs MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
-    },
-    "scripts/ai/scripts/ai/mcp/mcp_docker_wrapper.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an orphan compatibility copy of the Docker MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
-    },
-    "scripts/ai/scripts/ai/mcp/mcp_dockerhub_wrapper.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an orphan compatibility copy of the Docker Hub MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
-    },
-    "scripts/ai/scripts/ai/mcp/mcp_grafana_wrapper.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an orphan compatibility copy of the Grafana MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
-    },
-    "scripts/ai/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an orphan compatibility copy of the Neo4j Cypher MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
-    },
-    "scripts/ai/scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an orphan compatibility copy of the Neo4j Memory MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
-    },
-    "scripts/ai/scripts/ai/mcp/mcp_paper_search_wrapper.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an orphan compatibility copy of the Paper Search MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
-    },
-    "scripts/ai/scripts/ai/mcp/mcp_prometheus_wrapper.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an orphan compatibility copy of the Prometheus MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
-    },
-    "scripts/ai/scripts/ai/mcp/mcp_sonarqube_wrapper.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an orphan compatibility copy of the SonarQube MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
     },
     "scripts/engineering/dev/run_s7_stability_waves.sh": {
       "owner": "@bioetl-platform",

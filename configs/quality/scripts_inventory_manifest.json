@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-28T10:03:19.150197+00:00",
+  "generated_at": "2026-04-28T10:49:15.303447+00:00",
   "summary": {
-    "total_scripts": 449,
+    "total_scripts": 436,
     "status_counts": {
       "active": 320,
       "legacy": 15,
-      "orphan": 101,
+      "orphan": 88,
       "unknown": 13
     },
     "reference_group_coverage": {
@@ -20,14 +20,6 @@
     }
   },
   "scripts": [
-    {
-      "path": "scripts/_command_dispatch.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
     {
       "path": "scripts/ai/__main__.py",
       "type": "py",
@@ -2747,102 +2739,6 @@
       ]
     },
     {
-      "path": "scripts/ai/scripts/ai/mcp/github-mcp-wrapper.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/scripts/ai/mcp/mcp_brave_search_wrapper.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/scripts/ai/mcp/mcp_context7_wrapper.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/scripts/ai/mcp/mcp_docker_docs_wrapper.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/scripts/ai/mcp/mcp_docker_wrapper.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/scripts/ai/mcp/mcp_dockerhub_wrapper.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/scripts/ai/mcp/mcp_grafana_wrapper.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/scripts/ai/mcp/mcp_paper_search_wrapper.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/scripts/ai/mcp/mcp_prometheus_wrapper.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/scripts/ai/mcp/mcp_sonarqube_wrapper.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
       "path": "scripts/ai/sonar_issue_processor.py",
       "type": "py",
       "status": "active",
@@ -3227,7 +3123,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 30,
+      "reference_count": 32,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -4728,13 +4624,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 257,
+          "line": 260,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs export-matrix-structural-contract --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 266,
+          "line": 269,
           "source_group": "ci",
           "text": "uv run python -m scripts.docs sync-matrix-structural-policy --check --input \"$workbook\" --output \"$workbook\""
         },
@@ -4882,7 +4778,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 28,
+      "reference_count": 29,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -4921,16 +4817,16 @@
           "text": "python scripts/docs/check_doc_links.py"
         },
         {
+          "path": "docs/03-guides/script-management/script-analysis-prompt.md",
+          "line": 393,
+          "source_group": "docs",
+          "text": "compatibility shims, with `check_doc_links.py` preserved for legacy"
+        },
+        {
           "path": "scripts/docs/README.md",
           "line": 37,
           "source_group": "scripts",
           "text": "The only notable special case is `scripts/docs/check_doc_links.py`: it remains an"
-        },
-        {
-          "path": "scripts/docs/README.md",
-          "line": 150,
-          "source_group": "scripts",
-          "text": "| `scripts/docs/check_doc_links.py`  | Historical special-case shim that preserves the old monkeypatchable module surface for tests   |"
         }
       ]
     },
@@ -5838,7 +5734,7 @@
         },
         {
           "path": "scripts/engineering/baselines/__main__.py",
-          "line": 16,
+          "line": 18,
           "source_group": "scripts",
           "text": "COMMANDS: dict[str, str] = {\"dq-baseline\": \"dq_baseline_update.py\"}"
         }
@@ -5849,7 +5745,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 21,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -5859,7 +5755,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 223,
+          "line": 226,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -6191,11 +6087,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 636,
+          "line": 639,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -6218,28 +6114,22 @@
           "text": "scripts/engineering/ci/run_pytest_resilient.py"
         },
         {
-          "path": "docs/03-guides/script-management/script-analysis-prompt.md",
-          "line": 130,
-          "source_group": "docs",
-          "text": "scripts/engineering/ci/run_pytest_resilient.py"
+          "path": "scripts/engineering/ci/README.md",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "| `run-tests`      | `scripts/engineering/ci/run_pytest_resilient.py`       | Run pytest with resilient retry logic                                       |"
         },
         {
-          "path": "docs/03-guides/script-management/script-analysis-prompt.md",
-          "line": 133,
-          "source_group": "docs",
-          "text": "scripts/engineering/ci/run_pytest_resilient.py"
+          "path": "scripts/engineering/ci/__main__.py",
+          "line": 29,
+          "source_group": "scripts",
+          "text": "\"run-tests\": \"run_pytest_resilient.py\","
         },
         {
-          "path": "docs/03-guides/script-management/script-analysis-prompt.md",
-          "line": 376,
-          "source_group": "docs",
-          "text": "| TR-001   | `run_pytest.sh`, `run_pytest.ps1`, `run_pytest_resilient.py` | `run_pytest_resilient.py` | 2 scripts | Medium     |"
-        },
-        {
-          "path": "docs/03-guides/script-management/script-analysis-prompt.md",
-          "line": 421,
-          "source_group": "docs",
-          "text": "- Standardize on `run_pytest_resilient.py`"
+          "path": "tests/architecture/test_generated_artifact_routing.py",
+          "line": 134,
+          "source_group": "tests",
+          "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\""
         }
       ]
     },
@@ -7106,7 +6996,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 49,
+      "reference_count": 47,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7165,7 +7055,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 60,
+      "reference_count": 58,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7894,7 +7784,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 97,
+      "reference_count": 100,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -8093,7 +7983,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 275,
+          "line": 278,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/check_docs_drift.py"
         }
@@ -8294,7 +8184,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 272,
+          "line": 275,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -8396,7 +8286,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 556,
+          "line": 559,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -8847,7 +8737,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 339,
+          "line": 342,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/validate_dq_consistency.py"
         }
@@ -8931,7 +8821,7 @@
         },
         {
           "path": "scripts/engineering/qa/vcr/__main__.py",
-          "line": 20,
+          "line": 22,
           "source_group": "scripts",
           "text": "\"check-placement\": \"check_root_vcr_cassettes.py\","
         },
@@ -8982,7 +8872,7 @@
         },
         {
           "path": "scripts/engineering/qa/vcr/__main__.py",
-          "line": 21,
+          "line": 23,
           "source_group": "scripts",
           "text": "\"check-naming\": \"check_vcr_filename_policy.py\","
         },
@@ -9033,7 +8923,7 @@
         },
         {
           "path": "scripts/engineering/qa/vcr/__main__.py",
-          "line": 23,
+          "line": 25,
           "source_group": "scripts",
           "text": "\"check-metadata-age\": \"check_vcr_metadata_age.py\","
         },
@@ -9060,7 +8950,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/vcr/__main__.py",
-          "line": 22,
+          "line": 24,
           "source_group": "scripts",
           "text": "\"check-secrets\": \"check_vcr_secrets.py\","
         }
@@ -9961,7 +9851,7 @@
       "references": [
         {
           "path": "scripts/ops/data/__main__.py",
-          "line": 22,
+          "line": 24,
           "source_group": "scripts",
           "text": "\"check-delta\": \"check_delta_integrity.py\","
         }
@@ -9976,7 +9866,7 @@
       "references": [
         {
           "path": "scripts/ops/data/__main__.py",
-          "line": 26,
+          "line": 28,
           "source_group": "scripts",
           "text": "\"report-null-fields\": \"extract_null_fields.py\","
         }
@@ -9991,7 +9881,7 @@
       "references": [
         {
           "path": "scripts/ops/data/__main__.py",
-          "line": 27,
+          "line": 29,
           "source_group": "scripts",
           "text": "\"report-content-hash\": \"generate_content_hash_comparison_report.py\","
         }
@@ -10024,7 +9914,7 @@
         },
         {
           "path": "scripts/ops/data/__main__.py",
-          "line": 24,
+          "line": 26,
           "source_group": "scripts",
           "text": "\"vacuum\": \"vacuum_delta.py\","
         }
@@ -10039,7 +9929,7 @@
       "references": [
         {
           "path": "scripts/ops/data/__main__.py",
-          "line": 23,
+          "line": 25,
           "source_group": "scripts",
           "text": "\"check-data-dir\": \"validate_data_dir.py\","
         }
@@ -10066,7 +9956,7 @@
         },
         {
           "path": "scripts/ops/data/__main__.py",
-          "line": 25,
+          "line": 27,
           "source_group": "scripts",
           "text": "\"checksums\": \"verify_checksums.py\","
         }
@@ -11522,13 +11412,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 251,
+          "line": 254,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema check-required-fields --verbose"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 254,
+          "line": 257,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema audit-optionality --check"
         },
@@ -11585,7 +11475,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 33,
+          "line": 35,
           "source_group": "scripts",
           "text": "\"audit-optionality\": \"audit_effective_optionality.py\","
         }
@@ -11600,7 +11490,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 248,
+          "line": 251,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/check_config_invariants.py"
         },
@@ -11624,7 +11514,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 31,
+          "line": 33,
           "source_group": "scripts",
           "text": "\"check-invariants\": \"check_config_invariants.py\","
         }
@@ -11645,7 +11535,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 32,
+          "line": 34,
           "source_group": "scripts",
           "text": "\"check-required-fields\": \"check_required_filter_fields.py\","
         }
@@ -11696,7 +11586,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 45,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"analyze-gaps\": \"config_gap_analysis.py\","
         }
@@ -11717,7 +11607,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 39,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"generate-config-matrix\": \"generate_config_matrix.py\","
         },
@@ -11780,7 +11670,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 38,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"generate-contracts\": \"generate_contracts.py\","
         },
@@ -11807,7 +11697,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 41,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"generate-field-diagnostics\": \"generate_field_level_diagnostics.py\","
         }
@@ -11828,7 +11718,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 42,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"generate-field-spec\": \"generate_field_transformation_spec.py\","
         }
@@ -11843,7 +11733,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 269,
+          "line": 272,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/generate_pipeline_schema.py --check"
         },
@@ -11855,7 +11745,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 35,
+          "line": 37,
           "source_group": "scripts",
           "text": "\"generate-pipeline\": \"generate_pipeline_schema.py\","
         }
@@ -11876,7 +11766,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 37,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"generate-pubtype\": \"generate_publication_type_classification_artifacts.py\","
         },
@@ -11933,7 +11823,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 36,
+          "line": 38,
           "source_group": "scripts",
           "text": "\"generate-artifacts\": \"generate_schema_artifacts.py\","
         },
@@ -11966,7 +11856,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 40,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"generate-unified-map\": \"generate_unified_schema_map.py\","
         }
@@ -11993,7 +11883,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 34,
+          "line": 36,
           "source_group": "scripts",
           "text": "\"check-config-paths\": \"lint_config_paths.py\","
         }
@@ -12008,7 +11898,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 245,
+          "line": 248,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/validate_pipeline_configs.py"
         },
@@ -12071,7 +11961,7 @@
         },
         {
           "path": "scripts/schema/__main__.py",
-          "line": 44,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"validate-unified-configs\": \"validate_unified_configs.py\","
         }

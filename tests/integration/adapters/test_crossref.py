@@ -6,7 +6,6 @@ See RULES.md §4.2 for VCR requirements.
 
 from __future__ import annotations
 
-import time
 from collections.abc import AsyncIterator
 from unittest.mock import MagicMock
 
@@ -16,12 +15,14 @@ import respx
 from httpx import Response
 
 from bioetl.composition.factories.datasource.crossref import create_crossref_adapter
-from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+from tests.integration.adapters.http_integration_support import (
+    build_mock_logger,
+    managed_http_client,
+    reset_http_client_state,
+)
 
 CROSSREF_API_BASE = "https://api.crossref.org"
 
@@ -29,34 +30,19 @@ CROSSREF_API_BASE = "https://api.crossref.org"
 @pytest.fixture
 def mock_logger() -> MagicMock:
     """Create a mock logger for testing."""
-    return MagicMock()
-
-
-def _reset_http_client_state(client: UnifiedHTTPClient) -> None:
-    """Reset mutable HTTP client state between tests sharing one client."""
-    client.circuit_breaker.reset()
-    rate_limiter = client.rate_limiter
-    if isinstance(rate_limiter, TokenBucketRateLimiter):
-        rate_limiter._tokens = float(rate_limiter.capacity)
-        rate_limiter._last_refill = time.monotonic()
+    return build_mock_logger()
 
 
 @pytest_asyncio.fixture(scope="module", loop_scope="module")
 async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
     """Provide a shared started HTTP client for CrossRef integration tests."""
-    client = UnifiedHTTPClient(
-        TokenBucketRateLimiter(rate=50.0, capacity=100.0),
-        CircuitBreakerGuard(provider="crossref_test"),
-        retry_config=RetryConfig(
-            base_delay=0.0,
-            max_delay=0.0,
-            multiplier=1.0,
-            jitter_range=(0.0, 0.0),
-        ),
-    )
-    await client.__aenter__()
-    yield client
-    await client.__aexit__(None, None, None)
+    async with managed_http_client(
+        provider="crossref",
+        rate=50.0,
+        capacity=100.0,
+        circuit_breaker_provider="crossref_test",
+    ) as client:
+        yield client
 
 
 @pytest.fixture
@@ -64,7 +50,7 @@ def crossref_adapter(
     http_client: UnifiedHTTPClient, mock_logger: MagicMock
 ) -> CrossRefAdapter:
     """Fixture to provide a CrossRefAdapter instance for testing."""
-    _reset_http_client_state(http_client)
+    reset_http_client_state(http_client)
     return create_crossref_adapter(
         http_client=http_client,
         logger=mock_logger,

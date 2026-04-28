@@ -24,10 +24,11 @@ from bioetl.infrastructure.validation.pandera_validator import (
     PanderaSilverValidator,
 )
 from tests.unit.infrastructure.storage.silver_writer._test_support import (
+    assert_standard_silver_write_succeeds,
     make_silver_writer,
     patch_new_silver_write,
     silver_table_path,
-    silver_write_schema,
+    write_standard_silver,
 )
 
 
@@ -64,6 +65,44 @@ def _build_validation_writer(
         logger=logger,
         **writer_kwargs,
     )
+
+
+def _sample_prepare_payload_records() -> list[dict[str, str]]:
+    """Return the canonical minimal record batch for payload preparation tests."""
+    return [
+        {
+            "entity_id": "CHEMBL123",
+            "_run_id": "uuid-123",
+            "_run_type": "incremental",
+            "_source_batch_id": "batch-456",
+            "_ingestion_ts": "2025-01-15T12:00:00Z",
+        }
+    ]
+
+
+def _sample_prepare_payload_schema():
+    """Return the canonical schema used by payload preparation tests."""
+    import pyarrow as pa
+
+    return pa.schema(
+        [
+            pa.field("entity_id", pa.string()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ]
+    )
+
+
+def _sample_prepare_payload_fixture():
+    """Build the repeated records/schema/arrow triple for payload preparation."""
+    import pyarrow as pa
+
+    records = _sample_prepare_payload_records()
+    schema = _sample_prepare_payload_schema()
+    expected_table = pa.Table.from_pylist(records, schema=schema)
+    return records, schema, expected_table
 
 
 @pytest.fixture(autouse=True)
@@ -254,11 +293,9 @@ class TestSilverWriterWriteSilverWithPanderaValidation:
         )
 
         with pytest.raises(SchemaViolationError) as exc_info:
-            await writer.write_silver(
-                table_name="test.table",
+            await write_standard_silver(
+                writer,
                 records=valid_records,
-                primary_keys=["entity_id"],
-                schema=silver_write_schema(),
                 mode="merge",
             )
 
@@ -273,43 +310,27 @@ class TestSilverWriterWriteSilverWithPanderaValidation:
         self, valid_records, noop_logger
     ):
         """Test write_silver proceeds when Pandera validation passes."""
-        with patch_new_silver_write() as mock_write:
-            writer = _build_validation_writer(
-                logger=noop_logger,
-                validator=_build_pandera_validator(min_value=0),
-            )
-            # Should not raise
-            await writer.write_silver(
-                table_name="test.table",
-                records=valid_records,
-                primary_keys=["entity_id"],
-                schema=silver_write_schema(),
-                mode="merge",
-            )
-
-            # Verify write was called (validation passed)
-            mock_write.assert_called_once()
+        writer = _build_validation_writer(
+            logger=noop_logger,
+            validator=_build_pandera_validator(min_value=0),
+        )
+        await assert_standard_silver_write_succeeds(
+            writer,
+            records=valid_records,
+            mode="merge",
+        )
 
     @pytest.mark.asyncio
     async def test_write_silver_noop_validator_allows_write(
         self, valid_records, noop_logger
     ):
         """Test write_silver with NoOp validator allows write without Pandera."""
-        with patch_new_silver_write() as mock_write:
-            # Default NoOp validator
-            writer = make_silver_writer(logger=noop_logger)
-
-            # Should not raise
-            await writer.write_silver(
-                table_name="test.table",
-                records=valid_records,
-                primary_keys=["entity_id"],
-                schema=silver_write_schema(),
-                mode="merge",
-            )
-
-            # Verify write was called
-            mock_write.assert_called_once()
+        writer = make_silver_writer(logger=noop_logger)
+        await assert_standard_silver_write_succeeds(
+            writer,
+            records=valid_records,
+            mode="merge",
+        )
 
 
 @pytest.mark.unit
@@ -319,33 +340,13 @@ class TestSilverWriterPreparePayloadExecutor:
     @pytest.mark.asyncio
     async def test_prepare_payload_uses_to_thread(self, noop_logger) -> None:
         """Sync validation should be offloaded from the event loop."""
-        import pyarrow as pa
-
         from bioetl.infrastructure.storage.silver.validation_mixin import (
             _ValidatedSilverWriteContext,
         )
         from bioetl.domain.medallion import WriteModePolicy
 
         writer = make_silver_writer(logger=noop_logger)
-        records = [
-            {
-                "entity_id": "CHEMBL123",
-                "_run_id": "uuid-123",
-                "_run_type": "incremental",
-                "_source_batch_id": "batch-456",
-                "_ingestion_ts": "2025-01-15T12:00:00Z",
-            }
-        ]
-        schema = pa.schema(
-            [
-                pa.field("entity_id", pa.string()),
-                pa.field("_run_id", pa.string()),
-                pa.field("_run_type", pa.string()),
-                pa.field("_source_batch_id", pa.string()),
-                pa.field("_ingestion_ts", pa.string()),
-            ]
-        )
-        expected_table = pa.Table.from_pylist(records, schema=schema)
+        records, schema, expected_table = _sample_prepare_payload_fixture()
 
         # Create validation operations service with proper mocking
         from bioetl.infrastructure.storage.silver.operations.validation_operations import (
@@ -419,32 +420,12 @@ class TestSilverWriterPreparePayloadExecutor:
         self, noop_logger
     ) -> None:
         """Schema drift check should happen after sync payload building completes."""
-        import pyarrow as pa
-
         from bioetl.infrastructure.storage.silver.validation_mixin import (
             _ValidatedSilverWriteContext,
         )
 
         writer = make_silver_writer(logger=noop_logger)
-        records = [
-            {
-                "entity_id": "CHEMBL123",
-                "_run_id": "uuid-123",
-                "_run_type": "incremental",
-                "_source_batch_id": "batch-456",
-                "_ingestion_ts": "2025-01-15T12:00:00Z",
-            }
-        ]
-        schema = pa.schema(
-            [
-                pa.field("entity_id", pa.string()),
-                pa.field("_run_id", pa.string()),
-                pa.field("_run_type", pa.string()),
-                pa.field("_source_batch_id", pa.string()),
-                pa.field("_ingestion_ts", pa.string()),
-            ]
-        )
-        expected_table = pa.Table.from_pylist(records, schema=schema)
+        records, schema, expected_table = _sample_prepare_payload_fixture()
         call_order: list[str] = []
 
         def sync_stage(
@@ -488,33 +469,13 @@ class TestSilverWriterPreparePayloadExecutor:
         self, noop_logger
     ) -> None:
         """Silver payload preparation should pass one named request into sync stage."""
-        import pyarrow as pa
-
         from bioetl.infrastructure.storage.silver.validation_mixin import (
             _SilverWritePreparationRequest,
             _ValidatedSilverWriteContext,
         )
 
         writer = make_silver_writer(logger=noop_logger)
-        records = [
-            {
-                "entity_id": "CHEMBL123",
-                "_run_id": "uuid-123",
-                "_run_type": "incremental",
-                "_source_batch_id": "batch-456",
-                "_ingestion_ts": "2025-01-15T12:00:00Z",
-            }
-        ]
-        schema = pa.schema(
-            [
-                pa.field("entity_id", pa.string()),
-                pa.field("_run_id", pa.string()),
-                pa.field("_run_type", pa.string()),
-                pa.field("_source_batch_id", pa.string()),
-                pa.field("_ingestion_ts", pa.string()),
-            ]
-        )
-        expected_table = pa.Table.from_pylist(records, schema=schema)
+        records, schema, expected_table = _sample_prepare_payload_fixture()
         captured_request: _SilverWritePreparationRequest | None = None
 
         def sync_stage(

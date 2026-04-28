@@ -78,13 +78,14 @@ def _build_canonical_event_payload(
     timestamp: datetime,
 ) -> JsonDict:
     raw_event_data = dict(event_data or {})
-    raw_event_data.setdefault(
+    canonical_context = dict(raw_event_data)
+    canonical_context.setdefault(
         "event",
         _AUDIT_EVENT_NAME_TO_CANONICAL.get(event_name, event_name),
     )
     canonical = build_observability_contract_payload(
         event_name=event_name,
-        context=raw_event_data,
+        context=canonical_context,
         default_provider=_coerce_text(
             raw_event_data.get("provider"), fallback="unknown"
         ),

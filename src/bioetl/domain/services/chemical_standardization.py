@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from bioetl.domain.value_objects import InChIKey, SMILES
+from bioetl.domain.value_objects import SMILES, InChIKey
 
 ChemicalStandardizationStatus = Literal[
     "standardized",
@@ -161,14 +161,13 @@ def _record_parent_deferred_warnings(
     warnings: list[str],
 ) -> None:
     """Record visible warnings for unsupported parent normalization cases."""
-    if covalent_unit_count is not None and covalent_unit_count > 1:
+    if _has_parent_deferred_multi_component_input(
+        covalent_unit_count=covalent_unit_count,
+        standardized_canonical_smiles=standardized_canonical_smiles,
+        standardized_isomeric_smiles=standardized_isomeric_smiles,
+    ):
         warnings.append("multi_component_parent_deferred")
-        return
-    if _has_multi_component_smiles(
-        standardized_canonical_smiles
-    ) or _has_multi_component_smiles(standardized_isomeric_smiles):
-        warnings.append("multi_component_parent_deferred")
-    if charge not in (None, 0):
+    if _has_nonzero_charge(charge):
         warnings.append("charge_normalization_deferred")
 
 
@@ -199,13 +198,44 @@ def _resolve_standardization_status(
     warnings: list[str],
 ) -> ChemicalStandardizationStatus:
     """Resolve the bounded status from raw inputs and normalized outputs."""
-    if not any(not _is_blank(value) for value in raw_values):
+    if not _has_any_raw_structure(raw_values):
         return "missing_structure"
-    if not any(value is not None for value in standardized_values):
+    if not _has_any_standardized_structure(standardized_values):
         return "invalid"
     if warnings:
         return "partial"
     return "standardized"
+
+
+def _has_parent_deferred_multi_component_input(
+    *,
+    covalent_unit_count: int | None,
+    standardized_canonical_smiles: str | None,
+    standardized_isomeric_smiles: str | None,
+) -> bool:
+    """Return whether parent normalization is deferred for multi-component input."""
+    if covalent_unit_count is not None and covalent_unit_count > 1:
+        return True
+    return _has_multi_component_smiles(
+        standardized_canonical_smiles
+    ) or _has_multi_component_smiles(standardized_isomeric_smiles)
+
+
+def _has_nonzero_charge(charge: int | None) -> bool:
+    """Return whether charge normalization remains deferred."""
+    return charge not in (None, 0)
+
+
+def _has_any_raw_structure(raw_values: tuple[object, ...]) -> bool:
+    """Return whether at least one raw structure input is present."""
+    return any(not _is_blank(value) for value in raw_values)
+
+
+def _has_any_standardized_structure(
+    standardized_values: tuple[str | None, ...],
+) -> bool:
+    """Return whether at least one standardized structure was produced."""
+    return any(value is not None for value in standardized_values)
 
 
 def _is_blank(value: object) -> bool:
