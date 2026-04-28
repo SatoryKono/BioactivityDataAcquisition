@@ -166,7 +166,7 @@ class PipelineMetadata(BaseModel):
         entity: Entity type (e.g., 'activity').
         version: Pipeline/transform version.
         git_commit: Git commit hash for reproducibility.
-        config_hash: Legacy alias for the effective execution config hash.
+        config_hash: Legacy compatibility anchor for the resolved config hash.
         resolved_config_hash: SHA256 hash of resolved declarative config.
         effective_config_hash: SHA256 hash of final effective execution config.
     """
@@ -178,7 +178,10 @@ class PipelineMetadata(BaseModel):
     git_commit: str | None = Field(default=None, description="Git commit hash")
     config_hash: str | None = Field(
         default=None,
-        description="Legacy alias for the canonical effective execution config hash",
+        description=(
+            "Legacy compatibility anchor for resolved_config_hash; new consumers "
+            "must read resolved_config_hash/effective_config_hash explicitly"
+        ),
     )
     resolved_config_hash: str | None = Field(
         default=None,

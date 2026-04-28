@@ -9,9 +9,12 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.runtime_builders.inputs_resolver import (
     RunnerInputs as _RunnerInputs,
 )
+from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+    STRICT_PERSISTENCE_PROFILES,
+    normalize_required_persistence_profile,
+)
 
-_DEFAULT_REQUIRED_PERSISTENCE_PROFILE = "degraded_observable"
-_PERSISTENCE_PROFILE_REQUIREMENTS = {"replay_ready", "forensic_grade"}
 _PERSISTENCE_PROFILE_ACTIVE_LAYERS = ("bronze", "silver", "gold")
 
 
@@ -20,12 +23,7 @@ class _LoggerBindableObservability(Protocol):
 
 
 def _normalize_required_persistence_profile(required_profile: object) -> str:
-    profile = (
-        str(required_profile).strip()
-        if required_profile is not None
-        else _DEFAULT_REQUIRED_PERSISTENCE_PROFILE
-    )
-    return profile or _DEFAULT_REQUIRED_PERSISTENCE_PROFILE
+    return normalize_required_persistence_profile(required_profile)
 
 
 def _coerce_sink_layer_mapping(yaml_config: object) -> Mapping[str, object]:
@@ -86,14 +84,14 @@ def validate_required_persistence_profile(
 ) -> None:
     """Fail closed when static control-plane flags cannot satisfy required profile."""
     profile = _normalize_required_persistence_profile(required_profile)
-    if profile in _PERSISTENCE_PROFILE_REQUIREMENTS and not manifest_enabled:
+    if profile in STRICT_PERSISTENCE_PROFILES and not manifest_enabled:
         raise RuntimeError(
             f"{execution_label} requires run manifests for required persistence "
             f"profile '{profile}'; set "
             "pipeline.control_plane.run_manifest_enabled=true"
         )
     if (
-        profile in _PERSISTENCE_PROFILE_REQUIREMENTS
+        profile in STRICT_PERSISTENCE_PROFILES
         and not exact_replay_execution_context_supported
     ):
         raise RuntimeError(
@@ -131,7 +129,7 @@ def resolve_control_plane_flags(
     required_profile = getattr(
         control_plane,
         "required_persistence_profile",
-        "degraded_observable",
+        DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
     )
     if not manifest_enabled:
         raise RuntimeError(

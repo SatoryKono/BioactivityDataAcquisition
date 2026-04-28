@@ -493,6 +493,7 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Lineage Refs Missing": "or vector(0)",
             "Composite Source Selections": "or vector(0)",
             "Silver Filter Rejects": "or vector(0)",
+            "Pipeline Error Rate": "or vector(0)",
         },
         "bioetl-runtime.json": {
             "Warnings": "or vector(0)",
@@ -503,6 +504,7 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Provider Alert Conditions": "or vector(0)",
             "Freshness Alert Conditions": "or vector(0)",
             "Trace-enabled Runs": "or vector(0)",
+            "Pipeline Errors": "or vector(0)",
             "Silver Filter Rejects": "or vector(0)",
             "Metrics Endpoint Up": "or vector(0)",
             "Prometheus Up": "or vector(0)",
@@ -608,6 +610,7 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             "Control-plane Alert Conditions": "bioetl_runtime_alert_condition_manifest_write_failed_15m",
             "Provider Alert Conditions": "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
             "Trace-enabled Runs": "round(",
+            "Pipeline Errors": "round(",
             "Silver Filter Rejects": "round(",
             "Shutdown Initiated by Reason": "round(",
             "Shutdown Completed by Reason": "round(",
@@ -955,6 +958,7 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
     all_expressions = "\n".join(get_panel_expressions(dashboard))
 
     required_metrics = [
+        "bioetl_errors_total",
         "bioetl_records_processed_total",
         "bioetl_memory_pressure_events_total",
         "bioetl_memory_batch_resize_events_total",
@@ -968,6 +972,7 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
         "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
         "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m",
         "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
+        "bioetl_runtime_alert_condition_runtime_error_rate_high_30m",
         "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
         "bioetl_runtime_alert_condition_dq_hard_fail_15m",
         "bioetl_runtime_alert_condition_dq_critical_anomaly_30m",
@@ -1130,6 +1135,61 @@ def test_silver_filter_reject_rate_uses_selected_time_range() -> None:
     )
 
 
+def test_pipeline_error_rate_uses_runtime_error_metric_and_selected_time_range() -> None:
+    """Pipeline error rate must use bounded runtime errors over the active range."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Pipeline Error Rate"
+        ),
+        None,
+    )
+    assert panel is not None, "Panel 'Pipeline Error Rate' not found"
+
+    expressions = [
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    ]
+    assert any("bioetl_errors_total" in expr for expr in expressions), (
+        "Pipeline Error Rate must use bioetl_errors_total"
+    )
+    assert any('stage="bronze"' in expr for expr in expressions), (
+        "Pipeline Error Rate must normalize against bronze-stage processed volume"
+    )
+    assert any("[$__range]" in expr for expr in expressions), (
+        "Pipeline Error Rate must use the selected Grafana time range"
+    )
+
+
+def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_time_range() -> None:
+    """Runtime Pipeline Errors must use shipped runtime errors over the active range."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Pipeline Errors"
+        ),
+        None,
+    )
+    assert panel is not None, "Panel 'Pipeline Errors' not found"
+
+    expressions = [
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    ]
+    assert any("bioetl_errors_total" in expr for expr in expressions), (
+        "Pipeline Errors must use bioetl_errors_total"
+    )
+    assert any("[$__range]" in expr for expr in expressions), (
+        "Pipeline Errors must use the selected Grafana time range"
+    )
+
+
 @pytest.mark.parametrize(
     ("panel_title", "label_name"),
     [
@@ -1267,6 +1327,7 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
         ("bioetl-overview-v2.json", "Composite Source Selections"),
         ("bioetl-overview-v2.json", "Global Control-plane Lookup Failures"),
         ("bioetl-overview-v2.json", "Global Control-plane Lookup p95"),
+        ("bioetl-overview-v2.json", "Pipeline Error Rate"),
         ("bioetl-dq-v2.json", "Records Quarantined"),
         ("bioetl-dq-v2.json", "Soft Threshold Exceeded"),
         ("bioetl-dq-v2.json", "Quarantine by Error Type"),
@@ -1277,6 +1338,7 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
         ("bioetl-runtime.json", "DQ Context Failures"),
         ("bioetl-runtime.json", "DQ Reports Skipped"),
         ("bioetl-runtime.json", "DQ Reports Generated"),
+        ("bioetl-runtime.json", "Pipeline Errors"),
         ("bioetl-runtime.json", "Memory Pressure Events"),
         ("bioetl-runtime.json", "Batch Resize Events"),
         ("bioetl-runtime.json", "Fallback Monitor Decisions"),
@@ -1320,6 +1382,7 @@ def test_range_aware_summary_panels_use_selected_time_range(
                 "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
                 "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m",
                 "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
+                "bioetl_runtime_alert_condition_runtime_error_rate_high_30m",
             ],
         ),
         (

@@ -16,6 +16,7 @@ from bioetl.domain.control_plane.effective_config_artifact import (
     DQPolicySnapshot,
     EffectiveConfigArtifact,
     EffectiveExecutionConfig,
+    ExecutionEnvironmentSnapshot,
     ResolvedConfigSnapshot,
     RuntimeOverrideSnapshot,
     SourceClassProvenance,
@@ -219,6 +220,30 @@ def build_runtime_override_snapshot(
     )
 
 
+def build_execution_environment_snapshot(
+    runtime_overrides: JsonDict,
+) -> ExecutionEnvironmentSnapshot:
+    """Materialize explicit execution-affecting environment overrides."""
+    env_overrides = coerce_runtime_override_layer(runtime_overrides, "env")
+    materialized_env_overrides = {
+        str(key): to_jsonable(value)
+        for key, value in sorted(env_overrides.items(), key=lambda item: str(item[0]))
+    }
+    semantic_dependencies: tuple[str, ...] = ()
+    snapshot_payload = {
+        "materialized_env_overrides": materialized_env_overrides,
+        "non_materialized_semantic_env_dependencies": semantic_dependencies,
+        "ambient_environment_policy": "excluded_unless_explicitly_materialized",
+    }
+    return ExecutionEnvironmentSnapshot(
+        materialized_env_keys=tuple(materialized_env_overrides),
+        materialized_env_overrides=materialized_env_overrides,
+        ambient_environment_policy="excluded_unless_explicitly_materialized",
+        non_materialized_semantic_env_dependencies=semantic_dependencies,
+        environment_hash=stable_hash(snapshot_payload),
+    )
+
+
 def build_effective_execution_config(
     *,
     resolved_config: JsonDict,
@@ -315,6 +340,7 @@ class SemanticIdentityPayloadContext:
     resolution_policy: ConfigResolutionPolicy
     resolved_config: ResolvedConfigSnapshot
     runtime_overrides: RuntimeOverrideSnapshot
+    execution_environment: ExecutionEnvironmentSnapshot
     effective_execution_config: EffectiveExecutionConfig
     resolved_config_hash: str
     effective_config_hash: str
@@ -358,6 +384,7 @@ def build_semantic_identity_payload(
             "config_hash": request.resolved_config.config_hash,
         },
         "runtime_overrides": runtime_overrides_payload(request.runtime_overrides),
+        "execution_environment": to_jsonable(request.execution_environment),
         "effective_execution_config": {
             "config_data": to_jsonable(request.effective_execution_config.config_data),
             "effective_hash": request.effective_execution_config.effective_hash,
@@ -392,6 +419,7 @@ def semantic_artifact_payload(artifact: EffectiveConfigArtifact) -> JsonDict:
             "config_hash": artifact.resolved_config.config_hash,
         },
         "runtime_overrides": runtime_overrides_payload(artifact.runtime_overrides),
+        "execution_environment": to_jsonable(artifact.execution_environment),
         "effective_execution_config": {
             "config_data": to_jsonable(artifact.effective_execution_config.config_data),
             "effective_hash": artifact.effective_execution_config.effective_hash,

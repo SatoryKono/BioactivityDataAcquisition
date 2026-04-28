@@ -10,13 +10,13 @@ Stable commands:
     fix-grafana        Fix Grafana dashboard configurations
     rerender-grafana   Rerender Grafana dashboard screenshots
     wsl-proxy          Start WSL proxy helper
-    codex              Launch Codex interactive mode (shell)
-    codex-exec         Launch Codex full-auto mode (shell)
-    codex-headless     Launch Codex without MCP servers (shell)
-    diagnose-codex-wsl Run Codex WSL diagnostic checks (shell)
-    setup-agents       Sync Codex agents into CODEX_HOME
-    setup-plugins      Setup plugins (shell)
-    setup-skills       Setup skills (shell)
+    codex              Launch Codex via repo-local bootstrap adapter (shell)
+    codex-exec         Launch Codex full-auto via repo-local bootstrap adapter (shell)
+    codex-headless     Launch Codex without MCP servers via canonical wrapper (shell)
+    diagnose-codex-wsl Run Codex WSL diagnostics via canonical wrapper (shell)
+    setup-agents       Sync Codex agents via canonical wrapper
+    setup-plugins      Setup plugins via ops bootstrap helper (shell)
+    setup-skills       Sync Codex skills via canonical wrapper
     check-skills       Check AI skills layout (shell)
     check-mirror       Check skills mirror sync (shell)
     deploy             Deploy BioETL (shell)

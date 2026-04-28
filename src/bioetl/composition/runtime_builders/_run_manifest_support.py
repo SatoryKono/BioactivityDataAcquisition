@@ -30,6 +30,9 @@ from bioetl.domain.control_plane import (
     RunInputSnapshotRef,
     RunSourceRef,
 )
+from bioetl.domain.control_plane.reproducibility_policy import (
+    resolve_replay_capability as _resolve_policy_replay_capability,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
@@ -87,12 +90,10 @@ def resolve_replay_capability(
     source_refs: tuple[RunSourceRef, ...],
     resume_requested: bool,
 ) -> ReplayCapability:
-    has_input_snapshots = any(ref.input_snapshots for ref in source_refs)
-    if has_input_snapshots:
-        return ReplayCapability.EXACT_REPLAY_SUPPORTED
-    if resume_requested:
-        return ReplayCapability.RESUME_ONLY
-    return ReplayCapability.REBUILD_ONLY
+    return _resolve_policy_replay_capability(
+        source_refs=source_refs,
+        resume_requested=resume_requested,
+    )
 
 
 def validate_reproducible_sink_modes(

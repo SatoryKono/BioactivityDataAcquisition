@@ -297,10 +297,9 @@ def has_composite_correlation_policy_gap(traceability: dict[str, object]) -> boo
     if composite_projection.get("composite_run_id_consistent") is False:
         return True
     correlation_policy = composite_projection.get("correlation_policy")
-    return (
-        isinstance(correlation_policy, dict)
-        and correlation_policy.get("status") not in {None, "satisfied"}
-    )
+    return isinstance(correlation_policy, dict) and correlation_policy.get(
+        "status"
+    ) not in {None, "satisfied"}
 
 
 def build_next_steps(

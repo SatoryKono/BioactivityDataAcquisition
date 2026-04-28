@@ -17,6 +17,7 @@ from bioetl.infrastructure.control_plane.file_run_ledger_store import (
 )
 from bioetl.infrastructure.control_plane.file_run_manifest_store import (
     FileRunManifestStore,
+    RunManifestStoreCorruptionError,
 )
 
 __all__ = [
@@ -26,4 +27,5 @@ __all__ = [
     "FileLineageStore",
     "FileRunLedgerStore",
     "FileRunManifestStore",
+    "RunManifestStoreCorruptionError",
 ]

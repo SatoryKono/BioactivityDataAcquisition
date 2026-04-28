@@ -39,7 +39,11 @@ from bioetl.composition.runtime_builders.runner_builder_support import (
     validate_required_persistence_profile,
 )
 from bioetl.composition.services.versioning import get_code_revision_provenance
-from bioetl.domain.control_plane import ReplayCapability
+from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
+from bioetl.domain.control_plane.reproducibility_policy import (
+    assess_reproducibility_policy,
+    resolve_replay_capability,
+)
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
 from bioetl.infrastructure.time import SystemClock
@@ -232,23 +236,32 @@ def _build_composite_manifest_create_request(
 
 def _resolve_composite_replay_capability(
     *,
-    source_refs: tuple[object, ...],
+    source_refs: tuple[RunSourceRef, ...],
     required_persistence_profile: str,
 ) -> ReplayCapability:
     """Return exact capability only when every composite member has snapshots."""
-    has_full_snapshot_envelope = bool(source_refs) and all(
-        bool(getattr(source_ref, "input_snapshots", ())) for source_ref in source_refs
+    replay_capability = resolve_replay_capability(
+        source_refs=source_refs,
+        resume_requested=False,
+        require_full_snapshot_envelope=True,
     )
-    if has_full_snapshot_envelope:
-        return ReplayCapability.EXACT_REPLAY_SUPPORTED
-    if required_persistence_profile in {"replay_ready", "forensic_grade"}:
+    assessment = assess_reproducibility_policy(
+        source_refs=source_refs,
+        required_persistence_profile=required_persistence_profile,
+        strict_exact_replay_supported=True,
+        require_full_snapshot_envelope=True,
+        replay_capability=replay_capability,
+    )
+    if assessment.required_profile_satisfied:
+        return replay_capability
+    if "exact_replay_capability" in assessment.blocking_gaps:
         raise RuntimeError(
             "Composite execution cannot satisfy required persistence profile "
             f"'{required_persistence_profile}' because the full cached-Bronze "
             "input snapshot envelope was not captured for every seed, "
             "dependency, and enricher pipeline"
         )
-    return ReplayCapability.REBUILD_ONLY
+    return replay_capability
 
 
 def _build_run_ledger_service(

@@ -33,6 +33,9 @@ Commands:
   setup    Install/configure Vibe
   --help   Show this help
 
+Preferred public entrypoint:
+  python -m scripts.ai vibe [args...]
+
 All other arguments are forwarded to scripts/ai/vibe/launch.sh.
 EOF
     return 0

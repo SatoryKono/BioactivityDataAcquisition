@@ -30,6 +30,7 @@ if ($Args.Count -gt 0) {
             Write-Host "Mistral Vibe Compatibility Launcher"
             Write-Host ""
             Write-Host "Usage: .\run-vibe.ps1 [check|setup|args...]"
+            Write-Host "Preferred public entrypoint: python -m scripts.ai vibe [args...]"
             Write-Host "All other arguments are forwarded to scripts/ai/vibe/launch.ps1."
             exit 0
         }
@@ -37,6 +38,7 @@ if ($Args.Count -gt 0) {
             Write-Host "Mistral Vibe Compatibility Launcher"
             Write-Host ""
             Write-Host "Usage: .\run-vibe.ps1 [check|setup|args...]"
+            Write-Host "Preferred public entrypoint: python -m scripts.ai vibe [args...]"
             Write-Host "All other arguments are forwarded to scripts/ai/vibe/launch.ps1."
             exit 0
         }

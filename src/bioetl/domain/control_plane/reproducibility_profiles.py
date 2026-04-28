@@ -61,6 +61,7 @@ class ReproducibilityFamilyProfile:
     strict_exact_replay_supported: bool
     exact_replay_support_boundary: str
     replay_family_contract: ReplayFamilyContractName
+    default_required_persistence_profile: str
     support_scope: str
     reason: str
 
@@ -149,6 +150,7 @@ def resolve_reproducibility_family_profile(
             strict_exact_replay_supported=True,
             exact_replay_support_boundary="composite_snapshot_backed_input_envelope",
             replay_family_contract="composite_snapshot_backed_exact_replay",
+            default_required_persistence_profile="replay_ready",
             support_scope="snapshot_backed_composite_trace_debug",
             reason="composite_family_requires_full_snapshot_envelope",
         )
@@ -168,6 +170,9 @@ def resolve_reproducibility_family_profile(
         exact_replay_support_boundary="snapshot_backed_source_runs_only",
         replay_family_contract=(
             "snapshot_backed_exact_replay" if supported else "rebuild_only"
+        ),
+        default_required_persistence_profile=(
+            "replay_ready" if supported else "degraded_observable"
         ),
         support_scope="operator_grade_trace_debug",
         reason=reason,
@@ -215,6 +220,9 @@ def build_replay_family_contract(
         "family": profile.family,
         "execution_context": profile.execution_context,
         "contract": profile.replay_family_contract,
+        "default_required_persistence_profile": (
+            profile.default_required_persistence_profile
+        ),
         "strict_exact_replay_supported": profile.strict_exact_replay_supported,
         "exact_replay_support_boundary": profile.exact_replay_support_boundary,
         "support_scope": profile.support_scope,

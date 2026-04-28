@@ -98,6 +98,17 @@ class RuntimeOverrideSnapshot:
 
 
 @dataclass(frozen=True)
+class ExecutionEnvironmentSnapshot:
+    """Materialized execution-affecting environment identity surface."""
+
+    materialized_env_keys: tuple[str, ...] = ()
+    materialized_env_overrides: JsonDict = field(default_factory=dict)
+    ambient_environment_policy: str = "excluded_unless_explicitly_materialized"
+    non_materialized_semantic_env_dependencies: tuple[str, ...] = ()
+    environment_hash: str = ""
+
+
+@dataclass(frozen=True)
 class EffectiveExecutionConfig:
     """Final effective configuration after all overrides."""
 
@@ -137,6 +148,9 @@ class EffectiveConfigArtifact:
     resolved_config_hash: str
     effective_config_hash: str
     source_fingerprint: str
+    execution_environment: ExecutionEnvironmentSnapshot = field(
+        default_factory=ExecutionEnvironmentSnapshot
+    )
     source_class_provenance: tuple[SourceClassProvenance, ...] = ()
     schema_version: str = "1.0"
     created_at: datetime = field(default_factory=_current_utc_time)
