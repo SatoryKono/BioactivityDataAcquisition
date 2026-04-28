@@ -123,14 +123,14 @@ def apply_processed_batch_outcome(
     )
 
 
-def build_batch_result_snapshot[BatchResultT](
+def build_batch_result_snapshot[_BatchResultT](
     *,
-    batch_result_type: BatchResultBuilderPort[BatchResultT],
+    batch_result_type: BatchResultBuilderPort[_BatchResultT],
     records_bronze: int,
     records_silver: int,
     records_gold: int,
     records_quarantined: int,
-) -> BatchResultT:
+) -> _BatchResultT:
     """Build the public batch-result snapshot from cumulative executor counters."""
     return batch_result_type(
         bronze_count=records_bronze,

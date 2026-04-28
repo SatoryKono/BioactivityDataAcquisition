@@ -58,12 +58,12 @@ def get_source_metadata(
     return source_metadata
 
 
-async def execute_with_pipeline_failure_policy[ResultT](
+async def execute_with_pipeline_failure_policy[_ResultT](
     *,
     tracing: BatchTracingManagerService,
     span: Span | None,
-    work_coro: Awaitable[ResultT],
-) -> ResultT:
+    work_coro: Awaitable[_ResultT],
+) -> _ResultT:
     """Finish the batch span consistently across runtime failure cases."""
     try:
         return await work_coro
@@ -72,15 +72,15 @@ async def execute_with_pipeline_failure_policy[ResultT](
         raise
 
 
-async def execute_with_layer_span[ResultT](
+async def execute_with_layer_span[_ResultT](
     *,
     tracing: BatchTracingManagerService,
     name: str,
-    coro: Awaitable[ResultT],
+    coro: Awaitable[_ResultT],
     batch_id: BatchID,
     count: int,
     on_error: Callable[[Exception], None] | None = None,
-) -> ResultT:
+) -> _ResultT:
     """Execute a coroutine wrapped with a per-layer tracing span."""
     span = tracing.start_layer_span(name, batch_id, count)
     try:
