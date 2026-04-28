@@ -130,8 +130,8 @@ class _SilverPostwriteHostProtocol(Protocol):
         bronze_refs: list[BronzeWriteResult] | None,
         partition_cols: list[str] | None,
         source_batch_id: BatchID | None,
-        quarantined_count: int | None,
-        validation_errors: Sequence[str] | None,
+        quarantined_count: int | None = None,
+        validation_errors: Sequence[str] | None = None,
         started_at: datetime,
         start_perf: float,
     ) -> SilverWriteResult | None: ...
@@ -151,8 +151,8 @@ class _SilverPostwriteFinalizerProtocol(Protocol):
         bronze_refs: list[BronzeWriteResult] | None,
         partition_cols: list[str] | None,
         source_batch_id: BatchID | None,
-        quarantined_count: int | None,
-        validation_errors: Sequence[str] | None,
+        quarantined_count: int | None = None,
+        validation_errors: Sequence[str] | None = None,
         started_at: datetime,
         start_perf: float,
     ) -> SilverWriteResult | None: ...
@@ -211,19 +211,26 @@ async def _finalize_silver_postwrite_result(
     payload: _PreparedSilverWritePayload,
 ) -> SilverWriteResult | None:
     """Finalize a postwrite payload using the shared ctx/payload contract."""
+    finalize_kwargs: dict[str, object] = {
+        "table_name": ctx.table_name,
+        "records": payload.records,
+        "table_path": payload.table_path,
+        "primary_keys": ctx.primary_keys,
+        "validated_mode": payload.validated_mode,
+        "bronze_refs": ctx.bronze_refs,
+        "partition_cols": ctx.partition_cols,
+        "source_batch_id": ctx.source_batch_id,
+        "started_at": ctx.started_at,
+        "start_perf": ctx.start_perf,
+    }
+    quarantined_count = getattr(ctx, "quarantined_count", None)
+    if quarantined_count is not None:
+        finalize_kwargs["quarantined_count"] = quarantined_count
+    validation_errors = getattr(ctx, "validation_errors", None)
+    if validation_errors is not None:
+        finalize_kwargs["validation_errors"] = validation_errors
     return await finalizer(
-        table_name=ctx.table_name,
-        records=payload.records,
-        table_path=payload.table_path,
-        primary_keys=ctx.primary_keys,
-        validated_mode=payload.validated_mode,
-        bronze_refs=ctx.bronze_refs,
-        partition_cols=ctx.partition_cols,
-        source_batch_id=ctx.source_batch_id,
-        quarantined_count=ctx.quarantined_count,
-        validation_errors=ctx.validation_errors,
-        started_at=ctx.started_at,
-        start_perf=ctx.start_perf,
+        **finalize_kwargs,  # type: ignore[arg-type]
     )
 
 
