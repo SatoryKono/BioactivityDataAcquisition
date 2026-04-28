@@ -5,6 +5,7 @@ from __future__ import annotations
 import errno
 import time
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from threading import Lock
 from typing import TYPE_CHECKING
 
@@ -12,6 +13,7 @@ from prometheus_client import REGISTRY, start_http_server
 from prometheus_client.exposition import pushadd_to_gateway
 
 from bioetl.domain.exceptions import MetricsServerError
+from bioetl.domain.ports import MetricsServerRuntimeStatus
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
@@ -27,6 +29,9 @@ class _MetricsServerRuntimeState:
     """
 
     started: bool = False
+    port: int | None = None
+    addr: str | None = None
+    started_at: datetime | None = None
     lock: Lock = field(default_factory=Lock)
 
 
@@ -34,6 +39,7 @@ _SERVER_RUNTIME = _MetricsServerRuntimeState()
 
 # Re-export for backward compatibility
 __all__ = [
+    "get_metrics_server_runtime_status",
     "MetricsServerError",
     "is_metrics_server_running",
     "push_metrics_to_gateway",
@@ -134,6 +140,9 @@ def start_metrics_server(
             try:
                 start_http_server(port, addr=addr)
                 _SERVER_RUNTIME.started = True
+                _SERVER_RUNTIME.port = port
+                _SERVER_RUNTIME.addr = addr
+                _SERVER_RUNTIME.started_at = datetime.now(tz=UTC)
                 logger.info(
                     "Prometheus metrics server started",
                     port=port,
@@ -157,6 +166,16 @@ def start_metrics_server(
 def is_metrics_server_running() -> bool:
     """Return the live in-process metrics server state."""
     return _SERVER_RUNTIME.started
+
+
+def get_metrics_server_runtime_status() -> MetricsServerRuntimeStatus:
+    """Return live in-process metrics server runtime metadata."""
+    return MetricsServerRuntimeStatus(
+        running=_SERVER_RUNTIME.started,
+        port=_SERVER_RUNTIME.port if _SERVER_RUNTIME.started else None,
+        addr=_SERVER_RUNTIME.addr if _SERVER_RUNTIME.started else None,
+        started_at=_SERVER_RUNTIME.started_at if _SERVER_RUNTIME.started else None,
+    )
 
 
 def push_metrics_to_gateway(
@@ -229,3 +248,6 @@ def reset_server_state() -> None:
     """Reset server state for testing purposes only."""
     with _SERVER_RUNTIME.lock:
         _SERVER_RUNTIME.started = False
+        _SERVER_RUNTIME.port = None
+        _SERVER_RUNTIME.addr = None
+        _SERVER_RUNTIME.started_at = None

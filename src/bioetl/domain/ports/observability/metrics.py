@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+from datetime import datetime
 from typing import Protocol, runtime_checkable
 
 MetricLabels = dict[str, str]
@@ -86,6 +88,16 @@ class ExecutorMetricsPort(Protocol):
     records_quarantined: int
 
 
+@dataclass(frozen=True, slots=True)
+class MetricsServerRuntimeStatus:
+    """Live metrics server runtime metadata."""
+
+    running: bool
+    port: int | None = None
+    addr: str | None = None
+    started_at: datetime | None = None
+
+
 @runtime_checkable
 class MetricsServerPort(Protocol):
     """Protocol for metrics server operations."""
@@ -115,6 +127,10 @@ class MetricsServerPort(Protocol):
 
     def is_running(self) -> bool:
         """Return True if the metrics server is currently accepting connections."""
+        ...
+
+    def get_runtime_status(self) -> MetricsServerRuntimeStatus:
+        """Return the current in-process metrics server runtime metadata."""
         ...
 
     def reset(self) -> None:

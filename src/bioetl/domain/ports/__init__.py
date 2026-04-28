@@ -79,6 +79,7 @@ from bioetl.domain.ports.observability import (
     MetricsPort,
     MetricsPublisherPort,
     MetricsServerPort,
+    MetricsServerRuntimeStatus,
     TracingPort,
     resolve_metric_labels,
 )
@@ -221,6 +222,7 @@ __all__ = [
     "MetricsPort",
     "MetricsPublisherPort",
     "MetricsServerPort",
+    "MetricsServerRuntimeStatus",
     "PiiHasherPort",
     "PipelineConfigLoaderPort",
     "PipelineControlPlaneArtifacts",
