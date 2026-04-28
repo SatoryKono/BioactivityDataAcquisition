@@ -5,7 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord, HealthStatus
-from bioetl.infrastructure.adapters.base import build_mailto_user_agent_headers
+from bioetl.infrastructure.adapters.base import (
+    build_json_accept_headers,
+    build_mailto_user_agent_headers,
+)
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
@@ -16,6 +19,9 @@ from bioetl.infrastructure.adapters.common.source_metadata_capability import (
     clear_source_metadata_collector,
     consume_source_metadata,
     get_request_count,
+)
+from bioetl.infrastructure.adapters.openalex.query_builder import (
+    build_openalex_base_params,
 )
 
 if TYPE_CHECKING:
@@ -28,7 +34,8 @@ class OpenAlexAdapterHelpersMixin:
     """Utility helpers extracted from the main OpenAlex adapter."""
 
     # Host-class attributes (provided by OpenAlexAdapter.__post_init__)
-    mailto: str
+    mailto: str | None
+    api_key: str | None
     _request_collector: APIRequestCollector
 
     def _build_headers(self) -> dict[str, str]:
@@ -37,7 +44,9 @@ class OpenAlexAdapterHelpersMixin:
         Returns:
             Dictionary of HTTP headers with User-Agent and Accept fields.
         """
-        return build_mailto_user_agent_headers(self.mailto)
+        if self.mailto:
+            return build_mailto_user_agent_headers(self.mailto)
+        return build_json_accept_headers("BioETL/1.0")
 
     def _build_base_params(self) -> dict[str, str]:
         """Build base query parameters with mailto for polite pool.
@@ -45,7 +54,7 @@ class OpenAlexAdapterHelpersMixin:
         Returns:
             Dictionary containing the mailto parameter for polite pool access.
         """
-        return {"mailto": self.mailto}
+        return build_openalex_base_params(self.mailto, api_key=self.api_key)
 
     @staticmethod
     def _normalize_doi(doi: str) -> str | None:

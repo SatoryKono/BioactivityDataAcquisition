@@ -367,6 +367,10 @@ class Settings(BaseSettings):
         default=None,
         description="API key for PubMed",
     )
+    openalex_api_key: SecretStr | None = Field(
+        default=None,
+        description="API key for OpenAlex",
+    )
 
     @field_validator("silver_dedup_timeout_seconds", mode="before")
     @classmethod

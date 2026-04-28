@@ -21,6 +21,15 @@ class MailtoBatchProfile:
 
 
 @dataclass(frozen=True)
+class OpenAlexRequestProfile:
+    """Resolved OpenAlex request credentials and batch settings."""
+
+    api_key: str | None
+    mailto: str | None
+    batch_size: int
+
+
+@dataclass(frozen=True)
 class PubMedRequestProfile:
     """Resolved PubMed request credentials for data-source assembly."""
 
@@ -73,6 +82,26 @@ def _resolve_mailto_batch_profile(
     )
 
 
+def _resolve_openalex_request_profile(
+    settings: ProviderSettingsProtocol,
+    pipeline_config: PipelineYamlConfig,
+    *,
+    batch_size: int,
+) -> OpenAlexRequestProfile:
+    """Resolve OpenAlex API key, legacy mailto, and batch size."""
+    configured_api_key = _normalize_optional_override(pipeline_config.source.api_key)
+    settings_api_key = (
+        settings.openalex_api_key.get_secret_value()
+        if settings.openalex_api_key
+        else None
+    )
+    return OpenAlexRequestProfile(
+        api_key=configured_api_key or settings_api_key,
+        mailto=_resolve_biblio_contact_email(settings, pipeline_config),
+        batch_size=batch_size,
+    )
+
+
 def _resolve_semanticscholar_request_profile(
     settings: ProviderSettingsProtocol,
     *,
@@ -92,10 +121,12 @@ def _resolve_semanticscholar_request_profile(
 
 __all__ = [
     "MailtoBatchProfile",
+    "OpenAlexRequestProfile",
     "PubMedRequestProfile",
     "SemanticScholarRequestProfile",
     "_resolve_biblio_contact_email",
     "_resolve_mailto_batch_profile",
+    "_resolve_openalex_request_profile",
     "_resolve_pubmed_request_profile",
     "_resolve_semanticscholar_request_profile",
 ]

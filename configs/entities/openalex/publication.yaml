@@ -10,6 +10,7 @@ pipeline:
   business_primary_keys:
   - openalex_id
   source:
+    api_key: ${BIOETL_OPENALEX_API_KEY}
     email: ${BIOETL_OPENALEX_EMAIL}
   sink:
     gold:

@@ -62,18 +62,36 @@ def _parse_topic_dict(
 def _parse_grant_dict(
     grant: JsonDict,  # Any: untyped JSON fragment from OpenAlex API
 ) -> JsonDict | None:  # Any: untyped JSON fragment from OpenAlex API
-    """Parse a single grant dict into normalized format."""
-    funder_name = grant.get("funder_display_name")
+    """Parse OpenAlex legacy grants, current awards, or current funders."""
+    funder = grant.get("funder")
+    funder_name = (
+        grant.get("funder_display_name")
+        or grant.get("display_name")
+        or _get_nested_display_name(funder)
+    )
     if not funder_name or not isinstance(funder_name, str):
         return None
 
-    award_id = grant.get("award_id")
+    award_id = grant.get("award_id") or grant.get("funder_award_id")
     award_str = str(award_id).strip() if award_id else None
+    award_openalex_id = (
+        _extract_id_from_url(grant.get("id"))
+        if grant.get("funder_award_id") or grant.get("funder_id")
+        else None
+    )
+    funder_id = (
+        grant.get("funder_id")
+        or grant.get("funder")
+        or (grant.get("id") if not award_openalex_id else None)
+    )
 
     return {
-        "funder": _extract_id_from_url(grant.get("funder")),
+        "funder": _extract_id_from_url(funder_id),
         "funder_display_name": funder_name.strip(),
         "award_id": award_str,
+        "award_openalex_id": award_openalex_id,
+        "award_display_name": grant.get("display_name") if award_openalex_id else None,
+        "award_doi": grant.get("doi"),
     }
 
 

@@ -119,6 +119,10 @@ class ProviderConfigYaml(BaseModel):
 
     provider: str = ""
     base_url: str | None = None
+    auth_type: str | None = None
+    api_key_env: str | None = None
+    api_key: str | None = None
+    mailto: str | None = None
     client: ClientYamlConfig = Field(default_factory=ClientYamlConfig)
     pagination: PaginationConfig = Field(default_factory=PaginationConfig)
     api_version: str | None = None

@@ -259,11 +259,27 @@ def _coerce_silver_write_invocation(
 ) -> _SilverWriteInvocation:
     """Accept the canonical invocation object while preserving legacy kwargs."""
     if invocation is not None:
-        if legacy_kwargs:
-            unexpected = ", ".join(sorted(legacy_kwargs))
+        normalized_legacy = dict(legacy_kwargs)
+        if (
+            table_key in normalized_legacy
+            and "table_name" not in normalized_legacy
+            and table_key != "table_name"
+        ):
+            normalized_legacy["table_name"] = normalized_legacy.pop(table_key)
+        allowed_transport_aliases = {"table_name"}
+        if set(normalized_legacy) - allowed_transport_aliases:
+            unexpected = ", ".join(sorted(set(normalized_legacy) - allowed_transport_aliases))
             raise TypeError(
                 "unexpected legacy keyword arguments when invocation is provided: "
                 f"{unexpected}"
+            )
+        if (
+            "table_name" in normalized_legacy
+            and normalized_legacy["table_name"] != invocation.table_name
+        ):
+            raise TypeError(
+                "legacy table_name does not match invocation.table_name when both "
+                "are provided"
             )
         return invocation
 
@@ -312,27 +328,18 @@ async def _write_dual_targets(
     for contract_version, physical_table in iterate_write_targets(
         write_versions, write_targets
     ):
+        target_invocation = replace(
+            invocation,
+            table_name=physical_table,
+            records=_project_records_for_contract_version(
+                invocation.records,
+                contract_version=contract_version,
+            ),
+        )
         try:
             result = await writer._write_single_target(
+                invocation=target_invocation,
                 table_name=physical_table,
-                records=_project_records_for_contract_version(
-                    invocation.records,
-                    contract_version=contract_version,
-                ),
-                primary_keys=invocation.primary_keys,
-                schema=invocation.schema,
-                mode=invocation.mode,
-                partition_cols=invocation.partition_cols,
-                on_schema_mismatch=invocation.on_schema_mismatch,
-                column_order=invocation.column_order,
-                bronze_refs=invocation.bronze_refs,
-                key_nullability_rules=invocation.key_nullability_rules,
-                run_id=invocation.run_id,
-                run_type=invocation.run_type,
-                source_batch_id=invocation.source_batch_id,
-                ingestion_ts=invocation.ingestion_ts,
-                quarantined_count=invocation.quarantined_count,
-                validation_errors=invocation.validation_errors,
             )
         except (BioETLError, OSError, RuntimeError, ValueError) as exc:
             writer.logger.error(

@@ -5,21 +5,31 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 
-def build_openalex_base_params(mailto: str) -> dict[str, str]:
-    """Build base OpenAlex parameters with polite-pool mailto.
+def build_openalex_base_params(
+    mailto: str | None,
+    api_key: str | None = None,
+) -> dict[str, str]:
+    """Build base OpenAlex parameters with API-key auth and optional mailto.
 
     Args:
-        mailto: Email address for the OpenAlex polite pool.
+        mailto: Optional email address retained for legacy request attribution.
+        api_key: Optional OpenAlex API key.
 
     Returns:
-        Dictionary containing the mailto parameter for polite pool access.
+        Dictionary containing OpenAlex authentication/contact parameters.
     """
-    return {"mailto": mailto}
+    params: dict[str, str] = {}
+    if api_key:
+        params["api_key"] = api_key
+    if mailto:
+        params["mailto"] = mailto
+    return params
 
 
 def build_openalex_search_params(
     *,
-    mailto: str,
+    mailto: str | None,
+    api_key: str | None = None,
     query: str,
     cursor: str,
     per_page: int,
@@ -27,7 +37,8 @@ def build_openalex_search_params(
     """Build query search parameters for `/works` cursor pagination.
 
     Args:
-        mailto: Email address for the OpenAlex polite pool.
+        mailto: Optional email address retained for legacy request attribution.
+        api_key: Optional OpenAlex API key.
         query: Search query string to filter works.
         cursor: Pagination cursor from the previous page response.
         per_page: Number of results to request per page.
@@ -35,7 +46,7 @@ def build_openalex_search_params(
     Returns:
         Dictionary of query parameters for cursor-based search requests.
     """
-    params = build_openalex_base_params(mailto)
+    params = build_openalex_base_params(mailto, api_key=api_key)
     params.update(
         {
             "search": query,
@@ -48,13 +59,15 @@ def build_openalex_search_params(
 
 def build_openalex_doi_filter_params(
     *,
-    mailto: str,
+    mailto: str | None,
+    api_key: str | None = None,
     dois: Iterable[str],
 ) -> dict[str, str]:
     """Build DOI filter parameters for batch DOI lookup.
 
     Args:
-        mailto: Email address for the OpenAlex polite pool.
+        mailto: Optional email address retained for legacy request attribution.
+        api_key: Optional OpenAlex API key.
         dois: Iterable of DOI strings to filter by in the batch request.
 
     Returns:
@@ -62,7 +75,7 @@ def build_openalex_doi_filter_params(
     """
     normalized_dois = list(dois)
     doi_filter = "|".join(normalized_dois)
-    params = build_openalex_base_params(mailto)
+    params = build_openalex_base_params(mailto, api_key=api_key)
     params.update(
         {
             "filter": f"doi:{doi_filter}",
@@ -74,21 +87,23 @@ def build_openalex_doi_filter_params(
 
 def build_openalex_title_search_params(
     *,
-    mailto: str,
+    mailto: str | None,
+    api_key: str | None = None,
     escaped_title: str,
     limit: int,
 ) -> dict[str, str]:
     """Build title search parameters for `title.search` lookup.
 
     Args:
-        mailto: Email address for the OpenAlex polite pool.
+        mailto: Optional email address retained for legacy request attribution.
+        api_key: Optional OpenAlex API key.
         escaped_title: URL-safe escaped title string for the filter value.
         limit: Maximum number of results to request per page.
 
     Returns:
         Dictionary of query parameters for title-based search requests.
     """
-    params = build_openalex_base_params(mailto)
+    params = build_openalex_base_params(mailto, api_key=api_key)
     params.update(
         {
             "filter": f"title.search:{escaped_title}",
@@ -98,19 +113,22 @@ def build_openalex_title_search_params(
     return params
 
 
-def build_openalex_health_probe_params(mailto: str) -> dict[str, str]:
+def build_openalex_health_probe_params(
+    mailto: str | None,
+    api_key: str | None = None,
+) -> dict[str, str]:
     """Build minimal parameters for health probing.
 
     Args:
-        mailto: Email address for the OpenAlex polite pool.
+        mailto: Optional email address retained for legacy request attribution.
+        api_key: Optional OpenAlex API key.
 
     Returns:
         Dictionary of minimal query parameters for the health probe request.
     """
-    return {
-        "per-page": "1",
-        "mailto": mailto,
-    }
+    params = build_openalex_base_params(mailto, api_key=api_key)
+    params["per-page"] = "1"
+    return params
 
 
 __all__ = [

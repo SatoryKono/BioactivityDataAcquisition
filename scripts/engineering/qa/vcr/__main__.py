@@ -12,11 +12,9 @@ Commands:
     check-metadata-age Enforce managed VCR metadata freshness
 """
 
-from __future__ import annotations
-
-import subprocess
-import sys
 from pathlib import Path
+
+from scripts._command_dispatch import dispatch_script_command
 
 COMMANDS: dict[str, str] = {
     "check-placement": "check_root_vcr_cassettes.py",
@@ -28,31 +26,13 @@ COMMANDS: dict[str, str] = {
 _DIR = Path(__file__).parent
 
 
-def _run_script(name: str, argv: list[str]) -> int:
-    script = _DIR / name
-    result = subprocess.run([sys.executable, str(script), *argv], check=False)
-    return result.returncode
-
-
-def _print_help() -> None:
-    print(__doc__ or "", end="")
-
-
 def main(argv: list[str] | None = None) -> int:
-    args = argv if argv is not None else sys.argv[1:]
-
-    if not args or args[0] in ("--help", "-h"):
-        _print_help()
-        return 0
-
-    cmd, rest = args[0], args[1:]
-
-    if cmd not in COMMANDS:
-        print(f"Unknown command: {cmd}", file=sys.stderr)
-        print(f"Available: {', '.join(COMMANDS)}", file=sys.stderr)
-        return 2
-
-    return _run_script(COMMANDS[cmd], rest)
+    return dispatch_script_command(
+        doc=__doc__,
+        commands=COMMANDS,
+        base_dir=_DIR,
+        argv=argv,
+    )
 
 
 if __name__ == "__main__":

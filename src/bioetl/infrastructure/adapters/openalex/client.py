@@ -10,9 +10,9 @@ Error Handling (RULES.md S3.1):
 - Recoverable errors: Handled by UnifiedHTTPClient retry
 - Data quality errors: Log and skip record
 
-Polite Pool:
-- OpenAlex provides higher rate limits (10 req/sec) when `mailto` is provided
-- Always send mailto in query parameters
+Authentication:
+- OpenAlex API-key access is the canonical production path.
+- Optional `mailto` is retained only as a legacy/contact attribution parameter.
 """
 
 from __future__ import annotations
@@ -106,8 +106,8 @@ class OpenAlexAdapter(
     Args:
         http_client: UnifiedHTTPClient instance for making HTTP requests.
         logger: LoggerPort instance for structured logging.
-        mailto: Technical email for polite pool access (required).
-            OpenAlex provides higher rate limits (10 req/sec) with mailto.
+        mailto: Optional technical email for legacy request attribution.
+        api_key: Optional OpenAlex API key. Required for production-sized use.
             See: https://docs.openalex.org/how-to-use-the-api/rate-limits-and-authentication
         batch_size: Number of DOIs per batch request (max 50 recommended).
         metrics: Optional MetricsPort for recording adapter metrics.
@@ -116,7 +116,8 @@ class OpenAlexAdapter(
 
     http_client: UnifiedHTTPClient
     logger: LoggerPort
-    mailto: str
+    mailto: str | None = None
+    api_key: str | None = None
     batch_size: int = 50
     metrics: MetricsPort | None = None
     title_search_cache_size: int = 256
@@ -168,6 +169,7 @@ class OpenAlexAdapter(
             headers_provider=self._build_headers,
             api_base=OPENALEX_API_BASE,
             mailto=self.mailto,
+            api_key=self.api_key,
             batch_size=self.batch_size,
             title_search_cache_size=self.title_search_cache_size,
             normalize_doi=self._normalize_doi,
@@ -202,29 +204,41 @@ def _create_openalex_adapter(
 ) -> OpenAlexAdapter:
     """Custom creator for OpenAlex adapter.
 
-    Handles logic for obtaining mailto from settings.
+    Handles logic for obtaining OpenAlex credentials from settings.
 
     Args:
         http_client: HTTP client
         logger: Logger
         settings: Application settings
-        **kwargs: Additional parameters (mailto, batch_size, metrics)
+        **kwargs: Additional parameters (api_key, mailto, batch_size, metrics)
 
     Returns:
         Initialized OpenAlexAdapter
 
     Raises:
-        ValueError: If mailto is not provided and not found in settings
+        ValueError: If neither api_key nor mailto can be resolved
 
     """
-    # Mailto: from kwargs or settings
+    # API key: from kwargs or settings
+    api_key = kwargs.get("api_key")
+    if not api_key and settings:
+        settings_api_key = getattr(settings, "openalex_api_key", None)
+        if settings_api_key:
+            api_key = (
+                settings_api_key.get_secret_value()
+                if hasattr(settings_api_key, "get_secret_value")
+                else str(settings_api_key)
+            )
+
+    # Mailto: from kwargs or settings, retained for legacy request attribution.
     mailto = kwargs.get("mailto")
     if not mailto and settings:
         mailto = getattr(settings, "default_email", None)
-    if not mailto:
+    if not api_key and not mailto:
         raise ValueError(
-            "OpenAlex adapter requires mailto. "
-            "Provide via 'mailto' kwarg or settings.default_email"
+            "OpenAlex adapter requires api_key or mailto. "
+            "Provide via 'api_key' kwarg/BIOETL_OPENALEX_API_KEY or "
+            "'mailto' kwarg/settings.default_email for legacy compatibility"
         )
 
     if http_client is None:
@@ -238,6 +252,7 @@ def _create_openalex_adapter(
         http_client=http_client,
         logger=logger,
         mailto=mailto,
+        api_key=api_key,
         batch_size=kwargs.get("batch_size", 50),
         metrics=kwargs.get("metrics"),
         dependency_context=kwargs.get("dependency_context"),

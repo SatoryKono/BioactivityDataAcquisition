@@ -8,6 +8,10 @@ from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
+    _coerce_silver_metadata_audit_request,
+    _SilverMetadataAuditSupportRequest,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SilverMetadata
@@ -22,14 +26,9 @@ __all__ = ["SilverWriterAuditMetadataCompatibilityMixin"]
 class _SilverAuditMetadataOps(Protocol):
     async def _log_silver_audit(
         self,
-        table_name: str,
-        records: list[BronzeRecord],
-        mode: SilverWriteMode,
-        *,
-        run_id: RunID | None,
-        run_type: RunType | None,
-        source_batch_id: BatchID | None,
-        ingestion_ts: datetime | None,
+        request: _SilverMetadataAuditSupportRequest | None = None,
+        *args: object,
+        **kwargs: object,
     ) -> None: ...
 
 
@@ -44,25 +43,19 @@ class SilverWriterAuditMetadataCompatibilityMixin:
 
     async def _log_silver_audit(
         self,
-        table_name: str,
-        records: list[BronzeRecord],
-        mode: SilverWriteMode,
-        *,
-        run_id: RunID | None,
-        run_type: RunType | None,
-        source_batch_id: BatchID | None,
-        ingestion_ts: datetime | None,
+        request: _SilverMetadataAuditSupportRequest | None = None,
+        *args: object,
+        **kwargs: object,
     ) -> None:
         """Delegate audit logging to the metadata service."""
+        resolved_request = _coerce_silver_metadata_audit_request(
+            request,
+            args=args,
+            kwargs=kwargs,
+        )
         if self._metadata:
             await cast(_SilverAuditMetadataOps, self._metadata)._log_silver_audit(
-                table_name=table_name,
-                records=records,
-                mode=mode,
-                run_id=run_id,
-                run_type=run_type,
-                source_batch_id=source_batch_id,
-                ingestion_ts=ingestion_ts,
+                resolved_request
             )
             return
 
@@ -72,13 +65,13 @@ class SilverWriterAuditMetadataCompatibilityMixin:
 
         await SilverWriterMetadataMixin._log_silver_audit(
             self._as_metadata_mixin(),
-            table_name,
-            records,
-            mode,
-            run_id=run_id,
-            run_type=run_type,
-            source_batch_id=source_batch_id,
-            ingestion_ts=ingestion_ts,
+            resolved_request.table_name,
+            resolved_request.records,
+            resolved_request.mode,
+            run_id=resolved_request.run_id,
+            run_type=resolved_request.run_type,
+            source_batch_id=resolved_request.source_batch_id,
+            ingestion_ts=resolved_request.ingestion_ts,
         )
 
     def _should_skip_silver_metadata_write(
@@ -125,29 +118,29 @@ class SilverWriterAuditMetadataCompatibilityMixin:
 
     async def _maybe_log_silver_audit(
         self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        mode: SilverWriteMode,
-        run_id: RunID | None,
-        run_type: RunType | None,
-        source_batch_id: BatchID | None,
-        ingestion_ts: datetime | None,
+        request: _SilverMetadataAuditSupportRequest | None = None,
+        *args: object,
+        **kwargs: object,
     ) -> None:
         """Compatibility seam for conditional Silver audit logging."""
+        resolved_request = _coerce_silver_metadata_audit_request(
+            request,
+            args=args,
+            kwargs=kwargs,
+        )
         from bioetl.infrastructure.storage.silver.metadata_mixin import (
             SilverWriterMetadataMixin,
         )
 
         await SilverWriterMetadataMixin._maybe_log_silver_audit(
             self._as_metadata_mixin(),
-            table_name=table_name,
-            records=records,
-            mode=mode,
-            run_id=run_id,
-            run_type=run_type,
-            source_batch_id=source_batch_id,
-            ingestion_ts=ingestion_ts,
+            table_name=resolved_request.table_name,
+            records=resolved_request.records,
+            mode=resolved_request.mode,
+            run_id=resolved_request.run_id,
+            run_type=resolved_request.run_type,
+            source_batch_id=resolved_request.source_batch_id,
+            ingestion_ts=resolved_request.ingestion_ts,
         )
 
     async def _write_silver_metadata(

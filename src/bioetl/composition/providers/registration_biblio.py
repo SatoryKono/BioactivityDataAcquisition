@@ -23,6 +23,7 @@ from bioetl.composition.providers._registration_biblio_adapters import (
 )
 from bioetl.composition.providers._registration_biblio_profiles import (
     _resolve_mailto_batch_profile,
+    _resolve_openalex_request_profile,
     _resolve_pubmed_request_profile,
     _resolve_semanticscholar_request_profile,
 )
@@ -191,16 +192,24 @@ def _create_openalex_data_source(
     assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
     """Create OpenAlex data source with optional CSV filtering."""
-    return _create_mailto_batch_data_source(
+    profile = _resolve_openalex_request_profile(
+        settings,
+        pipeline_config,
+        batch_size=_get_batch_size_from_config("openalex", default=50),
+    )
+    return _create_http_data_source(
         provider="openalex",
-        adapter_factory=OpenAlexAdapter,
         settings=settings,
-        pipeline_config=pipeline_config,
         logger=logger,
         filter_config=filter_config,
         metrics=metrics,
         pipeline_name=pipeline_name,
-        default_batch_size=50,
+        adapter_factory=OpenAlexAdapter,
+        extra_kwargs={
+            "api_key": profile.api_key,
+            "mailto": profile.mailto,
+            "batch_size": profile.batch_size,
+        },
         assembly_support=assembly_support,
     )
 
