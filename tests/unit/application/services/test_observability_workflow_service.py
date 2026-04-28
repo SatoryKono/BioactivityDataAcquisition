@@ -36,8 +36,14 @@ def _make_manifest_result(
     *,
     pipeline_name: str = "chembl_activity",
     bronze_records: int = 10,
+    persistence_profile: dict[str, object] | None = None,
 ) -> SimpleNamespace:
     """Create a lightweight run-manifest result stub for workflow tests."""
+    profile = persistence_profile or {
+        "attained_profile": "forensic_grade",
+        "required_profile": "forensic_grade",
+        "required_profile_satisfied": True,
+    }
     return SimpleNamespace(
         manifest=SimpleNamespace(
             pipeline_name=pipeline_name,
@@ -54,7 +60,7 @@ def _make_manifest_result(
             "correlation_anchor_gaps": {"run_id": 0, "manifest_id": 0},
             "artifact_refs": ["manifest://manifest-1", "ledger://manifest-1"],
             "lineage_fragment_ids": ["fragment-1"],
-            "persistence_profile": {"attained_profile": "forensic_grade"},
+            "persistence_profile": profile,
             "next_steps": ["review dossier output"],
         },
         identity_graph={"replay_capability": "exact_replay_supported"},
@@ -216,6 +222,16 @@ async def test_inspect_run_dossier_aggregates_forensic_sections() -> None:
         "quarantine_status": "present",
         "missing_evidence_count": 0,
         "degraded_evidence_count": 0,
+        "operational_success": True,
+        "operational_success_criteria": {
+            "critical_pipeline": True,
+            "runtime_terminal_success": True,
+            "required_evidence_profile": "forensic_grade",
+            "attained_evidence_profile": "forensic_grade",
+            "required_profile_satisfied": True,
+            "dossier_evidence_satisfied": True,
+            "operational_success": True,
+        },
     }
     assert result.traceability == {
         "audit_entries_count": 0,
@@ -226,7 +242,11 @@ async def test_inspect_run_dossier_aggregates_forensic_sections() -> None:
         "trace_ids": ["abc"],
         "trace_urls": mock.ANY,
         "trace_links_available": True,
-        "persistence_profile": {"attained_profile": "forensic_grade"},
+        "persistence_profile": {
+            "attained_profile": "forensic_grade",
+            "required_profile": "forensic_grade",
+            "required_profile_satisfied": True,
+        },
         "replay_capability": "exact_replay_supported",
     }
     trace_url = result.traceability["trace_urls"][0]
@@ -317,7 +337,86 @@ async def test_inspect_run_dossier_degrades_traceability_when_tracing_is_noop() 
     assert result.traceability["trace_urls"] == []
     assert result.traceability["trace_links_available"] is False
     assert "trace_links_unavailable" in result.degraded_evidence
+    assert "critical_dossier_evidence_gap" in result.degraded_evidence
+    assert result.status["operational_success"] is False
+    assert result.status["operational_success_criteria"] == {
+        "critical_pipeline": True,
+        "runtime_terminal_success": True,
+        "required_evidence_profile": "forensic_grade",
+        "attained_evidence_profile": "forensic_grade",
+        "required_profile_satisfied": True,
+        "dossier_evidence_satisfied": False,
+        "operational_success": False,
+    }
+    assert (
+        "Resolve dossier evidence gaps before marking this critical run "
+        "operationally successful."
+        in result.next_steps
+    )
     assert (
         "Use audit, manifest, and lineage sections as the current traceability fallback."
         in result.next_steps
     )
+
+
+@pytest.mark.asyncio
+async def test_inspect_run_dossier_blocks_operational_success_for_critical_profile_gap() -> (
+    None
+):
+    audit_result = AuditInspectionResult(query={"run_id": "abc"}, entries=())
+    audit_service = mock.AsyncMock()
+    audit_service.inspect_run.return_value = audit_result
+
+    checkpoint_service = mock.AsyncMock()
+    checkpoint_service.get_checkpoint.return_value = CheckpointInfo(
+        pipeline_name="chembl_activity",
+        run_id="abc",
+        metadata={"records_processed": 5},
+    )
+
+    run_manifest_service = mock.Mock()
+    run_manifest_service.show.return_value = _make_manifest_result(
+        persistence_profile={
+            "attained_profile": "replay_ready",
+            "required_profile": "forensic_grade",
+            "required_profile_satisfied": False,
+            "required_profile_missing_requirements": ["lineage_closure_boundary"],
+        }
+    )
+
+    lineage_result = mock.Mock()
+    lineage_result.fragment_ids = ("fragment-1",)
+    lineage_result.to_dict.return_value = {"fragment_ids": ["fragment-1"]}
+    lineage_service = mock.Mock()
+    lineage_service.explain_run.return_value = lineage_result
+
+    quarantine_service = mock.AsyncMock()
+    quarantine_service.get_filtered_stats.return_value = {
+        "total": 0,
+        "silver_filter_rejects": {"total_count": 0},
+    }
+
+    service = ObservabilityWorkflowService(
+        audit_service=audit_service,
+        checkpoint_service=checkpoint_service,
+        run_manifest_service=run_manifest_service,
+        lineage_service=lineage_service,
+        quarantine_service=quarantine_service,
+        tracer=_make_mock_tracer(),
+    )
+
+    result = await service.inspect_run_dossier("abc")
+
+    assert "persistence_profile:replay_ready" in result.degraded_evidence
+    assert "required_profile_missing_requirements" in result.degraded_evidence
+    assert "critical_dossier_evidence_gap" in result.degraded_evidence
+    assert result.status["operational_success"] is False
+    assert result.status["operational_success_criteria"] == {
+        "critical_pipeline": True,
+        "runtime_terminal_success": True,
+        "required_evidence_profile": "forensic_grade",
+        "attained_evidence_profile": "replay_ready",
+        "required_profile_satisfied": False,
+        "dossier_evidence_satisfied": False,
+        "operational_success": False,
+    }

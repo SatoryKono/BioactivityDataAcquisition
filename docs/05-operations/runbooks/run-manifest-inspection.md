@@ -389,6 +389,14 @@ than silently accepting the bundle as canonical.
 - `alert_signals.required_persistence_profile_gap=true` means the run did not
   meet the minimum persistence profile declared at launch time and must not be
   treated as satisfying that operator contract;
+- one-run dossier `status.operational_success=false` means runtime success and
+  dossier evidence did not jointly satisfy the active operator contract;
+- for critical runs where `required_profile=forensic_grade`,
+  `status.operational_success_criteria.dossier_evidence_satisfied` must be
+  `true` before the run is marked operationally successful;
+- `degraded_evidence` containing `critical_dossier_evidence_gap` means the run
+  may have completed, but missing/degraded dossier evidence still blocks
+  operational success for the critical profile;
 - `alert_signals.produced_artifact_trace_gap=true` means the inspection surface
   could not resolve concrete produced artifacts from the manifest's run ledger;
 - `alert_signals.replay_ready_gap=true` means the run must not be treated as

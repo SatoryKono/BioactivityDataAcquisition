@@ -10,7 +10,7 @@ from bioetl.composition.runtime_builders.runner_builder_support import (
     validate_required_persistence_profile,
 )
 from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
-from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
+from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 
@@ -20,6 +20,9 @@ class _AuditRequiredFn(Protocol):
 
 class _ControlPlaneSettingsFn(Protocol):
     def __call__(self, *, control_plane: object | None) -> tuple[str, bool, bool]: ...
+
+
+_FORENSIC_GRADE_PROFILE = "forensic_grade"
 
 
 def _raise_if_noop_in_prod(
@@ -122,6 +125,43 @@ def validate_prod_noop_components(
             "BIOETL_OBSERVABILITY__ALLOW_NOOP_OBSERVABILITY_IN_PROD=true for an "
             "explicit override."
         ),
+    )
+
+
+def validate_forensic_grade_observability_evidence(
+    *,
+    tracer: TracingPort,
+    metrics: MetricsPort,
+    logger: LoggerPort,
+    audit: AuditPort | None,
+) -> None:
+    """Fail closed when critical runs cannot produce forensic-grade evidence."""
+    missing: list[str] = []
+    if isinstance(logger, NoOpLogger):
+        missing.append("structured_logger")
+    if isinstance(tracer, NoOpTracing):
+        missing.append("tracing")
+    if isinstance(metrics, NoOpMetrics):
+        missing.append("metrics")
+    if audit is None or isinstance(audit, NoOpAudit):
+        missing.append("audit")
+    if not missing:
+        return
+    logger.warning(
+        "forensic_grade_observability_evidence_unavailable",
+        stage="bootstrap",
+        reason_code="forensic_grade_observability_gap",
+        message=(
+            "forensic_grade runs require structured logger, tracing, metrics, "
+            "and audit evidence before execution"
+        ),
+        missing_observability_evidence=missing,
+        required_persistence_profile=_FORENSIC_GRADE_PROFILE,
+    )
+    joined = ", ".join(missing)
+    raise ObservabilityContractError(
+        "forensic_grade runs require non-noop observability evidence; missing: "
+        f"{joined}"
     )
 
 

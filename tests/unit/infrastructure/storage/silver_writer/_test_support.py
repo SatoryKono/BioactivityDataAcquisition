@@ -52,6 +52,39 @@ def silver_write_schema() -> pa.Schema:
     )
 
 
+async def write_standard_silver(
+    writer: object,
+    *,
+    table_name: str = "test.table",
+    records: list[dict[str, object]],
+    mode: str,
+) -> object:
+    """Execute the canonical Silver test write call shared across unit tests."""
+    return await writer.write_silver(
+        table_name=table_name,
+        records=records,
+        primary_keys=["entity_id"],
+        schema=silver_write_schema(),
+        mode=mode,
+    )
+
+
+async def assert_standard_silver_write_succeeds(
+    writer: object,
+    *,
+    records: list[dict[str, object]],
+    mode: str,
+) -> None:
+    """Assert the canonical Silver test write reaches the Delta write path."""
+    with patch_new_silver_write() as mock_write:
+        await write_standard_silver(
+            writer,
+            records=records,
+            mode=mode,
+        )
+        mock_write.assert_called_once()
+
+
 @contextmanager
 def patch_new_silver_write(
     *,

@@ -44,6 +44,31 @@ ______________________________________________________________________
 
 - Дедупликация записей.
 - Валидация схемы.
+- Управляемая стандартизация структур до нормализации, вычисления `content_hash`
+  и merge/dedup:
+  - policy version: `pubchem-basic-v1`;
+  - normalized identifiers: `standardized_canonical_smiles`,
+    `standardized_isomeric_smiles`, `standardized_inchi`,
+    `standardized_inchi_key`;
+  - parent grouping key: `structure_parent_key`;
+  - observability fields: `chemical_standardization_status` and
+    `chemical_standardization_warnings`.
+
+`pubchem-basic-v1` intentionally does not perform toolkit-based tautomer,
+salt/solvent, charge, or parent-structure mutation. Unsupported cases are made
+visible with bounded warning codes such as
+`multi_component_parent_deferred`, `charge_normalization_deferred`,
+`parent_key_from_smiles_without_inchi_key`, and
+`structure_parent_key_unavailable`. This keeps the first policy deterministic
+and dependency-free while providing a stable extension point for a future
+RDKit/OpenBabel-backed policy.
+
+| Status              | Meaning                                                                 |
+| ------------------- | ----------------------------------------------------------------------- |
+| `standardized`      | At least one structural identifier was normalized without warnings.      |
+| `partial`           | A normalized identifier exists, but invalid/deferred cases were found.   |
+| `invalid`           | Raw structural identifiers were present, but none passed validation.     |
+| `missing_structure` | No SMILES/InChI/InChIKey input was present for the standardization pass. |
 
 ### 3.3. Load
 

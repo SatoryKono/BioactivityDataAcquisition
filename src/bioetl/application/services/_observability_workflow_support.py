@@ -21,6 +21,7 @@ TRACE_DRILLDOWN_PATH = "/a/grafana-exploretraces-app/"
 TRACE_DRILLDOWN_DEFAULT_FROM = "now-24h"
 TRACE_DRILLDOWN_DEFAULT_TO = "now"
 TRACE_WINDOW_PADDING = timedelta(minutes=5)
+_CRITICAL_EVIDENCE_PROFILES = frozenset({"forensic_grade"})
 
 
 class _CheckpointLookupService(Protocol):
@@ -317,7 +318,34 @@ def classify_evidence_status(
     if quarantine_summary is None:
         degraded.append("quarantine_summary")
     degraded.extend(collect_traceability_degradation(traceability))
+    if requires_critical_dossier_evidence(run_manifest) and (missing or degraded):
+        degraded.append("critical_dossier_evidence_gap")
     return tuple(missing), tuple(degraded)
+
+
+def requires_critical_dossier_evidence(
+    run_manifest: RunManifestInspectionResult | None,
+) -> bool:
+    """Return whether this run requires forensic-grade dossier evidence."""
+    if run_manifest is None:
+        return False
+    diagnostics = run_manifest.diagnostics
+    if diagnostics.get("critical_pipeline") is True:
+        return True
+    return resolve_required_evidence_profile(diagnostics) in _CRITICAL_EVIDENCE_PROFILES
+
+
+def resolve_required_evidence_profile(diagnostics: dict[str, object]) -> str | None:
+    """Resolve the evidence profile required by runtime/control-plane policy."""
+    persistence_profile = diagnostics.get("persistence_profile")
+    if isinstance(persistence_profile, dict):
+        required_profile = persistence_profile.get("required_profile")
+        if isinstance(required_profile, str) and required_profile:
+            return required_profile
+    required_profile = diagnostics.get("required_persistence_profile")
+    if isinstance(required_profile, str) and required_profile:
+        return required_profile
+    return None
 
 
 def classify_checkpoint_status(checkpoint: CheckpointInfo | None) -> list[str]:
@@ -348,6 +376,7 @@ def collect_persistence_profile_degradation(
     if attained not in {None, "forensic_grade"}:
         degraded.append(f"persistence_profile:{attained}")
     for key in (
+        "required_profile_missing_requirements",
         "replay_ready_missing_requirements",
         "forensic_grade_missing_requirements",
     ):
@@ -403,6 +432,11 @@ def _degraded_evidence_steps(degraded_evidence: tuple[str, ...]) -> tuple[str, .
             "Review required persistence profile before treating this run as "
             "forensic-grade."
         )
+    if "critical_dossier_evidence_gap" in degraded_evidence:
+        steps.append(
+            "Resolve dossier evidence gaps before marking this critical run "
+            "operationally successful."
+        )
     if "trace_links_unavailable" in degraded_evidence:
         steps.append(
             "Use audit, manifest, and lineage sections as the current traceability "
@@ -427,6 +461,12 @@ def build_status_section(
         if isinstance(persistence_profile, dict)
         else None
     )
+    operational_success_criteria = build_operational_success_criteria(
+        diagnostics=diagnostics,
+        attained_profile=attained_profile,
+        missing_evidence=missing_evidence,
+        degraded_evidence=degraded_evidence,
+    )
     return {
         "forensic_profile": attained_profile,
         "latest_status": diagnostics.get("latest_status"),
@@ -442,4 +482,45 @@ def build_status_section(
         ),
         "missing_evidence_count": len(missing_evidence),
         "degraded_evidence_count": len(degraded_evidence),
+        "operational_success": operational_success_criteria["operational_success"],
+        "operational_success_criteria": operational_success_criteria,
+    }
+
+
+def build_operational_success_criteria(
+    *,
+    diagnostics: dict[str, object],
+    attained_profile: object,
+    missing_evidence: tuple[str, ...],
+    degraded_evidence: tuple[str, ...],
+) -> dict[str, object]:
+    """Build dossier-backed success criteria for operator decisions."""
+    required_profile = resolve_required_evidence_profile(diagnostics)
+    critical_pipeline = (
+        diagnostics.get("critical_pipeline") is True
+        or required_profile in _CRITICAL_EVIDENCE_PROFILES
+    )
+    persistence_profile = diagnostics.get("persistence_profile")
+    required_profile_satisfied = True
+    if isinstance(persistence_profile, dict) and isinstance(
+        persistence_profile.get("required_profile_satisfied"), bool
+    ):
+        required_profile_satisfied = bool(
+            persistence_profile["required_profile_satisfied"]
+        )
+    runtime_terminal_success = diagnostics.get("latest_status") == "success"
+    dossier_evidence_satisfied = (
+        required_profile_satisfied and not missing_evidence and not degraded_evidence
+    )
+    operational_success = runtime_terminal_success and (
+        dossier_evidence_satisfied if critical_pipeline else True
+    )
+    return {
+        "critical_pipeline": critical_pipeline,
+        "runtime_terminal_success": runtime_terminal_success,
+        "required_evidence_profile": required_profile,
+        "attained_evidence_profile": attained_profile,
+        "required_profile_satisfied": required_profile_satisfied,
+        "dossier_evidence_satisfied": dossier_evidence_satisfied,
+        "operational_success": operational_success,
     }

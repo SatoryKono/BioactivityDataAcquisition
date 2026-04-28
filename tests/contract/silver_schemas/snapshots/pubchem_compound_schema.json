@@ -129,6 +129,45 @@
     "required": false,
     "unique": false
   },
+  "chemical_standardization_policy_version": {
+    "checks": [
+      {
+        "name": "chemical_standardization_policy_version"
+      }
+    ],
+    "coerce": false,
+    "description": "Version of the applied chemical standardization policy",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "chemical_standardization_status": {
+    "checks": [
+      {
+        "name": "chemical_standardization_status_enum"
+      }
+    ],
+    "coerce": false,
+    "description": "Bounded chemical standardization status",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "chemical_standardization_warnings": {
+    "checks": [
+      {
+        "name": "chemical_standardization_warnings_length"
+      }
+    ],
+    "coerce": false,
+    "description": "JSON array of standardization warning codes",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "complexity": {
     "checks": [
       {
@@ -509,6 +548,71 @@
     "coerce": false,
     "description": "Rotatable bond count",
     "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "standardized_canonical_smiles": {
+    "checks": [
+      {
+        "name": "standardized_canonical_smiles_length"
+      }
+    ],
+    "coerce": false,
+    "description": "Policy-normalized canonical SMILES string",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "standardized_inchi": {
+    "checks": [
+      {
+        "name": "standardized_inchi_format"
+      }
+    ],
+    "coerce": false,
+    "description": "Policy-normalized IUPAC InChI identifier",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "standardized_inchi_key": {
+    "checks": [
+      {
+        "name": "standardized_inchi_key_format"
+      }
+    ],
+    "coerce": false,
+    "description": "Policy-normalized InChI hash key",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "standardized_isomeric_smiles": {
+    "checks": [
+      {
+        "name": "standardized_isomeric_smiles_length"
+      }
+    ],
+    "coerce": false,
+    "description": "Policy-normalized isomeric SMILES string",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "structure_parent_key": {
+    "checks": [
+      {
+        "name": "structure_parent_key_length"
+      }
+    ],
+    "coerce": false,
+    "description": "Stable parent-structure key from the standardization policy",
+    "dtype": "str",
     "nullable": true,
     "required": false,
     "unique": false
