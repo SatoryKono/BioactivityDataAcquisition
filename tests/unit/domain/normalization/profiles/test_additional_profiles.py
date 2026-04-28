@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from bioetl.domain.normalization.profiles import (
+    CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_ASSAY_PARAMETERS_PROFILE,
     CHEMBL_ASSAY_PROFILE,
     CHEMBL_CELL_LINE_PROFILE,
@@ -101,6 +102,16 @@ def test_chembl_molecule_ro3_pass_is_registry_governed_strict_enum() -> None:
     assert ro3_pass_rule.apply("maybe") is None
 
 
+def test_chembl_molecule_max_phase_preserves_quasi_enum_numeric_codes() -> None:
+    max_phase_rule = CHEMBL_MOLECULE_PROFILE.rule_for("max_phase")
+
+    assert max_phase_rule is not None
+    assert max_phase_rule.apply(" 0.5 ") == 0.5
+    assert max_phase_rule.apply("4.0") == 4
+    assert max_phase_rule.apply("5") is None
+    assert "quasi-enum" in (max_phase_rule.notes or "")
+
+
 def test_chembl_publication_profile_normalizes_publication_type_and_open_access() -> (
     None
 ):
@@ -127,6 +138,17 @@ def test_chembl_assay_parameter_type_preserves_unknown_for_raw_review() -> None:
     assert assay_parameter_type_rule.apply("novel assay tag") == "NOVEL ASSAY TAG"
     assert assay_parameter_type_rule.apply("   ") is None
     assert "raw-vs-canonical review" in (assay_parameter_type_rule.notes or "")
+
+
+def test_chembl_activity_mapping_status_companions_use_shared_enum_family() -> None:
+    bao_mapping_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("bao_endpoint_mapping_status")
+    qudt_mapping_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("qudt_unit_mapping_status")
+
+    assert bao_mapping_rule is not None
+    assert bao_mapping_rule.apply(" Mapped ") == "mapped"
+    assert bao_mapping_rule.apply("unknown") is None
+    assert qudt_mapping_rule is not None
+    assert qudt_mapping_rule.apply("UNMAPPED") == "unmapped"
 
 
 def test_chembl_subcellular_fraction_profiles_preserve_unknown_but_not_blank() -> None:

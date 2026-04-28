@@ -10,9 +10,14 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_canonical_smiles,
+    normalize_profile_quasi_enum_numeric,
 )
 from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
-from bioetl.domain.schemas.constants import MOLECULE_TYPES, STRUCTURE_TYPES
+from bioetl.domain.schemas.constants import (
+    MAX_PHASE_VALUES,
+    MOLECULE_TYPES,
+    STRUCTURE_TYPES,
+)
 
 from ._chembl_vocab import chembl_enum
 
@@ -45,7 +50,6 @@ _INT_FIELDS = frozenset(
         "dosed_ingredient",
         "first_in_class",
         "inorganic_flag",
-        "max_phase",
         "natural_product",
         "polymer_flag",
         "prodrug",
@@ -102,6 +106,15 @@ _SPECIAL_RULES = {
         normalize_profile_canonical_smiles,
         "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",
     ),
+    "max_phase": (
+        lambda value: normalize_profile_quasi_enum_numeric(
+            value,
+            allowed_values=MAX_PHASE_VALUES,
+        ),
+        "Normalize max_phase as a reviewed quasi-enum numeric provider code; "
+        "preserve canonical values including 0.5 and collapse out-of-universe "
+        "inputs to None.",
+    ),
 }
 
 # Enum fields for strict validation
@@ -113,7 +126,10 @@ _ENUM_FIELDS = {
 
 CHEMBL_MOLECULE_PROFILE = build_standard_profile(
     profile_name="chembl.molecule",
-    description="Canonical field-level normalization policy for the ChEMBL Molecule Silver schema.",
+    description=(
+        "Canonical field-level normalization policy for the ChEMBL Molecule "
+        "Silver schema."
+    ),
     schema_fields=CHEMBL_MOLECULE_SCHEMA_FIELDS,
     meta_fields=_META_FIELDS,
     title_fields=_TITLE_FIELDS,

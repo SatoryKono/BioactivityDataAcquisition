@@ -26,8 +26,9 @@ class MoleculeRecord(BaseModel):
     structure_type: str | None = Field(
         default=None, description="Structure type (MOL, NONE, SEQ, BOTH)"
     )
-    max_phase: int | None = Field(
-        default=None, description="Maximum clinical phase (0-4)"
+    max_phase: int | float | None = Field(
+        default=None,
+        description="Maximum clinical phase quasi-enum (-1, 0, 0.5, 1, 2, 3, 4)",
     )
     first_approval: int | None = Field(
         default=None, description="Year of first approval"

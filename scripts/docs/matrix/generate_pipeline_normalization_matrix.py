@@ -237,9 +237,13 @@ _UNIPROT_ENUM_CONFIG = "configs/enums/uniprot.yaml"
 
 ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("chembl", "activity", "assay_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "activity", "bao_endpoint_mapping_status"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "activity", "bao_format_mapping_status"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "activity", "data_validity_comment"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "activity", "qudt_unit_mapping_status"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "activity", "standard_relation"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "activity", "standard_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "activity", "uo_unit_mapping_status"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay", "assay_category"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay", "assay_group"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay", "assay_test_type"): _CHEMBL_ENUM_CONFIG,
@@ -249,9 +253,11 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("chembl", "assay_parameters", "standard_relation"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay_parameters", "standard_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "assay_parameters", "standard_units"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "molecule", "max_phase"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "molecule", "ro3_pass"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "molecule", "molecule_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "molecule", "structure_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "publication", "publication_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "publication_term", "term_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "target", "target_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "target_component", "component_type"): _CHEMBL_ENUM_CONFIG,
@@ -262,12 +268,28 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
 
 ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
     ("chembl", "activity", "assay_type"): ("assay", "types"),
+    ("chembl", "activity", "bao_endpoint_mapping_status"): (
+        "activity",
+        "mapping_statuses",
+    ),
+    ("chembl", "activity", "bao_format_mapping_status"): (
+        "activity",
+        "mapping_statuses",
+    ),
     ("chembl", "activity", "data_validity_comment"): (
         "activity",
         "data_validity_comments",
     ),
+    ("chembl", "activity", "qudt_unit_mapping_status"): (
+        "activity",
+        "mapping_statuses",
+    ),
     ("chembl", "activity", "standard_relation"): ("activity", "standard_relations"),
     ("chembl", "activity", "standard_type"): ("activity", "standard_types"),
+    ("chembl", "activity", "uo_unit_mapping_status"): (
+        "activity",
+        "mapping_statuses",
+    ),
     ("chembl", "activity", "standard_units"): ("activity", "standard_units"),
     ("chembl", "assay", "assay_category"): ("assay", "categories"),
     ("chembl", "assay", "assay_group"): ("assay", "assay_groups"),
@@ -290,15 +312,13 @@ ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
         "activity",
         "standard_units",
     ),
+    ("chembl", "molecule", "max_phase"): ("molecule", "max_phase_values"),
     ("chembl", "molecule", "molecule_type"): ("molecule", "types"),
     ("chembl", "molecule", "ro3_pass"): ("molecule", "ro3_pass_values"),
     ("chembl", "molecule", "structure_type"): ("molecule", "structure_types"),
     ("chembl", "publication", "doc_type"): ("publication", "native_doc_types"),
-    ("chembl", "publication", "publication_type"): (
-        "publication",
-        "native_doc_types",
-    ),
-    ("chembl", "publication_term", "term_type"): ("publication", "native_doc_types"),
+    ("chembl", "publication", "publication_type"): ("publication", "types"),
+    ("chembl", "publication_term", "term_type"): ("publication_term", "term_types"),
     ("chembl", "target", "target_type"): ("target", "types"),
     ("chembl", "target_component", "component_type"): (
         "target",

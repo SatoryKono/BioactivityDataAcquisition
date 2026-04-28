@@ -108,3 +108,15 @@ def test_chembl_activity_target_organism_uses_curated_organism_normalizer() -> N
     assert organism_rule.normalizer("  homo   sapiens ") == "Homo sapiens"
     assert organism_rule.normalizer("e. coli") == "Escherichia coli"
     assert "organism" in (organism_rule.notes or "").lower()
+
+
+def test_chembl_activity_mapping_status_rules_are_profile_visible() -> None:
+    endpoint_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("bao_endpoint_mapping_status")
+    unit_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("uo_unit_mapping_status")
+
+    assert endpoint_rule is not None
+    assert endpoint_rule.normalizer(" Mapped ") == "mapped"
+    assert endpoint_rule.normalizer("mystery") is None
+    assert unit_rule is not None
+    assert unit_rule.normalizer("MISSING") == "missing"
+    assert "mapping-status" in (endpoint_rule.notes or "").lower()

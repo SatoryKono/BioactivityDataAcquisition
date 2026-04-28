@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
+from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
 from ._chembl_activity_fields import (
     ACTIVITY_STANDARD_TYPES,
@@ -29,6 +30,7 @@ from .profile_normalizers import (
     normalize_profile_canonical_smiles,
     normalize_profile_chembl_organism_name,
     normalize_profile_enum,
+    normalize_profile_mapping_status,
     normalize_profile_operator,
 )
 
@@ -69,6 +71,14 @@ _ENUM_FIELDS = {
 _ONTOLOGY_ID_FIELDS = chembl_ontology_family_fields("uo", entity="activity")
 _UNIT_FIELDS = chembl_controlled_family_fields("units", entity="activity")
 _BAO_FIELDS = chembl_ontology_family_fields("bao", entity="activity")
+_MAPPING_STATUS_FIELDS = frozenset(
+    {
+        "bao_endpoint_mapping_status",
+        "bao_format_mapping_status",
+        "qudt_unit_mapping_status",
+        "uo_unit_mapping_status",
+    }
+)
 _STRICT_JSON_FIELDS = SET_LIKE_FIELDS
 
 _SPECIAL_RULE_COMPONENTS = {
@@ -98,6 +108,17 @@ _SPECIAL_RULE_COMPONENTS = {
         )
         for field_name in sorted(_BAO_FIELDS)
     },
+    **{
+        field_name: (
+            lambda value: normalize_profile_mapping_status(
+                value,
+                allowed_values=ONTOLOGY_MAPPING_STATUSES,
+            ),
+            "Normalize ontology and unit mapping-status companion fields to "
+            "the canonical lowercase enum family mapped/unmapped/missing.",
+        )
+        for field_name in sorted(_MAPPING_STATUS_FIELDS)
+    },
 }
 
 
@@ -125,6 +146,10 @@ CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
         "standard_type": ACTIVITY_STANDARD_TYPES,
         "assay_type": ASSAY_TYPES,
         "data_validity_comment": DATA_VALIDITY_COMMENTS,
+        **dict.fromkeys(
+            sorted(_MAPPING_STATUS_FIELDS),
+            ONTOLOGY_MAPPING_STATUSES,
+        ),
     },
     special_rules=_SPECIAL_RULE_COMPONENTS,
     unit_fields=_UNIT_FIELDS,

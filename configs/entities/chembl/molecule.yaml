@@ -165,6 +165,18 @@ quality:
                 - N
             nullable: true
             error_message: ro3_pass must be Y or N when present
+        -   field: max_phase
+            type: enum
+            allowed:
+                - -1
+                - 0
+                - 0.5
+                - 1
+                - 2
+                - 3
+                - 4
+            nullable: true
+            error_message: max_phase must be one of the declared ChEMBL phase codes when present
         -   field: canonical_smiles
             type: custom
             validator: smiles_validator

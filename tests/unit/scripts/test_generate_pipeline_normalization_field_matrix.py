@@ -182,6 +182,12 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
         == "normalize_profile_publication_type_field"
     )
     assert chembl_publication_type["strictness"] == "strict_enum"
+    assert chembl_publication_type["controlled_vocabulary_source"] == (
+        "configs/enums/chembl.yaml"
+    )
+    assert chembl_publication_type["policy_scope"] == (
+        "project_subset_of_provider_universe"
+    )
 
     chembl_publication_is_oa = _row(rows, "chembl_publication", "is_oa")
     assert chembl_publication_is_oa["normalizer"] == "normalize_profile_boolean"
@@ -309,10 +315,7 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     molecule_properties = _row(rows, "chembl_molecule", "molecule_properties")
     assert molecule_properties["normalizer"] == "normalize_profile_json_string_strict"
     assert molecule_properties["strictness"] == "strict_json"
-    assert (
-        molecule_properties["dq_coverage"]
-        == "runtime_warning:malformed_json_normalized_to_null"
-    )
+    assert molecule_properties["dq_coverage"] == "dq_config:unavailable"
 
     bao_format = _row(rows, "chembl_activity", "bao_format")
     assert bao_format["semantic_category"] == "ontology_reference_identifier"
@@ -350,7 +353,7 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     publication_term_type = _row(rows, "chembl_publication_term", "term_type")
     assert (
         publication_term_type["policy_scope"]
-        == "project_projection_of_provider_universe"
+        == "provider_full_universe"
     )
 
     publication_class = _row(rows, "chembl_publication", "publication_class")
@@ -362,7 +365,19 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     ro3_pass = _row(rows, "chembl_molecule", "ro3_pass")
     assert ro3_pass["controlled_vocabulary_source"] == "configs/enums/chembl.yaml"
     assert ro3_pass["strictness"] == "strict_enum"
-    assert ro3_pass["dq_coverage"] == "enum:error"
+    assert ro3_pass["dq_coverage"] == "dq_config:unavailable"
+
+    max_phase = _row(rows, "chembl_molecule", "max_phase")
+    assert max_phase["controlled_vocabulary_source"] == "configs/enums/chembl.yaml"
+    assert max_phase["strictness"] == "strict_enum"
+    assert max_phase["policy_scope"] == "provider_full_universe"
+
+    bao_mapping_status = _row(rows, "chembl_activity", "bao_endpoint_mapping_status")
+    assert bao_mapping_status["controlled_vocabulary_source"] == (
+        "configs/enums/chembl.yaml"
+    )
+    assert bao_mapping_status["strictness"] == "strict_enum"
+    assert bao_mapping_status["policy_scope"] == "provider_full_universe"
 
     component_type = _row(rows, "chembl_target_component", "component_type")
     assert component_type["controlled_vocabulary_source"] == (
@@ -392,6 +407,20 @@ def test_build_field_matrix_rows_keeps_chembl_cell_line_policy_fields_visible() 
         efo_id["controlled_vocabulary_source"] == "configs/vocab/chembl_ontology.yaml"
     )
     assert efo_id["dq_coverage"] == "pattern:error"
+
+
+def test_build_field_matrix_rows_explicitly_shows_no_governed_fields_for_audit_gap_pipelines() -> (
+    None
+):
+    rows = build_field_matrix_rows()
+    governed_sources = {
+        row["pipeline_name"]: row["controlled_vocabulary_source"]
+        for row in rows
+        if row["pipeline_name"] in {"chembl_compound_record", "chembl_protein_class"}
+        and row["controlled_vocabulary_source"]
+    }
+
+    assert governed_sources == {}
 
 
 def test_build_field_matrix_rows_aligns_chembl_taxonomy_fields_to_integer_contract() -> (

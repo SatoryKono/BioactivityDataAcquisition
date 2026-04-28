@@ -38,6 +38,7 @@ from bioetl.domain.value_objects.chemical import SMILES
 
 __all__ = [
     "normalize_profile_abstract",
+    "normalize_profile_assay_parameter_type",
     "normalize_profile_bao_identifier",
     "normalize_profile_binary_flag",
     "normalize_profile_boolean",
@@ -56,6 +57,7 @@ __all__ = [
     "normalize_profile_json_string",
     "normalize_profile_json_string_list_vocabulary_strict",
     "normalize_profile_json_string_strict",
+    "normalize_profile_mapping_status",
     "normalize_profile_null",
     "normalize_profile_ontology_id",
     "normalize_profile_operator",
@@ -63,6 +65,7 @@ __all__ = [
     "normalize_profile_pmc_id",
     "normalize_profile_pmid",
     "normalize_profile_publication_type",
+    "normalize_profile_quasi_enum_numeric",
     "normalize_profile_smiles",
     "normalize_profile_text",
     "normalize_profile_title",
@@ -164,6 +167,54 @@ def normalize_profile_enum(value: object, *, allowed_values: frozenset[str]) -> 
     if isinstance(value, str):
         return normalize_case(value, allowed_values)
     return value if value in allowed_values else None
+
+
+def normalize_profile_mapping_status(
+    value: object, *, allowed_values: frozenset[str]
+) -> object:
+    """Normalize mapping-status companion fields to canonical lowercase enums."""
+    if not isinstance(value, str):
+        return None
+    cleaned = normalize_string(value)
+    if cleaned is None:
+        return None
+    candidate = cleaned.casefold()
+    return candidate if candidate in allowed_values else None
+
+
+def normalize_profile_quasi_enum_numeric(
+    value: object, *, allowed_values: tuple[float, ...]
+) -> object:
+    """Normalize numeric provider codes while preserving non-integer canonical values."""
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, str):
+        cleaned = normalize_string(value)
+        if cleaned is None:
+            return None
+        try:
+            numeric = float(cleaned)
+        except ValueError:
+            return None
+    elif isinstance(value, (int, float)):
+        numeric = float(value)
+    else:
+        return None
+
+    if numeric not in allowed_values:
+        return None
+    return int(numeric) if numeric.is_integer() else numeric
+
+
+def normalize_profile_assay_parameter_type(
+    value: object, *, allowed_values: frozenset[str]
+) -> object:
+    """Normalize controlled assay-parameter type vocabulary while preserving unknowns."""
+    return normalize_profile_governed_uppercase_vocabulary(
+        value,
+        allowed_values=allowed_values,
+        preserve_unknown=True,
+    )
 
 
 def normalize_profile_publication_type(

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
@@ -123,40 +124,46 @@ def build_published_silver_artifact(
     return payload
 
 
+@dataclass(frozen=True)
+class RunManifestOverrides:
+    resolved_config_hash: str | None = VALID_RESOLVED_CONFIG_HASH
+    effective_config_hash: str | None = VALID_EFFECTIVE_CONFIG_HASH
+    provider: str = "chembl"
+    entity: str = "activity"
+    pipeline_name: str = "chembl_activity"
+    launch_context: dict[str, object] | None = None
+    runtime_config: dict[str, object] | None = None
+    resolved_config: dict[str, object] | None = None
+    contract_ref: str = "chembl.activity"
+    contract_version: str = "1.2.0"
+    dq_policy_ref: str = "chembl_activity.gold"
+    rule_bundle_version: str = "2026.03"
+    dq_contract_compatibility_hash: str = "compat-hash-1"
+    effective_config_artifact_id: str | None = "eca-123"
+
+
 def make_run_manifest(
     *,
     manifest_id: str = "manifest-diagnostics",
     run_id: RunID | None = None,
     run_type: RunType = RunType.INCREMENTAL,
     config_hash: str = VALID_CONFIG_HASH,
-    resolved_config_hash: str | None = VALID_RESOLVED_CONFIG_HASH,
-    effective_config_hash: str | None = VALID_EFFECTIVE_CONFIG_HASH,
     limit: int = 25,
     execution_fingerprint: str | None = None,
     created_at: datetime | None = None,
     source_refs: tuple[RunSourceRef, ...] = (),
     replay_capability: ReplayCapability = ReplayCapability.REBUILD_ONLY,
-    provider: str = "chembl",
-    entity: str = "activity",
-    pipeline_name: str = "chembl_activity",
-    launch_context: dict[str, object] | None = None,
-    runtime_config: dict[str, object] | None = None,
-    resolved_config: dict[str, object] | None = None,
-    contract_ref: str = "chembl.activity",
-    contract_version: str = "1.2.0",
-    dq_policy_ref: str = "chembl_activity.gold",
-    rule_bundle_version: str = "2026.03",
-    dq_contract_compatibility_hash: str = "compat-hash-1",
-    effective_config_artifact_id: str | None = "eca-123",
+    overrides: RunManifestOverrides | None = None,
 ) -> RunManifest:
     """Build a canonical run manifest for diagnostics/inspection test suites."""
+    resolved_overrides = overrides or RunManifestOverrides()
     resolved_run_id = run_id or RunID(uuid4())
     resolved_launch_context = {"limit": limit}
-    if launch_context is not None:
-        resolved_launch_context = dict(launch_context)
+    if resolved_overrides.launch_context is not None:
+        resolved_launch_context = dict(resolved_overrides.launch_context)
     resolved_runtime_config = {"run_type": run_type.value, "limit": limit}
-    if runtime_config is not None:
-        resolved_runtime_config = dict(runtime_config)
+    if resolved_overrides.runtime_config is not None:
+        resolved_runtime_config = dict(resolved_overrides.runtime_config)
     return RunManifest(
         manifest_id=manifest_id,
         execution_fingerprint=execution_fingerprint or f"fingerprint-{manifest_id}",
@@ -164,26 +171,33 @@ def make_run_manifest(
         created_at=created_at or FIXED_TIME,
         run_id=resolved_run_id,
         run_type=run_type,
-        pipeline_name=pipeline_name,
-        provider=provider,
-        entity=entity,
+        pipeline_name=resolved_overrides.pipeline_name,
+        provider=resolved_overrides.provider,
+        entity=resolved_overrides.entity,
         launch_context=resolved_launch_context,
         runtime_config=resolved_runtime_config,
-        resolved_config=resolved_config
-        or {"provider": provider, "entity_type": entity},
+        resolved_config=resolved_overrides.resolved_config
+        or {
+            "provider": resolved_overrides.provider,
+            "entity_type": resolved_overrides.entity,
+        },
         code_provenance=RunCodeProvenance(
             pipeline_version="1.0.0",
             git_commit="abc1234",
             source_revision_state="clean",
             config_hash=config_hash,
-            resolved_config_hash=resolved_config_hash,
-            effective_config_hash=effective_config_hash,
-            contract_ref=contract_ref,
-            contract_version=contract_version,
-            dq_policy_ref=dq_policy_ref,
-            rule_bundle_version=rule_bundle_version,
-            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-            effective_config_artifact_id=effective_config_artifact_id,
+            resolved_config_hash=resolved_overrides.resolved_config_hash,
+            effective_config_hash=resolved_overrides.effective_config_hash,
+            contract_ref=resolved_overrides.contract_ref,
+            contract_version=resolved_overrides.contract_version,
+            dq_policy_ref=resolved_overrides.dq_policy_ref,
+            rule_bundle_version=resolved_overrides.rule_bundle_version,
+            dq_contract_compatibility_hash=(
+                resolved_overrides.dq_contract_compatibility_hash
+            ),
+            effective_config_artifact_id=(
+                resolved_overrides.effective_config_artifact_id
+            ),
         ),
         replay_capability=replay_capability,
         source_refs=source_refs,

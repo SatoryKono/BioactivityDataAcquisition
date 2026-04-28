@@ -12,6 +12,8 @@ from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGu
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
+DEFAULT_TEST_HTTP_TIMEOUT = 30.0
+
 
 def build_mock_logger(*, bind_self: bool = False) -> MagicMock:
     """Create a mock logger with optional self-binding behavior."""
@@ -36,7 +38,6 @@ async def managed_http_client(
     provider: str,
     rate: float,
     capacity: float,
-    timeout: float = 30.0,
     limiter_provider: str | None = None,
     circuit_breaker_provider: str | None = None,
 ) -> AsyncIterator[UnifiedHTTPClient]:
@@ -56,7 +57,7 @@ async def managed_http_client(
             multiplier=1.0,
             jitter_range=(0.0, 0.0),
         ),
-        timeout=timeout,
+        timeout=DEFAULT_TEST_HTTP_TIMEOUT,
         provider=provider,
     )
     await client.__aenter__()

@@ -87,6 +87,13 @@ class TestActivitySync:
             chembl_yaml["activity"]["standard_units"]
         )
 
+    def test_activity_mapping_statuses(self, chembl_yaml: dict[str, Any]) -> None:
+        from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
+
+        assert ONTOLOGY_MAPPING_STATUSES == frozenset(
+            chembl_yaml["activity"]["mapping_statuses"]
+        )
+
 
 class TestAssaySync:
     """Assay enum constants must match YAML."""

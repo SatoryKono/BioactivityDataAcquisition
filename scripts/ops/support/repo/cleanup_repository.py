@@ -39,6 +39,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+COVERAGE_FILE_NAME = ".coverage"
+COVERAGE_GLOB_PATTERN = ".coverage.*"
+COVERAGE_XML_NAME = "coverage.xml"
+
 SAFE_LOCAL_DIR_NAMES: frozenset[str] = frozenset(
     {
         ".benchmarks",
@@ -58,9 +62,9 @@ SAFE_LOCAL_DIR_NAMES: frozenset[str] = frozenset(
 SAFE_LOCAL_FILE_PATTERNS: tuple[tuple[str, str], ...] = (
     ("compiled", "*.pyc"),
     ("compiled", "*.pyo"),
-    ("coverage", ".coverage"),
-    ("coverage", ".coverage.*"),
-    ("coverage", "coverage.xml"),
+    ("coverage", COVERAGE_FILE_NAME),
+    ("coverage", COVERAGE_GLOB_PATTERN),
+    ("coverage", COVERAGE_XML_NAME),
 )
 VENV_SEGMENTS: frozenset[str] = frozenset(
     {
@@ -184,7 +188,7 @@ def _iter_local_dir_candidates(
         if _is_venv_path(base):
             dirnames[:] = []
             continue
-        for name in list(dirnames):
+        for name in dirnames:
             if name not in SAFE_LOCAL_DIR_NAMES:
                 continue
             path = base / name
@@ -209,6 +213,36 @@ def _iter_local_dir_candidates(
     return candidates
 
 
+def _local_file_category(filename: str) -> str | None:
+    if filename in {COVERAGE_FILE_NAME, COVERAGE_XML_NAME}:
+        return "coverage"
+    if filename.startswith(f"{COVERAGE_FILE_NAME}."):
+        return "coverage"
+    if Path(filename).suffix in SAFE_LOCAL_FILE_SUFFIXES:
+        return "compiled"
+    return None
+
+
+def _local_file_candidate(
+    path: Path,
+    *,
+    repo_root: Path,
+    blocked_paths: frozenset[str],
+) -> CleanupCandidate | None:
+    if _is_blocked_path(path, repo_root, blocked_paths):
+        return None
+    category = _local_file_category(path.name)
+    if category is None:
+        return None
+    return CleanupCandidate(
+        path=path.relative_to(repo_root),
+        category=category,
+        tracked=False,
+        apply_allowed=True,
+        reason="exact local artifact file outside blocked cleanup zones",
+    )
+
+
 def _iter_local_file_candidates(
     repo_root: Path,
     *,
@@ -221,13 +255,6 @@ def _iter_local_file_candidates(
             blocked_paths=blocked_paths,
         )
     candidates: list[CleanupCandidate] = []
-    file_categories = {
-        ".coverage": "coverage",
-        "coverage.xml": "coverage",
-        ".coverage.*": "coverage",
-        ".pyc": "compiled",
-        ".pyo": "compiled",
-    }
     for dirpath, dirnames, filenames in os.walk(repo_root):
         base = Path(dirpath)
         if _is_venv_path(base):
@@ -241,27 +268,14 @@ def _iter_local_file_candidates(
             prune_safe_local_dirs=True,
         )
         for filename in filenames:
-            category = None
-            if filename in {".coverage", "coverage.xml"}:
-                category = file_categories.get(filename)
-            elif filename.startswith(".coverage."):
-                category = file_categories.get(".coverage.*")
-            elif Path(filename).suffix in SAFE_LOCAL_FILE_SUFFIXES:
-                category = file_categories.get(f"*{Path(filename).suffix}")
-            if category is None:
-                continue
             path = base / filename
-            if _is_blocked_path(path, repo_root, blocked_paths):
-                continue
-            candidates.append(
-                CleanupCandidate(
-                    path=path.relative_to(repo_root),
-                    category=category,
-                    tracked=False,
-                    apply_allowed=True,
-                    reason="exact local artifact file outside blocked cleanup zones",
-                )
+            candidate = _local_file_candidate(
+                path,
+                repo_root=repo_root,
+                blocked_paths=blocked_paths,
             )
+            if candidate is not None:
+                candidates.append(candidate)
     return candidates
 
 
@@ -307,13 +321,7 @@ def _iter_local_file_candidates_from_status_paths(
         normalized = Path(raw_path.rstrip("/"))
         if _is_venv_path(normalized) or raw_path.endswith("/"):
             continue
-        category = None
-        if normalized.name in {".coverage", "coverage.xml"}:
-            category = "coverage"
-        elif normalized.name.startswith(".coverage."):
-            category = "coverage"
-        elif normalized.suffix in SAFE_LOCAL_FILE_SUFFIXES:
-            category = "compiled"
+        category = _local_file_category(normalized.name)
         if category is None:
             continue
         if is_within_blocked_cleanup_zone(normalized, blocked_paths):
