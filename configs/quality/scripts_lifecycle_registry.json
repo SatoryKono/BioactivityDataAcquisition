@@ -14,18 +14,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the top-level scripts.ops.data module router. Promote it into a canonical supported workflow or remove it if not needed."
     },
-    "scripts/ops/maintenance/github/close_duplicate_prs_wave2.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_issue_workflow",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded issue-wave helper for historical GitHub cleanup execution; do not promote it into the canonical ops command surface unless the duplicate-PR wave is revived with active call-sites."
-    },
-    "scripts/ops/maintenance/github/close_duplicate_prs_wave3.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_issue_workflow",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded issue-wave helper for historical GitHub cleanup execution; do not promote it into the canonical ops command surface unless the duplicate-PR wave is revived with active call-sites."
-    },
     "scripts/ops/maintenance/github/close_great_expectations_spike_issue.sh": {
       "owner": "@bioetl-platform",
       "decision": "legacy_issue_workflow",
@@ -44,29 +32,11 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded issue-specific maintenance helper tied to a historical GitHub closure flow; remove it once the schema-drift follow-up is fully retired."
     },
-    "scripts/ops/maintenance/github/close_superseded_prs.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_issue_workflow",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded PR-cleanup helper for historical maintenance waves; do not expand it into a canonical repo-governance workflow without renewed in-repo call-site evidence."
-    },
     "scripts/ops/maintenance/github/post_issue_2597_progress.sh": {
       "owner": "@bioetl-platform",
       "decision": "legacy_issue_workflow",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded issue-specific maintenance helper tied to a historical GitHub reporting flow; remove it once the related progress-post workflow is retired."
-    },
-    "scripts/ops/maintenance/github/post_issue_rescope_comments.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_issue_workflow",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded issue-specific maintenance helper tied to a historical rescope-comment flow; remove it once the associated maintenance package is retired."
-    },
-    "scripts/ops/maintenance/github/update_issue_rescope_bodies.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_issue_workflow",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded issue-specific maintenance helper tied to a historical rescope-body update flow; remove it once the associated maintenance package is retired."
     },
     "scripts/ops/runtime/neo4j/neo4j_quick_start.sh": {
       "owner": "@bioetl-platform",

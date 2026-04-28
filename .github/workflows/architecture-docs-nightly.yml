@@ -22,7 +22,7 @@ jobs:
           uv-extras: "dev"
 
       - name: Regenerate architecture dependency map
-        run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --update
+        run: uv run python -m scripts.engineering.qa report-dep-map --update
 
       - name: Collect drift summary
         run: |

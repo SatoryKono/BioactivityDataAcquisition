@@ -25,6 +25,8 @@ from tests.unit.application.services.run_manifest_test_support import (
     VALID_CONFIG_HASH as _VALID_CONFIG_HASH,
     VALID_EFFECTIVE_CONFIG_HASH as _VALID_EFFECTIVE_CONFIG_HASH,
     VALID_RESOLVED_CONFIG_HASH as _VALID_RESOLVED_CONFIG_HASH,
+    build_published_silver_artifact,
+    build_source_refs,
     expected_canonical_execution_identity as _expected_canonical_execution_identity,
     expected_degraded_runtime_anchor as _expected_degraded_runtime_anchor,
     expected_exact_replay_anchors as _expected_exact_replay_anchors,
@@ -33,11 +35,20 @@ from tests.unit.application.services.run_manifest_test_support import (
     expected_replay_family_contract as _expected_replay_family_contract,
     expected_replay_parentage as _expected_replay_parentage,
     expected_resume_contract as _expected_resume_contract,
-    make_run_manifest as _make_manifest,
+    make_run_manifest as _build_manifest,
 )
 
 
 _InMemoryRunLedgerStore = InMemoryRunLedgerStore
+
+
+def _make_manifest() -> RunManifest:
+    return _build_manifest(
+        manifest_id="manifest-diagnostics",
+        execution_fingerprint="fingerprint-diagnostics",
+        run_id=RunID(uuid4()),
+        created_at=datetime.now(UTC),
+    )
 
 
 def _expected_missing_produced_artifact_trace(
@@ -54,14 +65,9 @@ def _expected_produced_artifact_trace(manifest: RunManifest) -> dict[str, object
         manifest,
         ledger_entries_present=True,
         artifacts=[
-            {
-                "event_type": "artifact_published",
-                "stage": "silver",
-                "artifact_id": "silver:chembl.activity@1",
-                "dataset_ref": "silver:chembl.activity@1",
-                "lineage_fragment_id": "silver:fragment-1",
-                "artifact_path": "data/output/silver/chembl/activity",
-            }
+            build_published_silver_artifact(
+                artifact_path="data/output/silver/chembl/activity",
+            )
         ],
     )
 
@@ -366,23 +372,12 @@ def test_build_diagnostics_summary_distinguishes_snapshot_backed_runs_from_exact
         _make_manifest(),
         launch_context={"limit": 25, "resume": False, "exact_replay": False},
         replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
-        source_refs=(
-            RunSourceRef(
-                provider="chembl",
-                entity="activity",
-                pipeline_name="chembl_activity",
-                input_snapshots=(
-                    RunInputSnapshotRef(
-                        snapshot_id="snapshot-1",
-                        content_hash="sha256:snapshot-1",
-                        immutable_uri="file:///workspace/bronze/batch_1.jsonl.zst",
-                        storage_provider="s3",
-                        object_bucket="bioetl-bronze",
-                        object_key="chembl/activity/batch_1.jsonl.zst",
-                        object_version_id="version-001",
-                    ),
-                ),
-            ),
+        source_refs=build_source_refs(
+            immutable_uri="file:///workspace/bronze/batch_1.jsonl.zst",
+            storage_provider="s3",
+            object_bucket="bioetl-bronze",
+            object_key="chembl/activity/batch_1.jsonl.zst",
+            object_version_id="version-001",
         ),
     )
 
@@ -460,19 +455,11 @@ def test_build_diagnostics_summary_does_not_mark_unsupported_family_strict_repla
             dq_policy_ref="openalex_publication.gold",
         ),
         replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
-        source_refs=(
-            RunSourceRef(
-                provider="openalex",
-                entity="publication",
-                pipeline_name="openalex_publication",
-                input_snapshots=(
-                    RunInputSnapshotRef(
-                        snapshot_id="snapshot-1",
-                        content_hash="sha256:snapshot-1",
-                        immutable_uri="file:///workspace/bronze/batch_1.jsonl.zst",
-                    ),
-                ),
-            ),
+        source_refs=build_source_refs(
+            provider="openalex",
+            entity="publication",
+            pipeline_name="openalex_publication",
+            immutable_uri="file:///workspace/bronze/batch_1.jsonl.zst",
         ),
     )
 
@@ -494,19 +481,8 @@ def test_build_diagnostics_summary_flags_append_mode_semantic_sinks() -> None:
         _make_manifest(),
         runtime_config={"sink": {"silver": {"enabled": True, "mode": "append"}}},
         replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
-        source_refs=(
-            RunSourceRef(
-                provider="chembl",
-                entity="activity",
-                pipeline_name="chembl_activity",
-                input_snapshots=(
-                    RunInputSnapshotRef(
-                        snapshot_id="snapshot-1",
-                        content_hash="sha256:snapshot-1",
-                        immutable_uri="file:///workspace/bronze/batch_1.jsonl.zst",
-                    ),
-                ),
-            ),
+        source_refs=build_source_refs(
+            immutable_uri="file:///workspace/bronze/batch_1.jsonl.zst",
         ),
     )
 

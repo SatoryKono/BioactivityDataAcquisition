@@ -61,6 +61,66 @@ def build_default_source_refs(
     )
 
 
+def build_source_refs(
+    *,
+    provider: str = "chembl",
+    entity: str = "activity",
+    pipeline_name: str = "chembl_activity",
+    immutable_uri: str,
+    query: str | None = None,
+    query_fingerprint: str | None = None,
+    storage_provider: str | None = None,
+    object_bucket: str | None = None,
+    object_key: str | None = None,
+    object_version_id: str | None = None,
+    etag: str | None = None,
+    last_modified: datetime | None = None,
+    captured_at: datetime | None = None,
+) -> tuple[RunSourceRef, ...]:
+    """Build a single-source immutable snapshot tuple with overridable fields."""
+    return (
+        RunSourceRef(
+            provider=provider,
+            entity=entity,
+            pipeline_name=pipeline_name,
+            query=query,
+            input_snapshots=(
+                RunInputSnapshotRef(
+                    snapshot_id="snapshot-1",
+                    content_hash="sha256:snapshot-1",
+                    immutable_uri=immutable_uri,
+                    query_fingerprint=query_fingerprint,
+                    storage_provider=storage_provider,
+                    object_bucket=object_bucket,
+                    object_key=object_key,
+                    object_version_id=object_version_id,
+                    etag=etag,
+                    last_modified=last_modified,
+                    captured_at=captured_at,
+                ),
+            ),
+        ),
+    )
+
+
+def build_published_silver_artifact(
+    *,
+    artifact_path: str,
+    include_dataset_ref: bool = True,
+) -> dict[str, object]:
+    """Build the canonical published silver artifact payload used in tests."""
+    payload = {
+        "event_type": "artifact_published",
+        "stage": "silver",
+        "artifact_id": "silver:chembl.activity@1",
+        "lineage_fragment_id": "silver:fragment-1",
+        "artifact_path": artifact_path,
+    }
+    if include_dataset_ref:
+        payload["dataset_ref"] = "silver:chembl.activity@1"
+    return payload
+
+
 def make_run_manifest(
     *,
     manifest_id: str = "manifest-diagnostics",
