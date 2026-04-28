@@ -37,6 +37,7 @@ schema:
     fields:
     - assay_param_id
     - assay_id
+    - type_raw
     - type
     - relation
     - value
@@ -86,6 +87,11 @@ quality:
     pattern: ^.{1,100}$
     nullable: false
     error_message: Parameter type is required
+  - field: type_raw
+    type: pattern
+    pattern: ^.{1,100}$
+    nullable: true
+    error_message: Raw parameter type must not exceed 100 chars
   - field: standard_type
     type: enum
     allowed:

@@ -25,6 +25,13 @@ strict_flag_families:
       - chembl_molecule.dosed_ingredient
       - chembl_molecule.polymer_flag
       - chembl_protein_class.downgraded
+  provider_code_flags:
+    invalid_value_mode: coerce_reviewed_flag_provider_codes
+    fields:
+      - chembl_molecule.first_in_class
+      - chembl_molecule.inorganic_flag
+      - chembl_molecule.natural_product
+      - chembl_molecule.prodrug
 
 controlled_vocabularies:
   units:
@@ -53,6 +60,7 @@ controlled_vocabularies:
         - chembl_activity.qudt_ontology_version
     fields:
       - chembl_activity.units
+      - chembl_activity.standard_units
       - chembl_activity.qudt_units
       - chembl_assay_parameters.units
       - chembl_assay_parameters.standard_units
@@ -67,6 +75,16 @@ controlled_vocabularies:
     invalid_value_mode: preserve_unknown_uppercase_lexeme
     fields:
       - chembl_assay_parameters.type
+  assay_categories:
+    canonicalizer: normalize_profile_governed_vocabulary
+    invalid_value_mode: reject_unknown_lexeme
+    fields:
+      - chembl_assay.assay_category
+  assay_confidence_descriptions:
+    canonicalizer: normalize_profile_governed_vocabulary
+    invalid_value_mode: reject_unknown_lexeme
+    fields:
+      - chembl_assay.confidence_description
   target_component_types:
     canonicalizer: normalize_profile_json_string_list_vocabulary_strict
     invalid_value_mode: reject_unknown_json_array_element

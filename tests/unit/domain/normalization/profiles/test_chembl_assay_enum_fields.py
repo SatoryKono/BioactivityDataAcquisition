@@ -21,7 +21,6 @@ class TestChemblAssayEnumFields:
         enum_fields = [
             "assay_type",
             "assay_test_type",
-            "assay_category",
             "relationship_type",
         ]
 
@@ -104,7 +103,6 @@ class TestChemblAssayEnumFields:
         enum_fields = [
             "assay_type",
             "assay_test_type",
-            "assay_category",
             "relationship_type",
         ]
 
@@ -118,6 +116,18 @@ class TestChemblAssayEnumFields:
             assert "normalize" in rule.notes.lower(), (
                 f"{field_name} should have normalization notes"
             )
+
+    def test_assay_category_and_confidence_are_controlled_vocabularies(self) -> None:
+        category_rule = CHEMBL_ASSAY_PROFILE.field_rules["assay_category"]
+        confidence_rule = CHEMBL_ASSAY_PROFILE.field_rules["confidence_description"]
+
+        assert category_rule.normalizer(" screening ") == "screening"
+        assert category_rule.normalizer("mystery category") is None
+        assert "controlled vocabulary" in (category_rule.notes or "").lower()
+
+        assert confidence_rule.normalizer(" active ") == "Active"
+        assert confidence_rule.normalizer("mystery confidence") is None
+        assert "controlled vocabulary" in (confidence_rule.notes or "").lower()
 
 
 class TestEnumValidation:

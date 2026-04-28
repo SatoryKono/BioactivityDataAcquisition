@@ -303,7 +303,91 @@ quality:
                 - standard_type
             condition: all_present
             error_message: Complete activity data requires value, units, and type
+        -   name: bao_endpoint_requires_mapping_status
+            fields:
+                - bao_endpoint
+                - bao_endpoint_mapping_status
+            condition: conditional_required
+            trigger_field: bao_endpoint
+            required_field: bao_endpoint_mapping_status
+            error_message: BAO endpoint mappings must publish a companion mapping status
+        -   name: bao_format_requires_mapping_status
+            fields:
+                - bao_format
+                - bao_format_mapping_status
+            condition: conditional_required
+            trigger_field: bao_format
+            required_field: bao_format_mapping_status
+            error_message: BAO format mappings must publish a companion mapping status
+        -   name: uo_unit_requires_mapping_status
+            fields:
+                - uo_units
+                - uo_unit_mapping_status
+            condition: conditional_required
+            trigger_field: uo_units
+            required_field: uo_unit_mapping_status
+            error_message: UO unit mappings must publish a companion mapping status
+        -   name: qudt_unit_requires_mapping_status
+            fields:
+                - qudt_units
+                - qudt_unit_mapping_status
+            condition: conditional_required
+            trigger_field: qudt_units
+            required_field: qudt_unit_mapping_status
+            error_message: QUDT unit mappings must publish a companion mapping status
     entity_conditional_validations:
+        -   name: mapped_bao_endpoint_requires_bundle
+            condition_field: bao_endpoint_mapping_status
+            condition_value: mapped
+            condition_operator: eq
+            then_validations:
+                -   field: bao_endpoint_iri
+                    type: required
+                    nullable: false
+                    error_message: Mapped BAO endpoint identifiers must publish a canonical IRI
+                -   field: bao_ontology_version
+                    type: required
+                    nullable: false
+                    error_message: Mapped BAO endpoint identifiers must publish an ontology version
+        -   name: mapped_bao_format_requires_bundle
+            condition_field: bao_format_mapping_status
+            condition_value: mapped
+            condition_operator: eq
+            then_validations:
+                -   field: bao_format_iri
+                    type: required
+                    nullable: false
+                    error_message: Mapped BAO format identifiers must publish a canonical IRI
+                -   field: bao_ontology_version
+                    type: required
+                    nullable: false
+                    error_message: Mapped BAO format identifiers must publish an ontology version
+        -   name: mapped_uo_unit_requires_bundle
+            condition_field: uo_unit_mapping_status
+            condition_value: mapped
+            condition_operator: eq
+            then_validations:
+                -   field: uo_unit_iri
+                    type: required
+                    nullable: false
+                    error_message: Mapped UO unit identifiers must publish a canonical IRI
+                -   field: uo_ontology_version
+                    type: required
+                    nullable: false
+                    error_message: Mapped UO unit identifiers must publish an ontology version
+        -   name: mapped_qudt_unit_requires_bundle
+            condition_field: qudt_unit_mapping_status
+            condition_value: mapped
+            condition_operator: eq
+            then_validations:
+                -   field: qudt_unit_iri
+                    type: required
+                    nullable: false
+                    error_message: Mapped QUDT unit identifiers must publish a canonical IRI
+                -   field: qudt_ontology_version
+                    type: required
+                    nullable: false
+                    error_message: Mapped QUDT unit identifiers must publish an ontology version
         -   name: binding_requires_target
             condition_field: assay_type
             condition_value: B

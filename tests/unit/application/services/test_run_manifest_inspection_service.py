@@ -484,7 +484,45 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
     assert result.diagnostics["persistence_profile"][
         "forensic_grade_missing_requirements"
     ] == ["produced_artifact_trace", "run_ledger_history"]
-    assert result.diagnostics == _expected_diagnostics_without_ledger(
+    diagnostics_without_unified = {
+        key: value
+        for key, value in result.diagnostics.items()
+        if key
+        not in {
+            "reproducibility_diagnostics",
+            "reproducibility_policy_assessment",
+        }
+    }
+    assert result.diagnostics["reproducibility_policy_assessment"] == {
+        "required_persistence_profile": "degraded_observable",
+        "replay_capability": "exact_replay_supported",
+        "strict_requirement_requested": True,
+        "strict_exact_replay_supported": True,
+        "required_profile_satisfied": True,
+        "blocking_gaps": [],
+        "snapshot_envelope": {
+            "source_count": 1,
+            "sources_with_snapshots": 1,
+            "any_input_snapshots": True,
+            "full_snapshot_envelope": True,
+            "require_full_snapshot_envelope": False,
+        },
+    }
+    assert (
+        result.diagnostics["reproducibility_diagnostics"]["policy"]["replay_capability"]
+        == "exact_replay_supported"
+    )
+    assert (
+        result.diagnostics["reproducibility_diagnostics"]["policy"]["policy_assessment"]
+        == result.diagnostics["reproducibility_policy_assessment"]
+    )
+    assert (
+        result.diagnostics["reproducibility_diagnostics"]["occurrence_identity"][
+            "manifest_id"
+        ]
+        == "manifest-no-ledger"
+    )
+    assert diagnostics_without_unified == _expected_diagnostics_without_ledger(
         manifest,
         run_id=run_id,
         identity_graph=result.identity_graph,

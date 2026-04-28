@@ -28,9 +28,10 @@ The Codex launcher cluster is intentionally mixed:
   repo-local Codex CLI and runtime prefix wiring before launch.
 - `launchers/codex/setup_plugins.sh` is a retained bootstrap helper with its
   own runtime-selection and `--pytest-only` behavior.
-- `launchers/codex/codex-headless*`, `diagnose-codex-wsl*`, `setup_agents.sh`,
-  and `setup_skills.sh` are compatibility facades around canonical
-  `scripts/ai/codex/` targets.
+- `python -m scripts.ops codex-headless`, `diagnose-codex-wsl`, `setup-agents`,
+  and `setup-skills` now dispatch directly to canonical `scripts/ai/codex/`
+  targets through the router; the old thin wrappers were removed once they
+  reached governance-only status.
 
 ## Internal-only zones
 

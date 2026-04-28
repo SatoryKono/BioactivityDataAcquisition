@@ -12,7 +12,7 @@
             }
         ]
     },
-    "description": "Runtime triage dashboard for log hygiene and alert-condition signals.",
+    "description": "Prometheus-first runtime triage dashboard. Log hygiene and Explore drilldowns require the optional tracing profile.",
     "editable": true,
     "graphTooltip": 1,
     "id": null,
@@ -85,124 +85,271 @@
             "type": "text"
         },
         {
-            "datasource": "Loki",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "mappings": [],
-                    "noValue": "0",
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "red",
-                                "value": 10
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
             "gridPos": {
-                "h": 6,
-                "w": 6,
+                "h": 3,
+                "w": 24,
                 "x": 0,
                 "y": 3
             },
-            "id": 2,
+            "id": 222,
             "options": {
-                "colorMode": "background",
-                "graphMode": "none",
-                "justifyMode": "center",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
+                "content": "<div style=\"padding:0.25rem 0.5rem;line-height:1.5\"><strong>Prometheus-first mode:</strong> summary panels stay usable without Loki/Tempo. Expand <em>Tracing-only Log Hygiene</em> only when the optional <code>tracing</code> profile is enabled; otherwise use Overview, Control Plane, and Data Quality for bounded triage and enable tracing only for log/trace drill-down.</div>",
+                "mode": "html"
             },
-            "targets": [
-                {
-                    "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" | pipeline=~\"$pipeline\" [$__range])) or vector(0)",
-                    "refId": "A"
-                }
-            ],
-            "title": "Warnings",
-            "type": "stat"
+            "title": "Tracing Mode Note",
+            "type": "text"
         },
         {
-            "datasource": "Loki",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "mappings": [],
-                    "noValue": "0",
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "yellow",
-                                "value": 1
-                            },
-                            {
-                                "color": "red",
-                                "value": 5
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
+            "collapsed": true,
             "gridPos": {
-                "h": 6,
-                "w": 6,
-                "x": 6,
-                "y": 3
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 6
             },
-            "id": 3,
-            "options": {
-                "colorMode": "background",
-                "graphMode": "none",
-                "justifyMode": "center",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "textMode": "auto"
-            },
-            "targets": [
+            "id": 223,
+            "panels": [
                 {
-                    "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__!=\"\" [$__range])) or vector(0)",
-                    "refId": "A"
+                    "datasource": "Loki",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "mode": "thresholds"
+                            },
+                            "mappings": [],
+                            "noValue": "0",
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "green",
+                                        "value": null
+                                    },
+                                    {
+                                        "color": "yellow",
+                                        "value": 1
+                                    },
+                                    {
+                                        "color": "red",
+                                        "value": 10
+                                    }
+                                ]
+                            },
+                            "unit": "short"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 6,
+                        "w": 6,
+                        "x": 0,
+                        "y": 0
+                    },
+                    "id": 2,
+                    "options": {
+                        "colorMode": "background",
+                        "graphMode": "none",
+                        "justifyMode": "center",
+                        "orientation": "auto",
+                        "reduceOptions": {
+                            "calcs": [
+                                "lastNotNull"
+                            ],
+                            "fields": "",
+                            "values": false
+                        },
+                        "textMode": "auto"
+                    },
+                    "targets": [
+                        {
+                            "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" | pipeline=~\"$pipeline\" [$__range])) or vector(0)",
+                            "refId": "A"
+                        }
+                    ],
+                    "title": "Warnings",
+                    "type": "stat"
+                },
+                {
+                    "datasource": "Loki",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "mode": "thresholds"
+                            },
+                            "mappings": [],
+                            "noValue": "0",
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "green",
+                                        "value": null
+                                    },
+                                    {
+                                        "color": "yellow",
+                                        "value": 1
+                                    },
+                                    {
+                                        "color": "red",
+                                        "value": 5
+                                    }
+                                ]
+                            },
+                            "unit": "short"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 6,
+                        "w": 6,
+                        "x": 6,
+                        "y": 0
+                    },
+                    "id": 3,
+                    "options": {
+                        "colorMode": "background",
+                        "graphMode": "none",
+                        "justifyMode": "center",
+                        "orientation": "auto",
+                        "reduceOptions": {
+                            "calcs": [
+                                "lastNotNull"
+                            ],
+                            "fields": "",
+                            "values": false
+                        },
+                        "textMode": "auto"
+                    },
+                    "targets": [
+                        {
+                            "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__!=\"\" [$__range])) or vector(0)",
+                            "refId": "A"
+                        }
+                    ],
+                    "title": "Unstructured Logs",
+                    "type": "stat"
+                },
+                {
+                    "datasource": "Loki",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "mode": "palette-classic"
+                            },
+                            "mappings": [],
+                            "noValue": "0",
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "green",
+                                        "value": null
+                                    }
+                                ]
+                            },
+                            "unit": "short"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 6,
+                        "w": 12,
+                        "x": 12,
+                        "y": 0
+                    },
+                    "id": 8,
+                    "options": {
+                        "displayMode": "gradient",
+                        "orientation": "horizontal",
+                        "reduceOptions": {
+                            "calcs": [
+                                "lastNotNull"
+                            ],
+                            "fields": "",
+                            "values": false
+                        },
+                        "showUnfilled": true
+                    },
+                    "targets": [
+                        {
+                            "expr": "topk(8, sum by (event) (count_over_time({job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" | pipeline=~\"$pipeline\" [$__range]))) or label_replace(vector(0), \"event\", \"none\", \"\", \"\")",
+                            "legendFormat": "{{event}}",
+                            "refId": "A"
+                        }
+                    ],
+                    "title": "Top Warning Events",
+                    "type": "bargauge"
+                },
+                {
+                    "datasource": "Loki",
+                    "fieldConfig": {
+                        "defaults": {
+                            "color": {
+                                "mode": "palette-classic"
+                            },
+                            "mappings": [],
+                            "noValue": "0",
+                            "thresholds": {
+                                "mode": "absolute",
+                                "steps": [
+                                    {
+                                        "color": "green",
+                                        "value": null
+                                    }
+                                ]
+                            },
+                            "unit": "short"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 8,
+                        "w": 24,
+                        "x": 0,
+                        "y": 6
+                    },
+                    "id": 9,
+                    "options": {
+                        "dataLinks": [
+                            {
+                                "title": "Open Logs in Loki Explore (tracing profile)",
+                                "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}"
+                            },
+                            {
+                                "title": "Open Traces in Tempo Explore (tracing profile)",
+                                "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}"
+                            }
+                        ],
+                        "legend": {
+                            "calcs": [
+                                "lastNotNull"
+                            ],
+                            "displayMode": "table",
+                            "placement": "bottom"
+                        },
+                        "tooltip": {
+                            "mode": "multi",
+                            "sort": "desc"
+                        }
+                    },
+                    "targets": [
+                        {
+                            "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" | pipeline=~\"$pipeline\" [$__interval])) or label_replace(vector(0), \"series\", \"warnings\", \"\", \"\")",
+                            "legendFormat": "{{series}}",
+                            "refId": "A"
+                        },
+                        {
+                            "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__!=\"\" [$__interval])) or label_replace(vector(0), \"series\", \"unstructured\", \"\", \"\")",
+                            "legendFormat": "{{series}}",
+                            "refId": "B"
+                        }
+                    ],
+                    "title": "Log Hygiene Trend",
+                    "type": "timeseries"
                 }
             ],
-            "title": "Unstructured Logs",
-            "type": "stat"
+            "title": "Tracing-only Log Hygiene (requires optional tracing profile)",
+            "type": "row"
         },
         {
             "datasource": "Prometheus",
@@ -238,7 +385,7 @@
                 "h": 6,
                 "w": 6,
                 "x": 12,
-                "y": 9
+                "y": 13
             },
             "id": 16,
             "options": {
@@ -297,7 +444,7 @@
                 "h": 6,
                 "w": 6,
                 "x": 12,
-                "y": 3
+                "y": 7
             },
             "id": 4,
             "options": {
@@ -356,7 +503,7 @@
                 "h": 6,
                 "w": 6,
                 "x": 18,
-                "y": 3
+                "y": 7
             },
             "id": 5,
             "options": {
@@ -371,7 +518,13 @@
                     "fields": "",
                     "values": false
                 },
-                "textMode": "auto"
+                "textMode": "auto",
+                "dataLinks": [
+                    {
+                        "title": "Open Control Plane v1 (manifest/checkpoint)",
+                        "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?from=${__from}&to=${__to}&var-pipeline=$pipeline&var-run_type=$run_type"
+                    }
+                ]
             },
             "targets": [
                 {
@@ -415,7 +568,7 @@
                 "h": 6,
                 "w": 6,
                 "x": 0,
-                "y": 9
+                "y": 13
             },
             "id": 6,
             "options": {
@@ -474,7 +627,7 @@
                 "h": 6,
                 "w": 6,
                 "x": 6,
-                "y": 9
+                "y": 13
             },
             "id": 7,
             "options": {
@@ -533,7 +686,7 @@
                 "h": 6,
                 "w": 6,
                 "x": 0,
-                "y": 23
+                "y": 27
             },
             "id": 10,
             "options": {
@@ -592,7 +745,7 @@
                 "h": 6,
                 "w": 6,
                 "x": 6,
-                "y": 23
+                "y": 27
             },
             "id": 11,
             "options": {
@@ -651,7 +804,7 @@
                 "h": 6,
                 "w": 6,
                 "x": 12,
-                "y": 23
+                "y": 27
             },
             "id": 12,
             "options": {
@@ -710,7 +863,7 @@
                 "h": 6,
                 "w": 6,
                 "x": 18,
-                "y": 23
+                "y": 27
             },
             "id": 220,
             "options": {
@@ -779,7 +932,7 @@
                 "h": 8,
                 "w": 12,
                 "x": 0,
-                "y": 29
+                "y": 33
             },
             "id": 13,
             "options": {
@@ -839,7 +992,7 @@
                 "h": 8,
                 "w": 12,
                 "x": 12,
-                "y": 29
+                "y": 33
             },
             "id": 14,
             "options": {
@@ -864,57 +1017,6 @@
             ],
             "title": "Global Control-plane Lookup p95",
             "type": "stat"
-        },
-        {
-            "datasource": "Loki",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "mappings": [],
-                    "noValue": "0",
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 6,
-                "x": 18,
-                "y": 9
-            },
-            "id": 8,
-            "options": {
-                "displayMode": "gradient",
-                "orientation": "horizontal",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showUnfilled": true
-            },
-            "targets": [
-                {
-                    "expr": "topk(8, sum by (event) (count_over_time({job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" | pipeline=~\"$pipeline\" [$__range]))) or label_replace(vector(0), \"event\", \"none\", \"\", \"\")",
-                    "legendFormat": "{{event}}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Top Warning Events",
-            "type": "bargauge"
         },
         {
             "datasource": "Prometheus",
@@ -945,7 +1047,7 @@
                 "h": 6,
                 "w": 6,
                 "x": 12,
-                "y": 17
+                "y": 21
             },
             "id": 15,
             "options": {
@@ -1004,7 +1106,7 @@
                 "h": 6,
                 "w": 6,
                 "x": 18,
-                "y": 17
+                "y": 21
             },
             "id": 17,
             "options": {
@@ -1064,7 +1166,7 @@
                 "h": 6,
                 "w": 6,
                 "x": 0,
-                "y": 37
+                "y": 41
             },
             "id": 18,
             "options": {
@@ -1123,7 +1225,7 @@
                 "h": 6,
                 "w": 6,
                 "x": 6,
-                "y": 37
+                "y": 41
             },
             "id": 19,
             "options": {
@@ -1182,7 +1284,7 @@
                 "h": 6,
                 "w": 6,
                 "x": 12,
-                "y": 37
+                "y": 41
             },
             "id": 20,
             "options": {
@@ -1237,7 +1339,7 @@
                 "h": 6,
                 "w": 6,
                 "x": 18,
-                "y": 37
+                "y": 41
             },
             "id": 21,
             "options": {
@@ -1262,73 +1364,6 @@
             ],
             "title": "Memory Pressure Active",
             "type": "stat"
-        },
-        {
-            "datasource": "Loki",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "mappings": [],
-                    "noValue": "0",
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 15
-            },
-            "id": 9,
-            "options": {
-                "dataLinks": [
-                    {
-                        "title": "Open Logs in Loki Explore (tracing profile)",
-                        "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}"
-                    },
-                    {
-                        "title": "Open Traces in Tempo Explore (tracing profile)",
-                        "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}"
-                    }
-                ],
-                "legend": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "targets": [
-                {
-                    "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__=\"\" | level=\"warning\" | pipeline=~\"$pipeline\" [$__interval])) or label_replace(vector(0), \"series\", \"warnings\", \"\", \"\")",
-                    "legendFormat": "{{series}}",
-                    "refId": "A"
-                },
-                {
-                    "expr": "sum(count_over_time({job=\"bioetl\"} | json | __error__!=\"\" [$__interval])) or label_replace(vector(0), \"series\", \"unstructured\", \"\", \"\")",
-                    "legendFormat": "{{series}}",
-                    "refId": "B"
-                }
-            ],
-            "title": "Log Hygiene Trend",
-            "type": "timeseries"
         },
         {
             "datasource": "Prometheus",
@@ -1360,7 +1395,7 @@
                 "h": 8,
                 "w": 6,
                 "x": 0,
-                "y": 45
+                "y": 49
             },
             "id": 201,
             "options": {
@@ -1416,7 +1451,7 @@
                 "h": 8,
                 "w": 6,
                 "x": 6,
-                "y": 45
+                "y": 49
             },
             "id": 202,
             "options": {
@@ -1472,7 +1507,7 @@
                 "h": 8,
                 "w": 6,
                 "x": 12,
-                "y": 45
+                "y": 49
             },
             "id": 203,
             "options": {
@@ -1528,7 +1563,7 @@
                 "h": 8,
                 "w": 6,
                 "x": 18,
-                "y": 45
+                "y": 49
             },
             "id": 204,
             "options": {
@@ -1584,7 +1619,7 @@
                 "h": 8,
                 "w": 12,
                 "x": 0,
-                "y": 53
+                "y": 57
             },
             "id": 205,
             "options": {
@@ -1599,7 +1634,13 @@
                     "fields": "",
                     "values": false
                 },
-                "textMode": "auto"
+                "textMode": "auto",
+                "dataLinks": [
+                    {
+                        "title": "Open Control Plane v1 (checkpoint/replay)",
+                        "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?from=${__from}&to=${__to}&var-pipeline=$pipeline&var-run_type=$run_type"
+                    }
+                ]
             },
             "targets": [
                 {
@@ -1640,7 +1681,7 @@
                 "h": 8,
                 "w": 12,
                 "x": 12,
-                "y": 53
+                "y": 57
             },
             "id": 206,
             "options": {
@@ -1655,7 +1696,13 @@
                     "fields": "",
                     "values": false
                 },
-                "textMode": "auto"
+                "textMode": "auto",
+                "dataLinks": [
+                    {
+                        "title": "Open Control Plane v1 (replay/lineage)",
+                        "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?from=${__from}&to=${__to}&var-pipeline=$pipeline&var-run_type=$run_type"
+                    }
+                ]
             },
             "targets": [
                 {
@@ -1710,7 +1757,7 @@
                 "h": 8,
                 "w": 12,
                 "x": 0,
-                "y": 61
+                "y": 65
             },
             "id": 207,
             "options": {
@@ -1780,7 +1827,7 @@
                 "h": 8,
                 "w": 12,
                 "x": 12,
-                "y": 61
+                "y": 65
             },
             "id": 208,
             "options": {
@@ -1850,7 +1897,7 @@
                 "h": 8,
                 "w": 12,
                 "x": 0,
-                "y": 69
+                "y": 73
             },
             "id": 209,
             "options": {
@@ -1920,7 +1967,7 @@
                 "h": 8,
                 "w": 12,
                 "x": 12,
-                "y": 69
+                "y": 73
             },
             "id": 210,
             "options": {
@@ -1945,6 +1992,76 @@
             ],
             "title": "Shutdown Completed by Reason",
             "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "Errors",
+                        "axisPlacement": "auto",
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 81
+            },
+            "id": 221,
+            "options": {
+                "displayMode": "gradient",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true
+            },
+            "targets": [
+                {
+                    "expr": "topk(10, sum by (error_code) (increase(bioetl_errors_total{pipeline=~\"$pipeline\"}[$__range]))) or label_replace(vector(0), \"error_code\", \"none\", \"\", \"\")",
+                    "instant": true,
+                    "legendFormat": "{{error_code}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Top Pipeline Error Codes",
+            "type": "bargauge"
         }
     ],
     "refresh": "30s",

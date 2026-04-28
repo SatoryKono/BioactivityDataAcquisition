@@ -3,6 +3,12 @@
 *Status: Supporting operational context*
 *Date: 2026-04-28*
 
+Freshness note: the thin compatibility wrappers in this note
+(`codex-headless*`, `diagnose-codex-wsl*`, `setup_agents.sh`,
+`setup_skills.sh`) were removed on 2026-04-28 after the caller matrix reached
+`governance-only`. This note remains as the rationale for retaining the
+bootstrap transport adapters and `setup_plugins.sh`.
+
 ## Purpose
 
 This note classifies the `scripts/ops/launchers/codex/*` surface for the
@@ -47,10 +53,10 @@ Out of scope for this note:
 | `scripts/ops/launchers/codex/codex-exec.sh` | local bootstrap transport adapter | same bootstrap path as `codex.sh`, but execs `codex exec --full-auto -C "$REPO_ROOT"` | retain |
 | `scripts/ops/launchers/codex/codex.bat` | Windows WSL transport adapter | delegates to `scripts/ops/launchers/codex/codex.sh` through WSL path conversion | retain |
 | `scripts/ops/launchers/codex/codex-exec.bat` | Windows WSL transport adapter | delegates to `scripts/ops/launchers/codex/codex-exec.sh` through WSL path conversion | retain |
-| `scripts/ops/launchers/codex/codex-headless.sh` | thin compatibility wrapper | direct `exec bash "$REPO_ROOT/scripts/ai/codex/headless.sh" "$@"` | keep for now; removable only after caller migration and contract review |
-| `scripts/ops/launchers/codex/diagnose-codex-wsl.sh` | thin compatibility wrapper | direct `exec bash "$REPO_ROOT/scripts/ai/codex/diagnose_wsl.sh" "$@"` | keep for now; removable only after caller migration and contract review |
-| `scripts/ops/launchers/codex/setup_agents.sh` | thin compatibility facade | direct delegation to `scripts/ai/codex/setup_agents.sh` | keep for now; removable only after caller migration |
-| `scripts/ops/launchers/codex/setup_skills.sh` | thin compatibility facade | direct delegation to `scripts/ai/codex/setup_skills.sh` | keep for now; removable only after caller migration |
+| `scripts/ops/launchers/codex/codex-headless.sh` | thin compatibility wrapper | direct `exec bash "$REPO_ROOT/scripts/ai/codex/headless.sh" "$@"` | removed after governance-only state |
+| `scripts/ops/launchers/codex/diagnose-codex-wsl.sh` | thin compatibility wrapper | direct `exec bash "$REPO_ROOT/scripts/ai/codex/diagnose_wsl.sh" "$@"` | removed after governance-only state |
+| `scripts/ops/launchers/codex/setup_agents.sh` | thin compatibility facade | direct delegation to `scripts/ai/codex/setup_agents.sh` | removed after governance-only state |
+| `scripts/ops/launchers/codex/setup_skills.sh` | thin compatibility facade | direct delegation to `scripts/ai/codex/setup_skills.sh` | removed after governance-only state |
 | `scripts/ops/launchers/codex/setup_plugins.sh` | runtime bootstrap helper | repo-root resolution, venv/runtime selection, Windows Git path fallback, `--pytest-only` semantics, cache/stamp management | retain |
 
 ## Findings
@@ -63,9 +69,9 @@ Out of scope for this note:
    contract for native Windows users.
 
 3. `codex-headless.sh`, `diagnose-codex-wsl.sh`, `setup_agents.sh`, and
-   `setup_skills.sh` are genuinely thin wrappers. They remain removable
-   candidates, but only after their repo caller matrix reaches zero and the
-   tested path contracts are updated.
+   `setup_skills.sh` were genuinely thin wrappers. They were removed once the
+   repo caller matrix reached `governance-only` and the tested contracts were
+   moved to canonical `scripts/ai/codex/*` entrypoints.
 
 4. `setup_plugins.sh` is not a trivial alias. It carries bootstrap behavior
    that is currently tested and referenced as an ops-facing helper surface.
@@ -75,16 +81,14 @@ Out of scope for this note:
 - Do not batch-delete `scripts/ops/launchers/codex/*`.
 - Treat `codex.sh`, `codex-exec.sh`, `codex.bat`, `codex-exec.bat`, and
   `setup_plugins.sh` as retained runtime surfaces.
-- Treat `codex-headless*`, `diagnose-codex-wsl*`, `setup_agents.sh`, and
-  `setup_skills.sh` as migration-first compatibility surfaces.
+- Keep `codex-headless`, `diagnose-codex-wsl`, `setup-agents`, and
+  `setup-skills` available only through the router-backed canonical
+  `scripts/ai/codex/*` commands, not through dedicated thin wrapper files.
 - Keep `scripts/ops/__main__.py` help and the wrapper caller matrix aligned
   with this classification.
 
 ## Next Safe Moves
 
-1. Continue caller migration away from thin wrapper paths where a canonical
-   `scripts.ai.codex` target already exists.
-2. Keep the wrapper caller matrix current and do not delete any thin wrapper
-   until it shows zero repo callers.
-3. Run a separate parity review before changing `codex.sh`, `codex-exec.sh`, or
+1. Keep the wrapper caller matrix current so removed thin wrappers stay gone.
+2. Run a separate parity review before changing `codex.sh`, `codex-exec.sh`, or
    `setup_plugins.sh`, because those files carry behavior beyond delegation.

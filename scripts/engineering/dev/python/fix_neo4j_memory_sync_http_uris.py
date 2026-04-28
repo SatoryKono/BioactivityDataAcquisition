@@ -5,21 +5,32 @@ from __future__ import annotations
 
 from pathlib import Path
 
-TARGET_FILE = Path("testing_support/neo4j_memory_sync.py")
+CANONICAL_TARGET_RELATIVE_PATH = Path("testing_support/neo4j_memory_sync.py")
 
 
 def _resolve_target_file() -> Path:
     repo_root = Path(__file__).resolve().parents[4]
-    resolved_target = (repo_root / TARGET_FILE).resolve()
     expected_target = (repo_root / "testing_support" / "neo4j_memory_sync.py").resolve()
+    resolved_target = (repo_root / CANONICAL_TARGET_RELATIVE_PATH).resolve()
     if resolved_target != expected_target:
         raise RuntimeError(f"Unexpected target file: {resolved_target}")
-    return resolved_target
+    if not resolved_target.is_file():
+        raise RuntimeError(f"Target file does not exist: {resolved_target}")
+    return expected_target
+
+
+def _read_target_text() -> str:
+    target_file = _resolve_target_file()
+    return target_file.read_text(encoding="utf-8")
+
+
+def _write_target_text(text: str) -> None:
+    target_file = _resolve_target_file()
+    target_file.write_text(text, encoding="utf-8")
 
 
 def main() -> int:
-    target_file = _resolve_target_file()
-    text = target_file.read_text(encoding="utf-8")
+    text = _read_target_text()
 
     replacements = {
         '"http://localhost:7474"': "_test_internal_http_uri('localhost', 7474)",
@@ -44,7 +55,7 @@ LOCALHOST_HTTP_URI = _test_internal_http_uri(\"localhost\", 7474)"""
         helper,
     )
 
-    target_file.write_text(text, encoding="utf-8")
+    _write_target_text(text)
     return 0
 
 

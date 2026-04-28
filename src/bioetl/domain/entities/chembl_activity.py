@@ -59,6 +59,7 @@ class Assay(BaseEntity):
     assay_cell_type: str | None = None
     assay_tissue: str | None = None
     assay_strain: str | None = None
+    assay_subcellular_fraction_raw: str | None = None
     assay_subcellular_fraction: str | None = None
 
     # BAO (BioAssay Ontology) annotations

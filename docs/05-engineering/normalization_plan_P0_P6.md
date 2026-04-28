@@ -135,6 +135,39 @@ Rollout notes:
   generated matrix artifacts, and `CHANGELOG.md` describe the same policy
   state.
 
+## 2026-04-28 ChEMBL Family Semantic-Alignment Closure
+
+Issues `#3259`-`#3268` tighten family-level semantics for shipped `chembl_*`
+profiles without changing the profile-driven architecture.
+
+The active implementation policy is:
+
+- `chembl_activity.standard_units` now uses the same canonical unit seam as
+  `units` and `chembl_assay_parameters.standard_units`; unit-like fields must
+  not diverge between intra-pipeline and cross-pipeline normalization paths.
+- `chembl_molecule` flag-like provider-code fields are explicitly split from
+  plain integer families: reviewed tri-state codes such as
+  `first_in_class`, `inorganic_flag`, `natural_product`, and `prodrug`
+  normalize through a reviewed flag-code seam instead of generic integer
+  coercion.
+- Unknown-preserving controlled vocabularies may retain raw provider lexemes in
+  explicit sidecars such as `assay_subcellular_fraction_raw`, `type_raw`, and
+  `subcellular_fraction_raw`; canonical analytical fields remain separately
+  normalized.
+- Publication compatibility identifiers and metadata sidecars such as
+  `publication_type_raw`, `publication_doi`, `publication_pmid`,
+  `publication_pmc_id`, and `oa_status` must remain domain-schema visible so
+  normalization, schema, and matrix evidence describe the same contract.
+- Set-like JSON arrays with element-wise controlled-vocabulary semantics, such
+  as `chembl_target.component_types` and
+  `chembl_target.component_relationships`, must canonicalize through explicit
+  JSON-string normalizer families and remain permutation-invariant only when
+  the profile marks them `set_like`.
+- Cross-field ontology bundle expectations belong in published config and
+  generated governance evidence: when a mapped BAO/UO/QUDT identifier exists,
+  companion status and derived ontology metadata must remain consistent with
+  the profile bundle semantics.
+
 ## Canonical Hash and Serialization Rules
 
 ### Canonical JSON

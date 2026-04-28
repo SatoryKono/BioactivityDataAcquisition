@@ -29,6 +29,7 @@ ______________________________________________________________________
 
 - Loki использует безопасный baseline `{job="bioetl"}`.
 - Tempo использует contextual TraceQL filters по текущему dashboard scope (`pipeline/run_type` или `provider`).
+- `bioetl-runtime` остаётся Prometheus-first в tracing-off режиме: Loki log-hygiene panels теперь живут в collapsed row `Tracing-only Log Hygiene`, а базовый triage path не требует Loki/Tempo datasource.
 
 Текущая навигационная модель:
 

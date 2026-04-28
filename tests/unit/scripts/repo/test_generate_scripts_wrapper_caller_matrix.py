@@ -10,5 +10,5 @@ def test_render_report_lists_known_wrapper_candidates() -> None:
 
     assert "# Scripts CLI Wrapper Caller Matrix" in report
     assert "`scripts/docs/check_doc_links.py`" in report
-    assert "`scripts/ops/launchers/codex/codex-headless.sh`" in report
+    assert "`scripts/ops/launchers/codex/codex.sh`" in report
     assert "retain" in report

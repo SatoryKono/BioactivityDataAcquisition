@@ -49,6 +49,7 @@ schema:
                 - assay_strain
                 - assay_tissue
                 - assay_cell_type
+                - assay_subcellular_fraction_raw
                 - assay_subcellular_fraction
                 - target_id
                 - relationship_type
@@ -177,6 +178,16 @@ quality:
                 - Not determined
             nullable: true
             error_message: Invalid confidence_description value
+        -   field: assay_subcellular_fraction_raw
+            type: pattern
+            pattern: ^.{1,200}$
+            nullable: true
+            error_message: assay_subcellular_fraction_raw must not exceed 200 chars
+        -   field: assay_subcellular_fraction
+            type: pattern
+            pattern: ^.{1,200}$
+            nullable: true
+            error_message: assay_subcellular_fraction must not exceed 200 chars
     entity_cross_field_validations:
         -   name: assay_identifiable
             fields:
@@ -271,6 +282,7 @@ hash_policy:
             - assay_strain
             - assay_tissue
             - assay_cell_type
+            - assay_subcellular_fraction_raw
             - assay_subcellular_fraction
             - target_id
             - relationship_type

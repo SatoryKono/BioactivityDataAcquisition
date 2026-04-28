@@ -308,6 +308,15 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
         "configs/vocab/chembl_controlled.yaml"
     )
 
+    activity_standard_units = _row(rows, "chembl_activity", "standard_units")
+    assert activity_standard_units["normalizer"] == "normalize_profile_unit"
+    assert activity_standard_units["semantic_category"] == "controlled_vocabulary"
+    assert activity_standard_units["strictness"] == "controlled_unit"
+    assert activity_standard_units["dq_coverage"] == "enum:error"
+    assert activity_standard_units["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_controlled.yaml"
+    )
+
     target_cross_references = _row(rows, "chembl_target", "cross_references")
     assert (
         target_cross_references["normalizer"] == "normalize_profile_json_string_strict"
@@ -387,6 +396,10 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     assert assay_parameter_type["strictness"] == "normalization_only"
     assert assay_parameter_type["dq_coverage"] == "pattern:error"
 
+    assay_parameter_type_raw = _row(rows, "chembl_assay_parameters", "type_raw")
+    assert assay_parameter_type_raw["normalizer"] == "normalize_profile_text"
+    assert assay_parameter_type_raw["semantic_category"] == "free_text"
+
     molecule_type = _row(rows, "chembl_molecule", "molecule_type")
     assert molecule_type["policy_scope"] == "project_subset_of_provider_universe"
 
@@ -420,6 +433,33 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     assert component_type["controlled_vocabulary_source"] == (
         "configs/enums/chembl.yaml"
     )
+
+    publication_doi = _row(rows, "chembl_publication", "publication_doi")
+    assert "domain_schema:present" in publication_doi["schema_coverage"]
+
+    publication_type_raw = _row(rows, "chembl_publication", "publication_type_raw")
+    assert "domain_schema:present" in publication_type_raw["schema_coverage"]
+
+    publication_oa_status = _row(rows, "chembl_publication", "oa_status")
+    assert "domain_schema:present" in publication_oa_status["schema_coverage"]
+
+    assay_fraction_raw = _row(rows, "chembl_assay", "assay_subcellular_fraction_raw")
+    assert assay_fraction_raw["normalizer"] == "normalize_profile_text"
+
+    subcellular_fraction_raw = _row(
+        rows, "chembl_subcellular_fraction", "subcellular_fraction_raw"
+    )
+    assert subcellular_fraction_raw["normalizer"] == "normalize_profile_text"
+
+    target_component_types = _row(rows, "chembl_target", "component_types")
+    assert target_component_types["set_like"] == "true"
+    assert target_component_types["hash_ordering"] == "set_like"
+
+    target_component_relationships = _row(
+        rows, "chembl_target", "component_relationships"
+    )
+    assert target_component_relationships["set_like"] == "true"
+    assert target_component_relationships["hash_ordering"] == "set_like"
 
 
 def test_build_field_matrix_rows_keeps_chembl_cell_line_policy_fields_visible() -> None:

@@ -181,6 +181,59 @@ quality:
             type: custom
             validator: smiles_validator
             nullable: true
+        -   field: black_box_warning
+            type: enum
+            allowed:
+                - 0
+                - 1
+            nullable: true
+            error_message: black_box_warning must be 0 or 1 when present
+        -   field: dosed_ingredient
+            type: enum
+            allowed:
+                - 0
+                - 1
+            nullable: true
+            error_message: dosed_ingredient must be 0 or 1 when present
+        -   field: polymer_flag
+            type: enum
+            allowed:
+                - 0
+                - 1
+            nullable: true
+            error_message: polymer_flag must be 0 or 1 when present
+        -   field: natural_product
+            type: enum
+            allowed:
+                - -1
+                - 0
+                - 1
+            nullable: true
+            error_message: natural_product must be one of the reviewed flag-like provider codes when present
+        -   field: first_in_class
+            type: enum
+            allowed:
+                - -1
+                - 0
+                - 1
+            nullable: true
+            error_message: first_in_class must be one of the reviewed flag-like provider codes when present
+        -   field: prodrug
+            type: enum
+            allowed:
+                - -1
+                - 0
+                - 1
+            nullable: true
+            error_message: prodrug must be one of the reviewed flag-like provider codes when present
+        -   field: inorganic_flag
+            type: enum
+            allowed:
+                - -1
+                - 0
+                - 1
+            nullable: true
+            error_message: inorganic_flag must be one of the reviewed flag-like provider codes when present
         -   field: hba_count
             type: range
             min: 0

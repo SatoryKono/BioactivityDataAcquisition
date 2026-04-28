@@ -219,6 +219,15 @@
     "required": false,
     "unique": false
   },
+  "type_raw": {
+    "checks": [],
+    "coerce": true,
+    "description": "Raw provider parameter type before controlled-vocabulary normalization.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "units": {
     "checks": [],
     "coerce": true,

@@ -34,6 +34,7 @@ schema:
     - _index
   - name: business
     fields:
+    - subcellular_fraction_raw
     - subcellular_fraction
     - assay_count
     - example_assay_id
@@ -70,6 +71,11 @@ quality:
     pattern: ^.{1,200}$
     nullable: false
     error_message: subcellular_fraction is required and must not exceed 200 chars
+  - field: subcellular_fraction_raw
+    type: pattern
+    pattern: ^.{1,200}$
+    nullable: true
+    error_message: subcellular_fraction_raw must not exceed 200 chars
   - field: assay_count
     type: range
     min: 0

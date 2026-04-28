@@ -95,6 +95,7 @@ class AssayParametersTransformer(BaseChemblTransformer):
             # Foreign key
             "assay_id": record.get("assay_id") or record.get("assay_chembl_id"),
             # Profile-owned controlled vocabulary normalization runs centrally.
+            "type_raw": record.get("type"),
             "type": record.get("type"),
         }
 

@@ -28,26 +28,50 @@ def build_trace_ids(
     diagnostics: dict[str, object],
     trace_links_available: bool,
 ) -> list[str]:
-    explicit_trace_ids = diagnostics.get("trace_ids")
     composite_run_id = resolve_primary_composite_run_id(diagnostics)
-    if isinstance(explicit_trace_ids, list):
-        normalized = [
-            value.strip()
-            for value in explicit_trace_ids
-            if isinstance(value, str) and value.strip()
-        ]
-        if composite_run_id is not None:
-            normalized.append(composite_run_id)
-        if normalized:
-            return list(dict.fromkeys(normalized))
+    explicit_trace_ids = _explicit_trace_ids(
+        diagnostics=diagnostics,
+        composite_run_id=composite_run_id,
+    )
+    if explicit_trace_ids:
+        return explicit_trace_ids
+    return _generated_trace_ids(
+        run_id=run_id,
+        composite_run_id=composite_run_id,
+        trace_links_available=trace_links_available,
+    )
+
+
+def _explicit_trace_ids(
+    *,
+    diagnostics: dict[str, object],
+    composite_run_id: str | None,
+) -> list[str]:
+    explicit_trace_ids = diagnostics.get("trace_ids")
+    if not isinstance(explicit_trace_ids, list):
+        return []
+    normalized = [
+        value.strip()
+        for value in explicit_trace_ids
+        if isinstance(value, str) and value.strip()
+    ]
+    if composite_run_id is not None:
+        normalized.append(composite_run_id)
+    return list(dict.fromkeys(normalized))
+
+
+def _generated_trace_ids(
+    *,
+    run_id: str,
+    composite_run_id: str | None,
+    trace_links_available: bool,
+) -> list[str]:
     generated: list[str] = []
     if trace_links_available and run_id:
         generated.append(run_id)
     if composite_run_id is not None:
         generated.append(composite_run_id)
-    if generated:
-        return list(dict.fromkeys(generated))
-    return []
+    return list(dict.fromkeys(generated))
 
 
 def resolve_manifest_provider(

@@ -68,6 +68,7 @@ schema:
                 - publication_type_unified
                 - publication_subclass
                 - publication_class
+                - oa_status
         -   name: citations
             fields:
                 - citations_received
@@ -152,6 +153,26 @@ quality:
             pattern: ^10\.\d{4,}/\S+$
             nullable: true
             error_message: DOI must match format 10.XXXX/suffix (no whitespace)
+        -   field: publication_pmc_id
+            type: pattern
+            pattern: ^PMC\d+$
+            nullable: true
+            error_message: publication_pmc_id must match PMC identifier format
+        -   field: publication_type_raw
+            type: pattern
+            pattern: ^[A-Z_ -]{1,64}$
+            nullable: true
+            error_message: publication_type_raw must be a provider-native type token when present
+        -   field: oa_status
+            type: enum
+            allowed:
+                - gold
+                - green
+                - hybrid
+                - bronze
+                - closed
+            nullable: true
+            error_message: oa_status must be one of the reviewed open-access status values when present
         -   field: title
             type: max_length
             max_length: 2000
@@ -285,6 +306,7 @@ hash_policy:
             - publication_type_unified
             - publication_subclass
             - publication_class
+            - oa_status
             - citations_received
             - citations_made
             - src_id

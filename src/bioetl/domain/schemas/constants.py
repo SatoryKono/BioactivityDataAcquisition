@@ -219,13 +219,17 @@ PUBLICATION_TYPES: frozenset[str] = frozenset(
     ]
 )
 
+OA_STATUS_VALUES: tuple[str, ...] = (
+    "gold",
+    "green",
+    "hybrid",
+    "bronze",
+    "closed",
+    "diamond",
+)
+
 PUBLICATION_TERM_TYPES: frozenset[str] = frozenset(
-    [
-        "MESH_HEADING",
-        "MESH_QUALIFIER",
-        "KEYWORD",
-        "CONCEPT",
-    ]
+    ["MESH_HEADING", "MESH_QUALIFIER", "KEYWORD", "CONCEPT"]
 )
 
 # =============================================================================
@@ -251,18 +255,13 @@ CANONICAL_SMILES_MAX_LENGTH: int = 20_000
 __all__ = [
     "ACTIVITY_STANDARD_TYPES",
     "ASSAY_CATEGORIES",
-    # Assay enums
-    "ASSAY_CATEGORIES",
     "ASSAY_GROUPS",
     "ASSAY_PARAMETER_STANDARD_TYPES",
     "ASSAY_TEST_TYPES",
-    "ASSAY_TEST_TYPES",
     "ASSAY_TYPES",
     "BAO_ID_PATTERN",
-    # Regex patterns
     "BTO_ID_PATTERN",
     "CALOHA_ID_PATTERN",
-    # Canonical validation bounds (Gold / Composite)
     "CANONICAL_HBA_COUNT_RANGE",
     "CANONICAL_HBD_COUNT_RANGE",
     "CANONICAL_HEAVY_ATOM_COUNT_RANGE",
@@ -280,20 +279,16 @@ __all__ = [
     "ISO_DATE_PATTERN",
     "ISSN_PATTERN",
     "MAX_PHASE_VALUES",
-    # Molecule enums
     "MOLECULE_TYPES",
+    "OA_STATUS_VALUES",
     "ORCID_PATTERN",
-    # Publication enums
     "PUBLICATION_TYPES",
     "RELATIONSHIP_TYPES",
-    "RELATIONSHIP_TYPES",
-    # Activity enums
     "STANDARD_RELATIONS",
     "STRUCTURE_TYPES",
     "SUBCELLULAR_FRACTIONS",
     "TARGET_COMPONENT_RELATIONSHIPS",
     "TARGET_COMPONENT_TYPES",
-    # Target enums
     "TARGET_TYPES",
     "UBERON_ID_PATTERN",
     "UO_ID_PATTERN",

@@ -87,6 +87,7 @@ def resolve_effective_run_id(run_id: str | None) -> str:
 def build_composite_runner_dependencies(
     inputs: CompositeRunnerServiceInputs,
 ) -> CompositeRunnerDependencies:
+    effective_clock = inputs.clock or SystemClock()
     return CompositeRunnerDependencies(
         seed_runner_factory=inputs.seed_runner_factory,
         enricher_runner_factory=inputs.enricher_runner_factory,
@@ -107,7 +108,7 @@ def build_composite_runner_dependencies(
         observer=inputs.observer,
         manifest_id=inputs.manifest_id,
         run_ledger_service=inputs.run_ledger_service,
-        clock=inputs.clock,
+        clock=effective_clock,
     )
 
 

@@ -69,18 +69,19 @@ def test_wsl_setup_uses_local_update_path() -> None:
     assert "--no-install --print-bin" in verify_sh
 
 
-def test_compatibility_wrappers_delegate_to_existing_canonical_codex_targets() -> None:
-    """Compatibility launchers must point to canonical scripts that exist."""
+def test_removed_thin_wrappers_are_absent_and_router_uses_canonical_targets() -> None:
+    """Thin wrappers should be gone once the router dispatches canonical targets."""
     root = _project_root()
-    headless_wrapper = (
-        root / "scripts" / "ops" / "launchers" / "codex" / "codex-headless.sh"
-    ).read_text(encoding="utf-8")
-    diagnose_wrapper = (
-        root / "scripts" / "ops" / "launchers" / "codex" / "diagnose-codex-wsl.sh"
-    ).read_text(encoding="utf-8")
+    ops_router = (root / "scripts" / "ops" / "__main__.py").read_text(encoding="utf-8")
 
-    assert "scripts/ai/codex/headless.sh" in headless_wrapper
-    assert "scripts/ai/codex/diagnose_wsl.sh" in diagnose_wrapper
+    assert not (
+        root / "scripts" / "ops" / "launchers" / "codex" / "codex-headless.sh"
+    ).exists()
+    assert not (
+        root / "scripts" / "ops" / "launchers" / "codex" / "diagnose-codex-wsl.sh"
+    ).exists()
+    assert "../ai/codex/headless.sh" in ops_router
+    assert "../ai/codex/diagnose_wsl.sh" in ops_router
     assert (root / "scripts" / "ai" / "codex" / "headless.sh").exists()
     assert (root / "scripts" / "ai" / "codex" / "headless.ps1").exists()
     assert (root / "scripts" / "ai" / "codex" / "diagnose_wsl.sh").exists()

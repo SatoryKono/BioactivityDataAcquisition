@@ -15,11 +15,15 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_bao_identifier,
     normalize_profile_chembl_organism_name,
     normalize_profile_governed_vocabulary,
+    normalize_profile_text,
 )
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.schemas.chembl.assay import AssaySchema
 
-from ._chembl_policy_registry import chembl_ontology_family_fields
+from ._chembl_policy_registry import (
+    chembl_controlled_family_fields,
+    chembl_ontology_family_fields,
+)
 from ._chembl_vocab import chembl_enum
 
 __all__ = [
@@ -72,6 +76,18 @@ _STRICT_JSON_FIELDS = frozenset(
 )
 _NULL_FIELDS = chembl_pseudo_null_fields("assay")
 _BAO_FIELDS = chembl_ontology_family_fields("bao", entity="assay")
+_CONTROLLED_FRACTION_FIELDS = chembl_controlled_family_fields(
+    "subcellular_fractions",
+    entity="assay",
+)
+_CONTROLLED_CATEGORY_FIELDS = chembl_controlled_family_fields(
+    "assay_categories",
+    entity="assay",
+)
+_CONTROLLED_CONFIDENCE_FIELDS = chembl_controlled_family_fields(
+    "assay_confidence_descriptions",
+    entity="assay",
+)
 
 
 def _normalize_bao_label_with_profile_context(
@@ -113,9 +129,7 @@ def create_case_normalizer(strategy: str = "uppercase") -> Callable[[str], str |
 _ENUM_FIELDS = {
     "assay_type": ASSAY_TYPES,
     "assay_test_type": ASSAY_TEST_TYPES,
-    "assay_category": ASSAY_CATEGORIES,
     "assay_group": ASSAY_GROUPS,
-    "confidence_description": CONFIDENCE_DESCRIPTIONS,
     "relationship_type": RELATIONSHIP_TYPES,
 }
 _SPECIAL_RULE_COMPONENTS = {
@@ -128,15 +142,49 @@ _SPECIAL_RULE_COMPONENTS = {
         "Normalize BAO label text inside the profile-visible assay contract, "
         "resolving canonical labels from sibling bao_format identifiers when present.",
     ),
-    "assay_subcellular_fraction": (
-        lambda value: normalize_profile_governed_vocabulary(
-            value,
-            allowed_values=SUBCELLULAR_FRACTIONS,
-            preserve_unknown=True,
+    "assay_subcellular_fraction_raw": (
+        normalize_profile_text,
+        "Preserve the raw assay_subcellular_fraction provider lexeme as trimmed "
+        "text before canonical controlled-vocabulary normalization.",
+    ),
+    **dict.fromkeys(
+        sorted(_CONTROLLED_FRACTION_FIELDS),
+        (
+            lambda value: normalize_profile_governed_vocabulary(
+                value,
+                allowed_values=SUBCELLULAR_FRACTIONS,
+                preserve_unknown=True,
+            ),
+            "Normalize assay_subcellular_fraction against the shared ChEMBL "
+            "subcellular-fraction vocabulary while preserving unknown observed "
+            "lexemes for review; the provider-native lexeme is retained "
+            "separately in assay_subcellular_fraction_raw.",
         ),
-        "Normalize assay_subcellular_fraction against the shared ChEMBL "
-        "subcellular-fraction vocabulary while preserving unknown observed "
-        "lexemes for review.",
+    ),
+    **dict.fromkeys(
+        sorted(_CONTROLLED_CATEGORY_FIELDS),
+        (
+            lambda value: normalize_profile_governed_vocabulary(
+                value,
+                allowed_values=ASSAY_CATEGORIES,
+                preserve_unknown=False,
+            ),
+            "Normalize assay_category against the governed ChEMBL controlled "
+            "vocabulary registry, preserving canonical allowed-value casing, "
+            "and fail closed on unknown values.",
+        ),
+    ),
+    **dict.fromkeys(
+        sorted(_CONTROLLED_CONFIDENCE_FIELDS),
+        (
+            lambda value: normalize_profile_governed_vocabulary(
+                value,
+                allowed_values=CONFIDENCE_DESCRIPTIONS,
+                preserve_unknown=False,
+            ),
+            "Normalize confidence_description against the governed ChEMBL "
+            "controlled vocabulary registry and fail closed on unknown values.",
+        ),
     ),
     **{
         field_name: (

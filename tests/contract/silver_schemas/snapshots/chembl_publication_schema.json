@@ -274,6 +274,20 @@
     "required": true,
     "unique": false
   },
+  "oa_status": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Open-access status token retained for compatibility when present.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "page_first": {
     "checks": [],
     "coerce": false,
@@ -348,6 +362,20 @@
     "required": true,
     "unique": false
   },
+  "publication_doi": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^10\\.\\d{4,}/\\S+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Publication DOI under the ChEMBL-prefixed compatibility contract.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "publication_id": {
     "checks": [
       {
@@ -360,6 +388,34 @@
     "dtype": "str",
     "nullable": false,
     "required": true,
+    "unique": false
+  },
+  "publication_pmc_id": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^PMC\\d+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Publication PMC ID under the ChEMBL-prefixed compatibility contract.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "publication_pmid": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^[1-9]\\d{0,9}$"
+      }
+    ],
+    "coerce": false,
+    "description": "Publication PMID under the ChEMBL-prefixed compatibility contract.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
     "unique": false
   },
   "publication_subclass": {
@@ -383,6 +439,15 @@
     "dtype": "str",
     "nullable": false,
     "required": true,
+    "unique": false
+  },
+  "publication_type_raw": {
+    "checks": [],
+    "coerce": false,
+    "description": "Raw provider publication type retained before canonical taxonomy mapping.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
     "unique": false
   },
   "publication_type_unified": {

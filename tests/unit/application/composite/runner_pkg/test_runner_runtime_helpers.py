@@ -9,6 +9,8 @@ from uuid import uuid4
 
 import pytest
 
+from tests.helpers.clock import fixed_test_clock
+
 if TYPE_CHECKING:
     from bioetl.application.composite.runner_pkg.runner_runtime_helpers import (
         _CheckpointManagerProtocol,
@@ -77,6 +79,7 @@ def test_bind_runner_dependencies_builds_metrics_aware_observer_fallback() -> No
             fsm_state_helper=MagicMock(),
             manifest_id="manifest-123",
             run_ledger_service=MagicMock(),
+            clock=fixed_test_clock(),
         ),
     )
 

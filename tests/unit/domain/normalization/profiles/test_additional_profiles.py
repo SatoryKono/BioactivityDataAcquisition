@@ -112,6 +112,24 @@ def test_chembl_molecule_max_phase_preserves_quasi_enum_numeric_codes() -> None:
     assert "quasi-enum" in (max_phase_rule.notes or "")
 
 
+def test_chembl_molecule_reviewed_flag_provider_codes_fail_closed_outside_tristate() -> (
+    None
+):
+    for field_name in (
+        "first_in_class",
+        "inorganic_flag",
+        "natural_product",
+        "prodrug",
+    ):
+        rule = CHEMBL_MOLECULE_PROFILE.rule_for(field_name)
+
+        assert rule is not None
+        assert rule.apply("-1") == -1
+        assert rule.apply("1") == 1
+        assert rule.apply("2") is None
+        assert "flag-like provider code" in (rule.notes or "")
+
+
 def test_chembl_publication_profile_normalizes_publication_type_and_open_access() -> (
     None
 ):
@@ -138,8 +156,11 @@ def test_chembl_publication_profile_normalizes_publication_type_and_open_access(
 
 def test_chembl_assay_parameter_type_preserves_unknown_for_raw_review() -> None:
     assay_parameter_type_rule = CHEMBL_ASSAY_PARAMETERS_PROFILE.rule_for("type")
+    assay_parameter_type_raw_rule = CHEMBL_ASSAY_PARAMETERS_PROFILE.rule_for("type_raw")
 
     assert assay_parameter_type_rule is not None
+    assert assay_parameter_type_raw_rule is not None
+    assert assay_parameter_type_raw_rule.apply(" conc ") == "conc"
     assert assay_parameter_type_rule.apply(" conc ") == "CONC"
     assert assay_parameter_type_rule.apply("novel assay tag") == "NOVEL ASSAY TAG"
     assert assay_parameter_type_rule.apply("   ") is None
@@ -159,16 +180,26 @@ def test_chembl_activity_mapping_status_companions_use_shared_enum_family() -> N
 
 def test_chembl_subcellular_fraction_profiles_preserve_unknown_but_not_blank() -> None:
     assay_fraction_rule = CHEMBL_ASSAY_PROFILE.rule_for("assay_subcellular_fraction")
+    assay_fraction_raw_rule = CHEMBL_ASSAY_PROFILE.rule_for(
+        "assay_subcellular_fraction_raw"
+    )
     aggregate_fraction_rule = CHEMBL_SUBCELLULAR_FRACTION_PROFILE.rule_for(
         "subcellular_fraction"
     )
+    aggregate_fraction_raw_rule = CHEMBL_SUBCELLULAR_FRACTION_PROFILE.rule_for(
+        "subcellular_fraction_raw"
+    )
 
     assert assay_fraction_rule is not None
+    assert assay_fraction_raw_rule is not None
+    assert assay_fraction_raw_rule.apply(" membrane ") == "membrane"
     assert assay_fraction_rule.apply(" membrane ") == "Membrane"
     assert assay_fraction_rule.apply("microsome fraction") == "microsome fraction"
     assert assay_fraction_rule.apply("   ") is None
 
     assert aggregate_fraction_rule is not None
+    assert aggregate_fraction_raw_rule is not None
+    assert aggregate_fraction_raw_rule.apply(" nucleus ") == "nucleus"
     assert aggregate_fraction_rule.apply(" nucleus ") == "Nucleus"
     assert (
         aggregate_fraction_rule.apply("custom fraction label")
@@ -193,6 +224,18 @@ def test_chembl_target_component_vocab_lists_fail_closed_on_unknown_members() ->
         == '["SINGLE PROTEIN","INTERACTING PROTEIN"]'
     )
     assert component_relationships_rule.apply('["SINGLE PROTEIN","UNKNOWN"]') is None
+
+
+def test_chembl_target_component_vocab_lists_are_profile_set_like_for_hashing() -> None:
+    component_types_rule = CHEMBL_TARGET_PROFILE.rule_for("component_types")
+    component_relationships_rule = CHEMBL_TARGET_PROFILE.rule_for(
+        "component_relationships"
+    )
+
+    assert component_types_rule is not None
+    assert component_types_rule.set_like is True
+    assert component_relationships_rule is not None
+    assert component_relationships_rule.set_like is True
 
 
 def test_chembl_profile_helpers_preserve_standard_meta_semantics() -> None:

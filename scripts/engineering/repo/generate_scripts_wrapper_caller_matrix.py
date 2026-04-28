@@ -94,73 +94,14 @@ class Candidate:
 
 CANDIDATES: Final[tuple[Candidate, ...]] = (
     Candidate("scripts/docs/check_doc_links.py", "special-case legacy shim"),
-    Candidate("scripts/docs/run_mkdocs_build.py", "compatibility shim"),
     Candidate("scripts/docs/build_docs_site.sh", "shell transport adapter"),
-    Candidate(
-        "scripts/diagrams/generate_architecture_bundle.py",
-        COMPATIBILITY_WRAPPER_ROLE,
-    ),
-    Candidate(
-        "scripts/diagrams/generate_views_bundle.py",
-        COMPATIBILITY_WRAPPER_ROLE,
-    ),
-    Candidate(
-        "scripts/engineering/dev/setup_copilot_codex_mcp.py",
-        "Python compatibility facade",
-    ),
-    Candidate(
-        "scripts/engineering/dev/setup_copilot_codex_mcp.sh",
-        "shell transport facade",
-    ),
-    Candidate(
-        "scripts/engineering/dev/setup_copilot_codex_mcp.ps1",
-        "PowerShell transport facade",
-    ),
-    Candidate(
-        "scripts/ai/mistrallvibe/run-vibe.sh",
-        COMPATIBILITY_WRAPPER_ROLE,
-    ),
-    Candidate(
-        "scripts/ai/mistrallvibe/run-vibe.ps1",
-        COMPATIBILITY_WRAPPER_ROLE,
-    ),
     Candidate("scripts/ops/launchers/codex/codex.sh", BOOTSTRAP_TRANSPORT_ROLE),
     Candidate(
         "scripts/ops/launchers/codex/codex-exec.sh",
         BOOTSTRAP_TRANSPORT_ROLE,
     ),
     Candidate("scripts/ops/launchers/codex/codex-exec.bat", WINDOWS_TRANSPORT_ROLE),
-    Candidate(
-        "scripts/ops/launchers/codex/codex-headless.sh",
-        COMPATIBILITY_WRAPPER_ROLE,
-    ),
-    Candidate(
-        "scripts/ops/launchers/codex/codex-headless.ps1",
-        COMPATIBILITY_WRAPPER_ROLE,
-    ),
-    Candidate(
-        "scripts/ops/launchers/codex/diagnose-codex-wsl.sh",
-        COMPATIBILITY_WRAPPER_ROLE,
-    ),
-    Candidate(
-        "scripts/ops/launchers/codex/diagnose-codex-wsl.bat",
-        COMPATIBILITY_WRAPPER_ROLE,
-    ),
-    Candidate(
-        "scripts/ops/launchers/codex/diagnose-codex-wsl.ps1",
-        COMPATIBILITY_WRAPPER_ROLE,
-    ),
-    Candidate(
-        "scripts/ops/launchers/codex/setup_agents.sh",
-        "compatibility facade",
-        allow_basename_match=False,
-    ),
     Candidate("scripts/ops/launchers/codex/setup_plugins.sh", BOOTSTRAP_HELPER_ROLE),
-    Candidate(
-        "scripts/ops/launchers/codex/setup_skills.sh",
-        "compatibility facade",
-        allow_basename_match=False,
-    ),
 )
 
 
@@ -330,9 +271,30 @@ def _format_callers(items: set[tuple[str, str]]) -> str:
     return ", ".join(path for _group, path in ordered)
 
 
+def _is_governance_evidence_path(rel_path: str) -> bool:
+    if rel_path.startswith("configs/quality/"):
+        return True
+    if rel_path.startswith("docs/plans/"):
+        return True
+    if rel_path == "tests/unit/scripts/repo/test_generate_scripts_wrapper_caller_matrix.py":
+        return True
+    if rel_path in {
+        "tests/architecture/test_codex_launcher_bootstrap.py",
+        "tests/architecture/test_ops_ai_setup_scripts.py",
+        "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+        "tests/architecture/test_diagram_bundle_generator_contracts.py",
+        "tests/architecture/test_docs_compat_shim_governance.py",
+        "tests/architecture/test_check_doc_links_guardrails.py",
+        "tests/architecture/test_docs_kpi_workflow.py",
+    }:
+        return True
+    return False
+
+
 def _render_report(root: Path) -> str:
     callers = _discover_callers(root)
-    zero_caller_candidates: list[str] = []
+    zero_operational_candidates: list[str] = []
+    governance_only_candidates: list[str] = []
     lines = [
         "# Scripts CLI Wrapper Caller Matrix",
         "",
@@ -346,18 +308,28 @@ def _render_report(root: Path) -> str:
         "",
         "Candidate wrappers reviewed:",
         "",
-        "| Path | Current role | Observed callers | Deletion status |",
-        "| --- | --- | --- | --- |",
+        "| Path | Current role | Operational callers | Governance/evidence callers | Deletion status |",
+        "| --- | --- | --- | --- | --- |",
     ]
 
     for candidate in CANDIDATES:
         observed = callers[candidate.path]
-        deletion_status = "ready-to-delete" if not observed else "retain"
+        governance_only = {
+            item for item in observed if _is_governance_evidence_path(item[1])
+        }
+        operational = observed - governance_only
         if not observed:
-            zero_caller_candidates.append(candidate.path)
+            deletion_status = "ready-to-delete"
+            zero_operational_candidates.append(candidate.path)
+        elif not operational:
+            deletion_status = "governance-only"
+            governance_only_candidates.append(candidate.path)
+        else:
+            deletion_status = "retain"
         lines.append(
             f"| `{candidate.path}` | {candidate.current_role} | "
-            f"{_format_callers(observed)} | {deletion_status} |"
+            f"{_format_callers(operational)} | "
+            f"{_format_callers(governance_only)} | {deletion_status} |"
         )
 
     lines.extend(
@@ -372,17 +344,24 @@ def _render_report(root: Path) -> str:
             "- `scripts/ops/launchers/codex/setup_plugins.sh` is retained as a "
             "bootstrap helper because it carries runtime-selection and "
             "`--pytest-only` semantics beyond simple delegation.",
+            "- `governance-only` means runtime callers are gone and only "
+            "inventory, plan, or governance-test references still mention the wrapper.",
             "- High-risk compatibility surfaces such as "
             "`scripts/docs/check_doc_links.py` stay retained until their "
             "special semantics are gone.",
         )
     )
-    if zero_caller_candidates:
-        joined = ", ".join(f"`{item}`" for item in zero_caller_candidates)
+    if zero_operational_candidates:
+        joined = ", ".join(f"`{item}`" for item in zero_operational_candidates)
         lines.append(f"- Zero-caller candidates in this snapshot: {joined}.")
     else:
         lines.append(
             "- No zero-caller wrapper candidates were found in this snapshot, so no deletion batch was applied."
+        )
+    if governance_only_candidates:
+        joined = ", ".join(f"`{item}`" for item in governance_only_candidates)
+        lines.append(
+            f"- Governance-only wrapper candidates in this snapshot: {joined}."
         )
     return "\n".join(lines) + "\n"
 

@@ -240,6 +240,7 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
         assay_id = record.get("assay_id") or record.get("assay_chembl_id")
 
         return {
+            "subcellular_fraction_raw": fraction,
             "subcellular_fraction": fraction,
             "example_assay_id": str(assay_id) if assay_id else None,
             "assay_count": 1,

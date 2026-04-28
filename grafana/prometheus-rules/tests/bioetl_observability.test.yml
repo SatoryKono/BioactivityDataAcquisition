@@ -22,6 +22,74 @@ tests:
               description: Prometheus could not scrape the BioETL /metrics endpoint for instance=host.docker.internal:8000.
               runbook: docs/05-operations/runbooks/observability-checklist.md
 
+  - name: metrics-endpoint-scrape-missing
+    interval: 1m
+    input_series: []
+    alert_rule_test:
+      - eval_time: 11m
+        alertname: BioETLMetricsEndpointScrapeMissing
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              summary: BioETL metrics endpoint has stopped emitting scrape samples
+              description: No up{job="bioetl"} samples were observed for 10m; monitoring blind spots may be silent.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: prometheus-unavailable
+    interval: 1m
+    input_series:
+      - series: 'up{job="prometheus",instance="prometheus:9090"}'
+        values: '0 0 0 0 0'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: BioETLPrometheusUnavailable
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: prometheus
+              instance: prometheus:9090
+            exp_annotations:
+              summary: Prometheus is unavailable
+              description: Prometheus self-scrape failed for instance=prometheus:9090.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: grafana-unavailable
+    interval: 1m
+    input_series:
+      - series: 'up{job="grafana",instance="grafana:3000"}'
+        values: '0 0 0 0 0'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: BioETLGrafanaUnavailable
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: grafana
+              instance: grafana:3000
+            exp_annotations:
+              summary: Grafana is unavailable
+              description: Grafana metrics endpoint is unavailable for instance=grafana:3000.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: pushgateway-unavailable
+    interval: 1m
+    input_series:
+      - series: 'up{job="pushgateway",instance="pushgateway:9091"}'
+        values: '0 0 0 0 0 0 0'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: BioETLPushgatewayUnavailable
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: pushgateway
+              instance: pushgateway:9091
+            exp_annotations:
+              summary: Pushgateway is unavailable
+              description: Pushgateway is not reachable for instance=pushgateway:9091.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
   - name: memory-pressure-active
     interval: 1m
     input_series:
@@ -308,3 +376,176 @@ tests:
               summary: Pipeline runtime error ratio is elevated
               description: Pipeline runtime error ratio exceeded 5% for pipeline=chembl over the last 30m, with at least 20 bronze records observed.
               runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: provider-failure-rate-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_health_check_failures_total{provider="pubmed"}'
+        values: '0+3x30'
+      - series: 'bioetl_health_check_success_total{provider="pubmed"}'
+        values: '0+7x30'
+      - series: 'bioetl_health_check_degraded_total{provider="pubmed"}'
+        values: '0+0x30'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLProviderFailureRateHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              provider: pubmed
+            exp_annotations:
+              summary: Provider health-check failure ratio is elevated
+              description: Health-check failure ratio exceeded 20% for provider=pubmed in the last 15m.
+              runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: provider-health-check-failures-detected
+    interval: 1m
+    input_series:
+      - series: 'bioetl_health_check_failures_total{provider="openalex"}'
+        values: '0+1x20'
+    alert_rule_test:
+      - eval_time: 12m
+        alertname: BioETLProviderHealthCheckFailuresDetected
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              provider: openalex
+            exp_annotations:
+              summary: Provider health-check failures detected
+              description: bioetl_health_check_failures_total increased for provider=openalex in the last 10m.
+              runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: provider-retries-exhausted-warning
+    interval: 1m
+    input_series:
+      - series: 'bioetl_data_source_retry_exhausted_total{provider="crossref",operation="fetch_page"}'
+        values: '0+1x70'
+    alert_rule_test:
+      - eval_time: 65m
+        alertname: BioETLProviderRetriesExhausted
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              provider: crossref
+              operation: fetch_page
+            exp_annotations:
+              summary: Provider retries exhausted
+              description: bioetl_data_source_retry_exhausted_total increased 1-2 times for provider=crossref operation=fetch_page in the last 1h.
+              runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: provider-retries-exhausted-persistent
+    interval: 1m
+    input_series:
+      - series: 'bioetl_data_source_retry_exhausted_total{provider="crossref",operation="fetch_page"}'
+        values: '0+1x70'
+    alert_rule_test:
+      - eval_time: 69m
+        alertname: BioETLProviderRetriesExhaustedPersistent
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              provider: crossref
+              operation: fetch_page
+            exp_annotations:
+              summary: Provider retries are repeatedly exhausted
+              description: bioetl_data_source_retry_exhausted_total increased at least 3 times for provider=crossref operation=fetch_page in the last 1h.
+              runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: checkpoint-load-failed
+    interval: 1m
+    input_series:
+      - series: 'bioetl_checkpoint_load_events_total{pipeline="chembl",status="failed"}'
+        values: '0+1x30'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLCheckpointLoadFailed
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+            exp_annotations:
+              summary: Checkpoint load failures detected
+              description: bioetl_checkpoint_load_events_total increased with status=failed for pipeline=chembl in the last 15m.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
+  - name: checkpoint-save-failed
+    interval: 1m
+    input_series:
+      - series: 'bioetl_checkpoint_save_events_total{pipeline="chembl",operation="persist",status="failed"}'
+        values: '0+1x30'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLCheckpointSaveFailed
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              operation: persist
+            exp_annotations:
+              summary: Checkpoint save failures detected
+              description: bioetl_checkpoint_save_events_total increased with status=failed for pipeline=chembl operation=persist in the last 15m.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
+  - name: checkpoint-operator-failed
+    interval: 1m
+    input_series:
+      - series: 'bioetl_checkpoint_operator_operations_total{operation="prune",status="failed"}'
+        values: '0+1x30'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLCheckpointOperatorFailed
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              operation: prune
+            exp_annotations:
+              summary: Checkpoint operator action failures detected
+              description: bioetl_checkpoint_operator_operations_total increased with status=failed for operation=prune in the last 15m.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
+  - name: checkpoint-save-latency-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_checkpoint_save_duration_seconds_bucket{pipeline="chembl",operation="persist",le="1.0"}'
+        values: '0+0x50'
+      - series: 'bioetl_checkpoint_save_duration_seconds_bucket{pipeline="chembl",operation="persist",le="2.5"}'
+        values: '0+8x50'
+      - series: 'bioetl_checkpoint_save_duration_seconds_bucket{pipeline="chembl",operation="persist",le="5.0"}'
+        values: '0+8x50'
+      - series: 'bioetl_checkpoint_save_duration_seconds_bucket{pipeline="chembl",operation="persist",le="+Inf"}'
+        values: '0+8x50'
+    alert_rule_test:
+      - eval_time: 45m
+        alertname: BioETLCheckpointSaveLatencyHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              operation: persist
+            exp_annotations:
+              summary: Checkpoint save latency is elevated
+              description: Checkpoint save p95 exceeded 1s for pipeline=chembl operation=persist over the last 30m.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
+  - name: checkpoint-operator-latency-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_checkpoint_operator_duration_seconds_bucket{operation="list",le="1.0"}'
+        values: '0+0x50'
+      - series: 'bioetl_checkpoint_operator_duration_seconds_bucket{operation="list",le="2.5"}'
+        values: '0+8x50'
+      - series: 'bioetl_checkpoint_operator_duration_seconds_bucket{operation="list",le="5.0"}'
+        values: '0+8x50'
+      - series: 'bioetl_checkpoint_operator_duration_seconds_bucket{operation="list",le="+Inf"}'
+        values: '0+8x50'
+    alert_rule_test:
+      - eval_time: 40m
+        alertname: BioETLCheckpointOperatorLatencyHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              operation: list
+            exp_annotations:
+              summary: Checkpoint operator latency is elevated
+              description: Checkpoint operator p95 exceeded 1s for operation=list over the last 30m.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md
