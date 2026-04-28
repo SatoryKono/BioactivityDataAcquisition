@@ -215,7 +215,8 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
     Returns:
         PipelineRunContext ready for bootstrap_pipeline_runner.
     """
-    started_at, _ = capture_runtime_timing_anchor()
+    clock = SystemClock()
+    started_at, _ = capture_runtime_timing_anchor(clock=clock)
     return PipelineRunContext(
         pipeline_name=name,
         run_id=cast(RunID, uuid4()),

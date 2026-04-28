@@ -175,7 +175,9 @@ class TestCrossRefAndOpenAlexCreators:
         settings = MagicMock()
         settings.default_email = "default@example.org"
         settings.openalex_api_key = MagicMock()
-        settings.openalex_api_key.get_secret_value.return_value = "settings-openalex-key"
+        settings.openalex_api_key.get_secret_value.return_value = (
+            "settings-openalex-key"
+        )
         pipeline_config = MagicMock()
         pipeline_config.source.email = ""
         pipeline_config.source.api_key = ""
@@ -231,7 +233,9 @@ class TestCrossRefAndOpenAlexCreators:
         settings = MagicMock()
         settings.default_email = "default@example.org"
         settings.openalex_api_key = MagicMock()
-        settings.openalex_api_key.get_secret_value.return_value = "settings-openalex-key"
+        settings.openalex_api_key.get_secret_value.return_value = (
+            "settings-openalex-key"
+        )
 
         result = _create_openalex_adapter_from_settings(
             http_client=MagicMock(),

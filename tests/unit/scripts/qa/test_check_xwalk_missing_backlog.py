@@ -114,10 +114,7 @@ publication_pmid,MISSING_CODE
     validation = validate_backlog(xwalk_root=root, backlog_path=backlog)
 
     assert not validation.ok
-    assert (
-        "New unclassified MISSING_CODE"
-        in "\n".join(validation.errors)
-    )
+    assert "New unclassified MISSING_CODE" in "\n".join(validation.errors)
     assert "publication_pmid" in "\n".join(validation.errors)
 
 
@@ -147,9 +144,9 @@ def test_current_repository_backlog_matches_xwalks() -> None:
 
     assert validation.ok
     payload = _build_payload(validation)
-    assert payload["missing_marker_count"] == 225
+    assert payload["missing_marker_count"] == 222
     assert payload["marker_counts"] == {
-        "MISSING_CODE": 5,
+        "MISSING_CODE": 2,
         "MISSING_DOC": 175,
         "MISSING_GOLD": 38,
         "MISSING_TRANSFORMER": 7,

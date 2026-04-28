@@ -23,6 +23,7 @@ from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
 from bioetl.domain.entities import PubchemMolecule
+from bioetl.domain.services import standardize_chemical_structure
 from bioetl.domain.transformations import safe_float, safe_int
 from bioetl.domain.types import JsonDict
 from bioetl.domain.validation import validate_molecular_weight, validate_non_negative
@@ -147,6 +148,39 @@ class PubChemCompoundTransformer(BaseTransformer):
             "feature_count_3d": safe_int(record.get("feature_count_3d")),
         }
 
+    def _extract_chemical_standardization(
+        self,
+        record: BronzeRecord,
+        *,
+        covalent_unit_count: int | None,
+        charge: int | None,
+    ) -> dict[str, str | None]:
+        """Apply the governed PubChem chemical standardization policy."""
+        result = standardize_chemical_structure(
+            canonical_smiles=record.get("canonical_smiles"),
+            isomeric_smiles=record.get("isomeric_smiles"),
+            inchi=record.get("inchi"),
+            inchi_key=record.get("inchikey") or record.get("inchi_key"),
+            covalent_unit_count=covalent_unit_count,
+            charge=charge,
+        )
+        return {
+            "standardized_canonical_smiles": result.standardized_canonical_smiles,
+            "standardized_isomeric_smiles": result.standardized_isomeric_smiles,
+            "standardized_inchi": result.standardized_inchi,
+            "standardized_inchi_key": result.standardized_inchi_key,
+            "structure_parent_key": result.structure_parent_key,
+            "chemical_standardization_status": (
+                result.chemical_standardization_status
+            ),
+            "chemical_standardization_warnings": self.serialize_json_list(
+                result.chemical_standardization_warnings
+            ),
+            "chemical_standardization_policy_version": (
+                result.chemical_standardization_policy_version
+            ),
+        }
+
     async def _transform_impl(
         self,
         context: PipelineContext,
@@ -236,6 +270,8 @@ class PubChemCompoundTransformer(BaseTransformer):
             )
             return None
 
+        computed_descriptors = self._extract_computed_descriptors(record)
+        stereochemistry = self._extract_stereochemistry(record)
         business_data: dict[str, object] = {
             "molecule_id": str(cid),
             "canonical_smiles": record.get("canonical_smiles"),
@@ -251,10 +287,15 @@ class PubChemCompoundTransformer(BaseTransformer):
             ),
             "exact_mass": validate_non_negative(record.get("exact_mass")),
             "monoisotopic_mass": validate_non_negative(record.get("monoisotopic_mass")),
-            **self._extract_computed_descriptors(record),
+            **computed_descriptors,
             **self._extract_atom_bond_counts(record),
-            **self._extract_stereochemistry(record),
+            **stereochemistry,
             **self._extract_3d_properties(record),
+            **self._extract_chemical_standardization(
+                record,
+                covalent_unit_count=stereochemistry["covalent_unit_count"],
+                charge=computed_descriptors["charge"],
+            ),
         }
         return cid, business_data
 

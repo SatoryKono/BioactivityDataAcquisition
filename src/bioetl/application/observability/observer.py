@@ -43,7 +43,7 @@ if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
     from bioetl.domain.aggregates.events import DomainEvent
-    from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
+    from bioetl.domain.ports import ClockPort, LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID, RunType
 
     class _ObserverEventMixinBase:
@@ -265,6 +265,7 @@ class PipelineObserver(
         run_type: RunType,
         metrics: MetricsPort,
         logger: LoggerPort,
+        clock: ClockPort,
         tracer: TracingPort | None = None,
         manifest_id: str | None = None,
         entity: str | None = None,
@@ -286,6 +287,7 @@ class PipelineObserver(
         self.composite_run_id = composite_run_id
         self._metrics = metrics
         self._logger = logger
+        self._clock = clock
         self._tracer = tracer
         self.start_time: float | None = None
         self.span: Span | None = None

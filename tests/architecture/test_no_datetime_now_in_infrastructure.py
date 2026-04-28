@@ -10,10 +10,17 @@ Use datetime.now(UTC) instead for timezone-aware UTC timestamps.
 
 from __future__ import annotations
 
-import ast
 from pathlib import Path
 
 import pytest
+
+from tests.architecture.datetime_now_policy_support import (
+    assert_allowed_paths_are_basename_unique,
+    assert_allowed_paths_exist,
+    collect_datetime_now_calls,
+    collect_datetime_policy_violations,
+    find_stale_datetime_exemptions,
+)
 
 # Path relative to project root
 INFRASTRUCTURE_DIR = Path("src/bioetl/infrastructure")
@@ -45,30 +52,10 @@ def _relative_infrastructure_path(py_file: Path) -> str:
 
 def _datetime_now_calls(py_file: Path) -> list[str]:
     """Collect datetime.now()/utcnow() calls for a Python file."""
-    source = py_file.read_text(encoding="utf-8")
-    tree = ast.parse(source)
-    relative_path = _relative_infrastructure_path(py_file)
-    calls: list[str] = []
-
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.Call):
-            continue
-        if not isinstance(node.func, ast.Attribute):
-            continue
-        if node.func.attr not in ("now", "utcnow"):
-            continue
-
-        if isinstance(node.func.value, ast.Name) and node.func.value.id == "datetime":
-            calls.append(f"{relative_path}:{node.lineno}: datetime.{node.func.attr}()")
-        elif (
-            isinstance(node.func.value, ast.Attribute)
-            and node.func.value.attr == "datetime"
-        ):
-            calls.append(
-                f"{relative_path}:{node.lineno}: datetime.datetime.{node.func.attr}()"
-            )
-
-    return calls
+    return collect_datetime_now_calls(
+        py_file,
+        relative_path=_relative_infrastructure_path(py_file),
+    )
 
 
 class TestNoDatetimeNowInInfrastructure:
@@ -90,13 +77,11 @@ class TestNoDatetimeNowInInfrastructure:
 
         Note: datetime.utcnow() is deprecated in Python 3.12+ (PEP 692).
         """
-        violations = []
-
-        for py_file in infrastructure_python_files:
-            relative_path = _relative_infrastructure_path(py_file)
-            if relative_path in ALLOWED_PATHS:
-                continue
-            violations.extend(_datetime_now_calls(py_file))
+        violations = collect_datetime_policy_violations(
+            py_files=infrastructure_python_files,
+            allowed_paths=ALLOWED_PATHS,
+            relative_path_fn=_relative_infrastructure_path,
+        )
 
         assert not violations, (
             "datetime.now()/utcnow() found in infrastructure layer:\n"
@@ -114,45 +99,30 @@ class TestNoDatetimeNowInInfrastructure:
         This prevents stale exceptions from accumulating and blocks future
         reintroduction of ambiguous basename-based exemptions like `client.py`.
         """
-        existing_paths = {
-            _relative_infrastructure_path(py_file)
-            for py_file in infrastructure_python_files
-        }
-        missing = ALLOWED_PATHS - existing_paths
-
-        assert not missing, (
-            f"ALLOWED_PATHS contains non-existent files: {missing}. "
-            "Remove stale entries from the allowed list."
+        assert_allowed_paths_exist(
+            py_files=infrastructure_python_files,
+            allowed_paths=ALLOWED_PATHS,
+            relative_path_fn=_relative_infrastructure_path,
         )
-
-        basename_to_paths: dict[str, list[str]] = {}
-        for path_str in existing_paths:
-            basename_to_paths.setdefault(Path(path_str).name, []).append(path_str)
-
-        ambiguous = {
-            allowed_path: sorted(basename_to_paths[Path(allowed_path).name])
-            for allowed_path in ALLOWED_PATHS
-            if len(basename_to_paths.get(Path(allowed_path).name, [])) > 1
-        }
-
-        assert not ambiguous, (
-            "ALLOWED_PATHS must stay basename-unique to prevent silent widening of "
-            f"datetime exceptions: {ambiguous}"
+        assert_allowed_paths_are_basename_unique(
+            py_files=infrastructure_python_files,
+            allowed_paths=ALLOWED_PATHS,
+            relative_path_fn=_relative_infrastructure_path,
+            message_prefix=(
+                "ALLOWED_PATHS must stay basename-unique to prevent silent widening "
+                "of datetime exceptions: "
+            ),
         )
 
     def test_allowed_paths_still_require_exception(
         self, infrastructure_python_files: list[Path]
     ) -> None:
         """Force removal of allowlist entries once datetime usage is refactored away."""
-        file_by_path = {
-            _relative_infrastructure_path(py_file): py_file
-            for py_file in infrastructure_python_files
-        }
-        stale_exemptions = [
-            allowed_path
-            for allowed_path in sorted(ALLOWED_PATHS)
-            if not _datetime_now_calls(file_by_path[allowed_path])
-        ]
+        stale_exemptions = find_stale_datetime_exemptions(
+            py_files=infrastructure_python_files,
+            allowed_paths=ALLOWED_PATHS,
+            relative_path_fn=_relative_infrastructure_path,
+        )
 
         assert not stale_exemptions, (
             "Remove stale datetime exceptions that no longer need allowlisting: "

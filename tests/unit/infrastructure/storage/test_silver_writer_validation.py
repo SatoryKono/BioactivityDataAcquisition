@@ -31,7 +31,9 @@ from tests.unit.infrastructure.storage.silver_writer._test_support import (
 )
 
 
-def _build_pandera_validator(*, min_value: float | None = None) -> PanderaSilverValidator:
+def _build_pandera_validator(
+    *, min_value: float | None = None
+) -> PanderaSilverValidator:
     """Create a simple validator for ``entity_id``/``value`` test records."""
     import pandera as pa
 

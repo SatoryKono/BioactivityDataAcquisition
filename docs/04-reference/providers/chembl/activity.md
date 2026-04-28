@@ -95,6 +95,13 @@ ______________________________________________________________________
 | `record_id`          | `int` | Нет          | Внутренний ID записи                            |
 | `src_id`             | `int` | Нет          | ID источника данных                             |
 
+`publication_doi`, `publication_pmid` и `publication_pmc_id` заполняются из
+canonical activity fields, если они уже есть в Bronze payload. Для совместимости
+трансформер также принимает provider aliases: `doi`/`document_doi`,
+`pmid`/`pubmed_id`/`document_pubmed_id` и `pmc_id`/`document_pmc_id`.
+Нормализация выполняется профильным слоем до расчёта `content_hash`, поэтому
+регистровые различия DOI не создают hash drift.
+
 #### Данные молекулы
 
 | Поле                 | Тип   | Описание                           |

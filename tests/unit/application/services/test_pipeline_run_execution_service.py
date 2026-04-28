@@ -12,12 +12,15 @@ from bioetl.application.services.pipeline_run_execution_service import (
     PipelineRunExecutionService,
 )
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
+from tests.helpers.clock import FixedClock
 
 
 @pytest.fixture
 def service() -> PipelineRunExecutionService:
     """Create the execution helper under test."""
-    return PipelineRunExecutionService()
+    return PipelineRunExecutionService(
+        clock=FixedClock(datetime(2026, 4, 13, 12, 0, tzinfo=UTC)),
+    )
 
 
 @pytest.fixture

@@ -6,11 +6,14 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
+from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
+    StrictGoldContractSchema,
+)
 from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 
-class PublicationGoldCommonSchema(pa.DataFrameModel):
+class PublicationGoldCommonSchema(StrictGoldContractSchema):
     """Common contract fields shared by provider-specific Gold publication schemas."""
 
     entity_id: Series[str] = pa.Field(nullable=False)
@@ -46,14 +49,6 @@ class PublicationGoldCommonSchema(pa.DataFrameModel):
         isin=LOOKUP_METHODS,
     )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
 
 
 __all__ = ["PublicationGoldCommonSchema"]

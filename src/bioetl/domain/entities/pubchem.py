@@ -62,6 +62,30 @@ class PubchemMoleculeRecord(BaseModel):
     )
     inchi: str | None = Field(default=None, description="InChI string")
     inchi_key: str | None = Field(default=None, description="InChI Key")
+    standardized_canonical_smiles: str | None = Field(
+        default=None, description="Policy-normalized canonical SMILES"
+    )
+    standardized_isomeric_smiles: str | None = Field(
+        default=None, description="Policy-normalized isomeric SMILES"
+    )
+    standardized_inchi: str | None = Field(
+        default=None, description="Policy-normalized InChI string"
+    )
+    standardized_inchi_key: str | None = Field(
+        default=None, description="Policy-normalized InChI Key"
+    )
+    structure_parent_key: str | None = Field(
+        default=None, description="Stable parent-structure grouping key"
+    )
+    chemical_standardization_status: str | None = Field(
+        default=None, description="Bounded chemical standardization status"
+    )
+    chemical_standardization_warnings: str | None = Field(
+        default=None, description="JSON array of chemical standardization warnings"
+    )
+    chemical_standardization_policy_version: str | None = Field(
+        default=None, description="Version of the applied standardization policy"
+    )
 
     # === Nomenclature ===
     molecular_formula: str | None = Field(default=None, description="Molecular formula")
@@ -207,6 +231,14 @@ class PubchemMolecule(BaseEntity):
     isomeric_smiles: str | None = None
     inchi: str | None = None
     inchi_key: str | None = None
+    standardized_canonical_smiles: str | None = None
+    standardized_isomeric_smiles: str | None = None
+    standardized_inchi: str | None = None
+    standardized_inchi_key: str | None = None
+    structure_parent_key: str | None = None
+    chemical_standardization_status: str | None = None
+    chemical_standardization_warnings: str | None = None
+    chemical_standardization_policy_version: str | None = None
 
     # === Nomenclature ===
     molecular_formula: str | None = None

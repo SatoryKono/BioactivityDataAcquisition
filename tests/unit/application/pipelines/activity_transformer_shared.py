@@ -134,6 +134,90 @@ class SharedActivityTransformerTransformTests:
         assert result["assay_type"] == "B"
 
     @pytest.mark.asyncio
+    async def test_transform_with_publication_identifier_aliases(
+        self, transformer, mock_context
+    ):
+        """Activity rows should promote publication IDs from ChEMBL aliases."""
+        record = {
+            "activity_id": 12345,
+            "molecule_id": "CHEMBL25",
+            "doi": "https://doi.org/10.1000/ABC",
+            "pubmed_id": "00012345",
+            "pmc_id": "12345",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["publication_doi"] == "10.1000/abc"
+        assert result["publication_pmid"] == "12345"
+        assert result["publication_pmc_id"] == "PMC12345"
+
+    @pytest.mark.asyncio
+    async def test_transform_with_partial_publication_identifiers(
+        self, transformer, mock_context
+    ):
+        """Partial publication identifiers should remain nullable field-by-field."""
+        record = {
+            "activity_id": 12345,
+            "molecule_id": "CHEMBL25",
+            "publication_doi": "10.2000/XYZ",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["publication_doi"] == "10.2000/xyz"
+        assert result["publication_pmid"] is None
+        assert result["publication_pmc_id"] is None
+
+    @pytest.mark.asyncio
+    async def test_transform_publication_identifier_precedence(
+        self, transformer, mock_context
+    ):
+        """Canonical publication identifier fields should win over legacy aliases."""
+        record = {
+            "activity_id": 12345,
+            "molecule_id": "CHEMBL25",
+            "publication_doi": "10.3000/CANONICAL",
+            "doi": "10.3000/alias",
+            "publication_pmid": "111",
+            "pubmed_id": "222",
+            "publication_pmc_id": "PMC333",
+            "pmc_id": "444",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["publication_doi"] == "10.3000/canonical"
+        assert result["publication_pmid"] == "111"
+        assert result["publication_pmc_id"] == "PMC333"
+
+    @pytest.mark.asyncio
+    async def test_publication_identifiers_participate_in_content_hash(
+        self, transformer, mock_context
+    ):
+        """Identifier normalization should be stable, but value changes should hash."""
+        base_record = {
+            "activity_id": 12345,
+            "molecule_id": "CHEMBL25",
+        }
+        upper = base_record | {"publication_doi": "10.4000/ABC"}
+        lower = base_record | {"publication_doi": "10.4000/abc"}
+        changed = base_record | {"publication_doi": "10.4000/def"}
+
+        upper_result = await transformer.transform(mock_context, upper, index=0)
+        lower_result = await transformer.transform(mock_context, lower, index=0)
+        changed_result = await transformer.transform(mock_context, changed, index=0)
+
+        assert upper_result is not None
+        assert lower_result is not None
+        assert changed_result is not None
+        assert upper_result["content_hash"] == lower_result["content_hash"]
+        assert upper_result["content_hash"] != changed_result["content_hash"]
+
+    @pytest.mark.asyncio
     async def test_transform_with_activity_values(self, transformer, mock_context):
         """Test transformation with raw and standardized activity values."""
         record = {

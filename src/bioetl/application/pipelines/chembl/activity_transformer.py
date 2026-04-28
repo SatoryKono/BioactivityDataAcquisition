@@ -59,6 +59,17 @@ _ACTION_TYPE_FIELDS: JsonDict = {  # Any: converter callables or None
     "parent_type": None,
 }
 
+_PUBLICATION_IDENTIFIER_ALIASES: dict[str, tuple[str, ...]] = {
+    "publication_doi": ("publication_doi", "doi", "document_doi"),
+    "publication_pmid": (
+        "publication_pmid",
+        "pmid",
+        "pubmed_id",
+        "document_pubmed_id",
+    ),
+    "publication_pmc_id": ("publication_pmc_id", "pmc_id", "document_pmc_id"),
+}
+
 # ============================================================================
 # Declarative field groups for Activity entity
 # ============================================================================
@@ -229,6 +240,29 @@ class ActivityTransformer(BaseChemblTransformer):
             renames={"action_type_action_type": "action_type"},
         )
 
+    @staticmethod
+    def _first_truthy_value(
+        record: BronzeRecord,
+        *field_names: str,
+    ) -> object | None:
+        """Return the first populated value across source alias fields."""
+        for field_name in field_names:
+            value = record.get(field_name)
+            if value:
+                return value
+        return None
+
+    @classmethod
+    def _extract_publication_identifiers(
+        cls,
+        record: BronzeRecord,
+    ) -> JsonDict:
+        """Extract publication identifiers from canonical and provider aliases."""
+        return {
+            target_field: cls._first_truthy_value(record, *aliases)
+            for target_field, aliases in _PUBLICATION_IDENTIFIER_ALIASES.items()
+        }
+
     def _extract_business_data(
         self,
         record: BronzeRecord,
@@ -271,6 +305,7 @@ class ActivityTransformer(BaseChemblTransformer):
                     record.get("action_type"),
                 )
             ),
+            **self._extract_publication_identifiers(record),
             # JSON serialization
             "activity_properties": self.serialize_json(
                 record.get("activity_properties")

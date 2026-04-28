@@ -24,6 +24,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.domain.observability_contract import build_observability_contract_payload
 from bioetl.domain.ports import AuditEntry, AuditLayer
 from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.types import JsonDict
@@ -38,6 +39,78 @@ from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
 
 _AUDIT_STATUS_ATTRIBUTE = "bioetl.audit.status"
 _AUDIT_ADAPTER_CLOSED_MESSAGE = "FileAuditAdapter has been closed"
+_CANONICAL_AUDIT_OPTIONAL_FIELDS = (
+    "manifest_id",
+    "composite_run_id",
+    "entity",
+    "phase",
+    "status",
+)
+_AUDIT_EVENT_NAME_TO_CANONICAL = {
+    "PipelineRunStarted": "pipeline_started",
+    "PipelineRunCompleted": "pipeline_finished",
+    "PipelineRunFailed": "pipeline_failed",
+    "PipelineRunShutdown": "pipeline_shutdown",
+}
+
+
+def _coerce_text(value: object, *, fallback: str) -> str:
+    text = str(value).strip() if value is not None else ""
+    return text or fallback
+
+
+def _default_severity(event_data: JsonDict) -> str:
+    severity = event_data.get("severity")
+    if severity is not None:
+        return _coerce_text(severity, fallback="info")
+    status = _coerce_text(event_data.get("status"), fallback="")
+    if status in {"failed", "failure", "error"}:
+        return "error"
+    if status in {"warning", "degraded"}:
+        return "warning"
+    return "info"
+
+
+def _build_canonical_event_payload(
+    *,
+    event_name: str,
+    event_data: JsonDict | None,
+    timestamp: datetime,
+) -> JsonDict:
+    raw_event_data = dict(event_data or {})
+    raw_event_data.setdefault(
+        "event",
+        _AUDIT_EVENT_NAME_TO_CANONICAL.get(event_name, event_name),
+    )
+    canonical = build_observability_contract_payload(
+        event_name=event_name,
+        context=raw_event_data,
+        default_provider=_coerce_text(raw_event_data.get("provider"), fallback="unknown"),
+        default_pipeline=_coerce_text(
+            raw_event_data.get("pipeline") or raw_event_data.get("pipeline_name"),
+            fallback="unknown",
+        ),
+        default_run_id=_coerce_text(raw_event_data.get("run_id"), fallback="unknown"),
+        default_severity=_default_severity(raw_event_data),
+    ).context
+    payload: JsonDict = {
+        "event_name": event_name,
+        "event": canonical["event"],
+        "event_family": canonical["event_family"],
+        "event_data": raw_event_data,
+        "timestamp": timestamp.isoformat(),
+        "provider": canonical["provider"],
+        "pipeline": canonical["pipeline"],
+        "run_id": canonical["run_id"],
+        "severity": canonical["severity"],
+        "error_type": canonical["error_type"],
+        "context": canonical,
+    }
+    for field in _CANONICAL_AUDIT_OPTIONAL_FIELDS:
+        value = canonical.get(field)
+        if value is not None:
+            payload[field] = value
+    return payload
 
 
 class FileAuditAdapter:
@@ -133,11 +206,11 @@ class FileAuditAdapter:
     ) -> None:
         self._ensure_directory()
         file_path = self._get_event_file_path(timestamp)
-        payload = {
-            "event_name": event_name,
-            "event_data": event_data or {},
-            "timestamp": timestamp.isoformat(),
-        }
+        payload = _build_canonical_event_payload(
+            event_name=event_name,
+            event_data=event_data,
+            timestamp=timestamp,
+        )
         json_line = serialize_to_json(payload, sort_keys=True) + "\n"
         with open(file_path, "a", encoding="utf-8") as f:
             f.write(json_line)

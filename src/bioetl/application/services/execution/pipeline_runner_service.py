@@ -137,7 +137,8 @@ class PipelineRunnerService:
             PipelineNotFoundError: If pipeline_name is not registered in the factory.
         """
         started_at, started_monotonic = capture_runtime_timing_anchor(
-            started_at=self.clock.now()
+            clock=self.clock,
+            started_at=self.clock.now(),
         )
         effective_options = self._merge_options(options, dry_run)
         self._ensure_pipeline_exists(pipeline_name)

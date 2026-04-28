@@ -14,7 +14,10 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
-from bioetl.application.observability.observer import LifecyclePhase, PipelineObserver
+from bioetl.application.observability.observer import (
+    LifecyclePhase,
+    PipelineObserver as _PipelineObserver,
+)
 from bioetl.domain.aggregates.events import (
     PipelineCompleted,
     QuarantineEntryResolved,
@@ -29,6 +32,18 @@ from bioetl.domain.runtime_observability_publication_contract import (
     CANONICAL_LIFECYCLE_EMITTER,
 )
 from bioetl.domain.types import RunType
+from tests.helpers.clock import FixedClock
+
+
+class PipelineObserver(_PipelineObserver):
+    """Create observers with explicit deterministic clock ownership in tests."""
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault(
+            "clock",
+            FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+        )
+        super().__init__(*args, **kwargs)
 
 
 @pytest.fixture
@@ -370,7 +385,7 @@ def test_observer_captures_startup_timing_anchor(
         assert observer.wall_start_time == started_at
         assert observer.start_time == pytest.approx(started_monotonic)
 
-    capture_anchor_mock.assert_called_once_with()
+    capture_anchor_mock.assert_called_once_with(clock=observer._clock)
     assert observer.wall_start_time == started_at
     assert observer.start_time == pytest.approx(started_monotonic)
 

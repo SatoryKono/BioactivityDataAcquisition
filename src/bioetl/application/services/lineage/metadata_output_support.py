@@ -111,10 +111,7 @@ def resolve_gold_source_tables(input_data: GoldMetadataInput) -> dict[str, int]:
     if not input_data.silver_refs:
         return {}
     return dict(
-        sorted(
-            (ref.table_name, ref.delta_version)
-            for ref in input_data.silver_refs
-        )
+        sorted((ref.table_name, ref.delta_version) for ref in input_data.silver_refs)
     )
 
 

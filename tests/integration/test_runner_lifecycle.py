@@ -33,6 +33,7 @@ from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.ports.noop import NoOpTracing
+from tests.helpers.clock import FixedClock
 from bioetl.domain.types import RunType
 
 _NOOP_TRACER = NoOpTracing()
@@ -370,6 +371,7 @@ class TestPipelineRunnerLifecycle:
             run_type=context.run_type,
             metrics=mock_services_with_recorder.metrics,
             logger=mock_logger,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
             tracer=_NOOP_TRACER,
         )
         lock_manager = MagicMock()

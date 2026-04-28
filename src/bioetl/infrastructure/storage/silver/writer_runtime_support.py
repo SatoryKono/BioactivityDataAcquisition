@@ -268,7 +268,9 @@ def _coerce_silver_write_invocation(
             normalized_legacy["table_name"] = normalized_legacy.pop(table_key)
         allowed_transport_aliases = {"table_name"}
         if set(normalized_legacy) - allowed_transport_aliases:
-            unexpected = ", ".join(sorted(set(normalized_legacy) - allowed_transport_aliases))
+            unexpected = ", ".join(
+                sorted(set(normalized_legacy) - allowed_transport_aliases)
+            )
             raise TypeError(
                 "unexpected legacy keyword arguments when invocation is provided: "
                 f"{unexpected}"

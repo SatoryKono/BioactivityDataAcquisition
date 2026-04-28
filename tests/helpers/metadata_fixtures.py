@@ -49,8 +49,7 @@ def build_runtime_metadata(
         run_id=run_id or str(uuid4()),
         manifest_id=manifest_id,
         run_type=run_type,
-        started_at_utc=started_at_utc
-        or datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC),
+        started_at_utc=started_at_utc or datetime(2025, 1, 15, 10, 0, 0, tzinfo=UTC),
         completed_at_utc=completed_at_utc
         or datetime(2025, 1, 15, 10, 5, 0, 0, tzinfo=UTC),
         duration_seconds=duration_seconds,

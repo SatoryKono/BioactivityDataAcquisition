@@ -6,8 +6,12 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
+from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
+    StrictGoldContractSchema,
+)
 
-class ChEMBLTargetGoldSchema(pa.DataFrameModel):
+
+class ChEMBLTargetGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Target in Gold layer."""
 
     entity_id: Series[str] = pa.Field(nullable=False)
@@ -36,20 +40,8 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     component_descriptions: Series[str] = pa.Field(nullable=True)
     component_relationships: Series[str] = pa.Field(nullable=True)  # list[str]
 
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
-    # Metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
-
-
-class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
+class ChEMBLTargetComponentGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Target Component in Gold layer."""
 
     entity_id: Series[str] = pa.Field(nullable=False)
@@ -72,20 +64,8 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     )  # int → float (nullable)
     protein_classification_ids: Series[str] = pa.Field(nullable=True)  # list[int]
 
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
-    # Metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
-
-
-class ChEMBLTissueGoldSchema(pa.DataFrameModel):
+class ChEMBLTissueGoldSchema(StrictGoldContractSchema):
     """Gold schema for ChEMBL Tissue entity.
 
     Validates:
@@ -134,20 +114,8 @@ class ChEMBLTissueGoldSchema(pa.DataFrameModel):
         description="Uberon Ontology ID",
     )
 
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
-    # Metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
-
-
-class ChEMBLSubcellularFractionGoldSchema(pa.DataFrameModel):
+class ChEMBLSubcellularFractionGoldSchema(StrictGoldContractSchema):
     """Gold schema for ChEMBL Subcellular Fraction entity.
 
     Derived entity: unique subcellular fractions extracted from Assay records.
@@ -183,18 +151,6 @@ class ChEMBLSubcellularFractionGoldSchema(pa.DataFrameModel):
         nullable=True,
         description="Example assay ChEMBL ID",
     )
-
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
-
-    # Metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
 
 
 __all__ = [

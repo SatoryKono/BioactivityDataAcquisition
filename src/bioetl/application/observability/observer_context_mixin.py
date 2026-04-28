@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
     from opentelemetry.trace import Span
 
-    from bioetl.domain.ports import MetricsPort, TracingPort
+    from bioetl.domain.ports import ClockPort, MetricsPort, TracingPort
 
 
 if TYPE_CHECKING:
@@ -66,6 +66,7 @@ class _ObserverContextManagerMixin(_ObserverEventMixinBase):
     _terminal_records_processed: int
     _metrics: MetricsPort
     _tracer: TracingPort | None
+    _clock: ClockPort
 
     def _domain_run_id(self) -> RunID:
         """Coerce the observer's string run id into the domain RunID type."""
@@ -73,7 +74,9 @@ class _ObserverContextManagerMixin(_ObserverEventMixinBase):
 
     def __enter__(self) -> Self:
         """Start observation (Span + Log + Metric)."""
-        wall_start_time, started_monotonic = capture_runtime_timing_anchor()
+        wall_start_time, started_monotonic = capture_runtime_timing_anchor(
+            clock=self._clock,
+        )
         self.wall_start_time = wall_start_time
         self.start_time = started_monotonic
         self._start_trace_span()

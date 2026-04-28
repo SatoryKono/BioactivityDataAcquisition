@@ -57,6 +57,8 @@ COMPAT_PARENT_IMPORTS = {
     "bioetl.infrastructure.adapters.openalex": frozenset({"client_helpers_mixin"}),
     "bioetl.infrastructure.adapters.uniprot": frozenset({"metadata_mixin"}),
 }
+
+
 @pytest.mark.architecture
 def test_infrastructure_adapter_compat_shim_files_have_been_removed() -> None:
     """Removed infrastructure adapter shim files should no longer exist."""

@@ -195,6 +195,14 @@ class TestFileAuditAdapter:
             "pipeline": "test_pipeline",
             "status": "success",
         }
+        assert data["event"] == "pipeline_finished"
+        assert data["event_family"] == "pipeline.lifecycle"
+        assert data["pipeline"] == "test_pipeline"
+        assert data["provider"] == "unknown"
+        assert data["run_id"] == "unknown"
+        assert data["severity"] == "info"
+        assert data["error_type"] == "none"
+        assert data["context"]["pipeline"] == "test_pipeline"
         assert "timestamp" in data
 
     @pytest.mark.asyncio

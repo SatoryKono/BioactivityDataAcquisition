@@ -1,619 +1,462 @@
-# Script Analysis and Cleanup Prompt
+# Script Analysis And Consolidation Prompt
 
-**Purpose**: Comprehensive guide for analyzing scripts to identify obsolete, duplicate, and suboptimal scripts with systematic cleanup planning.
+**Purpose**: Repo-specific audit-grade prompt for analyzing `./scripts` without
+hallucinating entrypoints, deleting compatibility surfaces too early, or
+ignoring governance sources of truth.
 
-**Last Updated**: 2024-04-14
+**Last Updated**: 2026-04-28
 **Status**: Active
-**Owner**: @bioetl-architecture
+**Owner**: `@bioetl-architecture`
 
 ______________________________________________________________________
 
-## Enhanced Script Analysis Prompt
+## Freshness Note
 
-### Analysis Objectives
+This prompt is intentionally tied to the current BioETL repository structure.
+Do not reuse it as a generic “analyze ./scripts” prompt for unrelated projects.
 
-**Primary Goals:**
+Before every new audit, refresh the facts from:
 
-- Identify obsolete scripts safe for removal
-- Find duplicate scripts suitable for consolidation
-- Detect suboptimal scripts needing refactoring
-- Uncover governance violations
-- Provide actionable cleanup recommendations
+- `configs/quality/scripts_inventory_manifest.json`
+- `scripts/engineering/repo/catalog.yaml`
 
-**Scope:**
+Current local snapshot on `2026-04-28`:
 
-- All scripts in `scripts/` directory
-- Scripts in `src/tools/` directory
-- Script references in workflows, agents, and documentation
+- total scripts: `449`
+- `active`: `320`
+- `legacy`: `15`
+- `orphan`: `101`
+- `unknown`: `13`
 
-______________________________________________________________________
-
-## 1. Obsolete Scripts (Deprecation Candidates)
-
-### Identification Criteria
-
-**Technical Indicators:**
-
-- ✅ No references in `.github/workflows/*` files
-- ✅ No usage in `.codex/skills/*` or agent documentation
-- ✅ Marked as "legacy" or "orphan" in `scripts_inventory_manifest.json`
-- ✅ Contains deprecated technology (e.g., `gemini run`, old API versions)
-- ✅ Located in `archive/`, `tmp/`, or `legacy/` directories
-- ✅ No git commits in past 12 months
-
-**Governance Indicators:**
-
-- ✅ No owner specified in lifecycle registry
-- ✅ No documentation in README files
-- ✅ No tests covering the script
-- ✅ Violates current architecture rules
-
-### Analysis Questions
-
-**Usage Evidence:**
-
-```bash
-# Check workflow references
-grep -r "script_name" .github/workflows/
-
-# Check agent/skill usage
-grep -r "script_name" .codex/ docs/00-project/ai/agents/
-
-# Check test coverage
-grep -r "script_name" tests/
-```
-
-**Safety Assessment:**
-
-- What's the last known usage in git history?
-- Are there hidden dependencies in configs or documentation?
-- What's the rollback plan if removal causes issues?
-- Can removal be automated or requires manual verification?
-
-### Removal Checklist
-
-- [ ] Verify no CI/CD references
-- [ ] Check no agent/skill dependencies
-- [ ] Confirm no test dependencies
-- [ ] Update lifecycle registry
-- [ ] Remove from inventory manifest
-- [ ] Document removal rationale
+These counts are evidence inputs, not hardcoded truths. If the manifest changes,
+the prompt consumer must rebaseline before drawing conclusions.
 
 ______________________________________________________________________
 
-## 2. Duplicate Scripts (Consolidation Candidates)
+## Why This Prompt Is Different
 
-### Identification Criteria
+This repository already uses strong script governance:
 
-**Code-Level Duplication:**
+- `scripts_inventory_manifest.json` is the primary inventory snapshot.
+- `catalog.yaml` defines canonical roots wider than a naive `scripts/{docs,ops,ai}` view.
+- package routers are often exposed through `__main__.py`, not through ad-hoc
+  `main.py` files.
+- several top-level files are intentionally kept as compatibility shims,
+  transport adapters, or thin wrappers.
 
-- ✅ Same functionality with different extensions (`.sh` vs `.py`)
-- ✅ Wrapper scripts that only delegate (`exec "$SCRIPT_DIR/..."`)
-- ✅ Cross-platform duplicates (Windows `.ps1` vs Unix `.sh`)
-- ✅ >80% code similarity (AST analysis)
-- ✅ Multiple scripts with identical help text
+Because of that, a generic cleanup prompt is dangerous here. The prompt must:
 
-**Functional Duplication:**
-
-- ✅ Different scripts solving same problem
-- ✅ Overlapping command-line interfaces
-- ✅ Redundant error handling patterns
-- ✅ Duplicate configuration logic
-
-### Consolidation Strategy
-
-**Decision Matrix:**
-
-| Factor               | Weight | Canonical Choice Criteria           |
-| -------------------- | ------ | ----------------------------------- |
-| **Usage Frequency**  | 40%    | Most frequently called in workflows |
-| **Documentation**    | 25%    | Best documented version             |
-| **Code Quality**     | 20%    | Best error handling, logging        |
-| **Platform Support** | 15%    | Cross-platform compatibility        |
-
-**Migration Path:**
-
-1. Identify canonical version
-1. Update all callers (workflows, docs, agents)
-1. Add deprecation warnings to old versions
-1. Monitor usage during transition period
-1. Remove deprecated versions
-
-### Common Duplication Patterns
-
-**Test Runners:**
-
-```bash
-# Before: Multiple runners
-scripts/engineering/dev/run_pytest.sh
-scripts/engineering/dev/run_pytest.ps1
-scripts/engineering/ci/run_pytest_resilient.py
-
-# After: Single canonical
-scripts/engineering/ci/run_pytest_resilient.py
-```
-
-**Cross-Platform Wrappers:**
-
-```bash
-# Before: Platform-specific duplicates
-scripts/ai/mcp/mcp_wrapper.ps1
-scripts/ai/mcp/mcp_wrapper.sh
-
-# After: Single cross-platform or documented choice
-scripts/ai/mcp/mcp_wrapper.sh  # Canonical
-```
+- normalize scope through manifest + catalog before filesystem opinions;
+- discover package-level routers through `__main__.py` first;
+- distinguish canonical router vs compatibility shim vs helper;
+- forbid blanket deletion of wrappers before caller/test/doc migration is proven;
+- require a replacement path for every `DELETE` or `MERGE`.
 
 ______________________________________________________________________
 
-## 3. Suboptimal Scripts (Refactoring Candidates)
+## Repo-Specific Guardrails
 
-### Identification Criteria
+### Canonical Roots
 
-**Code Quality Issues:**
+Read `scripts/engineering/repo/catalog.yaml` first. At `2026-04-28`, canonical
+roots include at least:
 
-- ✅ >8 command-line parameters (complex interface)
-- ✅ No error handling (`set -e` missing, no try/catch)
-- ✅ No logging or minimal logging
-- ✅ Hardcoded paths/values instead of config
-- ✅ No type hints (Python) or shellcheck errors
-- ✅ Missing documentation (no `--help`, no README)
+- `scripts/ai`
+- `scripts/ai/codex`
+- `scripts/ai/gemini`
+- `scripts/ai/mistrall`
+- `scripts/ai/mistrallvibe`
+- `scripts/engineering/ci`
+- `scripts/engineering/dev`
+- `scripts/engineering/qa`
+- `scripts/engineering/repo`
+- `scripts/engineering/diagnostics`
+- `scripts/engineering/baselines`
+- `scripts/engineering/common`
+- `scripts/docs`
+- `scripts/schema`
+- `scripts/ops`
+- `scripts/ops/migrations/active`
+- `scripts/ops/migrations/oneoff`
+- `scripts/diagrams`
 
-**Architecture Issues:**
+Do not reduce scope to a smaller subset unless the catalog explicitly changes.
 
-- ✅ Script does multiple unrelated things
-- ✅ Violates separation of concerns
-- ✅ Mixes I/O with business logic
-- ✅ Poor error messages (generic "failed")
-- ✅ No exit codes or inconsistent codes
-- ✅ No input validation
+### Entry Point Discovery Rules
 
-### Refactoring Priorities
+Determine entrypoints from actual code and docs in this order:
 
-**Critical (Do Now):**
+1. package-level `__main__.py`
+2. direct CLI files with `if __name__ == "__main__"`
+3. shell / PowerShell / batch wrappers
+4. documented facades, shims, and transport adapters
 
-- Add proper error handling and logging
-- Extract configuration to separate files
-- Add input validation
-- Implement consistent exit codes
+Do not invent `main.py`, top-level routers, or command names that do not exist
+in code, README files, tests, or configuration.
 
-**High (Next Sprint):**
+### Compatibility And Transport Rules
 
-- Add type hints and docstrings
-- Split complex scripts into modules
-- Implement proper argument parsing
-- Add comprehensive tests
+If a file is documented or tested as a compatibility wrapper, shim, or
+transport adapter, the default decision is:
 
-**Medium (Backlog):**
+- `KEEP AS THIN WRAPPER`
 
-- Improve performance bottlenecks
-- Add metrics/telemetry
-- Enhance documentation
-- Add examples to README
+Deletion is allowed only when all of the following are shown:
 
-______________________________________________________________________
+- identified callers;
+- replacement path for every caller;
+- updated tests/docs/workflows;
+- preserved or intentionally retired public contract.
 
-## 4. Governance Violations (Policy Candidates)
+Special-case shims kept for monkeypatch/import semantics must not be deleted
+without a dedicated test migration plan.
 
-### Identification Criteria
+### Public CLI Surface Rules
 
-**Location Violations:**
+If a command name is already published via:
 
-- ✅ Scripts not in canonical roots (`scripts/engineering/repo/catalog.yaml`)
-- ✅ Scripts in wrong directory for their purpose
-- ✅ Scripts violating layer boundaries
+- package `__main__.py`
+- README
+- tests
+- workflow invocation
 
-**Documentation Violations:**
-
-- ✅ No README entry for script group
-- ✅ Missing from inventory manifest
-- ✅ No owner in lifecycle registry
-- ✅ Undocumented parameters or behavior
-
-**Quality Violations:**
-
-- ✅ No tests for critical scripts
-- ✅ Bypassing established patterns
-- ✅ Inconsistent naming conventions
-- ✅ Missing license headers
-
-### Policy Actions
-
-**Immediate Fixes:**
-
-```bash
-# Move to canonical location
-mv scripts/misc/important.sh scripts/engineering/qa/important.sh
-
-# Add to catalog
-vim scripts/engineering/repo/catalog.yaml
-
-# Update lifecycle registry
-vim configs/quality/scripts_lifecycle_registry.json
-```
-
-**Preventive Measures:**
-
-- Add governance checks to CI
-- Create script location linter
-- Document canonical patterns
-- Add script creation template
+then prefer internal consolidation first. Do not rename the public command
+surface without strong evidence and an explicit migration path.
 
 ______________________________________________________________________
 
-## Analysis Methodology
+## Canonical Prompt
 
-### Step 1: Data Collection
+### Role
 
-**Inventory Analysis:**
+You are a senior software architect and refactoring auditor specializing in:
 
-```bash
-# Get comprehensive script inventory
-python3 -m scripts.engineering.repo sync-inventory --write
+- CLI tooling
+- compatibility layers
+- transport adapters
+- reproducible engineering systems
 
-# Export JSON for analysis
-python3 -m scripts.engineering.repo check-inventory --json > inventory.json
+### Task
+
+Build a deterministic, traceable, and conservative consolidation plan for
+`./scripts` in this repository.
+
+Target outcomes:
+
+- remove confirmed duplicates;
+- merge near-identical scenarios where safe;
+- extract shared logic into internal modules;
+- reduce the number of entrypoints only when public contracts remain safe.
+
+The aspirational goal is roughly 2x fewer standalone scripts, but safety wins
+over file-count reduction. If 2x is not safely achievable, state the realistic
+reduction range and why.
+
+### Mandatory Inputs And Source Of Truth
+
+Before any conclusions, read and normalize:
+
+- `configs/quality/scripts_inventory_manifest.json`
+- `scripts/engineering/repo/catalog.yaml`
+
+Then inspect:
+
+- `./scripts`
+- only those files outside `./scripts` that are:
+  - imported by scripts;
+  - invoked by scripts;
+  - used in workflows/tests/docs as script contracts;
+  - README/config/test artifacts that define canonical invocation or compatibility rules
+
+If a required file or required field is missing, mark it as `IncompleteData`.
+Do not fill gaps with guesses.
+
+### Scope Normalization Step
+
+First build a `Script Registry Table`:
+
+| script_id | path | purpose | entrypoint | deps | overlaps | used_by | last_modified | status |
+
+If a value cannot be confirmed from code, tests, README, or config, set it to
+`IncompleteData`.
+
+### File Role Taxonomy
+
+For every analyzed file, classify one or more of:
+
+- `canonical`
+- `duplicate`
+- `deprecated`
+- `orphan`
+- `experimental`
+- `compatibility_wrapper`
+- `transport_adapter`
+- `internal_module`
+- `library_misuse`
+
+Also assign:
+
+- duplication level: `full` / `high` / `partial` / `weak`
+- layer type: `CLI-only` / `mixed` / `internal-library`
+
+### Hard Analysis Rules
+
+1. Never decide without evidence.
+2. Every action must have a justification.
+3. Before any merge/delete proposal, verify:
+   - CLI interface
+   - arguments / flags / modes
+   - side-effects
+   - touched files or artifacts
+   - dependencies
+   - current callers
+   - tests that lock the behavior
+4. Keep these concerns separate:
+   - CLI entrypoints
+   - business logic
+   - internal helpers
+5. Decision priority order:
+   - active usage / public contract
+   - backwards compatibility
+   - architectural correctness
+   - code deduplication
+6. Every action must be exactly one of:
+   - `KEEP`
+   - `DELETE`
+   - `MERGE`
+   - `SPLIT`
+   - `MOVE`
+   - `REWRITE`
+
+### Evidence Requirements
+
+Every substantial conclusion must cite one or more of:
+
+- file paths
+- functions / classes
+- CLI flags / subcommands
+- imports
+- duplicated logic blocks
+- shared side-effects
+- shared pipeline steps
+- README / tests / config references
+
+Do not classify two files as duplicates only because their names look similar.
+
+If line-level data is unavailable, explicitly say:
+
+- `[line-level unavailable]`
+
+### What You Must Determine
+
+1. Which files are real entrypoints.
+2. Which files fully or partially duplicate each other.
+3. Which groups can be safely consolidated.
+4. Which differences block consolidation.
+5. Which entrypoints should remain canonical.
+6. Which wrappers must stay temporarily as compatibility layers.
+7. Which migration order minimizes regression risk.
+
+### Output Format
+
+Return Markdown with these sections:
+
+#### 1. Executive Summary
+
+- how many scripts and how many entrypoints were found;
+- which source-of-truth files were used;
+- realistic reduction range;
+- top consolidation candidates;
+- why “cut in half” is or is not safely realistic.
+
+#### 2. Source Of Truth
+
+- manifest summary;
+- catalog roots;
+- what counted as scope;
+- what data was incomplete.
+
+#### 3. Script Registry Table
+
+| script_id | path | purpose | entrypoint | deps | overlaps | used_by | last_modified | status |
+
+#### 4. Summary Table
+
+| script_id | path | classification | action | target | risk | reason |
+
+#### 5. Duplicate And Overlap Map
+
+For each pair or group:
+
+- evidence
+- similarity: `full` / `high` / `partial` / `weak`
+- material differences
+- recommendation: `delete` / `merge` / `keep` / `extract shared logic`
+
+#### 6. Per-File Decision Blocks
+
+For every relevant file:
+
+```text
+[script_id] path/to/file
+Decision: [KEEP | DELETE | MERGE | SPLIT | MOVE | REWRITE]
+
+Status:
+Fact:
+Assumption:
+Unknown:
+Reason:
+
+Actions:
+Remove:
+Extract:
+Move:
+Modify:
+CLI normalization:
 ```
 
-**Reference Analysis:**
+If old CLI remains as a wrapper, say so explicitly.
 
-```bash
-# Check workflow references
-grep -r "scripts/" .github/workflows/ | sort | uniq -c
+#### 7. Target CLI Consolidation Map
 
-# Check agent usage
-grep -r "scripts/" .codex/ docs/00-project/ai/agents/
+Show the intended CLI surface only if justified by existing routers.
 
-# Check test references
-grep -r "scripts/" tests/ | grep -v ".pyc"
-```
+Always include:
 
-**Quality Analysis:**
+| old_script | old_command | new_target | compatibility_strategy |
 
-```bash
-# Shell script quality
-shellcheck scripts/**/*.sh
+#### 8. Dependency Graph
 
-# Python script quality
-pylint scripts/**/*.py
+- who calls whom
+- subprocess fan-out
+- cyclic dependencies
+- shared helper hotspots
 
-# Code duplication detection
-# (Would use specialized tool in real analysis)
-```
+#### 9. Migration Plan
 
-### Step 2: Categorization Matrix
+Break into phases:
 
-```markdown
-| Script | Type | Last Used | References | Status | Decision | Action | Owner |
-|--------|------|-----------|------------|--------|----------|--------|-------|
-| `scripts/old.sh` | test | 2023-05-15 | None | legacy | remove | safe | @platform |
-| `scripts/dup.py` | util | 2024-01-10 | agents/bot.md:15 | active | consolidate | needs migration | @architecture |
-```
+- safe / quick wins
+- medium-complexity changes
+- risky changes after caller migration
+- wrapper deprecation
+- final removal
 
-### Step 3: Impact Analysis
+For each step include:
 
-**Risk Assessment Framework:**
+- changed files
+- expected effect
+- compatibility impact
+- what to test before old path removal
 
-| Risk Level | Criteria                                                 | Example                  |
-| ---------- | -------------------------------------------------------- | ------------------------ |
-| **Low**    | No references, archived, documented replacement          | Legacy migration scripts |
-| **Medium** | Some references, needs migration, has replacement        | Deprecated test runners  |
-| **High**   | Active usage, no clear replacement, complex dependencies | Core CI scripts          |
+#### 10. Checks And Limits
 
-**Validation Strategy:**
+Separate:
 
-```bash
-# Test CI still works
-act -j tests
+- confirmed facts
+- assumptions
+- unknowns
+- what cannot be concluded safely
+- why this target entrypoint set was chosen
 
-# Verify agent functionality
-# (Would test agent workflows)
+### Self-Check Before Answering
 
-# Check inventory validation
-python3 -m scripts.engineering.repo check-inventory --check
-```
+Before returning, verify:
 
-### Step 4: Prioritized Action Plan
+- all entrypoints are enumerated;
+- every `DELETE` and `MERGE` has a replacement path;
+- confirmed duplicates are separated from speculative ones;
+- no compatibility wrapper is removed without caller migration;
+- public command names are not changed without strong evidence;
+- regression risk is explicitly estimated;
+- scope comes from manifest + catalog, not guesswork.
 
-```markdown
-## Phase 1: Safe Removals (Week 1)
-- [ ] Remove 10 legacy scripts (no references, archived)
-- [ ] Update lifecycle registry entries
-- [ ] Verify CI still passes
-- [ ] Document removals in changelog
+### Fallback
 
-## Phase 2: Consolidations (Week 2)
-- [ ] Merge test runners (keep resilient version)
-- [ ] Unify cross-platform wrappers
-- [ ] Update all workflow callers
-- [ ] Add deprecation warnings
+If `./scripts` is incomplete, manifest/catalog is missing, or active callers
+cannot be established safely, stop and return:
 
-## Phase 3: Refactoring (Week 3-4)
-- [ ] Add error handling to top 5 critical scripts
-- [ ] Extract configurations
-- [ ] Improve documentation
-- [ ] Add missing tests
-
-## Phase 4: Governance (Ongoing)
-- [ ] Add script location checks to CI
-- [ ] Create script quality gates
-- [ ] Document canonical patterns
-- [ ] Train team on governance rules
-```
+- what is missing;
+- why the analysis would be unreliable;
+- the minimum additional files needed.
 
 ______________________________________________________________________
 
-## Expected Output Format
+## Repository Examples The Prompt Must Respect
 
-### Executive Summary
+Use these as anti-hallucination anchors:
 
-```
-✅ **Analysis Complete**: [Date]
-📊 **Total Scripts Analyzed**: 316
-🗑️ **Obsolete Candidates**: 15 (4.7%)
-🔄 **Duplicate Groups**: 8 groups (24 scripts)
-⚠️ **Suboptimal Scripts**: 42 (13.3%)
-📉 **Governance Violations**: 12
-🎯 **Estimated Cleanup Potential**: 39 scripts (12.3%)
-```
+- `scripts/diagrams/__main__.py` publishes the diagrams command surface.
+- `scripts/engineering/ci/__main__.py` and `scripts/engineering/qa/__main__.py`
+  already act as unified routers.
+- `scripts/docs/README.md` documents top-level `scripts/docs/*.py` mostly as
+  compatibility shims, with `check_doc_links.py` preserved for legacy
+  monkeypatch semantics.
+- `scripts/diagrams/README.md` treats bundle wrappers as compatibility surfaces
+  around canonical generators.
+- `scripts/engineering/dev/README.md` documents setup facades rather than
+  implying they are safe deletion candidates.
+- `scripts/ai/codex/README.md` and architecture tests preserve launcher and
+  transport contracts.
+- `tests/architecture/test_codex_launcher_bootstrap.py`
+- `tests/architecture/test_ops_ai_setup_scripts.py`
 
-### Detailed Findings
-
-#### 1. Obsolete Scripts (High Confidence for Removal)
-
-| Script                                 | Last Commit | References | Removal Risk | Savings  | Notes              |
-| -------------------------------------- | ----------- | ---------- | ------------ | -------- | ------------------ |
-| `scripts/ops/archive/old_migration.py` | 2023-05-15  | None       | Low          | 1 script | Historical only    |
-| `scripts/ai/legacy_bot.sh`             | 2023-08-20  | None       | Low          | 1 script | Replaced by skills |
-| `scripts/tmp/setup_temp.sh`            | 2023-11-01  | None       | Low          | 1 script | Temporary setup    |
-
-**Total Obsolete**: 15 scripts = **4.7%** of inventory
-
-#### 2. Duplicate Scripts (Consolidation Opportunities)
-
-| Group ID | Scripts                                                      | Canonical Candidate       | Savings   | Complexity |
-| -------- | ------------------------------------------------------------ | ------------------------- | --------- | ---------- |
-| TR-001   | `run_pytest.sh`, `run_pytest.ps1`, `run_pytest_resilient.py` | `run_pytest_resilient.py` | 2 scripts | Medium     |
-| MCP-001  | `mcp_wrapper.ps1`, `mcp_wrapper.sh`                          | `mcp_wrapper.sh`          | 1 script  | Low        |
-| QA-001   | `check_arch.py`, `validate_arch.py`                          | `validate_arch.py`        | 1 script  | High       |
-
-**Total Duplicate Groups**: 8 = **24 scripts** = **7.6%** of inventory
-**Consolidation Potential**: 16 scripts = **5.1%** savings
-
-#### 3. Suboptimal Scripts (Refactoring Needed)
-
-| Script                | Issue Type        | Severity | Effort | Impact |
-| --------------------- | ----------------- | -------- | ------ | ------ |
-| `critical_process.sh` | No error handling | High     | Medium | High   |
-| `complex_etl.py`      | 12 parameters     | High     | High   | Medium |
-| `config_loader.sh`    | Hardcoded paths   | Medium   | Low    | High   |
-
-**Top 10 Refactoring Candidates**: 10 scripts = **3.2%**
-**Medium Priority**: 20 scripts = **6.3%**
-**Low Priority**: 12 scripts = **3.8%**
-
-#### 4. Governance Violations
-
-| Script                      | Violation Type | Fix Required                    | Owner         |
-| --------------------------- | -------------- | ------------------------------- | ------------- |
-| `scripts/misc/important.sh` | Wrong location | Move to scripts/engineering/qa/ | @architecture |
-| `scripts/undocumented.py`   | No README      | Add documentation               | @docs         |
-| `scripts/untested.sh`       | No tests       | Add test coverage               | @qa           |
-
-**Critical Violations**: 4
-**Major Violations**: 6
-**Minor Violations**: 2
+If a recommendation contradicts these anchors, the burden of proof is on the
+recommendation.
 
 ______________________________________________________________________
 
-## Recommendations
+## Change Log
 
-### Immediate Actions (Next 2 Weeks)
-
-1. **Remove Obsolete Scripts**
-
-   - Remove 15 legacy scripts (4.7% reduction)
-   - Update lifecycle registry
-   - Expected savings: 15 scripts
-
-1. **Consolidate Test Runners**
-
-   - Standardize on `run_pytest_resilient.py`
-   - Remove duplicate wrappers
-   - Expected savings: 2 scripts
-
-### Short-Term (Next Month)
-
-3. **Cross-Platform Consolidation**
-
-   - Review PS1/SH pairs
-   - Standardize on SH versions
-   - Expected savings: 8 scripts
-
-1. **Critical Refactoring**
-
-   - Add error handling to top 5 scripts
-   - Extract hardcoded configurations
-   - Expected improvement: 5 scripts
-
-### Long-Term (Next Quarter)
-
-5. **Governance Enforcement**
-
-   - Add CI checks for script locations
-   - Create quality gates
-   - Document patterns
-
-1. **Comprehensive Refactoring**
-
-   - Address mediumpriority issues
-   - Improve documentation
-   - Add test coverage
+| Change | What Was Added | Why |
+| ------ | -------------- | --- |
+| Source of truth | Mandatory manifest + catalog normalization | Prevent wrong scope and stale counts |
+| Entrypoint definition | `__main__.py` first, then direct CLI, then wrappers | Prevent invented `main.py` and fake routers |
+| File taxonomy | compatibility / transport / internal roles | Separate public CLI surface from implementation |
+| Wrapper policy | default keep-as-thin-wrapper rule | Avoid premature contract breakage |
+| Public CLI safety | do not rename commands casually | Preserve published command surface |
+| Output structure | source-of-truth, registry, decision tables, fact/assumption/unknown | Make audit results verifiable |
+| Fallback | explicit `IncompleteData` stop condition | Reduce hallucination risk |
 
 ______________________________________________________________________
 
-## Implementation Roadmap
+## Assumption Ledger
 
-### Phase 1: Safe Cleanup (Week 1-2)
-
-**Objective**: Remove low-risk obsolete scripts
-**Actions**:
-
-- Remove 15 legacy scripts
-- Update lifecycle registry
-- Verify CI/CD pipelines
-- Document changes
-  **Success Criteria**:
-- CI still passes
-- No breaking changes
-- 4.7% inventory reduction
-
-### Phase 2: Consolidation (Week 3-4)
-
-**Objective**: Merge duplicate functionality
-**Actions**:
-
-- Consolidate test runners
-- Unify cross-platform wrappers
-- Update all callers
-- Add deprecation warnings
-  **Success Criteria**:
-- All workflows updated
-- 5.1% inventory reduction
-- No duplicate functionality
-
-### Phase 3: Quality Improvement (Week 5-8)
-
-**Objective**: Refactor suboptimal scripts
-**Actions**:
-
-- Add error handling
-- Extract configurations
-- Improve documentation
-- Add tests
-  **Success Criteria**:
-- Top 10 scripts refactored
-- Code quality metrics improved
-- Better maintainability
-
-### Phase 4: Governance (Ongoing)
-
-**Objective**: Prevent regression
-**Actions**:
-
-- Add CI checks
-- Document patterns
-- Team training
-- Regular audits
-  **Success Criteria**:
-- No new violations
-- Governance automated
-- Team compliance
+- Assume the audit is against current `HEAD`, not old prose summaries.
+- Assume `scripts_inventory_manifest.json` is the formal inventory snapshot.
+- Assume `catalog.yaml` defines valid consolidation scope for canonical roots.
+- Assume documented wrappers and tested launchers remain part of the public
+  contract until code/tests/docs prove otherwise.
+- Assume line-level connector visibility may be incomplete; file-level evidence
+  is still acceptable when explicitly marked.
 
 ______________________________________________________________________
 
-## Tools and Commands
+## Remaining Risks
 
-### Inventory Analysis
+- External callers outside the repository may still exist.
+- Platform-specific adapters (`.sh`, `.ps1`, `.bat`) may share intent while
+  differing in transport/bootstrap assumptions.
+- Some shims exist for import or monkeypatch semantics, not just execution.
 
-```bash
-# Sync inventory
-python3 -m scripts.engineering.repo sync-inventory --write
+Because of those risks, the default safe strategy is:
 
-# Check inventory status
-python3 -m scripts.engineering.repo check-inventory --check
-
-# Export JSON for analysis
-python3 -m scripts.engineering.repo check-inventory --json > analysis.json
-```
-
-### Reference Analysis
-
-```bash
-# Find script references in workflows
-grep -r "scripts/" .github/workflows/ | sort | uniq -c > workflow_refs.txt
-
-# Find script references in agents
-grep -r "scripts/" .codex/ docs/00-project/ai/agents/ > agent_refs.txt
-
-# Find script references in tests
-grep -r "scripts/" tests/ | grep -v ".pyc" > test_refs.txt
-```
-
-### Quality Analysis
-
-```bash
-# Check shell scripts
-shellcheck scripts/**/*.sh | tee shellcheck_results.txt
-
-# Check Python scripts
-pylint scripts/**/*.py | tee pylint_results.txt
-
-# Count script types
-find scripts/ -name "*.sh" | wc -l
-find scripts/ -name "*.py" | wc -l
-find scripts/ -name "*.ps1" | wc -l
-```
+- consolidate internal logic first;
+- keep thin wrappers where public or test contracts still depend on them;
+- remove only after explicit migration evidence.
 
 ______________________________________________________________________
 
-## Success Metrics
+## Related Sources
 
-### Quantitative Goals
-
-- **Inventory Reduction**: 12-15% (38-47 scripts)
-- **Legacy Reduction**: 50%+ reduction
-- **Duplicate Elimination**: 80%+ consolidation
-- **Code Quality**: 20% improvement in linting scores
-
-### Qualitative Goals
-
-- **Maintainability**: Easier to understand and modify
-- **Discoverability**: Clearer script purposes and locations
-- **Reliability**: Better error handling and logging
-- **Governance**: Automated compliance checking
-
-______________________________________________________________________
-
-## Appendix: Common Patterns
-
-### Healthy Script Characteristics
-
-```markdown
-✅ Clear single responsibility
-✅ Proper error handling and logging
-✅ Good documentation (help text, README)
-✅ Type hints (Python) or shellcheck clean (Bash)
-✅ Proper exit codes
-✅ Input validation
-✅ Configuration externalized
-✅ Tests available
-✅ Canonical location
-✅ Active usage evidence
-```
-
-### Problematic Script Characteristics
-
-```markdown
-❌ Multiple responsibilities
-❌ No error handling
-❌ Undocumented parameters
-❌ Hardcoded values
-❌ No tests
-❌ Duplicate functionality
-❌ Wrong location
-❌ No recent usage
-❌ Poor naming
-❌ Complex interfaces
-```
-
-______________________________________________________________________
-
-**Document Status**: Active
-**Review Cycle**: Quarterly
-**Next Review**: 2024-07-14
-**Change Log**:
-
-- 2024-04-14: Initial version based on cleanup analysis
-- 2024-04-14: Added governance violation section
-- 2024-04-14: Enhanced methodology with specific commands
+- `configs/quality/scripts_inventory_manifest.json`
+- `scripts/engineering/repo/catalog.yaml`
+- `scripts/docs/README.md`
+- `scripts/diagrams/README.md`
+- `scripts/diagrams/__main__.py`
+- `scripts/engineering/dev/README.md`
+- `scripts/ai/codex/README.md`
+- `tests/architecture/test_codex_launcher_bootstrap.py`
+- `tests/architecture/test_ops_ai_setup_scripts.py`
+- `scripts/engineering/ci/__main__.py`
+- `scripts/engineering/qa/__main__.py`

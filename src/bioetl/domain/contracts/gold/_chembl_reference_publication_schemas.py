@@ -6,8 +6,12 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
+from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
+    StrictGoldContractSchema,
+)
 
-class ChEMBLCellLineGoldSchema(pa.DataFrameModel):
+
+class ChEMBLCellLineGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Cell Line in Gold layer."""
 
     # System fields
@@ -33,20 +37,8 @@ class ChEMBLCellLineGoldSchema(pa.DataFrameModel):
     cl_lincs_id: Series[str] = pa.Field(nullable=True)
     efo_id: Series[str] = pa.Field(nullable=True)
 
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
-    # Metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
-
-
-class ChEMBLCompoundRecordGoldSchema(pa.DataFrameModel):
+class ChEMBLCompoundRecordGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Compound Record in Gold layer."""
 
     # System fields
@@ -68,20 +60,8 @@ class ChEMBLCompoundRecordGoldSchema(pa.DataFrameModel):
     src_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
     src_compound_id: Series[str] = pa.Field(nullable=True)
 
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
-    # Metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
-
-
-class ChEMBLPublicationGoldSchema(pa.DataFrameModel):
+class ChEMBLPublicationGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Document in Gold layer."""
 
     entity_id: Series[str] = pa.Field(nullable=False)
@@ -132,20 +112,8 @@ class ChEMBLPublicationGoldSchema(pa.DataFrameModel):
     lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
-    # Metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
-
-
-class ChEMBLPublicationSimilarityGoldSchema(pa.DataFrameModel):
+class ChEMBLPublicationSimilarityGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Document Similarity in Gold layer.
 
     Represents similarity between two ChEMBL documents based on Tanimoto coefficients.
@@ -174,20 +142,8 @@ class ChEMBLPublicationSimilarityGoldSchema(pa.DataFrameModel):
     avg_tani: Series[float] = pa.Field(nullable=True, ge=0, le=1, coerce=True)
     max_tani: Series[float] = pa.Field(nullable=True, ge=0, le=1, coerce=True)
 
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
-    # Metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
-
-
-class ChEMBLPublicationTermGoldSchema(pa.DataFrameModel):
+class ChEMBLPublicationTermGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Document Term in Gold layer.
 
     Derived entity extracted from Document records by flattening
@@ -206,18 +162,6 @@ class ChEMBLPublicationTermGoldSchema(pa.DataFrameModel):
     # MeSH-specific fields
     mesh_id: Series[str] = pa.Field(nullable=True)
     qualifier: Series[str] = pa.Field(nullable=True)
-
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
-
-    # Metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
 
 
 __all__ = [

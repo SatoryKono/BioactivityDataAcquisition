@@ -4,8 +4,11 @@
 from __future__ import annotations
 
 from bioetl.infrastructure.storage.silver.operations.merged_operations import (
+    _MergedSilverWriteRequest,
     _MergedWriteFacade,
 )
+
+__all__ = ["SilverWriterMergedMixin", "_MergedSilverWriteRequest"]
 
 
 class SilverWriterMergedMixin(_MergedWriteFacade):

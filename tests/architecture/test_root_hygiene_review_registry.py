@@ -111,7 +111,9 @@ def test_blocked_cleanup_lane_matches_structure_catalog() -> None:
     catalog_zones = structure_catalog.get("blocked_cleanup_zones")
     assert isinstance(catalog_zones, list), "blocked_cleanup_zones must be a list"
     catalog_paths = {
-        zone["path"] for zone in catalog_zones if isinstance(zone, dict) and "path" in zone
+        zone["path"]
+        for zone in catalog_zones
+        if isinstance(zone, dict) and "path" in zone
     }
 
     assert lane_paths == catalog_paths

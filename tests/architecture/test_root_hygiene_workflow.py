@@ -21,8 +21,7 @@ def test_root_hygiene_workflow_uses_strict_audit_and_unit_tests() -> None:
     assert "check_root_hygiene_review_registry.py" in workflow
     assert "tests/unit/scripts/repo/test_audit_root_cleanliness.py" in workflow
     assert (
-        "tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py"
-        in workflow
+        "tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py" in workflow
     )
     assert "tests/architecture/test_root_hygiene_workflow.py" in workflow
     assert "tests/architecture/test_root_hygiene_review_registry.py" in workflow
