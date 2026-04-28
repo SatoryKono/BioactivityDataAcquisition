@@ -115,7 +115,7 @@ Useful nested symbols may still exist in defining submodules, but they are not p
 | `BronzeCleanupService`        | Bronze layer cleanup                       |
 | `CheckpointService`           | Checkpoint management service              |
 | `VacuumService`               | Delta Lake vacuum operations               |
-| `ExportService`               | Data export to CSV/Parquet                 |
+| `ExportService`               | Data export plus provenance/licensing sidecar manifests |
 | `ExportOptions`               | Export configuration                       |
 | `ExportResult`                | Export operation result                    |
 | `QuarantineService`           | Quarantine record management               |

@@ -31,6 +31,7 @@ def test_provider_contract_replay_cases_do_not_break(
 def _render_report(report: dict[str, Any]) -> str:
     lines = [
         f"{report['provider']}.{report['probe']}: replay contract drift",
+        f"entity={report['entity']}",
         f"severity={report['severity']}",
         f"status={report['status']}",
         f"cassette={report['cassette_rel_path']}",
@@ -41,6 +42,7 @@ def _render_report(report: dict[str, Any]) -> str:
             "  "
             f"{difference['path']}: expected {difference['expected_type']!r}, "
             f"got {difference['actual_type']!r} "
-            f"({difference['severity']}; {difference['detail']})"
+            f"({difference['severity']}; {difference['detail']}; "
+            f"remediation={difference['remediation']})"
         )
     return "\n".join(lines)

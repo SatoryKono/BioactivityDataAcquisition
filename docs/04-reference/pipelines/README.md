@@ -83,7 +83,7 @@ ______________________________________________________________________
 | **PubChem**          | 1         | 5 req/sec                  | Public             |
 | **PubMed**           | 1         | 3 req/sec (10 with key)    | API Key            |
 | **CrossRef**         | 1         | Polite pool                | mailto header      |
-| **OpenAlex**         | 1         | ~10 req/sec                | email-based        |
+| **OpenAlex**         | 1         | 10 req/sec / credit model  | API key            |
 | **Semantic Scholar** | 1         | 0.1 req/sec (1.0 with key) | API Key            |
 | **Composite**        | 5         | N/A (local merge)          | N/A                |
 

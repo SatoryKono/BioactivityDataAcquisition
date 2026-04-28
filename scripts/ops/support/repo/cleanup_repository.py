@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import shutil
 import subprocess  # nosec B404
 import sys
@@ -70,6 +71,9 @@ VENV_SEGMENTS: frozenset[str] = frozenset(
         "venv",
     }
 )
+PRUNED_WALK_DIRS: frozenset[str] = frozenset(VENV_SEGMENTS | {".git", ".worktrees", ".rollback"})
+SAFE_LOCAL_FILE_SUFFIXES: frozenset[str] = frozenset({".pyc", ".pyo"})
+DEFAULT_DETAIL_LIMIT = 25
 
 
 @dataclass(frozen=True)
@@ -112,6 +116,26 @@ def _tracked_paths(repo_root: Path) -> list[str]:
     ]
 
 
+def _local_status_paths(repo_root: Path) -> list[str] | None:
+    try:
+        completed = _run_git(
+            repo_root,
+            "ls-files",
+            "--others",
+            "--ignored",
+            "--exclude-standard",
+            "--directory",
+            "-z",
+        )
+    except subprocess.CalledProcessError:
+        return None
+    return [
+        path
+        for path in completed.stdout.decode("utf-8", errors="replace").split("\0")
+        if path
+    ]
+
+
 def _is_venv_path(path: Path) -> bool:
     return bool(VENV_SEGMENTS.intersection(path.parts))
 
@@ -120,16 +144,50 @@ def _is_blocked_path(path: Path, repo_root: Path, blocked_paths: frozenset[str])
     return is_within_blocked_cleanup_zone(path.relative_to(repo_root), blocked_paths)
 
 
+def _prune_walk_dirs(
+    repo_root: Path,
+    base: Path,
+    dirnames: list[str],
+    *,
+    blocked_paths: frozenset[str],
+    prune_safe_local_dirs: bool,
+) -> None:
+    kept: list[str] = []
+    for name in dirnames:
+        if name in PRUNED_WALK_DIRS:
+            continue
+        child = base / name
+        if _is_venv_path(child):
+            continue
+        if _is_blocked_path(child, repo_root, blocked_paths):
+            continue
+        if prune_safe_local_dirs and name in SAFE_LOCAL_DIR_NAMES:
+            continue
+        kept.append(name)
+    dirnames[:] = kept
+
+
 def _iter_local_dir_candidates(
     repo_root: Path,
     *,
     blocked_paths: frozenset[str],
+    status_paths: list[str] | None = None,
 ) -> list[CleanupCandidate]:
+    if status_paths is not None:
+        return _iter_local_dir_candidates_from_status_paths(
+            status_paths,
+            blocked_paths=blocked_paths,
+        )
     candidates: list[CleanupCandidate] = []
-    for name in SAFE_LOCAL_DIR_NAMES:
-        for path in repo_root.rglob(name):
-            if not path.is_dir() or _is_venv_path(path):
+    for dirpath, dirnames, _filenames in os.walk(repo_root):
+        base = Path(dirpath)
+        if _is_venv_path(base):
+            dirnames[:] = []
+            continue
+        for name in list(dirnames):
+            if name not in SAFE_LOCAL_DIR_NAMES:
                 continue
+            path = base / name
             if _is_blocked_path(path, repo_root, blocked_paths):
                 continue
             candidates.append(
@@ -141,6 +199,13 @@ def _iter_local_dir_candidates(
                     reason="exact local artifact family outside blocked cleanup zones",
                 )
             )
+        _prune_walk_dirs(
+            repo_root,
+            base,
+            dirnames,
+            blocked_paths=blocked_paths,
+            prune_safe_local_dirs=False,
+        )
     return candidates
 
 
@@ -148,12 +213,44 @@ def _iter_local_file_candidates(
     repo_root: Path,
     *,
     blocked_paths: frozenset[str],
+    status_paths: list[str] | None = None,
 ) -> list[CleanupCandidate]:
+    if status_paths is not None:
+        return _iter_local_file_candidates_from_status_paths(
+            status_paths,
+            blocked_paths=blocked_paths,
+        )
     candidates: list[CleanupCandidate] = []
-    for category, pattern in SAFE_LOCAL_FILE_PATTERNS:
-        for path in repo_root.rglob(pattern):
-            if not path.is_file() or _is_venv_path(path):
+    file_categories = {
+        ".coverage": "coverage",
+        "coverage.xml": "coverage",
+        ".coverage.*": "coverage",
+        ".pyc": "compiled",
+        ".pyo": "compiled",
+    }
+    for dirpath, dirnames, filenames in os.walk(repo_root):
+        base = Path(dirpath)
+        if _is_venv_path(base):
+            dirnames[:] = []
+            continue
+        _prune_walk_dirs(
+            repo_root,
+            base,
+            dirnames,
+            blocked_paths=blocked_paths,
+            prune_safe_local_dirs=True,
+        )
+        for filename in filenames:
+            category = None
+            if filename in {".coverage", "coverage.xml"}:
+                category = file_categories.get(filename)
+            elif filename.startswith(".coverage."):
+                category = file_categories.get(".coverage.*")
+            elif Path(filename).suffix in SAFE_LOCAL_FILE_SUFFIXES:
+                category = file_categories.get(f"*{Path(filename).suffix}")
+            if category is None:
                 continue
+            path = base / filename
             if _is_blocked_path(path, repo_root, blocked_paths):
                 continue
             candidates.append(
@@ -165,6 +262,71 @@ def _iter_local_file_candidates(
                     reason="exact local artifact file outside blocked cleanup zones",
                 )
             )
+    return candidates
+
+
+def _iter_local_dir_candidates_from_status_paths(
+    status_paths: list[str],
+    *,
+    blocked_paths: frozenset[str],
+) -> list[CleanupCandidate]:
+    candidates: list[CleanupCandidate] = []
+    seen: set[Path] = set()
+    for raw_path in status_paths:
+        normalized = Path(raw_path.rstrip("/"))
+        if _is_venv_path(normalized):
+            continue
+        for index, segment in enumerate(normalized.parts):
+            if segment not in SAFE_LOCAL_DIR_NAMES:
+                continue
+            candidate_path = Path(*normalized.parts[: index + 1])
+            if candidate_path in seen:
+                continue
+            if is_within_blocked_cleanup_zone(candidate_path, blocked_paths):
+                continue
+            seen.add(candidate_path)
+            candidates.append(
+                CleanupCandidate(
+                    path=candidate_path,
+                    category="local_cache_dir",
+                    tracked=False,
+                    apply_allowed=True,
+                    reason="exact local artifact family outside blocked cleanup zones",
+                )
+            )
+    return candidates
+
+
+def _iter_local_file_candidates_from_status_paths(
+    status_paths: list[str],
+    *,
+    blocked_paths: frozenset[str],
+) -> list[CleanupCandidate]:
+    candidates: list[CleanupCandidate] = []
+    for raw_path in status_paths:
+        normalized = Path(raw_path.rstrip("/"))
+        if _is_venv_path(normalized) or raw_path.endswith("/"):
+            continue
+        category = None
+        if normalized.name in {".coverage", "coverage.xml"}:
+            category = "coverage"
+        elif normalized.name.startswith(".coverage."):
+            category = "coverage"
+        elif normalized.suffix in SAFE_LOCAL_FILE_SUFFIXES:
+            category = "compiled"
+        if category is None:
+            continue
+        if is_within_blocked_cleanup_zone(normalized, blocked_paths):
+            continue
+        candidates.append(
+            CleanupCandidate(
+                path=normalized,
+                category=category,
+                tracked=False,
+                apply_allowed=True,
+                reason="exact local artifact file outside blocked cleanup zones",
+            )
+        )
     return candidates
 
 
@@ -201,12 +363,14 @@ def collect_cleanup_candidates(
 ) -> list[CleanupCandidate]:
     policy = load_root_governance_policy(repo_root)
     candidates: list[CleanupCandidate] = []
+    status_paths = _local_status_paths(repo_root)
 
     if include_cache:
         candidates.extend(
             _iter_local_dir_candidates(
                 repo_root,
                 blocked_paths=policy.blocked_cleanup_paths,
+                status_paths=status_paths,
             )
         )
     if include_temp:
@@ -214,6 +378,7 @@ def collect_cleanup_candidates(
             _iter_local_file_candidates(
                 repo_root,
                 blocked_paths=policy.blocked_cleanup_paths,
+                status_paths=status_paths,
             )
         )
     if include_root_review:
@@ -243,7 +408,11 @@ def _apply_local_candidates(
     return deleted, errors
 
 
-def _log_candidates(candidates: list[CleanupCandidate]) -> None:
+def _log_candidates(
+    candidates: list[CleanupCandidate],
+    *,
+    detail_limit: int = DEFAULT_DETAIL_LIMIT,
+) -> None:
     if not candidates:
         logger.info("No cleanup candidates found.")
         return
@@ -253,11 +422,16 @@ def _log_candidates(candidates: list[CleanupCandidate]) -> None:
         categories.setdefault(candidate.category, []).append(candidate)
 
     for category in sorted(categories):
-        logger.info("## %s (%d)", category.upper(), len(categories[category]))
-        for candidate in categories[category]:
+        category_candidates = categories[category]
+        logger.info("## %s (%d)", category.upper(), len(category_candidates))
+        visible_candidates = category_candidates[:detail_limit]
+        for candidate in visible_candidates:
             mode = "apply" if candidate.apply_allowed else "review"
             logger.info("  [%s] %s", mode, candidate.rel_path)
             logger.info("      %s", candidate.reason)
+        hidden_count = len(category_candidates) - len(visible_candidates)
+        if hidden_count > 0:
+            logger.info("  ... %d additional candidate(s) omitted", hidden_count)
         logger.info("")
 
 
@@ -316,6 +490,12 @@ def parse_args() -> argparse.Namespace:
         default=Path.cwd(),
         help="Path inside the repository to inspect",
     )
+    parser.add_argument(
+        "--detail-limit",
+        type=int,
+        default=DEFAULT_DETAIL_LIMIT,
+        help="Maximum number of detailed entries to print per category",
+    )
     return parser.parse_args()
 
 
@@ -332,7 +512,7 @@ def main() -> int:
         include_temp=args.temp,
         include_root_review=args.root,
     )
-    _log_candidates(candidates)
+    _log_candidates(candidates, detail_limit=max(args.detail_limit, 0))
 
     if not args.apply:
         return 0

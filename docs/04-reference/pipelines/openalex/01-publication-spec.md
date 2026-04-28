@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-04-28'
 
 ______________________________________________________________________
 
@@ -35,6 +35,12 @@ ______________________________________________________________________
 - Current field names are snake_case, for example `openalex_id`,
   `publication_doi`, `publication_pmid`, `publication_year`, `page_first`,
   `page_last`.
+- Provider config now declares `auth_type: api_key`,
+  `api_key_env: BIOETL_OPENALEX_API_KEY`, cursor paging, and credit-model rate
+  headers. `BIOETL_OPENALEX_EMAIL` is contact attribution only.
+- The active output keeps the canonical `grants` field for compatibility, but
+  current OpenAlex funding data is read from `awards`/`funders` with legacy
+  `grants` accepted only as a fallback for old replay fixtures.
 - This page no longer republishes the older dashed contract tables.
 - For implementation, tests, and config changes, use the provider reference and
   entity config above.

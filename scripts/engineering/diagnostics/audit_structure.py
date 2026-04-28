@@ -19,6 +19,8 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
+import subprocess  # nosec B404
 import sys
 from collections.abc import Iterator
 from dataclasses import dataclass, field
@@ -78,6 +80,15 @@ TECHNICAL_DIRS: set[str] = {
     ".benchmarks",
     ".hypothesis",
 }
+PRUNED_RECURSION_DIRS: frozenset[str] = frozenset(
+    TECHNICAL_DIRS
+    | GENERATED_DIRS
+    | LOCAL_TOLERATED_ROOT_DIRS
+    | {"data", "docs", "configs"}
+)
+PRUNED_SUBTREE_DIRS: frozenset[str] = frozenset(
+    TECHNICAL_DIRS | GENERATED_DIRS | LOCAL_TOLERATED_ROOT_DIRS
+)
 
 # Allowed Python paths
 ALLOWED_PYTHON_PATHS: tuple[str, ...] = (
@@ -93,6 +104,10 @@ ALLOWED_ROOT_PY_FILES: set[str] = {
     "setup.py",
     "conftest.py",
 }
+CATALOG_ALLOWED_PYTHON_ROOT_SECTIONS: tuple[str, ...] = (
+    "root_tooling_roots",
+    "test_support_roots",
+)
 
 # Required layers in src/bioetl (per CLAUDE.md §2)
 REQUIRED_BIOETL_LAYERS: set[str] = {
@@ -177,6 +192,68 @@ def _has_path_segment(path: Path, segments: set[str]) -> bool:
     return any(part in segments for part in path.parts)
 
 
+def _walk_python_files(
+    root: Path,
+    *,
+    prune_dirs: frozenset[str],
+) -> Iterator[Path]:
+    """Yield Python files while pruning slow or policy-irrelevant subtrees."""
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [name for name in dirnames if name not in prune_dirs]
+        base = Path(dirpath)
+        for filename in filenames:
+            if filename.endswith(".py"):
+                yield base / filename
+
+
+def _tracked_python_files(project_root: Path) -> list[Path] | None:
+    """Return tracked Python files when the project is inside a git worktree."""
+    if not (project_root / ".git").exists():
+        return None
+    try:
+        completed = subprocess.run(  # nosec
+            ["git", "-C", str(project_root), "ls-files", "-z"],
+            check=True,
+            capture_output=True,
+            text=False,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return [
+        project_root / rel_path
+        for rel_path in completed.stdout.decode("utf-8", errors="replace").split("\0")
+        if rel_path.endswith(".py")
+    ]
+
+
+def _iter_project_python_files(project_root: Path) -> Iterator[Path]:
+    """Yield project Python files from git when possible, else from filesystem."""
+    tracked_files = _tracked_python_files(project_root)
+    if tracked_files is not None:
+        yield from tracked_files
+        return
+    yield from _walk_python_files(
+        project_root,
+        prune_dirs=PRUNED_RECURSION_DIRS,
+    )
+
+
+def _allowed_python_prefixes(root_policy) -> tuple[str, ...]:
+    """Return static and catalog-ratified Python roots."""
+    prefixes = list(ALLOWED_PYTHON_PATHS)
+    for section_name in CATALOG_ALLOWED_PYTHON_ROOT_SECTIONS:
+        section = root_policy.catalog.get(section_name)
+        if not isinstance(section, dict):
+            continue
+        for entry in section.get("approved_roots", []):
+            if not isinstance(entry, dict):
+                continue
+            path = entry.get("path")
+            if isinstance(path, str) and path:
+                prefixes.append(f"{path.rstrip('/')}/")
+    return tuple(dict.fromkeys(prefixes))
+
+
 def _check_root_directories(
     project_root: Path,
     *,
@@ -216,9 +293,13 @@ def _check_root_directories(
             )
 
 
-def _check_python_locations(project_root: Path) -> Iterator[Violation]:
+def _check_python_locations(
+    project_root: Path,
+    *,
+    allowed_python_prefixes: tuple[str, ...],
+) -> Iterator[Violation]:
     """Проверка расположения Python-файлов."""
-    for py_file in project_root.rglob("*.py"):
+    for py_file in _iter_project_python_files(project_root):
         rel_path = py_file.relative_to(project_root)
         posix_path = rel_path.as_posix()
 
@@ -229,7 +310,7 @@ def _check_python_locations(project_root: Path) -> Iterator[Violation]:
             continue
 
         # Check if in allowed location
-        is_allowed = any(posix_path.startswith(p) for p in ALLOWED_PYTHON_PATHS)
+        is_allowed = any(posix_path.startswith(p) for p in allowed_python_prefixes)
         is_root_allowed = (
             py_file.parent == project_root and py_file.name in ALLOWED_ROOT_PY_FILES
         )
@@ -288,7 +369,15 @@ def _check_no_python_in_docs(project_root: Path) -> Iterator[Violation]:
     if not docs_path.exists():
         return
 
-    for py_file in docs_path.rglob("*.py"):
+    tracked_files = _tracked_python_files(project_root)
+    python_files = (
+        tracked_files
+        if tracked_files is not None
+        else _walk_python_files(docs_path, prune_dirs=PRUNED_SUBTREE_DIRS)
+    )
+    for py_file in python_files:
+        if tracked_files is not None and not py_file.is_relative_to(docs_path):
+            continue
         rel_path = py_file.relative_to(project_root)
         posix_path = rel_path.as_posix()
 
@@ -310,7 +399,15 @@ def _check_no_python_in_configs(project_root: Path) -> Iterator[Violation]:
     if not configs_path.exists():
         return
 
-    for py_file in configs_path.rglob("*.py"):
+    tracked_files = _tracked_python_files(project_root)
+    python_files = (
+        tracked_files
+        if tracked_files is not None
+        else _walk_python_files(configs_path, prune_dirs=PRUNED_SUBTREE_DIRS)
+    )
+    for py_file in python_files:
+        if tracked_files is not None and not py_file.is_relative_to(configs_path):
+            continue
         yield Violation(
             category="CONFIGS_CODE",
             path=str(py_file.relative_to(project_root)),
@@ -325,7 +422,15 @@ def _check_no_python_in_data(project_root: Path) -> Iterator[Violation]:
     if not data_path.exists():
         return
 
-    for py_file in data_path.rglob("*.py"):
+    tracked_files = _tracked_python_files(project_root)
+    python_files = (
+        tracked_files
+        if tracked_files is not None
+        else _walk_python_files(data_path, prune_dirs=PRUNED_SUBTREE_DIRS)
+    )
+    for py_file in python_files:
+        if tracked_files is not None and not py_file.is_relative_to(data_path):
+            continue
         yield Violation(
             category="DATA_CODE",
             path=str(py_file.relative_to(project_root)),
@@ -338,6 +443,7 @@ def run_audit(project_root: Path) -> AuditResult:
     """Выполнить полный аудит структуры проекта."""
     result = AuditResult()
     root_policy = load_root_governance_policy(project_root)
+    allowed_python_prefixes = _allowed_python_prefixes(root_policy)
 
     # Run all checks
     checks = [
@@ -345,7 +451,10 @@ def run_audit(project_root: Path) -> AuditResult:
             root,
             approved_root_dirs=root_policy.approved_root_directories,
         ),
-        _check_python_locations,
+        lambda root: _check_python_locations(
+            root,
+            allowed_python_prefixes=allowed_python_prefixes,
+        ),
         _check_bioetl_layers,
         _check_no_python_in_docs,
         _check_no_python_in_configs,

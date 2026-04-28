@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-03'
+  Last verified: '2026-04-28'
 
 ______________________________________________________________________
 
@@ -73,6 +73,9 @@ Representative fields:
 - `molecule_id`
 - `target_id`
 - `publication_id`
+- `publication_doi`
+- `publication_pmid`
+- `publication_pmc_id`
 - `standard_type`
 - `standard_relation`
 - `standard_value`
@@ -91,6 +94,14 @@ Representative fields:
 - `assay_type`
 
 > **Notice**: This document is a canonical compact summary. For the most current information, always refer to the active entity configuration at `configs/entities/chembl/activity.yaml` and the [ChEMBL provider reference](../../providers/chembl/activity.md).
+
+Publication identifiers are implemented end-to-end in the activity transformer:
+canonical `publication_doi`, `publication_pmid`, and `publication_pmc_id`
+fields are preferred, while `doi`/`document_doi`,
+`pmid`/`pubmed_id`/`document_pubmed_id`, and
+`pmc_id`/`document_pmc_id` remain accepted input aliases. BAO/UO/QUDT token
+fields remain backward-compatible, with companion IRI/version/mapping-status
+fields carrying the machine-readable ontology contract.
 
 The canonical naming policy is `snake_case`. Legacy hyphenated field names are
 historical only and should not be used in new configs or examples.

@@ -24,6 +24,7 @@ from bioetl.application.composite.port_types import (
     ExecutionMetricsRunnerPort,
     LoggerPort,
 )
+from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.application.runtime_timestamps import (
     capture_runtime_timing_anchor,
     derive_completion_timestamp,
@@ -147,7 +148,7 @@ class DependencyCoordinatorService:
         self._chained_key_resolver = chained_key_resolver
         self._result_service = result_service
         self._progress_service = progress_service
-        self._clock = clock
+        self._clock = resolve_runtime_clock(clock)
 
     async def run_dependencies(
         self,

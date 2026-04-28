@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-28T11:40:23.026752+00:00",
+  "generated_at": "2026-04-28T12:31:46.272652+00:00",
   "summary": {
     "total_scripts": 405,
     "status_counts": {
@@ -12,7 +12,7 @@
     "reference_group_coverage": {
       "agents": 4,
       "build": 2,
-      "ci": 39,
+      "ci": 40,
       "docs": 120,
       "scripts": 301,
       "skills": 8,
@@ -4584,7 +4584,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 88,
+      "reference_count": 90,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -4599,14 +4599,20 @@
           "text": "run: uv run python -m scripts.docs verify"
         },
         {
+          "path": ".github/workflows/provider-contract-drift.yml",
+          "line": 74,
+          "source_group": "ci",
+          "text": "uv run python -m scripts.docs generate-pipeline-normalization-matrix --check"
+        },
+        {
           "path": ".github/workflows/tests.yml",
-          "line": 260,
+          "line": 267,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs export-matrix-structural-contract --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 269,
+          "line": 276,
           "source_group": "ci",
           "text": "uv run python -m scripts.docs sync-matrix-structural-policy --check --input \"$workbook\" --output \"$workbook\""
         },
@@ -4625,12 +4631,6 @@
         {
           "path": ".pre-commit-config.yaml",
           "line": 270,
-          "source_group": "ci",
-          "text": "python scripts/engineering/dev/run_project_python.py -m scripts.docs"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 279,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m scripts.docs"
         }
@@ -5349,8 +5349,20 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".github/workflows/provider-contract-drift.yml",
+          "line": 15,
+          "source_group": "ci",
+          "text": "- \"scripts/docs/matrix/generate_pipeline_normalization_matrix.py\""
+        },
+        {
+          "path": ".github/workflows/provider-contract-drift.yml",
+          "line": 33,
+          "source_group": "ci",
+          "text": "- \"scripts/docs/matrix/generate_pipeline_normalization_matrix.py\""
+        },
         {
           "path": "scripts/docs/README.md",
           "line": 53,
@@ -5710,7 +5722,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 226,
+          "line": 233,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -6046,7 +6058,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 639,
+          "line": 646,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -7595,7 +7607,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 111,
+      "reference_count": 114,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -7641,7 +7653,7 @@
         },
         {
           "path": ".github/workflows/provider-contract-drift.yml",
-          "line": 9,
+          "line": 12,
           "source_group": "ci",
           "text": "- \"scripts/engineering/qa/__main__.py\""
         }
@@ -8073,7 +8085,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 559,
+          "line": 566,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -8374,13 +8386,13 @@
       "references": [
         {
           "path": ".github/workflows/provider-contract-drift.yml",
-          "line": 11,
+          "line": 14,
           "source_group": "ci",
           "text": "- \"scripts/engineering/qa/report_provider_contract_drift.py\""
         },
         {
           "path": ".github/workflows/provider-contract-drift.yml",
-          "line": 23,
+          "line": 32,
           "source_group": "ci",
           "text": "- \"scripts/engineering/qa/report_provider_contract_drift.py\""
         },
@@ -11032,31 +11044,31 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 248,
+          "line": 255,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema validate-configs"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 251,
+          "line": 258,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema check-invariants"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 254,
+          "line": 261,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema check-required-fields --verbose"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 257,
+          "line": 264,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema audit-optionality --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 272,
+          "line": 279,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema generate-pipeline --check"
         },

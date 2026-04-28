@@ -55,6 +55,15 @@ _RUNTIME_METRIC_METHODS = frozenset(
 _RUNTIME_METRIC_NAME_KEYWORDS = frozenset(
     {"metric_name", "state_metric_name", "trip_metric_name"}
 )
+_RUNTIME_SCAN_MARKERS: Final[tuple[str, ...]] = (
+    "bioetl_",
+    "increment_counter",
+    "observe_histogram",
+    "set_gauge",
+    "metric_name",
+    "state_metric_name",
+    "trip_metric_name",
+)
 _PROMETHEUS_FAMILY_SUFFIXES: Final[frozenset[str]] = frozenset(
     {
         "_bytes",
@@ -123,6 +132,16 @@ def _scan_canonical_metric_mentions(
     return dict(mentions)
 
 
+def _read_runtime_candidate_text(path: Path) -> str | None:
+    try:
+        text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return None
+    if not any(marker in text for marker in _RUNTIME_SCAN_MARKERS):
+        return None
+    return text
+
+
 def _module_path_from_import(module_name: str, repo_root: Path) -> Path | None:
     if not module_name.startswith("bioetl."):
         return None
@@ -189,14 +208,15 @@ def _resolve_imported_string_bindings(
     tree: ast.AST,
     *,
     repo_root: Path,
+    cache: dict[Path, dict[str, str]] | None = None,
 ) -> dict[str, str]:
-    cache: dict[Path, dict[str, str]] = {}
+    resolved_cache = cache if cache is not None else {}
     bindings: dict[str, str] = {}
     for node in _import_from_nodes(tree):
         module_bindings = _module_string_bindings(
             node.module,
             repo_root=repo_root,
-            cache=cache,
+            cache=resolved_cache,
         )
         if module_bindings is None:
             continue
@@ -450,13 +470,21 @@ def _scan_runtime_metric_file(
     path: Path,
     *,
     repo_root: Path,
+    import_binding_cache: dict[Path, dict[str, str]],
+    preloaded_text: str | None = None,
 ) -> tuple[str, set[str], set[str], set[str]] | None:
-    text = path.read_text(encoding="utf-8")
+    text = preloaded_text if preloaded_text is not None else _read_runtime_candidate_text(path)
+    if text is None:
+        return None
     try:
         tree = ast.parse(text)
     except SyntaxError:
         return None
-    string_bindings = _resolve_imported_string_bindings(tree, repo_root=repo_root)
+    string_bindings = _resolve_imported_string_bindings(
+        tree,
+        repo_root=repo_root,
+        cache=import_binding_cache,
+    )
     string_bindings.update(_collect_local_string_bindings(tree))
     attribute_bindings = _collect_class_attribute_bindings(tree)
     direct_metric_names, helper_metric_names, alias_metric_names = (
@@ -480,11 +508,16 @@ def _scan_runtime_metric_calls(
     canonical_mentions: dict[str, list[str]] = defaultdict(list)
     helper_backed_mentions: dict[str, list[str]] = defaultdict(list)
     alias_mentions: dict[str, list[str]] = defaultdict(list)
+    import_binding_cache: dict[Path, dict[str, str]] = {}
     for path in _iter_text_files(repo_root / _RUNTIME_SCAN_ROOT):
         path_str = path.as_posix()
         if any(excluded in path_str for excluded in _RUNTIME_EXCLUDE_PARTS):
             continue
-        scan_result = _scan_runtime_metric_file(path, repo_root=repo_root)
+        scan_result = _scan_runtime_metric_file(
+            path,
+            repo_root=repo_root,
+            import_binding_cache=import_binding_cache,
+        )
         if scan_result is None:
             continue
         relative_path, direct_metric_names, helper_metric_names, alias_metric_names = (

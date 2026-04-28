@@ -12,44 +12,8 @@ from bioetl.application.services.control_plane.run_manifest_service import (
     RunManifestCreateSpec,
     RunManifestService,
 )
-from bioetl.composition.runtime_builders._run_manifest_support import (
-    ManifestControlPlaneRefs as _ManifestControlPlaneRefs,
-)
-from bioetl.composition.runtime_builders._run_manifest_support import (
-    build_launch_context_snapshot as _build_launch_context_snapshot,
-)
-from bioetl.composition.runtime_builders._run_manifest_support import (
-    build_planned_artifacts as _build_planned_artifacts,
-)
-from bioetl.composition.runtime_builders._run_manifest_support import (
-    build_run_source_refs as _build_run_source_refs,
-)
-from bioetl.composition.runtime_builders._run_manifest_support import (
-    control_plane_root as _control_plane_root,
-)
-from bioetl.composition.runtime_builders._run_manifest_support import (
-    create_control_plane_refs as _create_control_plane_refs,
-)
-from bioetl.composition.runtime_builders._run_manifest_support import (
-    resolve_contract_identity as _resolve_contract_identity,
-)
-from bioetl.composition.runtime_builders._run_manifest_support import (
-    resolve_provider_entity as _resolve_provider_entity,
-)
-from bioetl.composition.runtime_builders._run_manifest_support import (
-    resolve_replay_capability as _resolve_replay_capability,
-)
-from bioetl.composition.runtime_builders._run_manifest_support import (
-    resolve_replay_parentage as _resolve_replay_parentage,
-)
-from bioetl.composition.runtime_builders._run_manifest_support import (
-    resolve_run_context_values as _resolve_run_context_values,
-)
-from bioetl.composition.runtime_builders._run_manifest_support import (
-    to_serializable_mapping as _to_serializable_mapping,
-)
-from bioetl.composition.runtime_builders._run_manifest_support import (
-    validate_reproducible_sink_modes as _validate_reproducible_sink_modes,
+from bioetl.composition.runtime_builders import (
+    _run_manifest_support as _manifest_support,
 )
 from bioetl.composition.services.versioning import (
     CodeRevisionProvenance,
@@ -103,7 +67,9 @@ def _create_ledger_service(
 
     return RunLedgerService(
         ledger_port=FileRunLedgerStore(
-            base_path=_control_plane_root(inputs.settings, "run_ledger"),
+            base_path=_manifest_support.control_plane_root(
+                inputs.settings, "run_ledger"
+            ),
             metrics=inputs.observability.metrics,
         ),
         manifest_id="pending",
@@ -134,16 +100,18 @@ def _build_manifest_create_request(
     provider = request_inputs.provider
     entity = request_inputs.entity
     yaml_config = inputs.yaml_config
-    source_refs = _build_run_source_refs(
+    source_refs = _manifest_support.build_run_source_refs(
         ctx=ctx,
         cached_bronze=inputs.cached_bronze,
         settings=inputs.settings,
         provider=provider,
         entity=entity,
     )
-    replay_of_run_id, replay_of_manifest_id = _resolve_replay_parentage(
-        ctx=ctx,
-        runtime_config=inputs.runtime_config,
+    replay_of_run_id, replay_of_manifest_id = (
+        _manifest_support.resolve_replay_parentage(
+            ctx=ctx,
+            runtime_config=inputs.runtime_config,
+        )
     )
     control_plane = getattr(
         getattr(inputs.settings, "pipeline", None), "control_plane", None
@@ -155,7 +123,7 @@ def _build_manifest_create_request(
             "degraded_observable",
         )
     )
-    _validate_reproducible_sink_modes(
+    _manifest_support.validate_reproducible_sink_modes(
         yaml_config=yaml_config,
         strict_replay_requested=bool(getattr(ctx, "exact_replay", False))
         or required_persistence_profile in _STRICT_PERSISTENCE_PROFILES,
@@ -176,18 +144,18 @@ def _build_manifest_create_request(
         pipeline_name=ctx.pipeline_name,
         provider=provider,
         entity=entity,
-        launch_context=_build_launch_context_snapshot(
+        launch_context=_manifest_support.build_launch_context_snapshot(
             ctx,
             run_type_value=request_inputs.run_type_value,
             execution_context_value=request_inputs.execution_context_value,
             required_persistence_profile=required_persistence_profile,
         ),
-        runtime_config=_to_serializable_mapping(inputs.runtime_config),
-        resolved_config=_to_serializable_mapping(yaml_config),
+        runtime_config=_manifest_support.to_serializable_mapping(inputs.runtime_config),
+        resolved_config=_manifest_support.to_serializable_mapping(yaml_config),
         replay_of_run_id=replay_of_run_id,
         replay_of_manifest_id=replay_of_manifest_id,
         source_refs=source_refs,
-        planned_artifacts=_build_planned_artifacts(
+        planned_artifacts=_manifest_support.build_planned_artifacts(
             settings=inputs.settings,
             provider=provider,
             entity=entity,
@@ -205,7 +173,7 @@ def _build_manifest_create_request(
         rule_bundle_version=request_inputs.rule_bundle_version,
         dq_contract_compatibility_hash=request_inputs.dq_contract_compatibility_hash,
         effective_config_artifact_id=request_inputs.effective_config_artifact_id,
-        replay_capability=_resolve_replay_capability(
+        replay_capability=_manifest_support.resolve_replay_capability(
             source_refs=source_refs,
             resume_requested=bool(getattr(ctx, "resume", False)),
         ),
@@ -256,10 +224,10 @@ def _emit_replay_reconstructability_metric(
         request.launch_context.get("required_persistence_profile")
         or "degraded_observable"
     )
-    strict_requirement = (
-        strict_replay_requested
-        or required_persistence_profile in {"replay_ready", "forensic_grade"}
-    )
+    strict_requirement = strict_replay_requested or required_persistence_profile in {
+        "replay_ready",
+        "forensic_grade",
+    }
     status = "reconstructable"
     if strict_requirement and (
         not strict_exact_replay_supported
@@ -287,10 +255,12 @@ def create_run_manifest(
     resolved_config_hash: str,
     effective_config_hash: str,
     dq_contract_compatibility_hash: str,
-) -> tuple[_ManifestControlPlaneRefs, RunLedgerService | None]:
+) -> tuple[_manifest_support.ManifestControlPlaneRefs, RunLedgerService | None]:
     yaml_config = inputs.yaml_config
-    run_type_value, execution_context_value = _resolve_run_context_values(ctx)
-    provider, entity = _resolve_provider_entity(
+    run_type_value, execution_context_value = (
+        _manifest_support.resolve_run_context_values(ctx)
+    )
+    provider, entity = _manifest_support.resolve_provider_entity(
         pipeline_name=ctx.pipeline_name,
         yaml_config=yaml_config,
     )
@@ -300,9 +270,9 @@ def create_run_manifest(
         contract_schema_hash,
         dq_policy_ref,
         rule_bundle_version,
-    ) = _resolve_contract_identity(provider=provider, entity=entity)
+    ) = _manifest_support.resolve_contract_identity(provider=provider, entity=entity)
     manifest_store = FileRunManifestStore(
-        base_path=_control_plane_root(inputs.settings, "run_manifest"),
+        base_path=_manifest_support.control_plane_root(inputs.settings, "run_manifest"),
         metrics=inputs.observability.metrics,
     )
     ledger_service: RunLedgerService | None = None
@@ -348,7 +318,7 @@ def create_run_manifest(
     if ledger_service is not None:
         ledger_service.manifest_id = manifest.manifest_id
         ledger_service.record_manifest_created(manifest)
-    control_plane_refs = _create_control_plane_refs(
+    control_plane_refs = _manifest_support.create_control_plane_refs(
         manifest.manifest_id,
         manifest.execution_fingerprint,
         resolved_config_hash,

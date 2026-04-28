@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import logging
 import shutil
+import subprocess  # nosec B404
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -105,6 +106,7 @@ TEMP_PATTERNS: tuple[str, ...] = (
     "*.temp",
     "*.bak",
 )
+DEFAULT_DETAIL_LIMIT = 25
 
 
 # =============================================================================
@@ -225,6 +227,47 @@ def _dir_target(path: Path, category: str) -> CleanupTarget:
     )
 
 
+def _cache_dir_target(path: Path) -> CleanupTarget:
+    """Build a CleanupTarget for a cache directory without recursive sizing."""
+    return CleanupTarget(
+        path=path,
+        category="python_cache",
+        size_bytes=0,
+        is_dir=True,
+    )
+
+
+def _run_git(root: Path, *git_args: str) -> subprocess.CompletedProcess[bytes]:
+    return subprocess.run(  # nosec
+        ["git", "-C", str(root), *git_args],
+        check=True,
+        capture_output=True,
+        text=False,
+    )
+
+
+def _local_status_paths(root: Path) -> list[str] | None:
+    if not (root / ".git").exists():
+        return None
+    try:
+        completed = _run_git(
+            root,
+            "ls-files",
+            "--others",
+            "--ignored",
+            "--exclude-standard",
+            "--directory",
+            "-z",
+        )
+    except subprocess.CalledProcessError:
+        return None
+    return [
+        path
+        for path in completed.stdout.decode("utf-8", errors="replace").split("\0")
+        if path
+    ]
+
+
 def _rglob_file_targets(
     root: Path,
     patterns: tuple[str, ...],
@@ -257,8 +300,15 @@ def _find_cache_dirs(
     root: Path,
     *,
     blocked_cleanup_paths: frozenset[str],
+    status_paths: list[str] | None = None,
 ) -> list[CleanupTarget]:
     """Find Python cache directories."""
+    if status_paths is not None:
+        return _find_cache_dirs_from_status_paths(
+            root,
+            status_paths,
+            blocked_cleanup_paths=blocked_cleanup_paths,
+        )
     targets: list[CleanupTarget] = []
     for name in PYTHON_CACHE_DIRS:
         for cache_dir in root.rglob(name):
@@ -271,7 +321,7 @@ def _find_cache_dirs(
                 )
             ):
                 continue
-            targets.append(_dir_target(cache_dir, "python_cache"))
+            targets.append(_cache_dir_target(cache_dir))
     return targets
 
 
@@ -335,8 +385,15 @@ def _find_compiled_files(
     root: Path,
     *,
     blocked_cleanup_paths: frozenset[str],
+    status_paths: list[str] | None = None,
 ) -> list[CleanupTarget]:
     """Find compiled Python files outside cache dirs."""
+    if status_paths is not None:
+        return _find_compiled_files_from_status_paths(
+            root,
+            status_paths,
+            blocked_cleanup_paths=blocked_cleanup_paths,
+        )
     return _rglob_file_targets(
         root,
         COMPILED_PATTERNS,
@@ -350,8 +407,19 @@ def _find_log_files(
     root: Path,
     *,
     blocked_cleanup_paths: frozenset[str],
+    status_paths: list[str] | None = None,
 ) -> list[CleanupTarget]:
     """Find log files."""
+    if status_paths is not None:
+        return _find_files_from_status_paths(
+            root,
+            status_paths,
+            category="log",
+            suffixes=(".log",),
+            exact_names=("full_log.txt", "project_rules_failures.txt"),
+            prefix_names=("final_report",),
+            blocked_cleanup_paths=blocked_cleanup_paths,
+        )
     return _rglob_file_targets(
         root,
         LOG_PATTERNS,
@@ -364,8 +432,17 @@ def _find_temp_files(
     root: Path,
     *,
     blocked_cleanup_paths: frozenset[str],
+    status_paths: list[str] | None = None,
 ) -> list[CleanupTarget]:
     """Find temporary files."""
+    if status_paths is not None:
+        return _find_files_from_status_paths(
+            root,
+            status_paths,
+            category="temp",
+            suffixes=(".tmp", ".temp", ".bak"),
+            blocked_cleanup_paths=blocked_cleanup_paths,
+        )
     return _rglob_file_targets(
         root,
         TEMP_PATTERNS,
@@ -404,10 +481,15 @@ def find_cleanup_targets(
         if blocked_cleanup_paths is None
         else blocked_cleanup_paths
     )
+    status_paths = _local_status_paths(root)
 
     # Always include these
     targets.extend(
-        _find_cache_dirs(root, blocked_cleanup_paths=effective_blocked_paths)
+        _find_cache_dirs(
+            root,
+            blocked_cleanup_paths=effective_blocked_paths,
+            status_paths=status_paths,
+        )
     )
     targets.extend(
         _find_build_dirs(root, blocked_cleanup_paths=effective_blocked_paths)
@@ -416,18 +498,121 @@ def find_cleanup_targets(
         _find_coverage_files(root, blocked_cleanup_paths=effective_blocked_paths)
     )
     targets.extend(
-        _find_compiled_files(root, blocked_cleanup_paths=effective_blocked_paths)
+        _find_compiled_files(
+            root,
+            blocked_cleanup_paths=effective_blocked_paths,
+            status_paths=status_paths,
+        )
     )
     targets.extend(
-        _find_temp_files(root, blocked_cleanup_paths=effective_blocked_paths)
+        _find_temp_files(
+            root,
+            blocked_cleanup_paths=effective_blocked_paths,
+            status_paths=status_paths,
+        )
     )
 
     # Conditionally include logs
     if include_logs:
         targets.extend(
-            _find_log_files(root, blocked_cleanup_paths=effective_blocked_paths)
+            _find_log_files(
+                root,
+                blocked_cleanup_paths=effective_blocked_paths,
+                status_paths=status_paths,
+            )
         )
 
+    return targets
+
+
+def _find_cache_dirs_from_status_paths(
+    root: Path,
+    status_paths: list[str],
+    *,
+    blocked_cleanup_paths: frozenset[str],
+) -> list[CleanupTarget]:
+    targets: list[CleanupTarget] = []
+    seen: set[Path] = set()
+    for raw_path in status_paths:
+        normalized = Path(raw_path.rstrip("/"))
+        if _is_venv_path(normalized):
+            continue
+        for index, segment in enumerate(normalized.parts):
+            if segment not in PYTHON_CACHE_DIRS:
+                continue
+            candidate = root / Path(*normalized.parts[: index + 1])
+            if candidate in seen:
+                continue
+            if _is_excluded_cleanup_path(
+                root,
+                candidate,
+                blocked_cleanup_paths=blocked_cleanup_paths,
+            ):
+                continue
+            seen.add(candidate)
+            targets.append(_cache_dir_target(candidate))
+    return targets
+
+
+def _find_compiled_files_from_status_paths(
+    root: Path,
+    status_paths: list[str],
+    *,
+    blocked_cleanup_paths: frozenset[str],
+) -> list[CleanupTarget]:
+    targets: list[CleanupTarget] = []
+    for raw_path in status_paths:
+        if raw_path.endswith("/"):
+            continue
+        normalized = Path(raw_path)
+        if normalized.suffix not in {".pyc", ".pyo"}:
+            continue
+        target = root / normalized
+        if _is_excluded_cleanup_path(
+            root,
+            target,
+            blocked_cleanup_paths=blocked_cleanup_paths,
+        ):
+            continue
+        if "__pycache__" in normalized.parts:
+            continue
+        targets.append(_file_target(target, "compiled"))
+    return targets
+
+
+def _find_files_from_status_paths(
+    root: Path,
+    status_paths: list[str],
+    *,
+    category: str,
+    blocked_cleanup_paths: frozenset[str],
+    suffixes: tuple[str, ...] = (),
+    exact_names: tuple[str, ...] = (),
+    prefix_names: tuple[str, ...] = (),
+) -> list[CleanupTarget]:
+    targets: list[CleanupTarget] = []
+    for raw_path in status_paths:
+        if raw_path.endswith("/"):
+            continue
+        normalized = Path(raw_path)
+        if _is_venv_path(normalized):
+            continue
+        name = normalized.name
+        matches = (
+            name in exact_names
+            or normalized.suffix in suffixes
+            or any(name.startswith(prefix) for prefix in prefix_names)
+        )
+        if not matches:
+            continue
+        target = root / normalized
+        if _is_excluded_cleanup_path(
+            root,
+            target,
+            blocked_cleanup_paths=blocked_cleanup_paths,
+        ):
+            continue
+        targets.append(_file_target(target, category))
     return targets
 
 
@@ -526,7 +711,12 @@ def _log_report_header(result: CleanupResult) -> None:
     logger.info("")
 
 
-def _log_category_targets(category: str, targets: list[CleanupTarget]) -> None:
+def _log_category_targets(
+    category: str,
+    targets: list[CleanupTarget],
+    *,
+    detail_limit: int,
+) -> None:
     """Emit all targets for one cleanup category."""
     cat_size = sum(t.size_bytes for t in targets)
     logger.info(
@@ -535,10 +725,14 @@ def _log_category_targets(category: str, targets: list[CleanupTarget]) -> None:
         len(targets),
         _format_size(cat_size),
     )
-    for target in targets:
+    visible_targets = targets[:detail_limit]
+    for target in visible_targets:
         rel_path = target.path.relative_to(PROJECT_ROOT)
         marker = "[D]" if target.is_dir else "[F]"
         logger.info("  %s %s (%s)", marker, rel_path, _format_size(target.size_bytes))
+    hidden_count = len(targets) - len(visible_targets)
+    if hidden_count > 0:
+        logger.info("  ... %d additional item(s) omitted", hidden_count)
     logger.info("")
 
 
@@ -579,11 +773,15 @@ def _log_report_summary(result: CleanupResult) -> None:
     logger.info("=" * 70)
 
 
-def log_report(result: CleanupResult) -> None:
+def log_report(result: CleanupResult, *, detail_limit: int) -> None:
     """Log cleanup report."""
     _log_report_header(result)
     for category, targets in sorted(_targets_by_category(result.targets).items()):
-        _log_category_targets(category, targets)
+        _log_category_targets(
+            category,
+            targets,
+            detail_limit=detail_limit,
+        )
     _log_archived_targets(result.archived)
     _log_errors(result.errors)
     _log_report_summary(result)
@@ -622,6 +820,12 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=PROJECT_ROOT,
         help="Project root path (default: auto-detected)",
+    )
+    parser.add_argument(
+        "--detail-limit",
+        type=int,
+        default=DEFAULT_DETAIL_LIMIT,
+        help="Maximum number of detailed entries to print per category",
     )
     return parser.parse_args()
 
@@ -666,7 +870,7 @@ def main() -> int:
         result.deleted, result.errors = delete_targets(targets)
 
     # Report results
-    log_report(result)
+    log_report(result, detail_limit=max(args.detail_limit, 0))
 
     return 1 if result.errors else 0
 

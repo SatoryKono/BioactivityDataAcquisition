@@ -3,8 +3,6 @@
 
 from __future__ import annotations
 
-import pandera.pandas as pa
-
 from bioetl.domain.contracts.gold._composite_gold_common_schema import (
     CompositeGoldCommonSchema,
 )

@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-04-28'
 
 ______________________________________________________________________
 
@@ -38,6 +38,12 @@ ______________________________________________________________________
   `xlogp`, `tpsa`, `heavy_atom_count`, `h_bond_donor_count`,
   `h_bond_acceptor_count`, `rotatable_bond_count`, `volume_3d`,
   `conformer_count_3d`.
+- The active standardization policy is `pubchem-basic-v1`. It adds
+  `standardized_canonical_smiles`, `standardized_isomeric_smiles`,
+  `standardized_inchi`, `standardized_inchi_key`, `structure_parent_key`,
+  `chemical_standardization_status`, `chemical_standardization_warnings`, and
+  `chemical_standardization_policy_version` before `content_hash` and
+  merge/dedup.
 - This page no longer republishes older mixed-case and dashed labels such as
   `CID`, `CanonicalSMILES`, `InChIKey`, `molecule-id`, `canonical-smiles`, or
   `volume-3d` as the active contract.

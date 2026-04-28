@@ -294,5 +294,9 @@ def echo_export_result(result: ExportResult) -> None:
     if result.success:
         click.echo(f"\nExported {result.row_count:,} rows to {result.format.upper()}")
         click.echo(f"Output: {result.output_path}")
+        if result.manifest_paths:
+            click.echo("Manifests:")
+            for manifest_path in result.manifest_paths:
+                click.echo(f"  {manifest_path}")
     else:
         click.echo(f"\nExport failed: {result.error}", err=True)

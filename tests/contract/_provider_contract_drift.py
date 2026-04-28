@@ -70,9 +70,8 @@ def assert_provider_probe_matches_snapshot(
 
     probe_snapshot = snapshot_probes[probe]
     expected_paths = probe_snapshot.get("paths", {})
-    actual_paths = _extract_actual_path_types(payload, expected_paths)
-
     if update_snapshots:
+        actual_paths = _extract_actual_path_types(payload, expected_paths)
         updated_snapshot = dict(snapshot)
         updated_probe = dict(probe_snapshot)
         updated_probe["paths"] = actual_paths
@@ -94,6 +93,7 @@ def assert_provider_probe_matches_snapshot(
     if difference_count:
         lines = [
             f"{provider}.{probe}: provider contract snapshot drift detected",
+            f"entity={report['entity']}",
             f"severity={report['severity']}",
             f"paths_checked={report['paths_checked']}",
             f"mismatched_paths={difference_count}",
@@ -103,9 +103,10 @@ def assert_provider_probe_matches_snapshot(
             expected_type = cast(str | None, difference["expected_type"])
             actual_type = cast(str | None, difference["actual_type"])
             detail = cast(str, difference["detail"])
+            remediation = cast(str, difference["remediation"])
             lines.append(
                 f"  {path}: expected {expected_type!r}, got {actual_type!r} "
-                f"({difference['severity']}; {detail})"
+                f"({difference['severity']}; {detail}; remediation={remediation})"
             )
         lines.append("If intentional, run: UPDATE_SNAPSHOTS=1 pytest ...")
         pytest.fail("\n".join(lines))
@@ -129,6 +130,7 @@ def compare_provider_probe_to_snapshot(
 
     probe_snapshot = cast(Mapping[str, Any], snapshot_probes[probe])
     expected_paths = cast(Mapping[str, str], probe_snapshot.get("paths", {}))
+    entity = _infer_entity(provider=provider, probe=probe)
     actual_paths: dict[str, str] = {}
     differences: list[dict[str, Any]] = []
 
@@ -144,6 +146,11 @@ def compare_provider_probe_to_snapshot(
                     "actual_type": None,
                     "severity": _BREAKING_SEVERITY,
                     "detail": str(exc),
+                    "remediation": _remediation_for_difference(
+                        kind="missing_path",
+                        expected_type=expected_type,
+                        actual_type=None,
+                    ),
                 }
             )
             continue
@@ -166,6 +173,11 @@ def compare_provider_probe_to_snapshot(
                     expected_type=expected_type,
                     actual_type=actual_type,
                 ),
+                "remediation": _remediation_for_difference(
+                    kind="type_changed",
+                    expected_type=expected_type,
+                    actual_type=actual_type,
+                ),
             }
         )
 
@@ -174,6 +186,7 @@ def compare_provider_probe_to_snapshot(
     )
     return {
         "provider": provider,
+        "entity": entity,
         "probe": probe,
         "version": version,
         "paths_checked": len(expected_paths),
@@ -302,6 +315,47 @@ def _describe_type_change(*, expected_type: str, actual_type: str) -> str:
     if {expected_type, actual_type} <= {"int", "float"}:
         return "numeric type changed"
     return "provider-facing path type changed"
+
+
+def _remediation_for_difference(
+    *,
+    kind: str,
+    expected_type: str,
+    actual_type: str | None,
+) -> str:
+    if kind == "missing_path":
+        return (
+            "update adapter/schema/config/docs for a removed provider field, or "
+            "refresh fixture only after verifying the provider docs"
+        )
+    if actual_type == "null" and expected_type != "null":
+        return (
+            "update schema nullability or transformer fallback; refresh fixture only "
+            "if provider nullable behavior is expected"
+        )
+    if actual_type is not None and {expected_type, actual_type} <= {"int", "float"}:
+        return (
+            "update numeric schema/coercion expectation or refresh fixture after "
+            "confirming provider numeric type semantics"
+        )
+    return (
+        "update adapter/schema/config/docs for provider contract drift, then refresh "
+        "fixture only when the new provider shape is intentional"
+    )
+
+
+def _infer_entity(*, provider: str, probe: str) -> str:
+    if provider in {"crossref", "openalex", "pubmed", "semanticscholar"}:
+        return "publication"
+    if provider == "pubchem":
+        return "compound"
+    if provider == "uniprot":
+        return "taxonomy" if probe == "taxonomy_endpoint" else "protein"
+    if provider == "chembl":
+        for entity in ("activity", "molecule", "target"):
+            if probe.startswith(entity):
+                return entity
+    return "unknown"
 
 
 def _max_severity(severities: list[str]) -> str:

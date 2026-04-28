@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-04-28'
 
 ______________________________________________________________________
 
@@ -164,10 +164,10 @@ OpenAlex использует API key и credit-based rate limiting. `mailto` б
 является основным механизмом доступа и сохраняется в BioETL только как
 дополнительный contact/attribution параметр.
 
-| Режим             | Лимит BioETL | Условие                                      |
-| ----------------- | ------------ | -------------------------------------------- |
-| С API key         | 10 req/sec   | `BIOETL_OPENALEX_API_KEY` задан              |
-| Legacy/contact ID | 10 req/sec   | `BIOETL_OPENALEX_EMAIL` задан как attribution |
+| Режим                     | Лимит BioETL | Условие                                           |
+| ------------------------- | ------------ | ------------------------------------------------- |
+| Production/API key        | 10 req/sec   | `BIOETL_OPENALEX_API_KEY` задан                   |
+| Contact attribution only  | Not supported as production boundary | `BIOETL_OPENALEX_EMAIL` задан без API key |
 
 **Важно:** Для production-подобных запусков требуется
 `BIOETL_OPENALEX_API_KEY`. Переменная `BIOETL_OPENALEX_EMAIL` опциональна и не
@@ -269,8 +269,8 @@ doi,title
 
 | Переменная                 | Описание                                   | Обязательна |
 | -------------------------- | ------------------------------------------ | ----------- |
-| `BIOETL_OPENALEX_API_KEY`  | OpenAlex API key                           | Да          |
-| `BIOETL_OPENALEX_EMAIL`    | Contact email для legacy attribution       | Нет         |
+| `BIOETL_OPENALEX_API_KEY`  | OpenAlex API key for production-like runs  | Да          |
+| `BIOETL_OPENALEX_EMAIL`    | Optional contact attribution metadata      | Нет         |
 
 ______________________________________________________________________
 
@@ -576,4 +576,4 @@ OpenAlex records include person-centric scholarly metadata such as author names,
 - [OpenAlex About us](https://help.openalex.org/hc/en-us/articles/24396686889751-About-us)
 - [OpenAlex Terms of Service](https://openalex.org/OpenAlex_termsofservice.pdf)
 
-*Последнее обновление: 2026-03-30*
+*Последнее обновление: 2026-04-28*

@@ -64,6 +64,8 @@ def test_run_audit_allows_cataloged_root_tooling_and_test_support(tmp_path: Path
     _write_minimal_repo_tree(tmp_path)
     (tmp_path / "tools").mkdir()
     (tmp_path / "testing_support").mkdir()
+    (tmp_path / "tools" / "fix_http.py").write_text("print('ok')\n", encoding="utf-8")
+    (tmp_path / "testing_support" / "__init__.py").write_text("", encoding="utf-8")
 
     result = module.run_audit(tmp_path)
 

@@ -144,6 +144,10 @@ BIOETL_OPENALEX_API_KEY=your-openalex-key-here
 BIOETL_OPENALEX_EMAIL=your-email@example.com
 ```
 
+`BIOETL_UNIPROT_API_KEY` is optional because UniProt uses public access by
+default. `BIOETL_OPENALEX_API_KEY` is required for production-like OpenAlex
+runs; `BIOETL_OPENALEX_EMAIL` is optional attribution metadata.
+
 ## 4. Verify Installation
 
 We recommend running a dependency check before starting the full test suite to ensure all critical runtime packages (`pandas`, `pandera`, `polars`, etc.) are correctly installed.

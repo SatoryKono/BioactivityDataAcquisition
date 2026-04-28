@@ -73,9 +73,9 @@ from bioetl.domain.services.value_validator import ValueValidator
 DataNormalizationService = DefaultDataNormalizationService
 
 __all__ = [
-    "ActivityAggregator",
     "CHEMICAL_STANDARDIZATION_POLICY_VERSION",
     "CHEMICAL_STANDARDIZATION_STATUSES",
+    "ActivityAggregator",
     "ChemicalStandardizationResult",
     "ChemicalStandardizationStatus",
     "ClassificationStats",

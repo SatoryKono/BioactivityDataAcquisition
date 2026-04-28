@@ -141,12 +141,37 @@
           "dtype": "str",
           "nullable": true
         },
+        "bao_endpoint_iri": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "bao_endpoint_mapping_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "bao_format": {
           "description": "",
           "dtype": "str",
           "nullable": true
         },
+        "bao_format_iri": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "bao_format_mapping_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "bao_label": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "bao_ontology_version": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -261,6 +286,21 @@
           "dtype": "float64",
           "nullable": true
         },
+        "qudt_ontology_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "qudt_unit_iri": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "qudt_unit_mapping_status": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "qudt_units": {
           "description": "",
           "dtype": "str",
@@ -352,6 +392,21 @@
           "nullable": true
         },
         "units": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "uo_ontology_version": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "uo_unit_iri": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "uo_unit_mapping_status": {
           "description": "",
           "dtype": "str",
           "nullable": true

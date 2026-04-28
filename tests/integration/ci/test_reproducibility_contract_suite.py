@@ -736,7 +736,11 @@ def test_reproducibility_contract_replay_ready_profile_requires_snapshot_backed_
     )
     assert result.diagnostics["persistence_profile"][
         "required_profile_missing_requirements"
-    ] == ["exact_replay_capability", "immutable_input_snapshots"]
+    ] == [
+        "exact_replay_capability",
+        "immutable_input_snapshots",
+        "produced_artifact_trace",
+    ]
     assert (
         result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
     )
@@ -800,6 +804,7 @@ def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed(
     ] == [
         "exact_replay_capability",
         "immutable_input_snapshots",
+        "produced_artifact_trace",
     ]
     assert result.diagnostics["alert_signals"]["strict_replay_boundary_gap"] is False
     assert (

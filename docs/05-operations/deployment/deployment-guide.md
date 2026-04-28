@@ -123,17 +123,18 @@ kubectl edit secret bioetl-secrets
 # https://github.com/bitnami-labs/sealed-secrets
 ```
 
-**Critical Secrets to Update:**
+**Critical / Provider Secrets to Review:**
 
 ```yaml
 BIOETL_PII_SALT_CURRENT: "YOUR-RANDOM-64-CHAR-STRING"
-BIOETL_UNIPROT_API_KEY: "your-actual-key"
 BIOETL_OPENALEX_API_KEY: "your-actual-key"
 BIOETL_OPENALEX_EMAIL: "your@email.com"
 BIOETL_SEMANTICSCHOLAR_API_KEY: "your-actual-key"
 BIOETL_PUBMED_API_KEY: "your-actual-key"
 BIOETL_PUBMED_EMAIL: "your@email.com"
 BIOETL_CROSSREF_EMAIL: "your@email.com"
+# Optional higher-throughput UniProt profile only:
+BIOETL_UNIPROT_API_KEY: "your-optional-key"
 ```
 
 ______________________________________________________________________
