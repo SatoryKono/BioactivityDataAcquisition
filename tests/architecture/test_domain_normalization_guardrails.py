@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
-from typing import Callable
+from collections.abc import Callable
 
 
 _NORMALIZATION_PACKAGE_PREFIX = "bioetl/domain/normalization/"

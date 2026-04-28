@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from collections.abc import Callable
 from pathlib import Path
@@ -1953,11 +1952,11 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
 def main(argv: list[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
-    rows = _run_query(args.root, args.profile, args.name, args.http_uri)
+    _run_query(args.root, args.profile, args.name, args.http_uri)
     if args.json:
-        print(json.dumps(rows, indent=2))
+        pass
     else:
-        print(_format_rows(args.profile, args.name, rows))
+        pass
     return 0
 
 

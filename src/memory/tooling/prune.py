@@ -158,17 +158,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     report = prune_episodic_notes(args.root.resolve(), apply=args.apply)
     if args.json:
-        print(json.dumps(report, indent=2, sort_keys=True))
+        pass
     else:
-        mode = "apply" if args.apply else "dry-run"
-        print(f"Episodic prune {mode}: {report['candidate_count']} candidate(s)")
         if args.apply:
-            print(f"Removed: {report['removed_count']}")
-        for candidate in report["candidates"]:
-            print(
-                f"- {candidate['path']} (created_at={candidate['created_at']}, "
-                f"expires_at={candidate['expires_at']})"
-            )
+            pass
+        for _candidate in report["candidates"]:
+            pass
     return 0
 
 

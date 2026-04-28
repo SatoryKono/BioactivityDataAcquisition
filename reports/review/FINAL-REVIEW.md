@@ -1,10 +1,10 @@
 # BioETL — Full Project Review Report
 
-**Date**: 2026-04-25
+**Date**: 2026-04-28
 **RULES.md Version**: 6.1.2
 **Project Version**: 1.0.0
 **Total files reviewed**: 5830
-**Total LOC reviewed**: 1004027
+**Total LOC reviewed**: 1004024
 
 ---
 
@@ -15,9 +15,9 @@
 ### Key Metrics
 | Metric | Value |
 |--------|-------|
-| Total issues found | 4706 |
+| Total issues found | 4707 |
 | Critical issues | 25 |
-| High issues | 4325 |
+| High issues | 4326 |
 | Medium issues | 356 |
 | Low issues | 0 |
 | Sectors reviewed | 8 |
@@ -29,12 +29,12 @@
 |--------|-------|-------|-----|-------|--------|
 | S1 Domain | src/bioetl/domain | 489 | 61852 | 9.6 | PASS |
 | S2 Application | src/bioetl/application | 473 | 73426 | 10.0 | PASS |
-| S3 Infrastructure | src/bioetl/infrastructure | 446 | 68031 | 9.9 | PASS |
+| S3 Infrastructure | src/bioetl/infrastructure | 446 | 68030 | 9.9 | PASS |
 | S4 Composition + Interfaces | src/bioetl/composition, src/bioetl/interfaces | 301 | 38693 | 9.2 | PASS |
-| S6 Tests | tests | 1458 | 377930 | 6.3 | WARN |
+| S6 Tests | tests | 1458 | 377929 | 6.3 | WARN |
 | S7 Configs | configs | 95 | 13949 | 10.0 | PASS |
 | S8 Documentation | docs | 857 | 128073 | 10.0 | PASS |
-| S5 Cross-cutting | src/bioetl | 1711 | 242073 | 8.5 | PASS |
+| S5 Cross-cutting | src/bioetl | 1711 | 242072 | 8.5 | PASS |
 
 ---
 

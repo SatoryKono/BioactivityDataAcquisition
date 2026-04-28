@@ -1,6 +1,6 @@
 # Consolidated Review — S6: Tests
 
-**Date**: 2026-04-25
+**Date**: 2026-04-28
 **Sub-reviews**: 6 agents
 **Status**: WARN
 **Consolidated Score**: 6.3
@@ -10,7 +10,7 @@
 |------------|-------|-------|--------|------|------|
 | S6.1 — Architecture | 237 | 8.5 | PASS | 0 | 124 |
 | S6.2 — Unit Domain | 229 | 8.9 | PASS | 0 | 633 |
-| S6.3 — Unit Application | 277 | 4.5 | FAIL | 9 | 1332 |
+| S6.3 — Unit Application | 277 | 4.5 | FAIL | 9 | 1333 |
 | S6.4 — Unit Infrastructure | 282 | 5.2 | FAIL | 3 | 844 |
 | S6.5 — Unit Comp+Ifaces | 180 | 5.0 | FAIL | 4 | 752 |
 | S6.6 — Integration+Other | 184 | 5.7 | FAIL | 3 | 632 |
