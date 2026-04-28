@@ -63,39 +63,59 @@ def _parse_grant_dict(
     grant: JsonDict,  # Any: untyped JSON fragment from OpenAlex API
 ) -> JsonDict | None:  # Any: untyped JSON fragment from OpenAlex API
     """Parse OpenAlex legacy grants, current awards, or current funders."""
-    funder = grant.get("funder")
-    funder_name = (
-        grant.get("funder_display_name")
-        or grant.get("display_name")
-        or _get_nested_display_name(funder)
-    )
-    if not funder_name or not isinstance(funder_name, str):
+    funder_name = _resolve_funder_name(grant)
+    if funder_name is None:
         return None
 
     award_id = grant.get("award_id") or grant.get("funder_award_id")
     award_str = str(award_id).strip() if award_id else None
-    award_openalex_id = (
-        _extract_id_from_url(grant.get("id"))
-        if grant.get("funder_award_id") or grant.get("funder_id")
-        else None
-    )
-    funder_id = (
-        grant.get("funder_id")
-        or grant.get("funder")
-        or (grant.get("id") if not award_openalex_id else None)
-    )
-    if isinstance(funder_id, dict):
-        funder_id = funder_id.get("id")
-    funder_id_str = funder_id if isinstance(funder_id, str) else None
+    award_openalex_id = _resolve_award_openalex_id(grant)
+    funder_id_str = _resolve_funder_id(grant, award_openalex_id=award_openalex_id)
 
     return {
         "funder": _extract_id_from_url(funder_id_str),
-        "funder_display_name": funder_name.strip(),
+        "funder_display_name": funder_name,
         "award_id": award_str,
         "award_openalex_id": award_openalex_id,
         "award_display_name": grant.get("display_name") if award_openalex_id else None,
         "award_doi": grant.get("doi"),
     }
+
+
+def _resolve_funder_name(grant: JsonDict) -> str | None:
+    """Return the best available funder display name."""
+    candidate = (
+        grant.get("funder_display_name")
+        or grant.get("display_name")
+        or _get_nested_display_name(grant.get("funder"))
+    )
+    if not isinstance(candidate, str):
+        return None
+    stripped = candidate.strip()
+    return stripped or None
+
+
+def _resolve_award_openalex_id(grant: JsonDict) -> str | None:
+    """Return the OpenAlex award identifier for current award/funder shapes."""
+    if not (grant.get("funder_award_id") or grant.get("funder_id")):
+        return None
+    return _extract_id_from_url(grant.get("id"))
+
+
+def _resolve_funder_id(
+    grant: JsonDict,
+    *,
+    award_openalex_id: str | None,
+) -> str | None:
+    """Return the best available funder identifier as a raw OpenAlex URL/ID string."""
+    funder_id = (
+        grant.get("funder_id")
+        or grant.get("funder")
+        or (grant.get("id") if award_openalex_id is None else None)
+    )
+    if isinstance(funder_id, dict):
+        funder_id = funder_id.get("id")
+    return funder_id if isinstance(funder_id, str) else None
 
 
 __all__ = [

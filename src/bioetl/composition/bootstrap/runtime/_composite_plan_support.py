@@ -52,6 +52,17 @@ if TYPE_CHECKING:
     )
     from bioetl.infrastructure.config import Settings
 
+    type BootstrapRuntimeBasicsTuple = tuple[
+        str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort
+    ]
+    type SeedRunnerFactory = Callable[[], PipelineRunner]
+    type DataFrameRunnerFactory = Callable[[str, pl.DataFrame], PipelineRunner]
+    type RunnerFactoryBundle = tuple[
+        SeedRunnerFactory,
+        DataFrameRunnerFactory,
+        DataFrameRunnerFactory,
+    ]
+
 
 @dataclass(frozen=True, slots=True)
 class CompositeBootstrapPlan:
@@ -60,9 +71,9 @@ class CompositeBootstrapPlan:
     metrics: MetricsPort
     tracer: TracingPort
     lock: LockPort
-    seed_runner_factory: Callable[[], PipelineRunner]
-    dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
-    enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
+    seed_runner_factory: SeedRunnerFactory
+    dependencies_runner_factory: DataFrameRunnerFactory
+    enricher_runner_factory: DataFrameRunnerFactory
     support_services: CompositeSupportServices
 
 
@@ -82,10 +93,7 @@ class BootstrapRuntimeResources:
 
 def build_bootstrap_runtime_resources(
     *,
-    bootstrap_runtime_basics_fn: Callable[
-        ...,
-        tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort],
-    ],
+    bootstrap_runtime_basics_fn: Callable[..., BootstrapRuntimeBasicsTuple],
     config: CompositeConfig,
     run_id: str | None,
 ) -> BootstrapRuntimeResources | CompositeInfrastructureContext:
@@ -110,22 +118,11 @@ def build_bootstrap_runtime_resources(
 
 def build_bootstrap_runner_factories(
     *,
-    build_runner_factories_fn: Callable[
-        ...,
-        tuple[
-            Callable[[], PipelineRunner],
-            Callable[[str, pl.DataFrame], PipelineRunner],
-            Callable[[str, pl.DataFrame], PipelineRunner],
-        ],
-    ],
+    build_runner_factories_fn: Callable[..., RunnerFactoryBundle],
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     logger: LoggerPort,
-) -> tuple[
-    Callable[[], PipelineRunner],
-    Callable[[str, pl.DataFrame], PipelineRunner],
-    Callable[[str, pl.DataFrame], PipelineRunner],
-]:
+) -> RunnerFactoryBundle:
     """Resolve the canonical runner-factory bundle."""
     return build_runner_factories_fn(config=config, runtime=runtime, logger=logger)
 
@@ -225,20 +222,12 @@ def build_runner_factories_impl(
         [CompositeRuntimeConfig, bool | None],
         BronzeRunOptions,
     ],
-) -> tuple[
-    Callable[[], PipelineRunner],
-    Callable[[str, pl.DataFrame], PipelineRunner],
-    Callable[[str, pl.DataFrame], PipelineRunner],
-]:
+) -> RunnerFactoryBundle:
     from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
         build_runner_factories as _build_runner_factories_builder_impl,
     )
 
-    runner_factories: tuple[
-        Callable[[], PipelineRunner],
-        Callable[[str, pl.DataFrame], PipelineRunner],
-        Callable[[str, pl.DataFrame], PipelineRunner],
-    ] = _build_runner_factories_builder_impl(
+    runner_factories: RunnerFactoryBundle = _build_runner_factories_builder_impl(
         config=config,
         runtime=runtime,
         logger=logger,
@@ -286,14 +275,7 @@ def build_composite_bootstrap_plan_impl(
     runtime: CompositeRuntimeConfig,
     run_id: str | None,
     bootstrap_runtime_basics_fn: Callable[..., CompositeInfrastructureContext],
-    build_runner_factories_fn: Callable[
-        ...,
-        tuple[
-            Callable[[], PipelineRunner],
-            Callable[[str, pl.DataFrame], PipelineRunner],
-            Callable[[str, pl.DataFrame], PipelineRunner],
-        ],
-    ],
+    build_runner_factories_fn: Callable[..., RunnerFactoryBundle],
     build_support_services_fn: Callable[..., CompositeSupportServices],
 ) -> CompositeBootstrapPlan:
     runtime_resources = build_bootstrap_runtime_resources(

@@ -254,30 +254,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a compatibility-era scripts.ai.src mirror for SonarQube MCP smoke checks while historical module paths remain; remove it once callers converge on the canonical scripts/ai/mcp implementation."
     },
-    "scripts/engineering/dev/run_s7_stability_waves.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded S7 stability troubleshooting helper; either attach it to a canonical developer workflow with explicit call-sites or remove it after the stabilization wave completes."
-    },
-    "scripts/engineering/dev/fix_hypothesis_db.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded WSL-mounted checkout repair helper for Hypothesis state; remove it once the pytest wrappers no longer need manual cache recovery tooling."
-    },
-    "scripts/engineering/dev/run_pytest_off_mnt.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded mounted-WSL troubleshooting launcher that copies the repo off /mnt for pytest execution; remove it after the mixed Windows-WSL workflow is stabilized."
-    },
-    "scripts/engineering/dev/run_pytest_wsl_env.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded WSL bootstrap troubleshooting wrapper while mounted-checkout environment setup remains fragile; fold its behavior into canonical dev setup or remove it."
-    },
     "scripts/engineering/qa/py_review_orchestrator.py": {
       "owner": "platform-architecture",
       "decision": "legacy_manual_utility",
@@ -523,18 +499,6 @@
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a legacy wrapper delegating to the canonical schema unified-config validator; remove once historical src/tools wrapper references are retired."
-    },
-    "scripts/engineering/dev/run_100_stability_waves.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded 100-wave pytest stability troubleshooting helper while the test-health rollup workflow is being validated; either promote it into a documented QA workflow with explicit call-sites or remove it after the stabilization wave completes."
-    },
-    "scripts/engineering/dev/run_100_stability_waves_simple.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a simplified 100-wave pytest stability troubleshooting helper for local validation of JUnit aggregation; remove it once the full stability-wave helper or canonical sharded pytest runner covers the workflow."
     },
     "scripts/engineering/ci/validate_control_plane_artifacts.py": {
       "owner": "@bioetl-platform",

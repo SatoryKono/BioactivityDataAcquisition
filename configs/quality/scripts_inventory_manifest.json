@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-28T11:15:04.622206+00:00",
+  "generated_at": "2026-04-28T11:20:39.565470+00:00",
   "summary": {
-    "total_scripts": 410,
+    "total_scripts": 404,
     "status_counts": {
       "active": 319,
       "legacy": 10,
-      "orphan": 68,
+      "orphan": 62,
       "unknown": 13
     },
     "reference_group_coverage": {
@@ -6453,14 +6453,6 @@
       "references": []
     },
     {
-      "path": "scripts/engineering/dev/fix_hypothesis_db.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
       "path": "scripts/engineering/dev/install_deps.py",
       "type": "py",
       "status": "active",
@@ -6650,22 +6642,6 @@
           "text": "\"mock-quarantine\": \"quarantine_explorer_mock_server.py\","
         }
       ]
-    },
-    {
-      "path": "scripts/engineering/dev/run_100_stability_waves.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/run_100_stability_waves_simple.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/engineering/dev/run_mypy.ps1",
@@ -6908,7 +6884,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 58,
+      "reference_count": 56,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -6961,19 +6937,11 @@
       ]
     },
     {
-      "path": "scripts/engineering/dev/run_pytest_off_mnt.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
       "path": "scripts/engineering/dev/run_pytest_sharded.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 13,
       "references": [
         {
           "path": "docs/03-guides/testing.md",
@@ -7024,22 +6992,6 @@
           "text": "| `scripts/engineering/dev/run_pytest_sharded.sh`              | Run the recommended path-based pytest shard plan (shell variant)                          |"
         }
       ]
-    },
-    {
-      "path": "scripts/engineering/dev/run_pytest_wsl_env.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/run_s7_stability_waves.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/engineering/dev/run_tests.ps1",
