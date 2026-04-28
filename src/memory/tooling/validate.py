@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import json
+from typing import Any
 
 from memory.validation import ValidationIssue, validate_memory_scaffold
 
@@ -29,15 +31,17 @@ def main(argv: list[str] | None = None) -> int:
     issues = validate_memory_scaffold()
 
     if args.json:
-        {
+        payload: dict[str, Any] = {
             "ok": not issues,
             "issues": [_format_issue(issue) for issue in issues],
         }
+        print(json.dumps(payload, indent=2, sort_keys=True))
     elif issues:
-        for _issue in issues:
-            pass
+        print("Memory scaffold validation failed:")
+        for issue in issues:
+            print(f"- {issue.path}: {issue.message}")
     else:
-        pass
+        print("Memory scaffold validation passed.")
 
     return 1 if issues else 0
 

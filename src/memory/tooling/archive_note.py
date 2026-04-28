@@ -65,12 +65,13 @@ def archive_note(
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
-    archive_note(
+    path = archive_note(
         args.source.resolve(),
         reason=args.reason,
         output_path=args.output,
         move=args.move,
     )
+    print(f"Archived memory note: {path}")
     return 0
 
 

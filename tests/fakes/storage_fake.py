@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from datetime import datetime
 
     from bioetl.domain.ports.storage.silver_port import SilverWriteRequest
-    from bioetl.domain.types import BatchID, RunID, RunType
+    from bioetl.domain.types import ArrowSchema, BatchID, RunID, RunType
 
 from bioetl.domain.ports.storage.silver_port import coerce_silver_write_request
 

@@ -261,7 +261,7 @@ def content_hash(text: str) -> str:
 
 def build_chunk_id(source_path: str, title: str, index: int) -> str:
     """Build a deterministic chunk identifier from source path and section title."""
-    digest = hashlib.sha1(f"{source_path}:{index}:{title}".encode()).hexdigest()[
+    digest = hashlib.sha1(f"{source_path}:{index}:{title}".encode("utf-8")).hexdigest()[
         :12
     ]
     return f"{source_path}#{_slugify(title)}-{digest}"

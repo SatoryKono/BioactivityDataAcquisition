@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 
 from tests.helpers import repo_root, run_repo_command
 

@@ -296,10 +296,9 @@ def test_reservoir_add_is_order_independent_for_same_items(
     for record in reversed(records):
         second_harness._reservoir_add(second_reservoir, record)
 
-    def normalize(items):
-        return sorted(
-            _BatchExecutorDQMixin._serialize_dq_sample_item(item) for item in items
-        )
+    normalize = lambda items: sorted(
+        _BatchExecutorDQMixin._serialize_dq_sample_item(item) for item in items
+    )
     assert normalize(first_reservoir) == normalize(second_reservoir)
 
 

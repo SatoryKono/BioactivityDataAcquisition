@@ -97,7 +97,7 @@ def _service_like_classes_in_file(py_file: Path) -> set[str]:
 def _init_instantiation_violations(
     py_file: Path,
     forbidden_classes: set[str],
-) -> list[Violation]:
+) -> list["Violation"]:
     tree = _parse_python_tree(py_file)
     if tree is None:
         return []
@@ -116,7 +116,7 @@ def _init_instantiation_violations(
     ]
 
 
-def _format_violation_messages(violations: list[Violation], base: Path) -> list[str]:
+def _format_violation_messages(violations: list["Violation"], base: Path) -> list[str]:
     messages: list[str] = []
     for violation in violations:
         relative = violation.file_path.relative_to(base)

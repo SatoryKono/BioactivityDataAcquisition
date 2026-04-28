@@ -168,7 +168,7 @@ async def test_process_missing_dois_passes_entity_type_to_search_fallback() -> N
         limit=None,
         fetched=0,
     ):
-        raise AssertionError("process_missing_dois should not yield when all IDs are found")
+        assert False, "process_missing_dois should not yield when all IDs are found"
 
     assert captured_entity == ["sequence"]
 
@@ -205,7 +205,7 @@ async def test_process_missing_dois_passes_limit_and_fetched_to_search() -> None
         limit=50,
         fetched=10,
     ):
-        raise AssertionError("process_missing_dois should not yield fallback rows here")
+        assert False, "process_missing_dois should not yield fallback rows here"
 
     assert captured["limit"] == 50
     assert captured["fetched"] == 10

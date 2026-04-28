@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -301,18 +302,24 @@ def _payload_exit_code(payload: dict[str, Any]) -> int:
 
 def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
     if as_json:
-        pass
+        print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
     elif payload["kind"] == "pre-task":
+        print(f"Pre-task workflow: {payload['task_id']}")
         if payload.get("session_note"):
-            pass
+            print(f"- session note: {payload['session_note']}")
         if payload.get("refresh_output_root"):
-            pass
-        payload["retrieval"]["results"]
+            print(f"- refresh output root: {payload['refresh_output_root']}")
+        results = payload["retrieval"]["results"]
+        print(f"- catalog hits: {len(results['catalog'])}")
+        print(f"- rag hits: {len(results['rag'])}")
+        print(f"- timeline hits: {len(results['timeline'])}")
     else:
+        print(f"Post-task workflow: {payload['task_id']}")
+        print(f"- summary note: {payload['summary_note']}")
         if payload.get("refresh_output_root"):
-            pass
+            print(f"- refresh output root: {payload['refresh_output_root']}")
         if payload.get("promoted_note"):
-            pass
+            print(f"- promoted note: {payload['promoted_note']}")
     return _payload_exit_code(payload)
 
 
@@ -352,9 +359,17 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "review-curated":
         payload = review_curated_workflow(curated_root=args.root)
         if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
             return 0 if payload.get("ok", True) else 1
 
-        payload["summary"]
+        summary = payload["summary"]
+        print("Curated review ritual:")
+        print(f"- notes: {summary['note_count']}")
+        print(f"- due: {summary['due_count']}")
+        print(f"- stale: {summary['stale_count']}")
+        print(f"- review candidates: {summary['review_candidates']}")
+        print(f"- cadence: {payload['cadence']}")
+        print(f"- next action: {payload['next_action']}")
         return 0 if payload.get("ok", True) else 1
 
     parser.error(f"unsupported command: {args.command}")

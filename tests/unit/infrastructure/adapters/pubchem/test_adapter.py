@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any
-from collections.abc import AsyncIterator
+from typing import Any, AsyncIterator
 from unittest.mock import MagicMock, patch
 
 import pytest

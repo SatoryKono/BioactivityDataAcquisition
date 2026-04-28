@@ -13,7 +13,15 @@ COMMANDS = {
 
 
 def _print_help() -> None:
-    pass
+    print(
+        "Usage:\n"
+        "    python -m memory.graph <command> [args...]\n"
+        "    python -m memory.graph --help\n\n"
+        "Commands:\n"
+        "    sync        Build and optionally sync the deterministic Neo4j repo graph\n"
+        "    query       Query deterministic Neo4j memory ownership, neighbors, and analysis shortcuts",
+        end="",
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -25,6 +33,8 @@ def main(argv: list[str] | None = None) -> int:
     cmd, rest = args[0], args[1:]
     handler = COMMANDS.get(cmd)
     if handler is None:
+        print(f"Unknown command: {cmd}", file=sys.stderr)
+        print(f"Available: {', '.join(sorted(COMMANDS))}", file=sys.stderr)
         return 2
     return handler(rest)
 

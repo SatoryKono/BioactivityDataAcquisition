@@ -121,13 +121,14 @@ def create_note(
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
-    create_note(
+    path = create_note(
         note_kind=args.kind,
         title=args.title,
         task_id=args.task_id,
         source_refs=args.source_ref,
         output_path=args.output,
     )
+    print(f"Created memory note: {path}")
     return 0
 
 

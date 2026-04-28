@@ -11,7 +11,7 @@
 | S8.1 — Project+Reqs | 184 | 10.0 | PASS | 0 | 0 |
 | S8.2 — Architecture | 401 | 10.0 | PASS | 0 | 0 |
 | S8.3 — Reference | 107 | 10.0 | PASS | 0 | 0 |
-| S8.4 — Guides+Other Docs | 239 | 10.0 | PASS | 0 | 0 |
+| S8.4 — Guides+Other Docs | 236 | 10.0 | PASS | 0 | 0 |
 
 ## Aggregated Issues
 ### Critical (MUST fix)

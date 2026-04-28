@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-28T01:28:51.854483+00:00",
+  "generated_at": "2026-04-28T08:38:51.594681+00:00",
   "summary": {
     "total_scripts": 443,
     "status_counts": {
@@ -10023,7 +10023,7 @@
       "references": [
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
-          "line": 14,
+          "line": 15,
           "source_group": "tests",
           "text": "\"scripts/ops/launchers/codex/setup_agents.sh\","
         }
@@ -10080,7 +10080,7 @@
         },
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
-          "line": 50,
+          "line": 51,
           "source_group": "tests",
           "text": "content = (root / \"scripts/ops/launchers/codex/setup_plugins.sh\").read_text("
         }
@@ -10095,7 +10095,7 @@
       "references": [
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
-          "line": 34,
+          "line": 35,
           "source_group": "tests",
           "text": "\"scripts/ops/launchers/codex/setup_skills.sh\","
         }
