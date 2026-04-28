@@ -1,3 +1,4 @@
+# ruff: noqa: UP049
 """Prometheus Metrics adapter implementing MetricsPort.
 
 Provides concrete implementation of the MetricsPort interface using
@@ -46,12 +47,12 @@ class _GaugeMetric(Protocol):
     def labels(self, **labels: str) -> _GaugeObserver: ...
 
 
-def _require_registered_metric[MetricT](
+def _require_registered_metric[_MetricT](
     *,
     name: str,
-    registry: Mapping[str, MetricT],
+    registry: Mapping[str, _MetricT],
     metric_kind: str,
-) -> MetricT:
+) -> _MetricT:
     """Return a registered metric or fail loudly on contract drift."""
     metric = registry.get(name)
     if metric is None:

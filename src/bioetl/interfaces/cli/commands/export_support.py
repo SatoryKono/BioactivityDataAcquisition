@@ -1,3 +1,4 @@
+# ruff: noqa: UP049
 """Shared helpers for the export CLI command."""
 
 from __future__ import annotations
@@ -14,8 +15,6 @@ from bioetl.application.services import (
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CliBoundaryExecutionPolicy,
-)
-from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     run_async_with_cli_failure_policy,
     run_sync_with_cli_failure_policy,
 )
@@ -80,15 +79,15 @@ def _export_policy(
     )
 
 
-def _run_export_async[T](
-    coro: Coroutine[object, object, T],
+def _run_export_async[_T](
+    coro: Coroutine[object, object, _T],
     *,
     table: str,
     reason_prefix: str,
     domain_error_title: str,
     unexpected_error_title: str,
     handle_file_not_found: bool = False,
-) -> T | None:
+) -> _T | None:
     """Run an async export coroutine with shared CLI exception handling."""
     try:
         return run_async_with_cli_failure_policy(
@@ -110,14 +109,14 @@ def _run_export_async[T](
         raise
 
 
-def _run_export_sync[T](
-    fn: Callable[[], T],
+def _run_export_sync[_T](
+    fn: Callable[[], _T],
     *,
     table: str,
     reason_prefix: str,
     domain_error_title: str,
     unexpected_error_title: str,
-) -> T | None:
+) -> _T | None:
     """Run a sync export callable with shared CLI exception handling."""
     return run_sync_with_cli_failure_policy(
         fn,
