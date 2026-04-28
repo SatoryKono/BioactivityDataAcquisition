@@ -534,9 +534,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
 def test_show_surfaces_manifest_store_corruption_as_forensic_error() -> None:
     class _CorruptManifestStore:
         def get(self, manifest_id: str) -> RunManifest | None:
-            raise ValueError(
-                "Run manifest index corruption: indexed manifest mismatch"
-            )
+            raise ValueError("Run manifest index corruption: indexed manifest mismatch")
 
         def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
             raise AssertionError("run-id fallback should not hide corruption")

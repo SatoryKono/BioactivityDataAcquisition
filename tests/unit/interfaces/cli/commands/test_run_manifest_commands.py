@@ -15,6 +15,7 @@ from click.testing import CliRunner
 from bioetl.application.services.run_manifest_inspection_service import (
     RunManifestDiffEntry,
     RunManifestDiffResult,
+    RunManifestInspectionCorruptionError,
     RunManifestInspectionResult,
 )
 from bioetl.domain.control_plane import (
@@ -400,6 +401,24 @@ class _FakeRunManifestService:
         )
 
 
+class _CorruptRunManifestService:
+    def show(self, identifier: str) -> RunManifestInspectionResult:
+        raise RunManifestInspectionCorruptionError(
+            identifier,
+            "Run manifest index corruption: indexed manifest mismatch",
+        )
+
+    def diff(
+        self,
+        left_identifier: str,
+        right_identifier: str,
+    ) -> RunManifestDiffResult:
+        raise RunManifestInspectionCorruptionError(
+            left_identifier,
+            "Run manifest index corruption: indexed manifest mismatch",
+        )
+
+
 @pytest.fixture
 def cli_runner() -> CliRunner:
     return CliRunner()
@@ -603,6 +622,19 @@ class TestRunManifestCommands:
 
         assert result.exit_code == 0
         assert "Run manifest not found" in result.stderr
+
+    def test_show_manifest_store_corruption_prints_forensic_error(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        _patch_run_manifest_service(monkeypatch, _CorruptRunManifestService())
+
+        result = cli_runner.invoke(cli, ["run-manifest", "show", "manifest-corrupt"])
+
+        assert result.exit_code == 0
+        assert "Run manifest store corruption" in result.stderr
+        assert "indexed manifest mismatch" in result.stderr
 
     def test_diff_json_outputs_changed_fields(
         self,

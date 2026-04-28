@@ -11,7 +11,9 @@ __all__ = ["MetricsServerAdapter"]
 
 from typing import TYPE_CHECKING
 
+from bioetl.domain.ports import MetricsServerRuntimeStatus
 from bioetl.infrastructure.observability.server import (
+    get_metrics_server_runtime_status,
     is_metrics_server_running,
     reset_server_state,
     start_metrics_server,
@@ -80,6 +82,10 @@ class MetricsServerAdapter:
             True if server is running, False otherwise.
         """
         return is_metrics_server_running()
+
+    def get_runtime_status(self) -> MetricsServerRuntimeStatus:
+        """Return the current in-process server runtime metadata."""
+        return get_metrics_server_runtime_status()
 
     def reset(self) -> None:
         """Reset server state (for testing purposes only).

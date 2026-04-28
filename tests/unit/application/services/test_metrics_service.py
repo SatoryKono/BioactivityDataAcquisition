@@ -19,6 +19,7 @@ from bioetl.application.services.metrics_service import (
     PushResult,
     StartResult,
 )
+from bioetl.domain.ports import MetricsServerRuntimeStatus
 from tests.helpers.clock import FixedClock
 
 
@@ -81,6 +82,9 @@ class TestMetricsServerPort:
 
             def is_running(self) -> bool:
                 return True
+
+            def get_runtime_status(self) -> MetricsServerRuntimeStatus:
+                return MetricsServerRuntimeStatus(running=True, port=8000)
 
             def reset(self) -> None:
                 return None
@@ -152,6 +156,9 @@ class TestMetricsService:
         server = MagicMock()
         server.is_running.return_value = False
         server.start.return_value = True
+        server.get_runtime_status.return_value = MetricsServerRuntimeStatus(
+            running=False
+        )
         return server
 
     @pytest.fixture
@@ -196,12 +203,17 @@ class TestMetricsService:
         self, service: MetricsService, mock_server: MagicMock
     ) -> None:
         """Test start when server is already running."""
-        mock_server.is_running.return_value = True
+        mock_server.get_runtime_status.return_value = MetricsServerRuntimeStatus(
+            running=True,
+            port=9000,
+            addr="0.0.0.0",
+        )
 
         result = service.start(port=9000)
 
         assert result.success is True
         assert result.already_running is True
+        assert result.port == 9000
         mock_server.start.assert_not_called()
 
     def test_start_failure(
@@ -285,16 +297,18 @@ class TestMetricsService:
         self, service: MetricsService, mock_server: MagicMock
     ) -> None:
         """Test get_status when server is running."""
-        # First start the server to set _port and _started_at
-        mock_server.is_running.return_value = False
-        service.start(port=8000)
-        mock_server.is_running.return_value = True
+        started_at = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
+        mock_server.get_runtime_status.return_value = MetricsServerRuntimeStatus(
+            running=True,
+            port=8000,
+            started_at=started_at,
+        )
 
         status = service.get_status()
 
         assert status.running is True
         assert status.port == 8000
-        assert status.started_at is not None
+        assert status.started_at == started_at
 
     def test_get_status_not_running(
         self, service: MetricsService, mock_server: MagicMock
@@ -379,8 +393,10 @@ class TestMetricsServiceEdgeCases:
     def test_start_logs_correctly(self, mock_logger: MagicMock) -> None:
         """Test that start logs appropriately."""
         mock_server = MagicMock()
-        mock_server.is_running.return_value = False
         mock_server.start.return_value = True
+        mock_server.get_runtime_status.return_value = MetricsServerRuntimeStatus(
+            running=False
+        )
 
         service = MetricsService(
             logger=mock_logger,
@@ -395,7 +411,10 @@ class TestMetricsServiceEdgeCases:
     def test_start_already_running_logs_debug(self, mock_logger: MagicMock) -> None:
         """Test that already running logs debug message."""
         mock_server = MagicMock()
-        mock_server.is_running.return_value = True
+        mock_server.get_runtime_status.return_value = MetricsServerRuntimeStatus(
+            running=True,
+            port=8000,
+        )
 
         service = MetricsService(
             logger=mock_logger,
@@ -457,8 +476,10 @@ class TestMetricsServiceEdgeCases:
     def test_service_default_port(self, mock_logger: MagicMock) -> None:
         """Test that service uses default port 8000."""
         mock_server = MagicMock()
-        mock_server.is_running.return_value = False
         mock_server.start.return_value = True
+        mock_server.get_runtime_status.return_value = MetricsServerRuntimeStatus(
+            running=False
+        )
 
         service = MetricsService(
             logger=mock_logger,
@@ -479,8 +500,10 @@ class TestMetricsServiceEdgeCases:
     def test_start_failure_logs_warning(self, mock_logger: MagicMock) -> None:
         """Test that start failure logs warning."""
         mock_server = MagicMock()
-        mock_server.is_running.return_value = False
         mock_server.start.return_value = False
+        mock_server.get_runtime_status.return_value = MetricsServerRuntimeStatus(
+            running=False
+        )
 
         service = MetricsService(
             logger=mock_logger,
@@ -491,20 +514,22 @@ class TestMetricsServiceEdgeCases:
 
         mock_logger.warning.assert_called()
 
-    def test_get_status_uses_stored_port(self, mock_logger: MagicMock) -> None:
-        """Test that get_status uses the stored port from start."""
+    def test_get_status_uses_live_runtime_status(self, mock_logger: MagicMock) -> None:
+        """Test that get_status reads the live runtime snapshot from the port."""
         mock_server = MagicMock()
-        mock_server.is_running.return_value = False
-        mock_server.start.return_value = True
+        started_at = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
+        mock_server.get_runtime_status.return_value = MetricsServerRuntimeStatus(
+            running=True,
+            port=9999,
+            started_at=started_at,
+        )
 
         service = MetricsService(
             logger=mock_logger,
             clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
             _server=mock_server,
         )
-        service.start(port=9999)
-
-        mock_server.is_running.return_value = True
         status = service.get_status()
 
         assert status.port == 9999
+        assert status.started_at == started_at

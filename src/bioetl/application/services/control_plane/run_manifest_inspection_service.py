@@ -34,8 +34,7 @@ class RunManifestInspectionCorruptionError(ValueError):
         self.identifier = identifier
         self.reason = reason
         super().__init__(
-            "Run manifest store corruption while resolving "
-            f"{identifier!r}: {reason}"
+            f"Run manifest store corruption while resolving {identifier!r}: {reason}"
         )
 
 
@@ -203,7 +202,9 @@ class RunManifestInspectionService(
             try:
                 manifest = self.manifest_port.get_by_run_id(run_id)
             except ValueError as exc:
-                raise RunManifestInspectionCorruptionError(identifier, str(exc)) from exc
+                raise RunManifestInspectionCorruptionError(
+                    identifier, str(exc)
+                ) from exc
             if manifest is not None:
                 return manifest
         raise ValueError(f"Run manifest not found for identifier: {identifier}")

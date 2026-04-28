@@ -137,8 +137,6 @@ class _MetricsStartMixin(_MetricsTracingMixin):
     _server: MetricsServerPort
     tracer: TracingPort | None
     clock: ClockPort
-    _port: int | None
-    _started_at: datetime | None
 
     def _handle_start_error(
         self,
@@ -250,12 +248,13 @@ class _MetricsStartMixin(_MetricsTracingMixin):
             fail_fast=fail_fast,
         )
 
-        if self._server.is_running():
+        runtime_status = self._server.get_runtime_status()
+        if runtime_status.running:
             self.logger.debug("Metrics server already running")
             return StartResult(
                 success=True,
-                port=self._port or port,
-                addr=addr,
+                port=runtime_status.port or port,
+                addr=runtime_status.addr or addr,
                 already_running=True,
             )
 
@@ -268,8 +267,6 @@ class _MetricsStartMixin(_MetricsTracingMixin):
                 retry_delay=retry_delay,
             )
             if success:
-                object.__setattr__(self, "_port", port)
-                object.__setattr__(self, "_started_at", self.clock.now())
                 self.logger.info("Metrics server started", port=port, addr=addr)
                 return StartResult(success=True, port=port, addr=addr)
 
@@ -289,8 +286,6 @@ class _MetricsStatusMixin(_MetricsTracingMixin):
 
     _server: MetricsServerPort
     tracer: TracingPort | None
-    _port: int | None
-    _started_at: datetime | None
 
     def get_status(self) -> MetricsServerStatus:
         """Get the current status of the metrics server.
@@ -304,11 +299,11 @@ class _MetricsStatusMixin(_MetricsTracingMixin):
             ...     logger.info("Server running", port=status.port)
         """
         if self.tracer is None:
-            running = self._server.is_running()
+            runtime_status = self._server.get_runtime_status()
             return MetricsServerStatus(
-                running=running,
-                port=self._port if running else None,
-                started_at=self._started_at if running else None,
+                running=runtime_status.running,
+                port=runtime_status.port,
+                started_at=runtime_status.started_at,
             )
         with traced_operation(
             self.tracer,
@@ -316,16 +311,16 @@ class _MetricsStatusMixin(_MetricsTracingMixin):
             self._build_span_attributes(operation="get_status"),
             tracer_name=self.TRACER_NAME,
         ) as span:
-            running = self._server.is_running()
+            runtime_status = self._server.get_runtime_status()
             self._set_result_attributes(
                 span,
                 success=True,
-                attributes={"bioetl.running": running},
+                attributes={"bioetl.running": runtime_status.running},
             )
             return MetricsServerStatus(
-                running=running,
-                port=self._port if running else None,
-                started_at=self._started_at if running else None,
+                running=runtime_status.running,
+                port=runtime_status.port,
+                started_at=runtime_status.started_at,
             )
 
     def is_running(self) -> bool:
@@ -474,5 +469,3 @@ class MetricsService(
     clock: ClockPort
     tracer: TracingPort | None = None
     _publisher: MetricsPublisherPort | None = field(default=None, repr=False)
-    _port: int | None = field(default=None, repr=False)
-    _started_at: datetime | None = field(default=None, repr=False)
