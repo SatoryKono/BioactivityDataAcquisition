@@ -136,21 +136,21 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
 
 
 def test_setup_sh_wrapper_delegates_to_backend() -> None:
-    """Bash wrapper must stay a thin facade over the Python backend."""
+    """Bash wrapper must stay a thin facade over the canonical setup writer."""
     root = repo_root()
     content = (root / "scripts/engineering/dev/setup_copilot_codex_mcp.sh").read_text(
         encoding="utf-8"
     )
-    assert "scripts/engineering/dev/setup_copilot_codex_mcp.py" in content
+    assert "scripts/ai/codex/setup_mcp.py" in content
 
 
 def test_setup_ps1_wrapper_delegates_to_backend() -> None:
-    """PowerShell wrapper must stay a thin facade over the Python backend."""
+    """PowerShell wrapper must stay a thin facade over the canonical setup writer."""
     root = repo_root()
     content = (root / "scripts/engineering/dev/setup_copilot_codex_mcp.ps1").read_text(
         encoding="utf-8"
     )
-    assert "scripts/engineering/dev/setup_copilot_codex_mcp.py" in content
+    assert "scripts/ai/codex/setup_mcp.py" in content
 
 
 def test_github_mcp_wrappers_load_repo_env() -> None:

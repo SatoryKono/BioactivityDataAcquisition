@@ -461,6 +461,18 @@ Verification commands:
 - catalog drift fails locally and in CI;
 - required branch protection blocks policy regression.
 
+## Tracking Issues
+
+- `RH-001`: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3219
+- `RH-002`: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3220
+- `RH-003`: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3221
+- `RH-004`: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3222
+- `RH-005`: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3223
+- `RH-006`: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3224
+- `RH-007`: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3225
+- `RH-008`: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3226
+- `RH-009`: https://github.com/SatoryKono/BioactivityDataAcquisition/issues/3227
+
 ## PR Decomposition
 
 ### PR 1. Plan And Policy Alignment

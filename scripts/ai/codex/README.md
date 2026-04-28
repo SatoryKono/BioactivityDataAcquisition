@@ -135,7 +135,7 @@ Set `CODEX_SKIP_MCP_SETUP=1` only when you intentionally want to launch Codex wi
 - Internet connection
 - OpenAI API key
 
-Node.js and npm are auto-installed if missing.
+Node.js and npm are installed through the shared WSL helper flow if missing.
 
 ## ⚠️ Setup Hangs / Freezes?
 
@@ -153,7 +153,7 @@ This will identify exactly where the hang occurs:
 - [2/5] Bash execution
 - [3/5] apt-get update ← Usually hangs here
 - [4/5] Node.js check
-- [5/5] npm install
+- [5/5] helper/setup-env.sh bootstrap
 
 **Fixed in new version**: setup-env.sh now skips apt-get if it hangs and downloads Node.js binaries directly.
 
