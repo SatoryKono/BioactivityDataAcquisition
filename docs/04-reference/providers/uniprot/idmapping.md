@@ -114,6 +114,7 @@ ______________________________________________________________________
 - **Источник:** UniProt ID Mapping REST API (`https://rest.uniprot.org/idmapping`)
 - **Input:** CSV файл с колонкой `target_id`
 - **Batch Size:** 500 IDs per job
+- **Auth:** public unauthenticated access by default; `BIOETL_UNIPROT_API_KEY` remains optional and only affects configured rate profile selection.
 - **API Flow:**
   1. `POST /idmapping/run` — submit job, получить `jobId`
   1. `GET /idmapping/status/{jobId}` — poll пока `FINISHED`

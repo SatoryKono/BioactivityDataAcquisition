@@ -367,6 +367,10 @@ class Settings(BaseSettings):
         default=None,
         description="API key for PubMed",
     )
+    uniprot_api_key: SecretStr | None = Field(
+        default=None,
+        description="Optional API key for UniProt higher-throughput access",
+    )
     openalex_api_key: SecretStr | None = Field(
         default=None,
         description="API key for OpenAlex",

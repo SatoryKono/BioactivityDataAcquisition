@@ -4,16 +4,15 @@ from __future__ import annotations
 
 import pyarrow as pa
 
+from bioetl.infrastructure.schemas.silver_common_field_blocks import (
+    build_silver_dq_suffix_fields,
+    build_silver_system_prefix_fields,
+)
+
 CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string(), nullable=False),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_silver_system_prefix_fields(entity_id_nullable=False),
         # === Business fields (alphabetical order) ===
         pa.field("publication_id", pa.string()),
         pa.field("mesh_id", pa.string()),
@@ -21,8 +20,7 @@ CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
         pa.field("term", pa.string()),
         pa.field("term_type", pa.string()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_silver_dq_suffix_fields(),
     ]
 )
 
@@ -31,13 +29,7 @@ CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
 CHEMBL_MOLECULE_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.9.4) ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_silver_system_prefix_fields(),
         # === Business fields (alphabetical order) ===
         pa.field("atc_classifications", pa.string()),
         pa.field("availability_type", pa.float64()),  # Float for nullable int
@@ -92,8 +84,7 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("usan_year", pa.float64()),  # Float for nullable int
         pa.field("withdrawn_flag", pa.bool_()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_silver_dq_suffix_fields(),
     ]
 )
 
@@ -102,13 +93,7 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
 CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_silver_system_prefix_fields(),
         # === Business fields (alphabetical order) ===
         pa.field("compound_key", pa.string()),
         pa.field("compound_name", pa.string()),
@@ -118,8 +103,7 @@ CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
         pa.field("src_compound_id", pa.string()),
         pa.field("src_id", pa.int64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_silver_dq_suffix_fields(),
     ]
 )
 
@@ -128,13 +112,7 @@ CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
 CHEMBL_DOCUMENT_SIMILARITY_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_silver_system_prefix_fields(),
         # === Business fields (alphabetical order) ===
         # Derived metrics
         pa.field("avg_tani", pa.float64()),
@@ -150,8 +128,7 @@ CHEMBL_DOCUMENT_SIMILARITY_SCHEMA = pa.schema(
         pa.field("sim_id", pa.int64(), nullable=False),
         pa.field("tid_tani", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_silver_dq_suffix_fields(),
     ]
 )
 
@@ -161,13 +138,7 @@ CHEMBL_DOCUMENT_SIMILARITY_SCHEMA = pa.schema(
 CHEMBL_PROTEIN_CLASS_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_silver_system_prefix_fields(),
         # === Business fields (alphabetical order) ===
         # Hierarchy
         pa.field("class_level", pa.int64()),
@@ -183,8 +154,7 @@ CHEMBL_PROTEIN_CLASS_SCHEMA = pa.schema(
         pa.field("short_name", pa.string()),
         pa.field("sort_order", pa.int64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_silver_dq_suffix_fields(),
     ]
 )
 
@@ -193,13 +163,7 @@ CHEMBL_PROTEIN_CLASS_SCHEMA = pa.schema(
 CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_silver_system_prefix_fields(),
         # === Business fields (alphabetical order) ===
         # Foreign key
         pa.field("assay_id", pa.string()),
@@ -220,8 +184,7 @@ CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
         pa.field("units", pa.string()),
         pa.field("value", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_silver_dq_suffix_fields(),
     ]
 )
 

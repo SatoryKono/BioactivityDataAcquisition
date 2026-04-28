@@ -230,7 +230,7 @@ uv sync --extra dev --extra tracing
    | `BIOETL_PIPELINE__MAX_CONCURRENT_BATCHES`  | Max concurrent batch writes (1–16)                          | `4`                       |
    | `BIOETL_PIPELINE__HEARTBEAT_INTERVAL`      | Lock heartbeat interval in seconds (5–60)                   | `30`                      |
    | **Provider API Keys**                      |                                                             |                           |
-   | `BIOETL_UNIPROT_API_KEY`                   | UniProt API key (higher rate limits)                        | —                         |
+   | `BIOETL_UNIPROT_API_KEY`                   | Optional UniProt API key (higher rate limits)               | —                         |
    | `BIOETL_PUBMED_API_KEY`                    | NCBI E-utilities API key                                    | —                         |
    | `BIOETL_PUBMED_EMAIL`                      | Email for NCBI tool identification                          | —                         |
    | `BIOETL_OPENALEX_API_KEY`                  | OpenAlex API key                                            | —                         |

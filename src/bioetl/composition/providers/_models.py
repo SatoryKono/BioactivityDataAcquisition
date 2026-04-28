@@ -51,6 +51,11 @@ class ProviderSettingsProtocol(Protocol):
         ...
 
     @property
+    def uniprot_api_key(self) -> SecretValueProviderProtocol | None:
+        """Return the configured UniProt API key wrapper when available."""
+        ...
+
+    @property
     def openalex_api_key(self) -> SecretValueProviderProtocol | None:
         """Return the configured OpenAlex API key wrapper when available."""
         ...

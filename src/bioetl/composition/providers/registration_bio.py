@@ -141,6 +141,13 @@ def _create_pubchem_data_source(
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
+def _get_uniprot_api_key(settings: ProviderSettingsProtocol | None) -> str | None:
+    """Return optional UniProt API key from settings when configured."""
+    if settings is None or settings.uniprot_api_key is None:
+        return None
+    return settings.uniprot_api_key.get_secret_value()
+
+
 def _create_uniprot_data_source(
     settings: ProviderSettingsProtocol,
     pipeline_config: PipelineYamlConfig,
@@ -170,6 +177,7 @@ def _create_uniprot_data_source(
         http_client=http_client,
         logger=logger,
         settings=settings,
+        api_key=_get_uniprot_api_key(settings),
         base_url=pipeline_config.source.api.base_url or UNIPROT_API_BASE,
         strict_error_handling=settings.strict_error_handling,
         metrics=metrics,

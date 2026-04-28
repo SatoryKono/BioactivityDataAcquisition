@@ -38,7 +38,8 @@ ______________________________________________________________________
 
 - **Источник:** UniProt REST API.
 - **Стратегия:** `incremental` по `accession`.
-- **Rate Limit:** 10 запросов в секунду по умолчанию, до 100 запросов в секунду с API key.
+- **Auth:** public unauthenticated access by default; `BIOETL_UNIPROT_API_KEY` is optional and only enables the configured higher-throughput profile.
+- **Rate Limit:** 10 запросов в секунду по умолчанию, до 100 запросов в секунду с optional API key.
 
 ### 3.2. Transform
 
