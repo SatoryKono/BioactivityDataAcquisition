@@ -12,6 +12,9 @@ __all__ = [
     "CHECKPOINT_SAVE_DURATION_SECONDS",
     "CHECKPOINT_SAVE_EVENTS_TOTAL",
     "COMPOSITE_SOURCE_SELECTION_TOTAL",
+    "CONTROL_PLANE_LIFECYCLE_APPLY_TOTAL",
+    "CONTROL_PLANE_LIFECYCLE_DELETE_CANDIDATES",
+    "CONTROL_PLANE_LIFECYCLE_DELETED_TOTAL",
     "CONTROL_PLANE_LEDGER_APPENDS_TOTAL",
     "CONTROL_PLANE_MANIFEST_WRITES_TOTAL",
     "CONTROL_PLANE_READS_TOTAL",
@@ -170,6 +173,23 @@ CONTROL_PLANE_READ_DURATION_SECONDS = Histogram(
     "Latency of control-plane read and lookup operations in seconds",
     ["store", "operation", "status"],
     buckets=[0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0],
+)
+
+CONTROL_PLANE_LIFECYCLE_DELETED_TOTAL = Counter(
+    "bioetl_control_plane_lifecycle_deleted_total",
+    "Total control-plane lifecycle artifacts deleted by retention application",
+    ["surface"],
+)
+
+CONTROL_PLANE_LIFECYCLE_DELETE_CANDIDATES = Gauge(
+    "bioetl_control_plane_lifecycle_delete_candidates",
+    "Current number of control-plane lifecycle delete candidates in the latest plan",
+)
+
+CONTROL_PLANE_LIFECYCLE_APPLY_TOTAL = Counter(
+    "bioetl_control_plane_lifecycle_apply_total",
+    "Total control-plane lifecycle plan apply attempts by dry-run policy",
+    ["dry_run"],
 )
 
 TRACED_RUNS_TOTAL = Counter(

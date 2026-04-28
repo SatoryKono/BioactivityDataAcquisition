@@ -15,8 +15,12 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
+from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
+    StrictGoldContractSchema,
+)
 
-class PubChemCompoundGoldSchema(pa.DataFrameModel):
+
+class PubChemCompoundGoldSchema(StrictGoldContractSchema):
     """Schema for PubChem Compound in Gold layer.
 
     Aligned with domain/entities/pubchem.py (PubchemMolecule domain entity)
@@ -37,6 +41,14 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     isomeric_smiles: Series[str] = pa.Field(nullable=True)
     inchi: Series[str] = pa.Field(nullable=True)
     inchi_key: Series[str] = pa.Field(nullable=True)
+    standardized_canonical_smiles: Series[str] = pa.Field(nullable=True)
+    standardized_isomeric_smiles: Series[str] = pa.Field(nullable=True)
+    standardized_inchi: Series[str] = pa.Field(nullable=True)
+    standardized_inchi_key: Series[str] = pa.Field(nullable=True)
+    structure_parent_key: Series[str] = pa.Field(nullable=True)
+    chemical_standardization_status: Series[str] = pa.Field(nullable=True)
+    chemical_standardization_warnings: Series[str] = pa.Field(nullable=True)
+    chemical_standardization_policy_version: Series[str] = pa.Field(nullable=True)
     logp: Series[float] = pa.Field(nullable=True, coerce=True, alias="xlogp")
     polar_surface_area: Series[float] = pa.Field(
         nullable=True, coerce=True, alias="tpsa"
@@ -61,18 +73,6 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     x_steric_quadrupole_3d: Series[float] = pa.Field(nullable=True, coerce=True)
     y_steric_quadrupole_3d: Series[float] = pa.Field(nullable=True, coerce=True)
     z_steric_quadrupole_3d: Series[float] = pa.Field(nullable=True, coerce=True)
-
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
-
-    # Metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
 
 
 __all__ = ["PubChemCompoundGoldSchema"]

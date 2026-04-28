@@ -6,8 +6,12 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
+from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
+    StrictGoldContractSchema,
+)
 
-class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
+
+class ChEMBLMoleculeGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Molecule in Gold layer."""
 
     entity_id: Series[str] = pa.Field(nullable=False)
@@ -66,20 +70,8 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     standard_inchi: Series[str] = pa.Field(nullable=True)
     inchi_key: Series[str] = pa.Field(nullable=True)
 
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
-    # Metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
-
-
-class ChEMBLProteinClassGoldSchema(pa.DataFrameModel):
+class ChEMBLProteinClassGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Protein Classification in Gold layer.
 
     Hierarchical classification of protein targets (enzyme classes, receptor types, etc.).
@@ -107,18 +99,6 @@ class ChEMBLProteinClassGoldSchema(pa.DataFrameModel):
     sort_order: Series[float] = pa.Field(nullable=True, coerce=True)
     replaced_by: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
     downgraded: Series[float] = pa.Field(nullable=True, isin=[0, 1], coerce=True)
-
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
-
-    # Lineage metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
 
 
 __all__ = [

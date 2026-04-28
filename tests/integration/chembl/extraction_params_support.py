@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 from unittest.mock import MagicMock
 
 import pytest
@@ -28,6 +28,108 @@ class ExtractionParamsCase:
     input_filter_field: str | None = None
     cassette_names: tuple[str, ...] = ()
     cassette_hint: str = ""
+
+
+class ExtractionParamsSuiteBase:
+    """Shared test suite for one ChEMBL extraction-params case."""
+
+    CASE: ClassVar[ExtractionParamsCase]
+
+    @pytest.fixture
+    def extraction_case(self) -> ExtractionParamsCase:
+        """Expose the declarative case configured by the subclass."""
+        return self.CASE
+
+    def test_build_params_includes_extraction_params(
+        self,
+        extraction_case: ExtractionParamsCase,
+        mock_http_client: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Build params should keep pagination defaults and case filters."""
+        adapter = build_chembl_adapter(
+            case=extraction_case,
+            http_client=mock_http_client,
+            logger=mock_logger,
+            page_size=500,
+        )
+        params = adapter._build_params(offset=0, entity_type=extraction_case.entity_type)
+        assert_build_params(case=extraction_case, params=params, page_size=500)
+
+    def test_source_metadata_contains_query_string(
+        self,
+        extraction_case: ExtractionParamsCase,
+        extraction_params: Any,
+    ) -> None:
+        """Source metadata should expose the serialized extraction params."""
+        assert_query_string_contains(
+            case=extraction_case,
+            query_string=extraction_params.to_query_string(),
+        )
+
+    def test_source_metadata_query_string_deterministic(
+        self,
+        extraction_params: Any,
+    ) -> None:
+        """Query-string serialization must remain stable across invocations."""
+        assert_query_string_is_deterministic(extraction_params)
+
+    def test_get_source_metadata_records_extraction_params(
+        self,
+        extraction_case: ExtractionParamsCase,
+        mock_http_client: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Adapter metadata should preserve the configured extraction params."""
+        adapter = build_chembl_adapter(
+            case=extraction_case,
+            http_client=mock_http_client,
+            logger=mock_logger,
+        )
+        assert_metadata_records_extraction_params(case=extraction_case, adapter=adapter)
+
+    def test_extraction_params_logged_at_init(
+        self,
+        extraction_case: ExtractionParamsCase,
+        mock_http_client: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Adapter init should emit one audit log with the query string."""
+        build_chembl_adapter(
+            case=extraction_case,
+            http_client=mock_http_client,
+            logger=mock_logger,
+        )
+        assert_extraction_params_logged_at_init(
+            case=extraction_case,
+            logger=mock_logger,
+        )
+
+    async def assert_filtered_api_request(
+        self,
+        *,
+        token_bucket: Any,
+        circuit_breaker: Any,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Run the shared VCR-backed filtered request flow for the class case."""
+        await run_filtered_api_request_test(
+            case=self.CASE,
+            token_bucket=token_bucket,
+            circuit_breaker=circuit_breaker,
+            logger=mock_logger,
+        )
+
+
+class InputFilterExtractionParamsSuiteBase(ExtractionParamsSuiteBase):
+    """Shared test suite for cases that also guard input-filter overlap."""
+
+    def test_no_overlap_with_input_filter(
+        self,
+        extraction_case: ExtractionParamsCase,
+    ) -> None:
+        """Input filter and extraction params must stay on separate fields."""
+        assert_input_filter_field_not_overlapping(extraction_case)
 
 
 def has_any_cassette(*cassette_names: str) -> bool:

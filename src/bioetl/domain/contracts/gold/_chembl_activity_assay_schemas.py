@@ -6,8 +6,12 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
+from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
+    StrictGoldContractSchema,
+)
 
-class ChEMBLActivityGoldSchema(pa.DataFrameModel):
+
+class ChEMBLActivityGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Activity in Gold layer."""
 
     # System fields
@@ -106,20 +110,8 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
         nullable=True, coerce=True
     )  # int64 in Silver
 
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
-    # Metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
-
-
-class ChEMBLAssayGoldSchema(pa.DataFrameModel):
+class ChEMBLAssayGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL Assay in Gold layer."""
 
     entity_id: Series[str] = pa.Field(nullable=False)
@@ -162,20 +154,8 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     assay_classifications: Series[str] = pa.Field(nullable=True)
     assay_parameters: Series[str] = pa.Field(nullable=True)
 
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
-    # Metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
-
-
-class ChEMBLAssayParametersGoldSchema(pa.DataFrameModel):
+class ChEMBLAssayParametersGoldSchema(StrictGoldContractSchema):
     """Schema for ChEMBL AssayParameters in Gold layer.
 
     Experimental parameters for bioassays: concentrations, pH, temperature, etc.
@@ -209,18 +189,6 @@ class ChEMBLAssayParametersGoldSchema(pa.DataFrameModel):
     standard_value: Series[float] = pa.Field(nullable=True, coerce=True)
     standard_units: Series[str] = pa.Field(nullable=True)
     standard_text_value: Series[str] = pa.Field(nullable=True)
-
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
-
-    # Lineage metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
 
 
 __all__ = [

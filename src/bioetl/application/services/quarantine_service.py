@@ -41,7 +41,13 @@ from bioetl.domain.types import JsonDict
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
-    from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort, TracingPort
+    from bioetl.domain.ports import (
+        ClockPort,
+        LoggerPort,
+        MetricsPort,
+        QuarantinePort,
+        TracingPort,
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -90,6 +96,7 @@ class QuarantineService(
 
     quarantine_port: QuarantinePort
     logger: LoggerPort
+    clock: ClockPort
     metrics: MetricsPort | None = None
     tracer: TracingPort | None = None
     TRACER_NAME = "bioetl.quarantine_admin"

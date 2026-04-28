@@ -41,6 +41,8 @@ COMPAT_PARENT_IMPORTS = {
         }
     ),
 }
+
+
 @pytest.mark.architecture
 def test_application_core_lifecycle_shim_files_have_been_removed() -> None:
     """Lifecycle compatibility shim files should no longer exist."""

@@ -121,7 +121,7 @@ def service(
         audit=mock_audit_port,
         clock=clock,
         _context_service=PipelineRunContextService(),
-        _execution_service=PipelineRunExecutionService(),
+        _execution_service=PipelineRunExecutionService(clock=clock),
     )
 
 

@@ -71,5 +71,5 @@ def bootstrap_pipeline_runner_service(
         audit=observability.audit,
         clock=SystemClock(),
         _context_service=PipelineRunContextService(),
-        _execution_service=PipelineRunExecutionService(),
+        _execution_service=PipelineRunExecutionService(clock=SystemClock()),
     )

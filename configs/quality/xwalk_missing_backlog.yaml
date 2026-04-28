@@ -13,14 +13,6 @@ classification_values:
 rules:
   - path: docs/04-reference/pipelines/chembl/activity-xwalk.csv
     markers:
-      MISSING_CODE:
-        classification: must_fix
-        owner_issue: 3213
-        rationale: Activity publication identifiers are required for publication traceability.
-        fields:
-          - publication_doi
-          - publication_pmid
-          - publication_pmc_id
       MISSING_DOC:
         classification: should_fix
         owner_issue: 3218

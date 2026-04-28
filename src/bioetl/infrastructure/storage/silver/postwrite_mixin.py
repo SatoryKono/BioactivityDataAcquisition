@@ -27,6 +27,8 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BatchID, RunID, RunType
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
+
+
 class _SilverWriterPostwriteSelf(Protocol):
     """Structural type for mixin self dependencies."""
 

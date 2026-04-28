@@ -274,7 +274,9 @@ class TestSilverWriterLineage:
     ):
         """Test write_silver works without bronze_refs (backward compatibility)."""
         with patch_new_silver_write(patch_base_delta_table=True):
-            writer = make_silver_writer(logger=noop_logger, base_path=tmp_path / "silver")
+            writer = make_silver_writer(
+                logger=noop_logger, base_path=tmp_path / "silver"
+            )
 
             # Should not raise when bronze_refs not provided
             await writer.write_silver(
@@ -306,7 +308,9 @@ class TestSilverWriterLineage:
         )
 
         with patch_new_silver_write(patch_base_delta_table=True):
-            writer = make_silver_writer(logger=noop_logger, base_path=tmp_path / "silver")
+            writer = make_silver_writer(
+                logger=noop_logger, base_path=tmp_path / "silver"
+            )
 
             # Should not raise with bronze_refs
             await writer.write_silver(
@@ -567,6 +571,7 @@ class TestSilverWriterLineage:
         from bioetl.application.services.lineage import (
             MetadataLineageBundle,
         )
+
         metadata = _make_bundle_safe_metadata()
         mock_metadata_writer = MagicMock()
         mock_metadata_writer.write_silver_metadata = AsyncMock()
@@ -624,6 +629,7 @@ class TestSilverWriterLineage:
         from bioetl.application.services.lineage import (
             MetadataLineageBundle,
         )
+
         metadata = _make_bundle_safe_metadata(run_id="run-1")
 
         class _Coordinator:
@@ -673,6 +679,7 @@ class TestSilverWriterLineage:
         """Merged Silver metadata should persist canonical lineage fragments too."""
         from bioetl.domain.medallion import SilverWriteMode
         from bioetl.domain.ports import SilverMetadataInput
+
         metadata = _make_bundle_safe_metadata(run_id="run-1")
         fragment = make_produced_artifact_fragment(
             fragment_id="silver:merged-fragment-1",
@@ -738,6 +745,7 @@ class TestSilverWriterLineage:
     ):
         """Standard and merged metadata writes must fail closed without coordinator."""
         from bioetl.domain.medallion import SilverWriteMode
+
         logger = MagicMock()
         writer = make_silver_writer(
             logger=logger,

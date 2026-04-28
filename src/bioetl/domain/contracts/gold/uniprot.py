@@ -16,8 +16,12 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
+from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
+    StrictGoldContractSchema,
+)
 
-class UniProtProteinGoldSchema(pa.DataFrameModel):
+
+class UniProtProteinGoldSchema(StrictGoldContractSchema):
     """Schema for UniProt Protein in Gold layer.
 
     Extended schema with functional annotations, cross-references, and quality metrics.
@@ -100,20 +104,8 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
         nullable=True, coerce=True
     )  # Swiss-Prot vs TrEMBL
 
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
-    # Metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
-
-
-class UniProtIDMappingGoldSchema(pa.DataFrameModel):
+class UniProtIDMappingGoldSchema(StrictGoldContractSchema):
     """Schema for UniProt ID Mapping in Gold layer.
 
     Maps ChEMBL target IDs to UniProt accessions with entry metadata.
@@ -147,18 +139,6 @@ class UniProtIDMappingGoldSchema(pa.DataFrameModel):
         nullable=True, coerce=True
     )  # int → float
     all_mappings: Series[str] = pa.Field(nullable=True)
-
-    # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
-
-    # Metadata
-    index: Series[int] = pa.Field(nullable=False, alias="_index")
-
-    class Config:
-        """Pandera configuration for strict schema validation."""
-
-        strict = True
 
 
 __all__ = [

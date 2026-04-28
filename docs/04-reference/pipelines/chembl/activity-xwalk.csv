@@ -41,9 +41,9 @@ qudt_units,S2.12,YES,EMPTY,activity_transformer.py:113,chembl.py:122,activity.py
 uo_units,S2.12,YES,EMPTY,activity_transformer.py:113,chembl.py:123,activity.py:106,chembl.py:96,string,true,false,OK
 journal,S2.13,YES,EMPTY,activity_transformer.py:119,chembl.py:133,activity.py:215,chembl.py:99,string,true,false,RENAME:document_journal->journal;DENORM
 publication_year,S2.13,YES,EMPTY,activity_transformer.py:125,chembl.py:134,activity.py:227,chembl.py:100,integer,true,false,RENAME:document_year->publication_year;DENORM
-publication_doi,S2.13,YES,EMPTY,MISSING,MISSING,activity.py:219,chembl.py:101,string,true,false,MISSING_CODE
-publication_pmid,S2.13,YES,EMPTY,MISSING,MISSING,activity.py:222,chembl.py:102,string,true,false,MISSING_CODE
-publication_pmc_id,S2.13,YES,EMPTY,MISSING,MISSING,activity.py:225,chembl.py:103,string,true,false,MISSING_CODE
+publication_doi,S2.13,YES,EMPTY,activity_transformer.py:_extract_publication_identifiers,bioactivity/_extractors.py:119,activity.py:237,chembl.py:101,string,true,false,RENAME:publication_doi|doi|document_doi->publication_doi;DENORM
+publication_pmid,S2.13,YES,EMPTY,activity_transformer.py:_extract_publication_identifiers,bioactivity/_extractors.py:122,activity.py:240,chembl.py:102,string,true,false,RENAME:publication_pmid|pmid|pubmed_id|document_pubmed_id->publication_pmid;DENORM
+publication_pmc_id,S2.13,YES,EMPTY,activity_transformer.py:_extract_publication_identifiers,bioactivity/_extractors.py:131,activity.py:243,chembl.py:103,string,true,false,RENAME:publication_pmc_id|pmc_id|document_pmc_id->publication_pmc_id;DENORM
 activity_comment,S2.14,YES,EMPTY,activity_transformer.py:121,chembl.py:137,activity.py:91,chembl.py:106,string,true,false,OK
 data_validity_comment,S2.14,YES,EMPTY,activity_transformer.py:122,chembl.py:140,activity.py:86,chembl.py:107,string,true,false,OK
 data_validity_description,S2.14,YES,EMPTY,activity_transformer.py:123,chembl.py:143,activity.py:145,chembl.py:108,string,true,false,OK

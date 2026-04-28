@@ -38,6 +38,13 @@ Usage:
 from __future__ import annotations
 
 from bioetl.domain.services.activity_aggregator import ActivityAggregator
+from bioetl.domain.services.chemical_standardization import (
+    CHEMICAL_STANDARDIZATION_POLICY_VERSION,
+    CHEMICAL_STANDARDIZATION_STATUSES,
+    ChemicalStandardizationResult,
+    ChemicalStandardizationStatus,
+    standardize_chemical_structure,
+)
 from bioetl.domain.services.data_normalization_config import DataNormalizationConfig
 from bioetl.domain.services.data_normalization_service import (
     DefaultDataNormalizationService,
@@ -67,6 +74,10 @@ DataNormalizationService = DefaultDataNormalizationService
 
 __all__ = [
     "ActivityAggregator",
+    "CHEMICAL_STANDARDIZATION_POLICY_VERSION",
+    "CHEMICAL_STANDARDIZATION_STATUSES",
+    "ChemicalStandardizationResult",
+    "ChemicalStandardizationStatus",
     "ClassificationStats",
     "DQMetricsCalculator",
     "DQMetricsInput",
@@ -86,4 +97,5 @@ __all__ = [
     "ValueValidator",
     "jaccard_similarity",
     "normalize_text",
+    "standardize_chemical_structure",
 ]

@@ -71,64 +71,129 @@ def _validate_review_lanes(
     seen_lane_ids: set[str] = set()
     seen_paths: set[str] = set()
     for lane in lanes:
-        if not isinstance(lane, dict):
-            issues.append("Each review lane must be an object")
+        lane_id = _validate_review_lane_object(
+            lane,
+            issues=issues,
+            seen_lane_ids=seen_lane_ids,
+        )
+        if lane_id is None or not isinstance(lane, dict):
             continue
-        lane_id = lane.get("lane_id")
-        if not isinstance(lane_id, str) or not lane_id:
-            issues.append("Each review lane must define a non-empty lane_id")
-            continue
-        if lane_id in seen_lane_ids:
-            issues.append(f"Duplicate lane_id: {lane_id}")
-        seen_lane_ids.add(lane_id)
-
-        classification = lane.get("classification")
-        if classification not in ALLOWED_CLASSIFICATIONS:
-            issues.append(
-                f"Lane {lane_id} has unsupported classification: {classification}"
-            )
-
-        verification = lane.get("verification")
-        if not isinstance(verification, list) or not verification:
-            issues.append(f"Lane {lane_id} must declare verification commands")
-
-        candidates = lane.get("candidates")
-        if not isinstance(candidates, list) or not candidates:
-            issues.append(f"Lane {lane_id} must contain at least one candidate")
-            continue
-
-        for candidate in candidates:
-            if not isinstance(candidate, dict):
-                issues.append(f"Lane {lane_id} contains a non-object candidate")
-                continue
-            path = candidate.get("path")
-            if not isinstance(path, str) or not path:
-                issues.append(f"Lane {lane_id} contains candidate without path")
-                continue
-            if path in seen_paths:
-                issues.append(f"Duplicate candidate path: {path}")
-            seen_paths.add(path)
-
-            live_state = candidate.get("current_live_state")
-            if live_state not in ALLOWED_LIVE_STATES:
-                issues.append(f"{path}: unsupported current_live_state {live_state}")
-                continue
-
-            abs_path = repo_root / path
-            if live_state == "absent_from_root_baseline" and abs_path.exists():
-                issues.append(
-                    f"{path}: marked absent_from_root_baseline but path exists"
-                )
-            if live_state != "absent_from_root_baseline" and not abs_path.exists():
-                issues.append(f"{path}: marked present but path is missing")
-
-            canonical_path = candidate.get("canonical_path")
-            if isinstance(canonical_path, str) and canonical_path:
-                if not (repo_root / canonical_path).exists():
-                    issues.append(
-                        f"{path}: canonical_path does not exist: {canonical_path}"
-                    )
+        _validate_review_lane_candidates(
+            lane,
+            lane_id=lane_id,
+            repo_root=repo_root,
+            seen_paths=seen_paths,
+            issues=issues,
+        )
     return issues
+
+
+def _validate_review_lane_object(
+    lane: object,
+    *,
+    issues: list[str],
+    seen_lane_ids: set[str],
+) -> str | None:
+    if not isinstance(lane, dict):
+        issues.append("Each review lane must be an object")
+        return None
+
+    lane_id = lane.get("lane_id")
+    if not isinstance(lane_id, str) or not lane_id:
+        issues.append("Each review lane must define a non-empty lane_id")
+        return None
+    if lane_id in seen_lane_ids:
+        issues.append(f"Duplicate lane_id: {lane_id}")
+    seen_lane_ids.add(lane_id)
+
+    classification = lane.get("classification")
+    if classification not in ALLOWED_CLASSIFICATIONS:
+        issues.append(f"Lane {lane_id} has unsupported classification: {classification}")
+
+    verification = lane.get("verification")
+    if not isinstance(verification, list) or not verification:
+        issues.append(f"Lane {lane_id} must declare verification commands")
+
+    return lane_id
+
+
+def _validate_review_lane_candidates(
+    lane: dict[str, object],
+    *,
+    lane_id: str,
+    repo_root: Path,
+    seen_paths: set[str],
+    issues: list[str],
+) -> None:
+    candidates = lane.get("candidates")
+    if not isinstance(candidates, list) or not candidates:
+        issues.append(f"Lane {lane_id} must contain at least one candidate")
+        return
+
+    for candidate in candidates:
+        _validate_review_lane_candidate(
+            candidate,
+            lane_id=lane_id,
+            repo_root=repo_root,
+            seen_paths=seen_paths,
+            issues=issues,
+        )
+
+
+def _validate_review_lane_candidate(
+    candidate: object,
+    *,
+    lane_id: str,
+    repo_root: Path,
+    seen_paths: set[str],
+    issues: list[str],
+) -> None:
+    if not isinstance(candidate, dict):
+        issues.append(f"Lane {lane_id} contains a non-object candidate")
+        return
+
+    path = candidate.get("path")
+    if not isinstance(path, str) or not path:
+        issues.append(f"Lane {lane_id} contains candidate without path")
+        return
+    if path in seen_paths:
+        issues.append(f"Duplicate candidate path: {path}")
+    seen_paths.add(path)
+
+    live_state = candidate.get("current_live_state")
+    if live_state not in ALLOWED_LIVE_STATES:
+        issues.append(f"{path}: unsupported current_live_state {live_state}")
+        return
+
+    _validate_candidate_live_state(path, live_state=live_state, repo_root=repo_root, issues=issues)
+    _validate_candidate_canonical_path(path, candidate, repo_root=repo_root, issues=issues)
+
+
+def _validate_candidate_live_state(
+    path: str,
+    *,
+    live_state: object,
+    repo_root: Path,
+    issues: list[str],
+) -> None:
+    abs_path = repo_root / path
+    if live_state == "absent_from_root_baseline" and abs_path.exists():
+        issues.append(f"{path}: marked absent_from_root_baseline but path exists")
+    if live_state != "absent_from_root_baseline" and not abs_path.exists():
+        issues.append(f"{path}: marked present but path is missing")
+
+
+def _validate_candidate_canonical_path(
+    path: str,
+    candidate: dict[str, object],
+    *,
+    repo_root: Path,
+    issues: list[str],
+) -> None:
+    canonical_path = candidate.get("canonical_path")
+    if isinstance(canonical_path, str) and canonical_path:
+        if not (repo_root / canonical_path).exists():
+            issues.append(f"{path}: canonical_path does not exist: {canonical_path}")
 
 
 def _validate_blocked_lane_against_catalog(

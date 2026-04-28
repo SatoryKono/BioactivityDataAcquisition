@@ -15,6 +15,7 @@ from bioetl.application.services.quarantine_service import (
     QuarantineService,
 )
 from bioetl.domain.types import QuarantineRecordStatus
+from tests.helpers.clock import FixedClock
 
 
 def _make_mock_tracer() -> MagicMock:
@@ -94,6 +95,7 @@ def quarantine_service(mock_quarantine_port, mock_logger, mock_metrics, mock_tra
     return QuarantineService(
         quarantine_port=mock_quarantine_port,
         logger=mock_logger,
+        clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
         metrics=mock_metrics,
         tracer=mock_tracer,
     )

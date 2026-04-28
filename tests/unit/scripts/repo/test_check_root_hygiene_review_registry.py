@@ -56,7 +56,9 @@ def test_validate_blocked_lane_matches_catalog(tmp_path: Path) -> None:
             {
                 "lane_id": "retention_sensitive_boundaries",
                 "classification": "blocked_cleanup_zone",
-                "verification": ["docs/05-operations/runbooks/retention-sensitive-cleanup.md"],
+                "verification": [
+                    "docs/05-operations/runbooks/retention-sensitive-cleanup.md"
+                ],
                 "candidates": [
                     {
                         "path": "data",

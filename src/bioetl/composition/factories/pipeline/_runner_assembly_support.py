@@ -120,6 +120,7 @@ def build_observer(context: RunnerAssemblyContext) -> PipelineObserver:
         run_type=pipeline.runtime.run_type,
         metrics=pipeline.services.metrics,
         logger=context.logger_port,
+        clock=SystemClock(),
         tracer=context.observability.tracer,
         manifest_id=getattr(pipeline_context, "manifest_id", None),
         entity=getattr(pipeline_context, "entity", None),

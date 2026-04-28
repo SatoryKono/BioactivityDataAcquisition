@@ -46,6 +46,8 @@ REMOVED_PIPELINE_STORAGE_FILES = frozenset(
         / "silver_writer_runtime_helpers.py",
     }
 )
+
+
 @pytest.mark.architecture
 def test_removed_pipeline_storage_compat_files_have_been_removed() -> None:
     """Removed pipeline/storage compatibility shims should no longer exist."""

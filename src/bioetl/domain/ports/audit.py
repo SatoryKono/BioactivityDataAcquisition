@@ -157,7 +157,10 @@ class AuditPort(Protocol):
 
         Args:
             event_name: Stable event name for the audited lifecycle event.
-            event_data: Optional structured event context.
+            event_data: Optional structured event context. Implementations must
+                persist or expose the canonical observability correlation fields
+                when available: event, event_family, provider, pipeline, run_id,
+                severity, error_type, and optional manifest/composite anchors.
             timestamp: Canonical event timestamp supplied by the caller.
         """
         ...

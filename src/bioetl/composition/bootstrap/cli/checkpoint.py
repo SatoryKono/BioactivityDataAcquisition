@@ -48,6 +48,7 @@ from bioetl.composition.observability_resolution import (
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.time import SystemClock
 
 __all__ = [
     "bootstrap_audit_inspection_service",
@@ -193,6 +194,7 @@ def bootstrap_quarantine_service() -> QuarantineService:
     return QuarantineService(
         quarantine_port=quarantine_port,
         logger=noop_logger,
+        clock=SystemClock(),
         metrics=metrics,
         tracer=resolve_tracing_port(
             tracer=None,

@@ -204,7 +204,8 @@ async def _write_silver_metadata(
             run_id=request.run_id,
             manifest_id=(
                 str(request.records[0]["_manifest_id"])
-                if request.records and request.records[0].get("_manifest_id") is not None
+                if request.records
+                and request.records[0].get("_manifest_id") is not None
                 else None
             ),
             run_type=request.run_type,

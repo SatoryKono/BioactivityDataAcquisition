@@ -30,6 +30,7 @@ _PIPELINE_RUN_ERRORS = (
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
+        ClockPort,
         ExecutionMetricsRunnerPort,
         LoggerPort,
         MetricsExtractorPort,
@@ -47,8 +48,11 @@ class PipelineExecutionResult:
     metrics: JsonDict = field(default_factory=dict)
 
 
+@dataclass(frozen=True, slots=True)
 class PipelineRunExecutionService:
     """Executes runnable pipelines and captures normalized outcome."""
+
+    clock: ClockPort
 
     async def execute(
         self,
@@ -74,9 +78,14 @@ class PipelineRunExecutionService:
         error_message: str | None = None
         error_type: str | None = None
         if started_at is None:
-            started_at, started_monotonic = capture_runtime_timing_anchor()
+            started_at, started_monotonic = capture_runtime_timing_anchor(
+                clock=self.clock,
+            )
         elif started_monotonic is None:
-            _, started_monotonic = capture_runtime_timing_anchor(started_at=started_at)
+            _, started_monotonic = capture_runtime_timing_anchor(
+                clock=self.clock,
+                started_at=started_at,
+            )
 
         try:
             await runner.run()

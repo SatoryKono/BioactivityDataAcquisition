@@ -71,11 +71,7 @@ def _stable_unique_text(values: object) -> list[str]:
     """Return unique non-empty text values in content-stable order."""
     if not isinstance(values, (list, tuple, set, frozenset)):
         return []
-    normalized = {
-        text
-        for value in values
-        if (text := str(value).strip())
-    }
+    normalized = {text for value in values if (text := str(value).strip())}
     return sorted(normalized)
 
 

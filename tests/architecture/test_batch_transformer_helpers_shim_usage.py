@@ -19,6 +19,8 @@ REMOVED_FILE = (
 COMPAT_PARENT_IMPORTS = {
     "bioetl.application.core": frozenset({"batch_transformer_helpers"}),
 }
+
+
 @pytest.mark.architecture
 def test_batch_transformer_helpers_shim_file_has_been_removed() -> None:
     """The batch_transformer_helpers compatibility module should no longer exist."""
