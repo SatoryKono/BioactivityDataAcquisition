@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, cast
 
@@ -14,9 +13,8 @@ from bioetl.domain.services.composite_metadata_helpers import (
     parse_lineage_created_at,
     summarize_composite_cv_dq,
 )
-from bioetl.domain.transformations.hashing import (
-    canonical_json_dumps,
-    normalize_for_hash,
+from bioetl.domain.services.dataset_content_identity import (
+    build_dataset_content_hash,
 )
 
 if TYPE_CHECKING:
@@ -50,21 +48,6 @@ class PipelineMetadataProtocol(Protocol):
     """Callable protocol for pipeline metadata construction."""
 
     def __call__(self) -> PipelineMetadata: ...
-
-
-_DATASET_CONTENT_HASH_OCCURRENCE_ONLY_FIELDS = frozenset(
-    {
-        "content_hash",
-        "run_id",
-        "manifest_id",
-        "composite_run_id",
-        "lineage_created_at",
-        "write_started_at",
-        "write_completed_at",
-        "created_at",
-        "updated_at",
-    }
-)
 
 
 def _stable_unique_text(values: object) -> list[str]:
@@ -292,33 +275,6 @@ def build_runtime_duration(
     if started_at is None or completed_at is None:
         return 0.0
     return (completed_at - started_at).total_seconds()
-
-
-def build_dataset_content_hash(
-    *,
-    provider: str,
-    records: Sequence[Mapping[str, object]] | None,
-) -> str | None:
-    """Build an order-insensitive dataset-level content hash for one sidecar."""
-    if not records:
-        return None
-    normalized_rows = [
-        canonical_json_dumps(
-            normalize_for_hash(
-                {str(key): value for key, value in record.items()},
-                exclude_fields=set(_DATASET_CONTENT_HASH_OCCURRENCE_ONLY_FIELDS),
-            )
-        )
-        for record in records
-    ]
-    normalized_rows.sort()
-    canonical_payload = canonical_json_dumps(
-        {
-            "provider": provider,
-            "rows": normalized_rows,
-        }
-    )
-    return hashlib.sha256(canonical_payload.encode("utf-8")).hexdigest()
 
 
 __all__ = [

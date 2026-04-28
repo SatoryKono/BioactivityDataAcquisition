@@ -1008,6 +1008,65 @@
             "fieldConfig": {
                 "defaults": {
                     "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 3,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 0.05
+                            },
+                            {
+                                "color": "red",
+                                "value": 0.2
+                            }
+                        ]
+                    },
+                    "unit": "percentunit"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 6,
+                "w": 6,
+                "x": 18,
+                "y": 28
+            },
+            "id": 221,
+            "options": {
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+            },
+            "targets": [
+                {
+                    "expr": "(sum(increase(bioetl_errors_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) / clamp_min(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", stage=\"bronze\"}[$__range])) or vector(0), 1)",
+                    "legendFormat": "Errors / Bronze",
+                    "refId": "A"
+                }
+            ],
+            "title": "Pipeline Error Rate",
+            "type": "gauge"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
                         "mode": "palette-classic"
                     },
                     "custom": {

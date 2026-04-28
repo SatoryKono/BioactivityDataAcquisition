@@ -18,7 +18,12 @@ from bioetl.infrastructure.control_plane._read_metrics import (
 from bioetl.infrastructure.errors import build_storage_error
 from bioetl.infrastructure.storage.atomic import atomic_write_text
 
-__all__ = ["FileRunManifestStore"]
+__all__ = ["FileRunManifestStore", "RunManifestStoreCorruptionError"]
+
+
+class RunManifestStoreCorruptionError(ValueError):
+    """Raised when manifest files and run-id indexes disagree."""
+
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
@@ -133,8 +138,16 @@ class FileRunManifestStore(RunManifestPort):
                 return None
             manifest = self._load_manifest(manifest_id)
             if manifest is None:
-                status = "miss"
-                return None
+                raise RunManifestStoreCorruptionError(
+                    "Run manifest index corruption: run-id index points to "
+                    f"missing manifest file '{manifest_id}' for run_id '{run_id}'"
+                )
+            if manifest.run_id != run_id:
+                raise RunManifestStoreCorruptionError(
+                    "Run manifest index corruption: indexed manifest "
+                    f"'{manifest_id}' belongs to run_id '{manifest.run_id}', "
+                    f"not requested run_id '{run_id}'"
+                )
             return manifest
         except (OSError, TypeError, ValueError):
             status = "failed"
@@ -159,7 +172,11 @@ class FileRunManifestStore(RunManifestPort):
         manifest = RunManifest.from_dict(payload)
         indexed_manifest_id = self._load_manifest_id_for_run_id(manifest.run_id)
         if indexed_manifest_id != manifest.manifest_id:
-            return None
+            raise RunManifestStoreCorruptionError(
+                "Run manifest index corruption: manifest file "
+                f"'{manifest.manifest_id}' declares run_id '{manifest.run_id}' "
+                f"but the run-id index maps to '{indexed_manifest_id}'"
+            )
         return manifest
 
     def _load_manifest_id_for_run_id(self, run_id: RunID) -> str | None:

@@ -19,7 +19,10 @@ from bioetl.domain.control_plane import (
 )
 from bioetl.domain.exceptions import StorageError
 from bioetl.domain.types import RunID, RunType
-from bioetl.infrastructure.control_plane import FileRunManifestStore
+from bioetl.infrastructure.control_plane import (
+    FileRunManifestStore,
+    RunManifestStoreCorruptionError,
+)
 
 
 def test_file_store_round_trips_manifest_by_id_and_run_id(tmp_path) -> None:
@@ -230,7 +233,7 @@ def test_file_store_rolls_back_manifest_when_run_index_write_fails(
     assert not (store.base_path / f"{manifest.manifest_id}.json").exists()
 
 
-def test_file_store_hides_orphan_manifest_without_run_index(tmp_path) -> None:
+def test_file_store_reports_orphan_manifest_without_run_index(tmp_path) -> None:
     store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
     run_id = RunID(uuid4())
     manifest = RunManifest(
@@ -254,8 +257,37 @@ def test_file_store_hides_orphan_manifest_without_run_index(tmp_path) -> None:
         encoding="utf-8",
     )
 
-    assert store.get(manifest.manifest_id) is None
+    with pytest.raises(RunManifestStoreCorruptionError, match="index corruption"):
+        store.get(manifest.manifest_id)
     assert store.get_by_run_id(run_id) is None
+
+
+def test_file_store_reports_mismatched_run_index(tmp_path) -> None:
+    store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
+    run_id = RunID(uuid4())
+    manifest = RunManifest(
+        manifest_id="manifest-indexed",
+        execution_fingerprint="fingerprint-indexed",
+        schema_version="1.0",
+        created_at=datetime.now(UTC),
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        launch_context={},
+        runtime_config={},
+        resolved_config={},
+        code_provenance=RunCodeProvenance(),
+    )
+    store.save(manifest)
+    run_index_path = store.base_path / "_by_run_id" / f"{run_id}.txt"
+    run_index_path.write_text("manifest-other", encoding="utf-8")
+
+    with pytest.raises(RunManifestStoreCorruptionError, match="manifest-other"):
+        store.get(manifest.manifest_id)
+    with pytest.raises(RunManifestStoreCorruptionError, match="missing manifest"):
+        store.get_by_run_id(run_id)
 
 
 def test_file_store_fails_closed_on_run_id_manifest_collision(tmp_path) -> None:

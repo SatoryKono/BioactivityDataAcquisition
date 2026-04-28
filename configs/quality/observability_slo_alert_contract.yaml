@@ -56,6 +56,16 @@ slo_contracts:
         severity: warning
         for: 10m
         runbook: docs/05-operations/runbooks/pipeline-failure-critical.md
+  runtime_error_ratio:
+    target: "<= 5% runtime processing errors per pipeline over 30m when bronze >= 20"
+    metrics:
+      - bioetl_errors_total
+      - bioetl_records_processed_total
+    alerts:
+      - name: BioETLRuntimeErrorRateHigh
+        severity: warning
+        for: 10m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
   adaptive_memory_health:
     target: "Adaptive memory pressure should not remain active for sustained windows"
     metrics:

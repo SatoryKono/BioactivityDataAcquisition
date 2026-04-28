@@ -4,6 +4,17 @@ Compatibility surface for the canonical `scripts/ai/vibe` launcher.
 
 ## ⚡ Quick Start
 
+Preferred public entrypoint:
+
+```bash
+python -m scripts.ai vibe --help
+python -m scripts.ai vibe
+python -m scripts.ai vibe "explain this code"
+```
+
+Use the compatibility wrappers below only when you intentionally need the
+historical file-path surface.
+
 ### Windows (PowerShell)
 
 ```powershell
@@ -23,6 +34,8 @@ nano .env.mistrallvibe       # Add MISTRAL_API_KEY
 ## 📋 Commands
 
 ```bash
+python -m scripts.ai vibe --help  # Preferred public entrypoint
+python -m scripts.ai vibe         # Preferred interactive mode
 ./run-vibe.sh check                # Verify setup
 ./run-vibe.sh setup                # Install/configure Vibe
 ./run-vibe.sh                      # Interactive mode

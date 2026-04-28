@@ -199,6 +199,19 @@ _TUNED_ALERT_EXPECTATIONS: dict[str, dict[str, object]] = {
             "[30m]",
         ],
     },
+    "BioETLRuntimeErrorRateHigh": {
+        "severity": "warning",
+        "for": "10m",
+        "fragments": [
+            "bioetl_errors_total",
+            'stage="bronze"',
+            "bioetl_records_processed_total",
+            "clamp_min",
+            "> 0.05",
+            ">= 20",
+            "[30m]",
+        ],
+    },
     "BioETLMemoryPressureActive": {
         "severity": "warning",
         "for": "10m",
@@ -336,12 +349,22 @@ _TUNED_ALERT_EXPECTATIONS: dict[str, dict[str, object]] = {
     "BioETLCheckpointLoadFailed": {
         "severity": "warning",
         "for": "5m",
-        "fragments": ["bioetl_checkpoint_load_events_total", 'status="failed"', "[15m]", "> 0"],
+        "fragments": [
+            "bioetl_checkpoint_load_events_total",
+            'status="failed"',
+            "[15m]",
+            "> 0",
+        ],
     },
     "BioETLCheckpointSaveFailed": {
         "severity": "warning",
         "for": "5m",
-        "fragments": ["bioetl_checkpoint_save_events_total", 'status="failed"', "[15m]", "> 0"],
+        "fragments": [
+            "bioetl_checkpoint_save_events_total",
+            'status="failed"',
+            "[15m]",
+            "> 0",
+        ],
     },
     "BioETLCheckpointOperatorFailed": {
         "severity": "warning",
@@ -487,6 +510,7 @@ def test_runtime_dashboard_recording_rules_exist_and_reference_source_metrics() 
         "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m": "bioetl_pipeline_health_check_passed",
         "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m": "bioetl_infrastructure_validated",
         "bioetl_runtime_alert_condition_pipeline_runs_failed_15m": "bioetl_pipeline_runs_total",
+        "bioetl_runtime_alert_condition_runtime_error_rate_high_30m": "bioetl_errors_total",
         "bioetl_runtime_alert_condition_dq_soft_threshold_15m": "bioetl_dq_soft_threshold_exceeded",
         "bioetl_runtime_alert_condition_dq_hard_fail_15m": "bioetl_dq_validation_failures_total",
         "bioetl_runtime_alert_condition_dq_critical_anomaly_30m": "bioetl_dq_anomaly_detected",
@@ -537,8 +561,7 @@ def test_rule_expressions_use_real_metric_label_schemas() -> None:
                     )
 
     assert not errors, (
-        "Prometheus rules use selectors with nonexistent labels:\n"
-        + "\n".join(errors)
+        "Prometheus rules use selectors with nonexistent labels:\n" + "\n".join(errors)
     )
 
 
@@ -599,6 +622,10 @@ def test_pipeline_runtime_alerts_reference_expected_metrics() -> None:
         "BioETLNoRecordsProcessed": (
             "bioetl_records_processed_total",
             "docs/05-operations/runbooks/pipeline-failure-critical.md",
+        ),
+        "BioETLRuntimeErrorRateHigh": (
+            "bioetl_errors_total",
+            "docs/05-operations/runbooks/observability-checklist.md",
         ),
         "BioETLMemoryPressureActive": (
             "bioetl_memory_pressure_state",

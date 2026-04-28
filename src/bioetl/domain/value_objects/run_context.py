@@ -69,7 +69,7 @@ class RunContext:
         transform_steps: Tuple of transform step names applied.
         pipeline_version: Pipeline version for reproducibility (e.g., '1.0.0').
         git_commit: Git commit hash for reproducibility.
-        config_hash: SHA256 hash of pipeline configuration for change detection.
+        config_hash: Legacy compatibility anchor for resolved configuration identity.
         resolved_config_hash: SHA256 hash of resolved declarative configuration.
         effective_config_hash: SHA256 hash of final effective execution configuration.
         manifest_id: Optional control-plane manifest identifier linked to the run.

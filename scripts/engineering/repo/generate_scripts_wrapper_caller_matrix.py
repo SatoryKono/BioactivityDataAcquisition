@@ -80,12 +80,16 @@ SELF_GENERATOR_REL: Final[str] = (
     "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py"
 )
 COMPATIBILITY_WRAPPER_ROLE: Final[str] = "compatibility wrapper"
+BOOTSTRAP_TRANSPORT_ROLE: Final[str] = "local bootstrap transport adapter"
+WINDOWS_TRANSPORT_ROLE: Final[str] = "Windows WSL transport adapter"
+BOOTSTRAP_HELPER_ROLE: Final[str] = "runtime bootstrap helper"
 
 
 @dataclass(frozen=True)
 class Candidate:
     path: str
     current_role: str
+    allow_basename_match: bool = True
 
 
 CANDIDATES: Final[tuple[Candidate, ...]] = (
@@ -120,9 +124,12 @@ CANDIDATES: Final[tuple[Candidate, ...]] = (
         "scripts/ai/mistrallvibe/run-vibe.ps1",
         COMPATIBILITY_WRAPPER_ROLE,
     ),
-    Candidate("scripts/ops/launchers/codex/codex.sh", "public launcher facade"),
-    Candidate("scripts/ops/launchers/codex/codex-exec.sh", "public launcher facade"),
-    Candidate("scripts/ops/launchers/codex/codex-exec.bat", "public launcher facade"),
+    Candidate("scripts/ops/launchers/codex/codex.sh", BOOTSTRAP_TRANSPORT_ROLE),
+    Candidate(
+        "scripts/ops/launchers/codex/codex-exec.sh",
+        BOOTSTRAP_TRANSPORT_ROLE,
+    ),
+    Candidate("scripts/ops/launchers/codex/codex-exec.bat", WINDOWS_TRANSPORT_ROLE),
     Candidate(
         "scripts/ops/launchers/codex/codex-headless.sh",
         COMPATIBILITY_WRAPPER_ROLE,
@@ -143,9 +150,17 @@ CANDIDATES: Final[tuple[Candidate, ...]] = (
         "scripts/ops/launchers/codex/diagnose-codex-wsl.ps1",
         COMPATIBILITY_WRAPPER_ROLE,
     ),
-    Candidate("scripts/ops/launchers/codex/setup_agents.sh", "compatibility facade"),
-    Candidate("scripts/ops/launchers/codex/setup_plugins.sh", "compatibility facade"),
-    Candidate("scripts/ops/launchers/codex/setup_skills.sh", "compatibility facade"),
+    Candidate(
+        "scripts/ops/launchers/codex/setup_agents.sh",
+        "compatibility facade",
+        allow_basename_match=False,
+    ),
+    Candidate("scripts/ops/launchers/codex/setup_plugins.sh", BOOTSTRAP_HELPER_ROLE),
+    Candidate(
+        "scripts/ops/launchers/codex/setup_skills.sh",
+        "compatibility facade",
+        allow_basename_match=False,
+    ),
 )
 
 
@@ -253,7 +268,10 @@ def _mentions_any_candidate(
     """Return whether one file references any tracked wrapper candidate."""
     return any(
         candidate.path in normalized_text
-        or basename_patterns[candidate.path].search(normalized_text)
+        or (
+            candidate.allow_basename_match
+            and basename_patterns[candidate.path].search(normalized_text)
+        )
         for candidate in CANDIDATES
     )
 
@@ -272,7 +290,10 @@ def _collect_callers_for_file(
             continue
         if (
             candidate.path in normalized_text
-            or basename_patterns[candidate.path].search(normalized_text)
+            or (
+                candidate.allow_basename_match
+                and basename_patterns[candidate.path].search(normalized_text)
+            )
         ):
             callers[candidate.path].add((source_group, rel))
 
@@ -345,6 +366,12 @@ def _render_report(root: Path) -> str:
             "## Notes",
             "",
             "- The current safe wave is internal dispatch consolidation, not blanket file deletion.",
+            "- `scripts/ops/launchers/codex/codex.sh` and "
+            "`scripts/ops/launchers/codex/codex-exec.sh` are retained "
+            "bootstrap transport adapters, not deletion-first thin wrappers.",
+            "- `scripts/ops/launchers/codex/setup_plugins.sh` is retained as a "
+            "bootstrap helper because it carries runtime-selection and "
+            "`--pytest-only` semantics beyond simple delegation.",
             "- High-risk compatibility surfaces such as "
             "`scripts/docs/check_doc_links.py` stay retained until their "
             "special semantics are gone.",

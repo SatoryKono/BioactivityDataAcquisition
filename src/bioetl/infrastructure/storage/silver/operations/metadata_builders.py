@@ -8,6 +8,7 @@ from typing import Literal
 
 import orjson
 
+from bioetl.domain.lineage import DatasetRef
 from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
     ColumnMetrics,
@@ -22,6 +23,7 @@ from bioetl.domain.models.metadata import (
     SilverMetadata,
     SilverOutputExt,
 )
+from bioetl.domain.services.dataset_content_identity import build_dataset_content_hash
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
@@ -252,11 +254,25 @@ def _build_dq_summary(request: _SilverMetadataBuildRequest) -> DQSummary:
 
 def _build_output_metadata(request: _SilverMetadataBuildRequest) -> BaseOutputMetadata:
     """Build output artifact metadata for a Silver sidecar."""
+    provider_name, entity_name = _split_table_name(request.table_name)
+    dataset = DatasetRef(
+        layer="silver",
+        logical_name=f"{provider_name}.{entity_name}",
+        version=request.version_after,
+        provider=provider_name,
+        entity=entity_name,
+        path=request.table_path,
+        manifest_id=request.manifest_id,
+        run_id=str(request.run_id or "unknown"),
+    )
     return BaseOutputMetadata(
-        artifact_id=f"{request.table_name}-{request.run_id or 'unknown'}",
+        artifact_id=str(dataset.node_id),
         record_count=len(request.records),
         total_bytes=0,
-        content_hash="placeholder-hash",
+        content_hash=build_dataset_content_hash(
+            provider=provider_name,
+            records=request.records,
+        ),
     )
 
 

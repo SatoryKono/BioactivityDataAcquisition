@@ -10,6 +10,9 @@ groups:
       - record: bioetl_runtime_alert_condition_pipeline_runs_failed_15m
         expr: sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed"}[15m])) > bool 0
 
+      - record: bioetl_runtime_alert_condition_runtime_error_rate_high_30m
+        expr: ((sum by (pipeline) (increase(bioetl_errors_total[30m])) / clamp_min(sum by (pipeline) (increase(bioetl_records_processed_total{stage="bronze"}[30m])), 1)) > bool 0.05) and (sum by (pipeline) (increase(bioetl_records_processed_total{stage="bronze"}[30m])) >= bool 20)
+
       - record: bioetl_runtime_alert_condition_dq_soft_threshold_15m
         expr: sum by (pipeline) (increase(bioetl_dq_soft_threshold_exceeded[15m])) > bool 0
 
@@ -146,6 +149,16 @@ groups:
           summary: "Pipeline runs completed without processing records"
           description: "At least one pipeline run was observed for pipeline={{ $labels.pipeline }} run_type={{ $labels.run_type }} over the last 30m, but bioetl_records_processed_total did not increase."
           runbook: "docs/05-operations/runbooks/pipeline-failure-critical.md"
+
+      - alert: BioETLRuntimeErrorRateHigh
+        expr: ((sum by (pipeline) (increase(bioetl_errors_total[30m])) / clamp_min(sum by (pipeline) (increase(bioetl_records_processed_total{stage="bronze"}[30m])), 1)) > 0.05) and (sum by (pipeline) (increase(bioetl_records_processed_total{stage="bronze"}[30m])) >= 20)
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pipeline runtime error ratio is elevated"
+          description: "Pipeline runtime error ratio exceeded 5% for pipeline={{ $labels.pipeline }} over the last 30m, with at least 20 bronze records observed."
+          runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
       - alert: BioETLMemoryPressureActive
         expr: max by (pipeline) (max_over_time(bioetl_memory_pressure_state[15m])) > 0

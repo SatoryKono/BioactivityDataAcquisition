@@ -64,7 +64,7 @@ ______________________________________________________________________
 .\scripts\ops\verify-setup.ps1
 
 # Detailed diagnostics
-.\scripts\ops\diagnose-codex-wsl.ps1
+.\scripts\ai\codex\diagnose_wsl.ps1
 
 # Using batch (basic)
 .\scripts\ops\verify-setup.bat
@@ -217,7 +217,7 @@ You can also open the WSL terminal directly and use:
 ./scripts/ops/codex.sh "your prompt"
 ./scripts/ops/codex-exec.sh "your prompt"
 bash ./script-codex/helper/setup-wsl-complete.sh
-bash ./scripts/ops/diagnose-codex-wsl.sh
+bash ./scripts/ai/codex/diagnose_wsl.sh
 ```
 
 But PowerShell is easier for Windows users because path handling is simpler.

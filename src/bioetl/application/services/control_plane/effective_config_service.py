@@ -10,6 +10,7 @@ from bioetl.application.services.control_plane._effective_config_support import 
     build_dq_components,
     build_effective_config_artifact_id,
     build_effective_execution_config,
+    build_execution_environment_snapshot,
     build_resolved_config_snapshot,
     build_runtime_override_snapshot,
     build_semantic_identity_payload,
@@ -57,6 +58,7 @@ class EffectiveConfigService:
             resolved_config=resolved_config,
         )
         overrides_snapshot = build_runtime_override_snapshot(runtime_overrides)
+        execution_environment = build_execution_environment_snapshot(runtime_overrides)
         effective_snapshot = build_effective_execution_config(
             resolved_config=resolved_config,
             runtime_overrides=runtime_overrides,
@@ -89,6 +91,7 @@ class EffectiveConfigService:
                 resolution_policy=resolved_policy,
                 resolved_config=resolved_snapshot,
                 runtime_overrides=overrides_snapshot,
+                execution_environment=execution_environment,
                 effective_execution_config=effective_snapshot,
                 resolved_config_hash=resolved_snapshot.config_hash,
                 effective_config_hash=effective_snapshot.effective_hash,
@@ -112,6 +115,7 @@ class EffectiveConfigService:
             resolution_policy=resolved_policy,
             resolved_config=resolved_snapshot,
             runtime_overrides=overrides_snapshot,
+            execution_environment=execution_environment,
             effective_execution_config=effective_snapshot,
             resolved_config_hash=resolved_snapshot.config_hash,
             effective_config_hash=effective_snapshot.effective_hash,

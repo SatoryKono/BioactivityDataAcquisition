@@ -76,6 +76,7 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [repository-file-structure-cleanup-plan-2026-04-20.md](repository-file-structure-cleanup-plan-2026-04-20.md)
 - [repository-file-structure-remediation-plan-2026-04-28.md](repository-file-structure-remediation-plan-2026-04-28.md)
 - [scripts-cli-wrapper-caller-matrix-2026-04-28.md](scripts-cli-wrapper-caller-matrix-2026-04-28.md)
+- [codex-launcher-parity-review-2026-04-28.md](codex-launcher-parity-review-2026-04-28.md)
 
 Earlier operational context files such as
 `onboarding-checklist-day-1-2026-03-20.md` and
@@ -130,6 +131,12 @@ The scripts CLI wrapper caller matrix was added on `2026-04-28` as supporting
 evidence for RF-008 compatibility-wrapper retention decisions. It is generated
 by `python -m scripts.engineering.repo sync-wrapper-caller-matrix` and retained
 as operational context for scripts cleanup, not as a second active backlog.
+
+The Codex launcher parity review was added on `2026-04-28` as a bounded
+classification note for `scripts/ops/launchers/codex/*`. It distinguishes thin
+compatibility wrappers from retained bootstrap and transport adapters so the
+scripts cleanup wave does not treat the entire launcher cluster as removable by
+default.
 
 ### Retained Historical Context With Live Evidence References
 

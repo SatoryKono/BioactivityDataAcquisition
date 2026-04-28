@@ -331,6 +331,26 @@ class TestEffectiveConfigService:
         assert ambient_environment.artifact_surface == "not_persisted"
         assert ambient_environment.anchor_field is None
 
+    def test_execution_environment_snapshot_materializes_explicit_env_overrides(
+        self,
+    ) -> None:
+        """Explicit env overrides should be a semantic effective-config surface."""
+        artifact = self.service.create_effective_config_artifact(
+            pipeline_name="test_pipeline",
+            pipeline_kind="standard",
+            resolved_config={"pipeline": {"name": "test_pipeline"}},
+            runtime_overrides={"env": {"BIOETL_BATCH_LIMIT": "100"}},
+            source_refs=[],
+        )
+
+        assert artifact.execution_environment.materialized_env_keys == (
+            "BIOETL_BATCH_LIMIT",
+        )
+        assert artifact.execution_environment.materialized_env_overrides == {
+            "BIOETL_BATCH_LIMIT": "100"
+        }
+        assert artifact.execution_environment.environment_hash
+
     def test_semantic_serialization_omits_empty_runtime_override_sections(
         self,
     ) -> None:

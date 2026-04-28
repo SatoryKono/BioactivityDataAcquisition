@@ -289,3 +289,22 @@ tests:
               summary: Control-plane read failure rate is elevated
               description: Control-plane read failure rate exceeded 5% for store=manifest operation=read_latest in the last 30m.
               runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: runtime-error-rate-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_errors_total{pipeline="chembl",stage="processing",error_code="timeout"}'
+        values: '0+1x50'
+      - series: 'bioetl_records_processed_total{pipeline="chembl",stage="bronze",run_type="incremental"}'
+        values: '0+10x50'
+    alert_rule_test:
+      - eval_time: 40m
+        alertname: BioETLRuntimeErrorRateHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+            exp_annotations:
+              summary: Pipeline runtime error ratio is elevated
+              description: Pipeline runtime error ratio exceeded 5% for pipeline=chembl over the last 30m, with at least 20 bronze records observed.
+              runbook: docs/05-operations/runbooks/observability-checklist.md

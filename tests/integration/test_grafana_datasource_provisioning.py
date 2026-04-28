@@ -69,7 +69,7 @@ def test_bootstrap_script_prunes_tracing_datasources_when_disabled() -> None:
     content = Path("grafana/scripts/bootstrap-datasources.sh").read_text(
         encoding="utf-8"
     )
-    assert 'BIOETL_ENABLE_TRACING_DATASOURCES:-false' in content
+    assert "BIOETL_ENABLE_TRACING_DATASOURCES:-false" in content
     assert 'if [ "${TRACING_FLAG}" = "true" ]; then' in content
     assert "deleteDatasources:" in content
     assert "name: Loki" in content

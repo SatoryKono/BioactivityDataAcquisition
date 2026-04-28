@@ -20,7 +20,7 @@ def test_doc_publication_policy_documents_freshness_protocol() -> None:
     assert "generated artifacts" in lower_text
     assert "summaries" in lower_text
     assert "dated reports" in lower_text
-    assert "check_doc_drift.py --freshness" in text
+    assert "python -m scripts.docs check-drift --freshness" in text
 
 
 def test_plans_index_documents_refresh_triggers() -> None:

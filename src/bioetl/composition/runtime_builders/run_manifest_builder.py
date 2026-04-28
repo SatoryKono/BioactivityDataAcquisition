@@ -24,6 +24,10 @@ from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.control_plane.reproducibility_profiles import (
     resolve_reproducibility_family_profile,
 )
+from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
+    assess_reproducibility_policy,
+)
 from bioetl.infrastructure.control_plane import FileRunManifestStore
 from bioetl.infrastructure.time import SystemClock
 
@@ -51,9 +55,6 @@ class _RunManifestCreateRequestInputs:
     rule_bundle_version: str | None
     dq_contract_compatibility_hash: str
     effective_config_artifact_id: str
-
-
-_STRICT_PERSISTENCE_PROFILES = {"replay_ready", "forensic_grade"}
 
 
 def _create_ledger_service(
@@ -126,7 +127,7 @@ def _build_manifest_create_request(
     _manifest_support.validate_reproducible_sink_modes(
         yaml_config=yaml_config,
         strict_replay_requested=bool(getattr(ctx, "exact_replay", False))
-        or required_persistence_profile in _STRICT_PERSISTENCE_PROFILES,
+        or required_persistence_profile in STRICT_PERSISTENCE_PROFILES,
     )
     reproducibility_profile = resolve_reproducibility_family_profile(
         provider=provider,
@@ -194,18 +195,22 @@ def _validate_required_runtime_persistence_profile(
     required_persistence_profile: str,
     strict_exact_replay_supported: bool,
 ) -> None:
-    strict_replay_requested = bool(request.launch_context.get("exact_replay"))
-    if (
-        required_persistence_profile not in {"replay_ready", "forensic_grade"}
-        and not strict_replay_requested
-    ):
+    assessment = assess_reproducibility_policy(
+        source_refs=request.source_refs,
+        required_persistence_profile=required_persistence_profile,
+        strict_exact_replay_supported=strict_exact_replay_supported,
+        exact_replay_requested=bool(request.launch_context.get("exact_replay")),
+        resume_requested=bool(request.launch_context.get("resume")),
+        replay_capability=request.replay_capability,
+    )
+    if not assessment.strict_requirement_requested:
         return
-    if not strict_exact_replay_supported:
+    if "strict_replay_execution_context_support" in assessment.blocking_gaps:
         raise RuntimeError(
             "Pipeline execution is outside the published strict exact-replay "
             "support boundary for this run family"
         )
-    if request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
+    if "exact_replay_capability" in assessment.blocking_gaps:
         raise RuntimeError(
             "Pipeline execution cannot satisfy required persistence profile "
             f"'{required_persistence_profile}' because immutable input snapshots "

@@ -229,6 +229,9 @@ def _attach_base_summary_runtime_views(
     summary["next_steps"] = build_next_steps(
         cast(dict[str, bool], summary["alert_signals"])
     )
+    summary["reproducibility_diagnostics"] = _build_unified_reproducibility_diagnostics(
+        summary
+    )
     summary["reproducibility_audit_score"] = build_reproducibility_audit_scoring(
         summary
     )
@@ -242,6 +245,71 @@ def _build_base_summary(
     summary = _build_base_summary_payload(manifest, replay_context)
     _attach_base_summary_runtime_views(manifest, summary)
     return summary
+
+
+def _build_unified_reproducibility_diagnostics(
+    summary: dict[str, object],
+) -> dict[str, object]:
+    """Return a single operator-facing reproducibility diagnostics surface."""
+    persistence_profile = cast(
+        "dict[str, object]",
+        summary.get("persistence_profile", {}),
+    )
+    produced_artifact_trace = cast(
+        "dict[str, object]",
+        summary.get("produced_artifact_trace", {}),
+    )
+    return {
+        "policy": {
+            "required_persistence_profile": summary.get("required_persistence_profile"),
+            "attained_profile": persistence_profile.get("attained_profile"),
+            "required_profile_satisfied": persistence_profile.get(
+                "required_profile_satisfied"
+            ),
+            "required_profile_missing_requirements": persistence_profile.get(
+                "required_profile_missing_requirements",
+                [],
+            ),
+            "replay_capability": summary.get("replay_capability"),
+            "replay_mode": summary.get("replay_mode"),
+            "replay_family_contract": summary.get("replay_family_contract"),
+            "exact_replay_support_boundary": summary.get(
+                "exact_replay_support_boundary"
+            ),
+            "exact_replay_blockers": summary.get("exact_replay_blockers", []),
+        },
+        "semantic_identity": {
+            "execution_fingerprint": summary.get("execution_fingerprint"),
+            "config_hash_compatibility_anchor": summary.get("config_hash"),
+            "resolved_config_hash": summary.get("resolved_config_hash"),
+            "effective_config_hash": summary.get("effective_config_hash"),
+            "effective_config_artifact_id": summary.get("effective_config_artifact_id"),
+            "input_snapshot_identity_fingerprint": summary.get(
+                "input_snapshot_identity_fingerprint"
+            ),
+            "input_snapshot_ids": summary.get("input_snapshot_ids", []),
+        },
+        "occurrence_identity": {
+            "run_id": summary.get("run_id"),
+            "manifest_id": summary.get("manifest_id"),
+            "manifest_created_at": summary.get("manifest_created_at"),
+            "occurrence_only_diagnostics": summary.get(
+                "occurrence_only_diagnostics",
+                [],
+            ),
+        },
+        "checkpoint_anchors": {
+            "resume_contract": summary.get("resume_contract"),
+            "resume_diagnostics": summary.get("resume_diagnostics"),
+        },
+        "lineage": {
+            "lineage_closure_boundary": summary.get("lineage_closure_boundary"),
+            "lineage_fragment_ids": summary.get("lineage_fragment_ids", []),
+            "planned_artifact_count": summary.get("planned_artifact_count"),
+            "published_artifact_count": summary.get("published_artifact_count"),
+            "produced_artifact_trace_complete": produced_artifact_trace.get("complete"),
+        },
+    }
 
 
 def build_diagnostics_summary(
@@ -275,7 +343,7 @@ def build_diagnostics_summary(
         resume_diagnostics,
     ) = _process_ledger_entries(ledger_entries)
 
-    return _build_final_summary(
+    final_summary = _build_final_summary(
         _FinalSummaryRequest(
             manifest=manifest,
             base_summary=base_summary,
@@ -300,6 +368,10 @@ def build_diagnostics_summary(
             resume_diagnostics=resume_diagnostics,
         )
     )
+    final_summary["reproducibility_diagnostics"] = (
+        _build_unified_reproducibility_diagnostics(final_summary)
+    )
+    return final_summary
 
 
 def _build_artifact_ref(entry: RunLedgerEntry) -> dict[str, object] | None:

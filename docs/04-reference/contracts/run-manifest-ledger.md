@@ -537,8 +537,10 @@ published effective-config baseline is:
 Hash semantics are deliberately split:
 
 - `config_hash` is a legacy compatibility anchor retained for older manifest
-  and sidecar consumers. New code must not treat it as a synonym for
-  `effective_config_hash`.
+  and sidecar consumers. Current write paths populate it from
+  `resolved_config_hash`; new code must read the explicit
+  `resolved_config_hash` / `effective_config_hash` fields and must not treat
+  `config_hash` as a synonym for `effective_config_hash`.
 - `resolved_config_hash` is the hash of the resolved declarative configuration
   before occurrence envelope fields and supported runtime overrides are folded
   into the execution surface.
