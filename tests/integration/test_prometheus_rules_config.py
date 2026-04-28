@@ -8,11 +8,18 @@ import pytest
 import yaml
 
 RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
+SLO_ALERT_CONTRACT_PATH = Path("configs/quality/observability_slo_alert_contract.yaml")
 pytestmark = pytest.mark.integration
 
 
 def _load_rules() -> dict:
     payload = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    return payload
+
+
+def _load_slo_alert_contract() -> dict:
+    payload = yaml.safe_load(SLO_ALERT_CONTRACT_PATH.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
 
@@ -35,6 +42,28 @@ def _build_record_map(payload: dict) -> dict[str, dict]:
             if isinstance(record_name, str):
                 record_map[record_name] = rule
     return record_map
+
+
+def _iter_contract_alerts(contract: dict) -> list[tuple[str, dict, set[str]]]:
+    contracts = contract.get("slo_contracts")
+    assert isinstance(contracts, dict), "SLO alert contract must define contracts"
+    alerts: list[tuple[str, dict, set[str]]] = []
+    for slo_name, slo in contracts.items():
+        assert isinstance(slo, dict), f"{slo_name} SLO entry must be a mapping"
+        metrics = slo.get("metrics")
+        assert isinstance(metrics, list), f"{slo_name} must declare metrics"
+        assert metrics, f"{slo_name} must declare at least one source metric"
+        metric_set = {metric for metric in metrics if isinstance(metric, str)}
+        assert len(metric_set) == len(metrics), f"{slo_name} metrics must be strings"
+        raw_alerts = slo.get("alerts")
+        assert isinstance(raw_alerts, list), f"{slo_name} must declare alerts"
+        assert raw_alerts, f"{slo_name} must declare at least one alert"
+        for alert in raw_alerts:
+            assert isinstance(alert, dict), f"{slo_name} alert entry invalid"
+            alert_name = alert.get("name")
+            assert isinstance(alert_name, str), f"{slo_name} alert name missing"
+            alerts.append((slo_name, alert, metric_set))
+    return alerts
 
 
 def _classify_quarantine_rate(
@@ -75,6 +104,44 @@ def test_rules_file_contains_control_plane_traceability_group() -> None:
     assert "bioetl_dq_observability" in group_names
     assert "bioetl_provider_health_observability" in group_names
     assert "bioetl_chembl_assay_observability" not in group_names
+
+
+def test_slo_alert_contract_matches_shipped_prometheus_rules() -> None:
+    """Every contracted SLO alert must match shipped rule metadata and metrics."""
+    rules = _load_rules()
+    contract = _load_slo_alert_contract()
+    rule_map = _build_rule_map(rules)
+    contracted_alerts = _iter_contract_alerts(contract)
+
+    for slo_name, alert_contract, source_metrics in contracted_alerts:
+        alert_name = alert_contract["name"]
+        assert alert_name in rule_map, (
+            f"{slo_name} references missing alert {alert_name}"
+        )
+        rule = rule_map[alert_name]
+        expr = rule.get("expr", "")
+        labels = rule.get("labels", {})
+        annotations = rule.get("annotations", {})
+        assert isinstance(expr, str)
+        assert labels.get("severity") == alert_contract["severity"]
+        assert rule.get("for") == alert_contract["for"]
+        assert annotations.get("runbook") == alert_contract["runbook"]
+        assert any(metric in expr for metric in source_metrics), (
+            f"{alert_name} must reference at least one {slo_name} source metric"
+        )
+
+
+def test_all_shipped_alerts_are_bound_to_an_slo_contract() -> None:
+    """Avoid orphan alerts that are not tied to an operational objective."""
+    rules = _load_rules()
+    contract = _load_slo_alert_contract()
+    rule_map = _build_rule_map(rules)
+    contracted_alert_names = {
+        alert["name"] for _, alert, _ in _iter_contract_alerts(contract)
+    }
+
+    orphan_alerts = sorted(set(rule_map) - contracted_alert_names)
+    assert not orphan_alerts, f"Alerts missing SLO contract binding: {orphan_alerts}"
 
 
 def test_runtime_dashboard_recording_rules_exist_and_reference_source_metrics() -> None:

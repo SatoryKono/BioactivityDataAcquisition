@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
+import yaml
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -427,6 +428,65 @@ class TestMandatorySpans:
 
             if not found and filename in ["runner.py", "batch_executor.py"]:
                 assert found, f"Critical file {filename} should have methods {methods}"
+
+
+class TestMandatoryTracingCoverageContract:
+    """Freeze mandatory tracing surfaces for operationally critical flows."""
+
+    CONTRACT_PATH = Path("configs/quality/mandatory_tracing_coverage.yaml")
+
+    def _load_contract(self) -> dict[str, object]:
+        assert self.CONTRACT_PATH.exists(), (
+            f"Missing mandatory tracing coverage contract: {self.CONTRACT_PATH}"
+        )
+        payload = yaml.safe_load(self.CONTRACT_PATH.read_text(encoding="utf-8"))
+        assert isinstance(payload, dict), "Tracing coverage contract must be a mapping"
+        return payload
+
+    def test_contract_covers_required_observability_flows(self) -> None:
+        """Adapter, retry, checkpoint, and quarantine flows must be explicit."""
+        payload = self._load_contract()
+        surfaces = payload.get("surfaces")
+        assert isinstance(surfaces, dict), "Tracing contract must define surfaces"
+        assert set(surfaces) >= {
+            "adapter_request",
+            "retry",
+            "checkpoint",
+            "quarantine",
+        }
+
+    def test_required_tracing_terms_exist_in_owned_files(self) -> None:
+        """Each declared surface must retain its span names and attributes."""
+        payload = self._load_contract()
+        surfaces = payload["surfaces"]
+        assert isinstance(surfaces, dict)
+        for surface_name, surface in surfaces.items():
+            assert isinstance(surface, dict), f"{surface_name} must be a mapping"
+            files = surface.get("files")
+            assert isinstance(files, list), f"{surface_name} must declare files"
+            assert files, f"{surface_name} must cover at least one file"
+            for entry in files:
+                assert isinstance(entry, dict), f"{surface_name} file entry invalid"
+                path_value = entry.get("path")
+                assert isinstance(path_value, str), f"{surface_name} path missing"
+                path = Path(path_value)
+                assert path.exists(), f"{surface_name} coverage file missing: {path}"
+                source = path.read_text(encoding="utf-8")
+                required_terms = entry.get("required_terms", [])
+                assert isinstance(required_terms, list)
+                for term in required_terms:
+                    assert isinstance(term, str)
+                    assert term in source, (
+                        f"{surface_name} tracing coverage lost term {term!r} in {path}"
+                    )
+                forbidden_terms = entry.get("forbidden_terms", [])
+                assert isinstance(forbidden_terms, list)
+                for term in forbidden_terms:
+                    assert isinstance(term, str)
+                    assert term not in source, (
+                        f"{surface_name} intentionally excluded tracing term {term!r} "
+                        f"appeared in {path}"
+                    )
 
 
 class TestOperatorTracingPolicy:

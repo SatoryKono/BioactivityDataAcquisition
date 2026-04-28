@@ -7,9 +7,9 @@ from unittest.mock import MagicMock
 import pytest
 
 from tests.unit.infrastructure.storage.silver_writer._test_support import (
+    assert_standard_silver_write_succeeds,
     make_silver_writer,
-    patch_new_silver_write,
-    silver_write_schema,
+    write_standard_silver,
 )
 
 pytestmark = pytest.mark.unit
@@ -140,11 +140,9 @@ class TestSilverWriterWriteModePolicy:
         writer = make_silver_writer(logger=noop_logger)
 
         with pytest.raises(PolicyViolationError) as exc_info:
-            await writer.write_silver(
-                table_name="test.table",
+            await write_standard_silver(
+                writer,
                 records=valid_records,
-                primary_keys=["entity_id"],
-                schema=silver_write_schema(),
                 mode="delete",
             )
         assert "silver does not allow overwrite" in str(exc_info.value)
@@ -164,16 +162,12 @@ class TestSilverWriterWriteModePolicy:
         mode: str,
     ):
         """Allowed public write modes should proceed to Delta write."""
-        with patch_new_silver_write() as mock_write:
-            writer = make_silver_writer(logger=noop_logger)
-            await writer.write_silver(
-                table_name="test.table",
-                records=valid_records,
-                primary_keys=["entity_id"],
-                schema=silver_write_schema(),
-                mode=mode,
-            )
-            mock_write.assert_called_once()
+        writer = make_silver_writer(logger=noop_logger)
+        await assert_standard_silver_write_succeeds(
+            writer,
+            records=valid_records,
+            mode=mode,
+        )
 
     @pytest.mark.asyncio
     async def test_write_silver_delete_mode_increments_metric(
@@ -189,11 +183,9 @@ class TestSilverWriterWriteModePolicy:
         )
 
         with pytest.raises(PolicyViolationError):
-            await writer.write_silver(
-                table_name="test.table",
+            await write_standard_silver(
+                writer,
                 records=valid_records,
-                primary_keys=["entity_id"],
-                schema=silver_write_schema(),
                 mode="delete",
             )
 

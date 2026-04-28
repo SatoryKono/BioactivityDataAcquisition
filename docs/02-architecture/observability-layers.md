@@ -159,6 +159,21 @@ The infrastructure layer provides concrete adapters for the domain ports.
 - `UnifiedLogger` enriches logs with `trace_id` and `span_id` when an active
   span exists
 
+Mandatory tracing coverage is governed by
+`configs/quality/mandatory_tracing_coverage.yaml` and enforced by
+`tests/architecture/test_tracing_enforcement.py`.
+
+| Surface | Required span coverage | Required bounded attributes |
+| --- | --- | --- |
+| Adapter request | `http.{method}` request lifecycle in `client_retry_observability.start_request_span` | `http.method`, `http.url`, `bioetl.provider`, `bioetl.run_id` |
+| Retry | retry, retry-exhausted, and circuit-breaker outcomes on the adapter request span | `http.retries`, `http.status_code`, `error.type` |
+| Checkpoint | ordinary `checkpoint_save` spans and checkpoint admin `checkpoint.list`, `checkpoint.get`, `checkpoint.delete` spans | `bioetl.checkpoint.operation`, `bioetl.checkpoint.scope`, `bioetl.checkpoint.status`, aggregate count/result flags |
+| Quarantine | admin `quarantine.inspect`, `quarantine.stats`, `quarantine.replay`, `quarantine.mark_reprocessed`, `quarantine.purge`, and `quarantine.update_status` spans | operation, pipeline, filter-presence booleans, aggregate counts/status |
+
+Record-level quarantine explorer/detail lookups remain excluded from mandatory
+tracing. They are intentionally metric/log-only until a bounded trace attribute
+model exists for those per-record surfaces.
+
 ### Additional operator signals
 
 Infrastructure and application wiring now expose bounded operator metrics for
@@ -227,6 +242,9 @@ The supported runtime path is the bootstrap bundle under
 - enforcing production observability policy
 - failing closed in `prod` when metrics or tracing resolve to no-op
   implementations, unless an explicit override is configured
+- failing closed for `required_persistence_profile=forensic_grade` runs in any
+  environment unless structured logging, tracing, metrics, audit, run manifests,
+  run ledgers, and active-layer lineage sidecars are all available
 
 Compatibility wrappers may exist for older builder entrypoints, but they must
 delegate back to the canonical bootstrap path rather than reimplementing

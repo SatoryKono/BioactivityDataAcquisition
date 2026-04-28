@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.composition.bootstrap.runtime._observability_preflight_support import (
+    validate_forensic_grade_observability_evidence,
     validate_control_plane_readiness,
     validate_prod_noop_components,
 )
@@ -56,17 +57,27 @@ def validate_observability_preflight_impl(
         environment: Deployment environment name (e.g., 'prod', 'staging').
         logger: LoggerPort used to emit structured preflight warning events.
     """
-    if environment != "prod":
+    required_profile = _control_plane_settings(control_plane=control_plane)[0]
+    forensic_grade_required = required_profile == "forensic_grade"
+    if environment != "prod" and not forensic_grade_required:
         return
-    validate_prod_noop_components(
-        tracer=tracer,
-        metrics=metrics,
-        logger=logger,
-        allow_noop_in_prod=allow_noop_in_prod,
-        audit=audit,
-        audit_required=audit_required,
-        audit_required_fn=_audit_required,
-    )
+    if environment == "prod":
+        validate_prod_noop_components(
+            tracer=tracer,
+            metrics=metrics,
+            logger=logger,
+            allow_noop_in_prod=allow_noop_in_prod,
+            audit=audit,
+            audit_required=audit_required,
+            audit_required_fn=_audit_required,
+        )
+    if forensic_grade_required:
+        validate_forensic_grade_observability_evidence(
+            tracer=tracer,
+            metrics=metrics,
+            logger=logger,
+            audit=audit,
+        )
     validate_control_plane_readiness(
         logger=logger,
         control_plane=control_plane,
