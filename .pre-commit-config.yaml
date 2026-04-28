@@ -162,10 +162,12 @@ repos:
 
       - id: audit-root-cleanliness
         name: Audit repository root layout allowlist
-        entry: uv run --active python scripts/engineering/repo/audit_root_cleanliness.py
-        language: system
+        entry: python scripts/engineering/repo/audit_root_cleanliness.py
+        language: python
         pass_filenames: false
         stages: [pre-commit]
+        additional_dependencies:
+          - pyyaml==6.0.2
       - id: lint-config-paths
         name: Check for legacy dq/filter config path references
         entry: python scripts/schema/lint_config_paths.py

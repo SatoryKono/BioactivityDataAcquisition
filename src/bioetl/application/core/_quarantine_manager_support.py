@@ -8,10 +8,9 @@ from typing import TYPE_CHECKING
 from bioetl.application.core._quarantine_support import (
     FILTERED_OUT_SILVER,
     build_filtered_quarantine_request,
-    emit_quarantine_events,
     record_filtered_quarantine_metrics,
-    write_quarantine_request,
-    write_quarantine_requests,
+    write_quarantine_request_with_events,
+    write_quarantine_requests_with_events,
 )
 
 if TYPE_CHECKING:
@@ -54,17 +53,16 @@ class QuarantineManagerSupportMixin:
             run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
-        await write_quarantine_request(self._quarantine, request)
-        emit_quarantine_events(
+        await write_quarantine_request_with_events(
+            quarantine=self._quarantine,
+            request=request,
             emitter=self._domain_event_emitter,
             pipeline_name=self._pipeline_name,
-            payload=record,
             error_code=FILTERED_OUT_SILVER,
             error_message=error_details,
             batch_id=batch_id,
             run_id=run_id,
             ingestion_ts=ingestion_ts,
-            metadata=request["metadata"],
         )
         record_filtered_quarantine_metrics(
             metrics=self._metrics,
@@ -95,19 +93,17 @@ class QuarantineManagerSupportMixin:
             )
             for entry in records
         ]
-        await write_quarantine_requests(self._quarantine, write_requests)
-        for request, entry in zip(write_requests, records, strict=True):
-            emit_quarantine_events(
-                emitter=self._domain_event_emitter,
-                pipeline_name=self._pipeline_name,
-                payload=request["payload"],
-                error_code=FILTERED_OUT_SILVER,
-                error_message=entry.reason,
-                batch_id=batch_id,
-                run_id=run_id,
-                ingestion_ts=ingestion_ts,
-                metadata=request["metadata"],
-            )
+        await write_quarantine_requests_with_events(
+            quarantine=self._quarantine,
+            requests=write_requests,
+            emitter=self._domain_event_emitter,
+            pipeline_name=self._pipeline_name,
+            error_codes=(FILTERED_OUT_SILVER for _ in records),
+            error_messages=(entry.reason for entry in records),
+            batch_id=batch_id,
+            run_id=run_id,
+            ingestion_ts=ingestion_ts,
+        )
         record_filtered_quarantine_metrics(
             metrics=self._metrics,
             pipeline_metrics=self._pipeline_metrics,
