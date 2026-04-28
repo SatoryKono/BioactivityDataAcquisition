@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
-
 import yaml
 
 _METRIC_ALLOWLIST = Path(
@@ -204,7 +202,7 @@ def _check_tracing_file_entry(
             mismatches.append(f"{path_value}:forbidden:{term}")
 
 
-def _load_yaml(path: Path) -> dict[str, Any]:
+def _load_yaml(path: Path) -> dict[str, object]:
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
 
@@ -221,8 +219,8 @@ def _load_metric_allowlist(path: Path) -> dict[str, set[str]]:
     return allowlist
 
 
-def _build_alert_rule_map(rules: dict[str, Any]) -> dict[str, dict[str, Any]]:
-    rule_map: dict[str, dict[str, Any]] = {}
+def _build_alert_rule_map(rules: dict[str, object]) -> dict[str, dict[str, object]]:
+    rule_map: dict[str, dict[str, object]] = {}
     groups = rules.get("groups", [])
     if not isinstance(groups, list):
         return rule_map
@@ -239,7 +237,7 @@ def _build_alert_rule_map(rules: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 
 def _iter_slo_contract_alerts(
-    contract: dict[str, Any],
+    contract: dict[str, object],
 ) -> list[tuple[str, dict[str, object], set[str]]]:
     contracts = contract.get("slo_contracts")
     if not isinstance(contracts, dict):
@@ -258,7 +256,7 @@ def _iter_slo_contract_alerts(
     return results
 
 
-def _contract_alert_names(contract: dict[str, Any]) -> set[str]:
+def _contract_alert_names(contract: dict[str, object]) -> set[str]:
     return {str(alert["name"]) for _, alert, _ in _iter_slo_contract_alerts(contract)}
 
 

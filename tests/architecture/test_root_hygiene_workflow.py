@@ -22,7 +22,9 @@ def test_root_hygiene_workflow_uses_strict_audit_and_unit_tests() -> None:
         in workflow
     )
     assert "python -m scripts.engineering.repo check-root-review-registry" in workflow
+    assert "python -m scripts.engineering.diagnostics audit-structure --path ." in workflow
     assert "tests/unit/scripts/repo/test_audit_root_cleanliness.py" in workflow
+    assert "tests/unit/scripts/repo/test_audit_structure.py" in workflow
     assert (
         "tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py" in workflow
     )

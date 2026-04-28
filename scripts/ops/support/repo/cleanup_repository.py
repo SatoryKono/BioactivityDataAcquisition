@@ -398,8 +398,12 @@ def _apply_local_candidates(
         if not candidate.apply_allowed:
             continue
         try:
+            if not target.exists():
+                continue
             if target.is_dir():
-                shutil.rmtree(target)
+                shutil.rmtree(target, ignore_errors=True)
+                if target.exists():
+                    raise OSError(f"directory still exists after cleanup: {candidate.rel_path}")
             elif target.exists():
                 target.unlink()
             deleted.append(candidate)
