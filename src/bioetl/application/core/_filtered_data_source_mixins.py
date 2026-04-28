@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Self
 
-from bioetl.application.core._fetch_forwarding import build_forwarded_fetch_kwargs
+from bioetl.application.core._fetch_forwarding import forward_fetch_records
 from bioetl.application.core import (
     _filtered_data_source_fetch_support as fetch_support,
 )
@@ -135,16 +135,14 @@ class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
             filter_field: Ignored; filtering is driven by internal config filter_field.
             offset: Optional pagination offset passed through to the adapter.
         """
-        return fetch_support.fetch_records(
-            self,
-            **build_forwarded_fetch_kwargs(
-                entity_type=entity_type,
-                limit=limit,
-                query=query,
-                filter_ids=filter_ids,
-                filter_field=filter_field,
-                offset=offset,
-            ),
+        return forward_fetch_records(
+            lambda **kwargs: fetch_support.fetch_records(self, **kwargs),
+            entity_type=entity_type,
+            limit=limit,
+            query=query,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            offset=offset,
         )
 
     async def health_check(self) -> HealthStatus:
