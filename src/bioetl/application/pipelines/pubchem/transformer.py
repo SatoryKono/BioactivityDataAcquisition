@@ -170,9 +170,7 @@ class PubChemCompoundTransformer(BaseTransformer):
             "standardized_inchi": result.standardized_inchi,
             "standardized_inchi_key": result.standardized_inchi_key,
             "structure_parent_key": result.structure_parent_key,
-            "chemical_standardization_status": (
-                result.chemical_standardization_status
-            ),
+            "chemical_standardization_status": (result.chemical_standardization_status),
             "chemical_standardization_warnings": self.serialize_json_list(
                 result.chemical_standardization_warnings
             ),

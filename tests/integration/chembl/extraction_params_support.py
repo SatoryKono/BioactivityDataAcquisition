@@ -53,7 +53,9 @@ class ExtractionParamsSuiteBase:
             logger=mock_logger,
             page_size=500,
         )
-        params = adapter._build_params(offset=0, entity_type=extraction_case.entity_type)
+        params = adapter._build_params(
+            offset=0, entity_type=extraction_case.entity_type
+        )
         assert_build_params(case=extraction_case, params=params, page_size=500)
 
     def test_source_metadata_contains_query_string(

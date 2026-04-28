@@ -10,11 +10,15 @@ from scripts.engineering.qa.generate_architecture_debt_tasks import main
 SAMPLE_DOMAIN_MODULE = "src/bioetl/domain/sample.py"
 
 
-def test_generate_architecture_debt_tasks_script_writes_payload(tmp_path: Path) -> None:
-    module_path = tmp_path / "src" / "bioetl" / "domain" / "sample.py"
+def _write_sample_domain_module(tmp_path: Path) -> None:
+    """Create one minimal domain module referenced by the sample registry."""
+    module_path = tmp_path / SAMPLE_DOMAIN_MODULE
     module_path.parent.mkdir(parents=True, exist_ok=True)
     module_path.write_text("def value() -> int:\n    return 1\n", encoding="utf-8")
 
+
+def _write_sample_registry(tmp_path: Path) -> Path:
+    """Write one minimal architecture-debt registry for the sample module."""
     registry_path = tmp_path / "registry.yaml"
     registry_path.write_text(
         yaml.safe_dump(
@@ -42,6 +46,12 @@ def test_generate_architecture_debt_tasks_script_writes_payload(tmp_path: Path) 
         ),
         encoding="utf-8",
     )
+    return registry_path
+
+
+def test_generate_architecture_debt_tasks_script_writes_payload(tmp_path: Path) -> None:
+    _write_sample_domain_module(tmp_path)
+    registry_path = _write_sample_registry(tmp_path)
     output_path = tmp_path / "tasks.json"
 
     rc = main(
@@ -64,37 +74,8 @@ def test_generate_architecture_debt_tasks_script_writes_payload(tmp_path: Path) 
 def test_generate_architecture_debt_tasks_default_output_routes_to_reports_quality(
     tmp_path: Path,
 ) -> None:
-    module_path = tmp_path / "src" / "bioetl" / "domain" / "sample.py"
-    module_path.parent.mkdir(parents=True, exist_ok=True)
-    module_path.write_text("def value() -> int:\n    return 1\n", encoding="utf-8")
-
-    registry_path = tmp_path / "registry.yaml"
-    registry_path.write_text(
-        yaml.safe_dump(
-            {
-                "schema_version": 1,
-                "registries": {
-                    "file_size_limits": {
-                        SAMPLE_DOMAIN_MODULE: {
-                            "value": 1,
-                            "owner": "@bioetl-architecture",
-                            "reason": "demo",
-                            "expires_on": "2026-06-30",
-                            "removal_step": "shrink file",
-                        }
-                    },
-                    "function_complexity": {},
-                    "function_length": {},
-                    "class_size": {},
-                    "class_method_count": {},
-                    "god_object": {},
-                    "domain_complexity": {},
-                },
-            },
-            sort_keys=False,
-        ),
-        encoding="utf-8",
-    )
+    _write_sample_domain_module(tmp_path)
+    registry_path = _write_sample_registry(tmp_path)
 
     rc = main(
         [
