@@ -148,6 +148,26 @@ async def _resolve_silver_metadata_context(
     return _ResolvedSilverMetadataContext(provider_name, entity_name, version)
 
 
+def _resolve_silver_metadata_bundle(
+    *,
+    coordinator: MetadataCoordinatorPort | None,
+    table_path: str,
+    table_name: str,
+    silver_input: SilverMetadataInput,
+) -> tuple[SilverMetadata, object | None]:
+    """Build the canonical Silver metadata bundle with a shared fallback policy."""
+    return resolve_metadata_and_lineage_fragment(
+        coordinator=coordinator,
+        bundle_factory_name="create_silver_metadata_bundle",
+        coordinator_factory_name=None,
+        input_data=silver_input,
+        fallback_factory=lambda: _raise_missing_silver_metadata_bundle(
+            table_path=table_path,
+            table_name=table_name,
+        ),
+    )
+
+
 async def _prepare_silver_metadata_write(
     host: _SilverMetadataWriteHostProtocol,
     request: _SilverMetadataWriteRequest,
@@ -176,15 +196,11 @@ async def _prepare_silver_metadata_write(
         started_at=request.started_at,
         completed_at=request.completed_at,
     )
-    metadata, lineage_fragment = resolve_metadata_and_lineage_fragment(
+    metadata, lineage_fragment = _resolve_silver_metadata_bundle(
         coordinator=coordinator,
-        bundle_factory_name="create_silver_metadata_bundle",
-        coordinator_factory_name=None,
-        input_data=silver_input,
-        fallback_factory=lambda: _raise_missing_silver_metadata_bundle(
-            table_path=request.table_path,
-            table_name=request.table_name,
-        ),
+        table_path=request.table_path,
+        table_name=request.table_name,
+        silver_input=silver_input,
     )
     return _PreparedSilverMetadataWriteOperation(
         request=request,
@@ -222,15 +238,11 @@ async def _prepare_silver_merged_metadata_write(
         transform_version=host._transform_version,
         transform_steps=host._transform_steps,
     )
-    metadata, lineage_fragment = resolve_metadata_and_lineage_fragment(
+    metadata, lineage_fragment = _resolve_silver_metadata_bundle(
         coordinator=host._metadata_coordinator,
-        bundle_factory_name="create_silver_metadata_bundle",
-        coordinator_factory_name=None,
-        input_data=silver_input,
-        fallback_factory=lambda: _raise_missing_silver_metadata_bundle(
-            table_path=request.table_path,
-            table_name=request.table_name,
-        ),
+        table_path=request.table_path,
+        table_name=request.table_name,
+        silver_input=silver_input,
     )
     return _PreparedSilverMetadataWriteOperation(
         request=request,
