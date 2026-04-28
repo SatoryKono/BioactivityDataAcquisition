@@ -46,8 +46,16 @@ schema:
                 - activity_comment
                 - potential_duplicate
                 - bao_endpoint
+                - bao_endpoint_iri
+                - bao_endpoint_mapping_status
                 - uo_units
+                - uo_unit_iri
+                - uo_unit_mapping_status
+                - uo_ontology_version
                 - qudt_units
+                - qudt_unit_iri
+                - qudt_unit_mapping_status
+                - qudt_ontology_version
                 - src_id
                 - record_id
                 - type
@@ -81,7 +89,10 @@ schema:
                 - assay_variant_accession
                 - assay_variant_mutation
                 - bao_format
+                - bao_format_iri
+                - bao_format_mapping_status
                 - bao_label
+                - bao_ontology_version
                 - journal
                 - publication_doi
                 - publication_pmid
@@ -224,6 +235,58 @@ quality:
             pattern: '^(?:UO_[0-9]{7}|[A-Za-zµ%][A-Za-z0-9µ%._-]*)$'
             nullable: true
             error_message: uo_units must be a canonical ontology/unit token when present
+        -   field: bao_endpoint_iri
+            type: pattern
+            pattern: '^https?://[^\s]+$'
+            nullable: true
+            error_message: bao_endpoint_iri must be an HTTP(S) IRI when present
+        -   field: bao_format_iri
+            type: pattern
+            pattern: '^https?://[^\s]+$'
+            nullable: true
+            error_message: bao_format_iri must be an HTTP(S) IRI when present
+        -   field: uo_unit_iri
+            type: pattern
+            pattern: '^https?://[^\s]+$'
+            nullable: true
+            error_message: uo_unit_iri must be an HTTP(S) IRI when present
+        -   field: qudt_unit_iri
+            type: pattern
+            pattern: '^https?://[^\s]+$'
+            nullable: true
+            error_message: qudt_unit_iri must be an HTTP(S) IRI when present
+        -   field: bao_endpoint_mapping_status
+            type: enum
+            allowed:
+                - mapped
+                - unmapped
+                - missing
+            nullable: true
+            error_message: Invalid BAO endpoint mapping status
+        -   field: bao_format_mapping_status
+            type: enum
+            allowed:
+                - mapped
+                - unmapped
+                - missing
+            nullable: true
+            error_message: Invalid BAO format mapping status
+        -   field: uo_unit_mapping_status
+            type: enum
+            allowed:
+                - mapped
+                - unmapped
+                - missing
+            nullable: true
+            error_message: Invalid UO unit mapping status
+        -   field: qudt_unit_mapping_status
+            type: enum
+            allowed:
+                - mapped
+                - unmapped
+                - missing
+            nullable: true
+            error_message: Invalid QUDT unit mapping status
     entity_cross_field_validations:
         -   name: value_requires_units
             fields:

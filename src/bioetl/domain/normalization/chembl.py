@@ -2,12 +2,18 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import re
+from typing import Literal
 
 from bioetl.domain.mapping.organism_classification import normalize_organism_name
 from bioetl.domain.normalization.text import normalize_string
 
 __all__ = [
+    "ACTIVITY_ONTOLOGY_MAPPING_STATUSES",
+    "ActivityOntologyCompanionFields",
+    "OntologyMappingResult",
+    "OntologyMappingStatus",
     "normalize_bao_identifier",
     "normalize_bao_label",
     "normalize_cellosaurus_id",
@@ -15,15 +21,45 @@ __all__ = [
     "normalize_qudt_unit",
     "normalize_standard_unit",
     "normalize_uo_identifier",
+    "resolve_activity_ontology_companion_fields",
 ]
 
 _BAO_IDENTIFIER_RE = re.compile(r"^bao[_:](\d+)$", re.IGNORECASE)
 _UO_IDENTIFIER_RE = re.compile(r"^uo[_:](\d+)$", re.IGNORECASE)
+_BAO_CANONICAL_ID_RE = re.compile(r"^BAO_\d{7}$")
+_UO_CANONICAL_ID_RE = re.compile(r"^UO_\d{7}$")
 _CELLOSAURUS_IDENTIFIER_RE = re.compile(
     r"^cvcl[_:\-\s]?([a-z0-9]+)$",
     re.IGNORECASE,
 )
 _ORGANISM_WHITESPACE_RE = re.compile(r"\s+")
+
+OntologyMappingStatus = Literal["mapped", "unmapped", "missing"]
+ACTIVITY_ONTOLOGY_MAPPING_STATUSES: tuple[OntologyMappingStatus, ...] = (
+    "mapped",
+    "unmapped",
+    "missing",
+)
+
+BAO_ONTOLOGY_VERSION = "2.8.18a"
+UO_ONTOLOGY_VERSION = "2026-01-16"
+QUDT_ONTOLOGY_VERSION = "3.2.1"
+_OBO_IRI_TEMPLATE = "http://purl.obolibrary.org/obo/{identifier}"
+_QUDT_UNIT_IRI_TEMPLATE = "http://qudt.org/vocab/unit/{identifier}"
+_QUDT_UNIT_IDENTIFIER_BY_UNIT: dict[str, str] = {
+    "nM": "NanoMOL-PER-L",
+    "µM": "MicroMOL-PER-L",
+    "mM": "MilliMOL-PER-L",
+    "pM": "PicoMOL-PER-L",
+    "fM": "FemtoMOL-PER-L",
+    "M": "MOL-PER-L",
+    "%": "PERCENT",
+    "ug.mL-1": "MicroGM-PER-MilliL",
+    "mg.kg-1": "MilliGM-PER-KiloGM",
+}
+_QUDT_UNIT_IDENTIFIER_BY_LEGACY_URI: dict[str, str] = {
+    "http://www.openphacts.org/units/nanomolar": "NanoMOL-PER-L",
+}
 
 _UNIT_ALIASES: dict[str, str] = {
     "um": "µM",
@@ -88,6 +124,32 @@ _BAO_LABEL_BY_IDENTIFIER: dict[str, str] = {
     "BAO_0000357": "single protein format",
     "BAO_0000366": "cell-free format",
 }
+
+
+@dataclass(frozen=True, slots=True)
+class OntologyMappingResult:
+    """Machine-readable result of resolving one ontology/unit token."""
+
+    iri: str | None
+    status: OntologyMappingStatus
+    ontology_version: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class ActivityOntologyCompanionFields:
+    """Companion IRI/version/status fields for ChEMBL Activity rows."""
+
+    bao_endpoint_iri: str | None
+    bao_endpoint_mapping_status: OntologyMappingStatus
+    bao_format_iri: str | None
+    bao_format_mapping_status: OntologyMappingStatus
+    bao_ontology_version: str | None
+    uo_unit_iri: str | None
+    uo_unit_mapping_status: OntologyMappingStatus
+    uo_ontology_version: str | None
+    qudt_unit_iri: str | None
+    qudt_unit_mapping_status: OntologyMappingStatus
+    qudt_ontology_version: str | None
 
 
 def _normalize_prefixed_identifier(
@@ -192,6 +254,128 @@ def normalize_standard_unit(value: str | None) -> str | None:
 def normalize_qudt_unit(value: str | None) -> str | None:
     """Normalize QUDT values by trimming only."""
     return normalize_string(value)
+
+
+def resolve_activity_ontology_companion_fields(
+    *,
+    bao_endpoint: str | None,
+    bao_format: str | None,
+    uo_units: str | None,
+    qudt_units: str | None,
+) -> ActivityOntologyCompanionFields:
+    """Resolve ChEMBL Activity ontology/unit companion fields."""
+    endpoint = _resolve_obo_identifier_mapping(
+        normalize_bao_identifier(bao_endpoint),
+        pattern=_BAO_CANONICAL_ID_RE,
+        ontology_version=BAO_ONTOLOGY_VERSION,
+    )
+    assay_format = _resolve_obo_identifier_mapping(
+        normalize_bao_identifier(bao_format),
+        pattern=_BAO_CANONICAL_ID_RE,
+        ontology_version=BAO_ONTOLOGY_VERSION,
+    )
+    uo = _resolve_obo_identifier_mapping(
+        normalize_uo_identifier(uo_units),
+        pattern=_UO_CANONICAL_ID_RE,
+        ontology_version=UO_ONTOLOGY_VERSION,
+    )
+    qudt = _resolve_qudt_unit_mapping(qudt_units)
+
+    return ActivityOntologyCompanionFields(
+        bao_endpoint_iri=endpoint.iri,
+        bao_endpoint_mapping_status=endpoint.status,
+        bao_format_iri=assay_format.iri,
+        bao_format_mapping_status=assay_format.status,
+        bao_ontology_version=_shared_version(
+            endpoint,
+            assay_format,
+            version=BAO_ONTOLOGY_VERSION,
+        ),
+        uo_unit_iri=uo.iri,
+        uo_unit_mapping_status=uo.status,
+        uo_ontology_version=uo.ontology_version,
+        qudt_unit_iri=qudt.iri,
+        qudt_unit_mapping_status=qudt.status,
+        qudt_ontology_version=qudt.ontology_version,
+    )
+
+
+def _resolve_obo_identifier_mapping(
+    value: str | None,
+    *,
+    pattern: re.Pattern[str],
+    ontology_version: str,
+) -> OntologyMappingResult:
+    """Resolve an OBO-style ontology ID into an IRI and mapping status."""
+    if value is None:
+        return OntologyMappingResult(
+            iri=None,
+            status="missing",
+            ontology_version=None,
+        )
+    if not pattern.fullmatch(value):
+        return OntologyMappingResult(
+            iri=None,
+            status="unmapped",
+            ontology_version=ontology_version,
+        )
+    return OntologyMappingResult(
+        iri=_OBO_IRI_TEMPLATE.format(identifier=value),
+        status="mapped",
+        ontology_version=ontology_version,
+    )
+
+
+def _resolve_qudt_unit_mapping(value: str | None) -> OntologyMappingResult:
+    """Resolve a QUDT unit token or legacy URI into a QUDT unit IRI."""
+    normalized = normalize_qudt_unit(value)
+    if normalized is None:
+        return OntologyMappingResult(
+            iri=None,
+            status="missing",
+            ontology_version=None,
+        )
+
+    qudt_identifier = _qudt_identifier_from_uri(normalized)
+    if qudt_identifier is None:
+        normalized_unit = normalize_standard_unit(normalized)
+        qudt_identifier = (
+            None
+            if normalized_unit is None
+            else _QUDT_UNIT_IDENTIFIER_BY_UNIT.get(normalized_unit)
+        )
+    if qudt_identifier is None:
+        qudt_identifier = _QUDT_UNIT_IDENTIFIER_BY_LEGACY_URI.get(normalized.casefold())
+    if qudt_identifier is None:
+        return OntologyMappingResult(
+            iri=None,
+            status="unmapped",
+            ontology_version=QUDT_ONTOLOGY_VERSION,
+        )
+    return OntologyMappingResult(
+        iri=_QUDT_UNIT_IRI_TEMPLATE.format(identifier=qudt_identifier),
+        status="mapped",
+        ontology_version=QUDT_ONTOLOGY_VERSION,
+    )
+
+
+def _qudt_identifier_from_uri(value: str) -> str | None:
+    """Extract a QUDT unit identifier from an existing QUDT unit IRI."""
+    lowered = value.casefold()
+    for prefix in ("http://qudt.org/vocab/unit/", "https://qudt.org/vocab/unit/"):
+        if lowered.startswith(prefix):
+            return value.rsplit("/", maxsplit=1)[-1]
+    return None
+
+
+def _shared_version(
+    *results: OntologyMappingResult,
+    version: str,
+) -> str | None:
+    """Return the family version when at least one field was present."""
+    if all(result.status == "missing" for result in results):
+        return None
+    return version
 
 
 def normalize_chembl_organism_name(value: str | None) -> str | None:

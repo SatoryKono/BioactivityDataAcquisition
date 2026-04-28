@@ -9,6 +9,9 @@ from typing import cast
 from bioetl.application.services.control_plane._run_manifest_diagnostics_ledger import (
     _resolve_policy_value,
 )
+from bioetl.application.services.control_plane._run_manifest_diagnostics_helpers import (
+    extract_diagnostic_context,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_persistence import (
     build_alert_signals,
     build_next_steps,
@@ -354,6 +357,7 @@ def _build_final_summary_updates(
     *,
     identity_graph: dict[str, object],
     persistence_profile: dict[str, object],
+    composite_dossier_projection: dict[str, object],
     alert_signals: dict[str, bool],
     next_steps: list[str],
     exact_replay_anchors: dict[str, object],
@@ -390,6 +394,7 @@ def _build_final_summary_updates(
             request.occurrence_only_diagnostic_scopes
         ),
         "resume_diagnostics": request.resume_diagnostics,
+        "composite_dossier_projection": composite_dossier_projection,
         "cross_validation_signal_present": request.cross_validation_signal_present,
         "correlation_anchor_gaps": request.correlation_anchor_gaps,
         "identity_graph_complete": (
@@ -430,6 +435,10 @@ def _build_final_summary(
         lineage_fragment_ids=request.lineage_fragment_ids,
         missing_link_count=request.missing_link_count,
     )
+    composite_dossier_projection = _build_composite_dossier_projection(
+        request,
+        persistence_profile=persistence_profile,
+    )
     alert_signals, next_steps = _build_alert_bundle(
         request,
         persistence_profile=persistence_profile,
@@ -440,6 +449,7 @@ def _build_final_summary(
             request,
             identity_graph=identity_graph,
             persistence_profile=persistence_profile,
+            composite_dossier_projection=composite_dossier_projection,
             alert_signals=alert_signals,
             next_steps=next_steps,
             exact_replay_anchors=exact_replay_anchors,
@@ -457,3 +467,50 @@ def _build_identity_graph_artifact_ref(
 ) -> dict[str, object]:
     """Return the operator-facing artifact shape used inside identity graph."""
     return {key: value for key, value in artifact_ref.items() if key != "artifact_id"}
+
+
+def _build_composite_dossier_projection(
+    request: _FinalSummaryRequest,
+    *,
+    persistence_profile: dict[str, object],
+) -> dict[str, object]:
+    """Return a bounded composite-run projection for operator dossiers."""
+    composite_run_ids = sorted(
+        {
+            str(composite_run_id)
+            for entry in request.ledger_entries
+            if (
+                composite_run_id := extract_diagnostic_context(entry).get(
+                    "composite_run_id"
+                )
+            )
+            is not None
+        }
+    )
+    composite_gap_count = request.correlation_anchor_gaps.get("composite_run_id", 0)
+    is_composite_run = (
+        _is_composite_execution_context(request.manifest)
+        or bool(composite_run_ids)
+        or composite_gap_count > 0
+    )
+    return {
+        "is_composite_run": is_composite_run,
+        "primary_composite_run_id": (
+            composite_run_ids[0] if len(composite_run_ids) == 1 else None
+        ),
+        "composite_run_ids": composite_run_ids,
+        "composite_run_id_consistent": len(composite_run_ids) <= 1
+        and composite_gap_count == 0,
+        "correlation_policy": {
+            "required_anchor": "composite_run_id",
+            "required_event_families": ["checkpoint", "composite"],
+            "semantic_anchor": "execution_fingerprint",
+            "occurrence_anchor": "composite_run_identity",
+            "status": "satisfied" if composite_gap_count == 0 else "gap",
+        },
+        "correlation_anchor_gaps": {"composite_run_id": composite_gap_count},
+        "resume_diagnostics": request.resume_diagnostics,
+        "resume_reconstructability": persistence_profile.get(
+            "composite_resume_reconstructability"
+        ),
+    }

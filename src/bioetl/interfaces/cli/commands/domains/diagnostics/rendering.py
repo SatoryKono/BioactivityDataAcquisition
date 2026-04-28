@@ -253,6 +253,7 @@ def _render_traceability_lines(traceability: object) -> list[str]:
         f"  trace_urls: {traceability.get('trace_urls')}",
         f"  trace_links_available: {traceability.get('trace_links_available')}",
         f"  correlation_anchor_gaps: {traceability.get('correlation_anchor_gaps')}",
+        f"  composite_projection: {traceability.get('composite_projection')}",
     ]
 
 

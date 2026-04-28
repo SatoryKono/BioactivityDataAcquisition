@@ -8,11 +8,11 @@ from typing import Any
 
 import yaml
 
-_METRIC_ALLOWLIST = Path("configs/quality/observability_metric_inventory_allowlist.yaml")
-_SLO_ALERT_CONTRACT = Path("configs/quality/observability_slo_alert_contract.yaml")
-_TRACING_COVERAGE_CONTRACT = Path(
-    "configs/quality/mandatory_tracing_coverage.yaml"
+_METRIC_ALLOWLIST = Path(
+    "configs/quality/observability_metric_inventory_allowlist.yaml"
 )
+_SLO_ALERT_CONTRACT = Path("configs/quality/observability_slo_alert_contract.yaml")
+_TRACING_COVERAGE_CONTRACT = Path("configs/quality/mandatory_tracing_coverage.yaml")
 _PROMETHEUS_RULES = Path("grafana/prometheus-rules/bioetl_observability.yml")
 
 
