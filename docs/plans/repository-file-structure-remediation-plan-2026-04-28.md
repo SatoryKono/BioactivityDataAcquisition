@@ -99,8 +99,9 @@ python scripts/ops/support/repo/cleanup_repository.py --dry-run
 Если `.venv/bin/python` недоступен, использовать штатный repo command:
 
 ```bash
-uv run python -m scripts.engineering.dev setup-mcp --skip-codex
+uv run python scripts/engineering/repo/audit_root_cleanliness.py
 uv run python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
+uv run python scripts/engineering/diagnostics/audit_structure.py --path .
 ```
 
 Выходные артефакты:
@@ -127,6 +128,10 @@ uv run python scripts/engineering/repo/audit_root_cleanliness.py --strict-untrac
    а cleanup-plan 2026-04-20/2026-04-21 только historical baseline.
 1. Обновить plan index и `configs/quality/repo_structure_catalog.yaml`, чтобы
    remediation plan был cataloged supporting context.
+1. Перед запуском root audit в PR убедиться, что новые cataloged plan files
+   уже staged/tracked. `audit_root_cleanliness.py` читает tracked/indexed paths
+   через `git ls-files`; cataloged but untracked plan files будут выглядеть как
+   missing.
 1. Проверить `.github/root-allowlist.txt` против фактических tracked root files:
 
 ```bash
@@ -533,14 +538,62 @@ pytest tests/architecture -q
 
 Scope:
 
-- relocate/delete root notes, ad-hoc tests, diagnostics and unknown runtime
-  surfaces after usage-check.
+- relocate/delete root notes, ad-hoc tests and diagnostics after usage-check.
 
 Verification:
 
 ```bash
 .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
 .venv/bin/python -m pytest tests/unit/scripts/repo/test_audit_root_cleanliness.py -q
+```
+
+### PR 7. Docker And Runtime Root Surface Review
+
+Scope:
+
+- review `Dockerfile`, `entrypoint.sh`, and `requirements.txt` if present in
+  tracked root;
+- move, remove, or explicitly allow them after usage-check.
+
+Verification:
+
+```bash
+git ls-files Dockerfile entrypoint.sh requirements.txt
+rg -n "Dockerfile|entrypoint\.sh|requirements\.txt" \
+  .github docs scripts tests configs README.md Makefile docker-compose*.yml pyproject.toml
+.venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py
+```
+
+### PR 8. Retention Procedure Boundary
+
+Scope:
+
+- document a separate retention-driven procedure for `data/**`, `reports/**`,
+  `docs/reports/**`, `docs/99-archive/**`, and fixtures;
+- do not delete retention-sensitive paths in the root cleanup wave.
+
+Verification:
+
+```bash
+python scripts/ops/data/verify_checksums.py --help
+python scripts/ops/data/validate_data_dir.py --help
+python scripts/ops/data/vacuum_delta.py --help
+```
+
+### PR 9. Enforcement Hardening
+
+Scope:
+
+- strengthen root hygiene tests and CI coverage;
+- align `.gitignore`, `.dockerignore`, allowlist, catalog, and cleanup scripts;
+- make root hygiene a required branch-protection check.
+
+Verification:
+
+```bash
+.venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
+.venv/bin/python -m pytest tests/unit/scripts/repo/test_audit_root_cleanliness.py -q
+.venv/bin/python -m pytest tests/architecture -q
 ```
 
 ## Rollback Strategy
