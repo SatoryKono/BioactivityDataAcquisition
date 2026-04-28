@@ -12,6 +12,11 @@ from typing import TYPE_CHECKING, cast
 
 import click
 
+from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
+    add_audit_run_options,
+    add_checkpoint_workflow_options,
+    run_async_inspection_command,
+)
 from bioetl.interfaces.cli.commands._inspection_output import (
     emit_inspection_payload,
 )
@@ -244,50 +249,21 @@ def checkpoint_list(pipeline: str) -> None:
 
 
 @checkpoint.command("audit-run")
-@click.option("--run-id", required=True, help="Pipeline RUN_ID to inspect")
-@click.option("--limit", default=100, show_default=True, help="Maximum audit entries")
-@click.option(
-    "--format",
-    "output_format",
-    type=click.Choice(["text", "json", "yaml"]),
-    default="text",
-    help="Output format",
-)
+@add_audit_run_options
 def checkpoint_audit_run(run_id: str, limit: int, output_format: str) -> None:
     """Inspect one pipeline run across audit and run-manifest observability surfaces."""
     workflow_service = get_observability_workflow_service()
 
-    async def _inspect() -> None:
-        try:
-            result = await workflow_service.inspect_audit_run(run_id, limit=limit)
-        except ValueError as exc:
-            echo_error("Audit run diagnostics failed", str(exc))
-            return
-        emit_inspection_payload(
-            result.to_dict(),
-            output_format,
-            text_renderer=_render_checkpoint_payload,
-        )
-
-    asyncio.run(_inspect())
+    run_async_inspection_command(
+        lambda: workflow_service.inspect_audit_run(run_id, limit=limit),
+        error_title="Audit run diagnostics failed",
+        output_format=output_format,
+        text_renderer=_render_checkpoint_payload,
+    )
 
 
 @checkpoint.command("inspect")
-@click.option("--pipeline", required=True, help="Pipeline name")
-@click.option("--run-id", default=None, help="Optional RUN_ID override")
-@click.option(
-    "--audit-limit",
-    default=100,
-    show_default=True,
-    help="Maximum audit entries",
-)
-@click.option(
-    "--format",
-    "output_format",
-    type=click.Choice(["text", "json", "yaml"]),
-    default="text",
-    help="Output format",
-)
+@add_checkpoint_workflow_options
 def checkpoint_inspect(
     pipeline: str,
     run_id: str | None,
@@ -297,23 +273,16 @@ def checkpoint_inspect(
     """Inspect checkpoint state with correlated audit and run-manifest context."""
     workflow_service = get_observability_workflow_service()
 
-    async def _inspect() -> None:
-        try:
-            result = await workflow_service.inspect_checkpoint_workflow(
-                pipeline,
-                run_id=run_id,
-                audit_limit=audit_limit,
-            )
-        except ValueError as exc:
-            echo_error("Checkpoint diagnostics failed", str(exc))
-            return
-        emit_inspection_payload(
-            result.to_dict(),
-            output_format,
-            text_renderer=_render_checkpoint_payload,
-        )
-
-    asyncio.run(_inspect())
+    run_async_inspection_command(
+        lambda: workflow_service.inspect_checkpoint_workflow(
+            pipeline,
+            run_id=run_id,
+            audit_limit=audit_limit,
+        ),
+        error_title="Checkpoint diagnostics failed",
+        output_format=output_format,
+        text_renderer=_render_checkpoint_payload,
+    )
 
 
 # Hint for tooling: explicit reference to command function.

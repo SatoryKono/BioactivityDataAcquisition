@@ -93,7 +93,7 @@ Start-Sleep -Seconds 60
 docker ps --filter "name=bioetl-neo4j"
 docker logs bioetl-neo4j | Select-Object -Last 30
 curl.exe http://localhost:7474/
-node test_neo4j_connection.js
+codex mcp get neo4j-memory
 ```
 
 Expected:
@@ -101,7 +101,7 @@ Expected:
 - container is `Up`
 - logs show normal startup progress
 - HTTP returns `200` or `302`
-- `test_neo4j_connection.js` prints `Connection successful`
+- `neo4j-memory` is registered through the project MCP wrapper
 
 ### 4. Validate backend from WSL
 
@@ -113,25 +113,25 @@ This maintained script:
 
 - uses `docker.exe`
 - tests `host.docker.internal`
-- runs the repo-root connection test
+- prepares `.env.local` for local MCP use
+- points follow-up verification at `scripts/ai/mcp/check_neo4j_memory.sh`
 
-### 5. Seed project memory
+### 5. Sync project memory
 
 Once connectivity is stable:
 
 ```bash
-node seed_test_docs_memory.js
-node query_test_docs_memory.js
+python -m scripts.memory sync --report-fast --report /tmp/neo4j-memory-audit.json
+python -m scripts.memory sync --apply
 ```
 
 ## Verification
 
 - `docker ps` shows `bioetl-neo4j` as `Up`
 - `curl http://localhost:7474/` returns `200` or `302`
-- `node test_neo4j_connection.js` succeeds
 - `bash scripts/memory/setup/wsl_startup.sh` succeeds
-- `node seed_test_docs_memory.js` succeeds
-- `node query_test_docs_memory.js` returns counts greater than zero
+- `bash scripts/ai/mcp/check_neo4j_memory.sh` succeeds
+- `python -m scripts.memory sync --report-fast --report /tmp/neo4j-memory-audit.json` succeeds
 
 ## Recovery
 
@@ -148,10 +148,10 @@ node query_test_docs_memory.js
 | File                                            | Purpose                                                    |
 | ----------------------------------------------- | ---------------------------------------------------------- |
 | `docker-compose.neo4j.yml`                      | Docker Compose service for Neo4j 5.13                      |
-| `test_neo4j_connection.js`                      | Driver-level connectivity test using the active URI        |
-| `test_neo4j_localhost.js`                       | Localhost-specific connectivity test                       |
-| `seed_test_docs_memory.js`                      | Seed block for test strategy + docs source-of-truth memory |
-| `query_test_docs_memory.js`                     | Retrieval check for seeded test/docs memory                |
+| `scripts/ai/mcp/check_neo4j_memory.sh`          | MCP registration and backend connectivity verification     |
+| `scripts/memory/sync.py`                        | Deterministic repo graph sync entrypoint                   |
+| `scripts/memory/query.py`                       | Operator-facing memory query entrypoint                    |
+| `scripts/memory/prompts/print_seed.sh`          | Maintained prompt seed helper for manual enrichment        |
 | `scripts/ops/runtime/docker/restart-docker.ps1` | Docker Desktop restart helper                              |
 | `scripts/memory/setup/wsl_startup.sh`           | WSL-aware setup and validation path                        |
 
@@ -175,7 +175,7 @@ If `curl http://localhost:7474/` sometimes works and sometimes hangs, treat the 
 
 ### Driver times out
 
-If `node test_neo4j_connection.js` times out:
+If `bash scripts/ai/mcp/check_neo4j_memory.sh` times out:
 
 - backend is still not truly ready
 - or Bolt path is unstable even though TCP is open
@@ -194,7 +194,7 @@ and verify that:
 
 - `host.docker.internal` resolves
 - HTTP works from WSL
-- the repo-root Node test can connect
+- `scripts/ai/mcp/check_neo4j_memory.sh` can validate MCP/backend state
 
 ## What Not To Assume
 
