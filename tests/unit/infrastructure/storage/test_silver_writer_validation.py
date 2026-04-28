@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import asyncio
 import sys
-import tempfile
 import warnings
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -24,13 +23,45 @@ from bioetl.infrastructure.validation.pandera_validator import (
     NoOpValidator,
     PanderaSilverValidator,
 )
+from tests.unit.infrastructure.storage.silver_writer._test_support import (
+    make_silver_writer,
+    patch_new_silver_write,
+    silver_table_path,
+    silver_write_schema,
+)
 
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-silver-writer-validation-"))
-SILVER_BASE_PATH = TEST_ROOT / "silver"
+
+def _build_pandera_validator(*, min_value: float | None = None) -> PanderaSilverValidator:
+    """Create a simple validator for ``entity_id``/``value`` test records."""
+    import pandera as pa
+
+    value_kwargs = {"checks": pa.Check.ge(min_value)} if min_value is not None else {}
+    return PanderaSilverValidator(
+        schema=pa.DataFrameSchema(
+            {
+                "entity_id": pa.Column(str),
+                "value": pa.Column(float, **value_kwargs),
+            }
+        )
+    )
 
 
-def _silver_table_path(table_name: str) -> str:
-    return str(SILVER_BASE_PATH / table_name.replace(".", "/"))
+def _build_validation_writer(
+    *,
+    logger: object,
+    validator: PanderaSilverValidator | NoOpValidator | None = None,
+    metrics: object | None = None,
+) -> object:
+    """Create ``SilverWriter`` with the standard validation-oriented defaults."""
+    writer_kwargs: dict[str, object] = {}
+    if validator is not None:
+        writer_kwargs["silver_validator"] = validator
+    if metrics is not None:
+        writer_kwargs["metrics"] = metrics
+    return make_silver_writer(
+        logger=logger,
+        **writer_kwargs,
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -70,41 +101,22 @@ class TestSilverWriterSilverValidatorInit:
 
     def test_init_with_default_validator(self, noop_logger):
         """Test SilverWriter creates NoOpValidator when not provided."""
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+        writer = make_silver_writer(logger=noop_logger)
         assert isinstance(writer._silver_validator, NoOpValidator)
 
     def test_init_with_custom_validator(self, noop_logger):
         """Test SilverWriter accepts custom SilverValidatorPort."""
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
         custom_validator = PanderaSilverValidator()
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = _build_validation_writer(
             logger=noop_logger,
-            silver_validator=custom_validator,
+            validator=custom_validator,
         )
         assert writer._silver_validator is custom_validator
 
     def test_init_with_pandera_schema_validator(self, noop_logger):
         """Test SilverWriter with PanderaSilverValidator with schema."""
-        import pandera as pa
-
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-        schema = pa.DataFrameSchema(
-            {
-                "entity_id": pa.Column(str),
-                "value": pa.Column(float),
-            }
-        )
-        validator = PanderaSilverValidator(schema=schema)
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
-            logger=noop_logger,
-            silver_validator=validator,
-        )
+        validator = _build_pandera_validator()
+        writer = _build_validation_writer(logger=noop_logger, validator=validator)
         assert writer._silver_validator is validator
 
 
@@ -114,12 +126,9 @@ class TestSilverWriterValidateSilverPandera:
 
     def test_validate_silver_pandera_with_noop_validator(self, noop_logger):
         """Test _validate_silver_pandera with NoOp validator passes."""
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = _build_validation_writer(
             logger=noop_logger,
-            silver_validator=NoOpValidator(),
+            validator=NoOpValidator(),
         )
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
         # Should not raise
@@ -127,21 +136,9 @@ class TestSilverWriterValidateSilverPandera:
 
     def test_validate_silver_pandera_with_valid_records(self, noop_logger):
         """Test _validate_silver_pandera passes with valid records."""
-        import pandera as pa
-
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-        schema = pa.DataFrameSchema(
-            {
-                "entity_id": pa.Column(str),
-                "value": pa.Column(float),
-            }
-        )
-        validator = PanderaSilverValidator(schema=schema)
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = _build_validation_writer(
             logger=noop_logger,
-            silver_validator=validator,
+            validator=_build_pandera_validator(),
         )
         records = [{"entity_id": "CHEMBL123", "value": 5.5}]
         # Should not raise
@@ -153,21 +150,9 @@ class TestSilverWriterValidateSilverPandera:
     )
     def test_validate_silver_pandera_with_invalid_records_raises(self, noop_logger):
         """Test _validate_silver_pandera raises SchemaViolationError for invalid records."""
-        import pandera as pa
-
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-        schema = pa.DataFrameSchema(
-            {
-                "entity_id": pa.Column(str),
-                "value": pa.Column(float, checks=pa.Check.ge(0)),
-            }
-        )
-        validator = PanderaSilverValidator(schema=schema)
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = _build_validation_writer(
             logger=noop_logger,
-            silver_validator=validator,
+            validator=_build_pandera_validator(min_value=0),
         )
         records = [{"entity_id": "CHEMBL123", "value": -5.5}]  # Negative value fails
 
@@ -183,22 +168,10 @@ class TestSilverWriterValidateSilverPandera:
     )
     def test_validate_silver_pandera_logs_error_on_failure(self):
         """Test _validate_silver_pandera logs error when validation fails."""
-        import pandera as pa
-
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-        schema = pa.DataFrameSchema(
-            {
-                "entity_id": pa.Column(str),
-                "value": pa.Column(float, checks=pa.Check.ge(0)),
-            }
-        )
-        validator = PanderaSilverValidator(schema=schema)
         mock_logger = MagicMock()
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = _build_validation_writer(
             logger=mock_logger,
-            silver_validator=validator,
+            validator=_build_pandera_validator(min_value=0),
         )
         records = [{"entity_id": "CHEMBL123", "value": -5.5}]
 
@@ -216,22 +189,10 @@ class TestSilverWriterValidateSilverPandera:
     )
     def test_validate_silver_pandera_increments_metric_on_failure(self):
         """Test _validate_silver_pandera increments metric when validation fails."""
-        import pandera as pa
-
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-        schema = pa.DataFrameSchema(
-            {
-                "entity_id": pa.Column(str),
-                "value": pa.Column(float, checks=pa.Check.ge(0)),
-            }
-        )
-        validator = PanderaSilverValidator(schema=schema)
         mock_metrics = MagicMock()
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = _build_validation_writer(
             logger=NoOpLogger(),
-            silver_validator=validator,
+            validator=_build_pandera_validator(min_value=0),
             metrics=mock_metrics,
         )
         records = [{"entity_id": "CHEMBL123", "value": -5.5}]
@@ -251,22 +212,10 @@ class TestSilverWriterValidateSilverPandera:
     )
     def test_validate_silver_pandera_uses_pipeline_label_for_versioned_tables(self):
         """Validation failure metrics should expose canonical pipeline labels."""
-        import pandera as pa
-
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-        schema = pa.DataFrameSchema(
-            {
-                "entity_id": pa.Column(str),
-                "value": pa.Column(float, checks=pa.Check.ge(0)),
-            }
-        )
-        validator = PanderaSilverValidator(schema=schema)
         mock_metrics = MagicMock()
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = _build_validation_writer(
             logger=NoOpLogger(),
-            silver_validator=validator,
+            validator=_build_pandera_validator(min_value=0),
             metrics=mock_metrics,
         )
         records = [{"entity_id": "CHEMBL123", "value": -5.5}]
@@ -297,34 +246,9 @@ class TestSilverWriterWriteSilverWithPanderaValidation:
         self, valid_records, noop_logger
     ):
         """Test write_silver raises SchemaViolationError when Pandera validation fails."""
-        import pandera as pa
-        import pyarrow as arrow_pa
-
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-        # Schema that will fail: requires value >= 100
-        pandera_schema = pa.DataFrameSchema(
-            {
-                "value": pa.Column(float, checks=pa.Check.ge(100)),
-            }
-        )
-        validator = PanderaSilverValidator(schema=pandera_schema)
-
-        arrow_schema = arrow_pa.schema(
-            [
-                arrow_pa.field("entity_id", arrow_pa.string()),
-                arrow_pa.field("value", arrow_pa.float64()),
-                arrow_pa.field("_run_id", arrow_pa.string()),
-                arrow_pa.field("_run_type", arrow_pa.string()),
-                arrow_pa.field("_source_batch_id", arrow_pa.string()),
-                arrow_pa.field("_ingestion_ts", arrow_pa.string()),
-            ]
-        )
-
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = _build_validation_writer(
             logger=noop_logger,
-            silver_validator=validator,
+            validator=_build_pandera_validator(min_value=100),
         )
 
         with pytest.raises(SchemaViolationError) as exc_info:
@@ -332,7 +256,7 @@ class TestSilverWriterWriteSilverWithPanderaValidation:
                 table_name="test.table",
                 records=valid_records,
                 primary_keys=["entity_id"],
-                schema=arrow_schema,
+                schema=silver_write_schema(),
                 mode="merge",
             )
 
@@ -347,52 +271,17 @@ class TestSilverWriterWriteSilverWithPanderaValidation:
         self, valid_records, noop_logger
     ):
         """Test write_silver proceeds when Pandera validation passes."""
-        import pandera as pa
-        import pyarrow as arrow_pa
-        from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
-
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-        # Schema that will pass: value >= 0
-        pandera_schema = pa.DataFrameSchema(
-            {
-                "value": pa.Column(float, checks=pa.Check.ge(0)),
-            }
-        )
-        validator = PanderaSilverValidator(schema=pandera_schema)
-
-        arrow_schema = arrow_pa.schema(
-            [
-                arrow_pa.field("entity_id", arrow_pa.string()),
-                arrow_pa.field("value", arrow_pa.float64()),
-                arrow_pa.field("_run_id", arrow_pa.string()),
-                arrow_pa.field("_run_type", arrow_pa.string()),
-                arrow_pa.field("_source_batch_id", arrow_pa.string()),
-                arrow_pa.field("_ingestion_ts", arrow_pa.string()),
-            ]
-        )
-
-        with (
-            patch(
-                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
-                side_effect=DeltaTableNotFoundError("Not found"),
-            ),
-            patch(
-                "bioetl.infrastructure.storage.silver_writer.write_deltalake"
-            ) as mock_write,
-        ):
-            writer = SilverWriter(
-                base_path=str(SILVER_BASE_PATH),
+        with patch_new_silver_write() as mock_write:
+            writer = _build_validation_writer(
                 logger=noop_logger,
-                silver_validator=validator,
+                validator=_build_pandera_validator(min_value=0),
             )
-
             # Should not raise
             await writer.write_silver(
                 table_name="test.table",
                 records=valid_records,
                 primary_keys=["entity_id"],
-                schema=arrow_schema,
+                schema=silver_write_schema(),
                 mode="merge",
             )
 
@@ -404,43 +293,16 @@ class TestSilverWriterWriteSilverWithPanderaValidation:
         self, valid_records, noop_logger
     ):
         """Test write_silver with NoOp validator allows write without Pandera."""
-        import pyarrow as arrow_pa
-        from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
-
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-        arrow_schema = arrow_pa.schema(
-            [
-                arrow_pa.field("entity_id", arrow_pa.string()),
-                arrow_pa.field("value", arrow_pa.float64()),
-                arrow_pa.field("_run_id", arrow_pa.string()),
-                arrow_pa.field("_run_type", arrow_pa.string()),
-                arrow_pa.field("_source_batch_id", arrow_pa.string()),
-                arrow_pa.field("_ingestion_ts", arrow_pa.string()),
-            ]
-        )
-
-        with (
-            patch(
-                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
-                side_effect=DeltaTableNotFoundError("Not found"),
-            ),
-            patch(
-                "bioetl.infrastructure.storage.silver_writer.write_deltalake"
-            ) as mock_write,
-        ):
+        with patch_new_silver_write() as mock_write:
             # Default NoOp validator
-            writer = SilverWriter(
-                base_path=str(SILVER_BASE_PATH),
-                logger=noop_logger,
-            )
+            writer = make_silver_writer(logger=noop_logger)
 
             # Should not raise
             await writer.write_silver(
                 table_name="test.table",
                 records=valid_records,
                 primary_keys=["entity_id"],
-                schema=arrow_schema,
+                schema=silver_write_schema(),
                 mode="merge",
             )
 
@@ -457,13 +319,12 @@ class TestSilverWriterPreparePayloadExecutor:
         """Sync validation should be offloaded from the event loop."""
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
         from bioetl.infrastructure.storage.silver.validation_mixin import (
             _ValidatedSilverWriteContext,
         )
         from bioetl.domain.medallion import WriteModePolicy
 
-        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+        writer = make_silver_writer(logger=noop_logger)
         records = [
             {
                 "entity_id": "CHEMBL123",
@@ -496,7 +357,7 @@ class TestSilverWriterPreparePayloadExecutor:
             _metrics=None,
             _silver_validator=None,  # type: ignore
             _get_table_schema=AsyncMock(return_value=None),  # type: ignore
-            _resolve_table_path=_silver_table_path,
+            _resolve_table_path=silver_table_path,
             _prepare_arrow_data=lambda *args, **kwargs: expected_table,
             _validate_write_mode=lambda x: SilverWriteMode.APPEND,
             _deduplicate_by_primary_keys=lambda records, keys: records,
@@ -537,7 +398,7 @@ class TestSilverWriterPreparePayloadExecutor:
         assert payload.records == records
         assert payload.validated_mode is SilverWriteMode.APPEND
         # Normalize paths for comparison to handle different separators across platforms
-        expected_path = str(Path(_silver_table_path("test.table")).resolve())
+        expected_path = str(Path(silver_table_path("test.table")).resolve())
         actual_path = str(Path(payload.table_path).resolve())
         assert expected_path == actual_path, (
             f"Expected {expected_path}, got {actual_path}"
@@ -558,12 +419,11 @@ class TestSilverWriterPreparePayloadExecutor:
         """Schema drift check should happen after sync payload building completes."""
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
         from bioetl.infrastructure.storage.silver.validation_mixin import (
             _ValidatedSilverWriteContext,
         )
 
-        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+        writer = make_silver_writer(logger=noop_logger)
         records = [
             {
                 "entity_id": "CHEMBL123",
@@ -628,13 +488,12 @@ class TestSilverWriterPreparePayloadExecutor:
         """Silver payload preparation should pass one named request into sync stage."""
         import pyarrow as pa
 
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
         from bioetl.infrastructure.storage.silver.validation_mixin import (
             _SilverWritePreparationRequest,
             _ValidatedSilverWriteContext,
         )
 
-        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+        writer = make_silver_writer(logger=noop_logger)
         records = [
             {
                 "entity_id": "CHEMBL123",

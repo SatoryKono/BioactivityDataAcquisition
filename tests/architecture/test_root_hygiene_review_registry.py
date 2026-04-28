@@ -10,6 +10,9 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_PATH = ROOT / "configs" / "quality" / "root_hygiene_review_registry.yaml"
 STRUCTURE_CATALOG_PATH = ROOT / "configs" / "quality" / "repo_structure_catalog.yaml"
+REMEDIATION_PLAN_PATH = (
+    ROOT / "docs" / "plans" / "repository-file-structure-remediation-plan-2026-04-28.md"
+)
 
 ALLOWED_CLASSIFICATIONS = {
     "blocked_cleanup_zone",
@@ -120,3 +123,23 @@ def test_blocked_cleanup_lane_matches_structure_catalog() -> None:
     }
     for candidate in blocked_candidates:
         assert candidate.get("cleanup_runbook") == catalog_runbooks[candidate["path"]]
+
+
+def test_remediation_plan_links_github_issue_set_and_required_sources() -> None:
+    text = REMEDIATION_PLAN_PATH.read_text(encoding="utf-8")
+
+    for issue_ref in ("#3219", "#3223", "#3226", "#3227"):
+        assert issue_ref in text
+
+    for required_reference in (
+        ".github/root-allowlist.txt",
+        "configs/quality/repo_structure_catalog.yaml",
+        "docs/05-operations/runbooks/retention-sensitive-cleanup.md",
+        "configs/quality/scripts_lifecycle_registry.json",
+        "configs/quality/root_hygiene_review_registry.yaml",
+    ):
+        assert required_reference in text
+
+    assert "root-hygiene" in text
+    assert "401" in text
+    assert "owner/admin verification" in text

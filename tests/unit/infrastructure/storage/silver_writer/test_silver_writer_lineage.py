@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 import asyncio
-import tempfile
-from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -15,15 +13,14 @@ from bioetl.domain.medallion import SilverWriteMode
 from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
     make_produced_artifact_fragment,
 )
+from tests.unit.infrastructure.storage.silver_writer._test_support import (
+    make_silver_writer,
+    patch_new_silver_write,
+    silver_table_path,
+    silver_write_schema,
+)
 
 pytestmark = pytest.mark.unit
-
-TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-silver-writer-lineage-"))
-SILVER_BASE_PATH = TEST_ROOT / "silver"
-
-
-def _silver_table_path(table_name: str) -> str:
-    return str(SILVER_BASE_PATH / table_name.replace(".", "/"))
 
 
 def _make_bundle_safe_metadata(run_id: str = "test-run") -> MagicMock:
@@ -40,6 +37,36 @@ def _require_captured_input(value: object, message: str) -> object:
     return value
 
 
+def _capturing_metadata_writer() -> tuple[MagicMock, list[dict[str, object]]]:
+    """Create a metadata writer mock that records canonical write calls."""
+    write_calls: list[dict[str, object]] = []
+
+    async def capture_write(
+        table_path: str,
+        metadata: object,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
+    ) -> None:
+        await asyncio.sleep(0)
+        write_calls.append(
+            {
+                "table_path": table_path,
+                "metadata": metadata,
+                "table_name": table_name,
+                "flat_structure": flat_structure,
+                "provider": provider,
+                "entity": entity,
+            }
+        )
+
+    metadata_writer = MagicMock()
+    metadata_writer.write_silver_metadata = capture_write
+    return metadata_writer, write_calls
+
+
 class TestSilverWriterAudit:
     """Tests for SilverWriter audit logging."""
 
@@ -51,9 +78,8 @@ class TestSilverWriterAudit:
 
         from bioetl.domain.medallion import SilverWriteMode
         from bioetl.domain.types import BatchID, RunID, RunType
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+        writer = make_silver_writer(logger=noop_logger)
 
         # Should not raise, just return early
         await writer._log_silver_audit(
@@ -74,11 +100,11 @@ class TestSilverWriterAudit:
 
         from bioetl.domain.medallion import SilverWriteMode
         from bioetl.domain.types import BatchID, RunType
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_audit = MagicMock()
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH), logger=noop_logger, audit=mock_audit
+        writer = make_silver_writer(
+            logger=noop_logger,
+            audit=mock_audit,
         )
 
         with pytest.raises(ValueError, match="run_id is required"):
@@ -102,14 +128,11 @@ class TestSilverWriterAudit:
 
         from bioetl.domain.medallion import SilverWriteMode
         from bioetl.domain.types import BatchID, RunID, RunType
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_audit = MagicMock()
         mock_audit.log_write = AsyncMock()
 
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH), logger=noop_logger, audit=mock_audit
-        )
+        writer = make_silver_writer(logger=noop_logger, audit=mock_audit)
 
         valid_uuid = uuid4()
         await writer._log_silver_audit(
@@ -132,14 +155,11 @@ class TestSilverWriterAudit:
 
         from bioetl.domain.medallion import SilverWriteMode
         from bioetl.domain.types import BatchID, RunID, RunType
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_audit = MagicMock()
         mock_audit.log_write = AsyncMock()
 
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH), logger=noop_logger, audit=mock_audit
-        )
+        writer = make_silver_writer(logger=noop_logger, audit=mock_audit)
 
         valid_uuid = uuid4()
         ingestion_dt = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
@@ -163,14 +183,11 @@ class TestSilverWriterAudit:
 
         from bioetl.domain.medallion import SilverWriteMode
         from bioetl.domain.types import BatchID, RunID, RunType
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         mock_audit = MagicMock()
         mock_audit.log_write = AsyncMock()
 
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH), logger=noop_logger, audit=mock_audit
-        )
+        writer = make_silver_writer(logger=noop_logger, audit=mock_audit)
 
         valid_uuid = uuid4()
         with pytest.raises(ValueError, match="ingestion_ts is required"):
@@ -195,34 +212,11 @@ class TestSilverWriterCsvExport:
     async def test_write_silver_with_csv_exporter(self, noop_logger, valid_records):
         """Test write_silver calls CSV exporter when configured."""
 
-        import pyarrow as pa
-        from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
-
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
         mock_exporter = MagicMock()
         mock_exporter.export = AsyncMock()
 
-        schema = pa.schema(
-            [
-                pa.field("entity_id", pa.string()),
-                pa.field("value", pa.float64()),
-                pa.field("_run_id", pa.string()),
-                pa.field("_run_type", pa.string()),
-                pa.field("_source_batch_id", pa.string()),
-                pa.field("_ingestion_ts", pa.string()),
-            ]
-        )
-
-        with (
-            patch(
-                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
-                side_effect=DeltaTableNotFoundError("Not found"),
-            ),
-            patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
-        ):
-            writer = SilverWriter(
-                base_path=str(SILVER_BASE_PATH),
+        with patch_new_silver_write(patch_base_delta_table=True):
+            writer = make_silver_writer(
                 logger=noop_logger,
                 csv_exporter=mock_exporter,
             )
@@ -231,7 +225,7 @@ class TestSilverWriterCsvExport:
                 table_name="test.table",
                 records=valid_records,
                 primary_keys=["entity_id"],
-                schema=schema,
+                schema=silver_write_schema(),
                 mode="append",
             )
 
@@ -242,11 +236,6 @@ class TestSilverWriterCsvExport:
         self, noop_logger, valid_records, tmp_path
     ):
         """Test CSV exporter receives primary_keys when mode is merge."""
-        import pyarrow as pa
-        from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
-
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
         mock_exporter = MagicMock()
         export_calls = []
 
@@ -256,31 +245,10 @@ class TestSilverWriterCsvExport:
 
         mock_exporter.export = capture_export
 
-        schema = pa.schema(
-            [
-                pa.field("entity_id", pa.string()),
-                pa.field("value", pa.float64()),
-                pa.field("_run_id", pa.string()),
-                pa.field("_run_type", pa.string()),
-                pa.field("_source_batch_id", pa.string()),
-                pa.field("_ingestion_ts", pa.string()),
-            ]
-        )
-
-        with (
-            patch(
-                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
-                side_effect=DeltaTableNotFoundError("Not found"),
-            ),
-            patch(
-                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
-                side_effect=DeltaTableNotFoundError("Not found"),
-            ),
-            patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
-        ):
-            writer = SilverWriter(
-                base_path=str(tmp_path / "silver"),
+        with patch_new_silver_write(patch_base_delta_table=True):
+            writer = make_silver_writer(
                 logger=noop_logger,
+                base_path=tmp_path / "silver",
                 csv_exporter=mock_exporter,
             )
 
@@ -288,7 +256,7 @@ class TestSilverWriterCsvExport:
                 table_name="test.table",
                 records=valid_records,
                 primary_keys=["entity_id"],
-                schema=schema,
+                schema=silver_write_schema(),
                 mode="merge",
             )
 
@@ -305,43 +273,15 @@ class TestSilverWriterLineage:
         self, noop_logger, valid_records, tmp_path
     ):
         """Test write_silver works without bronze_refs (backward compatibility)."""
-        import pyarrow as pa
-        from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
-
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-        schema = pa.schema(
-            [
-                pa.field("entity_id", pa.string()),
-                pa.field("value", pa.float64()),
-                pa.field("_run_id", pa.string()),
-                pa.field("_run_type", pa.string()),
-                pa.field("_source_batch_id", pa.string()),
-                pa.field("_ingestion_ts", pa.string()),
-            ]
-        )
-
-        with (
-            patch(
-                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
-                side_effect=DeltaTableNotFoundError("Not found"),
-            ),
-            patch(
-                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
-                side_effect=DeltaTableNotFoundError("Not found"),
-            ),
-            patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
-        ):
-            writer = SilverWriter(
-                base_path=str(tmp_path / "silver"), logger=noop_logger
-            )
+        with patch_new_silver_write(patch_base_delta_table=True):
+            writer = make_silver_writer(logger=noop_logger, base_path=tmp_path / "silver")
 
             # Should not raise when bronze_refs not provided
             await writer.write_silver(
                 table_name="test.table",
                 records=valid_records,
                 primary_keys=["entity_id"],
-                schema=schema,
+                schema=silver_write_schema(),
                 mode="merge",
             )
 
@@ -352,23 +292,8 @@ class TestSilverWriterLineage:
         """Test write_silver accepts bronze_refs parameter."""
         from uuid import uuid4
 
-        import pyarrow as pa
-        from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
-
         from bioetl.domain.types import BatchID
         from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-        schema = pa.schema(
-            [
-                pa.field("entity_id", pa.string()),
-                pa.field("value", pa.float64()),
-                pa.field("_run_id", pa.string()),
-                pa.field("_run_type", pa.string()),
-                pa.field("_source_batch_id", pa.string()),
-                pa.field("_ingestion_ts", pa.string()),
-            ]
-        )
 
         bronze_result = BronzeWriteResult(
             batch_id=BatchID(uuid4()),
@@ -380,27 +305,15 @@ class TestSilverWriterLineage:
             checksum_blake2="abc123def456",
         )
 
-        with (
-            patch(
-                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
-                side_effect=DeltaTableNotFoundError("Not found"),
-            ),
-            patch(
-                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
-                side_effect=DeltaTableNotFoundError("Not found"),
-            ),
-            patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
-        ):
-            writer = SilverWriter(
-                base_path=str(tmp_path / "silver"), logger=noop_logger
-            )
+        with patch_new_silver_write(patch_base_delta_table=True):
+            writer = make_silver_writer(logger=noop_logger, base_path=tmp_path / "silver")
 
             # Should not raise with bronze_refs
             await writer.write_silver(
                 table_name="test.table",
                 records=valid_records,
                 primary_keys=["entity_id"],
-                schema=schema,
+                schema=silver_write_schema(),
                 mode="merge",
                 bronze_refs=[bronze_result],
             )
@@ -414,10 +327,7 @@ class TestSilverWriterLineage:
 
         from bioetl.domain.types import BatchID
         from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
-        from bioetl.infrastructure.storage.silver_writer import (
-            SilverWriteMode,
-            SilverWriter,
-        )
+        from bioetl.infrastructure.storage.silver_writer import SilverWriteMode
 
         bronze_result_1 = BronzeWriteResult(
             batch_id=BatchID(uuid4()),
@@ -439,32 +349,16 @@ class TestSilverWriterLineage:
             checksum_blake2="def456",
         )
 
-        mock_metadata_writer = MagicMock()
-        write_calls = []
+        mock_metadata_writer, write_calls = _capturing_metadata_writer()
 
-        async def capture_write(
-            table_path,
-            metadata,
-            *,
-            table_name=None,
-            flat_structure=False,
-            provider=None,
-            entity=None,
-        ):
-            await asyncio.sleep(0)
-            write_calls.append({"table_path": table_path, "metadata": metadata})
-
-        mock_metadata_writer.write_silver_metadata = capture_write
-
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = make_silver_writer(
             logger=noop_logger,
             metadata_writer=mock_metadata_writer,
             metadata_coordinator=mock_metadata_coordinator,
         )
 
         await writer._write_silver_metadata(
-            table_path=_silver_table_path("test.table"),
+            table_path=silver_table_path("test.table"),
             table_name="test_table",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -489,37 +383,18 @@ class TestSilverWriterLineage:
         self, noop_logger, valid_records, mock_metadata_coordinator
     ):
         """Test _write_silver_metadata has empty bronze_paths when bronze_refs=None."""
-        from bioetl.infrastructure.storage.silver_writer import (
-            SilverWriteMode,
-            SilverWriter,
-        )
+        from bioetl.infrastructure.storage.silver_writer import SilverWriteMode
 
-        mock_metadata_writer = MagicMock()
-        write_calls = []
+        mock_metadata_writer, write_calls = _capturing_metadata_writer()
 
-        async def capture_write(
-            table_path,
-            metadata,
-            *,
-            table_name=None,
-            flat_structure=False,
-            provider=None,
-            entity=None,
-        ):
-            await asyncio.sleep(0)
-            write_calls.append({"table_path": table_path, "metadata": metadata})
-
-        mock_metadata_writer.write_silver_metadata = capture_write
-
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = make_silver_writer(
             logger=noop_logger,
             metadata_writer=mock_metadata_writer,
             metadata_coordinator=mock_metadata_coordinator,
         )
 
         await writer._write_silver_metadata(
-            table_path=_silver_table_path("test.table"),
+            table_path=silver_table_path("test.table"),
             table_name="test_table",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -538,8 +413,6 @@ class TestSilverWriterLineage:
         self, noop_logger, valid_records, mock_metadata_coordinator
     ):
         """Standard Silver metadata path should preserve version and resolved target."""
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
         metadata = _make_bundle_safe_metadata()
         captured_input = None
 
@@ -561,15 +434,14 @@ class TestSilverWriterLineage:
         mock_metadata_writer = MagicMock()
         mock_metadata_writer.write_silver_metadata = AsyncMock()
 
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = make_silver_writer(
             logger=noop_logger,
             metadata_writer=mock_metadata_writer,
             metadata_coordinator=mock_metadata_coordinator,
         )
 
         await writer._write_silver_metadata(
-            table_path=_silver_table_path("chembl.activity"),
+            table_path=silver_table_path("chembl.activity"),
             table_name="chembl.activity",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -583,7 +455,7 @@ class TestSilverWriterLineage:
         )
         assert silver_input.version_after == 7
         mock_metadata_writer.write_silver_metadata.assert_awaited_once_with(
-            _silver_table_path("chembl.activity"),
+            silver_table_path("chembl.activity"),
             metadata,
             table_name="chembl.activity",
             flat_structure=False,
@@ -596,8 +468,6 @@ class TestSilverWriterLineage:
         self, noop_logger, valid_records, mock_metadata_coordinator
     ):
         """Standard and merged metadata flows should converge on one file handoff."""
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
         metadata = _make_bundle_safe_metadata()
 
         def create_silver_metadata_bundle(input_data: object) -> MetadataLineageBundle:
@@ -614,8 +484,7 @@ class TestSilverWriterLineage:
         mock_metadata_coordinator.create_silver_metadata_bundle = (
             create_silver_metadata_bundle
         )
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = make_silver_writer(
             logger=noop_logger,
             metadata_writer=MagicMock(),
             metadata_coordinator=mock_metadata_coordinator,
@@ -623,7 +492,7 @@ class TestSilverWriterLineage:
         writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
         await writer._write_silver_metadata(
-            table_path=_silver_table_path("chembl.activity"),
+            table_path=silver_table_path("chembl.activity"),
             table_name="chembl.activity",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -632,7 +501,7 @@ class TestSilverWriterLineage:
         )
 
         writer._write_silver_metadata_file.assert_awaited_once_with(
-            table_path=_silver_table_path("chembl.activity"),
+            table_path=silver_table_path("chembl.activity"),
             metadata=metadata,
             table_name="chembl.activity",
             provider_name="chembl",
@@ -646,7 +515,6 @@ class TestSilverWriterLineage:
         """Concrete bundle-aware coordinators should materialize lineage fragments."""
         from bioetl.infrastructure.storage.silver_writer import (
             SilverWriteMode,
-            SilverWriter,
         )
 
         metadata = _make_bundle_safe_metadata()
@@ -672,8 +540,7 @@ class TestSilverWriterLineage:
                 return metadata
 
         lineage_store = MagicMock()
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = make_silver_writer(
             logger=noop_logger,
             metadata_writer=MagicMock(),
             metadata_coordinator=_Coordinator(),
@@ -682,7 +549,7 @@ class TestSilverWriterLineage:
         writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
         await writer._write_silver_metadata(
-            table_path=_silver_table_path("chembl.activity"),
+            table_path=silver_table_path("chembl.activity"),
             table_name="chembl.activity",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -700,8 +567,6 @@ class TestSilverWriterLineage:
         from bioetl.application.services.lineage import (
             MetadataLineageBundle,
         )
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
         metadata = _make_bundle_safe_metadata()
         mock_metadata_writer = MagicMock()
         mock_metadata_writer.write_silver_metadata = AsyncMock()
@@ -723,15 +588,14 @@ class TestSilverWriterLineage:
                     ),
                 )
 
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = make_silver_writer(
             logger=noop_logger,
             metadata_writer=mock_metadata_writer,
             metadata_coordinator=_Coordinator(),
         )
         writer._get_delta_version = AsyncMock(return_value=11)  # type: ignore[method-assign]
         await writer._write_silver_merged_metadata(
-            table_path=_silver_table_path("composite.publication"),
+            table_path=silver_table_path("composite.publication"),
             table_name="composite.publication",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -740,11 +604,11 @@ class TestSilverWriterLineage:
         )
 
         input_arg = writer._metadata_coordinator.last_input
-        assert input_arg.table_path == _silver_table_path("composite.publication")
+        assert input_arg.table_path == silver_table_path("composite.publication")
         assert input_arg.mode == SilverWriteMode.DELETE
         assert input_arg.version_after == 11
         mock_metadata_writer.write_silver_metadata.assert_awaited_once_with(
-            _silver_table_path("composite.publication"),
+            silver_table_path("composite.publication"),
             metadata,
             table_name="composite.publication",
             flat_structure=False,
@@ -760,8 +624,6 @@ class TestSilverWriterLineage:
         from bioetl.application.services.lineage import (
             MetadataLineageBundle,
         )
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
         metadata = _make_bundle_safe_metadata(run_id="run-1")
 
         class _Coordinator:
@@ -779,8 +641,7 @@ class TestSilverWriterLineage:
                     ),
                 )
 
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = make_silver_writer(
             logger=noop_logger,
             metadata_writer=MagicMock(),
             metadata_coordinator=_Coordinator(),
@@ -789,7 +650,7 @@ class TestSilverWriterLineage:
         writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
         await writer._write_silver_merged_metadata(
-            table_path=_silver_table_path("composite.publication"),
+            table_path=silver_table_path("composite.publication"),
             table_name="composite.publication",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -798,7 +659,7 @@ class TestSilverWriterLineage:
         )
 
         writer._write_silver_metadata_file.assert_awaited_once_with(
-            table_path=_silver_table_path("composite.publication"),
+            table_path=silver_table_path("composite.publication"),
             metadata=metadata,
             table_name="composite.publication",
             provider_name="composite",
@@ -812,8 +673,6 @@ class TestSilverWriterLineage:
         """Merged Silver metadata should persist canonical lineage fragments too."""
         from bioetl.domain.medallion import SilverWriteMode
         from bioetl.domain.ports import SilverMetadataInput
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
         metadata = _make_bundle_safe_metadata(run_id="run-1")
         fragment = make_produced_artifact_fragment(
             fragment_id="silver:merged-fragment-1",
@@ -839,8 +698,7 @@ class TestSilverWriterLineage:
                 return metadata
 
         lineage_store = MagicMock()
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = make_silver_writer(
             logger=noop_logger,
             metadata_writer=MagicMock(),
             metadata_coordinator=_Coordinator(),
@@ -850,7 +708,7 @@ class TestSilverWriterLineage:
         writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
         await writer._write_silver_merged_metadata(
-            table_path=_silver_table_path("composite.publication"),
+            table_path=silver_table_path("composite.publication"),
             table_name="composite.publication",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -866,7 +724,7 @@ class TestSilverWriterLineage:
         assert captured_input.version_after == 11
         assert captured_input.records == valid_records
         writer._write_silver_metadata_file.assert_awaited_once_with(
-            table_path=_silver_table_path("composite.publication"),
+            table_path=silver_table_path("composite.publication"),
             metadata=metadata,
             table_name="composite.publication",
             provider_name="composite",
@@ -880,11 +738,8 @@ class TestSilverWriterLineage:
     ):
         """Standard and merged metadata writes must fail closed without coordinator."""
         from bioetl.domain.medallion import SilverWriteMode
-        from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
         logger = MagicMock()
-        writer = SilverWriter(
-            base_path=str(SILVER_BASE_PATH),
+        writer = make_silver_writer(
             logger=logger,
             metadata_coordinator=None,
         )
@@ -895,7 +750,7 @@ class TestSilverWriterLineage:
         ):
             writer._metadata_writer = MagicMock()
             await writer._write_silver_metadata(
-                table_path=_silver_table_path("chembl.activity"),
+                table_path=silver_table_path("chembl.activity"),
                 table_name="chembl.activity",
                 records=valid_records,
                 primary_keys=["entity_id"],
@@ -907,7 +762,7 @@ class TestSilverWriterLineage:
         ):
             writer._metadata_writer = MagicMock()
             await writer._write_silver_merged_metadata(
-                table_path=_silver_table_path("composite.publication"),
+                table_path=silver_table_path("composite.publication"),
                 table_name="composite.publication",
                 records=valid_records,
                 primary_keys=["entity_id"],

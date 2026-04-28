@@ -45,6 +45,38 @@ replay, traceability, fixture-governance и control-plane guarantees.
 2026-04-21 про `root cleanliness passes` нельзя использовать как текущее
 evidence после аудита 2026-04-28.
 
+## GitHub Tracking Baseline
+
+Текущий remediation baseline уже имеет canonical issue set в GitHub:
+
+- `#3219` `RH-001 finalize remediation plan and baseline root evidence`
+- `#3223` `RH-005 finish AI tooling root surface migration`
+- `#3226` `RH-008 define bounded cleanup procedure for protected surfaces`
+- `#3227` `RH-009 harden root hygiene enforcement and branch protection`
+
+Все четыре issue к моменту этой фиксации уже закрыты `2026-04-28`. Для
+повторного анализа root hygiene следует ссылаться на этот issue-set и на
+machine-checked repo state, а не создавать новый competing remediation queue.
+
+Обязательные опорные источники для решений по cleanup:
+
+- `.github/root-allowlist.txt`
+- `configs/quality/repo_structure_catalog.yaml`
+- `docs/05-operations/runbooks/retention-sensitive-cleanup.md`
+- `configs/quality/scripts_lifecycle_registry.json`
+- `configs/quality/root_hygiene_review_registry.yaml`
+
+GitHub policy docs уже требуют `root-hygiene` как required check для `main`, но
+live branch-protection admin state не является полностью проверяемым из
+анонимного public API. Повторная попытка запроса
+`GET /repos/SatoryKono/BioactivityDataAcquisition/branches/main/protection` на
+`2026-04-28` вернула `401`, поэтому фактическое состояние required checks
+должно дополнительно подтверждаться repository owner/admin в GitHub settings
+или authenticated API session. До такой проверки следует различать:
+
+- `policy-as-docs`: `root-hygiene` MUST be required;
+- `live admin state`: requires owner/admin verification.
+
 ## Guardrails
 
 ### Запрещено для broad cleanup
