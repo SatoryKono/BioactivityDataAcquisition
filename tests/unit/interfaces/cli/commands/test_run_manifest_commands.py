@@ -247,6 +247,38 @@ class _FakeRunManifestService:
                         ],
                     },
                 },
+                "reproducibility_policy_assessment": {
+                    "required_persistence_profile": "replay_ready",
+                    "replay_capability": "exact_replay_supported",
+                    "strict_requirement_requested": True,
+                    "strict_exact_replay_supported": True,
+                    "required_profile_satisfied": True,
+                    "blocking_gaps": [],
+                    "snapshot_envelope": {
+                        "source_count": 1,
+                        "sources_with_snapshots": 1,
+                        "any_input_snapshots": True,
+                        "full_snapshot_envelope": True,
+                        "require_full_snapshot_envelope": False,
+                    },
+                },
+                "reproducibility_diagnostics": {
+                    "policy": {
+                        "required_persistence_profile": "replay_ready",
+                        "attained_profile": "forensic_grade",
+                        "policy_assessment": {
+                            "required_profile_satisfied": True,
+                            "blocking_gaps": [],
+                        },
+                    },
+                    "semantic_identity": {
+                        "execution_fingerprint": "fingerprint-1",
+                        "config_hash_compatibility_anchor": "deadbeef",
+                    },
+                    "checkpoint_anchors": {
+                        "resume_contract": {"resume_requested": False}
+                    },
+                },
                 "alert_signals": {
                     "run_failed": False,
                     "run_shutdown": False,
@@ -443,6 +475,12 @@ class TestRunManifestCommands:
         assert payload["identity_graph"]["manifest_id"] == "manifest-1"
         assert payload["identity_graph"]["replay_mode"] == "exact_replay"
         assert payload["diagnostics"]["contract_version"] == "1.2.0"
+        assert (
+            payload["diagnostics"]["reproducibility_policy_assessment"][
+                "required_profile_satisfied"
+            ]
+            is True
+        )
         assert payload["diagnostics"]["dq_rule_ids"] == ["gold.not_null.id"]
         assert payload["diagnostics"]["cross_validation_rule_ids"] == [
             "composite.cross_validation.quarantine"
@@ -535,6 +573,9 @@ class TestRunManifestCommands:
         assert "cross_validation_config_paths" in result.output
         assert "correlation_anchor_gaps" in result.output
         assert "persistence_profile" in result.output
+        assert "reproducibility_policy_assessment" in result.output
+        assert "reproducibility_diagnostics" in result.output
+        assert "config_hash_compatibility_anchor" in result.output
         assert "attained_profile" in result.output
         assert "forensic_grade" in result.output
         assert "composite_resume_reconstructability" in result.output

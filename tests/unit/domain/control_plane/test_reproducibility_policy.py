@@ -9,6 +9,8 @@ from bioetl.domain.control_plane import (
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
     assess_reproducibility_policy,
+    legacy_config_hash_from_resolved_config_hash,
+    resolve_effective_required_persistence_profile,
     resolve_replay_capability,
 )
 from bioetl.domain.control_plane.reproducibility_profiles import (
@@ -85,3 +87,31 @@ def test_supported_family_contract_publishes_replay_ready_default() -> None:
 
     assert contract["strict_exact_replay_supported"] is True
     assert contract["default_required_persistence_profile"] == "replay_ready"
+
+
+def test_exact_replay_launch_inherits_supported_family_default_profile() -> None:
+    assert (
+        resolve_effective_required_persistence_profile(
+            configured_required_profile="degraded_observable",
+            family_default_profile="replay_ready",
+            exact_replay_requested=True,
+        )
+        == "replay_ready"
+    )
+
+
+def test_non_exact_launch_preserves_configured_default_profile() -> None:
+    assert (
+        resolve_effective_required_persistence_profile(
+            configured_required_profile="degraded_observable",
+            family_default_profile="replay_ready",
+            exact_replay_requested=False,
+        )
+        == "degraded_observable"
+    )
+
+
+def test_legacy_config_hash_alias_is_resolved_config_hash() -> None:
+    assert legacy_config_hash_from_resolved_config_hash("resolved-hash") == (
+        "resolved-hash"
+    )

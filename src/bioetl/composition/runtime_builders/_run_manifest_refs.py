@@ -10,6 +10,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.domain.control_plane import RunArtifactRef
+from bioetl.domain.control_plane.reproducibility_policy import (
+    legacy_config_hash_from_resolved_config_hash,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
@@ -130,9 +133,9 @@ def create_control_plane_refs(
     return ManifestControlPlaneRefs(
         manifest_id=manifest_id,
         execution_fingerprint=execution_fingerprint,
-        # Preserve the legacy config-hash alias for factory/checkpoint seams that
+        # Preserve the documented legacy alias for factory/checkpoint seams that
         # still expect a single canonical config surface.
-        config_hash=resolved_config_hash,
+        config_hash=legacy_config_hash_from_resolved_config_hash(resolved_config_hash),
         resolved_config_hash=resolved_config_hash,
         effective_config_hash=effective_config_hash,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,

@@ -294,10 +294,10 @@ class TestEffectiveConfigService:
         }
         assert "occurrence_envelope" in parsed
 
-    def test_source_class_provenance_marks_anchored_external_and_unsupported_classes(
+    def test_source_class_provenance_marks_anchored_external_and_policy_excluded_classes(
         self,
     ) -> None:
-        """Source-class provenance should distinguish anchored, external, and unsupported inputs."""
+        """Source provenance distinguishes anchored, external, and policy-excluded inputs."""
         artifact = self.service.create_effective_config_artifact(
             pipeline_name="test_pipeline",
             pipeline_kind="standard",
@@ -327,9 +327,12 @@ class TestEffectiveConfigService:
         )
 
         ambient_environment = provenance_by_class["implicit_process_environment"]
-        assert ambient_environment.provenance_status == "unsupported"
-        assert ambient_environment.artifact_surface == "not_persisted"
-        assert ambient_environment.anchor_field is None
+        assert ambient_environment.provenance_status == "policy_excluded"
+        assert (
+            ambient_environment.artifact_surface
+            == "semantic_artifact.execution_environment"
+        )
+        assert ambient_environment.anchor_field == "environment_hash"
 
     def test_execution_environment_snapshot_materializes_explicit_env_overrides(
         self,

@@ -320,12 +320,14 @@ def build_source_class_provenance() -> tuple[SourceClassProvenance, ...]:
         ),
         SourceClassProvenance(
             source_class="implicit_process_environment",
-            provenance_status="unsupported",
-            artifact_surface="not_persisted",
+            provenance_status="policy_excluded",
+            artifact_surface="semantic_artifact.execution_environment",
+            anchor_field="environment_hash",
             notes=(
-                "Ambient process environment outside explicit overrides is "
-                "intentionally excluded from semantic identity; strict "
-                "reproducibility relies on an explicit semantic env allowlist."
+                "Ambient process environment is excluded by policy unless it is "
+                "explicitly materialized through runtime_overrides.env; the "
+                "execution_environment surface anchors that exclusion policy and "
+                "the set of materialized semantic env overrides."
             ),
         ),
     )

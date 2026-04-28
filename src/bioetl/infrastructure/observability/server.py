@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import errno
 import time
+from dataclasses import dataclass, field
 from threading import Lock
 from typing import TYPE_CHECKING
 
@@ -16,8 +17,20 @@ from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
-_SERVER_STARTED = False
-_SERVER_LOCK = Lock()
+
+@dataclass(slots=True)
+class _MetricsServerRuntimeState:
+    """In-process metrics server state.
+
+    The HTTP server itself is still process-scoped, but its mutable started/lock
+    bookkeeping stays behind one explicit state object instead of free globals.
+    """
+
+    started: bool = False
+    lock: Lock = field(default_factory=Lock)
+
+
+_SERVER_RUNTIME = _MetricsServerRuntimeState()
 
 # Re-export for backward compatibility
 __all__ = [
@@ -105,23 +118,22 @@ def start_metrics_server(
     Returns:
         True if server started successfully or was already running, False otherwise.
     """
-    global _SERVER_STARTED
 
     if logger is None:
         logger = NoOpLogger()
 
-    if _SERVER_STARTED:
+    if _SERVER_RUNTIME.started:
         logger.debug("Metrics server already started")
         return True
 
-    with _SERVER_LOCK:
-        if _SERVER_STARTED:
+    with _SERVER_RUNTIME.lock:
+        if _SERVER_RUNTIME.started:
             return True
 
         for attempt in range(retry_count):
             try:
                 start_http_server(port, addr=addr)
-                _SERVER_STARTED = True
+                _SERVER_RUNTIME.started = True
                 logger.info(
                     "Prometheus metrics server started",
                     port=port,
@@ -144,7 +156,7 @@ def start_metrics_server(
 
 def is_metrics_server_running() -> bool:
     """Return the live in-process metrics server state."""
-    return _SERVER_STARTED
+    return _SERVER_RUNTIME.started
 
 
 def push_metrics_to_gateway(
@@ -215,6 +227,5 @@ def push_metrics_to_gateway(
 
 def reset_server_state() -> None:
     """Reset server state for testing purposes only."""
-    global _SERVER_STARTED
-    with _SERVER_LOCK:
-        _SERVER_STARTED = False
+    with _SERVER_RUNTIME.lock:
+        _SERVER_RUNTIME.started = False

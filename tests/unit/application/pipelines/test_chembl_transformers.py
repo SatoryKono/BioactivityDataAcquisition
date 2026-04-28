@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from unittest.mock import MagicMock
 from uuid import uuid4
 
@@ -23,9 +24,19 @@ from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
+from bioetl.composition.bootstrap.runtime.classification_init import (
+    initialize_publication_type_classification,
+)
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
+
+
+@pytest.fixture(scope="module", autouse=True)
+def initialize_publication_classification() -> None:
+    """Bootstrap publication-type classification for publication transformer tests."""
+    repo_root = Path(__file__).resolve().parents[4]
+    initialize_publication_type_classification(repo_root / "configs")
 
 
 @pytest.fixture

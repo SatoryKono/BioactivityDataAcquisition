@@ -58,7 +58,12 @@ class SourceClassProvenance:
     """Published provenance contract for one supported config/input source class."""
 
     source_class: str
-    provenance_status: Literal["identity_anchored", "external_anchor", "unsupported"]
+    provenance_status: Literal[
+        "identity_anchored",
+        "external_anchor",
+        "policy_excluded",
+        "unsupported",
+    ]
     artifact_surface: str
     anchor_field: str | None = None
     notes: str | None = None

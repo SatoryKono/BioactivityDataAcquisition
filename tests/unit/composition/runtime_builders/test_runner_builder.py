@@ -1176,6 +1176,60 @@ def test_build_pipeline_runner_allows_forensic_grade_with_exact_replay_and_sidec
     assert payload["replay_capability"] == "exact_replay_supported"
 
 
+def test_build_pipeline_runner_promotes_supported_exact_replay_to_family_default_profile(
+    tmp_path: Path,
+) -> None:
+    """Supported exact-replay launches inherit the published replay-ready default."""
+    fake_factory, fake_registry = _build_factory_registry()
+    bronze_root = tmp_path / "bronze-cache"
+    bronze_day = bronze_root / "2026-01-01"
+    bronze_day.mkdir(parents=True)
+    (bronze_day / "batch_2026-01-01_demo.jsonl.zst").write_bytes(b"snapshot-bytes")
+
+    with patch(
+        "bioetl.composition.runtime_builders.run_manifest_builder.get_code_revision_provenance",
+        return_value=SimpleNamespace(
+            git_commit="deadbeef" * 5,
+            source_revision_state="clean",
+        ),
+    ):
+        _call_build_pipeline_runner(
+            _build_context(limit=25, exact_replay=True),
+            registry=fake_registry,
+            settings=_build_settings(
+                data_dir=str(tmp_path),
+                control_plane=SimpleNamespace(
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=True,
+                    required_persistence_profile="degraded_observable",
+                ),
+            ),
+            pipeline_config=_build_pipeline_config(
+                sink={
+                    "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                    "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                    "gold": SimpleNamespace(enabled=True, save_metadata=True),
+                },
+            ),
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental"
+            ),
+            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
+                enabled=True,
+                bronze_path=str(bronze_root),
+                bronze_date="2026-01-01",
+            ),
+        )
+
+    assert isinstance(fake_factory.kwargs, dict)
+    manifest_id = fake_factory.kwargs["manifest_id"]
+    manifest_path = (
+        tmp_path / "output" / "control" / "run_manifest" / f"{manifest_id}.json"
+    )
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert payload["launch_context"]["required_persistence_profile"] == "replay_ready"
+
+
 def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
     tmp_path: Path,
 ) -> None:

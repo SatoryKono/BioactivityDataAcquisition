@@ -42,6 +42,7 @@ from bioetl.composition.services.versioning import get_code_revision_provenance
 from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
 from bioetl.domain.control_plane.reproducibility_policy import (
     assess_reproducibility_policy,
+    legacy_config_hash_from_resolved_config_hash,
     resolve_replay_capability,
 )
 from bioetl.domain.types import RunID, RunType
@@ -171,7 +172,9 @@ def build_composite_control_plane_bundle(
         manifest_id=manifest.manifest_id,
         execution_fingerprint=manifest.execution_fingerprint,
         run_ledger_service=run_ledger_service,
-        config_hash=resolved_config_hash or None,
+        config_hash=legacy_config_hash_from_resolved_config_hash(
+            resolved_config_hash or None
+        ),
         resolved_config_hash=resolved_config_hash or None,
         effective_config_hash=effective_config_hash or None,
         dq_contract_compatibility_hash=dq_contract_compatibility_hash or None,
@@ -223,7 +226,9 @@ def _build_composite_manifest_create_request(
         pipeline_version=contract_version or None,
         git_commit=code_revision.git_commit,
         source_revision_state=code_revision.source_revision_state,
-        config_hash=resolved_config_hash or None,
+        config_hash=legacy_config_hash_from_resolved_config_hash(
+            resolved_config_hash or None
+        ),
         resolved_config_hash=resolved_config_hash or None,
         effective_config_hash=effective_config_hash or None,
         contract_ref=contract_ref,

@@ -8,6 +8,7 @@ param(
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $WslDistro = if ($env:BIOETL_WSL_DISTRO) { $env:BIOETL_WSL_DISTRO } else { "Ubuntu" }
+$RepoRoot = (Resolve-Path (Join-Path $ScriptDir "..\..\..")).Path
 
 # Convert Windows path to WSL path
 function ConvertTo-WslPath {
@@ -17,7 +18,7 @@ function ConvertTo-WslPath {
     return "/mnt/$drive$rest"
 }
 
-$ScriptPathWSL = ConvertTo-WslPath $ScriptDir
+$RepoRootWSL = ConvertTo-WslPath $RepoRoot
 
 Write-Host ""
 Write-Host "=================================================="
@@ -33,7 +34,7 @@ if ($wt) {
     Write-Host ""
 
     # Open new tab with wsl and run vibe
-    $cmd = "wsl -d $WslDistro -e bash -i -c 'cd $ScriptPathWSL && bash run-vibe.sh start'"
+    $cmd = "wsl -d $WslDistro -e bash -i -c 'cd $RepoRootWSL && bash scripts/ai/vibe/launch.sh'"
     & wt -w 0 nt -d $ScriptDir pwsh -NoExit -Command $cmd
 
     exit $LASTEXITCODE
@@ -50,7 +51,7 @@ Write-Host ""
 # Try to launch directly with WSL
 try {
     $process = Start-Process -FilePath "wsl" `
-        -ArgumentList "-d", $WslDistro, "-e", "bash", "-i", "-c", "cd '$ScriptPathWSL' && bash run-vibe.sh start" `
+        -ArgumentList "-d", $WslDistro, "-e", "bash", "-i", "-c", "cd '$RepoRootWSL' && bash scripts/ai/vibe/launch.sh" `
         -NoNewWindow `
         -PassThru
 

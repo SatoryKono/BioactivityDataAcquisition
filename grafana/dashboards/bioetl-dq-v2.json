@@ -32,6 +32,18 @@
         },
         {
             "asDropdown": false,
+            "icon": "external link",
+            "includeVars": true,
+            "keepTime": true,
+            "tags": [],
+            "targetBlank": false,
+            "title": "Control Plane v1",
+            "tooltip": "",
+            "type": "link",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1"
+        },
+        {
+            "asDropdown": false,
             "icon": "list-ul",
             "includeVars": false,
             "keepTime": true,
@@ -152,6 +164,10 @@
                     {
                         "title": "Open Traces in Tempo Explore (tracing profile)",
                         "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}"
+                    },
+                    {
+                        "title": "Open Control Plane v1 (replay/checkpoint)",
+                        "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?from=${__from}&to=${__to}&var-pipeline=$pipeline&var-run_type=$run_type"
                     }
                 ]
             },
@@ -1149,7 +1165,13 @@
                     "fields": "",
                     "values": false
                 },
-                "textMode": "auto"
+                "textMode": "auto",
+                "dataLinks": [
+                    {
+                        "title": "Open Control Plane v1 (lineage/traceability)",
+                        "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?from=${__from}&to=${__to}&var-pipeline=$pipeline&var-run_type=$run_type"
+                    }
+                ]
             },
             "targets": [
                 {
@@ -1288,7 +1310,13 @@
                     "fields": "",
                     "values": false
                 },
-                "textMode": "auto"
+                "textMode": "auto",
+                "dataLinks": [
+                    {
+                        "title": "Open Control Plane v1 (gold hard-fail context)",
+                        "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?from=${__from}&to=${__to}&var-pipeline=$pipeline&var-run_type=$run_type"
+                    }
+                ]
             },
             "targets": [
                 {

@@ -98,7 +98,7 @@ function Status-Vibe {
         Write-Info "Web UI: http://$env:VIBE_HOST`:$env:VIBE_PORT"
     } else {
         Write-Warn "Vibe is NOT running"
-        Write-Info "Start with: .\run-vibe.ps1"
+        Write-Info "Start with: python -m scripts.ai vibe"
     }
 }
 

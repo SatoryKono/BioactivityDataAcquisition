@@ -121,6 +121,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("assay_parameters", pa.string()),
         ("assay_pref_name", pa.string()),
         ("assay_strain", pa.string()),
+        ("assay_subcellular_fraction_raw", pa.string()),
         ("assay_subcellular_fraction", pa.string()),
         ("assay_taxonomy_id", pa.int64()),
         ("assay_test_type", pa.string()),
@@ -162,6 +163,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("standard_units", pa.string()),
         ("standard_value", pa.float64()),
         ("text_value", pa.string()),
+        ("type_raw", pa.string()),
         ("type", pa.string()),
         ("units", pa.string()),
         ("value", pa.float64()),
@@ -215,12 +217,14 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("author_keys", pa.string()),  # Pipe-delimited Surname_F keys
         ("author_orcids", pa.string()),  # Not available from ChEMBL (None values)
         ("publication_type", pa.string()),
+        ("publication_type_raw", pa.string()),
         ("publication_type_unified", pa.string()),
         ("publication_subclass", pa.string()),
         ("publication_class", pa.string()),
         ("publication_date", pa.string()),  # Not available from ChEMBL (None values)
         ("language", pa.string()),  # Not available from ChEMBL (None values)
         ("is_oa", pa.bool_()),  # Not available from ChEMBL (None values)
+        ("oa_status", pa.string()),
         ("src_id", pa.int64()),
         ("citations_received", pa.int64()),
         ("citations_made", pa.int64()),
@@ -372,6 +376,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         *SILVER_CORE_FIELDS,
         ("assay_count", pa.int64()),
         ("example_assay_id", pa.string()),
+        ("subcellular_fraction_raw", pa.string()),
         ("subcellular_fraction", pa.string()),
         *DQ_FIELDS,
     ],
