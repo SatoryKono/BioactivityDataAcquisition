@@ -1,3 +1,4 @@
+# ruff: noqa: UP049
 """Shared CLI execution policy for orchestration commands.
 
 Centralizes command-level error handling and exit-code mapping for:
@@ -25,13 +26,13 @@ from bioetl.interfaces.cli.formatters import echo_error, echo_warning
 __all__ = [
     "CLI_ENTRYPOINT_TYPED_ERRORS",
     "BatchRunResultProtocol",
+    "CliBoundaryExecutionPolicy",
     "ExecutionFailureReasonCodes",
     "build_failure_context",
     "execute_prepared_cli_flow",
     "execute_with_cli_failure_policy",
     "finalize_cli_execution",
     "handle_cli_failure",
-    "CliBoundaryExecutionPolicy",
     "map_batch_run_result_to_exit_code",
     "map_run_status_to_exit_code",
     "map_success_flag_to_exit_code",
@@ -185,13 +186,13 @@ def map_success_flag_to_exit_code(
     return failure_exit_code
 
 
-def execute_with_cli_failure_policy[ResultT](
-    action: Callable[[], ResultT],
+def execute_with_cli_failure_policy[_ResultT](
+    action: Callable[[], _ResultT],
     *,
     subject: str,
     reason_codes: ExecutionFailureReasonCodes,
     failure_handler: CliFailureHandler,
-) -> ResultT | None:
+) -> _ResultT | None:
     """Execute one command action with the canonical typed-failure ladder."""
     try:
         return action()
@@ -206,11 +207,11 @@ def execute_with_cli_failure_policy[ResultT](
     return None
 
 
-def finalize_cli_execution[ResultT](
+def finalize_cli_execution[_ResultT](
     *,
     health_info_presenter: Callable[[], None],
-    execute: Callable[[], ResultT | None],
-    result_finalizer: Callable[[ResultT], None],
+    execute: Callable[[], _ResultT | None],
+    result_finalizer: Callable[[_ResultT], None],
 ) -> None:
     """Run the prepared health -> execute -> finalize command shell."""
     health_info_presenter()
@@ -220,11 +221,11 @@ def finalize_cli_execution[ResultT](
     result_finalizer(result)
 
 
-def execute_prepared_cli_flow[ResultT](
+def execute_prepared_cli_flow[_ResultT](
     *,
     health_info_presenter: Callable[[], None],
-    execute: Callable[[], ResultT | None],
-    result_finalizer: Callable[[ResultT], None],
+    execute: Callable[[], _ResultT | None],
+    result_finalizer: Callable[[_ResultT], None],
 ) -> None:
     """Execute one prepared CLI flow using the shared execution shell."""
     finalize_cli_execution(
@@ -326,12 +327,12 @@ def _handle_boundary_failure(
     )
 
 
-def _execute_boundary_action[ResultT](
-    action: Callable[[], ResultT],
+def _execute_boundary_action[_ResultT](
+    action: Callable[[], _ResultT],
     *,
     policy: CliBoundaryExecutionPolicy,
     passthrough_exception_types: tuple[type[BaseException], ...] = (),
-) -> ResultT | None:
+) -> _ResultT | None:
     """Execute one command-boundary action with the shared typed-failure ladder."""
     try:
         return action()
@@ -362,12 +363,12 @@ def _execute_boundary_action[ResultT](
         raise
 
 
-def run_async_with_cli_failure_policy[ResultT](
-    coro: Coroutine[object, object, ResultT],
+def run_async_with_cli_failure_policy[_ResultT](
+    coro: Coroutine[object, object, _ResultT],
     *,
     policy: CliBoundaryExecutionPolicy,
     passthrough_exception_types: tuple[type[BaseException], ...] = (),
-) -> ResultT | None:
+) -> _ResultT | None:
     """Run an async CLI coroutine with the canonical typed-failure ladder."""
     try:
         return _execute_boundary_action(
@@ -380,12 +381,12 @@ def run_async_with_cli_failure_policy[ResultT](
             coro.close()
 
 
-def run_sync_with_cli_failure_policy[ResultT](
-    fn: Callable[[], ResultT],
+def run_sync_with_cli_failure_policy[_ResultT](
+    fn: Callable[[], _ResultT],
     *,
     policy: CliBoundaryExecutionPolicy,
     passthrough_exception_types: tuple[type[BaseException], ...] = (),
-) -> ResultT | None:
+) -> _ResultT | None:
     """Run a sync CLI callable with the canonical typed-failure ladder."""
     return _execute_boundary_action(
         fn,

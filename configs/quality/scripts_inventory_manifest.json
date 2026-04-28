@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-28T08:30:06.310271+00:00",
+  "generated_at": "2026-04-28T08:47:48.902926+00:00",
   "summary": {
     "total_scripts": 446,
     "status_counts": {
@@ -13,7 +13,7 @@
       "agents": 4,
       "build": 2,
       "ci": 55,
-      "docs": 117,
+      "docs": 120,
       "scripts": 303,
       "skills": 8,
       "tests": 144
@@ -1280,7 +1280,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 28,
+      "reference_count": 39,
       "references": [
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
@@ -9596,7 +9596,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 115,
+      "reference_count": 120,
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
@@ -9661,8 +9661,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
+          "line": 154,
+          "source_group": "docs",
+          "text": "| `scripts/memory/prompts/print_seed.sh`          | Maintained prompt seed helper for manual enrichment        |"
+        },
         {
           "path": "scripts/memory/README.md",
           "line": 19,
@@ -9676,8 +9682,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
+        {
+          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
+          "line": 153,
+          "source_group": "docs",
+          "text": "| `scripts/memory/query.py`                       | Operator-facing memory query entrypoint                    |"
+        },
         {
           "path": "scripts/memory/README.md",
           "line": 24,
@@ -9709,7 +9721,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -9754,10 +9766,10 @@
           "text": "**Ready to start?** Run: `bash scripts/memory/setup/wsl_startup.sh`"
         },
         {
-          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
-          "line": 109,
+          "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
+          "line": 90,
           "source_group": "docs",
-          "text": "bash scripts/memory/setup/wsl_startup.sh"
+          "text": "| WSL setup             | `scripts/memory/setup/wsl_startup.sh` |"
         }
       ]
     },
@@ -9766,8 +9778,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
+          "line": 152,
+          "source_group": "docs",
+          "text": "| `scripts/memory/sync.py`                        | Deterministic repo graph sync entrypoint                   |"
+        },
         {
           "path": "scripts/memory/README.md",
           "line": 23,
@@ -10948,7 +10966,7 @@
           "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
           "line": 89,
           "source_group": "docs",
-          "text": "| Manual Docker restart | `scripts/restart-docker.ps1`           |"
+          "text": "| Manual Docker restart | `scripts/ops/runtime/docker/restart-docker.ps1` |"
         },
         {
           "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
@@ -10995,7 +11013,7 @@
           "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
           "line": 88,
           "source_group": "docs",
-          "text": "| Automated recovery    | `scripts/neo4j-recovery-checklist.ps1` |"
+          "text": "| Automated recovery    | `scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1` |"
         },
         {
           "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
