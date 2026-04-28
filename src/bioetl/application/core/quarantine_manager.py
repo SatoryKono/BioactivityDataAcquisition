@@ -17,6 +17,8 @@ from bioetl.application.core._quarantine_support import (
     emit_quarantine_events,
     track_processed_quarantined,
     track_quarantine_metrics,
+    write_quarantine_request,
+    write_quarantine_requests,
 )
 from bioetl.application.observability.domain_event_emitter import DomainEventEmitterPort
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
@@ -108,15 +110,7 @@ class QuarantineManagerService(QuarantineManagerSupportMixin):
             run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
-        await self._quarantine.write(
-            pipeline=request["pipeline"],
-            error_code=request["error_code"],
-            payload=request["payload"],
-            bronze_batch_id=request["bronze_batch_id"],
-            run_id=request.get("run_id"),
-            metadata=request.get("metadata"),
-            ingestion_ts=request["ingestion_ts"],
-        )
+        await write_quarantine_request(self._quarantine, request)
         emit_quarantine_events(
             emitter=self._domain_event_emitter,
             pipeline_name=self._pipeline_name,
@@ -165,7 +159,7 @@ class QuarantineManagerService(QuarantineManagerSupportMixin):
             )
             for record, error_type, error_details in records
         ]
-        await self._quarantine.write_many(write_requests)
+        await write_quarantine_requests(self._quarantine, write_requests)
         for request, (_, error_type, error_details) in zip(
             write_requests, records, strict=True
         ):

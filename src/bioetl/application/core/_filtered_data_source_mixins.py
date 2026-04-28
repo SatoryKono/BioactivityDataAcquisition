@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Self
 
+from bioetl.application.core._fetch_forwarding import build_forwarded_fetch_kwargs
 from bioetl.application.core import (
     _filtered_data_source_fetch_support as fetch_support,
 )
@@ -107,10 +108,10 @@ class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
         """Delegate plain unfiltered fetches to the wrapped adapter."""
         return fetch_support.fetch_without_internal_filters(
             self,
-            entity_type,
-            limit,
-            query,
-            offset,
+            entity_type=entity_type,
+            limit=limit,
+            query=query,
+            offset=offset,
         )
 
     def fetch(
@@ -136,12 +137,14 @@ class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
         """
         return fetch_support.fetch_records(
             self,
-            entity_type,
-            limit=limit,
-            query=query,
-            filter_ids=filter_ids,
-            filter_field=filter_field,
-            offset=offset,
+            **build_forwarded_fetch_kwargs(
+                entity_type=entity_type,
+                limit=limit,
+                query=query,
+                filter_ids=filter_ids,
+                filter_field=filter_field,
+                offset=offset,
+            ),
         )
 
     async def health_check(self) -> HealthStatus:

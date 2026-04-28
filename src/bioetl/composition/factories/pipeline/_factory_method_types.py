@@ -26,6 +26,7 @@ from bioetl.domain.ports import (
     DQMonitorPort,
     LoggerPort,
     MetricsPort,
+    PipelineCreateRunnerRequest,
     TracingPort,
 )
 from bioetl.domain.types import RunID
@@ -78,6 +79,37 @@ class _CreateFactoryRunnerRequest(ControlPlaneArtifacts):
     filter_config: InputFilterConfig | None = None
     config: PipelineYamlConfig | None = None
     cached_bronze: CachedBronzeContext | None = None
+
+
+def build_create_factory_runner_request(
+    *,
+    pipeline_name: str,
+    silver_schema: object | None,
+    gold_schema: object,
+    request: PipelineCreateRunnerRequest,
+) -> _CreateFactoryRunnerRequest:
+    """Build the canonical runner-factory request bundle."""
+    control_plane = request.control_plane
+    return _CreateFactoryRunnerRequest(
+        pipeline_name=pipeline_name,
+        silver_schema=silver_schema,
+        gold_schema=gold_schema,
+        run_id=request.run_id,
+        runtime=request.runtime,
+        started_at=request.started_at,
+        settings=request.settings,
+        observability=request.observability,
+        manifest_id=control_plane.manifest_id,
+        execution_fingerprint=control_plane.execution_fingerprint,
+        config_hash=control_plane.config_hash,
+        resolved_config_hash=control_plane.resolved_config_hash,
+        effective_config_hash=control_plane.effective_config_hash,
+        dq_contract_compatibility_hash=control_plane.dq_contract_compatibility_hash,
+        effective_config_artifact_id=control_plane.effective_config_artifact_id,
+        filter_config=request.filter_config,
+        config=request.config,
+        cached_bronze=request.cached_bronze,
+    )
 
 
 def extract_entity_type(pipeline_name: str) -> str | None:
