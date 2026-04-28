@@ -140,6 +140,29 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
             yield record, fetched + 1
             fetched += 1
 
+    def _warn_smiles_fetch_error(self, smiles: str, error: Exception) -> None:
+        self._logger.warning(
+            "smiles_fetch_failed",
+            provider=self._provider_name,
+            smiles=smiles[:50],
+            error=str(error),
+        )
+
+    async def _iter_smiles_chunk_records(
+        self,
+        chunk: list[str],
+    ) -> AsyncIterator[BronzeRecord]:
+        tasks = [self._fetch_single_smiles(smiles) for smiles in chunk]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        for smiles, result in zip(chunk, results, strict=True):
+            if isinstance(result, self.FETCH_STRATEGY_ERRORS):
+                self._warn_smiles_fetch_error(smiles, result)
+                continue
+            if isinstance(result, BaseException):
+                raise result
+            for record in result:
+                yield record
+
     async def fetch_by_smiles(
         self,
         smiles_list: list[str],
@@ -155,26 +178,11 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
                 break
 
             chunk = valid_smiles[i : i + batch_size]
-            tasks = [self._fetch_single_smiles(s) for s in chunk]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-
-            for smiles, result in zip(chunk, results, strict=True):
-                if isinstance(result, self.FETCH_STRATEGY_ERRORS):
-                    self._logger.warning(
-                        "smiles_fetch_failed",
-                        provider=self._provider_name,
-                        smiles=smiles[:50],
-                        error=str(result),
-                    )
-                    continue
-                if isinstance(result, BaseException):
-                    raise result
-
-                for record in result:
-                    if is_limit_reached(limit, fetched):
-                        return
-                    yield record
-                    fetched += 1
+            async for record in self._iter_smiles_chunk_records(chunk):
+                if is_limit_reached(limit, fetched):
+                    return
+                yield record
+                fetched += 1
 
     def _parse_valid_cids(self, cid_list: list[str]) -> list[int]:
         """Parse and validate CID list, returning only valid integers."""
