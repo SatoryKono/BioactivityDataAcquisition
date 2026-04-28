@@ -39,8 +39,8 @@ _SERVER_RUNTIME = _MetricsServerRuntimeState()
 
 # Re-export for backward compatibility
 __all__ = [
-    "get_metrics_server_runtime_status",
     "MetricsServerError",
+    "get_metrics_server_runtime_status",
     "is_metrics_server_running",
     "push_metrics_to_gateway",
     "reset_server_state",

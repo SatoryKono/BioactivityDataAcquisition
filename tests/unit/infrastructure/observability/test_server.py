@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.infrastructure.observability.server import (
+    get_metrics_server_runtime_status,
     MetricsServerError,
     is_metrics_server_running,
     push_metrics_to_gateway,
@@ -50,6 +51,18 @@ class TestStartMetricsServer:
             assert result2 is True
             # Should only be called once
             mock_server.assert_called_once()
+
+    def test_runtime_status_tracks_live_server_metadata(self):
+        """Test runtime status exposes port, addr, and start time after startup."""
+        with patch("bioetl.infrastructure.observability.server.start_http_server"):
+            result = start_metrics_server(port=9999, addr="127.0.0.1")
+
+        assert result is True
+        status = get_metrics_server_runtime_status()
+        assert status.running is True
+        assert status.port == 9999
+        assert status.addr == "127.0.0.1"
+        assert status.started_at is not None
 
     def test_lenient_mode_returns_false_on_port_conflict(self):
         """Test fail_fast=False returns False on port conflict instead of raising."""
@@ -371,6 +384,18 @@ class TestResetServerState:
             start_metrics_server(port=9999)
 
             assert mock_server.call_count == 2
+
+    def test_reset_clears_runtime_status_metadata(self):
+        """Reset should clear all runtime metadata, not only the running flag."""
+        with patch("bioetl.infrastructure.observability.server.start_http_server"):
+            start_metrics_server(port=9999, addr="127.0.0.1")
+
+        reset_server_state()
+        status = get_metrics_server_runtime_status()
+        assert status.running is False
+        assert status.port is None
+        assert status.addr is None
+        assert status.started_at is None
 
 
 @pytest.mark.unit
