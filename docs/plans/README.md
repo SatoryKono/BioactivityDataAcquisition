@@ -74,6 +74,7 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [project-memory-layer-implementation-plan-2026-04-20.md](project-memory-layer-implementation-plan-2026-04-20.md)
 - [project-memory-layer-issue-pack-2026-04-20.md](project-memory-layer-issue-pack-2026-04-20.md)
 - [repository-file-structure-cleanup-plan-2026-04-20.md](repository-file-structure-cleanup-plan-2026-04-20.md)
+- [repository-file-structure-remediation-plan-2026-04-28.md](repository-file-structure-remediation-plan-2026-04-28.md)
 
 Earlier operational context files such as
 `onboarding-checklist-day-1-2026-03-20.md` and
@@ -111,6 +112,12 @@ tracks policy convergence, generated-artifact routing, AI/editor surface
 decisions, and enforcement hardening rather than repeating closed root cleanup
 items. It is retained as supporting implementation context, not as a second
 active backlog.
+
+The repository file structure remediation plan was added on `2026-04-28` after
+an architecture-strict audit found drift between the published root policy and
+the live GitHub root snapshot. It supersedes the 2026-04-21 live-state claims
+for remediation planning while retaining the older cleanup plan as historical
+baseline and policy context.
 
 ### Retained Historical Context With Live Evidence References
 

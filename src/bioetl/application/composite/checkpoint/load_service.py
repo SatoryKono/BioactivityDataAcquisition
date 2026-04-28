@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 from bioetl.application.composite.checkpoint._anchor_context import (
     ExpectedCheckpointContext,
     fresh_checkpoint_state,
@@ -360,9 +362,8 @@ class CompositeCheckpointLoadService:
             return state
 
         replay_projection = project_run_ledger_replay(replay_entries)
-        replayed_state = CompositeCheckpointState(
-            composite_name=state.composite_name,
-            run_id=state.run_id,
+        replayed_state = replace(
+            state,
             state=(
                 replay_projection.state
                 if replay_projection.state is not None
@@ -380,15 +381,6 @@ class CompositeCheckpointLoadService:
             ),
             last_event_id=replay_projection.last_event_id,
             last_event_occurred_at=replay_projection.last_event_occurred_at,
-            effective_config_hash=state.effective_config_hash,
-            effective_config_artifact_id=state.effective_config_artifact_id,
-            execution_fingerprint=state.execution_fingerprint,
-            dq_contract_compatibility_hash=state.dq_contract_compatibility_hash,
-            contract_ref=state.contract_ref,
-            contract_version=state.contract_version,
-            manifest_id=state.manifest_id,
-            composite_run_identity=state.composite_run_identity,
-            created_at=state.created_at,
         )
         self._logger.info(
             "Replayed checkpoint state from run ledger",
