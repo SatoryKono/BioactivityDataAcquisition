@@ -129,6 +129,14 @@ def resolve_reproducibility_family(
     return ".".join(family_parts)
 
 
+def _resolve_source_profile_reason(*, supported: bool, published: bool) -> str:
+    if supported:
+        return "family_within_supported_boundary"
+    if published:
+        return "family_within_published_inventory_but_outside_supported_boundary"
+    return "family_outside_published_inventory"
+
+
 def resolve_reproducibility_family_profile(
     *,
     provider: object,
@@ -156,12 +164,6 @@ def resolve_reproducibility_family_profile(
         )
     supported = family in _PUBLISHED_SUPPORTED_SOURCE_FAMILIES
     published = family in _PUBLISHED_SOURCE_FAMILIES
-    if supported:
-        reason = "family_within_supported_boundary"
-    elif published:
-        reason = "family_within_published_inventory_but_outside_supported_boundary"
-    else:
-        reason = "family_outside_published_inventory"
     return ReproducibilityFamilyProfile(
         family=family,
         execution_context=execution_context,
@@ -175,7 +177,10 @@ def resolve_reproducibility_family_profile(
             "replay_ready" if supported else "degraded_observable"
         ),
         support_scope="operator_grade_trace_debug",
-        reason=reason,
+        reason=_resolve_source_profile_reason(
+            supported=supported,
+            published=published,
+        ),
     )
 
 

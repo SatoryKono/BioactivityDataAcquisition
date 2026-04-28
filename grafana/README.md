@@ -377,6 +377,9 @@ BIOETL_ENABLE_TRACING_DATASOURCES=true \
 # Проверка статуса контейнеров
 docker compose -f docker-compose.monitoring.yml ps
 
+# Live smoke для Grafana datasource provisioning в двух режимах
+python3 scripts/ops/observability/grafana/live_tracing_mode_smoke.py --mode both
+
 # Просмотр логов
 make monitoring-logs
 

@@ -149,6 +149,23 @@ def resolve_replay_capability(
     return ReplayCapability.REBUILD_ONLY
 
 
+def _resolve_blocking_gaps(
+    *,
+    strict_requirement_requested: bool,
+    strict_exact_replay_supported: bool,
+    resolved_capability: ReplayCapability,
+) -> tuple[str, ...]:
+    blocking_gaps: list[str] = []
+    if strict_requirement_requested and not strict_exact_replay_supported:
+        blocking_gaps.append("strict_replay_execution_context_support")
+    if (
+        strict_requirement_requested
+        and resolved_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
+    ):
+        blocking_gaps.extend(("immutable_input_snapshots", "exact_replay_capability"))
+    return tuple(dict.fromkeys(blocking_gaps))
+
+
 def assess_reproducibility_policy(
     *,
     source_refs: tuple[RunSourceRef, ...],
@@ -173,22 +190,17 @@ def assess_reproducibility_policy(
         source_refs=source_refs,
         require_full_snapshot_envelope=require_full_snapshot_envelope,
     )
-    blocking_gaps: list[str] = []
-    if strict_requirement_requested and not strict_exact_replay_supported:
-        blocking_gaps.append("strict_replay_execution_context_support")
-    if (
-        strict_requirement_requested
-        and resolved_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
-    ):
-        blocking_gaps.append("immutable_input_snapshots")
-        blocking_gaps.append("exact_replay_capability")
     return ReproducibilityPolicyAssessment(
         required_persistence_profile=profile,
         replay_capability=resolved_capability,
         strict_requirement_requested=strict_requirement_requested,
         strict_exact_replay_supported=strict_exact_replay_supported,
         snapshot_envelope=snapshot_envelope,
-        blocking_gaps=tuple(dict.fromkeys(blocking_gaps)),
+        blocking_gaps=_resolve_blocking_gaps(
+            strict_requirement_requested=strict_requirement_requested,
+            strict_exact_replay_supported=strict_exact_replay_supported,
+            resolved_capability=resolved_capability,
+        ),
     )
 
 

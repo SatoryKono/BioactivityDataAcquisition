@@ -15,20 +15,17 @@ from bioetl.application.services.control_plane.run_manifest_service import (
 from bioetl.composition.runtime_builders import (
     _run_manifest_support as _manifest_support,
 )
+from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
+    resolve_code_revision_for_manifest,
+    resolve_manifest_reproducibility_context,
+    validate_required_runtime_persistence_profile,
+)
 from bioetl.composition.services.versioning import (
-    CodeRevisionProvenance,
-    get_code_revision_provenance,
     get_pipeline_version,
 )
 from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.control_plane.reproducibility_policy import (
-    STRICT_PERSISTENCE_PROFILES,
-    assess_reproducibility_policy,
     legacy_config_hash_from_resolved_config_hash,
-    resolve_effective_required_persistence_profile,
-)
-from bioetl.domain.control_plane.reproducibility_profiles import (
-    resolve_reproducibility_family_profile,
 )
 from bioetl.infrastructure.control_plane import FileRunManifestStore
 from bioetl.infrastructure.time import SystemClock
@@ -80,21 +77,6 @@ def _create_ledger_service(
     )
 
 
-def _resolve_code_revision_for_manifest(
-    *,
-    resolved_config_hash: str,
-    test_mode: bool,
-) -> CodeRevisionProvenance:
-    """Return code provenance, with a deterministic test-only fallback."""
-    code_revision = get_code_revision_provenance()
-    if code_revision.git_commit is not None or not test_mode:
-        return code_revision
-    return CodeRevisionProvenance(
-        git_commit=f"test-{resolved_config_hash[:12]}",
-        source_revision_state="clean",
-    )
-
-
 def _build_manifest_create_request(
     request_inputs: _RunManifestCreateRequestInputs,
 ) -> RunManifestCreateSpec:
@@ -116,35 +98,14 @@ def _build_manifest_create_request(
             runtime_config=inputs.runtime_config,
         )
     )
-    control_plane = getattr(
-        getattr(inputs.settings, "pipeline", None), "control_plane", None
-    )
-    configured_required_persistence_profile = str(
-        getattr(
-            control_plane,
-            "required_persistence_profile",
-            "degraded_observable",
-        )
-    )
-    reproducibility_profile = resolve_reproducibility_family_profile(
+    reproducibility_context = resolve_manifest_reproducibility_context(
+        ctx=ctx,
+        inputs=inputs,
         provider=provider,
         entity=entity,
         contract_ref=request_inputs.contract_ref,
-        execution_context="source",
     )
-    required_persistence_profile = resolve_effective_required_persistence_profile(
-        configured_required_profile=configured_required_persistence_profile,
-        family_default_profile=(
-            reproducibility_profile.default_required_persistence_profile
-        ),
-        exact_replay_requested=bool(getattr(ctx, "exact_replay", False)),
-    )
-    _manifest_support.validate_reproducible_sink_modes(
-        yaml_config=yaml_config,
-        strict_replay_requested=bool(getattr(ctx, "exact_replay", False))
-        or required_persistence_profile in STRICT_PERSISTENCE_PROFILES,
-    )
-    code_revision = _resolve_code_revision_for_manifest(
+    code_revision = resolve_code_revision_for_manifest(
         resolved_config_hash=request_inputs.resolved_config_hash,
         test_mode=bool(getattr(inputs.settings, "test_mode", False)),
     )
@@ -158,7 +119,9 @@ def _build_manifest_create_request(
             ctx,
             run_type_value=request_inputs.run_type_value,
             execution_context_value=request_inputs.execution_context_value,
-            required_persistence_profile=required_persistence_profile,
+            required_persistence_profile=(
+                reproducibility_context.required_persistence_profile
+            ),
         ),
         runtime_config=_manifest_support.to_serializable_mapping(inputs.runtime_config),
         resolved_config=_manifest_support.to_serializable_mapping(yaml_config),
@@ -190,43 +153,16 @@ def _build_manifest_create_request(
             resume_requested=bool(getattr(ctx, "resume", False)),
         ),
     )
-    _validate_required_runtime_persistence_profile(
+    validate_required_runtime_persistence_profile(
         request=request,
-        required_persistence_profile=required_persistence_profile,
+        required_persistence_profile=(
+            reproducibility_context.required_persistence_profile
+        ),
         strict_exact_replay_supported=(
-            reproducibility_profile.strict_exact_replay_supported
+            reproducibility_context.strict_exact_replay_supported
         ),
     )
     return request
-
-
-def _validate_required_runtime_persistence_profile(
-    *,
-    request: RunManifestCreateSpec,
-    required_persistence_profile: str,
-    strict_exact_replay_supported: bool,
-) -> None:
-    assessment = assess_reproducibility_policy(
-        source_refs=request.source_refs,
-        required_persistence_profile=required_persistence_profile,
-        strict_exact_replay_supported=strict_exact_replay_supported,
-        exact_replay_requested=bool(request.launch_context.get("exact_replay")),
-        resume_requested=bool(request.launch_context.get("resume")),
-        replay_capability=request.replay_capability,
-    )
-    if not assessment.strict_requirement_requested:
-        return
-    if "strict_replay_execution_context_support" in assessment.blocking_gaps:
-        raise RuntimeError(
-            "Pipeline execution is outside the published strict exact-replay "
-            "support boundary for this run family"
-        )
-    if "exact_replay_capability" in assessment.blocking_gaps:
-        raise RuntimeError(
-            "Pipeline execution cannot satisfy required persistence profile "
-            f"'{required_persistence_profile}' because immutable input snapshots "
-            "and exact replay capability are not available for this run"
-        )
 
 
 def _emit_replay_reconstructability_metric(
