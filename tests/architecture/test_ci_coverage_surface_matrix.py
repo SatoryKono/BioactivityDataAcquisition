@@ -112,3 +112,16 @@ class TestCiCoverageSurfaceMatrix:
         assert "name: test-duration-telemetry" in workflow
         assert "control-plane-completeness" in workflow
         assert "junit-track-d.xml" in workflow
+
+    def test_coverage_shard_python_versions_match_workflow(self) -> None:
+        matrix = _load_yaml(MATRIX_PATH)
+        workflow = _read_workflow(ROOT / matrix["workflow_path"])
+        entries = {entry["job"]: entry for entry in matrix.get("lanes", [])}
+
+        test_matrix = entries["test-matrix"]
+        assert test_matrix["coverage_python_versions"] == ["3.12"]
+        assert (
+            "Upload coverage shard (${{ matrix.test-group.name }} on Python 3.12)"
+            in workflow
+        )
+        assert "matrix.python-version == '3.12'" in workflow

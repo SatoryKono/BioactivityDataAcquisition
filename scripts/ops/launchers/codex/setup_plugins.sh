@@ -515,7 +515,7 @@ New-Item -ItemType Directory -Force -Path \$env:GOCACHE | Out-Null
 New-Item -ItemType Directory -Force -Path \$env:GOPATH | Out-Null
 New-Item -ItemType Directory -Force -Path \$env:UV_CACHE_DIR | Out-Null
 Set-Location '$repo_root_win'
-& '$python_bin_win' -m pre_commit install --install-hooks
+& '$python_bin_win' -m pre_commit install --install-hooks --hook-type pre-commit --hook-type pre-push
 " >/dev/null
             log_ok "pre-commit hooks installed"
             return 0
@@ -529,7 +529,7 @@ Set-Location '$repo_root_win'
             uv run python -m pip install pre-commit
         fi
         if git rev-parse --git-dir >/dev/null 2>&1; then
-            uv run python -m pre_commit install --install-hooks
+            uv run python -m pre_commit install --install-hooks --hook-type pre-commit --hook-type pre-push
             log_ok "pre-commit hooks installed"
         else
             log_warn "Not a git repository, skipping pre-commit install"
@@ -539,7 +539,7 @@ Set-Location '$repo_root_win'
             "$PYTHON_BIN" -m pip install pre-commit
         fi
         if git rev-parse --git-dir >/dev/null 2>&1; then
-            "$PYTHON_BIN" -m pre_commit install --install-hooks
+            "$PYTHON_BIN" -m pre_commit install --install-hooks --hook-type pre-commit --hook-type pre-push
             log_ok "pre-commit hooks installed"
         else
             log_warn "Not a git repository, skipping pre-commit install"

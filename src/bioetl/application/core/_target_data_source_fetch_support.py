@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, TypeVar, cast
 
-from bioetl.application.core._fetch_forwarding import build_forwarded_fetch_kwargs
+from bioetl.application.core._fetch_forwarding import (
+    _UNSET_FETCH_ARG,
+    build_forwarded_fetch_kwargs,
+)
 from bioetl.domain.ports import FilterableDataSourcePort
 
 if TYPE_CHECKING:

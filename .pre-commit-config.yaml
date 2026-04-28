@@ -1,6 +1,15 @@
 # Pre-commit hooks for BioETL
-# Install: pip install pre-commit && pre-commit install
+# Install: pip install pre-commit && pre-commit install --hook-type pre-commit --hook-type pre-push
 # Run manually: pre-commit run --all-files
+
+minimum_pre_commit_version: "4.3.0"
+
+default_language_version:
+  python: python3.12
+
+default_install_hook_types:
+  - pre-commit
+  - pre-push
 
 repos:
   # Ruff - Fast Python linter and formatter
@@ -33,7 +42,7 @@ repos:
     hooks:
       - id: bandit
         args: [-c, pyproject.toml]
-        additional_dependencies: ["bandit[toml]"]
+        additional_dependencies: ["bandit[toml]==1.9.2"]
         stages: [pre-push]
 
   # Secret scanning in pre-push. CI keeps the canonical detect-secrets baseline
@@ -43,6 +52,7 @@ repos:
     hooks:
       - id: gitleaks
         args: ['--config', '.gitleaks.toml']
+        pass_filenames: false
         stages: [pre-push]
 
   # General file checks
@@ -83,8 +93,8 @@ repos:
       - id: mdformat
         stages: [manual]
         additional_dependencies:
-          - mdformat-gfm
-          - mdformat-black
+          - mdformat-gfm==0.4.1
+          - mdformat-black==0.1.1
         exclude: >
           (?x)(^|.*[\\/])(
             CHANGELOG\.md|
@@ -121,7 +131,7 @@ repos:
         entry: uv run --active pytest tests/architecture/test_future_annotations_policy.py tests/architecture/test_naming_conventions.py tests/architecture/test_no_structlog_in_application_interfaces.py tests/architecture/test_no_datetime_now_in_infrastructure.py tests/architecture/test_no_random_in_writers.py tests/architecture/test_forbidden_imports.py -q
         language: system
         pass_filenames: false
-        stages: [pre-commit]
+        stages: [pre-push]
 
       - id: forbid-cache-files
         name: Block common cache and temporary files
@@ -152,10 +162,10 @@ repos:
 
       - id: audit-root-cleanliness
         name: Audit repository root layout allowlist
-        entry: python scripts/engineering/repo/audit_root_cleanliness.py
-        language: python
+        entry: uv run --active python scripts/engineering/repo/audit_root_cleanliness.py
+        language: system
         pass_filenames: false
-        stages: [manual]
+        stages: [pre-commit]
       - id: lint-config-paths
         name: Check for legacy dq/filter config path references
         entry: python scripts/schema/lint_config_paths.py
