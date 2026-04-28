@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable, Coroutine
 from pathlib import Path
-from typing import Literal, Protocol, TypeVar, cast
+from typing import Literal, Protocol, cast
 
 from bioetl.application.services import (
     ExportOptions,
@@ -40,7 +40,6 @@ __all__ = [
 ]
 
 ExportFormat = Literal["csv", "xlsx", "tsv"]
-_T = TypeVar("_T")
 
 
 class _ExportCommandService(Protocol):
@@ -86,14 +85,14 @@ def _handle_export_failure(
 
 
 def _run_export_async[T](
-    coro: Coroutine[object, object, _T],
+    coro: Coroutine[object, object, T],
     *,
     table: str,
     reason_prefix: str,
     domain_error_title: str,
     unexpected_error_title: str,
     handle_file_not_found: bool = False,
-) -> _T | None:
+) -> T | None:
     """Run an async export coroutine with shared CLI exception handling."""
     try:
         return asyncio.run(coro)
@@ -133,13 +132,13 @@ def _run_export_async[T](
 
 
 def _run_export_sync[T](
-    fn: Callable[[], _T],
+    fn: Callable[[], T],
     *,
     table: str,
     reason_prefix: str,
     domain_error_title: str,
     unexpected_error_title: str,
-) -> _T | None:
+) -> T | None:
     """Run a sync export callable with shared CLI exception handling."""
     try:
         return fn()

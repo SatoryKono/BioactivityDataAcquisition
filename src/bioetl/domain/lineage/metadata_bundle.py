@@ -174,7 +174,9 @@ def _validate_bundle_identity_contract(
 
 
 @dataclass(frozen=True, slots=True)
-class MetadataLineageBundleResult[MetadataT: (BronzeMetadata, SilverMetadata, GoldMetadata)]:
+class MetadataLineageBundleResult[
+    MetadataT: (BronzeMetadata, SilverMetadata, GoldMetadata)
+]:
     """Bundle one sidecar metadata payload together with its lineage fragment."""
 
     metadata: MetadataT

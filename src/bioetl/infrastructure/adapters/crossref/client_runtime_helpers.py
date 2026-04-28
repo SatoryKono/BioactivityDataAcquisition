@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.adapters.common import ComposableFallbackDecorator
 from bioetl.infrastructure.adapters.crossref.client_builders import (
@@ -25,8 +25,6 @@ from bioetl.infrastructure.adapters.crossref.types import (
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
-_RuntimeService = TypeVar("_RuntimeService")
-
 __all__ = [
     "CrossRefRuntimeServices",
     "build_crossref_fetch_flow",
@@ -46,10 +44,10 @@ class CrossRefRuntimeServices:
 
 
 def _require_runtime_service[RuntimeService](
-    value: _RuntimeService | None,
+    value: RuntimeService | None,
     *,
     name: str,
-) -> _RuntimeService:
+) -> RuntimeService:
     """Fail fast when a mandatory runtime collaborator was not injected."""
     if value is None:
         raise ValueError(f"CrossRef adapter requires injected {name}")

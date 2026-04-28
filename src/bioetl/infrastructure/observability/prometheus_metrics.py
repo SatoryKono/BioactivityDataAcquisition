@@ -7,7 +7,7 @@ Prometheus client library.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Protocol, TypeVar
+from typing import Protocol
 
 from bioetl.domain.ports import MetricLabels, MetricsPort, resolve_metric_labels
 from bioetl.infrastructure.observability.prometheus_metric_label_policies import (
@@ -46,15 +46,12 @@ class _GaugeMetric(Protocol):
     def labels(self, **labels: str) -> _GaugeObserver: ...
 
 
-_MetricT = TypeVar("_MetricT")
-
-
 def _require_registered_metric[MetricT](
     *,
     name: str,
-    registry: Mapping[str, _MetricT],
+    registry: Mapping[str, MetricT],
     metric_kind: str,
-) -> _MetricT:
+) -> MetricT:
     """Return a registered metric or fail loudly on contract drift."""
     metric = registry.get(name)
     if metric is None:

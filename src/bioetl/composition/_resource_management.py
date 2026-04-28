@@ -8,7 +8,7 @@ Split from entrypoints.py per audit-package-structure-2026-02-07.
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, ParamSpec, Protocol, TypeVar, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.composition._pipeline_execution import (
     ArchiveOptions,
@@ -38,10 +38,6 @@ __all__ = [
     "preview_cleanup",
     "vacuum_table",
 ]
-
-_P = ParamSpec("_P")
-_T = TypeVar("_T")
-
 
 class QuarantineManagerProtocol(Protocol):
     """Minimal quarantine-manager contract exposed by resource management APIs."""
@@ -103,11 +99,11 @@ class CleanupPreviewProtocol(Protocol):
 
 
 def _bootstrap_registered_resource[**P, T](
-    bootstrap_fn: Callable[_P, _T],
+    bootstrap_fn: Callable[P, T],
     /,
-    *args: _P.args,
-    **kwargs: _P.kwargs,
-) -> _T:
+    *args: P.args,
+    **kwargs: P.kwargs,
+) -> T:
     """Run registration bootstrap before delegating to a resource builder."""
     _ensure_registrations()
     return bootstrap_fn(*args, **kwargs)

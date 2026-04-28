@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from typing import TypeVar
 
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
@@ -21,9 +20,6 @@ __all__ = [
     "run_quarantine_async",
     "run_quarantine_sync",
 ]
-
-_T = TypeVar("_T")
-
 
 @dataclass(frozen=True, slots=True)
 class QuarantineExecutionPolicy:
@@ -56,10 +52,10 @@ def _handle_quarantine_failure(
 
 
 def run_quarantine_async[T](
-    coro: Coroutine[object, object, _T],
+    coro: Coroutine[object, object, T],
     *,
     policy: QuarantineExecutionPolicy,
-) -> _T | None:
+) -> T | None:
     """Run an async quarantine coroutine with typed exception policy."""
     try:
         return asyncio.run(coro)
@@ -88,10 +84,10 @@ def run_quarantine_async[T](
 
 
 def run_quarantine_sync[T](
-    fn: Callable[[], _T],
+    fn: Callable[[], T],
     *,
     policy: QuarantineExecutionPolicy,
-) -> _T | None:
+) -> T | None:
     """Run a synchronous quarantine callable with typed exception policy."""
     try:
         return fn()

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.batch_runtime_failure_policy import (
     PIPELINE_EXECUTION_ERRORS,
@@ -22,9 +22,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
-
-_ResultT = TypeVar("_ResultT")
-
 
 def get_source_metadata(
     *,
@@ -64,8 +61,8 @@ async def execute_with_pipeline_failure_policy[ResultT](
     *,
     tracing: BatchTracingManagerService,
     span: Span | None,
-    work_coro: Awaitable[_ResultT],
-) -> _ResultT:
+    work_coro: Awaitable[ResultT],
+) -> ResultT:
     """Finish the batch span consistently across runtime failure cases."""
     try:
         return await work_coro
@@ -78,11 +75,11 @@ async def execute_with_layer_span[ResultT](
     *,
     tracing: BatchTracingManagerService,
     name: str,
-    coro: Awaitable[_ResultT],
+    coro: Awaitable[ResultT],
     batch_id: BatchID,
     count: int,
     on_error: Callable[[Exception], None] | None = None,
-) -> _ResultT:
+) -> ResultT:
     """Execute a coroutine wrapped with a per-layer tracing span."""
     span = tracing.start_layer_span(name, batch_id, count)
     try:

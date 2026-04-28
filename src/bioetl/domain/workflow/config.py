@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, fields
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import JsonDict
 from bioetl.domain.workflow.dag import topologically_sorted_step_ids
@@ -24,13 +24,10 @@ if TYPE_CHECKING:
 
 _RUN_OPTIONS_MULTI_FILTER_IDS = "multi_filter_ids"
 _RUN_OPTIONS_FILTER_IDS = "filter_ids"
-_RunOptionValue = TypeVar("_RunOptionValue")
-
-
 def _prefer_override[RunOptionValue](
-    current: _RunOptionValue | None,
-    override: _RunOptionValue | None,
-) -> _RunOptionValue | None:
+    current: RunOptionValue | None,
+    override: RunOptionValue | None,
+) -> RunOptionValue | None:
     """Return the override when it is set, otherwise keep the current value."""
     return override if override is not None else current
 

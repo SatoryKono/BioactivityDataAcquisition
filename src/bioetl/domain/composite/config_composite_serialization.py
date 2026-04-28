@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.config_parsing import (
     optional_bool,
@@ -25,13 +25,10 @@ __all__ = [
     "composite_to_dict",
 ]
 
-_ConfigT = TypeVar("_ConfigT")
-
-
 def _build_seed_config[ConfigT](
     seed_data: dict[str, object],
-    seed_cls: Callable[..., _ConfigT],
-) -> _ConfigT:
+    seed_cls: Callable[..., ConfigT],
+) -> ConfigT:
     """Build seed config from parsed seed mapping."""
     return seed_cls(
         pipeline=require_str(seed_data.get("pipeline"), "seed.pipeline"),
@@ -43,8 +40,8 @@ def _build_seed_config[ConfigT](
 
 def _build_dependency_config[ConfigT](
     dep: dict[str, object],
-    dependency_cls: Callable[..., _ConfigT],
-) -> _ConfigT:
+    dependency_cls: Callable[..., ConfigT],
+) -> ConfigT:
     """Build one dependency config from serialized mapping."""
     return dependency_cls(
         pipeline=require_str(dep.get("pipeline"), "dependencies[].pipeline"),
@@ -67,8 +64,8 @@ def _build_dependency_config[ConfigT](
 
 def _build_dependency_configs[ConfigT](
     dependency_data: list[dict[str, object]],
-    dependency_cls: Callable[..., _ConfigT],
-) -> tuple[_ConfigT, ...]:
+    dependency_cls: Callable[..., ConfigT],
+) -> tuple[ConfigT, ...]:
     """Build dependency config tuple."""
     return tuple(
         _build_dependency_config(dep, dependency_cls) for dep in dependency_data
@@ -77,8 +74,8 @@ def _build_dependency_configs[ConfigT](
 
 def _build_enricher_config[ConfigT](
     enricher: dict[str, object],
-    enricher_cls: Callable[..., _ConfigT],
-) -> _ConfigT:
+    enricher_cls: Callable[..., ConfigT],
+) -> ConfigT:
     """Build one enricher config from serialized mapping."""
     return enricher_cls(
         pipeline=require_str(enricher.get("pipeline"), "enrichers[].pipeline"),
@@ -95,8 +92,8 @@ def _build_enricher_config[ConfigT](
 
 def _build_enricher_configs[ConfigT](
     enricher_data: list[dict[str, object]],
-    enricher_cls: Callable[..., _ConfigT],
-) -> tuple[_ConfigT, ...]:
+    enricher_cls: Callable[..., ConfigT],
+) -> tuple[ConfigT, ...]:
     """Build enricher config tuple."""
     return tuple(
         _build_enricher_config(enricher, enricher_cls) for enricher in enricher_data
@@ -105,8 +102,8 @@ def _build_enricher_configs[ConfigT](
 
 def _build_merge_config[ConfigT](
     merge_data: dict[str, object],
-    merge_cls: Callable[..., _ConfigT],
-) -> _ConfigT:
+    merge_cls: Callable[..., ConfigT],
+) -> ConfigT:
     """Build merge config from serialized mapping."""
     return merge_cls(
         strategy=MergeStrategy.from_string(
