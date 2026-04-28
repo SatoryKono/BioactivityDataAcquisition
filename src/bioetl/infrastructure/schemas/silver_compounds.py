@@ -11,16 +11,15 @@ __all__ = [
 
 import pyarrow as pa
 
+from bioetl.infrastructure.schemas.silver_common_field_blocks import (
+    build_silver_dq_suffix_fields,
+    build_silver_system_prefix_fields,
+)
+
 PUBCHEM_COMPOUND_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_silver_system_prefix_fields(),
         # === Business fields (alphabetical order) ===
         pa.field("canonical_smiles", pa.string()),
         pa.field("molecule_id", pa.string(), nullable=False),
@@ -49,8 +48,7 @@ PUBCHEM_COMPOUND_SCHEMA = pa.schema(
         pa.field("y_steric_quadrupole_3d", pa.float64()),
         pa.field("z_steric_quadrupole_3d", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_silver_dq_suffix_fields(),
     ]
 )
 
@@ -60,13 +58,7 @@ PUBCHEM_COMPOUND_SCHEMA = pa.schema(
 UNIPROT_PROTEIN_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_silver_system_prefix_fields(),
         # === Business fields (alphabetical order) ===
         pa.field("accession", pa.string(), nullable=False),  # Primary UniProt accession
         pa.field("acetylation", pa.string()),  # PTM: acetylation sites
@@ -119,8 +111,7 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("transmembrane", pa.string()),  # Structural: transmembrane regions
         pa.field("ubiquitination", pa.string()),  # PTM: ubiquitination sites
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_silver_dq_suffix_fields(),
     ]
 )
 
@@ -129,13 +120,7 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
 UNIPROT_ID_MAPPING_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_silver_system_prefix_fields(),
         # === Business fields (alphabetical order) ===
         pa.field("all_mappings", pa.string()),  # JSON array for multiple mappings
         pa.field("annotation_score", pa.int64()),  # Quality score 1-5
@@ -156,8 +141,7 @@ UNIPROT_ID_MAPPING_SCHEMA = pa.schema(
         pa.field("uniprot_entry_name", pa.string()),  # Entry name (e.g., FA10_HUMAN)
         # === DQ suffix (MUST be last, if present) ===
         # DQ warning flag (True for not_found)
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_silver_dq_suffix_fields(),
     ]
 )
 

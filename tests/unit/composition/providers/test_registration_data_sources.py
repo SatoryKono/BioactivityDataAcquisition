@@ -19,6 +19,7 @@ from bioetl.composition.providers.registration_biblio import (
 from bioetl.composition.providers.registration_bio import (
     _create_chembl_data_source,
     _create_pubchem_adapter,
+    _create_uniprot_data_source,
     _create_uniprot_idmapping_data_source,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -570,3 +571,69 @@ class TestUniProtIdMappingCreatorBranches:
         assert call_kwargs["from_db"] == "ChEMBL"
         assert call_kwargs["to_db"] == "UniProtKB"
         assert call_kwargs["seed_ids"] is None
+
+
+@pytest.mark.unit
+class TestUniProtProteinCreatorBranches:
+    """Covers public/default and optional-key UniProt data-source wiring."""
+
+    @patch("bioetl.composition.providers.registration_bio._wrap_with_filter")
+    def test_uniprot_protein_runs_without_api_key(
+        self,
+        mock_wrap_with_filter: MagicMock,
+    ) -> None:
+        support = MagicMock()
+        support.create_http_client.return_value = MagicMock()
+        adapter = MagicMock(name="uniprot_adapter")
+        support.create_adapter.return_value = adapter
+        mock_wrap_with_filter.return_value = adapter
+
+        settings = MagicMock()
+        settings.uniprot_api_key = None
+        settings.strict_error_handling = False
+        source = SimpleNamespace(api=SimpleNamespace(base_url=None))
+        pipeline_config = cast(PipelineYamlConfig, SimpleNamespace(source=source))
+        logger = MagicMock()
+
+        result = _create_uniprot_data_source(
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=logger,
+            assembly_support=support,
+        )
+
+        call_kwargs = support.create_adapter.call_args.kwargs
+        assert call_kwargs["api_key"] is None
+        assert call_kwargs["base_url"] == "https://rest.uniprot.org"
+        assert result is adapter
+
+    @patch("bioetl.composition.providers.registration_bio._wrap_with_filter")
+    def test_uniprot_protein_forwards_optional_api_key(
+        self,
+        mock_wrap_with_filter: MagicMock,
+    ) -> None:
+        support = MagicMock()
+        support.create_http_client.return_value = MagicMock()
+        adapter = MagicMock(name="uniprot_adapter")
+        support.create_adapter.return_value = adapter
+        mock_wrap_with_filter.return_value = adapter
+
+        settings = MagicMock()
+        settings.uniprot_api_key = MagicMock()
+        settings.uniprot_api_key.get_secret_value.return_value = "uniprot-secret"
+        settings.strict_error_handling = True
+        source = SimpleNamespace(
+            api=SimpleNamespace(base_url="https://mirror.uniprot.test")
+        )
+        pipeline_config = cast(PipelineYamlConfig, SimpleNamespace(source=source))
+
+        _create_uniprot_data_source(
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=MagicMock(),
+            assembly_support=support,
+        )
+
+        call_kwargs = support.create_adapter.call_args.kwargs
+        assert call_kwargs["api_key"] == "uniprot-secret"
+        assert call_kwargs["base_url"] == "https://mirror.uniprot.test"

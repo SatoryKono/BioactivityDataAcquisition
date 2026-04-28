@@ -4,20 +4,22 @@ from __future__ import annotations
 
 import pyarrow as pa
 
+from bioetl.infrastructure.schemas.silver_common_field_blocks import (
+    build_silver_dq_suffix_fields,
+    build_silver_lookup_prefix_fields,
+    build_silver_system_prefix_fields,
+)
+from bioetl.infrastructure.schemas.silver_publication_field_blocks import (
+    build_publication_dq_suffix_fields,
+    build_publication_system_prefix_fields,
+)
+
 CHEMBL_PUBLICATION_SCHEMA = pa.schema(
     [
         # === SYSTEM_FIELDS_PREFIX ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_source", pa.string()),  # Data source identifier: "chembl"
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_publication_system_prefix_fields(),
         # === LOOKUP_FIELDS_PREFIX ===
-        pa.field("_lookup_method", pa.string()),
-        pa.field("_original_id", pa.string()),
+        *build_silver_lookup_prefix_fields(),
         # === PUBLICATION_METADATA_FIELDS ===
         # affiliations excluded per user request
         pa.field("authors", pa.string()),  # JSON array of author names
@@ -70,8 +72,7 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("chembl_release", pa.string()),  # e.g., CHEMBL_1, CHEMBL_34
         pa.field("creation_date", pa.string()),  # Record creation date (YYYY-MM-DD)
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_publication_dq_suffix_fields(),
     ]
 )
 
@@ -81,13 +82,7 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
 CHEMBL_ACTIVITY_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string(), nullable=False),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_silver_system_prefix_fields(source_batch_nullable=False),
         pa.field("_state", pa.string(), nullable=False),
         # === Business fields (alphabetical order) ===
         pa.field("action_type", pa.string()),
@@ -147,8 +142,7 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("upper_value", pa.float64()),
         pa.field("value", pa.float64(), nullable=False),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_silver_dq_suffix_fields(),
     ]
 )
 
@@ -159,13 +153,7 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
 CHEMBL_ASSAY_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_silver_system_prefix_fields(),
         # === Business fields (alphabetical order) ===
         pa.field("aidx", pa.string()),
         pa.field("assay_category", pa.string()),
@@ -206,8 +194,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("variant_sequence_json", pa.string()),  # Forensic: original JSON
         pa.field("variant_taxonomy_id", pa.int64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_silver_dq_suffix_fields(),
     ]
 )
 
@@ -216,13 +203,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
 CHEMBL_TARGET_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_silver_system_prefix_fields(),
         # === Business fields (alphabetical order) ===
         pa.field("component_accessions", pa.string()),
         pa.field("component_descriptions", pa.string()),
@@ -246,8 +227,7 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         # Note: protein_classifications not available in /target endpoint
         # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_silver_dq_suffix_fields(),
     ]
 )
 
@@ -256,13 +236,7 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
 CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_silver_system_prefix_fields(),
         # === Business fields (alphabetical order) ===
         pa.field("accession", pa.string()),
         pa.field("component_id", pa.int64(), nullable=False),
@@ -276,8 +250,7 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         pa.field("target_component_xrefs", pa.string()),
         pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_silver_dq_suffix_fields(),
     ]
 )
 
@@ -286,13 +259,7 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
 CHEMBL_CELL_LINE_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_silver_system_prefix_fields(),
         # === Business fields (alphabetical order) ===
         pa.field("cell_id", pa.string(), nullable=False),
         pa.field("cell_description", pa.string()),
@@ -308,8 +275,7 @@ CHEMBL_CELL_LINE_SCHEMA = pa.schema(
         pa.field("clo_id", pa.string()),
         pa.field("cl_lincs_id", pa.string()),
         pa.field("efo_id", pa.string()),
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_silver_dq_suffix_fields(),
     ]
 )
 
@@ -318,13 +284,7 @@ CHEMBL_CELL_LINE_SCHEMA = pa.schema(
 CHEMBL_TISSUE_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_silver_system_prefix_fields(),
         # === Business fields (alphabetical order) ===
         pa.field("bto_id", pa.string()),  # BRENDA Tissue Ontology
         pa.field("caloha_id", pa.string()),  # CALIPHO ID
@@ -333,8 +293,7 @@ CHEMBL_TISSUE_SCHEMA = pa.schema(
         pa.field("tissue_id", pa.string(), nullable=False),  # Primary key
         pa.field("uberon_id", pa.string()),  # Uberon Ontology
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_silver_dq_suffix_fields(),
     ]
 )
 # Derived entity extracted from Assay records (assay_subcellular_fraction field)
@@ -342,20 +301,13 @@ CHEMBL_TISSUE_SCHEMA = pa.schema(
 CHEMBL_SUBCELLULAR_FRACTION_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
-        pa.field("entity_id", pa.string(), nullable=False),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
+        *build_silver_system_prefix_fields(entity_id_nullable=False),
         # === Business fields (alphabetical order) ===
         pa.field("assay_count", pa.int64()),  # Number of assays using this fraction
         pa.field("example_assay_id", pa.string()),  # Example assay ChEMBL ID
         pa.field("subcellular_fraction", pa.string()),  # Primary key - fraction name
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
+        *build_silver_dq_suffix_fields(),
     ]
 )
 

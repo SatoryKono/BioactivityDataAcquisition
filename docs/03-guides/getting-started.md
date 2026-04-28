@@ -136,10 +136,11 @@ Open `.env` and verify the settings. For local development, the defaults are usu
 
 ### Secrets
 
-If you plan to access APIs requiring authentication (e.g., UniProt, OpenAlex), add your keys to `.env`:
+If you plan to access APIs requiring authentication, or optional higher-limit provider modes, add your keys to `.env`:
 
 ```ini
-BIOETL_UNIPROT_API_KEY=your-key-here
+BIOETL_UNIPROT_API_KEY=your-optional-key-here
+BIOETL_OPENALEX_API_KEY=your-openalex-key-here
 BIOETL_OPENALEX_EMAIL=your-email@example.com
 ```
 

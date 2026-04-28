@@ -4,27 +4,20 @@ from __future__ import annotations
 
 import pyarrow as pa
 
+from bioetl.infrastructure.schemas.silver_common_field_blocks import (
+    build_silver_dq_suffix_fields,
+    build_silver_system_prefix_fields,
+)
+
 
 def build_publication_system_prefix_fields() -> list[pa.Field]:
     """Return the canonical system-prefix fields for publication Silver schemas."""
-    return [
-        pa.field("entity_id", pa.string()),
-        pa.field("content_hash", pa.string()),
-        pa.field("_run_id", pa.string()),
-        pa.field("_run_type", pa.string()),
-        pa.field("_source_batch_id", pa.string()),
-        pa.field("_source", pa.string()),
-        pa.field("_ingestion_ts", pa.string()),
-        pa.field("_index", pa.int64()),
-    ]
+    return build_silver_system_prefix_fields(include_source=True)
 
 
 def build_publication_dq_suffix_fields() -> list[pa.Field]:
     """Return the canonical DQ suffix fields for publication Silver schemas."""
-    return [
-        pa.field("_dq_error", pa.bool_()),
-        pa.field("_dq_warn", pa.bool_()),
-    ]
+    return build_silver_dq_suffix_fields()
 
 
 def build_pubmed_publication_fields() -> list[pa.Field]:
