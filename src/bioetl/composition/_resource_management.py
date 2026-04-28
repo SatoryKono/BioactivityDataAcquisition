@@ -99,12 +99,12 @@ class CleanupPreviewProtocol(Protocol):
     total_files: int
 
 
-def _bootstrap_registered_resource[**P, T](
-    bootstrap_fn: Callable[P, T],
+def _bootstrap_registered_resource[**_P, _T](
+    bootstrap_fn: Callable[_P, _T],
     /,
-    *args: P.args,
-    **kwargs: P.kwargs,
-) -> T:
+    *args: _P.args,
+    **kwargs: _P.kwargs,
+) -> _T:
     """Run registration bootstrap before delegating to a resource builder."""
     _ensure_registrations()
     return bootstrap_fn(*args, **kwargs)
