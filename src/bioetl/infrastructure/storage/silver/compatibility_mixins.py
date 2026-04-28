@@ -20,6 +20,8 @@ from bioetl.infrastructure.storage.silver.merged_mixin import (
     SilverWriterMergedMixin,
 )
 from bioetl.infrastructure.storage.silver.merged_operations import (
+    _build_merged_silver_write_request,
+    _execute_merged_silver_write_flow,
     _MergedSilverWriteRequest,
     _PreparedMergedSilverWrite,
 )
@@ -232,15 +234,19 @@ class SilverWriterMergedCompatibilityMixin:
         preserve_column_order: bool = False,
     ) -> None:
         """Write merged Silver records through the merged-write service surface."""
+        request_kwargs = {
+            "table_name": table_name,
+            "records": records,
+            "primary_keys": primary_keys,
+            "completed_at": completed_at,
+            "run_id": run_id,
+            "sources_used": sources_used,
+            "preserve_column_order": preserve_column_order,
+        }
         if self._merged is not None:
-            await self._merged.write_silver_merged(
-                table_name=table_name,
-                records=records,
-                primary_keys=primary_keys,
-                completed_at=completed_at,
-                run_id=run_id,
-                sources_used=sources_used,
-                preserve_column_order=preserve_column_order,
+            await _execute_merged_silver_write_flow(
+                self._merged,
+                _build_merged_silver_write_request(**request_kwargs),
             )
             return
 
@@ -250,13 +256,7 @@ class SilverWriterMergedCompatibilityMixin:
 
         await SilverWriterMergedMixin.write_silver_merged(
             self._as_merged_mixin(),
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-            completed_at=completed_at,
-            run_id=run_id,
-            sources_used=sources_used,
-            preserve_column_order=preserve_column_order,
+            **request_kwargs,
         )
 
     def _prepare_merged_silver_write(

@@ -12,6 +12,7 @@ from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 from bioetl.infrastructure.storage.silver.merged_operations import (
+    _build_merged_silver_write_request,
     _execute_merged_silver_write_flow,
     _export_silver_merged_csv,
     _MergedSilverMetadataWriterProtocol,
@@ -112,7 +113,7 @@ class SilverWriterMergedMixin:
         """
         await _execute_merged_silver_write_flow(
             self,
-            _MergedSilverWriteRequest(
+            _build_merged_silver_write_request(
                 table_name=table_name,
                 records=records,
                 primary_keys=primary_keys,

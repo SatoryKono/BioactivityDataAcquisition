@@ -206,7 +206,12 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         """Extract topic, keyword, and grant classification fields."""
         subject_topics = extract_topics(self._ensure_dict_list(rec.get("topics", [])))
         primary_topic = extract_primary_topic(rec.get("primary_topic"))
-        grants = extract_grants(self._ensure_dict_list(rec.get("grants", [])))
+        grant_records = (
+            self._ensure_dict_list(rec.get("awards", []))
+            or self._ensure_dict_list(rec.get("funders", []))
+            or self._ensure_dict_list(rec.get("grants", []))
+        )
+        grants = extract_grants(grant_records)
         subject_mesh = extract_mesh_terms(self._ensure_dict_list(rec.get("mesh", [])))
         subject_keywords = extract_keywords(
             self._ensure_dict_list(rec.get("keywords", []))

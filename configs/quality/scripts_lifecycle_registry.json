@@ -2,6 +2,12 @@
   "schema_version": "1.0",
   "description": "Lifecycle decisions for non-active scripts (orphan/legacy).",
   "entries": {
+    "scripts/_command_dispatch.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the shared top-level scripts package command dispatcher for module routers and helper entrypoints; promote it to active inventory once helper modules receive explicit catalog classification."
+    },
     "scripts/engineering/common/cli_dispatch.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

@@ -20,6 +20,7 @@ from bioetl.infrastructure.storage.delta.schema_ops import (
 )
 
 __all__ = [
+    "_build_merged_silver_write_request",
     "_MergedSilverMetadataWriterProtocol",
     "_MergedSilverWriteExecutorProtocol",
     "_MergedSilverWriteRequest",
@@ -42,6 +43,28 @@ class _MergedSilverWriteRequest:
     run_id: str | None = None
     sources_used: list[str] | None = None
     preserve_column_order: bool = False
+
+
+def _build_merged_silver_write_request(
+    *,
+    table_name: str,
+    records: list[BronzeRecord],
+    primary_keys: list[str] | None = None,
+    completed_at: datetime | None = None,
+    run_id: str | None = None,
+    sources_used: list[str] | None = None,
+    preserve_column_order: bool = False,
+) -> _MergedSilverWriteRequest:
+    """Build the canonical merged-write request from legacy keyword arguments."""
+    return _MergedSilverWriteRequest(
+        table_name=table_name,
+        records=records,
+        primary_keys=primary_keys,
+        completed_at=completed_at,
+        run_id=run_id,
+        sources_used=sources_used,
+        preserve_column_order=preserve_column_order,
+    )
 
 
 @dataclass(frozen=True, slots=True)

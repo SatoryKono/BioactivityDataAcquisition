@@ -84,9 +84,12 @@ def _parse_grant_dict(
         or grant.get("funder")
         or (grant.get("id") if not award_openalex_id else None)
     )
+    if isinstance(funder_id, dict):
+        funder_id = funder_id.get("id")
+    funder_id_str = funder_id if isinstance(funder_id, str) else None
 
     return {
-        "funder": _extract_id_from_url(funder_id),
+        "funder": _extract_id_from_url(funder_id_str),
         "funder_display_name": funder_name.strip(),
         "award_id": award_str,
         "award_openalex_id": award_openalex_id,

@@ -40,6 +40,7 @@ from bioetl.infrastructure.storage.silver.metadata_operations import (
     _SilverMetadataWriteRequest,
 )
 from bioetl.infrastructure.storage.silver.metadata_request_models import (
+    _build_silver_merged_metadata_write_request,
     _coerce_silver_write_finalization_preparation_request,
     _coerce_silver_write_result_finalization_request,
     _SilverWriteFinalizationPreparationRequest,
@@ -186,7 +187,7 @@ class SilverWriterMetadataMixin:
             return
         await _execute_silver_metadata_write(
             self,
-            request=_SilverMergedMetadataWriteRequest(
+            request=_build_silver_merged_metadata_write_request(
                 table_path=table_path,
                 table_name=table_name,
                 records=records,
