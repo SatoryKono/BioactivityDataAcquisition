@@ -8,8 +8,9 @@ Centralizes command-level error handling and exit-code mapping for:
 
 from __future__ import annotations
 
+import asyncio
 import sys
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Coroutine, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -30,10 +31,13 @@ __all__ = [
     "execute_with_cli_failure_policy",
     "finalize_cli_execution",
     "handle_cli_failure",
+    "CliBoundaryExecutionPolicy",
     "map_batch_run_result_to_exit_code",
     "map_run_status_to_exit_code",
     "map_success_flag_to_exit_code",
     "render_failure_context",
+    "run_async_with_cli_failure_policy",
+    "run_sync_with_cli_failure_policy",
 ]
 
 CLI_ENTRYPOINT_TYPED_ERRORS = (
@@ -101,6 +105,19 @@ class ExecutionFailureReasonCodes:
     domain: str
     interrupted: str
     unexpected: str
+
+
+@dataclass(frozen=True, slots=True)
+class CliBoundaryExecutionPolicy:
+    """Typed policy for one CLI command boundary."""
+
+    reason_prefix: str
+    subject_key: str
+    subject_value: str
+    domain_error_title: str
+    unexpected_error_title: str
+    interrupted_message: str
+    default_exit_code: ExitCode = ExitCode.FAIL
 
 
 def map_run_status_to_exit_code(
@@ -288,6 +305,93 @@ def _format_failure_detail(
         subject_value=subject_value,
     )
     return render_failure_context(failure_context)
+
+
+def _handle_boundary_failure(
+    exc: BaseException,
+    *,
+    policy: CliBoundaryExecutionPolicy,
+    reason_suffix: str,
+) -> None:
+    """Handle one exception using the shared CLI boundary policy."""
+    handle_cli_failure(
+        exc,
+        reason_code=f"{policy.reason_prefix}_{reason_suffix}",
+        subject_key=policy.subject_key,
+        subject_value=policy.subject_value,
+        domain_error_title=policy.domain_error_title,
+        unexpected_error_title=policy.unexpected_error_title,
+        interrupted_message=policy.interrupted_message,
+        default_exit_code=policy.default_exit_code,
+    )
+
+
+def _execute_boundary_action[ResultT](
+    action: Callable[[], ResultT],
+    *,
+    policy: CliBoundaryExecutionPolicy,
+    passthrough_exception_types: tuple[type[BaseException], ...] = (),
+) -> ResultT | None:
+    """Execute one command-boundary action with the shared typed-failure ladder."""
+    try:
+        return action()
+    except BaseException as exc:
+        if passthrough_exception_types and isinstance(exc, passthrough_exception_types):
+            raise
+        if isinstance(exc, BioETLError):
+            _handle_boundary_failure(
+                exc,
+                policy=policy,
+                reason_suffix="DOMAIN_ERROR",
+            )
+            return None
+        if isinstance(exc, KeyboardInterrupt):
+            _handle_boundary_failure(
+                exc,
+                policy=policy,
+                reason_suffix="SIGINT",
+            )
+            return None
+        if isinstance(exc, CLI_ENTRYPOINT_TYPED_ERRORS):
+            _handle_boundary_failure(
+                exc,
+                policy=policy,
+                reason_suffix="UNEXPECTED_ERROR",
+            )
+            return None
+        raise
+
+
+def run_async_with_cli_failure_policy[ResultT](
+    coro: Coroutine[object, object, ResultT],
+    *,
+    policy: CliBoundaryExecutionPolicy,
+    passthrough_exception_types: tuple[type[BaseException], ...] = (),
+) -> ResultT | None:
+    """Run an async CLI coroutine with the canonical typed-failure ladder."""
+    try:
+        return _execute_boundary_action(
+            lambda: asyncio.run(coro),
+            policy=policy,
+            passthrough_exception_types=passthrough_exception_types,
+        )
+    finally:
+        if getattr(coro, "cr_frame", None) is not None:
+            coro.close()
+
+
+def run_sync_with_cli_failure_policy[ResultT](
+    fn: Callable[[], ResultT],
+    *,
+    policy: CliBoundaryExecutionPolicy,
+    passthrough_exception_types: tuple[type[BaseException], ...] = (),
+) -> ResultT | None:
+    """Run a sync CLI callable with the canonical typed-failure ladder."""
+    return _execute_boundary_action(
+        fn,
+        policy=policy,
+        passthrough_exception_types=passthrough_exception_types,
+    )
 
 
 def handle_cli_failure(

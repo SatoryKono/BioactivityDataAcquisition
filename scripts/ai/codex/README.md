@@ -1,13 +1,13 @@
 # Codex - Consolidated Setup
 
-Единая точка входа для запуска Codex на безголовой машине.
+Единая точка входа для запуска Codex через canonical WSL/Bash launcher.
 
 ## 📁 Структура
 
 ```
 scripts/ai/codex/
-├── run-codex.ps1              ⭐ Main entry point (PowerShell) - Non-blocking!
-├── run-codex.sh               ⭐ Main entry point (WSL/Bash)
+├── run-codex.ps1              PowerShell transport to the canonical WSL launcher
+├── run-codex.sh               ⭐ Canonical WSL/Bash entry point
 ├── headless.ps1               PowerShell transport for headless Codex launch
 ├── headless.sh                Headless Codex launch without MCP sync
 ├── diagnose_wsl.ps1           PowerShell transport for WSL diagnostics
@@ -29,12 +29,12 @@ scripts/ai/codex/
 
 ## 🚀 Quick Start
 
-### From PowerShell (Windows) - NON-BLOCKING
+### From PowerShell (Windows)
 
 ```powershell
 cd scripts/ai/codex
 
-# Just run - setup happens in background if needed!
+# Thin transport to the canonical WSL/Bash launcher
 .\run-codex.ps1
 .\run-codex.ps1 "analyze the code"
 
@@ -43,7 +43,8 @@ cd scripts/ai/codex
 .\run-codex.ps1 setup
 ```
 
-⚡ **NEW**: Setup no longer blocks! If components are missing, they install in the background while you use Codex.
+`run-codex.ps1` delegates to `run-codex.sh`, so the WSL/Bash launcher remains
+the single source of truth for environment checks, setup, MCP sync, and Codex execution.
 
 ### From WSL (Ubuntu)
 
@@ -91,8 +92,8 @@ bash diagnose_wsl.sh              # Run WSL diagnostics
 
 ## 🔧 What run-codex does
 
-1. **Quick check** (~2 sec) - Validates WSL, Node.js, npm, Codex CLI, and MCP config
-1. **Setup** (if needed) - Installs missing components and syncs MCP configuration
+1. **Check** - Validates the WSL/Bash environment and the managed Codex CLI path
+1. **Setup** (if needed) - Installs missing components through the repo-local helper flow
 1. **MCP sync before launch** - Regenerates `.mcp.json`, `.vscode/mcp.json`, and the Codex-native `~/.codex/config.toml` MCP block
 1. **Launch** - Runs Codex from the repo root with the managed Codex CLI
 
@@ -122,14 +123,15 @@ Get API key from: https://platform.openai.com/api-keys
 
 This will:
 
-- Check all dependencies
-- Install missing components in background (if any)
+- Check all dependencies through the canonical WSL/Bash launcher
+- Install missing components through the repo-local helper flow if needed
 - Synchronize MCP configuration for Codex
-- Launch Codex immediately
+- Launch Codex from the managed WSL/Bash entrypoint
 
 ## MCP configuration
 
-`run-codex.sh` runs `helper/ensure-mcp.sh` before launching Codex. This writes:
+`run-codex.sh` runs `helper/ensure-mcp.sh` before launching Codex. `run-codex.ps1`
+delegates to that same flow. This writes:
 
 - `.mcp.json` - workspace MCP config used by compatible tools
 - `.vscode/mcp.json` - VS Code MCP config
@@ -183,7 +185,7 @@ Make sure you have `OPENAI_API_KEY=sk-...` with valid key.
 
 ### "Node.js not found"
 
-Run setup (now non-blocking!):
+Run setup:
 
 ```powershell
 .\run-codex.ps1 setup
@@ -243,9 +245,7 @@ Just run:
 
 ✨ **What happens**:
 
-- Checks components (2 sec)
-- If setup needed → starts in background (non-blocking)
-- Launches Codex immediately
-- Setup finishes quietly in the background
-
-🚀 **No more waiting for setup!**
+- Checks components through the canonical WSL/Bash launcher
+- Runs repo-local setup helpers if needed
+- Synchronizes MCP configuration
+- Launches Codex from the managed WSL/Bash entrypoint

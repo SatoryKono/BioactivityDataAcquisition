@@ -14,6 +14,7 @@ python -m scripts.engineering.repo <command> [args...]
 | Command                 | Script                           | Description                                                           |
 | ----------------------- | -------------------------------- | --------------------------------------------------------------------- |
 | `check-inventory`       | `check_scripts_inventory.py`     | Check scripts inventory drift against manifest                        |
+| `sync-wrapper-caller-matrix` | `generate_scripts_wrapper_caller_matrix.py` | Refresh the tracked wrapper caller matrix used for RF-008 cleanup evidence |
 | `check-catalog`         | `check_scripts_catalog.py`       | Validate catalog governance policy                                    |
 | `check-versions`        | `check_version_consistency.py`   | Check version consistency across project files                        |
 | `check-cleanliness`     | `audit_root_cleanliness.py`      | Audit repository root layout allowlist                                |
@@ -45,6 +46,7 @@ branches.
 | Command                     | When                                                                                     | Trigger                      |
 | --------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------- |
 | `check-inventory`           | After adding/removing/renaming scripts                                                   | Manual or CI drift check     |
+| `sync-wrapper-caller-matrix` | After wrapper-routing changes or before deleting a compatibility entrypoint              | Manual evidence refresh      |
 | `check-catalog`             | After modifying `scripts/engineering/repo/catalog.yaml` or adding new script directories | CI gate (`architecture.yml`) |
 | `check-versions`            | Before release or after bumping version in any file                                      | CI gate (`docs.yml`)         |
 | `check-cleanliness`         | After adding files to repository root                                                    | Pre-commit hook              |

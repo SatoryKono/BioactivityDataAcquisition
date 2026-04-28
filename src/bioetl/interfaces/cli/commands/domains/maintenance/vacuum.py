@@ -5,20 +5,17 @@ Implements vacuum operations for Delta tables storage reclamation.
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
 import click
 
-from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    CLI_ENTRYPOINT_TYPED_ERRORS,
+    CliBoundaryExecutionPolicy,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    handle_cli_failure as handle_cli_execution_failure,
+    run_async_with_cli_failure_policy,
 )
-from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
     echo_dry_run_prefix,
     echo_info,
@@ -61,36 +58,22 @@ def get_vacuum_service() -> VacuumService:
     from bioetl.composition.maintenance_api import get_vacuum_service as _impl
 
     return _impl()
-
-
-def _handle_maintenance_failure(
-    exc: BaseException,
+def _maintenance_policy(
     *,
-    reason_code: str,
+    reason_prefix: str,
     target: str,
     domain_error_title: str,
     unexpected_error_title: str,
     interrupted_message: str,
-) -> None:
-    """Handle maintenance command failures with shared CLI policy.
-
-    Args:
-        exc: Exception caught at the CLI command boundary.
-        reason_code: Machine-readable code for the failure (e.g., 'CLI_MAINTENANCE_VACUUM_DOMAIN_ERROR').
-        target: Target identifier (e.g., table name or layer) used in error context.
-        domain_error_title: Human-readable title for BioETLError failures.
-        unexpected_error_title: Human-readable title for unexpected exception failures.
-        interrupted_message: Message displayed when KeyboardInterrupt is caught.
-    """
-    handle_cli_execution_failure(
-        exc,
-        reason_code=reason_code,
+) -> CliBoundaryExecutionPolicy:
+    """Build the shared CLI boundary policy for maintenance vacuum commands."""
+    return CliBoundaryExecutionPolicy(
+        reason_prefix=reason_prefix,
         subject_key="target",
         subject_value=target,
         domain_error_title=domain_error_title,
         unexpected_error_title=unexpected_error_title,
         interrupted_message=interrupted_message,
-        default_exit_code=ExitCode.FAIL,
     )
 
 
@@ -142,39 +125,16 @@ def vacuum_command(table: str, retention_days: int, dry_run: bool) -> None:
         else:
             echo_info(f"Removed {files_removed} files")
 
-    coro = _run()
-    try:
-        asyncio.run(coro)
-    except BioETLError as exc:
-        _handle_maintenance_failure(
-            exc,
-            reason_code="CLI_MAINTENANCE_VACUUM_DOMAIN_ERROR",
+    run_async_with_cli_failure_policy(
+        _run(),
+        policy=_maintenance_policy(
+            reason_prefix="CLI_MAINTENANCE_VACUUM",
             target=table,
             domain_error_title=_VACUUM_DOMAIN_ERROR_TITLE,
             unexpected_error_title=_VACUUM_UNEXPECTED_ERROR_TITLE,
             interrupted_message=_VACUUM_INTERRUPTED_MESSAGE,
-        )
-    except KeyboardInterrupt as exc:
-        _handle_maintenance_failure(
-            exc,
-            reason_code="CLI_MAINTENANCE_VACUUM_SIGINT",
-            target=table,
-            domain_error_title=_VACUUM_DOMAIN_ERROR_TITLE,
-            unexpected_error_title=_VACUUM_UNEXPECTED_ERROR_TITLE,
-            interrupted_message=_VACUUM_INTERRUPTED_MESSAGE,
-        )
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        _handle_maintenance_failure(
-            exc,
-            reason_code="CLI_MAINTENANCE_VACUUM_UNEXPECTED_ERROR",
-            target=table,
-            domain_error_title=_VACUUM_DOMAIN_ERROR_TITLE,
-            unexpected_error_title=_VACUUM_UNEXPECTED_ERROR_TITLE,
-            interrupted_message=_VACUUM_INTERRUPTED_MESSAGE,
-        )
-    finally:
-        if getattr(coro, "cr_frame", None) is not None:
-            coro.close()
+        ),
+    )
 
 
 @click.command("vacuum-all")
@@ -234,36 +194,13 @@ def vacuum_all_command(retention_days: int, dry_run: bool, layer: str) -> None:
 
         echo_vacuum_all_summary(result)
 
-    coro = _run()
-    try:
-        asyncio.run(coro)
-    except BioETLError as exc:
-        _handle_maintenance_failure(
-            exc,
-            reason_code="CLI_MAINTENANCE_VACUUM_ALL_DOMAIN_ERROR",
+    run_async_with_cli_failure_policy(
+        _run(),
+        policy=_maintenance_policy(
+            reason_prefix="CLI_MAINTENANCE_VACUUM_ALL",
             target=layer,
             domain_error_title=_VACUUM_ALL_DOMAIN_ERROR_TITLE,
             unexpected_error_title=_VACUUM_ALL_UNEXPECTED_ERROR_TITLE,
             interrupted_message=_VACUUM_ALL_INTERRUPTED_MESSAGE,
-        )
-    except KeyboardInterrupt as exc:
-        _handle_maintenance_failure(
-            exc,
-            reason_code="CLI_MAINTENANCE_VACUUM_ALL_SIGINT",
-            target=layer,
-            domain_error_title=_VACUUM_ALL_DOMAIN_ERROR_TITLE,
-            unexpected_error_title=_VACUUM_ALL_UNEXPECTED_ERROR_TITLE,
-            interrupted_message=_VACUUM_ALL_INTERRUPTED_MESSAGE,
-        )
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        _handle_maintenance_failure(
-            exc,
-            reason_code="CLI_MAINTENANCE_VACUUM_ALL_UNEXPECTED_ERROR",
-            target=layer,
-            domain_error_title=_VACUUM_ALL_DOMAIN_ERROR_TITLE,
-            unexpected_error_title=_VACUUM_ALL_UNEXPECTED_ERROR_TITLE,
-            interrupted_message=_VACUUM_ALL_INTERRUPTED_MESSAGE,
-        )
-    finally:
-        if getattr(coro, "cr_frame", None) is not None:
-            coro.close()
+        ),
+    )

@@ -5,20 +5,17 @@ Implements table archival to cold storage.
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
 import click
 
-from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    CLI_ENTRYPOINT_TYPED_ERRORS,
+    CliBoundaryExecutionPolicy,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    handle_cli_failure as handle_cli_execution_failure,
+    run_async_with_cli_failure_policy,
 )
-from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_info
 
 if TYPE_CHECKING:
@@ -38,30 +35,15 @@ def get_lifecycle_service() -> MedallionLifecycleService:
 
     impl = cast("Callable[[], MedallionLifecycleService]", _impl)
     return impl()
-
-
-def _handle_archive_failure(
-    exc: BaseException,
-    *,
-    reason_code: str,
-    table: str,
-) -> None:
-    """Handle archive command failures with shared CLI policy.
-
-    Args:
-        exc: Exception caught at the CLI command boundary.
-        reason_code: Machine-readable code for the failure (e.g., 'CLI_MAINTENANCE_ARCHIVE_DOMAIN_ERROR').
-        table: Table name used as subject value in the structured error context.
-    """
-    handle_cli_execution_failure(
-        exc,
-        reason_code=reason_code,
+def _archive_policy(table: str) -> CliBoundaryExecutionPolicy:
+    """Build the shared CLI boundary policy for archive commands."""
+    return CliBoundaryExecutionPolicy(
+        reason_prefix="CLI_MAINTENANCE_ARCHIVE",
         subject_key="table",
         subject_value=table,
         domain_error_title="Maintenance archive failed with domain error",
         unexpected_error_title="Unexpected error during maintenance archive",
         interrupted_message="Maintenance archive interrupted by user (Ctrl+C)",
-        default_exit_code=ExitCode.FAIL,
     )
 
 
@@ -102,27 +84,4 @@ def archive_command(table: str, target_path: str, remove_source: bool) -> None:
 
         echo_info(f"Archived {files_archived} files to {target_path}")
 
-    coro = _run()
-    try:
-        asyncio.run(coro)
-    except BioETLError as exc:
-        _handle_archive_failure(
-            exc,
-            reason_code="CLI_MAINTENANCE_ARCHIVE_DOMAIN_ERROR",
-            table=table,
-        )
-    except KeyboardInterrupt as exc:
-        _handle_archive_failure(
-            exc,
-            reason_code="CLI_MAINTENANCE_ARCHIVE_SIGINT",
-            table=table,
-        )
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        _handle_archive_failure(
-            exc,
-            reason_code="CLI_MAINTENANCE_ARCHIVE_UNEXPECTED_ERROR",
-            table=table,
-        )
-    finally:
-        if getattr(coro, "cr_frame", None) is not None:
-            coro.close()
+    run_async_with_cli_failure_policy(_run(), policy=_archive_policy(table))
