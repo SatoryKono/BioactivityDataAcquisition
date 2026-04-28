@@ -175,6 +175,159 @@ def test_lifecycle_plan_is_dry_run_and_retains_protected_references(
     assert stale_effective_config.exists()
 
 
+def test_lifecycle_retains_stale_replay_ready_evidence_floor_refs(
+    tmp_path: Path,
+) -> None:
+    control_root = tmp_path / "control"
+    now = datetime(2026, 4, 22, tzinfo=UTC)
+    old = datetime(2026, 1, 1, tzinfo=UTC)
+    cached_bronze_bytes = b"replay-ready snapshot bytes"
+    cached_bronze_snapshot_id = (
+        f"sha256:{hashlib.sha256(cached_bronze_bytes).hexdigest()}"
+    )
+    stale_manifest = _write_json(
+        control_root / "run_manifest" / "manifest-replay-ready.json",
+        {
+            "created_at": old.isoformat(),
+            "manifest_id": "manifest-replay-ready",
+            "run_id": "run-replay-ready",
+            "launch_context": {"required_persistence_profile": "replay_ready"},
+            "code_provenance": {
+                "effective_config_artifact_id": "effective-config-floor"
+            },
+            "source_refs": [
+                {
+                    "input_snapshots": [
+                        {
+                            "snapshot_id": cached_bronze_snapshot_id,
+                            "content_hash": cached_bronze_snapshot_id.removeprefix(
+                                "sha256:"
+                            ),
+                        }
+                    ]
+                }
+            ],
+        },
+    )
+    stale_ledger = _write_text(
+        control_root / "run_ledger" / "manifest-replay-ready.jsonl",
+        json.dumps(
+            {
+                "occurred_at": old.isoformat(),
+                "manifest_id": "manifest-replay-ready",
+                "run_id": "run-replay-ready",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+    )
+    stale_effective_config = _write_json(
+        control_root / "effective_config" / "effective-config-floor.json",
+        {"artifact_id": "effective-config-floor"},
+    )
+    stale_lineage = _write_json(
+        control_root / "lineage" / "fragments" / "fragment-floor.json",
+        {
+            "stored_fragment_id": "fragment-floor",
+            "run_id": "run-replay-ready",
+            "manifest_id": "manifest-replay-ready",
+        },
+    )
+    stale_checkpoint = _write_json(
+        control_root.parent / "checkpoints" / "chembl_activity.json",
+        {
+            "created_at": old.isoformat(),
+            "metadata": {
+                "run_id": "run-replay-ready",
+                "manifest_id": "manifest-replay-ready",
+                "effective_config_artifact_id": "effective-config-floor",
+            },
+        },
+    )
+    stale_cached_bronze = _write_bytes(
+        control_root.parent / "bronze" / "batch.jsonl.zst",
+        cached_bronze_bytes,
+    )
+    unrelated_manifest = _write_json(
+        control_root / "run_manifest" / "manifest-unrelated.json",
+        {
+            "created_at": old.isoformat(),
+            "manifest_id": "manifest-unrelated",
+            "run_id": "run-unrelated",
+        },
+    )
+    for path in (
+        stale_manifest,
+        stale_ledger,
+        stale_effective_config,
+        stale_lineage,
+        stale_checkpoint,
+        stale_cached_bronze,
+        unrelated_manifest,
+    ):
+        _set_mtime(path, old)
+
+    store = FileControlPlaneArtifactLifecycleStore(base_path=control_root)
+    plan = store.plan(
+        ControlPlaneArtifactLifecyclePolicy(retention_days=30, now=now),
+        dry_run=True,
+    )
+
+    by_name = {Path(artifact.path).name: artifact for artifact in plan.artifacts}
+    retained_names = (
+        "manifest-replay-ready.json",
+        "manifest-replay-ready.jsonl",
+        "effective-config-floor.json",
+        "fragment-floor.json",
+        "chembl_activity.json",
+        "batch.jsonl.zst",
+    )
+    for name in retained_names:
+        assert by_name[name].decision is ControlPlaneArtifactLifecycleDecision.RETAIN
+        assert by_name[name].reason == "reproducibility_evidence_floor"
+        assert any(
+            reason.startswith("evidence_floor:")
+            for reason in by_name[name].protected_by
+        )
+    assert by_name["manifest-unrelated.json"].decision is (
+        ControlPlaneArtifactLifecycleDecision.DELETE
+    )
+
+
+def test_lifecycle_profile_floor_override_allows_stale_replay_ready_deletion(
+    tmp_path: Path,
+) -> None:
+    control_root = tmp_path / "control"
+    now = datetime(2026, 4, 22, tzinfo=UTC)
+    old = datetime(2026, 1, 1, tzinfo=UTC)
+    stale_manifest = _write_json(
+        control_root / "run_manifest" / "manifest-replay-ready.json",
+        {
+            "created_at": old.isoformat(),
+            "manifest_id": "manifest-replay-ready",
+            "run_id": "run-replay-ready",
+            "launch_context": {"required_persistence_profile": "replay_ready"},
+        },
+    )
+    _set_mtime(stale_manifest, old)
+
+    store = FileControlPlaneArtifactLifecycleStore(base_path=control_root)
+    plan = store.plan(
+        ControlPlaneArtifactLifecyclePolicy(
+            retention_days=30,
+            now=now,
+            allow_profile_floor_violation=True,
+        ),
+        dry_run=True,
+    )
+
+    by_name = {Path(artifact.path).name: artifact for artifact in plan.artifacts}
+    assert by_name["manifest-replay-ready.json"].decision is (
+        ControlPlaneArtifactLifecycleDecision.DELETE
+    )
+    assert by_name["manifest-replay-ready.json"].reason == "retention_expired"
+
+
 def test_lifecycle_apply_deletes_only_expired_unprotected_files(tmp_path: Path) -> None:
     control_root = tmp_path / "control"
     now = datetime(2026, 4, 22, tzinfo=UTC)

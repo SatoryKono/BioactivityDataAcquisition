@@ -533,7 +533,9 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         result.diagnostics["persistence_profile"]["attained_profile"]
         == "degraded_observable"
     )
-    assert result.diagnostics["persistence_profile"]["claims"]["forensic_grade"] is False
+    assert (
+        result.diagnostics["persistence_profile"]["claims"]["forensic_grade"] is False
+    )
     assert result.diagnostics["next_steps"] == [
         "Resolve concrete produced artifacts from the run ledger before claiming replay-ready reproducibility.",
         "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
@@ -747,7 +749,7 @@ def _expected_diagnostics_without_ledger(
         "next_steps": [
             "Resolve concrete produced artifacts from the run ledger before claiming replay-ready reproducibility.",
             "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
-            "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction."
+            "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         ],
         "reproducibility_audit_score": reproducibility_audit_score,
     }
@@ -1110,6 +1112,25 @@ def test_show_collects_artifact_diagnostic_links() -> None:
             "artifact_path": SILVER_ARTIFACT_PATH,
         }
     ]
+    assert result.diagnostics["produced_artifact_trace"] == (
+        _expected_produced_artifact_trace(
+            manifest,
+            ledger_entries_present=True,
+            artifacts=[
+                {
+                    "event_type": "artifact_published",
+                    "stage": "silver",
+                    "artifact_id": "silver:chembl.activity@1",
+                    "dataset_ref": "silver:chembl.activity@1",
+                    "lineage_fragment_id": "silver:fragment-1",
+                    "artifact_path": SILVER_ARTIFACT_PATH,
+                }
+            ],
+        )
+    )
+    assert service.resolve_produced_artifacts("manifest-2") == (
+        result.diagnostics["produced_artifact_trace"]["artifacts"][0],
+    )
     assert result.identity_graph == result.diagnostics["identity_graph"]
     assert result.diagnostics["identity_graph"]["published_artifacts"] == [
         {

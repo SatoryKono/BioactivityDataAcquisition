@@ -62,6 +62,7 @@ def test_control_plane_lifecycle_defaults_to_dry_run() -> None:
     store.plan.assert_called_once()
     policy = store.plan.call_args.args[0]
     assert policy.retention_days == 90
+    assert policy.allow_profile_floor_violation is False
     assert store.plan.call_args.kwargs == {"dry_run": True}
 
 
@@ -91,6 +92,7 @@ def test_control_plane_lifecycle_apply_json_outputs_deleted_paths() -> None:
                 "run-1",
                 "--protected-snapshot-id",
                 "sha256:abc",
+                "--allow-profile-floor-violation",
             ],
         )
 
@@ -101,6 +103,7 @@ def test_control_plane_lifecycle_apply_json_outputs_deleted_paths() -> None:
     policy = store.plan.call_args.args[0]
     assert policy.protected_run_ids == frozenset({"run-1"})
     assert policy.protected_input_snapshot_ids == frozenset({"sha256:abc"})
+    assert policy.allow_profile_floor_violation is True
     assert store.plan.call_args.kwargs == {"dry_run": False}
 
 

@@ -487,9 +487,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "lineage_fragment_ids": [],
         "published_artifact_count": 0,
         "exact_replay_anchors": _expected_exact_replay_anchors(manifest),
-        "produced_artifact_trace": _expected_missing_produced_artifact_trace(
-            manifest
-        ),
+        "produced_artifact_trace": _expected_missing_produced_artifact_trace(manifest),
         "persistence_profile": {
             "attained_profile": "degraded_observable",
             "required_profile": "degraded_observable",

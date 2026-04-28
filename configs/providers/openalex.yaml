@@ -30,8 +30,9 @@ source:
     rate_limit:
         requests_per_second: 10
         burst: 20
-        daily_credit_limit: 100000
-        list_request_credit_cost: 1
+        credit_model:
+            enabled: true
+            budget_source: provider_account
         rate_limit_headers:
             - X-RateLimit-Limit
             - X-RateLimit-Remaining

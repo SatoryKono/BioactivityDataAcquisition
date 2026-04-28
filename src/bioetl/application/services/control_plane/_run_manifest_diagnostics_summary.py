@@ -152,20 +152,14 @@ def _build_exact_replay_anchors(
         "pipeline_version": summary.get("pipeline_version"),
         "git_commit": summary.get("git_commit"),
         "effective_config_hash": summary.get("effective_config_hash"),
-        "dq_contract_compatibility_hash": summary.get(
-            "dq_contract_compatibility_hash"
-        ),
+        "dq_contract_compatibility_hash": summary.get("dq_contract_compatibility_hash"),
         "contract_ref": summary.get("contract_ref"),
         "contract_version": summary.get("contract_version"),
-        "effective_config_artifact_id": summary.get(
-            "effective_config_artifact_id"
-        ),
+        "effective_config_artifact_id": summary.get("effective_config_artifact_id"),
         "input_snapshot_identity_fingerprint": summary.get(
             "input_snapshot_identity_fingerprint"
         ),
-        "input_snapshot_ids": _sorted_text_items(
-            summary.get("input_snapshot_ids", [])
-        ),
+        "input_snapshot_ids": _sorted_text_items(summary.get("input_snapshot_ids", [])),
         "input_snapshot_content_hashes": _sorted_text_items(
             summary.get("input_snapshot_content_hashes", [])
         ),
