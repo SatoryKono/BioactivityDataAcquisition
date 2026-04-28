@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-28T13:38:52.530933+00:00",
+  "generated_at": "2026-04-28T14:11:33.844982+00:00",
   "summary": {
     "total_scripts": 407,
     "status_counts": {
@@ -12,11 +12,11 @@
     "reference_group_coverage": {
       "agents": 4,
       "build": 2,
-      "ci": 41,
-      "docs": 120,
+      "ci": 50,
+      "docs": 127,
       "scripts": 301,
       "skills": 8,
-      "tests": 146
+      "tests": 147
     }
   },
   "scripts": [
@@ -4584,7 +4584,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 90,
+      "reference_count": 91,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -4733,7 +4733,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 28,
+      "reference_count": 27,
       "references": [
         {
           "path": "docs/00-project/DOCUMENTATION_GOVERNANCE.md",
@@ -4885,19 +4885,55 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 21,
       "references": [
         {
-          "path": "scripts/docs/README.md",
-          "line": 47,
-          "source_group": "scripts",
-          "text": "| `check-links`                            | `scripts/docs/checks/check_links.py`                            | Check documentation links, specs, configs, and mkdocs nav classification                 "
+          "path": ".github/workflows/docs.yml",
+          "line": 96,
+          "source_group": "ci",
+          "text": "run: uv run python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json"
         },
         {
-          "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
-          "line": 11,
-          "source_group": "tests",
-          "text": "\"scripts/docs/checks/check_links.py\","
+          "path": ".pre-commit-config.yaml",
+          "line": 258,
+          "source_group": "ci",
+          "text": "- id: docs-check-links"
+        },
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 50,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.docs check-links --links --specs --configs"
+        },
+        {
+          "path": "docs/00-project/ai/memory/agent-memory.md",
+          "line": 184,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.docs check-links --links --specs --configs"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
+          "line": 283,
+          "source_group": "docs",
+          "text": "python -m scripts.docs check-links --links --specs --configs"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-doc-bot.md",
+          "line": 239,
+          "source_group": "docs",
+          "text": "python -m scripts.docs check-links --links"
+        },
+        {
+          "path": "docs/00-project/ai/prompts/documentation_diagrams_audit.md",
+          "line": 97,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.docs check-links --links --specs --configs"
+        },
+        {
+          "path": "docs/00-project/governance/06-doc-publication-policy.md",
+          "line": 302,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.docs check-links"
         }
       ]
     },
@@ -7377,8 +7413,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 12,
       "references": [
+        {
+          "path": ".github/workflows/root-hygiene.yml",
+          "line": 32,
+          "source_group": "ci",
+          "text": "run: uv run python -m scripts.engineering.diagnostics audit-structure --path ."
+        },
         {
           "path": "docs/00-project/TOOLS.md",
           "line": 98,
@@ -7420,12 +7462,6 @@
           "line": 159,
           "source_group": "docs",
           "text": "| `make clean`                                   | Local-only cleanup через `python -m scripts.engineering.diagnostics cleanup`    |"
-        },
-        {
-          "path": "scripts/engineering/diagnostics/README.md",
-          "line": 8,
-          "source_group": "scripts",
-          "text": "python -m scripts.engineering.diagnostics --help"
         }
       ]
     },
@@ -7623,7 +7659,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 109,
+      "reference_count": 111,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -7764,8 +7800,44 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 11,
       "references": [
+        {
+          "path": ".github/workflows/import-linter.yml",
+          "line": 140,
+          "source_group": "ci",
+          "text": "uv run python -m scripts.engineering.qa check-c901 \\"
+        },
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 74,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.engineering.qa check-c901 --target src/bioetl"
+        },
+        {
+          "path": "docs/00-project/ai/memory/agent-memory.md",
+          "line": 175,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.engineering.qa check-c901"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
+          "line": 267,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa check-c901"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
+          "line": 293,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa check-c901"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-plan-bot.md",
+          "line": 251,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa check-c901 --mode report"
+        },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 20,
@@ -7774,15 +7846,9 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 52,
+          "line": 13,
           "source_group": "scripts",
-          "text": "\"check-c901\": \"check_c901_baseline.py\","
-        },
-        {
-          "path": "tests/architecture/test_c901_governance.py",
-          "line": 16,
-          "source_group": "tests",
-          "text": "assert \"scripts/engineering/qa/check_c901_baseline.py\" in workflow"
+          "text": "check-c901           C901 complexity baseline enforcement"
         }
       ]
     },
@@ -7827,8 +7893,20 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 12,
       "references": [
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 166,
+          "source_group": "ci",
+          "text": "run: uv run python -m scripts.engineering.qa check-naming-pkg --check"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
+          "line": 268,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa check-naming-pkg --check"
+        },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 21,
@@ -7837,39 +7915,33 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "check-naming-pkg     Package naming consistency check"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
           "line": 53,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": \"check_naming_package_consistency.py\","
+        },
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 137,
+          "source_group": "scripts",
+          "text": "\"check-naming-pkg\": ("
+        },
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 138,
+          "source_group": "scripts",
+          "text": "\"scripts/engineering/qa/check_naming_package_consistency.py\""
         },
         {
           "path": "tests/architecture/test_naming_package_consistency_gate.py",
           "line": 20,
           "source_group": "tests",
           "text": "/ \"check_naming_package_consistency.py\""
-        },
-        {
-          "path": "tests/architecture/test_naming_package_consistency_gate.py",
-          "line": 40,
-          "source_group": "tests",
-          "text": "/ \"check_naming_package_consistency.py\""
-        },
-        {
-          "path": "tests/architecture/test_naming_package_consistency_gate.py",
-          "line": 43,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/qa/check_naming_package_consistency.py must exist\""
-        },
-        {
-          "path": "tests/architecture/test_naming_package_consistency_gate.py",
-          "line": 64,
-          "source_group": "tests",
-          "text": "/ \"check_naming_package_consistency.py\""
-        },
-        {
-          "path": "tests/architecture/test_naming_package_consistency_gate.py",
-          "line": 81,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/qa/check_naming_package_consistency.py --check\" in workflow"
         }
       ]
     },
@@ -8477,13 +8549,13 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 338,
+          "line": 332,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_vcr_metadata_catalog.py\","
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 386,
+          "line": 380,
           "source_group": "tests",
           "text": "\"python scripts/engineering/qa/report_vcr_metadata_catalog.py --check\""
         }
@@ -8557,7 +8629,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 24,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -8614,37 +8686,55 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 13,
       "references": [
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 60,
+          "source_group": "ci",
+          "text": "run: uv run python -m scripts.engineering.qa.vcr check-placement"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 289,
+          "source_group": "ci",
+          "text": "check-placement"
+        },
+        {
+          "path": "docs/00-project/ai/memory/agent-memory.md",
+          "line": 194,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.engineering.qa.vcr check-placement"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
+          "line": 282,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa.vcr check-placement  # VCR cassette placement"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-test-bot.md",
+          "line": 240,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa.vcr check-placement  # VCR cassette placement"
+        },
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 457,
+          "source_group": "docs",
+          "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
+        },
+        {
+          "path": "scripts/engineering/qa/vcr/__main__.py",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "check-placement    Block VCR cassette anti-patterns"
+        },
         {
           "path": "scripts/engineering/qa/vcr/__main__.py",
           "line": 22,
           "source_group": "scripts",
           "text": "\"check-placement\": \"check_root_vcr_cassettes.py\","
-        },
-        {
-          "path": "tests/architecture/test_fixture_governance_rollout.py",
-          "line": 89,
-          "source_group": "tests",
-          "text": "\"python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\" in workflow"
-        },
-        {
-          "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 253,
-          "source_group": "tests",
-          "text": "\"python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\""
-        },
-        {
-          "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 102,
-          "source_group": "tests",
-          "text": "root / \"scripts\" / \"engineering\" / \"qa\" / \"vcr\" / \"check_root_vcr_cassettes.py\","
-        },
-        {
-          "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 114,
-          "source_group": "tests",
-          "text": "placement_refs = refs[\"scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\"]"
         }
       ]
     },
@@ -8653,37 +8743,55 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 15,
       "references": [
         {
+          "path": ".github/workflows/tests.yml",
+          "line": 63,
+          "source_group": "ci",
+          "text": "run: uv run python -m scripts.engineering.qa.vcr check-naming"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 298,
+          "source_group": "ci",
+          "text": "check-naming"
+        },
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 76,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.engineering.qa.vcr check-naming"
+        },
+        {
+          "path": "docs/00-project/ai/memory/agent-memory.md",
+          "line": 174,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.engineering.qa check-naming --check"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
+          "line": 283,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa.vcr check-naming     # VCR naming conventions"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-test-bot.md",
+          "line": 241,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa.vcr check-naming     # VCR naming conventions"
+        },
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 458,
+          "source_group": "docs",
+          "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
+        },
+        {
           "path": "scripts/engineering/qa/vcr/__main__.py",
-          "line": 23,
+          "line": 10,
           "source_group": "scripts",
-          "text": "\"check-naming\": \"check_vcr_filename_policy.py\","
-        },
-        {
-          "path": "tests/architecture/test_fixture_governance_rollout.py",
-          "line": 92,
-          "source_group": "tests",
-          "text": "\"python scripts/engineering/qa/vcr/check_vcr_filename_policy.py\" in workflow"
-        },
-        {
-          "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 257,
-          "source_group": "tests",
-          "text": "\"python scripts/engineering/qa/vcr/check_vcr_filename_policy.py\""
-        },
-        {
-          "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 108,
-          "source_group": "tests",
-          "text": "/ \"check_vcr_filename_policy.py\","
-        },
-        {
-          "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 115,
-          "source_group": "tests",
-          "text": "naming_refs = refs[\"scripts/engineering/qa/vcr/check_vcr_filename_policy.py\"]"
+          "text": "check-naming       Enforce VCR filename policy"
         }
       ]
     },
@@ -8692,8 +8800,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 8,
       "references": [
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 69,
+          "source_group": "ci",
+          "text": "run: uv run python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
+        },
         {
           "path": "docs/03-guides/testing.md",
           "line": 124,
@@ -8702,15 +8816,33 @@
         },
         {
           "path": "scripts/engineering/qa/vcr/__main__.py",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "check-metadata-age Enforce managed VCR metadata freshness"
+        },
+        {
+          "path": "scripts/engineering/qa/vcr/__main__.py",
           "line": 25,
           "source_group": "scripts",
           "text": "\"check-metadata-age\": \"check_vcr_metadata_age.py\","
         },
         {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 144,
+          "source_group": "scripts",
+          "text": "\"check-metadata-age\": \"scripts/engineering/qa/vcr/check_vcr_metadata_age.py\","
+        },
+        {
           "path": "tests/architecture/test_fixture_governance_rollout.py",
-          "line": 166,
+          "line": 162,
           "source_group": "tests",
-          "text": "\"python scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90\""
+          "text": "\"python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90\""
+        },
+        {
+          "path": "tests/architecture/test_integration_vcr_policy.py",
+          "line": 152,
+          "source_group": "tests",
+          "text": "\"python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90\""
         },
         {
           "path": "tests/architecture/test_vcr_metadata_inventory.py",
@@ -8740,7 +8872,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 35,
+      "reference_count": 37,
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -8883,8 +9015,44 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 12,
       "references": [
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 154,
+          "source_group": "ci",
+          "text": "run: uv run python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 253,
+          "source_group": "ci",
+          "text": "check-catalog --catalog scripts/engineering/repo/catalog.yaml"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
+          "line": 273,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.repo check-catalog"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-plan-bot.md",
+          "line": 262,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.repo check-catalog"
+        },
+        {
+          "path": "scripts/engineering/README.md",
+          "line": 32,
+          "source_group": "scripts",
+          "text": "python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml"
+        },
+        {
+          "path": "scripts/engineering/dev/pretest_guardrails.sh",
+          "line": 428,
+          "source_group": "scripts",
+          "text": "\"$PYTHON_BIN\" -m scripts.engineering.repo check-catalog \\"
+        },
         {
           "path": "scripts/engineering/repo/README.md",
           "line": 18,
@@ -8893,21 +9061,9 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 39,
+          "line": 12,
           "source_group": "scripts",
-          "text": "\"check-catalog\": \"check_scripts_catalog.py\","
-        },
-        {
-          "path": "tests/architecture/test_quality_governance_workflow.py",
-          "line": 78,
-          "source_group": "tests",
-          "text": "assert \"scripts/engineering/repo/check_scripts_catalog.py\" in workflow"
-        },
-        {
-          "path": "tests/architecture/test_scripts_catalog_governance.py",
-          "line": 18,
-          "source_group": "tests",
-          "text": "module_path = root / \"scripts\" / \"engineering\" / \"repo\" / \"check_scripts_catalog.py\""
+          "text": "check-catalog      Validate catalog governance policy"
         }
       ]
     },
@@ -8916,55 +9072,55 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 21,
       "references": [
         {
-          "path": "scripts/engineering/repo/README.md",
-          "line": 16,
+          "path": ".github/workflows/tests.yml",
+          "line": 146,
+          "source_group": "ci",
+          "text": "uv run python -m scripts.engineering.repo check-inventory \\"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 240,
+          "source_group": "ci",
+          "text": "check-inventory --check"
+        },
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 73,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.engineering.repo check-inventory --check"
+        },
+        {
+          "path": "docs/00-project/ai/memory/agent-memory.md",
+          "line": 176,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.engineering.repo check-inventory --check"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
+          "line": 272,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.repo check-inventory --check"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-plan-bot.md",
+          "line": 261,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.repo check-inventory --check"
+        },
+        {
+          "path": "docs/03-guides/script-management/README.md",
+          "line": 67,
+          "source_group": "docs",
+          "text": "python3 -m scripts.engineering.repo check-inventory --check"
+        },
+        {
+          "path": "scripts/engineering/README.md",
+          "line": 33,
           "source_group": "scripts",
-          "text": "| `check-inventory`       | `check_scripts_inventory.py`     | Check scripts inventory drift against manifest                        |"
-        },
-        {
-          "path": "scripts/engineering/repo/__main__.py",
-          "line": 36,
-          "source_group": "scripts",
-          "text": "\"check-inventory\": \"check_scripts_inventory.py\","
-        },
-        {
-          "path": "scripts/engineering/repo/sync_scripts_inventory.py",
-          "line": 37,
-          "source_group": "scripts",
-          "text": "script_path = Path(__file__).with_name(\"check_scripts_inventory.py\")"
-        },
-        {
-          "path": "tests/architecture/test_quality_governance_workflow.py",
-          "line": 69,
-          "source_group": "tests",
-          "text": "assert \"scripts/engineering/repo/check_scripts_inventory.py\" in workflow"
-        },
-        {
-          "path": "tests/architecture/test_scripts_deprecation_backlog.py",
-          "line": 18,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/repo/check_scripts_inventory.py\","
-        },
-        {
-          "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 16,
-          "source_group": "tests",
-          "text": "root / \"scripts\" / \"engineering\" / \"repo\" / \"check_scripts_inventory.py\""
-        },
-        {
-          "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 152,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/repo/check_scripts_inventory.py\","
-        },
-        {
-          "path": "tests/architecture/test_scripts_inventory_manifest.py",
-          "line": 18,
-          "source_group": "tests",
-          "text": "f\"{manifest_path}. Run scripts/engineering/repo/check_scripts_inventory.py --update.\""
+          "text": "python -m scripts.engineering.repo check-inventory --check --manifest configs/quality/scripts_inventory_manifest.json"
         }
       ]
     },
@@ -10279,7 +10435,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 156,
+          "line": 176,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_great_expectations_spike_issue.sh\","
         },
@@ -10300,7 +10456,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 153,
+          "line": 173,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_issue_2597.sh\","
         }
@@ -10315,7 +10471,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 157,
+          "line": 177,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_pandera_schema_drift_issue.sh\","
         },
@@ -10336,7 +10492,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 152,
+          "line": 172,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/post_issue_2597_progress.sh\","
         }
@@ -10450,19 +10606,19 @@
         },
         {
           "path": "tests/architecture/test_fixture_governance_rollout.py",
-          "line": 234,
+          "line": 230,
           "source_group": "tests",
           "text": "\"uv run python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check\""
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 339,
+          "line": 333,
           "source_group": "tests",
           "text": "\"scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py\","
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 389,
+          "line": 383,
           "source_group": "tests",
           "text": "assert \"backfill_vcr_metadata_sidecars.py\" in migrations_readme"
         }
@@ -11276,7 +11432,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 176,
+          "line": 196,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/generate_contracts.py\","
         },
@@ -11966,7 +12122,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 185,
+          "line": 205,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_application_deps.py\","
         },
@@ -11987,7 +12143,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 184,
+          "line": 204,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_architecture.py\","
         },
@@ -12008,7 +12164,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 186,
+          "line": 206,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_constructor_args.py\","
         },
@@ -12029,7 +12185,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 175,
+          "line": 195,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/config_matrix_generator.py\","
         },
@@ -12068,7 +12224,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 177,
+          "line": 197,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/lint_terminology.py\","
         },
@@ -12089,7 +12245,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 178,
+          "line": 198,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/validate_unified_configs.py\","
         },

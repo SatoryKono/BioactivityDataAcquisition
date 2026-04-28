@@ -46,7 +46,7 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("hierarchy_parent_chembl_id", pa.string()),
         pa.field("inchi_key", pa.string()),
         pa.field("inorganic_flag", pa.int64()),
-        pa.field("max_phase", pa.int64()),
+        pa.field("max_phase", pa.float64()),
         pa.field("molecule_id", pa.string(), nullable=False),
         pa.field("molecule_hierarchy", pa.string()),
         pa.field("molecule_properties", pa.string()),

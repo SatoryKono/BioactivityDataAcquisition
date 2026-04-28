@@ -16,10 +16,17 @@ from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 class _CompositeSummaryRequest(Protocol):
     """Subset of final summary request fields needed for composite projection."""
 
-    manifest: RunManifest
-    ledger_entries: tuple[RunLedgerEntry, ...]
-    correlation_anchor_gaps: dict[str, int]
-    resume_diagnostics: dict[str, object] | None
+    @property
+    def manifest(self) -> RunManifest: ...
+
+    @property
+    def ledger_entries(self) -> tuple[RunLedgerEntry, ...]: ...
+
+    @property
+    def correlation_anchor_gaps(self) -> dict[str, int]: ...
+
+    @property
+    def resume_diagnostics(self) -> dict[str, object] | None: ...
 
 
 def build_composite_dossier_projection(

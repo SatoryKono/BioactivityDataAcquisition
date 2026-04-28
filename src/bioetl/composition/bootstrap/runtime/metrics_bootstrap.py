@@ -47,7 +47,7 @@ def _observability_field_explicitly_set(
     field_name: str,
 ) -> bool:
     """Return True when a pydantic settings field was explicitly configured."""
-    fields_set = getattr(observability, "model_fields_set", frozenset())
+    fields_set: object = getattr(observability, "model_fields_set", frozenset())
     return isinstance(fields_set, (set, frozenset)) and field_name in fields_set
 
 

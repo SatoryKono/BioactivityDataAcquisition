@@ -5,7 +5,7 @@ from __future__ import annotations
 __all__ = ["MergeCollaboratorGroup", "MergeService"]
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.composite.join_planner_helpers import (
     extract_base_column,
@@ -190,4 +190,4 @@ class MergeService(
         request: MergeExecutionRequest,
     ) -> MergeResult:
         """Execute a canonical merge request envelope."""
-        return await execute_merge_request(self, request)
+        return await execute_merge_request(cast("MergeWorkflowContext", self), request)

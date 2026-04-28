@@ -270,7 +270,7 @@ async def _log_silver_audit_event(
         _SilverAuditWriteRequest,
     )
 
-    request = _SilverAuditWriteRequest(
+    audit_request = _SilverAuditWriteRequest(
         table_name=request.table_name,
         records=request.records,
         mode=request.mode,
@@ -281,6 +281,6 @@ async def _log_silver_audit_event(
     )
     audit_entry = _build_silver_audit_entry(
         _SilverAuditHost(_resolve_metadata_logger(metadata_ops)),
-        request,
+        audit_request,
     )
     await metadata_ops._audit.log_write(audit_entry)

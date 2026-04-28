@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
 from bioetl.application.composite.runtime_wiring_api import (
@@ -138,8 +138,11 @@ def build_runner_factories(
     )
     runner_factory_builder = runner_factory_builder_cls(
         logger=logger,
-        run_options_cls=RunOptions,
-        build_context=build_pipeline_context,
+        run_options_cls=cast("Callable[..., RunOptions]", RunOptions),
+        build_context=cast(
+            "Callable[[str, RunOptions], PipelineRunContext]",
+            build_pipeline_context,
+        ),
         pipeline_runner_builder=pipeline_runner_builder,
         filter_extraction_service=filter_extraction_service,
     )

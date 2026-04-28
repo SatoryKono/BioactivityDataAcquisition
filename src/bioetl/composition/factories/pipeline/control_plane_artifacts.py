@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from bioetl.domain.ports import PipelineControlPlaneArtifacts as ControlPlaneArtifacts
 
+__all__ = ["ControlPlaneArtifacts", "build_control_plane_artifacts"]
+
 
 def build_control_plane_artifacts(
     *,

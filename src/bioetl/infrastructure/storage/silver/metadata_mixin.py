@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["SilverWriterMetadataMixin"]
+__all__ = ["SilverWriterMetadataMixin", "time"]
 
 import asyncio
 import time
@@ -61,6 +61,52 @@ class _SilverWriterMetadataRuntimeProtocol(
     _audit: AuditPort | None
     _dq_calculator: DQMetricsCalculator
     _get_table_schema: Callable[[str], Awaitable[pa.Schema | None]]
+
+    def _should_skip_silver_metadata_write(
+        self,
+        *,
+        records: list[BronzeRecord],
+        table_path: str,
+        event_name: str,
+    ) -> bool: ...
+
+    async def _log_silver_audit(
+        self,
+        table_name: str,
+        records: list[BronzeRecord],
+        mode: SilverWriteMode,
+        *,
+        run_id: RunID | None,
+        run_type: RunType | None,
+        source_batch_id: BatchID | None,
+        ingestion_ts: datetime | None,
+    ) -> None: ...
+
+    async def _write_silver_metadata(
+        self,
+        request: _SilverMetadataWriteRequest | str | None = None,
+        *args: object,
+        **kwargs: object,
+    ) -> None: ...
+
+    async def _maybe_log_silver_audit(
+        self,
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        mode: SilverWriteMode,
+        run_id: RunID | None,
+        run_type: RunType | None,
+        source_batch_id: BatchID | None,
+        ingestion_ts: datetime | None,
+    ) -> None: ...
+
+    async def _prepare_silver_write_finalization_context(
+        self,
+        request: _SilverWriteFinalizationPreparationRequest | None = None,
+        *args: object,
+        **kwargs: object,
+    ) -> _PreparedSilverWriteFinalizationContext: ...
 
 
 class SilverWriterMetadataMixin:

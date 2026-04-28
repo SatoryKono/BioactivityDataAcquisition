@@ -10,6 +10,9 @@ from bioetl.infrastructure.storage.silver.operations.metadata_write_support impo
     _coerce_silver_metadata_audit_request,
     _SilverMetadataAuditSupportRequest,
 )
+from bioetl.infrastructure.storage.silver.metadata_mixin import (
+    _SilverWriterMetadataRuntimeProtocol,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SilverMetadata
@@ -34,9 +37,9 @@ class SilverWriterAuditMetadataCompatibilityMixin:
 
     _metadata: object | None
 
-    def _as_metadata_mixin(self) -> SilverWriterMetadataMixin:
+    def _as_metadata_mixin(self) -> _SilverWriterMetadataRuntimeProtocol:
         """Treat this compatibility host as a SilverWriterMetadataMixin implementation."""
-        return cast("SilverWriterMetadataMixin", self)
+        return cast("_SilverWriterMetadataRuntimeProtocol", self)
 
     async def _log_silver_audit(
         self,
