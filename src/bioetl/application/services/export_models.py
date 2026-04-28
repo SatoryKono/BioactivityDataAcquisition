@@ -50,6 +50,11 @@ class ExportOptions:
     output_path: Path | None = None
     limit: int | None = None
     columns: list[str] | None = None
+    include_manifests: bool = True
+    manifest_strict: bool = False
+    manifest_generated_at: str | None = None
+    run_ids: tuple[str, ...] = ()
+    code_revision: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -62,6 +67,7 @@ class ExportResult:
     output_path: Path | None
     row_count: int
     error: str | None = None
+    manifest_paths: tuple[Path, ...] = ()
 
     @property
     def success(self) -> bool:

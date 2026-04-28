@@ -403,6 +403,12 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Freshness Alert Conditions": "or vector(0)",
             "Trace-enabled Runs": "or vector(0)",
             "Silver Filter Rejects": "or vector(0)",
+            "Metrics Endpoint Up": "or vector(0)",
+            "Prometheus Up": "or vector(0)",
+            "Grafana Up": "or vector(0)",
+            "Pushgateway Up": "or vector(0)",
+            "No-Records Processed Runs": "or vector(0)",
+            "Replay Not Reconstructable": "or vector(0)",
             "Log Hygiene Trend": 'label_replace(vector(0), "series",',
         },
         "bioetl-provider-health-v2.json": {
@@ -410,18 +416,27 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Degraded Checks": "or vector(0)",
             "Provider Failure Rate": "or vector(0)",
             "Health Checks Total": "or vector(0)",
+            "Circuit Breaker State (max)": "or vector(0)",
+            "Circuit Breaker Trips by Provider": "or label_replace(vector(0), \"adapter\",",
         },
         "bioetl-dq-v2.json": {
             "Records Quarantined": "or vector(0)",
             "Silver Filter Rejects": "or vector(0)",
             "Soft Threshold Exceeded": "or vector(0)",
             "Silver Validation Failures": "or vector(0)",
+            "Gold Strict Validation Failures": "or vector(0)",
         },
         "bioetl-control-plane-v1.json": {
             "Manifest Write Failures": "or vector(0)",
             "Ledger Append Failures": "or vector(0)",
             "Checkpoint Compatibility Incompatibilities": "or vector(0)",
             "Control-Plane Read Failures": "or vector(0)",
+            "Checkpoint Load Failures": "or vector(0)",
+            "Checkpoint Save Failures": "or vector(0)",
+            "Checkpoint Operator Failures": "or vector(0)",
+            "Replay Not Reconstructable": "or vector(0)",
+            "Checkpoint Save Latency (p95)": "or vector(0)",
+            "Checkpoint Operator Latency (p95)": "or vector(0)",
         },
     }
 
@@ -715,6 +730,53 @@ def test_provider_dashboard_uses_pipeline_filters():
     )
 
 
+def test_runtime_provider_alert_conditions_do_not_filter_on_missing_pipeline_labels():
+    """Provider runtime alert summaries are fleet-wide and must not filter on pipeline."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Provider Alert Conditions"
+        ),
+        None,
+    )
+    assert panel is not None
+    expressions = [
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    ]
+    assert expressions
+    assert all('{pipeline=~"$pipeline"}' not in expr for expr in expressions), (
+        "Provider Alert Conditions must not filter provider-only recording rules by pipeline."
+    )
+
+
+@pytest.mark.parametrize(
+    ("dashboard_file", "variable_name"),
+    [
+        ("bioetl-runtime.json", "stage"),
+        ("bioetl-dq-v2.json", "stage"),
+    ],
+)
+def test_stage_drilldown_variable_is_available_for_runtime_and_dq_dashboards(
+    dashboard_file: str, variable_name: str
+) -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_file)
+    variable_map = {
+        var.get("name"): var
+        for var in dashboard.get("templating", {}).get("list", [])
+        if var.get("name")
+    }
+    stage_var = variable_map.get(variable_name)
+    assert stage_var is not None, f"{dashboard_file} must expose stage drill-down"
+    query = stage_var.get("query", {})
+    query_text = query.get("query", "") if isinstance(query, dict) else ""
+    assert "label_values(bioetl_records_processed_total" in query_text
+    assert "stage" in query_text
+
+
 def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics():
     """Ensure runtime dashboard stays anchored to log hygiene and alert-condition metrics."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
@@ -726,6 +788,7 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
         "bioetl_memory_batch_resize_events_total",
         "bioetl_memory_monitor_fallback_events_total",
         "bioetl_memory_pressure_state",
+        "bioetl_replay_reconstructability_events_total",
         "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
         "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m",
         "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
@@ -743,6 +806,10 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
         "bioetl_control_plane_reads_total",
         "bioetl_control_plane_read_duration_seconds",
         "bioetl_traced_runs_total",
+        'up{job="bioetl"}',
+        'up{job="prometheus"}',
+        'up{job="grafana"}',
+        'up{job="pushgateway"}',
     ]
     missing = [metric for metric in required_metrics if metric not in all_expressions]
     assert not missing, f"Runtime dashboard missing metrics: {missing}"
@@ -759,6 +826,55 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
     assert any('__error__!=""' in expr for expr in loki_exprs), (
         "Runtime dashboard must expose unstructured-log hygiene signal"
     )
+
+
+def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    all_expressions = "\n".join(get_panel_expressions(dashboard))
+
+    required_metrics = [
+        "bioetl_checkpoint_load_events_total",
+        "bioetl_checkpoint_save_events_total",
+        "bioetl_checkpoint_operator_operations_total",
+        "bioetl_checkpoint_save_duration_seconds_bucket",
+        "bioetl_checkpoint_operator_duration_seconds_bucket",
+        "bioetl_replay_reconstructability_events_total",
+    ]
+    missing = [metric for metric in required_metrics if metric not in all_expressions]
+    assert not missing, f"Control-plane dashboard missing metrics: {missing}"
+
+
+def test_provider_dashboard_contains_circuit_breaker_metrics() -> None:
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-provider-health-v2.json")
+    )
+    all_expressions = "\n".join(get_panel_expressions(dashboard))
+    required_metrics = [
+        "bioetl_circuit_breaker_state",
+        "bioetl_circuit_breaker_trips_total",
+    ]
+    missing = [metric for metric in required_metrics if metric not in all_expressions]
+    assert not missing, f"Provider dashboard missing metrics: {missing}"
+
+
+def test_dq_dashboard_contains_gold_specific_validation_surface() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Gold Strict Validation Failures"
+        ),
+        None,
+    )
+    assert panel is not None
+    expressions = [
+        target.get("expr", "")
+        for target in panel.get("targets", [])
+        if isinstance(target.get("expr"), str)
+    ]
+    assert any('stage="gold"' in expr for expr in expressions)
+    assert any('severity="hard_fail"' in expr for expr in expressions)
 
 
 @pytest.mark.parametrize(

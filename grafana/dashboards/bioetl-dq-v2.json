@@ -157,7 +157,7 @@
             },
             "targets": [
                 {
-                    "expr": "sum by (pipeline, stage) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
+                    "expr": "sum by (pipeline, stage) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"$stage\"}[$__interval]))",
                     "legendFormat": "{{pipeline}} / {{stage}}",
                     "refId": "A"
                 }
@@ -1242,6 +1242,62 @@
                 "mode": "markdown"
             },
             "type": "text"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 0,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 1
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 0,
+                "y": 64
+            },
+            "id": 151,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "expr": "round(sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\", severity=\"hard_fail\"}[$__range])) or vector(0))",
+                    "refId": "A"
+                }
+            ],
+            "title": "Gold Strict Validation Failures",
+            "type": "stat"
         }
     ],
     "refresh": "30s",
@@ -1294,6 +1350,31 @@
                 "options": [],
                 "query": {
                     "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
+                    "refId": "StandardVariableQuery"
+                },
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "tagValuesQuery": "",
+                "tags": [],
+                "tagsQuery": "",
+                "type": "query",
+                "useTags": false
+            },
+            {
+                "allValue": null,
+                "current": {},
+                "datasource": "Prometheus",
+                "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}, stage)",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Stage",
+                "multi": true,
+                "name": "stage",
+                "options": [],
+                "query": {
+                    "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}, stage)",
                     "refId": "StandardVariableQuery"
                 },
                 "refresh": 1,

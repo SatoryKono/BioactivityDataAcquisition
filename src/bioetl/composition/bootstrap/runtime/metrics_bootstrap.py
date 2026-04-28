@@ -11,7 +11,7 @@ from bioetl.composition.bootstrap.assembly.metrics_service import (
 )
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.ports.noop import NoOpMetrics
-from bioetl.infrastructure.observability import PrometheusMetrics
+from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings

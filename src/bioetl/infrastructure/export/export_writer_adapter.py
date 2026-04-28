@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import ExportWriterPort
+from bioetl.domain.ports import ExportFileFingerprint, ExportWriterPort
+from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -35,6 +38,34 @@ class ExportWriterAdapter(ExportWriterPort):
         if fmt == "xlsx":
             return _write_xlsx_file(table, output_dir / f"{safe_name}.xlsx")
         raise ValueError(f"Unsupported format: {fmt}")
+
+    def write_manifest(
+        self,
+        *,
+        manifest_name: str,
+        payload: dict[str, object],
+        output_dir: Path,
+    ) -> Path:
+        """Write one deterministic JSON export manifest and return its path."""
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_path = output_dir / f"{manifest_name}.json"
+        content = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+        atomic_write_text(output_path, content)
+        return output_path
+
+    def fingerprint_file(self, *, path: Path) -> ExportFileFingerprint:
+        """Return sha256 and byte size for one exported file."""
+        digest = hashlib.sha256()
+        size_bytes = 0
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                size_bytes += len(chunk)
+                digest.update(chunk)
+        return ExportFileFingerprint(
+            path=path,
+            size_bytes=size_bytes,
+            sha256=digest.hexdigest(),
+        )
 
 
 def _write_delimited_file(

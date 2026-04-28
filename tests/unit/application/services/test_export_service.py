@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
@@ -17,6 +18,7 @@ from bioetl.application.services.export_service import (
 from bioetl.domain.ports import (
     DeltaReaderPort,
     ExportCatalogPort,
+    ExportFileFingerprint,
     ExportWriterPort,
     LoggerPort,
 )
@@ -91,6 +93,29 @@ def mock_writer():
         return output_path
 
     writer.write_export.side_effect = _write_export
+
+    def _write_manifest(
+        *,
+        manifest_name,
+        payload,
+        output_dir,
+    ):
+        del payload
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_path = output_dir / f"{manifest_name}.json"
+        output_path.write_text("{}", encoding="utf-8")
+        return output_path
+
+    def _fingerprint_file(*, path):
+        content = path.read_bytes()
+        return ExportFileFingerprint(
+            path=path,
+            size_bytes=len(content),
+            sha256=hashlib.sha256(content).hexdigest(),
+        )
+
+    writer.write_manifest.side_effect = _write_manifest
+    writer.fingerprint_file.side_effect = _fingerprint_file
     return writer
 
 
@@ -150,6 +175,25 @@ async def test_export_csv(export_service, mock_reader):
     assert result.output_path.exists()
     assert result.output_path.name.endswith(".csv")
     assert result.row_count == 2
+    assert [path.name for path in result.manifest_paths] == [
+        "silver_chembl_activity.provenance-manifest.json",
+        "silver_chembl_activity.licensing-manifest.json",
+        "silver_chembl_activity.checksums-manifest.json",
+    ]
+
+
+@pytest.mark.asyncio
+async def test_export_can_disable_sidecar_manifests(export_service):
+    """Export manifests can be disabled for legacy callers."""
+    options = ExportOptions(include_manifests=False)
+
+    result = await export_service.export(
+        "chembl.activity", layer="silver", options=options
+    )
+
+    assert result.success
+    assert result.manifest_paths == ()
+    export_service.writer.write_manifest.assert_not_called()
 
 
 @pytest.mark.asyncio

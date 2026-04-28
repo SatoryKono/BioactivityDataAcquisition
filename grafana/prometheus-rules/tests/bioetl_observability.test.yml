@@ -1,0 +1,73 @@
+rule_files:
+  - ../bioetl_observability.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: metrics-endpoint-unavailable
+    interval: 1m
+    input_series:
+      - series: 'up{job="bioetl",instance="host.docker.internal:8000"}'
+        values: '0 0 0 0 0'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: BioETLMetricsEndpointUnavailable
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: bioetl
+              instance: host.docker.internal:8000
+
+  - name: memory-pressure-active
+    interval: 1m
+    input_series:
+      - series: 'bioetl_memory_pressure_state{pipeline="chembl",stage="bronze",reason="rss_limit",monitor_mode="psutil",status="resize"}'
+        values: '1 1 1 1 1 1 1 1 1 1 1 1 1 1 1'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: BioETLMemoryPressureActive
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+
+  - name: circuit-breaker-stuck-open
+    interval: 1m
+    input_series:
+      - series: 'bioetl_circuit_breaker_state{adapter="pubmed"}'
+        values: '2 2 2 2 2 2 2 2 2 2 2 2 2 2 2'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: BioETLCircuitBreakerStuckOpen
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              adapter: pubmed
+
+  - name: gold-validation-failures
+    interval: 1m
+    input_series:
+      - series: 'bioetl_dq_validation_failures_total{pipeline="chembl",stage="gold",severity="hard_fail"}'
+        values: '0+1x20'
+    alert_rule_test:
+      - eval_time: 16m
+        alertname: BioETLGoldValidationFailuresCritical
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+
+  - name: replay-not-reconstructable
+    interval: 1m
+    input_series:
+      - series: 'bioetl_replay_reconstructability_events_total{pipeline="chembl",replay_capability="resume_only",strict_requirement="true",status="not_reconstructable"}'
+        values: '0+1x35'
+    alert_rule_test:
+      - eval_time: 31m
+        alertname: BioETLReplayNotReconstructable
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+              replay_capability: resume_only
+              strict_requirement: "true"

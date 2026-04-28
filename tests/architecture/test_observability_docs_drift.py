@@ -23,6 +23,7 @@ CANONICAL_REGISTRY_REFERENCE = "REGISTERED_PROMETHEUS_METRIC_NAMES"
 INVENTORY_REPORT_COMMAND = (
     "python -m scripts.engineering.qa report-observability-metric-inventory --json"
 )
+LEGACY_METRICS_PORT_PATH = PROJECT_ROOT / "src/bioetl/domain/ports/metrics_port.py"
 
 
 def test_project_navigator_tracks_package_based_observability_ports() -> None:
@@ -59,3 +60,10 @@ def test_canonical_observability_docs_reference_registry_not_manual_count() -> N
                 f"{relative_path} still contains a stale manual metric-count claim "
                 f"({claim}); current registry count is {registered_count}."
             )
+
+
+def test_legacy_metrics_port_file_is_removed() -> None:
+    assert not LEGACY_METRICS_PORT_PATH.exists(), (
+        "Legacy src/bioetl/domain/ports/metrics_port.py must not coexist with the "
+        "canonical package-based observability metrics port."
+    )
