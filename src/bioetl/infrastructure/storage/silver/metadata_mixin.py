@@ -8,6 +8,7 @@ import asyncio
 import time
 from collections.abc import Awaitable, Callable, Sequence
 from datetime import datetime
+from typing import Protocol
 
 import pyarrow as pa
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
@@ -16,11 +17,7 @@ from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
     AuditPort,
-    LineageStorePort,
     LoggerPort,
-    MetadataCoordinatorPort,
-    MetadataWriterPort,
-    MetricsPort,
 )
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
@@ -28,11 +25,9 @@ from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
-from bioetl.infrastructure.storage.silver.audit_operations import (
-    _build_silver_audit_entry,
-    _SilverAuditWriteRequest,
-)
 from bioetl.infrastructure.storage.silver.metadata_operations import (
+    _SilverMetadataWriteHostProtocol,
+    _SilverWriteFinalizationHostProtocol,
     _build_silver_write_result,
     _coerce_silver_metadata_write_request,
     _execute_silver_metadata_write,
@@ -44,25 +39,29 @@ from bioetl.infrastructure.storage.silver.metadata_operations import (
     _SilverMergedMetadataWriteRequest,
     _SilverMetadataWriteRequest,
 )
+from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
+    _log_silver_audit_event,
+)
+
+
+class _SilverWriterMetadataRuntimeProtocol(
+    _SilverMetadataWriteHostProtocol,
+    _SilverWriteFinalizationHostProtocol,
+    Protocol,
+):
+    """Full runtime contract expected by ``SilverWriterMetadataMixin`` methods."""
+
+    logger: LoggerPort
+    _audit: AuditPort | None
+    _dq_calculator: DQMetricsCalculator
+    _get_table_schema: Callable[[str], Awaitable[pa.Schema | None]]
 
 
 class SilverWriterMetadataMixin:
     """Mixin with metadata, lineage, and audit helpers."""
 
-    logger: LoggerPort
-    _audit: AuditPort | None
-    _metadata_coordinator: MetadataCoordinatorPort | None
-    _lineage_store: LineageStorePort | None
-    _metadata_writer: MetadataWriterPort
-    _metrics: MetricsPort | None
-    _flat_structure: bool
-    _transform_version: str | None
-    _transform_steps: tuple[str, ...]
-    _dq_calculator: DQMetricsCalculator
-    _get_table_schema: Callable[[str], Awaitable[pa.Schema | None]]
-
     async def _compute_dq_metrics(
-        self,
+        self: _SilverWriterMetadataRuntimeProtocol,
         table_name: str,
         records: list[BronzeRecord],
         quarantined_count: int = 0,
@@ -85,7 +84,7 @@ class SilverWriterMetadataMixin:
         return self._dq_calculator.calculate(input_data)
 
     async def _log_silver_audit(
-        self,
+        self: _SilverWriterMetadataRuntimeProtocol,
         table_name: str,
         records: list[BronzeRecord],
         mode: SilverWriteMode,
@@ -96,21 +95,16 @@ class SilverWriterMetadataMixin:
         ingestion_ts: datetime | None,
     ) -> None:
         """Log audit entry for Silver write operation."""
-        if self._audit is None:
-            return
-        audit_entry = _build_silver_audit_entry(
+        await _log_silver_audit_event(
             self,
-            _SilverAuditWriteRequest(
-                table_name=table_name,
-                records=records,
-                mode=mode,
-                run_id=run_id,
-                run_type=run_type,
-                source_batch_id=source_batch_id,
-                ingestion_ts=ingestion_ts,
-            ),
+            table_name=table_name,
+            records=records,
+            mode=mode,
+            run_id=run_id,
+            run_type=run_type,
+            source_batch_id=source_batch_id,
+            ingestion_ts=ingestion_ts,
         )
-        await self._audit.log_write(audit_entry)
 
     async def _get_delta_version(self, table_path: str) -> int | None:
         """Get current Delta table version, if table exists."""
@@ -121,7 +115,7 @@ class SilverWriterMetadataMixin:
             return None
 
     def _should_skip_silver_metadata_write(
-        self,
+        self: _SilverWriterMetadataRuntimeProtocol,
         *,
         records: list[BronzeRecord],
         table_path: str,
@@ -141,7 +135,7 @@ class SilverWriterMetadataMixin:
         return False
 
     async def _write_silver_metadata(
-        self,
+        self: _SilverWriterMetadataRuntimeProtocol,
         request: _SilverMetadataWriteRequest | str | None = None,
         *args: object,
         **kwargs: object,
@@ -165,7 +159,7 @@ class SilverWriterMetadataMixin:
         )
 
     async def _write_silver_merged_metadata(
-        self,
+        self: _SilverWriterMetadataRuntimeProtocol,
         table_path: str,
         table_name: str,
         records: list[BronzeRecord],
@@ -196,7 +190,7 @@ class SilverWriterMetadataMixin:
         )
 
     async def _write_silver_metadata_file(
-        self,
+        self: _SilverWriterMetadataRuntimeProtocol,
         *,
         table_path: str,
         metadata: SilverMetadata,
@@ -215,7 +209,7 @@ class SilverWriterMetadataMixin:
         )
 
     async def _maybe_log_silver_audit(
-        self,
+        self: _SilverWriterMetadataRuntimeProtocol,
         *,
         table_name: str,
         records: list[BronzeRecord],
@@ -238,7 +232,7 @@ class SilverWriterMetadataMixin:
             )
 
     async def _finalize_silver_write_result(
-        self,
+        self: _SilverWriterMetadataRuntimeProtocol,
         *,
         table_name: str,
         records: list[BronzeRecord],
@@ -288,7 +282,7 @@ class SilverWriterMetadataMixin:
         )
 
     async def _prepare_silver_write_finalization_context(
-        self,
+        self: _SilverWriterMetadataRuntimeProtocol,
         *,
         table_name: str,
         records: list[BronzeRecord],

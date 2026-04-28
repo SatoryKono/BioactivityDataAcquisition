@@ -43,19 +43,19 @@ def _shared_policy(policy: QuarantineExecutionPolicy) -> CliBoundaryExecutionPol
     )
 
 
-def run_quarantine_async[T](
-    coro: Coroutine[object, object, T],
+def run_quarantine_async[_T](
+    coro: Coroutine[object, object, _T],
     *,
     policy: QuarantineExecutionPolicy,
-) -> T | None:
+) -> _T | None:
     """Run an async quarantine coroutine with typed exception policy."""
     return run_async_with_cli_failure_policy(coro, policy=_shared_policy(policy))
 
 
-def run_quarantine_sync[T](
-    fn: Callable[[], T],
+def run_quarantine_sync[_T](
+    fn: Callable[[], _T],
     *,
     policy: QuarantineExecutionPolicy,
-) -> T | None:
+) -> _T | None:
     """Run a synchronous quarantine callable with typed exception policy."""
     return run_sync_with_cli_failure_policy(fn, policy=_shared_policy(policy))

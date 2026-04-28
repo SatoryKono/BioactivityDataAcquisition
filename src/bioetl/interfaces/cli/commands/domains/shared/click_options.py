@@ -7,17 +7,17 @@ from collections.abc import Callable
 import click
 
 
-def _cast_command[**CommandParams, CommandReturn](
-    func: Callable[CommandParams, CommandReturn],
-) -> Callable[CommandParams, CommandReturn]:
+def _cast_command[**_CommandParams, _CommandReturn](
+    func: Callable[_CommandParams, _CommandReturn],
+) -> Callable[_CommandParams, _CommandReturn]:
     return func
 
 
-def with_run_type_option[CommandReturn, **CommandParams](
+def with_run_type_option[**_CommandParams, _CommandReturn](
     help_text: str,
 ) -> Callable[
-    [Callable[CommandParams, CommandReturn]],
-    Callable[CommandParams, CommandReturn],
+    [Callable[_CommandParams, _CommandReturn]],
+    Callable[_CommandParams, _CommandReturn],
 ]:
     """Attach the canonical ``--run-type`` option to a Click command."""
     return lambda func: _cast_command(
@@ -30,11 +30,11 @@ def with_run_type_option[CommandReturn, **CommandParams](
     )
 
 
-def with_limit_option[CommandReturn, **CommandParams](
+def with_limit_option[**_CommandParams, _CommandReturn](
     help_text: str,
 ) -> Callable[
-    [Callable[CommandParams, CommandReturn]],
-    Callable[CommandParams, CommandReturn],
+    [Callable[_CommandParams, _CommandReturn]],
+    Callable[_CommandParams, _CommandReturn],
 ]:
     """Attach the canonical ``--limit`` option to a Click command."""
     return lambda func: _cast_command(
@@ -46,11 +46,11 @@ def with_limit_option[CommandReturn, **CommandParams](
     )
 
 
-def with_dry_run_option[CommandReturn, **CommandParams](
+def with_dry_run_option[**_CommandParams, _CommandReturn](
     help_text: str,
 ) -> Callable[
-    [Callable[CommandParams, CommandReturn]],
-    Callable[CommandParams, CommandReturn],
+    [Callable[_CommandParams, _CommandReturn]],
+    Callable[_CommandParams, _CommandReturn],
 ]:
     """Attach the canonical ``--dry-run`` option to a Click command."""
     return lambda func: _cast_command(
@@ -62,11 +62,11 @@ def with_dry_run_option[CommandReturn, **CommandParams](
     )
 
 
-def with_yes_option[CommandReturn, **CommandParams](
+def with_yes_option[**_CommandParams, _CommandReturn](
     help_text: str,
 ) -> Callable[
-    [Callable[CommandParams, CommandReturn]],
-    Callable[CommandParams, CommandReturn],
+    [Callable[_CommandParams, _CommandReturn]],
+    Callable[_CommandParams, _CommandReturn],
 ]:
     """Attach the canonical destructive-confirmation bypass option."""
     return lambda func: _cast_command(
@@ -79,11 +79,11 @@ def with_yes_option[CommandReturn, **CommandParams](
     )
 
 
-def with_debug_option[CommandReturn, **CommandParams](
+def with_debug_option[**_CommandParams, _CommandReturn](
     help_text: str = "Enable DEBUG level logging for detailed output",
 ) -> Callable[
-    [Callable[CommandParams, CommandReturn]],
-    Callable[CommandParams, CommandReturn],
+    [Callable[_CommandParams, _CommandReturn]],
+    Callable[_CommandParams, _CommandReturn],
 ]:
     """Attach the canonical ``--debug`` option to a Click command."""
     return lambda func: _cast_command(
@@ -95,17 +95,17 @@ def with_debug_option[CommandReturn, **CommandParams](
     )
 
 
-def with_health_server_options[CommandReturn, **CommandParams](
+def with_health_server_options[**_CommandParams, _CommandReturn](
     default_health_server_port: int,
 ) -> Callable[
-    [Callable[CommandParams, CommandReturn]],
-    Callable[CommandParams, CommandReturn],
+    [Callable[_CommandParams, _CommandReturn]],
+    Callable[_CommandParams, _CommandReturn],
 ]:
     """Attach the canonical health-server option pair to a Click command."""
 
     def decorator(
-        func: Callable[CommandParams, CommandReturn],
-    ) -> Callable[CommandParams, CommandReturn]:
+        func: Callable[_CommandParams, _CommandReturn],
+    ) -> Callable[_CommandParams, _CommandReturn]:
         func = _cast_command(
             click.option(
                 "--health-port",
