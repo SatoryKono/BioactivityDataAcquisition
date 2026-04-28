@@ -149,7 +149,7 @@ def _normalize_inchi_key(value: object, *, warnings: list[str]) -> str | None:
     if inchi_key is None:
         warnings.append("inchi_key_invalid")
         return None
-    return inchi_key.value
+    return str(inchi_key.value)
 
 
 def _record_parent_deferred_warnings(

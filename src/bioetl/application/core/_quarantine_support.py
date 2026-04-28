@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from bioetl.application.observability.pipeline_metrics import (
         PipelineMetricsRecorder,
     )
-    from bioetl.domain.ports import MetricsPort
+    from bioetl.domain.ports import MetricsPort, QuarantinePort
 
 
 FILTERED_OUT_SILVER = "FILTERED_OUT_SILVER"
@@ -92,7 +92,7 @@ def build_filtered_quarantine_request(
 
 
 async def write_quarantine_request(
-    quarantine: object,
+    quarantine: QuarantinePort,
     request: QuarantineWriteRequest,
 ) -> None:
     """Write one quarantine request via the injected port."""
@@ -100,7 +100,7 @@ async def write_quarantine_request(
 
 
 async def write_quarantine_requests(
-    quarantine: object,
+    quarantine: QuarantinePort,
     requests: list[QuarantineWriteRequest],
 ) -> None:
     """Write multiple quarantine requests via the injected port."""
@@ -109,7 +109,7 @@ async def write_quarantine_requests(
 
 async def write_quarantine_request_with_events(
     *,
-    quarantine: object,
+    quarantine: QuarantinePort,
     request: QuarantineWriteRequest,
     emitter: DomainEventEmitterPort | None,
     pipeline_name: str,
@@ -136,7 +136,7 @@ async def write_quarantine_request_with_events(
 
 async def write_quarantine_requests_with_events(
     *,
-    quarantine: object,
+    quarantine: QuarantinePort,
     requests: list[QuarantineWriteRequest],
     emitter: DomainEventEmitterPort | None,
     pipeline_name: str,

@@ -61,6 +61,16 @@ def normalize_profile_assay_parameter_type_field(value: object) -> object:
     )
 
 
+_TYPE_RULE = (
+    normalize_profile_assay_parameter_type_field,
+    (
+        "Normalize assay-parameter type as an explicit controlled-vocabulary surface against the shared "
+        "registry, while preserving unknown provider lexemes as uppercase "
+        "for explicit raw-vs-canonical review without rejecting unknown."
+    ),
+)
+
+
 _SPECIAL_RULE_COMPONENTS = {
     "comments": (
         normalize_profile_text,
@@ -73,17 +83,7 @@ _SPECIAL_RULE_COMPONENTS = {
         ),
         "Normalize standard_relation to a canonical ASCII operator enum.",
     ),
-    **{
-        field_name: (
-            normalize_profile_assay_parameter_type_field,
-            (
-                "Normalize assay-parameter type as an explicit controlled-vocabulary surface against the shared "
-                "registry, while preserving unknown provider lexemes as uppercase "
-                "for explicit raw-vs-canonical review without rejecting unknown."
-            ),
-        )
-        for field_name in sorted(_TYPE_FIELDS)
-    },
+    **dict.fromkeys(sorted(_TYPE_FIELDS), _TYPE_RULE),
 }
 
 CHEMBL_ASSAY_PARAMETERS_PROFILE = build_standard_profile(

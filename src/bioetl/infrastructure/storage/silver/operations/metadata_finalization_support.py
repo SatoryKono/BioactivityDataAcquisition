@@ -22,6 +22,12 @@ from bioetl.infrastructure.storage.silver.operations.metadata_builders import (
     _SilverMetadataBuildRequest,
 )
 
+__all__ = [
+    "_PreparedSilverWriteFinalizationContext",
+    "_finalize_silver_write_result",
+    "_prepare_silver_write_finalization_context",
+]
+
 
 class _MetadataFinalizationOps(Protocol):
     """Minimal host surface needed by finalization helpers."""

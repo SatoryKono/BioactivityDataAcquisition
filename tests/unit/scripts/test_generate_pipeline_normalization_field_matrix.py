@@ -347,6 +347,18 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     )
     assert assay_parameter_standard_type["policy_scope"] == "provider_full_universe"
 
+    assay_parameter_type = _row(rows, "chembl_assay_parameters", "type")
+    assert (
+        assay_parameter_type["normalizer"]
+        == "normalize_profile_assay_parameter_type_field"
+    )
+    assert assay_parameter_type["semantic_category"] == "controlled_vocabulary"
+    assert assay_parameter_type["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_controlled.yaml"
+    )
+    assert assay_parameter_type["strictness"] == "normalization_only"
+    assert assay_parameter_type["dq_coverage"] == "pattern:error"
+
     molecule_type = _row(rows, "chembl_molecule", "molecule_type")
     assert molecule_type["policy_scope"] == "project_subset_of_provider_universe"
 

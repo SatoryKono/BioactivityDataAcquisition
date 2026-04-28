@@ -19,6 +19,7 @@ from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.silver.metadata_mixin import (
     SilverWriterMetadataMixin,
+    _SilverWriterMetadataRuntimeProtocol,
 )
 from bioetl.infrastructure.storage.silver.metadata_request_models import (
     _PreparedSilverWriteFinalizationContext,
@@ -41,9 +42,9 @@ __all__ = ["SilverWriterFinalizationCompatibilityMixin"]
 
 def _as_metadata_mixin(
     host: SilverWriterFinalizationCompatibilityMixin,
-) -> SilverWriterMetadataMixin:
+) -> _SilverWriterMetadataRuntimeProtocol:
     """Treat this compatibility host as a metadata-mixin implementation."""
-    return cast("SilverWriterMetadataMixin", host)
+    return cast("_SilverWriterMetadataRuntimeProtocol", host)
 
 
 class SilverWriterFinalizationCompatibilityMixin:
@@ -128,19 +129,16 @@ class SilverWriterFinalizationCompatibilityMixin:
     ) -> _PreparedSilverWriteFinalizationContext:
         """Prepare finalization context for silver write."""
         if self._metadata is not None:
-            return cast(
-                _PreparedSilverWriteFinalizationContext,
-                await self._metadata._prepare_silver_write_finalization_context(
-                    table_name=table_name,
-                    records=records,
-                    table_path=table_path,
-                    primary_keys=[],
-                    validated_mode=SilverWriteMode.MERGE,
-                    quarantined_count=quarantined_count,
-                    validation_errors=validation_errors,
-                    started_at=started_at,
-                    start_perf=start_perf,
-                ),
+            return await self._metadata._prepare_silver_write_finalization_context(
+                table_name=table_name,
+                records=records,
+                table_path=table_path,
+                primary_keys=[],
+                validated_mode=SilverWriteMode.MERGE,
+                quarantined_count=quarantined_count,
+                validation_errors=validation_errors,
+                started_at=started_at,
+                start_perf=start_perf,
             )
 
         from bioetl.infrastructure.storage.silver.metadata_mixin import (

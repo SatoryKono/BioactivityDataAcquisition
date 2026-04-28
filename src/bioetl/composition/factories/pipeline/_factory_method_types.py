@@ -93,13 +93,13 @@ def build_create_factory_runner_request(
     control_plane = request.control_plane
     return _CreateFactoryRunnerRequest(
         pipeline_name=pipeline_name,
-        silver_schema=silver_schema,
-        gold_schema=gold_schema,
+        silver_schema=cast("pa.Schema | None", silver_schema),
+        gold_schema=cast("GoldSchemaType", gold_schema),
         run_id=request.run_id,
         runtime=request.runtime,
         started_at=request.started_at,
-        settings=request.settings,
-        observability=request.observability,
+        settings=cast("Settings", request.settings),
+        observability=cast("ObservabilityBundle", request.observability),
         manifest_id=control_plane.manifest_id,
         execution_fingerprint=control_plane.execution_fingerprint,
         config_hash=control_plane.config_hash,
@@ -108,7 +108,7 @@ def build_create_factory_runner_request(
         dq_contract_compatibility_hash=control_plane.dq_contract_compatibility_hash,
         effective_config_artifact_id=control_plane.effective_config_artifact_id,
         filter_config=request.filter_config,
-        config=request.config,
+        config=cast("PipelineYamlConfig | None", request.config),
         cached_bronze=request.cached_bronze,
     )
 

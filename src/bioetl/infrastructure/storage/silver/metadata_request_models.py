@@ -230,8 +230,8 @@ class _SilverWriteFinalizationPreparationRequest:
     table_path: str
     quarantined_count: int | None = None
     validation_errors: tuple[str, ...] | None = None
-    started_at: datetime | None = None
-    start_perf: float | None = None
+    started_at: datetime
+    start_perf: float
     primary_keys: list[str] | None = None
     validated_mode: SilverWriteMode | None = None
 
@@ -250,8 +250,8 @@ class _SilverWriteResultFinalizationRequest:
     source_batch_id: BatchID | None
     quarantined_count: int | None = None
     validation_errors: tuple[str, ...] | None = None
-    started_at: datetime | None = None
-    start_perf: float | None = None
+    started_at: datetime
+    start_perf: float
 
 
 _FINALIZATION_PREPARATION_FIELDS = (

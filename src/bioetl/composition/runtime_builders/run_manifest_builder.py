@@ -219,6 +219,9 @@ def _emit_replay_reconstructability_metric(
     strict_exact_replay_supported: bool,
     metrics: object,
 ) -> None:
+    increment_counter = getattr(metrics, "increment_counter", None)
+    if not callable(increment_counter):
+        return
     strict_replay_requested = bool(request.launch_context.get("exact_replay"))
     required_persistence_profile = str(
         request.launch_context.get("required_persistence_profile")
@@ -234,7 +237,7 @@ def _emit_replay_reconstructability_metric(
         or request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
     ):
         status = "not_reconstructable"
-    metrics.increment_counter(
+    increment_counter(
         "bioetl_replay_reconstructability_events_total",
         value=1,
         labels={

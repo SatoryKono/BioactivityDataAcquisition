@@ -28,6 +28,7 @@ def build_compound_business_data(
 
     computed_descriptors = _extract_computed_descriptors(record)
     stereochemistry = _extract_stereochemistry(record)
+    charge = safe_int(record.get("charge"))
     business_data: dict[str, object] = {
         "molecule_id": str(cid),
         "canonical_smiles": record.get("canonical_smiles"),
@@ -49,7 +50,7 @@ def build_compound_business_data(
         **_extract_chemical_standardization(
             record,
             covalent_unit_count=stereochemistry["covalent_unit_count"],
-            charge=computed_descriptors["charge"],
+            charge=charge,
             serialize_json_list=serialize_json_list,
         ),
     }
@@ -150,7 +151,7 @@ def _extract_chemical_standardization(
         "structure_parent_key": result.structure_parent_key,
         "chemical_standardization_status": result.chemical_standardization_status,
         "chemical_standardization_warnings": serialize_json_list(
-            result.chemical_standardization_warnings
+            list(result.chemical_standardization_warnings)
         ),
         "chemical_standardization_policy_version": (
             result.chemical_standardization_policy_version

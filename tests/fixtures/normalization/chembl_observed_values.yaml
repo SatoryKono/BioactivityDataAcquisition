@@ -176,6 +176,16 @@ observed_values:
       - EFO:0001187
     clo_id:
       - CLO:0003684
+  tissue:
+    bto_id:
+      - BTO:0000142
+      - bto_0000142
+    caloha_id:
+      - CALOHA:TS-0284
+    efo_id:
+      - EFO:0000408
+    uberon_id:
+      - UBERON:0002107
   publication:
     publication_type:
       - journal-article

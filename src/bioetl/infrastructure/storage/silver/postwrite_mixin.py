@@ -15,6 +15,7 @@ from bioetl.infrastructure.storage.silver.operations.postwrite_operations import
     _finalize_silver_postwrite_result,
     _run_postwrite_audit_via_host_hook,
     _run_postwrite_export_via_host_hook,
+    _SilverPostwriteHostProtocol,
     _SilverWritePostwriteContext,
 )
 from bioetl.infrastructure.storage.silver.validation_operations import (
@@ -29,7 +30,7 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
-class _SilverWriterPostwriteSelf(Protocol):
+class _SilverWriterPostwriteSelf(_SilverPostwriteHostProtocol, Protocol):
     """Structural type for mixin self dependencies."""
 
     async def _maybe_export_csv(
