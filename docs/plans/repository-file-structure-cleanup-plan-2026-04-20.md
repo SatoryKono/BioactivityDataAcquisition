@@ -15,6 +15,13 @@ This document is a repo-only planning surface. It must not override:
 - active governance docs in `docs/00-project/governance/`
 - enforcement in `scripts/engineering/repo/audit_root_cleanliness.py`
 
+2026-04-28 update: an architecture-strict audit reported live GitHub root drift
+after this document's 2026-04-21 refresh. Treat the 2026-04-21 "root
+cleanliness passes" statements below as historical baseline, not as current
+live-state evidence. Use
+`docs/plans/repository-file-structure-remediation-plan-2026-04-28.md` for the
+current cleanup/refactoring remediation sequence.
+
 The 2026-04-21 refresh supersedes the original 2026-04-20 assessment for live
 state. The original cleanup wave appears to have closed the largest root
 artifact problems: root markdown is now reduced to canonical entries, root-level
