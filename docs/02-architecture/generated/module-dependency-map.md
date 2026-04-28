@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `1724`
-- Internal import edges (raw): `6784`
+- Scanned modules: `1728`
+- Internal import edges (raw): `6801`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `310`
@@ -21,14 +21,14 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1142 OK| application
+    application -->|1141 OK| application
     application -->|1003 OK| domain
     composition -->|239 OK| application
-    composition -->|527 OK| composition
+    composition -->|528 OK| composition
     composition -->|367 OK| domain
     composition -->|299 OK| infrastructure
-    domain -->|1090 OK| domain
-    infrastructure -->|742 OK| domain
+    domain -->|1106 OK| domain
+    infrastructure -->|743 OK| domain
     infrastructure -->|951 OK| infrastructure
     interfaces -->|68 OK| application
     interfaces -->|62 OK| composition
@@ -41,14 +41,14 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1142 | allowed |
+| `application`    | `application`    |    1141 | allowed |
 | `application`    | `domain`         |    1003 | allowed |
 | `composition`    | `application`    |     239 | allowed |
-| `composition`    | `composition`    |     527 | allowed |
+| `composition`    | `composition`    |     528 | allowed |
 | `composition`    | `domain`         |     367 | allowed |
 | `composition`    | `infrastructure` |     299 | allowed |
-| `domain`         | `domain`         |    1090 | allowed |
-| `infrastructure` | `domain`         |     742 | allowed |
+| `domain`         | `domain`         |    1106 | allowed |
+| `infrastructure` | `domain`         |     743 | allowed |
 | `infrastructure` | `infrastructure` |     951 | allowed |
 | `interfaces`     | `application`    |      68 | allowed |
 | `interfaces`     | `composition`    |      62 | allowed |

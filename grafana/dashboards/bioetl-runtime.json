@@ -434,7 +434,7 @@
             },
             "targets": [
                 {
-                    "expr": "(sum(bioetl_runtime_alert_condition_provider_failure_rate_high_15m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_retries_exhausted_1h) or vector(0))",
+                    "expr": "(sum(bioetl_runtime_alert_condition_provider_failure_rate_high_15m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_retries_exhausted_1h) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_adapter_latency_high_30m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_http_error_rate_high_15m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m) or vector(0))",
                     "refId": "A"
                 }
             ],
@@ -738,7 +738,7 @@
             },
             "targets": [
                 {
-                    "expr": "sum(increase(bioetl_control_plane_reads_total{pipeline=~\"$pipeline\"}[$__interval])) by (store, status) or label_replace(label_replace(vector(0), \"store\", \"none\", \"\", \"\"), \"status\", \"none\", \"\", \"\")",
+                    "expr": "sum(increase(bioetl_control_plane_reads_total[$__interval])) by (store, status) or label_replace(label_replace(vector(0), \"store\", \"none\", \"\", \"\"), \"status\", \"none\", \"\", \"\")",
                     "legendFormat": "{{store}} / {{status}}",
                     "refId": "A"
                 }
@@ -799,7 +799,7 @@
             },
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{pipeline=~\"$pipeline\", status!=\"failed\"}[$__range]))) or vector(0)",
+                    "expr": "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range]))) or vector(0)",
                     "refId": "A"
                 }
             ],
@@ -964,7 +964,7 @@
             },
             "targets": [
                 {
-                    "expr": "round(sum(last_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0))",
+                    "expr": "round(sum(increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"filtered_out\"}[$__range])) or vector(0))",
                     "instant": true,
                     "refId": "A"
                 }
@@ -1606,6 +1606,286 @@
             ],
             "title": "Replay Not Reconstructable",
             "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "Duration (seconds)",
+                        "axisPlacement": "auto",
+                        "drawStyle": "line",
+                        "fillOpacity": 20,
+                        "gradientMode": "none",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 61
+            },
+            "id": 207,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "max"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "targets": [
+                {
+                    "expr": "histogram_quantile(0.95, sum by (le, phase) (increase(bioetl_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__interval]))) or vector(0)",
+                    "legendFormat": "{{ phase }} p95",
+                    "refId": "A"
+                }
+            ],
+            "title": "Phase Duration by Phase (p95)",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "Duration (seconds)",
+                        "axisPlacement": "auto",
+                        "drawStyle": "line",
+                        "fillOpacity": 20,
+                        "gradientMode": "none",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 61
+            },
+            "id": 208,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "max"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "targets": [
+                {
+                    "expr": "histogram_quantile(0.95, sum by (le, phase) (increase(bioetl_postrun_phase_duration_seconds_bucket{pipeline=~\"$pipeline\"}[$__interval]))) or vector(0)",
+                    "legendFormat": "{{ phase }} p95",
+                    "refId": "A"
+                }
+            ],
+            "title": "Postrun Phase Duration by Phase (p95)",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "Initiations / interval",
+                        "axisPlacement": "auto",
+                        "drawStyle": "line",
+                        "fillOpacity": 20,
+                        "gradientMode": "none",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 69
+            },
+            "id": 209,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "sum"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "targets": [
+                {
+                    "expr": "round(sum by (reason) (increase(bioetl_shutdown_initiated[$__interval])) or vector(0))",
+                    "legendFormat": "{{ reason }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Shutdown Initiated by Reason",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisLabel": "Completions / interval",
+                        "axisPlacement": "auto",
+                        "drawStyle": "line",
+                        "fillOpacity": 20,
+                        "gradientMode": "none",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 69
+            },
+            "id": 210,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "sum"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "targets": [
+                {
+                    "expr": "round(sum by (reason) (increase(bioetl_shutdown_completed[$__interval])) or vector(0))",
+                    "legendFormat": "{{ reason }}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Shutdown Completed by Reason",
+            "type": "timeseries"
         }
     ],
     "refresh": "30s",
@@ -1717,5 +1997,5 @@
     "timezone": "",
     "title": "2. Runtime",
     "uid": "bioetl-runtime",
-    "version": 1
+    "version": 2
 }

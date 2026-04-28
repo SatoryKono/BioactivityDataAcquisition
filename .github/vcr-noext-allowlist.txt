@@ -1,39 +1,3 @@
 # Legacy VCR cassette files without .yaml extension.
 # Policy: no new extensionless VCR files should be added.
 # Existing entries are allowlisted for gradual migration.
-tests/fixtures/vcr/chembl/test_all_chembl_pipelines_chain
-tests/fixtures/vcr/chembl/test_backfill_clears_silver_only
-tests/fixtures/vcr/chembl/test_chembl_activity_full_cycle
-tests/fixtures/vcr/chembl/test_chembl_and_uniprot_sequential_run
-tests/fixtures/vcr/chembl/test_chembl_assay_confidence_score
-tests/fixtures/vcr/chembl/test_chembl_assay_full_cycle
-tests/fixtures/vcr/chembl/test_chembl_assay_metadata_fields
-tests/fixtures/vcr/chembl/test_chembl_molecule_full_cycle
-tests/fixtures/vcr/chembl/test_chembl_molecule_structural_fields
-tests/fixtures/vcr/chembl/test_chembl_molecule_then_activity_chain
-tests/fixtures/vcr/chembl/test_chembl_publication_full_cycle
-tests/fixtures/vcr/chembl/test_chembl_publication_metadata_fields
-tests/fixtures/vcr/chembl/test_chembl_target_cross_references
-tests/fixtures/vcr/chembl/test_chembl_target_full_cycle
-tests/fixtures/vcr/chembl/test_chembl_target_then_activity_chain
-tests/fixtures/vcr/chembl/test_failed_run_preserves_partial_data
-tests/fixtures/vcr/chembl/test_multiple_chembl_entities_parallel_safe
-tests/fixtures/vcr/chembl/test_parallel_independent_pipelines
-tests/fixtures/vcr/chembl/test_pipeline_idempotency
-tests/fixtures/vcr/chembl/test_pipeline_isolation
-tests/fixtures/vcr/chembl/test_pipeline_resume_from_checkpoint
-tests/fixtures/vcr/chembl/test_rebuild_clears_existing_data
-tests/fixtures/vcr/chembl/test_rerun_same_pipeline_twice
-tests/fixtures/vcr/chembl/test_vacuum_respects_retention_days
-tests/fixtures/vcr/chembl/test_vacuum_runs_after_successful_pipeline
-tests/fixtures/vcr/pubchem/test_pubchem_compound_full_cycle
-tests/fixtures/vcr/pubchem/test_pubchem_compound_query_filter
-tests/fixtures/vcr/pubchem/test_pubchem_compound_structural_fields
-tests/fixtures/vcr/pubmed/test_pubmed_publication_classification_fields
-tests/fixtures/vcr/pubmed/test_pubmed_publication_date_fields
-tests/fixtures/vcr/pubmed/test_pubmed_publication_full_cycle
-tests/fixtures/vcr/pubmed/test_pubmed_publication_identifier_fields
-tests/fixtures/vcr/pubmed/test_pubmed_publication_journal_fields
-tests/fixtures/vcr/uniprot/test_uniprot_protein_full_cycle
-tests/fixtures/vcr/uniprot/test_uniprot_protein_metadata_fields
-tests/fixtures/vcr/uniprot/test_uniprot_protein_sequence_fields

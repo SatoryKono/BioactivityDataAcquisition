@@ -80,6 +80,7 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
         payload: JsonDict,  # Any: quarantine payload has heterogeneous values
         bronze_batch_id: BatchID,
         run_id: RunID | None = None,
+        entry_id: str | None = None,
         metadata: JsonDict  # Any: metadata values are heterogeneous
         | None = None,
         *,
@@ -106,6 +107,7 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
                     "payload": payload,
                     "bronze_batch_id": bronze_batch_id,
                     "run_id": run_id,
+                    "entry_id": entry_id,
                     "metadata": metadata,
                     "ingestion_ts": ingestion_ts,
                 }

@@ -3,6 +3,6 @@ provider: pubchem
 cassette_rel_path: tests/fixtures/vcr/pubchem/provider_contract_compound_property_endpoint.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 938b8760694e1106e316c5a5802f80b059f35a1373d7db4d5804362cad7d617b
-recorded_at: '2026-04-24'
+cassette_sha256: c67161eca1c1bce1e43b6139e1650c04f3b0fefd494aea254c60c404530d05f0
+recorded_at: '2026-04-28'
 staleness_ready: true

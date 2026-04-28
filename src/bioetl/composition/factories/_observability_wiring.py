@@ -60,7 +60,7 @@ def _create_cached_bronze_data_source(
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
-    metrics: MetricsPort,
+    metrics: MetricsPort | None = None,
     cached_bronze: CachedBronzeContext,
 ) -> DataSourcePort:
     """Create CachedBronzeDataSource for reading from Bronze cache."""

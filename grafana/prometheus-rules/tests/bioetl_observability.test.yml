@@ -91,3 +91,85 @@ tests:
               summary: Replay request cannot be reconstructed safely
               description: bioetl_replay_reconstructability_events_total recorded not_reconstructable for pipeline=chembl replay_capability=resume_only strict_requirement=true in the last 30m.
               runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
+  - name: provider-adapter-latency-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_adapter_request_duration_seconds_bucket{provider="pubmed",le="5.0"}'
+        values: '0+0x50'
+      - series: 'bioetl_adapter_request_duration_seconds_bucket{provider="pubmed",le="10.0"}'
+        values: '0+20x50'
+      - series: 'bioetl_adapter_request_duration_seconds_bucket{provider="pubmed",le="30.0"}'
+        values: '0+20x50'
+      - series: 'bioetl_adapter_request_duration_seconds_bucket{provider="pubmed",le="+Inf"}'
+        values: '0+20x50'
+    alert_rule_test:
+      - eval_time: 45m
+        alertname: BioETLProviderAdapterLatencyHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              provider: pubmed
+            exp_annotations:
+              summary: Provider adapter latency is elevated
+              description: Adapter request p95 exceeded 5s for provider=pubmed over the last 30m.
+              runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: provider-http-error-rate-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_http_request_errors_total{provider="crossref",method="GET",error_type="timeout"}'
+        values: '0+2x30'
+      - series: 'bioetl_http_request_duration_seconds_count{provider="crossref",method="GET",status="200"}'
+        values: '0+10x30'
+    alert_rule_test:
+      - eval_time: 25m
+        alertname: BioETLProviderHttpErrorRateHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              provider: crossref
+            exp_annotations:
+              summary: Provider HTTP error rate is elevated
+              description: HTTP error ratio exceeded 10% for provider=crossref in the last 15m.
+              runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: provider-rate-limiter-wait-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_rate_limiter_wait_seconds_bucket{provider="semanticscholar",le="1.0"}'
+        values: '0+0x50'
+      - series: 'bioetl_rate_limiter_wait_seconds_bucket{provider="semanticscholar",le="2.5"}'
+        values: '0+12x50'
+      - series: 'bioetl_rate_limiter_wait_seconds_bucket{provider="semanticscholar",le="5.0"}'
+        values: '0+12x50'
+      - series: 'bioetl_rate_limiter_wait_seconds_bucket{provider="semanticscholar",le="+Inf"}'
+        values: '0+12x50'
+    alert_rule_test:
+      - eval_time: 40m
+        alertname: BioETLProviderRateLimiterWaitHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              provider: semanticscholar
+            exp_annotations:
+              summary: Provider rate-limiter wait is elevated
+              description: Rate-limiter wait p95 exceeded 1s for provider=semanticscholar over the last 30m.
+              runbook: docs/05-operations/runbooks/incident-response.md
+
+  - name: provider-rate-limiter-tokens-depleted
+    interval: 1m
+    input_series:
+      - series: 'bioetl_rate_limiter_tokens_available{provider="pubchem"}'
+        values: '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLProviderRateLimiterTokensDepleted
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              provider: pubchem
+            exp_annotations:
+              summary: Provider rate-limiter tokens were depleted
+              description: Rate-limiter tokens dropped below 1 for provider=pubchem within the last 15m.
+              runbook: docs/05-operations/runbooks/incident-response.md

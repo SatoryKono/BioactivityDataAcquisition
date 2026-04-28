@@ -136,13 +136,17 @@ def build_runner_factories(
         logger=logger,
         normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
     )
-    runner_factory_builder = runner_factory_builder_cls(
+    run_options_factory: Callable[..., RunOptions] = RunOptions
+    build_context_fn: Callable[[str, RunOptions], PipelineRunContext] = (
+        build_pipeline_context
+    )
+    runner_factory_builder = cast(
+        "Callable[..., RunnerFactoryBuilderService[RunOptions]]",
+        runner_factory_builder_cls,
+    )(
         logger=logger,
-        run_options_cls=cast("Callable[..., RunOptions]", RunOptions),
-        build_context=cast(
-            "Callable[[str, RunOptions], PipelineRunContext]",
-            build_pipeline_context,
-        ),
+        run_options_cls=run_options_factory,
+        build_context=build_context_fn,
         pipeline_runner_builder=pipeline_runner_builder,
         filter_extraction_service=filter_extraction_service,
     )

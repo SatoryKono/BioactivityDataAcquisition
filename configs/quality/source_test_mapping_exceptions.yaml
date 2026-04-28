@@ -21,14 +21,6 @@ exemptions:
       module rather than a mirrored thin-package sibling test file.
     owner_tests:
       - tests/unit/infrastructure/test_pandera_compat.py
-  - source: src/bioetl/application/runtime_timestamps.py
-    policy: aggregate_owner
-    reason: >
-      Runtime timestamp helpers are exercised through runner and execution
-      service owner tests instead of a mirrored thin-package sibling.
-    owner_tests:
-      - tests/unit/application/services/test_pipeline_run_execution_service.py
-      - tests/unit/application/services/test_pipeline_runner_service.py
   - source: src/bioetl/application/composite/helpers/resolver_helper.py
     policy: aggregate_owner
     reason: >

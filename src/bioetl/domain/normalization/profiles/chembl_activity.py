@@ -21,16 +21,27 @@ from ._chembl_activity_fields import (
 )
 from ._chembl_policy_registry import (
     chembl_controlled_family_fields,
+    chembl_flag_family_fields,
     chembl_ontology_family_fields,
 )
 from ._standard_profile_builder import build_standard_profile
 from .chembl_pseudo_nulls import chembl_pseudo_null_fields
 from .profile_normalizers import (
+    normalize_profile_activity_bao_endpoint_iri,
+    normalize_profile_activity_bao_endpoint_mapping_status,
+    normalize_profile_activity_bao_format_iri,
+    normalize_profile_activity_bao_format_mapping_status,
+    normalize_profile_activity_bao_ontology_version,
+    normalize_profile_activity_qudt_ontology_version,
+    normalize_profile_activity_qudt_unit_iri,
+    normalize_profile_activity_qudt_unit_mapping_status,
+    normalize_profile_activity_uo_ontology_version,
+    normalize_profile_activity_uo_unit_iri,
+    normalize_profile_activity_uo_unit_mapping_status,
     normalize_profile_bao_identifier,
     normalize_profile_canonical_smiles,
     normalize_profile_chembl_organism_name,
     normalize_profile_enum,
-    normalize_profile_mapping_status,
     normalize_profile_operator,
 )
 
@@ -71,14 +82,6 @@ _ENUM_FIELDS = {
 _ONTOLOGY_ID_FIELDS = chembl_ontology_family_fields("uo", entity="activity")
 _UNIT_FIELDS = chembl_controlled_family_fields("units", entity="activity")
 _BAO_FIELDS = chembl_ontology_family_fields("bao", entity="activity")
-_MAPPING_STATUS_FIELDS = frozenset(
-    {
-        "bao_endpoint_mapping_status",
-        "bao_format_mapping_status",
-        "qudt_unit_mapping_status",
-        "uo_unit_mapping_status",
-    }
-)
 _STRICT_JSON_FIELDS = SET_LIKE_FIELDS
 
 _SPECIAL_RULE_COMPONENTS = {
@@ -108,17 +111,62 @@ _SPECIAL_RULE_COMPONENTS = {
         )
         for field_name in sorted(_BAO_FIELDS)
     },
-    **{
-        field_name: (
-            lambda value: normalize_profile_mapping_status(
-                value,
-                allowed_values=ONTOLOGY_MAPPING_STATUSES,
-            ),
-            "Normalize ontology and unit mapping-status companion fields to "
-            "the canonical lowercase enum family mapped/unmapped/missing.",
-        )
-        for field_name in sorted(_MAPPING_STATUS_FIELDS)
-    },
+    "bao_endpoint_iri": (
+        normalize_profile_activity_bao_endpoint_iri,
+        "Resolve the BAO endpoint ontology companion bundle from sibling "
+        "normalized identifiers and emit the canonical OBO IRI.",
+    ),
+    "bao_endpoint_mapping_status": (
+        normalize_profile_activity_bao_endpoint_mapping_status,
+        "Resolve the BAO endpoint ontology companion bundle from sibling "
+        "normalized identifiers and emit the canonical mapping-status enum.",
+    ),
+    "bao_format_iri": (
+        normalize_profile_activity_bao_format_iri,
+        "Resolve the BAO format ontology companion bundle from sibling "
+        "normalized identifiers and emit the canonical OBO IRI.",
+    ),
+    "bao_format_mapping_status": (
+        normalize_profile_activity_bao_format_mapping_status,
+        "Resolve the BAO format ontology companion bundle from sibling "
+        "normalized identifiers and emit the canonical mapping-status enum.",
+    ),
+    "bao_ontology_version": (
+        normalize_profile_activity_bao_ontology_version,
+        "Resolve the BAO ontology companion bundle from sibling normalized "
+        "identifiers and emit the shared ontology version when a BAO "
+        "mapping context exists.",
+    ),
+    "uo_unit_iri": (
+        normalize_profile_activity_uo_unit_iri,
+        "Resolve the Units Ontology companion bundle from sibling normalized "
+        "identifiers and emit the canonical OBO IRI.",
+    ),
+    "uo_unit_mapping_status": (
+        normalize_profile_activity_uo_unit_mapping_status,
+        "Resolve the Units Ontology companion bundle from sibling normalized "
+        "identifiers and emit the canonical mapping-status enum.",
+    ),
+    "uo_ontology_version": (
+        normalize_profile_activity_uo_ontology_version,
+        "Resolve the Units Ontology companion bundle from sibling normalized "
+        "identifiers and emit the ontology version.",
+    ),
+    "qudt_unit_iri": (
+        normalize_profile_activity_qudt_unit_iri,
+        "Resolve the QUDT companion bundle from sibling normalized unit "
+        "tokens and emit the canonical QUDT unit IRI.",
+    ),
+    "qudt_unit_mapping_status": (
+        normalize_profile_activity_qudt_unit_mapping_status,
+        "Resolve the QUDT companion bundle from sibling normalized unit "
+        "tokens and emit the canonical mapping-status enum.",
+    ),
+    "qudt_ontology_version": (
+        normalize_profile_activity_qudt_ontology_version,
+        "Resolve the QUDT companion bundle from sibling normalized unit "
+        "tokens and emit the ontology version.",
+    ),
 }
 
 
@@ -136,7 +184,7 @@ CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
     pmc_id_fields={"publication_pmc_id"},
     int_fields=INT_FIELDS,
     float_fields=FLOAT_FIELDS,
-    flag_fields={"standard_flag", "potential_duplicate", "manual_curation_flag"},
+    flag_fields=chembl_flag_family_fields("binary_flags", entity="activity"),
     operator_fields=chembl_controlled_family_fields("operators", entity="activity"),
     set_like_fields=SET_LIKE_FIELDS,
     strict_json_fields=_STRICT_JSON_FIELDS,
@@ -146,10 +194,10 @@ CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
         "standard_type": ACTIVITY_STANDARD_TYPES,
         "assay_type": ASSAY_TYPES,
         "data_validity_comment": DATA_VALIDITY_COMMENTS,
-        **dict.fromkeys(
-            sorted(_MAPPING_STATUS_FIELDS),
-            ONTOLOGY_MAPPING_STATUSES,
-        ),
+        "bao_endpoint_mapping_status": ONTOLOGY_MAPPING_STATUSES,
+        "bao_format_mapping_status": ONTOLOGY_MAPPING_STATUSES,
+        "uo_unit_mapping_status": ONTOLOGY_MAPPING_STATUSES,
+        "qudt_unit_mapping_status": ONTOLOGY_MAPPING_STATUSES,
     },
     special_rules=_SPECIAL_RULE_COMPONENTS,
     unit_fields=_UNIT_FIELDS,

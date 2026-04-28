@@ -1,7 +1,4 @@
-"""Pandera schema for ChEMBL Activity entity.
-
-Aligned with RULES.md v5.24 and ChEMBL 34 schema.
-"""
+"""Pandera schema for ChEMBL Activity entity aligned with RULES.md v5.24 and ChEMBL 34 schema."""
 
 from __future__ import annotations
 
@@ -22,12 +19,9 @@ from bioetl.domain.schemas.constants import (
 )
 from bioetl.domain.validation import MAX_PUBLICATION_YEAR, MIN_PUBLICATION_YEAR
 
-__all__ = [
-    "ActivitySchema",
-]
+__all__ = ["ActivitySchema"]
 
 HTTP_IRI_PATTERN = r"^https?://[^\s]+$"
-
 
 class ActivitySchema(ETLRecordSchema):
     """Activity validation schema for Silver layer."""
@@ -43,10 +37,8 @@ class ActivitySchema(ETLRecordSchema):
         isin=["raw", "normalized", "validated"],
         description="Processing state for the activity record.",
     )
-
     # === Primary Key ===
     activity_id: Series[str] = pa.Field(nullable=False, description="Primary key.")
-
     # === Foreign Keys ===
     assay_id: Series[str] = pa.Field(
         nullable=False,
@@ -68,7 +60,6 @@ class ActivitySchema(ETLRecordSchema):
         str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to document.",
     )
-
     # === Standardized Values ===
     standard_relation: Series[str] = pa.Field(
         nullable=False,
@@ -93,7 +84,6 @@ class ActivitySchema(ETLRecordSchema):
         isin=[0, 1],
         description="Standardization flag.",
     )
-
     # === Derived Metrics ===
     pchembl_value: Series[float] = pa.Field(
         nullable=False,
@@ -101,7 +91,6 @@ class ActivitySchema(ETLRecordSchema):
         le=14,
         description="-log10 of molar activity.",
     )
-
     # === Comments & Quality ===
     data_validity_comment: Series[str] | None = pa.Field(
         nullable=True,
@@ -116,7 +105,6 @@ class ActivitySchema(ETLRecordSchema):
         isin=[0, 1],
         description="Duplicate flag.",
     )
-
     # === Ontologies ===
     bao_endpoint: Series[str] = pa.Field(
         nullable=False,
@@ -181,7 +169,6 @@ class ActivitySchema(ETLRecordSchema):
         nullable=True,
         description="QUDT ontology release/version used for IRI mapping.",
     )
-
     # === Original Values & Other Fields ===
     src_id: Series[int] = pa.Field(nullable=False, description="Source ID.")
     record_id: Series[int] = pa.Field(
@@ -215,7 +202,6 @@ class ActivitySchema(ETLRecordSchema):
     data_validity_description: Series[str] | None = pa.Field(
         nullable=True, description="Human-readable data validity explanation."
     )
-
     # === Flattened Fields (from JSON) ===
     ligand_efficiency_bei: Series[float] | None = pa.Field(
         nullable=True, description="Binding Efficiency Index (BEI)."
@@ -243,7 +229,6 @@ class ActivitySchema(ETLRecordSchema):
     activity_properties: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of activity properties."
     )
-
     # === Additional Fields from Silver Schema ===
     canonical_smiles: Series[str] = pa.Field(
         nullable=False, description="Canonical SMILES of molecule."

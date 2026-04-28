@@ -226,7 +226,7 @@ class GenericPipelineFactory[TPipeline: "BasePipeline"]:
                 pipeline_name=self.pipeline_name,
                 silver_schema=self.silver_schema,
                 gold_schema=self.gold_schema,
-                request=cast("PipelineCreateRunnerRequest", request),
+                request=request,
             ),
             assemble_runner_fn=cast(
                 Callable[..., PipelineRunner],

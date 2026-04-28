@@ -40,6 +40,18 @@ groups:
       - record: bioetl_runtime_alert_condition_provider_retries_exhausted_1h
         expr: sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[1h])) > bool 0
 
+      - record: bioetl_runtime_alert_condition_provider_adapter_latency_high_30m
+        expr: histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_adapter_request_duration_seconds_bucket[30m]))) > bool 5
+
+      - record: bioetl_runtime_alert_condition_provider_http_error_rate_high_15m
+        expr: (sum by (provider) (increase(bioetl_http_request_errors_total[15m])) / clamp_min(sum by (provider) (increase(bioetl_http_request_duration_seconds_count[15m])), 1)) > bool 0.1
+
+      - record: bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m
+        expr: histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket[30m]))) > bool 1
+
+      - record: bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m
+        expr: min by (provider) (min_over_time(bioetl_rate_limiter_tokens_available[15m])) < bool 1
+
   - name: bioetl_monitoring_stack_observability
     rules:
       - alert: BioETLMetricsEndpointUnavailable
@@ -429,4 +441,44 @@ groups:
         annotations:
           summary: "Circuit breaker remained open"
           description: "bioetl_circuit_breaker_state stayed open for adapter={{ $labels.adapter }} within the last 15m."
+          runbook: "docs/05-operations/runbooks/incident-response.md"
+
+      - alert: BioETLProviderAdapterLatencyHigh
+        expr: histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_adapter_request_duration_seconds_bucket[30m]))) > 5
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Provider adapter latency is elevated"
+          description: "Adapter request p95 exceeded 5s for provider={{ $labels.provider }} over the last 30m."
+          runbook: "docs/05-operations/runbooks/incident-response.md"
+
+      - alert: BioETLProviderHttpErrorRateHigh
+        expr: (sum by (provider) (increase(bioetl_http_request_errors_total[15m])) / clamp_min(sum by (provider) (increase(bioetl_http_request_duration_seconds_count[15m])), 1)) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Provider HTTP error rate is elevated"
+          description: "HTTP error ratio exceeded 10% for provider={{ $labels.provider }} in the last 15m."
+          runbook: "docs/05-operations/runbooks/incident-response.md"
+
+      - alert: BioETLProviderRateLimiterWaitHigh
+        expr: histogram_quantile(0.95, sum by (le, provider) (increase(bioetl_rate_limiter_wait_seconds_bucket[30m]))) > 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Provider rate-limiter wait is elevated"
+          description: "Rate-limiter wait p95 exceeded 1s for provider={{ $labels.provider }} over the last 30m."
+          runbook: "docs/05-operations/runbooks/incident-response.md"
+
+      - alert: BioETLProviderRateLimiterTokensDepleted
+        expr: min by (provider) (min_over_time(bioetl_rate_limiter_tokens_available[15m])) < 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Provider rate-limiter tokens were depleted"
+          description: "Rate-limiter tokens dropped below 1 for provider={{ $labels.provider }} within the last 15m."
           runbook: "docs/05-operations/runbooks/incident-response.md"

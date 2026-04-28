@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from bioetl.domain.normalization.profiles._chembl_policy_registry import (
+    chembl_boolean_family_fields,
+    chembl_flag_family_fields,
+)
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
@@ -61,22 +65,8 @@ _INT_FIELDS = frozenset(
         "rotatable_bond_count",
     }
 )
-_BOOLEAN_FIELDS = frozenset(
-    {
-        "therapeutic_flag",
-        "oral",
-        "parenteral",
-        "topical",
-        "withdrawn_flag",
-    }
-)
-_FLAG_FIELDS = frozenset(
-    {
-        "black_box_warning",
-        "dosed_ingredient",
-        "polymer_flag",
-    }
-)
+_BOOLEAN_FIELDS = chembl_boolean_family_fields("bool_like", entity="molecule")
+_FLAG_FIELDS = chembl_flag_family_fields("binary_flags", entity="molecule")
 _FLOAT_FIELDS = frozenset(
     {
         "availability_type",

@@ -7,7 +7,7 @@ import argparse
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[4]
 VCR_ROOT = ROOT / "tests" / "fixtures" / "vcr"
 ALLOWLIST_FILE = ROOT / ".github" / "vcr-noext-allowlist.txt"
 

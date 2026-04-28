@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Sequence
+from collections.abc import Awaitable, Callable, Sequence
 from datetime import datetime
 from typing import Literal, cast
 
@@ -26,7 +26,7 @@ from bioetl.infrastructure.storage.silver.merged_operations import (
     _PreparedMergedSilverWrite,
 )
 from bioetl.infrastructure.storage.silver.metadata_mixin import (
-    SilverWriterMetadataMixin,
+    _SilverWriterMetadataRuntimeProtocol,
 )
 from bioetl.infrastructure.storage.silver.operations.merged_operations import (
     SilverMergedOperations,
@@ -218,9 +218,9 @@ class SilverWriterMergedCompatibilityMixin:
         """Treat this compatibility host as a merged-mixin implementation."""
         return cast("SilverWriterMergedMixin", self)
 
-    def _as_metadata_mixin(self) -> SilverWriterMetadataMixin:
+    def _as_metadata_mixin(self) -> _SilverWriterMetadataRuntimeProtocol:
         """Treat this compatibility host as a metadata-mixin implementation."""
-        return cast("SilverWriterMetadataMixin", self)
+        return cast("_SilverWriterMetadataRuntimeProtocol", self)
 
     async def write_silver_merged(
         self,
@@ -331,7 +331,10 @@ class SilverWriterMergedCompatibilityMixin:
             _normalize_completed_at(completed_at) if completed_at is not None else None
         )
 
-        await SilverWriterMetadataMixin._write_silver_merged_metadata(
+        await cast(
+            "Callable[..., Awaitable[None]]",
+            SilverWriterMetadataMixin._write_silver_merged_metadata,
+        )(
             self._as_metadata_mixin(),
             table_path=table_path,
             table_name=table_name,

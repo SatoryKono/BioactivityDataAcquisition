@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from collections.abc import Sequence
+from collections.abc import Awaitable, Callable, Sequence
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import cast
@@ -18,7 +18,6 @@ from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.silver.metadata_mixin import (
-    SilverWriterMetadataMixin,
     _SilverWriterMetadataRuntimeProtocol,
 )
 from bioetl.infrastructure.storage.silver.metadata_request_models import (
@@ -63,7 +62,10 @@ class SilverWriterFinalizationCompatibilityMixin:
             SilverWriterMetadataMixin,
         )
 
-        return await SilverWriterMetadataMixin._get_delta_version(
+        return await cast(
+            "Callable[..., Awaitable[int | None]]",
+            SilverWriterMetadataMixin._get_delta_version,
+        )(
             _as_metadata_mixin(self), table_path
         )
 
@@ -87,7 +89,10 @@ class SilverWriterFinalizationCompatibilityMixin:
             SilverWriterMetadataMixin,
         )
 
-        return await SilverWriterMetadataMixin._compute_dq_metrics(
+        return await cast(
+            "Callable[..., Awaitable[BatchDQMetrics]]",
+            SilverWriterMetadataMixin._compute_dq_metrics,
+        )(
             _as_metadata_mixin(self),
             table_name=table_name,
             records=records,
@@ -146,7 +151,10 @@ class SilverWriterFinalizationCompatibilityMixin:
         )
 
         return (
-            await SilverWriterMetadataMixin._prepare_silver_write_finalization_context(
+            await cast(
+                "Callable[..., Awaitable[_PreparedSilverWriteFinalizationContext]]",
+                SilverWriterMetadataMixin._prepare_silver_write_finalization_context,
+            )(
                 _as_metadata_mixin(self),
                 table_name=table_name,
                 records=records,
@@ -216,7 +224,10 @@ class SilverWriterFinalizationCompatibilityMixin:
             SilverWriterMetadataMixin,
         )
 
-        return await SilverWriterMetadataMixin._finalize_silver_write_result(
+        return await cast(
+            "Callable[..., Awaitable[SilverWriteResult | None]]",
+            SilverWriterMetadataMixin._finalize_silver_write_result,
+        )(
             _as_metadata_mixin(self),
             table_name=table_name,
             records=records,

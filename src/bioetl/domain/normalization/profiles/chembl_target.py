@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from bioetl.domain.normalization.profiles._chembl_policy_registry import (
+    chembl_boolean_family_fields,
+)
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
@@ -42,7 +45,7 @@ _META_FIELDS = frozenset(
 _TITLE_FIELDS = frozenset({"pref_name"})
 _INT_FIELDS = frozenset({"taxonomy_id"})
 _FLOAT_FIELDS = frozenset({"primary_component_id"})
-_BOOLEAN_FIELDS = frozenset({"species_group_flag", "downgraded"})
+_BOOLEAN_FIELDS = chembl_boolean_family_fields("bool_like", entity="target")
 _STRICT_JSON_FIELDS = frozenset(
     {
         "target_components",

@@ -866,6 +866,51 @@ class TestFilteredDataSourceMetrics:
         assert "bioetl_filter_combinations_loaded_total" in counter_names
         assert counter_names.count("bioetl_filter_ids_loaded_total") == 2
 
+    @pytest.mark.asyncio
+    async def test_multi_column_metrics_are_compatible_with_prometheus_adapter(
+        self,
+        mock_data_source_with_filtered,
+    ):
+        """Multi-column filter metrics must not emit undeclared Prometheus labels."""
+        from bioetl.domain.filtering.input_config import FilterColumn
+        from bioetl.infrastructure.observability.prometheus_metrics import (
+            PrometheusMetrics,
+        )
+
+        reader = AsyncMock()
+        reader.load_multi_column_filter = AsyncMock(
+            return_value=FilterLoadResult(
+                ids=("CHEMBL1", "CHEMBL2"),
+                total_count=2,
+                unique_count=2,
+                duplicate_count=0,
+                duplicates=frozenset(),
+                column_ids={
+                    "molecule_id": frozenset({"CHEMBL1", "CHEMBL2"}),
+                    "assay_id": frozenset({"CHEMBL_ASSAY_1"}),
+                },
+                valid_combinations=frozenset({("CHEMBL1", "CHEMBL_ASSAY_1")}),
+                filter_fields=("molecule_id", "assay_id"),
+            )
+        )
+        config = InputFilterConfig(
+            enabled=True,
+            source_path="data/multi.csv",
+            columns=(
+                FilterColumn("molecule_id", "molecule_id"),
+                FilterColumn("assay_id", "assay_id"),
+            ),
+        )
+        filtered = FilteredDataSource(
+            data_source=mock_data_source_with_filtered,
+            filter_reader=reader,
+            filter_config=config,
+            metrics=PrometheusMetrics(),
+            pipeline_name="test_pipeline",
+        )
+
+        await filtered.__aenter__()
+
 
 @pytest.mark.unit
 class TestFilteredDataSourceGetSourceMetadata:

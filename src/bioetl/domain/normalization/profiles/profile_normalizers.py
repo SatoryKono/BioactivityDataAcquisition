@@ -8,14 +8,36 @@ from bioetl.domain.normalization.chembl import (
     normalize_cellosaurus_id,
     normalize_chembl_organism_name,
 )
-from bioetl.domain.normalization.dates import normalize_partial_date
 from bioetl.domain.normalization.identifiers import (
-    normalize_doi,
     normalize_ontology_id,
-    normalize_pmc_id,
-    normalize_pmid,
 )
-from bioetl.domain.normalization.json import canonicalize_json_string
+from bioetl.domain.normalization.profiles._profile_activity_ontology_normalizers import (
+    normalize_profile_activity_bao_endpoint_iri,
+    normalize_profile_activity_bao_endpoint_mapping_status,
+    normalize_profile_activity_bao_format_iri,
+    normalize_profile_activity_bao_format_mapping_status,
+    normalize_profile_activity_bao_ontology_version,
+    normalize_profile_activity_qudt_ontology_version,
+    normalize_profile_activity_qudt_unit_iri,
+    normalize_profile_activity_qudt_unit_mapping_status,
+    normalize_profile_activity_uo_ontology_version,
+    normalize_profile_activity_uo_unit_iri,
+    normalize_profile_activity_uo_unit_mapping_status,
+)
+from bioetl.domain.normalization.profiles._profile_textual_normalizers import (
+    normalize_profile_abstract,
+    normalize_profile_canonical_smiles,
+    normalize_profile_date,
+    normalize_profile_doi,
+    normalize_profile_isomeric_smiles,
+    normalize_profile_json_string,
+    normalize_profile_json_string_strict,
+    normalize_profile_pmc_id,
+    normalize_profile_pmid,
+    normalize_profile_smiles,
+    normalize_profile_text,
+    normalize_profile_title,
+)
 from bioetl.domain.normalization.profiles._profile_value_normalizers import (
     normalize_profile_binary_flag,
     normalize_profile_boolean,
@@ -31,13 +53,21 @@ from bioetl.domain.normalization.rules import (
     normalize_operator,
     normalize_unit,
 )
-from bioetl.domain.normalization.text import normalize_abstract as _normalize_abstract
 from bioetl.domain.normalization.text import normalize_string
-from bioetl.domain.normalization.text import normalize_title as _normalize_title
-from bioetl.domain.value_objects.chemical import SMILES
 
 __all__ = [
     "normalize_profile_abstract",
+    "normalize_profile_activity_bao_endpoint_iri",
+    "normalize_profile_activity_bao_endpoint_mapping_status",
+    "normalize_profile_activity_bao_format_iri",
+    "normalize_profile_activity_bao_format_mapping_status",
+    "normalize_profile_activity_bao_ontology_version",
+    "normalize_profile_activity_qudt_ontology_version",
+    "normalize_profile_activity_qudt_unit_iri",
+    "normalize_profile_activity_qudt_unit_mapping_status",
+    "normalize_profile_activity_uo_ontology_version",
+    "normalize_profile_activity_uo_unit_iri",
+    "normalize_profile_activity_uo_unit_mapping_status",
     "normalize_profile_assay_parameter_type",
     "normalize_profile_bao_identifier",
     "normalize_profile_binary_flag",
@@ -65,6 +95,7 @@ __all__ = [
     "normalize_profile_pmc_id",
     "normalize_profile_pmid",
     "normalize_profile_publication_type",
+    "normalize_profile_publication_type_raw",
     "normalize_profile_quasi_enum_numeric",
     "normalize_profile_smiles",
     "normalize_profile_text",
@@ -234,113 +265,9 @@ def normalize_profile_publication_type(
     return normalized if normalized in allowed_values else None
 
 
-def normalize_profile_text(value: object) -> object:
-    """Normalize one textual profile field when the value is a string."""
+def normalize_profile_publication_type_raw(value: object) -> object:
+    """Normalize raw provider publication-type tokens without mapping to canonical taxonomy."""
     if not isinstance(value, str):
-        return value
-    return normalize_string(value)
-
-
-def normalize_profile_json_string(value: object) -> object:
-    """Canonicalize one JSON-like string while preserving invalid payloads."""
-    if not isinstance(value, str):
-        return value
-    normalized = normalize_string(value)
-    if normalized is None:
         return None
-    try:
-        canonical = canonicalize_json_string(normalized)
-    except ValueError:
-        return normalized
-    return canonical if canonical is not None else normalized
-
-
-def normalize_profile_json_string_strict(value: object) -> object:
-    """Canonicalize one JSON-like string and fail closed on malformed payloads."""
-    if not isinstance(value, str):
-        return value
-    normalized = normalize_string(value)
-    if normalized is None:
-        return None
-    try:
-        return canonicalize_json_string(normalized)
-    except ValueError:
-        return None
-
-
-def normalize_profile_title(value: object) -> object:
-    """Normalize one title-like profile field."""
-    if not isinstance(value, str):
-        return value
-    return _normalize_title(value)
-
-
-def normalize_profile_abstract(value: object) -> object:
-    """Normalize one abstract-like profile field."""
-    if not isinstance(value, str):
-        return value
-    return _normalize_abstract(value)
-
-
-def normalize_profile_date(value: object) -> object:
-    """Normalize one date-like profile field to canonical partial-date semantics."""
-    if not isinstance(value, str):
-        return value
-    return normalize_partial_date(value)
-
-
-def normalize_profile_doi(value: object) -> object:
-    """Normalize DOI-like profile values when the value is textual."""
-    if not isinstance(value, str):
-        return value
-    return normalize_doi(value)
-
-
-def normalize_profile_pmid(value: object) -> object:
-    """Normalize PMID-like profile values with bool protection."""
-    if isinstance(value, bool):
-        return None
-    if isinstance(value, int):
-        return normalize_pmid(value)
-    if not isinstance(value, str):
-        return value
-    return _normalize_profile_pmid_text(value)
-
-
-def _normalize_profile_pmid_text(value: str) -> str | None:
-    """Normalize textual PMID payloads after generic string normalization."""
-    normalized = normalize_string(value)
-    if normalized is None:
-        return None
-    if normalized.lower().startswith("pmid:"):
-        return normalize_pmid(normalized[5:])
-    return normalize_pmid(normalized)
-
-
-def normalize_profile_pmc_id(value: object) -> object:
-    """Normalize PMC identifiers when the value is textual."""
-    if not isinstance(value, str):
-        return value
-    return normalize_pmc_id(value)
-
-
-def normalize_profile_smiles(value: object, *, is_canonical: bool) -> str | None:
-    """Normalize one SMILES-like value using the domain value object."""
-    if value is None or not isinstance(value, str):
-        return None
-    normalized = SMILES.from_raw(
-        value,
-        is_canonical=is_canonical,
-        mode="soft",
-    )
-    return str(normalized) if normalized is not None else None
-
-
-def normalize_profile_canonical_smiles(value: object) -> str | None:
-    """Normalize one canonical-SMILES profile field."""
-    return normalize_profile_smiles(value, is_canonical=True)
-
-
-def normalize_profile_isomeric_smiles(value: object) -> str | None:
-    """Normalize one isomeric-SMILES profile field."""
-    return normalize_profile_smiles(value, is_canonical=False)
+    cleaned = normalize_string(value)
+    return cleaned.upper() if cleaned is not None else None

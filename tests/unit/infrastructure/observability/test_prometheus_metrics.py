@@ -6,6 +6,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from bioetl.infrastructure.observability.prometheus_metric_label_policies import (
+    normalize_source_file_label,
+)
 from bioetl.infrastructure.observability.prometheus_metrics import (
     COUNTERS,
     GAUGES,
@@ -85,6 +88,40 @@ class TestPrometheusMetrics:
                 value=50,
                 labels={"label": "value"},
             )
+
+    def test_filter_source_metrics_normalize_source_file_label(self, prometheus_metrics):
+        """Filter-source metrics must not emit raw path labels."""
+        with patch.dict(
+            COUNTERS,
+            {"bioetl_filter_ids_loaded_total": MagicMock()},
+        ):
+            prometheus_metrics.increment_counter(
+                name="bioetl_filter_ids_loaded_total",
+                value=7,
+                labels={
+                    "pipeline": "chembl_activity",
+                    "source_file": r"C:\tmp\filters\Activity IDs.csv",
+                },
+            )
+
+            COUNTERS["bioetl_filter_ids_loaded_total"].labels.assert_called_once_with(
+                pipeline="chembl_activity",
+                source_file="activity_ids.csv",
+            )
+            COUNTERS["bioetl_filter_ids_loaded_total"].labels().inc.assert_called_once_with(7)
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ("/var/tmp/filters/activity_ids.csv", "activity_ids.csv"),
+            (r"C:\tmp\filters\Activity IDs.csv", "activity_ids.csv"),
+            ("", "unknown"),
+            ("////", "unknown"),
+        ],
+    )
+    def test_normalize_source_file_label(self, raw_value: str, expected: str):
+        """Source file labels should collapse to bounded basename-only values."""
+        assert normalize_source_file_label(raw_value) == expected
 
 
 @pytest.mark.unit

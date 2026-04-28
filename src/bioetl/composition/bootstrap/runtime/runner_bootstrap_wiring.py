@@ -19,6 +19,9 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
+    from bioetl.composition.bootstrap.composite_infrastructure_context import (
+        CompositeInfrastructureContext,
+    )
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
     )
@@ -33,7 +36,8 @@ def bootstrap_composite_runner_via_wiring(
     run_id: str | None,
     bootstrap_runtime_basics_fn: Callable[
         ...,
-        tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort],
+        tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort]
+        | CompositeInfrastructureContext,
     ],
     build_runner_factories_fn: Callable[
         ...,

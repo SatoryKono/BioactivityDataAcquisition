@@ -643,6 +643,8 @@ def _strictness_category_match(
     normalizer_name: str,
     normalized_notes: str,
 ) -> str | None:
+    if "ontology_version" in normalizer_name or "ontology version" in normalized_notes:
+        return "normalization_only"
     if "operator" in normalizer_name or "operator" in normalized_notes:
         return "strict_operator"
     if "enum" in normalized_notes or "allowed values" in normalized_notes:
@@ -659,6 +661,43 @@ def _strictness_category_match(
     if "cellosaurus" in normalizer_name or "identifier" in normalized_notes:
         return "canonical_identifier"
     return None
+
+
+def _row_policy_metadata(
+    *,
+    provider: str,
+    entity: str,
+    field_name: str,
+    normalization_source: str,
+    normalizer_name: str,
+    notes: str,
+) -> tuple[str, str, str, str]:
+    controlled_vocabulary_source = _controlled_vocabulary_source(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+        normalizer_name=normalizer_name,
+        notes=notes,
+    )
+    strictness = _strictness(
+        field_name=field_name,
+        normalization_source=normalization_source,
+        normalizer_name=normalizer_name,
+        notes=notes,
+    )
+    semantic_category = _semantic_category(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+        strictness=strictness,
+    )
+    policy_scope = _policy_scope(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+        controlled_vocabulary_source=controlled_vocabulary_source,
+    )
+    return controlled_vocabulary_source, strictness, semantic_category, policy_scope
 
 
 def _check_type_for_check(check: Any) -> str | None:
@@ -950,18 +989,15 @@ def _entity_profile_row(
         field_name=field_name,
         notes=profile_rule.notes,
     )
-    controlled_vocabulary_source = _controlled_vocabulary_source(
-        provider=provider,
-        entity=entity,
-        field_name=field_name,
-        normalizer_name=normalizer_name,
-        notes=notes,
-    )
-    strictness = _strictness(
-        field_name=field_name,
-        normalization_source=PROFILE_NORMALIZATION_SOURCE,
-        normalizer_name=normalizer_name,
-        notes=notes,
+    controlled_vocabulary_source, strictness, semantic_category, policy_scope = (
+        _row_policy_metadata(
+            provider=provider,
+            entity=entity,
+            field_name=field_name,
+            normalization_source=PROFILE_NORMALIZATION_SOURCE,
+            normalizer_name=normalizer_name,
+            notes=notes,
+        )
     )
     return {
         "provider": provider,
@@ -974,18 +1010,8 @@ def _entity_profile_row(
         "normalizer": normalizer_name,
         "normalization_summary": notes,
         "controlled_vocabulary_source": controlled_vocabulary_source,
-        "policy_scope": _policy_scope(
-            provider=provider,
-            entity=entity,
-            field_name=field_name,
-            controlled_vocabulary_source=controlled_vocabulary_source,
-        ),
-        "semantic_category": _semantic_category(
-            provider=provider,
-            entity=entity,
-            field_name=field_name,
-            strictness=strictness,
-        ),
+        "policy_scope": policy_scope,
+        "semantic_category": semantic_category,
         "include_in_content_hash": _render_bool(profile_rule.include_in_hash),
         "set_like": _render_bool(profile_rule.set_like),
         "hash_ordering": _hash_ordering(
@@ -1021,18 +1047,15 @@ def _entity_fallback_row(
     summary: str,
 ) -> dict[str, str]:
     """Build one entity matrix row sourced from fallback normalization policy."""
-    controlled_vocabulary_source = _controlled_vocabulary_source(
-        provider=provider,
-        entity=entity,
-        field_name=field_name,
-        normalizer_name=normalizer,
-        notes=summary,
-    )
-    strictness = _strictness(
-        field_name=field_name,
-        normalization_source=source,
-        normalizer_name=normalizer,
-        notes=summary,
+    controlled_vocabulary_source, strictness, semantic_category, policy_scope = (
+        _row_policy_metadata(
+            provider=provider,
+            entity=entity,
+            field_name=field_name,
+            normalization_source=source,
+            normalizer_name=normalizer,
+            notes=summary,
+        )
     )
     return {
         "provider": provider,
@@ -1045,18 +1068,8 @@ def _entity_fallback_row(
         "normalizer": normalizer,
         "normalization_summary": summary,
         "controlled_vocabulary_source": controlled_vocabulary_source,
-        "policy_scope": _policy_scope(
-            provider=provider,
-            entity=entity,
-            field_name=field_name,
-            controlled_vocabulary_source=controlled_vocabulary_source,
-        ),
-        "semantic_category": _semantic_category(
-            provider=provider,
-            entity=entity,
-            field_name=field_name,
-            strictness=strictness,
-        ),
+        "policy_scope": policy_scope,
+        "semantic_category": semantic_category,
         "include_in_content_hash": "",
         "set_like": FALSE_TEXT,
         "hash_ordering": "fallback_policy",

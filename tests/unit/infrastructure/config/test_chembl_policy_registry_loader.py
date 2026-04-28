@@ -20,6 +20,16 @@ class TestChemblPolicyRegistryLoader:
         (vocab_dir / "chembl_controlled.yaml").write_text(
             "\n".join(
                 [
+                    "strict_boolean_families:",
+                    "  bool_like:",
+                    "    invalid_value_mode: coerce_common_boolean_lexemes",
+                    "    fields:",
+                    "      - chembl_publication.is_oa",
+                    "strict_flag_families:",
+                    "  binary_flags:",
+                    "    invalid_value_mode: coerce_common_flag_lexemes",
+                    "    fields:",
+                    "      - chembl_activity.standard_flag",
                     "controlled_vocabularies:",
                     "  units:",
                     "    invalid_value_mode: preserve_unknown_lexeme",
@@ -36,6 +46,11 @@ class TestChemblPolicyRegistryLoader:
                     "  clo:",
                     "    fields:",
                     "      - chembl_cell_line.clo_id",
+                    "    companion_fields:",
+                    "      iri:",
+                    "        - chembl_cell_line.clo_iri",
+                    "      version:",
+                    "        - chembl_cell_line.clo_ontology_version",
                     "    code_label_fields:",
                     "      - chembl_assay.bao_label",
                 ]
@@ -45,11 +60,23 @@ class TestChemblPolicyRegistryLoader:
 
         data = ChemblPolicyRegistryLoader(tmp_path).load()
 
+        assert data.strict_boolean_families[0].family_name == "bool_like"
+        assert data.strict_boolean_families[0].fields == (
+            "chembl_publication.is_oa",
+        )
+        assert data.strict_flag_families[0].family_name == "binary_flags"
+        assert data.strict_flag_families[0].fields == (
+            "chembl_activity.standard_flag",
+        )
         assert data.controlled_vocabularies[0].family_name == "units"
         assert data.controlled_vocabularies[0].fields == ("chembl_activity.units",)
         assert data.ontology_families[0].family_name == "clo"
         assert data.ontology_families[0].code_label_fields == (
             "chembl_assay.bao_label",
+        )
+        assert data.ontology_families[0].iri_fields == ("chembl_cell_line.clo_iri",)
+        assert data.ontology_families[0].version_fields == (
+            "chembl_cell_line.clo_ontology_version",
         )
         assert data.publication_classification_fields == (
             "publication_type_unified",

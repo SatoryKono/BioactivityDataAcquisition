@@ -10,7 +10,7 @@ from bioetl.domain.ports import ClockPort
 __all__ = ["RuntimeClock", "resolve_runtime_clock"]
 
 
-class RuntimeClock(ClockPort):
+class RuntimeClockService(ClockPort):
     """ClockPort implementation used when legacy application constructors omit one."""
 
     def now(self) -> datetime:
@@ -18,6 +18,9 @@ class RuntimeClock(ClockPort):
         return datetime.fromtimestamp(time.time(), UTC)
 
 
+RuntimeClock = RuntimeClockService
+
+
 def resolve_runtime_clock(clock: ClockPort | None) -> ClockPort:
     """Return an explicit runtime clock for application services."""
-    return clock or RuntimeClock()
+    return clock or RuntimeClockService()

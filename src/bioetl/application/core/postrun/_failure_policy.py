@@ -106,16 +106,16 @@ def apply_postrun_failure_policy_or_raise(
 class PostrunStrictValidationMixin:
     """Compatibility mixin for postrun collaborators exposing strict mode check."""
 
-    def _is_strict_validation_enabled(self) -> bool:
+    def _is_strict_validation_enabled(self: _HasPostrunRuntime) -> bool:
         """Compatibility wrapper around shared strict-mode evaluation."""
-        return is_strict_validation_enabled(getattr(self, "_runtime", None))
+        return is_strict_validation_enabled(self._runtime)
 
 
 class PostrunFailureHandlingMixin(PostrunStrictValidationMixin):
     """Shared allowlisted failure handling for postrun collaborators."""
 
     def _handle_allowlisted_failure(
-        self,
+        self: _HasPostrunFailureHandling,
         error: BaseException,
         *,
         log_fields: dict[str, object] | None = None,
@@ -123,10 +123,10 @@ class PostrunFailureHandlingMixin(PostrunStrictValidationMixin):
     ) -> None:
         """Apply postrun warning/strict policy using instance-held collaborators."""
         apply_postrun_failure_policy_or_raise(
-            logger=getattr(self, "_logger"),
-            runtime=getattr(self, "_runtime", None),
+            logger=self._logger,
+            runtime=self._runtime,
             error=error,
-            spec=getattr(self, "_FAILURE_POLICY"),
+            spec=self._FAILURE_POLICY,
             log_fields=log_fields,
             emit_warning_error_log=emit_warning_error_log,
         )

@@ -17,6 +17,7 @@ from bioetl.domain.normalization.profiles._chembl_policy_registry_data import (
     ChemblControlledVocabularyFamily,
     ChemblOntologyPolicyFamily,
     ChemblPolicyRegistryData,
+    ChemblStrictScalarFamily,
 )
 
 __all__ = [
@@ -28,7 +29,10 @@ __all__ = [
     "ChemblOntologyPolicyFamily",
     "ChemblPolicyRegistryData",
     "ChemblPolicySurface",
+    "ChemblStrictScalarFamily",
+    "chembl_boolean_family_fields",
     "chembl_controlled_family_fields",
+    "chembl_flag_family_fields",
     "chembl_ontology_family_fields",
     "chembl_policy_surface",
     "initialize_chembl_policy_registry",
@@ -51,6 +55,8 @@ class ChemblPolicySurface:
 _CONTROLLED_VOCABULARIES: Mapping[str, ChemblControlledVocabularyFamily] = (
     MappingProxyType({})
 )
+_STRICT_BOOLEAN_FAMILIES: Mapping[str, ChemblStrictScalarFamily] = MappingProxyType({})
+_STRICT_FLAG_FAMILIES: Mapping[str, ChemblStrictScalarFamily] = MappingProxyType({})
 _ONTOLOGY_FAMILIES: Mapping[str, ChemblOntologyPolicyFamily] = MappingProxyType({})
 _POLICY_SURFACES: Mapping[tuple[str, str], ChemblPolicySurface] = MappingProxyType({})
 
@@ -69,10 +75,27 @@ def _build_policy_surfaces(
     data: ChemblPolicyRegistryData,
 ) -> Mapping[tuple[str, str], ChemblPolicySurface]:
     surfaces: dict[tuple[str, str], ChemblPolicySurface] = {}
+    _add_strict_scalar_surfaces(surfaces, data.strict_boolean_families, "strict_boolean")
+    _add_strict_scalar_surfaces(surfaces, data.strict_flag_families, "strict_flag")
     _add_controlled_vocabulary_surfaces(surfaces, data)
     _add_ontology_surfaces(surfaces, data)
     _add_publication_classification_surfaces(surfaces, data)
     return MappingProxyType(surfaces)
+
+
+def _add_strict_scalar_surfaces(
+    surfaces: dict[tuple[str, str], ChemblPolicySurface],
+    families: tuple[ChemblStrictScalarFamily, ...],
+    category: str,
+) -> None:
+    for family in families:
+        for field_ref in family.fields:
+            entity, field_name = _parse_chembl_field_ref(str(field_ref))
+            surfaces[(entity, field_name)] = ChemblPolicySurface(
+                category=category,
+                registry_source=CHEMBL_CONTROLLED_VOCAB_CONFIG,
+                invalid_value_mode=family.invalid_value_mode,
+            )
 
 
 def _add_controlled_vocabulary_surfaces(
@@ -108,6 +131,20 @@ def _add_ontology_surfaces(
                 registry_source=CHEMBL_ONTOLOGY_POLICY_CONFIG,
                 invalid_value_mode="resolve_identifier_backed_label",
             )
+        for field_ref in ontology_family.iri_fields:
+            entity, field_name = _parse_chembl_field_ref(str(field_ref))
+            surfaces[(entity, field_name)] = ChemblPolicySurface(
+                category="ontology_reference_identifier",
+                registry_source=CHEMBL_ONTOLOGY_POLICY_CONFIG,
+                invalid_value_mode="resolve_identifier_backed_iri",
+            )
+        for field_ref in ontology_family.version_fields:
+            entity, field_name = _parse_chembl_field_ref(str(field_ref))
+            surfaces[(entity, field_name)] = ChemblPolicySurface(
+                category="ontology_reference_metadata",
+                registry_source=CHEMBL_ONTOLOGY_POLICY_CONFIG,
+                invalid_value_mode="resolve_identifier_backed_version",
+            )
 
 
 def _add_publication_classification_surfaces(
@@ -125,7 +162,14 @@ def _add_publication_classification_surfaces(
 def initialize_chembl_policy_registry(data: ChemblPolicyRegistryData) -> None:
     """Inject immutable policy data into the domain registry runtime state."""
     global _CONTROLLED_VOCABULARIES, _ONTOLOGY_FAMILIES, _POLICY_SURFACES
+    global _STRICT_BOOLEAN_FAMILIES, _STRICT_FLAG_FAMILIES
 
+    _STRICT_BOOLEAN_FAMILIES = MappingProxyType(
+        {family.family_name: family for family in data.strict_boolean_families}
+    )
+    _STRICT_FLAG_FAMILIES = MappingProxyType(
+        {family.family_name: family for family in data.strict_flag_families}
+    )
     _CONTROLLED_VOCABULARIES = MappingProxyType(
         {family.family_name: family for family in data.controlled_vocabularies}
     )
@@ -152,6 +196,26 @@ def _family_fields(
 def chembl_policy_surface(entity: str, field: str) -> ChemblPolicySurface | None:
     """Return the shared ChEMBL policy surface for one field when defined."""
     return _POLICY_SURFACES.get((entity, field))
+
+
+def chembl_boolean_family_fields(
+    family: str,
+    *,
+    entity: str | None = None,
+) -> frozenset[str]:
+    """Return field names governed by one shared strict-boolean family."""
+    payload = _STRICT_BOOLEAN_FAMILIES[family]
+    return _family_fields(fields=list(payload.fields), entity=entity)
+
+
+def chembl_flag_family_fields(
+    family: str,
+    *,
+    entity: str | None = None,
+) -> frozenset[str]:
+    """Return field names governed by one shared strict-flag family."""
+    payload = _STRICT_FLAG_FAMILIES[family]
+    return _family_fields(fields=list(payload.fields), entity=entity)
 
 
 def chembl_controlled_family_fields(

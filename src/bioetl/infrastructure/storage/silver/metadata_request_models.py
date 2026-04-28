@@ -228,10 +228,10 @@ class _SilverWriteFinalizationPreparationRequest:
     table_name: str
     records: list[BronzeRecord]
     table_path: str
-    quarantined_count: int | None = None
-    validation_errors: tuple[str, ...] | None = None
     started_at: datetime
     start_perf: float
+    quarantined_count: int | None = None
+    validation_errors: tuple[str, ...] | None = None
     primary_keys: list[str] | None = None
     validated_mode: SilverWriteMode | None = None
 
@@ -248,10 +248,10 @@ class _SilverWriteResultFinalizationRequest:
     bronze_refs: list[BronzeWriteResult] | None
     partition_cols: list[str] | None
     source_batch_id: BatchID | None
-    quarantined_count: int | None = None
-    validation_errors: tuple[str, ...] | None = None
     started_at: datetime
     start_perf: float
+    quarantined_count: int | None = None
+    validation_errors: tuple[str, ...] | None = None
 
 
 _FINALIZATION_PREPARATION_FIELDS = (

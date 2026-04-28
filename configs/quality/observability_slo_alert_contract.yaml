@@ -152,6 +152,11 @@ slo_contracts:
       - bioetl_health_check_degraded_total
       - bioetl_health_check_failures_total
       - bioetl_circuit_breaker_state
+      - bioetl_adapter_request_duration_seconds
+      - bioetl_http_request_errors_total
+      - bioetl_http_request_duration_seconds
+      - bioetl_rate_limiter_wait_seconds
+      - bioetl_rate_limiter_tokens_available
     alerts:
       - name: BioETLProviderHealthCheckFailuresDetected
         severity: warning
@@ -162,6 +167,22 @@ slo_contracts:
         for: 5m
         runbook: docs/05-operations/runbooks/incident-response.md
       - name: BioETLCircuitBreakerStuckOpen
+        severity: warning
+        for: 10m
+        runbook: docs/05-operations/runbooks/incident-response.md
+      - name: BioETLProviderAdapterLatencyHigh
+        severity: warning
+        for: 15m
+        runbook: docs/05-operations/runbooks/incident-response.md
+      - name: BioETLProviderHttpErrorRateHigh
+        severity: warning
+        for: 10m
+        runbook: docs/05-operations/runbooks/incident-response.md
+      - name: BioETLProviderRateLimiterWaitHigh
+        severity: warning
+        for: 10m
+        runbook: docs/05-operations/runbooks/incident-response.md
+      - name: BioETLProviderRateLimiterTokensDepleted
         severity: warning
         for: 10m
         runbook: docs/05-operations/runbooks/incident-response.md

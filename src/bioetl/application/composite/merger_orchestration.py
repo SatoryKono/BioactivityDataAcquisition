@@ -68,8 +68,11 @@ class MergeExecutionContext:
 class MergeWorkflowContext(MergePostJoinWorkflowContext, Protocol):
     """Subset of MergeService API required by orchestration helpers."""
 
-    _clock: ClockPort | None
-    _join_planner: JoinPlannerService
+    @property
+    def _clock(self) -> ClockPort | None: ...
+
+    @property
+    def _join_planner(self) -> JoinPlannerService: ...
 
     async def _prepare_seed_dataframe(
         self,

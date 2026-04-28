@@ -3,17 +3,6 @@
 
 from __future__ import annotations
 
-__all__ = [
-    "CircuitBreakerYamlConfig",
-    "ConditionalValidationConfig",
-    "CrossFieldValidationConfig",
-    "CsvExportConfig",
-    "DQReportYamlConfig",
-    "DQYamlConfig",
-    "FieldValidationConfig",
-]
-
-
 from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
@@ -24,10 +13,28 @@ from bioetl.domain.config import (
 from bioetl.domain.config import (
     CrossFieldValidation as DomainCrossFieldValidation,
 )
-from bioetl.domain.config import DQConfig as DomainDQConfig
-from bioetl.domain.config import DQReportConfig as DomainDQReportConfig
-from bioetl.domain.config import FieldValidation as DomainFieldValidation
+from bioetl.domain.config import (
+    DQConfig as DomainDQConfig,
+)
+from bioetl.domain.config import (
+    DQReportConfig as DomainDQReportConfig,
+)
+from bioetl.domain.config import (
+    FieldValidation as DomainFieldValidation,
+)
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
+
+__all__ = [
+    "CircuitBreakerYamlConfig",
+    "ConditionalValidationConfig",
+    "CrossFieldValidationConfig",
+    "CsvExportConfig",
+    "DQReportYamlConfig",
+    "DQYamlConfig",
+    "FieldValidationConfig",
+]
+
+type DQAllowedScalar = str | int | float | bool
 
 
 class FieldValidationConfig(BaseModel):
@@ -55,7 +62,9 @@ class FieldValidationConfig(BaseModel):
     min: float | None = Field(default=None, description="Minimum value (range)")
     max: float | None = Field(default=None, description="Maximum value (range)")
     pattern: str | None = Field(default=None, description="Regex pattern")
-    allowed: list[str] = Field(default_factory=list, description="Allowed values")
+    allowed: list[DQAllowedScalar] = Field(
+        default_factory=list, description="Allowed values"
+    )
     max_length: int | None = Field(default=None, description="Maximum string length")
     validator: str | None = Field(default=None, description="Custom validator name")
     error_message: str | None = Field(default=None, description="Custom error message")
