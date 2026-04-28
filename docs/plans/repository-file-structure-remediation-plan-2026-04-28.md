@@ -1,7 +1,7 @@
 # Repository File Structure Remediation Plan
 
 Дата: 2026-04-28
-Статус: Draft / execution-ready plan
+Статус: Active / execution-tracking plan
 Основание: архитектурно-строгий аудит файловой структуры BioETL от 28/04/2026 SGT | DA
 Владелец: Engineering / Architecture
 
@@ -30,8 +30,14 @@ replay, traceability, fixture-governance и control-plane guarantees.
 Аудит от 2026-04-28 зафиксировал drift между опубликованной governance-моделью
 и root-tree, видимым в GitHub. Локальная рабочая копия может отличаться от
 этого снимка. Поэтому каждое действие ниже начинается с повторной верификации
-через `git ls-files`, root audit и usage-check. Нельзя выполнять `git rm` только
-по историческому плану или по визуальному root-листингу.
+через `git ls-files`, root audit и usage-check. Нельзя выполнять `git rm`
+только по историческому плану или по визуальному root-листингу.
+
+Повторная локальная проверка на 2026-04-28 уже показывает более чистое живое
+состояние: `scripts/engineering/repo/audit_root_cleanliness.py
+--strict-untracked` проходит, большинство исторических root candidates из
+аудита отсутствуют в tracked root, а оставшиеся review-required и blocked lanes
+зафиксированы в `configs/quality/root_hygiene_review_registry.yaml`.
 
 Предыдущий план
 `docs/plans/repository-file-structure-cleanup-plan-2026-04-20.md` остается
@@ -110,6 +116,8 @@ uv run python scripts/engineering/diagnostics/audit_structure.py --path .
 - root audit output в PR description;
 - cleanup dry-run output в PR description;
 - список расхождений между audit snapshot и live tracked tree.
+- updated `configs/quality/root_hygiene_review_registry.yaml` with current
+  lane status for review-required and blocked cleanup surfaces.
 
 Критерий выхода:
 
@@ -126,6 +134,8 @@ uv run python scripts/engineering/diagnostics/audit_structure.py --path .
 
 1. Считать audit snapshot 2026-04-28 текущим trigger evidence для remediation,
    а cleanup-plan 2026-04-20/2026-04-21 только historical baseline.
+1. Вести review-required root candidates в
+   `configs/quality/root_hygiene_review_registry.yaml`, а не только в prose.
 1. Обновить plan index и `configs/quality/repo_structure_catalog.yaml`, чтобы
    remediation plan был cataloged supporting context.
 1. Перед запуском root audit в PR убедиться, что новые cataloged plan files
@@ -148,6 +158,8 @@ comm -23 \
 
 - root allowlist отражает только intentionally allowed root files;
 - новые плановые документы cataloged;
+- review-required root lanes имеют machine-readable owner/status/evidence
+  registry;
 - старый cleanup-plan помечен как historical baseline для live-state claims.
 
 ## Phase 2. SAFE Cleanup Wave

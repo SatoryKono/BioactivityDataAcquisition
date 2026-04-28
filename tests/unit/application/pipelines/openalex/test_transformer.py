@@ -137,6 +137,36 @@ class TestOpenAlexPublicationTransformer:
         assert result["_lookup_method"] == "title_only"
 
     @pytest.mark.asyncio
+    async def test_transform_uses_awards_for_grants_field(
+        self,
+        transformer: OpenAlexPublicationTransformer,
+        pipeline_context: PipelineContext,
+        sample_openalex_record: dict[str, Any],
+    ) -> None:
+        """Should populate grants from current OpenAlex awards field."""
+        sample_openalex_record["awards"] = [
+            {
+                "id": "https://openalex.org/G5453342221",
+                "display_name": "Fusion roadmap implementation",
+                "funder_award_id": "633053",
+                "funder_id": "https://openalex.org/F4320337670",
+                "funder_display_name": "H2020 Euratom",
+            }
+        ]
+
+        result = await transformer.transform(
+            pipeline_context,
+            sample_openalex_record,
+            0,
+        )
+
+        assert result is not None
+        grants = json.loads(result["grants"])
+        assert grants[0]["award_id"] == "633053"
+        assert grants[0]["award_openalex_id"] == "G5453342221"
+        assert grants[0]["funder"] == "F4320337670"
+
+    @pytest.mark.asyncio
     async def test_transform_record_without_id_returns_none(
         self,
         transformer: OpenAlexPublicationTransformer,

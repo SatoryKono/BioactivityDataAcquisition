@@ -18,6 +18,7 @@ from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _PreparedSilverWritePayload,
+    _SilverWritePreparationRequest,
 )
 
 __all__ = [
@@ -57,19 +58,11 @@ class _SilverWriteExecutionContext:
 
 
 @dataclass(frozen=True, slots=True)
-class _SilverWriteInvocation:
+class _SilverWriteInvocation(_SilverWritePreparationRequest):
     """Immutable write request shared across tracing and pipeline stages."""
 
-    table_name: str
-    records: list[BronzeRecord]
-    primary_keys: list[str]
-    schema: pa.Schema
-    mode: str
-    partition_cols: list[str] | None
     on_schema_mismatch: Literal["error", "evolve", "ignore"]
-    column_order: list[str] | None
     bronze_refs: list[BronzeWriteResult] | None
-    key_nullability_rules: list[KeyNullabilityRule] | None
     run_id: RunID | None
     run_type: RunType | None
     source_batch_id: BatchID | None

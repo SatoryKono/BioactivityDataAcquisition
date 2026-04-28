@@ -82,6 +82,14 @@ def bootstrap_control_plane_lifecycle_store() -> FileControlPlaneArtifactLifecyc
     multiple=True,
     help="Input snapshot ID to retain regardless of age.",
 )
+@click.option(
+    "--allow-profile-floor-violation",
+    is_flag=True,
+    help=(
+        "Allow deletion of stale artifacts required by replay_ready or "
+        "forensic_grade evidence floors."
+    ),
+)
 def control_plane_lifecycle_command(
     retention_days: int,
     apply_mode: bool,
@@ -91,6 +99,7 @@ def control_plane_lifecycle_command(
     protected_effective_config_artifact_id: tuple[str, ...],
     protected_lineage_fragment_id: tuple[str, ...],
     protected_snapshot_id: tuple[str, ...],
+    allow_profile_floor_violation: bool,
 ) -> None:
     """Plan or apply control-plane artifact lifecycle cleanup."""
     store = bootstrap_control_plane_lifecycle_store()
@@ -105,6 +114,7 @@ def control_plane_lifecycle_command(
         ),
         protected_lineage_fragment_ids=frozenset(protected_lineage_fragment_id),
         protected_input_snapshot_ids=frozenset(protected_snapshot_id),
+        allow_profile_floor_violation=allow_profile_floor_violation,
     )
     plan = store.plan(policy, dry_run=dry_run)
     result = store.apply(plan)
@@ -123,9 +133,14 @@ def control_plane_lifecycle_command(
     )
     for artifact in plan.artifacts:
         marker = "DELETE" if artifact.delete_selected else "RETAIN"
+        protected_by = (
+            f" protected_by={','.join(artifact.protected_by)}"
+            if artifact.protected_by
+            else ""
+        )
         click.echo(
             f"{marker} {artifact.surface.value} {artifact.artifact_id} "
-            f"{artifact.reason} {artifact.path}"
+            f"{artifact.reason} {artifact.path}{protected_by}"
         )
 
 

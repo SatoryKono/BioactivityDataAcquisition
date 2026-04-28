@@ -202,6 +202,8 @@ def _optional_text(value: object) -> str | None:
 
 
 def _resolve_lifecycle_reason(*, stale: bool, protected_by: tuple[str, ...]) -> str:
+    if any(reason.startswith("evidence_floor:") for reason in protected_by):
+        return "reproducibility_evidence_floor"
     if protected_by:
         return "protected_reference"
     if stale:

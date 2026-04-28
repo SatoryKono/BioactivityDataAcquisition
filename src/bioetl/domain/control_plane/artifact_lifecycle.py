@@ -47,6 +47,7 @@ class ControlPlaneArtifactLifecyclePolicy:
         default_factory=frozenset
     )
     protected_lineage_fragment_ids: frozenset[str] = field(default_factory=frozenset)
+    allow_profile_floor_violation: bool = False
 
     def __post_init__(self) -> None:
         """Reject retention windows that would make every artifact eligible."""

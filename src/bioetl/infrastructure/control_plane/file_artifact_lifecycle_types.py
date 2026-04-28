@@ -16,3 +16,8 @@ class _ProtectedRefs:
     input_snapshot_ids: frozenset[str]
     effective_config_artifact_ids: frozenset[str]
     lineage_fragment_ids: frozenset[str]
+    evidence_floor_manifest_ids: frozenset[str]
+    evidence_floor_run_ids: frozenset[str]
+    evidence_floor_input_snapshot_ids: frozenset[str]
+    evidence_floor_effective_config_artifact_ids: frozenset[str]
+    evidence_floor_lineage_fragment_ids: frozenset[str]

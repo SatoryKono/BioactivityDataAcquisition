@@ -160,14 +160,25 @@ ______________________________________________________________________
 
 ### Rate Limiting
 
-OpenAlex предоставляет "polite pool" с повышенными лимитами:
+OpenAlex использует API key и credit-based rate limiting. `mailto` больше не
+является основным механизмом доступа и сохраняется в BioETL только как
+дополнительный contact/attribution параметр.
 
-| Режим             | Лимит      | Условие                                |
-| ----------------- | ---------- | -------------------------------------- |
-| Без идентификации | 10 req/sec | Базовый доступ                         |
-| С `mailto`        | 10 req/sec | Указан email в User-Agent и параметрах |
+| Режим             | Лимит BioETL | Условие                                      |
+| ----------------- | ------------ | -------------------------------------------- |
+| С API key         | 10 req/sec   | `BIOETL_OPENALEX_API_KEY` задан              |
+| Legacy/contact ID | 10 req/sec   | `BIOETL_OPENALEX_EMAIL` задан как attribution |
 
-**Важно:** Переменная окружения `BIOETL_OPENALEX_EMAIL` обязательна для production.
+**Важно:** Для production-подобных запусков требуется
+`BIOETL_OPENALEX_API_KEY`. Переменная `BIOETL_OPENALEX_EMAIL` опциональна и не
+заменяет API key.
+
+### Funding Fields
+
+OpenAlex удалил legacy поле `grants` из Work object. BioETL сохраняет
+каноническое выходное поле `grants`, но наполняет его из текущих OpenAlex
+`awards` и `funders`; legacy `grants` используется только как fallback для
+старых кассет/снапшотов.
 
 ### Batch DOI Resolution
 
@@ -256,9 +267,10 @@ doi,title
 
 ### Переменные окружения
 
-| Переменная              | Описание              | Обязательна |
-| ----------------------- | --------------------- | ----------- |
-| `BIOETL_OPENALEX_EMAIL` | Email для polite pool | Да          |
+| Переменная                 | Описание                                   | Обязательна |
+| -------------------------- | ------------------------------------------ | ----------- |
+| `BIOETL_OPENALEX_API_KEY`  | OpenAlex API key                           | Да          |
+| `BIOETL_OPENALEX_EMAIL`    | Contact email для legacy attribution       | Нет         |
 
 ______________________________________________________________________
 

@@ -79,3 +79,28 @@ def test_finalize_lineage_fragment_dedupes_nodes_and_preserves_envelope() -> Non
         nodes=fragment.nodes,
         edges=fragment.edges,
     )
+
+
+def test_finalize_lineage_fragment_orders_nodes_by_stable_identifier() -> None:
+    run_context = _make_run_context()
+    created_at = datetime(2026, 4, 24, 12, 30, tzinfo=UTC)
+    later_node = LineageNodeRef(
+        node_type=LineageNodeType.DATASET,
+        node_id="silver:z",
+        attributes={"layer": "silver"},
+    )
+    earlier_node = LineageNodeRef(
+        node_type=LineageNodeType.DATASET,
+        node_id="silver:a",
+        attributes={"layer": "silver"},
+    )
+
+    fragment = finalize_lineage_fragment(
+        fragment_name="silver",
+        run_context=run_context,
+        nodes=[later_node, earlier_node, later_node],
+        edges=[],
+        created_at=created_at,
+    )
+
+    assert [node.node_id for node in fragment.nodes] == ["silver:a", "silver:z"]

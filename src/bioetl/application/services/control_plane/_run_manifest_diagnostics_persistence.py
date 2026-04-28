@@ -21,6 +21,7 @@ class _PersistenceInputs:
     reproducible_semantic_output_mode: bool
     exact_replay_supported: bool
     strict_replay_execution_context_supported: bool
+    produced_artifact_trace_present: bool
     artifact_lineage_links_complete: bool
     composite_resume_rich_replay_supported: bool
 
@@ -32,6 +33,7 @@ def missing_replay_ready_requirements(
     immutable_input_snapshots_present: bool,
     effective_config_artifact_present: bool,
     reproducible_semantic_output_mode: bool,
+    produced_artifact_trace_present: bool,
 ) -> list[str]:
     """Return replay-ready persistence requirements missing for this run."""
     requirements = (
@@ -43,6 +45,7 @@ def missing_replay_ready_requirements(
         ("immutable_input_snapshots", immutable_input_snapshots_present),
         ("effective_config_artifact", effective_config_artifact_present),
         ("reproducible_semantic_output_mode", reproducible_semantic_output_mode),
+        ("produced_artifact_trace", produced_artifact_trace_present),
     )
     return [name for name, present in requirements if not present]
 
@@ -115,6 +118,7 @@ def build_persistence_profile(
         immutable_input_snapshots_present=inputs.immutable_input_snapshots_present,
         effective_config_artifact_present=inputs.effective_config_artifact_present,
         reproducible_semantic_output_mode=inputs.reproducible_semantic_output_mode,
+        produced_artifact_trace_present=inputs.produced_artifact_trace_present,
     )
     forensic_grade_missing_requirements = _build_forensic_grade_missing_requirements(
         replay_ready_missing_requirements=replay_ready_missing_requirements,
@@ -219,6 +223,7 @@ def _resolve_persistence_inputs(
                 exact_replay_boundary == "snapshot_backed_source_runs_only",
             )
         ),
+        produced_artifact_trace_present=bool(artifact_refs),
         artifact_lineage_links_complete=not artifact_refs
         or (missing_link_count == 0 and bool(lineage_fragment_ids)),
         composite_resume_rich_replay_supported=not composite_execution_context,
@@ -261,6 +266,7 @@ def _build_persistence_surfaces(
         ),
         "immutable_input_snapshots": inputs.immutable_input_snapshots_present,
         "exact_replay_capability": inputs.exact_replay_supported,
+        "produced_artifact_trace": inputs.produced_artifact_trace_present,
         "run_ledger_history": ledger_entries_present,
         "artifact_lineage_links": inputs.artifact_lineage_links_complete,
         "lineage_closure_boundary_support": inputs.lineage_closure_boundary_supported,
@@ -304,6 +310,9 @@ def build_alert_signals(
     reproducible_semantic_output_mode_gap = (
         "reproducible_semantic_output_mode" in replay_ready_missing_requirements
     )
+    produced_artifact_trace_gap = (
+        "produced_artifact_trace" in replay_ready_missing_requirements
+    )
     lineage_closure_boundary_gap = (
         "lineage_closure_boundary_support" in forensic_grade_missing_requirements
     )
@@ -317,6 +326,7 @@ def build_alert_signals(
         "reproducible_semantic_output_mode_gap": (
             reproducible_semantic_output_mode_gap
         ),
+        "produced_artifact_trace_gap": produced_artifact_trace_gap,
         "lineage_closure_boundary_gap": lineage_closure_boundary_gap,
         "composite_resume_reconstructability_gap": (
             composite_resume_reconstructability_gap
@@ -373,6 +383,13 @@ def build_next_steps(alert_signals: dict[str, bool]) -> list[str]:
                 "Treat this pipeline family as outside the current operator-grade "
                 "lineage closure boundary; do not claim forensic-grade trace/debug "
                 "support for it."
+            ),
+        ),
+        (
+            "produced_artifact_trace_gap",
+            (
+                "Resolve concrete produced artifacts from the run ledger before "
+                "claiming replay-ready reproducibility."
             ),
         ),
         (

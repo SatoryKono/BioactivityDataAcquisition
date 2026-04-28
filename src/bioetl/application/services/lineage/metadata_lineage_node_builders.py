@@ -83,11 +83,11 @@ def build_semantic_fragment_id(
 
 
 def dedupe_nodes(nodes: list[LineageNodeRef]) -> tuple[LineageNodeRef, ...]:
-    """Deduplicate nodes by canonical node identifier while preserving order."""
+    """Deduplicate nodes by canonical node identifier in stable content order."""
     unique: dict[str, LineageNodeRef] = {}
     for node in nodes:
         unique.setdefault(node.node_id, node)
-    return tuple(unique.values())
+    return tuple(unique[node_id] for node_id in sorted(unique))
 
 
 def run_node(run_context: RunContext) -> LineageNodeRef:
@@ -333,11 +333,11 @@ def bronze_batch_nodes_for_silver(
             ),
         )
     if input_data.bronze_refs is None:
-        return list(nodes.values())
+        return [nodes[node_id] for node_id in sorted(nodes)]
     bronze_refs = cast("list[BronzeWriteResult]", input_data.bronze_refs)
     for ref in bronze_refs:
         nodes[str(ref.batch_id)] = _bronze_batch_node_from_result(ref)
-    return list(nodes.values())
+    return [nodes[node_id] for node_id in sorted(nodes)]
 
 
 def silver_dataset_node(
@@ -388,7 +388,10 @@ def silver_source_nodes(input_data: GoldMetadataInput) -> list[LineageNodeRef]:
             version=ref.delta_version,
             path=ref.table_path,
         ).to_node_ref()
-        for ref in input_data.silver_refs
+        for ref in sorted(
+            input_data.silver_refs,
+            key=lambda item: (item.table_name, item.delta_version, item.table_path),
+        )
     ]
 
 

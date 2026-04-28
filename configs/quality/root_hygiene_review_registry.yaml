@@ -1,0 +1,159 @@
+version: 1.0.0
+status: active
+owner: Engineering / Architecture
+last_verified: "2026-04-28"
+
+current_live_root_baseline:
+  tracked_root_audit_status: pass
+  strict_untracked_root_audit_status: pass
+  verification_command: >-
+    .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py
+    --strict-untracked
+  note: >-
+    The current local repository root satisfies the published allowlist and
+    approved-root policy. The 2026-04-28 audit snapshot remains valid as
+    historical trigger evidence, but most previously cited root candidates are
+    absent from the live tracked root baseline.
+
+review_lanes:
+  - lane_id: root_env_security
+    classification: security_review_required
+    scope: tracked root env-like files
+    verification:
+      - git ls-files .env.local
+      - git log -- .env.local
+      - rg -n "^\\.env\\.local$|\\.env\\.local" .gitignore .dockerignore docs scripts .github
+    candidates:
+      - path: .env.local
+        current_live_state: absent_from_root_baseline
+        canonical_path: .env.example
+        action_if_reintroduced: security_review_then_untrack_or_replace_with_example
+
+  - lane_id: root_helper_duplicates
+    classification: review_required
+    scope: duplicate root helpers with canonical owners under scripts/engineering/dev
+    verification:
+      - git ls-files FixHypothesisDb.ps1 WSL_COMMANDS.sh test-driver-via-docker.sh warp-setup.sh
+      - cmp -s <root-copy> <canonical-path>
+      - rg -n "FixHypothesisDb\\.ps1|WSL_COMMANDS\\.sh|test-driver-via-docker\\.sh|warp-setup\\.sh" .github docs scripts tests configs README.md Makefile pyproject.toml
+    candidates:
+      - path: FixHypothesisDb.ps1
+        current_live_state: absent_from_root_baseline
+        canonical_path: scripts/engineering/dev/powershell/FixHypothesisDb.ps1
+        action_if_reintroduced: remove_root_copy_after_cmp_or_merge_into_canonical
+      - path: WSL_COMMANDS.sh
+        current_live_state: absent_from_root_baseline
+        canonical_path: scripts/engineering/dev/bash/WSL_COMMANDS.sh
+        action_if_reintroduced: remove_root_copy_after_cmp_or_merge_into_canonical
+      - path: test-driver-via-docker.sh
+        current_live_state: absent_from_root_baseline
+        canonical_path: scripts/engineering/dev/bash/test-driver-via-docker.sh
+        action_if_reintroduced: remove_root_copy_after_cmp_or_merge_into_canonical
+      - path: warp-setup.sh
+        current_live_state: absent_from_root_baseline
+        canonical_path: scripts/engineering/dev/bash/warp-setup.sh
+        action_if_reintroduced: remove_root_copy_after_cmp_or_merge_into_canonical
+
+  - lane_id: root_tooling_transitions
+    classification: owner_decision_required
+    scope: AI/editor/tooling root surfaces with transitional or owned status
+    verification:
+      - git ls-files .claude .codex_tmp .vibe
+      - rg -n "\\.claude/|\\.codex_tmp|\\.vibe" .github docs scripts tests configs README.md pyproject.toml
+      - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
+    candidates:
+      - path: .claude
+        current_live_state: absent_from_root_baseline
+        canonical_path: ai/claude
+        action_if_reintroduced: migrate_to_ai_claude_then_remove_root_surface
+      - path: .codex_tmp
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: decide_owner_or_remove_from_tracked_root
+      - path: .vibe
+        current_live_state: present_approved_root_surface
+        canonical_path: .vibe
+        action_if_reintroduced: keep_only_with_documented_owner_and_transition_note
+
+  - lane_id: root_ad_hoc_docs_and_diagnostics
+    classification: review_required
+    scope: non-canonical root notes, diagnostics, and ad-hoc tests
+    verification:
+      - git ls-files AGENT.md QUICK_START.md query_test_docs_memory.js seed_test_docs_memory.js test_neo4j_memory.py tinyproxy.conf Dockerfile entrypoint.sh requirements.txt
+      - rg -n "AGENT\\.md|QUICK_START\\.md|query_test_docs_memory|seed_test_docs_memory|test_neo4j_memory|tinyproxy\\.conf|Dockerfile|entrypoint\\.sh|requirements\\.txt" .github docs scripts tests configs README.md Makefile pyproject.toml package.json
+    candidates:
+      - path: AGENT.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: AGENTS.md
+        action_if_reintroduced: move_to_canonical_docs_or_remove
+      - path: QUICK_START.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/03-guides
+        action_if_reintroduced: move_to_docs_or_remove
+      - path: query_test_docs_memory.js
+        current_live_state: absent_from_root_baseline
+        canonical_path: tests
+        action_if_reintroduced: move_to_tests_or_remove
+      - path: seed_test_docs_memory.js
+        current_live_state: absent_from_root_baseline
+        canonical_path: tests
+        action_if_reintroduced: move_to_tests_or_remove
+      - path: test_neo4j_memory.py
+        current_live_state: absent_from_root_baseline
+        canonical_path: tests
+        action_if_reintroduced: move_to_tests_or_remove
+      - path: tinyproxy.conf
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/05-operations
+        action_if_reintroduced: move_to_ops_docs_or_remove
+      - path: Dockerfile
+        current_live_state: absent_from_root_baseline
+        canonical_path: Dockerfile.bioetl
+        action_if_reintroduced: move_to_named_runtime_surface_or_remove
+      - path: entrypoint.sh
+        current_live_state: absent_from_root_baseline
+        canonical_path: scripts/engineering/dev/bash
+        action_if_reintroduced: move_to_canonical_script_surface_or_remove
+      - path: requirements.txt
+        current_live_state: absent_from_root_baseline
+        canonical_path: pyproject.toml
+        action_if_reintroduced: justify_runtime_need_or_remove
+
+  - lane_id: retention_sensitive_boundaries
+    classification: blocked_cleanup_zone
+    scope: runtime, fixture, archive, and curated-report surfaces
+    verification:
+      - git ls-files data docs/99-archive docs/reports reports tests/fixtures tests/fixtures/vcr
+      - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
+      - docs/05-operations/runbooks/retention-sensitive-cleanup.md
+    candidates:
+      - path: data
+        current_live_state: present_blocked_cleanup_zone
+        canonical_path: null
+        cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+        action_if_reintroduced: cleanup_only_via_retention_driven_procedure
+      - path: docs/99-archive
+        current_live_state: present_blocked_cleanup_zone
+        canonical_path: null
+        cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+        action_if_reintroduced: cleanup_only_via_retention_driven_procedure
+      - path: docs/reports
+        current_live_state: present_blocked_cleanup_zone
+        canonical_path: null
+        cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+        action_if_reintroduced: cleanup_only_via_retention_driven_procedure
+      - path: reports
+        current_live_state: present_blocked_cleanup_zone
+        canonical_path: null
+        cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+        action_if_reintroduced: cleanup_only_via_retention_driven_procedure
+      - path: tests/fixtures
+        current_live_state: present_blocked_cleanup_zone
+        canonical_path: null
+        cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+        action_if_reintroduced: cleanup_only_via_retention_driven_procedure
+      - path: tests/fixtures/vcr
+        current_live_state: present_blocked_cleanup_zone
+        canonical_path: null
+        cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+        action_if_reintroduced: cleanup_only_via_retention_driven_procedure

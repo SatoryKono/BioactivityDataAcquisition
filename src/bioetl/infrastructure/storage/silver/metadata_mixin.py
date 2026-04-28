@@ -185,17 +185,18 @@ class SilverWriterMetadataMixin:
             event_name="silver_merged_metadata_skipped",
         ):
             return
+        request_kwargs = dict(
+            table_path=table_path,
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+        )
+        request_kwargs["completed_at"] = completed_at
+        request_kwargs["run_id"] = run_id
+        request_kwargs["sources_used"] = sources_used
         await _execute_silver_metadata_write(
             self,
-            request=_build_silver_merged_metadata_write_request(
-                table_path=table_path,
-                table_name=table_name,
-                records=records,
-                primary_keys=primary_keys,
-                completed_at=completed_at,
-                run_id=run_id,
-                sources_used=sources_used,
-            ),
+            request=_build_silver_merged_metadata_write_request(**request_kwargs),
             prepare=_prepare_silver_merged_metadata_write,
         )
 

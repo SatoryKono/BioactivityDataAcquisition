@@ -41,6 +41,7 @@ _INDEX_DIR_NAMES = {
     "_by_run_id",
     "_occurrences",
 }
+_EVIDENCE_FLOOR_PROFILES = frozenset({"replay_ready", "forensic_grade"})
 
 
 @dataclass(slots=True)
@@ -52,6 +53,11 @@ class _ProtectedRefAccumulator:
     input_snapshot_ids: set[str]
     effective_config_artifact_ids: set[str]
     lineage_fragment_ids: set[str]
+    evidence_floor_manifest_ids: set[str]
+    evidence_floor_run_ids: set[str]
+    evidence_floor_input_snapshot_ids: set[str]
+    evidence_floor_effective_config_artifact_ids: set[str]
+    evidence_floor_lineage_fragment_ids: set[str]
 
     @classmethod
     def from_policy(
@@ -66,6 +72,11 @@ class _ProtectedRefAccumulator:
                 policy.protected_effective_config_artifact_ids
             ),
             lineage_fragment_ids=set(policy.protected_lineage_fragment_ids),
+            evidence_floor_manifest_ids=set(),
+            evidence_floor_run_ids=set(),
+            evidence_floor_input_snapshot_ids=set(),
+            evidence_floor_effective_config_artifact_ids=set(),
+            evidence_floor_lineage_fragment_ids=set(),
         )
 
     def freeze(self) -> _ProtectedRefs:
@@ -75,6 +86,17 @@ class _ProtectedRefAccumulator:
             input_snapshot_ids=frozenset(self.input_snapshot_ids),
             effective_config_artifact_ids=frozenset(self.effective_config_artifact_ids),
             lineage_fragment_ids=frozenset(self.lineage_fragment_ids),
+            evidence_floor_manifest_ids=frozenset(self.evidence_floor_manifest_ids),
+            evidence_floor_run_ids=frozenset(self.evidence_floor_run_ids),
+            evidence_floor_input_snapshot_ids=frozenset(
+                self.evidence_floor_input_snapshot_ids
+            ),
+            evidence_floor_effective_config_artifact_ids=frozenset(
+                self.evidence_floor_effective_config_artifact_ids
+            ),
+            evidence_floor_lineage_fragment_ids=frozenset(
+                self.evidence_floor_lineage_fragment_ids
+            ),
         )
 
 
@@ -86,7 +108,12 @@ def _resolve_protected_refs(
 ) -> _ProtectedRefs:
     """Resolve explicit and live-reference protections before planning."""
     refs = _ProtectedRefAccumulator.from_policy(policy)
-    _collect_manifest_protections(base_path=base_path, cutoff=cutoff, refs=refs)
+    _collect_manifest_protections(
+        base_path=base_path,
+        cutoff=cutoff,
+        refs=refs,
+        allow_profile_floor_violation=policy.allow_profile_floor_violation,
+    )
     _collect_checkpoint_protections(base_path=base_path, cutoff=cutoff, refs=refs)
     _collect_lineage_protections(base_path=base_path, refs=refs)
     return refs.freeze()
@@ -97,6 +124,7 @@ def _collect_manifest_protections(
     base_path: Path,
     cutoff: datetime,
     refs: _ProtectedRefAccumulator,
+    allow_profile_floor_violation: bool,
 ) -> None:
     for manifest_path in _iter_surface_files(
         base_path, ControlPlaneArtifactSurface.RUN_MANIFEST
@@ -104,9 +132,25 @@ def _collect_manifest_protections(
         if manifest_path.parent.name in _INDEX_DIR_NAMES:
             continue
         payload = _read_json_object_or_empty(manifest_path)
-        if not payload or _is_payload_stale(manifest_path, payload, cutoff):
+        if not payload:
             continue
-        _record_manifest_protections(path=manifest_path, payload=payload, refs=refs)
+        is_stale = _is_payload_stale(manifest_path, payload, cutoff)
+        if not is_stale:
+            _record_manifest_protections(
+                path=manifest_path,
+                payload=payload,
+                refs=refs,
+                evidence_floor=False,
+            )
+            continue
+        if allow_profile_floor_violation or not _requires_evidence_floor(payload):
+            continue
+        _record_manifest_protections(
+            path=manifest_path,
+            payload=payload,
+            refs=refs,
+            evidence_floor=True,
+        )
 
 
 def _record_manifest_protections(
@@ -114,18 +158,44 @@ def _record_manifest_protections(
     path: Path,
     payload: dict[str, object],
     refs: _ProtectedRefAccumulator,
+    evidence_floor: bool,
 ) -> None:
-    refs.manifest_ids.add(str(payload.get("manifest_id") or path.stem))
+    manifest_id = str(payload.get("manifest_id") or path.stem)
+    refs.manifest_ids.add(manifest_id)
+    if evidence_floor:
+        refs.evidence_floor_manifest_ids.add(manifest_id)
     run_id = _optional_text(payload.get("run_id"))
     if run_id is not None:
         refs.run_ids.add(run_id)
+        if evidence_floor:
+            refs.evidence_floor_run_ids.add(run_id)
     replay_manifest_id = _optional_text(payload.get("replay_of_manifest_id"))
     if replay_manifest_id is not None:
         refs.manifest_ids.add(replay_manifest_id)
     artifact_id = _effective_config_artifact_id(payload)
     if artifact_id is not None:
         refs.effective_config_artifact_ids.add(artifact_id)
-    refs.input_snapshot_ids.update(_input_snapshot_ids(payload))
+        if evidence_floor:
+            refs.evidence_floor_effective_config_artifact_ids.add(artifact_id)
+    snapshot_ids = _input_snapshot_ids(payload)
+    refs.input_snapshot_ids.update(snapshot_ids)
+    if evidence_floor:
+        refs.evidence_floor_input_snapshot_ids.update(snapshot_ids)
+
+
+def _requires_evidence_floor(payload: dict[str, object]) -> bool:
+    """Return whether one stale manifest declares a replay/forensic floor."""
+    profile = _required_persistence_profile(payload)
+    return profile in _EVIDENCE_FLOOR_PROFILES
+
+
+def _required_persistence_profile(payload: dict[str, object]) -> str:
+    launch_context = payload.get("launch_context")
+    if isinstance(launch_context, dict):
+        profile = _optional_text(launch_context.get("required_persistence_profile"))
+        if profile is not None:
+            return profile
+    return _optional_text(payload.get("required_persistence_profile")) or ""
 
 
 def _collect_checkpoint_protections(
@@ -166,6 +236,8 @@ def _collect_lineage_protections(
 ) -> None:
     manifest_ids = frozenset(refs.manifest_ids)
     run_ids = frozenset(refs.run_ids)
+    evidence_floor_manifest_ids = frozenset(refs.evidence_floor_manifest_ids)
+    evidence_floor_run_ids = frozenset(refs.evidence_floor_run_ids)
     for fragment_path in _lineage_fragment_files(base_path):
         payload = _read_json_object_or_empty(fragment_path)
         if not payload:
@@ -176,6 +248,14 @@ def _collect_lineage_protections(
             run_ids=run_ids,
         ):
             refs.lineage_fragment_ids.update(_lineage_fragment_id_candidates(payload))
+        if _manifest_or_run_is_protected(
+            payload,
+            manifest_ids=evidence_floor_manifest_ids,
+            run_ids=evidence_floor_run_ids,
+        ):
+            refs.evidence_floor_lineage_fragment_ids.update(
+                _lineage_fragment_id_candidates(payload)
+            )
 
 
 def _iter_artifact_refs(

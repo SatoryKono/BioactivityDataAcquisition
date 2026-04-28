@@ -48,8 +48,8 @@ def build_silver_lineage(
 ) -> LineageMetadata:
     """Build lineage metadata for Silver writes."""
     return LineageMetadata(
-        source_batch_ids=source_batch_ids,
-        bronze_paths=bronze_paths,
+        source_batch_ids=sorted({value for value in source_batch_ids if value}),
+        bronze_paths=sorted({value for value in bronze_paths if value}),
         transform_version=transform_version,
         transform_steps=transform_steps,
     )
@@ -82,7 +82,7 @@ def build_gold_lineage(
 ) -> LineageMetadata:
     """Build lineage metadata for Gold writes."""
     return LineageMetadata(
-        source_tables=source_tables,
+        source_tables=dict(sorted(source_tables.items())),
         transform_version=transform_version,
         transform_steps=transform_steps,
     )
@@ -110,7 +110,12 @@ def resolve_gold_source_tables(input_data: GoldMetadataInput) -> dict[str, int]:
     """Resolve Gold lineage source tables from Silver refs."""
     if not input_data.silver_refs:
         return {}
-    return {ref.table_name: ref.delta_version for ref in input_data.silver_refs}
+    return dict(
+        sorted(
+            (ref.table_name, ref.delta_version)
+            for ref in input_data.silver_refs
+        )
+    )
 
 
 def build_gold_scd(input_data: GoldMetadataInput) -> SCDMetadata | None:

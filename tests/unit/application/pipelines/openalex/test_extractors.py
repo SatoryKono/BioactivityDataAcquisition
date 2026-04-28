@@ -1188,6 +1188,47 @@ class TestExtractGrants:
         result = extract_grants(grants)
         assert result[0]["funder"] == "F1234567"
 
+    def test_extract_grants_from_current_awards_shape(self) -> None:
+        """Should parse current OpenAlex awards that replaced grants."""
+        awards = [
+            {
+                "id": "https://openalex.org/G5453342221",
+                "display_name": "Fusion roadmap implementation",
+                "funder_award_id": "633053",
+                "funder_id": "https://openalex.org/F4320337670",
+                "funder_display_name": "H2020 Euratom",
+                "doi": "https://doi.org/10.3030/633053",
+            }
+        ]
+
+        result = extract_grants(awards)
+
+        assert result == [
+            {
+                "funder": "F4320337670",
+                "funder_display_name": "H2020 Euratom",
+                "award_id": "633053",
+                "award_openalex_id": "G5453342221",
+                "award_display_name": "Fusion roadmap implementation",
+                "award_doi": "https://doi.org/10.3030/633053",
+            }
+        ]
+
+    def test_extract_grants_from_current_funders_shape(self) -> None:
+        """Should parse current OpenAlex funders when awards are absent."""
+        funders = [
+            {
+                "id": "https://openalex.org/F4320332161",
+                "display_name": "National Institutes of Health",
+            }
+        ]
+
+        result = extract_grants(funders)
+
+        assert result[0]["funder"] == "F4320332161"
+        assert result[0]["funder_display_name"] == "National Institutes of Health"
+        assert result[0]["award_id"] is None
+
     def test_extract_grants_strips_whitespace(self) -> None:
         """Should strip whitespace from funder name and award_id."""
         grants = [

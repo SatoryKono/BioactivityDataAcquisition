@@ -6,6 +6,8 @@ from datetime import UTC, datetime
 
 import pytest
 
+from tests.helpers.metadata_fixtures import build_bronze_metadata
+
 from bioetl.application.services.lineage import MetadataLineageBundle
 from bioetl.domain.lineage import (
     LineageEdge,
@@ -14,44 +16,25 @@ from bioetl.domain.lineage import (
     LineageNodeRef,
     LineageNodeType,
 )
-from bioetl.domain.models.metadata import (
-    BaseOutputMetadata,
-    BronzeMetadata,
-    BronzeOutputExt,
-    EnvironmentMetadata,
-    PipelineMetadata,
-    RuntimeMetadata,
-    RunTypeEnum,
-    SourceMetadata,
-)
-from bioetl.domain.medallion import Layer
+from bioetl.domain.models.metadata import BronzeMetadata
 
 
 def _make_bronze_metadata() -> BronzeMetadata:
-    return BronzeMetadata(
-        version="1.1",
-        layer=Layer.BRONZE,
-        runtime=RuntimeMetadata(
-            run_id="run-1",
-            manifest_id="manifest-1",
-            run_type=RunTypeEnum.INCREMENTAL,
-            started_at_utc=datetime(2026, 4, 10, 10, 0, tzinfo=UTC),
-        ),
-        pipeline=PipelineMetadata(
-            name="chembl_activity",
-            provider="chembl",
-            entity="activity",
-            version="1.0.0",
-        ),
-        source=SourceMetadata(type="api"),
-        output=BaseOutputMetadata(record_count=1, total_bytes=128),
-        output_ext=BronzeOutputExt(),
-        environment=EnvironmentMetadata(
-            hostname="host",
-            python_version="3.13.0",
-            bioetl_version="6.0.0",
-        ),
-    )
+    metadata = build_bronze_metadata()
+    metadata.runtime.run_id = "run-1"
+    metadata.runtime.manifest_id = "manifest-1"
+    metadata.runtime.started_at_utc = datetime(2026, 4, 10, 10, 0, tzinfo=UTC)
+    metadata.runtime.completed_at_utc = None
+    metadata.pipeline.version = "1.0.0"
+    metadata.source.url = None
+    metadata.source.api_version = None
+    metadata.output.record_count = 1
+    metadata.output.total_bytes = 128
+    metadata.output_ext.files = []
+    metadata.environment.hostname = "host"
+    metadata.environment.python_version = "3.13.0"
+    metadata.environment.bioetl_version = "6.0.0"
+    return metadata
 
 
 def test_metadata_lineage_bundle_sets_output_artifact_id() -> None:

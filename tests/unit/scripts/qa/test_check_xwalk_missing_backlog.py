@@ -147,10 +147,10 @@ def test_current_repository_backlog_matches_xwalks() -> None:
 
     assert validation.ok
     payload = _build_payload(validation)
-    assert payload["missing_marker_count"] == 226
+    assert payload["missing_marker_count"] == 225
     assert payload["marker_counts"] == {
         "MISSING_CODE": 5,
-        "MISSING_DOC": 176,
+        "MISSING_DOC": 175,
         "MISSING_GOLD": 38,
         "MISSING_TRANSFORMER": 7,
     }

@@ -128,6 +128,7 @@ kubectl edit secret bioetl-secrets
 ```yaml
 BIOETL_PII_SALT_CURRENT: "YOUR-RANDOM-64-CHAR-STRING"
 BIOETL_UNIPROT_API_KEY: "your-actual-key"
+BIOETL_OPENALEX_API_KEY: "your-actual-key"
 BIOETL_OPENALEX_EMAIL: "your@email.com"
 BIOETL_SEMANTICSCHOLAR_API_KEY: "your-actual-key"
 BIOETL_PUBMED_API_KEY: "your-actual-key"
