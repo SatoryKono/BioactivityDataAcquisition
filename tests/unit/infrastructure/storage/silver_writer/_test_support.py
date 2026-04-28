@@ -25,9 +25,8 @@ def make_silver_writer(
     """Build a ``SilverWriter`` with the standard test base path."""
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-    resolved_base_path = SILVER_BASE_PATH if base_path is None else Path(base_path)
     return SilverWriter(
-        base_path=str(resolved_base_path),
+        base_path=str(SILVER_BASE_PATH if base_path is None else base_path),
         logger=logger,
         **kwargs,
     )

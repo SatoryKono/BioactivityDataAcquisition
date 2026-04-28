@@ -7,7 +7,6 @@ from unittest.mock import MagicMock
 import pytest
 
 from tests.unit.infrastructure.storage.silver_writer._test_support import (
-    SILVER_BASE_PATH,
     make_silver_writer,
     patch_new_silver_write,
     silver_write_schema,

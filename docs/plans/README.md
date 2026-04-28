@@ -121,7 +121,10 @@ for remediation planning while retaining the older cleanup plan as historical
 baseline and policy context. Its current execution state is grounded by
 `configs/quality/root_hygiene_review_registry.yaml`, which tracks the
 review-required and blocked cleanup lanes against the current live root
-baseline.
+baseline. The linked GitHub remediation issue set is `#3219`, `#3223`, `#3226`,
+and `#3227`; however, the actual branch-protection admin state for required
+checks still needs authenticated owner/admin verification beyond public policy
+docs.
 
 The scripts CLI wrapper caller matrix was added on `2026-04-28` as supporting
 evidence for RF-008 compatibility-wrapper retention decisions. It is generated
