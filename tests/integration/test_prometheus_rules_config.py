@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 
 import pytest
 import yaml
@@ -12,6 +13,9 @@ SLO_ALERT_CONTRACT_PATH = Path("configs/quality/observability_slo_alert_contract
 PROMETHEUS_CONFIG_PATH = Path("grafana/prometheus.yml")
 MONITORING_COMPOSE_PATH = Path("docker-compose.monitoring.yml")
 pytestmark = pytest.mark.integration
+
+_PROMQL_METRIC_SELECTOR_RE = re.compile(r"([a-zA-Z_:][a-zA-Z0-9_:]*)\{([^{}]*)\}")
+_PROMQL_LABEL_MATCHER_RE = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)\s*(=~|=|!=|!~)\s*"')
 
 
 def _load_rules() -> dict:
@@ -56,6 +60,56 @@ def _build_record_map(payload: dict) -> dict[str, dict]:
             if isinstance(record_name, str):
                 record_map[record_name] = rule
     return record_map
+
+
+def _infer_recording_rule_labels(expr: str) -> frozenset[str]:
+    match = re.search(r"\b(?:sum|max|min|avg|count)\s+by\s*\(([^)]*)\)", expr)
+    if not match:
+        return frozenset()
+    return frozenset(
+        label.strip() for label in match.group(1).split(",") if label.strip()
+    )
+
+
+def _extract_selector_labels(selector_body: str) -> set[str]:
+    labels: set[str] = set()
+    for label_name, _operator in _PROMQL_LABEL_MATCHER_RE.findall(selector_body):
+        if label_name == "__name__":
+            continue
+        labels.add(label_name)
+    return labels
+
+
+def _build_metric_label_sets(payload: dict) -> dict[str, frozenset[str]]:
+    from bioetl.infrastructure.observability.prometheus_metric_registries import (
+        COUNTERS,
+        GAUGES,
+        HISTOGRAMS,
+    )
+
+    label_sets: dict[str, frozenset[str]] = {
+        "up": frozenset({"job", "instance"}),
+    }
+
+    for name, metric in COUNTERS.items():
+        label_sets[name] = frozenset(metric._labelnames)
+    for name, metric in GAUGES.items():
+        label_sets[name] = frozenset(metric._labelnames)
+    for name, metric in HISTOGRAMS.items():
+        base_labels = frozenset(metric._labelnames)
+        label_sets[name] = base_labels
+        label_sets[f"{name}_bucket"] = base_labels | {"le"}
+        label_sets[f"{name}_sum"] = base_labels
+        label_sets[f"{name}_count"] = base_labels
+
+    for group in payload.get("groups", []):
+        for rule in group.get("rules", []):
+            record_name = rule.get("record")
+            expr = rule.get("expr")
+            if isinstance(record_name, str) and isinstance(expr, str):
+                label_sets[record_name] = _infer_recording_rule_labels(expr)
+
+    return label_sets
 
 
 def _iter_contract_alerts(contract: dict) -> list[tuple[str, dict, set[str]]]:
@@ -107,6 +161,254 @@ def _classify_retry_exhaustions(exhaustions_per_hour: int) -> str | None:
     if exhaustions_per_hour < 3:
         return "warning"
     return "critical"
+
+
+_TUNED_ALERT_EXPECTATIONS: dict[str, dict[str, object]] = {
+    "BioETLMetricsEndpointUnavailable": {
+        "severity": "critical",
+        "for": "2m",
+        "fragments": ['up{job="bioetl"}', "== 0"],
+    },
+    "BioETLMetricsEndpointScrapeMissing": {
+        "severity": "critical",
+        "for": "1m",
+        "fragments": ['up{job="bioetl"}', "absent_over_time"],
+    },
+    "BioETLPrometheusUnavailable": {
+        "severity": "critical",
+        "for": "2m",
+        "fragments": ['up{job="prometheus"}', "== 0"],
+    },
+    "BioETLGrafanaUnavailable": {
+        "severity": "critical",
+        "for": "2m",
+        "fragments": ['up{job="grafana"}', "== 0"],
+    },
+    "BioETLPushgatewayUnavailable": {
+        "severity": "warning",
+        "for": "5m",
+        "fragments": ['up{job="pushgateway"}', "== 0"],
+    },
+    "BioETLNoRecordsProcessed": {
+        "severity": "warning",
+        "for": "10m",
+        "fragments": [
+            "bioetl_pipeline_runs_total",
+            "bioetl_records_processed_total",
+            "unless on (pipeline, run_type)",
+            "[30m]",
+        ],
+    },
+    "BioETLMemoryPressureActive": {
+        "severity": "warning",
+        "for": "10m",
+        "fragments": [
+            "bioetl_memory_pressure_state",
+            "max_over_time",
+            "[15m]",
+            "> 0",
+        ],
+    },
+    "BioETLDQQuarantineRateHigh": {
+        "severity": "warning",
+        "for": "10m",
+        "fragments": ["> 0.05", "<= 0.2", ">= 20", "[30m]"],
+    },
+    "BioETLDQQuarantineRateCritical": {
+        "severity": "critical",
+        "for": "5m",
+        "fragments": ["> 0.2", ">= 20", "[15m]"],
+    },
+    "BioETLGoldValidationFailuresCritical": {
+        "severity": "critical",
+        "for": "2m",
+        "fragments": ['stage="gold"', 'severity="hard_fail"', "[15m]", "> 0"],
+    },
+    "BioETLDataFreshnessLagHigh": {
+        "severity": "warning",
+        "for": "15m",
+        "fragments": [
+            "clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds), 0)",
+            "> 86400",
+            "<= 259200",
+        ],
+    },
+    "BioETLDataFreshnessLagCritical": {
+        "severity": "critical",
+        "for": "15m",
+        "fragments": [
+            "clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds), 0)",
+            "> 259200",
+        ],
+    },
+    "BioETLPipelinePreflightDataSourceFailed": {
+        "severity": "critical",
+        "for": "2m",
+        "fragments": [
+            "bioetl_pipeline_health_check_passed",
+            'component="data_source"',
+            "[15m]",
+            "== 0",
+        ],
+    },
+    "BioETLPipelineInfrastructureValidationFailed": {
+        "severity": "critical",
+        "for": "2m",
+        "fragments": ["bioetl_infrastructure_validated", "[15m]", "< 1"],
+    },
+    "BioETLPipelineRunFailed": {
+        "severity": "critical",
+        "for": "1m",
+        "fragments": ["bioetl_pipeline_runs_total", 'status="failed"', "[15m]", "> 0"],
+    },
+    "BioETLProviderHealthCheckFailuresDetected": {
+        "severity": "warning",
+        "for": "2m",
+        "fragments": ["bioetl_health_check_failures_total", "[10m]", "> 0"],
+    },
+    "BioETLProviderFailureRateHigh": {
+        "severity": "warning",
+        "for": "5m",
+        "fragments": [
+            "bioetl_health_check_failures_total",
+            "bioetl_health_check_success_total",
+            "bioetl_health_check_degraded_total",
+            "[15m]",
+            "> 0.2",
+        ],
+    },
+    "BioETLProviderRetriesExhausted": {
+        "severity": "warning",
+        "for": "5m",
+        "fragments": ["> 0", "< 3", "[1h]"],
+    },
+    "BioETLProviderRetriesExhaustedPersistent": {
+        "severity": "critical",
+        "for": "10m",
+        "fragments": [">= 3", "[1h]"],
+    },
+    "BioETLCircuitBreakerStuckOpen": {
+        "severity": "warning",
+        "for": "10m",
+        "fragments": ["bioetl_circuit_breaker_state", "max_over_time", "[15m]", ">= 2"],
+    },
+    "BioETLProviderAdapterLatencyHigh": {
+        "severity": "warning",
+        "for": "15m",
+        "fragments": [
+            "bioetl_adapter_request_duration_seconds_bucket",
+            "histogram_quantile",
+            "[30m]",
+            "> 5",
+        ],
+    },
+    "BioETLProviderHttpErrorRateHigh": {
+        "severity": "warning",
+        "for": "10m",
+        "fragments": [
+            "bioetl_http_request_errors_total",
+            "bioetl_http_request_duration_seconds_count",
+            "clamp_min",
+            "[15m]",
+            "> 0.1",
+        ],
+    },
+    "BioETLProviderRateLimiterWaitHigh": {
+        "severity": "warning",
+        "for": "10m",
+        "fragments": [
+            "bioetl_rate_limiter_wait_seconds_bucket",
+            "histogram_quantile",
+            "[30m]",
+            "> 1",
+        ],
+    },
+    "BioETLProviderRateLimiterTokensDepleted": {
+        "severity": "warning",
+        "for": "10m",
+        "fragments": [
+            "bioetl_rate_limiter_tokens_available",
+            "min_over_time",
+            "[15m]",
+            "< 1",
+        ],
+    },
+    "BioETLCheckpointLoadFailed": {
+        "severity": "warning",
+        "for": "5m",
+        "fragments": ["bioetl_checkpoint_load_events_total", 'status="failed"', "[15m]", "> 0"],
+    },
+    "BioETLCheckpointSaveFailed": {
+        "severity": "warning",
+        "for": "5m",
+        "fragments": ["bioetl_checkpoint_save_events_total", 'status="failed"', "[15m]", "> 0"],
+    },
+    "BioETLCheckpointOperatorFailed": {
+        "severity": "warning",
+        "for": "5m",
+        "fragments": [
+            "bioetl_checkpoint_operator_operations_total",
+            'status="failed"',
+            "[15m]",
+            "> 0",
+        ],
+    },
+    "BioETLCheckpointSaveLatencyHigh": {
+        "severity": "warning",
+        "for": "15m",
+        "fragments": [
+            "bioetl_checkpoint_save_duration_seconds_bucket",
+            "histogram_quantile",
+            "[30m]",
+            "> 1",
+        ],
+    },
+    "BioETLCheckpointOperatorLatencyHigh": {
+        "severity": "warning",
+        "for": "15m",
+        "fragments": [
+            "bioetl_checkpoint_operator_duration_seconds_bucket",
+            "histogram_quantile",
+            "[30m]",
+            "> 1",
+        ],
+    },
+    "BioETLReplayNotReconstructable": {
+        "severity": "critical",
+        "for": "5m",
+        "fragments": [
+            "bioetl_replay_reconstructability_events_total",
+            'status="not_reconstructable"',
+            "[30m]",
+            "> 0",
+        ],
+    },
+    "BioETLControlPlaneReadFailureRate": {
+        "severity": "warning",
+        "for": "15m",
+        "fragments": [
+            "bioetl_control_plane_reads_total",
+            "increase",
+            "clamp_min",
+            "[30m]",
+            'status="failed"',
+            "store",
+            "operation",
+        ],
+    },
+}
+
+
+def _assert_tuned_alert_expectations(rule_map: dict[str, dict]) -> None:
+    for alert_name, expectation in _TUNED_ALERT_EXPECTATIONS.items():
+        rule = rule_map[alert_name]
+        expr = rule.get("expr", "")
+        assert rule.get("labels", {}).get("severity") == expectation["severity"]
+        assert rule.get("for") == expectation["for"]
+        for fragment in expectation["fragments"]:
+            assert fragment in expr, (
+                f"{alert_name} expression missing expected fragment: {fragment}"
+            )
 
 
 def test_rules_file_contains_control_plane_traceability_group() -> None:
@@ -205,6 +507,39 @@ def test_runtime_dashboard_recording_rules_exist_and_reference_source_metrics() 
         assert source_metric in expr, (
             f"{record_name} must reference {source_metric} to avoid semantic drift"
         )
+
+
+def test_rule_expressions_use_real_metric_label_schemas() -> None:
+    """Repo-backed alert/record expressions must only use real metric labels."""
+    payload = _load_rules()
+    label_sets = _build_metric_label_sets(payload)
+    errors: list[str] = []
+
+    for group in payload.get("groups", []):
+        group_name = group.get("name", "<unknown>")
+        for rule in group.get("rules", []):
+            rule_name = rule.get("alert") or rule.get("record") or "<unnamed>"
+            expr = rule.get("expr")
+            if not isinstance(expr, str):
+                continue
+
+            for metric_name, selector_body in _PROMQL_METRIC_SELECTOR_RE.findall(expr):
+                expected_labels = label_sets.get(metric_name)
+                if expected_labels is None:
+                    continue
+                selector_labels = _extract_selector_labels(selector_body)
+                unknown_labels = sorted(selector_labels - expected_labels)
+                if unknown_labels:
+                    errors.append(
+                        f"group={group_name} rule={rule_name} metric={metric_name} "
+                        f"selector_labels={unknown_labels} allowed={sorted(expected_labels)} "
+                        f"expr={expr}"
+                    )
+
+    assert not errors, (
+        "Prometheus rules use selectors with nonexistent labels:\n"
+        + "\n".join(errors)
+    )
 
 
 def test_runtime_and_provider_rules_are_fleet_wide_not_chembl_specific() -> None:
@@ -441,226 +776,7 @@ def test_dq_and_provider_alerts_reference_expected_metrics() -> None:
 def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
     payload = _load_rules()
     rule_map = _build_rule_map(payload)
-
-    expected_labels = {
-        "BioETLMetricsEndpointUnavailable": "critical",
-        "BioETLMetricsEndpointScrapeMissing": "critical",
-        "BioETLPrometheusUnavailable": "critical",
-        "BioETLGrafanaUnavailable": "critical",
-        "BioETLPushgatewayUnavailable": "warning",
-        "BioETLNoRecordsProcessed": "warning",
-        "BioETLMemoryPressureActive": "warning",
-        "BioETLDQQuarantineRateHigh": "warning",
-        "BioETLDQQuarantineRateCritical": "critical",
-        "BioETLGoldValidationFailuresCritical": "critical",
-        "BioETLDataFreshnessLagHigh": "warning",
-        "BioETLDataFreshnessLagCritical": "critical",
-        "BioETLPipelinePreflightDataSourceFailed": "critical",
-        "BioETLPipelineInfrastructureValidationFailed": "critical",
-        "BioETLPipelineRunFailed": "critical",
-        "BioETLProviderHealthCheckFailuresDetected": "warning",
-        "BioETLProviderFailureRateHigh": "warning",
-        "BioETLProviderRetriesExhausted": "warning",
-        "BioETLProviderRetriesExhaustedPersistent": "critical",
-        "BioETLCircuitBreakerStuckOpen": "warning",
-        "BioETLProviderAdapterLatencyHigh": "warning",
-        "BioETLProviderHttpErrorRateHigh": "warning",
-        "BioETLProviderRateLimiterWaitHigh": "warning",
-        "BioETLProviderRateLimiterTokensDepleted": "warning",
-        "BioETLCheckpointLoadFailed": "warning",
-        "BioETLCheckpointSaveFailed": "warning",
-        "BioETLCheckpointOperatorFailed": "warning",
-        "BioETLCheckpointSaveLatencyHigh": "warning",
-        "BioETLCheckpointOperatorLatencyHigh": "warning",
-        "BioETLReplayNotReconstructable": "critical",
-        "BioETLControlPlaneReadFailureRate": "warning",
-    }
-    expected_expr_fragments = {
-        "BioETLMetricsEndpointUnavailable": ['up{job="bioetl"}', "== 0"],
-        "BioETLMetricsEndpointScrapeMissing": ['up{job="bioetl"}', "absent_over_time"],
-        "BioETLPrometheusUnavailable": ['up{job="prometheus"}', "== 0"],
-        "BioETLGrafanaUnavailable": ['up{job="grafana"}', "== 0"],
-        "BioETLPushgatewayUnavailable": ['up{job="pushgateway"}', "== 0"],
-        "BioETLNoRecordsProcessed": [
-            "bioetl_pipeline_runs_total",
-            "bioetl_records_processed_total",
-            "unless on (pipeline, run_type)",
-            "[30m]",
-        ],
-        "BioETLMemoryPressureActive": [
-            "bioetl_memory_pressure_state",
-            "max_over_time",
-            "[15m]",
-            "> 0",
-        ],
-        "BioETLDQQuarantineRateHigh": ["> 0.05", "<= 0.2", ">= 20", "[30m]"],
-        "BioETLDQQuarantineRateCritical": ["> 0.2", ">= 20", "[15m]"],
-        "BioETLGoldValidationFailuresCritical": [
-            'stage="gold"',
-            'severity="hard_fail"',
-            "[15m]",
-            "> 0",
-        ],
-        "BioETLDataFreshnessLagHigh": [
-            "clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds), 0)",
-            "> 86400",
-            "<= 259200",
-        ],
-        "BioETLDataFreshnessLagCritical": [
-            "clamp_min(time() - max by (pipeline, entity) (bioetl_data_freshness_seconds), 0)",
-            "> 259200",
-        ],
-        "BioETLPipelinePreflightDataSourceFailed": [
-            "bioetl_pipeline_health_check_passed",
-            'component="data_source"',
-            "[15m]",
-            "== 0",
-        ],
-        "BioETLPipelineInfrastructureValidationFailed": [
-            "bioetl_infrastructure_validated",
-            "[15m]",
-            "< 1",
-        ],
-        "BioETLPipelineRunFailed": [
-            "bioetl_pipeline_runs_total",
-            'status="failed"',
-            "[15m]",
-            "> 0",
-        ],
-        "BioETLProviderHealthCheckFailuresDetected": [
-            "bioetl_health_check_failures_total",
-            "[10m]",
-            "> 0",
-        ],
-        "BioETLProviderFailureRateHigh": [
-            "bioetl_health_check_failures_total",
-            "bioetl_health_check_success_total",
-            "bioetl_health_check_degraded_total",
-            "[15m]",
-            "> 0.2",
-        ],
-        "BioETLProviderRetriesExhausted": ["> 0", "< 3", "[1h]"],
-        "BioETLProviderRetriesExhaustedPersistent": [">= 3", "[1h]"],
-        "BioETLCircuitBreakerStuckOpen": [
-            "bioetl_circuit_breaker_state",
-            "max_over_time",
-            "[15m]",
-            ">= 2",
-        ],
-        "BioETLProviderAdapterLatencyHigh": [
-            "bioetl_adapter_request_duration_seconds_bucket",
-            "histogram_quantile",
-            "[30m]",
-            "> 5",
-        ],
-        "BioETLProviderHttpErrorRateHigh": [
-            "bioetl_http_request_errors_total",
-            "bioetl_http_request_duration_seconds_count",
-            "clamp_min",
-            "[15m]",
-            "> 0.1",
-        ],
-        "BioETLProviderRateLimiterWaitHigh": [
-            "bioetl_rate_limiter_wait_seconds_bucket",
-            "histogram_quantile",
-            "[30m]",
-            "> 1",
-        ],
-        "BioETLProviderRateLimiterTokensDepleted": [
-            "bioetl_rate_limiter_tokens_available",
-            "min_over_time",
-            "[15m]",
-            "< 1",
-        ],
-        "BioETLCheckpointLoadFailed": [
-            "bioetl_checkpoint_load_events_total",
-            'status="failed"',
-            "[15m]",
-            "> 0",
-        ],
-        "BioETLCheckpointSaveFailed": [
-            "bioetl_checkpoint_save_events_total",
-            'status="failed"',
-            "[15m]",
-            "> 0",
-        ],
-        "BioETLCheckpointOperatorFailed": [
-            "bioetl_checkpoint_operator_operations_total",
-            'status="failed"',
-            "[15m]",
-            "> 0",
-        ],
-        "BioETLCheckpointSaveLatencyHigh": [
-            "bioetl_checkpoint_save_duration_seconds_bucket",
-            "histogram_quantile",
-            "[30m]",
-            "> 1",
-        ],
-        "BioETLCheckpointOperatorLatencyHigh": [
-            "bioetl_checkpoint_operator_duration_seconds_bucket",
-            "histogram_quantile",
-            "[30m]",
-            "> 1",
-        ],
-        "BioETLReplayNotReconstructable": [
-            "bioetl_replay_reconstructability_events_total",
-            'status="not_reconstructable"',
-            "[30m]",
-            "> 0",
-        ],
-        "BioETLControlPlaneReadFailureRate": [
-            "bioetl_control_plane_reads_total",
-            "increase",
-            "clamp_min",
-            "[30m]",
-            'status="failed"',
-            "store",
-            "operation",
-        ],
-    }
-    expected_for = {
-        "BioETLMetricsEndpointUnavailable": "2m",
-        "BioETLMetricsEndpointScrapeMissing": "1m",
-        "BioETLPrometheusUnavailable": "2m",
-        "BioETLGrafanaUnavailable": "2m",
-        "BioETLPushgatewayUnavailable": "5m",
-        "BioETLNoRecordsProcessed": "10m",
-        "BioETLMemoryPressureActive": "10m",
-        "BioETLDQQuarantineRateHigh": "10m",
-        "BioETLDQQuarantineRateCritical": "5m",
-        "BioETLGoldValidationFailuresCritical": "2m",
-        "BioETLDataFreshnessLagHigh": "15m",
-        "BioETLDataFreshnessLagCritical": "15m",
-        "BioETLPipelinePreflightDataSourceFailed": "2m",
-        "BioETLPipelineInfrastructureValidationFailed": "2m",
-        "BioETLPipelineRunFailed": "1m",
-        "BioETLProviderHealthCheckFailuresDetected": "2m",
-        "BioETLProviderFailureRateHigh": "5m",
-        "BioETLProviderRetriesExhausted": "5m",
-        "BioETLProviderRetriesExhaustedPersistent": "10m",
-        "BioETLCircuitBreakerStuckOpen": "10m",
-        "BioETLProviderAdapterLatencyHigh": "15m",
-        "BioETLProviderHttpErrorRateHigh": "10m",
-        "BioETLProviderRateLimiterWaitHigh": "10m",
-        "BioETLProviderRateLimiterTokensDepleted": "10m",
-        "BioETLCheckpointLoadFailed": "5m",
-        "BioETLCheckpointSaveFailed": "5m",
-        "BioETLCheckpointOperatorFailed": "5m",
-        "BioETLCheckpointSaveLatencyHigh": "15m",
-        "BioETLCheckpointOperatorLatencyHigh": "15m",
-        "BioETLReplayNotReconstructable": "5m",
-        "BioETLControlPlaneReadFailureRate": "15m",
-    }
-
-    for alert_name, severity in expected_labels.items():
-        rule = rule_map[alert_name]
-        expr = rule.get("expr", "")
-        assert rule.get("labels", {}).get("severity") == severity
-        assert rule.get("for") == expected_for[alert_name]
-        for fragment in expected_expr_fragments[alert_name]:
-            assert fragment in expr, (
-                f"{alert_name} expression missing expected fragment: {fragment}"
-            )
+    _assert_tuned_alert_expectations(rule_map)
 
 
 def test_silver_validation_alert_groups_by_pipeline_and_table() -> None:
