@@ -346,7 +346,7 @@ warn_unused_ignores = false
 # ============ RUFF ============
 [tool.ruff]
 line-length = 88
-target-version = "py311"
+target-version = "py312"
 src = ["src", "tests"]
 
 [tool.ruff.lint]

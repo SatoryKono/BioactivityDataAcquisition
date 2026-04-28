@@ -97,7 +97,7 @@ class _BuildPipelineServicesFn(Protocol):
     ) -> PipelineService: ...
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, kw_only=True)
 class _PipelineCreationRequest(ControlPlaneArtifacts):
     """Shared runtime request bundle for pipeline creation helpers."""
 

@@ -60,13 +60,13 @@ lanes:
     emits_coverage_artifact: true
     coverage_artifact: coverage-data-${matrix.test-group.name}
     coverage_python_versions:
-      - "3.11"
+      - "3.12"
     participates_in_hard_threshold: true
     threshold_enforced_in_job: false
     execution_confidence_role: breadth_parallel_execution
     notes: >-
       The matrix broadens execution confidence across unit, integration, and
-      security suites, but only Python 3.11 legs emit coverage shards for the
+      security suites, but only Python 3.12 legs emit coverage shards for the
       combined threshold.
   - job: coverage-verify
     lane_type: hard_threshold_gate
