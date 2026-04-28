@@ -8,6 +8,11 @@
 scripts/ai/codex/
 ├── run-codex.ps1              ⭐ Main entry point (PowerShell) - Non-blocking!
 ├── run-codex.sh               ⭐ Main entry point (WSL/Bash)
+├── headless.ps1               PowerShell transport for headless Codex launch
+├── headless.sh                Headless Codex launch without MCP sync
+├── diagnose_wsl.ps1           PowerShell transport for WSL diagnostics
+├── diagnose_wsl.sh            WSL diagnostics entrypoint
+├── diagnose_wsl.bat           Windows batch transport for WSL diagnostics
 ├── .env.codex                 # API key configuration
 ├── SETUP_HANG_FIX.md          # 📋 Read if setup hangs
 ├── helper/
@@ -64,6 +69,8 @@ bash run-codex.sh "analyze the code"
 .\run-codex.ps1 mcp-setup         # Sync MCP configuration
 .\run-codex.ps1 login             # Login with API key
 .\run-codex.ps1 device-login      # Device auth login
+.\headless.ps1 exec "prompt"      # Launch without MCP sync
+.\diagnose_wsl.ps1                # Run WSL diagnostics
 ```
 
 ```bash
@@ -78,6 +85,8 @@ bash run-codex.sh mcp-check       # Check MCP configuration
 bash run-codex.sh mcp-setup       # Sync MCP configuration
 bash run-codex.sh login           # Login with API key
 bash run-codex.sh device-login    # Device auth login
+bash headless.sh exec "prompt"    # Launch without MCP sync
+bash diagnose_wsl.sh              # Run WSL diagnostics
 ```
 
 ## 🔧 What run-codex does
@@ -127,6 +136,11 @@ This will:
 - `~/.codex/config.toml` - Codex-native MCP config used by `codex`
 
 Set `CODEX_SKIP_MCP_SETUP=1` only when you intentionally want to launch Codex without synchronizing MCP. Set `CODEX_VALIDATE_MCP_LIST=1` to additionally run `codex mcp list --json`; this validation is off by default because some local MCP/server environments can make the CLI list operation hang.
+
+The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`
+for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the
+canonical diagnostics entrypoints that the `scripts/ops/launchers/codex/*`
+compatibility wrappers delegate to.
 
 ## 🐧 Requirements
 

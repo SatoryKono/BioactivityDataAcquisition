@@ -4,10 +4,9 @@ from __future__ import annotations
 
 __all__ = ["UNIPROT_BATCH_SIZE", "UNIPROT_FETCH_ERRORS", "UniProtAdapter"]
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, override
 
 from httpx import HTTPStatusError, RequestError
-from typing_extensions import override
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import BronzeRecord, HealthStatus

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeAlias
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BatchID, JsonDict
 
-SpanAttributeValue: TypeAlias = (
+type SpanAttributeValue = (
     str
     | bool
     | int

@@ -50,7 +50,7 @@ def flatten_nested_dict(
     return result
 
 
-def extract_list_field(
+def extract_list_field[T](
     items: list[JsonDict] | None,  # Any: dict values vary by field type
     field: str,
     converter: Callable[[object], T]  # object: converter accepts heterogeneous input
@@ -141,7 +141,7 @@ def validate_smiles(smiles: str | None) -> bool:
     return is_valid
 
 
-def safe_extract(
+def safe_extract[T](
     record: JsonDict,  # Any: dict values vary by field type
     key: str,
     default: T | None = None,

@@ -45,7 +45,7 @@ class CrossRefRuntimeServices:
     fallback_handler: CrossRefTitleFallbackHandler
 
 
-def _require_runtime_service(
+def _require_runtime_service[RuntimeService](
     value: _RuntimeService | None,
     *,
     name: str,

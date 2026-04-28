@@ -130,7 +130,7 @@ def is_resumable(checkpoint_state: CompositeCheckpointState) -> bool:
     )
 
 
-def _replace_checkpoint_state(
+def _replace_checkpoint_state[TCheckpointState: "CompositeCheckpointState"](
     checkpoint_state: TCheckpointState,
     *,
     clock: ClockPort | None = None,

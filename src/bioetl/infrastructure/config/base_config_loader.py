@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 import yaml
 
@@ -40,7 +40,7 @@ def _load_yaml_file(
         return content if content is not None else {}
 
 
-class BaseConfigLoader(ABC, Generic[T]):
+class BaseConfigLoader[T](ABC):
     """Abstract base class for hierarchical config loaders.
 
     Provides common utilities for loading and merging YAML configs.

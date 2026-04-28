@@ -18,14 +18,13 @@ __all__ = [
 
 from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass
-from typing import TypeAlias
 
 from bioetl.domain.exceptions import RetryExhaustedError
 from bioetl.domain.ports import FallbackPolicyPort
 from bioetl.domain.types import BronzeRecord
 
 TITLE_ONLY_MARKER_PREFIX = "__title_only_"
-FallbackPolicyHandler: TypeAlias = FallbackPolicyPort
+type FallbackPolicyHandler = FallbackPolicyPort
 
 
 @dataclass(slots=True)

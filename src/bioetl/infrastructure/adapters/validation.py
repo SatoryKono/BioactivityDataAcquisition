@@ -58,7 +58,7 @@ class RecordValidationResult:
     """Detailed error information from Pydantic validation."""
 
 
-def validate_record(
+def validate_record[T: BaseModel](
     record: JsonDict,  # Any: validated records have heterogeneous field types
     model_class: type[T],
     logger: LoggerPort | None = None,
@@ -104,7 +104,7 @@ def validate_record(
         )
 
 
-def validate_records(
+def validate_records[T: BaseModel](
     records: list[
         JsonDict  # Any: validated records have heterogeneous field types
     ],  # Any: validated records have heterogeneous field types
@@ -139,7 +139,7 @@ def validate_records(
         yield validate_record(record, model_class, logger, context)
 
 
-def parse_with_validation(
+def parse_with_validation[T: BaseModel](
     record: JsonDict,  # Any: validated records have heterogeneous field types
     model_class: type[T],
     strict: bool = False,

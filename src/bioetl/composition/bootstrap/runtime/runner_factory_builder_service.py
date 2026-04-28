@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Generic, TypedDict, TypeVar
+from typing import TYPE_CHECKING, TypedDict, TypeVar
 
 if TYPE_CHECKING:
     import polars as pl
@@ -53,7 +53,7 @@ def resolve_bronze_opts(
     )
 
 
-class RunnerFactoryBuilderService(Generic[_RunOptionsT]):
+class RunnerFactoryBuilderService[RunOptionsT]:
     """Build seed/enricher/dependency runner factories."""
 
     def __init__(

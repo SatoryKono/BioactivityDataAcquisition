@@ -34,7 +34,7 @@ def validate_records_present(
         raise ValueError(f"Cannot create {layer_name} metadata without records")
 
 
-def create_metadata_bundle(
+def create_metadata_bundle[MetadataT: (BronzeMetadata, SilverMetadata, GoldMetadata)](
     *,
     metadata: _MetadataT,
     lineage_fragment: LineageGraphFragment,

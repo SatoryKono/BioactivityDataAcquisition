@@ -85,8 +85,8 @@ def _collect_explicit_field_policy(domain_config: object) -> dict[str, object]:
 
 __all__ = [
     "FieldCoercionPolicy",
-    "FieldPolicySpec",
     "FieldPolicyResolver",
+    "FieldPolicySpec",
     "ResolvedFieldPolicy",
 ]
 

@@ -310,7 +310,7 @@ def create_chained_key_resolver(
     return ChainedKeyResolver(resolver_helper)
 
 
-def _create_key_resolver(
+def _create_key_resolver[TResolver: ("SeedKeyResolver", "ChainedKeyResolver")](
     resolver_type: type[TResolver],
     logger: LoggerPort,
     *,

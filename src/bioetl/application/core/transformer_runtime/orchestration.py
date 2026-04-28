@@ -38,7 +38,7 @@ async def yield_control_if_needed(last_yield_at: float) -> float:
     return time.monotonic()
 
 
-async def _collect_transform_state(
+async def _collect_transform_state[TransformLoopResult: (RecordTransformOutcome, TransformedRecord)](
     *,
     records: list[BronzeRecord],
     batch_id: BatchID,

@@ -125,7 +125,7 @@ def apply_processed_batch_outcome(
     )
 
 
-def build_batch_result_snapshot(
+def build_batch_result_snapshot[BatchResultT](
     *,
     batch_result_type: BatchResultBuilderPort[_BatchResultT],
     records_bronze: int,

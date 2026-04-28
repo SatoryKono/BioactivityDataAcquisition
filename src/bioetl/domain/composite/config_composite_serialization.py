@@ -28,7 +28,7 @@ __all__ = [
 _ConfigT = TypeVar("_ConfigT")
 
 
-def _build_seed_config(
+def _build_seed_config[ConfigT](
     seed_data: dict[str, object],
     seed_cls: Callable[..., _ConfigT],
 ) -> _ConfigT:
@@ -41,7 +41,7 @@ def _build_seed_config(
     )
 
 
-def _build_dependency_config(
+def _build_dependency_config[ConfigT](
     dep: dict[str, object],
     dependency_cls: Callable[..., _ConfigT],
 ) -> _ConfigT:
@@ -65,7 +65,7 @@ def _build_dependency_config(
     )
 
 
-def _build_dependency_configs(
+def _build_dependency_configs[ConfigT](
     dependency_data: list[dict[str, object]],
     dependency_cls: Callable[..., _ConfigT],
 ) -> tuple[_ConfigT, ...]:
@@ -75,7 +75,7 @@ def _build_dependency_configs(
     )
 
 
-def _build_enricher_config(
+def _build_enricher_config[ConfigT](
     enricher: dict[str, object],
     enricher_cls: Callable[..., _ConfigT],
 ) -> _ConfigT:
@@ -93,7 +93,7 @@ def _build_enricher_config(
     )
 
 
-def _build_enricher_configs(
+def _build_enricher_configs[ConfigT](
     enricher_data: list[dict[str, object]],
     enricher_cls: Callable[..., _ConfigT],
 ) -> tuple[_ConfigT, ...]:
@@ -103,7 +103,7 @@ def _build_enricher_configs(
     )
 
 
-def _build_merge_config(
+def _build_merge_config[ConfigT](
     merge_data: dict[str, object],
     merge_cls: Callable[..., _ConfigT],
 ) -> _ConfigT:

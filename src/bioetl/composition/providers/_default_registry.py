@@ -12,7 +12,6 @@ from collections.abc import Callable
 from functools import wraps
 from typing import (
     TYPE_CHECKING,
-    Generic,
     Protocol,
     Self,
     TypeVar,
@@ -54,7 +53,7 @@ ProviderRegistryT = TypeVar("ProviderRegistryT", bound=_SupportsProviderRegistry
 _default_provider_registry: ProviderRegistry | None = None
 
 
-class DefaultRegistryMethod(Generic[R]):
+class DefaultRegistryMethod[R]:
     """Dispatch class access to the lazy default registry and instance access locally."""
 
     def __init__(self, func: Callable[..., R]) -> None:
@@ -97,7 +96,7 @@ class DefaultRegistryMethod(Generic[R]):
         return bound
 
 
-class ProvidersDescriptor(Generic[ProviderRegistryT]):
+class ProvidersDescriptor[ProviderRegistryT: _SupportsProviderRegistryStore]:
     """Expose the default singleton store on class access for compatibility."""
 
     def __get__(
