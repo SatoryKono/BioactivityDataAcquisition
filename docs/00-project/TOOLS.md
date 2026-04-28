@@ -40,6 +40,9 @@ ______________________________________________________________________
 - Docs site tooling lives in the separate `docs` extra; install it via `uv sync --extra dev --extra tracing --extra docs` or `pip install -e ".[dev,tracing,docs]"` before running MkDocs commands.
 - Preferred invocation after `uv sync` is `uv run python -m scripts.<group> ...`.
   With an activated virtual environment, `python -m scripts.<group> ...` remains a valid fallback.
+- Local automation that must resolve the project-preferred interpreter without
+  assuming `uv` should use
+  `python scripts/engineering/dev/run_project_python.py -m scripts.<group> ...`.
 - Standard docs checks:
 
 ```bash

@@ -326,12 +326,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded WSL bootstrap troubleshooting wrapper while mounted-checkout environment setup remains fragile; fold its behavior into canonical dev setup or remove it."
     },
-    "scripts/engineering/repo/finalize_docs_issues_2638_2643.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded maintainer helper for the prepared docs issue-finalization batch; do not treat this issue-number-specific path as a reusable automation workflow."
-    },
     "scripts/engineering/qa/py_review_orchestrator.py": {
       "owner": "platform-architecture",
       "decision": "legacy_manual_utility",
@@ -499,12 +493,6 @@
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded MCP smoke helper for local memory tooling diagnostics; do not expand it into a canonical contributor workflow without stronger call-site evidence."
-    },
-    "scripts/ops/maintenance/github/create_runmanifest_runledger_issue.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded maintainer helper for manual run-manifest/run-ledger issue creation under the maintenance/github namespace; prefer generalized issue automation for future workflows."
     },
     "scripts/ops/runtime/docker/restart-docker.ps1": {
       "owner": "@bioetl-platform",

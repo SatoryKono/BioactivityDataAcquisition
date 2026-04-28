@@ -23,7 +23,6 @@ from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane import (
     ReplayCapability,
     RunArtifactRef,
-    RunCodeProvenance,
     RunInputSnapshotRef,
     RunSourceRef,
     RunLedgerEntry,
@@ -33,151 +32,28 @@ from bioetl.domain.types import RunID, RunType
 from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
-from bioetl.domain.control_plane.reproducibility_profiles import (
-    build_lineage_closure_boundary,
-    build_replay_family_contract,
-    resolve_reproducibility_family_profile,
-)
-from bioetl.domain.normalization import (
-    build_execution_identity_payload,
-    compute_execution_identity_fingerprint,
-)
-
-_FIXED_TIME = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
-_VALID_CONFIG_HASH = "a" * 64
-_VALID_RESOLVED_CONFIG_HASH = "b" * 64
-_VALID_EFFECTIVE_CONFIG_HASH = "c" * 64
-_SNAPSHOT_IDENTITY_FINGERPRINT = (
-    "f29f1a5c18e94a4fe614b59ae8e68c5c65afd078155b95d1e7c4aa32f6291dcd"
+from tests.unit.application.services.run_manifest_test_support import (
+    FIXED_TIME as _FIXED_TIME,
+    SNAPSHOT_IDENTITY_FINGERPRINT as _SNAPSHOT_IDENTITY_FINGERPRINT,
+    VALID_CONFIG_HASH as _VALID_CONFIG_HASH,
+    VALID_EFFECTIVE_CONFIG_HASH as _VALID_EFFECTIVE_CONFIG_HASH,
+    VALID_RESOLVED_CONFIG_HASH as _VALID_RESOLVED_CONFIG_HASH,
+    build_default_source_refs,
+    expected_canonical_execution_identity as _expected_canonical_execution_identity,
+    expected_degraded_runtime_anchor as _expected_degraded_runtime_anchor,
+    expected_exact_replay_anchors as _expected_exact_replay_anchors,
+    expected_lineage_closure_boundary as _expected_lineage_closure_boundary,
+    expected_produced_artifact_trace as _expected_produced_artifact_trace,
+    expected_replay_family_contract as _expected_replay_family_contract,
+    expected_replay_parentage as _expected_replay_parentage,
+    expected_resume_contract as _expected_resume_contract,
+    make_run_manifest,
 )
 TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-run-manifest-inspection-"))
 BRONZE_BATCH_URI = (TEST_ROOT / "bronze" / "batch_1.jsonl.zst").as_uri()
 SILVER_ARTIFACT_PATH = str(TEST_ROOT / "output" / "silver" / "chembl" / "activity")
 GOLD_DQ_REPORT_PATH = str(TEST_ROOT / "reports" / "gold_dq.json")
 COMPOSITE_CV_REPORT_PATH = str(TEST_ROOT / "reports" / "composite_cv.json")
-
-
-def _expected_canonical_execution_identity(
-    manifest: RunManifest,
-    *,
-    requested_exact_replay: bool,
-    snapshot_fingerprint: str | None,
-) -> dict[str, object]:
-    payload = build_execution_identity_payload(
-        pipeline_name=manifest.pipeline_name,
-        run_type=manifest.run_type.value,
-        pipeline_version=manifest.code_provenance.pipeline_version,
-        git_commit=manifest.code_provenance.git_commit,
-        effective_config_hash=manifest.code_provenance.effective_config_hash,
-        dq_contract_compatibility_hash=(
-            manifest.code_provenance.dq_contract_compatibility_hash
-        ),
-        contract_ref=manifest.code_provenance.contract_ref,
-        contract_version=manifest.code_provenance.contract_version,
-        effective_config_artifact_id=(
-            manifest.code_provenance.effective_config_artifact_id
-        ),
-        exact_replay=requested_exact_replay,
-        input_snapshot_fingerprint=snapshot_fingerprint,
-    )
-    return {
-        "execution_fingerprint": manifest.execution_fingerprint,
-        "payload": payload,
-    }
-
-
-def _expected_degraded_runtime_anchor(manifest: RunManifest) -> dict[str, object]:
-    payload = {
-        "manifest_id": manifest.manifest_id,
-        "effective_config_hash": manifest.code_provenance.effective_config_hash,
-        "contract_ref": manifest.code_provenance.contract_ref,
-        "contract_version": manifest.code_provenance.contract_version,
-        "effective_config_artifact_id": (
-            manifest.code_provenance.effective_config_artifact_id
-        ),
-    }
-    filtered_payload = {
-        key: value for key, value in payload.items() if value is not None
-    }
-    return {
-        "compatibility_scope": "legacy_fallback_only",
-        "fingerprint": (
-            compute_execution_identity_fingerprint(filtered_payload)
-            if filtered_payload
-            else None
-        ),
-        "payload": filtered_payload,
-    }
-
-
-def _expected_exact_replay_anchors(
-    manifest: RunManifest,
-    *,
-    snapshot_fingerprint: str | None,
-    published_artifact_ids: list[str] | None = None,
-    published_artifact_paths: list[str] | None = None,
-    lineage_fragment_ids: list[str] | None = None,
-) -> dict[str, object]:
-    snapshot_ids = sorted(
-        {
-            snapshot.snapshot_id
-            for source_ref in manifest.source_refs
-            for snapshot in source_ref.input_snapshots
-        }
-    )
-    snapshot_hashes = sorted(
-        {
-            snapshot.content_hash
-            for source_ref in manifest.source_refs
-            for snapshot in source_ref.input_snapshots
-        }
-    )
-    return {
-        "semantic_identity_anchor": "execution_fingerprint",
-        "execution_fingerprint": manifest.execution_fingerprint,
-        "pipeline_name": manifest.pipeline_name,
-        "run_type": manifest.run_type.value,
-        "pipeline_version": manifest.code_provenance.pipeline_version,
-        "git_commit": manifest.code_provenance.git_commit,
-        "effective_config_hash": manifest.code_provenance.effective_config_hash,
-        "dq_contract_compatibility_hash": (
-            manifest.code_provenance.dq_contract_compatibility_hash
-        ),
-        "contract_ref": manifest.code_provenance.contract_ref,
-        "contract_version": manifest.code_provenance.contract_version,
-        "effective_config_artifact_id": (
-            manifest.code_provenance.effective_config_artifact_id
-        ),
-        "input_snapshot_identity_fingerprint": snapshot_fingerprint,
-        "input_snapshot_ids": snapshot_ids,
-        "input_snapshot_content_hashes": snapshot_hashes,
-        "published_artifact_ids": published_artifact_ids or [],
-        "published_artifact_paths": published_artifact_paths or [],
-        "lineage_fragment_ids": lineage_fragment_ids or [],
-    }
-
-
-def _expected_produced_artifact_trace(
-    manifest: RunManifest,
-    *,
-    ledger_entries_present: bool,
-    artifacts: list[dict[str, object]] | None = None,
-) -> dict[str, object]:
-    artifact_payload = artifacts or []
-    missing_requirements: list[str] = []
-    if not ledger_entries_present:
-        missing_requirements.append("run_ledger_history")
-    if not artifact_payload:
-        missing_requirements.append("artifact_publication_event")
-    return {
-        "lookup": "run_ledger_by_manifest_id",
-        "lookup_key": manifest.manifest_id,
-        "manifest_id": manifest.manifest_id,
-        "complete": not missing_requirements,
-        "artifact_count": len(artifact_payload),
-        "artifacts": artifact_payload,
-        "missing_requirements": missing_requirements,
-    }
 
 
 def _expected_code_provenance_state(manifest: RunManifest) -> dict[str, object]:
