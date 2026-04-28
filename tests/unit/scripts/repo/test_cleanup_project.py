@@ -18,10 +18,7 @@ def test_find_cleanup_targets_skips_blocked_cleanup_zones(tmp_path: Path) -> Non
         include_logs=True,
         blocked_cleanup_paths=frozenset({"reports", "docs/reports"}),
     )
-    rel_paths = {
-        target.path.relative_to(tmp_path).as_posix()
-        for target in targets
-    }
+    rel_paths = {target.path.relative_to(tmp_path).as_posix() for target in targets}
 
     assert ".pytest_cache" in rel_paths
     assert "reports/.pytest_cache" not in rel_paths
@@ -41,6 +38,4 @@ def test_archive_logs_uses_deterministic_default_directory(tmp_path: Path) -> No
     archived = module.archive_logs(tmp_path, [target])
 
     assert archived == [target]
-    assert (
-        tmp_path / "reports" / "archived_logs" / "manual" / "worker.log"
-    ).exists()
+    assert (tmp_path / "reports" / "archived_logs" / "manual" / "worker.log").exists()

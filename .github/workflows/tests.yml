@@ -279,7 +279,7 @@ jobs:
                 run: uv run python -m scripts.schema generate-pipeline --check
 
             -   name: Check architecture dependency docs drift
-                run: uv run python -m scripts.engineering.qa report-dep-map --check
+                run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check
 
             -   name: Check docs drift (forbidden patterns)
                 run: uv run python -m scripts.engineering.qa check-docs-drift

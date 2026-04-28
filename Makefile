@@ -78,7 +78,7 @@ run-local:
 	$(RUN) bioetl run --pipeline $(RUN_LOCAL_PIPELINE) --run-type incremental --limit $(RUN_LOCAL_LIMIT)
 
 qa-arch-fast:
-	$(RUN) pytest tests/architecture/test_future_annotations_policy.py tests/architecture/test_naming_conventions.py tests/architecture/test_no_structlog_in_application_interfaces.py tests/architecture/test_no_datetime_now_in_infrastructure.py tests/architecture/test_no_datetime_now_in_domain.py tests/architecture/test_replay_critical_time_seams.py tests/architecture/test_no_random_in_writers.py tests/architecture/test_forbidden_imports.py tests/architecture/test_domain_purity.py::TestDomainPurity::test_no_direct_io_in_domain tests/architecture/test_domain_normalization_guardrails.py::test_domain_normalization_modules_have_no_disallowed_runtime_imports tests/architecture/test_domain_normalization_guardrails.py::test_domain_normalization_modules_do_not_call_open -q --tb=short
+	$(RUN) pytest tests/architecture/ -m "not slow and not serial and not memory" -q --tb=short
 
 qa-arch-full:
 	$(RUN) pytest tests/architecture/ -m "not slow and not benchmark and not memory" -q --tb=short

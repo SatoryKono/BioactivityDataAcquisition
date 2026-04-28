@@ -43,6 +43,18 @@ def _write_governance_files(tmp_path: Path) -> None:
                 "test_support_roots": {
                     "approved_roots": [{"path": "testing_support"}],
                 },
+                "docs_code_zones": {
+                    "approved_roots": [
+                        {"path": "docs/plugins/link_checker"},
+                        {"path": "docs/00-project/ai/agents/scripts"},
+                    ],
+                },
+                "local_tolerated_root_dirs": {
+                    "approved_roots": [
+                        {"path": ".agent-work"},
+                        {"path": ".scannerwork"},
+                    ],
+                },
                 "blocked_cleanup_zones": [{"path": "docs/99-archive"}],
             },
             sort_keys=False,
@@ -59,13 +71,39 @@ def _write_minimal_repo_tree(tmp_path: Path) -> None:
         (tmp_path / "src" / "bioetl" / layer).mkdir(parents=True, exist_ok=True)
 
 
-def test_run_audit_allows_cataloged_root_tooling_and_test_support(tmp_path: Path) -> None:
+def test_run_audit_allows_cataloged_root_tooling_and_test_support(
+    tmp_path: Path,
+) -> None:
     _write_governance_files(tmp_path)
     _write_minimal_repo_tree(tmp_path)
     (tmp_path / "tools").mkdir()
     (tmp_path / "testing_support").mkdir()
     (tmp_path / "tools" / "fix_http.py").write_text("print('ok')\n", encoding="utf-8")
     (tmp_path / "testing_support" / "__init__.py").write_text("", encoding="utf-8")
+
+    result = module.run_audit(tmp_path)
+
+    assert not result.must_violations
+    assert not result.should_violations
+
+
+def test_run_audit_allows_cataloged_docs_code_zones_and_tolerated_hidden_roots(
+    tmp_path: Path,
+) -> None:
+    _write_governance_files(tmp_path)
+    _write_minimal_repo_tree(tmp_path)
+    (tmp_path / "docs" / "plugins" / "link_checker").mkdir(parents=True)
+    (tmp_path / "docs" / "plugins" / "link_checker" / "plugin.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
+    (tmp_path / "docs" / "00-project" / "ai" / "agents" / "scripts").mkdir(
+        parents=True, exist_ok=True
+    )
+    (
+        tmp_path / "docs" / "00-project" / "ai" / "agents" / "scripts" / "agent_tool.py"
+    ).write_text("print('ok')\n", encoding="utf-8")
+    (tmp_path / ".agent-work").mkdir()
+    (tmp_path / ".scannerwork").mkdir()
 
     result = module.run_audit(tmp_path)
 

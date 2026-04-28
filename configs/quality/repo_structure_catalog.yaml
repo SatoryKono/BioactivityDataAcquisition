@@ -79,15 +79,38 @@ src_sidecars:
     - path: src/memory
       role: approved_sidecar_memory_subsystem
 
-root_tooling_roots:
-  approved_roots:
-    - path: tools
-      role: review_required_transitional_root_tooling_surface
-
 test_support_roots:
   approved_roots:
     - path: testing_support
       role: approved_test_support_modules
+
+docs_code_zones:
+  approved_roots:
+    - path: docs/00-project/ai/agents/policy
+      role: approved_repo_only_agent_policy_automation
+    - path: docs/00-project/ai/agents/scripts
+      role: approved_repo_only_agent_script_mirror
+    - path: docs/plugins/link_checker
+      role: approved_docs_plugin_source_tree
+
+local_tolerated_root_dirs:
+  approved_roots:
+    - path: .agent-work
+      role: local_agent_runtime_state_untracked
+    - path: .agentbridge
+      role: local_agent_bridge_state_untracked
+    - path: .cache
+      role: local_cache_surface_untracked
+    - path: .coverage-sharded
+      role: local_coverage_shards_untracked
+    - path: .scannerwork
+      role: local_sonar_workspace_untracked
+    - path: .venv-docs
+      role: local_docs_virtualenv_untracked
+    - path: .venv-win
+      role: local_windows_virtualenv_untracked
+    - path: .venv-win-corrupt
+      role: local_windows_virtualenv_recovery_untracked
 
 blocked_cleanup_zones:
   - path: docs/99-archive

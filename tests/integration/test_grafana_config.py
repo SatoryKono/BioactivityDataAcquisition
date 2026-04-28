@@ -417,7 +417,7 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Provider Failure Rate": "or vector(0)",
             "Health Checks Total": "or vector(0)",
             "Circuit Breaker State (max)": "or vector(0)",
-            "Circuit Breaker Trips by Provider": "or label_replace(vector(0), \"adapter\",",
+            "Circuit Breaker Trips by Provider": 'or label_replace(vector(0), "adapter",',
         },
         "bioetl-dq-v2.json": {
             "Records Quarantined": "or vector(0)",

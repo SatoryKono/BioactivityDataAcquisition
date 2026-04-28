@@ -36,8 +36,7 @@ ______________________________________________________________________
   project surfaces: `.ai`, `.aiassistant`, `ai`, `.codex`,
   `.cursor`, `.gemini`, `.github`, `.idea`, `.jules`, `.junie`, `.sonarlint`,
   `.vibe`, `.vscode`, `assets`, `configs`, `data`, `docs`, `grafana`,
-  `reports`, `scripts`, `src`, `testing_support`, `tests`, and the
-  review-required transitional tooling surface `tools/`.
+  `reports`, `scripts`, `src`, `testing_support`, and `tests`.
 - Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
 - Shared repo tooling surfaces such as `ai/claude/`, `.codex/`, `.gemini/`,
   `.vibe/`, `.vscode/`, and `.cursor/` MAY оставаться tracked только если они
@@ -93,7 +92,11 @@ Machine-readable каталог для structure hygiene хранится в
 - допустимые sidecar roots под `src/`: `src/bioetl`, `src/tools`,
   `src/memory`;
 - разрешённый root-level test support family: `testing_support/`;
-- review-required transitional root tooling family: `tools/`;
+- approved docs-resident code zones under `docs/00-project/ai/agents/**` and
+  `docs/plugins/link_checker/**`;
+- tolerated local-only hidden root trees such as `.agent-work/`,
+  `.agentbridge/`, `.cache/`, `.coverage-sharded/`, `.scannerwork/`,
+  `.venv-docs/`, `.venv-win/`, and `.venv-win-corrupt/`;
 - blocked cleanup zones, которые не должны попадать под broad cleanup.
 
 `scripts/engineering/repo/audit_root_cleanliness.py` MUST использовать этот
@@ -141,15 +144,26 @@ Machine-readable каталог для structure hygiene хранится в
 - Новые root-level test support directories вне `testing_support/` запрещены,
   пока не будут явно ратифицированы в structure catalog.
 
-### 0.4.2. Review-required root tooling family
+### 0.4.2. Approved docs-resident code zones
 
-- `tools/` MAY оставаться tracked только как transitional root tooling surface
-  до завершения owner/usage classification.
-- Каждый tracked item под `tools/` SHOULD иметь documented disposition:
-  relocate to `scripts/**`, relocate to `src/tools/**`, keep-at-root with
-  explicit ratification, or remove after review.
-- `tools/` не считается generic cleanup target и должен попадать в отдельный
-  review lane, а не в broad cleanup automation.
+- Python code under `docs/**` остаётся запрещённым по умолчанию.
+- Исключения MUST быть явно зарегистрированы в
+  `configs/quality/repo_structure_catalog.yaml`.
+- Текущие ratified zones:
+  - `docs/00-project/ai/agents/policy/`
+  - `docs/00-project/ai/agents/scripts/`
+  - `docs/plugins/link_checker/`
+- Эти зоны считаются repo-only documentation/governance tooling surfaces и не
+  дают blanket permission на размещение нового Python-кода в других частях
+  `docs/**`.
+
+### 0.4.3. Tolerated local hidden root trees
+
+- Hidden root directories, зарегистрированные как
+  `local_tolerated_root_dirs` в structure catalog, MAY существовать в рабочем
+  дереве как untracked local runtime/editor state.
+- Такие каталоги не считаются approved tracked project surfaces и MUST NOT
+  использоваться как justification для новых tracked roots.
 
 ### 0.5. Retention boundary
 

@@ -13,7 +13,9 @@ from bioetl.application.services.export_manifests import (
 from bioetl.domain.ports import ExportFileFingerprint
 
 
-def _fingerprint(path: str = "exports/silver_chembl_activity.csv") -> ExportFileFingerprint:
+def _fingerprint(
+    path: str = "exports/silver_chembl_activity.csv",
+) -> ExportFileFingerprint:
     return ExportFileFingerprint(
         path=Path(path),
         size_bytes=11,

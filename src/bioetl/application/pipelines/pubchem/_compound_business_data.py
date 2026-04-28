@@ -62,7 +62,9 @@ def _resolve_compound_identifier(record: BronzeRecord) -> object | None:
     return cid if cid is not None else record.get("molecule_id")
 
 
-def _extract_computed_descriptors(record: BronzeRecord) -> dict[str, float | int | None]:
+def _extract_computed_descriptors(
+    record: BronzeRecord,
+) -> dict[str, float | int | None]:
     """Extract and validate computed molecular descriptors."""
     return {
         "xlogp": safe_float(record.get("xlogp")),

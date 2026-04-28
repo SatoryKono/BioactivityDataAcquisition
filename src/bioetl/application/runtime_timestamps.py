@@ -6,6 +6,8 @@ import time
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
+from bioetl.application.runtime_clock import resolve_runtime_clock
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import ClockPort
 
@@ -17,15 +19,13 @@ __all__ = [
 
 def capture_runtime_timing_anchor(
     *,
-    clock: ClockPort,
+    clock: ClockPort | None,
     started_at: datetime | None = None,
 ) -> tuple[datetime, float]:
     """Capture the wall-clock anchor and monotonic start for one execution."""
-    if clock is None:
-        raise RuntimeError("ClockPort is required for runtime timestamp capture.")
     wall_clock_anchor = started_at
     if wall_clock_anchor is None:
-        wall_clock_anchor = clock.now()
+        wall_clock_anchor = resolve_runtime_clock(clock).now()
     return wall_clock_anchor, time.monotonic()
 
 
