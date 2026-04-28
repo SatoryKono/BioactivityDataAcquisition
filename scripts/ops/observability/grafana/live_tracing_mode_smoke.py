@@ -90,6 +90,10 @@ def _run(
     return completed
 
 
+def _run_cleanup(command: list[str], *, env: dict[str, str]) -> None:
+    _run(command, env=env, check=False)
+
+
 def _wait_for_grafana(port: int, *, timeout_s: float) -> None:
     deadline = time.time() + timeout_s
     health_url = f"http://127.0.0.1:{port}/api/health"
@@ -200,9 +204,38 @@ def _smoke_mode(mode: str, *, timeout_s: float) -> None:
             )
         )
     finally:
-        down_command = compose_command + ["down", "-v", "--remove-orphans"]
+        down_command = compose_command.copy()
+        if tracing_enabled:
+            down_command.extend(["--profile", "tracing"])
+        down_command.extend(["down", "-v", "--remove-orphans"])
         try:
-            _run(down_command, env=compose_env, check=False)
+            _run_cleanup(down_command, env=compose_env)
+            for service_name in (
+                "prometheus",
+                "pushgateway",
+                "loki",
+                "promtail",
+                "tempo",
+                "grafana",
+            ):
+                _run_cleanup(
+                    ["docker", "rm", "-f", f"bioetl-{service_name}-{suffix}"],
+                    env=compose_env,
+                )
+            _run_cleanup(
+                ["docker", "network", "rm", f"{project_name}_monitoring"],
+                env=compose_env,
+            )
+            for volume_name in (
+                "prometheus-data",
+                "grafana-data",
+                "loki-data",
+                "tempo-data",
+            ):
+                _run_cleanup(
+                    ["docker", "volume", "rm", f"{project_name}_{volume_name}"],
+                    env=compose_env,
+                )
         finally:
             override_path.unlink(missing_ok=True)
 
