@@ -42,6 +42,7 @@ from bioetl.infrastructure.storage.metadata_writer import (
     _get_metadata_filename,
 )
 from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy
+from bioetl.infrastructure.storage.support.atomic_ops import ReplaceRetryHook
 
 
 def _fake_atomic_write_text(
@@ -59,9 +60,10 @@ def _retry_once_atomic_write_text(
     content: object,
     *,
     retry_policy: AdaptiveRetryPolicy,
-    on_retry: Callable[[int, float, OSError], None],
+    on_retry: ReplaceRetryHook | None,
 ) -> None:
     del path, content, retry_policy
+    assert on_retry is not None
     on_retry(1, 0.001, OSError(errno.EBUSY, "busy"))
 
 

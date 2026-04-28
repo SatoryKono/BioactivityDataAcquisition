@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -31,7 +31,7 @@ def _load_yaml(path: str) -> dict[str, Any]:
 
 
 @pytest.fixture(autouse=True)
-def reset_chembl_policy_registry() -> Generator[None, None, None]:
+def reset_chembl_policy_registry() -> Iterator[None]:
     initialize_chembl_policy_registry(DEFAULT_CHEMBL_POLICY_REGISTRY_DATA)
     try:
         yield
