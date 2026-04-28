@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
@@ -20,7 +21,10 @@ from bioetl.infrastructure.storage.delta.schema_ops import (
 
 __all__ = [
     "_MergedSilverWriteRequest",
+    "_MergedSilverMetadataWriterProtocol",
+    "_MergedSilverWriteExecutorProtocol",
     "_PreparedMergedSilverWrite",
+    "_execute_merged_silver_write_flow",
     "_export_silver_merged_csv",
     "_prepare_merged_silver_write",
     "_write_silver_merged_delta",
@@ -49,6 +53,22 @@ class _PreparedMergedSilverWrite:
     arrow_table: pa.Table
 
 
+class _MergedSilverMetadataWriterProtocol(Protocol):
+    """Keyword-friendly contract for merged-write metadata finalization."""
+
+    def __call__(
+        self,
+        *,
+        table_path: str,
+        table_name: str,
+        records: list[BronzeRecord],
+        primary_keys: list[str],
+        completed_at: datetime | None,
+        run_id: str | None,
+        sources_used: list[str] | None,
+    ) -> Awaitable[None]: ...
+
+
 class _SilverWriterMergedHostProtocol(Protocol):
     """Structural type for merged-write helper dependencies."""
 
@@ -57,6 +77,32 @@ class _SilverWriterMergedHostProtocol(Protocol):
     _arrow_converter: ArrowDataConverter
 
     def _resolve_table_path(self, table_name: str) -> str: ...
+
+
+class _MergedSilverWriteExecutorProtocol(Protocol):
+    """Lifecycle strategy for merged Silver write orchestration."""
+
+    logger: LoggerPort
+    _write_silver_merged_metadata: _MergedSilverMetadataWriterProtocol
+
+    def _prepare_merged_silver_write(
+        self,
+        request: _MergedSilverWriteRequest,
+    ) -> _PreparedMergedSilverWrite: ...
+
+    async def _write_silver_merged_delta(
+        self,
+        *,
+        table_path: str,
+        arrow_table: pa.Table,
+    ) -> None: ...
+
+    async def _export_silver_merged_csv(
+        self,
+        *,
+        table_name: str,
+        arrow_table: pa.Table,
+    ) -> None: ...
 
 
 def _prepare_merged_silver_write(
@@ -100,3 +146,41 @@ async def _export_silver_merged_csv(
             arrow_table,
             append=False,
         )
+
+
+async def _execute_merged_silver_write_flow(
+    executor: _MergedSilverWriteExecutorProtocol,
+    request: _MergedSilverWriteRequest,
+) -> None:
+    """Run the common merged Silver lifecycle through executor strategies."""
+    if not request.records:
+        executor.logger.warning(
+            "No records to write for merged Silver",
+            table_name=request.table_name,
+        )
+        return
+
+    prepared = executor._prepare_merged_silver_write(request)
+    executor.logger.info(
+        "Writing merged Silver records",
+        table_name=prepared.request.table_name,
+        path=prepared.table_path,
+        records=len(request.records),
+    )
+    await executor._write_silver_merged_delta(
+        table_path=prepared.table_path,
+        arrow_table=prepared.arrow_table,
+    )
+    await executor._export_silver_merged_csv(
+        table_name=prepared.request.table_name,
+        arrow_table=prepared.arrow_table,
+    )
+    await executor._write_silver_merged_metadata(
+        table_path=prepared.table_path,
+        table_name=prepared.request.table_name,
+        records=prepared.request.records,
+        primary_keys=prepared.request.primary_keys or [],
+        completed_at=prepared.request.completed_at,
+        run_id=prepared.request.run_id,
+        sources_used=prepared.request.sources_used,
+    )

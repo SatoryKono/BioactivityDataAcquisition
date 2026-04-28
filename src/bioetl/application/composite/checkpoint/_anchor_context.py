@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, fields
+from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -113,15 +113,6 @@ def _build_merged_anchor_payload(
     }
 
 
-def _copy_checkpoint_state(
-    state: CompositeCheckpointState, /, **changes: object
-) -> CompositeCheckpointState:
-    """Return a checkpoint state with the requested field updates applied."""
-    payload = {field.name: getattr(state, field.name) for field in fields(state)}
-    payload.update(changes)
-    return CompositeCheckpointState(**payload)
-
-
 def merge_expected_anchors(
     state: CompositeCheckpointState,
     anchors: ExpectedCheckpointContext,
@@ -130,8 +121,9 @@ def merge_expected_anchors(
     merged = normalize_runtime_anchor_payload(
         _build_merged_anchor_payload(state=state, anchors=anchors)
     )
-    updated_state = _copy_checkpoint_state(
-        state,
+    updated_state = CompositeCheckpointState(
+        composite_name=state.composite_name,
+        run_id=state.run_id,
         effective_config_hash=merged["effective_config_hash"] or "",
         effective_config_artifact_id=(merged["effective_config_artifact_id"] or ""),
         execution_fingerprint=merged["execution_fingerprint"] or "",
@@ -140,6 +132,12 @@ def merge_expected_anchors(
         contract_version=merged["contract_version"] or "",
         manifest_id=merged["manifest_id"] or "",
         composite_run_identity=merged["composite_run_identity"] or "",
+        state=state.state,
+        seed_completed=state.seed_completed,
+        merge_completed=state.merge_completed,
+        last_event_id=state.last_event_id,
+        last_event_occurred_at=state.last_event_occurred_at,
+        created_at=state.created_at,
     )
     return updated_state
 

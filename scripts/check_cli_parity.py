@@ -16,15 +16,16 @@ from pathlib import Path
 # Constants
 CLI_REGISTRY_FILE = "src/bioetl/interfaces/cli/main.py"
 CLI_DOC_FILE = "docs/04-reference/cli.md"
+_CLI_COMMAND_NAME_RE = re.compile(r"^[a-z][a-z0-9-]*$")
+_IGNORED_COMMAND_NAMES = {"name", "Commands"}
 
 
 def _is_cli_command_name(command_name: str) -> bool:
     """Return whether a registry entry looks like a real CLI command."""
     return (
-        command_name.replace("-", "").isalpha()
-        and command_name.islower()
+        command_name not in _IGNORED_COMMAND_NAMES
         and not command_name.startswith("__")
-        and command_name not in {"name", "Commands"}
+        and _CLI_COMMAND_NAME_RE.fullmatch(command_name) is not None
     )
 
 

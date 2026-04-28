@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol, cast
 
 import pyarrow as pa
@@ -12,7 +12,9 @@ from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 from bioetl.infrastructure.storage.silver.merged_operations import (
+    _execute_merged_silver_write_flow,
     _export_silver_merged_csv,
+    _MergedSilverMetadataWriterProtocol,
     _MergedSilverWriteRequest,
     _prepare_merged_silver_write,
     _PreparedMergedSilverWrite,
@@ -24,22 +26,6 @@ if TYPE_CHECKING:
     from datetime import datetime
 
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
-
-
-class _MergedSilverMetadataWriterProtocol(Protocol):
-    """Keyword-friendly contract for merged-write metadata finalization."""
-
-    def __call__(
-        self,
-        *,
-        table_path: str,
-        table_name: str,
-        records: list[BronzeRecord],
-        primary_keys: list[str],
-        completed_at: datetime | None,
-        run_id: str | None,
-        sources_used: list[str] | None,
-    ) -> Awaitable[None]: ...
 
 
 class SilverWriterMergedMixin:
@@ -124,14 +110,8 @@ class SilverWriterMergedMixin:
             sources_used: Optional list of source identifiers contributing to the merge.
             preserve_column_order: If True, skip canonical column reordering.
         """
-        if not records:
-            self.logger.warning(
-                "No records to write for merged Silver",
-                table_name=table_name,
-            )
-            return
-
-        prepared = self._prepare_merged_silver_write(
+        await _execute_merged_silver_write_flow(
+            self,
             _MergedSilverWriteRequest(
                 table_name=table_name,
                 records=records,
@@ -140,28 +120,5 @@ class SilverWriterMergedMixin:
                 run_id=run_id,
                 sources_used=sources_used,
                 preserve_column_order=preserve_column_order,
-            )
-        )
-        self.logger.info(
-            "Writing merged Silver records",
-            table_name=prepared.request.table_name,
-            path=prepared.table_path,
-            records=len(records),
-        )
-        await self._write_silver_merged_delta(
-            table_path=prepared.table_path,
-            arrow_table=prepared.arrow_table,
-        )
-        await self._export_silver_merged_csv(
-            table_name=prepared.request.table_name,
-            arrow_table=prepared.arrow_table,
-        )
-        await self._write_silver_merged_metadata(
-            table_path=prepared.table_path,
-            table_name=prepared.request.table_name,
-            records=prepared.request.records,
-            primary_keys=prepared.request.primary_keys or [],
-            completed_at=prepared.request.completed_at,
-            run_id=prepared.request.run_id,
-            sources_used=prepared.request.sources_used,
+            ),
         )
