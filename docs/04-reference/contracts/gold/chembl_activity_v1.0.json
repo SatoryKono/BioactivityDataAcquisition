@@ -5,6 +5,21 @@
   "description": "Gold layer data contract for chembl_activity. Auto-generated from Pandera schema ChEMBLActivityGoldSchema.",
   "type": "object",
   "properties": {
+    "_dq_warn": {
+      "type": "boolean",
+      "nullable": false,
+      "description": "Soft data-quality warning flag."
+    },
+    "_dq_error": {
+      "type": "boolean",
+      "nullable": false,
+      "description": "Hard data-quality error flag."
+    },
+    "_index": {
+      "type": "integer",
+      "nullable": false,
+      "description": ""
+    },
     "entity_id": {
       "type": "string",
       "nullable": false,
@@ -153,6 +168,22 @@
       "nullable": true,
       "description": ""
     },
+    "bao_endpoint_iri": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "bao_endpoint_mapping_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "bao_format": {
       "type": [
         "string",
@@ -161,7 +192,31 @@
       "nullable": true,
       "description": ""
     },
+    "bao_format_iri": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "bao_format_mapping_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "bao_label": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "bao_ontology_version": {
       "type": [
         "string",
         "null"
@@ -313,7 +368,55 @@
       "nullable": true,
       "description": ""
     },
+    "qudt_ontology_version": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "qudt_unit_iri": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "qudt_unit_mapping_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "qudt_units": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "uo_ontology_version": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "uo_unit_iri": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "uo_unit_mapping_status": {
       "type": [
         "string",
         "null"
@@ -455,21 +558,6 @@
         "null"
       ],
       "nullable": true,
-      "description": ""
-    },
-    "_dq_warn": {
-      "type": "boolean",
-      "nullable": false,
-      "description": ""
-    },
-    "_dq_error": {
-      "type": "boolean",
-      "nullable": false,
-      "description": ""
-    },
-    "_index": {
-      "type": "integer",
-      "nullable": false,
       "description": ""
     }
   },

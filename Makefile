@@ -1,4 +1,4 @@
-.PHONY: install test-deps setup-plugins precommit-install lint lint-fix lint-scripts-advisory quality-fast quality-pre-push quality-full test run-local qa-arch-fast qa-arch-full qa-debt quarantine-inspect quarantine-replay quarantine-purge release-lock
+.PHONY: install test-deps setup-plugins precommit-install lint lint-fix lint-scripts-advisory quality-fast quality-pre-push quality-full clean clean-all clean-preflight clean-local-artifacts test run-local qa-arch-fast qa-arch-full qa-debt quarantine-inspect quarantine-replay quarantine-purge release-lock
 
 PYTHON ?= python3
 RUN ?= $(PYTHON) -m
@@ -6,6 +6,20 @@ PIPELINE ?=
 RUN_ID ?=
 RUN_LOCAL_PIPELINE ?= chembl_activity
 RUN_LOCAL_LIMIT ?= 10
+DRY_RUN ?= 0
+PURGE_WORKTREES ?= 0
+
+ifeq ($(filter 1 true yes TRUE YES,$(DRY_RUN)),)
+	CLEAN_APPLY_FLAG := --apply
+else
+	CLEAN_APPLY_FLAG :=
+endif
+
+ifeq ($(filter 1 true yes TRUE YES,$(PURGE_WORKTREES)),)
+	PURGE_WORKTREES_CMD :=
+else
+	PURGE_WORKTREES_CMD := rm -rf .worktrees .rollback
+endif
 
 install:
 	@if command -v uv >/dev/null 2>&1; then \
@@ -43,6 +57,19 @@ quality-pre-push:
 
 quality-full:
 	$(RUN) pre_commit run --all-files
+
+clean:
+	$(RUN) scripts.engineering.diagnostics cleanup $(CLEAN_APPLY_FLAG)
+
+clean-all:
+	$(RUN) scripts.engineering.diagnostics cleanup $(CLEAN_APPLY_FLAG) --purge-logs
+
+clean-preflight:
+	$(RUN) scripts.engineering.repo preflight-cleanup $(if $(filter 1 true yes TRUE YES,$(DRY_RUN)),--dry-run)
+
+clean-local-artifacts:
+	$(RUN) scripts.engineering.diagnostics cleanup $(CLEAN_APPLY_FLAG)
+	@if [ -n "$(PURGE_WORKTREES_CMD)" ]; then $(PURGE_WORKTREES_CMD); fi
 
 test:
 	$(RUN) pytest

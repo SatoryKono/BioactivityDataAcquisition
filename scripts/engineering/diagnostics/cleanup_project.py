@@ -29,8 +29,12 @@ import logging
 import shutil
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime
 from pathlib import Path
+
+from scripts.engineering.repo._root_governance import (
+    is_within_blocked_cleanup_zone,
+    load_root_governance_policy,
+)
 
 # Configure logging for CLI output
 logging.basicConfig(
@@ -42,6 +46,7 @@ logger = logging.getLogger(__name__)
 
 # Project root
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
+DEFAULT_ARCHIVE_DIR = Path("reports/archived_logs/manual")
 
 
 # =============================================================================
@@ -169,6 +174,26 @@ def _is_venv_path(path: Path) -> bool:
     return ".venv" in path.parts or "venv" in path.parts
 
 
+def _load_blocked_cleanup_paths(root: Path) -> frozenset[str]:
+    """Best-effort loading of blocked cleanup zones for local artifact cleanup."""
+    try:
+        return load_root_governance_policy(root).blocked_cleanup_paths
+    except RuntimeError:
+        return frozenset()
+
+
+def _is_excluded_cleanup_path(
+    root: Path,
+    path: Path,
+    *,
+    blocked_cleanup_paths: frozenset[str],
+) -> bool:
+    """Return True when a path must not be touched by local artifact cleanup."""
+    if _is_venv_path(path):
+        return True
+    return is_within_blocked_cleanup_zone(path.relative_to(root), blocked_cleanup_paths)
+
+
 def _safe_file_size(path: Path) -> int:
     """Return file size, tolerating transient filesystem errors."""
     try:
@@ -203,13 +228,21 @@ def _rglob_file_targets(
     category: str,
     *,
     excluded_parts: tuple[str, ...] = (),
+    blocked_cleanup_paths: frozenset[str],
 ) -> list[CleanupTarget]:
     """Collect matching files under root while honoring path exclusions."""
     targets: list[CleanupTarget] = []
     excluded_parts_set = set(excluded_parts)
     for pattern in patterns:
         for matched_path in root.rglob(pattern):
-            if not matched_path.is_file() or _is_venv_path(matched_path):
+            if (
+                not matched_path.is_file()
+                or _is_excluded_cleanup_path(
+                    root,
+                    matched_path,
+                    blocked_cleanup_paths=blocked_cleanup_paths,
+                )
+            ):
                 continue
             if excluded_parts_set.intersection(matched_path.parts):
                 continue
@@ -217,61 +250,125 @@ def _rglob_file_targets(
     return targets
 
 
-def _find_cache_dirs(root: Path) -> list[CleanupTarget]:
+def _find_cache_dirs(
+    root: Path,
+    *,
+    blocked_cleanup_paths: frozenset[str],
+) -> list[CleanupTarget]:
     """Find Python cache directories."""
     targets: list[CleanupTarget] = []
     for name in PYTHON_CACHE_DIRS:
         for cache_dir in root.rglob(name):
-            if not cache_dir.is_dir() or _is_venv_path(cache_dir):
+            if (
+                not cache_dir.is_dir()
+                or _is_excluded_cleanup_path(
+                    root,
+                    cache_dir,
+                    blocked_cleanup_paths=blocked_cleanup_paths,
+                )
+            ):
                 continue
             targets.append(_dir_target(cache_dir, "python_cache"))
     return targets
 
 
-def _find_build_dirs(root: Path) -> list[CleanupTarget]:
+def _find_build_dirs(
+    root: Path,
+    *,
+    blocked_cleanup_paths: frozenset[str],
+) -> list[CleanupTarget]:
     """Find build artifact directories."""
     targets: list[CleanupTarget] = []
     for name in BUILD_DIRS:
         build_dir = root / name
-        if build_dir.exists() and build_dir.is_dir():
+        if (
+            build_dir.exists()
+            and build_dir.is_dir()
+            and not _is_excluded_cleanup_path(
+                root,
+                build_dir,
+                blocked_cleanup_paths=blocked_cleanup_paths,
+            )
+        ):
             targets.append(_dir_target(build_dir, "build_artifact"))
 
     # Egg-info directories
     for egg_dir in root.glob(EGGINFO_PATTERN):
-        if egg_dir.is_dir():
+        if (
+            egg_dir.is_dir()
+            and not _is_excluded_cleanup_path(
+                root,
+                egg_dir,
+                blocked_cleanup_paths=blocked_cleanup_paths,
+            )
+        ):
             targets.append(_dir_target(egg_dir, "build_artifact"))
 
     return targets
 
 
-def _find_coverage_files(root: Path) -> list[CleanupTarget]:
+def _find_coverage_files(
+    root: Path,
+    *,
+    blocked_cleanup_paths: frozenset[str],
+) -> list[CleanupTarget]:
     """Find coverage-related files."""
     targets: list[CleanupTarget] = []
     for pattern in COVERAGE_FILES:
         for cov_file in root.glob(pattern):
-            if cov_file.is_file():
+            if (
+                cov_file.is_file()
+                and not _is_excluded_cleanup_path(
+                    root,
+                    cov_file,
+                    blocked_cleanup_paths=blocked_cleanup_paths,
+                )
+            ):
                 targets.append(_file_target(cov_file, "coverage"))
     return targets
 
 
-def _find_compiled_files(root: Path) -> list[CleanupTarget]:
+def _find_compiled_files(
+    root: Path,
+    *,
+    blocked_cleanup_paths: frozenset[str],
+) -> list[CleanupTarget]:
     """Find compiled Python files outside cache dirs."""
     return _rglob_file_targets(
         root,
         COMPILED_PATTERNS,
         "compiled",
         excluded_parts=("__pycache__",),
+        blocked_cleanup_paths=blocked_cleanup_paths,
     )
 
 
-def _find_log_files(root: Path) -> list[CleanupTarget]:
+def _find_log_files(
+    root: Path,
+    *,
+    blocked_cleanup_paths: frozenset[str],
+) -> list[CleanupTarget]:
     """Find log files."""
-    return _rglob_file_targets(root, LOG_PATTERNS, "log")
+    return _rglob_file_targets(
+        root,
+        LOG_PATTERNS,
+        "log",
+        blocked_cleanup_paths=blocked_cleanup_paths,
+    )
 
 
-def _find_temp_files(root: Path) -> list[CleanupTarget]:
+def _find_temp_files(
+    root: Path,
+    *,
+    blocked_cleanup_paths: frozenset[str],
+) -> list[CleanupTarget]:
     """Find temporary files."""
-    return _rglob_file_targets(root, TEMP_PATTERNS, "temp")
+    return _rglob_file_targets(
+        root,
+        TEMP_PATTERNS,
+        "temp",
+        blocked_cleanup_paths=blocked_cleanup_paths,
+    )
 
 
 def _format_size(size_bytes: int) -> str:
@@ -287,6 +384,7 @@ def _format_size(size_bytes: int) -> str:
 def find_cleanup_targets(
     root: Path,
     include_logs: bool = False,
+    blocked_cleanup_paths: frozenset[str] | None = None,
 ) -> list[CleanupTarget]:
     """Find all cleanup targets.
 
@@ -298,22 +396,44 @@ def find_cleanup_targets(
         List of CleanupTarget objects.
     """
     targets = []
+    effective_blocked_paths = (
+        _load_blocked_cleanup_paths(root)
+        if blocked_cleanup_paths is None
+        else blocked_cleanup_paths
+    )
 
     # Always include these
-    targets.extend(_find_cache_dirs(root))
-    targets.extend(_find_build_dirs(root))
-    targets.extend(_find_coverage_files(root))
-    targets.extend(_find_compiled_files(root))
-    targets.extend(_find_temp_files(root))
+    targets.extend(
+        _find_cache_dirs(root, blocked_cleanup_paths=effective_blocked_paths)
+    )
+    targets.extend(
+        _find_build_dirs(root, blocked_cleanup_paths=effective_blocked_paths)
+    )
+    targets.extend(
+        _find_coverage_files(root, blocked_cleanup_paths=effective_blocked_paths)
+    )
+    targets.extend(
+        _find_compiled_files(root, blocked_cleanup_paths=effective_blocked_paths)
+    )
+    targets.extend(
+        _find_temp_files(root, blocked_cleanup_paths=effective_blocked_paths)
+    )
 
     # Conditionally include logs
     if include_logs:
-        targets.extend(_find_log_files(root))
+        targets.extend(
+            _find_log_files(root, blocked_cleanup_paths=effective_blocked_paths)
+        )
 
     return targets
 
 
-def archive_logs(root: Path, targets: list[CleanupTarget]) -> list[CleanupTarget]:
+def archive_logs(
+    root: Path,
+    targets: list[CleanupTarget],
+    *,
+    archive_dir: Path | None = None,
+) -> list[CleanupTarget]:
     """Archive log files to reports/ directory.
 
     Args:
@@ -324,21 +444,21 @@ def archive_logs(root: Path, targets: list[CleanupTarget]) -> list[CleanupTarget
         List of archived targets.
     """
     archived: list[CleanupTarget] = []
-    reports_dir = root / "reports" / "archived_logs"
-
-    # Create archive directory with timestamp
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    archive_dir = reports_dir / timestamp
+    effective_archive_dir = (
+        (root / archive_dir).resolve()
+        if archive_dir is not None
+        else (root / DEFAULT_ARCHIVE_DIR).resolve()
+    )
 
     log_targets = [t for t in targets if t.category == "log"]
     if not log_targets:
         return archived
 
-    archive_dir.mkdir(parents=True, exist_ok=True)
+    effective_archive_dir.mkdir(parents=True, exist_ok=True)
 
     for target in log_targets:
         try:
-            dest = archive_dir / target.path.name
+            dest = effective_archive_dir / target.path.name
             shutil.copy2(target.path, dest)
             archived.append(target)
             logger.info("  Archived: %s -> %s", target.path.name, dest)
@@ -489,6 +609,12 @@ def parse_args() -> argparse.Namespace:
         help="Include log files in cleanup (deletes them)",
     )
     parser.add_argument(
+        "--archive-dir",
+        type=Path,
+        default=DEFAULT_ARCHIVE_DIR,
+        help="Deterministic archive destination used with --archive-logs",
+    )
+    parser.add_argument(
         "--path",
         type=Path,
         default=PROJECT_ROOT,
@@ -524,7 +650,11 @@ def main() -> int:
     if args.apply:
         # Archive logs if requested
         if args.archive_logs:
-            result.archived = archive_logs(root, targets)
+            result.archived = archive_logs(
+                root,
+                targets,
+                archive_dir=args.archive_dir,
+            )
             # Remove archived logs from deletion targets
             archived_paths = {t.path for t in result.archived}
             targets = [t for t in targets if t.path not in archived_paths]

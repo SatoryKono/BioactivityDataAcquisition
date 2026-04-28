@@ -60,28 +60,29 @@ async with self._services, self._lock_manager:
 
 ## Политика метрик (fail_fast)
 
-Параметр `BIOETL_FAIL_FAST_METRICS` управляет поведением при ошибках запуска Prometheus сервера:
+Параметр `BIOETL_OBSERVABILITY__METRICS_FAIL_FAST` управляет поведением при ошибках запуска Prometheus сервера. Для production launcher paths (`BIOETL_ENV=prod` и `BIOETL_TEST_MODE=false`) дефолт разрешается как `true`, если параметр не задан явно.
 
-| Значение          | Поведение                                                      |
-| ----------------- | -------------------------------------------------------------- |
-| `false` (default) | Warning в лог, метрики отключаются, пайплайн продолжает работу |
-| `true`            | Исключение `MetricsServerError`, пайплайн не запускается       |
+| Значение | Поведение                                                      |
+| -------- | -------------------------------------------------------------- |
+| `false`  | Warning в лог, метрики отключаются, пайплайн продолжает работу |
+| `true`   | Исключение `MetricsServerError`, пайплайн не запускается       |
 
 ### Рекомендации
 
-- **Development/CI**: `false` — не блокировать из-за занятых портов
-- **Production с мониторингом**: `true` — гарантировать наличие метрик
+- **Development/CI**: `false` — не блокировать из-за занятых портов.
+- **Production с мониторингом**: `true` — гарантировать наличие метрик; это runtime default для production launcher paths.
+- **Production opt-out**: допускается только явной настройкой `BIOETL_OBSERVABILITY__METRICS_FAIL_FAST=false`.
 
 ### Пример настройки
 
 ```bash
 # Строгий режим для production
-export BIOETL_FAIL_FAST_METRICS=true
+export BIOETL_ENV=prod
+export BIOETL_OBSERVABILITY__METRICS_FAIL_FAST=true
 
 # Или в конфиге
-metrics:
-  port: 8000
-  fail_fast: true
+observability:
+  metrics_fail_fast: true
 ```
 
 ## Graceful Shutdown

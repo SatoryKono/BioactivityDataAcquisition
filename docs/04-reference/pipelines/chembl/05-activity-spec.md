@@ -79,6 +79,13 @@ Representative fields:
 - `standard_units`
 - `pchembl_value`
 - `data_validity_comment`
+- `bao_endpoint_iri`
+- `bao_format_iri`
+- `bao_ontology_version`
+- `uo_unit_iri`
+- `uo_ontology_version`
+- `qudt_unit_iri`
+- `qudt_ontology_version`
 - `canonical_smiles`
 - `target_pref_name`
 - `assay_type`

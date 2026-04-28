@@ -29,6 +29,7 @@ from scripts.engineering.common.cli_dispatch import (
     print_unknown_command,
     python_command,
     run_command,
+    shell_command,
 )
 
 COMMANDS = {
@@ -39,10 +40,16 @@ COMMANDS = {
     "check-versions": "check_version_consistency.py",
     "check-cleanliness": "audit_root_cleanliness.py",
     "check-root-review-registry": "check_root_hygiene_review_registry.py",
+    "preflight-cleanup": "preflight_cleanup.sh",
     "split-testing-roadmap": "split_testing_roadmap_issue.py",
     "sync-docs-issues": "sync_docs_issues.py",
 }
-COMMAND_SPECS = {name: python_command(script) for name, script in COMMANDS.items()}
+COMMAND_SPECS = {
+    name: python_command(script)
+    for name, script in COMMANDS.items()
+    if script.endswith(".py")
+}
+COMMAND_SPECS["preflight-cleanup"] = shell_command(COMMANDS["preflight-cleanup"])
 
 _DIR = Path(__file__).parent
 

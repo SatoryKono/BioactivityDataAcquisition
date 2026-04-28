@@ -6,15 +6,49 @@
       "file": "docs/04-reference/contracts/gold/chembl_activity_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "added_properties": [
+          "bao_endpoint_iri",
+          "bao_endpoint_mapping_status",
+          "bao_format_iri",
+          "bao_format_mapping_status",
+          "bao_ontology_version",
+          "qudt_ontology_version",
+          "qudt_unit_iri",
+          "qudt_unit_mapping_status",
+          "uo_ontology_version",
+          "uo_unit_iri",
+          "uo_unit_mapping_status"
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
+        ],
+        "required_changed": false
       }
     },
     "chembl_assay": {
@@ -22,14 +56,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "chembl_assay_parameters": {
@@ -37,14 +93,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "chembl_cell_line": {
@@ -52,14 +130,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "chembl_compound_record": {
@@ -67,14 +167,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "chembl_molecule": {
@@ -82,14 +204,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "chembl_protein_class": {
@@ -97,14 +241,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "chembl_publication": {
@@ -112,14 +278,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "chembl_publication_similarity": {
@@ -127,14 +315,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "chembl_publication_term": {
@@ -142,14 +352,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "chembl_subcellular_fraction": {
@@ -157,14 +389,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "chembl_target_component": {
@@ -172,14 +426,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "chembl_target": {
@@ -187,14 +463,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "chembl_tissue": {
@@ -202,14 +500,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "composite_activity": {
@@ -217,16 +537,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_composite_run_id",
-          "_ingestion_ts",
-          "_lineage_created_at",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "composite_assay": {
@@ -234,16 +574,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_composite_run_id",
-          "_ingestion_ts",
-          "_lineage_created_at",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "composite_molecule": {
@@ -251,16 +611,9 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_composite_run_id",
-          "_ingestion_ts",
-          "_lineage_created_at",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
-        ],
+        "removed_properties": [],
         "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "composite_publication": {
@@ -268,16 +621,9 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_composite_run_id",
-          "_ingestion_ts",
-          "_lineage_created_at",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
-        ],
+        "removed_properties": [],
         "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "composite_target": {
@@ -285,16 +631,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_composite_run_id",
-          "_ingestion_ts",
-          "_lineage_created_at",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "crossref_publication": {
@@ -302,14 +668,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "openalex_publication": {
@@ -317,14 +705,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "pubchem_compound": {
@@ -332,14 +742,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "pubmed_publication": {
@@ -347,14 +779,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "semanticscholar_publication": {
@@ -362,14 +816,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "uniprot_idmapping": {
@@ -377,14 +853,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "uniprot_protein": {
@@ -392,14 +890,36 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "_ingestion_ts",
-          "_run_id",
-          "_run_type",
-          "_source_batch_id"
+        "removed_properties": [],
+        "changed_properties": [
+          {
+            "property": "_dq_error",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Hard data-quality error flag."
+            }
+          },
+          {
+            "property": "_dq_warn",
+            "before": {
+              "type": "boolean",
+              "nullable": false,
+              "description": ""
+            },
+            "after": {
+              "type": "boolean",
+              "nullable": false,
+              "description": "Soft data-quality warning flag."
+            }
+          }
         ],
-        "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     }
   }

@@ -95,9 +95,9 @@ ______________________________________________________________________
 | `create_pipeline.py`           | src/tools/                       | Да      | —                                                            | —            | Генерация boilerplate для новых пайплайнов |
 | `verify_schema_parity.py`      | src/tools/                       | Да      | —                                                            | —            | Верификация Silver↔Gold schema parity      |
 | `file_merger.py`               | src/tools/                       | Нет     | —                                                            | —            | Объединение файлов с метаданными           |
-| `cleanup_project.py`           | scripts/engineering/diagnostics/ | Нет     | —                                                            | `make clean` | Очистка кэшей и артефактов                 |
+| `cleanup_project.py`           | scripts/engineering/diagnostics/ | Нет     | `uv run python -m scripts.engineering.diagnostics cleanup`   | `make clean` | Очистка локальных кэшей и build-артефактов |
 | `cleanup_consolidate.py`       | scripts/engineering/diagnostics/ | Нет     | —                                                            | —            | Консолидированный аудит очистки            |
-| `audit_structure.py`           | scripts/engineering/diagnostics/ | Нет     | —                                                            | —            | Аудит соответствия File Policy             |
+| `audit_structure.py`           | scripts/engineering/diagnostics/ | Нет     | `uv run python -m scripts.engineering.diagnostics audit-structure` | —     | Аудит соответствия File Policy             |
 | `vacuum_delta.py`              | scripts/ops/data/                | Нет     | `uv run python -m scripts.ops.data vacuum`                   | —            | VACUUM Delta Lake таблиц                   |
 | `dq_baseline_update.py`        | scripts/engineering/baselines/   | Нет     | `uv run python -m scripts.engineering.baselines dq-baseline` | —            | Пересчёт DQ baseline                       |
 | `verify_checksums.py`          | scripts/ops/data/                | Нет     | `uv run python -m scripts.ops.data checksums`                | —            | Верификация контрольных сумм               |
@@ -143,7 +143,7 @@ ______________________________________________________________________
 | Документ                                                    | Связанные инструменты                                          |
 | ----------------------------------------------------------- | -------------------------------------------------------------- |
 | [03-file-policy.md](governance/03-file-policy.md)           | `audit_structure.py`, `create_pipeline.py`                     |
-| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `vacuum_delta.py`, `verify_checksums.py` |
+| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `cleanup_repository.py`, `vacuum_delta.py`, `verify_checksums.py` |
 | RULES.md §2                                                 | `naming_audit.py`                                              |
 | RULES.md §2.1.1                                             | `vacuum_delta.py`                                              |
 | RULES.md §3.4.1                                             | `dq_baseline_update.py`                                        |

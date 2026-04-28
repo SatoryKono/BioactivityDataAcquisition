@@ -14,6 +14,7 @@ import pytest
 from bioetl.composition.bootstrap.runtime.metrics_bootstrap import (
     bootstrap_metrics_port,
     maybe_start_metrics_server,
+    resolve_metrics_fail_fast,
 )
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.ports.noop import NoOpMetrics
@@ -28,9 +29,14 @@ def _make_settings(
     metrics_retry_delay: float = 1.0,
     metrics_port: int = 8000,
     metrics_addr: str = "0.0.0.0",
+    env: str = "dev",
+    test_mode: bool = False,
+    explicit_observability_fields: set[str] | None = None,
 ) -> SimpleNamespace:
     """Create a minimal Settings-like object for metrics bootstrap tests."""
     return SimpleNamespace(
+        env=env,
+        test_mode=test_mode,
         metrics_port=metrics_port,
         metrics_addr=metrics_addr,
         observability=SimpleNamespace(
@@ -39,6 +45,7 @@ def _make_settings(
             metrics_fail_fast=metrics_fail_fast,
             metrics_retry_count=metrics_retry_count,
             metrics_retry_delay=metrics_retry_delay,
+            model_fields_set=explicit_observability_fields or set(),
         ),
     )
 
@@ -162,6 +169,49 @@ class TestMaybeStartMetricsServer:
             retry_count=5,
             retry_delay=2.5,
         )
+
+    def test_defaults_fail_fast_for_production_launcher(self) -> None:
+        """Production launchers default to fail-fast metrics startup."""
+        settings = _make_settings(
+            env="prod",
+            metrics_fail_fast=False,
+        )
+        mock_service = MagicMock()
+        mock_service.start.return_value = SimpleNamespace(success=True)
+        mock_service_factory = MagicMock(return_value=mock_service)
+
+        maybe_start_metrics_server(
+            settings=settings,
+            metrics_service_factory=mock_service_factory,
+        )
+
+        mock_service.start.assert_called_once_with(
+            port=8000,
+            addr="0.0.0.0",
+            fail_fast=True,
+            retry_count=3,
+            retry_delay=1.0,
+        )
+
+    def test_allows_explicit_production_fail_fast_override(self) -> None:
+        """Explicit operator config can still opt out of fail-fast startup."""
+        settings = _make_settings(
+            env="prod",
+            metrics_fail_fast=False,
+            explicit_observability_fields={"metrics_fail_fast"},
+        )
+
+        assert resolve_metrics_fail_fast(settings) is False
+
+    def test_does_not_default_fail_fast_in_production_test_mode(self) -> None:
+        """Test-mode production fixtures keep graceful metrics degradation."""
+        settings = _make_settings(
+            env="prod",
+            test_mode=True,
+            metrics_fail_fast=False,
+        )
+
+        assert resolve_metrics_fail_fast(settings) is False
 
     def test_propagates_metrics_service_exception(self) -> None:
         """Should propagate exceptions from MetricsService.start to caller."""

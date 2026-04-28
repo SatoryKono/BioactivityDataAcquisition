@@ -75,6 +75,23 @@ review_lanes:
         canonical_path: .vibe
         action_if_reintroduced: keep_only_with_documented_owner_and_transition_note
 
+  - lane_id: root_tools_surface
+    classification: owner_decision_required
+    scope: root-level tooling pending canonical placement review
+    verification:
+      - git ls-files tools
+      - rg -n "tools/|fix_http|setup_git_path" .github docs scripts tests configs README.md Makefile pyproject.toml
+      - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
+    candidates:
+      - path: tools/fix_http.py
+        current_live_state: present_approved_root_surface
+        canonical_path: scripts
+        action_if_reintroduced: classify_into_scripts_or_src_tools_then_relocate_or_explicitly_ratify
+      - path: tools/windows/setup_git_path.ps1
+        current_live_state: present_approved_root_surface
+        canonical_path: scripts/engineering/dev/powershell
+        action_if_reintroduced: classify_into_scripts_or_keep_with_explicit_root_tooling_rationale
+
   - lane_id: root_ad_hoc_docs_and_diagnostics
     classification: review_required
     scope: non-canonical root notes, diagnostics, and ad-hoc tests

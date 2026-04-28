@@ -13,12 +13,12 @@
     "_dq_warn": {
       "type": "boolean",
       "nullable": false,
-      "description": ""
+      "description": "Soft data-quality warning flag."
     },
     "_dq_error": {
       "type": "boolean",
       "nullable": false,
-      "description": ""
+      "description": "Hard data-quality error flag."
     },
     "_index": {
       "type": "integer",

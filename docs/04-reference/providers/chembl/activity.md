@@ -78,7 +78,7 @@ ______________________________________________________________________
 
 **Файл:** `src/bioetl/domain/entities/bioactivity/_entity.py`
 
-Сущность `Bioactivity` содержит **63 dataclass-поля** (включая унаследованные служебные поля `BaseEntity`), сгруппированных по категориям:
+Сущность `Bioactivity` содержит **77 dataclass-полей** (включая унаследованные служебные поля `BaseEntity`), сгруппированных по категориям:
 
 #### Идентификаторы
 
@@ -127,8 +127,17 @@ canonical activity fields, если они уже есть в Bronze payload. Д
 | `assay_variant_accession` | `str` | Accession варианта белка в анализе |
 | `assay_variant_mutation`  | `str` | Мутация варианта в анализе         |
 | `bao_endpoint`            | `str` | BAO endpoint (онтология)           |
+| `bao_endpoint_iri`        | `str` | Persistent OBO IRI для endpoint    |
+| `bao_endpoint_mapping_status` | `str` | Статус IRI mapping: `mapped`, `unmapped`, `missing` |
 | `bao_format`              | `str` | BAO format                         |
+| `bao_format_iri`          | `str` | Persistent OBO IRI для assay format |
+| `bao_format_mapping_status` | `str` | Статус IRI mapping: `mapped`, `unmapped`, `missing` |
 | `bao_label`               | `str` | BAO label                          |
+| `bao_ontology_version`    | `str` | Версия BAO registry для companion IRI |
+
+BAO token-поля (`bao_endpoint`, `bao_format`, `bao_label`) сохраняются для обратной
+совместимости. Companion-поля добавляют machine-readable IRI, версию ontology
+registry и статус mapping без изменения исторических token-полей.
 
 #### Сырые значения активности
 
@@ -141,7 +150,17 @@ canonical activity fields, если они уже есть в Bronze payload. Д
 | `upper_value` | `float` | Верхняя граница диапазона      |
 | `text_value`  | `str`   | Текстовое значение             |
 | `qudt_units`  | `str`   | Единицы из онтологии QUDT      |
+| `qudt_unit_iri` | `str` | Persistent QUDT unit IRI |
+| `qudt_unit_mapping_status` | `str` | Статус QUDT mapping: `mapped`, `unmapped`, `missing` |
+| `qudt_ontology_version` | `str` | Версия QUDT registry для companion IRI |
 | `uo_units`    | `str`   | Единицы из онтологии UO        |
+| `uo_unit_iri` | `str` | Persistent OBO IRI для UO unit |
+| `uo_unit_mapping_status` | `str` | Статус UO mapping: `mapped`, `unmapped`, `missing` |
+| `uo_ontology_version` | `str` | Версия UO registry для companion IRI |
+
+Для неизвестных или provider-specific единиц token сохраняется, а companion IRI
+остаётся `null` со статусом `unmapped`. Для отсутствующих значений статус
+становится `missing`.
 
 #### Стандартизированные значения
 
@@ -390,7 +409,7 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("pchembl_value", pa.float64()),
         pa.field("_source", pa.string()),
         pa.field("_index", pa.int64()),
-        # ... всего 62 поля (включая action_type*)
+        # ... всего 77 полей (включая action_type* и ontology companion fields)
     ]
 )
 ```

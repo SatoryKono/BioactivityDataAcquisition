@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import yaml
 from scripts.engineering.repo import _root_governance as root_governance
 
 ALLOWLIST_FILE = root_governance.ALLOWLIST_FILE
