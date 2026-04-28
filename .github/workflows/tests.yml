@@ -159,6 +159,9 @@ jobs:
             -   name: Validate hotspot-family baseline artifacts
                 run: uv run python -m scripts.engineering.qa report-family-baseline --active-only --check
 
+            -   name: Validate xwalk missing backlog
+                run: uv run python -m scripts.engineering.qa check-xwalk-missing-backlog
+
             -   name: Pre-merge naming/package consistency gate
                 run: uv run python scripts/engineering/qa/check_naming_package_consistency.py --check
 
