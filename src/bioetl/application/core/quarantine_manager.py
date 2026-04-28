@@ -14,9 +14,10 @@ from bioetl.application.core._quarantine_manager_support import (
 from bioetl.application.core._quarantine_support import (
     build_dq_quarantine_request,
     count_dq_error_types,
-    emit_quarantine_events,
     track_processed_quarantined,
     track_quarantine_metrics,
+    write_quarantine_request_with_events,
+    write_quarantine_requests_with_events,
 )
 from bioetl.application.observability.domain_event_emitter import DomainEventEmitterPort
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
@@ -108,25 +109,16 @@ class QuarantineManagerService(QuarantineManagerSupportMixin):
             run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
-        await self._quarantine.write(
-            pipeline=request["pipeline"],
-            error_code=request["error_code"],
-            payload=request["payload"],
-            bronze_batch_id=request["bronze_batch_id"],
-            run_id=request.get("run_id"),
-            metadata=request.get("metadata"),
-            ingestion_ts=request["ingestion_ts"],
-        )
-        emit_quarantine_events(
+        await write_quarantine_request_with_events(
+            quarantine=self._quarantine,
+            request=request,
             emitter=self._domain_event_emitter,
             pipeline_name=self._pipeline_name,
-            payload=record,
             error_code=error_type.value,
             error_message=error_details,
             batch_id=batch_id,
             run_id=run_id,
             ingestion_ts=ingestion_ts,
-            metadata=request["metadata"],
         )
         track_quarantine_metrics(
             metrics=self._metrics,
@@ -165,21 +157,17 @@ class QuarantineManagerService(QuarantineManagerSupportMixin):
             )
             for record, error_type, error_details in records
         ]
-        await self._quarantine.write_many(write_requests)
-        for request, (_, error_type, error_details) in zip(
-            write_requests, records, strict=True
-        ):
-            emit_quarantine_events(
-                emitter=self._domain_event_emitter,
-                pipeline_name=self._pipeline_name,
-                payload=request["payload"],
-                error_code=error_type.value,
-                error_message=error_details,
-                batch_id=batch_id,
-                run_id=run_id,
-                ingestion_ts=ingestion_ts,
-                metadata=request["metadata"],
-            )
+        await write_quarantine_requests_with_events(
+            quarantine=self._quarantine,
+            requests=write_requests,
+            emitter=self._domain_event_emitter,
+            pipeline_name=self._pipeline_name,
+            error_codes=tuple(error_type.value for _, error_type, _ in records),
+            error_messages=tuple(error_details for _, _, error_details in records),
+            batch_id=batch_id,
+            run_id=run_id,
+            ingestion_ts=ingestion_ts,
+        )
         for reason, count in count_dq_error_types(records).items():
             track_quarantine_metrics(
                 metrics=self._metrics,

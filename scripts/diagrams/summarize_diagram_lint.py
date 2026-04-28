@@ -18,6 +18,9 @@ def _out(message: str) -> None:
 
 def _err(message: str) -> None:
     sys.stderr.write(f"{message}\n")
+
+
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Summarize output produced by scripts/diagrams/lint_diagrams.py --json",
     )

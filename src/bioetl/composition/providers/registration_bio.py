@@ -18,9 +18,8 @@ from bioetl.composition.factories.datasource.pubchem import (
     create_pubchem_adapter,
 )
 from bioetl.composition.providers._config_helpers import (
-    _build_provider_family_http_config_map,
+    _build_provider_family_config_map,
     _get_adapter_config,
-    _get_rate_limits_from_config,
     _validate_extraction_input_filter_overlap,
     _wrap_with_filter,
 )
@@ -33,6 +32,7 @@ from bioetl.composition.providers._registration_contracts import (
     HttpProviderConfigSpec,
     ProviderAssemblySupport,
     build_data_source_provider_config,
+    build_http_provider_config_spec,
     resolve_provider_assembly_support,
 )
 from bioetl.domain.models.filter import ExtractionParams
@@ -256,14 +256,14 @@ def _build_bio_http_provider_specs(
     uniprot = rate_limits["uniprot"]
 
     return (
-        HttpProviderConfigSpec(
+        build_http_provider_config_spec(
             provider_name="chembl",
             adapter_class=ChemblAdapter,
             rate=chembl.rate,
             capacity=chembl.capacity,
             data_source_creator=_create_chembl_data_source,
         ),
-        HttpProviderConfigSpec(
+        build_http_provider_config_spec(
             provider_name="uniprot",
             adapter_class=UniProtAdapter,
             rate=uniprot.rate,
@@ -271,7 +271,7 @@ def _build_bio_http_provider_specs(
             rate_overrides={"uniprot_api_key": 100.0},
             data_source_creator=_create_uniprot_data_source,
         ),
-        HttpProviderConfigSpec(
+        build_http_provider_config_spec(
             provider_name="uniprot_idmapping",
             adapter_class=IDMappingDataSource,
             rate=uniprot.rate,
@@ -305,15 +305,11 @@ def _get_bio_provider_configs(
     assembly_support: ProviderAssemblySupport | None = None,
 ) -> dict[str, ProviderConfig]:
     """Build ProviderConfig entries for bio providers."""
-    support = resolve_provider_assembly_support(assembly_support)
-    rate_limits = _get_rate_limits_from_config(
+    return _build_provider_family_config_map(
         "chembl",
         "pubchem",
         "uniprot",
+        assembly_support=assembly_support,
+        http_spec_builder=_build_bio_http_provider_specs,
+        extra_config_builder=_build_bio_extra_provider_configs,
     )
-    configs = _build_provider_family_http_config_map(
-        rate_limits=rate_limits,
-        assembly_support=support,
-        spec_builder=_build_bio_http_provider_specs,
-    )
-    return dict(configs | _build_bio_extra_provider_configs(rate_limits, support))

@@ -86,6 +86,12 @@ ENTITY_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
         "filters",
         "contracts",
         "hash_policy",
+        "source_entities",
+        "composite_fields",
+        "loading",
+        "field_resolution",
+        "dq_rules",
+        "status",
     }
 )
 
@@ -128,6 +134,8 @@ QUALITY_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
         "entity_cross_field_validations",
         "key_nullability",
         "entity_conditional_validations",
+        "provider_conditional_validations",
+        "dq_rules",
     }
 )
 
@@ -142,6 +150,7 @@ FILTER_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
         "extraction_params",
         "batch_size",
         "page_size",
+        "filter_rules",
     }
 )
 
@@ -152,6 +161,8 @@ CONTRACT_ALLOWED_KEYS: Final[frozenset[str]] = frozenset(
         "rename_map",
         "hash_include",
         "hash_exclude",
+        "scd_type",
+        "gold_business_rules",
     }
 )
 

@@ -5,12 +5,13 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.lineage._fragment_finalization import (
+    finalize_lineage_fragment,
+)
 from bioetl.application.services.lineage.metadata_lineage_composite import (
     _build_dataset_composite_lineage_components,
 )
 from bioetl.application.services.lineage.metadata_lineage_nodes import (
-    build_semantic_fragment_id,
-    dedupe_nodes,
     fragment_timestamp,
     gold_dataset_node,
     manifest_edges,
@@ -290,16 +291,10 @@ def build_gold_lineage_fragment(
         run_context, input_data, nodes, created_at, composite_source_edges
     )
 
-    deduped_nodes = dedupe_nodes(nodes)
-    return LineageGraphFragment(
-        fragment_id=build_semantic_fragment_id(
-            "gold",
-            nodes=deduped_nodes,
-            edges=edges,
-        ),
-        nodes=deduped_nodes,
-        edges=tuple(edges),
-        run_id=str(run_context.run_id),
-        manifest_id=run_context.manifest_id,
+    return finalize_lineage_fragment(
+        fragment_name="gold",
+        run_context=run_context,
+        nodes=nodes,
+        edges=edges,
         created_at=created_at,
     )

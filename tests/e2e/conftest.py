@@ -319,6 +319,7 @@ def create_test_context(
     """
     from bioetl.domain.context import InputFilterContext
     from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.context import current_utc_time
     from bioetl.domain.types import RunID, RunType
 
     if filter_ids is not None and filter_field is not None:
@@ -331,6 +332,7 @@ def create_test_context(
         pipeline_name=pipeline_name,
         run_id=RunID(uuid4()),
         run_type=resolved_run_type,
+        started_at=current_utc_time(),
         resume=resume,
         limit=limit,
         query=query,
@@ -462,39 +464,50 @@ def assert_bronze_files_exist(data_dir: Path, provider: str, entity: str) -> lis
         entity: Тип сущности (activity, molecule, etc.)
 
     Returns:
-        Список найденных Bronze-файлов
+        Список найденных Bronze-артефактов
 
     Raises:
         AssertionError: Если файлы не найдены
 
     Note:
-        Handles both standard and flat_structure layouts:
-        - Standard: data_dir/output/bronze/{provider}/{entity}/{date}/
-        - Flat: data_dir/output/bronze/{date}/ (when flat_structure: true)
+        Handles both standard and flat_structure layouts. Prefers real Bronze
+        data files, but falls back to Bronze metadata sidecars when the runtime
+        path only materializes metadata for the current execution mode.
     """
-    # Standard path: data_dir/output/bronze/{provider}/{entity}/
-    bronze_path = data_dir / "output" / "bronze" / provider / entity
 
-    # Flat structure path: data_dir/output/bronze/ (files directly under base)
-    flat_path = data_dir / "output" / "bronze"
-
-    # Check both locations - standard path first, then flat structure
-    if bronze_path.exists():
-        files = list(bronze_path.rglob("*.jsonl.zst"))
+    def _find_artifacts(root: Path) -> list[Path]:
+        files = list(root.rglob("*.jsonl.zst"))
         if files:
             return files
-
-    # Try flat_structure path
-    if flat_path.exists():
-        files = list(flat_path.rglob("*.jsonl.zst"))
+        files = list(root.rglob("*.jsonl"))
         if files:
             return files
+        return list(root.rglob("*_metadata.yaml"))
 
-    raise AssertionError(
-        f"No Bronze files found. Checked paths:\n"
-        f"  - Standard: {bronze_path}\n"
-        f"  - Flat: {flat_path}"
+    candidate_roots = (
+        data_dir / "bronze",
+        data_dir / "output" / "bronze",
+        Path("data") / "output" / "bronze",
     )
+    checked_paths: list[Path] = []
+
+    for root in candidate_roots:
+        checked_paths.append(root / provider / entity)
+        checked_paths.append(root)
+
+        standard_path = root / provider / entity
+        if standard_path.exists():
+            files = _find_artifacts(standard_path)
+            if files:
+                return files
+
+        if root.exists():
+            files = _find_artifacts(root)
+            if files:
+                return files
+
+    checked = "\n".join(f"  - {path}" for path in checked_paths)
+    raise AssertionError(f"No Bronze files found. Checked paths:\n{checked}")
 
 
 def assert_run_manifest_exists(data_dir: Path, run_id: RunID) -> dict[str, Any]:

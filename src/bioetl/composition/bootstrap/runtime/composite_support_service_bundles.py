@@ -5,6 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.domain.ports.runtime.runner import (
+    PipelineControlPlaneArtifacts as ControlPlaneArtifacts,
+)
+
 if TYPE_CHECKING:
     from bioetl.application.composite.runtime_wiring_api import (
         CoalescePolicyService,
@@ -48,17 +52,10 @@ class RuntimeManagementServicesBundle:
 
 
 @dataclass(frozen=True, slots=True)
-class CompositeControlPlaneBundle:
+class CompositeControlPlaneBundle(ControlPlaneArtifacts):
     """Optional control-plane artifacts materialized for one composite run."""
 
-    manifest_id: str | None = None
-    execution_fingerprint: str | None = None
     run_ledger_service: RunLedgerService | None = None
-    config_hash: str | None = None
-    resolved_config_hash: str | None = None
-    effective_config_hash: str | None = None
-    dq_contract_compatibility_hash: str | None = None
-    effective_config_artifact_id: str | None = None
     contract_ref: str | None = None
     contract_version: str | None = None
 

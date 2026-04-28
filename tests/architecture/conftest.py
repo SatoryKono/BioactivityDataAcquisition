@@ -120,53 +120,29 @@ def _store_disk_cache(
         temp_path.unlink(missing_ok=True)
 
 
-def _build_text_cache(
-    cache_name_or_paths: str | list[Path],
-    paths: list[Path] | None = None,
-) -> dict[Path, str]:
-    """Read each file once and share the in-memory cache across the session."""
-    use_disk_cache = isinstance(cache_name_or_paths, str)
-    if isinstance(cache_name_or_paths, str):
-        cache_name = cache_name_or_paths
-        if paths is None:
-            msg = "paths must be provided when cache_name is passed explicitly"
-            raise TypeError(msg)
-        cache_paths = paths
-    else:
-        cache_name = "ad-hoc-text"
-        cache_paths = cache_name_or_paths
-
-    if use_disk_cache:
-        cached_payload = _load_disk_cache(cache_name, cache_paths)
-        if isinstance(cached_payload, dict):
-            return cached_payload
-
-    result: dict[Path, str] = {}
-    max_workers = _cache_worker_count(len(cache_paths))
-
-    if max_workers == 1:
-        for path in cache_paths:
-            _, text = _read_text_cache_entry(path)
-            if text is not None:
-                result[path] = text
-        return result
-
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        for path, text in executor.map(_read_text_cache_entry, cache_paths):
-            if text is not None:
-                result[path] = text
-    if use_disk_cache:
-        _store_disk_cache(cache_name, cache_paths, result)
-    return result
+def _resolve_disk_text_cache_request(
+    cache_name: str,
+    paths: list[Path] | None,
+) -> tuple[str, list[Path]]:
+    if paths is None:
+        msg = "paths must be provided when cache_name is passed explicitly"
+        raise TypeError(msg)
+    return cache_name, paths
 
 
-def _build_ast_cache(
+def _resolve_memory_text_cache_request(
+    cache_name_or_paths: list[Path],
+) -> tuple[str, list[Path]]:
+    return "ad-hoc-text", cache_name_or_paths
+
+
+def _resolve_ast_cache_request(
     cache_name_or_text_cache: str | dict[Path, str],
-    text_cache: dict[Path, str] | None = None,
-) -> dict[Path, ast.Module]:
-    """Parse each cached text payload once per pytest session."""
+    text_cache: dict[Path, str] | None,
+) -> tuple[str, dict[Path, str], bool]:
+    """Normalize AST-cache inputs and report whether disk caching is enabled."""
     use_disk_cache = isinstance(cache_name_or_text_cache, str)
-    if isinstance(cache_name_or_text_cache, str):
+    if use_disk_cache:
         cache_name = cache_name_or_text_cache
         if text_cache is None:
             msg = "text_cache must be provided when cache_name is passed explicitly"
@@ -175,24 +151,130 @@ def _build_ast_cache(
     else:
         cache_name = "ad-hoc-ast"
         cached_text = cache_name_or_text_cache
+    return cache_name, cached_text, use_disk_cache
 
-    cache_paths = list(cached_text)
+
+def _read_text_cache_entries_single_threaded(
+    cache_paths: list[Path],
+) -> dict[Path, str]:
+    result: dict[Path, str] = {}
+    for path in cache_paths:
+        _, text = _read_text_cache_entry(path)
+        if text is not None:
+            result[path] = text
+    return result
+
+
+def _read_text_cache_entries_threaded(
+    cache_paths: list[Path],
+    max_workers: int,
+) -> dict[Path, str]:
+    result: dict[Path, str] = {}
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for path, text in executor.map(_read_text_cache_entry, cache_paths):
+            if text is not None:
+                result[path] = text
+    return result
+
+
+def _load_disk_cached_payload(
+    cache_name: str,
+    cache_paths: list[Path],
+) -> dict[Path, str] | dict[Path, ast.Module] | None:
+    """Load a persisted cache snapshot when available."""
+    cached_payload = _load_disk_cache(cache_name, cache_paths)
+    if isinstance(cached_payload, dict):
+        return cached_payload
+    return None
+
+
+def _write_disk_cached_payload(
+    cache_name: str,
+    cache_paths: list[Path],
+    payload: dict[Path, str] | dict[Path, ast.Module],
+    use_disk_cache: bool,
+) -> None:
+    """Persist the computed cache payload when disk caching is enabled."""
     if use_disk_cache:
-        cached_payload = _load_disk_cache(cache_name, cache_paths)
-        if isinstance(cached_payload, dict):
-            return cached_payload
+        _store_disk_cache(cache_name, cache_paths, payload)
 
+
+def _parse_ast_cache_entry(item: tuple[Path, str]) -> tuple[Path, ast.Module | None]:
+    """Parse a single source file into an AST tree when possible."""
+    path, content = item
+    try:
+        return path, ast.parse(content)
+    except SyntaxError:
+        return path, None
+
+
+def _read_ast_cache_entries(
+    cached_text: dict[Path, str],
+    max_workers: int,
+) -> dict[Path, ast.Module]:
+    """Parse cached text payloads into ASTs with optional threading."""
     result: dict[Path, ast.Module] = {}
+    if max_workers == 1:
+        for path, content in cached_text.items():
+            parsed_path, tree = _parse_ast_cache_entry((path, content))
+            if tree is not None:
+                result[parsed_path] = tree
+        return result
 
-    for path, content in cached_text.items():
-        try:
-            tree = ast.parse(content)
-        except SyntaxError:
-            continue
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for path, tree in executor.map(_parse_ast_cache_entry, cached_text.items()):
+            if tree is not None:
+                result[path] = tree
+    return result
 
-        result[path] = tree
+
+def _build_text_cache(
+    cache_name_or_paths: str | list[Path],
+    paths: list[Path] | None = None,
+) -> dict[Path, str]:
+    """Read each file once and share the in-memory cache across the session."""
+    use_disk_cache = isinstance(cache_name_or_paths, str)
     if use_disk_cache:
-        _store_disk_cache(cache_name, cache_paths, result)
+        cache_name, cache_paths = _resolve_disk_text_cache_request(
+            cache_name_or_paths,
+            paths,
+        )
+    else:
+        cache_name, cache_paths = _resolve_memory_text_cache_request(
+            cache_name_or_paths
+        )
+    cached_payload = _load_disk_cached_payload(cache_name, cache_paths)
+    if cached_payload is not None:
+        return cached_payload
+
+    max_workers = _cache_worker_count(len(cache_paths))
+    if max_workers == 1:
+        result = _read_text_cache_entries_single_threaded(cache_paths)
+    else:
+        result = _read_text_cache_entries_threaded(cache_paths, max_workers)
+    _write_disk_cached_payload(cache_name, cache_paths, result, use_disk_cache)
+    return result
+
+
+def _build_ast_cache(
+    cache_name_or_text_cache: str | dict[Path, str],
+    text_cache: dict[Path, str] | None = None,
+) -> dict[Path, ast.Module]:
+    """Parse each cached text payload once per pytest session."""
+    cache_name, cached_text, use_disk_cache = _resolve_ast_cache_request(
+        cache_name_or_text_cache,
+        text_cache,
+    )
+    cache_paths = list(cached_text)
+    cached_payload = _load_disk_cached_payload(cache_name, cache_paths)
+    if cached_payload is not None:
+        return cached_payload
+
+    max_workers = _cache_worker_count(len(cache_paths))
+    result = _read_ast_cache_entries(cached_text, max_workers)
+
+    _write_disk_cached_payload(cache_name, cache_paths, result, use_disk_cache)
     return result
 
 

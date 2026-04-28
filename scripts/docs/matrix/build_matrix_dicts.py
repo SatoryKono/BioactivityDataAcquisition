@@ -22,7 +22,7 @@ else:
 
 ensure_repo_imports()
 
-from scripts.docs.common.xlsx import (
+from scripts.docs.common.xlsx import (  # noqa: E402
     NS,
     cell_text,
     column_index,

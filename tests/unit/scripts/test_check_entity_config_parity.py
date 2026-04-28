@@ -41,7 +41,8 @@ def test_check_spec_status_fails_for_historical_page_role_markers(
             [
                 "# Activity",
                 "> **Status**: Historical deep spec. Current canonical contract lives in",
-                "| Published-page role | Pass | Historical deep spec or summary is explicitly bounded by current canonical sources |",
+                "| Published-page role | Pass | Historical deep spec or summary"
+                " is explicitly bounded by current canonical sources |,",
             ]
         ),
     )
@@ -72,7 +73,8 @@ def test_check_spec_status_allows_canonical_compact_summary_language(
             [
                 "# Activity",
                 "> **Status**: Canonical compact spec summary. Current detailed contract lives in",
-                "| Published-page role | Pass | Canonical compact summary is explicitly bounded by current canonical sources |",
+                "| Published-page role | Pass | Canonical compact summary"
+                " is explicitly bounded by current canonical sources |",
                 "Legacy hyphenated field names remain historical only and should not be used in new configs.",
             ]
         ),

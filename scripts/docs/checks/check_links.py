@@ -53,6 +53,7 @@ import json
 import os
 import re
 import sys
+from collections.abc import Callable
 from datetime import UTC, datetime, timezone
 from fnmatch import fnmatch
 from functools import cache
@@ -68,7 +69,7 @@ else:
 
 ensure_repo_imports()
 
-from scripts.docs.common.markdown import (
+from scripts.docs.common.markdown import (  # noqa: E402
     FENCE_END_RE,
     INLINE_CODE_RE,
     MD_LINK_RE,
@@ -76,7 +77,11 @@ from scripts.docs.common.markdown import (
     PYTHON_FENCE_START_RE,
     extract_md_heading,
 )
-from scripts.docs.common.paths import DOCS_DIR, PROJECT_ROOT, is_generated_docs_artifact
+from scripts.docs.common.paths import (  # noqa: E402
+    DOCS_DIR,
+    PROJECT_ROOT,
+    is_generated_docs_artifact,
+)
 
 README_FILENAME = "README.md"
 LAST_VERIFIED_LABEL = "Last verified"
@@ -1283,6 +1288,70 @@ def _write_json_report(
     print(f"JSON report written to: {rel}")
 
 
+def _build_check_runners(
+    *,
+    run_all: bool,
+    args: argparse.Namespace,
+) -> tuple[tuple[str, bool, Callable[[], int]], ...]:
+    runner_table = _check_runner_table(args)
+    return tuple(
+        (
+            name,
+            run_all or enabled,
+            runner,
+        )
+        for name, (enabled, runner) in runner_table.items()
+    )
+
+
+def _check_runner_table(
+    args: argparse.Namespace,
+) -> dict[str, tuple[bool, Callable[[], int]]]:
+    """Return a data-driven dispatch table for the selected checks."""
+    return {
+        "links": (args.links, _run_links_checks),
+        "specs": (args.specs, _run_specs_check),
+        "configs": (args.configs, _run_configs_check),
+        "contracts_index": (args.contracts_index, _run_contracts_index_check),
+        "provider_overview": (args.provider_overview, _run_provider_overview_check),
+        "doc_governance": (args.doc_governance, _run_doc_governance_check),
+        "not_in_nav_growth": (args.not_in_nav_growth, _run_not_in_nav_growth_check),
+        "legacy_paths": (
+            args.legacy_paths or args.legacy_paths_all,
+            lambda: _run_legacy_paths_check(include_internal=args.legacy_paths_all),
+        ),
+    }
+
+
+def _run_check_runner(
+    check_name: str,
+    runner: Callable[[], int],
+    checks_run: list[dict[str, object]],
+) -> int:
+    """Execute one selected check and append its status."""
+    check_violations = runner()
+    checks_run.append(
+        {
+            "check": check_name,
+            "status": "pass" if check_violations == 0 else "fail",
+            "violations": check_violations,
+        }
+    )
+    return check_violations
+
+
+def _run_selected_checks(
+    check_runners: tuple[tuple[str, bool, Callable[[], int]], ...]
+) -> tuple[int, list[dict[str, object]]]:
+    violations = 0
+    checks_run: list[dict[str, object]] = []
+    for check_name, should_run, runner in check_runners:
+        if not should_run:
+            continue
+        violations += _run_check_runner(check_name, runner, checks_run)
+    return violations, checks_run
+
+
 def main() -> int:
     parser = _build_parser()
     args = parser.parse_args()
@@ -1299,51 +1368,9 @@ def main() -> int:
         or args.legacy_paths_all
     )
     run_all = not explicit_checks
-    violations = 0
-    checks_run: list[dict[str, object]] = []
-
-    check_runners = (
-        ("links", run_all or args.links, lambda: _run_links_checks()),
-        ("specs", run_all or args.specs, lambda: _run_specs_check()),
-        ("configs", run_all or args.configs, lambda: _run_configs_check()),
-        (
-            "contracts_index",
-            run_all or args.contracts_index,
-            lambda: _run_contracts_index_check(),
-        ),
-        (
-            "provider_overview",
-            run_all or args.provider_overview,
-            lambda: _run_provider_overview_check(),
-        ),
-        (
-            "doc_governance",
-            run_all or args.doc_governance,
-            lambda: _run_doc_governance_check(),
-        ),
-        (
-            "not_in_nav_growth",
-            run_all or args.not_in_nav_growth,
-            lambda: _run_not_in_nav_growth_check(),
-        ),
-        (
-            "legacy_paths",
-            run_all or args.legacy_paths or args.legacy_paths_all,
-            lambda: _run_legacy_paths_check(include_internal=args.legacy_paths_all),
-        ),
+    violations, checks_run = _run_selected_checks(
+        _build_check_runners(run_all=run_all, args=args)
     )
-
-    for check_name, should_run, runner in check_runners:
-        if should_run:
-            check_violations = runner()
-            violations += check_violations
-            checks_run.append(
-                {
-                    "check": check_name,
-                    "status": "pass" if check_violations == 0 else "fail",
-                    "violations": check_violations,
-                }
-            )
 
     if args.report_json:
         _write_json_report(

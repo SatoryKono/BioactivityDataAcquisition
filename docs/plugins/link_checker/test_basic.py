@@ -10,6 +10,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+import pytest
+
 # Add plugin to path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -21,8 +23,6 @@ def test_basic_plugin_structure():
 
         print("✅ Plugin imported successfully")
 
-        # Test plugin class exists
-        assert LinkCheckerPlugin is not None
         print("✅ LinkCheckerPlugin class exists")
 
         # Test plugin inherits from BasePlugin
@@ -211,7 +211,7 @@ def test_report_generation():
         assert summary["total_links"] == 10
         assert summary["valid_links"] == 8
         assert summary["broken_links"] == 2
-        assert summary["health_score"] == 80.0
+        assert summary["health_score"] == pytest.approx(80.0)
 
         # Verify details
         assert len(json_report["details"]) == 2

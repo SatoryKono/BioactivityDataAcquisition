@@ -25,17 +25,15 @@ SEMANTIC_GRAPH_EDGE_RELATIONS = {
     "reads_from": "reads_from",
     "orchestrates": "orchestrates",
 }
-PATH_REF_PATTERN = re.compile(
-    r"\b(?:src|configs|tests|docs)/(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+"
-)
 ADR_REF_PATTERN = re.compile(r"\bADR-(\d{3})\b", re.IGNORECASE)
-ADR_LIFECYCLE_FIELD_PATTERN = re.compile(
-    r"^\s*[*_`#>\-\s]*(supersedes|superseded by|amends|amended by)\s*:",
-    re.IGNORECASE,
-)
+ADR_LIFECYCLE_FIELDS = ("supersedes", "superseded by", "amends", "amended by")
 RUNBOOK_EXCLUDED_STEMS = frozenset({"index"})
 CONFIGS_DIR_PREFIX = "configs/"
 ADR_DOC_GLOB = "ADR-*.md"
+_PATH_REF_PREFIXES = ("src/", "configs/", "tests/", "docs/")
+_PATH_REF_CHARS = frozenset(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-/"
+)
 
 
 def default_expanded_graph_path(root: Path) -> Path:
@@ -780,7 +778,35 @@ def _pipeline_doc_paths(source_node: dict[str, Any], repo_root: Path) -> list[st
 
 
 def _explicit_path_refs(text: str) -> set[str]:
-    return {match.group(0).rstrip(".,);]") for match in PATH_REF_PATTERN.finditer(text)}
+    refs: set[str] = set()
+    for line in text.splitlines():
+        for prefix in _PATH_REF_PREFIXES:
+            refs.update(_extract_path_refs_for_prefix(line, prefix))
+    return refs
+
+
+def _extract_path_refs_for_prefix(line: str, prefix: str) -> set[str]:
+    refs: set[str] = set()
+    start = 0
+    while True:
+        index = line.find(prefix, start)
+        if index == -1:
+            break
+        if index > 0 and (line[index - 1].isalnum() or line[index - 1] in "_/"):
+            start = index + 1
+            continue
+        candidate = _collect_path_ref_candidate(line, index, prefix)
+        if candidate:
+            refs.add(candidate)
+        start = index + 1
+    return refs
+
+
+def _collect_path_ref_candidate(line: str, start_index: int, prefix: str) -> str:
+    end = start_index + len(prefix)
+    while end < len(line) and line[end] in _PATH_REF_CHARS:
+        end += 1
+    return line[start_index:end].rstrip(".,);]")
 
 
 def _explicit_config_path_refs(text: str) -> set[str]:
@@ -821,13 +847,23 @@ def _adr_number(path: Path) -> str | None:
     return match.group(1) if match else None
 
 
+def _extract_adr_lifecycle_field(line: str) -> str | None:
+    line_stripped = line.lstrip(" *_`#>-")
+    lower_line = line_stripped.lower()
+    for keyword in ADR_LIFECYCLE_FIELDS:
+        if lower_line.startswith(keyword):
+            remainder = lower_line[len(keyword) :].lstrip()
+            if remainder.lstrip(" *_`#>-").startswith(":"):
+                return keyword
+    return None
+
+
 def _iter_adr_lifecycle_refs(text: str) -> list[tuple[str, str]]:
     refs: list[tuple[str, str]] = []
     for line in text.splitlines():
-        field_match = ADR_LIFECYCLE_FIELD_PATTERN.search(line)
-        if field_match is None:
+        field = _extract_adr_lifecycle_field(line)
+        if field is None:
             continue
-        field = field_match.group(1).lower()
         for target_match in ADR_REF_PATTERN.finditer(line):
             refs.append((field, target_match.group(1)))
     return refs
@@ -842,13 +878,28 @@ def _markdown_title(text: str) -> str:
 
 
 def _failure_mode_name(title: str, fallback_stem: str) -> str:
-    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", title).strip()
-    cleaned = re.sub(r"\s+runbook\s*$", "", cleaned, flags=re.IGNORECASE).strip()
+    cleaned = title.strip()
+    if cleaned.lower().endswith(" runbook"):
+        cleaned = cleaned[:-8].strip()
+    if cleaned.endswith(")"):
+        start_paren = cleaned.rfind("(")
+        if start_paren != -1:
+            cleaned = cleaned[:start_paren].strip()
     return cleaned or fallback_stem.replace("-", " ")
 
 
 def _slugify(value: str) -> str:
-    slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    slug_parts: list[str] = []
+    previous_was_dash = False
+    for char in value.lower():
+        if char.isalnum():
+            slug_parts.append(char)
+            previous_was_dash = False
+            continue
+        if not previous_was_dash:
+            slug_parts.append("-")
+            previous_was_dash = True
+    slug = "".join(slug_parts).strip("-")
     return slug or "unknown"
 
 

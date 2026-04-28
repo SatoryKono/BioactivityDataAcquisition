@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.lineage._fragment_finalization import (
+    finalize_lineage_fragment,
+)
 from bioetl.application.services.lineage.metadata_lineage_nodes import (
     bronze_batch_node_from_input,
-    build_semantic_fragment_id,
-    dedupe_nodes,
     fragment_timestamp,
     manifest_edges,
     manifest_node,
@@ -97,16 +98,10 @@ def build_bronze_lineage_fragment(
             created_at=created_at,
         )
     )
-    deduped_nodes = dedupe_nodes(nodes)
-    return LineageGraphFragment(
-        fragment_id=build_semantic_fragment_id(
-            "bronze",
-            nodes=deduped_nodes,
-            edges=edges,
-        ),
-        nodes=deduped_nodes,
-        edges=tuple(edges),
-        run_id=str(run_context.run_id),
-        manifest_id=run_context.manifest_id,
+    return finalize_lineage_fragment(
+        fragment_name="bronze",
+        run_context=run_context,
+        nodes=nodes,
+        edges=edges,
         created_at=created_at,
     )

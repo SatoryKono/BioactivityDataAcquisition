@@ -24,8 +24,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Set logging
 ENV RUST_LOG=warn
 
-# Run as non-root where possible (but warp needs privileges for network)
-USER root
+# Run as the non-root service user by default.
+USER warp
 
-# Entrypoint
-CMD ["/bin/bash", "-c", "warp-cli connect && sleep infinity"]
+ENTRYPOINT ["/bin/bash", "-c"]
+CMD ["warp-cli connect && exec sleep infinity"]

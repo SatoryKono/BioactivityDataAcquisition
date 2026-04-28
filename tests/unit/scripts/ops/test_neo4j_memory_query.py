@@ -613,20 +613,20 @@ def test_format_rows_renders_workflow_execution_summary() -> None:
         in formatted
     )
     assert (
-        "call=tests::docs::./.github/workflows/reusable-setup | target_workflow=reusable-setup | kind=local_reusable_workflow"
-        in formatted
+        "call=tests::docs::./.github/workflows/reusable-setup"
+        " | target_workflow=reusable-setup | kind=local_reusable_workflow" in formatted
     )
     assert (
-        "matrix=tests::test-matrix[python-version=3.13, suite=unit] | axes=python-version=3.13,suite=unit"
-        in formatted
+        "matrix=tests::test-matrix[python-version=3.13, suite=unit]"
+        " | axes=python-version=3.13,suite=unit" in formatted
     )
     assert (
-        "workflow_output=tests::workflow_call_output::tests::venv-cache-key | scope=workflow_call | expression=cache-key"
-        in formatted
+        "workflow_output=tests::workflow_call_output::tests::venv-cache-key"
+        " | scope=workflow_call | expression=cache-key" in formatted
     )
     assert (
-        "job_output=tests::job_output::test-matrix::coverage-artifact | scope=job | expression=${{ steps.coverage.outputs.path }}"
-        in formatted
+        "job_output=tests::job_output::test-matrix::coverage-artifact"
+        " | scope=job | expression=${{ steps.coverage.outputs.path }}" in formatted
     )
 
 
@@ -704,8 +704,8 @@ def test_format_rows_renders_field_lineage_summary() -> None:
 
     assert f"Field lineage path: `{SILVER_CHEMBL_ACTIVITY}`" in formatted
     assert (
-        f"storage={SILVER_CHEMBL_ACTIVITY} | field=activity_id | group=business | drift=projected_to_gold | required=True"
-        in formatted
+        f"storage={SILVER_CHEMBL_ACTIVITY} | field=activity_id"
+        " | group=business | drift=projected_to_gold | required=True" in formatted
     )
     assert "validations=required" in formatted
     assert "upstream=bronze/chembl/activity::activity_id" in formatted
@@ -828,8 +828,8 @@ def test_format_rows_renders_runtime_state_summary() -> None:
 
     assert "Runtime state summary: `all`" in formatted
     assert (
-        "state=manifest-chain-2::retry-window | kind=retry_state | status=retrying | manifest_id=manifest-chain-2 | retry_count=1"
-        in formatted
+        "state=manifest-chain-2::retry-window | kind=retry_state"
+        " | status=retrying | manifest_id=manifest-chain-2 | retry_count=1" in formatted
     )
     assert "owner=manifest-chain-2 | labels=run_instance_surface" in formatted
     assert (
@@ -936,12 +936,12 @@ def test_format_rows_renders_duplication_cluster_summary() -> None:
         in formatted
     )
     assert (
-        f"promotion_target=src/bioetl/infrastructure/adapters/base.py | labels={MODULE_SURFACE}"
-        in formatted
+        f"promotion_target=src/bioetl/infrastructure/adapters/base.py"
+        f" | labels={MODULE_SURFACE}" in formatted
     )
     assert (
-        "member=src.bioetl.infrastructure.adapters.pubmed._health.PubMedHealthMixin.request_count | labels=method_surface"
-        in formatted
+        "member=src.bioetl.infrastructure.adapters.pubmed"
+        "._health.PubMedHealthMixin.request_count | labels=method_surface" in formatted
     )
     assert (
         "covered_by_test=tests/unit/infrastructure/adapters/test_pubmed_health.py"
@@ -1002,7 +1002,8 @@ def test_format_rows_renders_fallback_pipeline_summary() -> None:
 
     assert "Fallback-heavy pipelines: `all`" in formatted
     assert (
-        "pipeline=chembl_assay_parameters | fallback_business=22 | fallback_total=22 | profile_registered=False | profile_fields=0"
+        "pipeline=chembl_assay_parameters | fallback_business=22"
+        " | fallback_total=22 | profile_registered=False | profile_fields=0"
         in formatted
     )
 
@@ -1091,8 +1092,8 @@ def test_format_rows_renders_current_cycle_code_summary() -> None:
 
     assert f"Current-cycle code surfaces: `{ADAPTER_LAYER}`" in formatted
     assert (
-        f"target=src/bioetl/infrastructure/adapters/common/new_runtime.py | label={MODULE_SURFACE} | family={ADAPTER_LAYER}"
-        in formatted
+        f"target=src/bioetl/infrastructure/adapters/common/new_runtime.py"
+        f" | label={MODULE_SURFACE} | family={ADAPTER_LAYER}" in formatted
     )
     assert "cycle_status=current_cycle | cycle_score=5 | recent_age_days=3" in formatted
     assert "wip_markers=todo,temporary" in formatted
@@ -1128,12 +1129,12 @@ def test_format_rows_renders_overengineered_candidates_summary() -> None:
 
     assert f"Overengineered candidates: `{COMPOSITE_LAYER}`" in formatted
     assert (
-        f"target=src/bioetl/application/composite/runner_pkg/runner.py | label={MODULE_SURFACE} | family={COMPOSITE_LAYER}"
-        in formatted
+        f"target=src/bioetl/application/composite/runner_pkg/runner.py"
+        f" | label={MODULE_SURFACE} | family={COMPOSITE_LAYER}" in formatted
     )
     assert (
-        "classification=overengineered_stale | complexity_score=6 | simplification_score=6 | removable_score=8"
-        in formatted
+        "classification=overengineered_stale | complexity_score=6"
+        " | simplification_score=6 | removable_score=8" in formatted
     )
     assert "indirection_markers=compat,runner" in formatted
 
@@ -1174,7 +1175,10 @@ def test_format_rows_renders_simplification_blockers_summary() -> None:
         ADAPTER_LAYER,
         [
             {
-                "candidate_name": "method_surface:src.bioetl.infrastructure.adapters.pubmed._health.PubMedHealthMixin.request_count",
+                "candidate_name": (
+                    "method_surface:src.bioetl.infrastructure.adapters"
+                    ".pubmed._health.PubMedHealthMixin.request_count"
+                ),
                 "family_name": ADAPTER_LAYER,
                 "target_label": "method_surface",
                 "target_name": "src.bioetl.infrastructure.adapters.pubmed._health.PubMedHealthMixin.request_count",
@@ -1199,7 +1203,8 @@ def test_format_rows_renders_simplification_blockers_summary() -> None:
 
     assert f"Simplification blockers: `{ADAPTER_LAYER}`" in formatted
     assert (
-        f"target=src.bioetl.infrastructure.adapters.pubmed._health.PubMedHealthMixin.request_count | label=method_surface | family={ADAPTER_LAYER}"
+        f"target=src.bioetl.infrastructure.adapters.pubmed"
+        f"._health.PubMedHealthMixin.request_count | label=method_surface | family={ADAPTER_LAYER}"
         in formatted
     )
     assert (

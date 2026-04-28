@@ -8482,10 +8482,11 @@ def _workflow_artifact_specs(
             artifact_path = raw_path
     if artifact_name is None:
         step_name = step.get("name")
-        if isinstance(step_name, str) and step_name:
-            artifact_name = step_name
-        else:
-            artifact_name = f"{job_id}-artifact"
+        artifact_name = (
+            step_name
+            if isinstance(step_name, str) and step_name
+            else f"{job_id}-artifact"
+        )
     return ((f"{workflow_name}::{artifact_name}", relation_type, artifact_path),)
 
 

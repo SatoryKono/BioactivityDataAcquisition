@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from bioetl.application.core._fetch_forwarding import forward_fetch_records
+
 __all__ = [
     "_FallbackFilterableTargetFetchMixin",
     "_FilterableTargetDelegationMixin",

@@ -215,6 +215,7 @@ class TestChemblActivityFactory:
             services=mock_services,
             config=mock_domain_config,
             shutdown_signal=ANY,
+            started_at=_STARTED_AT,
             transformer=ANY,
         )
         assert result is mock_pipeline

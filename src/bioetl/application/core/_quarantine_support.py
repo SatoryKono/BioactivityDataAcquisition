@@ -91,6 +91,82 @@ def build_filtered_quarantine_request(
     }
 
 
+async def write_quarantine_request(
+    quarantine: object,
+    request: QuarantineWriteRequest,
+) -> None:
+    """Write one quarantine request via the injected port."""
+    await quarantine.write(**request)
+
+
+async def write_quarantine_requests(
+    quarantine: object,
+    requests: list[QuarantineWriteRequest],
+) -> None:
+    """Write multiple quarantine requests via the injected port."""
+    await quarantine.write_many(requests)
+
+
+async def write_quarantine_request_with_events(
+    *,
+    quarantine: object,
+    request: QuarantineWriteRequest,
+    emitter: DomainEventEmitterPort | None,
+    pipeline_name: str,
+    error_code: str,
+    error_message: str,
+    batch_id: BatchID,
+    run_id: RunID | None,
+    ingestion_ts: datetime,
+) -> None:
+    """Write a quarantine request and emit its companion events."""
+    await write_quarantine_request(quarantine, request)
+    emit_quarantine_events(
+        emitter=emitter,
+        pipeline_name=pipeline_name,
+        payload=request["payload"],
+        error_code=error_code,
+        error_message=error_message,
+        batch_id=batch_id,
+        run_id=run_id,
+        ingestion_ts=ingestion_ts,
+        metadata=request["metadata"],
+    )
+
+
+async def write_quarantine_requests_with_events(
+    *,
+    quarantine: object,
+    requests: list[QuarantineWriteRequest],
+    emitter: DomainEventEmitterPort | None,
+    pipeline_name: str,
+    error_codes: Sequence[str],
+    error_messages: Sequence[str],
+    batch_id: BatchID,
+    run_id: RunID | None,
+    ingestion_ts: datetime,
+) -> None:
+    """Write multiple quarantine requests and emit companion events."""
+    await write_quarantine_requests(quarantine, requests)
+    for request, error_code, error_message in zip(
+        requests,
+        error_codes,
+        error_messages,
+        strict=True,
+    ):
+        emit_quarantine_events(
+            emitter=emitter,
+            pipeline_name=pipeline_name,
+            payload=request["payload"],
+            error_code=error_code,
+            error_message=error_message,
+            batch_id=batch_id,
+            run_id=run_id,
+            ingestion_ts=ingestion_ts,
+            metadata=request["metadata"],
+        )
+
+
 def track_quarantine_metrics(
     *,
     metrics: MetricsPort | None,

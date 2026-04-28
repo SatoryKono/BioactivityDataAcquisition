@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Self
 
+from bioetl.application.core._fetch_forwarding import forward_fetch_records
 from bioetl.application.core import (
     _filtered_data_source_fetch_support as fetch_support,
 )
@@ -107,10 +108,10 @@ class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
         """Delegate plain unfiltered fetches to the wrapped adapter."""
         return fetch_support.fetch_without_internal_filters(
             self,
-            entity_type,
-            limit,
-            query,
-            offset,
+            entity_type=entity_type,
+            limit=limit,
+            query=query,
+            offset=offset,
         )
 
     def fetch(
@@ -134,9 +135,9 @@ class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
             filter_field: Ignored; filtering is driven by internal config filter_field.
             offset: Optional pagination offset passed through to the adapter.
         """
-        return fetch_support.fetch_records(
-            self,
-            entity_type,
+        return forward_fetch_records(
+            lambda **kwargs: fetch_support.fetch_records(self, **kwargs),
+            entity_type=entity_type,
             limit=limit,
             query=query,
             filter_ids=filter_ids,

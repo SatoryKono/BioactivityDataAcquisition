@@ -3,11 +3,17 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from typing import cast
+from typing import TYPE_CHECKING, cast
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
+
+if TYPE_CHECKING:
+    from bioetl.application.composite.runner_pkg.runner_runtime_helpers import (
+        _CheckpointManagerProtocol,
+        _FSMRuntimeHelperProtocol,
+    )
 
 from bioetl.application.composite.lifecycle_observer_service import (
     CompositeLifecycleObserverService,

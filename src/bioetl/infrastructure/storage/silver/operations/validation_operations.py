@@ -114,14 +114,10 @@ async def _prepare_silver_write_payload_impl(
     )
 
 
-@dataclass
-class SilverValidationOperations:
-    """Validation operations service for Silver layer writes.
+class _SilverValidationOperationFacade:
+    """Shared validation lifecycle facade for mixin and composition service paths."""
 
-    This service encapsulates all validation logic previously in SilverWriterValidationMixin,
-    following the composition pattern for better separation of concerns and testability.
-    """
-
+    _host: object | None
     logger: LoggerPort
     _write_policy: WriteModePolicy
     _metrics: MetricsPort | None
@@ -145,7 +141,6 @@ class SilverValidationOperations:
         ],
         None,
     ]
-    _host: object | None = None
 
     def _sync_validate_and_build_arrow(
         self,
@@ -229,3 +224,37 @@ class SilverValidationOperations:
             partition_cols=partition_cols,
             key_nullability_rules=key_nullability_rules,
         )
+
+
+@dataclass
+class SilverValidationOperations(_SilverValidationOperationFacade):
+    """Validation operations service for Silver layer writes.
+
+    This service encapsulates all validation logic previously in SilverWriterValidationMixin,
+    following the composition pattern for better separation of concerns and testability.
+    """
+
+    logger: LoggerPort
+    _write_policy: WriteModePolicy
+    _metrics: MetricsPort | None
+    _silver_validator: SilverValidatorPort
+    _get_table_schema: Callable[[str], Awaitable[pa.Schema | None]]
+    _resolve_table_path: Callable[[str], str]
+    _prepare_arrow_data: Callable[..., pa.Table]
+    _validate_write_mode: Callable[[str], SilverWriteMode]
+    _deduplicate_by_primary_keys: Callable[
+        [list[BronzeRecord], list[str]],
+        list[BronzeRecord],
+    ]
+    _to_policy_write_mode: Callable[[SilverWriteMode], WriteMode]
+    _validate_key_nullability: Callable[
+        [
+            list[BronzeRecord],
+            list[str],
+            list[str] | None,
+            list[KeyNullabilityRule] | None,
+            str,
+        ],
+        None,
+    ]
+    _host: object | None = None

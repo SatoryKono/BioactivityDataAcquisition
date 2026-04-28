@@ -19,7 +19,7 @@ else:
 
 ensure_repo_imports()
 
-from scripts.docs.common.xlsx import (
+from scripts.docs.common.xlsx import (  # noqa: E402
     MAIN_NS,
     NS,
     cell_text,

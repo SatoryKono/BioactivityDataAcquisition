@@ -213,36 +213,40 @@ _CANDIDATE_LABEL_SUFFIX_TOKENS = frozenset(
         "id",
     }
 )
+FAMILY_PUBCHEM = "pubchem:molecule"
+FAMILY_UNIPROT = "uniprot:target"
+FAMILY_CHEMBL = "chembl:publication"
+
 _EXPLICIT_NAME_FAMILIES = {
-    "pubchemmolecule": "pubchem:molecule",
-    "pubchemcompound": "pubchem:molecule",
-    "pubchemcompoundpipeline": "pubchem:molecule",
-    "pubchemcompoundtransformer": "pubchem:molecule",
-    "pubchemcompoundgoldschema": "pubchem:molecule",
-    "pubchem_compound": "pubchem:molecule",
-    "uniprottarget": "uniprot:target",
-    "uniprotprotein": "uniprot:target",
-    "uniprotproteinpipeline": "uniprot:target",
-    "uniprotproteintransformer": "uniprot:target",
-    "uniprotproteingoldschema": "uniprot:target",
-    "uniprot_protein": "uniprot:target",
-    "chemblpublication": "chembl:publication",
-    "chemblpublicationsimilarity": "chembl:publication",
-    "chemblpublicationterm": "chembl:publication",
-    "chembl_publication": "chembl:publication",
-    "chembl_publication_similarity": "chembl:publication",
-    "chembl_publication_term": "chembl:publication",
-    "document": "chembl:publication",
-    "documentsimilarity": "chembl:publication",
-    "documentterm": "chembl:publication",
-    "document_id": "chembl:publication",
-    "documentchemblid": "chembl:publication",
-    "document_chembl_id": "chembl:publication",
-    "compound": "pubchem:molecule",
-    "protein": "uniprot:target",
+    "pubchemmolecule": FAMILY_PUBCHEM,
+    "pubchemcompound": FAMILY_PUBCHEM,
+    "pubchemcompoundpipeline": FAMILY_PUBCHEM,
+    "pubchemcompoundtransformer": FAMILY_PUBCHEM,
+    "pubchemcompoundgoldschema": FAMILY_PUBCHEM,
+    "pubchem_compound": FAMILY_PUBCHEM,
+    "uniprottarget": FAMILY_UNIPROT,
+    "uniprotprotein": FAMILY_UNIPROT,
+    "uniprotproteinpipeline": FAMILY_UNIPROT,
+    "uniprotproteintransformer": FAMILY_UNIPROT,
+    "uniprotproteingoldschema": FAMILY_UNIPROT,
+    "uniprot_protein": FAMILY_UNIPROT,
+    "chemblpublication": FAMILY_CHEMBL,
+    "chemblpublicationsimilarity": FAMILY_CHEMBL,
+    "chemblpublicationterm": FAMILY_CHEMBL,
+    "chembl_publication": FAMILY_CHEMBL,
+    "chembl_publication_similarity": FAMILY_CHEMBL,
+    "chembl_publication_term": FAMILY_CHEMBL,
+    "document": FAMILY_CHEMBL,
+    "documentsimilarity": FAMILY_CHEMBL,
+    "documentterm": FAMILY_CHEMBL,
+    "document_id": FAMILY_CHEMBL,
+    "documentchemblid": FAMILY_CHEMBL,
+    "document_chembl_id": FAMILY_CHEMBL,
+    "compound": FAMILY_PUBCHEM,
+    "protein": FAMILY_UNIPROT,
 }
 _EXPLICIT_OK_FAMILY_MEMBERS = {
-    "pubchem:molecule": frozenset(
+    FAMILY_PUBCHEM: frozenset(
         {
             "PubchemMolecule",
             "pubchem_compound",
@@ -251,7 +255,7 @@ _EXPLICIT_OK_FAMILY_MEMBERS = {
             "PubChemCompoundGoldSchema",
         }
     ),
-    "uniprot:target": frozenset(
+    FAMILY_UNIPROT: frozenset(
         {
             "UniprotTarget",
             "uniprot_protein",
@@ -260,7 +264,7 @@ _EXPLICIT_OK_FAMILY_MEMBERS = {
             "UniProtProteinGoldSchema",
         }
     ),
-    "chembl:publication": frozenset(
+    FAMILY_CHEMBL: frozenset(
         {
             "ChemblPublication",
             "ChemblPublicationSimilarity",
@@ -280,8 +284,9 @@ _EXPLICIT_OK_FAMILY_MEMBERS = {
 def _normalize_doc_excluded_subpath(subpath: str) -> str:
     """Normalize configured docs exclusion prefixes to docs-root-relative paths."""
     normalized = subpath.replace("\\", "/").strip("/")
-    if normalized.startswith("docs/"):
-        normalized = normalized.removeprefix("docs/")
+    DOCS_PREFIX = "docs/"
+    if normalized.startswith(DOCS_PREFIX):
+        normalized = normalized.removeprefix(DOCS_PREFIX)
     return normalized
 
 
@@ -455,10 +460,9 @@ def load_naming_registry(
     )
 
 
-def validate_naming_registry(registry: NamingRegistry) -> list[str]:
-    """Return consistency errors for the loaded naming registry."""
-    errors: list[str] = []
-
+def _validate_registry_forbidden_alias_overlap(
+    registry: NamingRegistry, errors: list[str]
+) -> None:
     overlap = {
         alias.legacy_name for alias in registry.forbidden_domain_entity_aliases
     } & set(registry.class_suffix_exceptions)
@@ -469,11 +473,16 @@ def validate_naming_registry(registry: NamingRegistry) -> list[str]:
             f"{joined}"
         )
 
+
+def _validate_registry_required_pipeline_ids(
+    registry: NamingRegistry, errors: list[str]
+) -> None:
     stable_id_names = {entry.name for entry in registry.stable_pipeline_ids}
     if not stable_id_names:
         errors.append(
             "stable_public_surface.pipeline_ids must declare at least one entry"
         )
+        return
 
     for required in ("pubchem_compound", "uniprot_protein"):
         if required not in stable_id_names:
@@ -481,6 +490,10 @@ def validate_naming_registry(registry: NamingRegistry) -> list[str]:
                 f"stable_public_surface.pipeline_ids is missing required entry: {required}"
             )
 
+
+def _validate_registry_backward_compatibility(
+    registry: NamingRegistry, errors: list[str]
+) -> None:
     forbidden_aliases_by_surface: dict[str, set[str]] = {}
     for alias in registry.forbidden_domain_entity_aliases:
         forbidden_aliases_by_surface.setdefault(alias.export_surface, set()).add(
@@ -508,6 +521,13 @@ def validate_naming_registry(registry: NamingRegistry) -> list[str]:
                 f"{surface.module} reintroduces forbidden legacy aliases: {joined}"
             )
 
+
+def validate_naming_registry(registry: NamingRegistry) -> list[str]:
+    """Return consistency errors for the loaded naming registry."""
+    errors: list[str] = []
+    _validate_registry_forbidden_alias_overlap(registry, errors)
+    _validate_registry_required_pipeline_ids(registry, errors)
+    _validate_registry_backward_compatibility(registry, errors)
     return errors
 
 
@@ -669,31 +689,39 @@ def _class_surface_kind(py_file: Path, class_name: str) -> str | None:
     return None
 
 
+def _is_valid_class_node(node: ast.AST) -> bool:
+    if not isinstance(node, ast.ClassDef):
+        return False
+    if node.name.startswith("_"):
+        return False
+    return not _is_support_surface(node.name)
+
+def _build_symbol_surface(py_file: Path, node_name: str) -> SymbolSurface | None:
+    kind = _class_surface_kind(py_file, node_name)
+    if kind is None:
+        return None
+    semantic_family = _resolve_semantic_family(
+        node_name
+    ) or _lexical_semantic_family(node_name)
+    if semantic_family is None:
+        return None
+    return SymbolSurface(
+        name=node_name,
+        kind=kind,
+        location=str(py_file),
+        semantic_family=semantic_family,
+        source="code",
+    )
+
 def _iter_class_symbol_surfaces(src_path: Path) -> Iterator[SymbolSurface]:
     """Discover relevant class surfaces from code."""
     for py_file, tree in _iter_python_modules_with_trees(src_path):
         for node in ast.walk(tree):
-            if not isinstance(node, ast.ClassDef):
+            if not _is_valid_class_node(node):
                 continue
-            if node.name.startswith("_"):
-                continue
-            if _is_support_surface(node.name):
-                continue
-            kind = _class_surface_kind(py_file, node.name)
-            if kind is None:
-                continue
-            semantic_family = _resolve_semantic_family(
-                node.name
-            ) or _lexical_semantic_family(node.name)
-            if semantic_family is None:
-                continue
-            yield SymbolSurface(
-                name=node.name,
-                kind=kind,
-                location=str(py_file),
-                semantic_family=semantic_family,
-                source="code",
-            )
+            surface = _build_symbol_surface(py_file, node.name)
+            if surface:
+                yield surface
 
 
 def _iter_domain_export_surfaces(
@@ -824,6 +852,62 @@ def _compatibility_alias_index(registry: NamingRegistry) -> set[str]:
     return aliases
 
 
+def _forbidden_alias_group_rationale() -> str:
+    return (
+        "Forbidden ADR-024 alias surfaced on an active export without an "
+        "explicit compatibility decision."
+    )
+
+
+def _compatibility_alias_group_rationale() -> str:
+    return (
+        "Exact compatibility alias is registered in ADR-024 backward "
+        "compatibility metadata."
+    )
+
+
+def _duplicate_group_rationale(unresolved_summary: str) -> str:
+    return (
+        "Overlap family has active surfaces without registry-backed "
+        f"distinction: {unresolved_summary}"
+    )
+
+
+def _classify_forbidden_alias_group(
+    normalized_stem: str, symbols: tuple[SymbolSurface, ...]
+) -> AmbiguityGroup:
+    return AmbiguityGroup(
+        normalized_stem=normalized_stem,
+        symbols=symbols,
+        classification=AmbiguityClassification.CONFLICT,
+        rationale=_forbidden_alias_group_rationale(),
+    )
+
+
+def _classify_compat_alias_group(
+    normalized_stem: str, symbols: tuple[SymbolSurface, ...]
+) -> AmbiguityGroup:
+    return AmbiguityGroup(
+        normalized_stem=normalized_stem,
+        symbols=symbols,
+        classification=AmbiguityClassification.COMPAT,
+        rationale=_compatibility_alias_group_rationale(),
+    )
+
+
+def _classify_duplicate_group(
+    normalized_stem: str,
+    symbols: tuple[SymbolSurface, ...],
+    unresolved_summary: str,
+) -> AmbiguityGroup:
+    return AmbiguityGroup(
+        normalized_stem=normalized_stem,
+        symbols=symbols,
+        classification=AmbiguityClassification.DUPLICATE,
+        rationale=_duplicate_group_rationale(unresolved_summary),
+    )
+
+
 def classify_ambiguity_group(
     normalized_stem: str,
     symbols: tuple[SymbolSurface, ...],
@@ -834,27 +918,11 @@ def classify_ambiguity_group(
         sorted(symbols, key=lambda symbol: (symbol.name, symbol.kind, symbol.location))
     )
     if any(symbol.kind == "forbidden_alias" for symbol in ordered_symbols):
-        return AmbiguityGroup(
-            normalized_stem=normalized_stem,
-            symbols=ordered_symbols,
-            classification=AmbiguityClassification.CONFLICT,
-            rationale=(
-                "Forbidden ADR-024 alias surfaced on an active export without an "
-                "explicit compatibility decision."
-            ),
-        )
+        return _classify_forbidden_alias_group(normalized_stem, ordered_symbols)
 
     exact_compat_aliases = _compatibility_alias_index(registry)
     if any(symbol.name in exact_compat_aliases for symbol in ordered_symbols):
-        return AmbiguityGroup(
-            normalized_stem=normalized_stem,
-            symbols=ordered_symbols,
-            classification=AmbiguityClassification.COMPAT,
-            rationale=(
-                "Exact compatibility alias is registered in ADR-024 backward "
-                "compatibility metadata."
-            ),
-        )
+        return _classify_compat_alias_group(normalized_stem, ordered_symbols)
 
     allowlisted_names = _stable_registry_name_index(registry) | set(
         _EXPLICIT_OK_FAMILY_MEMBERS.get(normalized_stem, frozenset())
@@ -866,14 +934,10 @@ def classify_ambiguity_group(
         unresolved_summary = ", ".join(
             sorted(f"{symbol.name}:{symbol.kind}" for symbol in unresolved)
         )
-        return AmbiguityGroup(
-            normalized_stem=normalized_stem,
-            symbols=ordered_symbols,
-            classification=AmbiguityClassification.DUPLICATE,
-            rationale=(
-                "Overlap family has active surfaces without registry-backed "
-                f"distinction: {unresolved_summary}"
-            ),
+        return _classify_duplicate_group(
+            normalized_stem,
+            ordered_symbols,
+            unresolved_summary,
         )
 
     return AmbiguityGroup(
@@ -899,18 +963,26 @@ def build_ambiguity_groups(
     groups: list[AmbiguityGroup] = []
     for semantic_family in sorted(grouped):
         symbols = tuple(grouped[semantic_family].values())
-        if semantic_family.startswith("candidate:"):
-            labels = {_candidate_family_label(symbol.name) for symbol in symbols}
-            if len(labels) < 2 and not any(
-                symbol.kind == "forbidden_alias" for symbol in symbols
-            ):
-                continue
-        if len(symbols) < 2 and not any(
-            symbol.kind == "forbidden_alias" for symbol in symbols
-        ):
+        if _should_skip_ambiguity_group(semantic_family, symbols):
             continue
         groups.append(classify_ambiguity_group(semantic_family, symbols, registry))
     return groups
+
+
+def _should_skip_ambiguity_group(
+    semantic_family: str,
+    symbols: tuple[SymbolSurface, ...],
+) -> bool:
+    if len(symbols) < 2 and not any(
+        symbol.kind == "forbidden_alias" for symbol in symbols
+    ):
+        return True
+    if not semantic_family.startswith("candidate:"):
+        return False
+    labels = {_candidate_family_label(symbol.name) for symbol in symbols}
+    return len(labels) < 2 and not any(
+        symbol.kind == "forbidden_alias" for symbol in symbols
+    )
 
 
 def _doc_relative_parts(
@@ -926,8 +998,9 @@ def _doc_relative_parts(
 def _normalize_doc_exception_path(value: str) -> str:
     """Normalize docs exception paths to docs-root-relative slash form."""
     normalized = value.replace("\\", "/").strip("/")
-    if normalized.startswith("docs/"):
-        normalized = normalized.removeprefix("docs/")
+    DOCS_PREFIX = "docs/"
+    if normalized.startswith(DOCS_PREFIX):
+        normalized = normalized.removeprefix(DOCS_PREFIX)
     return normalized
 
 

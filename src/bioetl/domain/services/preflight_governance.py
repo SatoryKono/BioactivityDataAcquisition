@@ -9,8 +9,6 @@ __all__ = [
 ]
 
 from bioetl.domain.services._preflight_governance_helpers import (
-    BLOCKING_POLICIES,
-    apply_overrides_to_issues,
     build_governance_metadata,
     format_issue,
     rebuild_validation_result,
@@ -27,7 +25,6 @@ from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import (
     CompositeValidationReport,
     ValidationIssue,
-    ValidationResult,
 )
 from bioetl.domain.types.validation_severity import ValidationLayer, ValidationSeverity
 
@@ -73,60 +70,26 @@ class PreflightGovernanceService:
         if not config.issue_code_overrides:
             return report
         return CompositeValidationReport(
-            structural_result=self._rebuild_validation_result(
+            structural_result=rebuild_validation_result(
                 report.structural_result,
-                ValidationLayer.STRUCTURAL,
-                config,
+                layer=ValidationLayer.STRUCTURAL,
+                config=config,
             ),
-            deep_preflight_result=self._rebuild_validation_result(
+            deep_preflight_result=rebuild_validation_result(
                 report.deep_preflight_result,
-                ValidationLayer.DEEP_PREFLIGHT,
-                config,
+                layer=ValidationLayer.DEEP_PREFLIGHT,
+                config=config,
             ),
-            runtime_guard_result=self._runtime_result_with_overrides(
-                report.runtime_guard_result,
-                config,
+            runtime_guard_result=(
+                rebuild_validation_result(
+                    report.runtime_guard_result,
+                    layer=ValidationLayer.RUNTIME_GUARD,
+                    config=config,
+                )
+                if report.runtime_guard_result is not None
+                else None
             ),
         )
-
-    def _runtime_result_with_overrides(
-        self,
-        runtime_result: ValidationResult | None,
-        config: PreflightGovernanceConfig,
-    ) -> ValidationResult | None:
-        """Apply overrides to runtime-guard result when present."""
-        if runtime_result is None:
-            return None
-        return rebuild_validation_result(
-            runtime_result,
-            layer=ValidationLayer.RUNTIME_GUARD,
-            config=config,
-        )
-
-    def _rebuild_validation_result(
-        self,
-        result: ValidationResult,
-        layer: ValidationLayer,
-        config: PreflightGovernanceConfig,
-    ) -> ValidationResult:
-        """Rebuild one validation result after applying issue overrides."""
-        return rebuild_validation_result(
-            result,
-            layer=layer,
-            config=config,
-        )
-
-    def _apply_overrides_to_issues(
-        self,
-        issues: list[ValidationIssue],
-        config: PreflightGovernanceConfig,
-    ) -> list[ValidationIssue]:
-        """Apply severity overrides to individual issues."""
-        updated_issues: list[ValidationIssue] = apply_overrides_to_issues(
-            issues,
-            config,
-        )
-        return updated_issues
 
     def _determine_execution_decision(
         self,
@@ -142,7 +105,11 @@ class PreflightGovernanceService:
                 "policy_applied": policy.value,
             }
 
-        blocked, reason = self._resolve_policy_block_state(report, policy)
+        blocked, reason = resolve_policy_block_state(
+            report_has_any_issues=report.has_any_issues(),
+            has_effective_blockers=self._has_effective_blockers(report),
+            policy=policy,
+        )
         if blocked:
             return {
                 "execution_allowed": False,
@@ -160,19 +127,6 @@ class PreflightGovernanceService:
         all_issues = report.get_all_issues()
         return any(self._is_effective_blocker(issue) for issue in all_issues)
 
-    def _resolve_policy_block_state(
-        self,
-        report: CompositeValidationReport,
-        policy: GovernancePolicy,
-    ) -> tuple[bool, str]:
-        """Resolve whether a policy blocks execution and why."""
-        policy_state: tuple[bool, str] = resolve_policy_block_state(
-            report_has_any_issues=report.has_any_issues(),
-            has_effective_blockers=self._has_effective_blockers(report),
-            policy=policy,
-        )
-        return policy_state
-
     def _generate_governance_report(
         self,
         report: CompositeValidationReport,
@@ -182,7 +136,7 @@ class PreflightGovernanceService:
     ) -> JsonDict:
         """Generate comprehensive governance report."""
         return {
-            "governance_metadata": self._build_governance_metadata(
+            "governance_metadata": build_governance_metadata(
                 config,
                 execution_timestamp=self._resolve_execution_timestamp(report),
             ),
@@ -191,19 +145,6 @@ class PreflightGovernanceService:
             "execution_context": execution_context,
             "detailed_issues": self._format_detailed_issues(report, config),
         }
-
-    @staticmethod
-    def _build_governance_metadata(
-        config: PreflightGovernanceConfig,
-        *,
-        execution_timestamp: str,
-    ) -> JsonDict:
-        """Build governance metadata for reporting."""
-        metadata: JsonDict = build_governance_metadata(
-            config,
-            execution_timestamp=execution_timestamp,
-        )
-        return metadata
 
     @staticmethod
     def _resolve_execution_timestamp(report: CompositeValidationReport) -> str:
@@ -249,18 +190,6 @@ class PreflightGovernanceService:
             return False
         is_blocker: bool = issue.is_blocker()
         return is_blocker
-
-    def _determine_governance_impact(
-        self,
-        issue: ValidationIssue,
-        config: PreflightGovernanceConfig,
-    ) -> str:
-        """Determine governance impact of an issue."""
-        if issue.is_blocker():
-            if config.policy in BLOCKING_POLICIES:
-                return "execution_blocker"
-            return "warning_with_blocker_severity"
-        return "informational"
 
     def create_ci_gate_report(self, governance_report: JsonDict) -> JsonDict:
         """Create CI/CD gate compatible report."""

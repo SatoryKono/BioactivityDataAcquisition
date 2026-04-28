@@ -14,6 +14,7 @@ from __future__ import annotations
 
 __all__ = ["PubChemFetchStrategies"]
 
+import asyncio
 from typing import TYPE_CHECKING
 
 import pubchempy as pcp
@@ -132,33 +133,56 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
         )
         return self._response_mapper.map_compounds(compounds)
 
+    async def _yield_records(self, records: list[BronzeRecord], limit: int | None, fetched: int) -> AsyncIterator[tuple[BronzeRecord, int]]:
+        for record in records:
+            if is_limit_reached(limit, fetched):
+                break
+            yield record, fetched + 1
+            fetched += 1
+
+    def _warn_smiles_fetch_error(self, smiles: str, error: Exception) -> None:
+        self._logger.warning(
+            "smiles_fetch_failed",
+            provider=self._provider_name,
+            smiles=smiles[:50],
+            error=str(error),
+        )
+
+    async def _iter_smiles_chunk_records(
+        self,
+        chunk: list[str],
+    ) -> AsyncIterator[BronzeRecord]:
+        tasks = [self._fetch_single_smiles(smiles) for smiles in chunk]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        for smiles, result in zip(chunk, results, strict=True):
+            if isinstance(result, self.FETCH_STRATEGY_ERRORS):
+                self._warn_smiles_fetch_error(smiles, result)
+                continue
+            if isinstance(result, BaseException):
+                raise result
+            for record in result:
+                yield record
+
     async def fetch_by_smiles(
         self,
         smiles_list: list[str],
         limit: int | None = None,
+        batch_size: int = 10,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch compounds by SMILES strings."""
         fetched = 0
-        for smiles in smiles_list:
-            if is_limit_reached(limit, fetched):
-                return
-            if is_blank_value(smiles):
-                continue
+        valid_smiles = [s for s in smiles_list if not is_blank_value(s)]
 
-            try:
-                records = await self._fetch_single_smiles(smiles)
-                for record in records:
-                    if is_limit_reached(limit, fetched):
-                        return
-                    yield record
-                    fetched += 1
-            except self.FETCH_STRATEGY_ERRORS as error:
-                self._logger.warning(
-                    "smiles_fetch_failed",
-                    provider=self._provider_name,
-                    smiles=smiles[:50],
-                    error=str(error),
-                )
+        for i in range(0, len(valid_smiles), batch_size):
+            if is_limit_reached(limit, fetched):
+                break
+
+            chunk = valid_smiles[i : i + batch_size]
+            async for record in self._iter_smiles_chunk_records(chunk):
+                if is_limit_reached(limit, fetched):
+                    return
+                yield record
+                fetched += 1
 
     def _parse_valid_cids(self, cid_list: list[str]) -> list[int]:
         """Parse and validate CID list, returning only valid integers."""
@@ -216,19 +240,11 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
         )
         return self._response_mapper.map_compounds(compounds)
 
-    async def fetch_by_inchikey(
-        self,
-        inchikey_list: list[str],
-        limit: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch compounds by InChIKey list."""
-        fetched = 0
+    def _filter_valid_inchikeys(self, inchikey_list: list[str]) -> list[str]:
+        valid_keys = []
         for inchikey in inchikey_list:
-            if is_limit_reached(limit, fetched):
-                return
             if is_blank_value(inchikey):
                 continue
-
             cleaned = inchikey.strip()
             if not is_valid_inchikey(cleaned):
                 self._logger.warning(
@@ -238,18 +254,49 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
                     reason="invalid_format",
                 )
                 continue
+            valid_keys.append(cleaned)
+        return valid_keys
 
-            try:
-                records = await self._fetch_single_inchikey(cleaned)
-                for record in records:
-                    if is_limit_reached(limit, fetched):
-                        return
-                    yield record
-                    fetched += 1
-            except self.FETCH_STRATEGY_ERRORS as error:
-                self._logger.warning(
-                    "inchikey_fetch_failed",
-                    provider=self._provider_name,
-                    inchikey=cleaned,
-                    error=str(error),
-                )
+    def _warn_inchikey_fetch_error(self, inchikey: str, error: Exception) -> None:
+        self._logger.warning(
+            "inchikey_fetch_failed",
+            provider=self._provider_name,
+            inchikey=inchikey,
+            error=str(error),
+        )
+
+    async def _iter_inchikey_chunk_records(
+        self,
+        chunk: list[str],
+    ) -> AsyncIterator[BronzeRecord]:
+        tasks = [self._fetch_single_inchikey(inchikey) for inchikey in chunk]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        for cleaned, result in zip(chunk, results, strict=True):
+            if isinstance(result, self.FETCH_STRATEGY_ERRORS):
+                self._warn_inchikey_fetch_error(cleaned, result)
+                continue
+            if isinstance(result, BaseException):
+                raise result
+            for record in result:
+                yield record
+
+    async def fetch_by_inchikey(
+        self,
+        inchikey_list: list[str],
+        limit: int | None = None,
+        batch_size: int = 10,
+    ) -> AsyncIterator[BronzeRecord]:
+        """Fetch compounds by InChIKey list."""
+        fetched = 0
+        valid_keys = self._filter_valid_inchikeys(inchikey_list)
+
+        for i in range(0, len(valid_keys), batch_size):
+            if is_limit_reached(limit, fetched):
+                break
+
+            chunk = valid_keys[i : i + batch_size]
+            async for record in self._iter_inchikey_chunk_records(chunk):
+                if is_limit_reached(limit, fetched):
+                    return
+                yield record
+                fetched += 1

@@ -31,8 +31,12 @@ else:
 
 ensure_repo_imports()
 
-from scripts.docs.common.markdown import INLINE_CODE_RE, MD_LINK_RE, load_nav_docs
-from scripts.docs.common.paths import (
+from scripts.docs.common.markdown import (  # noqa: E402
+    INLINE_CODE_RE,
+    MD_LINK_RE,
+    load_nav_docs,
+)
+from scripts.docs.common.paths import (  # noqa: E402
     DOCS_DIR,
     MKDOCS_FILE,
     PROJECT_ROOT,

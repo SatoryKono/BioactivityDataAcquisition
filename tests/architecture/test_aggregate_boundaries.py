@@ -50,6 +50,32 @@ def _read_aggregate_content(aggregates_dir: Path, filename: str) -> str:
     return content
 
 
+def _aggregate_tree(aggregates_dir: Path, file_path: Path) -> ast.Module | None:
+    """Parse the aggregate file (and sub-modules for facades) into one AST."""
+    content = _read_aggregate_content(aggregates_dir, file_path.name)
+    if not content:
+        return None
+    try:
+        return ast.parse(content, filename=str(file_path))
+    except SyntaxError:
+        return None
+
+
+def _referenced_names_from_tree(tree: ast.Module) -> set[str]:
+    """Collect all referenced names from an aggregate AST."""
+    referenced_names: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call):
+            func = node.func
+            if isinstance(func, ast.Name):
+                referenced_names.add(func.id)
+            elif isinstance(func, ast.Attribute):
+                referenced_names.add(func.attr)
+        elif isinstance(node, ast.Name):
+            referenced_names.add(node.id)
+    return referenced_names
+
+
 def _iter_aggregate_files(aggregates_dir: Path) -> list[Path]:
     return [
         py_file
@@ -57,14 +83,6 @@ def _iter_aggregate_files(aggregates_dir: Path) -> list[Path]:
         if py_file.name not in ("__init__.py", "events.py")
         and not py_file.name.startswith("_")
     ]
-
-
-def _aggregate_tree(aggregates_dir: Path, py_file: Path) -> ast.AST | None:
-    full_content = _read_aggregate_content(aggregates_dir, py_file.name)
-    try:
-        return ast.parse(full_content, filename=str(py_file))
-    except SyntaxError:
-        return None
 
 
 def _current_aggregate_class(py_file: Path) -> str | None:
@@ -263,6 +281,112 @@ def _aggregate_file_contents(aggregates_dir: Path) -> list[tuple[Path, str]]:
     ]
 
 
+def _assert_aggregates_dir_exists(aggregates_dir: Path) -> None:
+    if not aggregates_dir.exists():
+        pytest.skip("Aggregates directory not found")
+
+
+def _assert_aggregate_event_references(
+    aggregates_dir: Path,
+    required_events: dict[str, list[str]],
+) -> None:
+    for py_file, events in required_events.items():
+        tree = _aggregate_tree(aggregates_dir, Path(aggregates_dir / py_file))
+        if tree is None:
+            continue
+
+        referenced_names = _referenced_names_from_tree(tree)
+        for event in events:
+            assert event in referenced_names, (
+                f"{py_file} should emit {event} domain event "
+                "for cross-aggregate coordination"
+            )
+
+
+def _assert_aggregate_collect_events_methods(
+    aggregates_dir: Path,
+    aggregate_files: list[str],
+) -> None:
+    for filename in aggregate_files:
+        tree = _aggregate_tree(aggregates_dir, Path(aggregates_dir / filename))
+        if tree is None:
+            continue
+
+        has_collect_events = any(
+            isinstance(node, ast.FunctionDef) and node.name == "collect_events"
+            for node in ast.walk(tree)
+        )
+        assert has_collect_events, (
+            f"{filename} should have collect_events() method "
+            "for domain event collection"
+        )
+
+
+def _assert_aggregate_slots(
+    aggregates_dir: Path,
+    expected_slots: dict[str, str],
+) -> None:
+    for filename, class_name in expected_slots.items():
+        content = _read_aggregate_content(aggregates_dir, filename)
+        if not content:
+            continue
+
+        assert "__slots__" in content, (
+            f"{filename}: {class_name} should use __slots__ "
+            "to prevent arbitrary attribute assignment"
+        )
+
+
+def _assert_aggregate_state_changes_through_methods_only(
+    aggregates_dir: Path,
+) -> None:
+    """Check aggregate files for slot-based state protection."""
+    expected_slots = {
+        "batch.py": "Batch",
+        "pipeline_run.py": "PipelineRun",
+        "quarantine_entry.py": "QuarantineEntry",
+    }
+    _assert_aggregate_slots(aggregates_dir, expected_slots)
+
+
+def _assert_aggregate_invariant_methods(aggregates_dir: Path) -> None:
+    """Check aggregate value objects validate their invariants."""
+    expected_validators = {
+        "batch.py": ["BatchRecord"],
+        "pipeline_run.py": ["StageResult"],
+        "quarantine_entry.py": ["ResolutionInfo"],
+    }
+    for filename, class_names in expected_validators.items():
+        content = _read_aggregate_content(aggregates_dir, filename)
+        if not content:
+            continue
+        for class_name in class_names:
+            if class_name not in content:
+                continue
+            assert "__post_init__" in content or "def _validate" in content, (
+                f"{filename}: {class_name} should validate invariants in "
+                "__post_init__ or _validate_invariants()"
+            )
+
+
+def _assert_aggregate_ids_immutable(
+    aggregates_dir: Path,
+    id_properties: dict[str, list[str]],
+) -> None:
+    for filename, properties in id_properties.items():
+        content = _read_aggregate_content(aggregates_dir, filename)
+        if not content:
+            continue
+
+        for prop in properties:
+            assert f"def {prop}(self)" in content, (
+                f"{filename}: {prop} should be a property"
+            )
+            assert f"@{prop}.setter" not in content, (
+                f"{filename}: {prop} should not have a setter (immutable)"
+            )
+
+
 class TestAggregateBoundaryIsolation:
     """Tests ensuring aggregates don't reference each other directly."""
 
@@ -277,8 +401,7 @@ class TestAggregateBoundaryIsolation:
         REQ-ARCH-020: Each aggregate is a consistency boundary.
         Aggregates should reference each other by ID only.
         """
-        if not aggregates_dir.exists():
-            pytest.skip("Aggregates directory not found")
+        _assert_aggregates_dir_exists(aggregates_dir)
 
         # Map of aggregate file -> aggregate classes defined
         aggregate_classes = {
@@ -337,29 +460,8 @@ class TestAggregateInvariantProtection:
         REQ-ARCH-022: Invariants must be validated internally.
         """
         aggregates_dir = src_dir / "bioetl" / "domain" / "aggregates"
-        if not aggregates_dir.exists():
-            pytest.skip("Aggregates directory not found")
-
-        # Classes that should have invariant validation
-        expected_validators = {
-            "batch.py": ["BatchRecord"],  # Batch validates in _assert_open
-            "pipeline_run.py": ["StageResult"],  # Uses __post_init__
-            "quarantine_entry.py": ["ResolutionInfo"],  # Uses __post_init__
-        }
-
-        # Check that value objects inside aggregates validate in __post_init__
-        for filename in expected_validators:
-            content = _read_aggregate_content(aggregates_dir, filename)
-            if not content:
-                continue
-
-            # Check for __post_init__ in value objects
-            for class_name in expected_validators[filename]:
-                if class_name in content:
-                    assert "__post_init__" in content or "def _validate" in content, (
-                        f"{filename}: {class_name} should validate "
-                        "invariants in __post_init__ or _validate_invariants()"
-                    )
+        _assert_aggregates_dir_exists(aggregates_dir)
+        _assert_aggregate_invariant_methods(aggregates_dir)
 
     def test_aggregate_properties_return_immutable_collections(
         self, src_dir: Path
@@ -373,9 +475,10 @@ class TestAggregateInvariantProtection:
             pytest.skip("Aggregates directory not found")
         violations = _immutable_property_violations(aggregates_dir)
 
-        # Note: This is a soft check - existing code returns tuples correctly
-        if violations:
-            pytest.skip(f"Found potential issues: {violations}")
+        assert not violations, (
+            "Aggregate properties returning collections should return immutable types.\n"
+            + "\n".join(f"  - {v}" for v in violations)
+        )
 
 
 class TestDomainEventsForCoordination:
@@ -385,12 +488,13 @@ class TestDomainEventsForCoordination:
         """Aggregates should emit domain events for state changes.
 
         REQ-ARCH-024: Cross-aggregate coordination via Domain Events.
+        Uses AST to detect event class instantiations or references.
         """
         aggregates_dir = src_dir / "bioetl" / "domain" / "aggregates"
         if not aggregates_dir.exists():
             pytest.skip("Aggregates directory not found")
 
-        required_patterns = {
+        required_events: dict[str, list[str]] = {
             "batch.py": ["BatchCreated", "BatchSealed", "BatchWritten"],
             "pipeline_run.py": ["PipelineCompleted", "PipelineFailed"],
             "quarantine_entry.py": [
@@ -399,37 +503,20 @@ class TestDomainEventsForCoordination:
             ],
         }
 
-        for py_file, events in required_patterns.items():
-            content = _read_aggregate_content(aggregates_dir, py_file)
-            if not content:
-                continue
-
-            for event in events:
-                assert event in content, (
-                    f"{py_file} should emit {event} domain event "
-                    "for cross-aggregate coordination"
-                )
+        _assert_aggregate_event_references(aggregates_dir, required_events)
 
     def test_aggregates_have_collect_events_method(self, src_dir: Path) -> None:
         """All aggregates should have collect_events() method.
 
         REQ-ARCH-025: Events must be collectable for publishing.
+        Uses AST to find method definitions with the expected name.
         """
         aggregates_dir = src_dir / "bioetl" / "domain" / "aggregates"
-        if not aggregates_dir.exists():
-            pytest.skip("Aggregates directory not found")
-
-        aggregate_files = ["batch.py", "pipeline_run.py", "quarantine_entry.py"]
-
-        for filename in aggregate_files:
-            content = _read_aggregate_content(aggregates_dir, filename)
-            if not content:
-                continue
-
-            assert "def collect_events(self)" in content, (
-                f"{filename} should have collect_events() method "
-                "for domain event collection"
-            )
+        _assert_aggregates_dir_exists(aggregates_dir)
+        _assert_aggregate_collect_events_methods(
+            aggregates_dir,
+            ["batch.py", "pipeline_run.py", "quarantine_entry.py"],
+        )
 
 
 class TestAggregateConsistencyBoundary:
@@ -441,26 +528,8 @@ class TestAggregateConsistencyBoundary:
         REQ-ARCH-026: State changes only via aggregate methods.
         """
         aggregates_dir = src_dir / "bioetl" / "domain" / "aggregates"
-        if not aggregates_dir.exists():
-            pytest.skip("Aggregates directory not found")
-
-        # Aggregate classes should use __slots__ to prevent attribute addition
-        expected_slots = {
-            "batch.py": "Batch",
-            "pipeline_run.py": "PipelineRun",
-            "quarantine_entry.py": "QuarantineEntry",
-        }
-
-        for filename, class_name in expected_slots.items():
-            content = _read_aggregate_content(aggregates_dir, filename)
-            if not content:
-                continue
-
-            # Check for __slots__ in the aggregate class
-            assert "__slots__" in content, (
-                f"{filename}: {class_name} should use __slots__ "
-                "to prevent arbitrary attribute assignment"
-            )
+        _assert_aggregates_dir_exists(aggregates_dir)
+        _assert_aggregate_state_changes_through_methods_only(aggregates_dir)
 
     def test_aggregate_ids_are_immutable(self, src_dir: Path) -> None:
         """Aggregate identifiers should be immutable after creation.
@@ -468,8 +537,7 @@ class TestAggregateConsistencyBoundary:
         REQ-ARCH-027: IDs are immutable.
         """
         aggregates_dir = src_dir / "bioetl" / "domain" / "aggregates"
-        if not aggregates_dir.exists():
-            pytest.skip("Aggregates directory not found")
+        _assert_aggregates_dir_exists(aggregates_dir)
 
         # ID properties should not have setters
         id_properties = {
@@ -478,16 +546,4 @@ class TestAggregateConsistencyBoundary:
             "quarantine_entry.py": ["entry_id", "run_id", "batch_id"],
         }
 
-        for filename, properties in id_properties.items():
-            content = _read_aggregate_content(aggregates_dir, filename)
-            if not content:
-                continue
-
-            for prop in properties:
-                # Should have @property but not setter
-                assert f"def {prop}(self)" in content, (
-                    f"{filename}: {prop} should be a property"
-                )
-                assert f"@{prop}.setter" not in content, (
-                    f"{filename}: {prop} should not have a setter (immutable)"
-                )
+        _assert_aggregate_ids_immutable(aggregates_dir, id_properties)

@@ -15,6 +15,7 @@ ALLOWLIST_FILE = Path(".github/root-allowlist.txt")
 STRUCTURE_CATALOG_FILE = Path("configs/quality/repo_structure_catalog.yaml")
 CANONICAL_ROOT_TEXT_FILES: frozenset[str] = frozenset(
     {
+        "AGENTS.md",
         "CHANGELOG.md",
         "GEMINI.md",
         "README.md",
@@ -76,6 +77,7 @@ ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
         "scripts",
         "src",
         "tests",
+        "tools",
     }
 )
 
@@ -330,16 +332,32 @@ def _collect_cataloged_paths(
     return cataloged
 
 
-def _collect_structure_policy_violations(
-    repo_root: Path,
+def _collect_docs_policy_violations(
     tracked_paths: list[str],
     catalog: dict[str, Any],
-) -> list[str]:
-    """Return policy violations beyond the root allowlist."""
+    violations: list[str],
+) -> None:
+    """Append documentation placement policy violations."""
     tracked_set = set(tracked_paths)
-    violations: list[str] = []
-
     docs_drafts = _collect_cataloged_paths(catalog["docs_drafts"]["allowed_files"])
+    _collect_docs_draft_policy_violations(
+        tracked_paths=tracked_paths,
+        docs_drafts=docs_drafts,
+        violations=violations,
+    )
+    _collect_docs_missing_policy_violations(
+        tracked_set=tracked_set,
+        docs_drafts=docs_drafts,
+        violations=violations,
+    )
+
+
+def _collect_docs_draft_policy_violations(
+    *,
+    tracked_paths: list[str],
+    docs_drafts: set[str],
+    violations: list[str],
+) -> None:
     actual_docs_drafts = {
         path
         for path in tracked_paths
@@ -349,16 +367,53 @@ def _collect_structure_policy_violations(
         violations.append(
             f"{path}: legacy flat doc must be cataloged in {STRUCTURE_CATALOG_FILE.as_posix()}"
         )
+
+
+def _collect_docs_missing_policy_violations(
+    *,
+    tracked_set: set[str],
+    docs_drafts: set[str],
+    violations: list[str],
+) -> None:
     for path in sorted(docs_drafts - tracked_set):
         violations.append(f"{path}: cataloged legacy doc is missing from tracked tree")
 
-    plans_readme = catalog["plans"].get("readme")
+
+def _collect_plan_policy_violations(
+    tracked_paths: list[str],
+    catalog: dict[str, Any],
+    violations: list[str],
+) -> None:
+    """Append plan catalog policy violations."""
+    tracked_set = set(tracked_paths)
+    plans = catalog["plans"]
+    plans_readme = plans.get("readme")
     if not isinstance(plans_readme, str) or not plans_readme:
         raise RuntimeError("Structure catalog plans.readme must be a non-empty path")
+    _collect_plans_readme_violation(plans_readme, tracked_set, violations)
+    _collect_plans_catalog_violations(tracked_paths, plans, plans_readme, tracked_set, violations)
+    _collect_plans_lifecycle_violation(plans, violations)
+
+
+def _collect_plans_readme_violation(
+    plans_readme: str,
+    tracked_set: set[str],
+    violations: list[str],
+) -> None:
+    """Ensure the plans readme exists in tracked files."""
     if plans_readme not in tracked_set:
         violations.append(f"{plans_readme}: plans readme required by structure catalog")
 
-    cataloged_plan_paths = _collect_cataloged_paths(catalog["plans"]["allowed_files"])
+
+def _collect_plans_catalog_violations(
+    tracked_paths: list[str],
+    plans: dict[str, Any],
+    plans_readme: str,
+    tracked_set: set[str],
+    violations: list[str],
+) -> None:
+    """Ensure tracked plans match the catalog allowlist."""
+    cataloged_plan_paths = _collect_cataloged_paths(plans["allowed_files"])
     actual_plan_paths = {
         path
         for path in tracked_paths
@@ -373,11 +428,17 @@ def _collect_structure_policy_violations(
     for path in sorted(cataloged_plan_paths - tracked_set):
         violations.append(f"{path}: cataloged plan file is missing from tracked tree")
 
-    plan_entries = catalog["plans"]["allowed_files"]
+
+def _collect_plans_lifecycle_violation(
+    plans: dict[str, Any],
+    violations: list[str],
+) -> None:
+    """Ensure the active backlog count matches the catalog constraint."""
+    plan_entries = plans["allowed_files"]
     active_backlog_count = sum(
         1 for entry in plan_entries if entry.get("lifecycle") == "active_backlog"
     )
-    max_active_backlog = catalog["plans"].get("max_active_backlog")
+    max_active_backlog = plans.get("max_active_backlog")
     if not isinstance(max_active_backlog, int) or max_active_backlog < 1:
         raise RuntimeError("Structure catalog plans.max_active_backlog must be >= 1")
     if active_backlog_count != max_active_backlog:
@@ -386,6 +447,13 @@ def _collect_structure_policy_violations(
             f"{max_active_backlog} active_backlog file(s), found {active_backlog_count}"
         )
 
+
+def _collect_src_policy_violations(
+    tracked_paths: list[str],
+    catalog: dict[str, Any],
+    violations: list[str],
+) -> None:
+    """Append src family approval policy violations."""
     approved_src_roots = _collect_cataloged_paths(
         catalog["src_sidecars"]["approved_roots"]
     )
@@ -399,6 +467,13 @@ def _collect_structure_policy_violations(
             f"{path}: new src top-level family requires explicit structure catalog approval"
         )
 
+
+def _collect_blocked_cleanup_violations(
+    repo_root: Path,
+    catalog: dict[str, Any],
+    violations: list[str],
+) -> None:
+    """Append violations for blocked cleanup zones missing on disk."""
     blocked_cleanup_entries = catalog["blocked_cleanup_zones"]
     blocked_cleanup_paths = _collect_cataloged_paths(blocked_cleanup_entries)
     for path in sorted(blocked_cleanup_paths):
@@ -406,6 +481,20 @@ def _collect_structure_policy_violations(
             violations.append(
                 f"{path}: blocked cleanup zone declared in catalog but missing"
             )
+
+
+def _collect_structure_policy_violations(
+    repo_root: Path,
+    tracked_paths: list[str],
+    catalog: dict[str, Any],
+) -> list[str]:
+    """Return policy violations beyond the root allowlist."""
+    violations: list[str] = []
+
+    _collect_docs_policy_violations(tracked_paths, catalog, violations)
+    _collect_plan_policy_violations(tracked_paths, catalog, violations)
+    _collect_src_policy_violations(tracked_paths, catalog, violations)
+    _collect_blocked_cleanup_violations(repo_root, catalog, violations)
 
     return violations
 

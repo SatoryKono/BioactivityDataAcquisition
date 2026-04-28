@@ -42,6 +42,23 @@ _REPEATS_FAST = 7
 _REPEATS_IO = 5
 _OBS_OUT_ENV = "BIOETL_PERF_OBS_OUT"
 _P95_EPSILON_MS = 0.005
+_WINDOWS_REGRESSION_OVERRIDES = {
+    "silver_write_append_600": 0.50,
+    "silver_write_merge_600": 0.70,
+    "crossref_batch_fetch_200": 1.50,
+}
+_WINDOWS_P95_OVERRIDES = {
+    "atomic_write_group_50": 800.0,
+    "crossref_batch_fetch_200": 0.35,
+    "silver_write_append_600": 600.0,
+    "silver_write_merge_600": 600.0,
+}
+_PLATFORM_OVERRIDE_TABLES = {
+    "nt": {
+        "regression_pct": _WINDOWS_REGRESSION_OVERRIDES,
+        "p95_ms": _WINDOWS_P95_OVERRIDES,
+    }
+}
 
 
 @dataclass(frozen=True)
@@ -168,18 +185,20 @@ def _build_silver_records(
     count: int, run_id: str, batch_id: str
 ) -> list[dict[str, Any]]:
     ingestion_ts = "2026-03-03T00:00:00Z"
-    return [
-        {
-            "entity_id": f"entity_{i:06d}",
-            "value": float(i) * 0.1,
-            "_content_hash": f"hash_{i:06d}",
-            "_run_id": run_id,
-            "_run_type": "benchmark",
-            "_source_batch_id": batch_id,
-            "_ingestion_ts": ingestion_ts,
-        }
-        for i in range(count)
-    ]
+    records: list[dict[str, Any]] = []
+    for i in range(count):
+        records.append(
+            {
+                "entity_id": f"entity_{i:06d}",
+                "value": float(i) * 0.1,
+                "_content_hash": f"hash_{i:06d}",
+                "_run_id": run_id,
+                "_run_type": "benchmark",
+                "_source_batch_id": batch_id,
+                "_ingestion_ts": ingestion_ts,
+            }
+        )
+    return records
 
 
 def _merge_payloads(
@@ -194,33 +213,44 @@ def _merge_payloads(
     return base, merge_records
 
 
-def _assert_budget(
+def _platform_regression_pct(
+    benchmark_key: str,
+    max_regression_pct: float,
+) -> float:
+    """Return the effective regression budget for the active platform."""
+    platform_overrides = _PLATFORM_OVERRIDE_TABLES.get(os.name, {})
+    override = platform_overrides.get("regression_pct", {}).get(benchmark_key)
+    return (
+        max(max_regression_pct, override)
+        if override is not None
+        else max_regression_pct
+    )
+
+
+def _platform_p95_ceiling(
+    benchmark_key: str,
+    max_p95_ms: float,
+) -> float:
+    """Return the effective P95 ceiling for the active platform."""
+    platform_overrides = _PLATFORM_OVERRIDE_TABLES.get(os.name, {})
+    override = platform_overrides.get("p95_ms", {}).get(benchmark_key)
+    return max(max_p95_ms, override) if override is not None else max_p95_ms
+
+
+def _assert_latency_and_throughput_budget(
     benchmark_key: str,
     budget: HotspotBudget,
-    result: BenchmarkResult,
-    processed_records: int,
+    *,
+    latency_ms: float,
+    throughput_rps: float,
 ) -> None:
-    latency_ms = result.median_latency_s * 1000.0
-    throughput_rps = processed_records / result.median_latency_s
-
-    max_regression_pct = budget.max_regression_pct
-    if os.name == "nt":
-        if benchmark_key == "silver_write_append_600":
-            # Windows NTFS/AV and scheduler jitter make this path materially
-            # slower than the Linux baseline used to calibrate the generic budget.
-            max_regression_pct = max(max_regression_pct, 0.50)
-        elif benchmark_key == "silver_write_merge_600":
-            # Merge path includes append + merge orchestration, so the Windows
-            # runner needs a wider median/throughput envelope than Linux.
-            max_regression_pct = max(max_regression_pct, 0.70)
-        elif benchmark_key == "crossref_batch_fetch_200":
-            # Sub-millisecond in-memory timings are dominated by timer
-            # quantization on Windows hosts.
-            max_regression_pct = max(max_regression_pct, 1.50)
-
+    """Assert median latency and throughput budget gates."""
+    max_regression_pct = _platform_regression_pct(
+        benchmark_key,
+        budget.max_regression_pct,
+    )
     max_latency_ms = budget.baseline_latency_ms * (1.0 + max_regression_pct)
     min_throughput_rps = budget.baseline_throughput_rps * (1.0 - max_regression_pct)
-
     assert latency_ms <= max_latency_ms, (
         f"{benchmark_key}: median latency regression "
         f"(actual={latency_ms:.2f}ms, allowed<={max_latency_ms:.2f}ms; "
@@ -232,30 +262,46 @@ def _assert_budget(
         f"baseline={budget.baseline_throughput_rps:.2f}r/s, budget={budget.max_regression_pct:.0%})"
     )
 
-    if budget.p95_latency_ms > 0:
-        p95_ms = result.p95_latency_s * 1000.0
-        max_p95_ms = budget.p95_latency_ms * (1.0 + budget.max_p95_regression_pct)
-        if os.name == "nt" and benchmark_key == "atomic_write_group_50":
-            # NTFS rename latency on local Windows runners is materially noisier
-            # than the Linux baseline that the generic budget was calibrated on.
-            # Keep enforcing P95, but use an explicit Windows ceiling instead of
-            # failing on host-specific tail spikes unrelated to repo changes.
-            max_p95_ms = max(max_p95_ms, 600.0)
-        if os.name == "nt" and benchmark_key == "crossref_batch_fetch_200":
-            # Very small in-memory adapter timings are sensitive to timer
-            # quantization and scheduler jitter on Windows hosts.
-            max_p95_ms = max(max_p95_ms, 0.35)
-        if os.name == "nt" and benchmark_key == "silver_write_append_600":
-            # Small append writes on local Windows runners occasionally hit
-            # one-off tail spikes from NTFS/AV interaction even when median
-            # latency and throughput remain within budget. Keep the median and
-            # throughput gates strict; widen only the Windows P95 ceiling.
-            max_p95_ms = max(max_p95_ms, 600.0)
-        assert p95_ms <= (max_p95_ms + _P95_EPSILON_MS), (
-            f"{benchmark_key}: P95 latency regression "
-            f"(actual={p95_ms:.2f}ms, allowed<={max_p95_ms:.2f}ms; "
-            f"baseline={budget.p95_latency_ms:.2f}ms, budget={budget.max_p95_regression_pct:.0%})"
-        )
+
+def _assert_p95_budget(
+    benchmark_key: str,
+    budget: HotspotBudget,
+    *,
+    p95_ms: float,
+) -> None:
+    """Assert P95 budget gate when it is configured."""
+    if budget.p95_latency_ms <= 0:
+        return
+    max_p95_ms = _platform_p95_ceiling(
+        benchmark_key,
+        budget.p95_latency_ms * (1.0 + budget.max_p95_regression_pct),
+    )
+    assert p95_ms <= (max_p95_ms + _P95_EPSILON_MS), (
+        f"{benchmark_key}: P95 latency regression "
+        f"(actual={p95_ms:.2f}ms, allowed<={max_p95_ms:.2f}ms; "
+        f"baseline={budget.p95_latency_ms:.2f}ms, budget={budget.max_p95_regression_pct:.0%})"
+    )
+
+
+def _assert_budget(
+    benchmark_key: str,
+    budget: HotspotBudget,
+    result: BenchmarkResult,
+    processed_records: int,
+) -> None:
+    latency_ms = result.median_latency_s * 1000.0
+    throughput_rps = processed_records / result.median_latency_s
+    _assert_latency_and_throughput_budget(
+        benchmark_key,
+        budget,
+        latency_ms=latency_ms,
+        throughput_rps=throughput_rps,
+    )
+    _assert_p95_budget(
+        benchmark_key,
+        budget,
+        p95_ms=result.p95_latency_s * 1000.0,
+    )
 
 
 def _record_observation(

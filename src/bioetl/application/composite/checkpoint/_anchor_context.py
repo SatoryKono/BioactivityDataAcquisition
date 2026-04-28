@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -121,8 +121,9 @@ def merge_expected_anchors(
     merged = normalize_runtime_anchor_payload(
         _build_merged_anchor_payload(state=state, anchors=anchors)
     )
-    return replace(
-        state,
+    updated_state = CompositeCheckpointState(
+        composite_name=state.composite_name,
+        run_id=state.run_id,
         effective_config_hash=merged["effective_config_hash"] or "",
         effective_config_artifact_id=(merged["effective_config_artifact_id"] or ""),
         execution_fingerprint=merged["execution_fingerprint"] or "",
@@ -131,7 +132,14 @@ def merge_expected_anchors(
         contract_version=merged["contract_version"] or "",
         manifest_id=merged["manifest_id"] or "",
         composite_run_identity=merged["composite_run_identity"] or "",
+        state=state.state,
+        seed_completed=state.seed_completed,
+        merge_completed=state.merge_completed,
+        last_event_id=state.last_event_id,
+        last_event_occurred_at=state.last_event_occurred_at,
+        created_at=state.created_at,
     )
+    return updated_state
 
 
 def fresh_checkpoint_state(

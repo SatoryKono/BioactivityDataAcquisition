@@ -67,55 +67,70 @@ class DocumentationParityChecker:
         self.entity_configs_dir = self.configs_dir / "entities"
         self.composite_configs_dir = self.configs_dir / "composites"
 
+    def _provider_entity_config_files(self, provider_dir: Path) -> list[Path]:
+        """Return visible entity config files for one provider directory."""
+        return list(filter(self._is_visible_config_file, self._provider_yaml_files(provider_dir)))
+
+    def _provider_yaml_files(self, provider_dir: Path) -> list[Path]:
+        """Return provider YAML files before visibility filtering."""
+        return sorted(provider_dir.glob("*.yaml"))
+
+    def _is_visible_config_file(self, config_file: Path) -> bool:
+        """Return whether a provider config file participates in parity checks."""
+        return not config_file.name.startswith("_")
+
+    def _iter_entity_config_files(self) -> list[Path]:
+        if not self.entity_configs_dir.exists():
+            return []
+        return [
+            config_file
+            for provider_dir in sorted(self.entity_configs_dir.iterdir())
+            if provider_dir.is_dir()
+            for config_file in self._provider_entity_config_files(provider_dir)
+        ]
+
+    def _iter_composite_config_files(self) -> list[Path]:
+        if not self.composite_configs_dir.exists():
+            return []
+        return list(self.composite_configs_dir.glob("*.yaml"))
+
+    def _iter_pipeline_doc_files(self) -> list[Path]:
+        """Return pipeline-spec docs when the docs tree exists."""
+        if not self.pipeline_specs_dir.exists():
+            return []
+        return list(self.pipeline_specs_dir.glob("*/*spec.md"))
+
+    def _iter_entity_doc_files(self) -> list[Path]:
+        """Return entity reference docs when the docs tree exists."""
+        entity_docs_dir = self.docs_dir / "04-reference" / "entity-specs"
+        if not entity_docs_dir.exists():
+            return []
+        return list(entity_docs_dir.glob("*.md"))
+
+    def _config_entity(self, config_file: Path, *, entity_type: str) -> ConfigEntity:
+        """Build a ConfigEntity from one config file."""
+        return ConfigEntity(
+            name=config_file.stem,
+            type=entity_type,
+            path=str(config_file.relative_to(self.configs_dir)),
+        )
+
     def find_config_files(self) -> list[ConfigEntity]:
         """Find all configuration files that should have documentation."""
-
-        config_entities = []
-
-        # Entity configs
-        if self.entity_configs_dir.exists():
-            for provider_dir in sorted(self.entity_configs_dir.iterdir()):
-                if not provider_dir.is_dir():
-                    continue
-                for config_file in sorted(provider_dir.glob("*.yaml")):
-                    if config_file.name.startswith("_"):
-                        continue
-                    entity_name = config_file.stem
-                    config_entities.append(
-                        ConfigEntity(
-                            name=entity_name,
-                            type="entity",
-                            path=str(config_file.relative_to(self.configs_dir)),
-                        )
-                    )
-
-        # Composite configs
-        if self.composite_configs_dir.exists():
-            for config_file in self.composite_configs_dir.glob("*.yaml"):
-                composite_name = config_file.stem
-                config_entities.append(
-                    ConfigEntity(
-                        name=composite_name,
-                        type="composite",
-                        path=str(config_file.relative_to(self.configs_dir)),
-                    )
-                )
-
+        config_entities = [
+            self._config_entity(config_file, entity_type="entity")
+            for config_file in self._iter_entity_config_files()
+        ]
+        config_entities.extend(
+            self._config_entity(config_file, entity_type="composite")
+            for config_file in self._iter_composite_config_files()
+        )
         return config_entities
 
     def find_documentation_files(self) -> list[Path]:
         """Find all pipeline specification documentation files."""
-
-        doc_files = []
-
-        if self.pipeline_specs_dir.exists():
-            doc_files.extend(self.pipeline_specs_dir.glob("*/*spec.md"))
-
-        # Also check for entity docs in reference section
-        entity_docs_dir = self.docs_dir / "04-reference" / "entity-specs"
-        if entity_docs_dir.exists():
-            doc_files.extend(entity_docs_dir.glob("*.md"))
-
+        doc_files = self._iter_pipeline_doc_files()
+        doc_files.extend(self._iter_entity_doc_files())
         return doc_files
 
     def extract_config_metadata(self, config_path: Path) -> dict[str, str]:

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from typing import cast
 
+from bioetl.domain.services.validation_result_envelopes import build_validation_result
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import ValidationIssue, ValidationResult
 from bioetl.domain.types.validation_severity import (
@@ -30,7 +32,7 @@ def rebuild_validation_result(
     config: PreflightGovernanceConfig,
 ) -> ValidationResult:
     """Rebuild one validation result after applying issue overrides."""
-    return ValidationResult(
+    return build_validation_result(
         issues=apply_overrides_to_issues(result.issues, config),
         validation_layer=layer,
         execution_context=result.execution_context,
@@ -59,7 +61,11 @@ def apply_issue_override(
     """Return issue with overridden severity when configuration requires it."""
     if override is None:
         return issue
-    return replace(issue, severity=override)
+    overridden_issue: ValidationIssue = cast(  # type: ignore[redundant-cast]
+        ValidationIssue,
+        replace(issue, severity=override),
+    )
+    return overridden_issue
 
 
 def resolve_policy_block_state(

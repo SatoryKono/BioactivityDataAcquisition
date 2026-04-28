@@ -220,13 +220,13 @@ class GoldBusinessRuleSpec:
     def _validate_severity(raw: object) -> GoldBusinessRuleSeverity:
         if raw not in ("error", "warn"):
             raise ValueError("severity must be 'error' or 'warn'")
-        return cast("GoldBusinessRuleSeverity", raw)
+        return raw
 
     @staticmethod
     def _validate_decision(raw: object) -> GoldBusinessRuleDecision | None:
         if raw is not None and raw not in ("pass", "warn", "fail", "quarantine"):
             raise ValueError("decision must be one of: pass, warn, fail, quarantine")
-        return cast("GoldBusinessRuleDecision | None", raw)
+        return raw
 
     @classmethod
     def from_mapping(cls, raw: Mapping[str, object]) -> GoldBusinessRuleSpec:

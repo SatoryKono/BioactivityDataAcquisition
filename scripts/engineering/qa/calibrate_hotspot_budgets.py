@@ -17,6 +17,10 @@ import math
 from pathlib import Path
 from typing import Any
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+ALLOWED_BUDGETS_ROOT = (REPO_ROOT / "tests" / "performance").resolve()
+HOTSPOT_BUDGETS_PATH = (ALLOWED_BUDGETS_ROOT / "hotspot_budgets.json").resolve()
+
 
 def _percentile(values: list[float], q: float) -> float:
     """Return percentile with linear interpolation."""
@@ -105,12 +109,24 @@ def recalibrate(
     return budgets, changed
 
 
-def _write_updated_budgets(path: Path, payload: dict[str, Any]) -> None:
-    """Write recalibrated hotspot budgets back to disk."""
-    path.write_text(
+def _write_validated_budgets(payload: dict[str, Any]) -> None:
+    """Write recalibrated hotspot budgets back to the validated budget path."""
+    HOTSPOT_BUDGETS_PATH.write_text(
         json.dumps(payload, ensure_ascii=True, indent=2) + "\n",
         encoding="utf-8",
     )
+
+
+def _validate_budgets_path(path: Path) -> None:
+    """Validate budget path to avoid writing outside performance budget scope."""
+    try:
+        matches = path.samefile(HOTSPOT_BUDGETS_PATH)
+    except OSError:
+        matches = False
+    if not matches:
+        raise ValueError(
+            "Budgets path must resolve to tests/performance/hotspot_budgets.json."
+        )
 
 
 def main() -> int:
@@ -142,9 +158,14 @@ def main() -> int:
         help="Throughput percentile for baseline (default: 0.0 for CI-stable min observed).",
     )
     args = parser.parse_args()
+    try:
+        _validate_budgets_path(args.budgets)
+    except ValueError as error:
+        print(f"Invalid budgets path: {error}")
+        return 2
 
     updated, changed = recalibrate(
-        args.budgets,
+        HOTSPOT_BUDGETS_PATH,
         args.observations,
         latency_q=args.latency_q,
         throughput_q=args.throughput_q,
@@ -154,7 +175,7 @@ def main() -> int:
         print("No matching observations found for configured benchmarks.")
         return 1
 
-    _write_updated_budgets(args.budgets, updated)
+    _write_validated_budgets(updated)
     print(f"Updated {len(changed)} benchmark baselines:")
     for key in changed:
         print(f"- {key}")

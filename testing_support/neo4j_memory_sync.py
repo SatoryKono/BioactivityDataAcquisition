@@ -57,7 +57,16 @@ from scripts.memory.sync import (
 
 pytestmark = pytest.mark.memory
 LEGACY_REPORT_PATH = str(Path(tempfile.gettempdir()) / "neo4j-memory-audit.json")
-LOCALHOST_HTTP_URI = "http://localhost:7474"
+def _test_internal_http_uri(host: str, port: int) -> str:
+    """Test-only helper for explicitly required unencrypted HTTP connections."""
+    return f"http://{host}:{port}"  # NOSONAR # nosec B108
+
+LOCALHOST_HTTP_URI = _test_internal_http_uri("localhost", 7474)
+LOCALHOST_AUDIT_HTTP_URI = _test_internal_http_uri("localhost", 7475)
+HOST_DOCKER_INTERNAL_HTTP_URI = _test_internal_http_uri("host.docker.internal", 7474)
+HOST_DOCKER_INTERNAL_AUDIT_HTTP_URI = _test_internal_http_uri(
+    "host.docker.internal", 7475
+)
 CHEMBL_ACTIVITY_CONFIG_PATH = "configs/entities/chembl/activity.yaml"
 RUN_MANIFEST_LEDGER_DOC_PATH = "docs/04-reference/contracts/run-manifest-ledger.md"
 RUN_MANIFEST_MODULE_PATH = "src/bioetl/domain/control_plane/run_manifest.py"
@@ -88,6 +97,67 @@ INTEGRATION_VCR_POLICY = "integration and VCR execution policy"
 DIAGRAM_GOVERNANCE_POLICY = "diagram governance policy"
 CHEMBL_ADAPTER_SURFACE = "bioetl.infrastructure.adapters.chembl"
 CHEMBL_ADAPTER_IMPL_SURFACE = "bioetl.infrastructure.adapters.chembl.client"
+
+
+REPO_ZONE_GITHUB = ".github"
+CONTRACT_CHEMBL_ACTIVITY = "chembl.activity"
+ARTIFACT_RUN_MANIFEST = "run_manifest::json"
+ARTIFACT_EFFECTIVE_CONFIG = "effective_config_artifact::json"
+ARTIFACT_LINEAGE = "lineage::fragment"
+STATE_MANIFEST_CHAIN_2 = "manifest-chain-2::retry-window"
+JOB_GOVERNANCE_PREFLIGHT = "tests::governance-preflight"
+ACTION_UPLOAD_ARTIFACT = "actions/upload-artifact"
+ARTIFACT_COVERAGE_DATA = "tests::coverage-data-${{ matrix.test-group.name }}"
+CMD_BIOETL_RUN = "bioetl run"
+CMD_MEMORY_SYNC = "scripts.memory sync"
+EXEC_BIOETL_RUN = "uv run python -m bioetl run --pipeline"
+EXEC_DIAGRAMS_LINT = "uv run python -m scripts.diagrams lint"
+EXEC_DOCS_VERIFY = "uv run python -m scripts.docs verify"
+EXEC_SCHEMA_VALIDATE = "uv run python -m scripts.schema validate-configs"
+QUALITY_GATE_DIAGRAMS = "diagram quality gates"
+JOB_TEST_MATRIX = "tests::test-matrix"
+PATH_CHEMBL_ACTIVITY_PROFILE = "src/bioetl/domain/normalization/profiles/chembl_activity.py"
+GATE_CONFIG_VALIDATION = "config validation"
+ARTIFACT_RUN_LEDGER = "run_ledger::jsonl"
+STMT_RETURN_1 = "RETURN 1 AS ok"
+NEO4J_HTTP_CLIENT_PATH = "scripts.memory.sync.Neo4jHttpClient"
+PATH_COMPOSITE_EXAMPLE = "src/bioetl/application/composite/example.py"
+CLASS_PKG_EXAMPLE = "pkg.Example"
+COMPLEXITY_PKG_EXAMPLE = "class_surface:pkg.Example"
+CONTEXT_COMPLEXITY_PREREQ = "complexity-layer targeted sync prerequisite anchor node check"
+PATH_PKG_EXAMPLE = "src/pkg/example.py"
+CONTEXT_FAST_AUDIT_LABEL = "fast audit label summary"
+PATH_SRC_A = "src/a.py"
+PATH_SRC_B = "src/b.py"
+PATH_SRC_C = "src/c.py"
+FAMILY_APP_COMPOSITE = "application/composite"
+
+
+class _TargetedApplyPrereqStubClient:
+    def query(
+        self,
+        _statement: str,
+        parameters: dict[str, object] | None = None,
+        *,
+        context: str | None = None,
+    ) -> list[dict[str, object]]:
+        assert parameters is not None
+        if context == "complexity-layer targeted sync prerequisite anchor check":
+            labels = parameters["labels"]
+            assert isinstance(labels, list)
+            return [{"label": label, "count": 0} for label in labels]
+        if context == CONTEXT_COMPLEXITY_PREREQ:
+            anchors = parameters["anchors"]
+            assert isinstance(anchors, list)
+            return [
+                {
+                    "label": anchor["label"],
+                    "name": anchor["name"],
+                    "count": 0,
+                }
+                for anchor in anchors
+            ]
+        raise AssertionError(f"Unexpected context: {context}")
 
 
 def _repo_root() -> Path:
@@ -135,7 +205,7 @@ def test_resolve_neo4j_connection_uses_audit_instance_when_live_audit_mode_enabl
 
     http_uri, username, password, database = resolve_neo4j_connection(tmp_path, None)
 
-    assert http_uri == "http://localhost:7475"
+    assert http_uri == LOCALHOST_AUDIT_HTTP_URI
     assert username == "neo4j"
     assert password == "audit_secure_password"
     assert database == "neo4j"
@@ -154,7 +224,7 @@ def test_resolve_neo4j_connection_prefers_host_docker_internal_for_wsl_audit_mod
 
     http_uri, username, password, database = resolve_neo4j_connection(tmp_path, None)
 
-    assert http_uri == "http://host.docker.internal:7475"
+    assert http_uri == HOST_DOCKER_INTERNAL_AUDIT_HTTP_URI
     assert username == "neo4j"
     assert password == "audit_secure_password"
     assert database == "neo4j"
@@ -178,7 +248,7 @@ def test_resolve_neo4j_connection_does_not_leak_default_mcp_credentials_into_aud
 
     http_uri, username, password, database = resolve_neo4j_connection(tmp_path, None)
 
-    assert http_uri == "http://localhost:7475"
+    assert http_uri == LOCALHOST_AUDIT_HTTP_URI
     assert username == "neo4j"
     assert password == "audit_secure_password"
     assert database == "neo4j"
@@ -191,7 +261,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("project", "BioETL") in node_keys
     assert ("repo_zone", "src") in node_keys
     assert ("repo_zone", "docs") in node_keys
-    assert ("repo_zone", ".github") in node_keys
+    assert ("repo_zone", REPO_ZONE_GITHUB) in node_keys
     assert ("directory_surface", APPLICATION_CORE_DIR) in node_keys
     assert ("directory_surface", CHEMBL_CONFIG_DIR) in node_keys
     assert ("directory_surface", TESTS_ARCHITECTURE_DIR) in node_keys
@@ -258,51 +328,51 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("adapter_surface", CHEMBL_ADAPTER_SURFACE) in node_keys
     assert ("adapter_impl_surface", CHEMBL_ADAPTER_IMPL_SURFACE) in node_keys
     assert ("pipeline_surface", "chembl_activity") in node_keys
-    assert ("contract_surface", "chembl.activity") in node_keys
+    assert ("contract_surface", CONTRACT_CHEMBL_ACTIVITY) in node_keys
     assert ("alert_surface", "BioETLPipelineRunFailed") in node_keys
     assert ("runtime_evidence_surface", "run_manifest") in node_keys
     assert ("runtime_evidence_surface", "run_ledger") in node_keys
     assert ("runtime_evidence_surface", "effective_config_artifact") in node_keys
     assert ("runtime_evidence_surface", "lineage") in node_keys
-    assert ("control_plane_artifact_surface", "run_manifest::json") in node_keys
+    assert ("control_plane_artifact_surface", ARTIFACT_RUN_MANIFEST) in node_keys
     assert (
         "control_plane_artifact_surface",
-        "effective_config_artifact::json",
+        ARTIFACT_EFFECTIVE_CONFIG,
     ) in node_keys
-    assert ("control_plane_artifact_surface", "lineage::fragment") in node_keys
+    assert ("control_plane_artifact_surface", ARTIFACT_LINEAGE) in node_keys
     assert ("run_instance_surface", "manifest-left") in node_keys
     assert ("run_instance_surface", "manifest-chain-smoke") in node_keys
     assert ("run_instance_surface", "manifest-chain-2") in node_keys
     assert ("run_instance_surface", "manifest-composite-quarantine") in node_keys
     assert ("runtime_state_surface", "manifest-left::active-window") in node_keys
-    assert ("runtime_state_surface", "manifest-chain-2::retry-window") in node_keys
+    assert ("runtime_state_surface", STATE_MANIFEST_CHAIN_2) in node_keys
     assert ("runtime_state_surface", "chembl_activity::composite-lock") in node_keys
     assert ("schema_field_surface", SILVER_CHEMBL_ACTIVITY_FIELD) in node_keys
     assert ("schema_field_surface", "gold/chembl/assay::_version") in node_keys
     assert ("schema_field_surface", SILVER_COMPOSITE_ACTIVITY_FIELD) in node_keys
     assert ("workflow_surface", "tests") in node_keys
-    assert ("workflow_job_surface", "tests::governance-preflight") in node_keys
+    assert ("workflow_job_surface", JOB_GOVERNANCE_PREFLIGHT) in node_keys
     assert any(label == "workflow_call_surface" for label, _ in node_keys)
     assert any(label == "workflow_matrix_variant_surface" for label, _ in node_keys)
     assert any(label == "workflow_output_surface" for label, _ in node_keys)
-    assert ("workflow_action_surface", "actions/upload-artifact") in node_keys
+    assert ("workflow_action_surface", ACTION_UPLOAD_ARTIFACT) in node_keys
     assert ("workflow_action_surface", "./.github/actions/setup-python-uv") in node_keys
     assert (
         "workflow_artifact_surface",
-        "tests::coverage-data-${{ matrix.test-group.name }}",
+        ARTIFACT_COVERAGE_DATA,
     ) in node_keys
     assert ("workflow_secret_surface", "GITHUB_TOKEN") in node_keys
-    assert ("cli_command_surface", "bioetl run") in node_keys
-    assert ("cli_command_surface", "scripts.memory sync") in node_keys
+    assert ("cli_command_surface", CMD_BIOETL_RUN) in node_keys
+    assert ("cli_command_surface", CMD_MEMORY_SYNC) in node_keys
     assert ("cli_command_surface", "scripts.docs verify") in node_keys
     assert any(label == "cli_option_surface" for label, _ in node_keys)
     assert any(label == "doc_claim_surface" for label, _ in node_keys)
-    assert ("execution_path", "uv run python -m bioetl run --pipeline") in node_keys
-    assert ("execution_path", "uv run python -m scripts.diagrams lint") in node_keys
-    assert ("execution_path", "uv run python -m scripts.docs verify") in node_keys
+    assert ("execution_path", EXEC_BIOETL_RUN) in node_keys
+    assert ("execution_path", EXEC_DIAGRAMS_LINT) in node_keys
+    assert ("execution_path", EXEC_DOCS_VERIFY) in node_keys
     assert (
         "execution_path",
-        "uv run python -m scripts.schema validate-configs",
+        EXEC_SCHEMA_VALIDATE,
     ) in node_keys
     assert (
         "execution_path",
@@ -316,7 +386,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
         "execution_path",
         "python -m scripts.engineering.qa report-normalization-fallback-inventory --limit 20",
     ) in node_keys
-    assert ("quality_gate", "diagram quality gates") in node_keys
+    assert ("quality_gate", QUALITY_GATE_DIAGRAMS) in node_keys
     assert any(label == "duplication_cluster" for label, _ in node_keys)
     assert (
         "test_artifact",
@@ -398,14 +468,14 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert tests_workflow.properties["workflow_family"] == "test"
     assert "pull_request" in tests_workflow.properties["trigger_names"]
 
-    matrix_job = snapshot.nodes[NodeKey("workflow_job_surface", "tests::test-matrix")]
+    matrix_job = snapshot.nodes[NodeKey("workflow_job_surface", JOB_TEST_MATRIX)]
     assert matrix_job.properties["matrix_axes"] == ["python-version", "suite"]
     assert matrix_job.properties["matrix_variant_count"] >= 2
 
     secret_job = snapshot.nodes[NodeKey("workflow_job_surface", "docker::docker-push")]
     assert "GITHUB_TOKEN" in secret_job.properties["secret_usage_hints"]
 
-    cli_command = snapshot.nodes[NodeKey("cli_command_surface", "scripts.memory sync")]
+    cli_command = snapshot.nodes[NodeKey("cli_command_surface", CMD_MEMORY_SYNC)]
     assert cli_command.properties["source_path"] == "scripts/memory/__main__.py"
     assert cli_command.properties["side_effect_class"] == "mutating"
 
@@ -430,7 +500,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     )
 
     retry_state = snapshot.nodes[
-        NodeKey("runtime_state_surface", "manifest-chain-2::retry-window")
+        NodeKey("runtime_state_surface", STATE_MANIFEST_CHAIN_2)
     ]
     assert retry_state.properties["state_kind"] == "retry_state"
     assert retry_state.properties["state_status"] == "retrying"
@@ -453,7 +523,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
         NodeKey("schema_field_surface", SILVER_CHEMBL_ACTIVITY_FIELD)
     ]
     assert activity_field.properties["required_in_quality"] is True
-    assert activity_field.properties["contract_ref"] == "chembl.activity"
+    assert activity_field.properties["contract_ref"] == CONTRACT_CHEMBL_ACTIVITY
     assert activity_field.properties["drift_classification"] is None
 
     composite_field = snapshot.nodes[
@@ -655,7 +725,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "dashboard_surface",
         "bioetl-runtime",
     ),
-    ("repo_zone", ".github", "CONTAINS", "directory_surface", ".github"),
+    ("repo_zone", REPO_ZONE_GITHUB, "CONTAINS", "directory_surface", REPO_ZONE_GITHUB),
     (
         "directory_surface",
         GITHUB_WORKFLOWS_DIR,
@@ -676,14 +746,14 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "configs/contracts",
         "HOUSES",
         "contract_surface",
-        "chembl.activity",
+        CONTRACT_CHEMBL_ACTIVITY,
     ),
     (
         "directory_surface",
         "configs/contracts/chembl",
         "HOUSES",
         "contract_surface",
-        "chembl.activity",
+        CONTRACT_CHEMBL_ACTIVITY,
     ),
     (
         "directory_surface",
@@ -701,7 +771,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ),
     (
         "module_surface",
-        "src/bioetl/domain/normalization/profiles/chembl_activity.py",
+        PATH_CHEMBL_ACTIVITY_PROFILE,
         "DECLARES",
         "function_surface",
         "src.bioetl.domain.normalization.profiles.chembl_activity.create_case_normalizer",
@@ -722,7 +792,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         CHEMBL_ADAPTER_SURFACE,
     ),
     ("project", "BioETL", "HAS_PIPELINE", "pipeline_surface", "chembl_activity"),
-    ("project", "BioETL", "HAS_CONTRACT", "contract_surface", "chembl.activity"),
+    ("project", "BioETL", "HAS_CONTRACT", "contract_surface", CONTRACT_CHEMBL_ACTIVITY),
     ("project", "BioETL", "HAS_ALERT", "alert_surface", "BioETLPipelineRunFailed"),
     ("project", "BioETL", "HAS_PROVIDER", "provider_surface", "chembl"),
     ("provider_surface", "chembl", "DEFINES", "entity_config", "chembl_activity"),
@@ -787,7 +857,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         DIAGRAM_GOVERNANCE_POLICY,
         "GOVERNS",
         "quality_gate",
-        "diagram quality gates",
+        QUALITY_GATE_DIAGRAMS,
     ),
     (
         "policy_surface",
@@ -815,25 +885,25 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "scripts/diagrams/__main__.py",
         "PROVIDES",
         "execution_path",
-        "uv run python -m scripts.diagrams lint",
+        EXEC_DIAGRAMS_LINT,
     ),
     (
         "execution_path",
-        "uv run python -m scripts.diagrams lint",
+        EXEC_DIAGRAMS_LINT,
         "EXECUTES_GATE",
         "quality_gate",
-        "diagram quality gates",
+        QUALITY_GATE_DIAGRAMS,
     ),
     (
         "script_surface",
         "scripts/docs/__main__.py",
         "PROVIDES",
         "execution_path",
-        "uv run python -m scripts.docs verify",
+        EXEC_DOCS_VERIFY,
     ),
     (
         "execution_path",
-        "uv run python -m scripts.docs verify",
+        EXEC_DOCS_VERIFY,
         "EXECUTES_GATE",
         "quality_gate",
         "docs verification",
@@ -843,14 +913,14 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "scripts/schema/__main__.py",
         "PROVIDES",
         "execution_path",
-        "uv run python -m scripts.schema validate-configs",
+        EXEC_SCHEMA_VALIDATE,
     ),
     (
         "execution_path",
-        "uv run python -m scripts.schema validate-configs",
+        EXEC_SCHEMA_VALIDATE,
         "EXECUTES_GATE",
         "quality_gate",
-        "config validation",
+        GATE_CONFIG_VALIDATION,
     ),
     (
         "script_surface",
@@ -899,7 +969,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "chembl_activity",
         "DEPENDS_ON",
         "contract_surface",
-        "chembl.activity",
+        CONTRACT_CHEMBL_ACTIVITY,
     ),
     (
         "pipeline_surface",
@@ -952,14 +1022,14 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ),
     (
         "contract_surface",
-        "chembl.activity",
+        CONTRACT_CHEMBL_ACTIVITY,
         "BACKED_BY",
         "config_artifact",
         "configs/contracts/chembl/activity.yaml",
     ),
     (
         "contract_surface",
-        "chembl.activity",
+        CONTRACT_CHEMBL_ACTIVITY,
         "DESCRIBED_IN",
         "doc_artifact",
         RUN_MANIFEST_LEDGER_DOC_PATH,
@@ -980,42 +1050,42 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ),
     (
         "contract_surface",
-        "chembl.activity",
+        CONTRACT_CHEMBL_ACTIVITY,
         "DEPENDS_ON",
         "module_surface",
         "src/bioetl/application/services/run_manifest_service.py",
     ),
     (
         "contract_surface",
-        "chembl.activity",
+        CONTRACT_CHEMBL_ACTIVITY,
         "DEPENDS_ON",
         "module_surface",
         "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py",
     ),
     (
         "contract_surface",
-        "chembl.activity",
+        CONTRACT_CHEMBL_ACTIVITY,
         "DEPENDS_ON",
         "module_surface",
         "src/bioetl/interfaces/cli/commands/run_manifest.py",
     ),
     (
         "contract_surface",
-        "chembl.activity",
+        CONTRACT_CHEMBL_ACTIVITY,
         "DEPENDS_ON",
         "module_surface",
         "src/bioetl/application/services/lineage_inspection_service.py",
     ),
     (
         "contract_surface",
-        "chembl.activity",
+        CONTRACT_CHEMBL_ACTIVITY,
         "DEPENDS_ON",
         "module_surface",
         "src/bioetl/composition/bootstrap/cli/lineage.py",
     ),
     (
         "contract_surface",
-        "chembl.activity",
+        CONTRACT_CHEMBL_ACTIVITY,
         "DESCRIBED_IN",
         "doc_artifact",
         "docs/05-operations/runbooks/traceability-signal-ownership.md",
@@ -1053,7 +1123,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "chembl_activity",
         "RUNS_VIA",
         "execution_path",
-        "uv run python -m bioetl run --pipeline",
+        EXEC_BIOETL_RUN,
     ),
     ("pipeline_surface", "chembl_activity", "VALIDATED_BY", "quality_gate", "pytest"),
     (
@@ -1061,7 +1131,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "chembl_activity",
         "VALIDATED_BY",
         "quality_gate",
-        "config validation",
+        GATE_CONFIG_VALIDATION,
     ),
     (
         "pipeline_surface",
@@ -1124,7 +1194,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "BioETLPipelineRunFailed",
         "DEPENDS_ON",
         "contract_surface",
-        "chembl.activity",
+        CONTRACT_CHEMBL_ACTIVITY,
     ),
     (
         "alert_surface",
@@ -1159,7 +1229,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "BioETLControlPlaneReadFailureRate",
         "DEPENDS_ON",
         "contract_surface",
-        "chembl.activity",
+        CONTRACT_CHEMBL_ACTIVITY,
     ),
     (
         "project",
@@ -1187,18 +1257,18 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "BioETL",
         "HAS_CONTROL_PLANE_ARTIFACT",
         "control_plane_artifact_surface",
-        "run_manifest::json",
+        ARTIFACT_RUN_MANIFEST,
     ),
     (
         "runtime_evidence_surface",
         "run_manifest",
         "EMITS_ARTIFACT",
         "control_plane_artifact_surface",
-        "run_manifest::json",
+        ARTIFACT_RUN_MANIFEST,
     ),
     (
         "control_plane_artifact_surface",
-        "run_manifest::json",
+        ARTIFACT_RUN_MANIFEST,
         "MATERIALIZED_AS",
         "storage_surface",
         RUN_MANIFEST_STORAGE_PATH,
@@ -1215,11 +1285,11 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "effective_config_artifact",
         "EMITS_ARTIFACT",
         "control_plane_artifact_surface",
-        "effective_config_artifact::json",
+        ARTIFACT_EFFECTIVE_CONFIG,
     ),
     (
         "control_plane_artifact_surface",
-        "effective_config_artifact::json",
+        ARTIFACT_EFFECTIVE_CONFIG,
         "MATERIALIZED_AS",
         "storage_surface",
         EFFECTIVE_CONFIG_STORAGE_PATH,
@@ -1236,11 +1306,11 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "lineage",
         "EMITS_ARTIFACT",
         "control_plane_artifact_surface",
-        "lineage::fragment",
+        ARTIFACT_LINEAGE,
     ),
     (
         "control_plane_artifact_surface",
-        "lineage::fragment",
+        ARTIFACT_LINEAGE,
         "MATERIALIZED_AS",
         "storage_surface",
         LINEAGE_FRAGMENT_STORAGE_PATH,
@@ -1251,21 +1321,21 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "manifest-left",
         "REFERENCES_ARTIFACT",
         "control_plane_artifact_surface",
-        "run_manifest::json",
+        ARTIFACT_RUN_MANIFEST,
     ),
     (
         "run_instance_surface",
         "manifest-left",
         "REFERENCES_ARTIFACT",
         "control_plane_artifact_surface",
-        "effective_config_artifact::json",
+        ARTIFACT_EFFECTIVE_CONFIG,
     ),
     (
         "run_instance_surface",
         "manifest-chain-smoke",
         "REFERENCES_ARTIFACT",
         "control_plane_artifact_surface",
-        "run_ledger::jsonl",
+        ARTIFACT_RUN_LEDGER,
     ),
     (
         "run_instance_surface",
@@ -1279,35 +1349,35 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "manifest-composite-quarantine",
         "DEPENDS_ON",
         "contract_surface",
-        "chembl.activity",
+        CONTRACT_CHEMBL_ACTIVITY,
     ),
     (
         "project",
         "BioETL",
         "HAS_RUNTIME_STATE",
         "runtime_state_surface",
-        "manifest-chain-2::retry-window",
+        STATE_MANIFEST_CHAIN_2,
     ),
     (
         "run_instance_surface",
         "manifest-chain-2",
         "HAS_RUNTIME_STATE",
         "runtime_state_surface",
-        "manifest-chain-2::retry-window",
+        STATE_MANIFEST_CHAIN_2,
     ),
     (
         "runtime_state_surface",
-        "manifest-chain-2::retry-window",
+        STATE_MANIFEST_CHAIN_2,
         "DEPENDS_ON",
         "pipeline_surface",
         "chembl_activity",
     ),
     (
         "runtime_state_surface",
-        "manifest-chain-2::retry-window",
+        STATE_MANIFEST_CHAIN_2,
         "REFERENCES_ARTIFACT",
         "control_plane_artifact_surface",
-        "run_ledger::jsonl",
+        ARTIFACT_RUN_LEDGER,
     ),
     (
         "storage_surface",
@@ -1318,7 +1388,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ),
     (
         "contract_surface",
-        "chembl.activity",
+        CONTRACT_CHEMBL_ACTIVITY,
         "HAS_SCHEMA_FIELD",
         "schema_field_surface",
         SILVER_CHEMBL_ACTIVITY_FIELD,
@@ -1343,28 +1413,28 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "tests",
         "CONTAINS",
         "workflow_job_surface",
-        "tests::governance-preflight",
+        JOB_GOVERNANCE_PREFLIGHT,
     ),
     (
         "workflow_job_surface",
-        "tests::governance-preflight",
+        JOB_GOVERNANCE_PREFLIGHT,
         "EXECUTES_GATE",
         "quality_gate",
         "deterministic neo4j memory ontology invariants",
     ),
     (
         "workflow_job_surface",
-        "tests::test-matrix",
+        JOB_TEST_MATRIX,
         "USES_ACTION",
         "workflow_action_surface",
-        "actions/upload-artifact",
+        ACTION_UPLOAD_ARTIFACT,
     ),
     (
         "workflow_job_surface",
-        "tests::test-matrix",
+        JOB_TEST_MATRIX,
         "PUBLISHES_ARTIFACT",
         "workflow_artifact_surface",
-        "tests::coverage-data-${{ matrix.test-group.name }}",
+        ARTIFACT_COVERAGE_DATA,
     ),
     (
         "workflow_job_surface",
@@ -1373,24 +1443,24 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "workflow_secret_surface",
         "GITHUB_TOKEN",
     ),
-    ("project", "BioETL", "HAS_CLI_COMMAND", "cli_command_surface", "bioetl run"),
+    ("project", "BioETL", "HAS_CLI_COMMAND", "cli_command_surface", CMD_BIOETL_RUN),
     (
         "cli_command_surface",
-        "bioetl run",
+        CMD_BIOETL_RUN,
         "RUNS_VIA",
         "execution_path",
-        "uv run python -m bioetl run --pipeline",
+        EXEC_BIOETL_RUN,
     ),
     (
         "cli_command_surface",
-        "bioetl run",
+        CMD_BIOETL_RUN,
         "SIDE_EFFECTS_ON",
         "pipeline_surface",
         "chembl_activity",
     ),
     (
         "cli_command_surface",
-        "scripts.memory sync",
+        CMD_MEMORY_SYNC,
         "RUNS_VIA",
         "execution_path",
         f"python -m scripts.memory sync --report {LEGACY_REPORT_PATH}",
@@ -1531,7 +1601,7 @@ def test_normalization_evidence_statements_cover_registry_and_fallback_metrics()
     chembl_params = chembl_activity["parameters"]
     assert chembl_params["normalization_profile_registered"] is True
     assert chembl_params["normalization_profile_module_path"] == (
-        "src/bioetl/domain/normalization/profiles/chembl_activity.py"
+        PATH_CHEMBL_ACTIVITY_PROFILE
     )
     assert chembl_params["profile_field_count"] > 0
 
@@ -1552,15 +1622,15 @@ def test_apply_normalization_evidence_only_executes_batched_statements(
     batch_contexts: list[str | None] = []
     stub_statements = [
         {
-            "statement": "RETURN 1 AS ok",
+            "statement": STMT_RETURN_1,
             "parameters": {"pipeline_name": "chembl_activity"},
         },
         {
-            "statement": "RETURN 1 AS ok",
+            "statement": STMT_RETURN_1,
             "parameters": {"pipeline_name": "pubmed_publication"},
         },
         {
-            "statement": "RETURN 1 AS ok",
+            "statement": STMT_RETURN_1,
             "parameters": {"pipeline_name": "crossref_publication"},
         },
     ]
@@ -1584,7 +1654,7 @@ def test_apply_normalization_evidence_only_executes_batched_statements(
             batch_contexts.append(context)
             return {"results": [], "errors": []}
 
-    monkeypatch.setattr("scripts.memory.sync.Neo4jHttpClient", StubClient)
+    monkeypatch.setattr(NEO4J_HTTP_CLIENT_PATH, StubClient)
     monkeypatch.setattr(
         "scripts.memory.sync._normalization_evidence_statements",
         lambda: list(stub_statements),
@@ -1593,7 +1663,7 @@ def test_apply_normalization_evidence_only_executes_batched_statements(
 
     summary = apply_normalization_evidence_only(
         root,
-        "http://host.docker.internal:7474",
+        HOST_DOCKER_INTERNAL_HTTP_URI,
         batch_size=2,
     )
 
@@ -1652,7 +1722,7 @@ def test_snapshot_enriches_current_normalization_topology() -> None:
     assert chembl_activity.properties["normalization_profile_registered"] is True
     assert (
         chembl_activity.properties["normalization_profile_module_path"]
-        == "src/bioetl/domain/normalization/profiles/chembl_activity.py"
+        == PATH_CHEMBL_ACTIVITY_PROFILE
     )
     assert int(chembl_activity.properties["profile_field_count"]) > 0
 
@@ -1956,13 +2026,13 @@ def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_
     assert ("storage_surface", SILVER_CHEMBL_ACTIVITY) in {
         (key.label, key.name) for key in filtered.nodes
     }
-    assert ("control_plane_artifact_surface", "run_manifest::json") in {
+    assert ("control_plane_artifact_surface", ARTIFACT_RUN_MANIFEST) in {
         (key.label, key.name) for key in filtered.nodes
     }
     assert ("run_instance_surface", "manifest-chain-smoke") in {
         (key.label, key.name) for key in filtered.nodes
     }
-    assert ("runtime_state_surface", "manifest-chain-2::retry-window") in {
+    assert ("runtime_state_surface", STATE_MANIFEST_CHAIN_2) in {
         (key.label, key.name) for key in filtered.nodes
     }
     assert ("schema_field_surface", SILVER_CHEMBL_ACTIVITY_FIELD) in {
@@ -1980,14 +2050,14 @@ def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_
         "run_manifest",
         "EMITS_ARTIFACT",
         "control_plane_artifact_surface",
-        "run_manifest::json",
+        ARTIFACT_RUN_MANIFEST,
     ) in relation_keys
     assert (
         "run_instance_surface",
         "manifest-chain-smoke",
         "REFERENCES_ARTIFACT",
         "control_plane_artifact_surface",
-        "run_ledger::jsonl",
+        ARTIFACT_RUN_LEDGER,
     ) in relation_keys
     assert (
         "storage_surface",
@@ -2012,7 +2082,7 @@ def test_filtered_snapshot_runtime_evidence_layer_preserves_runtime_support_link
     assert ("run_instance_surface", "manifest-chain-2") in {
         (key.label, key.name) for key in filtered.nodes
     }
-    assert ("runtime_state_surface", "manifest-chain-2::retry-window") in {
+    assert ("runtime_state_surface", STATE_MANIFEST_CHAIN_2) in {
         (key.label, key.name) for key in filtered.nodes
     }
     assert ("module_surface", RUN_MANIFEST_MODULE_PATH) in {
@@ -2037,7 +2107,7 @@ def test_filtered_snapshot_runtime_evidence_layer_preserves_runtime_support_link
         "manifest-chain-2",
         "HAS_RUNTIME_STATE",
         "runtime_state_surface",
-        "manifest-chain-2::retry-window",
+        STATE_MANIFEST_CHAIN_2,
     ) in relation_keys
 
 
@@ -2050,46 +2120,46 @@ def test_filtered_snapshot_workflow_graph_preserves_job_gate_and_run_targets() -
     assert ("workflow_surface", "tests") in {
         (key.label, key.name) for key in filtered.nodes
     }
-    assert ("workflow_job_surface", "tests::governance-preflight") in {
+    assert ("workflow_job_surface", JOB_GOVERNANCE_PREFLIGHT) in {
         (key.label, key.name) for key in filtered.nodes
     }
     assert any(key.label == "workflow_call_surface" for key in filtered.nodes)
     assert any(key.label == "workflow_matrix_variant_surface" for key in filtered.nodes)
     assert any(key.label == "workflow_output_surface" for key in filtered.nodes)
-    assert ("workflow_action_surface", "actions/upload-artifact") in {
+    assert ("workflow_action_surface", ACTION_UPLOAD_ARTIFACT) in {
         (key.label, key.name) for key in filtered.nodes
     }
     assert (
         "workflow_artifact_surface",
-        "tests::coverage-data-${{ matrix.test-group.name }}",
+        ARTIFACT_COVERAGE_DATA,
     ) in {(key.label, key.name) for key in filtered.nodes}
     assert (
         "workflow_job_surface",
-        "tests::governance-preflight",
+        JOB_GOVERNANCE_PREFLIGHT,
         "EXECUTES_GATE",
         "quality_gate",
         "pytest",
     ) in relation_keys
     assert (
         "workflow_job_surface",
-        "tests::governance-preflight",
+        JOB_GOVERNANCE_PREFLIGHT,
         "RUNS_VIA",
         "script_surface",
         "scripts/engineering/qa/__main__.py",
     ) in relation_keys
     assert (
         "workflow_job_surface",
-        "tests::test-matrix",
+        JOB_TEST_MATRIX,
         "USES_ACTION",
         "workflow_action_surface",
-        "actions/upload-artifact",
+        ACTION_UPLOAD_ARTIFACT,
     ) in relation_keys
     assert (
         "workflow_job_surface",
-        "tests::test-matrix",
+        JOB_TEST_MATRIX,
         "PUBLISHES_ARTIFACT",
         "workflow_artifact_surface",
-        "tests::coverage-data-${{ matrix.test-group.name }}",
+        ARTIFACT_COVERAGE_DATA,
     ) in relation_keys
     assert any(
         relation_key[2] == "CALLS_WORKFLOW"
@@ -2151,7 +2221,7 @@ def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
         in relation_keys
         for claim_name in chembl_doc_claims
     )
-    assert ("cli_command_surface", "scripts.memory sync") in {
+    assert ("cli_command_surface", CMD_MEMORY_SYNC) in {
         (key.label, key.name) for key in filtered.nodes
     }
 
@@ -2201,7 +2271,7 @@ def test_workflow_quality_gates_detect_repo_gate_signals() -> None:
 
     assert gates == (
         "pytest",
-        "config validation",
+        GATE_CONFIG_VALIDATION,
         "deterministic neo4j memory ontology invariants",
     )
 
@@ -2223,12 +2293,12 @@ def test_development_cycle_surface_filter_is_now_a_clean_noop() -> None:
     snapshot = GraphSnapshot()
     current_code = snapshot.add_node(
         "module_surface",
-        "src/bioetl/application/composite/example.py",
+        PATH_COMPOSITE_EXAMPLE,
         current_cycle_status="current_cycle",
     )
     candidate = snapshot.add_node(
         "retirement_candidate",
-        "src/bioetl/application/composite/example.py",
+        PATH_COMPOSITE_EXAMPLE,
         blocked_by_current_cycle=True,
     )
     snapshot.add_relation(current_code, "CANDIDATE_FOR_REMOVAL", candidate)
@@ -2245,9 +2315,9 @@ def test_development_cycle_surface_filter_is_now_a_clean_noop() -> None:
 def test_targeted_apply_required_anchor_labels_identifies_missing_base_labels() -> None:
     snapshot = GraphSnapshot()
     project = snapshot.add_node("project", "BioETL")
-    class_surface = snapshot.add_node("class_surface", "pkg.Example")
+    class_surface = snapshot.add_node("class_surface", CLASS_PKG_EXAMPLE)
     complexity_candidate = snapshot.add_node(
-        "complexity_candidate", "class_surface:pkg.Example"
+        "complexity_candidate", COMPLEXITY_PKG_EXAMPLE
     )
     snapshot.add_relation(project, "CONTAINS", complexity_candidate)
     snapshot.add_relation(class_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
@@ -2297,9 +2367,9 @@ def test_only_label_filter_does_not_pull_external_analysis_anchors() -> None:
 def test_targeted_apply_external_anchor_keys_identifies_missing_base_nodes() -> None:
     snapshot = GraphSnapshot()
     project = snapshot.add_node("project", "BioETL")
-    class_surface = snapshot.add_node("class_surface", "pkg.Example")
+    class_surface = snapshot.add_node("class_surface", CLASS_PKG_EXAMPLE)
     complexity_candidate = snapshot.add_node(
-        "complexity_candidate", "class_surface:pkg.Example"
+        "complexity_candidate", COMPLEXITY_PKG_EXAMPLE
     )
     snapshot.add_relation(project, "CONTAINS", complexity_candidate)
     snapshot.add_relation(class_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
@@ -2310,7 +2380,7 @@ def test_targeted_apply_external_anchor_keys_identifies_missing_base_nodes() -> 
     filtered = _filtered_snapshot(snapshot, only_complexity_layer=True)
 
     assert _targeted_apply_external_anchor_keys(filtered) == (
-        NodeKey("class_surface", "pkg.Example"),
+        NodeKey("class_surface", CLASS_PKG_EXAMPLE),
     )
 
 
@@ -2319,29 +2389,17 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_anchor_grap
 ):
     snapshot = GraphSnapshot()
     project = snapshot.add_node("project", "BioETL")
-    class_surface = snapshot.add_node("class_surface", "pkg.Example")
+    class_surface = snapshot.add_node("class_surface", CLASS_PKG_EXAMPLE)
     complexity_candidate = snapshot.add_node(
-        "complexity_candidate", "class_surface:pkg.Example"
+        "complexity_candidate", COMPLEXITY_PKG_EXAMPLE
     )
     snapshot.add_relation(project, "CONTAINS", complexity_candidate)
     snapshot.add_relation(class_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
     filtered = _filtered_snapshot(snapshot, only_complexity_layer=True)
 
-    class StubClient:
-        def query(
-            self,
-            statement: str,
-            parameters: dict[str, object] | None = None,
-            *,
-            context: str | None = None,
-        ) -> list[dict[str, object]]:
-            assert context == "complexity-layer targeted sync prerequisite anchor check"
-            assert parameters is not None
-            return [{"label": label, "count": 0} for label in parameters["labels"]]
-
     try:
         _ensure_targeted_apply_prerequisites(
-            StubClient(),  # type: ignore[arg-type]
+            _TargetedApplyPrereqStubClient(),  # type: ignore[arg-type]
             filtered,
             mode_description="complexity-layer targeted sync",
         )
@@ -2358,35 +2416,32 @@ def test_missing_managed_anchor_keys_reports_specific_nodes() -> None:
     class StubClient:
         def query(
             self,
-            statement: str,
+            _statement: str,
             parameters: dict[str, object] | None = None,
             *,
             context: str | None = None,
         ) -> list[dict[str, object]]:
-            assert (
-                context
-                == "complexity-layer targeted sync prerequisite anchor node check"
-            )
+            assert context == CONTEXT_COMPLEXITY_PREREQ
             assert parameters is not None
             assert parameters["anchors"] == [
-                {"label": "class_surface", "name": "pkg.Example"},
-                {"label": "module_surface", "name": "src/pkg/example.py"},
+                {"label": "class_surface", "name": CLASS_PKG_EXAMPLE},
+                {"label": "module_surface", "name": PATH_PKG_EXAMPLE},
             ]
             return [
-                {"label": "class_surface", "name": "pkg.Example", "count": 1},
-                {"label": "module_surface", "name": "src/pkg/example.py", "count": 0},
+                {"label": "class_surface", "name": CLASS_PKG_EXAMPLE, "count": 1},
+                {"label": "module_surface", "name": PATH_PKG_EXAMPLE, "count": 0},
             ]
 
     missing = _missing_managed_anchor_keys(
         StubClient(),  # type: ignore[arg-type]
         (
-            NodeKey("class_surface", "pkg.Example"),
-            NodeKey("module_surface", "src/pkg/example.py"),
+            NodeKey("class_surface", CLASS_PKG_EXAMPLE),
+            NodeKey("module_surface", PATH_PKG_EXAMPLE),
         ),
-        context="complexity-layer targeted sync prerequisite anchor node check",
+        context=CONTEXT_COMPLEXITY_PREREQ,
     )
 
-    assert missing == (NodeKey("module_surface", "src/pkg/example.py"),)
+    assert missing == (NodeKey("module_surface", PATH_PKG_EXAMPLE),)
 
 
 def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_specific_anchor_nodes_are_missing() -> (
@@ -2394,9 +2449,9 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_specific_an
 ):
     snapshot = GraphSnapshot()
     project = snapshot.add_node("project", "BioETL")
-    class_surface = snapshot.add_node("class_surface", "pkg.Example")
+    class_surface = snapshot.add_node("class_surface", CLASS_PKG_EXAMPLE)
     complexity_candidate = snapshot.add_node(
-        "complexity_candidate", "class_surface:pkg.Example"
+        "complexity_candidate", COMPLEXITY_PKG_EXAMPLE
     )
     snapshot.add_relation(project, "CONTAINS", complexity_candidate)
     snapshot.add_relation(class_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
@@ -2405,7 +2460,7 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_specific_an
     class StubClient:
         def query(
             self,
-            statement: str,
+            _statement: str,
             parameters: dict[str, object] | None = None,
             *,
             context: str | None = None,
@@ -2415,9 +2470,9 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_specific_an
                 return [{"label": "class_surface", "count": 1}]
             if (
                 context
-                == "complexity-layer targeted sync prerequisite anchor node check"
+                == CONTEXT_COMPLEXITY_PREREQ
             ):
-                return [{"label": "class_surface", "name": "pkg.Example", "count": 0}]
+                return [{"label": "class_surface", "name": CLASS_PKG_EXAMPLE, "count": 0}]
             raise AssertionError(f"Unexpected context: {context}")
 
     try:
@@ -2463,7 +2518,7 @@ def test_live_managed_count_helpers_batch_labels_and_relations() -> None:
     label_counts = _live_managed_node_counts(
         client,  # type: ignore[arg-type]
         ("retirement_candidate", "complexity_candidate"),
-        context="fast audit label summary",
+        context=CONTEXT_FAST_AUDIT_LABEL,
     )
     relation_counts = _live_managed_relation_counts(
         client,  # type: ignore[arg-type]
@@ -2489,7 +2544,12 @@ def test_git_last_commit_age_days_bulk_batches_history_lookup(monkeypatch) -> No
 
     calls: list[list[str]] = []
 
-    def _run(cmd: list[str], check: bool, capture_output: bool, text: bool) -> Result:
+    def _run(
+        cmd: list[str],
+        _check: bool,
+        _capture_output: bool,
+        _text: bool,
+    ) -> Result:
         calls.append(cmd)
         return Result(
             "__TS__1712448000\nsrc/a.py\nsrc/b.py\n\n__TS__1712361600\nsrc/c.py\n",
@@ -2501,17 +2561,17 @@ def test_git_last_commit_age_days_bulk_batches_history_lookup(monkeypatch) -> No
     cache: dict[str, int | None] = {}
     result = _git_last_commit_age_days_bulk(
         Path("/repo"),
-        ["src/a.py", "src/b.py", "src/c.py"],
+        [PATH_SRC_A, PATH_SRC_B, PATH_SRC_C],
         date(2026, 4, 10),
         cache,
         chunk_size=10,
     )
 
     assert len(calls) == 1
-    assert calls[0][-3:] == ["src/a.py", "src/b.py", "src/c.py"]
-    assert result["src/a.py"] is not None
-    assert result["src/b.py"] == result["src/a.py"]
-    assert result["src/c.py"] is not None
+    assert calls[0][-3:] == [PATH_SRC_A, PATH_SRC_B, PATH_SRC_C]
+    assert result[PATH_SRC_A] is not None
+    assert result[PATH_SRC_B] == result[PATH_SRC_A]
+    assert result[PATH_SRC_C] is not None
     assert cache == result
 
 
@@ -2579,13 +2639,13 @@ def test_build_fast_analysis_audit_report_uses_bulk_count_queries(monkeypatch) -
                 ]
             raise AssertionError(f"Unexpected statement: {statement}")
 
-    monkeypatch.setattr("scripts.memory.sync.Neo4jHttpClient", StubClient)
+    monkeypatch.setattr(NEO4J_HTTP_CLIENT_PATH, StubClient)
     root = _repo_root()
 
     report = build_fast_analysis_audit_report(snapshot, root, LOCALHOST_HTTP_URI)  # type: ignore[arg-type]
 
     assert query_calls == [
-        "fast audit label summary",
+        CONTEXT_FAST_AUDIT_LABEL,
         "fast audit relation summary",
     ]
     assert _critical_analysis_audit_issues(report) == []
@@ -2613,11 +2673,11 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
 
         def query(
             self,
-            statement: str,
-            parameters: dict[str, object] | None = None,
-            *,
+            _statement: str,
+            _parameters: dict[str, object] | None = None,
             context: str | None = None,
         ) -> list[dict[str, object]]:
+            del _statement, _parameters
             query_calls.append(context or "")
             if context == "full audit label summary":
                 return [
@@ -2658,10 +2718,10 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
                     {"label": "complexity_candidate", "count": 0, "samples": []},
                 ]
             raise AssertionError(
-                f"Unexpected query context: {context}, statement={statement}"
+                f"Unexpected query context: {context}"
             )
 
-    monkeypatch.setattr("scripts.memory.sync.Neo4jHttpClient", StubClient)
+    monkeypatch.setattr(NEO4J_HTTP_CLIENT_PATH, StubClient)
     root = _repo_root()
 
     report = build_audit_report(snapshot, root, LOCALHOST_HTTP_URI)
@@ -2726,27 +2786,35 @@ def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(
     captured_verify_sync_runs: list[str | None] = []
 
     class StubClient:
-        def execute(self, statements, *, context=None) -> dict[str, object]:
+        def execute(self, _statements, *, _context=None) -> dict[str, object]:
             return {"results": [], "errors": []}
 
         def query(
-            self, statement, parameters=None, *, context=None
+            self,
+            *args: object,
+            context=None,
         ) -> list[dict[str, object]]:
+            del args, context
             return []
 
     monkeypatch.setattr(
         "scripts.memory.sync.resolve_neo4j_connection",
-        lambda root, http_uri: (LOCALHOST_HTTP_URI, "neo4j", "password", "neo4j"),
+        lambda _root, _http_uri: (
+            LOCALHOST_HTTP_URI,
+            "neo4j",
+            "password",
+            "neo4j",
+        ),
     )
     monkeypatch.setattr(
-        "scripts.memory.sync.Neo4jHttpClient", lambda *args, **kwargs: StubClient()
+        NEO4J_HTTP_CLIENT_PATH, lambda *_args, **_kwargs: StubClient()
     )
     monkeypatch.setattr("scripts.memory.sync._sync_run_id", lambda: "run-123")
 
-    def _retry(*args, **kwargs) -> None:
+    def _retry(*_args, **kwargs) -> None:
         captured_retry_sync_runs.append(kwargs.get("sync_run"))
 
-    def _verify(*args, **kwargs) -> None:
+    def _verify(*_args, **kwargs) -> None:
         captured_verify_sync_runs.append(kwargs.get("sync_run"))
 
     monkeypatch.setattr("scripts.memory.sync._retry_critical_analysis_groups", _retry)
@@ -2771,15 +2839,18 @@ def test_main_skips_global_post_apply_fast_audit_for_targeted_sync(
     snapshot.add_node("retirement_candidate", "retire-me.py")
     called: dict[str, int] = {"sync_snapshot": 0, "build_fast_analysis_audit_report": 0}
 
-    monkeypatch.setattr("scripts.memory.sync.build_snapshot", lambda root: snapshot)
+    monkeypatch.setattr("scripts.memory.sync.build_snapshot", lambda _root: snapshot)
     monkeypatch.setattr(
-        "scripts.memory.sync._filtered_snapshot", lambda current, **kwargs: current
+        "scripts.memory.sync._filtered_snapshot",
+        lambda current, **_kwargs: current,
     )
 
-    def _sync_snapshot(*args, **kwargs) -> None:
+    def _sync_snapshot(*_args, **_kwargs) -> None:
         called["sync_snapshot"] += 1
 
-    def _build_fast_analysis_audit_report(*args, **kwargs) -> dict[str, object]:
+    def _build_fast_analysis_audit_report(
+        *_args, **_kwargs
+    ) -> dict[str, object]:
         called["build_fast_analysis_audit_report"] += 1
         return {}
 
@@ -2810,8 +2881,8 @@ def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing
     project = snapshot.add_node("project", "BioETL")
     module = snapshot.add_node(
         "module_surface",
-        "src/bioetl/application/composite/example.py",
-        family_name="application/composite",
+        PATH_COMPOSITE_EXAMPLE,
+        family_name=FAMILY_APP_COMPOSITE,
         current_cycle_status="current_cycle",
         current_cycle_score=5,
         current_cycle_wip_markers=["wip"],
@@ -2819,12 +2890,12 @@ def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing
     class_surface = snapshot.add_node(
         "class_surface",
         "src.bioetl.application.composite.example.ExampleService",
-        source_path="src/bioetl/application/composite/example.py",
+        source_path=PATH_COMPOSITE_EXAMPLE,
     )
     method_surface = snapshot.add_node(
         "method_surface",
         "src.bioetl.application.composite.example.ExampleService.merge",
-        source_path="src/bioetl/application/composite/example.py",
+        source_path=PATH_COMPOSITE_EXAMPLE,
         callable_name="merge",
         branch_count=6,
         nesting_depth=4,
@@ -2838,7 +2909,7 @@ def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing
 
     monkeypatch.setattr(
         "scripts.memory.sync._read_text",
-        lambda path: "merge helper compat policy",
+        lambda _path: "merge helper compat policy",
     )
 
     def _fail_parse(path: Path) -> None:
@@ -2857,19 +2928,19 @@ def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing
             "duplication_analysis": {
                 "enabled": True,
                 "families": {
-                    "application/composite": {
+                    FAMILY_APP_COMPOSITE: {
                         "roots": ["src/bioetl/application/composite"],
-                        "package_family": "application/composite",
+                        "package_family": FAMILY_APP_COMPOSITE,
                     }
                 },
             },
             "retirement_analysis": {
                 "enabled": True,
-                "families": ["application/composite"],
+                "families": [FAMILY_APP_COMPOSITE],
             },
             "complexity_analysis": {
                 "enabled": True,
-                "families": ["application/composite"],
+                "families": [FAMILY_APP_COMPOSITE],
                 "complexity_score_threshold": 3,
                 "removable_score_threshold": 20,
             },
@@ -2887,7 +2958,7 @@ def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing
 
 
 def test_neo4j_http_client_distinguishes_query_runtime_http_errors(monkeypatch) -> None:
-    def _raise_http_error(req: object, timeout: int = 60) -> object:
+    def _raise_http_error(_req: object, _timeout: int = 60) -> object:
         raise error.HTTPError(
             f"{LOCALHOST_HTTP_URI}/db/neo4j/tx/commit",
             400,
@@ -2900,13 +2971,13 @@ def test_neo4j_http_client_distinguishes_query_runtime_http_errors(monkeypatch) 
     client = Neo4jHttpClient(LOCALHOST_HTTP_URI, "neo4j", "password", "neo4j")
 
     try:
-        client.execute([], context="fast audit label summary")
+        client.execute([], context=CONTEXT_FAST_AUDIT_LABEL)
     except RuntimeError as exc:
         message = str(exc)
     else:  # pragma: no cover - defensive
         raise AssertionError("Expected RuntimeError")
 
-    assert "fast audit label summary" in message
+    assert CONTEXT_FAST_AUDIT_LABEL in message
     assert "query/runtime error" in message
     assert "transport error" not in message
 
@@ -2917,12 +2988,12 @@ def test_neo4j_http_client_reports_all_transport_attempts(monkeypatch) -> None:
         error.URLError(ConnectionRefusedError(111, "Connection refused")),
     ]
 
-    def _raise_transport_error(req: object, timeout: int = 60) -> object:
+    def _raise_transport_error(_req: object, _timeout: int = 60) -> object:
         raise responses.pop(0)
 
     monkeypatch.setattr("scripts.memory.sync.request.urlopen", _raise_transport_error)
     client = Neo4jHttpClient(
-        "http://host.docker.internal:7474", "neo4j", "password", "neo4j"
+        HOST_DOCKER_INTERNAL_HTTP_URI, "neo4j", "password", "neo4j"
     )
 
     try:
@@ -2940,7 +3011,7 @@ def test_neo4j_http_client_reports_all_transport_attempts(monkeypatch) -> None:
         in message
     )
     assert "attempts:" in message
-    assert "http://host.docker.internal:7474/db/neo4j/tx/commit" in message
+    assert f"{HOST_DOCKER_INTERNAL_HTTP_URI}/db/neo4j/tx/commit" in message
     assert f"{LOCALHOST_HTTP_URI}/db/neo4j/tx/commit" in message
 
 

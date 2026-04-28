@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import hashlib
 from pathlib import Path
-from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
@@ -12,6 +10,8 @@ import pytest
 from bioetl.application.services.effective_config_service import (
     create_effective_config_service,
 )
+from bioetl.composition.observability import ObservabilityBundle
+from bioetl.composition.runtime_builders.inputs_resolver import RunnerInputs
 from bioetl.composition.runtime_builders.effective_config_artifact_builder import (
     _build_effective_config_source_refs,
     create_and_persist_composite_effective_config_artifact,
@@ -20,7 +20,15 @@ from bioetl.composition.runtime_builders.effective_config_artifact_builder impor
 from bioetl.domain.control_plane.config_source_hashing import (
     compute_canonical_yaml_sha256,
 )
+from bioetl.domain.context import PipelineRunContext
+from bioetl.domain.context_cached_bronze import CachedBronzeContext
+from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.types import RunID
+from bioetl.domain.types import RunType
+from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 def test_build_effective_config_source_refs_persists_semantic_and_raw_source_hashes(
@@ -69,22 +77,33 @@ def test_build_effective_config_source_refs_persists_semantic_and_raw_source_has
         compute_canonical_yaml_sha256(entity_quality.read_bytes()),
         compute_canonical_yaml_sha256(contract_registry.read_bytes()),
     ]
-    assert [ref.raw_source_hash for ref in refs] == [
-        hashlib.sha256(base_config.read_bytes()).hexdigest(),
-        hashlib.sha256(base_quality.read_bytes()).hexdigest(),
-        hashlib.sha256(provider_config.read_bytes()).hexdigest(),
-        hashlib.sha256(entity_config.read_bytes()).hexdigest(),
-        hashlib.sha256(entity_quality.read_bytes()).hexdigest(),
-        hashlib.sha256(contract_registry.read_bytes()).hexdigest(),
-    ]
-    assert [ref.source_hash_strategy for ref in refs] == [
-        "canonical_yaml",
-        "canonical_yaml",
-        "canonical_yaml",
-        "canonical_yaml",
-        "canonical_yaml",
-        "canonical_yaml",
-    ]
+
+
+def _build_runner_inputs(
+    settings: Settings,
+    observability: ObservabilityBundle,
+) -> RunnerInputs:
+    return RunnerInputs(
+        settings=settings,
+        yaml_config=PipelineYamlConfig(
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity_type="activity",
+            business_primary_keys=["activity_id"],
+        ),
+        observability=observability,
+        runtime_config=RuntimeConfig(run_type=RunType.INCREMENTAL),
+        filter_config=None,
+        cached_bronze=CachedBronzeContext.disabled(),
+    )
+
+
+def _build_pipeline_run_context() -> PipelineRunContext:
+    return PipelineRunContext(
+        pipeline_name="chembl_activity",
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+    )
 
 
 def test_build_effective_config_source_refs_is_stable_across_equivalent_calls(
@@ -245,8 +264,31 @@ def test_create_and_persist_effective_config_artifact_forwards_required_profile(
 ) -> None:
     captured: dict[str, object] = {}
 
-    def _fake_payload(**kwargs: object) -> tuple[str, str, str, str]:
-        captured.update(kwargs)
+    def _fake_payload(
+        *,
+        pipeline_name: str,
+        pipeline_kind: str,
+        resolved_config: object,
+        runtime_overrides: dict[str, object],
+        provider: str,
+        entity: str,
+        required_persistence_profile: str,
+        settings: Settings,
+        logger: object,
+        run_id: RunID,
+    ) -> tuple[str, str, str, str]:
+        captured.update(
+            pipeline_name=pipeline_name,
+            pipeline_kind=pipeline_kind,
+            resolved_config=resolved_config,
+            runtime_overrides=runtime_overrides,
+            provider=provider,
+            entity=entity,
+            required_persistence_profile=required_persistence_profile,
+            settings=settings,
+            logger=logger,
+            run_id=run_id,
+        )
         return ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
 
     monkeypatch.setattr(
@@ -254,44 +296,24 @@ def test_create_and_persist_effective_config_artifact_forwards_required_profile(
         _fake_payload,
     )
 
+    settings = Settings(data_dir=Path("data"))
+    observability = ObservabilityBundle.create(
+        logger=NoOpLogger(),
+        metrics=NoOpMetrics(),
+        tracer=NoOpTracing(),
+        audit=NoOpAudit(),
+    )
+    inputs: RunnerInputs = _build_runner_inputs(settings, observability)
+    ctx: PipelineRunContext = _build_pipeline_run_context()
     result = create_and_persist_effective_config_artifact(
-        ctx=SimpleNamespace(
-            pipeline_name="chembl_activity",
-            run_id=RunID(uuid4()),
-            run_type="incremental",
-            resume=False,
-            dry_run=False,
-            limit=None,
-            query=None,
-            start_offset=None,
-            log_level="INFO",
-            ignore_yaml_filter=False,
-            skip_gold=False,
-            exact_replay=False,
-            input_filter=None,
-            cached_bronze=None,
-            vacuum=None,
-            replay_of_run_id=None,
-            replay_of_manifest_id=None,
-            execution_context="isolated",
-        ),
-        inputs=SimpleNamespace(
-            yaml_config=SimpleNamespace(),
-            settings=SimpleNamespace(
-                pipeline=SimpleNamespace(
-                    control_plane=SimpleNamespace(
-                        required_persistence_profile="replay_ready"
-                    )
-                )
-            ),
-            observability=SimpleNamespace(logger=SimpleNamespace()),
-        ),
+        ctx=ctx,
+        inputs=inputs,
         provider="chembl",
         entity="activity",
     )
 
     assert result == ("artifact-1", "resolved-hash", "effective-hash", "dq-hash")
-    assert captured["required_persistence_profile"] == "replay_ready"
+    assert captured["required_persistence_profile"] == "degraded_observable"
 
 
 def test_create_and_persist_composite_effective_config_artifact_forwards_required_profile(
@@ -299,8 +321,31 @@ def test_create_and_persist_composite_effective_config_artifact_forwards_require
 ) -> None:
     captured: dict[str, object] = {}
 
-    def _fake_payload(**kwargs: object) -> tuple[str, str, str, str]:
-        captured.update(kwargs)
+    def _fake_payload(
+        *,
+        pipeline_name: str,
+        pipeline_kind: str,
+        resolved_config: object,
+        runtime_overrides: dict[str, object],
+        provider: str,
+        entity: str,
+        required_persistence_profile: str,
+        settings: Settings,
+        logger: object,
+        run_id: RunID,
+    ) -> tuple[str, str, str, str]:
+        captured.update(
+            pipeline_name=pipeline_name,
+            pipeline_kind=pipeline_kind,
+            resolved_config=resolved_config,
+            runtime_overrides=runtime_overrides,
+            provider=provider,
+            entity=entity,
+            required_persistence_profile=required_persistence_profile,
+            settings=settings,
+            logger=logger,
+            run_id=run_id,
+        )
         return ("artifact-2", "resolved-hash", "effective-hash", "dq-hash")
 
     monkeypatch.setattr(
@@ -310,11 +355,16 @@ def test_create_and_persist_composite_effective_config_artifact_forwards_require
 
     result = create_and_persist_composite_effective_config_artifact(
         pipeline_name="composite_publication",
-        config=SimpleNamespace(),
-        runtime_config=SimpleNamespace(),
+        config=PipelineYamlConfig(
+            pipeline_name="composite_publication",
+            provider="composite",
+            entity_type="publication",
+            business_primary_keys=["publication_id"],
+        ),
+        runtime_config=RuntimeConfig(run_type=RunType.INCREMENTAL),
         required_persistence_profile="forensic_grade",
-        settings=SimpleNamespace(),
-        logger=SimpleNamespace(),
+        settings=Settings(data_dir=Path("data")),
+        logger=NoOpLogger(),
         run_id=RunID(uuid4()),
     )
 

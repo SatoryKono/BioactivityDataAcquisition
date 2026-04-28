@@ -3,11 +3,25 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from types import SimpleNamespace
 from uuid import uuid4
 
+from bioetl.domain.config import RuntimeConfig
 from bioetl.composition.factories.pipeline.run_context_factory import RunContextFactory
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.domain.types import RunID, RunType
+
+
+def _runtime() -> RuntimeConfig:
+    return RuntimeConfig(run_type=RunType.INCREMENTAL)
+
+
+def _yaml_config() -> PipelineYamlConfig:
+    return PipelineYamlConfig(
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity_type="activity",
+        business_primary_keys=["activity_id"],
+    )
 
 
 def _factory() -> RunContextFactory:
@@ -32,11 +46,15 @@ def _factory() -> RunContextFactory:
 
 def test_run_context_factory_preserves_distinct_config_hash_surfaces() -> None:
     """Legacy, resolved, and effective config hashes are independent anchors."""
-    context = _factory().create(
-        run_id=RunID(uuid4()),
-        runtime=SimpleNamespace(run_type=RunType.INCREMENTAL),
+    factory = _factory()
+    runtime = _runtime()
+    yaml_config = _yaml_config()
+    run_id = RunID(uuid4())
+    context = factory.create(
+        run_id=run_id,
+        runtime=runtime,
         started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
-        yaml_config=SimpleNamespace(),
+        yaml_config=yaml_config,
         config_hash="legacy-config-hash",
         resolved_config_hash="resolved-config-hash",
         effective_config_hash="effective-config-hash",
@@ -49,11 +67,15 @@ def test_run_context_factory_preserves_distinct_config_hash_surfaces() -> None:
 
 def test_run_context_factory_does_not_alias_missing_effective_hash() -> None:
     """Missing effective hash remains explicit instead of falling back to config_hash."""
-    context = _factory().create(
-        run_id=RunID(uuid4()),
-        runtime=SimpleNamespace(run_type=RunType.INCREMENTAL),
+    factory = _factory()
+    runtime = _runtime()
+    yaml_config = _yaml_config()
+    run_id = RunID(uuid4())
+    context = factory.create(
+        run_id=run_id,
+        runtime=runtime,
         started_at=datetime(2026, 4, 24, 12, 0, tzinfo=UTC),
-        yaml_config=SimpleNamespace(),
+        yaml_config=yaml_config,
         config_hash="legacy-config-hash",
         resolved_config_hash="resolved-config-hash",
         effective_config_hash=None,
@@ -67,6 +89,9 @@ def test_run_context_factory_does_not_alias_missing_effective_hash() -> None:
 def test_run_context_factory_uses_explicit_started_at_anchor() -> None:
     """RunContext timestamps must come from the caller-provided runtime anchor."""
     started_at = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
+    runtime = _runtime()
+    yaml_config = _yaml_config()
+    run_id = RunID(uuid4())
     factory = RunContextFactory(
         pipeline_name="chembl_activity",
         provider="chembl",
@@ -75,10 +100,10 @@ def test_run_context_factory_uses_explicit_started_at_anchor() -> None:
     )
 
     context = factory.create(
-        run_id=RunID(uuid4()),
-        runtime=SimpleNamespace(run_type=RunType.INCREMENTAL),
+        run_id=run_id,
+        runtime=runtime,
         started_at=started_at,
-        yaml_config=SimpleNamespace(),
+        yaml_config=yaml_config,
     )
 
     assert context.started_at == started_at

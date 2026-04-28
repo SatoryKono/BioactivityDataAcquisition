@@ -22,7 +22,7 @@ def _rate_limit(rate: float, capacity: int) -> SimpleNamespace:
 class TestGetBioProviderConfigs:
     """Tests for bio ProviderConfig registry entries."""
 
-    @patch("bioetl.composition.providers.registration_bio._get_rate_limits_from_config")
+    @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")
     def test_contains_expected_provider_keys(
         self,
         mock_get_rate_limits: MagicMock,
@@ -42,7 +42,7 @@ class TestGetBioProviderConfigs:
             "uniprot_idmapping",
         }
 
-    @patch("bioetl.composition.providers.registration_bio._get_rate_limits_from_config")
+    @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")
     def test_uniprot_provider_configs_share_uniprot_rate_limit_and_override(
         self,
         mock_get_rate_limits: MagicMock,
@@ -65,7 +65,7 @@ class TestGetBioProviderConfigs:
         assert uniprot_idmapping.http_config.rate == pytest.approx(8.0)
         assert uniprot_idmapping.http_config.capacity == 16
 
-    @patch("bioetl.composition.providers.registration_bio._get_rate_limits_from_config")
+    @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")
     def test_pubchem_provider_config_uses_non_http_special_case(
         self,
         mock_get_rate_limits: MagicMock,
@@ -86,7 +86,7 @@ class TestGetBioProviderConfigs:
         assert pubchem.requires_http_client is False
         assert pubchem.requires_logger is True
 
-    @patch("bioetl.composition.providers.registration_bio._get_rate_limits_from_config")
+    @patch("bioetl.composition.providers._config_helpers._get_rate_limits_from_config")
     def test_support_aware_creators_capture_same_injected_support_instance(
         self,
         mock_get_rate_limits: MagicMock,

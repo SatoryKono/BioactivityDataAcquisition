@@ -21,13 +21,15 @@ from bioetl.composition.factories.pipeline._factory_method_runtime_support impor
 )
 from bioetl.composition.factories.pipeline._factory_method_types import (
     _BuildFactoryServicesRequest,
-    _ControlPlaneArtifacts,
     _CreateFactoryRunnerRequest,
     _CreatePipelineWithServicesRequest,
     _PipelineFactoryContext,
 )
 from bioetl.composition.factories.pipeline._factory_method_types import (
     build_create_pipeline_with_services_request as _build_create_pipeline_with_services_request,
+)
+from bioetl.composition.factories.pipeline._factory_method_types import (
+    build_create_factory_runner_request as _build_create_factory_runner_request,
 )
 from bioetl.composition.factories.pipeline._factory_method_types import (
     build_pipeline_factory_context as _build_pipeline_factory_context,
@@ -37,6 +39,9 @@ from bioetl.composition.factories.pipeline._factory_method_types import (
 )
 from bioetl.composition.factories.pipeline._factory_method_types import (
     extract_entity_type as _extract_entity_type_helper,
+)
+from bioetl.composition.factories.pipeline.control_plane_artifacts import (
+    build_control_plane_artifacts,
 )
 from bioetl.composition.factories.pipeline._factory_method_types import (
     resolve_data_source_creator as _resolve_data_source_creator,
@@ -66,6 +71,7 @@ TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 build_create_pipeline_with_services_request = (
     _build_create_pipeline_with_services_request
 )
+build_create_factory_runner_request = _build_create_factory_runner_request
 build_pipeline_factory_context = _build_pipeline_factory_context
 create_factory_data_source = _create_factory_data_source
 extract_entity_type = _extract_entity_type_helper
@@ -76,6 +82,7 @@ __all__ = [
     "_CreateFactoryRunnerRequest",
     "_CreatePipelineWithServicesRequest",
     "_PipelineFactoryContext",
+    "build_create_factory_runner_request",
     "build_create_pipeline_with_services_request",
     "build_factory_services",
     "build_pipeline_factory_context",
@@ -180,7 +187,7 @@ def create_factory_runner(
         settings=request.settings,
         observability=request.observability,
         yaml_config=yaml_config,
-        control_plane_artifacts=_ControlPlaneArtifacts(
+        control_plane_artifacts=build_control_plane_artifacts(
             manifest_id=request.manifest_id,
             execution_fingerprint=request.execution_fingerprint,
             config_hash=request.config_hash,

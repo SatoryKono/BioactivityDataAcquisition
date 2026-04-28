@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Awaitable
 from dataclasses import dataclass
 from datetime import datetime
@@ -267,6 +268,7 @@ def _build_merged_operations(
             run_id,
             sources_used,
         )
+        await asyncio.sleep(0)
 
     return SilverMergedOperations(
         logger=logger,

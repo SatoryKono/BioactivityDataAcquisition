@@ -181,14 +181,12 @@ if [[ "$DRY_RUN" == "true" ]]; then
   exit 0
 fi
 
-if (( ${#DIR_TARGETS[@]} > 0 )); then
-  if ! rm -rf -- "${DIR_TARGETS[@]}" 2>/dev/null; then
-    for path in "${DIR_TARGETS[@]}"; do
-      if ! rm -rf -- "$path" 2>/dev/null; then
-        echo "[preflight_cleanup][warn] Could not remove directory: $path" >&2
-      fi
-    done
-  fi
+if (( ${#DIR_TARGETS[@]} > 0 )) && ! rm -rf -- "${DIR_TARGETS[@]}" 2>/dev/null; then
+  for path in "${DIR_TARGETS[@]}"; do
+    if ! rm -rf -- "$path" 2>/dev/null; then
+      echo "[preflight_cleanup][warn] Could not remove directory: $path" >&2
+    fi
+  done
 fi
 
 if (( ${#FILE_TARGETS[@]} > 0 )); then

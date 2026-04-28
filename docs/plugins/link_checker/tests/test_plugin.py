@@ -191,7 +191,7 @@ class TestLinkCheckerPlugin:
         assert report["summary"]["total_links"] == 5
         assert report["summary"]["valid_links"] == 4
         assert report["summary"]["broken_links"] == 1
-        assert report["summary"]["health_score"] == 80.0
+        assert report["summary"]["health_score"] == pytest.approx(80.0)
         assert len(report["details"]) == 1
 
     def test_generate_badge(self):

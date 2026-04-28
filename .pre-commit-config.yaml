@@ -1,6 +1,15 @@
 # Pre-commit hooks for BioETL
-# Install: pip install pre-commit && pre-commit install
+# Install: pip install pre-commit && pre-commit install --hook-type pre-commit --hook-type pre-push
 # Run manually: pre-commit run --all-files
+
+minimum_pre_commit_version: "4.3.0"
+
+default_language_version:
+  python: python3.12
+
+default_install_hook_types:
+  - pre-commit
+  - pre-push
 
 repos:
   # Ruff - Fast Python linter and formatter
@@ -10,23 +19,21 @@ repos:
       # Run the linter
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
+        files: >-
+          (?x)^(src|tests)/
         exclude: >
-          (?x)^(
-            check_cfg\.py|
-            debug_chembl_pub2?\.py|
-            debug_.*\.py|
-            docs/00-project/ai/agents/.*\.py|
-            docs/00-project/ai/skills/.*\.py
+          (?x)(
+            (^|.*/)(check_cfg|debug_chembl_pub2?|debug_.*)\.py|
+            .*/src/bioetl/infrastructure/quality/external_api\.py
           )$
       # Run the formatter
       - id: ruff-format
+        files: >-
+          (?x)^(src|tests)/
         exclude: >
-          (?x)^(
-            check_cfg\.py|
-            debug_chembl_pub2?\.py|
-            debug_.*\.py|
-            docs/00-project/ai/agents/.*\.py|
-            docs/00-project/ai/skills/.*\.py
+          (?x)(
+            (^|.*/)(check_cfg|debug_chembl_pub2?|debug_.*)\.py|
+            .*/src/bioetl/infrastructure/quality/external_api\.py
           )$
 
   # Security checks
@@ -35,7 +42,7 @@ repos:
     hooks:
       - id: bandit
         args: [-c, pyproject.toml]
-        additional_dependencies: ["bandit[toml]"]
+        additional_dependencies: ["bandit[toml]==1.9.2"]
         stages: [pre-push]
 
   # Secret scanning in pre-push. CI keeps the canonical detect-secrets baseline
@@ -45,6 +52,7 @@ repos:
     hooks:
       - id: gitleaks
         args: ['--config', '.gitleaks.toml']
+        pass_filenames: false
         stages: [pre-push]
 
   # General file checks
@@ -55,12 +63,13 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
         exclude: >
-          (?x)^(
+          (?x)(^|.*[\\/])(
             mkdocs\.yml|
-            docs/plugins/link_checker/mkdocs_example\.yml|
-            docs/05-operations/deployment/k8s-deployment\.yaml|
-            docs/05-operations/deployment/k8s-monitoring\.yaml|
-            docs/05-operations/deployment/k8s-networking\.yaml
+            docs[/\\]plugins[/\\]link_checker[/\\]mkdocs_example\.yml|
+            docs[/\\]05-operations[/\\]deployment[/\\]k8s-deployment\.yaml|
+            docs[/\\]05-operations[/\\]deployment[/\\]k8s-monitoring\.yaml|
+            docs[/\\]05-operations[/\\]deployment[/\\]k8s-networking\.yaml|
+            docs[/\\].*\.ya?ml
           )$
       - id: check-json
       - id: check-toml
@@ -70,12 +79,9 @@ repos:
       - id: check-merge-conflict
       - id: debug-statements
         exclude: >
-          (?x)^(
-            check_cfg\.py|
-            debug_chembl_pub2?\.py|
-            debug_.*\.py|
-            docs/00-project/ai/agents/.*\.py|
-            docs/00-project/ai/skills/.*\.py
+          (?x)(
+            (^|.*/)(check_cfg|debug_chembl_pub2?|debug_.*)\.py|
+            .*/src/bioetl/infrastructure/quality/external_api\.py
           )$
       - id: mixed-line-ending
         args: [--fix=lf]
@@ -85,20 +91,21 @@ repos:
     rev: 1.0.0
     hooks:
       - id: mdformat
+        stages: [manual]
         additional_dependencies:
-          - mdformat-gfm
-          - mdformat-black
+          - mdformat-gfm==0.4.1
+          - mdformat-black==0.1.1
         exclude: >
-          (?x)^(
+          (?x)(^|.*[\\/])(
             CHANGELOG\.md|
-            \.codex/.*\.md|
-            \.gemini/.*\.md|
-            docs/00-project/ai/(agents|skills)/.*\.md|
-            docs/02-architecture/decisions/.*\.md|
-            docs/03-guides/.*\.md|
-            docs/05-architecture/.*\.md|
-            docs/05-operations/runbooks/.*\.md|
-            grafana/README\.md
+            \.codex[/\\].*\.md|
+            \.gemini[/\\].*\.md|
+            docs[/\\]00-project[/\\]ai[/\\](agents|skills)[/\\].*\.md|
+            docs[/\\]02-architecture[/\\]decisions[/\\].*\.md|
+            docs[/\\]03-guides[/\\].*\.md|
+            docs[/\\]05-architecture[/\\].*\.md|
+            docs[/\\]05-operations[/\\]runbooks[/\\].*\.md|
+            grafana[/\\]README\.md
           )$
 
   # Local hooks
@@ -124,7 +131,7 @@ repos:
         entry: uv run --active pytest tests/architecture/test_future_annotations_policy.py tests/architecture/test_naming_conventions.py tests/architecture/test_no_structlog_in_application_interfaces.py tests/architecture/test_no_datetime_now_in_infrastructure.py tests/architecture/test_no_random_in_writers.py tests/architecture/test_forbidden_imports.py -q
         language: system
         pass_filenames: false
-        stages: [pre-commit]
+        stages: [pre-push]
 
       - id: forbid-cache-files
         name: Block common cache and temporary files
@@ -158,7 +165,9 @@ repos:
         entry: python scripts/engineering/repo/audit_root_cleanliness.py
         language: python
         pass_filenames: false
-        stages: [manual]
+        stages: [pre-commit]
+        additional_dependencies:
+          - pyyaml==6.0.2
       - id: lint-config-paths
         name: Check for legacy dq/filter config path references
         entry: python scripts/schema/lint_config_paths.py

@@ -148,7 +148,7 @@ class TestEffectiveConfigService:
         """Semantic env overrides must stay inside the explicit allowlist."""
         with pytest.raises(
             ValueError,
-            match="runtime_overrides.env contains non-allowlisted semantic environment overrides",
+            match=r"runtime_overrides\.env contains non-allowlisted semantic environment overrides",
         ):
             self.service.create_effective_config_artifact(
                 pipeline_name="test_pipeline",

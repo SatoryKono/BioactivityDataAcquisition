@@ -14,9 +14,9 @@ from bioetl.application.core.base_transformer.optionality import (
 FieldCoercionPolicy = Literal["default", "no_string_coercion"]
 
 
-@dataclass(frozen=True, slots=True)
-class ResolvedFieldPolicy:
-    """Resolved structural policy contract for one field."""
+@dataclass(frozen=True, slots=True, kw_only=True)
+class FieldPolicySpec:
+    """Shared resolved field-policy contract surface."""
 
     optional: bool
     optional_sources: tuple[OptionalitySource, ...]
@@ -24,6 +24,11 @@ class ResolvedFieldPolicy:
     coercion_policy: FieldCoercionPolicy = "default"
     boolean_true_values: tuple[str, ...] = ()
     boolean_false_values: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class ResolvedFieldPolicy(FieldPolicySpec):
+    """Resolved structural policy contract for one field."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,6 +85,7 @@ def _collect_explicit_field_policy(domain_config: object) -> dict[str, object]:
 
 __all__ = [
     "FieldCoercionPolicy",
+    "FieldPolicySpec",
     "FieldPolicyResolver",
     "ResolvedFieldPolicy",
 ]

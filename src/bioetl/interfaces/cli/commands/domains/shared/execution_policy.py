@@ -26,6 +26,7 @@ __all__ = [
     "BatchRunResultProtocol",
     "ExecutionFailureReasonCodes",
     "build_failure_context",
+    "execute_prepared_cli_flow",
     "execute_with_cli_failure_policy",
     "finalize_cli_execution",
     "handle_cli_failure",
@@ -202,6 +203,20 @@ def finalize_cli_execution(
     if result is None:
         return
     result_finalizer(result)
+
+
+def execute_prepared_cli_flow(
+    *,
+    health_info_presenter: Callable[[], None],
+    execute: Callable[[], _ResultT | None],
+    result_finalizer: Callable[[_ResultT], None],
+) -> None:
+    """Execute one prepared CLI flow using the shared execution shell."""
+    finalize_cli_execution(
+        health_info_presenter=health_info_presenter,
+        execute=execute,
+        result_finalizer=result_finalizer,
+    )
 
 
 def build_failure_context(

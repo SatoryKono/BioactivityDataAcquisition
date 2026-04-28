@@ -21,6 +21,7 @@ _IMPL = load_public_api(
     globals(),
     "scripts.docs.matrix.generate_pipeline_normalization_matrix",
 )
+main = _IMPL.main
 
 
 if __name__ == "__main__":

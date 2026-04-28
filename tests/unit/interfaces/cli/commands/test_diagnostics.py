@@ -243,9 +243,11 @@ def test_diagnostics_guide_matches_exact_output(cli_runner: CliRunner) -> None:
         "  metrics/admin: bioetl diagnostics metrics [--json]",
         "  health: bioetl diagnostics health [--provider <provider>] [--json]",
         "  run: bioetl diagnostics run --run-id <run-id> [--limit 100] [--format text|json|yaml]",
-        "  checkpoint: bioetl diagnostics checkpoint --pipeline <pipeline> [--run-id <run-id>] [--audit-limit 100] [--format text|json|yaml]",
+        "  checkpoint: bioetl diagnostics checkpoint --pipeline <pipeline>"
+        " [--run-id <run-id>] [--audit-limit 100] [--format text|json|yaml]",
         "  manifest: bioetl diagnostics manifest <run-id|manifest-id> [--format text|json|yaml]",
-        "  quarantine: bioetl diagnostics quarantine --pipeline <pipeline> [--run-id <run-id>] [--group-by reason-signature] [--json]",
+        "  quarantine: bioetl diagnostics quarantine --pipeline <pipeline>"
+        " [--run-id <run-id>] [--group-by reason-signature] [--json]",
         "",
         "Observability verification workflow:",
         "  1. bioetl diagnostics metrics [--json]",

@@ -18,7 +18,6 @@ Exit Codes:
 
 import sys
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
 
 import yaml
 
@@ -184,7 +183,7 @@ class ParityChecker:
             print(f"\n📊 Parity Score: {parity_score:.1f}%")
             return False
         else:
-            print(f"\n✅ All parity checks passed!")
+            print("\n✅ All parity checks passed!")
             print(f"📊 Parity Score: {parity_score:.1f}%")
             if parity_score >= 95:
                 print("🎉 Excellent documentation coverage!")

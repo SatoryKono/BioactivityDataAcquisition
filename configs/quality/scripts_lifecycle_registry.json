@@ -140,7 +140,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a narrow stdin-driven Sonar issue grouping helper for historical remediation triage; remove it once issue-wave analysis is fully folded into the canonical quality tooling."
     },
-
     "scripts/ai/mcp/mcp_brave_search_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
@@ -243,36 +242,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a historical exploratory code-quality probe; prefer canonical architecture and lint/report tooling instead of extending this orphan analysis script."
     },
-    "scripts/ai/scripts/ai/check_sonar_issues.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical GitHub/Sonar reconciliation helper for manual issue review; do not expand it into a supported automation surface without fresh call-site evidence."
-    },
-    "scripts/ai/scripts/ai/code_quality_analysis.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical exploratory code-quality probe; prefer canonical architecture and lint/report tooling instead of extending this orphan analysis script."
-    },
-    "scripts/ai/scripts/ai/analyze_test_failures.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical manual triage helper for clustered pytest failure analysis; prefer canonical QA reporting and targeted test diagnostics instead of extending this orphan script."
-    },
-    "scripts/ai/src/__main__.py": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a compatibility module router for the historical scripts.ai.src package surface while callers finish converging on the canonical scripts.ai entrypoints; remove it once no orphan references remain."
-    },
-    "scripts/ai/src/analyze_test_failures.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical scripts.ai.src copy of manual pytest-failure triage helpers; prefer canonical QA reporting flows and remove this orphan mirror once no references remain."
-    },
     "scripts/ai/src/bioetl/composition/factories/pipeline/_factory_method_types.py": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",
@@ -284,18 +253,6 @@
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a compatibility-era mirror under scripts.ai.src for historical import stability around composite runtime wiring; remove it once all legacy references have converged on the canonical src/bioetl package path."
-    },
-    "scripts/ai/src/check_sonar_issues.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical scripts.ai.src copy of Sonar issue review helpers; prefer the canonical repo-governance tooling and remove this orphan mirror once unreferenced."
-    },
-    "scripts/ai/src/code_quality_analysis.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical scripts.ai.src exploratory quality-analysis helper; prefer canonical architecture and lint/report tooling instead of extending this orphan mirror."
     },
     "scripts/ai/src/group_issues.py": {
       "owner": "@bioetl-platform",
@@ -458,12 +415,6 @@
       "decision": "internal_helper_orphan",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded shared path helper while governed scripts still depend on repository-root resolution; fold it into broader canonical helper surfaces once the remaining bootstrap helpers converge."
-    },
-    "scripts/engineering/dev/bash/.setup_wsl_codex.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded WSL Codex setup helper while mixed Windows/WSL setup flows remain operator-maintained; remove it once the bootstrap path is stable."
     },
     "scripts/engineering/dev/bash/WSL_COMMANDS.sh": {
       "owner": "@bioetl-platform",
@@ -794,6 +745,12 @@
       "decision": "active",
       "next_step": "Retain as the canonical script for validating control plane artifacts in CI workflows.",
       "review_by": "2026-07-15"
+    },
+    "scripts/engineering/dev/bash/.setup_wsl_codex.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded WSL setup helper for Codex; remove it once terminal setup is standardized."
     }
   }
 }

@@ -11,6 +11,9 @@ from typing import TYPE_CHECKING
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
+from bioetl.composition.bootstrap.runtime._composite_plan_support import (
+    build_bootstrap_runtime_resources,
+)
 from bioetl.composition.bootstrap.runtime.runner_assembly import (
     create_composite_runner as _create_composite_runner_impl,
 )
@@ -57,26 +60,19 @@ def bootstrap_runtime_basics(
     Returns:
         Infrastructure context handoff for the composite run.
     """
-    run_id_value, settings, logger, metrics, tracer, storage, lock = (
-        _bootstrap_runtime_basics_impl(
-            config=config,
-            run_id=run_id,
-            settings_provider=settings_provider,
-            logger_bootstrapper=logger_bootstrapper,
-            tracer_bootstrapper=tracer_bootstrapper,
-            storage_bootstrapper=storage_bootstrapper,
-            lock_factory=lock_factory,
-            uuid_factory=uuid_factory,
-        )
+    runtime_resources = build_bootstrap_runtime_resources(
+        bootstrap_runtime_basics_fn=_bootstrap_runtime_basics_impl,
+        config=config,
+        run_id=run_id,
     )
     return CompositeInfrastructureContext(
-        run_id=run_id_value,
-        settings=settings,
-        logger=logger,
-        metrics=metrics,
-        tracer=tracer,
-        storage=storage,
-        lock=lock,
+        run_id=runtime_resources.run_id,
+        settings=runtime_resources.settings,
+        logger=runtime_resources.logger,
+        metrics=runtime_resources.metrics,
+        tracer=runtime_resources.tracer,
+        storage=runtime_resources.storage,
+        lock=runtime_resources.lock,
         clock=SystemClock(),
     )
 

@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
 from datetime import datetime
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, TypeVar, cast
 
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.context import current_utc_time
@@ -26,6 +25,9 @@ else:
     )
     from bioetl.domain.ports import ClockPort
     from bioetl.domain.types import JsonDict
+
+T = TypeVar("T")
+TCheckpointState = TypeVar("TCheckpointState", bound="CompositeCheckpointState")
 
 
 def _current_utc_now(clock: ClockPort | None = None) -> datetime:
@@ -129,7 +131,7 @@ def is_resumable(checkpoint_state: CompositeCheckpointState) -> bool:
 
 
 def _replace_checkpoint_state(
-    checkpoint_state: CompositeCheckpointState,
+    checkpoint_state: TCheckpointState,
     *,
     clock: ClockPort | None = None,
     updated_at: datetime | None = None,
@@ -142,60 +144,52 @@ def _replace_checkpoint_state(
     enrichment_results: dict[str, EnrichmentResult] | None = None,
     merge_completed: bool | None = None,
     merge_result: JsonDict | None = None,
-) -> CompositeCheckpointState:
-    def _resolved(current: object, override: object) -> object:
+) -> TCheckpointState:
+    def _resolved(current: T, override: T | None) -> T:
         return current if override is None else override
 
-    return replace(
-        checkpoint_state,
-        state=cast(CompositePipelineState, _resolved(checkpoint_state.state, state)),
-        seed_completed=cast(
-            bool,
-            _resolved(checkpoint_state.seed_completed, seed_completed),
+    from bioetl.application.composite.checkpoint.state import (
+        CompositeCheckpointState,
+    )
+
+    checkpoint_state_copy = CompositeCheckpointState(
+        composite_name=checkpoint_state.composite_name,
+        run_id=checkpoint_state.run_id,
+        state=_resolved(checkpoint_state.state, state),
+        seed_completed=_resolved(checkpoint_state.seed_completed, seed_completed),
+        seed_result=_resolved(checkpoint_state.seed_result, seed_result),
+        completed_dependencies=_resolved(
+            checkpoint_state.completed_dependencies,
+            completed_dependencies,
         ),
-        seed_result=cast(
-            SeedResult | None,
-            _resolved(checkpoint_state.seed_result, seed_result),
+        dependency_results=_resolved(
+            checkpoint_state.dependency_results,
+            dependency_results,
         ),
-        completed_dependencies=(
-            cast(
-                frozenset[str],
-                _resolved(
-                    checkpoint_state.completed_dependencies,
-                    completed_dependencies,
-                ),
-            )
+        completed_enrichers=_resolved(
+            checkpoint_state.completed_enrichers,
+            completed_enrichers,
         ),
-        dependency_results=(
-            cast(
-                dict[str, DependencyResult],
-                _resolved(checkpoint_state.dependency_results, dependency_results),
-            )
+        enrichment_results=_resolved(
+            checkpoint_state.enrichment_results,
+            enrichment_results,
         ),
-        completed_enrichers=(
-            cast(
-                frozenset[str],
-                _resolved(
-                    checkpoint_state.completed_enrichers,
-                    completed_enrichers,
-                ),
-            )
+        merge_completed=_resolved(checkpoint_state.merge_completed, merge_completed),
+        merge_result=_resolved(checkpoint_state.merge_result, merge_result),
+        checkpoint_schema_version=checkpoint_state.checkpoint_schema_version,
+        effective_config_hash=checkpoint_state.effective_config_hash,
+        effective_config_artifact_id=checkpoint_state.effective_config_artifact_id,
+        execution_fingerprint=checkpoint_state.execution_fingerprint,
+        dq_contract_compatibility_hash=(
+            checkpoint_state.dq_contract_compatibility_hash
         ),
-        enrichment_results=(
-            cast(
-                dict[str, EnrichmentResult],
-                _resolved(checkpoint_state.enrichment_results, enrichment_results),
-            )
-        ),
-        merge_completed=(
-            cast(
-                bool,
-                _resolved(checkpoint_state.merge_completed, merge_completed),
-            )
-        ),
-        merge_result=cast(
-            JsonDict | None,
-            _resolved(checkpoint_state.merge_result, merge_result),
-        ),
+        contract_ref=checkpoint_state.contract_ref,
+        contract_version=checkpoint_state.contract_version,
+        manifest_id=checkpoint_state.manifest_id,
+        composite_run_identity=checkpoint_state.composite_run_identity,
+        last_event_id=checkpoint_state.last_event_id,
+        last_event_occurred_at=checkpoint_state.last_event_occurred_at,
+        created_at=checkpoint_state.created_at,
         updated_at=updated_at or _current_utc_now(clock),
     )
+    return cast(TCheckpointState, checkpoint_state_copy)

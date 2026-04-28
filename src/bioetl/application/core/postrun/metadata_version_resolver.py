@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Literal
 from bioetl.application.core.postrun._failure_policy import (
     PostrunFailureHandlingMixin,
     PostrunFailurePolicySpec,
-    apply_postrun_failure_policy_or_raise,
 )
 
 if TYPE_CHECKING:
@@ -64,11 +63,8 @@ class PostrunMetadataVersionResolver(PostrunFailureHandlingMixin):
             )
             return table_version
         except self._warning_allowlist as error:
-            apply_postrun_failure_policy_or_raise(
-                logger=self._logger,
-                runtime=self._runtime,
-                error=error,
-                spec=self._FAILURE_POLICY,
+            self._handle_allowlisted_failure(
+                error,
                 log_fields={
                     "layer": layer,
                     "table_path": table_path,

@@ -10,6 +10,7 @@ from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
     _complete_silver_write_pipeline_impl,
+    _finalize_silver_postwrite_result,
 )
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _PreparedSilverWritePayload,
@@ -172,26 +173,10 @@ class SilverWriterPostwriteMixin:
         payload: _PreparedSilverWritePayload,
     ) -> SilverWriteResult | None:
         """Finalize the legacy mixin postwrite flow."""
-        finalize_kwargs: dict[str, object] = {
-            "table_name": ctx.table_name,
-            "records": payload.records,
-            "table_path": payload.table_path,
-            "primary_keys": ctx.primary_keys,
-            "validated_mode": payload.validated_mode,
-            "bronze_refs": ctx.bronze_refs,
-            "partition_cols": ctx.partition_cols,
-            "source_batch_id": ctx.source_batch_id,
-            "started_at": ctx.started_at,
-            "start_perf": ctx.start_perf,
-        }
-        quarantined_count = getattr(ctx, "quarantined_count", None)
-        if quarantined_count is not None:
-            finalize_kwargs["quarantined_count"] = quarantined_count
-        validation_errors = getattr(ctx, "validation_errors", None)
-        if validation_errors is not None:
-            finalize_kwargs["validation_errors"] = validation_errors
-        return await self._finalize_silver_write_result(
-            **finalize_kwargs,  # type: ignore[arg-type]
+        return await _finalize_silver_postwrite_result(
+            self._finalize_silver_write_result,
+            ctx=ctx,
+            payload=payload,
         )
 
     async def _complete_silver_write_pipeline(
