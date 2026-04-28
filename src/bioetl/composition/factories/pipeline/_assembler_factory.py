@@ -38,6 +38,9 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     extract_entity_type as _extract_entity_type,
 )
+from bioetl.composition.factories.pipeline._factory_method_types import (
+    build_pipeline_create_runner_request_from_kwargs as _build_pipeline_create_runner_request_from_kwargs,
+)
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.domain.filtering import (
@@ -55,7 +58,6 @@ from bioetl.domain.ports import (
     LoggerPort,
     MetricsPort,
     PiiHasherPort,
-    PipelineControlPlaneArtifacts,
     PipelineCreateRunnerRequest,
     TracingPort,
 )
@@ -226,64 +228,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         **kwargs: object,
     ) -> PipelineRunner:
         if request is None:
-            request = PipelineCreateRunnerRequest(
-                run_id=cast("RunID", kwargs["run_id"]),
-                runtime=cast("RuntimeConfig", kwargs["runtime"]),
-                started_at=cast("datetime", kwargs["started_at"]),
-                settings=cast("Settings", kwargs["settings"]),
-                observability=cast(
-                    "ExecutionObservabilityPort",
-                    kwargs["observability"],
-                ),
-                control_plane=cast(
-                    "PipelineControlPlaneArtifacts",
-                    kwargs.get("control_plane"),
-                ),
-                filter_config=cast(
-                    "InputFilterConfig | None",
-                    kwargs.get("filter_config"),
-                ),
-                config=cast("PipelineYamlConfig | None", kwargs.get("config")),
-                cached_bronze=cast(
-                    "CachedBronzeContext | None",
-                    kwargs.get("cached_bronze"),
-                ),
-            )
-            if kwargs.get("control_plane") is None:
-                request = PipelineCreateRunnerRequest(
-                    run_id=request.run_id,
-                    runtime=request.runtime,
-                    started_at=request.started_at,
-                    settings=request.settings,
-                    observability=request.observability,
-                    control_plane=PipelineControlPlaneArtifacts(
-                        manifest_id=_optional_string_kwarg(kwargs, "manifest_id"),
-                        execution_fingerprint=_optional_string_kwarg(
-                            kwargs,
-                            "execution_fingerprint",
-                        ),
-                        config_hash=_optional_string_kwarg(kwargs, "config_hash"),
-                        resolved_config_hash=_optional_string_kwarg(
-                            kwargs,
-                            "resolved_config_hash",
-                        ),
-                        effective_config_hash=_optional_string_kwarg(
-                            kwargs,
-                            "effective_config_hash",
-                        ),
-                        dq_contract_compatibility_hash=_optional_string_kwarg(
-                            kwargs,
-                            "dq_contract_compatibility_hash",
-                        ),
-                        effective_config_artifact_id=_optional_string_kwarg(
-                            kwargs,
-                            "effective_config_artifact_id",
-                        ),
-                    ),
-                    filter_config=request.filter_config,
-                    config=request.config,
-                    cached_bronze=request.cached_bronze,
-                )
+            request = _build_pipeline_create_runner_request_from_kwargs(**kwargs)
         return create_runner_from_factory(
             cast(_FactoryLike, self),
             request=build_create_factory_runner_request(
