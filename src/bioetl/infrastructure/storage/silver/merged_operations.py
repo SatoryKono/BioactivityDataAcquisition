@@ -20,9 +20,9 @@ from bioetl.infrastructure.storage.delta.schema_ops import (
 )
 
 __all__ = [
-    "_MergedSilverWriteRequest",
     "_MergedSilverMetadataWriterProtocol",
     "_MergedSilverWriteExecutorProtocol",
+    "_MergedSilverWriteRequest",
     "_PreparedMergedSilverWrite",
     "_execute_merged_silver_write_flow",
     "_export_silver_merged_csv",
