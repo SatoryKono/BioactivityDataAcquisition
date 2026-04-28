@@ -50,6 +50,225 @@ def _row(
     )
 
 
+def _assert_activity_governance_rows(rows: list[dict[str, str]]) -> None:
+    standard_relation = _row(rows, "chembl_activity", "standard_relation")
+    assert standard_relation["controlled_vocabulary_source"] == (
+        "configs/enums/chembl.yaml"
+    )
+    assert standard_relation["strictness"] == "strict_operator"
+    assert "domain_schema:present" in standard_relation["schema_coverage"]
+    assert "checks=isin" in standard_relation["schema_coverage"]
+    assert standard_relation["dq_coverage"] == "enum:error"
+
+    assay_type = _row(rows, "chembl_activity", "assay_type")
+    assert assay_type["controlled_vocabulary_source"] == "configs/enums/chembl.yaml"
+    assert assay_type["strictness"] == "strict_enum"
+    assert assay_type["dq_coverage"] == "enum:error"
+    assert assay_type["policy_scope"] == "project_subset_of_provider_universe"
+
+    standard_flag = _row(rows, "chembl_activity", "standard_flag")
+    assert standard_flag["strictness"] == "strict_flag"
+    assert standard_flag["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_controlled.yaml"
+    )
+    assert "checks=isin" in standard_flag["schema_coverage"]
+    assert standard_flag["dq_coverage"] == "range:error"
+    assert standard_flag["policy_scope"] == "not_applicable"
+
+    activity_properties = _row(rows, "chembl_activity", "activity_properties")
+    assert activity_properties["normalizer"] == "normalize_profile_json_string_strict"
+    assert activity_properties["hash_ordering"] == "set_like"
+    assert activity_properties["strictness"] == "strict_json"
+    assert (
+        activity_properties["dq_coverage"]
+        == "runtime_warning:malformed_json_normalized_to_null"
+    )
+
+    activity_units = _row(rows, "chembl_activity", "units")
+    assert activity_units["semantic_category"] == "controlled_vocabulary"
+    assert activity_units["normalizer"] == "normalize_profile_unit"
+    assert activity_units["strictness"] == "controlled_unit"
+    assert activity_units["dq_coverage"] == "pattern:error"
+    assert activity_units["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_controlled.yaml"
+    )
+
+    activity_standard_units = _row(rows, "chembl_activity", "standard_units")
+    assert activity_standard_units["normalizer"] == "normalize_profile_unit"
+    assert activity_standard_units["semantic_category"] == "controlled_vocabulary"
+    assert activity_standard_units["strictness"] == "controlled_unit"
+    assert activity_standard_units["dq_coverage"] == "enum:error"
+    assert activity_standard_units["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_controlled.yaml"
+    )
+
+
+def _assert_activity_ontology_rows(rows: list[dict[str, str]]) -> None:
+    activity_uo_units = _row(rows, "chembl_activity", "uo_units")
+    assert activity_uo_units["semantic_category"] == "ontology_reference_identifier"
+    assert activity_uo_units["strictness"] == "controlled_unit"
+    assert activity_uo_units["dq_coverage"] == "pattern:error"
+    assert activity_uo_units["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_ontology.yaml"
+    )
+
+    activity_qudt_units = _row(rows, "chembl_activity", "qudt_units")
+    assert activity_qudt_units["semantic_category"] == "controlled_vocabulary"
+    assert activity_qudt_units["strictness"] == "controlled_unit"
+    assert activity_qudt_units["dq_coverage"] == "pattern:error"
+    assert activity_qudt_units["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_controlled.yaml"
+    )
+
+    bao_format = _row(rows, "chembl_activity", "bao_format")
+    assert bao_format["semantic_category"] == "ontology_reference_identifier"
+    assert bao_format["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_ontology.yaml"
+    )
+    assert bao_format["strictness"] == "canonical_ontology_id"
+
+    bao_endpoint_iri = _row(rows, "chembl_activity", "bao_endpoint_iri")
+    assert (
+        bao_endpoint_iri["normalizer"] == "normalize_profile_activity_bao_endpoint_iri"
+    )
+    assert bao_endpoint_iri["semantic_category"] == "ontology_reference_identifier"
+    assert bao_endpoint_iri["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_ontology.yaml"
+    )
+
+    bao_ontology_version = _row(rows, "chembl_activity", "bao_ontology_version")
+    assert (
+        bao_ontology_version["normalizer"]
+        == "normalize_profile_activity_bao_ontology_version"
+    )
+    assert bao_ontology_version["semantic_category"] == "ontology_reference_metadata"
+    assert bao_ontology_version["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_ontology.yaml"
+    )
+
+    bao_mapping_status = _row(rows, "chembl_activity", "bao_endpoint_mapping_status")
+    assert bao_mapping_status["controlled_vocabulary_source"] == (
+        "configs/enums/chembl.yaml"
+    )
+    assert bao_mapping_status["strictness"] == "strict_enum"
+    assert bao_mapping_status["policy_scope"] == "provider_full_universe"
+
+
+def _assert_assay_parameter_rows(rows: list[dict[str, str]]) -> None:
+    publication_term_type = _row(rows, "chembl_publication_term", "term_type")
+    assert publication_term_type["controlled_vocabulary_source"] == (
+        "configs/enums/chembl.yaml"
+    )
+    assert publication_term_type["strictness"] == "strict_enum"
+    assert publication_term_type["dq_coverage"] == "enum:error"
+    assert publication_term_type["policy_scope"] == "provider_full_universe"
+
+    assay_parameter_units = _row(rows, "chembl_assay_parameters", "units")
+    assert assay_parameter_units["semantic_category"] == "controlled_vocabulary"
+    assert assay_parameter_units["strictness"] == "controlled_unit"
+    assert assay_parameter_units["dq_coverage"] == "pattern:error"
+    assert assay_parameter_units["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_controlled.yaml"
+    )
+
+    assay_parameter_standard_type = _row(
+        rows, "chembl_assay_parameters", "standard_type"
+    )
+    assert assay_parameter_standard_type["controlled_vocabulary_source"] == (
+        "configs/enums/chembl.yaml"
+    )
+    assert assay_parameter_standard_type["policy_scope"] == "provider_full_universe"
+
+    assay_parameter_type = _row(rows, "chembl_assay_parameters", "type")
+    assert (
+        assay_parameter_type["normalizer"]
+        == "normalize_profile_assay_parameter_type_field"
+    )
+    assert assay_parameter_type["semantic_category"] == "controlled_vocabulary"
+    assert assay_parameter_type["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_controlled.yaml"
+    )
+    assert assay_parameter_type["strictness"] == "normalization_only"
+    assert assay_parameter_type["dq_coverage"] == "pattern:error"
+
+    assay_parameter_type_raw = _row(rows, "chembl_assay_parameters", "type_raw")
+    assert assay_parameter_type_raw["normalizer"] == "normalize_profile_text"
+    assert assay_parameter_type_raw["semantic_category"] == "free_text"
+
+    assay_fraction_raw = _row(rows, "chembl_assay", "assay_subcellular_fraction_raw")
+    assert assay_fraction_raw["normalizer"] == "normalize_profile_text"
+
+    subcellular_fraction_raw = _row(
+        rows, "chembl_subcellular_fraction", "subcellular_fraction_raw"
+    )
+    assert subcellular_fraction_raw["normalizer"] == "normalize_profile_text"
+
+
+def _assert_publication_and_target_rows(rows: list[dict[str, str]]) -> None:
+    publication_class = _row(rows, "chembl_publication", "publication_class")
+    assert publication_class["semantic_category"] == "derived_vocabulary"
+    assert publication_class["controlled_vocabulary_source"] == (
+        "configs/enums/publication_type_classification.csv"
+    )
+
+    publication_doi = _row(rows, "chembl_publication", "publication_doi")
+    assert "domain_schema:present" in publication_doi["schema_coverage"]
+
+    publication_type_raw = _row(rows, "chembl_publication", "publication_type_raw")
+    assert "domain_schema:present" in publication_type_raw["schema_coverage"]
+
+    publication_oa_status = _row(rows, "chembl_publication", "oa_status")
+    assert "domain_schema:present" in publication_oa_status["schema_coverage"]
+
+    target_cross_references = _row(rows, "chembl_target", "cross_references")
+    assert (
+        target_cross_references["normalizer"] == "normalize_profile_json_string_strict"
+    )
+    assert target_cross_references["strictness"] == "strict_json"
+    assert (
+        target_cross_references["dq_coverage"]
+        == "runtime_warning:malformed_json_normalized_to_null"
+    )
+
+    target_component_types = _row(rows, "chembl_target", "component_types")
+    assert target_component_types["set_like"] == "true"
+    assert target_component_types["hash_ordering"] == "set_like"
+
+    target_component_relationships = _row(
+        rows, "chembl_target", "component_relationships"
+    )
+    assert target_component_relationships["set_like"] == "true"
+    assert target_component_relationships["hash_ordering"] == "set_like"
+
+    component_type = _row(rows, "chembl_target_component", "component_type")
+    assert component_type["controlled_vocabulary_source"] == (
+        "configs/enums/chembl.yaml"
+    )
+
+
+def _assert_molecule_rows(rows: list[dict[str, str]]) -> None:
+    molecule_properties = _row(rows, "chembl_molecule", "molecule_properties")
+    assert molecule_properties["normalizer"] == "normalize_profile_json_string_strict"
+    assert molecule_properties["strictness"] == "strict_json"
+    assert (
+        molecule_properties["dq_coverage"]
+        == "runtime_warning:malformed_json_normalized_to_null"
+    )
+
+    molecule_type = _row(rows, "chembl_molecule", "molecule_type")
+    assert molecule_type["policy_scope"] == "project_subset_of_provider_universe"
+
+    ro3_pass = _row(rows, "chembl_molecule", "ro3_pass")
+    assert ro3_pass["controlled_vocabulary_source"] == "configs/enums/chembl.yaml"
+    assert ro3_pass["strictness"] == "strict_enum"
+    assert ro3_pass["dq_coverage"] == "enum:error"
+
+    max_phase = _row(rows, "chembl_molecule", "max_phase")
+    assert max_phase["controlled_vocabulary_source"] == "configs/enums/chembl.yaml"
+    assert max_phase["strictness"] == "strict_enum"
+    assert max_phase["policy_scope"] == "provider_full_universe"
+
+
 def test_generator_uses_checkpoint_package_facade() -> None:
     source = Path(
         "scripts/docs/generate_pipeline_normalization_field_matrix.py"
@@ -249,217 +468,11 @@ def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields(
 
 def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> None:
     rows = build_field_matrix_rows()
-
-    standard_relation = _row(rows, "chembl_activity", "standard_relation")
-    assert standard_relation["controlled_vocabulary_source"] == (
-        "configs/enums/chembl.yaml"
-    )
-    assert standard_relation["strictness"] == "strict_operator"
-    assert "domain_schema:present" in standard_relation["schema_coverage"]
-    assert "checks=isin" in standard_relation["schema_coverage"]
-    assert standard_relation["dq_coverage"] == "enum:error"
-
-    assay_type = _row(rows, "chembl_activity", "assay_type")
-    assert assay_type["controlled_vocabulary_source"] == "configs/enums/chembl.yaml"
-    assert assay_type["strictness"] == "strict_enum"
-    assert assay_type["dq_coverage"] == "enum:error"
-    assert assay_type["policy_scope"] == "project_subset_of_provider_universe"
-
-    standard_flag = _row(rows, "chembl_activity", "standard_flag")
-    assert standard_flag["strictness"] == "strict_flag"
-    assert standard_flag["controlled_vocabulary_source"] == (
-        "configs/vocab/chembl_controlled.yaml"
-    )
-    assert "checks=isin" in standard_flag["schema_coverage"]
-    assert standard_flag["dq_coverage"] == "range:error"
-    assert standard_flag["policy_scope"] == "not_applicable"
-
-    activity_properties = _row(rows, "chembl_activity", "activity_properties")
-    assert activity_properties["normalizer"] == "normalize_profile_json_string_strict"
-    assert activity_properties["hash_ordering"] == "set_like"
-    assert activity_properties["strictness"] == "strict_json"
-    assert (
-        activity_properties["dq_coverage"]
-        == "runtime_warning:malformed_json_normalized_to_null"
-    )
-
-    activity_units = _row(rows, "chembl_activity", "units")
-    assert activity_units["semantic_category"] == "controlled_vocabulary"
-    assert activity_units["normalizer"] == "normalize_profile_unit"
-    assert activity_units["strictness"] == "controlled_unit"
-    assert activity_units["dq_coverage"] == "pattern:error"
-    assert activity_units["controlled_vocabulary_source"] == (
-        "configs/vocab/chembl_controlled.yaml"
-    )
-
-    activity_uo_units = _row(rows, "chembl_activity", "uo_units")
-    assert activity_uo_units["semantic_category"] == "ontology_reference_identifier"
-    assert activity_uo_units["strictness"] == "controlled_unit"
-    assert activity_uo_units["dq_coverage"] == "pattern:error"
-    assert activity_uo_units["controlled_vocabulary_source"] == (
-        "configs/vocab/chembl_ontology.yaml"
-    )
-
-    activity_qudt_units = _row(rows, "chembl_activity", "qudt_units")
-    assert activity_qudt_units["semantic_category"] == "controlled_vocabulary"
-    assert activity_qudt_units["strictness"] == "controlled_unit"
-    assert activity_qudt_units["dq_coverage"] == "pattern:error"
-    assert activity_qudt_units["controlled_vocabulary_source"] == (
-        "configs/vocab/chembl_controlled.yaml"
-    )
-
-    activity_standard_units = _row(rows, "chembl_activity", "standard_units")
-    assert activity_standard_units["normalizer"] == "normalize_profile_unit"
-    assert activity_standard_units["semantic_category"] == "controlled_vocabulary"
-    assert activity_standard_units["strictness"] == "controlled_unit"
-    assert activity_standard_units["dq_coverage"] == "enum:error"
-    assert activity_standard_units["controlled_vocabulary_source"] == (
-        "configs/vocab/chembl_controlled.yaml"
-    )
-
-    target_cross_references = _row(rows, "chembl_target", "cross_references")
-    assert (
-        target_cross_references["normalizer"] == "normalize_profile_json_string_strict"
-    )
-    assert target_cross_references["strictness"] == "strict_json"
-    assert (
-        target_cross_references["dq_coverage"]
-        == "runtime_warning:malformed_json_normalized_to_null"
-    )
-
-    molecule_properties = _row(rows, "chembl_molecule", "molecule_properties")
-    assert molecule_properties["normalizer"] == "normalize_profile_json_string_strict"
-    assert molecule_properties["strictness"] == "strict_json"
-    assert (
-        molecule_properties["dq_coverage"]
-        == "runtime_warning:malformed_json_normalized_to_null"
-    )
-
-    bao_format = _row(rows, "chembl_activity", "bao_format")
-    assert bao_format["semantic_category"] == "ontology_reference_identifier"
-    assert bao_format["controlled_vocabulary_source"] == (
-        "configs/vocab/chembl_ontology.yaml"
-    )
-    assert bao_format["strictness"] == "canonical_ontology_id"
-
-    bao_endpoint_iri = _row(rows, "chembl_activity", "bao_endpoint_iri")
-    assert (
-        bao_endpoint_iri["normalizer"] == "normalize_profile_activity_bao_endpoint_iri"
-    )
-    assert bao_endpoint_iri["semantic_category"] == "ontology_reference_identifier"
-    assert bao_endpoint_iri["controlled_vocabulary_source"] == (
-        "configs/vocab/chembl_ontology.yaml"
-    )
-
-    bao_ontology_version = _row(rows, "chembl_activity", "bao_ontology_version")
-    assert (
-        bao_ontology_version["normalizer"]
-        == "normalize_profile_activity_bao_ontology_version"
-    )
-    assert bao_ontology_version["semantic_category"] == "ontology_reference_metadata"
-    assert bao_ontology_version["controlled_vocabulary_source"] == (
-        "configs/vocab/chembl_ontology.yaml"
-    )
-
-    publication_term_type = _row(rows, "chembl_publication_term", "term_type")
-    assert publication_term_type["controlled_vocabulary_source"] == (
-        "configs/enums/chembl.yaml"
-    )
-    assert publication_term_type["strictness"] == "strict_enum"
-    assert publication_term_type["dq_coverage"] == "enum:error"
-
-    assay_parameter_units = _row(rows, "chembl_assay_parameters", "units")
-    assert assay_parameter_units["semantic_category"] == "controlled_vocabulary"
-    assert assay_parameter_units["strictness"] == "controlled_unit"
-    assert assay_parameter_units["dq_coverage"] == "pattern:error"
-    assert assay_parameter_units["controlled_vocabulary_source"] == (
-        "configs/vocab/chembl_controlled.yaml"
-    )
-
-    assay_parameter_standard_type = _row(
-        rows, "chembl_assay_parameters", "standard_type"
-    )
-    assert assay_parameter_standard_type["controlled_vocabulary_source"] == (
-        "configs/enums/chembl.yaml"
-    )
-    assert assay_parameter_standard_type["policy_scope"] == "provider_full_universe"
-
-    assay_parameter_type = _row(rows, "chembl_assay_parameters", "type")
-    assert (
-        assay_parameter_type["normalizer"]
-        == "normalize_profile_assay_parameter_type_field"
-    )
-    assert assay_parameter_type["semantic_category"] == "controlled_vocabulary"
-    assert assay_parameter_type["controlled_vocabulary_source"] == (
-        "configs/vocab/chembl_controlled.yaml"
-    )
-    assert assay_parameter_type["strictness"] == "normalization_only"
-    assert assay_parameter_type["dq_coverage"] == "pattern:error"
-
-    assay_parameter_type_raw = _row(rows, "chembl_assay_parameters", "type_raw")
-    assert assay_parameter_type_raw["normalizer"] == "normalize_profile_text"
-    assert assay_parameter_type_raw["semantic_category"] == "free_text"
-
-    molecule_type = _row(rows, "chembl_molecule", "molecule_type")
-    assert molecule_type["policy_scope"] == "project_subset_of_provider_universe"
-
-    publication_term_type = _row(rows, "chembl_publication_term", "term_type")
-    assert publication_term_type["policy_scope"] == "provider_full_universe"
-
-    publication_class = _row(rows, "chembl_publication", "publication_class")
-    assert publication_class["semantic_category"] == "derived_vocabulary"
-    assert publication_class["controlled_vocabulary_source"] == (
-        "configs/enums/publication_type_classification.csv"
-    )
-
-    ro3_pass = _row(rows, "chembl_molecule", "ro3_pass")
-    assert ro3_pass["controlled_vocabulary_source"] == "configs/enums/chembl.yaml"
-    assert ro3_pass["strictness"] == "strict_enum"
-    assert ro3_pass["dq_coverage"] == "enum:error"
-
-    max_phase = _row(rows, "chembl_molecule", "max_phase")
-    assert max_phase["controlled_vocabulary_source"] == "configs/enums/chembl.yaml"
-    assert max_phase["strictness"] == "strict_enum"
-    assert max_phase["policy_scope"] == "provider_full_universe"
-
-    bao_mapping_status = _row(rows, "chembl_activity", "bao_endpoint_mapping_status")
-    assert bao_mapping_status["controlled_vocabulary_source"] == (
-        "configs/enums/chembl.yaml"
-    )
-    assert bao_mapping_status["strictness"] == "strict_enum"
-    assert bao_mapping_status["policy_scope"] == "provider_full_universe"
-
-    component_type = _row(rows, "chembl_target_component", "component_type")
-    assert component_type["controlled_vocabulary_source"] == (
-        "configs/enums/chembl.yaml"
-    )
-
-    publication_doi = _row(rows, "chembl_publication", "publication_doi")
-    assert "domain_schema:present" in publication_doi["schema_coverage"]
-
-    publication_type_raw = _row(rows, "chembl_publication", "publication_type_raw")
-    assert "domain_schema:present" in publication_type_raw["schema_coverage"]
-
-    publication_oa_status = _row(rows, "chembl_publication", "oa_status")
-    assert "domain_schema:present" in publication_oa_status["schema_coverage"]
-
-    assay_fraction_raw = _row(rows, "chembl_assay", "assay_subcellular_fraction_raw")
-    assert assay_fraction_raw["normalizer"] == "normalize_profile_text"
-
-    subcellular_fraction_raw = _row(
-        rows, "chembl_subcellular_fraction", "subcellular_fraction_raw"
-    )
-    assert subcellular_fraction_raw["normalizer"] == "normalize_profile_text"
-
-    target_component_types = _row(rows, "chembl_target", "component_types")
-    assert target_component_types["set_like"] == "true"
-    assert target_component_types["hash_ordering"] == "set_like"
-
-    target_component_relationships = _row(
-        rows, "chembl_target", "component_relationships"
-    )
-    assert target_component_relationships["set_like"] == "true"
-    assert target_component_relationships["hash_ordering"] == "set_like"
+    _assert_activity_governance_rows(rows)
+    _assert_activity_ontology_rows(rows)
+    _assert_assay_parameter_rows(rows)
+    _assert_publication_and_target_rows(rows)
+    _assert_molecule_rows(rows)
 
 
 def test_build_field_matrix_rows_keeps_chembl_cell_line_policy_fields_visible() -> None:

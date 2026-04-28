@@ -5,12 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.composition.runtime_builders import _run_manifest_support as _manifest_support
+from bioetl.composition.runtime_builders import (
+    _run_manifest_support as _manifest_support,
+)
 from bioetl.composition.services.versioning import (
     CodeRevisionProvenance,
     get_code_revision_provenance,
 )
-from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     assess_reproducibility_policy,
@@ -58,7 +59,9 @@ def resolve_manifest_reproducibility_context(
     contract_ref: str,
 ) -> ManifestReproducibilityContext:
     """Resolve the runtime persistence profile contract for one manifest build."""
-    control_plane = getattr(getattr(inputs.settings, "pipeline", None), "control_plane", None)
+    control_plane = getattr(
+        getattr(inputs.settings, "pipeline", None), "control_plane", None
+    )
     configured_required_profile = str(
         getattr(control_plane, "required_persistence_profile", "degraded_observable")
     )

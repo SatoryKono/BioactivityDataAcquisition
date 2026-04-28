@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""check_doc_links.py - Validate documentation links and spec file existence.
+"""Validate documentation links and spec file existence.
 
 Checks:
   1. Markdown relative links in docs/ resolve to existing files
@@ -29,15 +29,15 @@ Checks:
      `not_in_nav`
 
 Usage:
-    python scripts/check_doc_links.py          # Full check
-    python scripts/check_doc_links.py --specs   # Only spec file check
-    python scripts/check_doc_links.py --links   # Only broken link check
-    python scripts/check_doc_links.py --contracts-index  # Gold contract index parity
-    python scripts/check_doc_links.py --provider-overview  # Provider overview parity
-    python scripts/check_doc_links.py --doc-governance  # Provider/runbook/control-plane governance checks
-    python scripts/check_doc_links.py --not-in-nav-growth   # Only not-in-nav growth guard
-    python scripts/check_doc_links.py --legacy-paths   # Only doc drift guardrails
-    python scripts/check_doc_links.py --legacy-paths-all   # Drift guardrails incl. internal nav docs
+    python -m scripts.docs check-links                    # Full check
+    python -m scripts.docs check-links --specs            # Only spec file check
+    python -m scripts.docs check-links --links            # Only broken link check
+    python -m scripts.docs check-links --contracts-index  # Gold contract index parity
+    python -m scripts.docs check-links --provider-overview  # Provider overview parity
+    python -m scripts.docs check-links --doc-governance   # Provider/runbook/control-plane governance checks
+    python -m scripts.docs check-links --not-in-nav-growth  # Only not-in-nav growth guard
+    python -m scripts.docs check-links --legacy-paths     # Only doc drift guardrails
+    python -m scripts.docs check-links --legacy-paths-all # Drift guardrails incl. internal nav docs
 
 Exit code: 0 = clean, 1 = violations found
 

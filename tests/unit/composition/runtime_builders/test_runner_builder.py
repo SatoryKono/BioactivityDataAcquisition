@@ -281,7 +281,7 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
     )
 
     with patch(
-        "bioetl.composition.runtime_builders.run_manifest_builder.get_code_revision_provenance",
+        "bioetl.composition.runtime_builders._run_manifest_builder_policy.get_code_revision_provenance",
         return_value=SimpleNamespace(
             git_commit="deadbeef" * 5,
             source_revision_state="clean",
@@ -648,7 +648,7 @@ def test_build_pipeline_runner_keeps_snapshot_backed_execution_identity_stable_a
         fake_factory = _FakeFactory()
         fake_registry = _FakeRegistry(factory=fake_factory)
         with patch(
-            "bioetl.composition.runtime_builders.run_manifest_builder.get_code_revision_provenance",
+            "bioetl.composition.runtime_builders._run_manifest_builder_policy.get_code_revision_provenance",
             return_value=SimpleNamespace(
                 git_commit="deadbeef" * 5,
                 source_revision_state="clean",
@@ -1027,7 +1027,7 @@ def test_build_pipeline_runner_requires_git_commit_for_replay_ready_profile(
 
     with (
         patch(
-            "bioetl.composition.runtime_builders.run_manifest_builder.get_code_revision_provenance",
+            "bioetl.composition.runtime_builders._run_manifest_builder_policy.get_code_revision_provenance",
             return_value=SimpleNamespace(
                 git_commit=None,
                 source_revision_state="git_unavailable",
@@ -1126,7 +1126,7 @@ def test_build_pipeline_runner_allows_forensic_grade_with_exact_replay_and_sidec
     (bronze_day / "batch_2026-01-01_demo.jsonl.zst").write_bytes(b"snapshot-bytes")
 
     with patch(
-        "bioetl.composition.runtime_builders.run_manifest_builder.get_code_revision_provenance",
+        "bioetl.composition.runtime_builders._run_manifest_builder_policy.get_code_revision_provenance",
         return_value=SimpleNamespace(
             git_commit="deadbeef" * 5,
             source_revision_state="clean",
@@ -1187,7 +1187,7 @@ def test_build_pipeline_runner_promotes_supported_exact_replay_to_family_default
     (bronze_day / "batch_2026-01-01_demo.jsonl.zst").write_bytes(b"snapshot-bytes")
 
     with patch(
-        "bioetl.composition.runtime_builders.run_manifest_builder.get_code_revision_provenance",
+        "bioetl.composition.runtime_builders._run_manifest_builder_policy.get_code_revision_provenance",
         return_value=SimpleNamespace(
             git_commit="deadbeef" * 5,
             source_revision_state="clean",

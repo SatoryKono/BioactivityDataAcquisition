@@ -84,7 +84,7 @@ Done:
 Validation run:
 - targeted unit suites: green
 - `tests/architecture/test_domain_unit_test_purity.py`: green
-- `scripts/docs/check_doc_links.py`: green
+- `python -m scripts.docs check-links`: green
 
 Scope intentionally stayed narrow:
 - no runtime behavior changes
