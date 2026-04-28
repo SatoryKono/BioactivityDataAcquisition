@@ -141,8 +141,7 @@ Set `CODEX_SKIP_MCP_SETUP=1` only when you intentionally want to launch Codex wi
 
 The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`
 for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the
-canonical diagnostics entrypoints that the `scripts/ops/launchers/codex/*`
-compatibility wrappers delegate to.
+canonical diagnostics entrypoints.
 
 ## 🐧 Requirements
 

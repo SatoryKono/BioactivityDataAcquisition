@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
+
+FIXED_TEST_TIME = datetime(2026, 4, 28, 12, 0, tzinfo=UTC)
 
 
 class FixedClock:
@@ -30,4 +32,9 @@ class StepClock:
         return current
 
 
-__all__ = ["FixedClock", "StepClock"]
+def fixed_test_clock() -> FixedClock:
+    """Return the canonical deterministic clock shared across unit suites."""
+    return FixedClock(FIXED_TEST_TIME)
+
+
+__all__ = ["FIXED_TEST_TIME", "FixedClock", "StepClock", "fixed_test_clock"]

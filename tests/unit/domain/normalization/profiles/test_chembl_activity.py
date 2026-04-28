@@ -89,6 +89,7 @@ def test_chembl_activity_bao_identifier_rules_are_profile_visible() -> None:
 def test_chembl_activity_qudt_units_has_explicit_unit_normalization_rule() -> None:
     qudt_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("qudt_units")
     units_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("units")
+    standard_units_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("standard_units")
 
     assert qudt_rule is not None
     assert qudt_rule.normalizer(" uM ") == "µM"
@@ -99,6 +100,9 @@ def test_chembl_activity_qudt_units_has_explicit_unit_normalization_rule() -> No
     assert units_rule is not None
     assert units_rule.normalizer(" μM ") == "µM"
     assert "Canonicalize units" in (units_rule.notes or "")
+    assert standard_units_rule is not None
+    assert standard_units_rule.normalizer(" uM ") == "µM"
+    assert "Canonicalize units" in (standard_units_rule.notes or "")
 
 
 def test_chembl_activity_target_organism_uses_curated_organism_normalizer() -> None:

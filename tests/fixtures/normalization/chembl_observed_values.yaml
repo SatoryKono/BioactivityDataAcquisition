@@ -87,6 +87,10 @@ observed_values:
       - Membrane
       - Nucleus
       - Cytoplasm
+    assay_subcellular_fraction_raw:
+      - Membrane
+      - Nucleus
+      - Cytoplasm
     assay_classifications:
       - '[{"level":"A"},{"level":"B"}]'
     assay_parameters:
@@ -103,6 +107,10 @@ observed_values:
       - IC50
       - "% Inhibition"
     type:
+      - conc
+      - TEMP
+      - ph
+    type_raw:
       - conc
       - TEMP
       - ph
@@ -149,6 +157,22 @@ observed_values:
       - SEQ
       - BOTH
       - NONE
+    first_in_class:
+      - -1
+      - 0
+      - 1
+    inorganic_flag:
+      - -1
+      - 0
+      - 1
+    natural_product:
+      - -1
+      - 0
+      - 1
+    prodrug:
+      - -1
+      - 0
+      - 1
   target:
     target_type:
       - SINGLE PROTEIN
@@ -156,6 +180,12 @@ observed_values:
       - PROTEIN COMPLEX
       - CELL-LINE
       - UNKNOWN
+    component_types:
+      - '["PROTEIN"]'
+      - '["PROTEIN","DNA"]'
+    component_relationships:
+      - '["SINGLE PROTEIN"]'
+      - '["PROTEIN SUBUNIT","RNA"]'
   target_component:
     component_type:
       - PROTEIN
@@ -192,6 +222,11 @@ observed_values:
       - patent
       - dataset
       - book
+    publication_type_raw:
+      - PUBLICATION
+      - PATENT
+      - DATASET
+      - BOOK
     is_oa:
       - "1"
       - "0"
@@ -199,6 +234,11 @@ observed_values:
       - N
       - "true"
       - "false"
+    oa_status:
+      - gold
+      - green
+      - hybrid
+      - closed
     authors:
       - '["Alice Smith","Bob Jones"]'
     affiliation_list:
@@ -306,13 +346,28 @@ unexpected_observed_values:
       - input: Novelus specius
         expected: Novelus specius
   assay_parameters:
+    type:
+      - input: rfu
+        expected: RFU
     units:
       - input: RFU
         expected: RFU
+  assay:
+    assay_subcellular_fraction:
+      - input: Peroxisome
+        expected: Peroxisome
+  subcellular_fraction:
+    subcellular_fraction:
+      - input: Peroxisome
+        expected: Peroxisome
   target_component:
     accession:
       - input: ENSP00000354587
         expected: ENSP00000354587
+  publication:
+    oa_status:
+      - input: purple
+        expected: purple
   cell_line:
     cellosaurus_id:
       - input: HE-LA
@@ -334,6 +389,18 @@ negative_values:
       - input: "{not json}"
         expected: null
   molecule:
+    first_in_class:
+      - input: 2
+        expected: null
+    inorganic_flag:
+      - input: 2
+        expected: null
+    natural_product:
+      - input: 2
+        expected: null
+    prodrug:
+      - input: 2
+        expected: null
     ro3_pass:
       - input: MAYBE
         expected: null

@@ -12,11 +12,11 @@ Stable commands:
     wsl-proxy          Start WSL proxy helper
     codex              Launch Codex via repo-local bootstrap adapter (shell)
     codex-exec         Launch Codex full-auto via repo-local bootstrap adapter (shell)
-    codex-headless     Launch Codex without MCP servers via canonical wrapper (shell)
-    diagnose-codex-wsl Run Codex WSL diagnostics via canonical wrapper (shell)
-    setup-agents       Sync Codex agents via canonical wrapper
+    codex-headless     Launch Codex without MCP servers (canonical shell)
+    diagnose-codex-wsl Run Codex WSL diagnostics (canonical shell)
+    setup-agents       Sync Codex agents (canonical shell)
     setup-plugins      Setup plugins via ops bootstrap helper (shell)
-    setup-skills       Sync Codex skills via canonical wrapper
+    setup-skills       Sync Codex skills (canonical shell)
     check-skills       Check AI skills layout (shell)
     check-mirror       Check skills mirror sync (shell)
     deploy             Deploy BioETL (shell)

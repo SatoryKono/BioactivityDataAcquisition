@@ -61,6 +61,8 @@ from bioetl.domain.normalization.profiles._chembl_policy_registry import (
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_json_string,
+    normalize_profile_target_component_relationships,
+    normalize_profile_target_component_types,
     normalize_profile_json_string_strict,
     normalize_profile_passthrough,
 )
@@ -404,14 +406,14 @@ def _controlled_vocabulary_source(
     normalizer_name: str,
     notes: str,
 ) -> str:
+    configured_source = ENUM_CONFIG_SOURCES.get((provider, entity, field_name))
+    if configured_source is not None:
+        return configured_source
+
     if provider == "chembl":
         policy_surface = chembl_policy_surface(entity, field_name)
         if policy_surface is not None:
             return policy_surface.registry_source
-
-    configured_source = ENUM_CONFIG_SOURCES.get((provider, entity, field_name))
-    if configured_source is not None:
-        return configured_source
 
     normalized_notes = notes.casefold()
     if "enum field" in normalized_notes or "allowed values" in normalized_notes:
@@ -658,6 +660,8 @@ def _strictness_category_match(
         or "ontology_id" in normalizer_name
     ):
         return "canonical_ontology_id"
+    if "reviewed_flag_code" in normalizer_name or "flag-like provider code" in normalized_notes:
+        return "strict_flag"
     if "cellosaurus" in normalizer_name or "identifier" in normalized_notes:
         return "canonical_identifier"
     return None
@@ -1718,12 +1722,19 @@ def _normalizer_regression(location: str, rule: Any) -> str:
 
 def _is_json_string_normalizer(rule: Any) -> bool:
     """Return whether a rule uses the effective JSON-string normalizer family."""
+    normalizer_name = getattr(rule.normalizer, "__name__", "")
+    normalized_notes = str(getattr(rule, "notes", "")).casefold()
     return (
         rule.normalizer is normalize_profile_json_string
-        or getattr(rule.normalizer, "__name__", "") == "normalize_profile_json_string"
+        or normalizer_name == "normalize_profile_json_string"
         or rule.normalizer is normalize_profile_json_string_strict
-        or getattr(rule.normalizer, "__name__", "")
-        == "normalize_profile_json_string_strict"
+        or normalizer_name == "normalize_profile_json_string_strict"
+        or rule.normalizer is normalize_profile_target_component_types
+        or normalizer_name == "normalize_profile_target_component_types"
+        or rule.normalizer is normalize_profile_target_component_relationships
+        or normalizer_name == "normalize_profile_target_component_relationships"
+        or normalizer_name == "normalize_profile_json_string_list_vocabulary_strict"
+        or "canonical json array" in normalized_notes
     )
 
 

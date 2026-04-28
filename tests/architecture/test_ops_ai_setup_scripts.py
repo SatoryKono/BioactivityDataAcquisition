@@ -45,18 +45,19 @@ def test_setup_skills_dry_run_includes_paired_agent_sync_by_default(
     assert "py-test-bot.md" in result.stdout
 
 
-def test_ops_setup_wrappers_delegate_to_canonical_codex_scripts() -> None:
-    """Ops launcher wrappers should remain thin delegates to canonical targets."""
+def test_ops_router_dispatches_setup_commands_to_canonical_codex_scripts() -> None:
+    """scripts.ops should expose setup commands through canonical Codex targets."""
     root = repo_root()
-    setup_agents_wrapper = (
-        root / "scripts" / "ops" / "launchers" / "codex" / "setup_agents.sh"
-    ).read_text(encoding="utf-8")
-    setup_skills_wrapper = (
-        root / "scripts" / "ops" / "launchers" / "codex" / "setup_skills.sh"
-    ).read_text(encoding="utf-8")
+    ops_router = (root / "scripts" / "ops" / "__main__.py").read_text(encoding="utf-8")
 
-    assert 'scripts/ai/codex/setup_agents.sh' in setup_agents_wrapper
-    assert 'scripts/ai/codex/setup_skills.sh' in setup_skills_wrapper
+    assert "../ai/codex/setup_agents.sh" in ops_router
+    assert "../ai/codex/setup_skills.sh" in ops_router
+    assert not (
+        root / "scripts" / "ops" / "launchers" / "codex" / "setup_agents.sh"
+    ).exists()
+    assert not (
+        root / "scripts" / "ops" / "launchers" / "codex" / "setup_skills.sh"
+    ).exists()
 
 
 def test_setup_plugins_uses_repo_root_from_ops_directory() -> None:

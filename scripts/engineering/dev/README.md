@@ -201,8 +201,6 @@ python -m scripts.engineering.dev <command> [args...]
 | `scripts/engineering/dev/run_pytest_sharded.sh`              | Run the recommended path-based pytest shard plan (shell variant)                          |
 | `scripts/engineering/dev/quality_gate_probe.py`              | Diagnose narrow pytest/mypy startup latency and timeout behavior                          |
 | `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock `/ops/quarantine/*` endpoints for Silver Reject Explorer smoke checks          |
-| `scripts/engineering/dev/setup_copilot_codex_mcp.sh`         | Compatibility transport wrapper that dispatches directly to `scripts/ai/codex/setup_mcp.py` |
-| `scripts/engineering/dev/setup_copilot_codex_mcp.ps1`        | Compatibility transport wrapper that dispatches directly to `scripts/ai/codex/setup_mcp.py` |
 | `scripts/engineering/dev/setup_env_windows.ps1`              | Create/update the stable Windows virtualenv at `.venv-win`                                |
 | `scripts/engineering/dev/setup_env_wsl.sh`                   | Create/update the stable WSL virtualenv outside the repo (default: `$HOME/.venvs/bioetl`) |
 | `scripts/engineering/dev/.wsl-vpn-fix.ps1`                   | Recover Windows-side VPN proxy settings for WSL interoperability                          |

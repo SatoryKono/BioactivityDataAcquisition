@@ -85,6 +85,10 @@ class AssaySchema(ETLRecordSchema):
     assay_cell_type: Series[str] | None = pa.Field(
         nullable=True, description="Cell type."
     )
+    assay_subcellular_fraction_raw: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Raw provider subcellular-fraction lexeme before canonical normalization.",
+    )
     assay_subcellular_fraction: Series[str] | None = pa.Field(
         nullable=True, description="Subcellular fraction."
     )

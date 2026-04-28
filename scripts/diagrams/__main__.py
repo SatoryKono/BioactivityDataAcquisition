@@ -31,7 +31,7 @@ Fix:
 
 Render:
     docs-agent           Run full diagram docs pipeline
-    render-pdf           Refresh architecture Markdown bundle (legacy entrypoint)
+    render-pdf           Refresh architecture Markdown bundle
     render-pdf-desc      Generate PDF with descriptions
     render-docx          Generate DOCX with descriptions
     render-views         Refresh views Markdown bundle

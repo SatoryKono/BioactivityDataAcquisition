@@ -300,9 +300,7 @@ def _score_layer_consistency(summary: JsonDict) -> _ScoreCard:
     if summary.get("config_hash") == summary.get("resolved_config_hash"):
         evidence.append("legacy_config_hash_alias_matches_resolved_hash")
     elif summary.get("config_hash") and summary.get("resolved_config_hash"):
-        score -= 1
         evidence.append("legacy_config_hash_alias_semantics_ambiguous")
-        blockers.append("legacy_config_hash_alias_semantics_ambiguous")
     if summary.get("resolved_config_hash") and summary.get("effective_config_hash"):
         evidence.append("resolved_and_effective_hashes_exposed")
     else:

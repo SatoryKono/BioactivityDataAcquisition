@@ -70,24 +70,15 @@ def test_views_toc_is_grouped_by_parent_family() -> None:
     )
 
 
-def test_architecture_bundle_wrapper_delegates_to_canonical_generator() -> None:
-    content = Path("scripts/diagrams/generate_architecture_bundle.py").read_text(
-        encoding="utf-8"
-    )
+def test_diagrams_router_exposes_collection_specific_bundle_commands() -> None:
+    content = Path("scripts/diagrams/__main__.py").read_text(encoding="utf-8")
 
-    assert "Compatibility wrapper" in content
-    assert "generate_all_bundles.py --collection architecture" in content
-    assert 'canonical_main(["--collection", "architecture"])' in content
-
-
-def test_views_bundle_wrapper_delegates_to_canonical_generator() -> None:
-    content = Path("scripts/diagrams/generate_views_bundle.py").read_text(
-        encoding="utf-8"
-    )
-
-    assert "Compatibility wrapper" in content
-    assert "generate_all_bundles.py --collection views" in content
-    assert 'canonical_main(["--collection", "views"])' in content
+    assert '"render-pdf"' in content
+    assert '"generate_all_bundles.py", "--collection", "architecture"' in content
+    assert '"render-views"' in content
+    assert '"generate_all_bundles.py", "--collection", "views"' in content
+    assert not Path("scripts/diagrams/generate_architecture_bundle.py").exists()
+    assert not Path("scripts/diagrams/generate_views_bundle.py").exists()
 
 
 def test_bundle_generator_prefers_svg_embed_over_png(tmp_path: Path) -> None:

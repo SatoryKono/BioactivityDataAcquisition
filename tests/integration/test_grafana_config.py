@@ -131,11 +131,22 @@ def _load_logging_helpers() -> tuple[Any, Any]:
     return configure_logging, UnifiedLogger
 
 
+def _walk_panels(panels: list[dict]) -> list[dict]:
+    """Flatten dashboard panels, including row-contained nested panels."""
+    flattened: list[dict] = []
+    for panel in panels:
+        flattened.append(panel)
+        nested = panel.get("panels", [])
+        if isinstance(nested, list):
+            flattened.extend(_walk_panels(nested))
+    return flattened
+
+
 def get_dashboard_panels(dashboard: dict) -> list[dict]:
     """Get all panels, including nested row panels."""
-    panels = list(dashboard.get("panels", []))
+    panels = _walk_panels(list(dashboard.get("panels", [])))
     for row in dashboard.get("rows", []):
-        panels.extend(row.get("panels", []))
+        panels.extend(_walk_panels(row.get("panels", [])))
     return panels
 
 
@@ -1013,6 +1024,62 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
     )
 
 
+def test_runtime_dashboard_keeps_loki_log_hygiene_in_collapsed_tracing_row() -> None:
+    """Runtime should stay Prometheus-first when tracing datasources are disabled."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    row_panel = next(
+        (
+            panel
+            for panel in dashboard.get("panels", [])
+            if panel.get("title")
+            == "Tracing-only Log Hygiene (requires optional tracing profile)"
+        ),
+        None,
+    )
+    assert row_panel is not None, (
+        "Runtime dashboard must group Loki-only panels under an explicit tracing row"
+    )
+    assert row_panel.get("type") == "row"
+    assert row_panel.get("collapsed") is True, (
+        "Tracing-only log hygiene row must stay collapsed by default"
+    )
+    nested_titles = {
+        panel.get("title")
+        for panel in row_panel.get("panels", [])
+        if isinstance(panel.get("title"), str)
+    }
+    assert nested_titles == {
+        "Warnings",
+        "Unstructured Logs",
+        "Top Warning Events",
+        "Log Hygiene Trend",
+    }
+
+
+def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
+    """Runtime dashboard should explain the tracing-off degradation path."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    description = dashboard.get("description", "")
+    assert "Prometheus-first" in description
+    assert "optional tracing profile" in description
+
+    note_panel = next(
+        (
+            panel
+            for panel in dashboard.get("panels", [])
+            if panel.get("title") == "Tracing Mode Note"
+        ),
+        None,
+    )
+    assert note_panel is not None, (
+        "Runtime dashboard must expose a tracing-mode guidance note"
+    )
+    content = note_panel.get("options", {}).get("content", "")
+    assert "Prometheus-first mode" in content
+    assert "Tracing-only Log Hygiene" in content
+    assert "Overview, Control Plane, and Data Quality" in content
+
+
 def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     all_expressions = "\n".join(get_panel_expressions(dashboard))
@@ -1135,7 +1202,9 @@ def test_silver_filter_reject_rate_uses_selected_time_range() -> None:
     )
 
 
-def test_pipeline_error_rate_uses_runtime_error_metric_and_selected_time_range() -> None:
+def test_pipeline_error_rate_uses_runtime_error_metric_and_selected_time_range() -> (
+    None
+):
     """Pipeline error rate must use bounded runtime errors over the active range."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-overview-v2.json"))
     panel = next(
@@ -1164,7 +1233,9 @@ def test_pipeline_error_rate_uses_runtime_error_metric_and_selected_time_range()
     )
 
 
-def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_time_range() -> None:
+def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_time_range() -> (
+    None
+):
     """Runtime Pipeline Errors must use shipped runtime errors over the active range."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     panel = next(
@@ -1187,6 +1258,44 @@ def test_runtime_pipeline_errors_panel_uses_runtime_error_metric_and_selected_ti
     )
     assert any("[$__range]" in expr for expr in expressions), (
         "Pipeline Errors must use the selected Grafana time range"
+    )
+
+
+def test_runtime_pipeline_error_code_breakdown_uses_bounded_runtime_error_metric() -> (
+    None
+):
+    """Top Pipeline Error Codes must stay on bounded runtime error labels."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    panel = next(
+        (
+            item
+            for item in get_dashboard_panels(dashboard)
+            if item.get("title") == "Top Pipeline Error Codes"
+        ),
+        None,
+    )
+    assert panel is not None, "Panel 'Top Pipeline Error Codes' not found"
+
+    targets = [
+        target for target in panel.get("targets", []) if isinstance(target, dict)
+    ]
+    assert targets, "Panel 'Top Pipeline Error Codes' must define a query target"
+    expressions = [
+        target.get("expr", "")
+        for target in targets
+        if isinstance(target.get("expr"), str)
+    ]
+    assert any("bioetl_errors_total" in expr for expr in expressions), (
+        "Top Pipeline Error Codes must use bioetl_errors_total"
+    )
+    assert any("by (error_code)" in expr for expr in expressions), (
+        "Top Pipeline Error Codes must group by error_code"
+    )
+    assert any("[$__range]" in expr for expr in expressions), (
+        "Top Pipeline Error Codes must use the selected Grafana time range"
+    )
+    assert all(target.get("instant") is True for target in targets), (
+        "Top Pipeline Error Codes must use instant Prometheus queries"
     )
 
 
@@ -1345,6 +1454,7 @@ def test_runtime_and_control_plane_operator_panels_use_active_time_windows(
         ("bioetl-runtime.json", "Memory Pressure Active"),
         ("bioetl-runtime.json", "Global Control-plane Lookup p95"),
         ("bioetl-runtime.json", "Top Warning Events"),
+        ("bioetl-runtime.json", "Top Pipeline Error Codes"),
         ("bioetl-runtime.json", "Trace-enabled Runs"),
     ],
 )
@@ -1519,6 +1629,11 @@ def test_silver_filter_rejects_summary_panels_use_instant_queries(
             "bioetl-runtime.json",
             "Top Warning Events",
             'label_replace(vector(0), "event", "none", "", "")',
+        ),
+        (
+            "bioetl-runtime.json",
+            "Top Pipeline Error Codes",
+            'label_replace(vector(0), "error_code", "none", "", "")',
         ),
         (
             "bioetl-dq-v2.json",
@@ -1814,6 +1929,32 @@ def test_overview_and_runtime_dashboards_expose_data_quality_handoff() -> None:
         )
 
 
+def test_runtime_and_dq_dashboards_expose_control_plane_handoff() -> None:
+    """Runtime and DQ should offer an explicit handoff into control-plane triage."""
+    expectations = (
+        "bioetl-runtime.json",
+        "bioetl-dq-v2.json",
+    )
+
+    for dashboard_name in expectations:
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        titles = {
+            link.get("title")
+            for link in dashboard.get("links", [])
+            if link.get("title")
+        }
+        urls = [link.get("url", "") for link in dashboard.get("links", [])]
+
+        assert "Control Plane v1" in titles, (
+            f"{dashboard_name} must expose a Control Plane dashboard handoff"
+        )
+        assert any(
+            url == "/d/bioetl-control-plane-v1/bioetl-control-plane-v1" for url in urls
+        ), (
+            f"{dashboard_name} Control Plane handoff must target /d/bioetl-control-plane-v1/bioetl-control-plane-v1"
+        )
+
+
 def test_data_quality_dashboard_exposes_silver_reject_explorer_handoff() -> None:
     """Data Quality dashboard should expose an explicit handoff to Silver explorer."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
@@ -1840,6 +1981,88 @@ def test_data_quality_dashboard_exposes_silver_reject_explorer_handoff() -> None
         "Data Quality handoff must not pass Prometheus variables into "
         "Silver Reject Explorer"
     )
+
+
+def test_runtime_incident_panels_link_to_control_plane_dashboard() -> None:
+    """Runtime incident panels should hand off directly into control-plane triage."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    expectations = {
+        "Control-plane Alert Conditions": "Open Control Plane v1 (manifest/checkpoint)",
+        "No-Records Processed Runs": "Open Control Plane v1 (checkpoint/replay)",
+        "Replay Not Reconstructable": "Open Control Plane v1 (replay/lineage)",
+    }
+
+    for panel_title, expected_link_title in expectations.items():
+        panel = next(
+            (
+                item
+                for item in get_dashboard_panels(dashboard)
+                if item.get("title") == panel_title
+            ),
+            None,
+        )
+        assert panel is not None, (
+            f"Panel '{panel_title}' not found in bioetl-runtime.json"
+        )
+        data_links = panel.get("options", {}).get("dataLinks", [])
+        link = next(
+            (item for item in data_links if item.get("title") == expected_link_title),
+            None,
+        )
+        assert link is not None, (
+            f"Panel '{panel_title}' must expose control-plane incident handoff"
+        )
+        url = link.get("url", "")
+        assert url.startswith("/d/bioetl-control-plane-v1/bioetl-control-plane-v1"), (
+            f"Panel '{panel_title}' must hand off into control-plane dashboard"
+        )
+        assert "from=${__from}" in url and "to=${__to}" in url, (
+            f"Panel '{panel_title}' handoff must preserve current time range"
+        )
+        assert "var-pipeline=$pipeline" in url and "var-run_type=$run_type" in url, (
+            f"Panel '{panel_title}' handoff must preserve runtime pipeline scope"
+        )
+
+
+def test_data_quality_incident_panels_link_to_control_plane_dashboard() -> None:
+    """DQ panels should link into control-plane investigation for replay/lineage paths."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
+    expectations = {
+        "Data Flow in Range: Bronze -> Silver -> Gold": "Open Control Plane v1 (replay/checkpoint)",
+        "Lineage Refs Missing": "Open Control Plane v1 (lineage/traceability)",
+        "Gold Strict Validation Failures": "Open Control Plane v1 (gold hard-fail context)",
+    }
+
+    for panel_title, expected_link_title in expectations.items():
+        panel = next(
+            (
+                item
+                for item in get_dashboard_panels(dashboard)
+                if item.get("title") == panel_title
+            ),
+            None,
+        )
+        assert panel is not None, (
+            f"Panel '{panel_title}' not found in bioetl-dq-v2.json"
+        )
+        data_links = panel.get("options", {}).get("dataLinks", [])
+        link = next(
+            (item for item in data_links if item.get("title") == expected_link_title),
+            None,
+        )
+        assert link is not None, (
+            f"Panel '{panel_title}' must expose control-plane incident handoff"
+        )
+        url = link.get("url", "")
+        assert url.startswith("/d/bioetl-control-plane-v1/bioetl-control-plane-v1"), (
+            f"Panel '{panel_title}' must hand off into control-plane dashboard"
+        )
+        assert "from=${__from}" in url and "to=${__to}" in url, (
+            f"Panel '{panel_title}' handoff must preserve current time range"
+        )
+        assert "var-pipeline=$pipeline" in url and "var-run_type=$run_type" in url, (
+            f"Panel '{panel_title}' handoff must preserve DQ pipeline scope"
+        )
 
 
 def test_silver_reject_explorer_record_level_panels_do_not_use_prometheus() -> None:

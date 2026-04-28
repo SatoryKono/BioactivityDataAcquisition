@@ -84,6 +84,16 @@ DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
                 "chembl_protein_class.downgraded",
             ),
         ),
+        ChemblStrictScalarFamily(
+            family_name="provider_code_flags",
+            invalid_value_mode="coerce_reviewed_flag_provider_codes",
+            fields=(
+                "chembl_molecule.first_in_class",
+                "chembl_molecule.inorganic_flag",
+                "chembl_molecule.natural_product",
+                "chembl_molecule.prodrug",
+            ),
+        ),
     ),
     controlled_vocabularies=(
         ChemblControlledVocabularyFamily(
@@ -91,6 +101,7 @@ DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
             invalid_value_mode="preserve_unknown_lexeme",
             fields=(
                 "chembl_activity.units",
+                "chembl_activity.standard_units",
                 "chembl_activity.qudt_units",
                 "chembl_assay_parameters.units",
                 "chembl_assay_parameters.standard_units",
@@ -108,6 +119,16 @@ DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
             family_name="assay_parameter_types",
             invalid_value_mode="preserve_unknown_uppercase_lexeme",
             fields=("chembl_assay_parameters.type",),
+        ),
+        ChemblControlledVocabularyFamily(
+            family_name="assay_categories",
+            invalid_value_mode="reject_unknown_lexeme",
+            fields=("chembl_assay.assay_category",),
+        ),
+        ChemblControlledVocabularyFamily(
+            family_name="assay_confidence_descriptions",
+            invalid_value_mode="reject_unknown_lexeme",
+            fields=("chembl_assay.confidence_description",),
         ),
         ChemblControlledVocabularyFamily(
             family_name="target_component_types",

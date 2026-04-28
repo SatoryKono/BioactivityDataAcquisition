@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from bioetl.application.runtime_clock import RuntimeClock
 from bioetl.domain.composite.result import (
     DependencyResult,
     EnrichmentResult,
@@ -98,7 +99,7 @@ class CompositeRunnerDependencyGroup:
     observer: CompositeLifecycleObserverService | None = None
     manifest_id: str | None = None
     run_ledger_service: RunLedgerService | None = None
-    clock: ClockPort | None = None
+    clock: ClockPort = field(default_factory=RuntimeClock)
 
 
 CompositeRunnerDependencies = CompositeRunnerDependencyGroup

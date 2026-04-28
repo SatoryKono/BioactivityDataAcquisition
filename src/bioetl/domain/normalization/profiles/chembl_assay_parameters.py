@@ -72,6 +72,11 @@ _TYPE_RULE = (
 
 
 _SPECIAL_RULE_COMPONENTS = {
+    "type_raw": (
+        normalize_profile_text,
+        "Preserve the raw assay-parameter type provider lexeme as trimmed text "
+        "before canonical controlled-vocabulary normalization.",
+    ),
     "comments": (
         normalize_profile_text,
         "Normalize assay parameter comments as plain text; comments are not JSON-canonicalized by default.",

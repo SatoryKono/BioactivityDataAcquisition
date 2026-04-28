@@ -107,6 +107,7 @@ def test_chembl_policy_registry_configs_cover_declared_policy_fields() -> None:
     assert "chembl_assay_parameters.type" in controlled_fields
     assert "chembl_publication.is_oa" in strict_boolean_fields
     assert "chembl_activity.standard_flag" in strict_flag_fields
+    assert "chembl_molecule.inorganic_flag" in strict_flag_fields
     assert "chembl_activity.bao_format" in ontology_fields
     assert "chembl_cell_line.cellosaurus_id" in ontology_fields
     assert "chembl_cell_line.clo_id" in ontology_fields
@@ -120,11 +121,15 @@ def test_chembl_policy_registry_exposes_profile_authoring_field_sets() -> None:
         {"standard_flag", "potential_duplicate", "manual_curation_flag"}
     )
     assert chembl_controlled_family_fields("units", entity="activity") == frozenset(
-        {"units", "qudt_units"}
+        {"units", "standard_units", "qudt_units"}
     )
     assert chembl_controlled_family_fields(
         "units", entity="assay_parameters"
     ) == frozenset({"units", "standard_units"})
+    assert chembl_flag_family_fields(
+        "provider_code_flags",
+        entity="molecule",
+    ) == frozenset({"first_in_class", "inorganic_flag", "natural_product", "prodrug"})
     assert chembl_controlled_family_fields(
         "operators", entity="assay_parameters"
     ) == frozenset({"relation"})

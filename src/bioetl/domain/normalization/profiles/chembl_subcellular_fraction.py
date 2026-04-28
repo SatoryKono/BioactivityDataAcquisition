@@ -10,6 +10,7 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_governed_vocabulary,
+    normalize_profile_text,
     normalize_profile_title,
 )
 from bioetl.domain.schemas.chembl.subcellular_fraction import (
@@ -50,6 +51,11 @@ CHEMBL_SUBCELLULAR_FRACTION_PROFILE = build_standard_profile(
     title_fields=_TITLE_FIELDS,
     int_fields=_INT_FIELDS,
     special_rules={
+        "subcellular_fraction_raw": (
+            normalize_profile_text,
+            "Preserve the raw subcellular_fraction provider lexeme as trimmed text "
+            "before canonical controlled-vocabulary normalization.",
+        ),
         "subcellular_fraction": (
             lambda value: normalize_profile_governed_vocabulary(
                 normalize_profile_title(value),
@@ -58,7 +64,8 @@ CHEMBL_SUBCELLULAR_FRACTION_PROFILE = build_standard_profile(
             ),
             "Normalize subcellular_fraction against the shared ChEMBL "
             "subcellular-fraction vocabulary while preserving unknown observed "
-            "lexemes for review.",
+            "lexemes for review; the provider-native lexeme is retained "
+            "separately in subcellular_fraction_raw.",
         ),
     },
     null_fields=chembl_pseudo_null_fields("subcellular_fraction"),

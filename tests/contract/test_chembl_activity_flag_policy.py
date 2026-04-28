@@ -57,3 +57,23 @@ def test_activity_flag_fields_align_profile_schema_and_dq(
     assert dq_rule.min_value == 0
     assert dq_rule.max_value == 1
     assert dq_rule.nullable is nullable
+
+
+def test_activity_ontology_bundles_publish_mapped_bundle_requirements() -> None:
+    dq_config = DQConfigLoader(Path("configs")).load("chembl", "activity")
+
+    conditional_names = {rule.name for rule in dq_config.conditional_validations}
+    cross_names = {rule.name for rule in dq_config.cross_field_validations}
+
+    assert {
+        "bao_endpoint_requires_mapping_status",
+        "bao_format_requires_mapping_status",
+        "uo_unit_requires_mapping_status",
+        "qudt_unit_requires_mapping_status",
+    } <= cross_names
+    assert {
+        "mapped_bao_endpoint_requires_bundle",
+        "mapped_bao_format_requires_bundle",
+        "mapped_uo_unit_requires_bundle",
+        "mapped_qudt_unit_requires_bundle",
+    } <= conditional_names

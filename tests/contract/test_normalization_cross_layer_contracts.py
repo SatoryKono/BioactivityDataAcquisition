@@ -711,6 +711,49 @@ def test_chembl_activity_business_and_set_like_fields_follow_profile_family_cont
     )
 
 
+def test_chembl_activity_standard_units_uses_the_same_unit_family_as_units() -> None:
+    processor = RecordNormalizationProcessor(provider="chembl", entity_type="activity")
+
+    standard_units_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("standard_units")
+    units_rule = CHEMBL_ACTIVITY_PROFILE.rule_for("units")
+
+    assert standard_units_rule is not None
+    assert units_rule is not None
+    assert standard_units_rule.normalizer(" uM ") == "µM"
+    assert units_rule.normalizer(" uM ") == "µM"
+
+    standard_units_row = _matrix_row("chembl_activity", "standard_units")
+    assert standard_units_row["normalizer"] == "normalize_profile_unit"
+    assert standard_units_row["strictness"] == "controlled_unit"
+
+    normalized = processor.normalize_business_data({"standard_units": " uM "})
+    assert normalized["standard_units"] == "µM"
+
+
+def test_chembl_publication_prefixed_identifiers_and_raw_type_are_schema_visible() -> (
+    None
+):
+    publication_doi_row = _matrix_row("chembl_publication", "publication_doi")
+    publication_pmid_row = _matrix_row("chembl_publication", "publication_pmid")
+    publication_type_raw_row = _matrix_row("chembl_publication", "publication_type_raw")
+
+    assert "domain_schema:present" in publication_doi_row["schema_coverage"]
+    assert "domain_schema:present" in publication_pmid_row["schema_coverage"]
+    assert "domain_schema:present" in publication_type_raw_row["schema_coverage"]
+
+
+def test_chembl_target_controlled_json_arrays_are_set_like_for_hash_contracts() -> None:
+    component_types_row = _matrix_row("chembl_target", "component_types")
+    component_relationships_row = _matrix_row(
+        "chembl_target", "component_relationships"
+    )
+
+    assert component_types_row["set_like"] == "true"
+    assert component_types_row["hash_ordering"] == "set_like"
+    assert component_relationships_row["set_like"] == "true"
+    assert component_relationships_row["hash_ordering"] == "set_like"
+
+
 def test_chembl_activity_set_like_json_fails_closed_on_malformed_payloads() -> None:
     """Malformed set-like JSON must still fail closed in strict ChEMBL activity fields."""
     processor = RecordNormalizationProcessor(provider="chembl", entity_type="activity")

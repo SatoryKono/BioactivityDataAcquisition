@@ -46,6 +46,7 @@ class AssayParameters(BaseEntity):
     assay_id: str
 
     # === Parameter Type (Optional, may be None if not provided by API) ===
+    type_raw: str | None = None
     type: str | None = None
 
     # === Raw Values (API-OPTIONAL) ===

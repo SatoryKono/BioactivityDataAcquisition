@@ -86,18 +86,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a convenience Windows launcher for the mixed WSL Codex bootstrap flow while operators still use batch entrypoints; prefer documented canonical setup commands for normal contributor workflows."
     },
-    "scripts/ops/launchers/codex/codex-headless.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a thin PowerShell launcher to scripts/ai/codex/headless.ps1 while Windows-side headless entrypoints still reference the scripts.ops path."
-    },
-    "scripts/ops/launchers/codex/diagnose-codex-wsl.bat": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a thin batch launcher to scripts/ai/codex/diagnose_wsl.bat while mixed Windows/WSL operator flows still reference the scripts.ops path."
-    },
     "scripts/ai/vibe/__main__.py": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",
@@ -464,11 +452,11 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded implementation helper for the historical MistrallVibe launcher stack; remove it when the remaining launcher flow is sunset."
     },
-    "scripts/ai/mistrallvibe/helper/setup-env.sh": {
+    "scripts/ai/mistrallvibe/launch-interactive.ps1": {
       "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
+      "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded MistrallVibe setup helper while environment bootstrap still depends on helper scripts; fold into the canonical setup path when the surface is simplified."
+      "next_step": "Retain only as a Windows-side convenience launcher that opens an interactive WSL terminal on the canonical scripts/ai/vibe/launch.sh surface; remove it once operators no longer need a dedicated interactive bridge."
     },
     "src/tools/neo4j_audit.py": {
       "owner": "@bioetl-platform",

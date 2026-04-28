@@ -37,6 +37,7 @@ class SubcellularFraction(BaseEntity):
     """
 
     # === Primary Key Field ===
+    subcellular_fraction_raw: str | None = None  # Raw provider lexeme if preserved
     subcellular_fraction: str  # Normalized subcellular fraction name
 
     # === Statistics (aggregated from source assays) ===

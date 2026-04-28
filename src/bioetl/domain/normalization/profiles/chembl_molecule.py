@@ -15,6 +15,7 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_canonical_smiles,
     normalize_profile_quasi_enum_numeric,
+    normalize_profile_reviewed_flag_code,
 )
 from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
 from bioetl.domain.schemas.constants import (
@@ -52,11 +53,7 @@ _INT_FIELDS = frozenset(
         "black_box_warning",
         "chirality",
         "dosed_ingredient",
-        "first_in_class",
-        "inorganic_flag",
-        "natural_product",
         "polymer_flag",
-        "prodrug",
         "aromatic_ring_count",
         "hba_count",
         "hbd_count",
@@ -104,6 +101,26 @@ _SPECIAL_RULES = {
         "Normalize max_phase as a reviewed quasi-enum numeric provider code; "
         "preserve canonical values including 0.5 and collapse out-of-universe "
         "inputs to None.",
+    ),
+    "first_in_class": (
+        normalize_profile_reviewed_flag_code,
+        "Normalize first_in_class as a reviewed flag-like provider code with "
+        "the canonical tri-state universe {-1, 0, 1}.",
+    ),
+    "inorganic_flag": (
+        normalize_profile_reviewed_flag_code,
+        "Normalize inorganic_flag as a reviewed flag-like provider code with "
+        "the canonical tri-state universe {-1, 0, 1}.",
+    ),
+    "natural_product": (
+        normalize_profile_reviewed_flag_code,
+        "Normalize natural_product as a reviewed flag-like provider code with "
+        "the canonical tri-state universe {-1, 0, 1}.",
+    ),
+    "prodrug": (
+        normalize_profile_reviewed_flag_code,
+        "Normalize prodrug as a reviewed flag-like provider code with the "
+        "canonical tri-state universe {-1, 0, 1}.",
     ),
 }
 

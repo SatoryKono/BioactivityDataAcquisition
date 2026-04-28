@@ -15,6 +15,7 @@ from bioetl.domain.schemas.common.publication_base import (
 from bioetl.domain.schemas.constants import (
     CHEMBL_ID_PATTERN,
     ISO_DATE_PATTERN,
+    OA_STATUS_VALUES,
     PUBLICATION_TYPES,
 )
 from bioetl.domain.validation import DOI_REGEX_PATTERN
@@ -60,6 +61,30 @@ class ChemblPublicationSchema(PublicationBaseSchema):
         nullable=False,
         isin=list(PUBLICATION_TYPES),
         description="Document type (unified field name).",
+    )
+    publication_type_raw: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Raw provider publication type retained before canonical taxonomy mapping.",
+    )
+    publication_doi: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=DOI_REGEX_PATTERN,
+        description="Publication DOI under the ChEMBL-prefixed compatibility contract.",
+    )
+    publication_pmid: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=r"^[1-9]\d{0,9}$",
+        description="Publication PMID under the ChEMBL-prefixed compatibility contract.",
+    )
+    publication_pmc_id: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=r"^PMC\d+$",
+        description="Publication PMC ID under the ChEMBL-prefixed compatibility contract.",
+    )
+    oa_status: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=OA_STATUS_VALUES,
+        description="Open-access status token retained for compatibility when present.",
     )
 
     # === System Fields ===

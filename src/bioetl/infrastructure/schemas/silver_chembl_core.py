@@ -48,6 +48,7 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field(
             "publication_type", pa.string(), nullable=False
         ),  # Unified: from doc_type
+        pa.field("publication_type_raw", pa.string()),
         pa.field(
             "publication_type_unified", pa.string()
         ),  # Level 3: "Journal Article", etc.
@@ -62,6 +63,7 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
             "language", pa.string()
         ),  # Not available from ChEMBL API (None values)
         pa.field("is_oa", pa.bool_()),  # Not available from ChEMBL API (None values)
+        pa.field("oa_status", pa.string()),
         pa.field("src_id", pa.int64()),
         # === Unified citation metrics ===
         pa.field("citations_received", pa.int64()),  # Unified: from citation_count
@@ -176,6 +178,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("assay_parameters", pa.string()),  # JSON string
         pa.field("assay_pref_name", pa.string()),
         pa.field("assay_strain", pa.string()),
+        pa.field("assay_subcellular_fraction_raw", pa.string()),
         pa.field("assay_subcellular_fraction", pa.string()),
         pa.field("assay_taxonomy_id", pa.int64()),
         pa.field("assay_test_type", pa.string()),
@@ -316,6 +319,7 @@ CHEMBL_SUBCELLULAR_FRACTION_SCHEMA = pa.schema(
         # === Business fields (alphabetical order) ===
         pa.field("assay_count", pa.int64()),  # Number of assays using this fraction
         pa.field("example_assay_id", pa.string()),  # Example assay ChEMBL ID
+        pa.field("subcellular_fraction_raw", pa.string()),
         pa.field("subcellular_fraction", pa.string()),  # Primary key - fraction name
         # === DQ_FIELDS_SUFFIX ===
         *build_silver_dq_suffix_fields(),

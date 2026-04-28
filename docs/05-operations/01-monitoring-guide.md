@@ -116,8 +116,14 @@ Pushgateway publication на завершении run. Это позволяет
 #### 2. 2. Runtime
 
 Смешанный runtime/ops surface для triage log hygiene и alert-condition сигналов.
+Dashboard теперь намеренно остаётся **Prometheus-first**: базовые summary,
+adaptive-memory и alert-condition панели должны быть usable даже без Loki/Tempo,
+а tracing-backed log hygiene вынесен в collapsed row `Tracing-only Log Hygiene
+(requires optional tracing profile)`.
 
 - **Warnings / Unstructured Logs**: range-based count structured warning logs и unstructured rows по текущему `$pipeline`.
+  Эти Loki-панели живут внутри collapsed tracing-only row и не считаются частью
+  обязательного base layout для режима без `tracing` profile.
 
 - **Pipeline / DQ / Control-plane / Provider / Freshness Alert Conditions**: Prometheus-backed stat panels, которые отражают те же условия, что и alert rules, но не притворяются real alert-state engine.
 
@@ -128,8 +134,19 @@ Pushgateway publication на завершении run. Это позволяет
 
 - **Log Hygiene Trend**: короткий timeseries-тренд warnings vs unstructured rows через `$__interval`.
 
-- **Drilldown**: dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` / `Explore Traces (Tempo, tracing profile)` и data links у `Log Hygiene Trend` ведут в Explore с тем же временным окном.
-  Для Tempo runtime surface использует TraceQL filter по текущим `$pipeline/$run_type`, а не пустой search.
+- **Drilldown**: dashboard links `Back to Overview`, `Control Plane v1`,
+  `Explore Logs (Loki, tracing profile)` / `Explore Traces (Tempo, tracing profile)` и data links у `Log Hygiene Trend` ведут в Explore с тем же временным окном.
+  Panels `Control-plane Alert Conditions`, `No-Records Processed Runs` и
+  `Replay Not Reconstructable` дополнительно дают прямой handoff в
+  `Control Plane v1`, чтобы checkpoint/replay/lineage incidents не требовали
+  ручного поиска следующего dashboard. Для Tempo runtime surface используется
+  TraceQL filter по текущим `$pipeline/$run_type`, а не пустой search.
+
+- **Tracing Mode Note**: верхняя note-панель прямо под `Runtime Scope`
+  напоминает, что без включённого `tracing` profile оператор должен опираться
+  на Prometheus-backed surfaces (`Overview`, `Control Plane`, `Data Quality`) и
+  разворачивать tracing-only row только в окружениях с реальными Loki/Tempo
+  datasource.
 
 - **DQ Context Failures (24h) / DQ Reports Skipped (24h) / DQ Reports Generated (24h)**:
   lifecycle counters для DQ reporting. Используйте их, когда нужно быстро
@@ -197,9 +214,13 @@ Pushgateway publication на завершении run. Это позволяет
   (сейчас это `PipelineContext.started_at`, который также прокидывается в
   `_ingestion_ts` runtime writes); lag интерпретируется как
   `time() - bioetl_data_freshness_seconds`.
-- **Drilldown**: dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` / `Explore Traces (Tempo, tracing profile)`
+- **Drilldown**: dashboard links `Back to Overview`, `Control Plane v1`,
+  `Explore Logs (Loki, tracing profile)` / `Explore Traces (Tempo, tracing profile)`
   и data links у `Data Flow in Range: Bronze -> Silver -> Gold` переводят расследование
   DQ incidents и freshness lag в Grafana Explore с тем же временным окном.
+  Для replay/checkpoint traceability panel `Data Flow in Range: Bronze -> Silver -> Gold`,
+  а также `Lineage Refs Missing` и `Gold Strict Validation Failures`, теперь
+  дают прямой handoff в `Control Plane v1`.
   Tempo handoff уже ограничен текущими `$pipeline/$run_type`.
 
 #### 5. 5. Silver Reject Explorer

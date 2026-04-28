@@ -19,7 +19,7 @@ from bioetl.domain.control_plane import (
     RunManifest,
     RunSourceRef,
 )
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunID
 from tests.helpers.control_plane import InMemoryRunLedgerStore
 from tests.unit.application.services.run_manifest_test_support import (
     VALID_CONFIG_HASH as _VALID_CONFIG_HASH,
@@ -171,8 +171,42 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
     summary_without_score = {
         key: value
         for key, value in summary.items()
-        if key != "reproducibility_audit_score"
+        if key
+        not in {
+            "reproducibility_audit_score",
+            "reproducibility_diagnostics",
+            "reproducibility_policy_assessment",
+        }
     }
+    assert summary["reproducibility_policy_assessment"] == {
+        "required_persistence_profile": "degraded_observable",
+        "replay_capability": "rebuild_only",
+        "strict_requirement_requested": False,
+        "strict_exact_replay_supported": True,
+        "required_profile_satisfied": True,
+        "blocking_gaps": [],
+        "snapshot_envelope": {
+            "source_count": 0,
+            "sources_with_snapshots": 0,
+            "any_input_snapshots": False,
+            "full_snapshot_envelope": False,
+            "require_full_snapshot_envelope": False,
+        },
+    }
+    assert (
+        summary["reproducibility_diagnostics"]["policy"]["required_persistence_profile"]
+        == "degraded_observable"
+    )
+    assert (
+        summary["reproducibility_diagnostics"]["policy"]["policy_assessment"]
+        == summary["reproducibility_policy_assessment"]
+    )
+    assert (
+        summary["reproducibility_diagnostics"]["semantic_identity"][
+            "execution_fingerprint"
+        ]
+        == manifest.execution_fingerprint
+    )
     assert summary_without_score == {
         "manifest_id": "manifest-diagnostics",
         "manifest_created_at": manifest.created_at.isoformat(),

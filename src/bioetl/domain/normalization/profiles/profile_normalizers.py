@@ -8,9 +8,7 @@ from bioetl.domain.normalization.chembl import (
     normalize_cellosaurus_id,
     normalize_chembl_organism_name,
 )
-from bioetl.domain.normalization.identifiers import (
-    normalize_ontology_id,
-)
+from bioetl.domain.normalization.identifiers import normalize_ontology_id
 from bioetl.domain.normalization.profiles._profile_activity_ontology_normalizers import (
     normalize_profile_activity_bao_endpoint_iri,
     normalize_profile_activity_bao_endpoint_mapping_status,
@@ -54,6 +52,10 @@ from bioetl.domain.normalization.rules import (
     normalize_unit,
 )
 from bioetl.domain.normalization.text import normalize_string
+from bioetl.domain.schemas.constants import (
+    TARGET_COMPONENT_RELATIONSHIPS,
+    TARGET_COMPONENT_TYPES,
+)
 
 __all__ = [
     "normalize_profile_abstract",
@@ -97,7 +99,10 @@ __all__ = [
     "normalize_profile_publication_type",
     "normalize_profile_publication_type_raw",
     "normalize_profile_quasi_enum_numeric",
+    "normalize_profile_reviewed_flag_code",
     "normalize_profile_smiles",
+    "normalize_profile_target_component_relationships",
+    "normalize_profile_target_component_types",
     "normalize_profile_text",
     "normalize_profile_title",
     "normalize_profile_unit",
@@ -105,14 +110,7 @@ __all__ = [
 
 
 def normalize_profile_null(value: object) -> object:
-    """Convert pseudo-null values to proper None in profile fields.
-
-    Args:
-        value: The value to check for null patterns
-
-    Returns:
-        None if value matches null patterns, original value otherwise
-    """
+    """Convert profile pseudo-null values to ``None``."""
     return normalize_null(value)
 
 
@@ -124,30 +122,26 @@ def normalize_profile_passthrough(value: object) -> object:
 def normalize_profile_case(
     value: object, *, allowed_values: frozenset[str] | None = None
 ) -> object:
-    """Normalize case for enum-like profile fields.
-
-    Args:
-        value: The value to normalize
-        allowed_values: Optional set of allowed values for validation
-
-    Returns:
-        Normalized uppercase value if valid, None otherwise
-    """
+    """Normalize case for enum-like profile fields."""
     return normalize_case(value, allowed_values)
 
 
 def normalize_profile_bao_identifier(value: object) -> object:
     """Normalize BAO identifier profile fields to canonical underscore form."""
-    if value is None or isinstance(value, str):
-        return normalize_bao_identifier(value)
-    return value
+    return (
+        normalize_bao_identifier(value)
+        if value is None or isinstance(value, str)
+        else value
+    )
 
 
 def normalize_profile_chembl_organism_name(value: object) -> object:
     """Normalize ChEMBL organism display-name fields."""
-    if value is None or isinstance(value, str):
-        return normalize_chembl_organism_name(value)
-    return value
+    return (
+        normalize_chembl_organism_name(value)
+        if value is None or isinstance(value, str)
+        else value
+    )
 
 
 def normalize_profile_operator(
@@ -159,40 +153,25 @@ def normalize_profile_operator(
 
 def normalize_profile_ontology_id(value: object) -> object:
     """Normalize ontology identifier fields to canonical prefix form."""
-    if not isinstance(value, str):
-        return value
-    return normalize_ontology_id(value)
+    return normalize_ontology_id(value) if isinstance(value, str) else value
 
 
 def normalize_profile_cellosaurus_id(value: object) -> object:
     """Normalize Cellosaurus identifiers to canonical ``CVCL_XXXX`` form."""
-    if value is None or isinstance(value, str):
-        return normalize_cellosaurus_id(value)
-    return value
+    return (
+        normalize_cellosaurus_id(value)
+        if value is None or isinstance(value, str)
+        else value
+    )
 
 
 def normalize_profile_unit(value: object) -> object:
-    """Canonicalize unit strings in profile fields.
-
-    Args:
-        value: The unit value to normalize
-
-    Returns:
-        Canonical unit string or None if invalid
-    """
+    """Canonicalize unit strings in profile fields."""
     return normalize_unit(value)
 
 
 def normalize_profile_enum(value: object, *, allowed_values: frozenset[str]) -> object:
-    """Normalize one enum-like profile field against allowed values.
-
-    Args:
-        value: The value to normalize
-        allowed_values: Frozenset of allowed enum values
-
-    Returns:
-        Normalized value if it's in allowed_values, None otherwise
-    """
+    """Normalize one enum-like profile field against allowed values."""
     if value is None:
         return None
     if isinstance(value, str):
@@ -207,10 +186,13 @@ def normalize_profile_mapping_status(
     if not isinstance(value, str):
         return None
     cleaned = normalize_string(value)
-    if cleaned is None:
-        return None
-    candidate = cleaned.casefold()
-    return candidate if candidate in allowed_values else None
+    return (
+        None
+        if cleaned is None
+        else (
+            candidate if (candidate := cleaned.casefold()) in allowed_values else None
+        )
+    )
 
 
 def normalize_profile_quasi_enum_numeric(
@@ -221,6 +203,15 @@ def normalize_profile_quasi_enum_numeric(
     if numeric is None or numeric not in allowed_values:
         return None
     return int(numeric) if numeric.is_integer() else numeric
+
+
+def normalize_profile_reviewed_flag_code(
+    value: object,
+    *,
+    allowed_values: tuple[float, ...] = (-1.0, 0.0, 1.0),
+) -> object:
+    """Normalize reviewed flag-like provider codes with tri-state semantics."""
+    return normalize_profile_quasi_enum_numeric(value, allowed_values=allowed_values)
 
 
 def _coerce_quasi_enum_numeric(value: object) -> float | None:
@@ -251,6 +242,22 @@ def normalize_profile_assay_parameter_type(
         value,
         allowed_values=allowed_values,
         preserve_unknown=True,
+    )
+
+
+def normalize_profile_target_component_types(value: object) -> object:
+    """Normalize target component-type arrays through the strict JSON vocab seam."""
+    return normalize_profile_json_string_list_vocabulary_strict(
+        value,
+        allowed_values=TARGET_COMPONENT_TYPES,
+    )
+
+
+def normalize_profile_target_component_relationships(value: object) -> object:
+    """Normalize target component-relationship arrays through the strict JSON seam."""
+    return normalize_profile_json_string_list_vocabulary_strict(
+        value,
+        allowed_values=TARGET_COMPONENT_RELATIONSHIPS,
     )
 
 

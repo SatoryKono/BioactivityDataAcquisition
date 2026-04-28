@@ -22,14 +22,6 @@ from bioetl.domain.control_plane.effective_config_artifact import (
     RuntimeOverrideSnapshot,
     SourceClassProvenance,
 )
-from bioetl.domain.control_plane.reproducibility_profiles import (
-    ReproducibilityFamilyProfile,
-    build_lineage_closure_boundary,
-    build_replay_family_contract,
-    published_supported_reproducibility_families,
-    resolve_reproducibility_family,
-    resolve_reproducibility_family_profile,
-)
 from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
     SnapshotEnvelopeStatus,
@@ -37,6 +29,14 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     build_snapshot_envelope_status,
     normalize_required_persistence_profile,
     resolve_replay_capability,
+)
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    ReproducibilityFamilyProfile,
+    build_lineage_closure_boundary,
+    build_replay_family_contract,
+    published_supported_reproducibility_families,
+    resolve_reproducibility_family,
+    resolve_reproducibility_family_profile,
 )
 from bioetl.domain.control_plane.run_ledger import RunLedgerEntry
 from bioetl.domain.control_plane.run_manifest import (

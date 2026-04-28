@@ -13,14 +13,11 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_chembl_organism_name,
-    normalize_profile_json_string_list_vocabulary_strict,
+    normalize_profile_target_component_relationships,
+    normalize_profile_target_component_types,
 )
 from bioetl.domain.schemas.chembl.target import TargetSchema
-from bioetl.domain.schemas.constants import (
-    TARGET_COMPONENT_RELATIONSHIPS,
-    TARGET_COMPONENT_TYPES,
-    TARGET_TYPES,
-)
+from bioetl.domain.schemas.constants import TARGET_TYPES
 
 __all__ = [
     "CHEMBL_TARGET_PROFILE",
@@ -46,6 +43,7 @@ _TITLE_FIELDS = frozenset({"pref_name"})
 _INT_FIELDS = frozenset({"taxonomy_id"})
 _FLOAT_FIELDS = frozenset({"primary_component_id"})
 _BOOLEAN_FIELDS = chembl_boolean_family_fields("bool_like", entity="target")
+_SET_LIKE_FIELDS = frozenset({"component_types", "component_relationships"})
 _STRICT_JSON_FIELDS = frozenset(
     {
         "target_components",
@@ -69,19 +67,13 @@ _SPECIAL_RULE_COMPONENTS = {
         "Normalize ChEMBL target organism display name using curated organism aliases.",
     ),
     "component_types": (
-        lambda value: normalize_profile_json_string_list_vocabulary_strict(
-            value,
-            allowed_values=TARGET_COMPONENT_TYPES,
-        ),
+        normalize_profile_target_component_types,
         "Normalize target component_types as a canonical JSON array with "
         "element-wise validation against the shared ChEMBL "
         "target-component type registry.",
     ),
     "component_relationships": (
-        lambda value: normalize_profile_json_string_list_vocabulary_strict(
-            value,
-            allowed_values=TARGET_COMPONENT_RELATIONSHIPS,
-        ),
+        normalize_profile_target_component_relationships,
         "Normalize target component_relationships as a canonical JSON array "
         "with element-wise validation against the shared ChEMBL "
         "target-component relationship registry.",
@@ -96,6 +88,7 @@ CHEMBL_TARGET_PROFILE = build_standard_profile(
     title_fields=_TITLE_FIELDS,
     int_fields=_INT_FIELDS,
     float_fields=_FLOAT_FIELDS,
+    set_like_fields=_SET_LIKE_FIELDS,
     boolean_fields=_BOOLEAN_FIELDS,
     strict_json_fields=_STRICT_JSON_FIELDS,
     enum_fields=_ENUM_FIELDS,

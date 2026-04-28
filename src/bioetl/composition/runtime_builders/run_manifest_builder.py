@@ -21,12 +21,14 @@ from bioetl.composition.services.versioning import (
     get_pipeline_version,
 )
 from bioetl.domain.control_plane import ReplayCapability
-from bioetl.domain.control_plane.reproducibility_profiles import (
-    resolve_reproducibility_family_profile,
-)
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     assess_reproducibility_policy,
+    legacy_config_hash_from_resolved_config_hash,
+    resolve_effective_required_persistence_profile,
+)
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    resolve_reproducibility_family_profile,
 )
 from bioetl.infrastructure.control_plane import FileRunManifestStore
 from bioetl.infrastructure.time import SystemClock
@@ -117,23 +119,30 @@ def _build_manifest_create_request(
     control_plane = getattr(
         getattr(inputs.settings, "pipeline", None), "control_plane", None
     )
-    required_persistence_profile = str(
+    configured_required_persistence_profile = str(
         getattr(
             control_plane,
             "required_persistence_profile",
             "degraded_observable",
         )
     )
-    _manifest_support.validate_reproducible_sink_modes(
-        yaml_config=yaml_config,
-        strict_replay_requested=bool(getattr(ctx, "exact_replay", False))
-        or required_persistence_profile in STRICT_PERSISTENCE_PROFILES,
-    )
     reproducibility_profile = resolve_reproducibility_family_profile(
         provider=provider,
         entity=entity,
         contract_ref=request_inputs.contract_ref,
         execution_context="source",
+    )
+    required_persistence_profile = resolve_effective_required_persistence_profile(
+        configured_required_profile=configured_required_persistence_profile,
+        family_default_profile=(
+            reproducibility_profile.default_required_persistence_profile
+        ),
+        exact_replay_requested=bool(getattr(ctx, "exact_replay", False)),
+    )
+    _manifest_support.validate_reproducible_sink_modes(
+        yaml_config=yaml_config,
+        strict_replay_requested=bool(getattr(ctx, "exact_replay", False))
+        or required_persistence_profile in STRICT_PERSISTENCE_PROFILES,
     )
     code_revision = _resolve_code_revision_for_manifest(
         resolved_config_hash=request_inputs.resolved_config_hash,
@@ -164,7 +173,9 @@ def _build_manifest_create_request(
         pipeline_version=get_pipeline_version(yaml_config),
         git_commit=code_revision.git_commit,
         source_revision_state=code_revision.source_revision_state,
-        config_hash=request_inputs.resolved_config_hash,
+        config_hash=legacy_config_hash_from_resolved_config_hash(
+            request_inputs.resolved_config_hash
+        ),
         resolved_config_hash=request_inputs.resolved_config_hash,
         effective_config_hash=request_inputs.effective_config_hash,
         contract_ref=request_inputs.contract_ref,

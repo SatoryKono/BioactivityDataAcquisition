@@ -11,6 +11,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import OA_STATUS_VALUES
 from bioetl.domain.validation import (
     DOI_REGEX_PATTERN,
     MAX_PUBLICATION_YEAR,
@@ -25,9 +26,6 @@ __all__ = [
 
 # Lookup method values (used by all publication providers)
 LOOKUP_METHODS = ["direct", "doi", "pmid", "title_fallback", "title_only", "unknown"]
-
-# Open Access status values (normalized to lowercase for cross-provider consistency)
-OA_STATUS_VALUES = ["gold", "green", "hybrid", "bronze", "closed"]
 
 
 class PublicationBaseSchema(ETLRecordSchema):

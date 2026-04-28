@@ -191,6 +191,15 @@
     "required": false,
     "unique": false
   },
+  "assay_subcellular_fraction_raw": {
+    "checks": [],
+    "coerce": false,
+    "description": "Raw provider subcellular-fraction lexeme before canonical normalization.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "assay_taxonomy_id": {
     "checks": [],
     "coerce": false,

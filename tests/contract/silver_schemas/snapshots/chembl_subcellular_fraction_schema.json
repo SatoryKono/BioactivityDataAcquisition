@@ -141,5 +141,19 @@
     "nullable": false,
     "required": true,
     "unique": false
+  },
+  "subcellular_fraction_raw": {
+    "checks": [
+      {
+        "name": "str_length",
+        "type": "le"
+      }
+    ],
+    "coerce": false,
+    "description": "Raw provider subcellular-fraction lexeme before canonical normalization.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
   }
 }
