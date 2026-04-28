@@ -188,6 +188,19 @@ def test_approved_root_directories_include_cataloged_test_support_root() -> None
     assert "tests" in approved
 
 
+def test_approved_root_directories_include_cataloged_root_tooling_root() -> None:
+    catalog = {
+        "root_tooling_roots": {
+            "approved_roots": [{"path": "tools"}],
+        }
+    }
+
+    approved = module._approved_root_directories(catalog)
+
+    assert "tools" in approved
+    assert "scripts" in approved
+
+
 def test_load_structure_catalog_requires_sections(tmp_path: Path, monkeypatch) -> None:
     catalog_path = tmp_path / ".github" / "root-allowlist.txt"
     catalog_path.parent.mkdir(parents=True)

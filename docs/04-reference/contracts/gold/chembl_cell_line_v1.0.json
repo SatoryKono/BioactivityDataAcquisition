@@ -5,6 +5,21 @@
   "description": "Gold layer data contract for chembl_cell_line. Auto-generated from Pandera schema ChEMBLCellLineGoldSchema.",
   "type": "object",
   "properties": {
+    "_dq_warn": {
+      "type": "boolean",
+      "nullable": false,
+      "description": "Soft data-quality warning flag."
+    },
+    "_dq_error": {
+      "type": "boolean",
+      "nullable": false,
+      "description": "Hard data-quality error flag."
+    },
+    "_index": {
+      "type": "integer",
+      "nullable": false,
+      "description": ""
+    },
     "entity_id": {
       "type": "string",
       "nullable": false,
@@ -79,21 +94,6 @@
         "null"
       ],
       "nullable": true,
-      "description": ""
-    },
-    "_dq_warn": {
-      "type": "boolean",
-      "nullable": false,
-      "description": ""
-    },
-    "_dq_error": {
-      "type": "boolean",
-      "nullable": false,
-      "description": ""
-    },
-    "_index": {
-      "type": "integer",
-      "nullable": false,
       "description": ""
     }
   },

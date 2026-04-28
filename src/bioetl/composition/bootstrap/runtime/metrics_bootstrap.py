@@ -22,6 +22,7 @@ MetricsServiceFactory = Callable[..., MetricsService]
 __all__ = [
     "bootstrap_metrics_port",
     "maybe_start_metrics_server",
+    "resolve_metrics_fail_fast",
 ]
 
 
@@ -31,6 +32,40 @@ def _metrics_enabled(settings: object) -> bool:
     if observability is not None and hasattr(observability, "metrics_enabled"):
         return bool(observability.metrics_enabled)
     return bool(getattr(settings, "metrics_enabled", False))
+
+
+def _is_production_launcher(settings: object) -> bool:
+    """Return True when the runtime launcher is executing in production mode."""
+    env = getattr(settings, "env", None)
+    test_mode = getattr(settings, "test_mode", False)
+    test_mode_enabled = test_mode if isinstance(test_mode, bool) else False
+    return env == "prod" and not test_mode_enabled
+
+
+def _observability_field_explicitly_set(
+    observability: object | None,
+    field_name: str,
+) -> bool:
+    """Return True when a pydantic settings field was explicitly configured."""
+    fields_set = getattr(observability, "model_fields_set", frozenset())
+    return isinstance(fields_set, (set, frozenset)) and field_name in fields_set
+
+
+def resolve_metrics_fail_fast(settings: Settings) -> bool:
+    """Resolve metrics startup fail-fast policy for runtime launcher paths.
+
+    Production launchers default to fail-fast metrics startup unless operators
+    explicitly configure ``observability.metrics_fail_fast``. Non-production
+    launchers keep the declared setting value.
+    """
+    observability = getattr(settings, "observability", None)
+    configured_fail_fast = bool(getattr(observability, "metrics_fail_fast", False))
+    if _is_production_launcher(settings) and not _observability_field_explicitly_set(
+        observability,
+        "metrics_fail_fast",
+    ):
+        return True
+    return configured_fail_fast
 
 
 def bootstrap_metrics_port(
@@ -84,7 +119,7 @@ def maybe_start_metrics_server(
     result = service.start(
         port=settings.metrics_port,
         addr=settings.metrics_addr,
-        fail_fast=obs.metrics_fail_fast,
+        fail_fast=resolve_metrics_fail_fast(settings),
         retry_count=obs.metrics_retry_count,
         retry_delay=obs.metrics_retry_delay,
     )

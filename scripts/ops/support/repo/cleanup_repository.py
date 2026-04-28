@@ -1,189 +1,348 @@
 #!/usr/bin/env python3
-"""Repository cleanup script for BioETL.
+"""Deterministic repository cleanup for policy-approved local artifact families.
 
-This script helps maintain repository hygiene by identifying and optionally removing
-common temporary files, cache directories, and other artifacts that shouldn't be
-committed to git.
+This tool intentionally does **not** perform broad repository cleanup anymore.
+It reports tracked policy-violation candidates for manual review and can apply
+deletion only for exact local artifact families outside blocked cleanup zones.
 
 Usage:
-    # Dry run (show what would be cleaned)
     python scripts/ops/support/repo/cleanup_repository.py --dry-run
-
-    # Actually clean
-    python scripts/ops/support/repo/cleanup_repository.py
-
-    # Clean specific categories
-    python scripts/ops/support/repo/cleanup_repository.py --cache --temp
+    python scripts/ops/support/repo/cleanup_repository.py --apply
 """
+
+from __future__ import annotations
 
 import argparse
 import logging
-import os
 import shutil
+import subprocess  # nosec B404
 import sys
+from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Tuple
 
-# Configure logging
+from scripts.engineering.repo.audit_root_cleanliness import (
+    _is_forbidden_tracked_artifact,
+)
+from scripts.engineering.repo._root_governance import (
+    is_within_blocked_cleanup_zone,
+    load_root_governance_policy,
+)
+
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
+    format="%(message)s",
     stream=sys.stdout,
 )
 logger = logging.getLogger(__name__)
 
-
-class RepositoryCleaner:
-    """Main cleanup class for repository hygiene."""
-
-    def __init__(self, dry_run: bool = True):
-        self.dry_run = dry_run
-        self.root_dir = Path.cwd()
-        self.files_removed = 0
-        self.size_freed = 0
-
-    def _get_file_size(self, path: Path) -> int:
-        """Get file size in bytes."""
-        if path.is_file():
-            return path.stat().st_size
-        elif path.is_dir():
-            return sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
-        return 0
-
-    def _remove_path(self, path: Path) -> bool:
-        """Remove file or directory."""
-        if not path.exists():
-            return False
-
-        size = self._get_file_size(path)
-
-        if self.dry_run:
-            logger.info(f"[DRY RUN] Would remove: {path} ({size:,} bytes)")
-            return False
-
-        try:
-            if path.is_file():
-                path.unlink()
-            else:
-                shutil.rmtree(path)
-
-            self.files_removed += 1
-            self.size_freed += size
-            logger.info(f"Removed: {path} ({size:,} bytes)")
-            return True
-        except Exception as e:
-            logger.error(f"Failed to remove {path}: {e}")
-            return False
-
-    def clean_cache_directories(self) -> None:
-        """Clean common cache directories."""
-        cache_patterns = [
-            ".python-user",
-            ".codex_tmp",
-            "MagicMock",
-            "__pycache__",
-            ".pytest_cache",
-            ".mypy_cache",
-            ".ruff_cache",
-        ]
-
-        logger.info("Cleaning cache directories...")
-        for pattern in cache_patterns:
-            for path in self.root_dir.rglob(pattern):
-                if path.is_dir():
-                    self._remove_path(path)
-
-    def clean_temporary_files(self) -> None:
-        """Clean temporary files."""
-        temp_patterns = [
-            "*.pyc",
-            "*.pyo",
-            "*.tmp",
-            "*.log",
-            "test_*.js",
-            "test_*.json",
-        ]
-
-        logger.info("Cleaning temporary files...")
-        for pattern in temp_patterns:
-            for path in self.root_dir.rglob(pattern):
-                if path.is_file():
-                    # Skip package.json and package-lock.json
-                    if path.name in ["package.json", "package-lock.json"]:
-                        continue
-                    self._remove_path(path)
-
-    def clean_root_directory(self) -> None:
-        """Clean root directory of orphan files."""
-        logger.info("Cleaning root directory...")
-        root_files = [
-            "test_*.py",  # Keep our test scripts
-        ]
-
-        for pattern in root_files:
-            for path in self.root_dir.glob(pattern):
-                # Skip our intentional test scripts
-                if path.name.startswith("test_") and path.suffix == ".py":
-                    continue
-                self._remove_path(path)
-
-    def run(self, cache: bool = True, temp: bool = True, root: bool = True) -> None:
-        """Run cleanup operations."""
-        logger.info(f"Starting repository cleanup (dry_run={self.dry_run})")
-
-        if cache:
-            self.clean_cache_directories()
-
-        if temp:
-            self.clean_temporary_files()
-
-        if root:
-            self.clean_root_directory()
-
-        logger.info(
-            f"Cleanup complete: {self.files_removed} files, {self.size_freed:,} bytes freed"
-        )
+SAFE_LOCAL_DIR_NAMES: frozenset[str] = frozenset(
+    {
+        ".benchmarks",
+        ".coverage-sharded",
+        ".eggs",
+        ".hypothesis",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".python-user",
+        ".ruff_cache",
+        "__pycache__",
+        "build",
+        "dist",
+        "htmlcov",
+    }
+)
+SAFE_LOCAL_FILE_PATTERNS: tuple[tuple[str, str], ...] = (
+    ("compiled", "*.pyc"),
+    ("compiled", "*.pyo"),
+    ("coverage", ".coverage"),
+    ("coverage", ".coverage.*"),
+    ("coverage", "coverage.xml"),
+)
+VENV_SEGMENTS: frozenset[str] = frozenset(
+    {
+        ".venv",
+        ".venv-docs",
+        ".venv-win",
+        ".venv-win-corrupt",
+        "venv",
+    }
+)
 
 
-def main() -> None:
-    """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="BioETL Repository Cleanup Tool",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+@dataclass(frozen=True)
+class CleanupCandidate:
+    path: Path
+    category: str
+    tracked: bool
+    apply_allowed: bool
+    reason: str
+
+    @property
+    def rel_path(self) -> str:
+        return self.path.as_posix()
+
+
+def _discover_repo_root(start: Path) -> Path:
+    current = start.resolve()
+    search_root = current if current.is_dir() else current.parent
+    for candidate in (search_root, *search_root.parents):
+        if (candidate / ".git").exists():
+            return candidate
+    raise RuntimeError(f"Could not locate repository root from {start}")
+
+
+def _run_git(repo_root: Path, *git_args: str) -> subprocess.CompletedProcess[bytes]:
+    return subprocess.run(  # nosec
+        ["git", "-C", str(repo_root), *git_args],
+        check=True,
+        capture_output=True,
+        text=False,
     )
 
+
+def _tracked_paths(repo_root: Path) -> list[str]:
+    completed = _run_git(repo_root, "ls-files", "-z")
+    return [
+        path
+        for path in completed.stdout.decode("utf-8", errors="replace").split("\0")
+        if path
+    ]
+
+
+def _is_venv_path(path: Path) -> bool:
+    return bool(VENV_SEGMENTS.intersection(path.parts))
+
+
+def _is_blocked_path(path: Path, repo_root: Path, blocked_paths: frozenset[str]) -> bool:
+    return is_within_blocked_cleanup_zone(path.relative_to(repo_root), blocked_paths)
+
+
+def _iter_local_dir_candidates(
+    repo_root: Path,
+    *,
+    blocked_paths: frozenset[str],
+) -> list[CleanupCandidate]:
+    candidates: list[CleanupCandidate] = []
+    for name in SAFE_LOCAL_DIR_NAMES:
+        for path in repo_root.rglob(name):
+            if not path.is_dir() or _is_venv_path(path):
+                continue
+            if _is_blocked_path(path, repo_root, blocked_paths):
+                continue
+            candidates.append(
+                CleanupCandidate(
+                    path=path.relative_to(repo_root),
+                    category="local_cache_dir",
+                    tracked=False,
+                    apply_allowed=True,
+                    reason="exact local artifact family outside blocked cleanup zones",
+                )
+            )
+    return candidates
+
+
+def _iter_local_file_candidates(
+    repo_root: Path,
+    *,
+    blocked_paths: frozenset[str],
+) -> list[CleanupCandidate]:
+    candidates: list[CleanupCandidate] = []
+    for category, pattern in SAFE_LOCAL_FILE_PATTERNS:
+        for path in repo_root.rglob(pattern):
+            if not path.is_file() or _is_venv_path(path):
+                continue
+            if _is_blocked_path(path, repo_root, blocked_paths):
+                continue
+            candidates.append(
+                CleanupCandidate(
+                    path=path.relative_to(repo_root),
+                    category=category,
+                    tracked=False,
+                    apply_allowed=True,
+                    reason="exact local artifact file outside blocked cleanup zones",
+                )
+            )
+    return candidates
+
+
+def _tracked_policy_candidates(repo_root: Path) -> list[CleanupCandidate]:
+    candidates: list[CleanupCandidate] = []
+    for tracked_path in _tracked_paths(repo_root):
+        if not _is_forbidden_tracked_artifact(tracked_path):
+            continue
+        candidates.append(
+            CleanupCandidate(
+                path=Path(tracked_path),
+                category="tracked_policy_review",
+                tracked=True,
+                apply_allowed=False,
+                reason="tracked generated/runtime artifact requires explicit git review",
+            )
+        )
+    return candidates
+
+
+def _dedupe_candidates(candidates: list[CleanupCandidate]) -> list[CleanupCandidate]:
+    deduped: dict[tuple[str, str], CleanupCandidate] = {}
+    for candidate in candidates:
+        deduped[(candidate.category, candidate.rel_path)] = candidate
+    return sorted(deduped.values(), key=lambda candidate: (candidate.rel_path, candidate.category))
+
+
+def collect_cleanup_candidates(
+    repo_root: Path,
+    *,
+    include_cache: bool = True,
+    include_temp: bool = True,
+    include_root_review: bool = True,
+) -> list[CleanupCandidate]:
+    policy = load_root_governance_policy(repo_root)
+    candidates: list[CleanupCandidate] = []
+
+    if include_cache:
+        candidates.extend(
+            _iter_local_dir_candidates(
+                repo_root,
+                blocked_paths=policy.blocked_cleanup_paths,
+            )
+        )
+    if include_temp:
+        candidates.extend(
+            _iter_local_file_candidates(
+                repo_root,
+                blocked_paths=policy.blocked_cleanup_paths,
+            )
+        )
+    if include_root_review:
+        candidates.extend(_tracked_policy_candidates(repo_root))
+
+    return _dedupe_candidates(candidates)
+
+
+def _apply_local_candidates(
+    repo_root: Path,
+    candidates: list[CleanupCandidate],
+) -> tuple[list[CleanupCandidate], list[str]]:
+    deleted: list[CleanupCandidate] = []
+    errors: list[str] = []
+    for candidate in candidates:
+        target = repo_root / candidate.path
+        if not candidate.apply_allowed:
+            continue
+        try:
+            if target.is_dir():
+                shutil.rmtree(target)
+            elif target.exists():
+                target.unlink()
+            deleted.append(candidate)
+        except OSError as exc:
+            errors.append(f"{candidate.rel_path}: {exc}")
+    return deleted, errors
+
+
+def _log_candidates(candidates: list[CleanupCandidate]) -> None:
+    if not candidates:
+        logger.info("No cleanup candidates found.")
+        return
+
+    categories: dict[str, list[CleanupCandidate]] = {}
+    for candidate in candidates:
+        categories.setdefault(candidate.category, []).append(candidate)
+
+    for category in sorted(categories):
+        logger.info("## %s (%d)", category.upper(), len(categories[category]))
+        for candidate in categories[category]:
+            mode = "apply" if candidate.apply_allowed else "review"
+            logger.info("  [%s] %s", mode, candidate.rel_path)
+            logger.info("      %s", candidate.reason)
+        logger.info("")
+
+
+def _log_apply_summary(
+    *,
+    deleted: list[CleanupCandidate],
+    skipped_review: list[CleanupCandidate],
+    errors: list[str],
+) -> None:
+    logger.info("=" * 70)
+    logger.info("Deleted: %d", len(deleted))
+    logger.info("Manual review candidates left untouched: %d", len(skipped_review))
+    if errors:
+        logger.info("Errors: %d", len(errors))
+        for error in errors:
+            logger.info("  %s", error)
+    logger.info("=" * 70)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Deterministic BioETL repository cleanup",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Show what would be cleaned without actually deleting files",
+        help="Show the exact candidate set without deleting local artifacts",
     )
-
+    parser.add_argument(
+        "--apply",
+        action="store_true",
+        help="Delete only exact local artifact candidates outside blocked zones",
+    )
     parser.add_argument(
         "--no-cache",
         action="store_false",
         dest="cache",
-        help="Skip cache directory cleanup",
+        help="Skip local cache directory candidates",
     )
-
     parser.add_argument(
         "--no-temp",
         action="store_false",
         dest="temp",
-        help="Skip temporary file cleanup",
+        help="Skip compiled/coverage local file candidates",
     )
-
     parser.add_argument(
         "--no-root",
         action="store_false",
         dest="root",
-        help="Skip root directory cleanup",
+        help="Skip tracked policy review candidates",
     )
+    parser.add_argument(
+        "--path",
+        type=Path,
+        default=Path.cwd(),
+        help="Path inside the repository to inspect",
+    )
+    return parser.parse_args()
 
-    args = parser.parse_args()
 
-    cleaner = RepositoryCleaner(dry_run=args.dry_run)
-    cleaner.run(cache=args.cache, temp=args.temp, root=args.root)
+def main() -> int:
+    args = parse_args()
+    repo_root = _discover_repo_root(args.path)
+    if args.dry_run and args.apply:
+        logger.error("Use either --dry-run or --apply, not both.")
+        return 2
+
+    candidates = collect_cleanup_candidates(
+        repo_root,
+        include_cache=args.cache,
+        include_temp=args.temp,
+        include_root_review=args.root,
+    )
+    _log_candidates(candidates)
+
+    if not args.apply:
+        return 0
+
+    deleted, errors = _apply_local_candidates(repo_root, candidates)
+    skipped_review = [candidate for candidate in candidates if not candidate.apply_allowed]
+    _log_apply_summary(
+        deleted=deleted,
+        skipped_review=skipped_review,
+        errors=errors,
+    )
+    return 1 if errors else 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

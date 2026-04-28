@@ -5,17 +5,27 @@
   "description": "Gold layer data contract for openalex_publication. Auto-generated from Pandera schema OpenAlexPublicationGoldSchema.",
   "type": "object",
   "properties": {
+    "_dq_warn": {
+      "type": "boolean",
+      "nullable": false,
+      "description": "Soft data-quality warning flag."
+    },
+    "_dq_error": {
+      "type": "boolean",
+      "nullable": false,
+      "description": "Hard data-quality error flag."
+    },
+    "_index": {
+      "type": "integer",
+      "nullable": false,
+      "description": ""
+    },
     "entity_id": {
       "type": "string",
       "nullable": false,
       "description": ""
     },
     "content_hash": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "openalex_id": {
       "type": "string",
       "nullable": false,
       "description": ""
@@ -76,47 +86,7 @@
       "nullable": true,
       "description": ""
     },
-    "subject_mesh": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "subject_keywords": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "mag_id": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
     "journal": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "issn": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "publisher": {
       "type": [
         "string",
         "null"
@@ -204,6 +174,77 @@
       "nullable": true,
       "description": ""
     },
+    "citations_made": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_source": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "_lookup_method": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "_original_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "openalex_id": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "subject_mesh": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "subject_keywords": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "mag_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "issn": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "publisher": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "is_oa": {
       "type": [
         "boolean",
@@ -242,14 +283,6 @@
       "description": ""
     },
     "fwci": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "citations_made": {
       "type": [
         "number",
         "null"
@@ -327,39 +360,6 @@
         "null"
       ],
       "nullable": true,
-      "description": ""
-    },
-    "_source": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_lookup_method": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_original_id": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "_dq_warn": {
-      "type": "boolean",
-      "nullable": false,
-      "description": ""
-    },
-    "_dq_error": {
-      "type": "boolean",
-      "nullable": false,
-      "description": ""
-    },
-    "_index": {
-      "type": "integer",
-      "nullable": false,
       "description": ""
     }
   },

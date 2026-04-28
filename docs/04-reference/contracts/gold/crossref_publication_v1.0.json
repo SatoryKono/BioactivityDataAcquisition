@@ -5,6 +5,21 @@
   "description": "Gold layer data contract for crossref_publication. Auto-generated from Pandera schema CrossRefPublicationGoldSchema.",
   "type": "object",
   "properties": {
+    "_dq_warn": {
+      "type": "boolean",
+      "nullable": false,
+      "description": "Soft data-quality warning flag."
+    },
+    "_dq_error": {
+      "type": "boolean",
+      "nullable": false,
+      "description": "Hard data-quality error flag."
+    },
+    "_index": {
+      "type": "integer",
+      "nullable": false,
+      "description": ""
+    },
     "entity_id": {
       "type": "string",
       "nullable": false,
@@ -36,23 +51,15 @@
       "nullable": true,
       "description": ""
     },
-    "abstract": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "affiliation_list": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
     "title": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "abstract": {
       "type": [
         "string",
         "null"
@@ -68,31 +75,15 @@
       "nullable": true,
       "description": ""
     },
+    "affiliation_list": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "journal": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "issn": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "issn_list": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "publisher": {
       "type": [
         "string",
         "null"
@@ -148,22 +139,6 @@
       "nullable": true,
       "description": ""
     },
-    "published_print": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "published_online": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
     "publication_type": {
       "type": [
         "string",
@@ -196,7 +171,7 @@
       "nullable": true,
       "description": ""
     },
-    "citations_received": {
+    "citations_made": {
       "type": [
         "number",
         "null"
@@ -204,7 +179,65 @@
       "nullable": true,
       "description": ""
     },
-    "citations_made": {
+    "_source": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "_lookup_method": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "_original_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "issn": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "issn_list": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "publisher": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "published_print": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "published_online": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "citations_received": {
       "type": [
         "number",
         "null"
@@ -322,39 +355,6 @@
         "null"
       ],
       "nullable": true,
-      "description": ""
-    },
-    "_source": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_lookup_method": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_original_id": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "_dq_warn": {
-      "type": "boolean",
-      "nullable": false,
-      "description": ""
-    },
-    "_dq_error": {
-      "type": "boolean",
-      "nullable": false,
-      "description": ""
-    },
-    "_index": {
-      "type": "integer",
-      "nullable": false,
       "description": ""
     }
   },

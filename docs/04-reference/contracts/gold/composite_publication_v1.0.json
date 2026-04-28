@@ -25,6 +25,16 @@
       "nullable": false,
       "description": ""
     },
+    "_source_providers": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "_enrichment_status": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
     "_source": {
       "type": [
         "string",
@@ -47,16 +57,6 @@
         "null"
       ],
       "nullable": true,
-      "description": ""
-    },
-    "_source_providers": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_enrichment_status": {
-      "type": "string",
-      "nullable": false,
       "description": ""
     }
   },

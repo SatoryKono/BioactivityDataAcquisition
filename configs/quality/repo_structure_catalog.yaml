@@ -79,6 +79,11 @@ src_sidecars:
     - path: src/memory
       role: approved_sidecar_memory_subsystem
 
+root_tooling_roots:
+  approved_roots:
+    - path: tools
+      role: review_required_transitional_root_tooling_surface
+
 test_support_roots:
   approved_roots:
     - path: testing_support

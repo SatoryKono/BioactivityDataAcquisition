@@ -151,16 +151,21 @@ All whitelist patterns **MUST** be in `.gitignore`.
 
 ### 4.2. Cleanup Automation (Makefile)
 
-Основной путь очистки — цели в `Makefile`:
+Основной путь deterministic local cleanup — цели в `Makefile`, которые
+маршрутизируют в поддерживаемые `scripts.engineering.*` entrypoints:
 
 | Command                                        | Behavior                                                                        |
 | ---------------------------------------------- | ------------------------------------------------------------------------------- |
-| `make clean`                                   | Удаляет Python-кэш, coverage-артефакты, build/dist                              |
-| `make clean-local-artifacts DRY_RUN=1`         | Preview очистки локальных артефактов                                            |
-| `make clean-local-artifacts`                   | Применяет локальную очистку (без удаления `.worktrees/.rollback`)               |
+| `make clean`                                   | Local-only cleanup через `python -m scripts.engineering.diagnostics cleanup`    |
+| `make clean-local-artifacts DRY_RUN=1`         | Preview локальной cleanup wave                                                  |
+| `make clean-local-artifacts`                   | Применяет локальную cleanup wave                                                |
 | `make clean-local-artifacts PURGE_WORKTREES=1` | Дополнительно очищает локальные `.worktrees/.rollback`                          |
-| `make clean-preflight DRY_RUN=1`               | Preview preflight-очистки через `scripts/engineering/repo/preflight_cleanup.sh` |
-| `make clean-all`                               | `clean` + удаление логов/временных файлов                                       |
+| `make clean-preflight DRY_RUN=1`               | Preview preflight-очистки через `python -m scripts.engineering.repo preflight-cleanup` |
+| `make clean-all`                               | `clean` + purge локальных логов                                                 |
+
+`scripts/ops/support/repo/cleanup_repository.py` больше не является broad
+first-line cleanup tool. Он используется как deterministic repo-hygiene review
+lane для exact candidate discovery, а не как blanket delete utility.
 
 ### 4.3. Delta Lake VACUUM (MUST)
 
@@ -212,6 +217,9 @@ make clean
 
 # Full cleanup (includes logs/temp files)
 make clean-all
+
+# Exact repo-hygiene review lane without mutation
+python -m scripts.ops.support.repo.cleanup_repository --dry-run
 ```
 
 ### 6.2. Local Artifact Cleanup

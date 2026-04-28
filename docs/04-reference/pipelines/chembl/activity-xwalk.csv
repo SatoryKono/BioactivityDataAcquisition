@@ -17,8 +17,13 @@ assay_description,S2.6,YES,EMPTY,activity_transformer.py:79,chembl.py:106,activi
 assay_variant_accession,S2.6,YES,EMPTY,activity_transformer.py:80,chembl.py:109,activity.py:203,chembl.py:60,string,true,false,DENORM
 assay_variant_mutation,S2.6,YES,EMPTY,activity_transformer.py:81,chembl.py:112,activity.py:206,chembl.py:61,string,true,false,DENORM
 bao_endpoint,S2.7,YES,EMPTY,activity_transformer.py:82,chembl.py:117,activity.py:101,chembl.py:64,string,true,false,OK
+bao_endpoint_iri,S2.7,YES,EMPTY,activity_transformer.py:resolve_activity_ontology_companion_fields,chembl.py:ActivityOntologyCompanionFields,activity.py:bao_endpoint_iri,chembl.py:bao_endpoint_iri,string,true,false,ONTOLOGY_COMPANION_IRI
+bao_endpoint_mapping_status,S2.7,YES,EMPTY,activity_transformer.py:resolve_activity_ontology_companion_fields,chembl.py:ActivityOntologyCompanionFields,activity.py:bao_endpoint_mapping_status,chembl.py:bao_endpoint_mapping_status,string,true,false,ONTOLOGY_COMPANION_STATUS
 bao_format,S2.7,YES,EMPTY,activity_transformer.py:83,chembl.py:118,activity.py:209,chembl.py:65,string,true,false,OK
+bao_format_iri,S2.7,YES,EMPTY,activity_transformer.py:resolve_activity_ontology_companion_fields,chembl.py:ActivityOntologyCompanionFields,activity.py:bao_format_iri,chembl.py:bao_format_iri,string,true,false,ONTOLOGY_COMPANION_IRI
+bao_format_mapping_status,S2.7,YES,EMPTY,activity_transformer.py:resolve_activity_ontology_companion_fields,chembl.py:ActivityOntologyCompanionFields,activity.py:bao_format_mapping_status,chembl.py:bao_format_mapping_status,string,true,false,ONTOLOGY_COMPANION_STATUS
 bao_label,S2.7,YES,EMPTY,activity_transformer.py:84,chembl.py:119,activity.py:212,chembl.py:66,string,true,false,OK
+bao_ontology_version,S2.7,YES,EMPTY,activity_transformer.py:resolve_activity_ontology_companion_fields,chembl.py:ActivityOntologyCompanionFields,activity.py:bao_ontology_version,chembl.py:bao_ontology_version,string,true,false,ONTOLOGY_COMPANION_VERSION
 type,S2.8,YES,EMPTY,activity_transformer.py:92,chembl.py:77,activity.py:118,chembl.py:69,string,true,false,OK
 value,S2.8,YES,EMPTY,activity_transformer.py:93,chembl.py:78,activity.py:122,chembl.py:70,number,true,false,OK
 units,S2.8,YES,EMPTY,activity_transformer.py:92,chembl.py:79,activity.py:123,chembl.py:71,string,true,false,OK
@@ -38,7 +43,13 @@ ligand_efficiency_le,S2.11,YES,EMPTY,activity_transformer.py:218,chembl.py:154,a
 ligand_efficiency_lle,S2.11,YES,EMPTY,activity_transformer.py:218,chembl.py:157,activity.py:156,chembl.py:91,number,true,false,NESTED
 ligand_efficiency_sei,S2.11,YES,EMPTY,activity_transformer.py:218,chembl.py:160,activity.py:159,chembl.py:92,number,true,false,NESTED
 qudt_units,S2.12,YES,EMPTY,activity_transformer.py:113,chembl.py:122,activity.py:111,chembl.py:95,string,true,false,OK
+qudt_unit_iri,S2.12,YES,EMPTY,activity_transformer.py:resolve_activity_ontology_companion_fields,chembl.py:ActivityOntologyCompanionFields,activity.py:qudt_unit_iri,chembl.py:qudt_unit_iri,string,true,false,ONTOLOGY_COMPANION_IRI
+qudt_unit_mapping_status,S2.12,YES,EMPTY,activity_transformer.py:resolve_activity_ontology_companion_fields,chembl.py:ActivityOntologyCompanionFields,activity.py:qudt_unit_mapping_status,chembl.py:qudt_unit_mapping_status,string,true,false,ONTOLOGY_COMPANION_STATUS
+qudt_ontology_version,S2.12,YES,EMPTY,activity_transformer.py:resolve_activity_ontology_companion_fields,chembl.py:ActivityOntologyCompanionFields,activity.py:qudt_ontology_version,chembl.py:qudt_ontology_version,string,true,false,ONTOLOGY_COMPANION_VERSION
 uo_units,S2.12,YES,EMPTY,activity_transformer.py:113,chembl.py:123,activity.py:106,chembl.py:96,string,true,false,OK
+uo_unit_iri,S2.12,YES,EMPTY,activity_transformer.py:resolve_activity_ontology_companion_fields,chembl.py:ActivityOntologyCompanionFields,activity.py:uo_unit_iri,chembl.py:uo_unit_iri,string,true,false,ONTOLOGY_COMPANION_IRI
+uo_unit_mapping_status,S2.12,YES,EMPTY,activity_transformer.py:resolve_activity_ontology_companion_fields,chembl.py:ActivityOntologyCompanionFields,activity.py:uo_unit_mapping_status,chembl.py:uo_unit_mapping_status,string,true,false,ONTOLOGY_COMPANION_STATUS
+uo_ontology_version,S2.12,YES,EMPTY,activity_transformer.py:resolve_activity_ontology_companion_fields,chembl.py:ActivityOntologyCompanionFields,activity.py:uo_ontology_version,chembl.py:uo_ontology_version,string,true,false,ONTOLOGY_COMPANION_VERSION
 journal,S2.13,YES,EMPTY,activity_transformer.py:119,chembl.py:133,activity.py:215,chembl.py:99,string,true,false,RENAME:document_journal->journal;DENORM
 publication_year,S2.13,YES,EMPTY,activity_transformer.py:125,chembl.py:134,activity.py:227,chembl.py:100,integer,true,false,RENAME:document_year->publication_year;DENORM
 publication_doi,S2.13,YES,EMPTY,activity_transformer.py:_extract_publication_identifiers,bioactivity/_extractors.py:119,activity.py:237,chembl.py:101,string,true,false,RENAME:publication_doi|doi|document_doi->publication_doi;DENORM
