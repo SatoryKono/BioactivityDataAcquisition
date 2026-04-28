@@ -21,9 +21,22 @@ from bioetl.domain.types import RunID
 __all__ = [
     "RunManifestDiffEntry",
     "RunManifestDiffResult",
+    "RunManifestInspectionCorruptionError",
     "RunManifestInspectionResult",
     "RunManifestInspectionService",
 ]
+
+
+class RunManifestInspectionCorruptionError(ValueError):
+    """Raised when manifest storage is structurally corrupted during inspection."""
+
+    def __init__(self, identifier: str, reason: str) -> None:
+        self.identifier = identifier
+        self.reason = reason
+        super().__init__(
+            "Run manifest store corruption while resolving "
+            f"{identifier!r}: {reason}"
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -179,12 +192,18 @@ class RunManifestInspectionService(
 
     def _resolve_manifest(self, identifier: str) -> RunManifest:
         """Resolve manifest_id first, then run_id lookup when identifier is UUID-like."""
-        manifest = self.manifest_port.get(identifier)
+        try:
+            manifest = self.manifest_port.get(identifier)
+        except ValueError as exc:
+            raise RunManifestInspectionCorruptionError(identifier, str(exc)) from exc
         if manifest is not None:
             return manifest
         run_id = self._parse_run_id(identifier)
         if run_id is not None:
-            manifest = self.manifest_port.get_by_run_id(run_id)
+            try:
+                manifest = self.manifest_port.get_by_run_id(run_id)
+            except ValueError as exc:
+                raise RunManifestInspectionCorruptionError(identifier, str(exc)) from exc
             if manifest is not None:
                 return manifest
         raise ValueError(f"Run manifest not found for identifier: {identifier}")

@@ -12,6 +12,7 @@ import pytest
 
 from bioetl.application.services.effective_config_service import EffectiveConfigService
 from bioetl.application.services.run_manifest_inspection_service import (
+    RunManifestInspectionCorruptionError,
     RunManifestInspectionService,
 )
 from bioetl.application.services.run_ledger_service import RunLedgerService
@@ -528,6 +529,31 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         identity_graph=result.identity_graph,
         reproducibility_audit_score=result.diagnostics["reproducibility_audit_score"],
     )
+
+
+def test_show_surfaces_manifest_store_corruption_as_forensic_error() -> None:
+    class _CorruptManifestStore:
+        def get(self, manifest_id: str) -> RunManifest | None:
+            raise ValueError(
+                "Run manifest index corruption: indexed manifest mismatch"
+            )
+
+        def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
+            raise AssertionError("run-id fallback should not hide corruption")
+
+        def save(self, manifest: RunManifest) -> None:
+            raise AssertionError("not used")
+
+    service = RunManifestInspectionService(
+        manifest_port=_CorruptManifestStore(),
+    )
+
+    with pytest.raises(RunManifestInspectionCorruptionError) as exc_info:
+        service.show("manifest-corrupt")
+
+    assert exc_info.value.identifier == "manifest-corrupt"
+    assert "indexed manifest mismatch" in exc_info.value.reason
+    assert "Run manifest store corruption" in str(exc_info.value)
 
 
 def test_show_resume_only_manifest_reports_resume_mode() -> None:

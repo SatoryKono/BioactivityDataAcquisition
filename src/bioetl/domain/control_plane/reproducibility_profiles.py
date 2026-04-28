@@ -137,31 +137,29 @@ def _resolve_source_profile_reason(*, supported: bool, published: bool) -> str:
     return "family_outside_published_inventory"
 
 
-def resolve_reproducibility_family_profile(
+def _build_composite_reproducibility_family_profile(
     *,
-    provider: object,
-    entity: object,
-    contract_ref: object,
+    family: str | None,
     execution_context: ReproducibilityExecutionContext,
 ) -> ReproducibilityFamilyProfile:
-    """Resolve the authoritative reproducibility profile for one run family."""
-    family = resolve_reproducibility_family(
-        provider=provider,
-        entity=entity,
-        contract_ref=contract_ref,
+    return ReproducibilityFamilyProfile(
+        family=family,
+        execution_context=execution_context,
+        lineage_closure_supported=False,
+        strict_exact_replay_supported=True,
+        exact_replay_support_boundary="composite_snapshot_backed_input_envelope",
+        replay_family_contract="composite_snapshot_backed_exact_replay",
+        default_required_persistence_profile="replay_ready",
+        support_scope="snapshot_backed_composite_trace_debug",
+        reason="composite_family_requires_full_snapshot_envelope",
     )
-    if execution_context == "composite":
-        return ReproducibilityFamilyProfile(
-            family=family,
-            execution_context=execution_context,
-            lineage_closure_supported=False,
-            strict_exact_replay_supported=True,
-            exact_replay_support_boundary="composite_snapshot_backed_input_envelope",
-            replay_family_contract="composite_snapshot_backed_exact_replay",
-            default_required_persistence_profile="replay_ready",
-            support_scope="snapshot_backed_composite_trace_debug",
-            reason="composite_family_requires_full_snapshot_envelope",
-        )
+
+
+def _build_source_reproducibility_family_profile(
+    *,
+    family: str | None,
+    execution_context: ReproducibilityExecutionContext,
+) -> ReproducibilityFamilyProfile:
     supported = family in _PUBLISHED_SUPPORTED_SOURCE_FAMILIES
     published = family in _PUBLISHED_SOURCE_FAMILIES
     return ReproducibilityFamilyProfile(
@@ -181,6 +179,30 @@ def resolve_reproducibility_family_profile(
             supported=supported,
             published=published,
         ),
+    )
+
+
+def resolve_reproducibility_family_profile(
+    *,
+    provider: object,
+    entity: object,
+    contract_ref: object,
+    execution_context: ReproducibilityExecutionContext,
+) -> ReproducibilityFamilyProfile:
+    """Resolve the authoritative reproducibility profile for one run family."""
+    family = resolve_reproducibility_family(
+        provider=provider,
+        entity=entity,
+        contract_ref=contract_ref,
+    )
+    if execution_context == "composite":
+        return _build_composite_reproducibility_family_profile(
+            family=family,
+            execution_context=execution_context,
+        )
+    return _build_source_reproducibility_family_profile(
+        family=family,
+        execution_context=execution_context,
     )
 
 

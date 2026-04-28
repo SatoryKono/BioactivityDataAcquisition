@@ -166,6 +166,30 @@ def _resolve_blocking_gaps(
     return tuple(dict.fromkeys(blocking_gaps))
 
 
+def _is_strict_requirement_requested(
+    *,
+    profile: str,
+    exact_replay_requested: bool,
+) -> bool:
+    return profile in STRICT_PERSISTENCE_PROFILES or exact_replay_requested
+
+
+def _resolve_effective_replay_capability(
+    *,
+    replay_capability: ReplayCapability | None,
+    source_refs: tuple[RunSourceRef, ...],
+    resume_requested: bool,
+    require_full_snapshot_envelope: bool,
+) -> ReplayCapability:
+    if replay_capability is not None:
+        return replay_capability
+    return resolve_replay_capability(
+        source_refs=source_refs,
+        resume_requested=resume_requested,
+        require_full_snapshot_envelope=require_full_snapshot_envelope,
+    )
+
+
 def assess_reproducibility_policy(
     *,
     source_refs: tuple[RunSourceRef, ...],
@@ -178,10 +202,12 @@ def assess_reproducibility_policy(
 ) -> ReproducibilityPolicyAssessment:
     """Evaluate snapshot-envelope and profile gates in one place."""
     profile = normalize_required_persistence_profile(required_persistence_profile)
-    strict_requirement_requested = (
-        profile in STRICT_PERSISTENCE_PROFILES or exact_replay_requested
+    strict_requirement_requested = _is_strict_requirement_requested(
+        profile=profile,
+        exact_replay_requested=exact_replay_requested,
     )
-    resolved_capability = replay_capability or resolve_replay_capability(
+    resolved_capability = _resolve_effective_replay_capability(
+        replay_capability=replay_capability,
         source_refs=source_refs,
         resume_requested=resume_requested,
         require_full_snapshot_envelope=require_full_snapshot_envelope,
