@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Protocol
+from typing import Protocol, cast
 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
@@ -23,10 +23,7 @@ from bioetl.infrastructure.storage.silver.operations.metadata_builders import (
 
 
 class _MetadataWriteOps(Protocol):
-    """Minimal host surface needed by write/audit helpers."""
-
-    @property
-    def _logger(self) -> LoggerPort: ...
+    """Minimal host surface needed by Silver metadata write helpers."""
 
     @property
     def _metrics(self) -> MetricsPort | None: ...
@@ -43,11 +40,30 @@ class _MetadataWriteOps(Protocol):
     ) -> SilverWriteResult | None: ...
 
 
+class _MetadataAuditOps(Protocol):
+    """Minimal host surface needed by Silver audit helpers."""
+
+    @property
+    def _audit(self) -> AuditPort | None: ...
+
+
 class _SilverAuditHost:
     """Simple audit host adapter exposing the logger expected by audit builders."""
 
     def __init__(self, logger: LoggerPort) -> None:
         self.logger = logger
+
+
+def _resolve_metadata_logger(metadata_ops: object) -> LoggerPort:
+    """Resolve logger from either composition or mixin style host objects."""
+    logger = getattr(metadata_ops, "_logger", None)
+    if logger is None:
+        logger = getattr(metadata_ops, "logger", None)
+    if logger is None:
+        raise AttributeError(
+            "Silver metadata audit host must expose either '_logger' or 'logger'"
+        )
+    return cast(LoggerPort, logger)
 
 
 async def _write_silver_metadata(
@@ -138,7 +154,7 @@ def _emit_silver_metadata_write_success(
 
 
 async def _log_silver_audit_event(
-    metadata_ops: _MetadataWriteOps,
+    metadata_ops: _MetadataAuditOps,
     table_name: str,
     records: list[BronzeRecord],
     mode: SilverWriteMode,
@@ -167,7 +183,7 @@ async def _log_silver_audit_event(
         ingestion_ts=ingestion_ts,
     )
     audit_entry = _build_silver_audit_entry(
-        _SilverAuditHost(metadata_ops._logger),
+        _SilverAuditHost(_resolve_metadata_logger(metadata_ops)),
         request,
     )
     await metadata_ops._audit.log_write(audit_entry)

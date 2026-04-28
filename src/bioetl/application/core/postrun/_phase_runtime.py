@@ -27,6 +27,8 @@ PostrunPhaseName = Literal[
     "vacuum",
     "final_metadata",
 ]
+
+
 def resolve_postrun_phase_log_level(status: str) -> PostrunLogLevel:
     """Map bounded postrun statuses to structured log levels."""
     if status == "failed":

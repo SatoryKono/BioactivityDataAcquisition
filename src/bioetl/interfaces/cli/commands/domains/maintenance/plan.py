@@ -162,6 +162,8 @@ def _render_plan_payload(payload: dict[str, object]) -> str:
     _append_required_actions(lines, payload.get("required_actions"))
     _append_notes(lines, payload.get("notes"))
     return "\n".join(lines)
+
+
 def _plan_policy(pipeline: str) -> CliBoundaryExecutionPolicy:
     """Build the shared CLI boundary policy for the contract planner."""
     return CliBoundaryExecutionPolicy(

@@ -625,10 +625,13 @@ Only approved top-level entries are allowed.
 - Operational/project assets: `configs/`, `scripts/`, `assets/`, `data/`, `reports/`, `grafana/`
 - Shared AI/editor tooling surfaces approved by policy:
   `.ai/`, `.aiassistant/`, `ai/claude/` (runtime),
-  `.codex/`, `.codex_tmp/`,
+  `.codex/`,
   `.cursor/`, `.gemini/`, `.idea/`, `.jules/`, `.junie/`, `.sonarlint/`,
   `.vibe/`, `.vscode/`
 - Explicit exceptions listed in `.github/root-allowlist.txt`
+
+`.codex_tmp/` is allowed only as ignored local scratch space; it must not be
+committed.
 
 **Where to place artifacts**:
 

@@ -58,6 +58,8 @@ def get_vacuum_service() -> VacuumService:
     from bioetl.composition.maintenance_api import get_vacuum_service as _impl
 
     return _impl()
+
+
 def _maintenance_policy(
     *,
     reason_prefix: str,

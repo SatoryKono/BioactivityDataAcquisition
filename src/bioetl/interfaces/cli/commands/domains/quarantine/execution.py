@@ -19,6 +19,7 @@ __all__ = [
     "run_quarantine_sync",
 ]
 
+
 @dataclass(frozen=True, slots=True)
 class QuarantineExecutionPolicy:
     """Typed execution policy for one quarantine CLI operation."""
@@ -28,6 +29,8 @@ class QuarantineExecutionPolicy:
     domain_error_title: str
     unexpected_error_title: str
     interrupted_message: str = "Quarantine command interrupted by user (Ctrl+C)"
+
+
 def _shared_policy(policy: QuarantineExecutionPolicy) -> CliBoundaryExecutionPolicy:
     """Convert the quarantine policy to the shared CLI boundary policy."""
     return CliBoundaryExecutionPolicy(

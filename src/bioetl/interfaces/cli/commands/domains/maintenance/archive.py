@@ -35,6 +35,8 @@ def get_lifecycle_service() -> MedallionLifecycleService:
 
     impl = cast("Callable[[], MedallionLifecycleService]", _impl)
     return impl()
+
+
 def _archive_policy(table: str) -> CliBoundaryExecutionPolicy:
     """Build the shared CLI boundary policy for archive commands."""
     return CliBoundaryExecutionPolicy(

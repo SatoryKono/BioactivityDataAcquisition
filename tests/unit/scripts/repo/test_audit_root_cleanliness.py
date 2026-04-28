@@ -32,6 +32,7 @@ def test_collect_tracked_policy_violations_rejects_generated_artifact_families()
 ):
     violations = module._collect_tracked_policy_violations(
         [
+            ".codex_tmp/session.md",
             "src/tools/reports/project_structure.md",
             "contract-identity-diagnostics.json",
             "contract-registry-diagnostics.json",
@@ -50,6 +51,7 @@ def test_collect_tracked_policy_violations_rejects_generated_artifact_families()
     )
 
     assert violations == [
+        ".codex_tmp/session.md: generated/runtime artifact must not be tracked",
         ".coverage-sharded/.coverage: generated/runtime artifact must not be tracked",
         "contract-identity-diagnostics.json: generated/runtime artifact must not be tracked",
         "contract-registry-diagnostics.json: generated/runtime artifact must not be tracked",

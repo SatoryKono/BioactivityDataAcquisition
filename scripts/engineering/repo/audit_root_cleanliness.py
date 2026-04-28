@@ -23,6 +23,7 @@ CANONICAL_ROOT_TEXT_FILES: frozenset[str] = frozenset(
 )
 FORBIDDEN_TRACKED_PATH_PREFIXES: tuple[str, ...] = (
     ".coverage-sharded/",
+    ".codex_tmp/",
     ".python-user/",
     "MagicMock/",
     "htmlcov/",
@@ -54,7 +55,6 @@ ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
         ".aiassistant",
         "ai",
         ".codex",
-        ".codex_tmp",
         ".gemini",
         ".github",
         ".jules",

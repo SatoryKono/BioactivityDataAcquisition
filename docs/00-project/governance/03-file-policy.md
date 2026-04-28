@@ -33,7 +33,7 @@ ______________________________________________________________________
   `docs/05-operations/`, а одноразовые status/recovery/final-summary артефакты
   MUST архивироваться под `docs/99-archive/`.
 - Root-level tracked директории MUST ограничиваться approved runtime/tooling and
-  project surfaces: `.ai`, `.aiassistant`, `ai`, `.codex`, `.codex_tmp`,
+  project surfaces: `.ai`, `.aiassistant`, `ai`, `.codex`,
   `.cursor`, `.gemini`, `.github`, `.idea`, `.jules`, `.junie`, `.sonarlint`,
   `.vibe`, `.vscode`, `assets`, `configs`, `data`, `docs`, `grafana`,
   `reports`, `scripts`, `src`, `testing_support`, `tests`.
@@ -59,10 +59,10 @@ Root allowlist интерпретируется как policy surface, а не �
 Если новый root-level файл существует только для инцидента, ручной проверки или
 финального статуса волны, он не должен закрепляться в корне.
 
-`.codex_tmp` и `.vibe` may remain transitional tooling surfaces only while they
-are intentionally maintained as shared repo tooling. They are not preferred
-long-term root placements, and local package/runtime output trees are excluded
-from this exception.
+`.codex_tmp/` is a local scratch/cache surface and MUST remain untracked.
+`.vibe/` may remain tracked only for curated project-local Mistral Vibe
+configuration such as `.vibe/config.toml`; credentials, runtime state, and
+generated local package/output trees are excluded from this exception.
 
 Проверка:
 
