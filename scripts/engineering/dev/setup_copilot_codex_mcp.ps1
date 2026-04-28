@@ -20,5 +20,5 @@ if (-not $pythonCmd) {
     exit 1
 }
 
-& $pythonCmd.Source scripts/engineering/dev/setup_copilot_codex_mcp.py @args
+& $pythonCmd.Source scripts/ai/codex/setup_mcp.py @args
 exit $LASTEXITCODE

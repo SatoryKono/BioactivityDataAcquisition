@@ -15,54 +15,33 @@ Commands:
 
 from __future__ import annotations
 
-import subprocess
-import sys
 from pathlib import Path
 
-PYTHON_COMMANDS: dict[str, str] = {
-    "smoke-sonarqube": "sonarqube_mcp_smoke.py",
-    "smoke-neo4j-memory": "neo4j_memory_mcp_smoke.py",
-}
+from scripts.engineering.common.cli_dispatch import (
+    dispatch_cli,
+    python_command,
+    shell_command,
+)
 
-SHELL_COMMANDS: dict[str, str] = {
-    "check": "check.sh",
-    "check-neo4j-memory": "check_neo4j_memory.sh",
-    "test-env-loading": "test_env_loading.sh",
+COMMAND_SPECS = {
+    "smoke-sonarqube": python_command("sonarqube_mcp_smoke.py"),
+    "smoke-neo4j-memory": python_command("neo4j_memory_mcp_smoke.py"),
+    "check": shell_command("check.sh"),
+    "check-neo4j-memory": shell_command("check_neo4j_memory.sh"),
+    "test-env-loading": shell_command("test_env_loading.sh"),
 }
 
 _DIR = Path(__file__).parent
 
 
-def _run_python(script_name: str, argv: list[str]) -> int:
-    return subprocess.run(
-        [sys.executable, str(_DIR / script_name), *argv],
-        check=False,
-    ).returncode
-
-
-def _run_shell(script_name: str, argv: list[str]) -> int:
-    return subprocess.run(
-        ["bash", str(_DIR / script_name), *argv],
-        check=False,
-    ).returncode
-
-
 def main(argv: list[str] | None = None) -> int:
-    args = argv if argv is not None else sys.argv[1:]
-    if not args or args[0] in {"-h", "--help"}:
-        print(__doc__ or "", end="")
-        return 0
-
-    command, rest = args[0], args[1:]
-    if command in PYTHON_COMMANDS:
-        return _run_python(PYTHON_COMMANDS[command], rest)
-    if command in SHELL_COMMANDS:
-        return _run_shell(SHELL_COMMANDS[command], rest)
-
-    available = sorted([*PYTHON_COMMANDS, *SHELL_COMMANDS])
-    print(f"Unknown command: {command}", file=sys.stderr)
-    print(f"Available: {', '.join(available)}", file=sys.stderr)
-    return 2
+    return dispatch_cli(
+        argv,
+        help_text=__doc__ or "",
+        commands=COMMAND_SPECS,
+        base_dir=_DIR,
+        sort_available=True,
+    )
 
 
 if __name__ == "__main__":

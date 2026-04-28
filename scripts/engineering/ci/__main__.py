@@ -18,11 +18,14 @@ Commands:
 
 from __future__ import annotations
 
-import subprocess
-import sys
 from pathlib import Path
 
-COMMANDS: dict[str, str] = {
+from scripts.engineering.common.cli_dispatch import (
+    dispatch_cli,
+    python_command,
+)
+
+COMMANDS = {
     "run-tests": "run_pytest_resilient.py",
     "quality-gate": "quality_integral_gate.py",
     "e2e-skip-rate": "check_e2e_matrix_skip_rate.py",
@@ -32,35 +35,18 @@ COMMANDS: dict[str, str] = {
     "debt-report": "report_quality_debt_weekly.py",
     "apply-ci-fixes": "apply_ci_fixes.py",
 }
+COMMAND_SPECS = {name: python_command(script) for name, script in COMMANDS.items()}
 
 _DIR = Path(__file__).parent
 
 
-def _run_script(name: str, argv: list[str]) -> int:
-    script = _DIR / name
-    result = subprocess.run([sys.executable, str(script), *argv], check=False)
-    return result.returncode
-
-
-def _print_help() -> None:
-    print(__doc__ or "", end="")
-
-
 def main(argv: list[str] | None = None) -> int:
-    args = argv if argv is not None else sys.argv[1:]
-
-    if not args or args[0] in ("--help", "-h"):
-        _print_help()
-        return 0
-
-    cmd, rest = args[0], args[1:]
-
-    if cmd not in COMMANDS:
-        print(f"Unknown command: {cmd}", file=sys.stderr)
-        print(f"Available: {', '.join(COMMANDS)}", file=sys.stderr)
-        return 2
-
-    return _run_script(COMMANDS[cmd], rest)
+    return dispatch_cli(
+        argv,
+        help_text=__doc__ or "",
+        commands=COMMAND_SPECS,
+        base_dir=_DIR,
+    )
 
 
 if __name__ == "__main__":

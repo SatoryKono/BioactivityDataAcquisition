@@ -29,10 +29,11 @@ Commands:
 
 from __future__ import annotations
 
-import subprocess
-import sys
+from pathlib import Path
 
-COMMANDS: dict[str, str] = {
+from scripts.engineering.common.cli_dispatch import dispatch_cli, module_command
+
+COMMANDS = {
     "verify": "scripts.docs.checks.verify",
     "build-site": "scripts.docs.build.mkdocs_build",
     "check-links": "scripts.docs.checks.check_links",
@@ -53,35 +54,17 @@ COMMANDS: dict[str, str] = {
     "audit-sentence": "scripts.docs.fixers.sentence_audit",
     "sync-repo-identity": "scripts.docs.fixers.repo_identity",
 }
-
-
-def _run_module(module_name: str, argv: list[str]) -> int:
-    result = subprocess.run(
-        [sys.executable, "-m", module_name, *argv],
-        check=False,
-    )
-    return result.returncode
-
-
-def _print_help() -> None:
-    print(__doc__ or "", end="")
+COMMAND_SPECS = {name: module_command(module_name) for name, module_name in COMMANDS.items()}
+_DIR = Path(__file__).parent
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = argv if argv is not None else sys.argv[1:]
-
-    if not args or args[0] in ("--help", "-h"):
-        _print_help()
-        return 0
-
-    cmd, rest = args[0], args[1:]
-
-    if cmd not in COMMANDS:
-        print(f"Unknown command: {cmd}", file=sys.stderr)
-        print(f"Available: {', '.join(COMMANDS)}", file=sys.stderr)
-        return 2
-
-    return _run_module(COMMANDS[cmd], rest)
+    return dispatch_cli(
+        argv,
+        help_text=__doc__ or "",
+        commands=COMMAND_SPECS,
+        base_dir=_DIR,
+    )
 
 
 if __name__ == "__main__":

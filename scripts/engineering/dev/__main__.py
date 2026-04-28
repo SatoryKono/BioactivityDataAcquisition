@@ -23,11 +23,17 @@ Commands:
 
 from __future__ import annotations
 
-import subprocess
 import sys
 from pathlib import Path
 
-COMMANDS: dict[str, str] = {
+from scripts.engineering.common.cli_dispatch import (
+    dispatch_cli,
+    print_help,
+    python_command,
+    shell_command,
+)
+
+COMMAND_SPECS = {
     "install-deps": "install_deps.py",
     "migrate-deprecated-names": "python/migrate_deprecated_names.py",
     "probe-quality": "quality_gate_probe.py",
@@ -36,54 +42,60 @@ COMMANDS: dict[str, str] = {
     "mock-quarantine": "quarantine_explorer_mock_server.py",
     "setup-mcp": "setup_copilot_codex_mcp.py",
 }
+COMMAND_SPECS = {name: python_command(script) for name, script in COMMAND_SPECS.items()}
 
-SHELL_COMMANDS: dict[str, str] = {
+SHELL_COMMANDS = {
     "setup": "dev_setup.sh",
     "pretest-guardrails": "pretest_guardrails.sh",
     "pytest-sharded": "run_pytest_sharded.sh",
 }
+SHELL_COMMAND_SPECS = {
+    name: shell_command(script) for name, script in SHELL_COMMANDS.items()
+}
 
 _DIR = Path(__file__).parent
-
-
-def _run_script(name: str, argv: list[str]) -> int:
-    script = _DIR / name
-    result = subprocess.run([sys.executable, str(script), *argv], check=False)
-    return result.returncode
-
-
-def _run_shell(name: str, argv: list[str]) -> int:
-    script = _DIR / name
-    result = subprocess.run(["bash", str(script), *argv], check=False)
-    return result.returncode
-
-
-def _print_help() -> None:
-    print(__doc__ or "", end="")
 
 
 def main(argv: list[str] | None = None) -> int:
     args = argv if argv is not None else sys.argv[1:]
 
     if not args or args[0] in ("--help", "-h"):
-        _print_help()
+        print_help(__doc__ or "")
         return 0
 
     cmd, rest = args[0], args[1:]
 
-    if cmd in COMMANDS:
-        return _run_script(COMMANDS[cmd], rest)
+    if cmd in COMMAND_SPECS:
+        return dispatch_cli(
+            [cmd, *rest],
+            help_text=__doc__ or "",
+            commands=COMMAND_SPECS,
+            base_dir=_DIR,
+        )
 
     if cmd == "test-changed":
-        return _run_script("run_tests.py", ["changed", *rest])
+        return dispatch_cli(
+            [cmd, *rest],
+            help_text=__doc__ or "",
+            commands={"test-changed": python_command("run_tests.py", "changed")},
+            base_dir=_DIR,
+        )
 
-    if cmd in SHELL_COMMANDS:
-        return _run_shell(SHELL_COMMANDS[cmd], rest)
+    if cmd in SHELL_COMMAND_SPECS:
+        return dispatch_cli(
+            [cmd, *rest],
+            help_text=__doc__ or "",
+            commands=SHELL_COMMAND_SPECS,
+            base_dir=_DIR,
+        )
 
-    all_cmds = sorted([*COMMANDS, *SHELL_COMMANDS])
-    print(f"Unknown command: {cmd}", file=sys.stderr)
-    print(f"Available: {', '.join(all_cmds)}", file=sys.stderr)
-    return 2
+    return dispatch_cli(
+        [cmd, *rest],
+        help_text=__doc__ or "",
+        commands={**COMMAND_SPECS, **SHELL_COMMAND_SPECS},
+        base_dir=_DIR,
+        sort_available=True,
+    )
 
 
 if __name__ == "__main__":

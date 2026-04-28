@@ -43,74 +43,60 @@ Suite:
 
 from __future__ import annotations
 
-import subprocess
-import sys
 from pathlib import Path
 
-COMMANDS: dict[str, str] = {
+from scripts.engineering.common.cli_dispatch import (
+    dispatch_cli,
+    python_command,
+    shell_command,
+)
+
+COMMAND_SPECS = {
     # Lint
-    "lint": "lint_diagrams.py",
-    "lint-summarize": "summarize_diagram_lint.py",
-    "lint-budget": "enforce_diagram_quality_budget.py",
+    "lint": python_command("lint_diagrams.py"),
+    "lint-summarize": python_command("summarize_diagram_lint.py"),
+    "lint-budget": python_command("enforce_diagram_quality_budget.py"),
     # Check
-    "checks": "run_diagram_checks.sh",
-    "check-artifacts": "check_diagram_artifacts.py",
-    "check-quality-gates": "check_diagram_quality_gates.py",
-    "check-visual-smoke": "check_diagram_visual_smoke.py",
-    "check-svg-text": "check_svg_text_visibility.py",
-    "check-class-methods": "check_class_method_render_integrity.py",
-    "check-pdf-bounds": "check_pdf_image_bounds.py",
-    "check-padding": "report_diagram_padding.py",
+    "checks": shell_command("run_diagram_checks.sh"),
+    "check-artifacts": python_command("check_diagram_artifacts.py"),
+    "check-quality-gates": python_command("check_diagram_quality_gates.py"),
+    "check-visual-smoke": python_command("check_diagram_visual_smoke.py"),
+    "check-svg-text": python_command("check_svg_text_visibility.py"),
+    "check-class-methods": python_command("check_class_method_render_integrity.py"),
+    "check-pdf-bounds": python_command("check_pdf_image_bounds.py"),
+    "check-padding": python_command("report_diagram_padding.py"),
     # Fix
-    "fix-operators": "fix_mermaid_operators.py",
-    "fix-svg-text": "add_svg_text_fallback.py",
-    "fix-svg-styles": "inject_svg_styles.py",
-    "fix-foreign-object": "strip_svg_foreign_object.py",
-    "fix-orphans": "prune_orphan_nodes.py",
-    "fix-sizes": "uniform_diagram_sizes.py",
-    "fix-pagebreaks": "fix_pagebreaks_in_bundles.py",
+    "fix-operators": python_command("fix_mermaid_operators.py"),
+    "fix-svg-text": python_command("add_svg_text_fallback.py"),
+    "fix-svg-styles": python_command("inject_svg_styles.py"),
+    "fix-foreign-object": python_command("strip_svg_foreign_object.py"),
+    "fix-orphans": python_command("prune_orphan_nodes.py"),
+    "fix-sizes": python_command("uniform_diagram_sizes.py"),
+    "fix-pagebreaks": python_command("fix_pagebreaks_in_bundles.py"),
     # Render
-    "docs-agent": "run_diagram_docs_agent.sh",
-    "render-pdf": "generate_architecture_bundle.py",
-    "render-pdf-desc": "generate_with_descriptions_pdf.py",
-    "render-docx": "generate_with_descriptions_docx.py",
-    "render-views": "generate_views_bundle.py",
-    "render-desc-indexes": "generate_description_indexes.py",
+    "docs-agent": shell_command("run_diagram_docs_agent.sh"),
+    "render-pdf": python_command(
+        "generate_all_bundles.py", "--collection", "architecture"
+    ),
+    "render-pdf-desc": python_command("generate_with_descriptions_pdf.py"),
+    "render-docx": python_command("generate_with_descriptions_docx.py"),
+    "render-views": python_command("generate_all_bundles.py", "--collection", "views"),
+    "render-desc-indexes": python_command("generate_description_indexes.py"),
     # Suite
-    "nightly": "run_diagram_nightly_suite.py",
+    "nightly": python_command("run_diagram_nightly_suite.py"),
 }
 
 _DIR = Path(__file__).parent
 
 
-def _run_script(name: str, argv: list[str]) -> int:
-    script = _DIR / name
-    command = [sys.executable, str(script), *argv]
-    if script.suffix == ".sh":
-        command = ["bash", str(script), *argv]
-    result = subprocess.run(command, check=False)
-    return result.returncode
-
-
-def _print_help() -> None:
-    print(__doc__ or "", end="")
-
-
 def main(argv: list[str] | None = None) -> int:
-    args = argv if argv is not None else sys.argv[1:]
-
-    if not args or args[0] in ("--help", "-h"):
-        _print_help()
-        return 0
-
-    cmd, rest = args[0], args[1:]
-
-    if cmd not in COMMANDS:
-        print(f"Unknown command: {cmd}", file=sys.stderr)
-        print(f"Available: {', '.join(sorted(COMMANDS))}", file=sys.stderr)
-        return 2
-
-    return _run_script(COMMANDS[cmd], rest)
+    return dispatch_cli(
+        argv,
+        help_text=__doc__ or "",
+        commands=COMMAND_SPECS,
+        base_dir=_DIR,
+        sort_available=True,
+    )
 
 
 if __name__ == "__main__":

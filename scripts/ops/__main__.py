@@ -31,73 +31,54 @@ Legacy maintenance commands:
 
 from __future__ import annotations
 
-import subprocess
-import sys
 from pathlib import Path
 
-COMMANDS: dict[str, str] = {
+from scripts.engineering.common.cli_dispatch import (
+    dispatch_cli,
+    python_command,
+    shell_command,
+)
+
+COMMAND_SPECS = {
     "salt-rotate": "maintenance/security/salt_rotate.py",
     "fix-grafana": "observability/grafana/fix_grafana_dashboards.py",
     "rerender-grafana": "observability/grafana/rerender_grafana_screenshots.py",
     "wsl-proxy": "runtime/wsl/wsl_proxy.py",
 }
+COMMAND_SPECS = {name: python_command(script) for name, script in COMMAND_SPECS.items()}
 
-SHELL_COMMANDS: dict[str, str] = {
+SHELL_COMMAND_SPECS = {
     "update-issue": "maintenance/github/update_github_issue.sh",
     "triage-issues": "maintenance/github/triage_cleanup_issue_wave.sh",
     "close-ge-spike": "maintenance/github/close_great_expectations_spike_issue.sh",
     "close-schema-drift": "maintenance/github/close_pandera_schema_drift_issue.sh",
     "codex": "launchers/codex/codex.sh",
     "codex-exec": "launchers/codex/codex-exec.sh",
-    "codex-headless": "launchers/codex/codex-headless.sh",
-    "diagnose-codex-wsl": "launchers/codex/diagnose-codex-wsl.sh",
-    "setup-agents": "launchers/codex/setup_agents.sh",
+    "codex-headless": "../ai/codex/headless.sh",
+    "diagnose-codex-wsl": "../ai/codex/diagnose_wsl.sh",
+    "setup-agents": "../ai/codex/setup_agents.sh",
     "setup-plugins": "launchers/codex/setup_plugins.sh",
-    "setup-skills": "launchers/codex/setup_skills.sh",
+    "setup-skills": "../ai/codex/setup_skills.sh",
     "check-skills": "support/skills/check_ai_skills_layout.sh",
     "check-mirror": "support/skills/check_skills_mirror.sh",
     "deploy": "runtime/deploy/deploy-bioetl.sh",
     "delete-branches": "maintenance/git/delete-stale-branches.sh",
 }
+SHELL_COMMAND_SPECS = {
+    name: shell_command(script) for name, script in SHELL_COMMAND_SPECS.items()
+}
 
 _DIR = Path(__file__).parent
 
 
-def _run_script(name: str, argv: list[str]) -> int:
-    script = _DIR / name
-    result = subprocess.run([sys.executable, str(script), *argv], check=False)
-    return result.returncode
-
-
-def _run_shell(name: str, argv: list[str]) -> int:
-    script = _DIR / name
-    result = subprocess.run(["bash", str(script), *argv], check=False)
-    return result.returncode
-
-
-def _print_help() -> None:
-    print(__doc__ or "", end="")
-
-
 def main(argv: list[str] | None = None) -> int:
-    args = argv if argv is not None else sys.argv[1:]
-
-    if not args or args[0] in ("--help", "-h"):
-        _print_help()
-        return 0
-
-    cmd, rest = args[0], args[1:]
-
-    if cmd in COMMANDS:
-        return _run_script(COMMANDS[cmd], rest)
-
-    if cmd in SHELL_COMMANDS:
-        return _run_shell(SHELL_COMMANDS[cmd], rest)
-
-    all_cmds = sorted([*COMMANDS, *SHELL_COMMANDS])
-    print(f"Unknown command: {cmd}", file=sys.stderr)
-    print(f"Available: {', '.join(all_cmds)}", file=sys.stderr)
-    return 2
+    return dispatch_cli(
+        argv,
+        help_text=__doc__ or "",
+        commands={**COMMAND_SPECS, **SHELL_COMMAND_SPECS},
+        base_dir=_DIR,
+        sort_available=True,
+    )
 
 
 if __name__ == "__main__":

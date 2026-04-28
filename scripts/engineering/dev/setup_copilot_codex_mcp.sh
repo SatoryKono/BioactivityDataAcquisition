@@ -22,4 +22,4 @@ PYTHON_BIN="$(detect_python)" || {
     exit 1
 }
 
-exec "$PYTHON_BIN" scripts/engineering/dev/setup_copilot_codex_mcp.py "$@"
+exec "$PYTHON_BIN" scripts/ai/codex/setup_mcp.py "$@"
