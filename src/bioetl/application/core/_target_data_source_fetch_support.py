@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from bioetl.application.core._fetch_forwarding import (
     _UNSET_FETCH_ARG,
-    build_forwarded_fetch_kwargs,
+    forward_fetch_records,
 )
 from bioetl.domain.ports import FilterableDataSourcePort
 
@@ -44,24 +44,19 @@ async def yield_wrapped_fetch_records(
     offset: int | None = None,
 ) -> AsyncIterator[RecordT]:
     """Delegate a plain fetch call to a wrapped data source adapter."""
-    iterator = cast(
-        "AsyncIterator[RecordT]",
+    async for record in forward_fetch_records(
         cast(
             "Any",  # Any: Dynamic data source adapter
             data_source,
-        ).fetch(
-            **build_forwarded_fetch_kwargs(
-                entity_type=entity_type,
-                limit=limit,
-                query=query,
-                filter_ids=filter_ids,
-                filter_field=filter_field,
-                offset=offset,
-            ),
-        ),
-    )
-    async for record in iterator:
-        yield record
+        ).fetch,
+        entity_type=entity_type,
+        limit=limit,
+        query=query,
+        filter_ids=filter_ids,
+        filter_field=filter_field,
+        offset=offset,
+    ):
+        yield cast("RecordT", record)
 
 
 def yield_plain_wrapped_fetch_records(
