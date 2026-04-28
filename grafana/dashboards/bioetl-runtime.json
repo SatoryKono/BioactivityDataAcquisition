@@ -434,7 +434,7 @@
             },
             "targets": [
                 {
-                    "expr": "(sum(bioetl_runtime_alert_condition_provider_failure_rate_high_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_retries_exhausted_1h{pipeline=~\"$pipeline\"}) or vector(0))",
+                    "expr": "(sum(bioetl_runtime_alert_condition_provider_failure_rate_high_15m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_retries_exhausted_1h) or vector(0))",
                     "refId": "A"
                 }
             ],
@@ -1024,7 +1024,7 @@
             },
             "targets": [
                 {
-                    "expr": "round(sum(increase(bioetl_memory_pressure_events_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
+                    "expr": "round(sum(increase(bioetl_memory_pressure_events_total{pipeline=~\"$pipeline\",stage=~\"$stage\"}[$__range])) or vector(0))",
                     "refId": "A"
                 }
             ],
@@ -1197,7 +1197,7 @@
             },
             "targets": [
                 {
-                    "expr": "max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"$pipeline\"}[$__range])) or vector(0)",
+                    "expr": "max(max_over_time(bioetl_memory_pressure_state{pipeline=~\"$pipeline\",stage=~\"$stage\"}[$__range])) or vector(0)",
                     "refId": "A"
                 }
             ],
@@ -1270,6 +1270,342 @@
             ],
             "title": "Log Hygiene Trend",
             "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 0,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "red",
+                                "value": null
+                            },
+                            {
+                                "color": "green",
+                                "value": 1
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 6,
+                "x": 0,
+                "y": 45
+            },
+            "id": 201,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "expr": "max(up{job=\"bioetl\"}) or vector(0)",
+                    "refId": "A"
+                }
+            ],
+            "title": "Metrics Endpoint Up",
+            "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 0,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "red",
+                                "value": null
+                            },
+                            {
+                                "color": "green",
+                                "value": 1
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 6,
+                "x": 6,
+                "y": 45
+            },
+            "id": 202,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "expr": "max(up{job=\"prometheus\"}) or vector(0)",
+                    "refId": "A"
+                }
+            ],
+            "title": "Prometheus Up",
+            "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 0,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "red",
+                                "value": null
+                            },
+                            {
+                                "color": "green",
+                                "value": 1
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 6,
+                "x": 12,
+                "y": 45
+            },
+            "id": 203,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "expr": "max(up{job=\"grafana\"}) or vector(0)",
+                    "refId": "A"
+                }
+            ],
+            "title": "Grafana Up",
+            "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 0,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "red",
+                                "value": null
+                            },
+                            {
+                                "color": "green",
+                                "value": 1
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 6,
+                "x": 18,
+                "y": 45
+            },
+            "id": 204,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "expr": "max(up{job=\"pushgateway\"}) or vector(0)",
+                    "refId": "A"
+                }
+            ],
+            "title": "Pushgateway Up",
+            "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 0,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 1
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 53
+            },
+            "id": 205,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "expr": "sum(((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range])) > 0) unless on (pipeline, run_type) (sum by (pipeline, run_type) (increase(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range])) > 0))) or vector(0)",
+                    "refId": "A"
+                }
+            ],
+            "title": "No-Records Processed Runs",
+            "type": "stat"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 0,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 1
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 53
+            },
+            "id": 206,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "expr": "round(sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~\"$pipeline\",status=\"not_reconstructable\"}[$__range])) or vector(0))",
+                    "refId": "A"
+                }
+            ],
+            "title": "Replay Not Reconstructable",
+            "type": "stat"
         }
     ],
     "refresh": "30s",
@@ -1321,6 +1657,31 @@
                 "options": [],
                 "query": {
                     "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
+                    "refId": "StandardVariableQuery"
+                },
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "tagValuesQuery": "",
+                "tags": [],
+                "tagsQuery": "",
+                "type": "query",
+                "useTags": false
+            },
+            {
+                "allValue": null,
+                "current": {},
+                "datasource": "Prometheus",
+                "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}, stage)",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Stage",
+                "multi": true,
+                "name": "stage",
+                "options": [],
+                "query": {
+                    "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}, stage)",
                     "refId": "StandardVariableQuery"
                 },
                 "refresh": 1,

@@ -49,7 +49,11 @@ from bioetl.domain.ports.data_source import (
     FilterableDataSourcePort,
 )
 from bioetl.domain.ports.delta_reader import DeltaReaderPort
-from bioetl.domain.ports.export import ExportCatalogPort, ExportWriterPort
+from bioetl.domain.ports.export import (
+    ExportCatalogPort,
+    ExportFileFingerprint,
+    ExportWriterPort,
+)
 from bioetl.domain.ports.filtering import InputFilterPort
 from bioetl.domain.ports.health_check import (
     HealthCheckPort,
@@ -184,6 +188,7 @@ __all__ = [
     "ExecutionObservabilityPort",
     "ExecutorMetricsPort",
     "ExportCatalogPort",
+    "ExportFileFingerprint",
     "ExportWriterPort",
     "FallbackPolicyPort",
     "FilterableDataSourcePort",
