@@ -28,6 +28,11 @@ def build_diagnostics_guide_lines() -> list[str]:
             "[--limit 100] [--format text|json|yaml]"
         ),
         (
+            "  dossier: bioetl diagnostics dossier --run-id <run-id> "
+            "[--limit 100] [--format text|json|yaml]"
+        ),
+        "  contract-checks: bioetl diagnostics contract-checks [--json]",
+        (
             "  checkpoint: bioetl diagnostics checkpoint --pipeline <pipeline> "
             "[--run-id <run-id>] [--audit-limit 100] [--format text|json|yaml]"
         ),
@@ -43,9 +48,9 @@ def build_diagnostics_guide_lines() -> list[str]:
         "Observability verification workflow:",
         "  1. bioetl diagnostics metrics [--json]",
         "  2. bioetl diagnostics health [--json]",
-        "  3. python -m scripts.engineering.qa report-observability-metric-inventory --json",
+        "  3. bioetl diagnostics contract-checks [--json]",
         (
-            "  4. compare inventory output with "
+            "  4. compare contract output with "
             "grafana/prometheus-rules/bioetl_observability.yml and shipped dashboards"
         ),
         "",
@@ -174,6 +179,11 @@ def _render_dossier_status_lines(status: dict[str, object]) -> list[str]:
         f"  quarantine_status: {status.get('quarantine_status')}",
         f"  missing_evidence_count: {status.get('missing_evidence_count')}",
         f"  degraded_evidence_count: {status.get('degraded_evidence_count')}",
+        f"  operational_success: {status.get('operational_success')}",
+        (
+            "  operational_success_criteria: "
+            f"{status.get('operational_success_criteria')}"
+        ),
     ]
 
 

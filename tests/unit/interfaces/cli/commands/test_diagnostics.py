@@ -56,6 +56,11 @@ class _FakeWorkflowService:
                     "quarantine_status": "present",
                     "missing_evidence_count": 0,
                     "degraded_evidence_count": 1,
+                    "operational_success": False,
+                    "operational_success_criteria": {
+                        "critical_pipeline": True,
+                        "runtime_terminal_success": True,
+                    },
                 },
                 "audit": {
                     "query": {"run_id": run_id, "limit": audit_limit},
@@ -225,6 +230,8 @@ def test_diagnostics_guide_displays_canonical_routes(cli_runner: CliRunner) -> N
     assert "BioETL Diagnostics Guide" in result.output
     assert "bioetl diagnostics metrics" in result.output
     assert "bioetl diagnostics health" in result.output
+    assert "bioetl diagnostics dossier" in result.output
+    assert "bioetl diagnostics contract-checks" in result.output
     assert "bioetl diagnostics checkpoint" in result.output
     assert "bioetl diagnostics manifest" in result.output
     assert "bioetl diagnostics quarantine" in result.output
@@ -243,6 +250,8 @@ def test_diagnostics_guide_matches_exact_output(cli_runner: CliRunner) -> None:
         "  metrics/admin: bioetl diagnostics metrics [--json]",
         "  health: bioetl diagnostics health [--provider <provider>] [--json]",
         "  run: bioetl diagnostics run --run-id <run-id> [--limit 100] [--format text|json|yaml]",
+        "  dossier: bioetl diagnostics dossier --run-id <run-id> [--limit 100] [--format text|json|yaml]",
+        "  contract-checks: bioetl diagnostics contract-checks [--json]",
         "  checkpoint: bioetl diagnostics checkpoint --pipeline <pipeline>"
         " [--run-id <run-id>] [--audit-limit 100] [--format text|json|yaml]",
         "  manifest: bioetl diagnostics manifest <run-id|manifest-id> [--format text|json|yaml]",
@@ -252,8 +261,8 @@ def test_diagnostics_guide_matches_exact_output(cli_runner: CliRunner) -> None:
         "Observability verification workflow:",
         "  1. bioetl diagnostics metrics [--json]",
         "  2. bioetl diagnostics health [--json]",
-        "  3. python -m scripts.engineering.qa report-observability-metric-inventory --json",
-        "  4. compare inventory output with grafana/prometheus-rules/bioetl_observability.yml and shipped dashboards",
+        "  3. bioetl diagnostics contract-checks [--json]",
+        "  4. compare contract output with grafana/prometheus-rules/bioetl_observability.yml and shipped dashboards",
         "",
         "Metrics server startup is auto-managed during pipeline runs when metrics are enabled.",
         "Pushgateway publication is best-effort on run completion; inspect current config with diagnostics metrics.",
@@ -414,6 +423,7 @@ def test_diagnostics_run_text_outputs_correlated_summary(
     assert result.exit_code == 0
     assert "Run Forensic Dossier" in result.output
     assert "forensic_profile: forensic_grade" in result.output
+    assert "operational_success: False" in result.output
     assert "manifest_id: manifest-1" in result.output
     assert "checkpoint_run_id: 00000000-0000-0000-0000-000000000001" in result.output
     assert "lineage_fragment_ids: ['fragment-1']" in result.output
@@ -422,6 +432,44 @@ def test_diagnostics_run_text_outputs_correlated_summary(
     assert "trace_urls: ['/a/grafana-exploretraces-app/" in result.output
     assert workflow_service.run_dossier_calls == [
         ("00000000-0000-0000-0000-000000000001", 100)
+    ]
+
+
+@pytest.mark.unit
+def test_diagnostics_dossier_alias_uses_run_dossier_workflow(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    workflow_service = _FakeWorkflowService()
+    bundle = _build_bundle(workflow_service=workflow_service)
+    import bioetl.interfaces.cli.commands.diagnostics as diagnostics_module
+
+    monkeypatch.setattr(
+        diagnostics_module,
+        "get_observability_diagnostics_bundle",
+        lambda: bundle,
+        raising=True,
+    )
+
+    result = cli_runner.invoke(
+        cli,
+        [
+            "diagnostics",
+            "dossier",
+            "--run-id",
+            "00000000-0000-0000-0000-000000000001",
+            "--limit",
+            "7",
+            "--format",
+            "json",
+        ],
+    )
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["run_id"] == "00000000-0000-0000-0000-000000000001"
+    assert workflow_service.run_dossier_calls == [
+        ("00000000-0000-0000-0000-000000000001", 7)
     ]
 
 
