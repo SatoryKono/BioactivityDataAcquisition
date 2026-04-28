@@ -11,19 +11,22 @@ from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.types import BatchID, BronzeRecord
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
+from bioetl.infrastructure.storage.silver.merged_request_support import (
+    _build_merged_write_request,
+)
 
 __all__ = [
-    "_build_silver_merged_metadata_write_request",
     "_PreparedSilverMetadataWriteOperation",
     "_PreparedSilverWriteFinalizationContext",
     "_ResolvedSilverMetadataContext",
-    "_SilverWriteFinalizationPreparationRequest",
-    "_SilverWriteResultFinalizationRequest",
     "_SilverMergedMetadataWriteRequest",
     "_SilverMetadataWriteRequest",
+    "_SilverWriteFinalizationPreparationRequest",
+    "_SilverWriteResultFinalizationRequest",
+    "_build_silver_merged_metadata_write_request",
+    "_coerce_silver_metadata_write_request",
     "_coerce_silver_write_finalization_preparation_request",
     "_coerce_silver_write_result_finalization_request",
-    "_coerce_silver_metadata_write_request",
 ]
 
 
@@ -182,7 +185,8 @@ def _build_silver_merged_metadata_write_request(
     sources_used: list[str] | None = None,
 ) -> _SilverMergedMetadataWriteRequest:
     """Build the canonical request for merged Silver metadata sidecar writes."""
-    return _SilverMergedMetadataWriteRequest(
+    return _build_merged_write_request(
+        _SilverMergedMetadataWriteRequest,
         table_path=table_path,
         table_name=table_name,
         records=records,

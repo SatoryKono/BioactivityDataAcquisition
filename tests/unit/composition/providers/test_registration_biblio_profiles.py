@@ -53,17 +53,18 @@ def test_resolve_openalex_request_profile_prefers_pipeline_api_key() -> None:
     settings.default_email = "default@example.org"
     settings.openalex_api_key = MagicMock()
     settings.openalex_api_key.get_secret_value.return_value = "settings-openalex-key"
+    pipeline_token = "test-token"
 
     result = _resolve_openalex_request_profile(
         settings,
         _pipeline_config(
             email="pipeline@example.org",
-            api_key="pipeline-openalex-key",
+            api_key=pipeline_token,
         ),
         batch_size=50,
     )
 
-    assert result.api_key == "pipeline-openalex-key"
+    assert result.api_key == pipeline_token
     assert result.mailto == "pipeline@example.org"
     assert result.batch_size == 50
 

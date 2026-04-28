@@ -9,11 +9,6 @@ from typing import TYPE_CHECKING, cast
 import click
 
 from bioetl.interfaces.cli.commands.checkpoint import _render_checkpoint_payload
-from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
-    add_audit_run_options,
-    add_checkpoint_workflow_options,
-    run_async_inspection_command,
-)
 from bioetl.interfaces.cli.commands.domains.diagnostics.rendering import (
     build_diagnostics_guide_lines,
     build_metrics_profile_lines,
@@ -27,6 +22,11 @@ from bioetl.interfaces.cli.commands.domains.health.rendering import (
 from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     _QuarantineManager,
     _show_quarantine_stats,
+)
+from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
+    add_audit_run_options,
+    add_checkpoint_workflow_options,
+    run_async_inspection_command,
 )
 from bioetl.interfaces.cli.commands.inspection_output import (
     emit_inspection_payload,

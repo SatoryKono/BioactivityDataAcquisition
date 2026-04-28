@@ -31,6 +31,9 @@ Protected references are fail-closed:
 
 - retention-active manifests protect their run, replay parent, effective-config
   artifact, input snapshots, ledgers, and lineage fragments;
+- stale manifests that declare `required_persistence_profile=replay_ready` or
+  `required_persistence_profile=forensic_grade` protect the same evidence floor
+  unless the operator explicitly passes `--allow-profile-floor-violation`;
 - retention-active checkpoints protect their run, manifest, and effective-config
   artifact anchors;
 - cached Bronze files are retained when their content-addressed
@@ -66,6 +69,20 @@ bioetl maintenance control-plane-lifecycle \
   --protected-manifest-id "$MANIFEST_ID" \
   --protected-snapshot-id "sha256:$CONTENT_HASH"
 ```
+
+Override a stale replay/forensic evidence floor only after separate review:
+
+```bash
+bioetl maintenance control-plane-lifecycle \
+  --retention-days 90 \
+  --allow-profile-floor-violation \
+  --apply
+```
+
+Dry-run and JSON output expose evidence-floor retention as
+`reason=reproducibility_evidence_floor` with `protected_by` values prefixed by
+`evidence_floor:`. Treat those entries as replay/forensic contract violations,
+not as ordinary retention-expired cleanup candidates.
 
 ## Recovery
 

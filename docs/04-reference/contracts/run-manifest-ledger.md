@@ -104,6 +104,10 @@ Protected-reference rules are fail-closed:
   `code_provenance.effective_config_artifact_id`;
 - manifests inside the retention window protect content-addressed
   `source_refs[*].input_snapshots[*].snapshot_id` values;
+- stale manifests that declare `required_persistence_profile=replay_ready` or
+  `required_persistence_profile=forensic_grade` retain their replay evidence
+  floor unless `ControlPlaneArtifactLifecyclePolicy.allow_profile_floor_violation`
+  is explicitly enabled;
 - checkpoints inside the retention window protect their `run_id`,
   `manifest_id`, and `effective_config_artifact_id` anchors;
 - explicit protected manifest/run/effective-config/lineage/snapshot identifiers
@@ -117,6 +121,10 @@ Protected-reference rules are fail-closed:
   `stored_fragment_id`, or semantic `fragment_id` is protected.
 - cached Bronze files are retained when their `sha256:{content_hash}` identity
   is protected by a retained manifest or explicit snapshot protection.
+- profile-floor retention is emitted as
+  `reason=reproducibility_evidence_floor` with `protected_by` entries prefixed
+  by `evidence_floor:` so dry-run/apply output distinguishes replay evidence
+  violations from ordinary protected references.
 
 Lifecycle planning is intentionally independent from read APIs: expired
 unprotected files can be selected for deletion even if higher-level lookup
@@ -805,13 +813,25 @@ For replay-safe runs the published inspection surface MUST expose compact replay
 anchors derived from manifest source refs:
 
 - `requested_exact_replay`
+- `exact_replay_anchors`
 - `input_snapshot_ids`
 - `input_snapshot_content_hashes`
 - `input_snapshot_identity_fingerprint`
+- `produced_artifact_trace`
 
 These fields are derived operator-facing summaries used to line up run-manifest
 inspection with checkpoint compatibility diagnostics; they do not expand the
 persisted `RunManifest` storage schema.
+
+`exact_replay_anchors` is the semantic replay section. It intentionally excludes
+occurrence-only identifiers such as `manifest_id` and `run_id`; those values stay
+in the surrounding inspection payload and occurrence diagnostics.
+
+`produced_artifact_trace` is rooted at the manifest lookup key and is resolved
+from run-ledger artifact publication events only. A run cannot claim
+`replay_ready` unless this trace is complete, because replay inspection must be
+able to move from `manifest_id` to concrete produced artifacts without scraping
+logs or metadata sidecars.
 
 The paired effective-config artifact publishes a separate semantic provenance
 table through `semantic_artifact.source_class_provenance`. That table makes the

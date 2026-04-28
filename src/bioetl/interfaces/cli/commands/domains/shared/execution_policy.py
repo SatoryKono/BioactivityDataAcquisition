@@ -10,8 +10,7 @@ Centralizes command-level error handling and exit-code mapping for:
 from __future__ import annotations
 
 import asyncio
-import sys
-from collections.abc import Callable, Coroutine, Mapping, Sequence
+from collections.abc import Callable, Coroutine, Sequence
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -20,8 +19,12 @@ from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
 )
 from bioetl.domain.exceptions import BioETLError
-from bioetl.interfaces.cli.exit_codes import ExitCode, get_exit_code_for_exception
-from bioetl.interfaces.cli.formatters import echo_error, echo_warning
+from bioetl.interfaces.cli.commands.domains.shared._execution_failure_support import (
+    build_failure_context,
+    handle_cli_failure,
+    render_failure_context,
+)
+from bioetl.interfaces.cli.exit_codes import ExitCode
 
 __all__ = [
     "CLI_ENTRYPOINT_TYPED_ERRORS",
@@ -235,63 +238,6 @@ def execute_prepared_cli_flow[_ResultT](
     )
 
 
-def build_failure_context(
-    exc: BaseException,
-    *,
-    reason_code: str,
-    subject_key: str,
-    subject_value: str,
-) -> dict[str, object]:
-    """Build structured context for CLI failure diagnostics.
-
-    Args:
-        exc: Exception to build context from; BioETLError instances use their
-            own structured context method.
-        reason_code: Machine-readable code attached to error context (e.g.,
-            'CLI_RUN_DOMAIN_ERROR').
-        subject_key: Key name for the structured context field (e.g., 'pipeline').
-        subject_value: Value for the structured context field (e.g., 'chembl_activity').
-
-    Returns:
-        Dictionary with structured error context including message, reason_code,
-        subject key/value, and error type.
-    """
-    if isinstance(exc, BioETLError):
-        structured_context: dict[str, object] = exc.to_structured_context(
-            reason_code=reason_code,
-            **{subject_key: subject_value},
-        )
-        return structured_context
-
-    return {
-        "message": str(exc),
-        "reason_code": reason_code,
-        subject_key: subject_value,
-        "error_type": type(exc).__name__,
-    }
-
-
-def render_failure_context(context: Mapping[str, object]) -> str:
-    """Render a structured failure context as stable human-readable text.
-
-    Args:
-        context: Structured failure context mapping with at least a 'message' key
-            and optional metadata fields.
-
-    Returns:
-        Human-readable string combining the message and sorted metadata fields.
-    """
-    message = str(context.get("message", ""))
-    keys = [key for key in context if key != "message"]
-    keys.sort()
-    metadata = ", ".join(f"{key}={context[key]}" for key in keys)
-    if not metadata:
-        return message
-    if not message:
-        return metadata
-    return f"{message} ({metadata})"
-
-
 def _format_failure_detail(
     exc: BaseException,
     *,
@@ -393,60 +339,3 @@ def run_sync_with_cli_failure_policy[_ResultT](
         policy=policy,
         passthrough_exception_types=passthrough_exception_types,
     )
-
-
-def handle_cli_failure(
-    exc: BaseException,
-    *,
-    reason_code: str,
-    subject_key: str,
-    subject_value: str,
-    domain_error_title: str,
-    unexpected_error_title: str,
-    interrupted_message: str,
-    default_exit_code: ExitCode = ExitCode.FAIL,
-) -> None:
-    """Handle command-level exceptions with a consistent policy.
-
-    Maps the exception type to the appropriate exit code, formats a structured
-    error message, echoes it to stderr, and calls sys.exit() with the mapped code.
-
-    Args:
-        exc: Exception caught at the CLI command boundary.
-        reason_code: Machine-readable code attached to error context (e.g.,
-            'CLI_COMPOSITE_DOMAIN_ERROR').
-        subject_key: Key name for the structured context field (e.g., 'pipeline').
-        subject_value: Value for the structured context field (e.g., 'chembl_activity').
-        domain_error_title: Title shown for BioETLError exceptions.
-        unexpected_error_title: Title shown for non-domain exceptions.
-        interrupted_message: Message shown when KeyboardInterrupt is caught.
-        default_exit_code: Fallback exit code when no specific code is determined.
-            Defaults to ExitCode.FAIL.
-    """
-    if isinstance(exc, PipelineNotFoundError):
-        echo_error("Pipeline not found", str(exc))
-        sys.exit(ExitCode.CONFIG_ERROR)
-
-    if isinstance(exc, KeyboardInterrupt):
-        echo_warning(interrupted_message)
-        sys.exit(ExitCode.SIGINT)
-
-    detail = _format_failure_detail(
-        exc,
-        reason_code=reason_code,
-        subject_key=subject_key,
-        subject_value=subject_value,
-    )
-
-    if isinstance(exc, BioETLError):
-        domain_exit = get_exit_code_for_exception(exc)
-        if domain_exit == ExitCode.FAIL:
-            domain_exit = default_exit_code
-        echo_error(domain_error_title, detail)
-        sys.exit(domain_exit)
-
-    exit_code = get_exit_code_for_exception(exc)
-    if exit_code == ExitCode.FAIL:
-        exit_code = default_exit_code
-    echo_error(unexpected_error_title, detail)
-    sys.exit(exit_code)

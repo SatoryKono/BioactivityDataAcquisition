@@ -18,6 +18,9 @@ from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConvert
 from bioetl.infrastructure.storage.delta.schema_ops import (
     drop_nondeterministic_persisted_fields,
 )
+from bioetl.infrastructure.storage.silver.merged_request_support import (
+    _build_merged_write_request,
+)
 
 __all__ = [
     "_build_merged_silver_write_request",
@@ -56,7 +59,8 @@ def _build_merged_silver_write_request(
     preserve_column_order: bool = False,
 ) -> _MergedSilverWriteRequest:
     """Build the canonical merged-write request from legacy keyword arguments."""
-    return _MergedSilverWriteRequest(
+    return _build_merged_write_request(
+        _MergedSilverWriteRequest,
         table_name=table_name,
         records=records,
         primary_keys=primary_keys,

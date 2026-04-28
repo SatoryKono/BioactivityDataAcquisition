@@ -17,10 +17,7 @@ from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
     add_checkpoint_workflow_options,
     run_async_inspection_command,
 )
-from bioetl.interfaces.cli.commands._inspection_output import (
-    emit_inspection_payload,
-)
-from bioetl.interfaces.cli.formatters import echo_checkpoint, echo_error, echo_info
+from bioetl.interfaces.cli.formatters import echo_checkpoint, echo_info
 
 if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (

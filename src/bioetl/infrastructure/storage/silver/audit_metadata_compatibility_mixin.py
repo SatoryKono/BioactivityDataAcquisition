@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, cast
 
-from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
     _coerce_silver_metadata_audit_request,
@@ -15,7 +13,6 @@ from bioetl.infrastructure.storage.silver.operations.metadata_write_support impo
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SilverMetadata
-    from bioetl.domain.types import BatchID, RunID, RunType
     from bioetl.infrastructure.storage.silver.metadata_mixin import (
         SilverWriterMetadataMixin,
     )

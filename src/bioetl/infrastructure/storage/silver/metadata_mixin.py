@@ -22,12 +22,9 @@ from bioetl.domain.ports import (
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
-from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.silver.metadata_operations import (
-    _SilverMetadataWriteHostProtocol,
-    _SilverWriteFinalizationHostProtocol,
     _build_silver_write_result,
     _coerce_silver_metadata_write_request,
     _execute_silver_metadata_write,
@@ -36,8 +33,9 @@ from bioetl.infrastructure.storage.silver.metadata_operations import (
     _prepare_silver_write_finalization_context,
     _PreparedSilverWriteFinalizationContext,
     _read_delta_version,
-    _SilverMergedMetadataWriteRequest,
+    _SilverMetadataWriteHostProtocol,
     _SilverMetadataWriteRequest,
+    _SilverWriteFinalizationHostProtocol,
 )
 from bioetl.infrastructure.storage.silver.metadata_request_models import (
     _build_silver_merged_metadata_write_request,
@@ -47,8 +45,8 @@ from bioetl.infrastructure.storage.silver.metadata_request_models import (
     _SilverWriteResultFinalizationRequest,
 )
 from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
-    _SilverMetadataAuditSupportRequest,
     _log_silver_audit_event,
+    _SilverMetadataAuditSupportRequest,
 )
 
 

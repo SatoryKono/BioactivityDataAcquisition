@@ -18,8 +18,14 @@ def test_root_hygiene_workflow_uses_strict_audit_and_unit_tests() -> None:
     workflow = Path(".github/workflows/root-hygiene.yml").read_text(encoding="utf-8")
 
     assert "audit_root_cleanliness.py --strict-untracked" in workflow
+    assert "check_root_hygiene_review_registry.py" in workflow
     assert "tests/unit/scripts/repo/test_audit_root_cleanliness.py" in workflow
+    assert (
+        "tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py"
+        in workflow
+    )
     assert "tests/architecture/test_root_hygiene_workflow.py" in workflow
+    assert "tests/architecture/test_root_hygiene_review_registry.py" in workflow
     assert "-q" in workflow
 
 
