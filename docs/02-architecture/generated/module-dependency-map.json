@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1712,
-    "total_internal_imports": 6755,
+    "scanned_modules": 1714,
+    "total_internal_imports": 6750,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 308,
@@ -53,19 +53,19 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 747,
+      "imports": 741,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 944,
+      "imports": 946,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 67,
+      "imports": 68,
       "allowed": true
     },
     {
@@ -77,7 +77,7 @@
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 38,
+      "imports": 39,
       "allowed": true
     },
     {
@@ -89,7 +89,7 @@
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 252,
+      "imports": 249,
       "allowed": true
     }
   ],
@@ -132,7 +132,7 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.types",
-      "imports": 70
+      "imports": 69
     },
     {
       "source": "application.composite",
@@ -147,7 +147,7 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.ports",
-      "imports": 62
+      "imports": 61
     },
     {
       "source": "application.services",
@@ -160,13 +160,13 @@
       "imports": 54
     },
     {
-      "source": "infrastructure.storage",
-      "target": "domain.value_objects",
-      "imports": 47
-    },
-    {
       "source": "interfaces.cli",
       "target": "application.services",
+      "imports": 46
+    },
+    {
+      "source": "infrastructure.storage",
+      "target": "domain.value_objects",
       "imports": 45
     },
     {
@@ -235,11 +235,6 @@
       "imports": 28
     },
     {
-      "source": "infrastructure.storage",
-      "target": "domain.medallion",
-      "imports": 27
-    },
-    {
       "source": "application.pipelines",
       "target": "domain.entities",
       "imports": 26
@@ -247,6 +242,11 @@
     {
       "source": "application.composite",
       "target": "domain.exceptions",
+      "imports": 25
+    },
+    {
+      "source": "infrastructure.storage",
+      "target": "domain.medallion",
       "imports": 25
     },
     {

@@ -18,11 +18,17 @@ from bioetl.infrastructure.storage.silver.merged_operations import (
     _execute_merged_silver_write_flow,
     _export_silver_merged_csv,
     _MergedSilverMetadataWriterProtocol,
+    _MergedSilverWriteExecutorProtocol,
     _MergedSilverWriteRequest,
     _prepare_merged_silver_write,
     _PreparedMergedSilverWrite,
+    _SilverWriterMergedHostProtocol,
     _write_silver_merged_delta,
 )
+
+__all__ = [
+    "SilverMergedOperations",
+]
 
 
 class _MergedWriteFacade:
@@ -81,17 +87,17 @@ class _MergedWriteFacade:
         preserve_column_order: bool = False,
     ) -> None:
         """Write merged records to Silver layer without explicit schema."""
-        request_kwargs = dict(
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-        )
+        request_kwargs = {
+            "table_name": table_name,
+            "records": records,
+            "primary_keys": primary_keys,
+        }
         request_kwargs["completed_at"] = completed_at
         request_kwargs["run_id"] = run_id
         request_kwargs["sources_used"] = sources_used
         request_kwargs["preserve_column_order"] = preserve_column_order
         await _execute_merged_silver_write_flow(
-            self,
+            cast(_MergedSilverWriteExecutorProtocol, self),
             _build_merged_silver_write_request(**request_kwargs),
         )
 

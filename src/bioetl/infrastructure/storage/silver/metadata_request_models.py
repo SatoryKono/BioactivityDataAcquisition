@@ -12,7 +12,7 @@ from bioetl.domain.types import BatchID, BronzeRecord
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.infrastructure.storage.silver.merged_request_support import (
-    _build_merged_write_request,
+    _build_merged_write_request_from_mapping,
 )
 
 __all__ = [
@@ -185,15 +185,10 @@ def _build_silver_merged_metadata_write_request(
     sources_used: list[str] | None = None,
 ) -> _SilverMergedMetadataWriteRequest:
     """Build the canonical request for merged Silver metadata sidecar writes."""
-    return _build_merged_write_request(
+    return _build_merged_write_request_from_mapping(
         _SilverMergedMetadataWriteRequest,
+        locals(),
         table_path=table_path,
-        table_name=table_name,
-        records=records,
-        primary_keys=primary_keys,
-        completed_at=completed_at,
-        run_id=run_id,
-        sources_used=sources_used,
     )
 
 
