@@ -1,3 +1,4 @@
+# ruff: noqa: UP049
 """Pure helpers for BatchExecutor DQ context construction."""
 
 from __future__ import annotations

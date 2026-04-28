@@ -1,3 +1,4 @@
+# ruff: noqa: UP049
 """Pure helper functions for metadata coordinator orchestration."""
 
 from __future__ import annotations

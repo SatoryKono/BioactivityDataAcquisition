@@ -39,6 +39,12 @@ from bioetl.infrastructure.storage.silver.metadata_operations import (
     _SilverMergedMetadataWriteRequest,
     _SilverMetadataWriteRequest,
 )
+from bioetl.infrastructure.storage.silver.metadata_request_models import (
+    _coerce_silver_write_finalization_preparation_request,
+    _coerce_silver_write_result_finalization_request,
+    _SilverWriteFinalizationPreparationRequest,
+    _SilverWriteResultFinalizationRequest,
+)
 from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
     _log_silver_audit_event,
 )
@@ -233,74 +239,65 @@ class SilverWriterMetadataMixin:
 
     async def _finalize_silver_write_result(
         self: _SilverWriterMetadataRuntimeProtocol,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        table_path: str,
-        primary_keys: list[str],
-        validated_mode: SilverWriteMode,
-        bronze_refs: list[BronzeWriteResult] | None,
-        partition_cols: list[str] | None,
-        source_batch_id: BatchID | None,
-        quarantined_count: int | None = None,
-        validation_errors: Sequence[str] | None = None,
-        started_at: datetime,
-        start_perf: float,
+        request: _SilverWriteResultFinalizationRequest | None = None,
+        *args: object,
+        **kwargs: object,
     ) -> SilverWriteResult | None:
         """Compute DQ metrics, write metadata, and build final result."""
+        resolved_request = _coerce_silver_write_result_finalization_request(
+            request,
+            args=args,
+            kwargs=kwargs,
+        )
         context = await self._prepare_silver_write_finalization_context(
-            table_name=table_name,
-            records=records,
-            table_path=table_path,
-            quarantined_count=quarantined_count,
-            validation_errors=validation_errors,
-            started_at=started_at,
-            start_perf=start_perf,
+            table_name=resolved_request.table_name,
+            records=resolved_request.records,
+            table_path=resolved_request.table_path,
+            quarantined_count=resolved_request.quarantined_count,
+            validation_errors=resolved_request.validation_errors,
+            started_at=resolved_request.started_at,
+            start_perf=resolved_request.start_perf,
         )
 
         await self._write_silver_metadata(
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-            mode=validated_mode,
-            bronze_refs=bronze_refs,
+            table_path=resolved_request.table_path,
+            table_name=resolved_request.table_name,
+            records=resolved_request.records,
+            primary_keys=resolved_request.primary_keys,
+            mode=resolved_request.validated_mode,
+            bronze_refs=resolved_request.bronze_refs,
             dq_metrics=context.dq_metrics,
-            partition_by=partition_cols,
+            partition_by=resolved_request.partition_cols,
             source_batch_ids=(
-                [str(source_batch_id)] if source_batch_id is not None else None
+                [str(resolved_request.source_batch_id)]
+                if resolved_request.source_batch_id is not None
+                else None
             ),
-            started_at=started_at,
+            started_at=resolved_request.started_at,
             completed_at=context.completed_at,
             version_after=context.version_after,
         )
         return _build_silver_write_result(
-            table_name=table_name,
-            table_path=table_path,
+            table_name=resolved_request.table_name,
+            table_path=resolved_request.table_path,
             version_after=context.version_after,
-            records_count=len(records),
+            records_count=len(resolved_request.records),
         )
 
     async def _prepare_silver_write_finalization_context(
         self: _SilverWriterMetadataRuntimeProtocol,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        table_path: str,
-        quarantined_count: int | None = None,
-        validation_errors: Sequence[str] | None = None,
-        started_at: datetime,
-        start_perf: float,
+        request: _SilverWriteFinalizationPreparationRequest | None = None,
+        *args: object,
+        **kwargs: object,
     ) -> _PreparedSilverWriteFinalizationContext:
         """Prepare DQ/version/timing context before Silver metadata persistence."""
+        resolved_request = _coerce_silver_write_finalization_preparation_request(
+            request,
+            args=args,
+            kwargs=kwargs,
+        )
         return await _prepare_silver_write_finalization_context(
             self,
-            table_name=table_name,
-            records=records,
-            table_path=table_path,
-            quarantined_count=quarantined_count,
-            validation_errors=validation_errors,
-            started_at=started_at,
-            start_perf=start_perf,
+            resolved_request,
             perf_counter=time.perf_counter,
         )

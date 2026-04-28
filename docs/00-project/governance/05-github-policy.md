@@ -113,6 +113,7 @@ For PRs to `main`, the following status checks **MUST** pass:
 | `detect-secrets`           | security.yml          | No credential leaks                                           |
 | `commit-lint`              | commit-lint.yml       | Conventional Commits                                          |
 | `type-check`               | type-checking.yml     | mypy strict compliance                                        |
+| `root-hygiene`             | root-hygiene.yml      | Clean repository root, cataloged plan/docs placement, and generated artifact bans |
 
 Docs-only PRs still go through blocking documentation governance via `docs.yml`:
 the lightweight `docs-governance` job runs architecture doc-sync / drift tests
@@ -124,7 +125,6 @@ without pulling the full heavy test matrix into documentation-only changesets.
 | ------------------ | ---------------------------- | ----------------------------- |
 | `contracts-status` | port-contracts.yml           | Port contract compliance      |
 | `no-pyc-check`     | compiled-artifacts-block.yml | No compiled artifacts         |
-| `root-hygiene`     | root-hygiene.yml             | Clean repository root         |
 | `docker-build`     | docker.yml                   | Container builds successfully |
 
 ______________________________________________________________________

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol, cast
 
@@ -66,61 +67,68 @@ def _resolve_metadata_logger(metadata_ops: object) -> LoggerPort:
     return cast(LoggerPort, logger)
 
 
+@dataclass(frozen=True, slots=True)
+class _SilverMetadataWriteSupportRequest:
+    """Normalized support-layer request for one Silver metadata sidecar write."""
+
+    table_name: str
+    dq_metrics: BatchDQMetrics
+    records: list[BronzeRecord]
+    bronze_refs: list[BronzeWriteResult] | None = None
+    mode: str = "merge"
+    validated_mode: SilverWriteMode = SilverWriteMode.MERGE
+    run_id: RunID | None = None
+    run_type: RunType | None = None
+    source_batch_id: BatchID | None = None
+    ingestion_ts: datetime | None = None
+    transform_version: str | None = None
+    transform_steps: tuple[str, ...] | None = None
+
+
 async def _write_silver_metadata(
     metadata_ops: _MetadataWriteOps,
-    table_name: str,
-    dq_metrics: BatchDQMetrics,
-    records: list[BronzeRecord],
-    bronze_refs: list[BronzeWriteResult] | None = None,
-    mode: str = "merge",
-    validated_mode: SilverWriteMode = SilverWriteMode.MERGE,
-    run_id: RunID | None = None,
-    run_type: RunType | None = None,
-    source_batch_id: BatchID | None = None,
-    ingestion_ts: datetime | None = None,
-    transform_version: str | None = None,
-    transform_steps: tuple[str, ...] | None = None,
+    request: _SilverMetadataWriteSupportRequest,
 ) -> SilverWriteResult | None:
     """Write one Silver metadata sidecar through the configured writer."""
-    del validated_mode
+    _ = request.validated_mode
 
     runtime_anchor = _resolve_metadata_timestamp(
-        explicit=ingestion_ts,
-        records=records,
+        explicit=request.ingestion_ts,
+        records=request.records,
     )
-    table_path_placeholder = _placeholder_table_path(table_name)
+    table_path_placeholder = _placeholder_table_path(request.table_name)
     metadata = _build_silver_metadata(
         _SilverMetadataBuildRequest(
-            table_name=table_name,
+            table_name=request.table_name,
             table_path=table_path_placeholder,
-            records=records,
-            dq_metrics=dq_metrics,
-            mode=mode,
+            records=request.records,
+            dq_metrics=request.dq_metrics,
+            mode=request.mode,
             runtime_started_at=runtime_anchor,
             runtime_completed_at=runtime_anchor,
-            run_id=run_id,
+            run_id=request.run_id,
             manifest_id=(
-                str(records[0]["_manifest_id"])
-                if records and records[0].get("_manifest_id") is not None
+                str(request.records[0]["_manifest_id"])
+                if request.records and request.records[0].get("_manifest_id") is not None
                 else None
             ),
-            run_type=run_type,
-            source_batch_id=source_batch_id,
-            transform_version=transform_version,
-            transform_steps=transform_steps,
-            bronze_refs=bronze_refs,
+            run_type=request.run_type,
+            source_batch_id=request.source_batch_id,
+            transform_version=request.transform_version,
+            transform_steps=request.transform_steps,
+            bronze_refs=request.bronze_refs,
         )
     )
     result = await metadata_ops._persist_silver_metadata(
         metadata=metadata,
-        table_name=table_name,
+        table_name=request.table_name,
         table_path=table_path_placeholder,
     )
     _emit_silver_metadata_write_success(
         metadata_ops,
-        table_name,
-        records,
-        dq_metrics,
+        request.table_name,
+        request.records,
+        request.dq_metrics,
         timestamp=runtime_anchor,
     )
     return result

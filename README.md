@@ -614,7 +614,7 @@ Access the docs at `http://localhost:8000`.
 ### Root layout policy
 
 Repository root is protected by `scripts/engineering/repo/audit_root_cleanliness.py`
-(pre-commit + CI job `root-hygiene`).
+(pre-commit + required CI job `root-hygiene`).
 Only approved top-level entries are allowed.
 
 **Core allowed root entries**:

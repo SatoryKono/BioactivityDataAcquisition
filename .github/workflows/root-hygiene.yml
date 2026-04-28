@@ -5,17 +5,8 @@ concurrency:
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '.ai/**'
-      - 'ai/claude/**'
-      - 'LICENSE'
   push:
-    paths-ignore:
-      - 'docs/**'
-      - '.ai/**'
-      - 'ai/claude/**'
-      - 'LICENSE'
+  workflow_dispatch:
 
 jobs:
   root-hygiene:
@@ -31,7 +22,14 @@ jobs:
           python-version: '3.12'
 
       - name: Install required dependencies
-        run: pip install pyyaml
+        run: pip install pyyaml pytest
 
       - name: Validate repository root allowlist
-        run: python scripts/engineering/repo/audit_root_cleanliness.py
+        run: python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
+
+      - name: Run root hygiene unit tests
+        run: >
+          python -m pytest
+          tests/unit/scripts/repo/test_audit_root_cleanliness.py
+          tests/architecture/test_root_hygiene_workflow.py
+          -q

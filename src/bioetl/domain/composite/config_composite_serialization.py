@@ -1,3 +1,4 @@
+# ruff: noqa: UP049
 """Serialization helpers for CompositeConfig."""
 
 from __future__ import annotations

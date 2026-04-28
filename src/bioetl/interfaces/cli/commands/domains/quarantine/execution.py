@@ -1,3 +1,4 @@
+# ruff: noqa: UP049
 """Execution policy helpers for quarantine CLI commands."""
 
 from __future__ import annotations
@@ -7,8 +8,6 @@ from dataclasses import dataclass
 
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CliBoundaryExecutionPolicy,
-)
-from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     run_async_with_cli_failure_policy,
     run_sync_with_cli_failure_policy,
 )

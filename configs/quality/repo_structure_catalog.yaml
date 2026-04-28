@@ -88,18 +88,24 @@ blocked_cleanup_zones:
   - path: docs/99-archive
     class: archive_history
     cleanup_policy: retain_for_traceability
+    cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
   - path: tests/fixtures
     class: test_fixture_surface
     cleanup_policy: retain_under_fixture_governance
+    cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
   - path: tests/fixtures/vcr
     class: recorded_http_fixture_surface
     cleanup_policy: retain_under_vcr_governance
+    cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
   - path: docs/reports
     class: curated_repo_only_reports
     cleanup_policy: curated_cleanup_only
+    cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
   - path: reports
     class: generated_working_outputs
     cleanup_policy: bounded_cleanup_only
+    cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
   - path: data
     class: runtime_and_local_data_surface
     cleanup_policy: separate_runtime_retention_procedure
+    cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md

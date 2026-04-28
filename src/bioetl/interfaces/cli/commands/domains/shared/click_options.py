@@ -1,3 +1,4 @@
+# ruff: noqa: UP049
 """Reusable Click option decorators for orchestration command entrypoints."""
 
 from __future__ import annotations

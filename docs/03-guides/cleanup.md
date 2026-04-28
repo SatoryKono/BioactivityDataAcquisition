@@ -4,6 +4,12 @@ This guide documents the cleanup procedures and best practices for maintaining t
 
 ## 🗑️ Cleanup Procedures
 
+Before cleaning retention-sensitive surfaces, use
+[Retention-Sensitive Cleanup](../05-operations/runbooks/retention-sensitive-cleanup.md).
+Blanket deletion is prohibited for `data/**`, control-plane artifacts,
+`tests/fixtures/**`, `tests/fixtures/vcr/**`, `docs/reports/**`, `reports/**`,
+and `docs/99-archive/**`.
+
 ### 1. Manual Cleanup
 
 For one-time cleanup of existing repository issues:
@@ -142,5 +148,6 @@ The repository includes pre-commit hooks that prevent cache files from being com
 
 - [Documentation Publication Policy](../00-project/governance/06-doc-publication-policy.md)
 - [Documentation Navigation Policy](../00-project/governance/07-doc-nav-policy.md)
+- [Retention-Sensitive Cleanup](../05-operations/runbooks/retention-sensitive-cleanup.md)
 - [Git LFS Documentation](https://git-lfs.com/)
 - [Pre-commit Framework](https://pre-commit.com/)

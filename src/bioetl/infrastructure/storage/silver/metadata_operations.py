@@ -32,12 +32,14 @@ from bioetl.infrastructure.storage.metadata.builder_base import (
     _resolve_metadata_timestamp,
 )
 from bioetl.infrastructure.storage.silver.metadata_request_models import (
+    _coerce_silver_write_finalization_preparation_request,
     _coerce_silver_metadata_write_request,
     _PreparedSilverMetadataWriteOperation,
     _PreparedSilverWriteFinalizationContext,
     _ResolvedSilverMetadataContext,
     _SilverMergedMetadataWriteRequest,
     _SilverMetadataWriteRequest,
+    _SilverWriteFinalizationPreparationRequest,
 )
 
 __all__ = [
@@ -300,25 +302,27 @@ def _raise_missing_silver_metadata_bundle(
 
 async def _prepare_silver_write_finalization_context(
     host: _SilverWriteFinalizationHostProtocol,
-    *,
-    table_name: str,
-    records: list[BronzeRecord],
-    table_path: str,
-    quarantined_count: int | None = None,
-    validation_errors: Sequence[str] | None = None,
-    started_at: datetime,
-    start_perf: float,
+    request: _SilverWriteFinalizationPreparationRequest | None = None,
+    *args: object,
     perf_counter: Callable[[], float] = time.perf_counter,
+    **kwargs: object,
 ) -> _PreparedSilverWriteFinalizationContext:
     """Prepare DQ/version/timing context before Silver metadata persistence."""
-    dq_metrics = await host._compute_dq_metrics(
-        table_name,
-        records,
-        quarantined_count=quarantined_count or 0,
-        validation_errors=validation_errors,
+    resolved_request = _coerce_silver_write_finalization_preparation_request(
+        request,
+        args=args,
+        kwargs=kwargs,
     )
-    version_after = await host._get_delta_version(table_path)
-    completed_at = started_at + timedelta(seconds=perf_counter() - start_perf)
+    dq_metrics = await host._compute_dq_metrics(
+        resolved_request.table_name,
+        resolved_request.records,
+        quarantined_count=resolved_request.quarantined_count or 0,
+        validation_errors=resolved_request.validation_errors,
+    )
+    version_after = await host._get_delta_version(resolved_request.table_path)
+    completed_at = resolved_request.started_at + timedelta(
+        seconds=perf_counter() - resolved_request.start_perf
+    )
     return _PreparedSilverWriteFinalizationContext(
         dq_metrics=dq_metrics,
         version_after=version_after,

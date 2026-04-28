@@ -1,3 +1,4 @@
+# ruff: noqa: UP049
 """Resource management entrypoints.
 
 Legacy managers, maintenance operations (vacuum, archive),
