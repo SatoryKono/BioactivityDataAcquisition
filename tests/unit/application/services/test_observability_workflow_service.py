@@ -37,6 +37,7 @@ def _make_manifest_result(
     pipeline_name: str = "chembl_activity",
     bronze_records: int = 10,
     persistence_profile: dict[str, object] | None = None,
+    extra_diagnostics: dict[str, object] | None = None,
 ) -> SimpleNamespace:
     """Create a lightweight run-manifest result stub for workflow tests."""
     profile = persistence_profile or {
@@ -44,6 +45,17 @@ def _make_manifest_result(
         "required_profile": "forensic_grade",
         "required_profile_satisfied": True,
     }
+    diagnostics = {
+        "latest_status": "success",
+        "latest_event_type": "run_finished",
+        "correlation_anchor_gaps": {"run_id": 0, "manifest_id": 0},
+        "artifact_refs": ["manifest://manifest-1", "ledger://manifest-1"],
+        "lineage_fragment_ids": ["fragment-1"],
+        "persistence_profile": profile,
+        "next_steps": ["review dossier output"],
+    }
+    if extra_diagnostics:
+        diagnostics.update(extra_diagnostics)
     return SimpleNamespace(
         manifest=SimpleNamespace(
             pipeline_name=pipeline_name,
@@ -54,15 +66,7 @@ def _make_manifest_result(
         ledger_entries=(
             SimpleNamespace(metrics_snapshot={"records_bronze": bronze_records}),
         ),
-        diagnostics={
-            "latest_status": "success",
-            "latest_event_type": "run_finished",
-            "correlation_anchor_gaps": {"run_id": 0, "manifest_id": 0},
-            "artifact_refs": ["manifest://manifest-1", "ledger://manifest-1"],
-            "lineage_fragment_ids": ["fragment-1"],
-            "persistence_profile": profile,
-            "next_steps": ["review dossier output"],
-        },
+        diagnostics=diagnostics,
         identity_graph={"replay_capability": "exact_replay_supported"},
         to_dict=lambda: {"manifest": {"pipeline_name": pipeline_name}},
     )
@@ -419,3 +423,38 @@ async def test_inspect_run_dossier_blocks_operational_success_for_critical_profi
         "dossier_evidence_satisfied": False,
         "operational_success": False,
     }
+
+
+@pytest.mark.asyncio
+async def test_inspect_run_dossier_surfaces_composite_projection() -> None:
+    projection = {
+        "is_composite_run": True,
+        "primary_composite_run_id": "composite-run-1",
+        "composite_run_ids": ["composite-run-1"],
+        "correlation_policy": {"required_anchor": "composite_run_id"},
+    }
+    audit_result = AuditInspectionResult(query={"run_id": "abc"}, entries=())
+    audit_service = mock.AsyncMock()
+    audit_service.inspect_run.return_value = audit_result
+
+    checkpoint_service = mock.AsyncMock()
+    checkpoint_service.get_checkpoint.return_value = None
+
+    run_manifest_service = mock.Mock()
+    run_manifest_service.show.return_value = _make_manifest_result(
+        pipeline_name="composite_activity",
+        extra_diagnostics={"composite_dossier_projection": projection},
+    )
+
+    service = ObservabilityWorkflowService(
+        audit_service=audit_service,
+        checkpoint_service=checkpoint_service,
+        run_manifest_service=run_manifest_service,
+        lineage_service=None,
+        quarantine_service=None,
+        tracer=_make_mock_tracer(),
+    )
+
+    result = await service.inspect_run_dossier("abc")
+
+    assert result.traceability["composite_projection"] == projection

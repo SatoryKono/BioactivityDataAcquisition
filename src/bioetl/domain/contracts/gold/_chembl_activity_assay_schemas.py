@@ -47,8 +47,13 @@ class ChEMBLActivityGoldSchema(StrictGoldContractSchema):
 
     # BAO annotations
     bao_endpoint: Series[str] = pa.Field(nullable=True)
+    bao_endpoint_iri: Series[str] = pa.Field(nullable=True)
+    bao_endpoint_mapping_status: Series[str] = pa.Field(nullable=True)
     bao_format: Series[str] = pa.Field(nullable=True)
+    bao_format_iri: Series[str] = pa.Field(nullable=True)
+    bao_format_mapping_status: Series[str] = pa.Field(nullable=True)
     bao_label: Series[str] = pa.Field(nullable=True)
+    bao_ontology_version: Series[str] = pa.Field(nullable=True)
 
     # Raw activity values
     type: Series[str] = pa.Field(nullable=True)
@@ -77,7 +82,13 @@ class ChEMBLActivityGoldSchema(StrictGoldContractSchema):
     ligand_efficiency_sei: Series[float] = pa.Field(nullable=True, coerce=True)
 
     # Units ontology
+    qudt_ontology_version: Series[str] = pa.Field(nullable=True)
+    qudt_unit_iri: Series[str] = pa.Field(nullable=True)
+    qudt_unit_mapping_status: Series[str] = pa.Field(nullable=True)
     qudt_units: Series[str] = pa.Field(nullable=True)
+    uo_ontology_version: Series[str] = pa.Field(nullable=True)
+    uo_unit_iri: Series[str] = pa.Field(nullable=True)
+    uo_unit_mapping_status: Series[str] = pa.Field(nullable=True)
     uo_units: Series[str] = pa.Field(nullable=True)
 
     # Document/Publication data

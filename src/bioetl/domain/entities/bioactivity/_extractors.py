@@ -78,8 +78,17 @@ def _extract_assay_fields(raw_data: JsonDict) -> dict[str, object]:
 def _extract_bao_fields(raw_data: JsonDict) -> dict[str, object]:
     return {
         "bao_endpoint": _safe_str(raw_data.get("bao_endpoint")),
+        "bao_endpoint_iri": _safe_str(raw_data.get("bao_endpoint_iri")),
+        "bao_endpoint_mapping_status": _safe_str(
+            raw_data.get("bao_endpoint_mapping_status")
+        ),
         "bao_format": _safe_str(raw_data.get("bao_format")),
+        "bao_format_iri": _safe_str(raw_data.get("bao_format_iri")),
+        "bao_format_mapping_status": _safe_str(
+            raw_data.get("bao_format_mapping_status")
+        ),
         "bao_label": _safe_str(raw_data.get("bao_label")),
+        "bao_ontology_version": _safe_str(raw_data.get("bao_ontology_version")),
     }
 
 
@@ -99,6 +108,16 @@ def _extract_activity_measurement_fields(raw_data: JsonDict) -> dict[str, object
         "standard_text_value": _safe_str(raw_data.get("standard_text_value")),
         "standard_flag": _safe_int(raw_data.get("standard_flag")),
         "pchembl_value": _safe_float(raw_data.get("pchembl_value")),
+        "qudt_units": _safe_str(raw_data.get("qudt_units")),
+        "qudt_unit_iri": _safe_str(raw_data.get("qudt_unit_iri")),
+        "qudt_unit_mapping_status": _safe_str(
+            raw_data.get("qudt_unit_mapping_status")
+        ),
+        "qudt_ontology_version": _safe_str(raw_data.get("qudt_ontology_version")),
+        "uo_units": _safe_str(raw_data.get("uo_units")),
+        "uo_unit_iri": _safe_str(raw_data.get("uo_unit_iri")),
+        "uo_unit_mapping_status": _safe_str(raw_data.get("uo_unit_mapping_status")),
+        "uo_ontology_version": _safe_str(raw_data.get("uo_ontology_version")),
     }
 
 

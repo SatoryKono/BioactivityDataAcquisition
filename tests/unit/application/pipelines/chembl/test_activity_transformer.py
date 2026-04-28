@@ -60,6 +60,16 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
         assert result["bao_endpoint"] == "BAO_0000190"
         assert result["bao_format"] == "BAO_0000218"
         assert result["uo_units"] == "UO_0000065"
+        assert result["bao_endpoint_iri"] == (
+            "http://purl.obolibrary.org/obo/BAO_0000190"
+        )
+        assert result["bao_endpoint_mapping_status"] == "mapped"
+        assert result["bao_format_iri"] == "http://purl.obolibrary.org/obo/BAO_0000218"
+        assert result["bao_format_mapping_status"] == "mapped"
+        assert result["bao_ontology_version"] == "2.8.18a"
+        assert result["uo_unit_iri"] == "http://purl.obolibrary.org/obo/UO_0000065"
+        assert result["uo_unit_mapping_status"] == "mapped"
+        assert result["uo_ontology_version"] == "2026-01-16"
 
     @pytest.mark.asyncio
     async def test_transform_normalizes_activity_units_and_preserves_qudt_uri(
@@ -80,6 +90,9 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
         assert result["standard_units"] == "nM"
         assert result["units"] == "µM"
         assert result["qudt_units"] == LEGACY_QUDT_UNIT_URI
+        assert result["qudt_unit_iri"] == "http://qudt.org/vocab/unit/NanoMOL-PER-L"
+        assert result["qudt_unit_mapping_status"] == "mapped"
+        assert result["qudt_ontology_version"] == "3.2.1"
 
     @pytest.mark.asyncio
     async def test_transform_normalizes_full_activity_canonical_field_set(
@@ -106,6 +119,12 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
         assert result["uo_units"] == "UO_0000065"
         assert result["qudt_units"] == LEGACY_QUDT_UNIT_URI
         assert result["units"] == "raw-uM"
+        assert result["bao_endpoint_iri"] == (
+            "http://purl.obolibrary.org/obo/BAO_0000190"
+        )
+        assert result["bao_format_iri"] == "http://purl.obolibrary.org/obo/BAO_0000218"
+        assert result["uo_unit_iri"] == "http://purl.obolibrary.org/obo/UO_0000065"
+        assert result["qudt_unit_iri"] == "http://qudt.org/vocab/unit/NanoMOL-PER-L"
 
     @pytest.mark.asyncio
     async def test_transform_preserves_already_canonical_activity_fields(
@@ -130,6 +149,10 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
         assert result["standard_units"] == "nM"
         assert result["uo_units"] == "UO_0000065"
         assert result["qudt_units"] == LEGACY_QUDT_UNIT_URI
+        assert result["bao_endpoint_mapping_status"] == "mapped"
+        assert result["bao_format_mapping_status"] == "mapped"
+        assert result["uo_unit_mapping_status"] == "mapped"
+        assert result["qudt_unit_mapping_status"] == "mapped"
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -160,6 +183,35 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
 
         assert result is not None
         assert result[field_name] is None
+
+    @pytest.mark.asyncio
+    async def test_transform_marks_unmapped_activity_ontology_companions(
+        self, transformer, mock_context
+    ) -> None:
+        """Unrecognized ontology/unit tokens should keep null IRIs and status."""
+        record = {
+            "activity_id": 12345,
+            "molecule_id": "CHEMBL25",
+            "bao_endpoint": "not-bao",
+            "bao_format": "still-not-bao",
+            "uo_units": "relative potency",
+            "qudt_units": "unknown-unit",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["bao_endpoint_iri"] is None
+        assert result["bao_endpoint_mapping_status"] == "unmapped"
+        assert result["bao_format_iri"] is None
+        assert result["bao_format_mapping_status"] == "unmapped"
+        assert result["bao_ontology_version"] == "2.8.18a"
+        assert result["uo_unit_iri"] is None
+        assert result["uo_unit_mapping_status"] == "unmapped"
+        assert result["uo_ontology_version"] == "2026-01-16"
+        assert result["qudt_unit_iri"] is None
+        assert result["qudt_unit_mapping_status"] == "unmapped"
+        assert result["qudt_ontology_version"] == "3.2.1"
 
 
 @pytest.mark.unit

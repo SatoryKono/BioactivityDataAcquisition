@@ -104,18 +104,6 @@
       "review_by": "2026-07-15",
       "next_step": "Validate active usage and integrate into canonical DQ validation workflows."
     },
-    "scripts/ai/sonar_issue_processor_demo.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical demo helper under scripts.ai.src for Sonar issue processing experiments; remove it once the exploratory workflow is fully retired."
-    },
-    "scripts/ai/group_issues.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a narrow stdin-driven Sonar issue grouping helper for historical remediation triage; remove it once issue-wave analysis is fully folded into the canonical quality tooling."
-    },
     "scripts/ai/mcp/mcp_brave_search_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
@@ -211,12 +199,6 @@
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical SonarQube MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
-    },
-    "scripts/ai/code_quality_analysis.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical exploratory code-quality probe; prefer canonical architecture and lint/report tooling instead of extending this orphan analysis script."
     },
     "scripts/ai/src/bioetl/composition/factories/pipeline/_factory_method_types.py": {
       "owner": "@bioetl-platform",
@@ -343,96 +325,6 @@
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded Windows-side Hypothesis database repair helper; remove it once pytest wrappers no longer need manual cache recovery."
-    },
-    "scripts/engineering/dev/python/test_case_unit_normalization.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded unit test normalization helper; remove it once test case normalization is handled by canonical test utilities."
-    },
-    "scripts/engineering/dev/python/test_case_unit_simple.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded simple unit test helper; remove it once test utilities converge on canonical patterns."
-    },
-    "scripts/engineering/dev/python/test_column_service.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded column service test helper; remove it once column service testing is handled by canonical test utilities."
-    },
-    "scripts/engineering/dev/python/test_composition_integration.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded composition integration test helper; remove it once composition testing is handled by canonical test utilities."
-    },
-    "scripts/engineering/dev/python/test_cross_pipeline_enums.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded cross-pipeline enum test helper; remove it once enum testing is handled by canonical test utilities."
-    },
-    "scripts/engineering/dev/python/test_cross_pipeline_integration.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded cross-pipeline integration test helper; remove it once integration testing is handled by canonical test utilities."
-    },
-    "scripts/engineering/dev/python/test_enum_loading.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded enum loading test helper; remove it once enum loading is handled by canonical test utilities."
-    },
-    "scripts/engineering/dev/python/test_enum_simple.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded simple enum test helper; remove it once enum testing is handled by canonical test utilities."
-    },
-    "scripts/engineering/dev/python/test_maintenance_minimal.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded minimal maintenance test helper; remove it once maintenance testing is handled by canonical test utilities."
-    },
-    "scripts/engineering/dev/python/test_maintenance_operations.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded maintenance operations test helper; remove it once maintenance operations testing is handled by canonical test utilities."
-    },
-    "scripts/engineering/dev/python/test_maintenance_simple.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded simple maintenance test helper; remove it once maintenance testing is handled by canonical test utilities."
-    },
-    "scripts/engineering/dev/python/test_null_handling.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded null handling test helper; remove it once null handling is handled by canonical test utilities."
-    },
-    "scripts/engineering/dev/python/test_type_consistency.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded type consistency test helper; remove it once type consistency is handled by canonical test utilities."
-    },
-    "scripts/engineering/dev/python/update_assay_imports.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded assay import update helper; remove it once assay import updates are handled by canonical migration utilities."
-    },
-    "scripts/engineering/dev/python/update_assay_profile.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded assay profile update helper; remove it once assay profile updates are handled by canonical migration utilities."
     },
     "scripts/docs/_compat_shim.py": {
       "owner": "@bioetl-docs",

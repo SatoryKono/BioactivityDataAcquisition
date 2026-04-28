@@ -155,7 +155,7 @@ def build_traceability_section(
         diagnostics=diagnostics,
         trace_links_available=bool(trace_urls),
     )
-    return {
+    traceability = {
         "audit_entries_count": len(audit.entries),
         "identity_graph_complete": diagnostics.get("identity_graph_complete"),
         "correlation_anchor_gaps": diagnostics.get("correlation_anchor_gaps"),
@@ -169,6 +169,10 @@ def build_traceability_section(
         "replay_capability": identity_graph.get("replay_capability")
         or diagnostics.get("replay_capability"),
     }
+    composite_projection = diagnostics.get("composite_dossier_projection")
+    if composite_projection is not None:
+        traceability["composite_projection"] = composite_projection
+    return traceability
 
 
 def trace_links_enabled(tracer: object | None) -> bool:

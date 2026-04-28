@@ -107,15 +107,17 @@ def build_published_silver_artifact(
     *,
     artifact_path: str,
     include_dataset_ref: bool = True,
+    include_artifact_id: bool = True,
 ) -> dict[str, object]:
     """Build the canonical published silver artifact payload used in tests."""
     payload = {
         "event_type": "artifact_published",
         "stage": "silver",
-        "artifact_id": "silver:chembl.activity@1",
         "lineage_fragment_id": "silver:fragment-1",
         "artifact_path": artifact_path,
     }
+    if include_artifact_id:
+        payload["artifact_id"] = "silver:chembl.activity@1"
     if include_dataset_ref:
         payload["dataset_ref"] = "silver:chembl.activity@1"
     return payload

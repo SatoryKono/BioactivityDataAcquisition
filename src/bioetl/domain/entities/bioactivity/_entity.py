@@ -64,8 +64,13 @@ class Bioactivity(BaseEntity):
     assay_variant_mutation: str | None = None
 
     bao_endpoint: str | None = None
+    bao_endpoint_iri: str | None = None
+    bao_endpoint_mapping_status: str | None = None
     bao_format: str | None = None
+    bao_format_iri: str | None = None
+    bao_format_mapping_status: str | None = None
     bao_label: str | None = None
+    bao_ontology_version: str | None = None
 
     type: str | None = None
     value: float | None = None
@@ -90,7 +95,13 @@ class Bioactivity(BaseEntity):
     ligand_efficiency_sei: float | None = None
 
     qudt_units: str | None = None
+    qudt_unit_iri: str | None = None
+    qudt_unit_mapping_status: str | None = None
+    qudt_ontology_version: str | None = None
     uo_units: str | None = None
+    uo_unit_iri: str | None = None
+    uo_unit_mapping_status: str | None = None
+    uo_ontology_version: str | None = None
 
     journal: str | None = None
     publication_year: int | None = None

@@ -4,6 +4,17 @@ description: Shared ChEMBL ontology/reference canonicalization registry for pref
 families:
   bao:
     canonical_prefix: BAO_
+    iri_template: http://purl.obolibrary.org/obo/{id}
+    ontology_version: 2.8.18a
+    companion_fields:
+      iri:
+        - chembl_activity.bao_endpoint_iri
+        - chembl_activity.bao_format_iri
+      mapping_status:
+        - chembl_activity.bao_endpoint_mapping_status
+        - chembl_activity.bao_format_mapping_status
+      version:
+        - chembl_activity.bao_ontology_version
     accepted_inputs:
       - prefixed_id
       - colon_form
@@ -16,6 +27,15 @@ families:
       - chembl_assay.bao_label
   uo:
     canonical_prefix: UO_
+    iri_template: http://purl.obolibrary.org/obo/{id}
+    ontology_version: 2026-01-16
+    companion_fields:
+      iri:
+        - chembl_activity.uo_unit_iri
+      mapping_status:
+        - chembl_activity.uo_unit_mapping_status
+      version:
+        - chembl_activity.uo_ontology_version
     accepted_inputs:
       - prefixed_id
       - colon_form

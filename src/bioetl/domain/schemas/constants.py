@@ -95,6 +95,10 @@ ACTIVITY_STANDARD_UNITS: frozenset[str] = frozenset(
 
 ASSAY_TYPES: frozenset[str] = frozenset(["B", "F", "A", "T", "P", "U"])
 
+ONTOLOGY_MAPPING_STATUSES: frozenset[str] = frozenset(
+    ["mapped", "unmapped", "missing"]
+)
+
 ASSAY_TEST_TYPES: frozenset[str] = frozenset(["In vivo", "In vitro", "Ex vivo"])
 
 ASSAY_CATEGORIES: frozenset[str] = frozenset(

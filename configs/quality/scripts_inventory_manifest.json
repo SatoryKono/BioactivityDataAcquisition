@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-28T11:04:17.782276+00:00",
+  "generated_at": "2026-04-28T11:15:04.622206+00:00",
   "summary": {
-    "total_scripts": 428,
+    "total_scripts": 410,
     "status_counts": {
       "active": 319,
       "legacy": 10,
-      "orphan": 86,
+      "orphan": 68,
       "unknown": 13
     },
     "reference_group_coverage": {
@@ -91,14 +91,6 @@
           "text": "\"path_prefix\": \"scripts/ai/check_sonar_issues.py\","
         }
       ]
-    },
-    {
-      "path": "scripts/ai/code_quality_analysis.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/ai/codex/diagnose_wsl.bat",
@@ -1200,14 +1192,6 @@
           "text": "bash scripts/ai/gemini/run-gemini.sh exec \"...\"    # Headless YOLO approvals"
         }
       ]
-    },
-    {
-      "path": "scripts/ai/group_issues.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/ai/mcp/__main__.py",
@@ -2743,7 +2727,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 6,
       "references": [
         {
           "path": ".github/workflows/sonarcloud.yml",
@@ -2780,22 +2764,8 @@
           "line": 88,
           "source_group": "scripts",
           "text": "python3 sonar_issue_processor.py"
-        },
-        {
-          "path": "scripts/ai/sonar_issue_processor_demo.py",
-          "line": 178,
-          "source_group": "scripts",
-          "text": "print(\"   2. Run: python3 sonar_issue_processor.py\")"
         }
       ]
-    },
-    {
-      "path": "scripts/ai/sonar_issue_processor_demo.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/ai/src/bioetl/application/composite/runtime_wiring_api.py",
@@ -6626,126 +6596,6 @@
           "text": "\"migrate-deprecated-names\": \"python/migrate_deprecated_names.py\","
         }
       ]
-    },
-    {
-      "path": "scripts/engineering/dev/python/test_case_unit_normalization.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/python/test_case_unit_simple.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/python/test_column_service.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/python/test_composition_integration.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/python/test_cross_pipeline_enums.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/python/test_cross_pipeline_integration.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/python/test_enum_loading.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/python/test_enum_simple.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/python/test_maintenance_minimal.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/python/test_maintenance_operations.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/python/test_maintenance_simple.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/python/test_null_handling.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/python/test_type_consistency.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/python/update_assay_imports.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/engineering/dev/python/update_assay_profile.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/engineering/dev/quality_gate_probe.py",

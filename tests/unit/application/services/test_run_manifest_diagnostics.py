@@ -641,13 +641,11 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "input_snapshots": [],
         "planned_artifacts": [],
         "published_artifacts": [
-            {
-                "event_type": "artifact_published",
-                "stage": "silver",
-                "dataset_ref": "silver:chembl.activity@1",
-                "lineage_fragment_id": "silver:fragment-1",
-                "artifact_path": "data/output/silver/chembl/activity",
-            }
+            build_published_silver_artifact(
+                artifact_path="data/output/silver/chembl/activity",
+                include_dataset_ref=True,
+                include_artifact_id=False,
+            )
         ],
         "produced_artifact_trace": _expected_produced_artifact_trace(manifest),
         "occurrence_only_diagnostics": [],
@@ -799,6 +797,75 @@ def test_build_diagnostics_summary_surfaces_persisted_resume_diagnostics() -> No
     assert (
         summary["identity_graph"]["resume_diagnostics"] == summary["resume_diagnostics"]
     )
+
+
+def test_build_diagnostics_summary_projects_composite_dossier_correlation() -> None:
+    base_manifest = _make_manifest()
+    manifest = replace(
+        base_manifest,
+        provider="composite",
+        entity="composite_activity",
+        launch_context={
+            **base_manifest.launch_context,
+            "execution_context": "composite",
+        },
+    )
+    entry = RunLedgerEntry(
+        entry_id="entry-composite-1",
+        manifest_id=manifest.manifest_id,
+        run_id=manifest.run_id,
+        event_type="composite_merge_completed",
+        event_family="composite",
+        occurred_at=datetime.now(UTC),
+        status="success",
+        details={
+            "_diagnostic": {
+                "manifest_id": manifest.manifest_id,
+                "run_id": str(manifest.run_id),
+                "event_type": "composite_merge_completed",
+                "event_family": "composite",
+                "resolved_config_hash": _VALID_RESOLVED_CONFIG_HASH,
+                "effective_config_hash": _VALID_EFFECTIVE_CONFIG_HASH,
+                "contract_ref": "chembl.activity",
+                "contract_version": "1.2.0",
+                "composite_run_id": "composite-run-1",
+            }
+        },
+    )
+
+    summary = build_diagnostics_summary(manifest, (entry,))
+
+    assert summary["composite_dossier_projection"] == {
+        "is_composite_run": True,
+        "primary_composite_run_id": "composite-run-1",
+        "composite_run_ids": ["composite-run-1"],
+        "composite_run_id_consistent": True,
+        "correlation_policy": {
+            "required_anchor": "composite_run_id",
+            "required_event_families": ["checkpoint", "composite"],
+            "semantic_anchor": "execution_fingerprint",
+            "occurrence_anchor": "composite_run_identity",
+            "status": "satisfied",
+        },
+        "correlation_anchor_gaps": {"composite_run_id": 0},
+        "resume_diagnostics": None,
+        "resume_reconstructability": {
+            "scope": "coarse_grained_composite_resume",
+            "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
+            "reconstructs": [
+                "state",
+                "seed_completed",
+                "merge_completed",
+                "last_event_id",
+                "last_event_occurred_at",
+            ],
+            "does_not_reconstruct": [
+                "per_provider_result_maps",
+                "rich_checkpoint_payloads",
+            ],
+            "forensic_grade_supported": True,
+        },
+    }
 
 
 def test_replay_surfaces_ignore_occurrence_only_manifest_drift() -> None:

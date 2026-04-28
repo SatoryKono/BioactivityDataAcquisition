@@ -16,6 +16,7 @@ from bioetl.domain.schemas.constants import (
     BAO_ID_PATTERN,
     CHEMBL_ID_PATTERN,
     DATA_VALIDITY_COMMENTS,
+    ONTOLOGY_MAPPING_STATUSES,
     STANDARD_RELATIONS,
     UO_ID_PATTERN,
 )
@@ -24,6 +25,8 @@ from bioetl.domain.validation import MAX_PUBLICATION_YEAR, MIN_PUBLICATION_YEAR
 __all__ = [
     "ActivitySchema",
 ]
+
+HTTP_IRI_PATTERN = r"^https?://[^\s]+$"
 
 
 class ActivitySchema(ETLRecordSchema):
@@ -120,12 +123,64 @@ class ActivitySchema(ETLRecordSchema):
         str_matches=BAO_ID_PATTERN,
         description="BAO ID.",
     )
+    bao_endpoint_iri: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=HTTP_IRI_PATTERN,
+        description="Persistent IRI for the BAO endpoint ID.",
+    )
+    bao_endpoint_mapping_status: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=list(ONTOLOGY_MAPPING_STATUSES),
+        description="BAO endpoint IRI mapping status.",
+    )
+    bao_format_iri: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=HTTP_IRI_PATTERN,
+        description="Persistent IRI for the BAO format ID.",
+    )
+    bao_format_mapping_status: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=list(ONTOLOGY_MAPPING_STATUSES),
+        description="BAO format IRI mapping status.",
+    )
+    bao_ontology_version: Series[str] | None = pa.Field(
+        nullable=True,
+        description="BAO ontology release/version used for IRI mapping.",
+    )
     uo_units: Series[str] = pa.Field(
         nullable=False,
         str_matches=UO_ID_PATTERN,
         description="Units Ontology ID.",
     )
+    uo_unit_iri: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=HTTP_IRI_PATTERN,
+        description="Persistent IRI for the Units Ontology unit ID.",
+    )
+    uo_unit_mapping_status: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=list(ONTOLOGY_MAPPING_STATUSES),
+        description="Units Ontology IRI mapping status.",
+    )
+    uo_ontology_version: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Units Ontology release/version used for IRI mapping.",
+    )
     qudt_units: Series[str] | None = pa.Field(nullable=True, description="QUDT unit.")
+    qudt_unit_iri: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=HTTP_IRI_PATTERN,
+        description="Persistent QUDT unit IRI.",
+    )
+    qudt_unit_mapping_status: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=list(ONTOLOGY_MAPPING_STATUSES),
+        description="QUDT unit IRI mapping status.",
+    )
+    qudt_ontology_version: Series[str] | None = pa.Field(
+        nullable=True,
+        description="QUDT ontology release/version used for IRI mapping.",
+    )
 
     # === Original Values & Other Fields ===
     src_id: Series[int] = pa.Field(nullable=False, description="Source ID.")

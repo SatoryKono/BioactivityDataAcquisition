@@ -39,6 +39,8 @@ from tests.unit.application.services.run_manifest_test_support import (
     VALID_EFFECTIVE_CONFIG_HASH as _VALID_EFFECTIVE_CONFIG_HASH,
     VALID_RESOLVED_CONFIG_HASH as _VALID_RESOLVED_CONFIG_HASH,
     build_default_source_refs,
+    build_published_silver_artifact,
+    build_source_refs,
     expected_canonical_execution_identity as _expected_canonical_execution_identity,
     expected_degraded_runtime_anchor as _expected_degraded_runtime_anchor,
     expected_exact_replay_anchors as _expected_exact_replay_anchors,
@@ -49,6 +51,7 @@ from tests.unit.application.services.run_manifest_test_support import (
     expected_resume_contract as _expected_resume_contract,
     make_run_manifest,
 )
+
 TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-run-manifest-inspection-"))
 BRONZE_BATCH_URI = (TEST_ROOT / "bronze" / "batch_1.jsonl.zst").as_uri()
 SILVER_ARTIFACT_PATH = str(TEST_ROOT / "output" / "silver" / "chembl" / "activity")
@@ -697,19 +700,8 @@ def test_show_snapshot_backed_manifest_reports_non_replay_snapshot_mode() -> Non
         _make_manifest(manifest_id="manifest-snapshot-backed", run_id=run_id),
         launch_context={"limit": 100, "resume": False, "exact_replay": False},
         replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
-        source_refs=(
-            RunSourceRef(
-                provider="chembl",
-                entity="activity",
-                pipeline_name="chembl_activity",
-                input_snapshots=(
-                    RunInputSnapshotRef(
-                        snapshot_id="snapshot-1",
-                        content_hash="sha256:snapshot-1",
-                        immutable_uri=BRONZE_BATCH_URI,
-                    ),
-                ),
-            ),
+        source_refs=build_source_refs(
+            immutable_uri=BRONZE_BATCH_URI,
         ),
     )
     manifest_store.save(manifest)
@@ -806,28 +798,14 @@ def test_show_collects_artifact_diagnostic_links() -> None:
         "cross_validation_signal_present": False,
     }
     assert result.diagnostics["artifact_refs"] == [
-        {
-            "event_type": "artifact_published",
-            "stage": "silver",
-            "artifact_id": "silver:chembl.activity@1",
-            "dataset_ref": "silver:chembl.activity@1",
-            "lineage_fragment_id": "silver:fragment-1",
-            "artifact_path": SILVER_ARTIFACT_PATH,
-        }
+        build_published_silver_artifact(artifact_path=SILVER_ARTIFACT_PATH)
     ]
     assert result.diagnostics["produced_artifact_trace"] == (
         _expected_produced_artifact_trace(
             manifest,
             ledger_entries_present=True,
             artifacts=[
-                {
-                    "event_type": "artifact_published",
-                    "stage": "silver",
-                    "artifact_id": "silver:chembl.activity@1",
-                    "dataset_ref": "silver:chembl.activity@1",
-                    "lineage_fragment_id": "silver:fragment-1",
-                    "artifact_path": SILVER_ARTIFACT_PATH,
-                }
+                build_published_silver_artifact(artifact_path=SILVER_ARTIFACT_PATH)
             ],
         )
     )
@@ -836,14 +814,7 @@ def test_show_collects_artifact_diagnostic_links() -> None:
     )
     assert result.identity_graph == result.diagnostics["identity_graph"]
     assert result.diagnostics["identity_graph"]["published_artifacts"] == [
-        {
-            "event_type": "artifact_published",
-            "stage": "silver",
-            "artifact_id": "silver:chembl.activity@1",
-            "dataset_ref": "silver:chembl.activity@1",
-            "lineage_fragment_id": "silver:fragment-1",
-            "artifact_path": SILVER_ARTIFACT_PATH,
-        }
+        build_published_silver_artifact(artifact_path=SILVER_ARTIFACT_PATH)
     ]
 
 
