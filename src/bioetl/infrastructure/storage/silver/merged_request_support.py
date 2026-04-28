@@ -4,11 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from datetime import datetime
-from typing import cast, TypedDict, TypeVar
+from typing import TypedDict, cast
 
 from bioetl.domain.types import BronzeRecord
-
-_TRequest = TypeVar("_TRequest")
 
 
 class _CommonMergedWriteFields(TypedDict):
@@ -41,11 +39,11 @@ def _build_common_merged_write_fields(
     }
 
 
-def _build_merged_write_request_from_mapping(
-    request_factory: Callable[..., _TRequest],
+def _build_merged_write_request_from_mapping[TRequest](
+    request_factory: Callable[..., TRequest],
     fields: Mapping[str, object],
     **extra_fields: object,
-) -> _TRequest:
+) -> TRequest:
     """Build one merged-write request object from shared and extra fields."""
     common_fields = _build_common_merged_write_fields(
         cast(str, fields["table_name"]),
