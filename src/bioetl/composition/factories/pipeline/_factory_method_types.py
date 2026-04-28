@@ -120,16 +120,10 @@ def build_pipeline_create_runner_request_from_kwargs(
     if control_plane is None:
         control_plane = build_control_plane_artifacts(
             manifest_id=cast(str | None, kwargs.get("manifest_id")),
-            execution_fingerprint=cast(
-                str | None, kwargs.get("execution_fingerprint")
-            ),
+            execution_fingerprint=cast(str | None, kwargs.get("execution_fingerprint")),
             config_hash=cast(str | None, kwargs.get("config_hash")),
-            resolved_config_hash=cast(
-                str | None, kwargs.get("resolved_config_hash")
-            ),
-            effective_config_hash=cast(
-                str | None, kwargs.get("effective_config_hash")
-            ),
+            resolved_config_hash=cast(str | None, kwargs.get("resolved_config_hash")),
+            effective_config_hash=cast(str | None, kwargs.get("effective_config_hash")),
             dq_contract_compatibility_hash=cast(
                 str | None, kwargs.get("dq_contract_compatibility_hash")
             ),
