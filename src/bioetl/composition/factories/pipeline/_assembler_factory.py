@@ -26,6 +26,9 @@ from bioetl.composition.factories.pipeline.assembler_helpers import (
     create_runner_from_factory,
     create_with_services_from_factory,
 )
+from bioetl.composition.factories.pipeline.control_plane_artifacts import (
+    build_control_plane_artifacts,
+)
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _BuildFactoryServicesRequest,
     _CreateFactoryRunnerRequest,
@@ -283,6 +286,19 @@ class GenericPipelineFactory(Generic[TPipeline]):
                     config=request.config,
                     cached_bronze=request.cached_bronze,
                 )
+        control_plane_artifacts = build_control_plane_artifacts(
+            manifest_id=request.control_plane.manifest_id,
+            execution_fingerprint=request.control_plane.execution_fingerprint,
+            config_hash=request.control_plane.config_hash,
+            resolved_config_hash=request.control_plane.resolved_config_hash,
+            effective_config_hash=request.control_plane.effective_config_hash,
+            dq_contract_compatibility_hash=(
+                request.control_plane.dq_contract_compatibility_hash
+            ),
+            effective_config_artifact_id=(
+                request.control_plane.effective_config_artifact_id
+            ),
+        )
         return create_runner_from_factory(
             cast(_FactoryLike, self),
             request=_CreateFactoryRunnerRequest(
@@ -294,16 +310,16 @@ class GenericPipelineFactory(Generic[TPipeline]):
                 started_at=request.started_at,
                 settings=cast("Settings", request.settings),
                 observability=cast("ObservabilityBundle", request.observability),
-                manifest_id=request.control_plane.manifest_id,
-                execution_fingerprint=request.control_plane.execution_fingerprint,
-                config_hash=request.control_plane.config_hash,
-                resolved_config_hash=request.control_plane.resolved_config_hash,
-                effective_config_hash=request.control_plane.effective_config_hash,
+                manifest_id=control_plane_artifacts.manifest_id,
+                execution_fingerprint=control_plane_artifacts.execution_fingerprint,
+                config_hash=control_plane_artifacts.config_hash,
+                resolved_config_hash=control_plane_artifacts.resolved_config_hash,
+                effective_config_hash=control_plane_artifacts.effective_config_hash,
                 dq_contract_compatibility_hash=(
-                    request.control_plane.dq_contract_compatibility_hash
+                    control_plane_artifacts.dq_contract_compatibility_hash
                 ),
                 effective_config_artifact_id=(
-                    request.control_plane.effective_config_artifact_id
+                    control_plane_artifacts.effective_config_artifact_id
                 ),
                 filter_config=request.filter_config,
                 config=cast("PipelineYamlConfig | None", request.config),
