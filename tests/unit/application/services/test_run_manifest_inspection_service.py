@@ -65,149 +65,6 @@ def _expected_code_provenance_state(manifest: RunManifest) -> dict[str, object]:
     }
 
 
-def _manifest_execution_context(manifest: RunManifest) -> str:
-    """Return the effective execution context for a manifest."""
-    return (
-        "composite"
-        if (
-            str(manifest.launch_context.get("execution_context") or "") == "composite"
-            or manifest.provider == "composite"
-        )
-        else "source"
-    )
-
-
-def _resolve_checkpoint_policy(
-    *,
-    requested_exact_replay: bool,
-    required_profile: str,
-    requested_policy: str | None,
-) -> str:
-    """Resolve the checkpoint compatibility policy used in expectations."""
-    if requested_exact_replay:
-        return "hard_fail"
-    if required_profile not in {"replay_ready", "forensic_grade"}:
-        return requested_policy or "observe"
-    if requested_policy in {"observe", "legacy_observe"}:
-        return "soft_fail"
-    return requested_policy or "soft_fail"
-
-
-def _resume_contract_layout(
-    manifest: RunManifest,
-) -> tuple[str, str, str | None]:
-    """Return the execution context, resume mode, and occurrence anchor."""
-    is_composite = _manifest_execution_context(manifest) == "composite"
-    return (
-        "composite" if is_composite else "ordinary",
-        "checkpoint_snapshot_plus_ledger_suffix"
-        if is_composite
-        else "checkpoint_snapshot_only",
-        "composite_run_identity" if is_composite else None,
-    )
-
-
-def _strict_replay_requested(
-    requested_exact_replay: bool,
-    required_profile: str,
-) -> bool:
-    """Return whether the manifest is asking for strict replay semantics."""
-    return requested_exact_replay or required_profile in {
-        "replay_ready",
-        "forensic_grade",
-    }
-
-
-def _expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
-    requested_exact_replay = bool(manifest.launch_context.get("exact_replay"))
-    required_profile = str(
-        manifest.launch_context.get("required_persistence_profile")
-        or "degraded_observable"
-    )
-    requested_policy = manifest.launch_context.get("checkpoint_compatibility_policy")
-    if not isinstance(requested_policy, str):
-        requested_policy = None
-    applied_policy = _resolve_checkpoint_policy(
-        requested_exact_replay=requested_exact_replay,
-        required_profile=required_profile,
-        requested_policy=requested_policy,
-    )
-    profile = resolve_reproducibility_family_profile(
-        provider=manifest.provider,
-        entity=manifest.entity,
-        contract_ref=manifest.code_provenance.contract_ref,
-        execution_context=_manifest_execution_context(manifest),
-    )
-    execution_context, resume_mode, occurrence_identity_anchor = (
-        _resume_contract_layout(manifest)
-    )
-    strict_replay_requested = _strict_replay_requested(
-        requested_exact_replay,
-        required_profile,
-    )
-    return {
-        "resume_requested": bool(manifest.launch_context.get("resume")),
-        "requested_exact_replay": requested_exact_replay,
-        "requested_checkpoint_compatibility_policy": requested_policy,
-        "applied_checkpoint_compatibility_policy": applied_policy,
-        "strict_replay_safe": (
-            strict_replay_requested
-            and applied_policy == "hard_fail"
-            and profile.strict_exact_replay_supported
-            and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
-        ),
-        "execution_context": execution_context,
-        "resume_mode": resume_mode,
-        "semantic_identity_anchor": "execution_fingerprint",
-        "occurrence_identity_anchor": occurrence_identity_anchor,
-    }
-
-
-def _expected_replay_parentage(manifest: RunManifest) -> dict[str, object]:
-    return {
-        "is_exact_replay": (
-            manifest.replay_of_run_id is not None
-            or manifest.replay_of_manifest_id is not None
-        ),
-        "replay_of_run_id": manifest.replay_of_run_id,
-        "replay_of_manifest_id": manifest.replay_of_manifest_id,
-    }
-
-
-def _expected_lineage_closure_boundary(manifest: RunManifest) -> dict[str, object]:
-    execution_context = (
-        "composite"
-        if (
-            str(manifest.launch_context.get("execution_context") or "") == "composite"
-            or manifest.provider == "composite"
-        )
-        else "source"
-    )
-    return build_lineage_closure_boundary(
-        provider=manifest.provider,
-        entity=manifest.entity,
-        contract_ref=manifest.code_provenance.contract_ref,
-        execution_context=execution_context,
-    )
-
-
-def _expected_replay_family_contract(manifest: RunManifest) -> dict[str, object]:
-    execution_context = (
-        "composite"
-        if (
-            str(manifest.launch_context.get("execution_context") or "") == "composite"
-            or manifest.provider == "composite"
-        )
-        else "source"
-    )
-    return build_replay_family_contract(
-        provider=manifest.provider,
-        entity=manifest.entity,
-        contract_ref=manifest.code_provenance.contract_ref,
-        execution_context=execution_context,
-    )
-
-
 _InMemoryRunManifestStore = InMemoryRunManifestStore
 _InMemoryRunLedgerStore = InMemoryRunLedgerStore
 
@@ -225,56 +82,26 @@ def _make_manifest(
     created_at: datetime | None = None,
     source_refs: tuple[RunSourceRef, ...] | None = None,
 ) -> RunManifest:
-    return RunManifest(
+    return make_run_manifest(
         manifest_id=manifest_id,
-        execution_fingerprint=execution_fingerprint or f"fingerprint-{manifest_id}",
-        schema_version="1.0",
-        created_at=created_at or _FIXED_TIME,
         run_id=run_id,
         run_type=run_type,
-        pipeline_name="chembl_activity",
-        provider="chembl",
-        entity="activity",
+        config_hash=config_hash,
+        resolved_config_hash=resolved_config_hash,
+        effective_config_hash=effective_config_hash,
+        limit=limit,
+        execution_fingerprint=execution_fingerprint,
+        created_at=created_at or _FIXED_TIME,
         launch_context={"limit": limit, "exact_replay": True},
         runtime_config={
             "run_type": run_type.value,
             "limit": limit,
             "exact_replay": True,
         },
-        resolved_config={"provider": "chembl", "entity_type": "activity"},
-        code_provenance=RunCodeProvenance(
-            pipeline_version="1.0.0",
-            git_commit="abc1234",
-            source_revision_state="clean",
-            config_hash=config_hash,
-            resolved_config_hash=resolved_config_hash,
-            effective_config_hash=effective_config_hash,
-            contract_ref="chembl.activity",
-            contract_version="1.2.0",
-            dq_policy_ref="chembl_activity.gold",
-            rule_bundle_version="2026.03",
-            dq_contract_compatibility_hash="compat-hash-1",
-            effective_config_artifact_id="eca-123",
-        ),
         replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
         source_refs=source_refs
-        or (
-            RunSourceRef(
-                provider="chembl",
-                entity="activity",
-                pipeline_name="chembl_activity",
-                input_snapshots=(
-                    RunInputSnapshotRef(
-                        snapshot_id="snapshot-1",
-                        content_hash="sha256:snapshot-1",
-                        immutable_uri=BRONZE_BATCH_URI,
-                        storage_provider="s3",
-                        object_bucket="bioetl-bronze",
-                        object_key="chembl/activity/batch_1.jsonl.zst",
-                        object_version_id="snapshot-version-1",
-                    ),
-                ),
-            ),
+        or build_default_source_refs(
+            bronze_batch_uri=BRONZE_BATCH_URI,
         ),
     )
 

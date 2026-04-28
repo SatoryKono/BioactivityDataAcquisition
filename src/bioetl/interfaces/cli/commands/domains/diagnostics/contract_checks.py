@@ -92,9 +92,7 @@ def _check_metric_inventory(repo_root: Path) -> ContractCheck:
     allowlist_path = repo_root / _METRIC_ALLOWLIST
     violations = report_observability_metric_inventory.validate_metric_inventory(
         report,
-        allowlist=report_observability_metric_inventory._load_drift_allowlist(
-            allowlist_path
-        ),
+        allowlist=_load_metric_allowlist(allowlist_path),
     )
     return ContractCheck(
         name="metric_inventory_drift",
@@ -209,6 +207,18 @@ def _check_tracing_file_entry(
 def _load_yaml(path: Path) -> dict[str, Any]:
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
+
+
+def _load_metric_allowlist(path: Path) -> dict[str, set[str]]:
+    payload = _load_yaml(path)
+    raw_allowed = payload.get("allowed", payload)
+    if not isinstance(raw_allowed, dict):
+        return {}
+    allowlist: dict[str, set[str]] = {}
+    for key, values in raw_allowed.items():
+        if isinstance(key, str) and isinstance(values, list):
+            allowlist[key] = {str(value) for value in values}
+    return allowlist
 
 
 def _build_alert_rule_map(rules: dict[str, Any]) -> dict[str, dict[str, Any]]:

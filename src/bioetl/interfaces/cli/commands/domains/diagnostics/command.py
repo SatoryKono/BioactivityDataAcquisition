@@ -16,6 +16,10 @@ from bioetl.interfaces.cli.commands.domains.diagnostics.rendering import (
     render_guide_lines,
     render_run_dossier_payload,
 )
+from bioetl.interfaces.cli.commands.domains.diagnostics.contract_checks import (
+    render_contract_check_report,
+    run_observability_contract_checks,
+)
 from bioetl.interfaces.cli.commands.domains.health.rendering import (
     all_health_results_healthy,
 )
@@ -51,6 +55,8 @@ __all__ = [
     "COMMANDS",
     "diagnostics",
     "diagnostics_checkpoint",
+    "diagnostics_contract_checks",
+    "diagnostics_dossier",
     "diagnostics_guide",
     "diagnostics_health",
     "diagnostics_manifest",
@@ -145,10 +151,8 @@ def diagnostics_metrics(output_json: bool) -> None:
     render_guide_lines(build_metrics_profile_lines(profile))
 
 
-@diagnostics.command("run")
-@add_audit_run_options
-def diagnostics_run(run_id: str, limit: int, output_format: str) -> None:
-    """Inspect one pipeline run as a bounded forensic dossier."""
+def _emit_run_dossier(run_id: str, limit: int, output_format: str) -> None:
+    """Emit one-run dossier using the canonical workflow service."""
     bundle = get_observability_diagnostics_bundle()
 
     run_async_inspection_command(
@@ -160,6 +164,33 @@ def diagnostics_run(run_id: str, limit: int, output_format: str) -> None:
         output_format=output_format,
         text_renderer=render_run_dossier_payload,
     )
+
+
+@diagnostics.command("run")
+@add_audit_run_options
+def diagnostics_run(run_id: str, limit: int, output_format: str) -> None:
+    """Inspect one pipeline run as a bounded forensic dossier."""
+    _emit_run_dossier(run_id=run_id, limit=limit, output_format=output_format)
+
+
+@diagnostics.command("dossier")
+@add_audit_run_options
+def diagnostics_dossier(run_id: str, limit: int, output_format: str) -> None:
+    """Inspect one pipeline run through the public dossier entrypoint."""
+    _emit_run_dossier(run_id=run_id, limit=limit, output_format=output_format)
+
+
+@diagnostics.command("contract-checks")
+@click.option("--json", "output_json", is_flag=True, help="Output as JSON")
+def diagnostics_contract_checks(output_json: bool) -> None:
+    """Run public observability contract checks."""
+    report = run_observability_contract_checks()
+    if output_json:
+        click.echo(json.dumps(report.to_dict(), indent=2, default=str))
+    else:
+        click.echo(render_contract_check_report(report))
+    if not report.passed:
+        raise SystemExit(ExitCode.FAIL)
 
 
 @diagnostics.command("checkpoint")
@@ -284,6 +315,8 @@ _COMMAND_OBJECTS = (
     diagnostics_health,
     diagnostics_metrics,
     diagnostics_run,
+    diagnostics_dossier,
+    diagnostics_contract_checks,
     diagnostics_checkpoint,
     diagnostics_manifest,
     diagnostics_quarantine,
@@ -294,6 +327,8 @@ COMMANDS = (
     "metrics",
     "health",
     "run",
+    "dossier",
+    "contract-checks",
     "checkpoint",
     "manifest",
     "quarantine",
