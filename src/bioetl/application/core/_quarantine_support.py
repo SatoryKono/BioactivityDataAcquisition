@@ -91,6 +91,22 @@ def build_filtered_quarantine_request(
     }
 
 
+async def write_quarantine_request(
+    quarantine: object,
+    request: QuarantineWriteRequest,
+) -> None:
+    """Write one quarantine request via the injected port."""
+    await quarantine.write(**request)
+
+
+async def write_quarantine_requests(
+    quarantine: object,
+    requests: list[QuarantineWriteRequest],
+) -> None:
+    """Write multiple quarantine requests via the injected port."""
+    await quarantine.write_many(requests)
+
+
 def track_quarantine_metrics(
     *,
     metrics: MetricsPort | None,

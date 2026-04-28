@@ -29,6 +29,9 @@ from bioetl.composition.factories.pipeline._factory_method_types import (
     build_create_pipeline_with_services_request as _build_create_pipeline_with_services_request,
 )
 from bioetl.composition.factories.pipeline._factory_method_types import (
+    build_create_factory_runner_request as _build_create_factory_runner_request,
+)
+from bioetl.composition.factories.pipeline._factory_method_types import (
     build_pipeline_factory_context as _build_pipeline_factory_context,
 )
 from bioetl.composition.factories.pipeline._factory_method_types import (
@@ -68,6 +71,7 @@ TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 build_create_pipeline_with_services_request = (
     _build_create_pipeline_with_services_request
 )
+build_create_factory_runner_request = _build_create_factory_runner_request
 build_pipeline_factory_context = _build_pipeline_factory_context
 create_factory_data_source = _create_factory_data_source
 extract_entity_type = _extract_entity_type_helper
@@ -78,6 +82,7 @@ __all__ = [
     "_CreateFactoryRunnerRequest",
     "_CreatePipelineWithServicesRequest",
     "_PipelineFactoryContext",
+    "build_create_factory_runner_request",
     "build_create_pipeline_with_services_request",
     "build_factory_services",
     "build_pipeline_factory_context",

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, TypeVar, cast
 
+from bioetl.application.core._fetch_forwarding import build_forwarded_fetch_kwargs
 from bioetl.domain.ports import FilterableDataSourcePort
 
 if TYPE_CHECKING:
@@ -12,7 +13,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import DataSourcePort
 
 RecordT = TypeVar("RecordT")
-_UNSET_FETCH_ARG = object()
 
 
 def ensure_filterable_data_source(
@@ -41,22 +41,21 @@ async def yield_wrapped_fetch_records(
     offset: int | None = None,
 ) -> AsyncIterator[RecordT]:
     """Delegate a plain fetch call to a wrapped data source adapter."""
-    fetch_kwargs: dict[str, object] = {
-        "entity_type": entity_type,
-        "limit": limit,
-        "query": query,
-        "offset": offset,
-    }
-    if filter_ids is not _UNSET_FETCH_ARG:
-        fetch_kwargs["filter_ids"] = filter_ids
-    if filter_field is not _UNSET_FETCH_ARG:
-        fetch_kwargs["filter_field"] = filter_field
     iterator = cast(
         "AsyncIterator[RecordT]",
         cast(
             "Any",  # Any: Dynamic data source adapter
             data_source,
-        ).fetch(**fetch_kwargs),
+        ).fetch(
+            **build_forwarded_fetch_kwargs(
+                entity_type=entity_type,
+                limit=limit,
+                query=query,
+                filter_ids=filter_ids,
+                filter_field=filter_field,
+                offset=offset,
+            ),
+        ),
     )
     async for record in iterator:
         yield record

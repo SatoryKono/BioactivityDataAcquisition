@@ -10,6 +10,8 @@ from bioetl.application.core._quarantine_support import (
     build_filtered_quarantine_request,
     emit_quarantine_events,
     record_filtered_quarantine_metrics,
+    write_quarantine_request,
+    write_quarantine_requests,
 )
 
 if TYPE_CHECKING:
@@ -52,15 +54,7 @@ class QuarantineManagerSupportMixin:
             run_id=run_id,
             ingestion_ts=ingestion_ts,
         )
-        await self._quarantine.write(
-            pipeline=request["pipeline"],
-            error_code=request["error_code"],
-            payload=request["payload"],
-            bronze_batch_id=request["bronze_batch_id"],
-            run_id=request.get("run_id"),
-            metadata=request.get("metadata"),
-            ingestion_ts=request["ingestion_ts"],
-        )
+        await write_quarantine_request(self._quarantine, request)
         emit_quarantine_events(
             emitter=self._domain_event_emitter,
             pipeline_name=self._pipeline_name,
@@ -101,7 +95,7 @@ class QuarantineManagerSupportMixin:
             )
             for entry in records
         ]
-        await self._quarantine.write_many(write_requests)
+        await write_quarantine_requests(self._quarantine, write_requests)
         for request, entry in zip(write_requests, records, strict=True):
             emit_quarantine_events(
                 emitter=self._domain_event_emitter,
