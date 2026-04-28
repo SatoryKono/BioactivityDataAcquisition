@@ -248,7 +248,7 @@ def _iter_slo_contract_alerts(
     for slo_name, slo in contracts.items():
         if not isinstance(slo, dict):
             continue
-        metrics = {metric for metric in _string_list(slo.get("metrics"))}
+        metrics = set(_string_list(slo.get("metrics")))
         alerts = slo.get("alerts")
         if not isinstance(alerts, list):
             continue

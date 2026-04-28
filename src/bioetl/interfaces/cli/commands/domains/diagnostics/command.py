@@ -9,16 +9,16 @@ from typing import TYPE_CHECKING, cast
 import click
 
 from bioetl.interfaces.cli.commands.checkpoint import _render_checkpoint_payload
+from bioetl.interfaces.cli.commands.domains.diagnostics.contract_checks import (
+    render_contract_check_report,
+    run_observability_contract_checks,
+)
 from bioetl.interfaces.cli.commands.domains.diagnostics.rendering import (
     build_diagnostics_guide_lines,
     build_metrics_profile_lines,
     echo_health_results,
     render_guide_lines,
     render_run_dossier_payload,
-)
-from bioetl.interfaces.cli.commands.domains.diagnostics.contract_checks import (
-    render_contract_check_report,
-    run_observability_contract_checks,
 )
 from bioetl.interfaces.cli.commands.domains.health.rendering import (
     all_health_results_healthy,

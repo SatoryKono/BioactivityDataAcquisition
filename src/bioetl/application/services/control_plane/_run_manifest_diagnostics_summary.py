@@ -6,11 +6,11 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import cast
 
-from bioetl.application.services.control_plane._run_manifest_diagnostics_ledger import (
-    _resolve_policy_value,
-)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_helpers import (
     extract_diagnostic_context,
+)
+from bioetl.application.services.control_plane._run_manifest_diagnostics_ledger import (
+    _resolve_policy_value,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_persistence import (
     build_alert_signals,

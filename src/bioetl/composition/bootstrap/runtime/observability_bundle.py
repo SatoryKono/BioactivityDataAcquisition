@@ -5,8 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.composition.bootstrap.runtime._observability_preflight_support import (
-    validate_forensic_grade_observability_evidence,
     validate_control_plane_readiness,
+    validate_forensic_grade_observability_evidence,
     validate_prod_noop_components,
 )
 from bioetl.composition.observability import (
