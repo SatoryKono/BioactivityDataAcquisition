@@ -85,6 +85,101 @@ class _SilverMetadataWriteSupportRequest:
     transform_steps: tuple[str, ...] | None = None
 
 
+@dataclass(frozen=True, slots=True)
+class _SilverMetadataAuditSupportRequest:
+    """Normalized support-layer request for one Silver audit write."""
+
+    table_name: str
+    records: list[BronzeRecord]
+    mode: SilverWriteMode
+    run_id: RunID | None = None
+    run_type: RunType | None = None
+    source_batch_id: BatchID | None = None
+    ingestion_ts: datetime | None = None
+
+
+_AUDIT_SUPPORT_FIELDS = (
+    "table_name",
+    "records",
+    "mode",
+    "run_id",
+    "run_type",
+    "source_batch_id",
+    "ingestion_ts",
+)
+_AUDIT_SUPPORT_REQUIRED_FIELDS = (
+    "table_name",
+    "records",
+    "mode",
+)
+_AUDIT_SUPPORT_DEFAULTS: dict[str, object] = {
+    "run_id": None,
+    "run_type": None,
+    "source_batch_id": None,
+    "ingestion_ts": None,
+}
+
+
+def _coerce_silver_metadata_audit_request(
+    request: _SilverMetadataAuditSupportRequest | None = None,
+    *,
+    args: tuple[object, ...] = (),
+    kwargs: dict[str, object] | None = None,
+) -> _SilverMetadataAuditSupportRequest:
+    """Normalize legacy or request-style Silver audit arguments."""
+    if isinstance(request, _SilverMetadataAuditSupportRequest):
+        if args or kwargs:
+            raise TypeError(
+                "_SilverMetadataAuditSupportRequest cannot be combined with "
+                "legacy args/kwargs"
+            )
+        return request
+
+    resolved_kwargs = dict(kwargs or {})
+    legacy_values = list(args) if request is None else [request, *args]
+    if len(legacy_values) > len(_AUDIT_SUPPORT_FIELDS):
+        raise TypeError("_log_silver_audit() received too many positional arguments")
+
+    for field_name, value in zip(_AUDIT_SUPPORT_FIELDS, legacy_values, strict=False):
+        if field_name in resolved_kwargs:
+            raise TypeError(
+                f"_log_silver_audit() got multiple values for argument '{field_name}'"
+            )
+        resolved_kwargs[field_name] = value
+
+    unexpected_fields = sorted(
+        set(resolved_kwargs)
+        - frozenset({*_AUDIT_SUPPORT_FIELDS, *tuple(_AUDIT_SUPPORT_DEFAULTS)})
+    )
+    if unexpected_fields:
+        unexpected = ", ".join(unexpected_fields)
+        raise TypeError(
+            f"_log_silver_audit() got unexpected keyword arguments: {unexpected}"
+        )
+
+    missing_fields = [
+        field_name
+        for field_name in _AUDIT_SUPPORT_REQUIRED_FIELDS
+        if field_name not in resolved_kwargs
+    ]
+    if missing_fields:
+        missing = ", ".join(missing_fields)
+        raise TypeError(f"_log_silver_audit() missing required arguments: {missing}")
+
+    for field_name, default in _AUDIT_SUPPORT_DEFAULTS.items():
+        resolved_kwargs.setdefault(field_name, default)
+
+    return _SilverMetadataAuditSupportRequest(
+        table_name=resolved_kwargs["table_name"],  # type: ignore[arg-type]
+        records=resolved_kwargs["records"],  # type: ignore[arg-type]
+        mode=resolved_kwargs["mode"],  # type: ignore[arg-type]
+        run_id=resolved_kwargs["run_id"],  # type: ignore[arg-type]
+        run_type=resolved_kwargs["run_type"],  # type: ignore[arg-type]
+        source_batch_id=resolved_kwargs["source_batch_id"],  # type: ignore[arg-type]
+        ingestion_ts=resolved_kwargs["ingestion_ts"],  # type: ignore[arg-type]
+    )
+
+
 async def _write_silver_metadata(
     metadata_ops: _MetadataWriteOps,
     request: _SilverMetadataWriteSupportRequest,
@@ -163,14 +258,7 @@ def _emit_silver_metadata_write_success(
 
 async def _log_silver_audit_event(
     metadata_ops: _MetadataAuditOps,
-    table_name: str,
-    records: list[BronzeRecord],
-    mode: SilverWriteMode,
-    *,
-    run_id: RunID | None,
-    run_type: RunType | None,
-    source_batch_id: BatchID | None,
-    ingestion_ts: datetime | None,
+    request: _SilverMetadataAuditSupportRequest,
 ) -> None:
     """Build and persist one Silver audit entry."""
     if not metadata_ops._audit:
@@ -182,13 +270,13 @@ async def _log_silver_audit_event(
     )
 
     request = _SilverAuditWriteRequest(
-        table_name=table_name,
-        records=records,
-        mode=mode,
-        run_id=run_id,
-        run_type=run_type,
-        source_batch_id=source_batch_id,
-        ingestion_ts=ingestion_ts,
+        table_name=request.table_name,
+        records=request.records,
+        mode=request.mode,
+        run_id=request.run_id,
+        run_type=request.run_type,
+        source_batch_id=request.source_batch_id,
+        ingestion_ts=request.ingestion_ts,
     )
     audit_entry = _build_silver_audit_entry(
         _SilverAuditHost(_resolve_metadata_logger(metadata_ops)),

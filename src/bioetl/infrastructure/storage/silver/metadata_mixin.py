@@ -46,6 +46,7 @@ from bioetl.infrastructure.storage.silver.metadata_request_models import (
     _SilverWriteResultFinalizationRequest,
 )
 from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
+    _SilverMetadataAuditSupportRequest,
     _log_silver_audit_event,
 )
 
@@ -103,13 +104,15 @@ class SilverWriterMetadataMixin:
         """Log audit entry for Silver write operation."""
         await _log_silver_audit_event(
             self,
-            table_name=table_name,
-            records=records,
-            mode=mode,
-            run_id=run_id,
-            run_type=run_type,
-            source_batch_id=source_batch_id,
-            ingestion_ts=ingestion_ts,
+            _SilverMetadataAuditSupportRequest(
+                table_name=table_name,
+                records=records,
+                mode=mode,
+                run_id=run_id,
+                run_type=run_type,
+                source_batch_id=source_batch_id,
+                ingestion_ts=ingestion_ts,
+            ),
         )
 
     async def _get_delta_version(self, table_path: str) -> int | None:

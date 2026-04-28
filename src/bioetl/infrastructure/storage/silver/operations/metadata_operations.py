@@ -42,6 +42,8 @@ from bioetl.infrastructure.storage.silver.metadata_request_models import (
     _SilverWriteResultFinalizationRequest,
 )
 from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
+    _coerce_silver_metadata_audit_request,
+    _SilverMetadataAuditSupportRequest,
     _log_silver_audit_event,
     _SilverMetadataWriteSupportRequest,
     _write_silver_metadata,
@@ -289,25 +291,19 @@ class SilverMetadataOperations:
 
     async def _log_silver_audit(
         self,
-        table_name: str,
-        records: list[BronzeRecord],
-        mode: SilverWriteMode,
-        *,
-        run_id: RunID | None,
-        run_type: RunType | None,
-        source_batch_id: BatchID | None,
-        ingestion_ts: datetime | None,
+        request: _SilverMetadataAuditSupportRequest | None = None,
+        *args: object,
+        **kwargs: object,
     ) -> None:
         """Backward compatibility alias for log_silver_audit."""
+        resolved_request = _coerce_silver_metadata_audit_request(
+            request,
+            args=args,
+            kwargs=kwargs,
+        )
         await _log_silver_audit_event(
             self,
-            table_name=table_name,
-            records=records,
-            mode=mode,
-            run_id=run_id,
-            run_type=run_type,
-            source_batch_id=source_batch_id,
-            ingestion_ts=ingestion_ts,
+            resolved_request,
         )
 
     async def _prepare_silver_write_finalization_context(

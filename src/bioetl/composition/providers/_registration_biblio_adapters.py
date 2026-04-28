@@ -28,6 +28,13 @@ def _get_pubmed_api_key(settings: ProviderSettingsProtocol | None) -> str | None
     return settings.pubmed_api_key.get_secret_value()
 
 
+def _get_openalex_api_key(settings: ProviderSettingsProtocol | None) -> str | None:
+    """Return resolved OpenAlex API key from settings when configured."""
+    if settings is None or settings.openalex_api_key is None:
+        return None
+    return settings.openalex_api_key.get_secret_value()
+
+
 def _build_pubmed_adapter_from_settings(
     *,
     adapter_cls: type[PubMedAdapter],
@@ -86,12 +93,14 @@ def _build_openalex_adapter_from_settings(
     settings: ProviderSettingsProtocol | None,
     **kwargs: Any,  # Any: forward arbitrary adapter kwargs
 ) -> OpenAlexAdapter:
-    """Create OpenAlexAdapter with mailto resolution owned by composition."""
+    """Create OpenAlexAdapter with API-key/mailto resolution owned by composition."""
+    api_key = kwargs.get("api_key") or _get_openalex_api_key(settings)
     mailto = kwargs.get("mailto") or _get_default_email(settings)
-    if not mailto:
+    if not api_key and not mailto:
         raise ValueError(
-            "OpenAlex adapter requires mailto. "
-            "Provide via 'mailto' kwarg or settings.default_email"
+            "OpenAlex adapter requires api_key or mailto. "
+            "Provide via 'api_key' kwarg/BIOETL_OPENALEX_API_KEY or "
+            "'mailto' kwarg/settings.default_email for legacy compatibility"
         )
 
     if http_client is None:
@@ -109,6 +118,7 @@ def _build_openalex_adapter_from_settings(
         http_client=http_client,
         logger=logger,
         mailto=mailto,
+        api_key=api_key,
         batch_size=kwargs.get("batch_size", 50),
         metrics=metrics,
         dependency_context=kwargs.get("dependency_context"),

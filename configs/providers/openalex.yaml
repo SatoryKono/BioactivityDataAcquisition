@@ -4,13 +4,14 @@ source:
     provider_config:
         provider: openalex
         base_url: https://api.openalex.org
-        auth_type: email
+        auth_type: api_key
+        api_key_env: BIOETL_OPENALEX_API_KEY
         mailto: ${BIOETL_OPENALEX_EMAIL}
         client:
             timeout_sec: 30.0
             max_retries: 3
         pagination:
-            page_size: 50
+            page_size: 200
             id_batch_size: 50
             strategy: cursor
         fallback:
@@ -29,7 +30,13 @@ source:
     rate_limit:
         requests_per_second: 10
         burst: 20
-        polite_pool: true
+        daily_credit_limit: 100000
+        list_request_credit_cost: 1
+        rate_limit_headers:
+            - X-RateLimit-Limit
+            - X-RateLimit-Remaining
+            - X-RateLimit-Credits-Used
+            - X-RateLimit-Reset
     health_check:
         endpoint: /works
         params:

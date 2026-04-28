@@ -9,6 +9,11 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
+    _build_postwrite_audit_hook_request,
+    _build_postwrite_export_hook_request,
+    _run_postwrite_audit_via_host_hook,
+    _run_postwrite_export_via_host_hook,
+    _SilverWritePostwriteContext,
     _complete_silver_write_pipeline_impl,
     _finalize_silver_postwrite_result,
 )
@@ -22,51 +27,6 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BatchID, RunID, RunType
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
-
-
-class _SilverWritePostwriteContext(Protocol):
-    """Structural type for the write execution context used after Delta write."""
-
-    @property
-    def table_name(self) -> str: ...
-
-    @property
-    def mode(self) -> str: ...
-
-    @property
-    def primary_keys(self) -> list[str]: ...
-
-    @property
-    def bronze_refs(self) -> list[BronzeWriteResult] | None: ...
-
-    @property
-    def partition_cols(self) -> list[str] | None: ...
-
-    @property
-    def run_id(self) -> RunID | None: ...
-
-    @property
-    def run_type(self) -> RunType | None: ...
-
-    @property
-    def source_batch_id(self) -> BatchID | None: ...
-
-    @property
-    def ingestion_ts(self) -> datetime | None: ...
-
-    @property
-    def quarantined_count(self) -> int | None: ...
-
-    @property
-    def validation_errors(self) -> Sequence[str] | None: ...
-
-    @property
-    def started_at(self) -> datetime: ...
-
-    @property
-    def start_perf(self) -> float: ...
-
-
 class _SilverWriterPostwriteSelf(Protocol):
     """Structural type for mixin self dependencies."""
 
@@ -141,12 +101,12 @@ class SilverWriterPostwriteMixin:
         payload: _PreparedSilverWritePayload,
     ) -> None:
         """Run the legacy mixin export branch via the compatibility hook."""
-        await self._maybe_export_csv(
-            table_name=ctx.table_name,
-            arrow_data=payload.arrow_data,
-            mode=ctx.mode,
-            validated_mode=payload.validated_mode,
-            primary_keys=ctx.primary_keys,
+        await _run_postwrite_export_via_host_hook(
+            self,
+            request=_build_postwrite_export_hook_request(
+                ctx=ctx,
+                payload=payload,
+            ),
         )
 
     async def _run_postwrite_audit(
@@ -156,14 +116,12 @@ class SilverWriterPostwriteMixin:
         payload: _PreparedSilverWritePayload,
     ) -> None:
         """Run the legacy mixin audit branch via the compatibility hook."""
-        await self._maybe_log_silver_audit(
-            table_name=ctx.table_name,
-            records=payload.records,
-            mode=payload.validated_mode,
-            run_id=ctx.run_id,
-            run_type=ctx.run_type,
-            source_batch_id=ctx.source_batch_id,
-            ingestion_ts=ctx.ingestion_ts,
+        await _run_postwrite_audit_via_host_hook(
+            self,
+            request=_build_postwrite_audit_hook_request(
+                ctx=ctx,
+                payload=payload,
+            ),
         )
 
     async def _finalize_postwrite_result(
@@ -179,15 +137,4 @@ class SilverWriterPostwriteMixin:
             payload=payload,
         )
 
-    async def _complete_silver_write_pipeline(
-        self: _SilverWriterPostwriteSelf,
-        *,
-        ctx: _SilverWritePostwriteContext,
-        payload: _PreparedSilverWritePayload,
-    ) -> SilverWriteResult | None:
-        """Run post-write stages: CSV export, audit, and result finalization."""
-        return await _complete_silver_write_pipeline_impl(
-            self,
-            ctx=ctx,
-            payload=payload,
-        )
+    _complete_silver_write_pipeline = _complete_silver_write_pipeline_impl

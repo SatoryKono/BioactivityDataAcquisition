@@ -51,6 +51,11 @@ class ProviderSettingsProtocol(Protocol):
         ...
 
     @property
+    def openalex_api_key(self) -> SecretValueProviderProtocol | None:
+        """Return the configured OpenAlex API key wrapper when available."""
+        ...
+
+    @property
     def semanticscholar_api_key(self) -> SecretValueProviderProtocol | None:
         """Return the configured Semantic Scholar API key wrapper when available."""
         ...

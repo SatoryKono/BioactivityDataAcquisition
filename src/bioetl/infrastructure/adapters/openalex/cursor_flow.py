@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 class OpenAlexCursorFlowService:
     """Encapsulates OpenAlex pagination/query/filter/title-search flows."""
 
-    mailto: str
+    mailto: str | None
     batch_size: int
     title_search_cache_size: int
     normalize_doi: Callable[[str], str | None]
@@ -38,6 +38,7 @@ class OpenAlexCursorFlowService:
     response_mapper: OpenAlexResponseMapper
     logger: LoggerPort
     runtime_errors: tuple[type[Exception], ...]
+    api_key: str | None = None
     _title_search_cache: dict[tuple[str, int], list[BronzeRecord]] = field(
         init=False,
         default_factory=dict,
@@ -65,6 +66,7 @@ class OpenAlexCursorFlowService:
         while cursor:
             params = build_openalex_search_params(
                 mailto=self.mailto,
+                api_key=self.api_key,
                 query=query,
                 cursor=cursor,
                 per_page=per_page,
@@ -203,7 +205,11 @@ class OpenAlexCursorFlowService:
         if not normalized:
             return []
 
-        params = build_openalex_doi_filter_params(mailto=self.mailto, dois=normalized)
+        params = build_openalex_doi_filter_params(
+            mailto=self.mailto,
+            api_key=self.api_key,
+            dois=normalized,
+        )
         self.logger.debug("openalex_batch_doi_request", doi_count=len(normalized))
         payload = await self.query_executor.request_works_payload(params)
         results = self.response_mapper.extract_results(payload)
@@ -234,6 +240,7 @@ class OpenAlexCursorFlowService:
 
         params = build_openalex_title_search_params(
             mailto=self.mailto,
+            api_key=self.api_key,
             escaped_title=self.escape_title_for_search(normalized_title[:200]),
             limit=limit,
         )

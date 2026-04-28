@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
@@ -183,6 +184,94 @@ class _SilverPostwriteExecutorProtocol(Protocol):
     ) -> SilverWriteResult | None: ...
 
 
+@dataclass(frozen=True, slots=True)
+class _SilverPostwriteExportHookRequest:
+    """Normalized host-hook request for postwrite export delegation."""
+
+    table_name: str
+    arrow_data: pa.Table
+    mode: str
+    validated_mode: SilverWriteMode
+    primary_keys: list[str]
+
+
+@dataclass(frozen=True, slots=True)
+class _SilverPostwriteAuditHookRequest:
+    """Normalized host-hook request for postwrite audit delegation."""
+
+    table_name: str
+    records: list[BronzeRecord]
+    mode: SilverWriteMode
+    run_id: RunID | None
+    run_type: RunType | None
+    source_batch_id: BatchID | None
+    ingestion_ts: datetime | None
+
+
+def _build_postwrite_export_hook_request(
+    *,
+    ctx: _SilverWritePostwriteContext,
+    payload: _PreparedSilverWritePayload,
+) -> _SilverPostwriteExportHookRequest:
+    """Build the normalized export request from postwrite ctx/payload."""
+    return _SilverPostwriteExportHookRequest(
+        table_name=ctx.table_name,
+        arrow_data=payload.arrow_data,
+        mode=ctx.mode,
+        validated_mode=payload.validated_mode,
+        primary_keys=ctx.primary_keys,
+    )
+
+
+def _build_postwrite_audit_hook_request(
+    *,
+    ctx: _SilverWritePostwriteContext,
+    payload: _PreparedSilverWritePayload,
+) -> _SilverPostwriteAuditHookRequest:
+    """Build the normalized audit request from postwrite ctx/payload."""
+    return _SilverPostwriteAuditHookRequest(
+        table_name=ctx.table_name,
+        records=payload.records,
+        mode=payload.validated_mode,
+        run_id=ctx.run_id,
+        run_type=ctx.run_type,
+        source_batch_id=ctx.source_batch_id,
+        ingestion_ts=ctx.ingestion_ts,
+    )
+
+
+async def _run_postwrite_export_via_host_hook(
+    host: _SilverPostwriteHostProtocol,
+    *,
+    request: _SilverPostwriteExportHookRequest,
+) -> None:
+    """Delegate postwrite export through the compatibility host hook."""
+    await host._maybe_export_csv(
+        table_name=request.table_name,
+        arrow_data=request.arrow_data,
+        mode=request.mode,
+        validated_mode=request.validated_mode,
+        primary_keys=request.primary_keys,
+    )
+
+
+async def _run_postwrite_audit_via_host_hook(
+    host: _SilverPostwriteHostProtocol,
+    *,
+    request: _SilverPostwriteAuditHookRequest,
+) -> None:
+    """Delegate postwrite audit through the compatibility host hook."""
+    await host._maybe_log_silver_audit(
+        table_name=request.table_name,
+        records=request.records,
+        mode=request.mode,
+        run_id=request.run_id,
+        run_type=request.run_type,
+        source_batch_id=request.source_batch_id,
+        ingestion_ts=request.ingestion_ts,
+    )
+
+
 async def _complete_silver_write_pipeline_impl(
     executor: _SilverPostwriteExecutorProtocol,
     *,
@@ -269,12 +358,12 @@ class SilverPostwriteOperations:
             )
             return
 
-        await self._host._maybe_export_csv(
-            table_name=ctx.table_name,
-            arrow_data=payload.arrow_data,
-            mode=ctx.mode,
-            validated_mode=payload.validated_mode,
-            primary_keys=ctx.primary_keys,
+        await _run_postwrite_export_via_host_hook(
+            self._host,
+            request=_build_postwrite_export_hook_request(
+                ctx=ctx,
+                payload=payload,
+            ),
         )
 
     async def _run_postwrite_audit(

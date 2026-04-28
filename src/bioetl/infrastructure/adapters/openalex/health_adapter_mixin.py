@@ -17,7 +17,8 @@ if TYPE_CHECKING:
 class _OpenAlexHealthHost(Protocol):
     """Structural host contract for OpenAlex health/lifecycle methods."""
 
-    mailto: str
+    mailto: str | None
+    api_key: str | None
     http_client: UnifiedHTTPClient
     logger: LoggerPort
     _http_client: UnifiedHTTPClient
@@ -41,6 +42,7 @@ class OpenAlexAdapterHealthMixin:
         return await probe_openalex_health(
             api_base=OPENALEX_API_BASE,
             mailto=self.mailto,
+            api_key=self.api_key,
             http_client=self._http_client,
             logger=self._logger,
             adapter_metrics=self._adapter_metrics,

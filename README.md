@@ -233,7 +233,8 @@ uv sync --extra dev --extra tracing
    | `BIOETL_UNIPROT_API_KEY`                   | UniProt API key (higher rate limits)                        | —                         |
    | `BIOETL_PUBMED_API_KEY`                    | NCBI E-utilities API key                                    | —                         |
    | `BIOETL_PUBMED_EMAIL`                      | Email for NCBI tool identification                          | —                         |
-   | `BIOETL_OPENALEX_EMAIL`                    | Email for OpenAlex polite pool                              | —                         |
+   | `BIOETL_OPENALEX_API_KEY`                  | OpenAlex API key                                            | —                         |
+   | `BIOETL_OPENALEX_EMAIL`                    | Optional OpenAlex contact email for request attribution     | —                         |
    | `BIOETL_SEMANTICSCHOLAR_API_KEY`           | Semantic Scholar API key                                    | —                         |
    | `BIOETL_CROSSREF_EMAIL`                    | Email for Crossref polite pool                              | —                         |
    | **Security**                               |                                                             |                           |

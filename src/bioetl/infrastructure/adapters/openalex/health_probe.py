@@ -25,7 +25,8 @@ if TYPE_CHECKING:
 async def probe_openalex_health(
     *,
     api_base: str,
-    mailto: str,
+    mailto: str | None,
+    api_key: str | None,
     http_client: UnifiedHTTPClient,
     logger: LoggerPort,
     adapter_metrics: AdapterMetricsRecorder,
@@ -35,7 +36,8 @@ async def probe_openalex_health(
 
     Args:
         api_base: Base URL for the OpenAlex API (e.g., "https://api.openalex.org").
-        mailto: Email address for the polite pool parameter.
+        mailto: Optional email address retained for legacy request attribution.
+        api_key: Optional OpenAlex API key.
         http_client: HTTP client for making the probe request.
         logger: Logger port for structured warning output.
         adapter_metrics: Adapter metrics for measuring request latency.
@@ -45,7 +47,7 @@ async def probe_openalex_health(
         HealthStatus reflecting the current OpenAlex API availability and response latency.
     """
     url = f"{api_base}/works"
-    params = build_openalex_health_probe_params(mailto)
+    params = build_openalex_health_probe_params(mailto, api_key=api_key)
 
     start_time = time.monotonic()
     with adapter_metrics.measure_request("/health"):

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import inspect
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -135,13 +136,39 @@ def build_bootstrap_support_services(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     resources: BootstrapRuntimeResources,
+    include_legacy_runtime_kwargs: bool = False,
 ) -> CompositeSupportServices:
     """Resolve support services from the shared resource bundle."""
-    return build_support_services_fn(
-        config=config,
-        runtime=runtime,
-        infra_context=resources,
-    )
+    call_kwargs: dict[str, object] = {
+        "config": config,
+        "runtime": runtime,
+        "infra_context": resources,
+    }
+    if include_legacy_runtime_kwargs:
+        call_kwargs.update(
+            run_id=resources.run_id,
+            settings=resources.settings,
+            logger=resources.logger,
+            metrics=resources.metrics,
+            tracer=resources.tracer,
+            storage=resources.storage,
+            lock=resources.lock,
+        )
+    try:
+        parameters = inspect.signature(build_support_services_fn).parameters
+    except (TypeError, ValueError):
+        return build_support_services_fn(**call_kwargs)
+
+    if any(
+        parameter.kind is inspect.Parameter.VAR_KEYWORD
+        for parameter in parameters.values()
+    ):
+        return build_support_services_fn(**call_kwargs)
+
+    supported_kwargs = {
+        name: value for name, value in call_kwargs.items() if name in parameters
+    }
+    return build_support_services_fn(**supported_kwargs)
 
 
 def load_composite_config_impl(

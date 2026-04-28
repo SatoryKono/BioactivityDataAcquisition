@@ -78,7 +78,7 @@ class OpenAlexRuntimeServicesRequest:
     request_collector: APIRequestCollector
     headers_provider: HeadersProvider
     api_base: str
-    mailto: str
+    mailto: str | None
     batch_size: int
     title_search_cache_size: int
     normalize_doi: NormalizeDoiFn
@@ -87,6 +87,7 @@ class OpenAlexRuntimeServicesRequest:
     search_by_title: SearchByTitleFn
     logger: LoggerPort
     runtime_errors: tuple[type[Exception], ...]
+    api_key: str | None = None
 
 
 def _coerce_openalex_runtime_services_request(
@@ -117,6 +118,7 @@ def _coerce_openalex_runtime_services_request(
         "headers_provider",
         "api_base",
         "mailto",
+        "api_key",
         "batch_size",
         "title_search_cache_size",
         "normalize_doi",
@@ -149,6 +151,7 @@ def _coerce_openalex_runtime_services_request(
         headers_provider=kwargs.pop("headers_provider"),  # type: ignore[arg-type]
         api_base=kwargs.pop("api_base"),  # type: ignore[arg-type]
         mailto=kwargs.pop("mailto"),  # type: ignore[arg-type]
+        api_key=kwargs.pop("api_key", None),  # type: ignore[arg-type]
         batch_size=kwargs.pop("batch_size"),  # type: ignore[arg-type]
         title_search_cache_size=kwargs.pop("title_search_cache_size"),  # type: ignore[arg-type]
         normalize_doi=kwargs.pop("normalize_doi"),  # type: ignore[arg-type]
@@ -185,7 +188,8 @@ def _create_default_openalex_response_mapper() -> OpenAlexResponseMapper:
 
 def _create_default_openalex_cursor_flow(
     *,
-    mailto: str,
+    mailto: str | None,
+    api_key: str | None,
     batch_size: int,
     title_search_cache_size: int,
     normalize_doi: NormalizeDoiFn,
@@ -198,6 +202,7 @@ def _create_default_openalex_cursor_flow(
     """Create the default OpenAlex cursor flow service."""
     return OpenAlexCursorFlowService(
         mailto=mailto,
+        api_key=api_key,
         batch_size=batch_size,
         title_search_cache_size=title_search_cache_size,
         normalize_doi=normalize_doi,
@@ -264,6 +269,7 @@ def build_openalex_runtime_services(
         if resolved.openalex_cursor_flow is not None
         else _create_default_openalex_cursor_flow(
             mailto=resolved.mailto,
+            api_key=resolved.api_key,
             batch_size=resolved.batch_size,
             title_search_cache_size=resolved.title_search_cache_size,
             normalize_doi=resolved.normalize_doi,
