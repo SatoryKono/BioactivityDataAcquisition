@@ -115,10 +115,11 @@ branch_exists() {
 
 remote_branch_exists() {
   local branch="$1"
+  local status=1
   if git show-ref --verify --quiet "refs/remotes/origin/${branch}"; then
-    return 0
+    status=0
   fi
-  return 1
+  return "${status}"
 }
 
 archive_tag_for() {

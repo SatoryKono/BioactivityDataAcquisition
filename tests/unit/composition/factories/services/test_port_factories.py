@@ -21,16 +21,12 @@ from bioetl.infrastructure.config import Settings
 
 @dataclass(frozen=True, slots=True)
 class _StorageContext:
-    _checkpoints_path: Path
-
-    @property
-    def checkpoints_path(self) -> Path:
-        return self._checkpoints_path
+    checkpoints_path: Path
 
 
 @pytest.fixture
 def storage_ctx(tmp_path: Path) -> _StorageContext:
-    return _StorageContext(_checkpoints_path=tmp_path)
+    return _StorageContext(checkpoints_path=tmp_path)
 
 
 @pytest.mark.unit
