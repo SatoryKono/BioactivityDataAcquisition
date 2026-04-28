@@ -18,16 +18,17 @@ def _activity_ontology_companions(
 ) -> ActivityOntologyCompanionFields | None:
     if record is None:
         return None
-    bao_endpoint = record.get("bao_endpoint")
-    bao_format = record.get("bao_format")
-    uo_units = record.get("uo_units")
-    qudt_units = record.get("qudt_units")
     return resolve_activity_ontology_companion_fields(
-        bao_endpoint=bao_endpoint if isinstance(bao_endpoint, str) else None,
-        bao_format=bao_format if isinstance(bao_format, str) else None,
-        uo_units=uo_units if isinstance(uo_units, str) else None,
-        qudt_units=qudt_units if isinstance(qudt_units, str) else None,
+        bao_endpoint=_record_string(record, "bao_endpoint"),
+        bao_format=_record_string(record, "bao_format"),
+        uo_units=_record_string(record, "uo_units"),
+        qudt_units=_record_string(record, "qudt_units"),
     )
+
+
+def _record_string(record: Mapping[str, object], key: str) -> str | None:
+    value = record.get(key)
+    return value if isinstance(value, str) else None
 
 
 def _normalize_mapping_status(value: object) -> object:

@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Literal
 from bioetl.domain.validation import validate_smiles
 
 if TYPE_CHECKING:
+
     class _ValueObjectBase[ValueT]:
         """Typing-only stand-in for ValueObject under skipped imports."""
 

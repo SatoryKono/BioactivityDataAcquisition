@@ -65,9 +65,7 @@ class SilverWriterFinalizationCompatibilityMixin:
         return await cast(
             "Callable[..., Awaitable[int | None]]",
             SilverWriterMetadataMixin._get_delta_version,
-        )(
-            _as_metadata_mixin(self), table_path
-        )
+        )(_as_metadata_mixin(self), table_path)
 
     async def _compute_dq_metrics(
         self,
@@ -150,20 +148,18 @@ class SilverWriterFinalizationCompatibilityMixin:
             SilverWriterMetadataMixin,
         )
 
-        return (
-            await cast(
-                "Callable[..., Awaitable[_PreparedSilverWriteFinalizationContext]]",
-                SilverWriterMetadataMixin._prepare_silver_write_finalization_context,
-            )(
-                _as_metadata_mixin(self),
-                table_name=table_name,
-                records=records,
-                table_path=table_path,
-                quarantined_count=quarantined_count,
-                validation_errors=validation_errors,
-                started_at=started_at,
-                start_perf=start_perf,
-            )
+        return await cast(
+            "Callable[..., Awaitable[_PreparedSilverWriteFinalizationContext]]",
+            SilverWriterMetadataMixin._prepare_silver_write_finalization_context,
+        )(
+            _as_metadata_mixin(self),
+            table_name=table_name,
+            records=records,
+            table_path=table_path,
+            quarantined_count=quarantined_count,
+            validation_errors=validation_errors,
+            started_at=started_at,
+            start_perf=start_perf,
         )
 
     async def _finalize_silver_write_result(

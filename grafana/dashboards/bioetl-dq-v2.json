@@ -1292,7 +1292,7 @@
             },
             "targets": [
                 {
-                    "expr": "round(sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\", severity=\"hard_fail\"}[$__range])) or vector(0))",
+                    "expr": "round(sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", stage=\"gold\", severity=\"hard_fail\"}[$__range])) or vector(0))",
                     "refId": "A"
                 }
             ],

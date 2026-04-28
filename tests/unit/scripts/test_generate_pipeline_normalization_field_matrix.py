@@ -334,7 +334,9 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     assert bao_format["strictness"] == "canonical_ontology_id"
 
     bao_endpoint_iri = _row(rows, "chembl_activity", "bao_endpoint_iri")
-    assert bao_endpoint_iri["normalizer"] == "normalize_profile_activity_bao_endpoint_iri"
+    assert (
+        bao_endpoint_iri["normalizer"] == "normalize_profile_activity_bao_endpoint_iri"
+    )
     assert bao_endpoint_iri["semantic_category"] == "ontology_reference_identifier"
     assert bao_endpoint_iri["controlled_vocabulary_source"] == (
         "configs/vocab/chembl_ontology.yaml"
@@ -389,10 +391,7 @@ def test_build_field_matrix_rows_exposes_dq_schema_and_vocab_governance() -> Non
     assert molecule_type["policy_scope"] == "project_subset_of_provider_universe"
 
     publication_term_type = _row(rows, "chembl_publication_term", "term_type")
-    assert (
-        publication_term_type["policy_scope"]
-        == "provider_full_universe"
-    )
+    assert publication_term_type["policy_scope"] == "provider_full_universe"
 
     publication_class = _row(rows, "chembl_publication", "publication_class")
     assert publication_class["semantic_category"] == "derived_vocabulary"

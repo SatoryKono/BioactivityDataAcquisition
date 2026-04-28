@@ -79,6 +79,14 @@ def _strip_trailing_parenthetical_annotation(value: str) -> str:
         return stripped
 
     annotation = stripped[separator_index + 2 : -1]
-    if not annotation or any(char in annotation for char in "()\n\r"):
+    if _annotation_is_invalid(annotation):
         return stripped
     return stripped[:separator_index]
+
+
+def _annotation_is_invalid(annotation: str) -> bool:
+    return not annotation or _contains_special_annotation_chars(annotation)
+
+
+def _contains_special_annotation_chars(annotation: str) -> bool:
+    return bool(set(annotation) & {"(", ")", "\n", "\r"})

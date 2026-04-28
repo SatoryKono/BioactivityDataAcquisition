@@ -213,6 +213,4 @@ class SilverWriterAuditMetadataCompatibilityMixin:
         return await cast(
             "Callable[..., Awaitable[int | None]]",
             SilverWriterMetadataMixin._get_delta_version,
-        )(
-            self._as_metadata_mixin(), table_path
-        )
+        )(self._as_metadata_mixin(), table_path)

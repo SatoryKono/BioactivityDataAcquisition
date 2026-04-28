@@ -571,10 +571,7 @@ def test_profile_matrix_distinguishes_provider_universe_from_project_policy_scop
     )
 
     assert assay_type_row["policy_scope"] == "project_subset_of_provider_universe"
-    assert (
-        publication_term_type_row["policy_scope"]
-        == "provider_full_universe"
-    )
+    assert publication_term_type_row["policy_scope"] == "provider_full_universe"
     assert confidence_description_row["policy_scope"] == "provider_full_universe"
 
 

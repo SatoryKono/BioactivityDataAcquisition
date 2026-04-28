@@ -217,24 +217,30 @@ def normalize_profile_quasi_enum_numeric(
     value: object, *, allowed_values: tuple[float, ...]
 ) -> object:
     """Normalize numeric provider codes while preserving non-integer canonical values."""
+    numeric = _coerce_quasi_enum_numeric(value)
+    if numeric is None or numeric not in allowed_values:
+        return None
+    return int(numeric) if numeric.is_integer() else numeric
+
+
+def _coerce_quasi_enum_numeric(value: object) -> float | None:
     if value is None or isinstance(value, bool):
         return None
     if isinstance(value, str):
-        cleaned = normalize_string(value)
-        if cleaned is None:
-            return None
-        try:
-            numeric = float(cleaned)
-        except ValueError:
-            return None
-    elif isinstance(value, (int, float)):
-        numeric = float(value)
-    else:
-        return None
+        return _parse_quasi_enum_numeric_text(value)
+    if isinstance(value, (int, float)):
+        return float(value)
+    return None
 
-    if numeric not in allowed_values:
+
+def _parse_quasi_enum_numeric_text(value: str) -> float | None:
+    cleaned = normalize_string(value)
+    if cleaned is None:
         return None
-    return int(numeric) if numeric.is_integer() else numeric
+    try:
+        return float(cleaned)
+    except ValueError:
+        return None
 
 
 def normalize_profile_assay_parameter_type(
