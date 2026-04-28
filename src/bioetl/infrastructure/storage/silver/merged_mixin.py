@@ -3,9 +3,6 @@
 
 from __future__ import annotations
 
-from bioetl.infrastructure.storage.silver.merged_operations import (
-    _MergedSilverWriteRequest,
-)
 from bioetl.infrastructure.storage.silver.operations.merged_operations import (
     _MergedWriteFacade,
 )

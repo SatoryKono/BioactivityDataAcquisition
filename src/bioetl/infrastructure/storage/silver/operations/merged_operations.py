@@ -87,18 +87,17 @@ class _MergedWriteFacade:
         preserve_column_order: bool = False,
     ) -> None:
         """Write merged records to Silver layer without explicit schema."""
-        request_kwargs = {
-            "table_name": table_name,
-            "records": records,
-            "primary_keys": primary_keys,
-        }
-        request_kwargs["completed_at"] = completed_at
-        request_kwargs["run_id"] = run_id
-        request_kwargs["sources_used"] = sources_used
-        request_kwargs["preserve_column_order"] = preserve_column_order
         await _execute_merged_silver_write_flow(
             cast(_MergedSilverWriteExecutorProtocol, self),
-            _build_merged_silver_write_request(**request_kwargs),
+            _build_merged_silver_write_request(
+                table_name=table_name,
+                records=records,
+                primary_keys=primary_keys,
+                completed_at=completed_at,
+                run_id=run_id,
+                sources_used=sources_used,
+                preserve_column_order=preserve_column_order,
+            ),
         )
 
 
