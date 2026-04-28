@@ -66,7 +66,7 @@ _CreatePipelineWithServicesRequest = _PipelineCreationRequest
 _ControlPlaneArtifacts = ControlPlaneArtifacts
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, kw_only=True)
 class _CreateFactoryRunnerRequest(ControlPlaneArtifacts):
     pipeline_name: str
     silver_schema: pa.Schema | None

@@ -257,6 +257,29 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
             valid_keys.append(cleaned)
         return valid_keys
 
+    def _warn_inchikey_fetch_error(self, inchikey: str, error: Exception) -> None:
+        self._logger.warning(
+            "inchikey_fetch_failed",
+            provider=self._provider_name,
+            inchikey=inchikey,
+            error=str(error),
+        )
+
+    async def _iter_inchikey_chunk_records(
+        self,
+        chunk: list[str],
+    ) -> AsyncIterator[BronzeRecord]:
+        tasks = [self._fetch_single_inchikey(inchikey) for inchikey in chunk]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        for cleaned, result in zip(chunk, results, strict=True):
+            if isinstance(result, self.FETCH_STRATEGY_ERRORS):
+                self._warn_inchikey_fetch_error(cleaned, result)
+                continue
+            if isinstance(result, BaseException):
+                raise result
+            for record in result:
+                yield record
+
     async def fetch_by_inchikey(
         self,
         inchikey_list: list[str],
@@ -272,23 +295,8 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
                 break
 
             chunk = valid_keys[i : i + batch_size]
-            tasks = [self._fetch_single_inchikey(k) for k in chunk]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-
-            for cleaned, result in zip(chunk, results, strict=True):
-                if isinstance(result, self.FETCH_STRATEGY_ERRORS):
-                    self._logger.warning(
-                        "inchikey_fetch_failed",
-                        provider=self._provider_name,
-                        inchikey=cleaned,
-                        error=str(result),
-                    )
-                    continue
-                if isinstance(result, BaseException):
-                    raise result
-
-                for record in result:
-                    if is_limit_reached(limit, fetched):
-                        return
-                    yield record
-                    fetched += 1
+            async for record in self._iter_inchikey_chunk_records(chunk):
+                if is_limit_reached(limit, fetched):
+                    return
+                yield record
+                fetched += 1
