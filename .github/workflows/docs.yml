@@ -8,10 +8,13 @@ on:
     branches: [ "main" ]
     paths:
       - 'README.md'
+      - 'configs/quality/xwalk_missing_backlog.yaml'
       - 'docs/**'
       - 'scripts/docs/**'
+      - 'scripts/engineering/qa/check_xwalk_missing_backlog.py'
       - '.github/actions/setup-python-uv/**'
       - 'tests/architecture/test_check_doc_links_guardrails.py'
+      - 'tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py'
       - 'mkdocs.yml'
       - 'pyproject.toml'
       - 'uv.lock'
@@ -20,10 +23,13 @@ on:
     branches: [ "main" ]
     paths:
       - 'README.md'
+      - 'configs/quality/xwalk_missing_backlog.yaml'
       - 'docs/**'
       - 'scripts/docs/**'
+      - 'scripts/engineering/qa/check_xwalk_missing_backlog.py'
       - '.github/actions/setup-python-uv/**'
       - 'tests/architecture/test_check_doc_links_guardrails.py'
+      - 'tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py'
       - 'mkdocs.yml'
       - 'pyproject.toml'
       - 'uv.lock'
@@ -64,6 +70,12 @@ jobs:
             tests/architecture/test_internal_orchestration_docs.py \
             tests/architecture/test_runtime_agent_docs_drift.py \
             -q --tb=short
+
+      - name: Validate xwalk missing backlog
+        run: |
+          uv run python -m scripts.engineering.qa check-xwalk-missing-backlog \
+            --json-out reports/quality/xwalk-missing-backlog.json \
+            --markdown-out reports/quality/xwalk-missing-backlog.md
 
   validate-mkdocs:
     needs: docs-governance
