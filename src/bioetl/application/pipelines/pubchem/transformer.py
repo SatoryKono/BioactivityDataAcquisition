@@ -11,7 +11,6 @@ from __future__ import annotations
 
 __all__ = ["PubChemCompoundTransformer"]
 
-
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.base_transformer import (
@@ -22,12 +21,11 @@ from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
+from bioetl.application.pipelines.pubchem._compound_business_data import (
+    build_compound_business_data,
+)
 from bioetl.domain.entities import PubchemMolecule
-from bioetl.domain.services import standardize_chemical_structure
-from bioetl.domain.transformations import safe_float, safe_int
 from bioetl.domain.types import JsonDict
-from bioetl.domain.validation import validate_molecular_weight, validate_non_negative
-from bioetl.domain.value_objects import InChIKey
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -78,106 +76,6 @@ class PubChemCompoundTransformer(BaseTransformer):
             pii_hasher=pii_hasher,
             dependencies=dependencies,
         )
-
-    def _extract_computed_descriptors(
-        self, record: BronzeRecord
-    ) -> dict[str, float | int | None]:
-        """Extract and validate computed molecular descriptors."""
-        return {
-            "xlogp": safe_float(record.get("xlogp")),  # Can be negative
-            "tpsa": validate_non_negative(record.get("tpsa")),
-            "complexity": validate_non_negative(record.get("complexity")),
-            "charge": safe_int(record.get("charge")),  # Can be negative
-        }
-
-    def _extract_atom_bond_counts(self, record: BronzeRecord) -> dict[str, int | None]:
-        """Extract and validate atom/bond count properties."""
-        return {
-            "heavy_atom_count": safe_int(record.get("heavy_atom_count")),
-            "h_bond_donor_count": safe_int(record.get("h_bond_donor_count")),
-            "h_bond_acceptor_count": safe_int(record.get("h_bond_acceptor_count")),
-            "rotatable_bond_count": safe_int(record.get("rotatable_bond_count")),
-        }
-
-    def _extract_stereochemistry(self, record: BronzeRecord) -> dict[str, int | None]:
-        """Extract and validate stereochemistry counts."""
-        return {
-            "atom_stereo_count": safe_int(record.get("atom_stereo_count")),
-            "defined_atom_stereo_count": safe_int(
-                record.get("defined_atom_stereo_count")
-            ),
-            "undefined_atom_stereo_count": safe_int(
-                record.get("undefined_atom_stereo_count")
-            ),
-            "bond_stereo_count": safe_int(record.get("bond_stereo_count")),
-            "defined_bond_stereo_count": safe_int(
-                record.get("defined_bond_stereo_count")
-            ),
-            "undefined_bond_stereo_count": safe_int(
-                record.get("undefined_bond_stereo_count")
-            ),
-            "isotope_atom_count": safe_int(record.get("isotope_atom_count")),
-            "covalent_unit_count": safe_int(record.get("covalent_unit_count")),
-        }
-
-    def _extract_3d_properties(
-        self, record: BronzeRecord
-    ) -> dict[str, float | int | None]:
-        """Extract and validate 3D molecular properties."""
-        return {
-            "volume_3d": validate_non_negative(record.get("volume_3d")),
-            "conformer_count_3d": safe_int(record.get("conformer_count_3d")),
-            "feature_acceptor_count_3d": safe_int(
-                record.get("feature_acceptor_count_3d")
-            ),
-            "feature_donor_count_3d": safe_int(record.get("feature_donor_count_3d")),
-            "feature_anion_count_3d": safe_int(record.get("feature_anion_count_3d")),
-            "feature_cation_count_3d": safe_int(record.get("feature_cation_count_3d")),
-            "feature_ring_count_3d": safe_int(record.get("feature_ring_count_3d")),
-            "feature_hydrophobe_count_3d": safe_int(
-                record.get("feature_hydrophobe_count_3d")
-            ),
-            "effective_rotor_count_3d": validate_non_negative(
-                record.get("effective_rotor_count_3d")
-            ),
-            "conformer_rmsd_3d": validate_non_negative(record.get("conformer_rmsd_3d")),
-            # Steric quadrupole moments can be negative (charge distribution)
-            "x_steric_quadrupole_3d": safe_float(record.get("x_steric_quadrupole_3d")),
-            "y_steric_quadrupole_3d": safe_float(record.get("y_steric_quadrupole_3d")),
-            "z_steric_quadrupole_3d": safe_float(record.get("z_steric_quadrupole_3d")),
-            "feature_count_3d": safe_int(record.get("feature_count_3d")),
-        }
-
-    def _extract_chemical_standardization(
-        self,
-        record: BronzeRecord,
-        *,
-        covalent_unit_count: int | None,
-        charge: int | None,
-    ) -> dict[str, str | None]:
-        """Apply the governed PubChem chemical standardization policy."""
-        result = standardize_chemical_structure(
-            canonical_smiles=record.get("canonical_smiles"),
-            isomeric_smiles=record.get("isomeric_smiles"),
-            inchi=record.get("inchi"),
-            inchi_key=record.get("inchikey") or record.get("inchi_key"),
-            covalent_unit_count=covalent_unit_count,
-            charge=charge,
-        )
-        return {
-            "standardized_canonical_smiles": result.standardized_canonical_smiles,
-            "standardized_isomeric_smiles": result.standardized_isomeric_smiles,
-            "standardized_inchi": result.standardized_inchi,
-            "standardized_inchi_key": result.standardized_inchi_key,
-            "structure_parent_key": result.structure_parent_key,
-            "chemical_standardization_status": (result.chemical_standardization_status),
-            "chemical_standardization_warnings": self.serialize_json_list(
-                result.chemical_standardization_warnings
-            ),
-            "chemical_standardization_policy_version": (
-                result.chemical_standardization_policy_version
-            ),
-        }
 
     async def _transform_impl(
         self,
@@ -258,44 +156,18 @@ class PubChemCompoundTransformer(BaseTransformer):
         index: int,
     ) -> tuple[object, dict[str, object]] | None:
         """Build PubChem business data prior to hash finalization."""
-        cid = record.get("cid")
-        if cid is None:
-            cid = record.get("molecule_id")
-        if cid is None:
+        prepared = build_compound_business_data(
+            record,
+            validate_inchi_key=self.validate_value_object,
+            serialize_json_list=self.serialize_json_list,
+        )
+        if prepared is None:
             context.logger.warning(
                 "Skipping PubChem compound: missing compound identifier",
                 index=index,
             )
             return None
-
-        computed_descriptors = self._extract_computed_descriptors(record)
-        stereochemistry = self._extract_stereochemistry(record)
-        business_data: dict[str, object] = {
-            "molecule_id": str(cid),
-            "canonical_smiles": record.get("canonical_smiles"),
-            "isomeric_smiles": record.get("isomeric_smiles"),
-            "inchi": record.get("inchi"),
-            "inchi_key": self.validate_value_object(
-                InChIKey, record.get("inchikey") or record.get("inchi_key")
-            ),
-            "molecular_formula": record.get("molecular_formula"),
-            "iupac_name": record.get("iupac_name"),
-            "molecular_weight": validate_molecular_weight(
-                record.get("molecular_weight")
-            ),
-            "exact_mass": validate_non_negative(record.get("exact_mass")),
-            "monoisotopic_mass": validate_non_negative(record.get("monoisotopic_mass")),
-            **computed_descriptors,
-            **self._extract_atom_bond_counts(record),
-            **stereochemistry,
-            **self._extract_3d_properties(record),
-            **self._extract_chemical_standardization(
-                record,
-                covalent_unit_count=stereochemistry["covalent_unit_count"],
-                charge=computed_descriptors["charge"],
-            ),
-        }
-        return cid, business_data
+        return prepared
 
     def _build_pre_silver_record(
         self,

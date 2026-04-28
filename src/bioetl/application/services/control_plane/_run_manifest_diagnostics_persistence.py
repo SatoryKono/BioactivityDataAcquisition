@@ -26,6 +26,84 @@ class _PersistenceInputs:
     composite_resume_rich_replay_supported: bool
 
 
+_NEXT_STEP_BY_SIGNAL: tuple[tuple[str, str], ...] = (
+    (
+        "run_failed",
+        "Inspect failure classification and decide retry/quarantine/escalation.",
+    ),
+    (
+        "artifact_linkage_gap",
+        "Validate artifact publication metadata and repair dataset/lineage links.",
+    ),
+    (
+        "lineage_gap",
+        "Investigate lineage persistence for published artifacts before restart.",
+    ),
+    (
+        "immutable_input_snapshot_gap",
+        "Persist immutable cached Bronze input snapshots before treating this run as strict exact-replay capable.",
+    ),
+    (
+        "strict_replay_boundary_gap",
+        (
+            "Treat this execution context as outside the strict exact-replay "
+            "support boundary; use rebuild/resume semantics instead of exact replay."
+        ),
+    ),
+    (
+        "reproducible_semantic_output_mode_gap",
+        (
+            "Replace append-mode Silver/Gold semantic sinks before claiming "
+            "replay-ready or forensic-grade reproducibility."
+        ),
+    ),
+    (
+        "lineage_closure_boundary_gap",
+        (
+            "Treat this pipeline family as outside the current operator-grade "
+            "lineage closure boundary; do not claim forensic-grade trace/debug "
+            "support for it."
+        ),
+    ),
+    (
+        "produced_artifact_trace_gap",
+        "Resolve concrete produced artifacts from the run ledger before claiming replay-ready reproducibility.",
+    ),
+    (
+        "required_persistence_profile_gap",
+        "Current persisted surfaces do not satisfy the declared required persistence profile for this run.",
+    ),
+    (
+        "composite_resume_reconstructability_gap",
+        (
+            "Treat composite resume as checkpoint snapshot plus ledger suffix "
+            "replay only; do not expect per-provider result maps or other rich "
+            "checkpoint payloads to be reconstructed."
+        ),
+    ),
+    (
+        "replay_ready_gap",
+        "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
+    ),
+    (
+        "forensic_grade_gap",
+        "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
+    ),
+    (
+        "dq_signal_present",
+        "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",
+    ),
+    (
+        "cross_validation_signal_present",
+        "Review cross-validation mismatch outcomes and composite policy anchors before retry or quarantine changes.",
+    ),
+    (
+        "run_shutdown",
+        "Confirm graceful shutdown reason and resume policy compatibility.",
+    ),
+)
+
+
 def missing_replay_ready_requirements(
     *,
     strict_replay_execution_context_supported: bool,
@@ -343,106 +421,9 @@ def build_alert_signals(
 
 def build_next_steps(alert_signals: dict[str, bool]) -> list[str]:
     """Return operator-oriented next steps based on active alert signals."""
-    step_by_signal = (
-        (
-            "run_failed",
-            "Inspect failure classification and decide retry/quarantine/escalation.",
-        ),
-        (
-            "artifact_linkage_gap",
-            "Validate artifact publication metadata and repair dataset/lineage links.",
-        ),
-        (
-            "lineage_gap",
-            "Investigate lineage persistence for published artifacts before restart.",
-        ),
-        (
-            "immutable_input_snapshot_gap",
-            (
-                "Persist immutable cached Bronze input snapshots before treating "
-                "this run as strict exact-replay capable."
-            ),
-        ),
-        (
-            "strict_replay_boundary_gap",
-            (
-                "Treat this execution context as outside the strict exact-replay "
-                "support boundary; use rebuild/resume semantics instead of exact replay."
-            ),
-        ),
-        (
-            "reproducible_semantic_output_mode_gap",
-            (
-                "Replace append-mode Silver/Gold semantic sinks before claiming "
-                "replay-ready or forensic-grade reproducibility."
-            ),
-        ),
-        (
-            "lineage_closure_boundary_gap",
-            (
-                "Treat this pipeline family as outside the current operator-grade "
-                "lineage closure boundary; do not claim forensic-grade trace/debug "
-                "support for it."
-            ),
-        ),
-        (
-            "produced_artifact_trace_gap",
-            (
-                "Resolve concrete produced artifacts from the run ledger before "
-                "claiming replay-ready reproducibility."
-            ),
-        ),
-        (
-            "required_persistence_profile_gap",
-            (
-                "Current persisted surfaces do not satisfy the declared required "
-                "persistence profile for this run."
-            ),
-        ),
-        (
-            "composite_resume_reconstructability_gap",
-            (
-                "Treat composite resume as checkpoint snapshot plus ledger suffix "
-                "replay only; do not expect per-provider result maps or other rich "
-                "checkpoint payloads to be reconstructed."
-            ),
-        ),
-        (
-            "replay_ready_gap",
-            (
-                "Review replay-ready persistence requirements before treating this "
-                "run as exact-replay capable."
-            ),
-        ),
-        (
-            "forensic_grade_gap",
-            (
-                "Review forensic-grade persistence requirements before using this "
-                "run for full trace/debug reconstruction."
-            ),
-        ),
-        (
-            "dq_signal_present",
-            (
-                "Review DQ report artifacts, rule IDs, and contract policy anchors "
-                "before retry or escalation."
-            ),
-        ),
-        (
-            "cross_validation_signal_present",
-            (
-                "Review cross-validation mismatch outcomes and composite policy "
-                "anchors before retry or quarantine changes."
-            ),
-        ),
-        (
-            "run_shutdown",
-            "Confirm graceful shutdown reason and resume policy compatibility.",
-        ),
-    )
     steps = [
         message
-        for signal, message in step_by_signal
+        for signal, message in _NEXT_STEP_BY_SIGNAL
         if alert_signals.get(signal, False)
     ]
     if not steps:

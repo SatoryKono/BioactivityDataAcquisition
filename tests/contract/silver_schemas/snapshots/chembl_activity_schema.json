@@ -214,6 +214,34 @@
     "required": true,
     "unique": false
   },
+  "bao_endpoint_iri": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^https?://[^\\s]+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Persistent IRI for the BAO endpoint ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "bao_endpoint_mapping_status": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "BAO endpoint IRI mapping status.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "bao_format": {
     "checks": [
       {
@@ -228,6 +256,34 @@
     "required": true,
     "unique": false
   },
+  "bao_format_iri": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^https?://[^\\s]+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Persistent IRI for the BAO format ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "bao_format_mapping_status": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "BAO format IRI mapping status.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "bao_label": {
     "checks": [],
     "coerce": false,
@@ -235,6 +291,15 @@
     "dtype": "str",
     "nullable": false,
     "required": true,
+    "unique": false
+  },
+  "bao_ontology_version": {
+    "checks": [],
+    "coerce": false,
+    "description": "BAO ontology release/version used for IRI mapping.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
     "unique": false
   },
   "canonical_smiles": {
@@ -483,6 +548,43 @@
     "required": true,
     "unique": false
   },
+  "qudt_ontology_version": {
+    "checks": [],
+    "coerce": false,
+    "description": "QUDT ontology release/version used for IRI mapping.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "qudt_unit_iri": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^https?://[^\\s]+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Persistent QUDT unit IRI.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "qudt_unit_mapping_status": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "QUDT unit IRI mapping status.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "qudt_units": {
     "checks": [],
     "coerce": false,
@@ -677,6 +779,43 @@
     "dtype": "str",
     "nullable": false,
     "required": true,
+    "unique": false
+  },
+  "uo_ontology_version": {
+    "checks": [],
+    "coerce": false,
+    "description": "Units Ontology release/version used for IRI mapping.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "uo_unit_iri": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^https?://[^\\s]+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Persistent IRI for the Units Ontology unit ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "uo_unit_mapping_status": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Units Ontology IRI mapping status.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
     "unique": false
   },
   "uo_units": {

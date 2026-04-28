@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
 from typing import Literal
 
 from bioetl.domain.mapping.organism_classification import normalize_organism_name
@@ -336,16 +336,7 @@ def _resolve_qudt_unit_mapping(value: str | None) -> OntologyMappingResult:
             ontology_version=None,
         )
 
-    qudt_identifier = _qudt_identifier_from_uri(normalized)
-    if qudt_identifier is None:
-        normalized_unit = normalize_standard_unit(normalized)
-        qudt_identifier = (
-            None
-            if normalized_unit is None
-            else _QUDT_UNIT_IDENTIFIER_BY_UNIT.get(normalized_unit)
-        )
-    if qudt_identifier is None:
-        qudt_identifier = _QUDT_UNIT_IDENTIFIER_BY_LEGACY_URI.get(normalized.casefold())
+    qudt_identifier = _resolve_qudt_unit_identifier(normalized)
     if qudt_identifier is None:
         return OntologyMappingResult(
             iri=None,
@@ -357,6 +348,21 @@ def _resolve_qudt_unit_mapping(value: str | None) -> OntologyMappingResult:
         status="mapped",
         ontology_version=QUDT_ONTOLOGY_VERSION,
     )
+
+
+def _resolve_qudt_unit_identifier(value: str) -> str | None:
+    """Resolve a canonical QUDT unit identifier from URI, unit token, or legacy URI."""
+    identifier = _qudt_identifier_from_uri(value)
+    if identifier is not None:
+        return identifier
+
+    normalized_unit = normalize_standard_unit(value)
+    if normalized_unit is not None:
+        mapped_identifier = _QUDT_UNIT_IDENTIFIER_BY_UNIT.get(normalized_unit)
+        if mapped_identifier is not None:
+            return mapped_identifier
+
+    return _QUDT_UNIT_IDENTIFIER_BY_LEGACY_URI.get(value.casefold())
 
 
 def _qudt_identifier_from_uri(value: str) -> str | None:

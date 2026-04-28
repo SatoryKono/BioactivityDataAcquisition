@@ -24,6 +24,8 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from scripts.engineering.repo._root_governance import load_root_governance_policy
+
 # Configure logging for CLI output
 logging.basicConfig(
     level=logging.INFO,
@@ -35,32 +37,6 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 # Configuration: Allowed directories and paths
 # =============================================================================
-
-# Allowed root directories per 03-file-policy.md §0 (tracked policy).
-ALLOWED_ROOT_DIRS: set[str] = {
-    ".ai",
-    ".aiassistant",
-    "ai",
-    ".codex",
-    ".cursor",
-    ".gemini",
-    ".github",
-    ".idea",
-    ".jules",
-    ".junie",
-    ".sonarlint",
-    "assets",
-    "configs",
-    "data",
-    "docs",
-    "grafana",
-    "reports",
-    "scripts",
-    "src",
-    "tests",
-    ".vibe",
-    ".vscode",
-}
 
 # Local untracked directories tolerated by structural audit.
 LOCAL_TOLERATED_ROOT_DIRS: set[str] = {
@@ -198,7 +174,11 @@ def _has_path_segment(path: Path, segments: set[str]) -> bool:
     return any(part in segments for part in path.parts)
 
 
-def _check_root_directories(project_root: Path) -> Iterator[Violation]:
+def _check_root_directories(
+    project_root: Path,
+    *,
+    approved_root_dirs: frozenset[str],
+) -> Iterator[Violation]:
     """Проверка корневых каталогов против whitelist."""
     for item in project_root.iterdir():
         if not item.is_dir():
@@ -216,7 +196,7 @@ def _check_root_directories(project_root: Path) -> Iterator[Violation]:
 
         # Check hidden directories
         if name.startswith("."):
-            if name not in ALLOWED_ROOT_DIRS:
+            if name not in approved_root_dirs:
                 yield Violation(
                     category="ROOT_DIR_HIDDEN",
                     path=str(item.relative_to(project_root)),
@@ -224,7 +204,7 @@ def _check_root_directories(project_root: Path) -> Iterator[Violation]:
                     severity="SHOULD",
                 )
         # Check regular directories
-        elif name not in ALLOWED_ROOT_DIRS:
+        elif name not in approved_root_dirs:
             yield Violation(
                 category="ROOT_DIR",
                 path=str(item.relative_to(project_root)),
@@ -354,10 +334,14 @@ def _check_no_python_in_data(project_root: Path) -> Iterator[Violation]:
 def run_audit(project_root: Path) -> AuditResult:
     """Выполнить полный аудит структуры проекта."""
     result = AuditResult()
+    root_policy = load_root_governance_policy(project_root)
 
     # Run all checks
     checks = [
-        _check_root_directories,
+        lambda root: _check_root_directories(
+            root,
+            approved_root_dirs=root_policy.approved_root_directories,
+        ),
         _check_python_locations,
         _check_bioetl_layers,
         _check_no_python_in_docs,

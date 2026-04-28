@@ -1,9 +1,4 @@
-"""Shared fetch/retry policy helpers for infrastructure adapters.
-
-Centralizes:
-- fallback ID splitting and three-phase fallback orchestration
-- retry-exhausted error classification across wrapped exceptions
-"""
+"""Shared fetch/retry policy helpers for infrastructure adapters."""
 
 from __future__ import annotations
 

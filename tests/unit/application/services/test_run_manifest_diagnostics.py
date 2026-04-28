@@ -863,7 +863,7 @@ def test_build_diagnostics_summary_projects_composite_dossier_correlation() -> N
                 "per_provider_result_maps",
                 "rich_checkpoint_payloads",
             ],
-            "forensic_grade_supported": True,
+            "forensic_grade_supported": False,
         },
     }
 

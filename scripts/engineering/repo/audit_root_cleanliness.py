@@ -9,10 +9,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
-import yaml
+from scripts.engineering.repo import _root_governance as root_governance
 
-ALLOWLIST_FILE = Path(".github/root-allowlist.txt")
-STRUCTURE_CATALOG_FILE = Path("configs/quality/repo_structure_catalog.yaml")
+ALLOWLIST_FILE = root_governance.ALLOWLIST_FILE
+STRUCTURE_CATALOG_FILE = root_governance.STRUCTURE_CATALOG_FILE
 CANONICAL_ROOT_TEXT_FILES: frozenset[str] = frozenset(
     {
         "AGENTS.md",
@@ -49,96 +49,22 @@ FORBIDDEN_TRACKED_ROOT_FILES: frozenset[str] = frozenset(
     }
 )
 
-ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
-    {
-        ".ai",
-        ".aiassistant",
-        "ai",
-        ".codex",
-        ".gemini",
-        ".github",
-        ".jules",
-        ".junie",
-        ".vibe",
-        ".cursor",
-        ".idea",
-        ".sonarlint",
-        ".vscode",
-        "script-codex",
-        "script-gemini",
-        "script-mistrall",
-        "script-mistrallvibe",
-        "assets",
-        "configs",
-        "data",
-        "docs",
-        "grafana",
-        "reports",
-        "scripts",
-        "src",
-        "tests",
-        "tools",
-    }
-)
+ALLOWED_ROOT_DIRECTORIES: frozenset[str] = root_governance.BASE_ALLOWED_ROOT_DIRECTORIES
 
 
 def _approved_root_directories(catalog: dict[str, Any]) -> frozenset[str]:
     """Return allowed root directories, including catalog-ratified test support."""
-    approved_test_support_dirs: set[str] = set()
-    test_support = catalog.get("test_support_roots")
-    if isinstance(test_support, dict):
-        approved_test_support_dirs = _collect_cataloged_paths(
-            test_support.get("approved_roots", [])
-        )
-    return frozenset(ALLOWED_ROOT_DIRECTORIES | approved_test_support_dirs)
+    return root_governance.approved_root_directories(catalog)
 
 
 def _load_structure_catalog(repo_root: Path) -> dict[str, Any]:
     """Load machine-readable structure governance catalog."""
-    catalog_path = repo_root / STRUCTURE_CATALOG_FILE
-    if not catalog_path.exists():
-        raise RuntimeError(f"Structure catalog does not exist: {catalog_path}")
-
-    with catalog_path.open("r", encoding="utf-8") as handle:
-        payload = yaml.safe_load(handle) or {}
-
-    required_sections = {
-        "docs_drafts",
-        "plans",
-        "src_sidecars",
-        "blocked_cleanup_zones",
-    }
-    missing_sections = sorted(
-        section for section in required_sections if section not in payload
-    )
-    if missing_sections:
-        missing = ", ".join(missing_sections)
-        raise RuntimeError(f"Structure catalog missing required sections: {missing}")
-    return payload
+    return root_governance.load_structure_catalog(repo_root)
 
 
 def _load_allowed_root_files(repo_root: Path) -> frozenset[str]:
     """Load canonical root-file allowlist from .github/root-allowlist.txt."""
-    allowlist_path = repo_root / ALLOWLIST_FILE
-    if not allowlist_path.exists():
-        raise RuntimeError(f"Allowlist file does not exist: {allowlist_path}")
-
-    entries: set[str] = set()
-    with allowlist_path.open("r", encoding="utf-8") as handle:
-        for line in handle:
-            cleaned = line.strip()
-            if not cleaned or cleaned.startswith("#"):
-                continue
-            if "/" in cleaned:
-                raise RuntimeError(
-                    "Root allowlist must contain only root-level file names "
-                    f"(invalid entry: {cleaned})"
-                )
-            entries.add(cleaned)
-
-    if not entries:
-        raise RuntimeError(f"Allowlist is empty: {allowlist_path}")
-    return frozenset(entries)
+    return root_governance.load_allowed_root_files(repo_root)
 
 
 def _discover_repo_root(script_root: Path) -> Path:
@@ -321,15 +247,7 @@ def _collect_cataloged_paths(
     entries: list[dict[str, Any]], *, field_name: str = "path"
 ) -> set[str]:
     """Return normalized path set from catalog entries."""
-    cataloged: set[str] = set()
-    for entry in entries:
-        path = entry.get(field_name)
-        if not isinstance(path, str) or not path:
-            raise RuntimeError(
-                f"Structure catalog entry must contain non-empty '{field_name}'"
-            )
-        cataloged.add(path)
-    return cataloged
+    return root_governance.collect_cataloged_paths(entries, field_name=field_name)
 
 
 def _collect_docs_policy_violations(
