@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import AsyncIterator, Iterator
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 T = TypeVar("T")
 
 
-class _StaticAsyncIterator(AsyncIterator[T], Generic[T]):
+class _StaticAsyncIterator[T](AsyncIterator[T]):
     """Async iterator wrapper around an in-memory iterator."""
 
     def __init__(self, items: Iterator[T]) -> None:
@@ -26,7 +26,7 @@ class _StaticAsyncIterator(AsyncIterator[T], Generic[T]):
             raise StopAsyncIteration from exc
 
 
-def async_iterable(*items: T) -> AsyncIterator[T]:
+def async_iterable[T](*items: T) -> AsyncIterator[T]:
     """Return an async iterator that yields the provided items."""
 
     return _StaticAsyncIterator(iter(items))

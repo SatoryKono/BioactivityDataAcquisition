@@ -20,6 +20,9 @@ from tests.integration.adapters.pubmed_integration_support import (
     pubmed_adapter,
 )
 
+# Required by pytest to use the imported fixtures
+__all__ = ["http_client", "mock_logger", "pubmed_adapter"]
+
 
 class TestPubMedEdgeCases:
     """Edge case tests for PubMed adapter."""
