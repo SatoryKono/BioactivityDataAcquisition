@@ -133,7 +133,9 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
         )
         return self._response_mapper.map_compounds(compounds)
 
-    async def _yield_records(self, records: list[BronzeRecord], limit: int | None, fetched: int) -> AsyncIterator[tuple[BronzeRecord, int]]:
+    async def _yield_records(
+        self, records: list[BronzeRecord], limit: int | None, fetched: int
+    ) -> AsyncIterator[tuple[BronzeRecord, int]]:
         for record in records:
             if is_limit_reached(limit, fetched):
                 break
