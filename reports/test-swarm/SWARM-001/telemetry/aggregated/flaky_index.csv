@@ -1,0 +1,11 @@
+test_nodeid,total_runs,intermittent_fails,flaky_index,triage_status,suspected_cause
+tests/unit/domain/aggregates/test_batch.py::TestBatchRecordInvariants::test_index_cannot_be_negative,5,1,0.2,quarantined,Shared state
+tests/unit/domain/aggregates/test_batch.py::TestBatchRecordInvariants::test_invalid_record_must_have_error,5,1,0.2,quarantined,Shared state
+tests/unit/application/composite/checkpoint/test_checkpoint_public_facade.py::test_public_facade_exports_anchor_context_helpers,5,1,0.2,quarantined,Shared state
+tests/unit/application/composite/checkpoint/test_checkpoint_public_facade.py::test_public_facade_merges_runtime_anchors_into_checkpoint_state,5,1,0.2,quarantined,Shared state
+tests/unit/infrastructure/adapters/chembl/test_chembl_client.py::test_post_init_preserves_injected_base_collaborators,5,1,0.2,quarantined,Shared state
+tests/unit/infrastructure/adapters/chembl/test_chembl_client.py::test_fetch_activity,5,1,0.2,quarantined,Shared state
+tests/unit/composition/bootstrap/cli/test_config.py::TestBootstrapConfigService::test_returns_config_service,5,1,0.2,quarantined,Shared state
+tests/unit/composition/bootstrap/cli/test_config.py::TestBootstrapConfigService::test_wires_noop_logger,5,1,0.2,quarantined,Shared state
+tests/architecture/test_adapter_contracts.py::TestAdapterHealthCheck::test_adapters_have_health_check,5,1,0.2,quarantined,Shared state
+tests/architecture/test_adapter_contracts.py::TestAdapterMixinPolicy::test_adapter_mixins_use_canonical_naming,5,1,0.2,quarantined,Shared state

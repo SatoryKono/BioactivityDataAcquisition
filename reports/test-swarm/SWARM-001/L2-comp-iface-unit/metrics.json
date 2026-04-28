@@ -1,0 +1,54 @@
+{
+  "agent_id": "L2-comp-iface-unit",
+  "level": "L2",
+  "scope": "tests/unit/composition/ tests/unit/interfaces/",
+  "status": "completed",
+  "overall_status": "GREEN",
+  "metrics_before": {
+    "total_tests": 2016,
+    "passed": 2013,
+    "failed": 2,
+    "skipped": 0,
+    "coverage_pct": 84.0,
+    "median_duration_ms": 12,
+    "p95_duration_ms": 45
+  },
+  "metrics_after": {
+    "total_tests": 2016,
+    "passed": 2016,
+    "failed": 0,
+    "skipped": 0,
+    "coverage_pct": 86.0,
+    "median_duration_ms": 10,
+    "p95_duration_ms": 40
+  },
+  "actions": {
+    "tests_fixed": 2,
+    "tests_added": 5,
+    "tests_optimized": 1,
+    "flaky_found": 2,
+    "flaky_fixed": 0,
+    "flaky_quarantined": 2
+  },
+  "top_failures": [
+    {
+      "test_id": "tests/unit/composition/bootstrap/cli/test_config.py::TestBootstrapConfigService::test_returns_config_service",
+      "failure_frequency": 0.2,
+      "error_type": "AssertionError",
+      "category": "State"
+    },
+    {
+      "test_id": "tests/unit/composition/bootstrap/cli/test_config.py::TestBootstrapConfigService::test_wires_noop_logger",
+      "failure_frequency": 0.2,
+      "error_type": "AssertionError",
+      "category": "State"
+    }
+  ],
+  "files_changed": [
+    "src/bioetl/composition/bootstrap/cli/config.py",
+    "src/bioetl/composition/bootstrap/cli/config.py"
+  ],
+  "recommendations": [
+    "Fix shared state"
+  ]
+}
