@@ -49,10 +49,10 @@ python -m scripts.diagrams <command> [args...]
 | Command               | Script                                             | Description                                                |
 | --------------------- | -------------------------------------------------- | ---------------------------------------------------------- |
 | `docs-agent`          | `run_diagram_docs_agent.sh`                        | Run checks + DOCX export + PDF export pipeline             |
-| `render-pdf`          | `generate_architecture_bundle.py`                  | Refresh architecture Markdown bundle via legacy entrypoint |
+| `render-pdf`          | `generate_all_bundles.py --collection architecture` | Refresh architecture Markdown bundle via the canonical generator |
 | `render-pdf-desc`     | `generate_with_descriptions_pdf.py`                | Generate PDF with descriptions                             |
 | `render-docx`         | `generate_with_descriptions_docx.py`               | Generate DOCX with descriptions                            |
-| `render-views`        | `generate_views_bundle.py`                         | Refresh views Markdown bundle                              |
+| `render-views`        | `generate_all_bundles.py --collection views`       | Refresh views Markdown bundle via the canonical generator  |
 | `render-desc-indexes` | `scripts/diagrams/generate_description_indexes.py` | Refresh family-oriented description indexes                |
 
 ### Suite
