@@ -27,6 +27,12 @@ from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
+from bioetl.infrastructure.storage.silver.metadata_request_models import (
+    _coerce_silver_write_finalization_preparation_request,
+    _coerce_silver_write_result_finalization_request,
+    _SilverWriteFinalizationPreparationRequest,
+    _SilverWriteResultFinalizationRequest,
+)
 from bioetl.infrastructure.storage.silver.operations.metadata_builders import (
     _normalize_records_for_dq_metrics,
 )
@@ -35,16 +41,10 @@ from bioetl.infrastructure.storage.silver.operations.metadata_finalization_suppo
     _prepare_silver_write_finalization_context,
     _PreparedSilverWriteFinalizationContext,
 )
-from bioetl.infrastructure.storage.silver.metadata_request_models import (
-    _coerce_silver_write_finalization_preparation_request,
-    _coerce_silver_write_result_finalization_request,
-    _SilverWriteFinalizationPreparationRequest,
-    _SilverWriteResultFinalizationRequest,
-)
 from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
     _coerce_silver_metadata_audit_request,
-    _SilverMetadataAuditSupportRequest,
     _log_silver_audit_event,
+    _SilverMetadataAuditSupportRequest,
     _SilverMetadataWriteSupportRequest,
     _write_silver_metadata,
 )
@@ -280,13 +280,15 @@ class SilverMetadataOperations:
 
         await _log_silver_audit_event(
             self,
-            table_name=table_name,
-            records=records,
-            mode=validated_mode,
-            run_id=run_id,
-            run_type=run_type,
-            source_batch_id=source_batch_id,
-            ingestion_ts=ingestion_ts,
+            _SilverMetadataAuditSupportRequest(
+                table_name=table_name,
+                records=records,
+                mode=validated_mode,
+                run_id=run_id,
+                run_type=run_type,
+                source_batch_id=source_batch_id,
+                ingestion_ts=ingestion_ts,
+            ),
         )
 
     async def _log_silver_audit(

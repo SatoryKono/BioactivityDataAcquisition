@@ -27,9 +27,14 @@ jobs:
       - name: Validate repository root allowlist
         run: python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
 
+      - name: Validate root-hygiene review registry
+        run: python scripts/engineering/repo/check_root_hygiene_review_registry.py
+
       - name: Run root hygiene unit tests
         run: >
           python -m pytest
           tests/unit/scripts/repo/test_audit_root_cleanliness.py
+          tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py
           tests/architecture/test_root_hygiene_workflow.py
+          tests/architecture/test_root_hygiene_review_registry.py
           -q

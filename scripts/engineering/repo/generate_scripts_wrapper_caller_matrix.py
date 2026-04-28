@@ -79,6 +79,7 @@ DEFAULT_OUTPUT: Final[str] = "docs/plans/scripts-cli-wrapper-caller-matrix-2026-
 SELF_GENERATOR_REL: Final[str] = (
     "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py"
 )
+COMPATIBILITY_WRAPPER_ROLE: Final[str] = "compatibility wrapper"
 
 
 @dataclass(frozen=True)
@@ -93,11 +94,11 @@ CANDIDATES: Final[tuple[Candidate, ...]] = (
     Candidate("scripts/docs/build_docs_site.sh", "shell transport adapter"),
     Candidate(
         "scripts/diagrams/generate_architecture_bundle.py",
-        "compatibility wrapper",
+        COMPATIBILITY_WRAPPER_ROLE,
     ),
     Candidate(
         "scripts/diagrams/generate_views_bundle.py",
-        "compatibility wrapper",
+        COMPATIBILITY_WRAPPER_ROLE,
     ),
     Candidate(
         "scripts/engineering/dev/setup_copilot_codex_mcp.py",
@@ -113,10 +114,13 @@ CANDIDATES: Final[tuple[Candidate, ...]] = (
     ),
     Candidate("scripts/ops/launchers/codex/codex.sh", "public launcher facade"),
     Candidate("scripts/ops/launchers/codex/codex-exec.sh", "public launcher facade"),
-    Candidate("scripts/ops/launchers/codex/codex-headless.sh", "compatibility wrapper"),
+    Candidate(
+        "scripts/ops/launchers/codex/codex-headless.sh",
+        COMPATIBILITY_WRAPPER_ROLE,
+    ),
     Candidate(
         "scripts/ops/launchers/codex/diagnose-codex-wsl.sh",
-        "compatibility wrapper",
+        COMPATIBILITY_WRAPPER_ROLE,
     ),
     Candidate("scripts/ops/launchers/codex/setup_agents.sh", "compatibility facade"),
     Candidate("scripts/ops/launchers/codex/setup_skills.sh", "compatibility facade"),
@@ -212,6 +216,45 @@ def _basename_patterns() -> dict[str, re.Pattern[str]]:
     }
 
 
+def _read_normalized_search_text(file_path: Path) -> str | None:
+    """Read one search file and normalize path separators."""
+    try:
+        return file_path.read_text(encoding="utf-8").replace("\\", "/")
+    except (OSError, UnicodeDecodeError):
+        return None
+
+
+def _mentions_any_candidate(
+    normalized_text: str,
+    basename_patterns: dict[str, re.Pattern[str]],
+) -> bool:
+    """Return whether one file references any tracked wrapper candidate."""
+    return any(
+        candidate.path in normalized_text
+        or basename_patterns[candidate.path].search(normalized_text)
+        for candidate in CANDIDATES
+    )
+
+
+def _collect_callers_for_file(
+    *,
+    callers: dict[str, set[tuple[str, str]]],
+    rel: str,
+    normalized_text: str,
+    basename_patterns: dict[str, re.Pattern[str]],
+) -> None:
+    """Record all wrapper references found in one normalized file body."""
+    source_group = _source_group(rel)
+    for candidate in CANDIDATES:
+        if rel == candidate.path:
+            continue
+        if (
+            candidate.path in normalized_text
+            or basename_patterns[candidate.path].search(normalized_text)
+        ):
+            callers[candidate.path].add((source_group, rel))
+
+
 def _discover_callers(root: Path) -> dict[str, set[tuple[str, str]]]:
     callers = {candidate.path: set() for candidate in CANDIDATES}
     basename_patterns = _basename_patterns()
@@ -220,26 +263,19 @@ def _discover_callers(root: Path) -> dict[str, set[tuple[str, str]]]:
         rel = file_path.relative_to(root).as_posix()
         if rel in {DEFAULT_OUTPUT, SELF_GENERATOR_REL}:
             continue
-        try:
-            normalized_text = file_path.read_text(encoding="utf-8").replace("\\", "/")
-        except (OSError, UnicodeDecodeError):
+        normalized_text = _read_normalized_search_text(file_path)
+        if normalized_text is None:
             continue
 
-        if not any(
-            candidate.path in normalized_text
-            or basename_patterns[candidate.path].search(normalized_text)
-            for candidate in CANDIDATES
-        ):
+        if not _mentions_any_candidate(normalized_text, basename_patterns):
             continue
 
-        source_group = _source_group(rel)
-        for candidate in CANDIDATES:
-            if rel == candidate.path:
-                continue
-            if candidate.path in normalized_text or basename_patterns[candidate.path].search(
-                normalized_text
-            ):
-                callers[candidate.path].add((source_group, rel))
+        _collect_callers_for_file(
+            callers=callers,
+            rel=rel,
+            normalized_text=normalized_text,
+            basename_patterns=basename_patterns,
+        )
 
     return callers
 

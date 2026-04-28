@@ -4,24 +4,22 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable, Sequence
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Protocol
 
-from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models import SilverMetadata
 from bioetl.domain.models.metadata import RunTypeEnum
-from bioetl.domain.types import BatchID, BronzeRecord
-from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
-from bioetl.infrastructure.storage.silver.operations.metadata_builders import (
-    _build_silver_metadata,
-    _SilverMetadataBuildRequest,
-)
 from bioetl.infrastructure.storage.silver.metadata_request_models import (
     _PreparedSilverWriteFinalizationContext,
     _SilverWriteFinalizationPreparationRequest,
     _SilverWriteResultFinalizationRequest,
+)
+from bioetl.infrastructure.storage.silver.operations.metadata_builders import (
+    _build_silver_metadata,
+    _SilverMetadataBuildRequest,
 )
 
 

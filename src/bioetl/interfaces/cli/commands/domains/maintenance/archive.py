@@ -12,8 +12,6 @@ import click
 
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CliBoundaryExecutionPolicy,
-)
-from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     run_async_with_cli_failure_policy,
 )
 from bioetl.interfaces.cli.formatters import echo_info

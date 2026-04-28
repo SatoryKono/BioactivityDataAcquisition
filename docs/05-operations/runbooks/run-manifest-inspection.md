@@ -345,10 +345,17 @@ than silently accepting the bundle as canonical.
   stronger postmortem reconstruction within the current supported lineage
   closure boundary;
 - `persistence_profile.attained_profile=replay_ready` means exact replay anchors
-  are present but richer forensic surfaces are still incomplete;
+  and a concrete produced-artifact trace are present, but richer forensic
+  surfaces are still incomplete;
 - `persistence_profile.attained_profile=degraded_observable` means manifest
   inspection still works, but replay-ready requirements are missing and should
   be read from `*_missing_requirements`;
+- `exact_replay_anchors` is the semantic replay section and intentionally
+  excludes occurrence-only identifiers such as `manifest_id` and `run_id`;
+- `produced_artifact_trace` is resolved from run-ledger artifact publication
+  events by `manifest_id`; if it is incomplete, do not treat the run as
+  replay-ready even when manifest snapshots and exact replay capability are
+  present;
 - `exact_replay_support_boundary=snapshot_backed_source_runs_only` means only
   snapshot-backed source runs can become strict-replayable in the current
   model;
@@ -382,6 +389,8 @@ than silently accepting the bundle as canonical.
 - `alert_signals.required_persistence_profile_gap=true` means the run did not
   meet the minimum persistence profile declared at launch time and must not be
   treated as satisfying that operator contract;
+- `alert_signals.produced_artifact_trace_gap=true` means the inspection surface
+  could not resolve concrete produced artifacts from the manifest's run ledger;
 - `alert_signals.replay_ready_gap=true` means the run must not be treated as
   exact-replay ready even if manifest inspection itself is available;
 - `alert_signals.forensic_grade_gap=true` means the run must not be treated as

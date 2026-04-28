@@ -10,8 +10,6 @@ import click
 
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CliBoundaryExecutionPolicy,
-)
-from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     run_sync_with_cli_failure_policy,
 )
 from bioetl.interfaces.cli.commands.inspection_output import (

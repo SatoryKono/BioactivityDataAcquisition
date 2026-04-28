@@ -11,11 +11,11 @@ from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
     _build_postwrite_audit_hook_request,
     _build_postwrite_export_hook_request,
+    _complete_silver_write_pipeline_impl,
+    _finalize_silver_postwrite_result,
     _run_postwrite_audit_via_host_hook,
     _run_postwrite_export_via_host_hook,
     _SilverWritePostwriteContext,
-    _complete_silver_write_pipeline_impl,
-    _finalize_silver_postwrite_result,
 )
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _PreparedSilverWritePayload,

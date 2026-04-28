@@ -144,16 +144,82 @@ def _require_str_list(value: Any, *, label: str) -> tuple[str, ...]:
     return tuple(cast(list[str], value))
 
 
-def _build_rule_index(backlog: Mapping[str, Any]) -> dict[tuple[str, str], BacklogRule]:
-    marker_kinds = set(
-        _require_str_list(backlog.get("marker_kinds", sorted(MARKER_KINDS)), label="marker_kinds")
+def _resolve_allowed_marker_kinds(backlog: Mapping[str, Any]) -> set[str]:
+    """Resolve the configured set of allowed MISSING_* marker kinds."""
+    return set(
+        _require_str_list(
+            backlog.get("marker_kinds", sorted(MARKER_KINDS)),
+            label="marker_kinds",
+        )
     )
-    classification_values = set(
+
+
+def _resolve_allowed_classification_values(backlog: Mapping[str, Any]) -> set[str]:
+    """Resolve the configured set of allowed backlog classifications."""
+    return set(
         _require_str_list(
             backlog.get("classification_values", sorted(CLASSIFICATION_VALUES)),
             label="classification_values",
         )
     )
+
+
+def _require_rule_path_and_markers(
+    raw_rule: Mapping[str, Any],
+    *,
+    rule_number: int,
+) -> tuple[str, dict[str, Any]]:
+    """Validate one raw rule envelope and return normalized path/marker mapping."""
+    path = raw_rule.get("path")
+    markers = raw_rule.get("markers")
+    if not isinstance(path, str) or not path:
+        raise ValueError(f"rules[{rule_number}].path must be a non-empty string")
+    if not isinstance(markers, dict):
+        raise ValueError(f"rules[{rule_number}].markers must be a mapping")
+    return path, cast(dict[str, Any], markers)
+
+
+def _build_backlog_rule(
+    *,
+    path: str,
+    marker: str,
+    raw_marker_rule: Mapping[str, Any],
+    marker_kinds: set[str],
+    classification_values: set[str],
+) -> BacklogRule:
+    """Validate and build one backlog rule for one path/marker pair."""
+    if marker not in marker_kinds:
+        raise ValueError(f"{path}:{marker} is not in marker_kinds")
+    if not isinstance(raw_marker_rule, dict):
+        raise ValueError(f"{path}:{marker} rule must be a mapping")
+
+    fields = _require_str_list(
+        raw_marker_rule.get("fields", []),
+        label=f"{path}:{marker}.fields",
+    )
+    classification = raw_marker_rule.get("classification")
+    owner_issue = raw_marker_rule.get("owner_issue")
+    rationale = raw_marker_rule.get("rationale", "")
+    if classification not in classification_values:
+        raise ValueError(f"{path}:{marker}.classification is not allowed")
+    if owner_issue in {None, ""}:
+        raise ValueError(f"{path}:{marker}.owner_issue is required")
+    if not isinstance(rationale, str) or not rationale:
+        raise ValueError(f"{path}:{marker}.rationale is required")
+
+    return BacklogRule(
+        path=path,
+        marker=marker,
+        classification=cast(str, classification),
+        owner_issue=str(owner_issue),
+        rationale=rationale,
+        fields=fields,
+    )
+
+
+def _build_rule_index(backlog: Mapping[str, Any]) -> dict[tuple[str, str], BacklogRule]:
+    marker_kinds = _resolve_allowed_marker_kinds(backlog)
+    classification_values = _resolve_allowed_classification_values(backlog)
     raw_rules = backlog.get("rules", [])
     if not isinstance(raw_rules, list):
         raise ValueError("rules must be a list")
@@ -162,43 +228,23 @@ def _build_rule_index(backlog: Mapping[str, Any]) -> dict[tuple[str, str], Backl
     for rule_number, raw_rule in enumerate(raw_rules, start=1):
         if not isinstance(raw_rule, dict):
             raise ValueError(f"rules[{rule_number}] must be a mapping")
-        path = raw_rule.get("path")
-        markers = raw_rule.get("markers")
-        if not isinstance(path, str) or not path:
-            raise ValueError(f"rules[{rule_number}].path must be a non-empty string")
-        if not isinstance(markers, dict):
-            raise ValueError(f"rules[{rule_number}].markers must be a mapping")
+        path, markers = _require_rule_path_and_markers(
+            raw_rule,
+            rule_number=rule_number,
+        )
 
-        for marker, raw_marker_rule in cast(dict[str, Any], markers).items():
-            if marker not in marker_kinds:
-                raise ValueError(f"{path}:{marker} is not in marker_kinds")
-            if not isinstance(raw_marker_rule, dict):
-                raise ValueError(f"{path}:{marker} rule must be a mapping")
-            fields = _require_str_list(
-                raw_marker_rule.get("fields", []),
-                label=f"{path}:{marker}.fields",
+        for marker, raw_marker_rule in markers.items():
+            rule = _build_backlog_rule(
+                path=path,
+                marker=marker,
+                raw_marker_rule=cast(Mapping[str, Any], raw_marker_rule),
+                marker_kinds=marker_kinds,
+                classification_values=classification_values,
             )
-            classification = raw_marker_rule.get("classification")
-            owner_issue = raw_marker_rule.get("owner_issue")
-            rationale = raw_marker_rule.get("rationale", "")
-            if classification not in classification_values:
-                raise ValueError(f"{path}:{marker}.classification is not allowed")
-            if owner_issue in {None, ""}:
-                raise ValueError(f"{path}:{marker}.owner_issue is required")
-            if not isinstance(rationale, str) or not rationale:
-                raise ValueError(f"{path}:{marker}.rationale is required")
-
             key = (path, marker)
             if key in rule_index:
                 raise ValueError(f"Duplicate backlog rule for {path}:{marker}")
-            rule_index[key] = BacklogRule(
-                path=path,
-                marker=marker,
-                classification=cast(str, classification),
-                owner_issue=str(owner_issue),
-                rationale=rationale,
-                fields=fields,
-            )
+            rule_index[key] = rule
 
     return rule_index
 

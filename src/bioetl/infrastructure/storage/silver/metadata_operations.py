@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Awaitable, Callable, Sequence
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Protocol
 
 from deltalake import DeltaTable
@@ -32,8 +32,8 @@ from bioetl.infrastructure.storage.metadata.builder_base import (
     _resolve_metadata_timestamp,
 )
 from bioetl.infrastructure.storage.silver.metadata_request_models import (
-    _coerce_silver_write_finalization_preparation_request,
     _coerce_silver_metadata_write_request,
+    _coerce_silver_write_finalization_preparation_request,
     _PreparedSilverMetadataWriteOperation,
     _PreparedSilverWriteFinalizationContext,
     _ResolvedSilverMetadataContext,
