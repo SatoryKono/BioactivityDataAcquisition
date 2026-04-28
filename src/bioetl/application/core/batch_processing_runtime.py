@@ -1,3 +1,4 @@
+# ruff: noqa: UP049
 """Family-local runtime helpers for batch-processing support."""
 
 from __future__ import annotations

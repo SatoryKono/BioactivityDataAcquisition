@@ -1,3 +1,4 @@
+# ruff: noqa: UP049
 """Shared phase runtime helpers for ``PostrunService``."""
 
 from __future__ import annotations

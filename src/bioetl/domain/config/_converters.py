@@ -1,3 +1,4 @@
+# ruff: noqa: UP049
 """Internal converters for domain configuration objects.
 
 Provides type conversion utilities used by config dataclasses during

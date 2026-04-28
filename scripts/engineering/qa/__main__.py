@@ -13,6 +13,7 @@ Commands:
     check-c901           C901 complexity baseline enforcement
     check-naming-pkg     Package naming consistency check
     check-exemptions     Quality exemptions audit
+    check-xwalk-missing-backlog Validate xwalk MISSING_* backlog coverage
     generate-debt-tasks  Generate architecture debt task backlog from exemptions registry
     reduce-architecture-debt  Build execution plan from latest architecture debt tasks JSON
     check-terminology    Terminology linting
@@ -49,6 +50,7 @@ COMMAND_SPECS = {
     "check-c901": "check_c901_baseline.py",
     "check-naming-pkg": "check_naming_package_consistency.py",
     "check-exemptions": "check_quality_exemptions.py",
+    "check-xwalk-missing-backlog": "check_xwalk_missing_backlog.py",
     "generate-debt-tasks": "generate_architecture_debt_tasks.py",
     "reduce-architecture-debt": "reduce_architecture_debt.py",
     "check-terminology": "lint_terminology.py",

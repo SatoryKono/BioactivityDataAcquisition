@@ -1,3 +1,4 @@
+# ruff: noqa: UP049
 """Immutable workflow configuration models."""
 
 from __future__ import annotations

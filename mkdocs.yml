@@ -368,6 +368,7 @@ nav:
                     -   "Schema Evolution": 05-operations/runbooks/schema-evolution.md
                     -   "Stale Lock": 05-operations/runbooks/stale-lock.md
                     -   "Quarantine Management": 05-operations/runbooks/quarantine-management.md
+                    -   "Retention-Sensitive Cleanup": 05-operations/runbooks/retention-sensitive-cleanup.md
                     -   "VACUUM Procedures": 05-operations/runbooks/vacuum-procedures.md
                     -   "Observability Checklist": 05-operations/runbooks/observability-checklist.md
                     -   "Run Manifest Inspection": 05-operations/runbooks/run-manifest-inspection.md

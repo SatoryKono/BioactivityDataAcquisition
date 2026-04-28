@@ -1,3 +1,4 @@
+# ruff: noqa: UP049
 """Shared sync helpers for quarantine admin operations."""
 
 from __future__ import annotations

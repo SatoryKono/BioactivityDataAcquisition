@@ -20,6 +20,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `check-c901`                     | `check_c901_baseline.py`                              | C901 complexity baseline enforcement                                                              |
 | `check-naming-pkg`               | `check_naming_package_consistency.py`                 | Package naming consistency check                                                                  |
 | `check-exemptions`               | `check_quality_exemptions.py`                         | Quality exemptions audit                                                                          |
+| `check-xwalk-missing-backlog`    | `check_xwalk_missing_backlog.py`                      | Validate that xwalk `MISSING_*` markers are tracked in the backlog                                |
 | `generate-debt-tasks`            | `generate_architecture_debt_tasks.py`                 | Generate `tasks_architecture_metric_exemptions_*.json` from the registry                          |
 | `reduce-architecture-debt`       | `reduce_architecture_debt.py`                         | Build `architecture_debt_execution_plan_*.json` from the latest tasks file                        |
 | `check-terminology`              | `lint_terminology.py`                                 | Terminology linting against glossary                                                              |
@@ -46,6 +47,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `check-c901`                     | After modifying complex functions; prevents new C901 violations above baseline                                                                   | CI gate (`import-linter.yml`, every PR)    |
 | `check-naming-pkg`               | After restructuring packages or adding new modules; enforces factory isolation                                                                   | CI gate (`architecture.yml`)               |
 | `check-exemptions`               | After modifying quality exemption registry                                                                                                       | CI gate (`architecture.yml`)               |
+| `check-xwalk-missing-backlog`    | After changing provider xwalk CSV files; prevents new `MISSING_*` schema gaps without explicit classification and owner issue                    | Data-contract governance gate              |
 | `generate-debt-tasks`            | Before a debt-reduction campaign; creates the canonical refactoring task backlog from the registry                                               | Manual, on-demand                          |
 | `reduce-architecture-debt`       | Before running the debt-reduction agent; classifies latest tasks into an execution order                                                         | Manual, on-demand                          |
 | `check-terminology`              | After adding domain terms; validates code uses canonical terminology per `glossary.md`                                                           | CI gate (`architecture.yml`)               |
@@ -92,6 +94,7 @@ python scripts/engineering/qa/report_duplication_baseline.py
 python -m scripts.engineering.qa check-architecture
 python -m scripts.engineering.qa check-app-deps
 python -m scripts.engineering.qa check-constructor-args -- --warn-only
+python -m scripts.engineering.qa check-xwalk-missing-backlog
 python -m scripts.engineering.qa analyze-duplicate-functions
 ```
 

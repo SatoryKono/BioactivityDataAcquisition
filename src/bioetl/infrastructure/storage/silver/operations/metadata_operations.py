@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Protocol, cast
@@ -35,8 +35,15 @@ from bioetl.infrastructure.storage.silver.operations.metadata_finalization_suppo
     _prepare_silver_write_finalization_context,
     _PreparedSilverWriteFinalizationContext,
 )
+from bioetl.infrastructure.storage.silver.metadata_request_models import (
+    _coerce_silver_write_finalization_preparation_request,
+    _coerce_silver_write_result_finalization_request,
+    _SilverWriteFinalizationPreparationRequest,
+    _SilverWriteResultFinalizationRequest,
+)
 from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
     _log_silver_audit_event,
+    _SilverMetadataWriteSupportRequest,
     _write_silver_metadata,
 )
 
@@ -236,18 +243,20 @@ class SilverMetadataOperations:
         """Write metadata for Silver layer."""
         return await _write_silver_metadata(
             self,
-            table_name=table_name,
-            dq_metrics=dq_metrics,
-            records=records,
-            bronze_refs=bronze_refs,
-            mode=mode,
-            validated_mode=validated_mode,
-            run_id=run_id,
-            run_type=run_type,
-            source_batch_id=source_batch_id,
-            ingestion_ts=ingestion_ts,
-            transform_version=transform_version,
-            transform_steps=transform_steps,
+            _SilverMetadataWriteSupportRequest(
+                table_name=table_name,
+                dq_metrics=dq_metrics,
+                records=records,
+                bronze_refs=bronze_refs,
+                mode=mode,
+                validated_mode=validated_mode,
+                run_id=run_id,
+                run_type=run_type,
+                source_batch_id=source_batch_id,
+                ingestion_ts=ingestion_ts,
+                transform_version=transform_version,
+                transform_steps=transform_steps,
+            ),
         )
 
     async def log_silver_audit(
@@ -303,60 +312,41 @@ class SilverMetadataOperations:
 
     async def _prepare_silver_write_finalization_context(
         self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        table_path: str,
-        primary_keys: list[str],
-        validated_mode: SilverWriteMode,
-        quarantined_count: int | None = None,
-        validation_errors: Sequence[str] | None = None,
-        started_at: datetime,
-        start_perf: float,
+        request: _SilverWriteFinalizationPreparationRequest | None = None,
+        *args: object,
+        perf_counter: Callable[[], float] | None = None,
+        **kwargs: object,
     ) -> _PreparedSilverWriteFinalizationContext:
         """Prepare DQ/version/timing context before Silver metadata persistence."""
+        resolved_request = _coerce_silver_write_finalization_preparation_request(
+            request,
+            args=args,
+            kwargs=kwargs,
+        )
+        resolved_perf_counter = perf_counter
+        if resolved_perf_counter is None:
+            from bioetl.infrastructure.storage.silver import metadata_mixin
+
+            resolved_perf_counter = metadata_mixin.time.perf_counter
         return await _prepare_silver_write_finalization_context(
             self,
-            table_name=table_name,
-            records=records,
-            table_path=table_path,
-            primary_keys=primary_keys,
-            validated_mode=validated_mode,
-            quarantined_count=quarantined_count,
-            validation_errors=validation_errors,
-            started_at=started_at,
-            start_perf=start_perf,
+            resolved_request,
+            perf_counter=resolved_perf_counter,
         )
 
     async def _finalize_silver_write_result(
         self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        table_path: str,
-        primary_keys: list[str],
-        validated_mode: SilverWriteMode,
-        bronze_refs: list[BronzeWriteResult] | None,
-        partition_cols: list[str] | None,
-        source_batch_id: BatchID | None,
-        quarantined_count: int | None = None,
-        validation_errors: Sequence[str] | None = None,
-        started_at: datetime,
-        start_perf: float,
+        request: _SilverWriteResultFinalizationRequest | None = None,
+        *args: object,
+        **kwargs: object,
     ) -> SilverWriteResult | None:
         """Compute DQ metrics, write metadata, and build final result."""
+        resolved_request = _coerce_silver_write_result_finalization_request(
+            request,
+            args=args,
+            kwargs=kwargs,
+        )
         return await _finalize_silver_write_result(
             self,
-            table_name=table_name,
-            records=records,
-            table_path=table_path,
-            primary_keys=primary_keys,
-            validated_mode=validated_mode,
-            bronze_refs=bronze_refs,
-            partition_cols=partition_cols,
-            source_batch_id=source_batch_id,
-            quarantined_count=quarantined_count,
-            validation_errors=validation_errors,
-            started_at=started_at,
-            start_perf=start_perf,
+            resolved_request,
         )

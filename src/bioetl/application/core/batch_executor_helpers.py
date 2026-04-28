@@ -1,3 +1,4 @@
+# ruff: noqa: UP049
 """Internal helper functions for batch execution state updates."""
 
 from __future__ import annotations

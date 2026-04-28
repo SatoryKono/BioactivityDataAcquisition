@@ -56,6 +56,7 @@ ______________________________________________________________________
 | [DQ Failure Investigation](dq-failure-investigation.md) | Investigating data quality failures                | P1       |
 | [Backfill/Rebuild](backfill-rebuild.md)                 | Data backfill and rebuild procedures               | P2       |
 | [Schema Evolution](schema-evolution.md)                 | Handling schema changes                            | P2       |
+| [Retention-Sensitive Cleanup](retention-sensitive-cleanup.md) | Bounded cleanup gate for protected data, fixtures, reports, archives, and control-plane artifacts | P1 |
 
 ### Infrastructure
 
@@ -83,6 +84,9 @@ ______________________________________________________________________
 
 - Use [Run Manifest and Run Ledger Contract](../../04-reference/contracts/run-manifest-ledger.md)
   when you need storage layout, rollout flags, invariants, or event baseline.
+- Use [Retention-Sensitive Cleanup](retention-sensitive-cleanup.md) before
+  deleting from `data/**`, `tests/fixtures/**`, `docs/reports/**`,
+  `reports/**`, `docs/99-archive/**`, or control-plane artifact paths.
 - Use [CLI Reference](../../04-reference/cli.md) for supported inspection
   commands: `bioetl run-manifest show <run-id|manifest-id>` and
   `bioetl run-manifest diff <left> <right>`.

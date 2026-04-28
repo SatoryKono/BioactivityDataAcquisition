@@ -109,6 +109,7 @@ For PRs to `main`, configure GitHub branch protection/rulesets to require:
 - `type-check` (from `.github/workflows/type-checking.yml` — mypy strict compliance)
 - `Schema Governance Status` (from `.github/workflows/schema-governance.yml`)
 - `detect-secrets` (from `.github/workflows/security.yml`)
+- `root-hygiene` (from `.github/workflows/root-hygiene.yml` — root allowlist, docs/plans catalog, and generated artifact bans)
 
 This ensures no PR can be merged with failing tests, lint errors, or secret leaks.
 

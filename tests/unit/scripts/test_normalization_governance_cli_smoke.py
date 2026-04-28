@@ -36,6 +36,21 @@ def test_qa_cli_report_normalization_fallback_inventory_help_smoke() -> None:
     )
 
 
+def test_qa_cli_check_xwalk_missing_backlog_help_smoke() -> None:
+    result = run_python_cli(
+        "-m",
+        "scripts.engineering.qa",
+        "check-xwalk-missing-backlog",
+        "--help",
+    )
+
+    assert_cli_succeeded(result)
+    assert (
+        "Validate that xwalk MISSING_* markers are tracked in the backlog."
+        in result.stdout
+    )
+
+
 def test_docs_cli_generate_pipeline_normalization_matrix_execution_smoke(
     tmp_path: Path,
 ) -> None:

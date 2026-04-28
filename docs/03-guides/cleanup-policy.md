@@ -266,11 +266,14 @@ Root-level audit artifacts **MUST NOT** be committed.
 Enforcement:
 
 - `.gitignore` **MUST** include `/coverage.json` and `/all_fixtures.txt`.
-- CI **MUST** run `scripts/engineering/repo/audit_root_cleanliness.py`; this
+- CI **MUST** run `scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked`;
+  this
   validates `.github/root-allowlist.txt` and blocks tracked root/generated
   artifact regressions such as root coverage files, root Python helpers,
   non-canonical root text files, `src/tools/reports/`, and local runtime
   output trees.
+- GitHub branch protection for `main` **MUST** require the `root-hygiene`
+  status check.
 - Any intentional new root-level tracked file **MUST** be added to `.github/root-allowlist.txt` in the same PR with justification.
 
 ### 7.4. Scheduled Jobs (SHOULD)
