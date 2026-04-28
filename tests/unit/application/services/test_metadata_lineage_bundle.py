@@ -37,20 +37,24 @@ def _make_bronze_metadata() -> BronzeMetadata:
     return metadata
 
 
-def test_metadata_lineage_bundle_sets_output_artifact_id() -> None:
-    metadata = _make_bronze_metadata()
+def _make_produced_fragment(
+    *,
+    artifact_id: str = "bronze_batch:batch-1",
+    fragment_id: str = "fragment-1",
+) -> LineageGraphFragment:
+    """Build one minimal fragment exposing a produced Bronze artifact node."""
     batch_node = LineageNodeRef(
         node_type=LineageNodeType.BRONZE_BATCH,
-        node_id="bronze_batch:batch-1",
-        attributes={"batch_id": "batch-1"},
+        node_id=artifact_id,
+        attributes={"batch_id": artifact_id.split(":")[-1]},
     )
     run_node = LineageNodeRef(
         node_type=LineageNodeType.RUN,
         node_id="run:run-1",
         attributes={"run_id": "run-1"},
     )
-    fragment = LineageGraphFragment(
-        fragment_id="fragment-1",
+    return LineageGraphFragment(
+        fragment_id=fragment_id,
         run_id="run-1",
         manifest_id="manifest-1",
         nodes=(batch_node, run_node),
@@ -64,6 +68,11 @@ def test_metadata_lineage_bundle_sets_output_artifact_id() -> None:
             ),
         ),
     )
+
+
+def test_metadata_lineage_bundle_sets_output_artifact_id() -> None:
+    metadata = _make_bronze_metadata()
+    fragment = _make_produced_fragment()
 
     bundle = MetadataLineageBundle(metadata=metadata, lineage_fragment=fragment)
 
@@ -94,31 +103,7 @@ def test_metadata_lineage_bundle_requires_produced_artifact_node() -> None:
 def test_metadata_lineage_bundle_rejects_preexisting_artifact_id_mismatch() -> None:
     metadata = _make_bronze_metadata()
     metadata.output.artifact_id = "bronze_batch:other-batch"
-    batch_node = LineageNodeRef(
-        node_type=LineageNodeType.BRONZE_BATCH,
-        node_id="bronze_batch:batch-1",
-        attributes={"batch_id": "batch-1"},
-    )
-    run_node = LineageNodeRef(
-        node_type=LineageNodeType.RUN,
-        node_id="run:run-1",
-        attributes={"run_id": "run-1"},
-    )
-    fragment = LineageGraphFragment(
-        fragment_id="fragment-1",
-        run_id="run-1",
-        manifest_id="manifest-1",
-        nodes=(batch_node, run_node),
-        edges=(
-            LineageEdge(
-                edge_type=LineageEdgeType.PRODUCED_BY,
-                source=batch_node,
-                target=run_node,
-                run_id="run-1",
-                manifest_id="manifest-1",
-            ),
-        ),
-    )
+    fragment = _make_produced_fragment()
 
     with pytest.raises(
         ValueError,
@@ -130,31 +115,7 @@ def test_metadata_lineage_bundle_rejects_preexisting_artifact_id_mismatch() -> N
 def test_metadata_lineage_bundle_rejects_preexisting_fragment_id_mismatch() -> None:
     metadata = _make_bronze_metadata()
     metadata.output.lineage_fragment_id = "fragment-other"
-    batch_node = LineageNodeRef(
-        node_type=LineageNodeType.BRONZE_BATCH,
-        node_id="bronze_batch:batch-1",
-        attributes={"batch_id": "batch-1"},
-    )
-    run_node = LineageNodeRef(
-        node_type=LineageNodeType.RUN,
-        node_id="run:run-1",
-        attributes={"run_id": "run-1"},
-    )
-    fragment = LineageGraphFragment(
-        fragment_id="fragment-1",
-        run_id="run-1",
-        manifest_id="manifest-1",
-        nodes=(batch_node, run_node),
-        edges=(
-            LineageEdge(
-                edge_type=LineageEdgeType.PRODUCED_BY,
-                source=batch_node,
-                target=run_node,
-                run_id="run-1",
-                manifest_id="manifest-1",
-            ),
-        ),
-    )
+    fragment = _make_produced_fragment()
 
     with pytest.raises(
         ValueError,

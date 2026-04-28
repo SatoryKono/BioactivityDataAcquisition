@@ -85,7 +85,9 @@ def _build_canonical_event_payload(
     canonical = build_observability_contract_payload(
         event_name=event_name,
         context=raw_event_data,
-        default_provider=_coerce_text(raw_event_data.get("provider"), fallback="unknown"),
+        default_provider=_coerce_text(
+            raw_event_data.get("provider"), fallback="unknown"
+        ),
         default_pipeline=_coerce_text(
             raw_event_data.get("pipeline") or raw_event_data.get("pipeline_name"),
             fallback="unknown",

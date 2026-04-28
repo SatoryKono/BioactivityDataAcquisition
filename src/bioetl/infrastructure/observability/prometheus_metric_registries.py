@@ -44,6 +44,8 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_control_plane_manifest_writes_total": _metrics.CONTROL_PLANE_MANIFEST_WRITES_TOTAL,
         "bioetl_control_plane_ledger_appends_total": _metrics.CONTROL_PLANE_LEDGER_APPENDS_TOTAL,
         "bioetl_control_plane_reads_total": _metrics.CONTROL_PLANE_READS_TOTAL,
+        "bioetl_control_plane_lifecycle_deleted_total": _metrics.CONTROL_PLANE_LIFECYCLE_DELETED_TOTAL,
+        "bioetl_control_plane_lifecycle_apply_total": _metrics.CONTROL_PLANE_LIFECYCLE_APPLY_TOTAL,
         "bioetl_checkpoint_compatibility_events_total": _metrics.CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL,
         "bioetl_checkpoint_load_events_total": _metrics.CHECKPOINT_LOAD_EVENTS_TOTAL,
         "bioetl_checkpoint_operator_operations_total": _metrics.CHECKPOINT_OPERATOR_OPERATIONS_TOTAL,
@@ -55,6 +57,7 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
     },
     gauges={
         "bioetl_memory_pressure_state": _metrics.MEMORY_PRESSURE_STATE,
+        "bioetl_control_plane_lifecycle_delete_candidates": _metrics.CONTROL_PLANE_LIFECYCLE_DELETE_CANDIDATES,
     },
     histograms={
         "bioetl_pipeline_duration_seconds": _metrics.PIPELINE_DURATION_SECONDS,
@@ -84,6 +87,10 @@ STORAGE_MEDALLION_REGISTRY = MetricRegistryFamily(
         "bioetl_silver_csv_export_start_total": _metrics.SILVER_CSV_EXPORT_START_TOTAL,
         "bioetl_silver_csv_export_success_total": _metrics.SILVER_CSV_EXPORT_SUCCESS_TOTAL,
         "bioetl_silver_csv_export_failures_total": _metrics.SILVER_CSV_EXPORT_FAILURES_TOTAL,
+        "bioetl_silver_vacuum_start_total": _metrics.SILVER_VACUUM_START_TOTAL,
+        "bioetl_silver_vacuum_success_total": _metrics.SILVER_VACUUM_SUCCESS_TOTAL,
+        "bioetl_silver_optimize_start_total": _metrics.SILVER_OPTIMIZE_START_TOTAL,
+        "bioetl_silver_optimize_success_total": _metrics.SILVER_OPTIMIZE_SUCCESS_TOTAL,
         "bioetl_silver_merge_retries_total": _metrics.SILVER_MERGE_RETRIES_TOTAL,
         "bioetl_silver_merge_failures_total": _metrics.SILVER_MERGE_FAILURES_TOTAL,
         "bioetl_silver_validation_failures_total": _metrics.SILVER_VALIDATION_FAILURES_TOTAL,
@@ -96,7 +103,9 @@ STORAGE_MEDALLION_REGISTRY = MetricRegistryFamily(
         "bioetl_composite_source_selection_total": _metrics.COMPOSITE_SOURCE_SELECTION_TOTAL,
         "bioetl_quarantine_operator_operations_total": _metrics.QUARANTINE_OPERATOR_OPERATIONS_TOTAL,
     },
-    gauges={},
+    gauges={
+        "bioetl_silver_vacuum_files_removed": _metrics.SILVER_VACUUM_FILES_REMOVED,
+    },
     histograms={
         "bioetl_audit_write_duration_seconds": _metrics.AUDIT_WRITE_DURATION_SECONDS,
         "bioetl_audit_query_duration_seconds": _metrics.AUDIT_QUERY_DURATION_SECONDS,

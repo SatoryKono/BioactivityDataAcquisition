@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from unittest.mock import MagicMock
 from uuid import uuid4
 
@@ -64,6 +65,12 @@ class TestPubChemCompoundTransformer:
         assert result["molecular_formula"] == "C9H8O4"
         assert result["canonical_smiles"] == "CC(=O)OC1=CC=CC=C1C(=O)O"
         assert result["inchi_key"] == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+        assert result["standardized_canonical_smiles"] == ("CC(=O)OC1=CC=CC=C1C(=O)O")
+        assert result["standardized_inchi_key"] == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+        assert result["structure_parent_key"] == "inchikey14:BSYNRYMUTXBXSQ"
+        assert result["chemical_standardization_status"] == "standardized"
+        assert result["chemical_standardization_policy_version"] == "pubchem-basic-v1"
+        assert result["chemical_standardization_warnings"] is None
         assert "entity_id" in result
         assert "content_hash" in result
         # Lineage fields should be present
@@ -120,6 +127,11 @@ class TestPubChemCompoundTransformer:
         assert result is not None
         assert result["molecule_id"] == "12345"
         assert result["canonical_smiles"] == "CCO"
+        assert result["standardized_canonical_smiles"] == "CCO"
+        assert result["chemical_standardization_status"] == "partial"
+        assert json.loads(result["chemical_standardization_warnings"]) == [
+            "parent_key_from_smiles_without_inchi_key"
+        ]
 
     @pytest.mark.asyncio
     async def test_transform_with_only_isomeric_smiles(self, transformer, mock_context):
@@ -230,7 +242,55 @@ class TestPubChemCompoundTransformer:
         assert isinstance(result, PreSilverRecord)
         assert result.entity_id == "pubchem:2244"
         assert result.business_data["molecule_id"] == "2244"
+        assert result.business_data["chemical_standardization_status"] == "partial"
+        assert result.business_data["standardized_canonical_smiles"] == (
+            "CC(=O)OC1=CC=CC=C1C(=O)O"
+        )
         assert "content_hash" not in result.business_data
+
+    @pytest.mark.asyncio
+    async def test_transform_reports_invalid_standardization_inputs(
+        self, transformer, mock_context
+    ):
+        """Invalid structural identifiers are visible in standardization warnings."""
+        record = {
+            "molecule_id": 12345,
+            "canonical_smiles": " CCO ",
+            "inchi_key": "not-an-inchikey",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["canonical_smiles"] == "CCO"
+        assert result["standardized_canonical_smiles"] == "CCO"
+        assert result["standardized_inchi_key"] is None
+        assert result["chemical_standardization_status"] == "partial"
+        assert json.loads(result["chemical_standardization_warnings"]) == [
+            "inchi_key_invalid",
+            "parent_key_from_smiles_without_inchi_key",
+        ]
+
+    @pytest.mark.asyncio
+    async def test_transform_reports_multi_component_parent_deferred(
+        self, transformer, mock_context
+    ):
+        """Multi-component compounds do not get an implicit parent structure."""
+        record = {
+            "molecule_id": 12345,
+            "canonical_smiles": "CCO.Cl",
+            "covalent_unit_count": 2,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["structure_parent_key"] is None
+        assert result["chemical_standardization_status"] == "partial"
+        assert json.loads(result["chemical_standardization_warnings"]) == [
+            "multi_component_parent_deferred",
+            "structure_parent_key_unavailable",
+        ]
 
     @pytest.mark.asyncio
     async def test_transform_matches_staged_finalization(

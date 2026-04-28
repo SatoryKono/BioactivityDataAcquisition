@@ -41,6 +41,9 @@ _DOC_SCAN_ROOTS = (
     Path("grafana/README.md"),
 )
 _RULE_SCAN_ROOT = Path("grafana/prometheus-rules")
+_DEFAULT_DRIFT_ALLOWLIST = Path(
+    "configs/quality/observability_metric_inventory_allowlist.yaml"
+)
 _RUNTIME_EXCLUDE_PARTS = (
     "src/bioetl/infrastructure/observability",
     "src/bioetl/domain",
@@ -76,6 +79,13 @@ _IGNORED_DOC_METRIC_NAMES: Final[frozenset[str]] = frozenset(
         "bioetl_observability",
         "bioetl_pipeline",
     }
+)
+_CHECK_DRIFT_KEYS: Final[tuple[str, ...]] = (
+    "registered_without_runtime",
+    "runtime_without_registry",
+    "dead_metrics",
+    "documented_without_registry",
+    "rules_without_registry",
 )
 
 
@@ -619,6 +629,7 @@ def collect_metric_inventory(
     docs_set = set(docs_mentions)
     rules_set = set(rules_mentions)
     registry_only_metrics = registered_set - runtime_set
+    runtime_without_registry = runtime_set - registered_set
     dead_metrics = registry_only_metrics - docs_set - rules_set
     documented_without_runtime = (docs_set & registered_set) - runtime_set
     ruled_without_runtime = (rules_set & registered_set) - runtime_set
@@ -629,6 +640,7 @@ def collect_metric_inventory(
         "direct_live_metrics": sorted(registered_set & direct_runtime_set),
         "helper_backed_live_metrics": sorted(registered_set & helper_runtime_set),
         "registered_without_runtime": sorted(registry_only_metrics),
+        "runtime_without_registry": sorted(runtime_without_registry),
         "registry_only_metrics": sorted(registry_only_metrics),
         "dead_metrics": sorted(dead_metrics),
         "documented_without_registry": sorted(docs_set - registered_set),
@@ -650,12 +662,63 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true", help="Emit JSON report")
     parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail when metric registry/runtime/docs drift exceeds the allowlist",
+    )
+    parser.add_argument(
+        "--allowlist",
+        type=Path,
+        default=_DEFAULT_DRIFT_ALLOWLIST,
+        help="YAML file with allowed drift entries for --check",
+    )
+    parser.add_argument(
         "--repo-root",
         type=Path,
         default=Path.cwd(),
         help="Repository root to scan",
     )
     return parser
+
+
+def _load_drift_allowlist(path: Path) -> dict[str, set[str]]:
+    if not path.exists():
+        return {}
+    try:
+        import yaml
+    except ImportError:
+        return {}
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        return {}
+    raw_allowed = payload.get("allowed", payload)
+    if not isinstance(raw_allowed, dict):
+        return {}
+    allowlist: dict[str, set[str]] = {}
+    for key in _CHECK_DRIFT_KEYS:
+        values = raw_allowed.get(key, [])
+        if not isinstance(values, list):
+            continue
+        allowlist[key] = {str(value) for value in values}
+    return allowlist
+
+
+def validate_metric_inventory(
+    report: dict[str, list[str] | dict[str, list[str]]],
+    *,
+    allowlist: dict[str, set[str]] | None = None,
+) -> dict[str, list[str]]:
+    """Return unallowed metric drift grouped by deterministic check category."""
+    allowed = allowlist or {}
+    violations: dict[str, list[str]] = {}
+    for key in _CHECK_DRIFT_KEYS:
+        values = report.get(key, [])
+        if not isinstance(values, list):
+            continue
+        unallowed = sorted(set(values) - allowed.get(key, set()))
+        if unallowed:
+            violations[key] = unallowed
+    return violations
 
 
 def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:
@@ -665,6 +728,7 @@ def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:
         "direct_live_metrics",
         "helper_backed_live_metrics",
         "registered_without_runtime",
+        "runtime_without_registry",
         "dead_metrics",
         "documented_without_registry",
         "rules_without_registry",
@@ -686,11 +750,33 @@ def main(argv: list[str] | None = None) -> None:
     parser = _build_parser()
     args = parser.parse_args(argv)
     report = collect_metric_inventory(args.repo_root)
+    allowlist_path = args.allowlist
+    if not allowlist_path.is_absolute():
+        allowlist_path = args.repo_root / allowlist_path
+    violations = (
+        validate_metric_inventory(
+            report,
+            allowlist=_load_drift_allowlist(allowlist_path),
+        )
+        if args.check
+        else {}
+    )
     if args.json:
+        if args.check:
+            report["check_violations"] = violations
         json.dump(report, sys.stdout, indent=2, sort_keys=True)
         sys.stdout.write("\n")
+        if violations:
+            raise SystemExit(1)
         return
     print(_render_text(report))
+    if violations:
+        print("\nMetric inventory drift check failed:", file=sys.stderr)
+        for key, values in violations.items():
+            print(f"{key} ({len(values)}):", file=sys.stderr)
+            for value in values:
+                print(f"  - {value}", file=sys.stderr)
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

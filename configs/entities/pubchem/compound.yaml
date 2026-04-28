@@ -39,6 +39,14 @@ schema:
     - isomeric_smiles
     - inchi
     - inchi_key
+    - standardized_canonical_smiles
+    - standardized_isomeric_smiles
+    - standardized_inchi
+    - standardized_inchi_key
+    - structure_parent_key
+    - chemical_standardization_status
+    - chemical_standardization_warnings
+    - chemical_standardization_policy_version
     - molecular_formula
     - iupac_name
     - molecular_weight
@@ -120,6 +128,21 @@ quality:
     type: custom
     validator: smiles_validator
     nullable: true
+  - field: chemical_standardization_status
+    type: enum
+    allowed_values:
+    - standardized
+    - partial
+    - invalid
+    - missing_structure
+    nullable: true
+    error_message: Chemical standardization status must use a bounded policy value
+  - field: chemical_standardization_policy_version
+    type: enum
+    allowed_values:
+    - pubchem-basic-v1
+    nullable: true
+    error_message: Chemical standardization policy version must be recognized
   - field: xlogp
     type: range
     min: -20

@@ -38,8 +38,7 @@ def collect_datetime_now_calls(
             and node.func.value.attr == "datetime"
         ):
             calls.append(
-                f"{relative_path}:{node.lineno}: "
-                f"datetime.datetime.{node.func.attr}()"
+                f"{relative_path}:{node.lineno}: datetime.datetime.{node.func.attr}()"
             )
     return calls
 

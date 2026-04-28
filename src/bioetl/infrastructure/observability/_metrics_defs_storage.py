@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from prometheus_client import Counter, Histogram
+from prometheus_client import Counter, Gauge, Histogram
 
 __all__ = [
     "AUDIT_QUERY_DURATION_SECONDS",
@@ -24,6 +24,11 @@ __all__ = [
     "SILVER_CSV_EXPORT_SUCCESS_TOTAL",
     "SILVER_MERGE_FAILURES_TOTAL",
     "SILVER_MERGE_RETRIES_TOTAL",
+    "SILVER_OPTIMIZE_START_TOTAL",
+    "SILVER_OPTIMIZE_SUCCESS_TOTAL",
+    "SILVER_VACUUM_FILES_REMOVED",
+    "SILVER_VACUUM_START_TOTAL",
+    "SILVER_VACUUM_SUCCESS_TOTAL",
     "SILVER_VALIDATION_FAILURES_TOTAL",
 ]
 
@@ -149,4 +154,29 @@ SILVER_CSV_EXPORT_FAILURES_TOTAL = Counter(
     "bioetl_silver_csv_export_failures_total",
     "Total failed Silver CSV export operations",
     ["table", "pipeline", "error_type"],
+)
+
+SILVER_VACUUM_START_TOTAL = Counter(
+    "bioetl_silver_vacuum_start_total",
+    "Total Silver vacuum operations started",
+)
+
+SILVER_VACUUM_SUCCESS_TOTAL = Counter(
+    "bioetl_silver_vacuum_success_total",
+    "Total successful Silver vacuum operations",
+)
+
+SILVER_VACUUM_FILES_REMOVED = Gauge(
+    "bioetl_silver_vacuum_files_removed",
+    "Current number of files removed by the latest Silver vacuum operation",
+)
+
+SILVER_OPTIMIZE_START_TOTAL = Counter(
+    "bioetl_silver_optimize_start_total",
+    "Total Silver optimize operations started",
+)
+
+SILVER_OPTIMIZE_SUCCESS_TOTAL = Counter(
+    "bioetl_silver_optimize_success_total",
+    "Total successful Silver optimize operations",
 )
