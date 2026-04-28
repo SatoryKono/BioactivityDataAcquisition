@@ -137,7 +137,7 @@ jobs:
                 run: |
                     mode="${C901_GOVERNANCE_MODE:-block}"
                     echo "C901 governance mode: ${mode}"
-                    uv run python scripts/engineering/qa/check_c901_baseline.py \
+                    uv run python -m scripts.engineering.qa check-c901 \
                       --target src/bioetl \
                       --baseline-file scripts/engineering/baselines/c901_baseline.json \
                       --mode "${mode}"

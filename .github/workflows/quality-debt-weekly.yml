@@ -36,7 +36,7 @@ jobs:
 
       - name: Run config gap analysis
         run: |
-          uv run python scripts/schema/config_gap_analysis.py
+          uv run python -m scripts.schema analyze-gaps
 
       - name: Upload weekly debt artifacts
         uses: actions/upload-artifact@v4

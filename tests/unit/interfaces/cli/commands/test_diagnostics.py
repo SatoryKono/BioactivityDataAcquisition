@@ -236,7 +236,7 @@ def test_diagnostics_guide_displays_canonical_routes(cli_runner: CliRunner) -> N
     assert "bioetl diagnostics manifest" in result.output
     assert "bioetl diagnostics quarantine" in result.output
     assert "auto-managed during pipeline runs" in result.output
-    assert "report-observability-metric-inventory" in result.output
+    assert "bioetl diagnostics contract-checks" in result.output
     assert "grafana/prometheus-rules/bioetl_observability.yml" in result.output
 
 
@@ -368,6 +368,78 @@ def test_diagnostics_metrics_text_displays_operator_workflow(
         in result.output
     )
     assert "report-observability-metric-inventory" in result.output
+
+
+@pytest.mark.unit
+def test_diagnostics_contract_checks_json_reports_passed_contracts(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    report = SimpleNamespace(
+        passed=True,
+        to_dict=lambda: {
+            "passed": True,
+            "checks": [{"name": "metric_inventory_drift", "passed": True}],
+        },
+        checks=[
+            SimpleNamespace(
+                name="metric_inventory_drift",
+                passed=True,
+                details={},
+            )
+        ],
+    )
+    import bioetl.interfaces.cli.commands.diagnostics as diagnostics_module
+
+    monkeypatch.setattr(
+        diagnostics_module,
+        "run_observability_contract_checks",
+        lambda: report,
+        raising=True,
+    )
+
+    result = cli_runner.invoke(cli, ["diagnostics", "contract-checks", "--json"])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["passed"] is True
+    assert payload["checks"][0]["name"] == "metric_inventory_drift"
+
+
+@pytest.mark.unit
+def test_diagnostics_contract_checks_fails_when_contracts_fail(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    report = SimpleNamespace(
+        passed=False,
+        to_dict=lambda: {
+            "passed": False,
+            "checks": [{"name": "slo_alert_contract", "passed": False}],
+        },
+        checks=[
+            SimpleNamespace(
+                name="slo_alert_contract",
+                passed=False,
+                details={"mismatches": ["BioETLExample:runbook"]},
+            )
+        ],
+    )
+    import bioetl.interfaces.cli.commands.diagnostics as diagnostics_module
+
+    monkeypatch.setattr(
+        diagnostics_module,
+        "run_observability_contract_checks",
+        lambda: report,
+        raising=True,
+    )
+
+    result = cli_runner.invoke(cli, ["diagnostics", "contract-checks"])
+
+    assert result.exit_code == 1
+    assert "BioETL Observability Contract Checks" in result.output
+    assert "slo_alert_contract: fail" in result.output
+    assert "BioETLExample:runbook" in result.output
 
 
 @pytest.mark.unit

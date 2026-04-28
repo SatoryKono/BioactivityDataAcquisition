@@ -73,7 +73,7 @@ jobs:
           uv-extras: "dev"
 
       - name: Verify generated schema artifacts are up-to-date
-        run: uv run python scripts/schema/generate_schema_artifacts.py --check
+        run: uv run python -m scripts.schema generate-artifacts --check
 
   contracts-export:
     name: Contracts Export (blocking)

@@ -16,23 +16,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
         with:
-          python-version: '3.12'
-
-      - name: Install required dependencies
-        run: pip install pyyaml pytest
+          python-version: "3.12"
+          uv-extras: "dev"
 
       - name: Validate repository root allowlist
-        run: python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
+        run: uv run python -m scripts.engineering.repo check-cleanliness --strict-untracked
 
       - name: Validate root-hygiene review registry
-        run: python scripts/engineering/repo/check_root_hygiene_review_registry.py
+        run: uv run python -m scripts.engineering.repo check-root-review-registry
 
       - name: Run root hygiene unit tests
         run: >
-          python -m pytest
+          uv run pytest
           tests/unit/scripts/repo/test_audit_root_cleanliness.py
           tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py
           tests/architecture/test_root_hygiene_workflow.py
