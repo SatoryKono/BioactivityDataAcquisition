@@ -33,7 +33,13 @@ FIXTURE_PATH = (
     ROOT / "tests" / "fixtures" / "normalization" / "chembl_observed_values.yaml"
 )
 TARGET_BRONZE_FIXTURE_PATH = (
-    ROOT / "tests" / "fixtures" / "bronze" / "chembl" / "target" / "sample_ci_2026-04-24.jsonl"
+    ROOT
+    / "tests"
+    / "fixtures"
+    / "bronze"
+    / "chembl"
+    / "target"
+    / "sample_ci_2026-04-24.jsonl"
 )
 
 

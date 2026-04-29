@@ -11,10 +11,59 @@ def _load_yaml(path: str) -> dict[str, object]:
     return yaml.safe_load(Path(path).read_text(encoding="utf-8"))
 
 
-def test_uniprot_reviewed_gold_filter_uses_stringified_boolean_value() -> None:
+def test_uniprot_reviewed_gold_filter_uses_boolean_value() -> None:
     config = _load_yaml("configs/entities/uniprot/protein.yaml")
 
-    assert config["filters"]["gold_filters"]["columns"]["reviewed"] == ["True"]
+    assert config["filters"]["gold_filters"]["columns"]["reviewed"] == [True]
+
+
+def test_non_chembl_publication_configs_use_canonical_identifier_names() -> None:
+    provider_paths = (
+        "configs/entities/crossref/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
+    )
+
+    for path in provider_paths:
+        config = _load_yaml(path)
+        identifiers = next(
+            group
+            for group in config["schema"]["column_groups"]
+            if group["name"] == "identifiers"
+        )
+
+        assert "publication_doi" not in identifiers["fields"]
+        assert "publication_pmid" not in identifiers["fields"]
+        assert "doi" in identifiers["fields"]
+
+
+def test_composite_publication_promotes_harmonized_classification() -> None:
+    config = _load_yaml("configs/composites/publication.yaml")
+    merge = config["composite"]["merge"]
+    doc_type = next(
+        group for group in merge["column_groups"] if group["name"] == "doc_type"
+    )
+
+    for field_name in (
+        "publication_type_unified",
+        "publication_subclass",
+        "publication_class",
+    ):
+        assert field_name in doc_type["fields"]
+        assert field_name in merge["field_priorities"]
+        assert f"chembl.publication.{field_name}" not in merge["exclude_fields"]
+
+
+def test_publication_field_groups_keep_publication_doi_as_chembl_legacy_only() -> None:
+    config = _load_yaml("configs/composites/field_groups/publication.yaml")
+    id_group = next(
+        group for group in config["groups"] if group["id"] == "id_and_status"
+    )
+    publication_doi = next(
+        field for field in id_group["fields"] if field["base_name"] == "publication_doi"
+    )
+
+    assert publication_doi["columns"] == ["chembl.publication.publication_doi"]
 
 
 def test_molecule_composite_exposes_pubchem_normalized_structure_anchors() -> None:
@@ -67,6 +116,15 @@ def test_target_composite_documents_uniprot_idmapping_anchor_boundary() -> None:
     assert uniprot_protein["join_keys"] == [policy["normalized_output_anchor"]]
     assert uniprot_protein["key_source"] == "uniprot_idmapping"
     assert uniprot_protein["key_filter"] == "mapping_status = 'found'"
+
+
+def test_target_composite_references_canonical_uniprot_protein_fields() -> None:
+    config = _load_yaml("configs/composites/target.yaml")
+    exclude_fields = set(config["composite"]["merge"]["exclude_fields"])
+
+    assert "uniprot.protein.features_json" in exclude_fields
+    assert "uniprot.protein.features" not in exclude_fields
+    assert "uniprot.protein.organism_id" not in exclude_fields
 
 
 def test_semanticscholar_dq_conditions_use_derived_publication_taxonomy() -> None:

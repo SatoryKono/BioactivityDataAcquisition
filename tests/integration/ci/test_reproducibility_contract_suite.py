@@ -29,6 +29,14 @@ from bioetl.composition.bootstrap.runtime.composite_control_plane_builder import
 from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
+from bioetl.domain.composite.config import (
+    CompositeConfig,
+    DependencyConfig,
+    EnricherConfig,
+    MergeConfig,
+    SeedConfig,
+)
+from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane import (
     ReplayCapability,
@@ -131,35 +139,37 @@ class _CompositeReplayHost(CompositeRunnerObservabilityMixin):
         self._metrics = None
 
 
-class _ReplayMatrixCompositeConfig:
-    """Minimal composite config for full-envelope exact replay evidence."""
-
-    name = "composite_publication"
-    version = "1.0.0"
-    seed = SimpleNamespace(pipeline="pubmed_publication")
-    dependencies = (SimpleNamespace(pipeline="crossref_publication"),)
-    enrichers = (SimpleNamespace(pipeline="openalex_publication"),)
-    merge = SimpleNamespace(
-        output_silver_path="data/output/silver/composite/publication",
-        output_gold_path="data/output/gold/composite/publication",
+def _build_replay_matrix_composite_config() -> CompositeConfig:
+    """Build a canonical composite config for full-envelope exact replay evidence."""
+    return CompositeConfig(
+        name="composite_publication",
+        version="1.0.0",
+        seed=SeedConfig(
+            pipeline="pubmed_publication",
+            output_keys=("publication_id",),
+            silver_table="publication",
+        ),
+        dependencies=(
+            DependencyConfig(
+                pipeline="crossref_publication",
+                join_keys=("publication_id",),
+                silver_table="publication",
+            ),
+        ),
+        enrichers=(
+            EnricherConfig(
+                pipeline="openalex_publication",
+                join_keys=("publication_id",),
+                silver_table="publication",
+            ),
+        ),
+        merge=MergeConfig(
+            strategy=MergeStrategy.LEFT_OUTER,
+            conflict_resolution=ConflictResolution.SEED_PRIORITY,
+            output_silver_path="data/output/silver/composite/publication",
+            output_gold_path="data/output/gold/composite/publication",
+        ),
     )
-
-    def to_dict(self) -> dict[str, object]:
-        return {
-            "name": self.name,
-            "version": self.version,
-            "seed": {"pipeline": self.seed.pipeline},
-            "dependencies": [
-                {"pipeline": dependency.pipeline} for dependency in self.dependencies
-            ],
-            "enrichers": [
-                {"pipeline": enricher.pipeline} for enricher in self.enrichers
-            ],
-            "merge": {
-                "output_silver_path": self.merge.output_silver_path,
-                "output_gold_path": self.merge.output_gold_path,
-            },
-        }
 
 
 def _write_composite_snapshot_envelope(bronze_root: Path) -> None:
@@ -895,7 +905,7 @@ def test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_
             source_revision_state="clean",
         ),
     )
-    config = _ReplayMatrixCompositeConfig()
+    config = _build_replay_matrix_composite_config()
     runtime = CompositeRuntimeConfig(
         resume=True,
         use_cached_bronze=True,

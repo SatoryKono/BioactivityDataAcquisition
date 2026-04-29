@@ -33,7 +33,7 @@ schema:
     - _original_id
   - name: identifiers
     fields:
-    - publication_doi
+    - doi
     - alternative_id
   - name: title
     fields:

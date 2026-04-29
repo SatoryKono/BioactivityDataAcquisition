@@ -353,7 +353,7 @@ composite:
       - uniprot.protein.entry_version       # Audit field
       - uniprot.protein.entry_created       # Audit field
       - uniprot.protein.entry_modified      # Audit field
-      - uniprot.protein.features            # JSON, too large
+      - uniprot.protein.features_json       # JSON, too large
       - uniprot.protein.alternative_products  # Specialized
       - uniprot.protein.similarity_comment  # Low value
       - uniprot.protein.caution             # Low value
@@ -364,7 +364,6 @@ composite:
       - uniprot.protein.feature_count       # Metadata
       - uniprot.protein.keyword_count       # Metadata
       - uniprot.protein.isoform_count       # Metadata
-      - uniprot.protein.organism_id         # Duplicate of taxonomy_id
       - uniprot.protein.organism_scientific  # Use ChEMBL organism
       - uniprot.protein.organism_common     # Use ChEMBL organism
 

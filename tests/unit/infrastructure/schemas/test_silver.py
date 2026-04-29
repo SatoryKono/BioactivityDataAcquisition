@@ -365,19 +365,19 @@ class TestUniprotProteinSchema:
 
     def test_has_core_fields(self):
         """Verify core fields exist."""
-        expected = ["entry_name", "protein_name", "organism_id", "sequence_length"]
+        expected = ["entry_name", "protein_name", "taxonomy_id", "sequence_length"]
         for field_name in expected:
             assert field_name in UNIPROT_PROTEIN_SCHEMA.names
 
-    def test_gene_names_is_list(self):
-        """Verify gene_names is list of strings."""
-        field = UNIPROT_PROTEIN_SCHEMA.field("gene_names")
-        assert isinstance(field.type, pa.ListType)
-        assert field.type.value_type == pa.string()
+    def test_gene_fields_are_canonical_json_strings(self):
+        """Verify gene structured fields use persisted JSON string semantics."""
+        for field_name in ("gene_names", "gene_synonyms", "gene_orf_names"):
+            field = UNIPROT_PROTEIN_SCHEMA.field(field_name)
+            assert field.type == pa.string()
 
-    def test_organism_id_is_int64(self):
-        """Verify organism_id is int64."""
-        field = UNIPROT_PROTEIN_SCHEMA.field("organism_id")
+    def test_taxonomy_id_is_int64(self):
+        """Verify canonical taxonomy_id is int64."""
+        field = UNIPROT_PROTEIN_SCHEMA.field("taxonomy_id")
         assert field.type == pa.int64()
 
 
@@ -394,17 +394,15 @@ class TestPubmedPublicationSchema:
         for field_name in expected:
             assert field_name in PUBMED_PUBLICATION_SCHEMA.names
 
-    def test_has_list_fields(self):
-        """Verify list fields exist and have correct types."""
-        # authors is now JSON-serialized string (per commit fcf29f2)
-        list_fields = ["publication_types", "subject_keywords", "subject_mesh"]
-        for field_name in list_fields:
+    def test_structured_fields_are_json_strings(self):
+        """Verify structured fields use canonical JSON string storage."""
+        structured_fields = ["publication_types", "subject_keywords", "subject_mesh"]
+        for field_name in structured_fields:
             assert field_name in PUBMED_PUBLICATION_SCHEMA.names
             field = PUBMED_PUBLICATION_SCHEMA.field(field_name)
-            assert isinstance(field.type, pa.ListType), (
-                f"{field_name} should be list, got {field.type}"
+            assert field.type == pa.string(), (
+                f"{field_name} should be string, got {field.type}"
             )
-            assert field.type.value_type == pa.string()
 
     def test_authors_is_json_string(self):
         """Verify authors field is JSON-serialized string."""
@@ -582,8 +580,8 @@ class TestSilverSchemaValidation:
             "accession": "P00533",
             "entry_name": "EGFR_HUMAN",
             "protein_name": "Epidermal growth factor receptor",
-            "gene_names": ["EGFR", "ERBB1"],
-            "organism_id": 9606,
+            "gene_names": '["EGFR","ERBB1"]',
+            "taxonomy_id": 9606,
             "sequence_length": 1210,
             "content_hash": "hash123",
             "_run_id": "run_003",

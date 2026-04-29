@@ -35,9 +35,9 @@ if TYPE_CHECKING:
     from bioetl.application.services.quarantine_service import QuarantineService
 
 __all__ = [
-    "delete_metrics_from_gateway",
     "MetricsOperatorProfile",
     "ObservabilityDiagnosticsBundle",
+    "delete_metrics_from_gateway",
     "get_audit_service",
     "get_checkpoint_service",
     "get_health_service",

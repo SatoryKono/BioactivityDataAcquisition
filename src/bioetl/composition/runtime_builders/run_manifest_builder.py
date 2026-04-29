@@ -270,20 +270,6 @@ def create_run_manifest(
             skip_gold=bool(getattr(ctx, "skip_gold", False)),
         )
     )
-    validate_required_persistence_profile(
-        manifest_enabled=True,
-        ledger_enabled=ledger_enabled,
-        required_profile=reproducibility_context.required_persistence_profile,
-        execution_label="Pipeline execution",
-        exact_replay_execution_context_supported=(
-            reproducibility_context.strict_exact_replay_supported
-        ),
-        missing_artifact_lineage_layers=missing_artifact_lineage_layers,
-    )
-    manifest_store = _create_manifest_store(inputs)
-    ledger_service: RunLedgerService | None = None
-    if ledger_enabled:
-        ledger_service = _create_ledger_service(inputs, ctx)
     manifest_create_request = _build_manifest_create_request(
         _RunManifestCreateRequestInputs(
             ctx=ctx,
@@ -303,6 +289,20 @@ def create_run_manifest(
             effective_config_artifact_id=effective_config_artifact_id,
         )
     )
+    validate_required_persistence_profile(
+        manifest_enabled=True,
+        ledger_enabled=ledger_enabled,
+        required_profile=reproducibility_context.required_persistence_profile,
+        execution_label="Pipeline execution",
+        exact_replay_execution_context_supported=(
+            reproducibility_context.strict_exact_replay_supported
+        ),
+        missing_artifact_lineage_layers=missing_artifact_lineage_layers,
+    )
+    manifest_store = _create_manifest_store(inputs)
+    ledger_service: RunLedgerService | None = None
+    if ledger_enabled:
+        ledger_service = _create_ledger_service(inputs, ctx)
     _emit_replay_reconstructability_metric(
         request=manifest_create_request,
         strict_exact_replay_supported=(

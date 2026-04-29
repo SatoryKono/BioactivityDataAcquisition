@@ -33,6 +33,15 @@ def _coerce_sink_layer_mapping(yaml_config: object) -> Mapping[str, object]:
     return {}
 
 
+def _resolve_sink_layer_config(yaml_config: object, layer: str) -> object | None:
+    sink = getattr(yaml_config, "sink", None)
+    if sink is None:
+        return None
+    if isinstance(sink, Mapping):
+        return sink.get(layer)
+    return getattr(sink, layer, None)
+
+
 def _is_sink_layer_enabled(layer_config: object | None) -> bool:
     if layer_config is None:
         return True
@@ -58,13 +67,14 @@ def resolve_required_artifact_lineage_layers(
             if not (layer == "gold" and skip_gold)
         )
         return default_active_layers, default_active_layers
-    sink_mapping = _coerce_sink_layer_mapping(yaml_config)
+    if getattr(yaml_config, "sink", None) is None:
+        return (), ()
     active_layer_names: list[str] = []
     missing_lineage_layers: list[str] = []
     for layer in _PERSISTENCE_PROFILE_ACTIVE_LAYERS:
         if layer == "gold" and skip_gold:
             continue
-        layer_config = sink_mapping.get(layer)
+        layer_config = _resolve_sink_layer_config(yaml_config, layer)
         if not _is_sink_layer_enabled(layer_config):
             continue
         active_layer_names.append(layer)

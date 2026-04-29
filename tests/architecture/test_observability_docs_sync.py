@@ -10,6 +10,7 @@ import pytest
 RULES_PATH = Path("docs/00-project/RULES.md")
 METRICS_GUIDE_PATH = Path("docs/03-guides/metrics-monitoring.md")
 OBSERVABILITY_CONTRACT_PATH = Path("docs/04-reference/contracts/observability.md")
+GRAFANA_README_PATH = Path("grafana/README.md")
 
 
 @pytest.mark.architecture
@@ -131,3 +132,38 @@ def test_docs_publish_dq_disposition_metric_contract() -> None:
     assert expected_metric in observability_contract, (
         f"observability.md is missing canonical observability metric: {expected_metric}"
     )
+
+
+@pytest.mark.architecture
+def test_monitoring_docs_track_modular_observability_code_paths() -> None:
+    """Monitoring docs must point to current modular observability paths."""
+    grafana_readme = GRAFANA_README_PATH.read_text(encoding="utf-8")
+    metrics_guide = METRICS_GUIDE_PATH.read_text(encoding="utf-8")
+    observability_contract = OBSERVABILITY_CONTRACT_PATH.read_text(encoding="utf-8")
+
+    assert "src/bioetl/domain/ports/noop.py" not in grafana_readme
+    for required_token in (
+        "src/bioetl/domain/ports/noop/_metrics.py",
+        "src/bioetl/infrastructure/observability/_metrics_defs_*.py",
+        "src/bioetl/infrastructure/observability/prometheus_metric_registries.py",
+        "src/bioetl/infrastructure/observability/prometheus_metric_label_policies.py",
+    ):
+        assert required_token in grafana_readme, (
+            f"grafana/README.md is missing current observability path: "
+            f"{required_token}"
+        )
+
+    for text, doc_name in (
+        (grafana_readme, "grafana/README.md"),
+        (metrics_guide, "metrics-monitoring.md"),
+        (observability_contract, "observability.md"),
+    ):
+        assert "replace-style" in text, (
+            f"{doc_name} must document Pushgateway replace-style publication."
+        )
+        assert "delete_metrics_from_gateway" in text, (
+            f"{doc_name} must document Pushgateway cleanup seam."
+        )
+        assert "manifest/ledger/CLI/explorer" in text, (
+            f"{doc_name} must preserve Prometheus aggregate vs forensic boundary."
+        )

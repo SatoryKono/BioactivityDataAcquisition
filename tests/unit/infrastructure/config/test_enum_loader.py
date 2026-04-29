@@ -4,6 +4,12 @@ from __future__ import annotations
 
 import yaml
 
+from bioetl.domain.schemas.uniprot import (
+    ENTRY_TYPES,
+    PROTEIN_EXISTENCE_LEVELS,
+    PROTEIN_FLAGS,
+)
+from bioetl.domain.schemas.uniprot.idmapping import MAPPING_STATUSES
 from bioetl.infrastructure.config.enum_file_loader import (
     load_provider_enums_from_file,
 )
@@ -44,3 +50,12 @@ def test_provider_file_loader_rejects_path_like_provider_names() -> None:
         assert "path separators" in str(exc)
     else:  # pragma: no cover - assertion helper branch
         raise AssertionError("Expected path-like provider to be rejected")
+
+
+def test_uniprot_enum_registry_matches_domain_contract_literals() -> None:
+    enums = load_provider_enums_from_file("uniprot")
+
+    assert enums["protein"]["entry_types"] == ENTRY_TYPES
+    assert enums["protein"]["protein_flags"] == PROTEIN_FLAGS
+    assert enums["protein"]["protein_existence_levels"] == (PROTEIN_EXISTENCE_LEVELS)
+    assert enums["idmapping"]["mapping_statuses"] == MAPPING_STATUSES

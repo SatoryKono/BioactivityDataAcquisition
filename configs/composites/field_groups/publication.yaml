@@ -48,10 +48,6 @@ groups:
       - base_name: publication_doi
         columns:
           - chembl.publication.publication_doi
-          - crossref.publication.publication_doi
-          - openalex.publication.publication_doi
-          - pubmed.publication.publication_doi
-          - semanticscholar.publication.publication_doi
 
       - base_name: doi
         columns:
@@ -105,7 +101,11 @@ groups:
 
       - base_name: pmc_id
         columns:
+          - chembl.publication.pmc_id
+          - crossref.publication.pmc_id
+          - openalex.publication.pmc_id
           - pubmed.publication.pmc_id
+          - semanticscholar.publication.pmc_id
 
       - base_name: pmid
         columns:
@@ -520,6 +520,30 @@ groups:
           - openalex.publication.publication_type
           - pubmed.publication.publication_type
           - semanticscholar.publication.publication_type
+
+      - base_name: publication_type_unified
+        columns:
+          - chembl.publication.publication_type_unified
+          - crossref.publication.publication_type_unified
+          - openalex.publication.publication_type_unified
+          - pubmed.publication.publication_type_unified
+          - semanticscholar.publication.publication_type_unified
+
+      - base_name: publication_subclass
+        columns:
+          - chembl.publication.publication_subclass
+          - crossref.publication.publication_subclass
+          - openalex.publication.publication_subclass
+          - pubmed.publication.publication_subclass
+          - semanticscholar.publication.publication_subclass
+
+      - base_name: publication_class
+        columns:
+          - chembl.publication.publication_class
+          - crossref.publication.publication_class
+          - openalex.publication.publication_class
+          - pubmed.publication.publication_class
+          - semanticscholar.publication.publication_class
 
       - base_name: publication_type_list
         columns:

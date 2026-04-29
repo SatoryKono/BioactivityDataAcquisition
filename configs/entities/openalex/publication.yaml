@@ -37,8 +37,8 @@ schema:
   - name: identifiers
     fields:
     - openalex_id
-    - publication_doi
-    - publication_pmid
+    - doi
+    - pmid
     - mag_id
   - name: title
     fields:
@@ -153,6 +153,7 @@ schema:
     - citations
     - open_access
     - subjects
+    - doc_type
     - quality
     exclude_fields:
     - _dq_*

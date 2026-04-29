@@ -57,7 +57,8 @@ BioETL предоставляет комплексную систему observab
 - metrics HTTP server startup остаётся auto-managed during normal
   `bioetl run`, `bioetl run-all` и `bioetl run-composite` execution when
   metrics are enabled;
-- Pushgateway publication остаётся best-effort on run completion;
+- Pushgateway publication остаётся best-effort on run completion and uses
+  replace-style bounded aggregate snapshots;
 - `bioetl diagnostics metrics` — canonical operator summary для этих
   auto-managed behaviors.
 - `bioetl diagnostics run --run-id <run-id>` показывает bounded trace
@@ -130,7 +131,11 @@ export BIOETL_OBSERVABILITY__METRICS_ENABLED=false
 > Для short-lived pipeline runs BioETL теперь дополнительно делает best-effort
 > публикацию текущего registry в локальный Pushgateway (`localhost:9091` по
 > умолчанию). Это снижает риск потери post-run метрик между scrape-циклами
-> Prometheus.
+> Prometheus. Grouping labels ограничены `pipeline` и `run_type`; runtime
+> использует replace-style `push_to_gateway`, а cleanup выполняется через
+> `delete_metrics_from_gateway` / `delete_from_gateway`. `run_id`,
+> `record_id`, `payload_hash`, raw paths/URLs и другие forensic anchors
+> остаются в manifest/ledger/CLI/explorer surfaces.
 
 ______________________________________________________________________
 

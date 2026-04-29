@@ -179,7 +179,7 @@
           "column": "potential_duplicate",
           "operator": "in",
           "values": [
-            "0"
+            0
           ]
         }
       ],
@@ -250,7 +250,7 @@
           "column": "potential_duplicate",
           "operator": "in",
           "values": [
-            "0"
+            0
           ]
         }
       ],
@@ -497,7 +497,7 @@
           "column": "inorganic_flag",
           "operator": "in",
           "values": [
-            "0"
+            0
           ]
         }
       ],
@@ -541,7 +541,7 @@
           "column": "inorganic_flag",
           "operator": "in",
           "values": [
-            "0"
+            0
           ]
         }
       ],
@@ -739,7 +739,7 @@
       },
       {
         "fields": [
-          "publication_doi",
+          "doi",
           "alternative_id"
         ],
         "name": "identifiers",
@@ -1088,8 +1088,8 @@
       {
         "fields": [
           "openalex_id",
-          "publication_doi",
-          "publication_pmid",
+          "doi",
+          "pmid",
           "mag_id"
         ],
         "name": "identifiers",
@@ -2032,8 +2032,8 @@
       {
         "fields": [
           "paper_id",
-          "publication_doi",
-          "publication_pmid",
+          "doi",
+          "pmid",
           "corpus_id",
           "dblp_id"
         ],
@@ -2628,7 +2628,7 @@
           "column": "reviewed",
           "operator": "in",
           "values": [
-            "True"
+            true
           ]
         }
       ],

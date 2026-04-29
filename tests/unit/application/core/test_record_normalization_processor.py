@@ -999,6 +999,54 @@ def test_crossref_publication_profile_stabilizes_identifier_date_and_set_like_co
 
 
 @pytest.mark.unit
+def test_uniprot_idmapping_profile_treats_all_mappings_as_identifier_set() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="uniprot", entity_type="idmapping"
+    )
+
+    record_a = {
+        "target_id": "CHEMBL123",
+        "mapping_status": "multiple",
+        "all_mappings": ["P12345", "Q8N158"],
+    }
+    record_b = {
+        "target_id": "CHEMBL123",
+        "mapping_status": "multiple",
+        "all_mappings": ["Q8N158", "P12345"],
+    }
+
+    normalized = processor.normalize_business_data(record_b)
+
+    assert normalized["target_id"] == "CHEMBL123"
+    assert normalized["all_mappings"] == '["P12345","Q8N158"]'
+    assert processor.compute_content_hash(record_a) == processor.compute_content_hash(
+        record_b
+    )
+
+
+@pytest.mark.unit
+def test_uniprot_protein_profile_treats_identifier_arrays_as_sets() -> None:
+    processor = RecordNormalizationProcessor(provider="uniprot", entity_type="protein")
+
+    record_a = {
+        "accession": "P12345",
+        "drugbank_ids": ["DB00002", "DB00001"],
+        "chembl_ids": ["CHEMBL2", "CHEMBL1"],
+        "reactome_xrefs": ["R-HSA-2", "R-HSA-1"],
+    }
+    record_b = {
+        "accession": "P12345",
+        "drugbank_ids": ["DB00001", "DB00002"],
+        "chembl_ids": ["CHEMBL1", "CHEMBL2"],
+        "reactome_xrefs": ["R-HSA-1", "R-HSA-2"],
+    }
+
+    assert processor.compute_content_hash(record_a) == processor.compute_content_hash(
+        record_b
+    )
+
+
+@pytest.mark.unit
 def test_chembl_assay_profile_makes_content_hash_invariant_for_equivalent_scalar_and_json_forms() -> (
     None
 ):

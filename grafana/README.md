@@ -131,7 +131,7 @@ Observability-подсистема BioETL следует принципам Hexa
 
 - **PrometheusMetrics** (Adapter) реализует MetricsPort в infrastructure-слое (`src/bioetl/infrastructure/observability/prometheus_metrics.py`). Использует библиотеку `prometheus_client` для создания и экспорта метрик.
 
-- **NoOpMetrics** — Null Object реализация MetricsPort (`src/bioetl/domain/ports/noop.py`). Используется когда метрики отключены (`BIOETL_METRICS_ENABLED=false`). Все вызовы становятся no-op без каких-либо побочных эффектов.
+- **NoOpMetrics** — Null Object реализация MetricsPort (`src/bioetl/domain/ports/noop/_metrics.py`). Используется когда метрики отключены (`BIOETL_METRICS_ENABLED=false`). Все вызовы становятся no-op без каких-либо побочных эффектов.
 
 - **Composition Root** собирает зависимости в `src/bioetl/composition/bootstrap/runtime/observability.py`. Функция `bootstrap_metrics_port(settings)` создаёт PrometheusMetrics или NoOpMetrics в зависимости от настроек. Функция `maybe_start_metrics_server(settings)` запускает HTTP-сервер для экспорта метрик.
 
@@ -167,10 +167,13 @@ docker-compose.monitoring.yml          # Docker Compose для стека мон
 
 src/bioetl/
 ├── domain/ports/observability/        # MetricsPort, TracingPort, LoggerPort, DQMonitorPort (Protocols)
+├── domain/ports/noop/                 # NoOpMetrics and other null-object ports
 └── infrastructure/observability/
     ├── metrics.py                     # Runtime-export surface for Prometheus metric objects
-    ├── metrics_definitions.py         # Canonical grouped metric definitions
-    ├── prometheus_metric_registries.py # COUNTERS/GAUGES/HISTOGRAMS + registry inventory
+    ├── metrics_definitions.py         # Compatibility aggregate export surface
+    ├── _metrics_defs_*.py             # Canonical grouped metric definitions
+    ├── prometheus_metric_registries.py # Canonical COUNTERS/GAUGES/HISTOGRAMS inventory
+    ├── prometheus_metric_label_policies.py # Bounded label policy and denylist
     ├── prometheus_metrics.py          # PrometheusMetrics adapter (реализация MetricsPort)
     ├── server.py                      # HTTP-сервер для /metrics endpoint
     └── anomaly/                       # DataQualityMonitor implementation family
@@ -182,7 +185,7 @@ ______________________________________________________________________
 
 ### 2.1 Шаг 1: Определение метрик в коде
 
-Шипуемые метрики определяются в `src/bioetl/infrastructure/observability/metrics_definitions.py` и собираются в registry-backed inventory через `src/bioetl/infrastructure/observability/prometheus_metric_registries.py`. Модуль `src/bioetl/infrastructure/observability/metrics.py` остаётся runtime-export surface для готовых Prometheus objects. Каждая метрика имеет:
+Шипуемые метрики определяются в модульных файлах `src/bioetl/infrastructure/observability/_metrics_defs_*.py` и собираются в registry-backed inventory через `src/bioetl/infrastructure/observability/prometheus_metric_registries.py`. Модуль `src/bioetl/infrastructure/observability/metrics.py` остаётся runtime-export surface для готовых Prometheus objects, а `metrics_definitions.py` — compatibility/aggregate export surface. Каждая метрика имеет:
 
 - **Имя** (с префиксом `bioetl_`) — глобально уникальный идентификатор в формате Prometheus.
 - **Описание** — человекочитаемое описание метрики.
@@ -465,6 +468,16 @@ ______________________________________________________________________
 - Container: `bioetl-pushgateway`
 - Порт: `9091:9091`
 - Restart: `unless-stopped`
+- Default stack retains Pushgateway only as a short-lived batch bridge for
+  bounded aggregate snapshots.
+- Runtime publication uses replace-style `push_to_gateway` semantics, not
+  additive `pushadd_to_gateway`, so a later snapshot replaces the previous
+  snapshot for the same grouping key.
+- Cleanup uses `delete_metrics_from_gateway` / `delete_from_gateway` with the
+  same bounded grouping key.
+- Allowed Pushgateway grouping labels are only `pipeline` and `run_type`;
+  `run_id`, `record_id`, `payload_hash`, raw paths/URLs, and other forensic
+  anchors remain in manifest/ledger/CLI/explorer surfaces, not Prometheus.
 
 Опциональный профиль `tracing` добавляет:
 
@@ -523,7 +536,7 @@ ______________________________________________________________________
 
 ## 5. Полный каталог метрик BioETL
 
-Все метрики определены в `src/bioetl/infrastructure/observability/metrics.py`.
+Все canonical metric families определены в `src/bioetl/infrastructure/observability/_metrics_defs_*.py` и опубликованы через `src/bioetl/infrastructure/observability/prometheus_metric_registries.py`. `src/bioetl/infrastructure/observability/metrics.py` является runtime-export surface для Prometheus objects.
 
 Каждая метрика автоматически получает префикс `bioetl_` от Prometheus. Для Histogram-метрик Prometheus автоматически создаёт суффиксы: `_bucket` (бакеты распределения), `_sum` (сумма всех наблюдений), `_count` (количество наблюдений), `_created` (timestamp создания). Для Counter-метрик автоматически создаётся `_total` суффикс и `_created` timestamp.
 
@@ -1593,11 +1606,12 @@ v1 дашборды оптимизированы для историческог
 
 ### Как добавить новую метрику?
 
-1. Определите метрику в `src/bioetl/infrastructure/observability/metrics_definitions.py`:
+1. Определите метрику в профильном `src/bioetl/infrastructure/observability/_metrics_defs_*.py`:
    ```python
    MY_NEW_METRIC = Counter("bioetl_my_new_metric", "Description", ["label1", "label2"])
    ```
 1. Зарегистрируйте её в `src/bioetl/infrastructure/observability/prometheus_metric_registries.py`.
+1. Если добавляете labels, синхронизируйте bounded policy в `src/bioetl/infrastructure/observability/prometheus_metric_label_policies.py`.
 1. Вызывайте через MetricsPort в application-коде:
    ```python
    self._metrics.increment_counter("my_new_metric", value=1, labels={"label1": "val"})
@@ -1806,10 +1820,10 @@ ______________________________________________________________________
 
 ### 27.1 Шаг 1: Определение метрики в коде
 
-Каждая метрика BioETL определяется в модуле `src/bioetl/infrastructure/observability/metrics.py` как глобальный объект `prometheus_client`. При импорте модуля объект метрики регистрируется в глобальном реестре Prometheus (`REGISTRY`). Это происходит однократно при загрузке модуля. Повторная регистрация метрики с тем же именем вызывает исключение `ValueError`, поэтому metrics.py импортируется только один раз через composition root.
+Каждая metric family BioETL определяется в модульных файлах `src/bioetl/infrastructure/observability/_metrics_defs_*.py` как объект `prometheus_client`, затем входит в canonical registry inventory `src/bioetl/infrastructure/observability/prometheus_metric_registries.py`. `metrics.py` экспортирует готовые runtime objects, а application-код публикует значения только через MetricsPort/adapter dispatch. Повторная регистрация метрики с тем же именем вызывает исключение `ValueError`, поэтому runtime export surface импортируется через composition-controlled paths.
 
 ```python
-# metrics.py — определение метрики
+# _metrics_defs_pipeline.py — определение метрики
 from prometheus_client import Counter
 
 RECORDS_PROCESSED_TOTAL = Counter(
@@ -2004,14 +2018,14 @@ for f in grafana/dashboards/*.json; do
 done
 
 # Проверка отсутствия phantom-метрик (метрик, не определённых в коде)
-# Извлечение имён метрик из дашбордов:
-grep -ohP 'bioetl_[a-z_]+' grafana/dashboards/*.json | sort -u > /tmp/dashboard_metrics.txt
+PYTHONPYCACHEPREFIX=/tmp/pycache .venv/bin/python -m pytest \
+    tests/integration/test_grafana_config.py \
+    tests/integration/test_prometheus_rules_config.py \
+    -q
 
-# Извлечение определённых метрик из кода:
-grep -ohP '"bioetl_[a-z_]+"' src/bioetl/infrastructure/observability/metrics.py | tr -d '"' | sort -u > /tmp/code_metrics.txt
-
-# Поиск расхождений:
-diff /tmp/dashboard_metrics.txt /tmp/code_metrics.txt
+# Canonical inventory/report surface:
+PYTHONPYCACHEPREFIX=/tmp/pycache .venv/bin/python -m scripts.engineering.qa \
+    report-observability-metric-inventory --json
 ```
 
 ### 29.2 Smoke-тест мониторинга
