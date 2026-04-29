@@ -15,7 +15,7 @@ Exit code: 0 = pass, 1 = threshold violation found
 
 References:
     - RULES.md TYPE-001 (public function annotations)
-    - ai-selfreview-rules.md §5 (Type Annotations)
+    - docs/00-project/ai/rules/bioetl-ai-rules.md (Type Annotations)
 """
 
 from __future__ import annotations

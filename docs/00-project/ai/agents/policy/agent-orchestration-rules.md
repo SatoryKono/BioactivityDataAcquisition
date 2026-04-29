@@ -97,5 +97,5 @@ Skills now inlined into commands — invoke directly via `/command-name`:
 При старте нового чата загрузи:
 
 1. Этот файл (загружается автоматически)
-1. runtime project context file — компактный контекст проекта
+1. `docs/00-project/ai/memory/agent-memory.md` — компактный контекст проекта
 1. `docs/00-project/ai/agents/agents/ORCHESTRATION.md` — при оркестрации задач

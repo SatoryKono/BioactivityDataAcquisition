@@ -61,7 +61,7 @@ ______________________________________________________________________
 | Правила оркестратора и runtime policy       | `AGENTS.md`                                            |
 | Инструкции для Claude                       | `docs/00-project/ai/agents/guides/CLAUDE.md`           |
 | Персона агента                              | `docs/00-project/ai/agents/guides/AGENT.md`            |
-| Claude compact context (runtime-specific)   | runtime project context file                           |
+| Claude compact context (runtime-specific)   | Claude runtime compact context (auto-loaded)           |
 | Claude self-review rules (runtime-specific) | runtime self-review rules file                         |
 | Оркестрация субагентов                      | `.codex/agents/ORCHESTRATION.md`                       |
 | Папка с промтами проекта                    | `docs/00-project/ai/prompts/`                          |
@@ -521,7 +521,7 @@ ______________________________________________________________________
 1. **При использовании логического профиля** — прочитать `.codex/agents/py-{name}.md`
 1. **При scaffolding** — использовать workflow `new-pipeline`
 1. **Перед завершением code/docs changes** — прогнать `verify-architecture` или эквивалентный project check
-1. **Только если активный runtime = Claude** — дополнительно прочитать runtime project context file
+1. **Только если активный runtime = Claude** — дополнительно прочитать Claude runtime compact context (auto-loaded)
 1. **Только если активный runtime = Claude** — дополнительно прочитать runtime self-review rules file
 
 ### Команда для загрузки полного контекста:

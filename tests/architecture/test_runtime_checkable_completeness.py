@@ -3,7 +3,7 @@
 Ensures that all public port protocols in domain/ports/ are decorated with
 @runtime_checkable, enabling isinstance() boundary checks at composition time.
 
-See: TYPE-004 in ai-selfreview-rules.md
+See: TYPE-004 in docs/00-project/ai/rules/bioetl-ai-rules.md
 """
 
 from __future__ import annotations
