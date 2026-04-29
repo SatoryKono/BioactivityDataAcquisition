@@ -985,3 +985,180 @@ class TestCheckpointManagerCompatibilityPolicy:
                 "status": "legacy_observe_loaded_degraded",
             },
         )
+
+    async def test_hard_fail_policy_raises_on_manifest_identity_mismatch(
+        self, mock_checkpoint_port, mock_logger
+    ) -> None:
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {"records_processed": 100, "manifest_id": "manifest-old"},
+        )
+
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            resume=True,
+            checkpoint_compatibility_service=CheckpointCompatibilityService(
+                logger=mock_logger
+            ),
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                manifest_id="manifest-new",
+            ),
+            compatibility_policy="hard_fail",
+        )
+
+        with pytest.raises(ValueError, match="Manifest identity mismatch"):
+            await manager.load_checkpoint()
+
+    async def test_hard_fail_policy_raises_on_contract_reference_mismatch(
+        self, mock_checkpoint_port, mock_logger
+    ) -> None:
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {
+                "records_processed": 100,
+                "contract_ref": "chembl.activity",
+                "contract_version": "1.0.0",
+            },
+        )
+
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            resume=True,
+            checkpoint_compatibility_service=CheckpointCompatibilityService(
+                logger=mock_logger
+            ),
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                contract_ref="chembl.assay",
+                contract_version="1.0.0",
+            ),
+            compatibility_policy="hard_fail",
+        )
+
+        with pytest.raises(ValueError, match="Contract reference mismatch"):
+            await manager.load_checkpoint()
+
+    async def test_hard_fail_policy_raises_on_exact_replay_snapshot_mismatch(
+        self, mock_checkpoint_port, mock_logger
+    ) -> None:
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {
+                "records_processed": 100,
+                "exact_replay": True,
+                "input_snapshot_ids": ["bronze:chembl.activity:2025-01-01"],
+            },
+        )
+
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            resume=True,
+            checkpoint_compatibility_service=CheckpointCompatibilityService(
+                logger=mock_logger
+            ),
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                exact_replay=True,
+                input_snapshot_ids=("bronze:chembl.activity:2025-01-02",),
+            ),
+            compatibility_policy="hard_fail",
+        )
+
+        with pytest.raises(ValueError, match="Input snapshot identity mismatch"):
+            await manager.load_checkpoint()
+
+    async def test_hard_fail_policy_allows_exact_replay_resume_with_memory_trace(
+        self, mock_checkpoint_port, mock_logger
+    ) -> None:
+        saved_run_id = uuid4()
+        decision_trace = [
+            {
+                "decision_index": 1,
+                "stage": "pressure_check",
+                "old_batch_size": 100,
+                "new_batch_size": 50,
+                "reason": "monitor_recommended_reduction",
+                "pressure_state": True,
+                "monitor_mode": "psutil",
+            }
+        ]
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {
+                "records_processed": 125,
+                "execution_fingerprint": "fingerprint-stable",
+                "exact_replay": True,
+                "input_snapshot_ids": ["bronze:chembl.activity:2025-01-01"],
+                "memory_decision_trace": decision_trace,
+            },
+        )
+
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            resume=True,
+            checkpoint_compatibility_service=CheckpointCompatibilityService(
+                logger=mock_logger
+            ),
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                execution_fingerprint="fingerprint-stable",
+                exact_replay=True,
+                input_snapshot_ids=("bronze:chembl.activity:2025-01-01",),
+            ),
+            compatibility_policy="hard_fail",
+        )
+
+        result = await manager.load_checkpoint()
+
+        assert result is not None
+        assert result.records_processed == 125
+        assert result.exact_replay is True
+        assert result.input_snapshot_ids == ("bronze:chembl.activity:2025-01-01",)
+        assert result.memory_decision_trace == (decision_trace[0],)
+
+    async def test_hard_fail_policy_raises_on_composite_run_identity_mismatch(
+        self, mock_checkpoint_port, mock_logger
+    ) -> None:
+        saved_run_id = uuid4()
+        mock_checkpoint_port.load.return_value = (
+            saved_run_id,
+            {
+                "records_processed": 100,
+                "composite_run_identity": "composite-run-old",
+            },
+        )
+
+        manager = CheckpointManager(
+            checkpoint_port=mock_checkpoint_port,
+            logger=mock_logger,
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            resume=True,
+            checkpoint_compatibility_service=CheckpointCompatibilityService(
+                logger=mock_logger
+            ),
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                composite_run_identity="composite-run-new",
+            ),
+            compatibility_policy="hard_fail",
+        )
+
+        with pytest.raises(ValueError, match="Composite run identity mismatch"):
+            await manager.load_checkpoint()

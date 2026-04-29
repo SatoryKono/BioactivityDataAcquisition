@@ -315,7 +315,7 @@ jobs:
                     mkdir -p reports/test-telemetry
                     uv run pytest \
                       tests/architecture/test_config_ci_invariants.py::TestBronzeFixtureCoverage::test_bronze_fixture_coverage \
-                      tests/integration/ci/test_config_stability.py::TestCheckpointResumeCompatibilityPolicy \
+                      tests/unit/application/core/test_checkpoint_manager.py::TestCheckpointManagerCompatibilityPolicy \
                       tests/integration/ci/test_track_d_fixture_control_plane_linkage.py \
                       -q --tb=short --maxfail=1 \
                       --junitxml=reports/test-telemetry/junit-track-d.xml
