@@ -39,19 +39,35 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.normalization.dates import (
     format_date_parts as _format_date_parts,
+)
+from bioetl.domain.normalization.dates import (
     normalize_partial_date as _normalize_partial_date,
+)
+from bioetl.domain.normalization.dates import (
     validate_publication_year as _validate_publication_year,
 )
 from bioetl.domain.normalization.identifiers import (
     normalize_doi as _normalize_doi,
+)
+from bioetl.domain.normalization.identifiers import (
     normalize_pmid as _normalize_pmid,
 )
 from bioetl.domain.normalization.text import (
     normalize_abstract as _normalize_abstract,
+)
+from bioetl.domain.normalization.text import (
     normalize_oa_status as _normalize_oa_status,
+)
+from bioetl.domain.normalization.text import (
     normalize_string as _normalize_string,
+)
+from bioetl.domain.normalization.text import (
     normalize_title as _normalize_title,
+)
+from bioetl.domain.normalization.text import (
     normalize_to_string as _normalize_to_string,
+)
+from bioetl.domain.normalization.text import (
     strip_html_tags as _strip_html_tags,
 )
 from bioetl.domain.services.author_normalization_service import (

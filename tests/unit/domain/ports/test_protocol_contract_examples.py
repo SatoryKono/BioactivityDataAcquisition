@@ -33,6 +33,13 @@ async def _yield_once() -> None:
     await asyncio.sleep(0)
 
 
+async def _zero_count_after_yield(operation: str, *context: object) -> int:
+    """Return a no-op count while keeping protocol example methods distinct."""
+    del operation, context
+    await _yield_once()
+    return 0
+
+
 @pytest.mark.unit
 class TestNarrowStoragePortProtocols:
     """Narrow storage ports warrant concrete structural examples."""
@@ -141,20 +148,16 @@ class TestNarrowStoragePortProtocols:
                 return None
 
             async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
-                await _yield_once()
-                return 0
+                return await _zero_count_after_yield("clear_silver", table_name, dry_run)
 
             async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
-                await _yield_once()
-                return 0
+                return await _zero_count_after_yield("clear_gold", table_name, dry_run)
 
             async def clear_csv(self, table_name: str | None = None) -> int:
-                await _yield_once()
-                return 0
+                return await _zero_count_after_yield("clear_csv", table_name)
 
             async def clear_delta(self, table_name: str | None = None) -> int:
-                await _yield_once()
-                return 0
+                return await _zero_count_after_yield("clear_delta", table_name)
 
             async def vacuum(
                 self,
@@ -162,8 +165,9 @@ class TestNarrowStoragePortProtocols:
                 retention_hours: int = 168,
                 dry_run: bool = False,
             ) -> int:
-                await _yield_once()
-                return 0
+                return await _zero_count_after_yield(
+                    "vacuum", table_name, retention_hours, dry_run
+                )
 
             async def archive(
                 self,
@@ -171,8 +175,9 @@ class TestNarrowStoragePortProtocols:
                 target_path: str,
                 remove_source: bool = False,
             ) -> int:
-                await _yield_once()
-                return 0
+                return await _zero_count_after_yield(
+                    "archive", table_name, target_path, remove_source
+                )
 
             async def health_check(self) -> Any:
                 from bioetl.domain.types import HealthStatus
@@ -216,8 +221,9 @@ class TestNarrowStoragePortProtocols:
                 table_name: str,
                 primary_keys: list[str],
             ) -> int:
-                await _yield_once()
-                return 0
+                return await _zero_count_after_yield(
+                    "deduplicate_silver", table_name, primary_keys
+                )
 
             def get_table_version(
                 self,

@@ -41,7 +41,10 @@ from bioetl.application.core.lifecycle import (
     ShutdownSignal,
 )
 from bioetl.application.core.lifecycle.batch_fsm import BatchExecutionFSM
-from bioetl.application.core.pipeline_services import PipelineService, PipelineStoragePort
+from bioetl.application.core.pipeline_services import (
+    PipelineService,
+    PipelineStoragePort,
+)
 from bioetl.application.core.protocols import (
     GoldFilterCallback,
     GoldTransformCallback,

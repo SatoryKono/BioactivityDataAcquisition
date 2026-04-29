@@ -27,5 +27,5 @@ class MemoryStorage:
     def write_silver(self, table_name, records, _primary_keys):
         self.data[table_name].extend(records)
 
-    def write_gold(self, table_name, records, schema, _mode):
+    def write_gold(self, table_name, records, _schema, _mode):
         self.data[table_name].extend(records)
