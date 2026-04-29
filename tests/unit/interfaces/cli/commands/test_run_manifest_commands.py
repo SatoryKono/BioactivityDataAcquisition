@@ -413,6 +413,16 @@ class _FakeRunManifestService:
             replay_relationship="right_is_exact_replay_of_left",
             classification="semantic_equivalent_with_noncanonical_differences",
             semantic_equivalent=True,
+            cross_surface_replay_diff={
+                "verdict": "semantic_equivalent_replay",
+                "effective_config": {"semantic_equivalent": True},
+                "checkpoint_anchors": {
+                    "compatible": True,
+                    "matching_fields": ["execution_fingerprint"],
+                    "mismatched_fields": [],
+                },
+                "lineage": {"planned_artifacts_match": True},
+            },
             differences=(
                 RunManifestDiffEntry(
                     field="runtime_config",
@@ -691,6 +701,10 @@ class TestRunManifestCommands:
         assert payload["left_manifest_id"] == "manifest-1"
         assert payload["right_manifest_id"] == "manifest-2"
         assert payload["replay_relationship"] == "right_is_exact_replay_of_left"
+        assert (
+            payload["cross_surface_replay_diff"]["verdict"]
+            == "semantic_equivalent_replay"
+        )
         assert payload["differences"][0]["field"] == "runtime_config"
 
     def test_diff_defaults_to_human_readable_text(
@@ -710,6 +724,10 @@ class TestRunManifestCommands:
         assert "left_manifest_id: manifest-1" in result.output
         assert "right_manifest_id: manifest-2" in result.output
         assert "replay_relationship: right_is_exact_replay_of_left" in result.output
+        assert "cross_surface_replay_diff:" in result.output
+        assert "verdict: semantic_equivalent_replay" in result.output
+        assert "checkpoint_anchors:" in result.output
+        assert "compatible: true" in result.output
         assert "field: runtime_config" in result.output
 
     def test_diff_yaml_outputs_changed_fields(

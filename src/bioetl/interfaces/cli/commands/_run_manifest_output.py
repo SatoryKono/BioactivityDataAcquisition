@@ -21,6 +21,45 @@ def _render_jsonish_block(value: object) -> list[str]:
     return rendered.replace("\\\\", "\\").splitlines()
 
 
+def _render_cross_surface_replay_diff(payload: dict[str, object]) -> list[str]:
+    """Render the replay-oriented cross-surface diff summary."""
+    diff = payload.get("cross_surface_replay_diff")
+    if not isinstance(diff, dict) or not diff:
+        return []
+
+    effective_config = diff.get("effective_config")
+    checkpoint_anchors = diff.get("checkpoint_anchors")
+    lineage = diff.get("lineage")
+    if not isinstance(effective_config, dict):
+        effective_config = {}
+    if not isinstance(checkpoint_anchors, dict):
+        checkpoint_anchors = {}
+    if not isinstance(lineage, dict):
+        lineage = {}
+
+    lines = [
+        "  cross_surface_replay_diff:",
+        f"    verdict: {format_scalar(diff.get('verdict'))}",
+        "    effective_config:",
+        "      semantic_equivalent: "
+        f"{format_scalar(effective_config.get('semantic_equivalent'))}",
+        "    checkpoint_anchors:",
+        f"      compatible: {format_scalar(checkpoint_anchors.get('compatible'))}",
+    ]
+    mismatched = checkpoint_anchors.get("mismatched_fields")
+    if mismatched:
+        lines.append("      mismatched_fields:")
+        lines.extend(f"        {line}" for line in _render_jsonish_block(mismatched))
+    lines.extend(
+        [
+            "    lineage:",
+            "      planned_artifacts_match: "
+            f"{format_scalar(lineage.get('planned_artifacts_match'))}",
+        ]
+    )
+    return lines
+
+
 def render_show_payload(payload: dict[str, object]) -> str:
     """Render one manifest inspection payload in human-readable form."""
     manifest = payload.get("manifest", {})
@@ -84,6 +123,7 @@ def render_diff_payload(payload: dict[str, object]) -> str:
         f"  occurrence_only: {format_scalar(payload.get('occurrence_only'))}",
         f"  replay_relationship: {format_scalar(payload.get('replay_relationship'))}",
     ]
+    lines.extend(_render_cross_surface_replay_diff(payload))
     for label in (
         "occurrence_difference_fields",
         "semantic_difference_fields",
