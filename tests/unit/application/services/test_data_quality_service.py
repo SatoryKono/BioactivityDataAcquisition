@@ -329,21 +329,27 @@ class TestDataQualityServiceThresholds:
         )
         mock_logger.error.assert_not_called()
         increment_counter_calls = mock_metrics.increment_counter.call_args_list
-        assert call(
-            "bioetl_dq_monitor_disabled_total",
-            1,
-            {"pipeline": "test_pipeline", "entity": "test_entity"},
-        ) in increment_counter_calls
-        assert call(
-            "bioetl_dq_dispositions_total",
-            1,
-            {
-                "pipeline": "test_pipeline",
-                "stage": "validation",
-                "disposition": "pass",
-                "terminal_status": "success",
-            },
-        ) in increment_counter_calls
+        assert (
+            call(
+                "bioetl_dq_monitor_disabled_total",
+                1,
+                {"pipeline": "test_pipeline", "entity": "test_entity"},
+            )
+            in increment_counter_calls
+        )
+        assert (
+            call(
+                "bioetl_dq_dispositions_total",
+                1,
+                {
+                    "pipeline": "test_pipeline",
+                    "stage": "validation",
+                    "disposition": "pass",
+                    "terminal_status": "success",
+                },
+            )
+            in increment_counter_calls
+        )
 
 
 @pytest.mark.unit

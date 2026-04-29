@@ -303,9 +303,7 @@ class TestPrometheusMetrics:
                 "bioetl_record_flow_records_total"
             ].labels().inc.assert_called_once_with(8)
 
-    def test_stage_model_metrics_normalize_unknown_labels(
-        self, prometheus_metrics
-    ):
+    def test_stage_model_metrics_normalize_unknown_labels(self, prometheus_metrics):
         """Stage-model families must enforce bounded stage/outcome vocabularies."""
         with patch.dict(
             COUNTERS,
@@ -332,9 +330,7 @@ class TestPrometheusMetrics:
                 6
             )
 
-    def test_dq_disposition_metrics_normalize_unknown_labels(
-        self, prometheus_metrics
-    ):
+    def test_dq_disposition_metrics_normalize_unknown_labels(self, prometheus_metrics):
         """DQ disposition labels must stay within the bounded canonical set."""
         with patch.dict(
             COUNTERS,
@@ -457,9 +453,7 @@ class TestPrometheusMetrics:
             ("custom_outcome", "other"),
         ],
     )
-    def test_normalize_stage_model_outcome(
-        self, raw_value: str, expected: str
-    ) -> None:
+    def test_normalize_stage_model_outcome(self, raw_value: str, expected: str) -> None:
         assert normalize_stage_model_outcome(raw_value) == expected
 
     @pytest.mark.parametrize(
