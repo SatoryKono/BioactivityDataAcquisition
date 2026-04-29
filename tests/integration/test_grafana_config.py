@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 
 import pytest
+import yaml
 from tests.integration._grafana_test_support import (
     _PROMQL_METRIC_SELECTOR_RE,
     _assert_provider_health_variable_contract,
@@ -29,6 +30,20 @@ from tests.integration._grafana_test_support import (
 
 
 pytestmark = pytest.mark.integration
+
+RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
+_BIOETL_METRIC_TOKEN_RE = re.compile(r"\b(bioetl_[a-z0-9_]+)\b")
+
+
+def _load_recording_rule_names() -> set[str]:
+    payload = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    return {
+        record_name
+        for group in payload.get("groups", [])
+        for rule in group.get("rules", [])
+        if isinstance(record_name := rule.get("record"), str)
+    }
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
@@ -87,6 +102,32 @@ def test_dashboard_queries_use_real_metric_label_schemas(dashboard_path: Path) -
     assert not errors, (
         f"Dashboard {dashboard_path.name} uses selectors with nonexistent labels:\n"
         + "\n".join(errors)
+    )
+
+
+def test_dashboard_recording_rule_queries_are_backed_by_shipped_rules_config() -> None:
+    """Dashboard recording-rule references must resolve to shipped rule records."""
+    recording_rules = _load_recording_rule_names()
+    used_recording_rules: set[str] = set()
+    errors: list[str] = []
+
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        for query in get_dashboard_prometheus_queries(dashboard):
+            for token in _BIOETL_METRIC_TOKEN_RE.findall(query):
+                if token in recording_rules:
+                    used_recording_rules.add(token)
+                    continue
+                if token.startswith("bioetl_runtime_alert_condition_"):
+                    errors.append(
+                        f"{dashboard_path.name} references missing recording rule "
+                        f"{token}: {query}"
+                    )
+
+    assert not errors, "Dashboard recording-rule drift:\n" + "\n".join(errors)
+    assert used_recording_rules, (
+        "At least one shipped dashboard must consume recording rules; otherwise "
+        "runtime dashboard parity checks are no longer exercising the rule pack."
     )
 
 
