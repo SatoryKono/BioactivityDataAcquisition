@@ -93,6 +93,33 @@ def test_push_metrics_to_gateway_uses_metrics_service_push() -> None:
     )
 
 
+def test_delete_metrics_from_gateway_uses_metrics_service_delete() -> None:
+    metrics_service = mock.Mock()
+    metrics_service.delete_from_gateway.return_value = mock.Mock(success=True)
+
+    with mock.patch.object(
+        observability_api,
+        "get_metrics_service",
+        return_value=metrics_service,
+    ) as mock_get_service:
+        result = observability_api.delete_metrics_from_gateway(
+            run_label="bioetl",
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+        )
+
+    assert result is True
+    mock_get_service.assert_called_once_with()
+    metrics_service.delete_from_gateway.assert_called_once_with(
+        gateway=mock.ANY,
+        run_label="bioetl",
+        grouping_key={
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+        },
+    )
+
+
 def test_get_audit_service_delegates_to_services_api() -> None:
     expected = mock.Mock()
     fake_services_api = ModuleType("bioetl.composition.services_api")

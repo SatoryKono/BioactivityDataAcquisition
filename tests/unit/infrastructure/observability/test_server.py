@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.infrastructure.observability.server import (
+    delete_metrics_from_gateway,
     get_metrics_server_runtime_status,
     MetricsServerError,
     is_metrics_server_running,
@@ -344,7 +345,7 @@ class TestPushMetricsToGateway:
 
     def test_push_success(self):
         """Should return True on successful push."""
-        with patch("bioetl.infrastructure.observability.server.pushadd_to_gateway"):
+        with patch("bioetl.infrastructure.observability.server.push_to_gateway"):
             result = push_metrics_to_gateway(gateway="localhost:9091")
 
         assert result is True
@@ -352,7 +353,7 @@ class TestPushMetricsToGateway:
     def test_push_success_with_logger(self):
         """Should log info on successful push."""
         logger = MagicMock()
-        with patch("bioetl.infrastructure.observability.server.pushadd_to_gateway"):
+        with patch("bioetl.infrastructure.observability.server.push_to_gateway"):
             result = push_metrics_to_gateway(
                 gateway="localhost:9091",
                 run_label="test_job",
@@ -363,9 +364,9 @@ class TestPushMetricsToGateway:
         logger.info.assert_called_once()
 
     def test_push_success_with_grouping_key(self):
-        """Should pass grouping_key to pushadd_to_gateway."""
+        """Should pass grouping_key to push_to_gateway."""
         with patch(
-            "bioetl.infrastructure.observability.server.pushadd_to_gateway"
+            "bioetl.infrastructure.observability.server.push_to_gateway"
         ) as mock_push:
             push_metrics_to_gateway(
                 gateway="localhost:9091",
@@ -378,7 +379,7 @@ class TestPushMetricsToGateway:
     def test_push_success_emits_publication_metric(self):
         """Successful push should emit one bounded publication success event."""
         with (
-            patch("bioetl.infrastructure.observability.server.pushadd_to_gateway"),
+            patch("bioetl.infrastructure.observability.server.push_to_gateway"),
             patch(
                 "bioetl.infrastructure.observability.server."
                 "METRICS_PUBLICATION_EVENTS_TOTAL"
@@ -403,7 +404,7 @@ class TestPushMetricsToGateway:
     def test_push_success_with_multiple_grouping_labels(self):
         """Should preserve all low-cardinality grouping labels."""
         with patch(
-            "bioetl.infrastructure.observability.server.pushadd_to_gateway"
+            "bioetl.infrastructure.observability.server.push_to_gateway"
         ) as mock_push:
             push_metrics_to_gateway(
                 gateway="localhost:9091",
@@ -422,7 +423,7 @@ class TestPushMetricsToGateway:
     def test_push_grouping_key_drops_forensic_high_cardinality_labels(self):
         """Pushgateway bridge must use only bounded aggregate grouping labels."""
         with patch(
-            "bioetl.infrastructure.observability.server.pushadd_to_gateway"
+            "bioetl.infrastructure.observability.server.push_to_gateway"
         ) as mock_push:
             push_metrics_to_gateway(
                 gateway="localhost:9091",
@@ -444,7 +445,7 @@ class TestPushMetricsToGateway:
     def test_push_default_gateway(self):
         """Should use localhost:9091 when gateway is None."""
         with patch(
-            "bioetl.infrastructure.observability.server.pushadd_to_gateway"
+            "bioetl.infrastructure.observability.server.push_to_gateway"
         ) as mock_push:
             push_metrics_to_gateway()
 
@@ -455,7 +456,7 @@ class TestPushMetricsToGateway:
     def test_push_failure_oserror(self):
         """Should return False on OSError."""
         with patch(
-            "bioetl.infrastructure.observability.server.pushadd_to_gateway",
+            "bioetl.infrastructure.observability.server.push_to_gateway",
             side_effect=OSError("Connection refused"),
         ):
             result = push_metrics_to_gateway()
@@ -466,7 +467,7 @@ class TestPushMetricsToGateway:
         """Failed push should emit one bounded publication failure event."""
         with (
             patch(
-                "bioetl.infrastructure.observability.server.pushadd_to_gateway",
+                "bioetl.infrastructure.observability.server.push_to_gateway",
                 side_effect=OSError("Connection refused"),
             ),
             patch(
@@ -493,7 +494,7 @@ class TestPushMetricsToGateway:
     def test_push_failure_connection_error(self):
         """Should return False on ConnectionError."""
         with patch(
-            "bioetl.infrastructure.observability.server.pushadd_to_gateway",
+            "bioetl.infrastructure.observability.server.push_to_gateway",
             side_effect=ConnectionError("Failed"),
         ):
             result = push_metrics_to_gateway()
@@ -503,7 +504,7 @@ class TestPushMetricsToGateway:
     def test_push_failure_timeout_error(self):
         """Should return False on TimeoutError."""
         with patch(
-            "bioetl.infrastructure.observability.server.pushadd_to_gateway",
+            "bioetl.infrastructure.observability.server.push_to_gateway",
             side_effect=TimeoutError("Timed out"),
         ):
             result = push_metrics_to_gateway()
@@ -513,7 +514,7 @@ class TestPushMetricsToGateway:
     def test_push_failure_runtime_error(self):
         """Should return False on RuntimeError."""
         with patch(
-            "bioetl.infrastructure.observability.server.pushadd_to_gateway",
+            "bioetl.infrastructure.observability.server.push_to_gateway",
             side_effect=RuntimeError("Failed"),
         ):
             result = push_metrics_to_gateway()
@@ -524,7 +525,7 @@ class TestPushMetricsToGateway:
         """Should log warning on push failure."""
         logger = MagicMock()
         with patch(
-            "bioetl.infrastructure.observability.server.pushadd_to_gateway",
+            "bioetl.infrastructure.observability.server.push_to_gateway",
             side_effect=OSError("Connection refused"),
         ):
             push_metrics_to_gateway(logger=logger)
@@ -534,7 +535,7 @@ class TestPushMetricsToGateway:
     def test_push_default_job_label(self):
         """Should use 'bioetl' as default job label."""
         with patch(
-            "bioetl.infrastructure.observability.server.pushadd_to_gateway"
+            "bioetl.infrastructure.observability.server.push_to_gateway"
         ) as mock_push:
             push_metrics_to_gateway()
 
@@ -544,12 +545,106 @@ class TestPushMetricsToGateway:
     def test_push_empty_grouping_key_default(self):
         """Should pass empty dict when grouping_key is None."""
         with patch(
-            "bioetl.infrastructure.observability.server.pushadd_to_gateway"
+            "bioetl.infrastructure.observability.server.push_to_gateway"
         ) as mock_push:
             push_metrics_to_gateway()
 
         call_kwargs = mock_push.call_args[1]
         assert call_kwargs["grouping_key"] == {}
+
+    def test_push_uses_replace_style_gateway_publication(self):
+        """Pushgateway publication must replace, not add to, a bounded group."""
+        with patch(
+            "bioetl.infrastructure.observability.server.push_to_gateway"
+        ) as mock_push:
+            push_metrics_to_gateway(
+                gateway="localhost:9091",
+                grouping_key={"pipeline": "chembl_activity"},
+            )
+
+        mock_push.assert_called_once()
+
+
+@pytest.mark.unit
+class TestDeleteMetricsFromGateway:
+    """Tests for Pushgateway cleanup lifecycle."""
+
+    def test_delete_success_with_grouping_key(self):
+        """Should delete only the bounded aggregate grouping key."""
+        with patch(
+            "bioetl.infrastructure.observability.server.delete_from_gateway"
+        ) as mock_delete:
+            result = delete_metrics_from_gateway(
+                gateway="localhost:9091",
+                grouping_key={
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                    "run_id": "run-123",
+                    "payload_hash": "abcdef",
+                },
+            )
+
+        assert result is True
+        mock_delete.assert_called_once_with(
+            "localhost:9091",
+            job="bioetl",
+            grouping_key={
+                "pipeline": "chembl_activity",
+                "run_type": "incremental",
+            },
+            timeout=pytest.approx(1.0),
+        )
+
+    def test_delete_success_emits_publication_metric(self):
+        """Successful cleanup should emit one bounded publication success event."""
+        with (
+            patch("bioetl.infrastructure.observability.server.delete_from_gateway"),
+            patch(
+                "bioetl.infrastructure.observability.server."
+                "METRICS_PUBLICATION_EVENTS_TOTAL"
+            ) as mock_metric,
+        ):
+            delete_metrics_from_gateway(
+                gateway="localhost:9091",
+                grouping_key={
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                },
+            )
+
+        mock_metric.labels.assert_called_once_with(
+            pipeline="chembl_activity",
+            run_type="incremental",
+            target="pushgateway",
+            status="success",
+        )
+        mock_metric.labels().inc.assert_called_once_with()
+
+    def test_delete_failure_returns_false_and_emits_publication_metric(self):
+        """Failed cleanup should stay best-effort and expose failure telemetry."""
+        with (
+            patch(
+                "bioetl.infrastructure.observability.server.delete_from_gateway",
+                side_effect=OSError("Connection refused"),
+            ),
+            patch(
+                "bioetl.infrastructure.observability.server."
+                "METRICS_PUBLICATION_EVENTS_TOTAL"
+            ) as mock_metric,
+        ):
+            result = delete_metrics_from_gateway(
+                gateway="localhost:9091",
+                grouping_key={"pipeline": "chembl_activity"},
+            )
+
+        assert result is False
+        mock_metric.labels.assert_called_once_with(
+            pipeline="chembl_activity",
+            run_type="unknown",
+            target="pushgateway",
+            status="failed",
+        )
+        mock_metric.labels().inc.assert_called_once_with()
 
 
 @pytest.mark.unit
