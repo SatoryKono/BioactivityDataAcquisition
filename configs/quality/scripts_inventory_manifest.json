@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-29T19:21:37.131861+00:00",
+  "generated_at": "2026-04-29T19:29:47.034899+00:00",
   "summary": {
     "total_scripts": 355,
     "status_counts": {
@@ -6396,7 +6396,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 32,
+      "reference_count": 31,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -6455,7 +6455,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 32,
+      "reference_count": 31,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -6571,7 +6571,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 47,
+      "reference_count": 46,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -6630,7 +6630,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 60,
+      "reference_count": 59,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -6855,7 +6855,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 26,
+      "reference_count": 25,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -6874,12 +6874,6 @@
           "line": 46,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
-        },
-        {
-          "path": "docs/00-project/ai/agents/runtime/agent-memory.md",
-          "line": 55,
-          "source_group": "docs",
-          "text": "- PowerShell: `.\\scripts\\engineering\\dev\\setup_env_windows.ps1`,"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
@@ -6904,6 +6898,12 @@
           "line": 143,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
+        },
+        {
+          "path": "docs/03-guides/getting-started.md",
+          "line": 79,
+          "source_group": "docs",
+          "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
         }
       ]
     },
@@ -6912,7 +6912,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 24,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -6931,12 +6931,6 @@
           "line": 52,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
-        },
-        {
-          "path": "docs/00-project/ai/agents/runtime/agent-memory.md",
-          "line": 57,
-          "source_group": "docs",
-          "text": "- WSL/Linux: `bash scripts/engineering/dev/setup_env_wsl.sh`,"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
@@ -6959,6 +6953,12 @@
         {
           "path": "docs/03-guides/docs-verification.md",
           "line": 148,
+          "source_group": "docs",
+          "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
+        },
+        {
+          "path": "docs/03-guides/getting-started.md",
+          "line": 85,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
         }
@@ -8423,7 +8423,7 @@
         },
         {
           "path": "tests/architecture/test_fixture_governance_rollout.py",
-          "line": 162,
+          "line": 165,
           "source_group": "tests",
           "text": "\"python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90\""
         },
@@ -9987,7 +9987,7 @@
         },
         {
           "path": "tests/architecture/test_fixture_governance_rollout.py",
-          "line": 230,
+          "line": 233,
           "source_group": "tests",
           "text": "\"uv run python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check\""
         },

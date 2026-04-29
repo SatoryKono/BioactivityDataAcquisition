@@ -36,9 +36,7 @@ EXACT_REPLACEMENTS: dict[str, str] = {
     "docs/00-project/agents/diagram_docs_orchestrator.md": (
         "docs/00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md"
     ),
-    "docs/00-project/agents/memory.md": (
-        "docs/00-project/ai/agents/runtime/agent-memory.md"
-    ),
+    "docs/00-project/agents/memory.md": "docs/00-project/ai/memory/agent-memory.md",
     "docs/00-project/agents/orchestration/ORCHESTRATION.md": (
         "docs/00-project/ai/agents/orchestration/ORCHESTRATION.md"
     ),

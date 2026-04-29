@@ -27,6 +27,10 @@ make clean-local-artifacts
 make clean-local-artifacts PURGE_WORKTREES=1
 ```
 
+`make clean-local-artifacts` is the maintained post-test/root-hygiene cleanup
+path. It removes stale local caches plus forbidden root output directories such
+as `.coverage-sharded/`, `node_modules/`, `test-output/`, and `logs/`.
+
 ### 2. Repo-Hygiene Review Lane
 
 Use the repo cleanup tool only as an exact candidate discovery lane:

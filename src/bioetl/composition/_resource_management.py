@@ -16,13 +16,15 @@ from bioetl.composition._pipeline_execution import (
     VacuumOptions,
     _ensure_registrations,
 )
-from bioetl.composition.bootstrap import (
+from bioetl.composition.bootstrap.cli.checkpoint import (
     bootstrap_checkpoint_manager,
+    bootstrap_quarantine_manager,
+)
+from bioetl.composition.bootstrap.cli.storage import (
     bootstrap_cleanup_service,
     bootstrap_lifecycle_service,
-    bootstrap_quarantine_manager,
-    load_pipeline_config,
 )
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:

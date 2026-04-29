@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import yaml
+
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -84,3 +86,36 @@ def test_project_test_health_summary_is_evidence_only_with_freshness_note() -> N
         assert canonical_source in text
     assert "backlog signal only" in lower_text
     assert "fresh evidence-pack rebaseline" in lower_text
+
+
+def test_project_test_health_summary_has_machine_readable_metadata() -> None:
+    metadata_path = (
+        ROOT / "docs" / "reports" / "evidence" / "project-test-health" / "metadata.yaml"
+    )
+    shard_registry_path = (
+        ROOT
+        / "docs"
+        / "reports"
+        / "evidence"
+        / "project-test-health"
+        / "shard_registry.yaml"
+    )
+
+    metadata = yaml.safe_load(metadata_path.read_text(encoding="utf-8"))
+    shard_registry = yaml.safe_load(shard_registry_path.read_text(encoding="utf-8"))
+    assert metadata["policy_scope"] == "non_canonical_evidence_summary"
+    assert metadata["owner"]
+    assert metadata["freshness_window_days"] >= 1
+    assert metadata["last_verified"].startswith("2026-")
+    assert metadata["allowed_interpretation"] == "backlog_signal_only"
+    assert metadata["canonical_sources"]
+    assert shard_registry["policy_scope"] == "project_test_health_evidence_shards"
+    assert shard_registry["owner"]
+    assert shard_registry["shards"]
+
+    planned_shards = {
+        shard["id"]
+        for shard in shard_registry["shards"]
+        if shard.get("status") == "planned"
+    }
+    assert {"flaky-rate", "uncovered-module-risk-map"} <= planned_shards

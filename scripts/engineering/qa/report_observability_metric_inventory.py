@@ -666,8 +666,25 @@ def collect_metric_inventory(
     dead_metrics = registry_only_metrics - docs_set - rules_set
     documented_without_runtime = (docs_set & registered_set) - runtime_set
     ruled_without_runtime = (rules_set & registered_set) - runtime_set
+    combined_emitters = _combine_metric_emitters(runtime_mentions, helper_backed_mentions)
+    runtime_cardinality_review_required = sorted(
+        metric_name
+        for metric_name, emitter_paths in combined_emitters.items()
+        if len(set(emitter_paths)) >= 3
+    )
 
     report: dict[str, list[str] | dict[str, list[str]]] = {
+        "declared_metrics": registered,
+        "emitted_metrics": sorted(registered_set & runtime_set),
+        "dashboarded_metrics": sorted(docs_set & registered_set),
+        "alerted_metrics": sorted(rules_set & registered_set),
+        "unused_declared_metrics": sorted(registry_only_metrics),
+        "emitted_without_declaration": sorted(runtime_without_registry),
+        "dashboarded_without_declaration": sorted(docs_set - registered_set),
+        "alerted_without_declaration": sorted(rules_set - registered_set),
+        "dashboarded_without_emission": sorted(documented_without_runtime),
+        "alerted_without_emission": sorted(ruled_without_runtime),
+        "runtime_cardinality_review_required": runtime_cardinality_review_required,
         "registered_metrics": registered,
         "live_metrics": sorted(registered_set & runtime_set),
         "direct_live_metrics": sorted(registered_set & direct_runtime_set),
@@ -689,6 +706,17 @@ def collect_metric_inventory(
         "alias_emitters": alias_mentions,
     }
     return report
+
+
+def _combine_metric_emitters(
+    runtime_emitters: dict[str, list[str]],
+    helper_backed_emitters: dict[str, list[str]],
+) -> dict[str, list[str]]:
+    combined: dict[str, list[str]] = defaultdict(list)
+    for source in (runtime_emitters, helper_backed_emitters):
+        for metric_name, emitter_paths in source.items():
+            combined[metric_name].extend(emitter_paths)
+    return dict(combined)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -757,6 +785,17 @@ def validate_metric_inventory(
 def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:
     lines = ["Observability metric inventory"]
     for key in (
+        "declared_metrics",
+        "emitted_metrics",
+        "dashboarded_metrics",
+        "alerted_metrics",
+        "unused_declared_metrics",
+        "emitted_without_declaration",
+        "dashboarded_without_declaration",
+        "alerted_without_declaration",
+        "dashboarded_without_emission",
+        "alerted_without_emission",
+        "runtime_cardinality_review_required",
         "live_metrics",
         "direct_live_metrics",
         "helper_backed_live_metrics",

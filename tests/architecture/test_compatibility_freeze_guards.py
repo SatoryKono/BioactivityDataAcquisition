@@ -14,6 +14,8 @@ INTERNAL_COMPOSITION_ENTRYPOINT_MODULES = (
     "bioetl.composition._resource_management",
     "bioetl.composition._services",
 )
+COMPOSITION_BOOTSTRAP_FACADE_MODULE = "bioetl.composition.bootstrap"
+SERVICE_BOOTSTRAPS_COMPAT_MODULE = "bioetl.composition._service_bootstraps"
 CLI_REGISTRY_HELPER_MODULE = "bioetl.interfaces.cli.registry_helpers"
 METADATA_BUILDER_COMPAT_MODULE = (
     "bioetl.infrastructure.storage.metadata_builder_composite_helpers"
@@ -118,6 +120,14 @@ TRANSFORMER_DEPENDENCY_SHIM_PATH = (
     / "core"
     / "base_transformer"
     / "dependencies.py"
+)
+BIOETL_PACKAGE_INIT_PATH = ROOT / "src" / "bioetl" / "__init__.py"
+COMPOSITION_PACKAGE_INIT_PATH = ROOT / "src" / "bioetl" / "composition" / "__init__.py"
+COMPOSITION_BOOTSTRAP_INIT_PATH = (
+    ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "__init__.py"
+)
+SERVICE_BOOTSTRAPS_COMPAT_MODULE_PATH = (
+    ROOT / "src" / "bioetl" / "composition" / "_service_bootstraps.py"
 )
 
 ALLOWED_DATASOURCE_REGISTRY_SRC_FILES = frozenset(
@@ -822,6 +832,33 @@ def _assert_no_violations(violations: list[str], failure_message: str) -> None:
     assert not violations, failure_message + "\n" + "\n".join(violations)
 
 
+def _literal_assignment_names(path: Path, assignment_name: str) -> frozenset[str]:
+    """Return string keys/items assigned to a module-level literal."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    for node in tree.body:
+        if not isinstance(node, ast.Assign):
+            continue
+        if not any(
+            isinstance(target, ast.Name) and target.id == assignment_name
+            for target in node.targets
+        ):
+            continue
+        value = node.value
+        if isinstance(value, ast.Dict):
+            return frozenset(
+                key.value
+                for key in value.keys
+                if isinstance(key, ast.Constant) and isinstance(key.value, str)
+            )
+        if isinstance(value, ast.List | ast.Tuple | ast.Set):
+            return frozenset(
+                item.value
+                for item in value.elts
+                if isinstance(item, ast.Constant) and isinstance(item.value, str)
+            )
+    raise AssertionError(f"{path} missing module-level {assignment_name}")
+
+
 def _resolve_cache_fixture(
     request: pytest.FixtureRequest,
     cache_fixture_name: str,
@@ -937,6 +974,34 @@ _MODULE_IMPORT_SCOPE_CASES = (
             "canonical package-root and compatibility seams:"
         ),
         id="registry-module-src",
+    ),
+    pytest.param(
+        "src",
+        "source_ast_cache",
+        COMPOSITION_BOOTSTRAP_FACADE_MODULE,
+        frozenset(),
+        (
+            "First-party src must import canonical bootstrap owners "
+            "(`bootstrap.runtime`, `bootstrap.cli`, or `bootstrap.assembly`) "
+            "instead of the package-level bootstrap facade:"
+        ),
+        id="composition-bootstrap-facade-src",
+    ),
+    pytest.param(
+        "src",
+        "source_ast_cache",
+        SERVICE_BOOTSTRAPS_COMPAT_MODULE,
+        frozenset(),
+        "_service_bootstraps compatibility wrapper imports must stay removed from src:",
+        id="service-bootstraps-src",
+    ),
+    pytest.param(
+        "tests",
+        "test_ast_cache",
+        SERVICE_BOOTSTRAPS_COMPAT_MODULE,
+        frozenset(),
+        "_service_bootstraps compatibility wrapper imports must stay removed from tests:",
+        id="service-bootstraps-tests",
     ),
     pytest.param(
         "tests",

@@ -59,6 +59,30 @@ def test_collect_metric_inventory_classifies_registry_runtime_and_docs(
 
     report = inventory.collect_metric_inventory(tmp_path)
 
+    assert report["declared_metrics"] == [
+        "bioetl_doc_only_total",
+        "bioetl_live_counter_total",
+        "bioetl_rule_only_total",
+    ]
+    assert report["emitted_metrics"] == ["bioetl_live_counter_total"]
+    assert report["dashboarded_metrics"] == [
+        "bioetl_doc_only_total",
+        "bioetl_live_counter_total",
+    ]
+    assert report["alerted_metrics"] == [
+        "bioetl_live_counter_total",
+        "bioetl_rule_only_total",
+    ]
+    assert report["unused_declared_metrics"] == [
+        "bioetl_doc_only_total",
+        "bioetl_rule_only_total",
+    ]
+    assert report["emitted_without_declaration"] == []
+    assert report["dashboarded_without_declaration"] == ["bioetl_unknown_total"]
+    assert report["alerted_without_declaration"] == []
+    assert report["dashboarded_without_emission"] == ["bioetl_doc_only_total"]
+    assert report["alerted_without_emission"] == ["bioetl_rule_only_total"]
+    assert report["runtime_cardinality_review_required"] == []
     assert report["live_metrics"] == ["bioetl_live_counter_total"]
     assert report["direct_live_metrics"] == ["bioetl_live_counter_total"]
     assert report["helper_backed_live_metrics"] == []
@@ -200,6 +224,29 @@ def test_collect_metric_inventory_tracks_helper_backed_emitters(
     assert helper_emitters["bioetl_helper_live_total"] == [
         "src/bioetl/application/emitters.py"
     ]
+
+
+def test_collect_metric_inventory_flags_multi_emitter_cardinality_review_candidates(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset({"bioetl_hotspot_total"}),
+    )
+
+    runtime_dir = tmp_path / "src" / "bioetl" / "application"
+    runtime_dir.mkdir(parents=True)
+    for idx in range(3):
+        (runtime_dir / f"emitters_{idx}.py").write_text(
+            'metrics.increment_counter("bioetl_hotspot_total", labels={})\n',
+            encoding="utf-8",
+        )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert report["runtime_cardinality_review_required"] == ["bioetl_hotspot_total"]
 
 
 def test_collect_metric_inventory_detects_runtime_metric_without_registry(

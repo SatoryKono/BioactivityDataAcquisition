@@ -22,6 +22,8 @@ entries:
   min_score: 60
   blocking_classification: missing_stable_application_mutation_baseline
   issue: '#3410'
+  last_reviewed: '2026-04-29'
+  target_resolution_date: '2026-06-30'
   current_evidence_paths:
   - configs/quality/test_matrix.yaml
   - .github/workflows/mutation-testing.yml

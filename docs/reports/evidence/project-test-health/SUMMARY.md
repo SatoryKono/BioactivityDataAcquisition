@@ -16,6 +16,9 @@ override active policy in `configs/quality/test_matrix.yaml`,
 or current CI workflow definitions. Treat the "Оставшиеся пробелы" section as a
 backlog signal only until a fresh evidence-pack rebaseline or a machine-readable
 policy update confirms the finding.
+Machine-readable metadata for this non-canonical summary now lives in
+`docs/reports/evidence/project-test-health/metadata.yaml`, and shard status is
+tracked in `docs/reports/evidence/project-test-health/shard_registry.yaml`.
 
 Примечание о rebaseline: после `RF-011` текущий confidence baseline подтверждён
 полным verify bundle: `pytest tests -q`, секторные прогоны `tests/architecture`
