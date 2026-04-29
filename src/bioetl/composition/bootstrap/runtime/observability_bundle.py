@@ -19,7 +19,7 @@ from bioetl.domain.ports import (
     MetricsPort,
     TracingPort,
 )
-from bioetl.domain.ports.noop import NoOpAudit
+from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -214,6 +214,45 @@ def _log_observability_initialized(
         run_manifest_enabled=_control_plane_settings(control_plane=control_plane)[1],
         run_ledger_enabled=_control_plane_settings(control_plane=control_plane)[2],
         preflight_status="passed",
+    )
+    pipeline_name = getattr(logger, "pipeline", None)
+    if not isinstance(pipeline_name, str) or not pipeline_name.strip():
+        pipeline_name = "unknown"
+    metrics.set_gauge(
+        "bioetl_observability_runtime_status",
+        1.0,
+        {
+            "pipeline": pipeline_name,
+            "component": "metrics",
+            "mode": "noop" if isinstance(metrics, NoOpMetrics) else "active",
+        },
+    )
+    metrics.set_gauge(
+        "bioetl_observability_runtime_status",
+        1.0,
+        {
+            "pipeline": pipeline_name,
+            "component": "tracing",
+            "mode": "noop" if isinstance(tracer, NoOpTracing) else "active",
+        },
+    )
+    metrics.set_gauge(
+        "bioetl_observability_runtime_status",
+        1.0,
+        {
+            "pipeline": pipeline_name,
+            "component": "audit",
+            "mode": "noop" if isinstance(audit, NoOpAudit) else "active",
+        },
+    )
+    metrics.set_gauge(
+        "bioetl_observability_runtime_status",
+        1.0,
+        {
+            "pipeline": pipeline_name,
+            "component": "dq_monitor",
+            "mode": "disabled" if dq_monitor is None else "active",
+        },
     )
 
 

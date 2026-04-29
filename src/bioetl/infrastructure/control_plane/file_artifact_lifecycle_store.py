@@ -109,12 +109,16 @@ class FileControlPlaneArtifactLifecycleStore:
                 artifact_id=artifact.artifact_id,
                 path=artifact.path,
                 reason=artifact.reason,
+                replay_impact=artifact.replay_impact.value,
             )
         if self.metrics is not None:
             self.metrics.increment_counter(
                 "bioetl_control_plane_lifecycle_deleted_total",
                 1,
-                labels={"surface": artifact.surface.value},
+                labels={
+                    "surface": artifact.surface.value,
+                    "replay_impact": artifact.replay_impact.value,
+                },
             )
 
     def _emit_apply_summary(

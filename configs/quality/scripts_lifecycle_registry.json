@@ -158,60 +158,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical SonarQube MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
-    "scripts/ai/src/bioetl/composition/factories/pipeline/_factory_method_types.py": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a compatibility-era mirror under scripts.ai.src for historical import stability; remove it once all legacy references have converged on the canonical src/bioetl package path."
-    },
-    "scripts/ai/src/bioetl/application/composite/runtime_wiring_api.py": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a compatibility-era mirror under scripts.ai.src for historical import stability around composite runtime wiring; remove it once all legacy references have converged on the canonical src/bioetl package path."
-    },
-    "scripts/ai/src/group_issues.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical scripts.ai.src copy of Sonar issue grouping helpers; remove it once all remaining manual triage flows use the canonical scripts.ai path or are retired."
-    },
-    "scripts/ai/src/neo4j_memory_mcp_adapter.py": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a compatibility-era scripts.ai.src mirror for the Neo4j memory MCP adapter while legacy import paths remain; remove it once callers converge on the canonical scripts/ai/mcp implementation."
-    },
-    "scripts/ai/src/neo4j_memory_mcp_smoke.py": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a compatibility-era scripts.ai.src mirror for Neo4j memory MCP smoke checks while legacy import paths remain; remove it once callers converge on the canonical scripts/ai/mcp implementation."
-    },
-    "scripts/ai/src/setup_mcp.py": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a compatibility-era scripts.ai.src mirror for MCP setup automation while historical module paths remain; remove it once all callers use the canonical scripts.ai.codex.setup_mcp entrypoint."
-    },
-    "scripts/ai/src/sonar_issue_processor_demo.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical demo helper under scripts.ai.src for Sonar issue processing experiments; remove it once the exploratory workflow is fully retired."
-    },
-    "scripts/ai/src/sonar_issue_processor.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical scripts.ai.src copy of the Sonar issue processor; prefer the canonical scripts/ai/sonar_issue_processor.py workflow and remove this orphan mirror once no legacy references remain."
-    },
-    "scripts/ai/src/sonarqube_mcp_smoke.py": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a compatibility-era scripts.ai.src mirror for SonarQube MCP smoke checks while historical module paths remain; remove it once callers converge on the canonical scripts/ai/mcp implementation."
-    },
     "scripts/engineering/qa/py_review_orchestrator.py": {
       "owner": "platform-architecture",
       "decision": "legacy_manual_utility",
@@ -302,29 +248,11 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a Windows-side Neo4j recovery checklist under the runtime/neo4j namespace for operator troubleshooting after Docker restarts."
     },
-    "scripts/ai/codex/helper/check-env.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Codex environment helper while mixed Windows/WSL setup flows still reference helper scripts; remove or consolidate once the Codex setup surface is fully unified."
-    },
     "scripts/ai/codex/launch-interactive.ps1": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded Windows interactive-launch convenience helper while direct PowerShell-to-WSL Codex startup remains operator-oriented; remove it once the canonical launcher contract no longer needs a separate interactive transport."
-    },
-    "scripts/ai/codex/helper/check-env.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Codex environment helper while shell-based setup flows still reference helper scripts; remove or consolidate once the Codex setup surface is fully unified."
-    },
-    "scripts/ai/codex/helper/setup-env.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Codex setup helper while environment bootstrap still depends on helper scripts; fold into the canonical setup path when the surface is simplified."
     },
     "scripts/ai/codex/helper/test-basic.sh": {
       "owner": "@bioetl-platform",
@@ -332,71 +260,11 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded Codex smoke helper for manual environment checks; remove or promote it once there is a governed automated validation path."
     },
-    "scripts/ai/gemini/helper/check-env.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Gemini environment helper while historical setup flows still reference helper scripts; remove or consolidate once the Gemini surface is retired or unified."
-    },
-    "scripts/ai/gemini/helper/setup-env.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Gemini setup helper while environment bootstrap still depends on helper scripts; fold into the canonical setup path when the surface is simplified."
-    },
-    "scripts/ai/mistrall/helper/check-env.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Mistrall environment helper while historical launcher flows still reference helper scripts; remove or consolidate once that AI surface is retired or unified."
-    },
-    "scripts/ai/mistrall/helper/check-env.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Mistrall environment helper while shell-based launcher flows still reference helper scripts; remove or consolidate once that AI surface is retired or unified."
-    },
     "scripts/ai/mistrall/helper/download-image.ps1": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded Mistrall image/bootstrap helper for legacy workstation setup flows; remove it when no maintained operator path depends on it."
-    },
-    "scripts/ai/mistrall/helper/setup-env.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Mistrall setup helper while environment bootstrap still depends on helper scripts; fold into the canonical setup path when the surface is simplified."
-    },
-    "scripts/ai/mistrallvibe/helper/check-env.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded MistrallVibe environment helper while historical launcher flows still reference helper scripts; remove or consolidate once that AI surface is retired or unified."
-    },
-    "scripts/ai/mistrallvibe/helper/check-env.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded MistrallVibe environment helper while shell-based launcher flows still reference helper scripts; remove or consolidate once that AI surface is retired or unified."
-    },
-    "scripts/ai/mistrallvibe/helper/run-mistrallvibe-impl.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded implementation helper for the historical MistrallVibe launcher stack; remove it when the remaining launcher flow is sunset."
-    },
-    "scripts/ai/mistrallvibe/helper/run-mistrallvibe-impl.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded implementation helper for the historical MistrallVibe launcher stack; remove it when the remaining launcher flow is sunset."
-    },
-    "scripts/ai/mistrallvibe/launch-interactive.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a Windows-side convenience launcher that opens an interactive WSL terminal on the canonical scripts/ai/vibe/launch.sh surface; remove it once operators no longer need a dedicated interactive bridge."
     },
     "src/tools/neo4j_audit.py": {
       "owner": "@bioetl-platform",

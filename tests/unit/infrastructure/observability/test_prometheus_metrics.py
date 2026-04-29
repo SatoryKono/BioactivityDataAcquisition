@@ -8,11 +8,17 @@ import pytest
 
 from bioetl.infrastructure.observability.prometheus_metric_label_policies import (
     normalize_adapter_operation_label,
+    normalize_dq_disposition,
     normalize_flow_stage,
+    normalize_observability_mode,
     normalize_postrun_phase,
+    normalize_publication_status,
     normalize_runtime_phase,
     normalize_runtime_stage,
     normalize_source_file_label,
+    normalize_stage_model_outcome,
+    normalize_stage_model_stage,
+    normalize_terminal_status,
 )
 from bioetl.infrastructure.observability.prometheus_metrics import (
     COUNTERS,
@@ -175,15 +181,17 @@ class TestPrometheusMetrics:
                 },
             )
 
-            COUNTERS["bioetl_adapter_error_taxonomy_total"].labels.assert_called_once_with(
+            COUNTERS[
+                "bioetl_adapter_error_taxonomy_total"
+            ].labels.assert_called_once_with(
                 provider="chembl",
                 operation="other",
                 error_category="provider",
                 error_type="timeout",
             )
-            COUNTERS["bioetl_adapter_error_taxonomy_total"].labels().inc.assert_called_once_with(
-                1
-            )
+            COUNTERS[
+                "bioetl_adapter_error_taxonomy_total"
+            ].labels().inc.assert_called_once_with(1)
 
     def test_runtime_stage_metrics_normalize_unknown_stage_values(
         self, prometheus_metrics
@@ -208,9 +216,9 @@ class TestPrometheusMetrics:
                 stage="other",
                 run_type="incremental",
             )
-            COUNTERS["bioetl_records_processed_total"].labels().inc.assert_called_once_with(
-                5
-            )
+            COUNTERS[
+                "bioetl_records_processed_total"
+            ].labels().inc.assert_called_once_with(5)
 
     def test_runtime_phase_metrics_normalize_unknown_phase_values(
         self, prometheus_metrics
@@ -235,9 +243,9 @@ class TestPrometheusMetrics:
                 phase="other",
                 status="success",
             )
-            HISTOGRAMS["bioetl_phase_duration_seconds"].labels().observe.assert_called_once_with(
-                1.5
-            )
+            HISTOGRAMS[
+                "bioetl_phase_duration_seconds"
+            ].labels().observe.assert_called_once_with(1.5)
 
     def test_postrun_phase_metrics_normalize_unknown_subphases(
         self, prometheus_metrics
@@ -257,14 +265,16 @@ class TestPrometheusMetrics:
                 },
             )
 
-            COUNTERS["bioetl_postrun_phase_events_total"].labels.assert_called_once_with(
+            COUNTERS[
+                "bioetl_postrun_phase_events_total"
+            ].labels.assert_called_once_with(
                 pipeline="chembl_activity",
                 phase="other",
                 status="success",
             )
-            COUNTERS["bioetl_postrun_phase_events_total"].labels().inc.assert_called_once_with(
-                1
-            )
+            COUNTERS[
+                "bioetl_postrun_phase_events_total"
+            ].labels().inc.assert_called_once_with(1)
 
     def test_record_flow_metrics_normalize_unknown_flow_stage_values(
         self, prometheus_metrics
@@ -289,9 +299,98 @@ class TestPrometheusMetrics:
                 run_type="incremental",
                 flow_stage="other",
             )
-            COUNTERS["bioetl_record_flow_records_total"].labels().inc.assert_called_once_with(
-                8
+            COUNTERS[
+                "bioetl_record_flow_records_total"
+            ].labels().inc.assert_called_once_with(8)
+
+    def test_stage_model_metrics_normalize_unknown_labels(
+        self, prometheus_metrics
+    ):
+        """Stage-model families must enforce bounded stage/outcome vocabularies."""
+        with patch.dict(
+            COUNTERS,
+            {"bioetl_stage_records_total": MagicMock()},
+        ):
+            prometheus_metrics.increment_counter(
+                name="bioetl_stage_records_total",
+                value=6,
+                labels={
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                    "stage": "wild_stage",
+                    "outcome": "wild_outcome",
+                },
             )
+
+            COUNTERS["bioetl_stage_records_total"].labels.assert_called_once_with(
+                pipeline="chembl_activity",
+                run_type="incremental",
+                stage="other",
+                outcome="other",
+            )
+            COUNTERS["bioetl_stage_records_total"].labels().inc.assert_called_once_with(
+                6
+            )
+
+    def test_dq_disposition_metrics_normalize_unknown_labels(
+        self, prometheus_metrics
+    ):
+        """DQ disposition labels must stay within the bounded canonical set."""
+        with patch.dict(
+            COUNTERS,
+            {"bioetl_dq_dispositions_total": MagicMock()},
+        ):
+            prometheus_metrics.increment_counter(
+                name="bioetl_dq_dispositions_total",
+                value=1,
+                labels={
+                    "pipeline": "chembl_activity",
+                    "stage": "custom_stage",
+                    "disposition": "custom_disposition",
+                    "terminal_status": "custom_terminal",
+                },
+            )
+
+            COUNTERS["bioetl_dq_dispositions_total"].labels.assert_called_once_with(
+                pipeline="chembl_activity",
+                stage="other",
+                disposition="other",
+                terminal_status="other",
+            )
+            COUNTERS[
+                "bioetl_dq_dispositions_total"
+            ].labels().inc.assert_called_once_with(1)
+
+    def test_metrics_publication_events_normalize_unknown_labels(
+        self, prometheus_metrics
+    ):
+        """Publication self-monitoring counters must keep bounded target/status."""
+        with patch.dict(
+            COUNTERS,
+            {"bioetl_metrics_publication_events_total": MagicMock()},
+        ):
+            prometheus_metrics.increment_counter(
+                name="bioetl_metrics_publication_events_total",
+                value=1,
+                labels={
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                    "target": "custom_sink",
+                    "status": "custom_state",
+                },
+            )
+
+            COUNTERS[
+                "bioetl_metrics_publication_events_total"
+            ].labels.assert_called_once_with(
+                pipeline="chembl_activity",
+                run_type="incremental",
+                target="other",
+                status="other",
+            )
+            COUNTERS[
+                "bioetl_metrics_publication_events_total"
+            ].labels().inc.assert_called_once_with(1)
 
     @pytest.mark.parametrize(
         ("raw_value", "expected"),
@@ -340,6 +439,68 @@ class TestPrometheusMetrics:
     def test_normalize_flow_stage(self, raw_value: str, expected: str) -> None:
         """Record-flow stage labels should stay within the canonical set."""
         assert normalize_flow_stage(raw_value) == expected
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ("validation", "validation"),
+            ("custom_stage", "other"),
+        ],
+    )
+    def test_normalize_stage_model_stage(self, raw_value: str, expected: str) -> None:
+        assert normalize_stage_model_stage(raw_value) == expected
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ("silver_written", "silver_written"),
+            ("custom_outcome", "other"),
+        ],
+    )
+    def test_normalize_stage_model_outcome(
+        self, raw_value: str, expected: str
+    ) -> None:
+        assert normalize_stage_model_outcome(raw_value) == expected
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ("warn", "warn"),
+            ("custom", "other"),
+        ],
+    )
+    def test_normalize_dq_disposition(self, raw_value: str, expected: str) -> None:
+        assert normalize_dq_disposition(raw_value) == expected
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ("success", "success"),
+            ("custom", "other"),
+        ],
+    )
+    def test_normalize_terminal_status(self, raw_value: str, expected: str) -> None:
+        assert normalize_terminal_status(raw_value) == expected
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ("failed", "failed"),
+            ("custom", "other"),
+        ],
+    )
+    def test_normalize_publication_status(self, raw_value: str, expected: str) -> None:
+        assert normalize_publication_status(raw_value) == expected
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ("active", "active"),
+            ("custom", "other"),
+        ],
+    )
+    def test_normalize_observability_mode(self, raw_value: str, expected: str) -> None:
+        assert normalize_observability_mode(raw_value) == expected
 
     @pytest.mark.parametrize(
         ("raw_value", "expected"),

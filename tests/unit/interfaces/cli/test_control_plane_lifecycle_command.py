@@ -59,6 +59,7 @@ def test_control_plane_lifecycle_defaults_to_dry_run() -> None:
     assert result.exit_code == 0, result.output
     assert "[DRY-RUN]" in result.output
     assert "Would delete 1 artifacts" in result.output
+    assert "replay_impact=no_replay_evidence" in result.output
     store.plan.assert_called_once()
     policy = store.plan.call_args.args[0]
     assert policy.retention_days == 90
@@ -100,6 +101,7 @@ def test_control_plane_lifecycle_apply_json_outputs_deleted_paths() -> None:
     payload = json.loads(result.output)
     assert payload["dry_run"] is False
     assert payload["deleted_paths"] == [CONTROL_PLANE_MANIFEST_PATH]
+    assert payload["artifacts"][0]["replay_impact"] == "no_replay_evidence"
     policy = store.plan.call_args.args[0]
     assert policy.protected_run_ids == frozenset({"run-1"})
     assert policy.protected_input_snapshot_ids == frozenset({"sha256:abc"})

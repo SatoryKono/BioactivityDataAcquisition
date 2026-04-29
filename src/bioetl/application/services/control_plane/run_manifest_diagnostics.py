@@ -65,13 +65,14 @@ _EMPTY_RESUME_ANCHOR_COMPARISON = {
     "checkpoint_identity_present": False,
     "matching_fields": [],
     "mismatched_fields": [],
-    "missing_current_fields": [], "missing_checkpoint_fields": [],
+    "missing_current_fields": [],
+    "missing_checkpoint_fields": [],
 }
 
 
-def _resolve_resume_identity_maps(summary: dict[str, object]) -> (
-    tuple[dict[str, object], dict[str, object]] | None
-):
+def _resolve_resume_identity_maps(
+    summary: dict[str, object],
+) -> tuple[dict[str, object], dict[str, object]] | None:
     resume_diagnostics = summary.get("resume_diagnostics")
     if not isinstance(resume_diagnostics, dict):
         return None

@@ -10,6 +10,7 @@ from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecycleDecision,
     ControlPlaneArtifactLifecyclePolicy,
     ControlPlaneArtifactRef,
+    ControlPlaneArtifactReplayImpact,
     ControlPlaneArtifactSurface,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -303,6 +304,11 @@ def _build_artifact_ref(
         else ControlPlaneArtifactLifecycleDecision.RETAIN
     )
     reason = _resolve_lifecycle_reason(stale=stale, protected_by=protected_by)
+    replay_impact = _resolve_replay_impact(
+        surface=surface,
+        decision=decision,
+        protected_by=protected_by,
+    )
     return ControlPlaneArtifactRef(
         surface=surface,
         path=str(path),
@@ -311,7 +317,31 @@ def _build_artifact_ref(
         reason=reason,
         created_at=created_at,
         protected_by=protected_by,
+        replay_impact=replay_impact,
     )
+
+
+def _resolve_replay_impact(
+    *,
+    surface: ControlPlaneArtifactSurface,
+    decision: ControlPlaneArtifactLifecycleDecision,
+    protected_by: tuple[str, ...],
+) -> ControlPlaneArtifactReplayImpact:
+    """Classify whether a lifecycle action affects replay/recovery evidence."""
+    if any(reason.startswith("evidence_floor:") for reason in protected_by):
+        return ControlPlaneArtifactReplayImpact.STRICT_REPLAY_EVIDENCE_PROTECTED
+    if protected_by:
+        return ControlPlaneArtifactReplayImpact.RECOVERY_EVIDENCE_PROTECTED
+    if decision is ControlPlaneArtifactLifecycleDecision.DELETE and surface in {
+        ControlPlaneArtifactSurface.CACHED_BRONZE,
+        ControlPlaneArtifactSurface.CHECKPOINT,
+        ControlPlaneArtifactSurface.EFFECTIVE_CONFIG,
+        ControlPlaneArtifactSurface.LINEAGE,
+        ControlPlaneArtifactSurface.RUN_LEDGER,
+        ControlPlaneArtifactSurface.RUN_MANIFEST,
+    }:
+        return ControlPlaneArtifactReplayImpact.UNPROTECTED_REPLAY_EVIDENCE_DELETE_CANDIDATE
+    return ControlPlaneArtifactReplayImpact.NO_REPLAY_EVIDENCE
 
 
 def _iter_surface_files(

@@ -8,36 +8,43 @@ from bioetl.infrastructure.observability.circuit_breaker_mapping import (
     CIRCUIT_BREAKER_STATE_DESCRIPTION,
 )
 
-__all__ = [
-    "BATCH_SIZE_RECORDS",
-    "CIRCUIT_BREAKER_FAILURE_TOTAL",
-    "CIRCUIT_BREAKER_OPEN_TOTAL",
-    "CIRCUIT_BREAKER_STATE",
-    "CIRCUIT_BREAKER_SUCCESS_TOTAL",
-    "CIRCUIT_BREAKER_TRIPS_TOTAL",
-    "DATA_FRESHNESS_SECONDS",
-    "DQ_ANOMALY_DETECTED",
-    "DQ_BASELINE_SAMPLES",
-    "DQ_BASELINE_UPDATED",
-    "DQ_CHECK_DURATION_MS",
-    "DQ_CHECK_FAILURES_TOTAL",
-    "DQ_MONITOR_ENABLED",
-    "DQ_RECORDS_QUARANTINED_TOTAL",
-    "DQ_VALIDATION_FAILURES_TOTAL",
-    "DQ_VALIDATION_RECORD_COUNT",
-    "DQ_VALIDATION_SCORE",
-    "ERRORS_TOTAL",
-    "FILTER_IDS_DUPLICATES_TOTAL",
-    "FILTER_IDS_LOADED_TOTAL",
-    "PIPELINE_DURATION_SECONDS",
-    "QUARANTINE_OPERATOR_DURATION_SECONDS",
-    "QUARANTINE_OPERATOR_OPERATIONS_TOTAL",
-    "QUARANTINE_RECORDS_TOTAL",
-    "RECORDS_PROCESSED_TOTAL",
-    "RECORD_FLOW_RECORDS_TOTAL",
-    "SILVER_FILTER_REJECTIONS_TOTAL",
-    "VACUUM_FILES_REMOVED_TOTAL",
-]
+__all__ = sorted(
+    [
+        "BATCH_SIZE_RECORDS",
+        "CIRCUIT_BREAKER_FAILURE_TOTAL",
+        "CIRCUIT_BREAKER_OPEN_TOTAL",
+        "CIRCUIT_BREAKER_STATE",
+        "CIRCUIT_BREAKER_SUCCESS_TOTAL",
+        "CIRCUIT_BREAKER_TRIPS_TOTAL",
+        "DATA_FRESHNESS_SECONDS",
+        "DQ_ANOMALY_DETECTED",
+        "DQ_BASELINE_SAMPLES",
+        "DQ_BASELINE_UPDATED",
+        "DQ_CHECK_DURATION_MS",
+        "DQ_CHECK_FAILURES_TOTAL",
+        "DQ_DISPOSITIONS_TOTAL",
+        "DQ_MONITOR_DISABLED_TOTAL",
+        "DQ_MONITOR_ENABLED",
+        "DQ_RECORDS_QUARANTINED_TOTAL",
+        "DQ_VALIDATION_FAILURES_TOTAL",
+        "DQ_VALIDATION_RECORD_COUNT",
+        "DQ_VALIDATION_SCORE",
+        "ERRORS_TOTAL",
+        "FILTER_IDS_DUPLICATES_TOTAL",
+        "FILTER_IDS_LOADED_TOTAL",
+        "METRICS_PUBLICATION_EVENTS_TOTAL",
+        "OBSERVABILITY_RUNTIME_STATUS",
+        "PIPELINE_DURATION_SECONDS",
+        "QUARANTINE_OPERATOR_DURATION_SECONDS",
+        "QUARANTINE_OPERATOR_OPERATIONS_TOTAL",
+        "QUARANTINE_RECORDS_TOTAL",
+        "RECORD_FLOW_RECORDS_TOTAL",
+        "RECORDS_PROCESSED_TOTAL",
+        "SILVER_FILTER_REJECTIONS_TOTAL",
+        "STAGE_RECORDS_TOTAL",
+        "VACUUM_FILES_REMOVED_TOTAL",
+    ]
+)
 
 PIPELINE_DURATION_SECONDS = Histogram(
     "bioetl_pipeline_duration_seconds",
@@ -55,6 +62,12 @@ RECORD_FLOW_RECORDS_TOTAL = Counter(
     "bioetl_record_flow_records_total",
     "Total records observed in the bounded pipeline flow projection",
     ["pipeline", "run_type", "flow_stage"],
+)
+
+STAGE_RECORDS_TOTAL = Counter(
+    "bioetl_stage_records_total",
+    "Total records observed in the canonical stage-model projection",
+    ["pipeline", "run_type", "stage", "outcome"],
 )
 
 ERRORS_TOTAL = Counter(
@@ -86,6 +99,12 @@ DQ_RECORDS_QUARANTINED_TOTAL = Counter(
     "bioetl_dq_records_quarantined_total",
     "Total number of records quarantined due to data quality issues",
     ["pipeline", "error_type", "run_type"],
+)
+
+DQ_DISPOSITIONS_TOTAL = Counter(
+    "bioetl_dq_dispositions_total",
+    "Total bounded DQ disposition events correlated with terminal run outcomes",
+    ["pipeline", "stage", "disposition", "terminal_status"],
 )
 
 QUARANTINE_RECORDS_TOTAL = Counter(
@@ -214,4 +233,16 @@ DQ_BASELINE_SAMPLES = Gauge(
     "bioetl_dq_baseline_samples",
     "Current number of samples in DQ baseline",
     ["pipeline", "metric"],
+)
+
+METRICS_PUBLICATION_EVENTS_TOTAL = Counter(
+    "bioetl_metrics_publication_events_total",
+    "Total best-effort metrics publication attempts by target and status",
+    ["pipeline", "run_type", "target", "status"],
+)
+
+OBSERVABILITY_RUNTIME_STATUS = Gauge(
+    "bioetl_observability_runtime_status",
+    "Current observability component mode for the active pipeline runtime",
+    ["pipeline", "component", "mode"],
 )

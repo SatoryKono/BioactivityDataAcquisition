@@ -117,6 +117,7 @@ def _build_pipeline_dq_service(
         metrics=pipeline.services.metrics,
         pipeline_name=pipeline.config.pipeline_name,
         entity_type=pipeline.config.entity_type,
+        run_type=pipeline.runtime.run_type.value,
     )
 
 

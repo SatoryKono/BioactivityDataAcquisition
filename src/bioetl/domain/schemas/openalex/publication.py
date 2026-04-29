@@ -54,6 +54,10 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         nullable=True,
         description="Raw OpenAlex type (article, book, dataset, etc.)",
     )
+    type_crossref: Series[str] = pa.Field(
+        nullable=True,
+        description="Raw Crossref-compatible type exposed by OpenAlex when available.",
+    )
 
     # Note: citations_received and citations_made inherited from base as pd.Int64Dtype
 

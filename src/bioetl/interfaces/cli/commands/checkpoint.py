@@ -111,6 +111,31 @@ def _extract_persistence_profile_details(
     )
 
 
+def _render_replay_view_lines(replay_view: dict[str, object]) -> list[str]:
+    """Render replay and persistence diagnostics shared by checkpoint views."""
+    (
+        attained_profile,
+        composite_resume_reconstructability,
+        replay_ready_missing_requirements,
+        forensic_grade_missing_requirements,
+    ) = _extract_persistence_profile_details(replay_view)
+    return [
+        f"  replay_capability: {replay_view.get('replay_capability')}",
+        f"  requested_exact_replay: {replay_view.get('requested_exact_replay')}",
+        f"  exact_replay_support_boundary: {replay_view.get('exact_replay_support_boundary')}",
+        f"  replay_capability_reason: {replay_view.get('replay_capability_reason')}",
+        f"  exact_replay_blockers: {replay_view.get('exact_replay_blockers')}",
+        f"  input_snapshot_ids: {replay_view.get('input_snapshot_ids')}",
+        f"  input_snapshot_identity_fingerprint: {replay_view.get('input_snapshot_identity_fingerprint')}",
+        f"  persistence_profile: {attained_profile}",
+        f"  replay_ready_missing_requirements: {replay_ready_missing_requirements}",
+        f"  forensic_grade_missing_requirements: {forensic_grade_missing_requirements}",
+        f"  composite_resume_reconstructability: {composite_resume_reconstructability}",
+        f"  alert_signals: {replay_view.get('alert_signals')}",
+        f"  next_steps: {replay_view.get('next_steps')}",
+    ]
+
+
 def _render_audit_run_manifest_lines(
     run_manifest: dict[str, object],
 ) -> list[str]:
@@ -127,30 +152,29 @@ def _render_audit_run_manifest_lines(
     if replay_view is None:
         return lines
 
-    (
-        attained_profile,
-        composite_resume_reconstructability,
-        replay_ready_missing_requirements,
-        forensic_grade_missing_requirements,
-    ) = _extract_persistence_profile_details(replay_view)
-    lines.extend(
-        [
-            f"  replay_capability: {replay_view.get('replay_capability')}",
-            f"  requested_exact_replay: {replay_view.get('requested_exact_replay')}",
-            f"  exact_replay_support_boundary: {replay_view.get('exact_replay_support_boundary')}",
-            f"  replay_capability_reason: {replay_view.get('replay_capability_reason')}",
-            f"  exact_replay_blockers: {replay_view.get('exact_replay_blockers')}",
-            f"  input_snapshot_ids: {replay_view.get('input_snapshot_ids')}",
-            f"  input_snapshot_identity_fingerprint: {replay_view.get('input_snapshot_identity_fingerprint')}",
-            f"  persistence_profile: {attained_profile}",
-            f"  replay_ready_missing_requirements: {replay_ready_missing_requirements}",
-            f"  forensic_grade_missing_requirements: {forensic_grade_missing_requirements}",
-            f"  composite_resume_reconstructability: {composite_resume_reconstructability}",
-            f"  alert_signals: {replay_view.get('alert_signals')}",
-            f"  next_steps: {replay_view.get('next_steps')}",
-        ]
-    )
+    lines.extend(_render_replay_view_lines(replay_view))
     return lines
+
+
+def _render_checkpoint_anchor_lines(checkpoint: dict[str, object]) -> list[str]:
+    """Render checkpoint identity anchors that drive compatibility decisions."""
+    metadata = checkpoint.get("metadata")
+    if not isinstance(metadata, dict):
+        return []
+    anchor_keys = (
+        "manifest_id",
+        "execution_fingerprint",
+        "effective_config_hash",
+        "effective_config_artifact_id",
+        "contract_ref",
+        "contract_version",
+        "dq_contract_compatibility_hash",
+    )
+    return [
+        f"  checkpoint_{key}: {metadata.get(key)}"
+        for key in anchor_keys
+        if key in metadata
+    ]
 
 
 def _render_audit_run_payload(payload: dict[str, object]) -> str:
@@ -191,10 +215,11 @@ def _render_checkpoint_workflow_payload(payload: dict[str, object]) -> str:
                 f"{len(checkpoint.get('metadata', {})) if isinstance(checkpoint.get('metadata'), dict) else 0}",
             ]
         )
+        lines.extend(_render_checkpoint_anchor_lines(checkpoint))
     else:
         lines.append("  checkpoint: none")
     if isinstance(run_manifest, dict):
-        manifest = run_manifest.get("manifest", {})
+        manifest, replay_view = _resolve_replay_view(run_manifest)
         if isinstance(manifest, dict):
             lines.extend(
                 [
@@ -202,6 +227,8 @@ def _render_checkpoint_workflow_payload(payload: dict[str, object]) -> str:
                     f"  manifest_run_id: {manifest.get('run_id')}",
                 ]
             )
+        if replay_view is not None:
+            lines.extend(_render_replay_view_lines(replay_view))
     lines.extend(
         [
             f"  audit_entries: {len(entries) if isinstance(entries, list) else 0}",

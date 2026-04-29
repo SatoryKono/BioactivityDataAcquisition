@@ -51,6 +51,7 @@ def sample_openalex_record() -> dict[str, Any]:
         "publication_year": 2024,
         "publication_date": "2024-05-15",
         "type": "article",
+        "type_crossref": "journal-article",
         "abstract_inverted_index": {
             "This": [0],
             "is": [1],
@@ -101,6 +102,7 @@ class TestOpenAlexPublicationTransformer:
         assert result["publication_year"] == 2024
         assert result["publication_date"] == "2024-05-15"
         assert result["publication_type"] == "article"
+        assert result["type_crossref"] == "journal-article"
         assert result["publication_type_unified"] == "Journal Article"
         assert result["abstract"] == "This is an abstract"
         assert result["journal"] == "Nature"

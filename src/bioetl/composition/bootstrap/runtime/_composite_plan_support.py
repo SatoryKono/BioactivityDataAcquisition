@@ -55,7 +55,9 @@ if TYPE_CHECKING:
     type BootstrapRuntimeBasicsTuple = tuple[
         str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort
     ]
-    type BootstrapRuntimeBasicsResult = BootstrapRuntimeBasicsTuple | CompositeInfrastructureContext
+    type BootstrapRuntimeBasicsResult = (
+        BootstrapRuntimeBasicsTuple | CompositeInfrastructureContext
+    )
     type SeedRunnerFactory = Callable[[], PipelineRunner]
     type DataFrameRunnerFactory = Callable[[str, pl.DataFrame], PipelineRunner]
     type RunnerFactoryBundle = tuple[

@@ -261,6 +261,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
                 "openalex",
                 raw_type=raw_publication_type,
             ),
+            "type_crossref": rec.get("type_crossref"),
             "is_oa": oa_info.get("is_oa"),
             "oa_status": oa_info.get("oa_status"),
             "citations_received": rec.get("cited_by_count"),

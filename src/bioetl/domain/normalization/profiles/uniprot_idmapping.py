@@ -5,7 +5,10 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
-from bioetl.domain.schemas.uniprot.idmapping import IDMappingSchema
+from bioetl.domain.schemas.uniprot.idmapping import (
+    MAPPING_STATUSES,
+    IDMappingSchema,
+)
 
 __all__ = [
     "UNIPROT_IDMAPPING_PROFILE",
@@ -33,6 +36,7 @@ _INT_FIELDS = frozenset(
 )
 _JSON_STRING_FIELDS = frozenset({"all_mappings"})
 _BOOLEAN_FIELDS = frozenset({"reviewed"})
+_ENUM_FIELDS = {"mapping_status": frozenset(MAPPING_STATUSES)}
 
 UNIPROT_IDMAPPING_PROFILE = build_standard_profile(
     profile_name="uniprot.idmapping",
@@ -43,6 +47,7 @@ UNIPROT_IDMAPPING_PROFILE = build_standard_profile(
     int_fields=_INT_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
     boolean_fields=_BOOLEAN_FIELDS,
+    enum_fields=_ENUM_FIELDS,
 )
 
 UNIPROT_IDMAPPING_PROFILE.assert_covers_schema(UNIPROT_IDMAPPING_SCHEMA_FIELDS)

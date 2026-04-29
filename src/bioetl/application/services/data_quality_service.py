@@ -38,6 +38,7 @@ class _DataQualityThresholdMixin:
     _metrics: MetricsPort | None
     _pipeline_name: str
     _pipeline_metrics: PipelineMetricsRecorder
+    _run_type: str
 
     def _check_hard_threshold(self, error_rate: float) -> None:
         """Check if error rate exceeds hard threshold."""
@@ -53,6 +54,11 @@ class _DataQualityThresholdMixin:
             self._pipeline_metrics.record_dq_validation_failures(
                 stage="threshold",
                 severity="hard_fail",
+            )
+            self._pipeline_metrics.record_dq_disposition(
+                stage="validation",
+                disposition="fail",
+                terminal_status="failed",
             )
             raise DataQualityThresholdError(
                 error_rate=error_rate,
@@ -93,6 +99,8 @@ class _DataQualityMetricsMixin:
     _metrics: MetricsPort | None
     _pipeline_name: str
     _entity_type: str
+    _pipeline_metrics: PipelineMetricsRecorder
+    _run_type: str
 
     @staticmethod
     def _resolve_freshness_anchor_timestamp(
@@ -166,6 +174,27 @@ class _DataQualityMetricsMixin:
             1,
             {"pipeline": self._pipeline_name, "entity": self._entity_type},
         )
+
+    def _emit_validation_stage_metrics(
+        self,
+        *,
+        record_count: int,
+        quarantined_count: int,
+    ) -> None:
+        """Emit bounded validation-stage counts used for denominator semantics."""
+        self._pipeline_metrics.record_stage_records(
+            run_type=self._run_type,
+            stage="validation",
+            outcome="evaluated",
+            count=record_count,
+        )
+        if quarantined_count > 0:
+            self._pipeline_metrics.record_stage_records(
+                run_type=self._run_type,
+                stage="validation",
+                outcome="quarantined",
+                count=quarantined_count,
+            )
 
 
 class _DataQualityAnomalyMixin(_DataQualityMetricsMixin):
@@ -271,6 +300,7 @@ class DataQualityService(
         metrics: MetricsPort | None,
         pipeline_name: str,
         entity_type: str,
+        run_type: str = "unknown",
         pipeline_metrics: PipelineMetricsRecorder | None = None,
     ) -> None:
         """Initialize DataQualityService.
@@ -290,6 +320,7 @@ class DataQualityService(
         self._metrics = metrics
         self._pipeline_name = pipeline_name
         self._entity_type = entity_type
+        self._run_type = run_type
         resolved_pipeline_metrics = pipeline_metrics
         if resolved_pipeline_metrics is None:
             resolved_pipeline_metrics = PipelineMetricsRecorder(
@@ -322,11 +353,12 @@ class DataQualityService(
         error_rate = metrics.get("error_rate", 0.0)
         freshness_anchor = self._resolve_freshness_anchor_timestamp(metrics)
         canonical_dq_timestamp = self._resolve_canonical_dq_timestamp(freshness_anchor)
+        record_count = max(int(metrics.get("record_count", 0.0)), 0)
+        quarantined_count = max(int(metrics.get("quarantined_count", 0.0)), 0)
 
         # Emit validation score gauge (1.0 - error_rate)
         if self._metrics:
             labels = {"pipeline": self._pipeline_name, "entity": self._entity_type}
-            record_count = max(metrics.get("record_count", 0.0), 0.0)
             self._metrics.set_gauge(
                 "bioetl_dq_monitor_enabled",
                 1.0 if self._dq_monitor is not None else 0.0,
@@ -351,6 +383,10 @@ class DataQualityService(
                     freshness_anchor,
                     labels,
                 )
+        self._emit_validation_stage_metrics(
+            record_count=record_count,
+            quarantined_count=quarantined_count,
+        )
 
         # Check hard threshold first - raises if exceeded
         self._check_hard_threshold(error_rate)
@@ -361,6 +397,17 @@ class DataQualityService(
         # Log warning and emit metric if soft threshold exceeded
         if status == DQEvaluationStatus.WARNING:
             self._emit_soft_threshold_warning(error_rate)
+            self._pipeline_metrics.record_dq_disposition(
+                stage="validation",
+                disposition="warn",
+                terminal_status="success",
+            )
+        else:
+            self._pipeline_metrics.record_dq_disposition(
+                stage="validation",
+                disposition="pass",
+                terminal_status="success",
+            )
 
         # Run anomaly detection if monitor available
         if self._dq_monitor is None:

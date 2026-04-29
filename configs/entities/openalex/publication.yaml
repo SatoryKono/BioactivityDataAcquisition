@@ -99,6 +99,7 @@ schema:
   - name: doc_type
     fields:
     - publication_type
+    - type_crossref
     - publication_type_unified
     - publication_subclass
     - publication_class
@@ -205,15 +206,29 @@ quality:
   - field: publication_type
     type: enum
     allowed:
+    - peer-review
     - article
-    - book-chapter
-    - book
+    - preprint
     - dataset
+    - database
     - dissertation
+    - report
+    - report-component
+    - supplementary-materials
+    - software
+    - review
     - editorial
     - letter
-    - review
-    - preprint
+    - erratum
+    - retraction
+    - book
+    - book-chapter
+    - book-section
+    - reference-entry
+    - standard
+    - paratext
+    - libguides
+    - grant
     - other
     nullable: true
   - field: citations_received
@@ -249,7 +264,7 @@ quality:
   - name: article_requires_title
     condition_field: publication_type
     condition_value:
-    - journal-article
+    - article
     - review
     condition_operator: in
     then_validations:

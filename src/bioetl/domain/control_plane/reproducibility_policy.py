@@ -103,9 +103,7 @@ def is_critical_reproducibility_runtime(
     debug_mode: object = False,
 ) -> bool:
     """Return whether runtime should inherit published strict family defaults."""
-    return str(runtime_environment or "").strip().lower() == "prod" or bool(
-        debug_mode
-    )
+    return str(runtime_environment or "").strip().lower() == "prod" or bool(debug_mode)
 
 
 def legacy_config_hash_from_resolved_config_hash(

@@ -543,6 +543,15 @@
     "required": true,
     "unique": false
   },
+  "type_crossref": {
+    "checks": [],
+    "coerce": false,
+    "description": "Raw Crossref-compatible type exposed by OpenAlex when available.",
+    "dtype": "str",
+    "nullable": true,
+    "required": true,
+    "unique": false
+  },
   "volume": {
     "checks": [],
     "coerce": false,

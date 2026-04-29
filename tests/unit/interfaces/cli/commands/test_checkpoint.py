@@ -114,7 +114,16 @@ class _FakeWorkflowService:
                 "checkpoint": {
                     "pipeline_name": pipeline_name,
                     "run_id": run_id or "00000000-0000-0000-0000-000000000123",
-                    "metadata": {"records_processed": 100},
+                    "metadata": {
+                        "records_processed": 100,
+                        "manifest_id": "manifest-2",
+                        "execution_fingerprint": "fingerprint-2",
+                        "effective_config_hash": "effective-hash-2",
+                        "effective_config_artifact_id": "effective-artifact-2",
+                        "contract_ref": "chembl.activity",
+                        "contract_version": "1.0.0",
+                        "dq_contract_compatibility_hash": "dq-hash-2",
+                    },
                 },
                 "audit": {
                     "query": {"pipeline_name": pipeline_name, "limit": audit_limit},
@@ -132,7 +141,29 @@ class _FakeWorkflowService:
                     "manifest": {
                         "manifest_id": "manifest-2",
                         "run_id": run_id or "00000000-0000-0000-0000-000000000123",
-                    }
+                    },
+                    "diagnostics": {
+                        "replay_capability": "resume_only",
+                        "requested_exact_replay": False,
+                        "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+                        "replay_capability_reason": "checkpoint_resume_without_exact_replay_request",
+                        "exact_replay_blockers": ["exact_replay_not_requested"],
+                        "input_snapshot_ids": ["snapshot-2"],
+                        "input_snapshot_identity_fingerprint": "snapshot-fingerprint-2",
+                        "persistence_profile": {
+                            "attained_profile": "replay_ready",
+                            "replay_ready_missing_requirements": [],
+                            "forensic_grade_missing_requirements": [
+                                "lineage_closure",
+                            ],
+                        },
+                        "alert_signals": {
+                            "checkpoint_resume_blocked": False,
+                        },
+                        "next_steps": [
+                            "Resume is compatible; this is not an exact replay.",
+                        ],
+                    },
                 },
             }
         )
@@ -272,4 +303,47 @@ class TestCheckpointCommands:
         assert "silver/chembl.activity merge" in result.output
         assert service.audit_run_calls == [
             ("00000000-0000-0000-0000-000000000001", 100)
+        ]
+
+    def test_checkpoint_inspect_text_outputs_anchors_and_replay_taxonomy(
+        self,
+        cli_runner: CliRunner,
+        monkeypatch: Any,
+    ) -> None:
+        service = _FakeWorkflowService()
+        _patch_workflow_service(monkeypatch, service)
+
+        result = cli_runner.invoke(
+            cli,
+            [
+                "checkpoint",
+                "inspect",
+                "--pipeline",
+                "chembl_activity",
+                "--run-id",
+                "00000000-0000-0000-0000-000000000123",
+            ],
+        )
+
+        assert result.exit_code == 0
+        assert "Checkpoint Workflow Diagnostics" in result.output
+        assert "checkpoint_manifest_id: manifest-2" in result.output
+        assert "checkpoint_execution_fingerprint: fingerprint-2" in result.output
+        assert "checkpoint_effective_config_hash: effective-hash-2" in result.output
+        assert (
+            "checkpoint_effective_config_artifact_id: effective-artifact-2"
+            in result.output
+        )
+        assert "checkpoint_contract_ref: chembl.activity" in result.output
+        assert "checkpoint_contract_version: 1.0.0" in result.output
+        assert "checkpoint_dq_contract_compatibility_hash: dq-hash-2" in result.output
+        assert "replay_capability: resume_only" in result.output
+        assert "requested_exact_replay: False" in result.output
+        assert "exact_replay_blockers: ['exact_replay_not_requested']" in result.output
+        assert "persistence_profile: replay_ready" in result.output
+        assert "forensic_grade_missing_requirements: ['lineage_closure']" in (
+            result.output
+        )
+        assert service.checkpoint_calls == [
+            ("chembl_activity", "00000000-0000-0000-0000-000000000123", 100)
         ]

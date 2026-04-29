@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-29T05:48:17.047757+00:00",
+  "generated_at": "2026-04-29T06:23:19.089698+00:00",
   "summary": {
-    "total_scripts": 386,
+    "total_scripts": 367,
     "status_counts": {
-      "active": 310,
-      "supporting": 60,
+      "active": 320,
+      "supporting": 31,
       "temporary_diagnostic": 16
     },
     "reference_group_coverage": {
@@ -13,7 +13,7 @@
       "build": 2,
       "ci": 49,
       "docs": 121,
-      "scripts": 282,
+      "scripts": 292,
       "skills": 8,
       "tests": 131
     }
@@ -24,7 +24,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 31,
+      "reference_count": 29,
       "references": [
         {
           "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
@@ -343,18 +343,32 @@
     {
       "path": "scripts/ai/codex/helper/check-env.ps1",
       "type": "ps1",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 205,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/codex/helper/check-env.ps1\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/codex/helper/check-env.sh",
       "type": "sh",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 206,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/codex/helper/check-env.sh\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/codex/helper/diagnose-hang.ps1",
@@ -539,10 +553,17 @@
     {
       "path": "scripts/ai/codex/helper/setup-env.sh",
       "type": "sh",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 207,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/codex/helper/setup-env.sh\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/codex/helper/setup-wsl-complete.sh",
@@ -893,8 +914,20 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "scripts/ai/codex/helper/ensure-mcp.sh",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "SETUP_MCP=\"${ROOT_DIR}/setup_mcp.py\""
+        },
+        {
+          "path": "scripts/ai/codex/helper/run-codex-impl.sh",
+          "line": 75,
+          "source_group": "scripts",
+          "text": "# Add 60-second timeout to prevent hanging on setup_mcp.py"
+        },
         {
           "path": "scripts/ai/gemini/helper/ensure-mcp.sh",
           "line": 9,
@@ -939,10 +972,17 @@
     {
       "path": "scripts/ai/gemini/helper/check-env.ps1",
       "type": "ps1",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 208,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/gemini/helper/check-env.ps1\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/gemini/helper/check-env.sh",
@@ -1091,10 +1131,17 @@
     {
       "path": "scripts/ai/gemini/helper/setup-env.sh",
       "type": "sh",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 209,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/gemini/helper/setup-env.sh\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/gemini/run-gemini.ps1",
@@ -2241,18 +2288,32 @@
     {
       "path": "scripts/ai/mistrall/helper/check-env.ps1",
       "type": "ps1",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 210,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mistrall/helper/check-env.ps1\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/mistrall/helper/check-env.sh",
       "type": "sh",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 211,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mistrall/helper/check-env.sh\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/mistrall/helper/download-image.ps1",
@@ -2415,10 +2476,17 @@
     {
       "path": "scripts/ai/mistrall/helper/setup-env.sh",
       "type": "sh",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 212,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mistrall/helper/setup-env.sh\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/mistrall/run-mistrall.ps1",
@@ -2537,34 +2605,32 @@
     {
       "path": "scripts/ai/mistrallvibe/helper/check-env.ps1",
       "type": "ps1",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 213,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mistrallvibe/helper/check-env.ps1\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/mistrallvibe/helper/check-env.sh",
       "type": "sh",
-      "status": "supporting",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/mistrallvibe/helper/run-mistrallvibe-impl.ps1",
-      "type": "ps1",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/mistrallvibe/helper/run-mistrallvibe-impl.sh",
-      "type": "sh",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 214,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mistrallvibe/helper/check-env.sh\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/mistrallvibe/helper/setup-env.ps1",
@@ -2615,14 +2681,6 @@
       ]
     },
     {
-      "path": "scripts/ai/mistrallvibe/launch-interactive.ps1",
-      "type": "ps1",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
       "path": "scripts/ai/sonar_issue_processor.py",
       "type": "py",
       "status": "active",
@@ -2666,14 +2724,6 @@
           "text": "python3 sonar_issue_processor.py"
         }
       ]
-    },
-    {
-      "path": "scripts/ai/src/bioetl/application/composite/runtime_wiring_api.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/ai/src/bioetl/composition/bootstrap/runtime/runner_assembly.py",
@@ -2731,70 +2781,6 @@
           "text": "Path(\"bioetl/composition/bootstrap/runtime/runner_assembly.py\"),"
         }
       ]
-    },
-    {
-      "path": "scripts/ai/src/bioetl/composition/factories/pipeline/_factory_method_types.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/src/group_issues.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/src/neo4j_memory_mcp_adapter.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/src/neo4j_memory_mcp_smoke.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/src/setup_mcp.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/src/sonar_issue_processor.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/src/sonar_issue_processor_demo.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/src/sonarqube_mcp_smoke.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/ai/vibe/__main__.py",
@@ -2866,7 +2852,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
@@ -2905,16 +2891,16 @@
           "text": "context, but the actual launch path is now `scripts/ai/vibe/launch.sh` and"
         },
         {
-          "path": "scripts/ai/mistrallvibe/launch-interactive.ps1",
-          "line": 37,
+          "path": "scripts/ai/vibe/README.md",
+          "line": 17,
           "source_group": "scripts",
-          "text": "$cmd = \"wsl -d $WslDistro -e bash -i -c 'cd $RepoRootWSL && bash scripts/ai/vibe/launch.sh'\""
+          "text": "bash scripts/ai/vibe/launch.sh --help"
         },
         {
-          "path": "scripts/ai/mistrallvibe/launch-interactive.ps1",
-          "line": 54,
+          "path": "scripts/ai/vibe/README.md",
+          "line": 23,
           "source_group": "scripts",
-          "text": "-ArgumentList \"-d\", $WslDistro, \"-e\", \"bash\", \"-i\", \"-c\", \"cd '$RepoRootWSL' && bash scripts/ai/vibe/launch.sh\" `"
+          "text": "`launch.sh` / `launch.ps1` entrypoints."
         }
       ]
     },
@@ -7868,8 +7854,38 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 11,
       "references": [
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 106,
+          "source_group": "docs",
+          "text": "| `lint_terminology.py`          | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-terminology`  | —            | Линтер терминологии                       "
+        },
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 151,
+          "source_group": "docs",
+          "text": "| [glossary.md](glossary.md)                                  | `lint_terminology.py`                                          |"
+        },
+        {
+          "path": "docs/00-project/ai/agents/scripts/py-team-orchestration.py",
+          "line": 5,
+          "source_group": "docs",
+          "text": "- src/tools/scripts/engineering/qa/lint_terminology.py"
+        },
+        {
+          "path": "docs/00-project/ai/agents/scripts/py-team-orchestration.py",
+          "line": 21,
+          "source_group": "docs",
+          "text": "if (parent / \"src\" / \"tools\" / \"scripts\" / \"lint_terminology.py\").exists()"
+        },
+        {
+          "path": "docs/00-project/ai/agents/scripts/py-team-orchestration.py",
+          "line": 25,
+          "source_group": "docs",
+          "text": "return repo_root / \"src\" / \"tools\" / \"scripts\" / \"lint_terminology.py\""
+        },
         {
           "path": "docs/00-project/glossary.md",
           "line": 510,
@@ -7887,18 +7903,6 @@
           "line": 26,
           "source_group": "scripts",
           "text": "| `check-terminology`              | `lint_terminology.py`                                 | Terminology linting against glossary                                                              |"
-        },
-        {
-          "path": "scripts/engineering/qa/__main__.py",
-          "line": 60,
-          "source_group": "scripts",
-          "text": "\"check-terminology\": \"lint_terminology.py\","
-        },
-        {
-          "path": "tests/architecture/test_lint_terminology_script.py",
-          "line": 15,
-          "source_group": "tests",
-          "text": "assert script_path.exists(), \"scripts/engineering/qa/lint_terminology.py must exist\""
         }
       ]
     },
@@ -10655,14 +10659,6 @@
       ]
     },
     {
-      "path": "scripts/qa/lint_terminology.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
       "path": "scripts/schema/__main__.py",
       "type": "py",
       "status": "active",
@@ -10838,7 +10834,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/schema/README.md",
@@ -10851,12 +10847,6 @@
           "line": 41,
           "source_group": "scripts",
           "text": "\"generate-config-matrix\": \"generate_config_matrix.py\","
-        },
-        {
-          "path": "src/tools/scripts/config_matrix_generator.py",
-          "line": 15,
-          "source_group": "scripts",
-          "text": "/ \"generate_config_matrix.py\""
         }
       ]
     },
@@ -11573,54 +11563,6 @@
           "text": "- [ ] Review src/tools/neo4j_audit.py"
         }
       ]
-    },
-    {
-      "path": "src/tools/scripts/check_application_deps.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "src/tools/scripts/check_architecture.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "src/tools/scripts/check_constructor_args.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "src/tools/scripts/config_matrix_generator.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "src/tools/scripts/lint_terminology.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "src/tools/scripts/validate_unified_configs.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "src/tools/verify_schema_parity.py",

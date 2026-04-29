@@ -217,6 +217,7 @@ def build_openalex_publication_fields() -> list[pa.Field]:
         pa.field("subject_mesh", pa.list_(pa.string())),
         pa.field("subject_topics", pa.string()),
         pa.field("title", pa.string()),
+        pa.field("type_crossref", pa.string()),
         pa.field("volume", pa.string()),
     ]
 

@@ -10,7 +10,7 @@ from pathlib import Path
 def test_lint_terminology_supports_check_without_paths() -> None:
     """CLI must allow --check with no positional paths."""
     repo_root = Path(__file__).resolve().parents[2]
-    script_path = repo_root / "scripts" / "qa" / "lint_terminology.py"
+    script_path = repo_root / "scripts" / "engineering" / "qa" / "lint_terminology.py"
 
     assert script_path.exists(), "scripts/engineering/qa/lint_terminology.py must exist"
 

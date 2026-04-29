@@ -143,7 +143,9 @@ def test_chembl_activity_ontology_companion_rules_derive_from_bundle_context() -
     }
 
     assert endpoint_iri_rule is not None
-    assert endpoint_iri_rule.apply("ignored", record=record) == EXPECTED_BAO_ENDPOINT_IRI
+    assert (
+        endpoint_iri_rule.apply("ignored", record=record) == EXPECTED_BAO_ENDPOINT_IRI
+    )
     assert version_rule is not None
     assert version_rule.apply(None, record=record) == "2.8.18a"
     assert qudt_iri_rule is not None

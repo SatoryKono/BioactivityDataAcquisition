@@ -632,6 +632,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("subject_mesh", pa.list_(pa.string())),
         ("subject_topics", pa.string()),
         ("title", pa.string()),
+        ("type_crossref", pa.string()),
         ("volume", pa.string()),
         *DQ_FIELDS,
     ],

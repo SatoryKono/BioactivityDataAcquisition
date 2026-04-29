@@ -12,6 +12,7 @@ __all__ = [
     "ControlPlaneArtifactLifecyclePlan",
     "ControlPlaneArtifactLifecyclePolicy",
     "ControlPlaneArtifactRef",
+    "ControlPlaneArtifactReplayImpact",
     "ControlPlaneArtifactSurface",
 ]
 
@@ -32,6 +33,17 @@ class ControlPlaneArtifactLifecycleDecision(StrEnum):
 
     DELETE = "delete"
     RETAIN = "retain"
+
+
+class ControlPlaneArtifactReplayImpact(StrEnum):
+    """Replay impact classification for one lifecycle artifact decision."""
+
+    NO_REPLAY_EVIDENCE = "no_replay_evidence"
+    RECOVERY_EVIDENCE_PROTECTED = "recovery_evidence_protected"
+    STRICT_REPLAY_EVIDENCE_PROTECTED = "strict_replay_evidence_protected"
+    UNPROTECTED_REPLAY_EVIDENCE_DELETE_CANDIDATE = (
+        "unprotected_replay_evidence_delete_candidate"
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -66,6 +78,9 @@ class ControlPlaneArtifactRef:
     reason: str
     created_at: datetime | None = None
     protected_by: tuple[str, ...] = ()
+    replay_impact: ControlPlaneArtifactReplayImpact = (
+        ControlPlaneArtifactReplayImpact.NO_REPLAY_EVIDENCE
+    )
 
     @property
     def delete_selected(self) -> bool:

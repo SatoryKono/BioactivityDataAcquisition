@@ -202,6 +202,16 @@ ACTIVE_EXPLICIT_SCRIPTS: Final[frozenset[str]] = frozenset(
         "scripts/ops/support/repo/cleanup_repository.py",
         "scripts/check_dq_dsl_parity.py",
         "scripts/engineering/ci/validate_control_plane_artifacts.py",
+        "scripts/ai/codex/helper/check-env.ps1",
+        "scripts/ai/codex/helper/check-env.sh",
+        "scripts/ai/codex/helper/setup-env.sh",
+        "scripts/ai/gemini/helper/check-env.ps1",
+        "scripts/ai/gemini/helper/setup-env.sh",
+        "scripts/ai/mistrall/helper/check-env.ps1",
+        "scripts/ai/mistrall/helper/check-env.sh",
+        "scripts/ai/mistrall/helper/setup-env.sh",
+        "scripts/ai/mistrallvibe/helper/check-env.ps1",
+        "scripts/ai/mistrallvibe/helper/check-env.sh",
     }
 )
 SUPPORTING_LIFECYCLE_DECISIONS: Final[frozenset[str]] = frozenset(

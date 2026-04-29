@@ -109,6 +109,11 @@ class BatchProcessingSupportService:
         )
         self._batch_metrics.track_batch_size("bronze", len(records))
         self._batch_metrics.track_processed_records("bronze", len(records))
+        self._batch_metrics.track_stage_records(
+            stage="ingestion",
+            outcome="bronze_written",
+            count=len(records),
+        )
         emit_batch_written(
             emitter=self._domain_event_emitter,
             run_id=self._run_id,
@@ -136,6 +141,16 @@ class BatchProcessingSupportService:
         )
         self._batch_metrics.track_processed_records(
             "gold", len(transform_result.gold_records)
+        )
+        self._batch_metrics.track_stage_records(
+            stage="transform",
+            outcome="silver_ready",
+            count=len(transform_result.silver_records),
+        )
+        self._batch_metrics.track_stage_records(
+            stage="transform",
+            outcome="gold_ready",
+            count=len(transform_result.gold_records),
         )
         return transform_result
 
@@ -184,6 +199,16 @@ class BatchProcessingSupportService:
             )
         if write_coros:
             await asyncio.gather(*write_coros)
+        self._batch_metrics.track_stage_records(
+            stage="storage",
+            outcome="silver_written",
+            count=len(transform_result.silver_records),
+        )
+        self._batch_metrics.track_stage_records(
+            stage="storage",
+            outcome="gold_written",
+            count=len(transform_result.gold_records),
+        )
 
     def finalize_batch_span(
         self,

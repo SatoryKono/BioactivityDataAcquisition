@@ -44,6 +44,7 @@ _TITLE_FIELDS = frozenset({"protein_name"})
 _INT_FIELDS = frozenset({"annotation_score", "organism_id", "sequence_length"})
 _SET_LIKE_FIELDS = frozenset(
     {
+        "cellular_component",
         "chembl_ids",
         "drugbank_ids",
         "gene_names",
@@ -53,11 +54,15 @@ _SET_LIKE_FIELDS = frozenset(
         "guidetopharmacology_ids",
         "interpro_xrefs",
         "keywords",
+        "molecular_function",
         "pdb_xrefs",
         "pfam_xrefs",
+        "reaction_ec_numbers",
         "reactome_xrefs",
         "secondary_accessions",
         "isoform_ids",
+        "isoform_names",
+        "isoform_synonyms",
         "protein_alternative_names",
         "protein_ec_numbers",
         "protein_short_names",
@@ -67,13 +72,19 @@ _JSON_STRING_FIELDS = frozenset(
     {
         "alternative_products",
         "biophysicochemical_properties",
+        "cellular_component",
         "cofactors",
         "features_json",
         "isoform_ids",
+        "isoform_names",
+        "isoform_synonyms",
         "lineage",
+        "molecular_function",
         "protein_alternative_names",
         "protein_ec_numbers",
         "protein_short_names",
+        "reactions",
+        "reaction_ec_numbers",
     }
 )
 _BOOLEAN_FIELDS = frozenset({"reviewed"})

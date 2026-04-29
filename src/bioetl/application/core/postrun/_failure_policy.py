@@ -18,6 +18,8 @@ class PostrunFailurePolicySpec:
     strict_reason_code: str
     warning_reason: str
     warning_reason_code: str
+
+
 def is_strict_validation_enabled(runtime: object) -> bool:
     """Return True only when strict validation is explicitly enabled."""
     value = getattr(runtime, "strict_validation", False)

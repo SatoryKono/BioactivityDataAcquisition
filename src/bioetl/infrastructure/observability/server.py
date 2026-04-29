@@ -14,6 +14,9 @@ from prometheus_client.exposition import pushadd_to_gateway
 
 from bioetl.domain.exceptions import MetricsServerError
 from bioetl.domain.ports import MetricsServerRuntimeStatus
+from bioetl.infrastructure.observability._metrics_defs_core import (
+    METRICS_PUBLICATION_EVENTS_TOTAL,
+)
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
@@ -46,6 +49,22 @@ __all__ = [
     "reset_server_state",
     "start_metrics_server",
 ]
+
+
+def _emit_metrics_publication_event(
+    *,
+    grouping_key: dict[str, str] | None,
+    status: str,
+    target: str = "pushgateway",
+) -> None:
+    """Emit best-effort publication outcomes through the shared registry."""
+    labels = grouping_key or {}
+    METRICS_PUBLICATION_EVENTS_TOTAL.labels(
+        pipeline=labels.get("pipeline", "unknown"),
+        run_type=labels.get("run_type", "unknown"),
+        target=target,
+        status=status,
+    ).inc()
 
 
 def _handle_port_in_use(
@@ -228,6 +247,10 @@ def push_metrics_to_gateway(
             run_label=effective_run_label,
             grouping_key=grouping_key,
         )
+        _emit_metrics_publication_event(
+            grouping_key=grouping_key,
+            status="success",
+        )
         return True
     except (
         OSError,
@@ -241,6 +264,10 @@ def push_metrics_to_gateway(
             "Failed to push metrics to gateway",
             gateway=gateway,
             error=str(e),
+        )
+        _emit_metrics_publication_event(
+            grouping_key=grouping_key,
+            status="failed",
         )
         return False
 
