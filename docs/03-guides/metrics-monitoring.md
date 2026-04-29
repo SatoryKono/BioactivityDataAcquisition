@@ -307,6 +307,10 @@ Guardrail:
 | `bioetl_filter_ids_duplicates_total`      | Counter | pipeline, source_file | Дубликаты ID        |
 | `bioetl_filter_combinations_loaded_total` | Counter | pipeline, source_file | Комбинации фильтров |
 
+`source_file` в этих family не должен содержать raw paths. Канонический label
+shape — normalized basename token (`activity_ids.csv`), неизвестные или
+неразборчивые значения схлопываются в `unknown`.
+
 #### Health Check Metrics
 
 | Метрика                                | Тип       | Labels              | Описание                                                  |
@@ -384,26 +388,26 @@ ______________________________________________________________________
 
 | Поле       | Обязательно | Описание                                  |
 | ---------- | ----------- | ----------------------------------------- |
-| `ts`       | MUST        | ISO timestamp                             |
-| `level`    | MUST        | Log level (DEBUG, INFO, WARNING, ERROR)   |
-| `run-id`   | MUST        | UUID correlation ID                       |
-| `pipeline` | MUST        | Имя пайплайна                             |
-| `stage`    | SHOULD      | Этап (extract, transform, load, validate) |
-| `event`    | MUST        | Описание события                          |
+| `timestamp` | MUST   | ISO timestamp                                        |
+| `level`     | MUST   | Log level (DEBUG, INFO, WARNING, ERROR)              |
+| `run_id`    | MUST   | UUID correlation ID                                  |
+| `pipeline`  | MUST   | Имя пайплайна                                        |
+| `stage`     | SHOULD | `preflight`, `execution`, `postrun`, `cleanup`, etc. |
+| `event`     | MUST   | Описание события                                     |
 
 ### Пример лога
 
 ```json
 {
-  "ts": "2026-01-26T10:30:45.123456Z",
+  "timestamp": "2026-01-26T10:30:45.123456Z",
   "level": "INFO",
-  "run-id": "550e8400-e29b-41d4-a716-446655440000",
+  "run_id": "550e8400-e29b-41d4-a716-446655440000",
   "pipeline": "chembl_activity",
-  "stage": "extract",
+  "stage": "preflight",
   "event": "Fetching records",
   "offset": 0,
   "limit": 100,
-  "batch-size": 100
+  "batch_size": 100
 }
 ```
 

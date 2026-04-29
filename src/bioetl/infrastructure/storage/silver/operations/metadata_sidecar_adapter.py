@@ -1,4 +1,10 @@
-"""Pure helper functions for Silver metadata construction."""
+"""Operations-only Silver metadata sidecar adapter.
+
+This adapter exists for infrastructure write/finalization paths that cannot
+directly depend on application metadata coordination. It must keep Silver
+artifact identity deterministic and must not emit placeholder content hashes or
+run-derived artifact ids.
+"""
 
 from __future__ import annotations
 
@@ -30,7 +36,7 @@ from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 
 
 @dataclass(frozen=True, slots=True)
-class _SilverMetadataBuildRequest:
+class _SilverMetadataSidecarRequest:
     """Input bundle for constructing one SilverMetadata payload."""
 
     table_name: str
@@ -62,8 +68,8 @@ def _split_table_name(table_name: str) -> tuple[str, str]:
     return table_name, "unknown"
 
 
-def _placeholder_table_path(table_name: str) -> str:
-    """Build a stable placeholder path when the real table path is unavailable."""
+def _fallback_table_path(table_name: str) -> str:
+    """Build a stable table path when the real table path is unavailable."""
     return f"data/output/silver/{table_name.replace('.', '/')}"
 
 
@@ -162,7 +168,7 @@ def _normalize_records_for_dq_metrics(
 
 
 def _build_runtime_metadata(
-    request: _SilverMetadataBuildRequest,
+    request: _SilverMetadataSidecarRequest,
 ) -> RuntimeMetadata:
     """Build runtime metadata for a Silver sidecar."""
     return RuntimeMetadata(
@@ -193,7 +199,7 @@ def _build_pipeline_metadata(provider_name: str, entity_name: str) -> PipelineMe
 
 
 def _build_lineage_metadata(
-    request: _SilverMetadataBuildRequest,
+    request: _SilverMetadataSidecarRequest,
 ) -> LineageMetadata:
     """Build lineage metadata for a Silver sidecar."""
     return LineageMetadata(
@@ -210,7 +216,7 @@ def _build_lineage_metadata(
     )
 
 
-def _build_delta_metadata(request: _SilverMetadataBuildRequest) -> DeltaMetrics:
+def _build_delta_metadata(request: _SilverMetadataSidecarRequest) -> DeltaMetrics:
     """Build Delta operation metadata for a Silver sidecar."""
     return DeltaMetrics(
         table_path=request.table_path,
@@ -227,7 +233,7 @@ def _build_delta_metadata(request: _SilverMetadataBuildRequest) -> DeltaMetrics:
     )
 
 
-def _build_dq_summary(request: _SilverMetadataBuildRequest) -> DQSummary:
+def _build_dq_summary(request: _SilverMetadataSidecarRequest) -> DQSummary:
     """Build DQ summary metadata for a Silver sidecar."""
     (
         total_records,
@@ -252,7 +258,9 @@ def _build_dq_summary(request: _SilverMetadataBuildRequest) -> DQSummary:
     )
 
 
-def _build_output_metadata(request: _SilverMetadataBuildRequest) -> BaseOutputMetadata:
+def _build_output_metadata(
+    request: _SilverMetadataSidecarRequest,
+) -> BaseOutputMetadata:
     """Build output artifact metadata for a Silver sidecar."""
     provider_name, entity_name = _split_table_name(request.table_name)
     dataset = DatasetRef(
@@ -277,7 +285,7 @@ def _build_output_metadata(request: _SilverMetadataBuildRequest) -> BaseOutputMe
 
 
 def _build_environment_metadata(
-    request: _SilverMetadataBuildRequest,
+    request: _SilverMetadataSidecarRequest,
 ) -> EnvironmentMetadata:
     """Build runtime environment metadata for a Silver sidecar."""
     return EnvironmentMetadata(
@@ -287,8 +295,8 @@ def _build_environment_metadata(
     )
 
 
-def _build_silver_metadata(
-    request: _SilverMetadataBuildRequest,
+def _build_silver_sidecar_metadata(
+    request: _SilverMetadataSidecarRequest,
 ) -> SilverMetadata:
     """Build a complete SilverMetadata payload from write/finalization inputs."""
     provider_name, entity_name = _split_table_name(request.table_name)

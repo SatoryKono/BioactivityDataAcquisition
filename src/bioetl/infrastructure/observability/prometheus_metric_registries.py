@@ -28,6 +28,7 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
     family="pipeline_runtime",
     counters={
         "bioetl_records_processed_total": _metrics.RECORDS_PROCESSED_TOTAL,
+        "bioetl_record_flow_records_total": _metrics.RECORD_FLOW_RECORDS_TOTAL,
         "bioetl_errors_total": _metrics.ERRORS_TOTAL,
         "bioetl_filter_ids_loaded_total": _metrics.FILTER_IDS_LOADED_TOTAL,
         "bioetl_filter_ids_duplicates_total": _metrics.FILTER_IDS_DUPLICATES_TOTAL,

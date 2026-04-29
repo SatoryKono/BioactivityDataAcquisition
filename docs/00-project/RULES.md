@@ -758,7 +758,11 @@ pmid → pmid → pubmed-id
 См. [ADR-017](../02-architecture/decisions/ADR-017-observability-architecture.md) и [ADR-022](../02-architecture/decisions/ADR-022-tracing-noop.md) для NoOp Tracing.
 
 - **TracingPort = OTel facade**: `TracingPort` сознательно моделирует OpenTelemetry Tracing API (`get-tracer → start-as-current-span → Span`). Это обеспечивает единый calling convention для NoOp и реального OTel бэкенда. См. ADR-022.
-- **Correlation ID**: `run-id` обязателен во всех логах, метриках и блокировках.
+- **Correlation ID**: `run_id` обязателен во всех логах и блокировках.
+- **Prometheus guardrail**: `run_id`, `manifest_id`, `record_id`,
+  `lineage_fragment_id`, hashes и filesystem paths **MUST NOT** публиковаться
+  как labels; per-run forensic correlation идёт через logs, RunManifest,
+  RunLedger и inspection CLI.
 - **Retention**: Логи хранятся 30 дней, метрики — 90 дней.
 - **Логи**: Структурированный JSON.
 - **Dataset ID**: В логи и метрики добавляется лейбл `dataset` (логическое имя таблицы, напр. `chembl/activity`), так как pipeline может писать в несколько таблиц.
@@ -767,14 +771,14 @@ pmid → pmid → pubmed-id
 
 | Поле         | Обязательность | Пример                         |
 | ------------ | -------------- | ------------------------------ |
-| timestamp    | MUST           | `2025-12-15T10:00:00Z`         |
-| level        | MUST           | `INFO`, `ERROR`                |
-| run-id       | MUST           | UUID                           |
-| pipeline     | MUST           | `chembl_activity`              |
-| stage        | MUST           | `extract`, `transform`, `load` |
-| dataset      | SHOULD         | `chembl/activity`              |
-| record-count | SHOULD         | 1000                           |
-| error-type   | При ошибках    | `SCHEMA-VIOLATION`             |
+| timestamp    | MUST        | `2025-12-15T10:00:00Z`                |
+| level        | MUST        | `INFO`, `ERROR`                       |
+| run_id       | MUST        | UUID                                  |
+| pipeline     | MUST        | `chembl_activity`                     |
+| stage        | SHOULD      | `preflight`, `execution`, `postrun`   |
+| dataset      | SHOULD      | `chembl/activity`                     |
+| record_count | SHOULD      | 1000                                  |
+| error_type   | При ошибках | `SCHEMA_VIOLATION`, `timeout`, `other` |
 
 ### 3.2.2. Prometheus Metrics
 
@@ -790,12 +794,29 @@ pmid → pmid → pubmed-id
 
 | Метрика                       | Тип       | Labels                            | Описание                        |
 | ----------------------------- | --------- | --------------------------------- | ------------------------------- |
-| `pipeline-duration-seconds`   | Histogram | pipeline, stage, status, run-type | Длительность выполнения этапов  |
-| `records-processed-total`     | Counter   | pipeline, stage, run-type         | Количество обработанных записей |
-| `errors-total`                | Counter   | pipeline, stage, error-code       | Количество ошибок по типам      |
-| `batch-size-records`          | Histogram | pipeline, stage                   | Распределение размеров батчей   |
-| `filter-ids-loaded-total`     | Counter   | pipeline                          | Загружено ID для фильтрации     |
-| `filter-ids-duplicates-total` | Counter   | pipeline                          | Дубликаты в файле фильтрации    |
+| `bioetl_pipeline_duration_seconds` | Histogram | pipeline, stage, status, run_type | Длительность выполнения этапов  |
+| `bioetl_records_processed_total`   | Counter   | pipeline, stage, run_type         | Количество обработанных записей |
+| `bioetl_errors_total`              | Counter   | pipeline, stage, error_code       | Количество ошибок по типам      |
+| `bioetl_batch_size_records`        | Histogram | pipeline, stage                   | Распределение размеров батчей   |
+| `bioetl_filter_ids_loaded_total`   | Counter   | pipeline, source_file             | Загружено ID для фильтрации     |
+| `bioetl_filter_ids_duplicates_total` | Counter | pipeline, source_file             | Дубликаты в файле фильтрации    |
+
+Для runtime `stage`/`phase` labels используйте только bounded vocabulary:
+
+- ordinary lifecycle: `startup`, `preflight`, `lifecycle_clear`, `execution`,
+  `postrun`, `cleanup`
+- record-flow stages: `bronze`, `silver`, `gold`, `filtered_out`,
+  `quarantined`, `validation`, `transform`
+- composite phases: `preflight_validation`, `seed`, `dependencies`,
+  `enrichment`, `merge`, `cross_validation`, `gold_write`
+
+Для adapter labels:
+
+- `endpoint` MUST быть нормализован к bounded route-template виду
+  (`/works/{id}`, а не `/works/123456789`)
+- `source_file` MUST публиковаться как bounded normalized basename token
+- `operation` MUST использовать reviewable bounded vocabulary; неизвестные
+  значения схлопываются в `other`
 
 **Реализация:** См. `src/bioetl/infrastructure/observability/metrics.py` и `prometheus_metrics.py`.
 

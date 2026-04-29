@@ -13,6 +13,8 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
     from bioetl.domain.types import ErrorType, JsonDict
 
+_FLOW_ACCOUNTING_STAGES = frozenset({"bronze", "silver", "gold", "filtered_out"})
+
 
 class BatchMetricsRecorderService:
     """Helper to record metrics for a batch processing cycle.
@@ -83,6 +85,14 @@ class BatchMetricsRecorderService:
                 {"pipeline": self._pipeline_label, "stage": stage},
             )
 
+    def track_records_fetched(self, count: int) -> None:
+        """Record the bounded fetched-side record-flow projection."""
+        self._pipeline_metrics.record_record_flow(
+            run_type=self._run_type_label,
+            flow_stage="fetched",
+            count=count,
+        )
+
     def track_processed_records(self, stage: str, count: int) -> None:
         """Record number of processed records at a specific stage.
 
@@ -103,6 +113,12 @@ class BatchMetricsRecorderService:
                     "stage": stage,
                     "run_type": self._run_type_label,
                 },
+            )
+        if stage in _FLOW_ACCOUNTING_STAGES:
+            self._pipeline_metrics.record_record_flow(
+                run_type=self._run_type_label,
+                flow_stage=stage,
+                count=count,
             )
 
     def track_error(self, stage: str, error_type: ErrorType) -> None:
@@ -164,6 +180,11 @@ class BatchMetricsRecorderService:
             )
             self._pipeline_metrics.record_quarantine_records(
                 reason=error_type.value,
+                count=count,
+            )
+            self._pipeline_metrics.record_record_flow(
+                run_type=self._run_type_label,
+                flow_stage="quarantined",
                 count=count,
             )
 

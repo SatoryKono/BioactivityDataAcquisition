@@ -335,6 +335,10 @@ All shipped observability must follow these rules:
 - metric labels stay low-cardinality
 - `run_id`, `manifest_id`, payload hashes, filesystem paths, and other
   per-run/per-record identifiers must not appear in Prometheus labels
+- adapter `endpoint` labels use bounded route-template forms
+- filter `source_file` labels use normalized basename tokens
+- adapter `operation` labels use reviewed bounded vocabularies
+- runtime `stage` / `phase` labels use canonical bounded vocabularies
 - logs keep `run_id`, `pipeline`, and `stage` for correlation
 - traces keep the canonical run-correlation attribute defined by the
   observability contract together with phase-specific attributes
