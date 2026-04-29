@@ -34,9 +34,18 @@ class Tissue(BaseEntity):
 
     # External ontology identifiers (API-OPTIONAL)
     bto_id: str | None = None  # BRENDA Tissue Ontology
+    bto_iri: str | None = None
+    bto_mapping_status: str | None = None
+    bto_ontology_version: str | None = None
     caloha_id: str | None = None  # CALIPHO tissue ontology
     efo_id: str | None = None  # Experimental Factor Ontology
+    efo_iri: str | None = None
+    efo_mapping_status: str | None = None
+    efo_ontology_version: str | None = None
     uberon_id: str | None = None  # Uberon multi-species anatomy ontology
+    uberon_iri: str | None = None
+    uberon_mapping_status: str | None = None
+    uberon_ontology_version: str | None = None
 
     def _validate_invariants(self) -> None:
         if not self.tissue_id:

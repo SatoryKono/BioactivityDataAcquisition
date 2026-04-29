@@ -16,11 +16,14 @@ from bioetl.domain.schemas.constants import (
     CHEMBL_ID_PATTERN,
     CLO_ID_PATTERN,
     EFO_ID_PATTERN,
+    ONTOLOGY_MAPPING_STATUSES,
 )
 
 __all__ = [
     "CellLineSchema",
 ]
+
+HTTP_IRI_PATTERN = r"^https?://[^\s]+$"
 
 
 class CellLineSchema(ETLRecordSchema):
@@ -79,6 +82,20 @@ class CellLineSchema(ETLRecordSchema):
         str_matches=CLO_ID_PATTERN,
         description="Cell Line Ontology ID.",
     )
+    clo_iri: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=HTTP_IRI_PATTERN,
+        description="Persistent IRI for the CLO identifier.",
+    )
+    clo_mapping_status: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=list(ONTOLOGY_MAPPING_STATUSES),
+        description="CLO IRI mapping status.",
+    )
+    clo_ontology_version: Series[str] | None = pa.Field(
+        nullable=True,
+        description="CLO ontology release/version used for IRI mapping.",
+    )
     cl_lincs_id: Series[str] | None = pa.Field(
         nullable=True,
         description="LINCS ID (Library of Integrated Network-Based Cellular Signatures).",
@@ -87,6 +104,20 @@ class CellLineSchema(ETLRecordSchema):
         nullable=True,
         str_matches=EFO_ID_PATTERN,
         description="EFO ontology ID.",
+    )
+    efo_iri: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=HTTP_IRI_PATTERN,
+        description="Persistent IRI for the EFO identifier.",
+    )
+    efo_mapping_status: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=list(ONTOLOGY_MAPPING_STATUSES),
+        description="EFO IRI mapping status.",
+    )
+    efo_ontology_version: Series[str] | None = pa.Field(
+        nullable=True,
+        description="EFO ontology release/version used for IRI mapping.",
     )
 
     class Config:

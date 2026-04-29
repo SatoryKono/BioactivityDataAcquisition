@@ -96,6 +96,12 @@ class CellLineTransformer(BaseChemblTransformer):
                 record.get("cellosaurus_id")
             ),
             "clo_id": normalizer.normalize_to_string(record.get("clo_id")),
+            "clo_iri": None,
+            "clo_mapping_status": None,
+            "clo_ontology_version": None,
             "cl_lincs_id": normalizer.normalize_to_string(record.get("cl_lincs_id")),
             "efo_id": normalizer.normalize_to_string(record.get("efo_id")),
+            "efo_iri": None,
+            "efo_mapping_status": None,
+            "efo_ontology_version": None,
         }

@@ -48,6 +48,10 @@ def test_chembl_policy_surface_points_to_externalized_registry_sources() -> None
     standard_flag = chembl_policy_surface("activity", "standard_flag")
     bao_format = chembl_policy_surface("activity", "bao_format")
     bao_endpoint_iri = chembl_policy_surface("activity", "bao_endpoint_iri")
+    assay_bao_mapping_status = chembl_policy_surface(
+        "assay",
+        "bao_format_mapping_status",
+    )
     bao_version = chembl_policy_surface("activity", "bao_ontology_version")
     publication_class = chembl_policy_surface("publication", "publication_class")
 
@@ -70,6 +74,10 @@ def test_chembl_policy_surface_points_to_externalized_registry_sources() -> None
     assert bao_endpoint_iri is not None
     assert bao_endpoint_iri.category == "ontology_reference_identifier"
     assert bao_endpoint_iri.registry_source == CHEMBL_ONTOLOGY_POLICY_CONFIG
+
+    assert assay_bao_mapping_status is not None
+    assert assay_bao_mapping_status.category == "ontology_reference_metadata"
+    assert assay_bao_mapping_status.registry_source == CHEMBL_ONTOLOGY_POLICY_CONFIG
 
     assert bao_version is not None
     assert bao_version.category == "ontology_reference_metadata"
@@ -102,6 +110,12 @@ def test_chembl_policy_registry_configs_cover_declared_policy_fields() -> None:
     ontology_fields = {
         field for policy in ontology["families"].values() for field in policy["fields"]
     }
+    ontology_companion_fields = {
+        field
+        for policy in ontology["families"].values()
+        for companion_fields in policy.get("companion_fields", {}).values()
+        for field in companion_fields
+    }
 
     assert "chembl_activity.units" in controlled_fields
     assert "chembl_assay_parameters.type" in controlled_fields
@@ -111,6 +125,9 @@ def test_chembl_policy_registry_configs_cover_declared_policy_fields() -> None:
     assert "chembl_activity.bao_format" in ontology_fields
     assert "chembl_cell_line.cellosaurus_id" in ontology_fields
     assert "chembl_cell_line.clo_id" in ontology_fields
+    assert "chembl_assay.bao_format_mapping_status" in ontology_companion_fields
+    assert "chembl_tissue.bto_iri" in ontology_companion_fields
+    assert "chembl_cell_line.clo_ontology_version" in ontology_companion_fields
 
 
 def test_chembl_policy_registry_exposes_profile_authoring_field_sets() -> None:
@@ -175,6 +192,9 @@ def test_chembl_policy_registry_can_be_reinitialized_from_in_memory_data() -> No
                     fields=("chembl_cell_line.cellosaurus_id",),
                     code_label_fields=("chembl_assay.bao_label",),
                     iri_fields=("chembl_activity.bao_endpoint_iri",),
+                    mapping_status_fields=(
+                        "chembl_activity.bao_endpoint_mapping_status",
+                    ),
                     version_fields=("chembl_activity.bao_ontology_version",),
                 ),
             ),
@@ -199,6 +219,9 @@ def test_chembl_policy_registry_can_be_reinitialized_from_in_memory_data() -> No
     iri_surface = chembl_policy_surface("activity", "bao_endpoint_iri")
     assert iri_surface is not None
     assert iri_surface.category == "ontology_reference_identifier"
+    status_surface = chembl_policy_surface("activity", "bao_endpoint_mapping_status")
+    assert status_surface is not None
+    assert status_surface.category == "ontology_reference_metadata"
     publication_class = chembl_policy_surface("publication", "publication_class")
     assert publication_class is not None
     assert publication_class.registry_source == PUBLICATION_CLASSIFICATION_CONFIG

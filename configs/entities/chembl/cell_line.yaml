@@ -41,8 +41,14 @@ schema:
     - cell_type
     - cellosaurus_id
     - clo_id
+    - clo_iri
+    - clo_mapping_status
+    - clo_ontology_version
     - cl_lincs_id
     - efo_id
+    - efo_iri
+    - efo_mapping_status
+    - efo_ontology_version
   - name: dq
     pattern: ^_dq_
   silver:
@@ -83,21 +89,89 @@ quality:
     error_message: cellosaurus_id must match CVCL format
   - field: clo_id
     type: pattern
-    pattern: ^CLO:\d{7}$
+    pattern: ^CLO[_:]\d+$
     nullable: true
-    error_message: clo_id must match CLO format (CLO:0000000)
+    error_message: clo_id must match CLO format (CLO_0000000 or CLO:0000000)
+  - field: clo_iri
+    type: pattern
+    pattern: '^https?://[^\s]+$'
+    nullable: true
+    error_message: clo_iri must be an HTTP(S) IRI when present
+  - field: clo_mapping_status
+    type: enum
+    allowed:
+    - mapped
+    - unmapped
+    - missing
+    nullable: true
+    error_message: Invalid CLO mapping status
   - field: efo_id
     type: pattern
-    pattern: ^EFO:\d{7}$
+    pattern: ^EFO[_:]\d+$
     nullable: true
-    error_message: efo_id must match EFO format (EFO:0000000)
+    error_message: efo_id must match EFO format (EFO_0000000 or EFO:0000000)
+  - field: efo_iri
+    type: pattern
+    pattern: '^https?://[^\s]+$'
+    nullable: true
+    error_message: efo_iri must be an HTTP(S) IRI when present
+  - field: efo_mapping_status
+    type: enum
+    allowed:
+    - mapped
+    - unmapped
+    - missing
+    nullable: true
+    error_message: Invalid EFO mapping status
   - field: cell_source_taxonomy_id
     type: range
     min: 1
     max: 10000000
     nullable: true
-  entity_cross_field_validations: []
-  entity_conditional_validations: []
+  entity_cross_field_validations:
+  - name: clo_id_requires_mapping_status
+    fields:
+    - clo_id
+    - clo_mapping_status
+    condition: conditional_required
+    trigger_field: clo_id
+    required_field: clo_mapping_status
+    error_message: CLO mappings must publish a companion mapping status
+  - name: efo_id_requires_mapping_status
+    fields:
+    - efo_id
+    - efo_mapping_status
+    condition: conditional_required
+    trigger_field: efo_id
+    required_field: efo_mapping_status
+    error_message: EFO mappings must publish a companion mapping status
+  entity_conditional_validations:
+  - name: mapped_clo_id_requires_bundle
+    condition_field: clo_mapping_status
+    condition_value: mapped
+    condition_operator: eq
+    then_validations:
+    - field: clo_iri
+      type: required
+      nullable: false
+      error_message: Mapped CLO identifiers must publish a canonical IRI
+    - field: clo_ontology_version
+      type: required
+      nullable: false
+      error_message: Mapped CLO identifiers must publish an ontology version
+  - name: mapped_efo_id_requires_bundle
+    condition_field: efo_mapping_status
+    condition_value: mapped
+    condition_operator: eq
+    then_validations:
+    - field: efo_iri
+      type: required
+      nullable: false
+      error_message: Mapped EFO identifiers must publish a canonical IRI
+    - field: efo_ontology_version
+      type: required
+      nullable: false
+      error_message: Mapped EFO identifiers must publish an ontology version
   key_nullability:
   - field: cell_id
     key_type: merge

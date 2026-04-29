@@ -139,6 +139,12 @@ def _add_ontology_surfaces(
         )
         _register_ontology_family_fields(
             surfaces,
+            ontology_family.mapping_status_fields,
+            category="ontology_reference_metadata",
+            invalid_value_mode="resolve_identifier_backed_mapping_status",
+        )
+        _register_ontology_family_fields(
+            surfaces,
             ontology_family.version_fields,
             category="ontology_reference_metadata",
             invalid_value_mode="resolve_identifier_backed_version",

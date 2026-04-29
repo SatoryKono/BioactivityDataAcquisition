@@ -72,6 +72,16 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/root-hygiene-cleanup-hardening-2026-04-29.md
       lifecycle: supporting_context
+    - path: docs/plans/root-hygiene-review-lane-automation-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/scripts-supporting-retained-set-closeout-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/temporary-diagnostic-ttl-wave-1-closeout-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/temporary-diagnostic-ttl-wave-2-closeout-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/temporary-diagnostic-ttl-wave-3-closeout-2026-04-29.md
+      lifecycle: supporting_context
     - path: docs/plans/silver-filter-rejects-observability-plan.md
       lifecycle: supporting_context
     - path: docs/plans/test-health-observability-plan-2026-04-22.md

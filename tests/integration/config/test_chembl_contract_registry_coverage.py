@@ -6,10 +6,10 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.domain.control_plane.contract_registry import ContractRegistry
 from bioetl.infrastructure.config.dq_contract_config_loader import (
     DQContractConfigLoader,
 )
+from bioetl.infrastructure.control_plane import FileContractRegistryStore
 
 _REGISTRY_PATH = Path("configs/base/contract_registry.yaml")
 _CONFIGS_ROOT = Path("configs")
@@ -77,7 +77,8 @@ _EXPECTED_CHEMBL_CONTRACT_SURFACE: dict[str, dict[str, str]] = {
 @pytest.mark.integration
 def test_chembl_contract_registry_covers_all_shipped_gold_surfaces() -> None:
     """Registry must cover the full shipped ChEMBL Gold contract surface."""
-    registry = ContractRegistry(_REGISTRY_PATH)
+    store = FileContractRegistryStore(_REGISTRY_PATH)
+    registry = store.load()
 
     chembl_entries = {
         contract_ref: entry
@@ -100,9 +101,10 @@ def test_chembl_contract_registry_covers_all_shipped_gold_surfaces() -> None:
 @pytest.mark.integration
 def test_chembl_contract_registry_paths_are_filesystem_consistent() -> None:
     """All registered ChEMBL contract sources and artifacts must exist."""
-    registry = ContractRegistry(_REGISTRY_PATH)
+    store = FileContractRegistryStore(_REGISTRY_PATH)
+    registry = store.load()
 
-    result = registry.validate_filesystem_consistency()
+    result = store.validate_filesystem_consistency(registry)
 
     chembl_issues = [
         issue for issue in result.issues if issue.contract_ref.startswith("chembl.")

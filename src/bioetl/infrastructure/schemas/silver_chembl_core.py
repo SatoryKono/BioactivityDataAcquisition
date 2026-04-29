@@ -186,7 +186,10 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("assay_type", pa.string(), nullable=False),
         pa.field("assay_type_description", pa.string()),
         pa.field("bao_format", pa.string()),
+        pa.field("bao_format_iri", pa.string()),
+        pa.field("bao_format_mapping_status", pa.string()),
         pa.field("bao_label", pa.string()),
+        pa.field("bao_ontology_version", pa.string()),
         pa.field("cell_id", pa.string()),
         pa.field("confidence_description", pa.string()),
         pa.field("confidence_score", pa.int64()),
@@ -286,9 +289,15 @@ CHEMBL_CELL_LINE_SCHEMA = pa.schema(
         pa.field("cell_type", pa.string()),
         # External identifiers
         pa.field("cellosaurus_id", pa.string()),
-        pa.field("clo_id", pa.string()),
         pa.field("cl_lincs_id", pa.string()),
+        pa.field("clo_id", pa.string()),
+        pa.field("clo_iri", pa.string()),
+        pa.field("clo_mapping_status", pa.string()),
+        pa.field("clo_ontology_version", pa.string()),
         pa.field("efo_id", pa.string()),
+        pa.field("efo_iri", pa.string()),
+        pa.field("efo_mapping_status", pa.string()),
+        pa.field("efo_ontology_version", pa.string()),
         *build_silver_dq_suffix_fields(),
     ]
 )
@@ -301,11 +310,20 @@ CHEMBL_TISSUE_SCHEMA = pa.schema(
         *build_silver_system_prefix_fields(),
         # === Business fields (alphabetical order) ===
         pa.field("bto_id", pa.string()),  # BRENDA Tissue Ontology
+        pa.field("bto_iri", pa.string()),
+        pa.field("bto_mapping_status", pa.string()),
+        pa.field("bto_ontology_version", pa.string()),
         pa.field("caloha_id", pa.string()),  # CALIPHO ID
         pa.field("efo_id", pa.string()),  # Experimental Factor Ontology
+        pa.field("efo_iri", pa.string()),
+        pa.field("efo_mapping_status", pa.string()),
+        pa.field("efo_ontology_version", pa.string()),
         pa.field("pref_name", pa.string(), nullable=False),  # Preferred tissue name
         pa.field("tissue_id", pa.string(), nullable=False),  # Primary key
         pa.field("uberon_id", pa.string()),  # Uberon Ontology
+        pa.field("uberon_iri", pa.string()),
+        pa.field("uberon_mapping_status", pa.string()),
+        pa.field("uberon_ontology_version", pa.string()),
         # === DQ_FIELDS_SUFFIX ===
         *build_silver_dq_suffix_fields(),
     ]

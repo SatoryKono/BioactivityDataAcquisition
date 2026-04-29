@@ -288,7 +288,7 @@ Focus on:
   rejected or degraded; these compact payloads surface
   `composite_run_identity`, `execution_fingerprint`, `manifest_id`,
   `effective_config_hash`, `contract_ref`, `contract_version`, `exact_replay`,
-  and `input_snapshot_ids`;
+  `input_snapshot_ids`, and `input_snapshot_content_hashes`;
 - `dq_policy_ref`, `rule_bundle_version`, and `dq_contract_compatibility_hash` as adjacent DQ/control-plane anchors that are related but not interchangeable with manifest identity;
 - `correlation_anchor_gaps`, `alert_signals`, `next_steps`.
 

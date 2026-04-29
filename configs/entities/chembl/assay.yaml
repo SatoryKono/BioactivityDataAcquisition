@@ -64,7 +64,10 @@ schema:
                 - cell_id
                 - tissue_id
                 - bao_format
+                - bao_format_iri
+                - bao_format_mapping_status
                 - bao_label
+                - bao_ontology_version
                 - aidx
                 - variant_accession
                 - variant_isoform
@@ -188,6 +191,19 @@ quality:
             pattern: ^.{1,200}$
             nullable: true
             error_message: assay_subcellular_fraction must not exceed 200 chars
+        -   field: bao_format_iri
+            type: pattern
+            pattern: '^https?://[^\s]+$'
+            nullable: true
+            error_message: bao_format_iri must be an HTTP(S) IRI when present
+        -   field: bao_format_mapping_status
+            type: enum
+            allowed:
+                - mapped
+                - unmapped
+                - missing
+            nullable: true
+            error_message: Invalid BAO format mapping status
     entity_cross_field_validations:
         -   name: assay_identifiable
             fields:
@@ -195,7 +211,28 @@ quality:
                 - description
             condition: all_present
             error_message: Assay must have ID and description
-    entity_conditional_validations: []
+        -   name: bao_format_requires_mapping_status
+            fields:
+                - bao_format
+                - bao_format_mapping_status
+            condition: conditional_required
+            trigger_field: bao_format
+            required_field: bao_format_mapping_status
+            error_message: BAO format mappings must publish a companion mapping status
+    entity_conditional_validations:
+        -   name: mapped_bao_format_requires_bundle
+            condition_field: bao_format_mapping_status
+            condition_value: mapped
+            condition_operator: eq
+            then_validations:
+                -   field: bao_format_iri
+                    type: required
+                    nullable: false
+                    error_message: Mapped BAO format identifiers must publish a canonical IRI
+                -   field: bao_ontology_version
+                    type: required
+                    nullable: false
+                    error_message: Mapped BAO format identifiers must publish an ontology version
     key_nullability:
         -   field: assay_id
             key_type: merge

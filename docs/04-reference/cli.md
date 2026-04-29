@@ -408,7 +408,8 @@ bioetl run-manifest show <run-id|manifest-id> [--format text|json|yaml]
 
 Они содержат resume-critical anchors: `composite_run_identity`,
 `execution_fingerprint`, `manifest_id`, `effective_config_hash`,
-`contract_ref`, `contract_version`, `exact_replay`, `input_snapshot_ids`.
+`contract_ref`, `contract_version`, `exact_replay`, `input_snapshot_ids`,
+`input_snapshot_content_hashes`.
 
 В `text`/`json`/`yaml` diff output отдельное поле `replay_relationship`
 показывает, является ли один manifest exact replay другого, вместо того чтобы
@@ -802,7 +803,7 @@ ______________________________________________________________________
 
 ### `quarantine` — Управление карантином
 
-Dashboard для работы с проблемными записями.
+CLI surface для работы с проблемными записями.
 
 #### `quarantine inspect` — Просмотр записей
 

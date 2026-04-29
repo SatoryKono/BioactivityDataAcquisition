@@ -14,12 +14,15 @@ from bioetl.domain.schemas.constants import (
     CALOHA_ID_PATTERN,
     CHEMBL_ID_PATTERN,
     EFO_ID_PATTERN,
+    ONTOLOGY_MAPPING_STATUSES,
     UBERON_ID_PATTERN,
 )
 
 __all__ = [
     "TissueSchema",
 ]
+
+HTTP_IRI_PATTERN = r"^https?://[^\s]+$"
 
 
 class TissueSchema(ETLRecordSchema):
@@ -41,6 +44,20 @@ class TissueSchema(ETLRecordSchema):
         str_matches=BTO_ID_PATTERN,
         description="BRENDA Tissue Ontology identifier.",
     )
+    bto_iri: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=HTTP_IRI_PATTERN,
+        description="Persistent IRI for the BTO identifier.",
+    )
+    bto_mapping_status: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=list(ONTOLOGY_MAPPING_STATUSES),
+        description="BTO IRI mapping status.",
+    )
+    bto_ontology_version: Series[str] | None = pa.Field(
+        nullable=True,
+        description="BTO ontology release/version used for IRI mapping.",
+    )
     caloha_id: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=CALOHA_ID_PATTERN,
@@ -51,10 +68,38 @@ class TissueSchema(ETLRecordSchema):
         str_matches=EFO_ID_PATTERN,
         description="Experimental Factor Ontology identifier.",
     )
+    efo_iri: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=HTTP_IRI_PATTERN,
+        description="Persistent IRI for the EFO identifier.",
+    )
+    efo_mapping_status: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=list(ONTOLOGY_MAPPING_STATUSES),
+        description="EFO IRI mapping status.",
+    )
+    efo_ontology_version: Series[str] | None = pa.Field(
+        nullable=True,
+        description="EFO ontology release/version used for IRI mapping.",
+    )
     uberon_id: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=UBERON_ID_PATTERN,
         description="Uberon anatomy ontology identifier.",
+    )
+    uberon_iri: Series[str] | None = pa.Field(
+        nullable=True,
+        str_matches=HTTP_IRI_PATTERN,
+        description="Persistent IRI for the Uberon identifier.",
+    )
+    uberon_mapping_status: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=list(ONTOLOGY_MAPPING_STATUSES),
+        description="Uberon IRI mapping status.",
+    )
+    uberon_ontology_version: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Uberon ontology release/version used for IRI mapping.",
     )
 
     class Config:

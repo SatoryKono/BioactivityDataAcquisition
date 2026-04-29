@@ -49,6 +49,8 @@ class TestChemblPolicyRegistryLoader:
                     "    companion_fields:",
                     "      iri:",
                     "        - chembl_cell_line.clo_iri",
+                    "      mapping_status:",
+                    "        - chembl_cell_line.clo_mapping_status",
                     "      version:",
                     "        - chembl_cell_line.clo_ontology_version",
                     "    code_label_fields:",
@@ -71,6 +73,9 @@ class TestChemblPolicyRegistryLoader:
             "chembl_assay.bao_label",
         )
         assert data.ontology_families[0].iri_fields == ("chembl_cell_line.clo_iri",)
+        assert data.ontology_families[0].mapping_status_fields == (
+            "chembl_cell_line.clo_mapping_status",
+        )
         assert data.ontology_families[0].version_fields == (
             "chembl_cell_line.clo_ontology_version",
         )

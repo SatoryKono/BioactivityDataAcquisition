@@ -39,6 +39,7 @@ class ChemblOntologyPolicyFamily:
     fields: tuple[str, ...]
     code_label_fields: tuple[str, ...] = ()
     iri_fields: tuple[str, ...] = ()
+    mapping_status_fields: tuple[str, ...] = ()
     version_fields: tuple[str, ...] = ()
 
 
@@ -161,18 +162,31 @@ DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
             iri_fields=(
                 "chembl_activity.bao_endpoint_iri",
                 "chembl_activity.bao_format_iri",
+                "chembl_assay.bao_format_iri",
             ),
-            version_fields=("chembl_activity.bao_ontology_version",),
+            mapping_status_fields=(
+                "chembl_activity.bao_endpoint_mapping_status",
+                "chembl_activity.bao_format_mapping_status",
+                "chembl_assay.bao_format_mapping_status",
+            ),
+            version_fields=(
+                "chembl_activity.bao_ontology_version",
+                "chembl_assay.bao_ontology_version",
+            ),
         ),
         ChemblOntologyPolicyFamily(
             family_name="uo",
             fields=("chembl_activity.uo_units",),
             iri_fields=("chembl_activity.uo_unit_iri",),
+            mapping_status_fields=("chembl_activity.uo_unit_mapping_status",),
             version_fields=("chembl_activity.uo_ontology_version",),
         ),
         ChemblOntologyPolicyFamily(
             family_name="bto",
             fields=("chembl_tissue.bto_id",),
+            iri_fields=("chembl_tissue.bto_iri",),
+            mapping_status_fields=("chembl_tissue.bto_mapping_status",),
+            version_fields=("chembl_tissue.bto_ontology_version",),
         ),
         ChemblOntologyPolicyFamily(
             family_name="caloha",
@@ -184,14 +198,32 @@ DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
                 "chembl_cell_line.efo_id",
                 "chembl_tissue.efo_id",
             ),
+            iri_fields=(
+                "chembl_cell_line.efo_iri",
+                "chembl_tissue.efo_iri",
+            ),
+            mapping_status_fields=(
+                "chembl_cell_line.efo_mapping_status",
+                "chembl_tissue.efo_mapping_status",
+            ),
+            version_fields=(
+                "chembl_cell_line.efo_ontology_version",
+                "chembl_tissue.efo_ontology_version",
+            ),
         ),
         ChemblOntologyPolicyFamily(
             family_name="clo",
             fields=("chembl_cell_line.clo_id",),
+            iri_fields=("chembl_cell_line.clo_iri",),
+            mapping_status_fields=("chembl_cell_line.clo_mapping_status",),
+            version_fields=("chembl_cell_line.clo_ontology_version",),
         ),
         ChemblOntologyPolicyFamily(
             family_name="uberon",
             fields=("chembl_tissue.uberon_id",),
+            iri_fields=("chembl_tissue.uberon_iri",),
+            mapping_status_fields=("chembl_tissue.uberon_mapping_status",),
+            version_fields=("chembl_tissue.uberon_ontology_version",),
         ),
         ChemblOntologyPolicyFamily(
             family_name="cellosaurus",
