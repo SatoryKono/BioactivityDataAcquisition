@@ -117,6 +117,73 @@ def test_record_stage_records_uses_generic_counter() -> None:
 
 
 @pytest.mark.unit
+def test_record_flow_invariant_uses_generic_counter() -> None:
+    metrics = MagicMock()
+    recorder = PipelineMetricsRecorder(metrics, "chembl_activity")
+
+    recorder.record_flow_invariant(
+        run_type="incremental",
+        invariant="bronze_partitioned",
+        status="passed",
+    )
+
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_record_flow_invariants_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "invariant": "bronze_partitioned",
+            "status": "passed",
+        },
+    )
+
+
+@pytest.mark.unit
+def test_record_stage_backlog_uses_generic_gauge() -> None:
+    metrics = MagicMock()
+    recorder = PipelineMetricsRecorder(metrics, "chembl_activity")
+
+    recorder.record_stage_backlog(
+        run_type="incremental",
+        stage="output",
+        count=3,
+    )
+
+    metrics.set_gauge.assert_called_once_with(
+        "bioetl_stage_backlog_records",
+        3.0,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "stage": "output",
+        },
+    )
+
+
+@pytest.mark.unit
+def test_record_stage_lag_seconds_uses_generic_gauge() -> None:
+    metrics = MagicMock()
+    recorder = PipelineMetricsRecorder(metrics, "chembl_activity")
+
+    recorder.record_stage_lag_seconds(
+        run_type="incremental",
+        stage="validation",
+        seconds=12.5,
+    )
+
+    metrics.set_gauge.assert_called_once_with(
+        "bioetl_stage_lag_seconds",
+        12.5,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "stage": "validation",
+        },
+    )
+
+
+@pytest.mark.unit
 def test_record_dq_disposition_uses_generic_counter() -> None:
     metrics = MagicMock()
     recorder = PipelineMetricsRecorder(metrics, "chembl_activity")
@@ -151,6 +218,21 @@ def test_noop_when_metrics_missing() -> None:
         run_type="incremental",
         stage="input",
         outcome="fetched",
+    )
+    recorder.record_flow_invariant(
+        run_type="incremental",
+        invariant="fetched_equals_bronze",
+        status="unknown",
+    )
+    recorder.record_stage_backlog(
+        run_type="incremental",
+        stage="ingestion",
+        count=0,
+    )
+    recorder.record_stage_lag_seconds(
+        run_type="incremental",
+        stage="output",
+        seconds=0.0,
     )
     recorder.record_dq_disposition(
         stage="validation",

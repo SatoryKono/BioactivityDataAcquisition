@@ -54,6 +54,29 @@ def _write_governance_files(tmp_path: Path) -> None:
     )
 
 
+def _write_review_registry(tmp_path: Path, lanes: list[dict[str, object]]) -> None:
+    registry_path = (
+        tmp_path / "configs" / "quality" / "root_hygiene_review_registry.yaml"
+    )
+    registry_path.parent.mkdir(parents=True, exist_ok=True)
+    registry_path.write_text(
+        yaml.safe_dump(
+            {
+                "version": "1.0.0",
+                "status": "active",
+                "current_live_root_baseline": {
+                    "tracked_root_audit_status": "pass",
+                    "strict_untracked_root_audit_status": "pass",
+                    "verification_command": "python audit_root_cleanliness.py --strict-untracked",
+                },
+                "review_lanes": lanes,
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+
 def test_collect_cleanup_candidates_excludes_blocked_cleanup_zones(
     tmp_path: Path,
     monkeypatch,
@@ -165,3 +188,137 @@ def test_collect_cleanup_candidates_includes_egg_info_and_notebook_checkpoints(
 
     assert "dist-info.egg-info" in rel_paths
     assert ".ipynb_checkpoints" in rel_paths
+
+
+def test_collect_root_review_evidence_marks_absent_baseline_ok(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _write_governance_files(tmp_path)
+    _write_review_registry(
+        tmp_path,
+        [
+            {
+                "lane_id": "lane",
+                "classification": "review_required",
+                "verification": ["git ls-files foo"],
+                "candidates": [
+                    {
+                        "path": "FixHypothesisDb.ps1",
+                        "current_live_state": "absent_from_root_baseline",
+                        "canonical_path": "scripts/engineering/dev/powershell/FixHypothesisDb.ps1",
+                        "action_if_reintroduced": "review",
+                    }
+                ],
+            }
+        ],
+    )
+    canonical = (
+        tmp_path
+        / "scripts"
+        / "engineering"
+        / "dev"
+        / "powershell"
+        / "FixHypothesisDb.ps1"
+    )
+    canonical.parent.mkdir(parents=True, exist_ok=True)
+    canonical.write_text("echo hi\n", encoding="utf-8")
+
+    monkeypatch.setattr(module, "_tracked_paths", lambda repo_root: [])
+    monkeypatch.setattr(module, "_git_path_has_history", lambda repo_root, path: False)
+    monkeypatch.setattr(module, "_count_reference_hits", lambda repo_root, path: 0)
+
+    evidence = module.collect_root_review_evidence(tmp_path)
+
+    assert len(evidence) == 1
+    assert evidence[0].rel_path == "FixHypothesisDb.ps1"
+    assert evidence[0].review_status == "absent_baseline_ok"
+    assert evidence[0].canonical_exists is True
+
+
+def test_collect_root_review_evidence_marks_present_cmp_match(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _write_governance_files(tmp_path)
+    _write_review_registry(
+        tmp_path,
+        [
+            {
+                "lane_id": "lane",
+                "classification": "review_required",
+                "verification": ["git ls-files foo"],
+                "candidates": [
+                    {
+                        "path": "FixHypothesisDb.ps1",
+                        "current_live_state": "present_approved_root_surface",
+                        "canonical_path": "scripts/engineering/dev/powershell/FixHypothesisDb.ps1",
+                        "action_if_reintroduced": "review",
+                    }
+                ],
+            }
+        ],
+    )
+    root_copy = tmp_path / "FixHypothesisDb.ps1"
+    root_copy.write_text("echo hi\n", encoding="utf-8")
+    canonical = (
+        tmp_path
+        / "scripts"
+        / "engineering"
+        / "dev"
+        / "powershell"
+        / "FixHypothesisDb.ps1"
+    )
+    canonical.parent.mkdir(parents=True, exist_ok=True)
+    canonical.write_text("echo hi\n", encoding="utf-8")
+
+    monkeypatch.setattr(
+        module, "_tracked_paths", lambda repo_root: ["FixHypothesisDb.ps1"]
+    )
+    monkeypatch.setattr(module, "_git_path_has_history", lambda repo_root, path: True)
+    monkeypatch.setattr(module, "_count_reference_hits", lambda repo_root, path: 3)
+
+    evidence = module.collect_root_review_evidence(tmp_path)
+
+    assert len(evidence) == 1
+    assert evidence[0].review_status == "present_cmp_match"
+    assert evidence[0].cmp_status == "match"
+    assert evidence[0].tracked is True
+
+
+def test_collect_root_review_evidence_marks_blocked_cleanup_retained(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _write_governance_files(tmp_path)
+    _write_review_registry(
+        tmp_path,
+        [
+            {
+                "lane_id": "retention_sensitive_boundaries",
+                "classification": "blocked_cleanup_zone",
+                "verification": ["git ls-files reports"],
+                "candidates": [
+                    {
+                        "path": "reports",
+                        "current_live_state": "present_blocked_cleanup_zone",
+                        "canonical_path": None,
+                        "action_if_reintroduced": "cleanup_only_via_retention_driven_procedure",
+                    }
+                ],
+            }
+        ],
+    )
+    (tmp_path / "reports").mkdir()
+
+    monkeypatch.setattr(
+        module, "_tracked_paths", lambda repo_root: ["reports/dummy.txt"]
+    )
+    monkeypatch.setattr(module, "_git_path_has_history", lambda repo_root, path: True)
+    monkeypatch.setattr(module, "_count_reference_hits", lambda repo_root, path: 1)
+
+    evidence = module.collect_root_review_evidence(tmp_path)
+
+    assert len(evidence) == 1
+    assert evidence[0].review_status == "blocked_cleanup_retained"
+    assert evidence[0].exists is True

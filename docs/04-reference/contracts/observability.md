@@ -229,6 +229,10 @@ Canonical composite/runtime phase additions:
 | `bioetl_control_plane_reads_total`             | Counter   | `store,operation,status`                    | Срез outcomes manifest/ledger/lineage lookup paths для success/miss/fail агрегатов                                                                                            |
 | `bioetl_records_processed_total`               | Counter   | `pipeline,stage,run_type`                   | throughput                                                                                                                                                                    |
 | `bioetl_record_flow_records_total`             | Counter   | `pipeline,run_type,flow_stage`              | bounded record-flow projection for `fetched/bronze/silver/gold/filtered_out/quarantined`; not a replacement for manifest/ledger or canonical DQ quarantine truth          |
+| `bioetl_record_flow_invariants_total`          | Counter   | `pipeline,run_type,invariant,status`        | bounded terminal invariant outcomes for `fetched_equals_bronze`, `bronze_partitioned`, `silver_gold_monotonic`; runtime alert/rule surface, not forensic truth            |
+| `bioetl_stage_records_total`                   | Counter   | `pipeline,run_type,stage,outcome`           | canonical stage-model projection for `input/ingestion/transform/validation/storage/output`                                                                                    |
+| `bioetl_stage_backlog_records`                 | Gauge     | `pipeline,run_type,stage`                   | bounded unresolved stage backlog at terminal projection time                                                                                                                  |
+| `bioetl_stage_lag_seconds`                     | Gauge     | `pipeline,run_type,stage`                   | bounded unresolved stage lag derived from run wall-clock anchor; `0` when no backlog is present                                                                               |
 | `bioetl_errors_total`                          | Counter   | `pipeline,stage,error_code`                 | taxonomy входа                                                                                                                                                                |
 | `bioetl_http_request_duration_seconds`         | Histogram | `provider,method,status`                    | HTTP latency                                                                                                                                                                  |
 | `bioetl_http_request_errors_total`             | Counter   | `provider,method,error_type`                | HTTP errors                                                                                                                                                                   |
@@ -268,6 +272,10 @@ Guardrail для новых метрик control-plane/traceability:
   `record_index`, old/new batch sizes, host memory totals, RSS, and checkpoint
   payload details belong in checkpoint metadata, run ledger diagnostics, or
   trace events/attributes, not in Prometheus labels.
+- stage-model and invariant metric families MUST stay bounded as well;
+  unresolved counts may surface in gauges/counters, but `run_id`, `manifest_id`,
+  raw batch identifiers, content hashes, and per-record forensic anchors must
+  stay in control-plane artifacts, logs, or traces.
 - provider health-check latency MUST use `_seconds` families only; `_ms`
   latency families для provider health-check path считаются legacy и не должны
   добавляться в новые dashboards, alerts или runtime emission paths
