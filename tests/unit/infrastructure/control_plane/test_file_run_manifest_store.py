@@ -263,7 +263,8 @@ def test_file_store_reports_orphan_manifest_without_run_index(tmp_path) -> None:
 
 
 def test_file_store_reports_mismatched_run_index(tmp_path) -> None:
-    store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
+    metrics = MagicMock()
+    store = FileRunManifestStore(base_path=tmp_path / "run_manifest", metrics=metrics)
     run_id = RunID(uuid4())
     manifest = RunManifest(
         manifest_id="manifest-indexed",
@@ -281,13 +282,36 @@ def test_file_store_reports_mismatched_run_index(tmp_path) -> None:
         code_provenance=RunCodeProvenance(),
     )
     store.save(manifest)
+    metrics.reset_mock()
     run_index_path = store.base_path / "_by_run_id" / f"{run_id}.txt"
     run_index_path.write_text("manifest-other", encoding="utf-8")
 
     with pytest.raises(RunManifestStoreCorruptionError, match="manifest-other"):
         store.get(manifest.manifest_id)
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_control_plane_reads_total",
+        1,
+        {
+            "store": "manifest",
+            "operation": "get",
+            "status": "failed",
+        },
+    )
+    metrics.observe_histogram.assert_called_once()
+    metrics.reset_mock()
+
     with pytest.raises(RunManifestStoreCorruptionError, match="missing manifest"):
         store.get_by_run_id(run_id)
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_control_plane_reads_total",
+        1,
+        {
+            "store": "manifest",
+            "operation": "get_by_run_id",
+            "status": "failed",
+        },
+    )
+    metrics.observe_histogram.assert_called_once()
 
 
 def test_file_store_fails_closed_on_run_id_manifest_collision(tmp_path) -> None:
