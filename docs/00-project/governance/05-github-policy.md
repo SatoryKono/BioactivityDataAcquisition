@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-04-29'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md v6.1.2 | Last updated: 2026-04-09*
+*Synced with RULES.md v6.1.3 | Last updated: 2026-04-29*
 
 ______________________________________________________________________
 
@@ -27,11 +27,11 @@ ______________________________________________________________________
 
 ## 1. Branch Strategy
 
-| Branch           | Purpose                         | Protection                                |
-| ---------------- | ------------------------------- | ----------------------------------------- |
-| `main`           | Production-ready code           | Required status checks, CODEOWNERS review |
-| `develop`        | Integration branch (optional)   | Commit lint enforced                      |
-| Feature branches | `feat/*`, `fix/*`, `refactor/*` | None                                      |
+| Branch           | Purpose                         | Protection                                             |
+| ---------------- | ------------------------------- | ------------------------------------------------------ |
+| `main`           | Production-ready code           | Direct merge allowed; no active required-check ruleset |
+| `develop`        | Integration branch (optional)   | Commit lint enforced                                   |
+| Feature branches | `feat/*`, `fix/*`, `refactor/*` | None                                                   |
 
 ### Branch Naming Convention
 
@@ -99,11 +99,13 @@ BioETL uses **19 GitHub Actions workflows** organized by purpose.
 
 ______________________________________________________________________
 
-## 3. Required Status Checks
+## 3. Recommended Status Checks
 
-For PRs to `main`, the following status checks **MUST** pass:
+Direct merges to `main` are currently allowed. When a PR is used, the following
+checks remain the recommended quality gate even though GitHub does not
+currently enforce them as a blocking repository rule.
 
-### Critical (blocking merge)
+### Core recommended checks
 
 | Check Name                 | Workflow              | Purpose                                                       |
 | -------------------------- | --------------------- | ------------------------------------------------------------- |
@@ -115,11 +117,11 @@ For PRs to `main`, the following status checks **MUST** pass:
 | `type-check`               | type-checking.yml     | mypy strict compliance                                        |
 | `root-hygiene`             | root-hygiene.yml      | Clean repository root, cataloged plan/docs placement, and generated artifact bans |
 
-Docs-only PRs still go through blocking documentation governance via `docs.yml`:
+Docs-only PRs should still go through documentation governance via `docs.yml`:
 the lightweight `docs-governance` job runs architecture doc-sync / drift tests
 without pulling the full heavy test matrix into documentation-only changesets.
 
-### Recommended (should be required)
+### Additional recommended checks
 
 | Check Name         | Workflow                     | Purpose                       |
 | ------------------ | ---------------------------- | ----------------------------- |
@@ -129,24 +131,25 @@ without pulling the full heavy test matrix into documentation-only changesets.
 
 ### Branch Protection Verification
 
-Repository policy requires `root-hygiene` as a blocking check for `main`.
-Repo-side evidence is the `root-hygiene` entry above plus
-`.github/workflows/root-hygiene.yml`.
+Repository settings currently allow direct merge to `main`.
+Repo-side evidence remains the `root-hygiene` workflow plus the repository
+ruleset state below.
 
 Verified on `2026-04-29` with repository admin credentials via the GitHub REST
-API as part of issue `#3380`.
+API.
 
 Live GitHub enforcement state:
 
-- Active repository ruleset `root-hygiene-required-check` targets
+- Repository ruleset `root-hygiene-required-check` targets
   `refs/heads/main`.
-- Required status check: `root-hygiene`.
+- Enforcement: `disabled`.
+- Rule payload still references status check `root-hygiene`, but it is not
+  active.
 - Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
 
 The legacy repository ruleset `main`
 (`https://github.com/SatoryKono/BioactivityDataAcquisition/rules/13643213`)
-remains disabled and is not the authoritative required-check control for this
-policy.
+also remains disabled.
 
 Repeat this verification at least quarterly and after any branch-protection or
 ruleset migration.

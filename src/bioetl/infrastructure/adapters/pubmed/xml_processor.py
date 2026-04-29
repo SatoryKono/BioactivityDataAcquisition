@@ -10,7 +10,7 @@ from __future__ import annotations
 __all__ = ["PubMedXmlProcessor"]
 
 
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # nosec B405
 
 import defusedxml.ElementTree as defused_ET
 
