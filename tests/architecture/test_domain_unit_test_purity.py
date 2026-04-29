@@ -219,105 +219,77 @@ def _attribute_path(node: ast.AST) -> str | None:
     return None
 
 
+def _runtime_violation(
+    *,
+    file_path: Path,
+    line: int,
+    seam: str,
+) -> RuntimeSeamViolation:
+    return RuntimeSeamViolation(
+        file_path=file_path,
+        line=line,
+        seam=seam,
+        reason=_SEAM_MESSAGES[seam],
+    )
+
+
+def _import_runtime_seam(node: ast.AST) -> str | None:
+    if isinstance(node, ast.Import):
+        return next(
+            (
+                "yaml"
+                for alias in node.names
+                if alias.name == "yaml" or alias.name.startswith("yaml.")
+            ),
+            None,
+        )
+    if isinstance(node, ast.ImportFrom) and node.module:
+        if node.module == "yaml" or node.module.startswith("yaml."):
+            return "yaml"
+    return None
+
+
+def _call_runtime_seam(node: ast.Call) -> str | None:
+    target = _attribute_path(node.func)
+    attr_name = node.func.attr if isinstance(node.func, ast.Attribute) else None
+    if target in {"open", "datetime.now", "datetime.utcnow", "time.time"}:
+        return target
+    if attr_name == "open":
+        return "path.open"
+    if attr_name in {
+        "read_text",
+        "write_text",
+        "glob",
+        "rglob",
+        "exists",
+        "mkdir",
+        "unlink",
+        "touch",
+    }:
+        return attr_name
+    if target is not None and target.startswith("yaml."):
+        return "yaml"
+    return None
+
+
 def _collect_disallowed_runtime_seams(file_path: Path) -> list[RuntimeSeamViolation]:
     violations: list[RuntimeSeamViolation] = []
     tree = ast.parse(file_path.read_text(encoding="utf-8"), filename=str(file_path))
 
     for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                if alias.name == "yaml" or alias.name.startswith("yaml."):
-                    violations.append(
-                        RuntimeSeamViolation(
-                            file_path=file_path,
-                            line=node.lineno,
-                            seam="yaml",
-                            reason=_SEAM_MESSAGES["yaml"],
-                        )
-                    )
-        elif isinstance(node, ast.ImportFrom) and node.module:
-            if node.module == "yaml" or node.module.startswith("yaml."):
-                violations.append(
-                    RuntimeSeamViolation(
-                        file_path=file_path,
-                        line=node.lineno,
-                        seam="yaml",
-                        reason=_SEAM_MESSAGES["yaml"],
-                    )
-                )
+        import_seam = _import_runtime_seam(node)
+        if import_seam is not None:
+            violations.append(
+                _runtime_violation(file_path=file_path, line=node.lineno, seam=import_seam)
+            )
         if isinstance(node, ast.Call):
-            target = _attribute_path(node.func)
-            attr_name = node.func.attr if isinstance(node.func, ast.Attribute) else None
-            if target == "open":
+            call_seam = _call_runtime_seam(node)
+            if call_seam is not None:
                 violations.append(
-                    RuntimeSeamViolation(
+                    _runtime_violation(
                         file_path=file_path,
                         line=node.lineno,
-                        seam="open",
-                        reason=_SEAM_MESSAGES["open"],
-                    )
-                )
-            elif target == "datetime.now":
-                violations.append(
-                    RuntimeSeamViolation(
-                        file_path=file_path,
-                        line=node.lineno,
-                        seam="datetime.now",
-                        reason=_SEAM_MESSAGES["datetime.now"],
-                    )
-                )
-            elif target == "datetime.utcnow":
-                violations.append(
-                    RuntimeSeamViolation(
-                        file_path=file_path,
-                        line=node.lineno,
-                        seam="datetime.utcnow",
-                        reason=_SEAM_MESSAGES["datetime.utcnow"],
-                    )
-                )
-            elif target == "time.time":
-                violations.append(
-                    RuntimeSeamViolation(
-                        file_path=file_path,
-                        line=node.lineno,
-                        seam="time.time",
-                        reason=_SEAM_MESSAGES["time.time"],
-                    )
-                )
-            elif attr_name == "open":
-                violations.append(
-                    RuntimeSeamViolation(
-                        file_path=file_path,
-                        line=node.lineno,
-                        seam="path.open",
-                        reason=_SEAM_MESSAGES["path.open"],
-                    )
-                )
-            elif attr_name in {
-                "read_text",
-                "write_text",
-                "glob",
-                "rglob",
-                "exists",
-                "mkdir",
-                "unlink",
-                "touch",
-            }:
-                violations.append(
-                    RuntimeSeamViolation(
-                        file_path=file_path,
-                        line=node.lineno,
-                        seam=attr_name,
-                        reason=_SEAM_MESSAGES[attr_name],
-                    )
-                )
-            elif target is not None and target.startswith("yaml."):
-                violations.append(
-                    RuntimeSeamViolation(
-                        file_path=file_path,
-                        line=node.lineno,
-                        seam="yaml",
-                        reason=_SEAM_MESSAGES["yaml"],
+                        seam=call_seam,
                     )
                 )
 

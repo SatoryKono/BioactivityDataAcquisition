@@ -91,7 +91,7 @@ def create_mock_services():
     services.metrics.observe_histogram = MagicMock()
     services.metrics.increment_counter = MagicMock()
     services.metrics.set_gauge = MagicMock()
-    # Storage with clear methods and health_check (part of StoragePort contract)
+    # Storage with clear methods and health_check (narrow storage contracts)
     services.storage = MagicMock()
     services.storage.clear_silver = AsyncMock(return_value=0)
     services.storage.clear_gold = AsyncMock(return_value=0)

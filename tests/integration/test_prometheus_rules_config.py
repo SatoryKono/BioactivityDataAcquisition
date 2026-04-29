@@ -127,18 +127,40 @@ def _collect_rule_expression_label_schema_errors(
                 continue
 
             for metric_name, selector_body in _PROMQL_METRIC_SELECTOR_RE.findall(expr):
-                expected_labels = label_sets.get(metric_name)
-                if expected_labels is None:
-                    continue
-                selector_labels = _extract_selector_labels(selector_body)
-                unknown_labels = sorted(selector_labels - expected_labels)
-                if unknown_labels:
-                    errors.append(
-                        f"group={group_name} rule={rule_name} metric={metric_name} "
-                        f"selector_labels={unknown_labels} allowed={sorted(expected_labels)} "
-                        f"expr={expr}"
-                    )
+                error = _rule_expression_label_schema_error(
+                    group_name=group_name,
+                    rule_name=rule_name,
+                    metric_name=metric_name,
+                    selector_body=selector_body,
+                    expr=expr,
+                    label_sets=label_sets,
+                )
+                if error is not None:
+                    errors.append(error)
     return errors
+
+
+def _rule_expression_label_schema_error(
+    *,
+    group_name: object,
+    rule_name: object,
+    metric_name: str,
+    selector_body: str,
+    expr: str,
+    label_sets: dict[str, frozenset[str]],
+) -> str | None:
+    expected_labels = label_sets.get(metric_name)
+    if expected_labels is None:
+        return None
+    selector_labels = _extract_selector_labels(selector_body)
+    unknown_labels = sorted(selector_labels - expected_labels)
+    if not unknown_labels:
+        return None
+    return (
+        f"group={group_name} rule={rule_name} metric={metric_name} "
+        f"selector_labels={unknown_labels} allowed={sorted(expected_labels)} "
+        f"expr={expr}"
+    )
 
 
 def _iter_contract_alerts(contract: dict) -> list[tuple[str, dict, set[str]]]:

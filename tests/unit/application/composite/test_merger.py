@@ -63,7 +63,7 @@ def _path_to_table_name_helper(path: str) -> str:
 
 @pytest.fixture
 def mock_storage():
-    """Create a mock StoragePort."""
+    """Create a mock merged storage port."""
     storage = AsyncMock()
     storage.read_silver = AsyncMock(return_value=[])
     storage.write_silver_merged = AsyncMock()
@@ -182,7 +182,7 @@ class TestPathToTableName:
 
 @pytest.mark.unit
 class TestMergeServiceReadsSilverViaStorage:
-    """Tests for MergeService reading Silver via StoragePort."""
+    """Tests for MergeService reading Silver via SilverStoragePort."""
 
     @pytest.mark.asyncio
     async def test_prepare_seed_dataframe_returns_named_context(
@@ -205,7 +205,7 @@ class TestMergeServiceReadsSilverViaStorage:
 
     @pytest.mark.asyncio
     async def test_read_silver_uses_storage_port(self, merge_service, mock_storage):
-        """Test _read_silver_table uses StoragePort.read_silver."""
+        """Test _read_silver_table uses SilverStoragePort.read_silver."""
         mock_storage.read_silver.return_value = [
             {"id": "1", "val": "A"},
             {"id": "2", "val": "B"},
@@ -244,13 +244,13 @@ class TestMergeServiceReadsSilverViaStorage:
 
 @pytest.mark.unit
 class TestMergeServiceWritesViaStorage:
-    """Tests for MergeService writing via StoragePort."""
+    """Tests for MergeService writing via MergedStoragePort."""
 
     @pytest.mark.asyncio
     async def test_write_merged_silver_uses_storage_port(
         self, merge_service, mock_storage
     ):
-        """Test _write_merged_silver uses StoragePort.write_silver_merged."""
+        """Test _write_merged_silver uses MergedStoragePort.write_silver_merged."""
         import polars as pl
 
         df = pl.DataFrame({"id": ["1", "2"], "val": ["A", "B"]})
@@ -266,7 +266,7 @@ class TestMergeServiceWritesViaStorage:
     async def test_write_merged_gold_uses_storage_port(
         self, merge_service, mock_storage
     ):
-        """Test _write_merged_gold uses StoragePort.write_gold_merged."""
+        """Test _write_merged_gold uses MergedStoragePort.write_gold_merged."""
         import polars as pl
 
         df = pl.DataFrame({"id": ["1", "2"], "val": ["A", "B"]})
@@ -464,7 +464,7 @@ class TestMergeServiceMergeOperation:
 
     @pytest.mark.asyncio
     async def test_merge_calls_read_and_write(self, merge_service, mock_storage):
-        """Test merge calls read and write via StoragePort."""
+        """Test merge calls read and write via narrow storage ports."""
         # Setup seed data
         mock_storage.read_silver.return_value = [
             {"id": "1", "name": "Test1"},

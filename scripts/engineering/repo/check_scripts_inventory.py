@@ -877,16 +877,62 @@ def _check(manifest_path: Path, actual: dict[str, object]) -> int:
     return 1
 
 
-def _write_deprecation_report(path: Path, payload: dict[str, object]) -> None:
-    scripts = payload["scripts"]
+def _group_non_active_scripts(
+    scripts: object,
+) -> dict[str, list[dict[str, object]]]:
     assert isinstance(scripts, list)
-
     grouped: dict[str, list[dict[str, object]]] = defaultdict(list)
     for item in scripts:
         assert isinstance(item, dict)
         status = str(item.get("status", "unknown"))
         if status in NON_ACTIVE_STATUSES:
             grouped[status].append(item)
+    return grouped
+
+
+def _deprecation_next_step(status: str) -> str:
+    if status == "unknown":
+        return "Validate runtime usage; promote to active or mark deprecated."
+    if status == "orphan":
+        return "Plan staged removal or add explicit compatibility call-site."
+    if status == "temporary_diagnostic":
+        return "Retain only while the bounded troubleshooting flow remains live."
+    if status == "supporting":
+        return (
+            "Retain as a supporting surface/helper until a canonical replacement exists."
+        )
+    return "Archive/remove after freeze window if no active consumers."
+
+
+def _reference_count(item: dict[str, object]) -> int:
+    ref_count_raw = item.get("reference_count", 0)
+    return int(ref_count_raw) if isinstance(ref_count_raw, (int, float, str)) else 0
+
+
+def _render_deprecation_section(
+    *,
+    status: str,
+    entries: list[dict[str, object]],
+) -> list[str]:
+    lines = [
+        f"## {status} ({len(entries)})",
+        "",
+        "| Script Path | Type | Reference Count | Suggested Next Step |",
+        "|---|---|---:|---|",
+    ]
+    next_step = _deprecation_next_step(status)
+    for item in entries:
+        path_value = str(item["path"])
+        type_value = str(item["type"])
+        lines.append(
+            f"| `{path_value}` | `{type_value}` | {_reference_count(item)} | {next_step} |"
+        )
+    lines.append("")
+    return lines
+
+
+def _write_deprecation_report(path: Path, payload: dict[str, object]) -> None:
+    grouped = _group_non_active_scripts(payload["scripts"])
 
     lines = [
         "# Scripts Deprecation Backlog",
@@ -897,40 +943,7 @@ def _write_deprecation_report(path: Path, payload: dict[str, object]) -> None:
 
     for status in NON_ACTIVE_STATUSES:
         entries = sorted(grouped.get(status, []), key=lambda row: str(row["path"]))
-        lines.append(f"## {status} ({len(entries)})")
-        lines.append("")
-        lines.append("| Script Path | Type | Reference Count | Suggested Next Step |")
-        lines.append("|---|---|---:|---|")
-        for item in entries:
-            path_value = str(item["path"])
-            type_value = str(item["type"])
-            ref_count_raw = item.get("reference_count", 0)
-            if isinstance(ref_count_raw, (int, float, str)):
-                ref_count = int(ref_count_raw)
-            else:
-                ref_count = 0
-            if status == "unknown":
-                next_step = (
-                    "Validate runtime usage; promote to active or mark deprecated."
-                )
-            elif status == "orphan":
-                next_step = (
-                    "Plan staged removal or add explicit compatibility call-site."
-                )
-            elif status == "temporary_diagnostic":
-                next_step = (
-                    "Retain only while the bounded troubleshooting flow remains live."
-                )
-            elif status == "supporting":
-                next_step = (
-                    "Retain as a supporting surface/helper until a canonical replacement exists."
-                )
-            else:
-                next_step = "Archive/remove after freeze window if no active consumers."
-            lines.append(
-                f"| `{path_value}` | `{type_value}` | {ref_count} | {next_step} |"
-            )
-        lines.append("")
+        lines.extend(_render_deprecation_section(status=status, entries=entries))
 
     _write_text_atomic(path, "\n".join(lines).rstrip() + "\n")
 

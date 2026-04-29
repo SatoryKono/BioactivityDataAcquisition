@@ -7,6 +7,7 @@ from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
+from typing import cast
 from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID, uuid4
 
@@ -25,6 +26,9 @@ from bioetl.application.services.run_manifest_inspection_service import (
 )
 from bioetl.composition.bootstrap.runtime.composite_control_plane_builder import (
     build_composite_control_plane_bundle,
+)
+from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
+    CompositeInfrastructureContext,
 )
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane import (
@@ -902,22 +906,25 @@ def test_reproducibility_contract_composite_full_snapshot_envelope_exact_replay_
     bundles = []
     manifests = []
     for index in range(2):
-        infra_context = SimpleNamespace(
-            run_id=str(UUID(f"00000000-0000-0000-0000-00000000052{index}")),
-            settings=SimpleNamespace(
-                data_dir=str(data_dir),
-                pipeline=SimpleNamespace(
-                    control_plane=SimpleNamespace(
-                        run_manifest_enabled=True,
-                        run_ledger_enabled=True,
-                        required_persistence_profile="replay_ready",
-                    )
+        infra_context = cast(
+            CompositeInfrastructureContext,
+            SimpleNamespace(
+                run_id=str(UUID(f"00000000-0000-0000-0000-00000000052{index}")),
+                settings=SimpleNamespace(
+                    data_dir=str(data_dir),
+                    pipeline=SimpleNamespace(
+                        control_plane=SimpleNamespace(
+                            run_manifest_enabled=True,
+                            run_ledger_enabled=True,
+                            required_persistence_profile="replay_ready",
+                        )
+                    ),
                 ),
+                logger=MagicMock(),
+                metrics=None,
+                storage=MagicMock(),
+                lock=MagicMock(),
             ),
-            logger=MagicMock(),
-            metrics=None,
-            storage=MagicMock(),
-            lock=MagicMock(),
         )
         bundle = build_composite_control_plane_bundle(
             config=config,

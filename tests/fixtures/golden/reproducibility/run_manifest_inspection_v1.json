@@ -186,6 +186,7 @@
         "family": "chembl.activity",
         "reason": "family_within_supported_boundary",
         "strict_exact_replay_supported": true,
+        "strict_replay_runtime_verdict": "allowed_with_snapshot_backed_source_refs",
         "support_scope": "operator_grade_trace_debug",
         "supported_families": [
           "chembl.activity",
@@ -363,6 +364,7 @@
       "family": "chembl.activity",
       "reason": "family_within_supported_boundary",
       "strict_exact_replay_supported": true,
+      "strict_replay_runtime_verdict": "allowed_with_snapshot_backed_source_refs",
       "support_scope": "operator_grade_trace_debug",
       "supported_families": [
         "chembl.activity",
@@ -637,6 +639,7 @@
           "family": "chembl.activity",
           "reason": "family_within_supported_boundary",
           "strict_exact_replay_supported": true,
+          "strict_replay_runtime_verdict": "allowed_with_snapshot_backed_source_refs",
           "support_scope": "operator_grade_trace_debug",
           "supported_families": [
             "chembl.activity",
@@ -824,6 +827,7 @@
       "family": "chembl.activity",
       "reason": "family_within_supported_boundary",
       "strict_exact_replay_supported": true,
+      "strict_replay_runtime_verdict": "allowed_with_snapshot_backed_source_refs",
       "support_scope": "operator_grade_trace_debug",
       "supported_families": [
         "chembl.activity",
