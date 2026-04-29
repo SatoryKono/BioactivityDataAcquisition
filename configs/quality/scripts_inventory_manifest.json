@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-29T16:39:30.533026+00:00",
+  "generated_at": "2026-04-29T18:55:40.214324+00:00",
   "summary": {
     "total_scripts": 355,
     "status_counts": {
@@ -4392,7 +4392,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 115,
+      "reference_count": 118,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -4648,7 +4648,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 26,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -4681,6 +4681,12 @@
           "text": "uv run python -m scripts.docs check-links --links --specs --configs"
         },
         {
+          "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+          "line": 40,
+          "source_group": "docs",
+          "text": "- run `python -m scripts.docs check-links --links --specs --configs`"
+        },
+        {
           "path": "docs/00-project/ai/memory/agent-memory.md",
           "line": 184,
           "source_group": "docs",
@@ -4691,12 +4697,6 @@
           "line": 283,
           "source_group": "docs",
           "text": "python -m scripts.docs check-links --links --specs --configs"
-        },
-        {
-          "path": "docs/00-project/ai/memory/memory-py-doc-bot.md",
-          "line": 239,
-          "source_group": "docs",
-          "text": "python -m scripts.docs check-links --links"
         }
       ]
     },
@@ -5494,13 +5494,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 98,
+          "line": 105,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci neo4j-memory`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 104,
+          "line": 111,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci neo4j-memory-live`."
         },
@@ -6101,7 +6101,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 125,
+          "line": 127,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev setup-mcp"
         },
@@ -6859,13 +6859,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 134,
+          "line": 136,
           "source_group": "docs",
           "text": "- `.\\scripts\\engineering\\dev\\setup_env_windows.ps1` → `.venv-win`"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 142,
+          "line": 144,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
         },
@@ -6916,13 +6916,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 135,
+          "line": 137,
           "source_group": "docs",
           "text": "- `bash scripts/engineering/dev/setup_env_wsl.sh` → `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}`"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 148,
+          "line": 150,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
         },
@@ -9031,49 +9031,49 @@
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 27,
+          "line": 34,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync`"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 68,
+          "line": 75,
           "source_group": "docs",
           "text": "Для cleanup-режима используй `python -m scripts.memory sync --apply --prune-stale`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 72,
+          "line": 79,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --export /tmp/storage-memory.json --only-storage-layer`,"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 73,
+          "line": 80,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --export /tmp/runtime-memory.json --only-runtime-evidence-layer`,"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 74,
+          "line": 81,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --export /tmp/workflow-memory.json --only-workflow-graph`,"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 75,
+          "line": 82,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --export /tmp/docs-drift-memory.json --only-docs-drift`."
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 76,
+          "line": 83,
           "source_group": "docs",
           "text": "Для audit/report режима используй `python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 80,
+          "line": 87,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --report-fast --report /tmp/neo4j-memory-audit.json`:"
         }

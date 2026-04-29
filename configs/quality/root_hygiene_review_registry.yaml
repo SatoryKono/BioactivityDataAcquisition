@@ -63,6 +63,27 @@ review_lanes:
         canonical_path: .vibe
         action_if_reintroduced: keep_only_with_documented_owner_and_transition_note
 
+  - lane_id: local_vendor_tooling_roots
+    classification: review_required
+    scope: local vendor/editor tooling roots that must remain untracked unless explicitly promoted
+    verification:
+      - git ls-files .junie .sonarlint .windsurf
+      - git check-ignore -v .junie .sonarlint .windsurf
+      - rg -n "\\.junie/|\\.sonarlint/|\\.windsurf/" .gitignore docs scripts .github tests configs
+    candidates:
+      - path: .junie
+        current_live_state: present_local_untracked_root
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_move_curated_shared_content_to_an_approved_root_surface
+      - path: .sonarlint
+        current_live_state: present_local_untracked_root
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_owner_review
+      - path: .windsurf
+        current_live_state: present_local_untracked_root
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_or_move_curated_shared_content_to_an_approved_root_surface
+
   - lane_id: root_ad_hoc_docs_and_diagnostics
     classification: review_required
     scope: non-canonical root notes, diagnostics, and ad-hoc tests

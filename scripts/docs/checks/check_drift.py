@@ -148,6 +148,64 @@ RUNTIME_MIRROR_RULES: tuple[RuntimeMirrorRule, ...] = (
 
 AGENT_MEMORY_PATH = Path("docs/00-project/ai/memory/agent-memory.md")
 FILE_POLICY_PATH = Path("docs/00-project/governance/03-file-policy.md")
+AI_SURFACE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
+    Path("AGENTS.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+        ".codex/agents/CODEX-RUNTIME.md",
+        ".gemini/agents/GEMINI-RUNTIME.md",
+    ),
+    Path("GEMINI.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+    ),
+    Path(".github/copilot-instructions.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".codex/agents/CODEX-RUNTIME.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path(".gemini/agents/GEMINI-RUNTIME.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
+    ),
+    Path("docs/00-project/ai/agents/guides/CODEX.md"): (
+        "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
+        "docs/00-project/ai/memory/agent-memory.md",
+    ),
+    Path("docs/00-project/ai/agents/guides/AGENT.md"): (
+        "MEMORY_USAGE.md",
+        "../policy/POST_CHANGE_VALIDATION.md",
+        "../memory/agent-memory.md",
+    ),
+}
+AI_SURFACE_STALE_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"docs/00-project/ai/agents/runtime/agent-memory\.md"),
+    re.compile(r"(?<!\.)runtime/agent-memory\.md"),
+)
+AI_SURFACE_FORBIDDEN_PATTERNS: dict[Path, tuple[re.Pattern[str], ...]] = {
+    Path(".codex/agents/CODEX-RUNTIME.md"): (re.compile(r"\.claude/"),),
+    Path(".gemini/agents/GEMINI-RUNTIME.md"): (re.compile(r"\.claude/"),),
+    Path(".codex/agents/py-audit-bot.md"): (re.compile(r"\.claude/"),),
+    Path(".gemini/agents/py-audit-bot.md"): (re.compile(r"\.claude/"),),
+    Path(".codex/agents/py-review-orchestrator.md"): (re.compile(r"\.claude/"),),
+    Path(".gemini/agents/py-review-orchestrator.md"): (re.compile(r"\.claude/"),),
+    Path(".gemini/skills/new-pipeline/SKILL.md"): (re.compile(r"\.claude/"),),
+    Path(".gemini/skills/verify-architecture/SKILL.md"): (re.compile(r"\.claude/"),),
+    Path(".gemini/skills/vcr-record/SKILL.md"): (re.compile(r"\.claude/"),),
+    Path(".gemini/skills/py-review-orchestrator/SKILL.md"): (re.compile(r"\.claude/"),),
+    Path(".gemini/skills/py-test-swarm/SKILL.md"): (re.compile(r"\.claude/"),),
+    Path(".gemini/skills/documentation-cascade-audit/SKILL.md"): (
+        re.compile(r"\.claude/"),
+    ),
+    Path(".gemini/skills/py-architecture-debt-bot/SKILL.md"): (
+        re.compile(r"\.claude/"),
+    ),
+    Path(".gemini/skills/capability-discovery/SKILL.md"): (re.compile(r"\.claude/"),),
+}
 
 
 def _collect_classes(directory: Path) -> set[str]:
@@ -751,6 +809,103 @@ def check_freshness(report: DriftReport) -> None:
         )
 
 
+def check_ai_surfaces(report: DriftReport, *, root: Path | None = None) -> None:
+    """Verify AI runtime control points keep required policy links and no stale refs."""
+    project_root = root or PROJECT_ROOT
+
+    for relative_path, required_tokens in AI_SURFACE_REQUIRED_TOKENS.items():
+        _check_ai_surface_required_tokens(
+            report,
+            project_root=project_root,
+            relative_path=relative_path,
+            required_tokens=required_tokens,
+        )
+
+    for relative_path in AI_SURFACE_REQUIRED_TOKENS:
+        _check_ai_surface_stale_refs(
+            report,
+            project_root=project_root,
+            relative_path=relative_path,
+        )
+
+    for relative_path, forbidden_patterns in AI_SURFACE_FORBIDDEN_PATTERNS.items():
+        _check_ai_surface_forbidden_patterns(
+            report,
+            project_root=project_root,
+            relative_path=relative_path,
+            forbidden_patterns=forbidden_patterns,
+        )
+
+
+def _check_ai_surface_required_tokens(
+    report: DriftReport,
+    *,
+    project_root: Path,
+    relative_path: Path,
+    required_tokens: tuple[str, ...],
+) -> None:
+    path = project_root / relative_path
+    text = _read_doc(path)
+    if not text:
+        report.add("ai-surfaces", "ERROR", str(relative_path), "AI surface file missing")
+        return
+
+    for token in required_tokens:
+        if token not in text:
+            report.add(
+                "ai-surfaces",
+                "ERROR",
+                str(relative_path),
+                f"Missing required AI policy/runtime token: {token}",
+            )
+
+
+def _check_ai_surface_stale_refs(
+    report: DriftReport,
+    *,
+    project_root: Path,
+    relative_path: Path,
+) -> None:
+    path = project_root / relative_path
+    text = _read_doc(path)
+    if not text:
+        return
+
+    for pattern in AI_SURFACE_STALE_PATTERNS:
+        match = pattern.search(text)
+        if match is not None:
+            report.add(
+                "ai-surfaces",
+                "ERROR",
+                str(relative_path),
+                f"Stale AI runtime path detected: {match.group(0)}",
+            )
+
+
+def _check_ai_surface_forbidden_patterns(
+    report: DriftReport,
+    *,
+    project_root: Path,
+    relative_path: Path,
+    forbidden_patterns: tuple[re.Pattern[str], ...],
+) -> None:
+    path = project_root / relative_path
+    text = _read_doc(path)
+    if not text:
+        report.add("ai-surfaces", "ERROR", str(relative_path), "AI surface file missing")
+        return
+
+    for pattern in forbidden_patterns:
+        match = pattern.search(text)
+        if match is not None:
+            report.add(
+                "ai-surfaces",
+                "ERROR",
+                str(relative_path),
+                f"Forbidden legacy runtime dependency detected: {match.group(0)}",
+            )
+
+
 def print_report(report: DriftReport) -> None:
     """Print human-readable drift report."""
     print("Documentation Drift Report")
@@ -797,6 +952,11 @@ def main() -> int:
         help="Check freshness/version markers in active runtime/governance docs",
     )
     parser.add_argument(
+        "--ai-surfaces",
+        action="store_true",
+        help="Check AI runtime control points for policy links and legacy refs",
+    )
+    parser.add_argument(
         "--json",
         action="store_true",
         dest="json_output",
@@ -812,6 +972,7 @@ def main() -> int:
         or args.modules
         or args.runtime_mirrors
         or args.freshness
+        or args.ai_surfaces
     )
 
     if run_all or args.ports:
@@ -824,6 +985,8 @@ def main() -> int:
         check_runtime_mirrors(report)
     if run_all or args.freshness:
         check_freshness(report)
+    if run_all or args.ai_surfaces:
+        check_ai_surfaces(report)
     if run_all:
         check_providers(report)
         check_glossary(report)
