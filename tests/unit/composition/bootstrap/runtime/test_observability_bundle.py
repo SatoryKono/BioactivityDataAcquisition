@@ -429,3 +429,45 @@ class TestBootstrapObservabilityBundleImpl:
             run_ledger_enabled=True,
             preflight_status="passed",
         )
+
+    def test_emits_runtime_status_gauges_for_all_observability_components(self) -> None:
+        from bioetl.composition.bootstrap.runtime.observability_bundle import (
+            bootstrap_observability_bundle_impl,
+        )
+
+        logger = MagicMock()
+        metrics = MagicMock()
+
+        bootstrap_observability_bundle_impl(
+            pipeline="p",
+            run_id=_FIXED_UUID,
+            settings=_settings(),
+            log_level="INFO",
+            logger_bootstrapper=lambda _p, _r, _l: logger,
+            tracer_bootstrapper=lambda _s: NoOpTracing(),
+            metrics_bootstrapper=lambda _s: metrics,
+            audit_bootstrapper=lambda _s, _l, _m, _t: NoOpAudit(),
+            dq_monitor_bootstrapper=lambda _s, _lg: None,
+            preflight_validator=MagicMock(),
+        )
+
+        metrics.set_gauge.assert_any_call(
+            "bioetl_observability_runtime_status",
+            1.0,
+            {"pipeline": "unknown", "component": "metrics", "mode": "active"},
+        )
+        metrics.set_gauge.assert_any_call(
+            "bioetl_observability_runtime_status",
+            1.0,
+            {"pipeline": "unknown", "component": "tracing", "mode": "noop"},
+        )
+        metrics.set_gauge.assert_any_call(
+            "bioetl_observability_runtime_status",
+            1.0,
+            {"pipeline": "unknown", "component": "audit", "mode": "noop"},
+        )
+        metrics.set_gauge.assert_any_call(
+            "bioetl_observability_runtime_status",
+            1.0,
+            {"pipeline": "unknown", "component": "dq_monitor", "mode": "disabled"},
+        )

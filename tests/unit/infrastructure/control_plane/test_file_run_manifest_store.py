@@ -193,7 +193,11 @@ def test_file_store_rolls_back_manifest_when_run_index_write_fails(
     tmp_path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
+    metrics = MagicMock()
+    store = FileRunManifestStore(
+        base_path=tmp_path / "run_manifest",
+        metrics=metrics,
+    )
     manifest = RunManifest(
         manifest_id="manifest-rollback",
         execution_fingerprint="fingerprint-rollback",
@@ -231,6 +235,15 @@ def test_file_store_rolls_back_manifest_when_run_index_write_fails(
     assert store.get(manifest.manifest_id) is None
     assert store.get_by_run_id(manifest.run_id) is None
     assert not (store.base_path / f"{manifest.manifest_id}.json").exists()
+    metrics.increment_counter.assert_any_call(
+        "bioetl_control_plane_manifest_writes_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "status": "failed",
+        },
+    )
 
 
 def test_file_store_reports_orphan_manifest_without_run_index(tmp_path) -> None:

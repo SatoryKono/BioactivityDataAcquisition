@@ -325,6 +325,31 @@ class TestPushMetricsToGateway:
         call_kwargs = mock_push.call_args[1]
         assert call_kwargs["grouping_key"] == {"pipeline": "chembl_activity"}
 
+    def test_push_success_emits_publication_metric(self):
+        """Successful push should emit one bounded publication success event."""
+        with (
+            patch("bioetl.infrastructure.observability.server.pushadd_to_gateway"),
+            patch(
+                "bioetl.infrastructure.observability.server."
+                "METRICS_PUBLICATION_EVENTS_TOTAL"
+            ) as mock_metric,
+        ):
+            push_metrics_to_gateway(
+                gateway="localhost:9091",
+                grouping_key={
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                },
+            )
+
+        mock_metric.labels.assert_called_once_with(
+            pipeline="chembl_activity",
+            run_type="incremental",
+            target="pushgateway",
+            status="success",
+        )
+        mock_metric.labels().inc.assert_called_once_with()
+
     def test_push_success_with_multiple_grouping_labels(self):
         """Should preserve all low-cardinality grouping labels."""
         with patch(
@@ -364,6 +389,34 @@ class TestPushMetricsToGateway:
             result = push_metrics_to_gateway()
 
         assert result is False
+
+    def test_push_failure_emits_publication_metric(self):
+        """Failed push should emit one bounded publication failure event."""
+        with (
+            patch(
+                "bioetl.infrastructure.observability.server.pushadd_to_gateway",
+                side_effect=OSError("Connection refused"),
+            ),
+            patch(
+                "bioetl.infrastructure.observability.server."
+                "METRICS_PUBLICATION_EVENTS_TOTAL"
+            ) as mock_metric,
+        ):
+            push_metrics_to_gateway(
+                gateway="localhost:9091",
+                grouping_key={
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                },
+            )
+
+        mock_metric.labels.assert_called_once_with(
+            pipeline="chembl_activity",
+            run_type="incremental",
+            target="pushgateway",
+            status="failed",
+        )
+        mock_metric.labels().inc.assert_called_once_with()
 
     def test_push_failure_connection_error(self):
         """Should return False on ConnectionError."""
