@@ -31,6 +31,12 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_record_flow_records_total": _metrics.RECORD_FLOW_RECORDS_TOTAL,
         "bioetl_record_flow_invariants_total": _metrics.RECORD_FLOW_INVARIANTS_TOTAL,
         "bioetl_stage_records_total": _metrics.STAGE_RECORDS_TOTAL,
+        "bioetl_batch_lifecycle_events_total": _metrics.BATCH_LIFECYCLE_EVENTS_TOTAL,
+        "bioetl_batch_lifecycle_records_total": _metrics.BATCH_LIFECYCLE_RECORDS_TOTAL,
+        "bioetl_composite_phase_records_total": _metrics.COMPOSITE_PHASE_RECORDS_TOTAL,
+        "bioetl_composite_phase_errors_total": _metrics.COMPOSITE_PHASE_ERRORS_TOTAL,
+        "bioetl_composite_phase_loss_total": _metrics.COMPOSITE_PHASE_LOSS_TOTAL,
+        "bioetl_composite_phase_retries_total": _metrics.COMPOSITE_PHASE_RETRIES_TOTAL,
         "bioetl_errors_total": _metrics.ERRORS_TOTAL,
         "bioetl_filter_ids_loaded_total": _metrics.FILTER_IDS_LOADED_TOTAL,
         "bioetl_filter_ids_duplicates_total": _metrics.FILTER_IDS_DUPLICATES_TOTAL,
@@ -108,6 +114,9 @@ STORAGE_MEDALLION_REGISTRY = MetricRegistryFamily(
         "bioetl_metadata_write_retries_total": _metrics.METADATA_WRITE_RETRIES_TOTAL,
         "bioetl_metadata_write_outcomes_total": _metrics.METADATA_WRITE_OUTCOMES_TOTAL,
         "bioetl_quarantine_records_total": _metrics.QUARANTINE_RECORDS_TOTAL,
+        "bioetl_output_artifact_publication_events_total": (
+            _metrics.OUTPUT_ARTIFACT_PUBLICATION_EVENTS_TOTAL
+        ),
         "bioetl_silver_filter_rejections_total": _metrics.SILVER_FILTER_REJECTIONS_TOTAL,
         "bioetl_lineage_fragments_emitted_total": _metrics.LINEAGE_FRAGMENTS_EMITTED_TOTAL,
         "bioetl_lineage_refs_missing_total": _metrics.LINEAGE_REFS_MISSING_TOTAL,

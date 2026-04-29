@@ -114,6 +114,7 @@ async def safe_write_layer(
                     "silver",
                     error,
                     batch_id,
+                    record_count=len(records),
                 ),
             )
         else:
@@ -126,8 +127,10 @@ async def safe_write_layer(
                     "gold",
                     error,
                     batch_id,
+                    record_count=len(records),
                 ),
             )
+        writer._batch_metrics.track_batch_written(stage=layer, count=len(records))
         emit_batch_written(
             emitter=domain_event_emitter,
             run_id=run_id,
@@ -137,6 +140,7 @@ async def safe_write_layer(
             occurred_at=ingestion_ts,
         )
     except SchemaViolationError as error:
+        writer._batch_metrics.track_batch_failed(stage=layer, count=len(records))
         emit_batch_failed(
             emitter=domain_event_emitter,
             run_id=run_id,
@@ -164,6 +168,7 @@ async def safe_write_layer(
         )
     except operation_errors as error:
         if isinstance(error, Exception):
+            writer._batch_metrics.track_batch_failed(stage=layer, count=len(records))
             emit_batch_failed(
                 emitter=domain_event_emitter,
                 run_id=run_id,

@@ -9,6 +9,7 @@ from bioetl.domain.normalization.json import (
     deserialize_json_value,
     serialize_json_canonical,
 )
+from bioetl.domain.normalization.open_access import normalize_governed_oa_status
 from bioetl.domain.normalization.rules import (
     normalize_binary_flag,
     normalize_boolean,
@@ -121,6 +122,11 @@ def _normalize_json_string_list_vocabulary_item(
 def normalize_profile_boolean(value: object) -> bool | None:
     """Normalize common boolean-like profile fields to canonical bool."""
     return normalize_boolean(value)
+
+
+def normalize_profile_oa_status(value: object) -> str | None:
+    """Normalize OA status against the shared publication OA-status registry."""
+    return normalize_governed_oa_status(value)
 
 
 def normalize_profile_binary_flag(value: object) -> int | None:

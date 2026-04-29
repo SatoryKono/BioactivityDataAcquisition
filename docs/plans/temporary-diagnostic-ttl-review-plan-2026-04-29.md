@@ -3,6 +3,11 @@
 *Status: supporting_context*
 *Date: 2026-04-29*
 
+Freshness note: the bounded TTL execution waves on `2026-04-29` fully closed
+the `temporary_diagnostic` bucket. This document now remains as historical
+policy context; the live closeout state is recorded in
+`docs/plans/temporary-diagnostic-program-closeout-2026-04-29.md`.
+
 ## Purpose
 
 This note closes the scripts inventory cleanup wave by defining a bounded review
@@ -16,7 +21,7 @@ surface. Each item must converge to exactly one end state:
 
 ## Current Baseline
 
-Inventory snapshot after the 2026-04-29 supporting reclassification wave:
+Historical baseline at the time this plan was created:
 
 - `scripts=367`
 - `active=322`

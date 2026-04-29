@@ -104,11 +104,12 @@ class BatchProcessingSupportService:
             batch_id,
             len(records),
             on_error=lambda error: self._writer.log_and_track_write_error(
-                "bronze", error, batch_id
+                "bronze", error, batch_id, record_count=len(records)
             ),
         )
         self._batch_metrics.track_batch_size("bronze", len(records))
         self._batch_metrics.track_processed_records("bronze", len(records))
+        self._batch_metrics.track_batch_written(stage="bronze", count=len(records))
         self._batch_metrics.track_stage_records(
             stage="ingestion",
             outcome="bronze_written",

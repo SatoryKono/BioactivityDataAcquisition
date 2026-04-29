@@ -6,9 +6,12 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_chembl_ids,
+    normalize_profile_drugbank_ids,
     normalize_profile_pdb_references,
     normalize_profile_pfam_references,
     normalize_profile_reactome_references,
+    normalize_profile_uniprot_accessions,
     normalize_profile_uniprot_go_references,
     normalize_profile_uniprot_interpro_references,
 )
@@ -123,9 +126,17 @@ _REFERENCE_ID_RULE_NOTES = {
     ),
 }
 _SPECIAL_RULES = {
+    "chembl_ids": (
+        normalize_profile_chembl_ids,
+        "Canonicalize ChEMBL identifiers inside a set-like canonical JSON array.",
+    ),
     "cellular_component": (
         normalize_profile_uniprot_go_references,
         _REFERENCE_ID_RULE_NOTES["go"],
+    ),
+    "drugbank_ids": (
+        normalize_profile_drugbank_ids,
+        "Canonicalize DrugBank identifiers inside a set-like canonical JSON array.",
     ),
     "go_terms": (
         normalize_profile_uniprot_go_references,
@@ -150,6 +161,10 @@ _SPECIAL_RULES = {
     "reactome_xrefs": (
         normalize_profile_reactome_references,
         _REFERENCE_ID_RULE_NOTES["reactome"],
+    ),
+    "secondary_accessions": (
+        normalize_profile_uniprot_accessions,
+        "Canonicalize UniProt secondary accessions inside a set-like canonical JSON array.",
     ),
 }
 

@@ -2,5 +2,5 @@
 REM Compatibility facade for the canonical Codex Windows launcher
 
 setlocal EnableExtensions
-call "%~dp0..\..\..\ai\codex\launch.bat" %*
+call "%~dp0codex.bat" %*
 exit /b %errorlevel%

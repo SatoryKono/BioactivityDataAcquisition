@@ -10,6 +10,9 @@
 # Join Strategy:
 # - Primary: InChIKey (IUPAC standard, 27 characters)
 # - Fallback: Canonical SMILES (less reliable due to canonization differences)
+# - Normalized PubChem anchors (standardized_inchi_key, structure_parent_key)
+#   are retained as downstream validation/fallback surfaces; they are not used
+#   as primary symmetric join keys until seed pipelines emit the same anchors.
 #
 # Note: ChEMBL uses "molecule" terminology, PubChem uses "compound".
 # Unified entity name: molecule
@@ -231,6 +234,8 @@ composite:
         fields:
           - molecule_id          # Canonical molecule id
           - inchi_key            # Standard InChIKey (both ChEMBL and PubChem)
+          - standardized_inchi_key # PubChem standardized InChIKey validation anchor
+          - structure_parent_key # PubChem connectivity-level parent structure anchor
           - inchi
           - standard_inchi
         provider_order: [chembl, pubchem]

@@ -152,6 +152,7 @@ class MetadataWriter:
         )
         _record_artifact_publication(
             recorder=self._artifact_recorder,
+            metrics=self._metrics,
             layer=layer,
             base_path=base_path,
             metadata_path=metadata_path,

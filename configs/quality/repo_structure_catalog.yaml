@@ -58,6 +58,8 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/codex-launcher-parity-review-2026-04-28.md
       lifecycle: supporting_context
+    - path: docs/plans/codex-launcher-parity-refresh-2026-04-29.md
+      lifecycle: supporting_context
     - path: docs/plans/docs-cli-wrapper-closeout-2026-04-28.md
       lifecycle: supporting_context
     - path: docs/plans/mcp-wrapper-contract-audit-2026-04-28.md
@@ -81,6 +83,10 @@ plans:
     - path: docs/plans/temporary-diagnostic-ttl-wave-2-closeout-2026-04-29.md
       lifecycle: supporting_context
     - path: docs/plans/temporary-diagnostic-ttl-wave-3-closeout-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/temporary-diagnostic-program-closeout-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/scripts-normalization-program-closeout-2026-04-29.md
       lifecycle: supporting_context
     - path: docs/plans/silver-filter-rejects-observability-plan.md
       lifecycle: supporting_context

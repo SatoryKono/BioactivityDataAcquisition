@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
+import yaml
 
 from bioetl.domain.normalization.profiles import (
     CHEMBL_ACTIVITY_PROFILE,
@@ -12,8 +15,9 @@ from bioetl.domain.normalization.profiles import (
     CHEMBL_MOLECULE_PROFILE,
     CHEMBL_PUBLICATION_PROFILE,
     CHEMBL_SUBCELLULAR_FRACTION_PROFILE,
-    CHEMBL_TARGET_PROFILE,
     CHEMBL_TARGET_COMPONENT_PROFILE,
+    CHEMBL_TARGET_PROFILE,
+    CHEMBL_TISSUE_PROFILE,
     CROSSREF_PUBLICATION_PROFILE,
     CROSSREF_PUBLICATION_SCHEMA_FIELDS,
     OPENALEX_PUBLICATION_PROFILE,
@@ -186,10 +190,8 @@ def test_non_chembl_publication_bool_fields_are_profile_normalized() -> None:
 
 def test_uniprot_protein_json_array_fields_are_profile_canonicalized() -> None:
     for field_name in (
-        "cellular_component",
         "isoform_names",
         "isoform_synonyms",
-        "molecular_function",
         "reaction_ec_numbers",
         "reactions",
     ):
@@ -202,6 +204,15 @@ def test_uniprot_protein_json_array_fields_are_profile_canonicalized() -> None:
     assert UNIPROT_PROTEIN_PROFILE.rule_for("molecular_function").set_like is True
     assert UNIPROT_PROTEIN_PROFILE.rule_for("reaction_ec_numbers").set_like is True
     assert UNIPROT_PROTEIN_PROFILE.rule_for("reactions").set_like is False
+
+
+def test_uniprot_reference_array_fields_are_persisted_as_set_like_json() -> None:
+    for field_name in ("cellular_component", "molecular_function"):
+        rule = UNIPROT_PROTEIN_PROFILE.rule_for(field_name)
+
+        assert rule is not None
+        assert rule.apply('["b", "a"]') == '["a","b"]'
+        assert rule.set_like is True
 
 
 def test_uniprot_protein_reference_ids_are_profile_canonicalized() -> None:
@@ -252,6 +263,70 @@ def test_openalex_reference_ids_are_profile_canonicalized() -> None:
         primary_topic_rule.apply('{"id":"https://openalex.org/T987","score":1}')
         == '{"id":"T987","score":1}'
     )
+
+
+def test_non_chembl_identifier_arrays_are_profile_canonicalized_from_fixture() -> None:
+    fixture_path = (
+        Path(__file__).resolve().parents[4]
+        / "fixtures"
+        / "normalization"
+        / "non_chembl_identifier_cases.yaml"
+    )
+    cases = yaml.safe_load(fixture_path.read_text(encoding="utf-8"))
+
+    crossref_orcids = CROSSREF_PUBLICATION_PROFILE.rule_for("author_orcids")
+    crossref_issns = CROSSREF_PUBLICATION_PROFILE.rule_for("issn_list")
+    openalex_authors = OPENALEX_PUBLICATION_PROFILE.rule_for("author_openalex_ids")
+    assert crossref_orcids is not None
+    assert crossref_issns is not None
+    assert openalex_authors is not None
+
+    publication_cases = cases["publication_identifier_arrays"]
+    assert (
+        crossref_orcids.apply(publication_cases["author_orcids"]["input"])
+        == publication_cases["author_orcids"]["expected"]
+    )
+    assert (
+        crossref_issns.apply(publication_cases["issn_list"]["input"])
+        == publication_cases["issn_list"]["expected"]
+    )
+    assert (
+        openalex_authors.apply(publication_cases["openalex_author_ids"]["input"])
+        == publication_cases["openalex_author_ids"]["expected"]
+    )
+
+    all_mappings = UNIPROT_IDMAPPING_PROFILE.rule_for("all_mappings")
+    chembl_ids = UNIPROT_PROTEIN_PROFILE.rule_for("chembl_ids")
+    drugbank_ids = UNIPROT_PROTEIN_PROFILE.rule_for("drugbank_ids")
+    assert all_mappings is not None
+    assert chembl_ids is not None
+    assert drugbank_ids is not None
+
+    uniprot_cases = cases["uniprot_identifier_arrays"]
+    assert (
+        all_mappings.apply(uniprot_cases["all_mappings"]["input"])
+        == uniprot_cases["all_mappings"]["expected"]
+    )
+    assert (
+        chembl_ids.apply(uniprot_cases["chembl_ids"]["input"])
+        == uniprot_cases["chembl_ids"]["expected"]
+    )
+    assert (
+        drugbank_ids.apply(uniprot_cases["drugbank_ids"]["input"])
+        == uniprot_cases["drugbank_ids"]["expected"]
+    )
+
+
+def test_publication_oa_status_profiles_use_shared_governed_registry() -> None:
+    openalex_oa_status = OPENALEX_PUBLICATION_PROFILE.rule_for("oa_status")
+    semanticscholar_oa_status = SEMANTICSCHOLAR_PUBLICATION_PROFILE.rule_for(
+        "oa_status"
+    )
+
+    assert openalex_oa_status is not None
+    assert semanticscholar_oa_status is not None
+    assert openalex_oa_status.apply(" GOLD ") == "gold"
+    assert semanticscholar_oa_status.apply("unknown") is None
 
 
 def test_chembl_target_organism_display_normalization_is_profile_visible() -> None:

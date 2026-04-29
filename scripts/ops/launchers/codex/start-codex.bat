@@ -8,8 +8,8 @@ echo ========================================
 echo  Codex Setup & Launch
 echo ========================================
 echo.
-echo [compat] Delegating to scripts\ai\codex\launch.bat
+echo [compat] Delegating to scripts\ops\launchers\codex\codex.bat
 echo.
 
-call "%~dp0..\..\..\ai\codex\launch.bat" %*
+call "%~dp0codex.bat" %*
 exit /b %errorlevel%

@@ -14,6 +14,7 @@ from bioetl.application.composite.runner_pkg.runner_stage_payloads import (
     build_merge_stage_metrics,
     build_seed_stage_metrics,
 )
+from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.domain.composite.result import (
     DependencyResult,
     EnrichmentResult,
@@ -31,11 +32,15 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.run_ledger_service import (
         RunLedgerService,
     )
+    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.ports import MetricsPort
 
 __all__ = ["CompositeRunnerControlPlaneMixin"]
 
 
 class _CompositeRunnerControlPlaneHostProtocol(Protocol):
+    _config: CompositeConfig
+    _metrics: MetricsPort | None
     _run_ledger_service: RunLedgerService | None
     _manifest_id: str | None
 
@@ -70,6 +75,13 @@ _SEED_STAGE_NAME = COMPOSITE_RUN_LEDGER_STAGE_NAMES[0]
 _DEPENDENCIES_STAGE_NAME = COMPOSITE_RUN_LEDGER_STAGE_NAMES[1]
 _ENRICHMENT_STAGE_NAME = COMPOSITE_RUN_LEDGER_STAGE_NAMES[2]
 _MERGE_STAGE_NAME = COMPOSITE_RUN_LEDGER_STAGE_NAMES[3]
+
+
+def _build_pipeline_metrics(
+    host: _CompositeRunnerControlPlaneHostProtocol,
+) -> PipelineMetricsRecorder:
+    """Build a pipeline-scoped metrics facade for composite phase counters."""
+    return PipelineMetricsRecorder(host._metrics, f"composite:{host._config.name}")
 
 
 class CompositeRunnerControlPlaneMixin:
@@ -216,6 +228,30 @@ class CompositeRunnerControlPlaneMixin:
         seed_result: SeedResult,
     ) -> None:
         """Append one ``stage_completed`` entry for seed phase."""
+        pipeline_metrics = _build_pipeline_metrics(self)
+        pipeline_metrics.record_composite_phase_records(
+            phase="seed",
+            outcome="extracted",
+            count=int(seed_result.records_extracted),
+        )
+        pipeline_metrics.record_composite_phase_records(
+            phase="seed",
+            outcome="silver",
+            count=int(seed_result.records_silver),
+        )
+        pipeline_metrics.record_composite_phase_loss(
+            phase="seed",
+            loss_kind="unwritten",
+            count=max(
+                int(seed_result.records_extracted) - int(seed_result.records_silver),
+                0,
+            ),
+        )
+        if seed_result.resumed:
+            pipeline_metrics.record_composite_phase_retries(
+                phase="seed",
+                retry_kind="resume",
+            )
         self._record_stage_completed(
             stage=_SEED_STAGE_NAME,
             metrics_snapshot=build_seed_stage_metrics(seed_result),
@@ -226,6 +262,50 @@ class CompositeRunnerControlPlaneMixin:
         dependency_results: dict[str, DependencyResult],
     ) -> None:
         """Append one ``stage_completed`` entry for dependencies phase."""
+        pipeline_metrics = _build_pipeline_metrics(self)
+        records_extracted = sum(
+            int(result.records_extracted) for result in dependency_results.values()
+        )
+        records_silver = sum(
+            int(result.records_silver) for result in dependency_results.values()
+        )
+        failed = sum(
+            1 for result in dependency_results.values() if result.status.value == "failed"
+        )
+        timed_out = sum(
+            1 for result in dependency_results.values() if result.status.value == "timeout"
+        )
+        resumed = sum(1 for result in dependency_results.values() if result.resumed)
+        pipeline_metrics.record_composite_phase_records(
+            phase="dependencies",
+            outcome="extracted",
+            count=records_extracted,
+        )
+        pipeline_metrics.record_composite_phase_records(
+            phase="dependencies",
+            outcome="silver",
+            count=records_silver,
+        )
+        pipeline_metrics.record_composite_phase_loss(
+            phase="dependencies",
+            loss_kind="unwritten",
+            count=max(records_extracted - records_silver, 0),
+        )
+        pipeline_metrics.record_composite_phase_errors(
+            phase="dependencies",
+            error_kind="failed",
+            count=failed,
+        )
+        pipeline_metrics.record_composite_phase_errors(
+            phase="dependencies",
+            error_kind="timeout",
+            count=timed_out,
+        )
+        pipeline_metrics.record_composite_phase_retries(
+            phase="dependencies",
+            retry_kind="resume",
+            count=resumed,
+        )
         self._record_stage_completed(
             stage=_DEPENDENCIES_STAGE_NAME,
             metrics_snapshot=build_dependency_stage_metrics(dependency_results),
@@ -236,6 +316,55 @@ class CompositeRunnerControlPlaneMixin:
         enrichment_results: dict[str, EnrichmentResult],
     ) -> None:
         """Append one ``stage_completed`` entry for enrichment phase."""
+        pipeline_metrics = _build_pipeline_metrics(self)
+        records_input = sum(
+            int(result.records_input) for result in enrichment_results.values()
+        )
+        records_enriched = sum(
+            int(result.records_enriched) for result in enrichment_results.values()
+        )
+        records_not_found = sum(
+            int(result.records_not_found) for result in enrichment_results.values()
+        )
+        records_errored = sum(
+            int(result.records_errored) for result in enrichment_results.values()
+        )
+        failed = sum(
+            1 for result in enrichment_results.values() if result.status.value == "failed"
+        )
+        timed_out = sum(
+            1 for result in enrichment_results.values() if result.status.value == "timeout"
+        )
+        pipeline_metrics.record_composite_phase_records(
+            phase="enrichment",
+            outcome="input",
+            count=records_input,
+        )
+        pipeline_metrics.record_composite_phase_records(
+            phase="enrichment",
+            outcome="enriched",
+            count=records_enriched,
+        )
+        pipeline_metrics.record_composite_phase_loss(
+            phase="enrichment",
+            loss_kind="not_found",
+            count=records_not_found,
+        )
+        pipeline_metrics.record_composite_phase_errors(
+            phase="enrichment",
+            error_kind="record_error",
+            count=records_errored,
+        )
+        pipeline_metrics.record_composite_phase_errors(
+            phase="enrichment",
+            error_kind="failed",
+            count=failed,
+        )
+        pipeline_metrics.record_composite_phase_errors(
+            phase="enrichment",
+            error_kind="timeout",
+            count=timed_out,
+        )
         self._record_stage_completed(
             stage=_ENRICHMENT_STAGE_NAME,
             metrics_snapshot=build_enrichment_stage_metrics(enrichment_results),
@@ -246,6 +375,36 @@ class CompositeRunnerControlPlaneMixin:
         merge_result: MergeResult,
     ) -> None:
         """Append one ``stage_completed`` entry for merge phase."""
+        pipeline_metrics = _build_pipeline_metrics(self)
+        pipeline_metrics.record_composite_phase_records(
+            phase="merge",
+            outcome="merged",
+            count=int(merge_result.records_merged),
+        )
+        pipeline_metrics.record_composite_phase_records(
+            phase="merge",
+            outcome="enriched",
+            count=int(merge_result.records_enriched),
+        )
+        pipeline_metrics.record_composite_phase_records(
+            phase="merge",
+            outcome="fully_enriched",
+            count=int(merge_result.records_fully_enriched),
+        )
+        pipeline_metrics.record_composite_phase_loss(
+            phase="merge",
+            loss_kind="partially_enriched",
+            count=max(
+                int(merge_result.records_merged)
+                - int(merge_result.records_fully_enriched),
+                0,
+            ),
+        )
+        pipeline_metrics.record_composite_phase_loss(
+            phase="merge",
+            loss_kind="quarantined",
+            count=len(merge_result.quarantine_payloads),
+        )
         self._record_stage_completed(
             stage=_MERGE_STAGE_NAME,
             metrics_snapshot=build_merge_stage_metrics(merge_result),

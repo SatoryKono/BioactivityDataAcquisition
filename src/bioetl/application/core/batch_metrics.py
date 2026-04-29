@@ -99,6 +99,39 @@ class BatchMetricsRecorderService:
             count=count,
         )
 
+    def track_batch_created(self, *, stage: str, count: int) -> None:
+        """Record one successful batch-created lifecycle projection."""
+        self._pipeline_metrics.record_batch_lifecycle_event(
+            run_type=self._run_type_label,
+            event="created",
+            stage=stage,
+            status="success",
+            count=1,
+            record_count=count,
+        )
+
+    def track_batch_written(self, *, stage: str, count: int) -> None:
+        """Record one successful batch-written lifecycle projection."""
+        self._pipeline_metrics.record_batch_lifecycle_event(
+            run_type=self._run_type_label,
+            event="written",
+            stage=stage,
+            status="success",
+            count=1,
+            record_count=count,
+        )
+
+    def track_batch_failed(self, *, stage: str, count: int = 0) -> None:
+        """Record one failed batch lifecycle projection."""
+        self._pipeline_metrics.record_batch_lifecycle_event(
+            run_type=self._run_type_label,
+            event="failed",
+            stage=stage,
+            status="failed",
+            count=1,
+            record_count=count,
+        )
+
     def track_processed_records(self, stage: str, count: int) -> None:
         """Record number of processed records at a specific stage.
 

@@ -18,8 +18,8 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
 from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
     chembl_pseudo_null_fields,
 )
-from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 from bioetl.domain.schemas.chembl.tissue import TissueSchema
+from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
 from ._chembl_policy_registry import chembl_ontology_family_fields
 
@@ -60,53 +60,57 @@ _OBO_COMPANION_SPECS = {
     "efo": ("efo_id", "EFO_", EFO_ONTOLOGY_VERSION),
     "uberon": ("uberon_id", "UBERON_", UBERON_ONTOLOGY_VERSION),
 }
-_SPECIAL_RULES = {
-    f"{family}_iri": (
-        build_obo_companion_iri_normalizer(
-            source_field=source_field,
-            canonical_prefix=canonical_prefix,
-            ontology_version=ontology_version,
-        ),
-        f"Resolve the {family.upper()} ontology companion bundle from sibling "
-        "normalized identifiers and emit the canonical OBO IRI.",
-    )
-    for family, (
-        source_field,
-        canonical_prefix,
-        ontology_version,
-    ) in _OBO_COMPANION_SPECS.items()
-} | {
-    f"{family}_mapping_status": (
-        build_obo_companion_mapping_status_normalizer(
-            source_field=source_field,
-            canonical_prefix=canonical_prefix,
-            ontology_version=ontology_version,
-        ),
-        f"Resolve the {family.upper()} ontology companion bundle from sibling "
-        "normalized identifiers and emit the canonical mapping-status enum.",
-    )
-    for family, (
-        source_field,
-        canonical_prefix,
-        ontology_version,
-    ) in _OBO_COMPANION_SPECS.items()
-} | {
-    f"{family}_ontology_version": (
-        build_obo_companion_version_normalizer(
-            source_field=source_field,
-            canonical_prefix=canonical_prefix,
-            ontology_version=ontology_version,
-        ),
-        f"Resolve the {family.upper()} ontology companion bundle from sibling "
-        "normalized identifiers and emit the ontology version when a mapping "
-        "context exists.",
-    )
-    for family, (
-        source_field,
-        canonical_prefix,
-        ontology_version,
-    ) in _OBO_COMPANION_SPECS.items()
-}
+_SPECIAL_RULES = (
+    {
+        f"{family}_iri": (
+            build_obo_companion_iri_normalizer(
+                source_field=source_field,
+                canonical_prefix=canonical_prefix,
+                ontology_version=ontology_version,
+            ),
+            f"Resolve the {family.upper()} ontology companion bundle from sibling "
+            "normalized identifiers and emit the canonical OBO IRI.",
+        )
+        for family, (
+            source_field,
+            canonical_prefix,
+            ontology_version,
+        ) in _OBO_COMPANION_SPECS.items()
+    }
+    | {
+        f"{family}_mapping_status": (
+            build_obo_companion_mapping_status_normalizer(
+                source_field=source_field,
+                canonical_prefix=canonical_prefix,
+                ontology_version=ontology_version,
+            ),
+            f"Resolve the {family.upper()} ontology companion bundle from sibling "
+            "normalized identifiers and emit the canonical mapping-status enum.",
+        )
+        for family, (
+            source_field,
+            canonical_prefix,
+            ontology_version,
+        ) in _OBO_COMPANION_SPECS.items()
+    }
+    | {
+        f"{family}_ontology_version": (
+            build_obo_companion_version_normalizer(
+                source_field=source_field,
+                canonical_prefix=canonical_prefix,
+                ontology_version=ontology_version,
+            ),
+            f"Resolve the {family.upper()} ontology companion bundle from sibling "
+            "normalized identifiers and emit the ontology version when a mapping "
+            "context exists.",
+        )
+        for family, (
+            source_field,
+            canonical_prefix,
+            ontology_version,
+        ) in _OBO_COMPANION_SPECS.items()
+    }
+)
 
 CHEMBL_TISSUE_PROFILE = build_standard_profile(
     profile_name="chembl.tissue",

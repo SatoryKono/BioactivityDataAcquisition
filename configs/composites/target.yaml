@@ -87,7 +87,9 @@ composite:
       timeout_seconds: 300
       silver_table: silver/chembl/protein_class
 
-    # UniProt ID Mapping: maps ChEMBL target IDs to UniProt accessions
+    # UniProt ID Mapping: maps canonical ChEMBL target IDs to canonical UniProt
+    # accessions. The uniprot_idmapping normalization profile owns both anchor
+    # families and all_mappings set-like accession-array semantics.
     # This MUST run before uniprot_protein to provide uniprot_accession keys.
     # OPTIONAL: Many non-protein targets lack UniProt mappings.
     #
@@ -112,7 +114,7 @@ composite:
       silver_table: silver/uniprot/idmapping
 
     # UniProt Protein: detailed protein functional data
-    # Uses uniprot_accession from idmapping Silver table.
+    # Uses normalized uniprot_accession from idmapping Silver table.
     # This is a CHAINED DEPENDENCY: reads keys from uniprot_idmapping output.
     # Only fetches proteins where mapping_status = 'found'.
     # Provides: function, GO terms, disease associations, subcellular location,

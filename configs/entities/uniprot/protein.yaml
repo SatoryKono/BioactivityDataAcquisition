@@ -279,7 +279,7 @@ filters:
   gold_filters:
     columns:
       reviewed:
-      - 'true'
+      - "True"
     required_fields:
     - accession
     - entry_name

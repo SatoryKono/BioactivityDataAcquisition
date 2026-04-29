@@ -24,7 +24,12 @@ from bioetl.application.pipelines.semanticscholar._page_parsing import (
     parse_page_range,
     parse_volume_issue,
 )
-from bioetl.domain.schemas.common.publication_base import OA_STATUS_VALUES
+from bioetl.domain.normalization.open_access import (
+    OA_STATUS_REGISTRY as OA_STATUS_SET,
+)
+from bioetl.domain.normalization.open_access import (
+    normalize_governed_oa_status as normalize_oa_status,
+)
 from bioetl.domain.types import JsonDict
 
 
@@ -166,39 +171,6 @@ def extract_journal_info(
         "page_first": None,
         "page_last": None,
     }
-
-
-# Valid OA status values (normalized to lowercase for consistency with OpenAlex)
-OA_STATUS_SET = frozenset(OA_STATUS_VALUES)
-
-
-def normalize_oa_status(status: str | None) -> str | None:
-    """Normalize OA status to lowercase.
-
-    Converts OA status values to lowercase for consistency with OpenAlex.
-    Returns None for invalid or unknown status values.
-
-    Args:
-        status: Raw OA status string (may be uppercase, mixed case, or None).
-
-    Returns:
-        Normalized lowercase status if valid, None otherwise.
-
-    Example:
-        >>> normalize_oa_status("GOLD")
-        'gold'
-        >>> normalize_oa_status("Green")
-        'green'
-        >>> normalize_oa_status("unknown")
-        None
-        >>> normalize_oa_status(None)
-        None
-
-    """
-    if status is None:
-        return None
-    normalized = status.lower().strip()
-    return normalized if normalized in OA_STATUS_SET else None
 
 
 def extract_open_access_info(

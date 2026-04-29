@@ -23,8 +23,8 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_text,
 )
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
-from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 from bioetl.domain.schemas.chembl.assay import AssaySchema
+from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
 from ._chembl_policy_registry import (
     chembl_controlled_family_fields,

@@ -9,6 +9,11 @@ from bioetl.domain.ports import MetricLabels
 from bioetl.infrastructure.observability._prometheus_metric_label_normalizers import (
     normalize_adapter_endpoint_label,
     normalize_adapter_operation_label,
+    normalize_batch_lifecycle_event,
+    normalize_composite_phase_error_kind,
+    normalize_composite_phase_loss_kind,
+    normalize_composite_phase_record_outcome,
+    normalize_composite_phase_retry_kind,
     normalize_dq_check_type,
     normalize_dq_disposition,
     normalize_dq_severity,
@@ -76,14 +81,29 @@ _STAGE_MODEL_LABEL_METRICS = frozenset({"bioetl_stage_records_total"})
 _STAGE_BACKLOG_LABEL_METRICS = frozenset({"bioetl_stage_backlog_records"})
 _STAGE_LAG_LABEL_METRICS = frozenset({"bioetl_stage_lag_seconds"})
 _FLOW_STAGE_LABEL_METRICS = frozenset({"bioetl_record_flow_records_total"})
+_BATCH_LIFECYCLE_LABEL_METRICS = frozenset(
+    {
+        "bioetl_batch_lifecycle_events_total",
+        "bioetl_batch_lifecycle_records_total",
+    }
+)
 _DQ_DISPOSITION_LABEL_METRICS = frozenset({"bioetl_dq_dispositions_total"})
 _METRICS_PUBLICATION_LABEL_METRICS = frozenset(
     {"bioetl_metrics_publication_events_total"}
+)
+_OUTPUT_ARTIFACT_PUBLICATION_LABEL_METRICS = frozenset(
+    {"bioetl_output_artifact_publication_events_total"}
 )
 _OBSERVABILITY_RUNTIME_STATUS_METRICS = frozenset(
     {"bioetl_observability_runtime_status"}
 )
 _PHASE_LABEL_METRICS = frozenset({"bioetl_phase_duration_seconds"})
+_COMPOSITE_PHASE_RECORDS_METRICS = frozenset({"bioetl_composite_phase_records_total"})
+_COMPOSITE_PHASE_ERRORS_METRICS = frozenset({"bioetl_composite_phase_errors_total"})
+_COMPOSITE_PHASE_LOSS_METRICS = frozenset({"bioetl_composite_phase_loss_total"})
+_COMPOSITE_PHASE_RETRIES_METRICS = frozenset(
+    {"bioetl_composite_phase_retries_total"}
+)
 _POSTRUN_PHASE_LABEL_METRICS = frozenset(
     {
         "bioetl_postrun_phase_duration_seconds",
@@ -266,6 +286,19 @@ def _normalize_publication_metric_labels(
     name: str,
     labels: MetricLabels,
 ) -> MetricLabels | None:
+    if name in _BATCH_LIFECYCLE_LABEL_METRICS:
+        return {
+            **labels,
+            "event": normalize_batch_lifecycle_event(str(labels.get("event", "other"))),
+            "stage": normalize_runtime_stage(str(labels.get("stage", "other"))),
+            "status": normalize_publication_status(str(labels.get("status", "other"))),
+        }
+    if name in _OUTPUT_ARTIFACT_PUBLICATION_LABEL_METRICS:
+        return {
+            **labels,
+            "stage": normalize_runtime_stage(str(labels.get("stage", "other"))),
+            "status": normalize_publication_status(str(labels.get("status", "other"))),
+        }
     if name in _METRICS_PUBLICATION_LABEL_METRICS:
         return {
             **labels,
@@ -296,6 +329,38 @@ def _normalize_publication_metric_labels(
             "stage": normalize_stage_model_stage(str(labels.get("stage", "other"))),
             "outcome": normalize_stage_model_outcome(
                 str(labels.get("outcome", "other"))
+            ),
+        }
+    if name in _COMPOSITE_PHASE_RECORDS_METRICS:
+        return {
+            **labels,
+            "phase": normalize_runtime_phase(str(labels.get("phase", "other"))),
+            "outcome": normalize_composite_phase_record_outcome(
+                str(labels.get("outcome", "other"))
+            ),
+        }
+    if name in _COMPOSITE_PHASE_ERRORS_METRICS:
+        return {
+            **labels,
+            "phase": normalize_runtime_phase(str(labels.get("phase", "other"))),
+            "error_kind": normalize_composite_phase_error_kind(
+                str(labels.get("error_kind", "other"))
+            ),
+        }
+    if name in _COMPOSITE_PHASE_LOSS_METRICS:
+        return {
+            **labels,
+            "phase": normalize_runtime_phase(str(labels.get("phase", "other"))),
+            "loss_kind": normalize_composite_phase_loss_kind(
+                str(labels.get("loss_kind", "other"))
+            ),
+        }
+    if name in _COMPOSITE_PHASE_RETRIES_METRICS:
+        return {
+            **labels,
+            "phase": normalize_runtime_phase(str(labels.get("phase", "other"))),
+            "retry_kind": normalize_composite_phase_retry_kind(
+                str(labels.get("retry_kind", "other"))
             ),
         }
     return None

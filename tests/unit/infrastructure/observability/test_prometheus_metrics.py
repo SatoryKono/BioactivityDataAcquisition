@@ -247,6 +247,58 @@ class TestPrometheusMetrics:
                 "bioetl_phase_duration_seconds"
             ].labels().observe.assert_called_once_with(1.5)
 
+    def test_batch_lifecycle_metrics_normalize_unreviewed_labels(
+        self, prometheus_metrics
+    ):
+        """Batch lifecycle labels must stay within bounded event/stage/status vocabularies."""
+        with patch.dict(
+            COUNTERS,
+            {"bioetl_batch_lifecycle_events_total": MagicMock()},
+        ):
+            prometheus_metrics.increment_counter(
+                name="bioetl_batch_lifecycle_events_total",
+                value=1,
+                labels={
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                    "event": "custom_created_variant",
+                    "stage": "experimental_stage",
+                    "status": "unexpected_status",
+                },
+            )
+
+            COUNTERS["bioetl_batch_lifecycle_events_total"].labels.assert_called_once_with(
+                pipeline="chembl_activity",
+                run_type="incremental",
+                event="other",
+                stage="other",
+                status="other",
+            )
+
+    def test_composite_phase_metrics_normalize_unknown_labels(
+        self, prometheus_metrics
+    ):
+        """Composite phase counters must collapse unknown phase and outcome labels."""
+        with patch.dict(
+            COUNTERS,
+            {"bioetl_composite_phase_records_total": MagicMock()},
+        ):
+            prometheus_metrics.increment_counter(
+                name="bioetl_composite_phase_records_total",
+                value=4,
+                labels={
+                    "pipeline": "composite:target",
+                    "phase": "wild_phase",
+                    "outcome": "wild_outcome",
+                },
+            )
+
+            COUNTERS["bioetl_composite_phase_records_total"].labels.assert_called_once_with(
+                pipeline="composite:target",
+                phase="other",
+                outcome="other",
+            )
+
     def test_postrun_phase_metrics_normalize_unknown_subphases(
         self, prometheus_metrics
     ):

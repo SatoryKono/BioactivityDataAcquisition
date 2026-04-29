@@ -115,6 +115,7 @@ class BatchProcessingService:
         source_metadata = self._get_source_metadata(query_string)
         span = self._tracing.start_batch_span(batch_id, len(records), start_index)
         self._batch_metrics.track_records_fetched(len(records))
+        self._batch_metrics.track_batch_created(stage="bronze", count=len(records))
         self._support.emit_domain_event(
             BatchCreated(
                 occurred_at=ingestion_ts,

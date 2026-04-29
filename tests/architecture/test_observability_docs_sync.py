@@ -76,6 +76,13 @@ def test_docs_publish_stage_model_and_invariant_metric_contracts() -> None:
         "bioetl_stage_backlog_records",
         "bioetl_stage_lag_seconds",
         "bioetl_record_flow_invariants_total",
+        "bioetl_batch_lifecycle_events_total",
+        "bioetl_batch_lifecycle_records_total",
+        "bioetl_composite_phase_records_total",
+        "bioetl_composite_phase_errors_total",
+        "bioetl_composite_phase_loss_total",
+        "bioetl_composite_phase_retries_total",
+        "bioetl_output_artifact_publication_events_total",
     )
 
     for token in required_tokens:

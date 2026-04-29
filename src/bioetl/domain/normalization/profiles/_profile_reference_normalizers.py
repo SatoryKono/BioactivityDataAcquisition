@@ -4,28 +4,47 @@ from __future__ import annotations
 
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization.reference_ids import (
+    normalize_chembl_reference_id,
+    normalize_drugbank_reference_id,
     normalize_go_reference_id,
     normalize_interpro_reference_id,
+    normalize_issn_reference_id,
     normalize_json_array_reference_ids,
     normalize_json_object_reference_id,
     normalize_json_string_reference_ids,
     normalize_openalex_reference_id,
+    normalize_orcid_reference_id,
     normalize_pdb_reference_id,
     normalize_pfam_reference_id,
     normalize_reactome_reference_id,
     normalize_ror_reference_id,
+    normalize_semantic_scholar_reference_id,
+    normalize_uniprot_accession_reference_id,
 )
 from bioetl.domain.normalization.text import normalize_string
 
 __all__ = [
+    "normalize_profile_chembl_id",
+    "normalize_profile_chembl_ids",
+    "normalize_profile_drugbank_ids",
+    "normalize_profile_issn_id",
+    "normalize_profile_issn_ids",
+    "normalize_profile_openalex_author_ids",
+    "normalize_profile_openalex_institution_ids",
     "normalize_profile_openalex_ror_ids",
     "normalize_profile_openalex_topic",
     "normalize_profile_openalex_topics",
+    "normalize_profile_openalex_work_id",
+    "normalize_profile_orcid_ids",
     "normalize_profile_pdb_references",
     "normalize_profile_pfam_references",
     "normalize_profile_publication_type",
     "normalize_profile_publication_type_raw",
     "normalize_profile_reactome_references",
+    "normalize_profile_semantic_scholar_id",
+    "normalize_profile_semantic_scholar_ids",
+    "normalize_profile_uniprot_accession",
+    "normalize_profile_uniprot_accessions",
     "normalize_profile_uniprot_go_references",
     "normalize_profile_uniprot_interpro_references",
 ]
@@ -68,6 +87,101 @@ def normalize_profile_pdb_references(value: object) -> object:
     return normalize_json_array_reference_ids(
         value,
         id_normalizer=normalize_pdb_reference_id,
+    )
+
+
+def normalize_profile_orcid_ids(value: object) -> object:
+    """Canonicalize ORCID identifier JSON arrays."""
+    return normalize_json_string_reference_ids(
+        value,
+        item_normalizer=normalize_orcid_reference_id,
+    )
+
+
+def normalize_profile_issn_id(value: object) -> object:
+    """Canonicalize one ISSN value."""
+    return normalize_issn_reference_id(value)
+
+
+def normalize_profile_issn_ids(value: object) -> object:
+    """Canonicalize ISSN identifier JSON arrays."""
+    return normalize_json_string_reference_ids(
+        value,
+        item_normalizer=normalize_issn_reference_id,
+    )
+
+
+def normalize_profile_openalex_author_ids(value: object) -> object:
+    """Canonicalize OpenAlex author identifier JSON arrays."""
+    return normalize_json_string_reference_ids(
+        value,
+        item_normalizer=lambda item: normalize_openalex_reference_id(
+            item,
+            prefix="A",
+        ),
+    )
+
+
+def normalize_profile_openalex_institution_ids(value: object) -> object:
+    """Canonicalize OpenAlex institution identifier JSON arrays."""
+    return normalize_json_string_reference_ids(
+        value,
+        item_normalizer=lambda item: normalize_openalex_reference_id(
+            item,
+            prefix="I",
+        ),
+    )
+
+
+def normalize_profile_openalex_work_id(value: object) -> object:
+    """Canonicalize one OpenAlex work identifier value."""
+    return normalize_openalex_reference_id(value, prefix="W")
+
+
+def normalize_profile_semantic_scholar_ids(value: object) -> object:
+    """Canonicalize Semantic Scholar identifier JSON arrays."""
+    return normalize_json_string_reference_ids(
+        value,
+        item_normalizer=normalize_semantic_scholar_reference_id,
+    )
+
+
+def normalize_profile_semantic_scholar_id(value: object) -> object:
+    """Canonicalize one Semantic Scholar identifier value."""
+    return normalize_semantic_scholar_reference_id(value)
+
+
+def normalize_profile_uniprot_accession(value: object) -> object:
+    """Canonicalize one UniProt accession value."""
+    return normalize_uniprot_accession_reference_id(value)
+
+
+def normalize_profile_uniprot_accessions(value: object) -> object:
+    """Canonicalize UniProt accession JSON arrays."""
+    return normalize_json_string_reference_ids(
+        value,
+        item_normalizer=normalize_uniprot_accession_reference_id,
+    )
+
+
+def normalize_profile_chembl_id(value: object) -> object:
+    """Canonicalize one ChEMBL identifier value."""
+    return normalize_chembl_reference_id(value)
+
+
+def normalize_profile_chembl_ids(value: object) -> object:
+    """Canonicalize ChEMBL identifier JSON arrays."""
+    return normalize_json_string_reference_ids(
+        value,
+        item_normalizer=normalize_chembl_reference_id,
+    )
+
+
+def normalize_profile_drugbank_ids(value: object) -> object:
+    """Canonicalize DrugBank identifier JSON arrays."""
+    return normalize_json_string_reference_ids(
+        value,
+        item_normalizer=normalize_drugbank_reference_id,
     )
 
 

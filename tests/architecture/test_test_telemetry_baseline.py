@@ -1,0 +1,47 @@
+"""Architecture checks for committed CI test telemetry baselines."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import yaml
+
+ROOT = Path(__file__).resolve().parents[2]
+BASELINE_YAML = ROOT / "configs" / "quality" / "test_telemetry_baseline.yaml"
+BASELINE_MD = ROOT / "docs" / "05-engineering" / "test-telemetry-baseline.md"
+ENGINEERING_README = ROOT / "docs" / "05-engineering" / "README.md"
+WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
+
+
+def _load_yaml(path: Path) -> dict[str, object]:
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
+def test_test_telemetry_baseline_contract_is_present_and_scoped() -> None:
+    payload = _load_yaml(BASELINE_YAML)
+
+    assert payload["policy_scope"] == "test_telemetry_baseline"
+    assert payload["workflow_path"] == ".github/workflows/tests.yml"
+    assert payload["source_branch"] == "main"
+    assert payload["artifact_inputs"]["coverage_xml"] == "reports/coverage/coverage.xml"
+    assert (
+        payload["artifact_inputs"]["slowest_tests_json"]
+        == "reports/test-telemetry/slowest-tests.json"
+    )
+    assert payload["coverage"]["threshold_percent"] == 85.0
+
+
+def test_test_telemetry_baseline_doc_is_published_from_engineering_index() -> None:
+    assert BASELINE_MD.exists()
+    readme = ENGINEERING_README.read_text(encoding="utf-8")
+    assert "test-telemetry-baseline.md" in readme
+
+
+def test_tests_workflow_and_baseline_contract_use_same_artifact_paths() -> None:
+    payload = _load_yaml(BASELINE_YAML)
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+
+    assert payload["artifact_inputs"]["coverage_xml"] in workflow
+    assert payload["artifact_inputs"]["slowest_tests_json"] in workflow
+    assert "name: test-duration-telemetry" in workflow
+    assert "coverage xml -o reports/coverage/coverage.xml" in workflow

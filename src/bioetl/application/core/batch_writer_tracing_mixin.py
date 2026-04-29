@@ -66,7 +66,12 @@ class BatchWriterTracingMixin:
         close_span(span, error)
 
     def log_and_track_write_error(
-        self, layer: str, error: Exception, batch_id: BatchID
+        self,
+        layer: str,
+        error: Exception,
+        batch_id: BatchID,
+        *,
+        record_count: int = 0,
     ) -> None:
         """Log write-layer error and track metrics.
 
@@ -95,6 +100,7 @@ class BatchWriterTracingMixin:
             exc_info=True,
         )
         self._batch_metrics.track_error(f"{layer}_write", error_type)
+        self._batch_metrics.track_batch_failed(stage=layer, count=record_count)
 
 
 BatchWriterLockValidator = Callable[[], Awaitable[bool]] | None

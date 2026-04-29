@@ -51,6 +51,36 @@ def test_windows_launchers_delegate_to_wsl_scripts_without_posix_redirects() -> 
     assert "wslpath -a" in codex_exec_bat
 
 
+def test_windows_compatibility_wrappers_delegate_to_existing_targets() -> None:
+    """Compatibility wrappers should delegate only to live launcher targets."""
+    root = _project_root()
+    codex_wsl_bat = (
+        root / "scripts" / "ops" / "launchers" / "codex" / "codex-wsl.bat"
+    ).read_text(encoding="utf-8")
+    start_codex_bat = (
+        root / "scripts" / "ops" / "launchers" / "codex" / "start-codex.bat"
+    ).read_text(encoding="utf-8")
+    verify_setup_bat = (
+        root / "scripts" / "ops" / "launchers" / "codex" / "verify-setup.bat"
+    ).read_text(encoding="utf-8")
+    verify_setup_ps1 = (
+        root / "scripts" / "ops" / "launchers" / "codex" / "verify-setup.ps1"
+    ).read_text(encoding="utf-8")
+
+    assert "launch.bat" not in codex_wsl_bat
+    assert 'call "%~dp0codex.bat" %*' in codex_wsl_bat
+
+    assert "launch.bat" not in start_codex_bat
+    assert 'call "%~dp0codex.bat" %*' in start_codex_bat
+
+    assert "verify_setup.bat" not in verify_setup_bat
+    assert 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0verify-setup.ps1" %*' in verify_setup_bat
+
+    assert "verify_setup.ps1" not in verify_setup_ps1
+    assert "run-codex.ps1" in verify_setup_ps1
+    assert "& $Target check" in verify_setup_ps1
+
+
 def test_wsl_setup_uses_local_update_path() -> None:
     """Setup and verification scripts should rely on the repo-local installer."""
     root = _project_root()

@@ -205,3 +205,135 @@ class PipelineMetricsRecorder:
                 "terminal_status": terminal_status,
             },
         )
+
+    def record_batch_lifecycle_event(
+        self,
+        *,
+        run_type: str,
+        event: str,
+        stage: str,
+        status: str,
+        count: int = 1,
+        record_count: int = 0,
+    ) -> None:
+        """Increment bounded batch lifecycle event and record counters."""
+        if self.metrics is None or count <= 0:
+            return
+        labels = {
+            "pipeline": self.pipeline,
+            "run_type": run_type,
+            "event": event,
+            "stage": stage,
+            "status": status,
+        }
+        self.metrics.increment_counter(
+            "bioetl_batch_lifecycle_events_total",
+            count,
+            labels,
+        )
+        if record_count > 0:
+            self.metrics.increment_counter(
+                "bioetl_batch_lifecycle_records_total",
+                record_count,
+                labels,
+            )
+
+    def record_output_artifact_publication(
+        self,
+        *,
+        stage: str,
+        status: str,
+        count: int = 1,
+    ) -> None:
+        """Increment bounded output artifact publication outcomes."""
+        if self.metrics is None or count <= 0:
+            return
+        self.metrics.increment_counter(
+            "bioetl_output_artifact_publication_events_total",
+            count,
+            {
+                "pipeline": self.pipeline,
+                "stage": stage,
+                "status": status,
+            },
+        )
+
+    def record_composite_phase_records(
+        self,
+        *,
+        phase: str,
+        outcome: str,
+        count: int = 1,
+    ) -> None:
+        """Increment bounded composite phase record counters."""
+        if self.metrics is None or count <= 0:
+            return
+        self.metrics.increment_counter(
+            "bioetl_composite_phase_records_total",
+            count,
+            {
+                "pipeline": self.pipeline,
+                "phase": phase,
+                "outcome": outcome,
+            },
+        )
+
+    def record_composite_phase_errors(
+        self,
+        *,
+        phase: str,
+        error_kind: str,
+        count: int = 1,
+    ) -> None:
+        """Increment bounded composite phase error counters."""
+        if self.metrics is None or count <= 0:
+            return
+        self.metrics.increment_counter(
+            "bioetl_composite_phase_errors_total",
+            count,
+            {
+                "pipeline": self.pipeline,
+                "phase": phase,
+                "error_kind": error_kind,
+            },
+        )
+
+    def record_composite_phase_loss(
+        self,
+        *,
+        phase: str,
+        loss_kind: str,
+        count: int = 1,
+    ) -> None:
+        """Increment bounded composite phase loss counters."""
+        if self.metrics is None or count <= 0:
+            return
+        self.metrics.increment_counter(
+            "bioetl_composite_phase_loss_total",
+            count,
+            {
+                "pipeline": self.pipeline,
+                "phase": phase,
+                "loss_kind": loss_kind,
+            },
+        )
+
+    def record_composite_phase_retries(
+        self,
+        *,
+        phase: str,
+        retry_kind: str,
+        count: int = 1,
+    ) -> None:
+        """Increment bounded composite phase retry or resume counters."""
+        if self.metrics is None or count <= 0:
+            return
+        self.metrics.increment_counter(
+            "bioetl_composite_phase_retries_total",
+            count,
+            {
+                "pipeline": self.pipeline,
+                "phase": phase,
+                "retry_kind": retry_kind,
+            },
+        )
