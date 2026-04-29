@@ -49,6 +49,7 @@ class BronzeMetadataInputRequest:
     started_at: datetime
     completed_at: datetime
     source_metadata: SourceMetadata | None
+    output_content_hash: str | None = None
     input_snapshots: tuple[InputSnapshotRef, ...] = ()
 
 
@@ -83,6 +84,7 @@ def build_bronze_metadata_input(
         output_path=request.output_path,
         started_at=request.started_at,
         completed_at=request.completed_at,
+        output_content_hash=request.output_content_hash,
         source_metadata=request.source_metadata,
         input_snapshots=request.input_snapshots,
         query_string=(

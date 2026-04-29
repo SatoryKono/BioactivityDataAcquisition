@@ -943,6 +943,34 @@ def test_build_pipeline_runner_requires_ledger_for_forensic_grade_profile(
         )
 
 
+def test_build_pipeline_runner_requires_ledger_for_replay_ready_profile(
+    tmp_path: Path,
+) -> None:
+    """Replay-ready runtime profile must fail closed when ledger is disabled."""
+    fake_registry = _build_factory_registry()[1]
+
+    with pytest.raises(
+        RuntimeError,
+        match="required persistence profile 'replay_ready'",
+    ):
+        _call_build_pipeline_runner(
+            _build_context(limit=25),
+            registry=fake_registry,
+            settings=_build_settings(
+                data_dir=str(tmp_path),
+                control_plane=SimpleNamespace(
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=False,
+                    required_persistence_profile="replay_ready",
+                ),
+            ),
+            pipeline_config=_build_pipeline_config(),
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental"
+            ),
+        )
+
+
 def test_build_pipeline_runner_requires_lineage_sidecars_for_forensic_grade_profile(
     tmp_path: Path,
 ) -> None:
@@ -969,6 +997,40 @@ def test_build_pipeline_runner_requires_lineage_sidecars_for_forensic_grade_prof
                     "bronze": SimpleNamespace(enabled=True, save_metadata=False),
                     "silver": SimpleNamespace(enabled=True, save_metadata=True),
                     "gold": SimpleNamespace(enabled=True, save_metadata=False),
+                },
+            ),
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental"
+            ),
+        )
+
+
+def test_build_pipeline_runner_requires_lineage_sidecars_for_replay_ready_profile(
+    tmp_path: Path,
+) -> None:
+    """Replay-ready profile must fail when active sink layers skip metadata."""
+    fake_registry = _build_factory_registry()[1]
+
+    with pytest.raises(
+        RuntimeError,
+        match="metadata sidecars / lineage persistence for active layers",
+    ):
+        _call_build_pipeline_runner(
+            _build_context(limit=25),
+            registry=fake_registry,
+            settings=_build_settings(
+                data_dir=str(tmp_path),
+                control_plane=SimpleNamespace(
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=True,
+                    required_persistence_profile="replay_ready",
+                ),
+            ),
+            pipeline_config=_build_pipeline_config(
+                sink={
+                    "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                    "silver": SimpleNamespace(enabled=True, save_metadata=False),
+                    "gold": SimpleNamespace(enabled=False, save_metadata=False),
                 },
             ),
             assemble_runtime_config_fn=lambda **_: SimpleNamespace(
@@ -1228,6 +1290,58 @@ def test_build_pipeline_runner_promotes_supported_exact_replay_to_family_default
     )
     payload = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert payload["launch_context"]["required_persistence_profile"] == "replay_ready"
+
+
+def test_build_pipeline_runner_promoted_replay_ready_requires_ledger(
+    tmp_path: Path,
+) -> None:
+    """Exact replay auto-promotion must re-check ledger after profile resolution."""
+    fake_factory, fake_registry = _build_factory_registry()
+    bronze_root = tmp_path / "bronze-cache"
+    bronze_day = bronze_root / "2026-01-01"
+    bronze_day.mkdir(parents=True)
+    (bronze_day / "batch_2026-01-01_demo.jsonl.zst").write_bytes(b"snapshot-bytes")
+
+    with (
+        patch(
+            "bioetl.composition.runtime_builders._run_manifest_builder_policy.get_code_revision_provenance",
+            return_value=SimpleNamespace(
+                git_commit="deadbeef" * 5,
+                source_revision_state="clean",
+            ),
+        ),
+        pytest.raises(RuntimeError, match="required persistence profile 'replay_ready'"),
+    ):
+        _call_build_pipeline_runner(
+            _build_context(limit=25, exact_replay=True),
+            registry=fake_registry,
+            settings=_build_settings(
+                data_dir=str(tmp_path),
+                control_plane=SimpleNamespace(
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=False,
+                    required_persistence_profile="degraded_observable",
+                ),
+            ),
+            pipeline_config=_build_pipeline_config(
+                sink={
+                    "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                    "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                    "gold": SimpleNamespace(enabled=True, save_metadata=True),
+                },
+            ),
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental"
+            ),
+            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
+                enabled=True,
+                bronze_path=str(bronze_root),
+                bronze_date="2026-01-01",
+            ),
+        )
+
+    assert fake_factory.kwargs is None
+    assert not (tmp_path / "output" / "control" / "run_manifest").exists()
 
 
 def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(

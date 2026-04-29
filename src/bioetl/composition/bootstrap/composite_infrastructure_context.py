@@ -24,8 +24,6 @@ class CompositeInfrastructureContext:
     logger: LoggerPort
     metrics: MetricsPort
     tracer: TracingPort
-    storage: (
-        Any  # Any: concrete storage adapter implements the narrow storage ports
-    )
+    storage: Any  # Any: concrete storage adapter implements the narrow storage ports
     lock: LockPort
     clock: ClockPort | None = None

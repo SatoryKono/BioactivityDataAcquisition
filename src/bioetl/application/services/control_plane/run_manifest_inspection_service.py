@@ -88,6 +88,7 @@ class RunManifestDiffResult:
     semantic_difference_fields: tuple[str, ...] = ()
     noncanonical_difference_fields: tuple[str, ...] = ()
     replay_relationship: str = "none"
+    cross_surface_replay_diff: dict[str, object] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         """Return JSON/YAML-safe payload for CLI presentation."""
@@ -101,6 +102,7 @@ class RunManifestDiffResult:
             "semantic_difference_fields": list(self.semantic_difference_fields),
             "noncanonical_difference_fields": list(self.noncanonical_difference_fields),
             "replay_relationship": self.replay_relationship,
+            "cross_surface_replay_diff": self.cross_surface_replay_diff,
             "differences": [entry.to_dict() for entry in self.differences],
         }
 
@@ -187,6 +189,152 @@ class RunManifestInspectionService(
                 classification["noncanonical_difference_fields"],
             ),
             replay_relationship=str(classification["replay_relationship"]),
+            cross_surface_replay_diff=self._build_cross_surface_replay_diff(
+                left_manifest=left_manifest,
+                right_manifest=right_manifest,
+                classification=classification,
+            ),
+        )
+
+    @staticmethod
+    def _build_cross_surface_replay_diff(
+        *,
+        left_manifest: RunManifest,
+        right_manifest: RunManifest,
+        classification: dict[str, object],
+    ) -> dict[str, object]:
+        """Return one replay-oriented diff across manifest-adjacent surfaces."""
+        effective_config_match = (
+            left_manifest.code_provenance.effective_config_hash
+            == right_manifest.code_provenance.effective_config_hash
+            and left_manifest.code_provenance.effective_config_artifact_id
+            == right_manifest.code_provenance.effective_config_artifact_id
+        )
+        checkpoint_anchor_matches = {
+            "execution_fingerprint": (
+                left_manifest.execution_fingerprint
+                == right_manifest.execution_fingerprint
+            ),
+            "effective_config_hash": (
+                left_manifest.code_provenance.effective_config_hash
+                == right_manifest.code_provenance.effective_config_hash
+            ),
+            "effective_config_artifact_id": (
+                left_manifest.code_provenance.effective_config_artifact_id
+                == right_manifest.code_provenance.effective_config_artifact_id
+            ),
+            "contract_ref": (
+                left_manifest.code_provenance.contract_ref
+                == right_manifest.code_provenance.contract_ref
+            ),
+            "contract_version": (
+                left_manifest.code_provenance.contract_version
+                == right_manifest.code_provenance.contract_version
+            ),
+            "input_snapshot_ids": (
+                RunManifestInspectionService._manifest_snapshot_ids(left_manifest)
+                == RunManifestInspectionService._manifest_snapshot_ids(right_manifest)
+            ),
+        }
+        checkpoint_compatible = all(checkpoint_anchor_matches.values())
+        semantic_equivalent = bool(classification["semantic_equivalent"])
+        occurrence_only = bool(classification["occurrence_only"])
+        verdict = RunManifestInspectionService._resolve_cross_surface_replay_verdict(
+            semantic_equivalent=semantic_equivalent,
+            occurrence_only=occurrence_only,
+            checkpoint_compatible=checkpoint_compatible,
+        )
+        return {
+            "verdict": verdict,
+            "manifest": {
+                "classification": classification["classification"],
+                "semantic_equivalent": semantic_equivalent,
+                "occurrence_only": occurrence_only,
+                "semantic_difference_fields": list(
+                    cast(tuple[str, ...], classification["semantic_difference_fields"])
+                ),
+                "occurrence_difference_fields": list(
+                    cast(
+                        tuple[str, ...],
+                        classification["occurrence_difference_fields"],
+                    )
+                ),
+                "noncanonical_difference_fields": list(
+                    cast(
+                        tuple[str, ...],
+                        classification["noncanonical_difference_fields"],
+                    )
+                ),
+            },
+            "effective_config": {
+                "semantic_equivalent": effective_config_match,
+                "left_effective_config_hash": (
+                    left_manifest.code_provenance.effective_config_hash
+                ),
+                "right_effective_config_hash": (
+                    right_manifest.code_provenance.effective_config_hash
+                ),
+                "left_effective_config_artifact_id": (
+                    left_manifest.code_provenance.effective_config_artifact_id
+                ),
+                "right_effective_config_artifact_id": (
+                    right_manifest.code_provenance.effective_config_artifact_id
+                ),
+            },
+            "checkpoint_anchors": {
+                "compatible": checkpoint_compatible,
+                "matching_fields": [
+                    name for name, matches in checkpoint_anchor_matches.items() if matches
+                ],
+                "mismatched_fields": [
+                    name
+                    for name, matches in checkpoint_anchor_matches.items()
+                    if not matches
+                ],
+            },
+            "lineage": {
+                "planned_artifacts_match": (
+                    RunManifestInspectionService._planned_artifact_identity(
+                        left_manifest
+                    )
+                    == RunManifestInspectionService._planned_artifact_identity(
+                        right_manifest
+                    )
+                ),
+                "left_planned_artifact_count": len(left_manifest.planned_artifacts),
+                "right_planned_artifact_count": len(right_manifest.planned_artifacts),
+            },
+        }
+
+    @staticmethod
+    def _resolve_cross_surface_replay_verdict(
+        *,
+        semantic_equivalent: bool,
+        occurrence_only: bool,
+        checkpoint_compatible: bool,
+    ) -> str:
+        if not semantic_equivalent:
+            return "semantic_drift"
+        if not checkpoint_compatible:
+            return "checkpoint_incompatible"
+        if occurrence_only:
+            return "occurrence_only_replay"
+        return "semantic_equivalent_replay"
+
+    @staticmethod
+    def _manifest_snapshot_ids(manifest: RunManifest) -> tuple[str, ...]:
+        return tuple(
+            sorted(
+                snapshot.snapshot_id
+                for source_ref in manifest.source_refs
+                for snapshot in source_ref.input_snapshots
+            )
+        )
+
+    @staticmethod
+    def _planned_artifact_identity(manifest: RunManifest) -> tuple[tuple[str, str], ...]:
+        return tuple(
+            sorted((artifact.layer, artifact.path) for artifact in manifest.planned_artifacts)
         )
 
     def _resolve_manifest(self, identifier: str) -> RunManifest:

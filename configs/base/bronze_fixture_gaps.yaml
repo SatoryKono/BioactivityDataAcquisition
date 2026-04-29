@@ -1,63 +1,33 @@
-version: 1.2.0
-updated_at: "2026-04-24"
+version: 1.3.0
+updated_at: "2026-04-29"
 gaps:
   chembl/assay_parameters:
-    status: open
-    reason: "No factual Bronze JSONL artifacts are currently available in data/input or data/output."
+    status: de_scoped
+    reason: "The ChEMBL assay endpoint exposes nested assay_parameters without the assay_param_id primary key required by the current assay_parameters Bronze contract; no dedicated factual 20-record provider snapshot is available."
     owner: "data-platform"
-    resolution_plan: "Generate fixture from dedicated assay-parameters extraction run or VCR payloads."
-  chembl/cell_line:
-    status: open
-    reason: "Bronze fixture snapshot was not materialized; only DQ report artifact existed."
-    owner: "data-platform"
-    resolution_plan: "Extract representative records from ChEMBL cell_line VCR cassettes into sample_*.jsonl."
-  chembl/compound_record:
-    status: open
-    reason: "Bronze fixture snapshot was not materialized; only DQ report artifact existed."
-    owner: "data-platform"
-    resolution_plan: "Extract representative records from ChEMBL compound_record VCR cassettes into sample_*.jsonl."
-  chembl/protein_class:
-    status: open
-    reason: "No factual Bronze JSONL artifacts are currently available in data/input or data/output."
-    owner: "data-platform"
-    resolution_plan: "Run pipeline or extract protein_classification records from VCR-backed requests."
+    resolution_plan: "De-scoped until the extraction layer materializes a stable assay_parameters Bronze source with provider-backed assay_param_id values."
+    de_scope_decision: "Do not synthesize assay_param_id values solely to satisfy replay fixture coverage."
   chembl/publication_similarity:
-    status: open
-    reason: "No factual Bronze JSONL artifacts are currently available in data/input or data/output."
+    status: de_scoped
+    reason: "The live ChEMBL document_similarity endpoint omits the sim_id/doc_1/doc_2 Bronze contract fields consumed by the publication_similarity transformer; no factual 20-record contract-aligned snapshot is available."
     owner: "data-platform"
-    resolution_plan: "Generate fixture from document_similarity endpoint captures or a bounded pipeline run."
+    resolution_plan: "De-scoped until the adapter owns a deterministic provider-backed projection from document_similarity payloads into the publication_similarity Bronze contract."
+    de_scope_decision: "Do not mint synthetic sim_id values in tracked Bronze fixtures."
   chembl/publication_term:
-    status: open
-    reason: "Current publication input sample has no mesh_terms/keywords to derive publication_term records."
+    status: de_scoped
+    reason: "publication_term is a derived term surface and the current tracked publication/provider samples do not provide 20 factual mesh_terms or keywords records."
     owner: "data-platform"
-    resolution_plan: "Build fixture from publication_term VCR captures containing mesh/keyword records."
+    resolution_plan: "De-scoped until publication term extraction has a dedicated provider-backed or recorded source with at least 20 factual term records."
+    de_scope_decision: "Do not duplicate or fabricate terms from sparse publication samples."
   chembl/subcellular_fraction:
-    status: open
-    reason: "No factual Bronze JSONL artifacts are currently available in data/input or data/output."
+    status: de_scoped
+    reason: "subcellular_fraction is derived from assay_subcellular_fraction values and the bounded live scan did not provide a stable 20-record distinct Bronze source."
     owner: "data-platform"
-    resolution_plan: "Create fixture using subcellular-fraction datasource output from a controlled run."
-  chembl/target_component:
-    status: open
-    reason: "Bronze fixture snapshot was not materialized; only DQ report artifact existed."
-    owner: "data-platform"
-    resolution_plan: "Extract representative records from ChEMBL target_component VCR cassettes into sample_*.jsonl."
-  chembl/tissue:
-    status: open
-    reason: "No factual Bronze JSONL artifacts are currently available in data/input or data/output."
-    owner: "data-platform"
-    resolution_plan: "Create fixture from tissue endpoint extraction run and persist sample_*.jsonl."
-  openalex/publication:
-    status: in_progress
-    reason: "Bronze publication fixtures are local runtime artifacts and are not versioned in Git."
-    owner: "data-platform"
-    resolution_plan: "Promote bounded OpenAlex publication sample into tracked fixture storage."
+    resolution_plan: "De-scoped until a controlled extraction run materializes at least 20 factual subcellular_fraction records."
+    de_scope_decision: "Do not repeat sparse values to meet tracked sample cardinality."
   semanticscholar/publication:
-    status: in_progress
-    reason: "Bronze publication fixtures are local runtime artifacts and are not versioned in Git."
+    status: de_scoped
+    reason: "The unauthenticated Semantic Scholar search endpoint is rate-limited and existing recorded cassettes contain fewer than 20 publication records, so no stable factual tracked CI sample is available without API-key-backed recording."
     owner: "data-platform"
-    resolution_plan: "Promote bounded Semantic Scholar publication sample into tracked fixture storage."
-  uniprot/idmapping:
-    status: open
-    reason: "No Bronze input directory/JSONL fixture exists for idmapping pipeline."
-    owner: "data-platform"
-    resolution_plan: "Generate sample idmapping records from UniProt ID mapping VCR cassettes."
+    resolution_plan: "De-scoped until a keyed recording or approved cassette refresh provides a stable 20-record publication sample."
+    de_scope_decision: "Do not add a flaky live-generated fixture from an unauthenticated 429-prone API."

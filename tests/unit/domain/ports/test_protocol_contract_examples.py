@@ -148,7 +148,9 @@ class TestNarrowStoragePortProtocols:
                 return None
 
             async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
-                return await _zero_count_after_yield("clear_silver", table_name, dry_run)
+                return await _zero_count_after_yield(
+                    "clear_silver", table_name, dry_run
+                )
 
             async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
                 return await _zero_count_after_yield("clear_gold", table_name, dry_run)

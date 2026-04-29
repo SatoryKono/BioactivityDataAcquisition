@@ -161,6 +161,9 @@ def _build_bronze_metadata_input_request(
         output_path=request.relative_path,
         started_at=request.ingestion_ts,
         completed_at=completed_at,
+        output_content_hash=(
+            live_snapshot.content_hash if live_snapshot is not None else None
+        ),
         source_metadata=source_metadata,
         input_snapshots=input_snapshots,
     )

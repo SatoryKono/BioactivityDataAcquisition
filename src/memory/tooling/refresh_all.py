@@ -106,18 +106,16 @@ def refresh_all(
 
     if include_graph_export:
         graph_export = output_root / "graph" / "exports" / "repo_snapshot.json"
-        exit_code = graph_sync.main(
-            ["--root", str(root), "--export", str(graph_export)]
-        )
+        snapshot = graph_sync.build_snapshot(root)
+        graph_sync._write_export(graph_export, snapshot)
         summary["artifacts"].append(
             {
                 "kind": "graph",
                 "paths": [str(graph_export)],
-                "exit_code": exit_code,
+                "node_count": len(snapshot.nodes),
+                "relation_count": len(snapshot.relations),
             }
         )
-        if exit_code != 0:
-            summary["ok"] = False
 
     if include_graph_relations:
         snapshot_path = expanded_graph_path or default_expanded_graph_path(root)

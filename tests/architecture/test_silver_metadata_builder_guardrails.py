@@ -38,10 +38,29 @@ def test_silver_metadata_sidecar_adapter_does_not_emit_placeholder_identity() ->
     """Silver sidecars must not publish placeholder content or run-derived IDs."""
     source = TARGET.read_text(encoding="utf-8")
 
+    assert "SIDECAR_ADAPTER_PRODUCTION_STATUS" in source
+    assert "quarantined_compatibility_only" in source
     assert "placeholder-hash" not in source
     assert "{request.table_name}-{request.run_id" not in source
     assert "build_dataset_content_hash" in source
     assert "DatasetRef" in source
+
+
+@pytest.mark.architecture
+def test_silver_metadata_sidecar_adapter_carries_control_plane_provenance() -> None:
+    """The quarantined adapter must not silently drop canonical run anchors."""
+    source = TARGET.read_text(encoding="utf-8")
+    required_fragments = (
+        "extract_control_plane_provenance_from_records",
+        "execution_fingerprint=request.execution_fingerprint",
+        "effective_config_hash=request.effective_config_hash",
+        "effective_config_artifact_id=request.effective_config_artifact_id",
+        "contract_ref=request.contract_ref",
+        "dq_contract_compatibility_hash=request.dq_contract_compatibility_hash",
+    )
+
+    missing = [fragment for fragment in required_fragments if fragment not in source]
+    assert not missing
 
 
 @pytest.mark.architecture

@@ -129,6 +129,5 @@ def test_docs_publish_dq_disposition_metric_contract() -> None:
         f"{expected_metric}"
     )
     assert expected_metric in observability_contract, (
-        "observability.md is missing canonical observability metric: "
-        f"{expected_metric}"
+        f"observability.md is missing canonical observability metric: {expected_metric}"
     )

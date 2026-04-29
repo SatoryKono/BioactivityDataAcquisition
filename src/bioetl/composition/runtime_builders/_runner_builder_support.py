@@ -99,18 +99,17 @@ def validate_required_persistence_profile(
             f"'{profile}' because this execution context is outside the strict "
             "exact-replay support boundary"
         )
-    if profile == "forensic_grade" and not ledger_enabled:
+    if profile in STRICT_PERSISTENCE_PROFILES and not ledger_enabled:
         raise RuntimeError(
             f"{execution_label} requires run ledgers for required persistence "
-            "profile 'forensic_grade'; set "
-            "pipeline.control_plane.run_ledger_enabled=true"
+            f"profile '{profile}'; set pipeline.control_plane.run_ledger_enabled=true"
         )
-    if profile == "forensic_grade" and missing_artifact_lineage_layers:
+    if profile in STRICT_PERSISTENCE_PROFILES and missing_artifact_lineage_layers:
         layers = ", ".join(missing_artifact_lineage_layers)
         raise RuntimeError(
             f"{execution_label} requires metadata sidecars / lineage persistence "
             f"for active layers [{layers}] to satisfy required persistence profile "
-            "'forensic_grade'; enable sink.<layer>.save_metadata for each active "
+            f"'{profile}'; enable sink.<layer>.save_metadata for each active "
             "published layer"
         )
 

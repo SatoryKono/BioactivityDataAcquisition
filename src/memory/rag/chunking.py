@@ -7,6 +7,7 @@ import hashlib
 import json
 import re
 import tomllib
+from datetime import date, datetime
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -166,10 +167,28 @@ def split_python_symbols(text: str) -> list[ChunkSection]:
     return sections
 
 
+def _json_ready_config_value(value: object) -> object:
+    if isinstance(value, dict):
+        return {str(key): _json_ready_config_value(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_json_ready_config_value(item) for item in value]
+    if isinstance(value, tuple):
+        return [_json_ready_config_value(item) for item in value]
+    if isinstance(value, set):
+        normalized = (_json_ready_config_value(item) for item in value)
+        return sorted(normalized, key=lambda item: json.dumps(item, sort_keys=True))
+    if isinstance(value, (date, datetime)):
+        return value.isoformat()
+    if isinstance(value, Path):
+        return value.as_posix()
+    return value
+
+
 def _serialize_config_value(value: object) -> str:
-    if isinstance(value, (dict, list)):
-        return json.dumps(value, indent=2, sort_keys=True, ensure_ascii=True)
-    return json.dumps(value, ensure_ascii=True)
+    normalized = _json_ready_config_value(value)
+    if isinstance(normalized, (dict, list)):
+        return json.dumps(normalized, indent=2, sort_keys=True, ensure_ascii=True)
+    return json.dumps(normalized, ensure_ascii=True)
 
 
 def split_config_sections(text: str, path: Path) -> list[ChunkSection]:
