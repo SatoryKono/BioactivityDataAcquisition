@@ -1,19 +1,18 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-29T09:22:40.068316+00:00",
+  "generated_at": "2026-04-29T09:32:53.648670+00:00",
   "summary": {
-    "total_scripts": 355,
+    "total_scripts": 354,
     "status_counts": {
-      "active": 319,
-      "supporting": 28,
-      "temporary_diagnostic": 8
+      "active": 325,
+      "supporting": 29
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 2,
       "ci": 49,
       "docs": 121,
-      "scripts": 291,
+      "scripts": 297,
       "skills": 8,
       "tests": 133
     }
@@ -349,7 +348,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 206,
+          "line": 207,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.ps1\","
         }
@@ -364,7 +363,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 207,
+          "line": 208,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.sh\","
         }
@@ -559,7 +558,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 208,
+          "line": 209,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/setup-env.sh\","
         }
@@ -646,9 +645,9 @@
     {
       "path": "scripts/ai/codex/helper/test-basic.sh",
       "type": "sh",
-      "status": "temporary_diagnostic",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/INSTALLATION_COMPLETE.md",
@@ -661,6 +660,12 @@
           "line": 203,
           "source_group": "docs",
           "text": "- **Testing**: `bash ./script-codex/helper/test-basic.sh`"
+        },
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 206,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/codex/helper/test-basic.sh\","
         }
       ]
     },
@@ -970,7 +975,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 209,
+          "line": 210,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/check-env.ps1\","
         }
@@ -1129,7 +1134,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 210,
+          "line": 211,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/setup-env.sh\","
         }
@@ -2280,7 +2285,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 211,
+          "line": 212,
           "source_group": "scripts",
           "text": "\"scripts/ai/mistrall/helper/check-env.ps1\","
         }
@@ -2295,7 +2300,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 212,
+          "line": 213,
           "source_group": "scripts",
           "text": "\"scripts/ai/mistrall/helper/check-env.sh\","
         }
@@ -2460,7 +2465,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 213,
+          "line": 214,
           "source_group": "scripts",
           "text": "\"scripts/ai/mistrall/helper/setup-env.sh\","
         }
@@ -2589,7 +2594,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 214,
+          "line": 215,
           "source_group": "scripts",
           "text": "\"scripts/ai/mistrallvibe/helper/check-env.ps1\","
         }
@@ -2604,7 +2609,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 215,
+          "line": 216,
           "source_group": "scripts",
           "text": "\"scripts/ai/mistrallvibe/helper/check-env.sh\","
         }
@@ -10057,9 +10062,9 @@
     {
       "path": "scripts/ops/runtime/docker/restart-docker.ps1",
       "type": "ps1",
-      "status": "temporary_diagnostic",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
@@ -10078,23 +10083,21 @@
           "line": 155,
           "source_group": "docs",
           "text": "| `scripts/ops/runtime/docker/restart-docker.ps1` | Docker Desktop restart helper                              |"
+        },
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 217,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/runtime/docker/restart-docker.ps1\","
         }
       ]
     },
     {
-      "path": "scripts/ops/runtime/health/start_health_server.ps1",
-      "type": "ps1",
-      "status": "temporary_diagnostic",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
       "path": "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1",
       "type": "ps1",
-      "status": "temporary_diagnostic",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
@@ -10119,15 +10122,21 @@
           "line": 111,
           "source_group": "docs",
           "text": "**Next**: Restart Docker Desktop, then run `.\\scripts\\neo4j-recovery-checklist.ps1`"
+        },
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 218,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1\","
         }
       ]
     },
     {
       "path": "scripts/ops/runtime/neo4j/neo4j_quick_start.sh",
       "type": "sh",
-      "status": "temporary_diagnostic",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
@@ -10164,15 +10173,21 @@
           "line": 169,
           "source_group": "docs",
           "text": "| **Quick Start**      | `bash scripts/ops/runtime/neo4j/neo4j_quick_start.sh`                                                                         |"
+        },
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 219,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/runtime/neo4j/neo4j_quick_start.sh\","
         }
       ]
     },
     {
       "path": "scripts/ops/runtime/neo4j/start-neo4j-audit.ps1",
       "type": "ps1",
-      "status": "temporary_diagnostic",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 24,
+      "reference_count": 25,
       "references": [
         {
           "path": "docs/05-operations/deployment/neo4j-audit-instance-guide.md",
@@ -10227,9 +10242,9 @@
     {
       "path": "scripts/ops/runtime/neo4j/start-neo4j-audit.sh",
       "type": "sh",
-      "status": "temporary_diagnostic",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/05-operations/deployment/neo4j-audit-instance-implementation.md",
@@ -10266,6 +10281,12 @@
           "line": 89,
           "source_group": "docs",
           "text": "./scripts/ops/runtime/neo4j/start-neo4j-audit.sh --stop"
+        },
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 221,
+          "source_group": "scripts",
+          "text": "\"scripts/ops/runtime/neo4j/start-neo4j-audit.sh\","
         }
       ]
     },
@@ -11376,7 +11397,7 @@
     {
       "path": "src/tools/neo4j_audit.py",
       "type": "py",
-      "status": "temporary_diagnostic",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 8,
       "references": [

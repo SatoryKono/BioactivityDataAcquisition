@@ -54,6 +54,9 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.run_context import RunContext
 from tests.helpers.control_plane import InMemoryRunManifestStore
+from tests.helpers.control_plane_replay import (
+    build_tracked_fixture_exact_replay_matrix_payload,
+)
 
 FIXTURE_DIR = Path("tests/fixtures/golden/reproducibility")
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
@@ -410,6 +413,26 @@ def _make_composite_checkpoint_state_payload() -> dict[str, object]:
     return state.to_dict()
 
 
+def _make_tracked_fixture_exact_replay_matrix_payload() -> dict[str, object]:
+    manifest_payload = _make_manifest().to_dict()
+    effective_payload = _make_effective_config_artifact_payload()
+    return build_tracked_fixture_exact_replay_matrix_payload(
+        pipeline_name="chembl_activity",
+        manifest_payload=manifest_payload,
+        effective_payload=effective_payload,
+        occurrences=[
+            {
+                "run_id": str(manifest_payload["run_id"]),
+                "manifest_id": str(manifest_payload["manifest_id"]),
+            },
+            {
+                "run_id": "00000000-0000-0000-0000-000000000908",
+                "manifest_id": "manifest-golden-002",
+            },
+        ],
+    )
+
+
 def test_effective_config_artifact_golden_fixture() -> None:
     _assert_matches_fixture(
         "effective_config_artifact_v1",
@@ -451,4 +474,11 @@ def test_diagnostics_summary_golden_fixture() -> None:
     _assert_matches_fixture(
         "diagnostics_summary_v1",
         build_diagnostics_summary(_make_manifest(), ()),
+    )
+
+
+def test_tracked_fixture_exact_replay_matrix_golden_fixture() -> None:
+    _assert_matches_fixture(
+        "tracked_fixture_exact_replay_matrix_v1",
+        _make_tracked_fixture_exact_replay_matrix_payload(),
     )

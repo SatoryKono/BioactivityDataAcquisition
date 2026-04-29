@@ -1,0 +1,24 @@
+{
+  "case": "ordinary_supported_family_cached_bronze_exact_replay",
+  "occurrences": [
+    {
+      "manifest_id": "manifest-golden-001",
+      "run_id": "00000000-0000-0000-0000-000000000901"
+    },
+    {
+      "manifest_id": "manifest-golden-002",
+      "run_id": "00000000-0000-0000-0000-000000000908"
+    }
+  ],
+  "pipeline_name": "chembl_activity",
+  "replay_capability": "exact_replay_supported",
+  "semantic_identity": {
+    "dq_contract_compatibility_hash": "no_dq_policies",
+    "effective_config_artifact_id": "eca-golden-001",
+    "effective_config_hash": "a580ca1cdd3c40668a31f3d3c416b88609362ec0d0c6c18c64090a210cdfb590",
+    "execution_fingerprint": "fp-golden-001",
+    "snapshot_ids": [
+      "snapshot-golden-001"
+    ]
+  }
+}
