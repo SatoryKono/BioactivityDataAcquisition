@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-29T10:29:00.091279+00:00",
+  "generated_at": "2026-04-29T11:27:13.187052+00:00",
   "summary": {
     "total_scripts": 355,
     "status_counts": {
@@ -14,7 +14,7 @@
       "docs": 121,
       "scripts": 298,
       "skills": 8,
-      "tests": 137
+      "tests": 139
     }
   },
   "scripts": [
@@ -2911,7 +2911,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 105,
+          "line": 106,
           "source_group": "ci",
           "text": "run: uv run python scripts/check_entity_config_parity.py"
         },
@@ -2967,7 +2967,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 38,
+      "reference_count": 41,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
@@ -3148,7 +3148,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 213,
+          "line": 214,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_artifacts.py \\"
         },
@@ -3205,7 +3205,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 233,
+          "line": 234,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_quality_gates.py \\"
         },
@@ -3270,7 +3270,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 223,
+          "line": 224,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
         },
@@ -3360,7 +3360,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 218,
+          "line": 219,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_svg_text_visibility.py \\"
         },
@@ -3848,7 +3848,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 181,
+          "line": 182,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json || true"
         },
@@ -4214,7 +4214,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 182,
+          "line": 183,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -4351,7 +4351,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 176,
+          "line": 177,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -4392,7 +4392,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 111,
+      "reference_count": 115,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -4402,13 +4402,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 96,
+          "line": 97,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 108,
+          "line": 109,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs verify"
         },
@@ -4667,7 +4667,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 96,
+          "line": 97,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json"
         },
@@ -5027,7 +5027,7 @@
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 702,
+          "line": 703,
           "source_group": "docs",
           "text": "- [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministic multi-pipeline artifacts"
         },
@@ -5039,7 +5039,7 @@
         },
         {
           "path": "tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py",
-          "line": 277,
+          "line": 281,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_pipeline_normalization_field_matrix.py\""
         }
@@ -5487,7 +5487,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 22,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -5833,7 +5833,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 646,
+          "line": 644,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -6645,7 +6645,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 56,
+      "reference_count": 60,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7245,11 +7245,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 111,
+      "reference_count": 114,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 76,
+          "line": 77,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa check-xwalk-missing-backlog \\"
         },
@@ -7651,13 +7651,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 111,
+          "line": 112,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 115,
+          "line": 116,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         },
@@ -7675,7 +7675,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1450,
+          "line": 1456,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -7759,7 +7759,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 566,
+          "line": 564,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -7830,13 +7830,13 @@
         },
         {
           "path": "docs/00-project/glossary.md",
-          "line": 510,
+          "line": 514,
           "source_group": "docs",
           "text": "A terminology linter is available at `scripts/engineering/qa/lint_terminology.py`:"
         },
         {
           "path": "docs/00-project/glossary.md",
-          "line": 514,
+          "line": 518,
           "source_group": "docs",
           "text": "python scripts/engineering/qa/lint_terminology.py src/bioetl/"
         },
@@ -8486,7 +8486,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 93,
+          "line": 94,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.repo check-versions"
         },
@@ -8551,7 +8551,7 @@
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 102,
+          "line": 101,
           "source_group": "docs",
           "text": "`scripts/engineering/repo/audit_root_cleanliness.py` MUST использовать этот"
         },
@@ -9015,7 +9015,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 120,
+      "reference_count": 125,
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
@@ -10583,7 +10583,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 52,
+      "reference_count": 56,
       "references": [
         {
           "path": ".github/workflows/quality-debt-weekly.yml",
@@ -11421,7 +11421,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 228,
+          "line": 229,
           "source_group": "ci",
           "text": "python3 src/tools/harmonize_link_styles.py --dry-run --fail-on-errors"
         }

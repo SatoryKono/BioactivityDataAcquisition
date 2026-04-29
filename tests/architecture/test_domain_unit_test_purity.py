@@ -24,6 +24,9 @@ DISALLOWED_RUNTIME_SEAMS: tuple[tuple[str, str], ...] = (
     ("glob", "filesystem discovery via Path.glob()"),
     ("rglob", "filesystem discovery via Path.rglob()"),
     ("exists", "filesystem discovery via Path.exists()"),
+    ("mkdir", "filesystem mutation via Path.mkdir()"),
+    ("unlink", "filesystem mutation via Path.unlink()"),
+    ("touch", "filesystem mutation via Path.touch()"),
     ("yaml", "direct YAML parsing/serialization"),
     ("datetime.now", "wall-clock time via datetime.now()"),
     ("datetime.utcnow", "wall-clock time via datetime.utcnow()"),
@@ -57,6 +60,10 @@ _ALLOWED_RUNTIME_SEAMS: dict[tuple[str, str], str] = {
         "tests/unit/domain/hash_policy/test_hash_policy_stability.py",
         "exists",
     ): "hash-policy golden fixture contract verifies expected fixture paths",
+    (
+        "tests/unit/domain/hash_policy/test_hash_policy_stability.py",
+        "mkdir",
+    ): "hash-policy golden fixture contract creates isolated tmp_path output dir",
     (
         "tests/unit/domain/hash_policy/test_hash_policy_stability.py",
         "yaml",
@@ -286,7 +293,16 @@ def _collect_disallowed_runtime_seams(file_path: Path) -> list[RuntimeSeamViolat
                         reason=_SEAM_MESSAGES["path.open"],
                     )
                 )
-            elif attr_name in {"read_text", "write_text", "glob", "rglob", "exists"}:
+            elif attr_name in {
+                "read_text",
+                "write_text",
+                "glob",
+                "rglob",
+                "exists",
+                "mkdir",
+                "unlink",
+                "touch",
+            }:
                 violations.append(
                     RuntimeSeamViolation(
                         file_path=file_path,
@@ -351,8 +367,7 @@ def test_domain_surfaces_do_not_import_orchestration_layers(
 
     assert not violations, (
         f"{surface_label} import non-domain layers (application/"
-        "infrastructure/composition):\n"
-        + "\n".join(violations)
+        "infrastructure/composition):\n" + "\n".join(violations)
     )
 
 
@@ -417,6 +432,9 @@ def test_runtime_seam_detector_catches_representative_violations(
                 "Path('x').write_text('x')",
                 "Path('x').glob('*.py')",
                 "Path('x').exists()",
+                "Path('x').mkdir()",
+                "Path('x').touch()",
+                "Path('x').unlink()",
                 "datetime.now()",
                 "datetime.utcnow()",
                 "time.time()",
@@ -435,6 +453,9 @@ def test_runtime_seam_detector_catches_representative_violations(
         "write_text",
         "glob",
         "exists",
+        "mkdir",
+        "touch",
+        "unlink",
         "yaml",
         "datetime.now",
         "datetime.utcnow",

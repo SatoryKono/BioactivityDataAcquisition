@@ -10,15 +10,16 @@ Create a new ETL pipeline for a provider/entity pair in BioETL.
 
 ## Source Of Truth
 
-- Primary instructions: `../../../ai/claude/skills/new-pipeline.md`
+- Canonical runtime entrypoint: this `SKILL.md`
+- Project rules: `../../../AGENTS.md`
 
 ## Workflow
 
-1. Open and follow `../../../ai/claude/skills/new-pipeline.md`.
+1. Follow this skill file as the canonical Codex runtime instructions.
 1. If source examples are shell-specific, adapt commands to the current shell/environment.
 1. Keep generated code/config aligned with project architecture rules in `AGENTS.md`.
 1. Run verification commands from the source skill (or closest working equivalents in this environment).
 
 ## Notes
 
-- Treat the `.claude` skill file as canonical for templates and detailed steps.
+- Treat this file as canonical for the runtime workflow and verification sequence.

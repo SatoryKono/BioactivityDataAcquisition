@@ -12,6 +12,7 @@ from bioetl.domain.control_plane.contract_registry import (
     RegistryValidationIssue,
     RegistryValidationSeverity,
 )
+from bioetl.infrastructure.control_plane import FileContractRegistryStore
 
 
 def _issue_payload(issue: RegistryValidationIssue) -> dict[str, Any]:
@@ -163,7 +164,8 @@ def main() -> int:
         return 1
 
     try:
-        registry = ContractRegistry(registry_path)
+        store = FileContractRegistryStore(registry_path)
+        registry = store.load()
         print(
             "::notice::Loaded contract registry with", len(registry.entries), "entries"
         )
@@ -171,7 +173,7 @@ def main() -> int:
         validation_result = registry.validate_all()
         _print_validation_issues(list(validation_result.issues))
 
-        fs_result = registry.validate_filesystem_consistency()
+        fs_result = store.validate_filesystem_consistency(registry)
 
         if fs_result.valid:
             print("::notice::Filesystem consistency validated")

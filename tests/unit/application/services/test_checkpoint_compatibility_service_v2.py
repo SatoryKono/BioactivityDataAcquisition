@@ -15,6 +15,46 @@ from bioetl.application.services.checkpoint_compatibility_service_v2 import (
 HASH_A = "a" * 64
 HASH_B = "b" * 64
 
+CONFIG_MISMATCH_SUGGESTION = (
+    "Configuration mismatch detected. Review config changes and update checkpoint "
+    "or configuration to match."
+)
+CONFIG_OVERRIDE_SUGGESTION = (
+    "Configuration mismatch can be overridden with --allow-config-mismatch if "
+    "changes are backward-compatible."
+)
+DEPENDENCY_PHASE_SUGGESTION = (
+    "For dependency/enrichment phases, consider re-running only affected sources "
+    "instead of full resume."
+)
+MAJOR_SCHEMA_SUGGESTION = (
+    "Major schema version incompatibility. Checkpoint cannot be used. Consider "
+    "schema migration or starting fresh execution."
+)
+MERGE_PHASE_SUGGESTION = (
+    "For merge/cross-validation phases, review conflict resolution and validation "
+    "rules as they may be affected by config changes."
+)
+
+
+def _assert_component(
+    result,
+    component_name: str,
+    *,
+    compatible: bool,
+    reason: str,
+    severity: str,
+) -> None:
+    component = result.details[component_name]
+    assert component["compatible"] is compatible
+    assert component["reason"] == reason
+    assert component["severity"] == severity
+
+
+def _assert_hex_fingerprint(value: str) -> None:
+    assert len(value) == 64
+    assert all(char in "0123456789abcdef" for char in value)
+
 
 def test_service_creation():
     """Test that service can be created."""
@@ -62,10 +102,37 @@ def test_identical_checkpoint_compatibility():
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
     assert result.verdict == CompatibilityVerdict.COMPATIBLE
-    assert "compatible" in result.message.lower()
+    assert result.message == "Checkpoint is compatible for dependency_execution phase"
     assert result.execution_phase == ExecutionPhase.DEPENDENCY_EXECUTION
-    # Even identical checkpoints get phase-specific suggestions
-    assert len(result.recovery_suggestions) == 1
+    _assert_component(
+        result,
+        "phase_compatibility",
+        compatible=True,
+        reason="same_execution_phase",
+        severity="none",
+    )
+    _assert_component(
+        result,
+        "config_compatibility",
+        compatible=True,
+        reason="identical_config_hash",
+        severity="none",
+    )
+    _assert_component(
+        result,
+        "execution_identity_compatibility",
+        compatible=True,
+        reason="identical_degraded_runtime_anchor_fingerprint",
+        severity="none",
+    )
+    _assert_component(
+        result,
+        "schema_compatibility",
+        compatible=True,
+        reason="identical_schema_version",
+        severity="none",
+    )
+    assert result.recovery_suggestions == [DEPENDENCY_PHASE_SUGGESTION]
 
 
 def test_phase_incompatibility():
@@ -87,8 +154,18 @@ def test_phase_incompatibility():
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
     assert result.verdict == CompatibilityVerdict.MINOR_INCOMPATIBLE
-    assert "incompatible" in result.message.lower() or "minor" in result.message.lower()
-    assert len(result.recovery_suggestions) > 0
+    assert (
+        result.message
+        == "Checkpoint has minor incompatibilities with current merge phase"
+    )
+    _assert_component(
+        result,
+        "phase_compatibility",
+        compatible=True,
+        reason="compatible_phase_transition",
+        severity="minor",
+    )
+    assert result.recovery_suggestions == [MERGE_PHASE_SUGGESTION]
 
 
 def test_config_hash_incompatibility():
@@ -110,10 +187,28 @@ def test_config_hash_incompatibility():
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
     assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
-    assert "incompatible" in result.message.lower()
-    assert any(
-        "config" in suggestion.lower() for suggestion in result.recovery_suggestions
+    assert (
+        result.message
+        == "Checkpoint is incompatible with current dependency_execution phase"
     )
+    _assert_component(
+        result,
+        "config_compatibility",
+        compatible=False,
+        reason="different_config_hash",
+        severity="major",
+    )
+    _assert_component(
+        result,
+        "execution_identity_compatibility",
+        compatible=False,
+        reason="degraded_runtime_anchor_fingerprint_mismatch",
+        severity="major",
+    )
+    assert result.recovery_suggestions == [
+        CONFIG_MISMATCH_SUGGESTION,
+        DEPENDENCY_PHASE_SUGGESTION,
+    ]
 
 
 def test_schema_version_incompatibility():
@@ -135,10 +230,21 @@ def test_schema_version_incompatibility():
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
     assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
-    assert "incompatible" in result.message.lower()
-    assert any(
-        "schema" in suggestion.lower() for suggestion in result.recovery_suggestions
+    assert (
+        result.message
+        == "Checkpoint is incompatible with current dependency_execution phase"
     )
+    _assert_component(
+        result,
+        "schema_compatibility",
+        compatible=False,
+        reason="incompatible_major_version",
+        severity="major",
+    )
+    assert result.recovery_suggestions == [
+        MAJOR_SCHEMA_SUGGESTION,
+        DEPENDENCY_PHASE_SUGGESTION,
+    ]
 
 
 def test_minor_schema_version_compatibility():
@@ -160,7 +266,18 @@ def test_minor_schema_version_compatibility():
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
     assert result.verdict == CompatibilityVerdict.MINOR_INCOMPATIBLE
-    assert "minor" in result.message.lower() or "compatible" in result.message.lower()
+    assert (
+        result.message
+        == "Checkpoint has minor incompatibilities with current dependency_execution phase"
+    )
+    _assert_component(
+        result,
+        "schema_compatibility",
+        compatible=True,
+        reason="compatible_minor_version_delta_1",
+        severity="minor",
+    )
+    assert result.recovery_suggestions == [DEPENDENCY_PHASE_SUGGESTION]
 
 
 def test_lenient_mode_compatibility():
@@ -182,9 +299,20 @@ def test_lenient_mode_compatibility():
 
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
-    # Should be compatible in lenient mode
     assert result.verdict == CompatibilityVerdict.COMPATIBLE
-    assert "lenient" in result.message.lower() or "compatible" in result.message.lower()
+    assert (
+        result.message
+        == "Checkpoint is compatible for dependency_execution phase (mode: lenient)"
+    )
+    assert result.details["compatibility_mode"] == "lenient"
+    _assert_component(
+        result,
+        "schema_compatibility",
+        compatible=True,
+        reason="compatible_minor_version_delta_1",
+        severity="minor",
+    )
+    assert result.recovery_suggestions == [DEPENDENCY_PHASE_SUGGESTION]
 
 
 def test_legacy_mode_compatibility():
@@ -206,9 +334,31 @@ def test_legacy_mode_compatibility():
 
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
-    # Should be compatible in legacy mode (only checks major phase incompatibilities)
     assert result.verdict == CompatibilityVerdict.COMPATIBLE
-    assert "legacy" in result.message.lower() or "compatible" in result.message.lower()
+    assert (
+        result.message
+        == "Checkpoint is compatible for dependency_execution phase (mode: legacy)"
+    )
+    assert result.details["compatibility_mode"] == "legacy"
+    _assert_component(
+        result,
+        "config_compatibility",
+        compatible=False,
+        reason="different_config_hash",
+        severity="major",
+    )
+    _assert_component(
+        result,
+        "schema_compatibility",
+        compatible=False,
+        reason="incompatible_major_version",
+        severity="major",
+    )
+    assert result.recovery_suggestions == [
+        CONFIG_MISMATCH_SUGGESTION,
+        MAJOR_SCHEMA_SUGGESTION,
+        DEPENDENCY_PHASE_SUGGESTION,
+    ]
 
 
 def test_compatible_phase_transition():
@@ -229,9 +379,19 @@ def test_compatible_phase_transition():
 
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
-    # Should be minor incompatible (compatible transition but different phase)
     assert result.verdict == CompatibilityVerdict.MINOR_INCOMPATIBLE
-    assert "minor" in result.message.lower() or "compatible" in result.message.lower()
+    assert (
+        result.message
+        == "Checkpoint has minor incompatibilities with current dependency_execution phase"
+    )
+    _assert_component(
+        result,
+        "phase_compatibility",
+        compatible=True,
+        reason="compatible_phase_transition",
+        severity="minor",
+    )
+    assert result.recovery_suggestions == [DEPENDENCY_PHASE_SUGGESTION]
 
 
 def test_incompatible_phase_transition():
@@ -252,8 +412,19 @@ def test_incompatible_phase_transition():
 
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
-    # Should be major incompatible (cannot jump ahead)
     assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    assert result.message == "Checkpoint is incompatible with current preflight phase"
+    _assert_component(
+        result,
+        "phase_compatibility",
+        compatible=False,
+        reason="incompatible_phase_transition",
+        severity="major",
+    )
+    assert result.recovery_suggestions == [
+        "Cannot resume from preflight to incompatible phase. Consider restarting "
+        "execution from beginning."
+    ]
 
 
 def test_terminal_phase_compatibility():
@@ -274,8 +445,9 @@ def test_terminal_phase_compatibility():
 
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
-    # Same terminal phase should be compatible
     assert result.verdict == CompatibilityVerdict.COMPATIBLE
+    assert result.message == "Checkpoint is compatible for completed_success phase"
+    assert result.recovery_suggestions == []
 
 
 def test_recovery_suggestions():
@@ -296,14 +468,26 @@ def test_recovery_suggestions():
 
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
-    # Should have multiple recovery suggestions
-    assert len(result.recovery_suggestions) > 0
-
-    # Check for actual suggestions that are generated
-    suggestions_text = " ".join(result.recovery_suggestions).lower()
-    assert "config" in suggestions_text
-    assert "schema" in suggestions_text
-    assert "migration" in suggestions_text or "fresh execution" in suggestions_text
+    assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    _assert_component(
+        result,
+        "config_compatibility",
+        compatible=False,
+        reason="different_config_hash",
+        severity="major",
+    )
+    _assert_component(
+        result,
+        "schema_compatibility",
+        compatible=False,
+        reason="incompatible_major_version",
+        severity="major",
+    )
+    assert result.recovery_suggestions == [
+        CONFIG_MISMATCH_SUGGESTION,
+        MAJOR_SCHEMA_SUGGESTION,
+        MERGE_PHASE_SUGGESTION,
+    ]
 
 
 def test_compatibility_details():
@@ -341,8 +525,12 @@ def test_compatibility_details():
     assert details["checkpoint_identity"]["composite_run_identity"] == "run-002"
     assert details["current_identity"]["canonical_execution_identity_payload"] == {}
     assert details["checkpoint_identity"]["canonical_execution_identity_payload"] == {}
-    assert details["current_identity"]["degraded_runtime_anchor_fingerprint"]
-    assert details["checkpoint_identity"]["degraded_runtime_anchor_fingerprint"]
+    _assert_hex_fingerprint(
+        details["current_identity"]["degraded_runtime_anchor_fingerprint"]
+    )
+    _assert_hex_fingerprint(
+        details["checkpoint_identity"]["degraded_runtime_anchor_fingerprint"]
+    )
 
 
 def test_composite_run_identity_mismatch_is_enforced():
@@ -609,12 +797,15 @@ def test_canonical_checkpoint_execution_identity_fallback_is_used_when_available
         result.details["execution_identity_compatibility"]["reason"]
         == "checkpoint_execution_identity_fallback_mismatch"
     )
-    assert result.details["current_identity"][
+    current_fallback_fingerprint = result.details["current_identity"][
         "checkpoint_execution_identity_fallback_fingerprint"
     ]
-    assert result.details["checkpoint_identity"][
+    checkpoint_fallback_fingerprint = result.details["checkpoint_identity"][
         "checkpoint_execution_identity_fallback_fingerprint"
     ]
+    _assert_hex_fingerprint(current_fallback_fingerprint)
+    _assert_hex_fingerprint(checkpoint_fallback_fingerprint)
+    assert current_fallback_fingerprint != checkpoint_fallback_fingerprint
 
 
 def test_schema_version_delta_config():
@@ -636,10 +827,10 @@ def test_schema_version_delta_config():
 
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
-    # Should be incompatible with delta > 2
     assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
     assert (
-        "exceeds_max_version_delta" in result.details["schema_compatibility"]["reason"]
+        result.details["schema_compatibility"]["reason"]
+        == "exceeds_max_version_delta_3"
     )
 
 
@@ -662,9 +853,12 @@ def test_policy_override_suggestions():
 
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
-    # Should suggest policy override when allowed
-    suggestions_text = " ".join(result.recovery_suggestions).lower()
-    assert "override" in suggestions_text or "config-mismatch" in suggestions_text
+    assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    assert result.recovery_suggestions == [
+        CONFIG_MISMATCH_SUGGESTION,
+        CONFIG_OVERRIDE_SUGGESTION,
+        DEPENDENCY_PHASE_SUGGESTION,
+    ]
 
 
 def test_phase_specific_suggestions():
@@ -686,10 +880,10 @@ def test_phase_specific_suggestions():
 
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
-    # Should have dependency-specific suggestions
-    assert any(
-        "source" in suggestion.lower() for suggestion in result.recovery_suggestions
-    )
+    assert result.recovery_suggestions == [
+        CONFIG_MISMATCH_SUGGESTION,
+        DEPENDENCY_PHASE_SUGGESTION,
+    ]
 
     # Test merge phase
     current_identity = CheckpointIdentity(
@@ -706,7 +900,9 @@ def test_phase_specific_suggestions():
 
     result = service.check_compatibility(current_identity, checkpoint_identity)
 
-    # Should have merge-specific suggestions
-    assert any(
-        "conflict" in suggestion.lower() for suggestion in result.recovery_suggestions
-    )
+    assert result.recovery_suggestions == [
+        "Cannot resume from merge to incompatible phase. Consider restarting execution "
+        "from beginning.",
+        CONFIG_MISMATCH_SUGGESTION,
+        MERGE_PHASE_SUGGESTION,
+    ]

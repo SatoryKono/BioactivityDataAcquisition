@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(slots=True)
-class PipelineMetricsRecorder:
+class _PipelineMetricsRecorderCore:
     """Wrap generic metric dispatch with BioETL pipeline-level semantics.
 
     This facade lives in the application layer so ``MetricsPort`` can remain a
@@ -258,6 +258,10 @@ class PipelineMetricsRecorder:
             },
         )
 
+
+class _CompositePhaseMetricsRecorderMixin:
+    """Composite-phase specific metrics emitted by pipeline-scoped recorders."""
+
     def record_composite_phase_records(
         self,
         *,
@@ -337,3 +341,10 @@ class PipelineMetricsRecorder:
                 "retry_kind": retry_kind,
             },
         )
+
+
+class PipelineMetricsRecorder(
+    _CompositePhaseMetricsRecorderMixin,
+    _PipelineMetricsRecorderCore,
+):
+    """Public pipeline-scoped metrics facade used by runtime/application code."""

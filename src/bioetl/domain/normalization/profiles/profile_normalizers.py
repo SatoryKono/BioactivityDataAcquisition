@@ -155,6 +155,7 @@ __all__ = [
     "normalize_profile_unit",
 ]
 
+
 def normalize_profile_null(value: object) -> object:
     """Convert profile pseudo-null values to ``None``."""
     return normalize_null(value)
@@ -163,6 +164,7 @@ def normalize_profile_null(value: object) -> object:
 def normalize_profile_passthrough(value: object) -> object:
     """Return one profile value unchanged."""
     return value
+
 
 def normalize_profile_case(
     value: object, *, allowed_values: frozenset[str] | None = None
@@ -262,20 +264,16 @@ def _coerce_quasi_enum_numeric(value: object) -> float | None:
     if value is None or isinstance(value, bool):
         return None
     if isinstance(value, str):
-        return _parse_quasi_enum_numeric_text(value)
+        cleaned = normalize_string(value)
+        if cleaned is None:
+            return None
+        try:
+            return float(cleaned)
+        except ValueError:
+            return None
     if isinstance(value, (int, float)):
         return float(value)
     return None
-
-
-def _parse_quasi_enum_numeric_text(value: str) -> float | None:
-    cleaned = normalize_string(value)
-    if cleaned is None:
-        return None
-    try:
-        return float(cleaned)
-    except ValueError:
-        return None
 
 
 def normalize_profile_assay_parameter_type(

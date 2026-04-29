@@ -164,6 +164,7 @@ nav:
                     -   "Workflow Guide": 02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md
             -   Decisions:
                     -   "Index": 02-architecture/decisions/README.md
+                    -   "ADR Registry": 02-architecture/adr-registry.md
                     -   "ADR-001 Delta Lake vs Parquet": 02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md
                     -   "ADR-002 Medallion Architecture": 02-architecture/decisions/ADR-002-medallion-architecture.md
                     -   "ADR-003 In-Memory Locking": 02-architecture/decisions/ADR-003-in-memory-locking-strategy.md
@@ -215,6 +216,7 @@ nav:
             -   "Getting Started": 03-guides/getting-started.md
             -   "Quick Start": 03-guides/quick-start.md
             -   "Docs Verification": 03-guides/docs-verification.md
+            -   "Docs Parity Gate": 03-guides/docs-parity-gate.md
             -   "Running Pipelines": 03-guides/running-pipelines.md
             -   "GitHub Local Workflow": 03-guides/github-local-workflow.md
             -   "Pipeline Configuration": 03-guides/pipeline-configuration.md

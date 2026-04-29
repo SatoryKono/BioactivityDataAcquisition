@@ -5,6 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
+from bioetl.domain.normalization._publication_structured_field_policy_specs import (
+    PUBLICATION_STRUCTURED_FIELD_POLICY_SPECS,
+)
+
 __all__ = [
     "CollectionSemantics",
     "FieldRepresentation",
@@ -50,91 +54,22 @@ class PublicationStructuredFieldPolicy:
         return "raw_provider_value"
 
 
-_POLICIES: tuple[PublicationStructuredFieldPolicy, ...] = (
+_POLICIES: tuple[PublicationStructuredFieldPolicy, ...] = tuple(
     PublicationStructuredFieldPolicy(
-        "crossref.publication",
-        "author_orcids",
+        profile_name,
+        field_name,
         FieldRepresentation.CANONICAL_JSON_STRING,
-        CollectionSemantics.UNORDERED_SET,
-        identifier_family="orcid",
-    ),
-    PublicationStructuredFieldPolicy(
-        "crossref.publication",
-        "issn_list",
-        FieldRepresentation.CANONICAL_JSON_STRING,
-        CollectionSemantics.UNORDERED_SET,
-        identifier_family="issn",
-    ),
-    PublicationStructuredFieldPolicy(
-        "openalex.publication",
-        "author_openalex_ids",
-        FieldRepresentation.CANONICAL_JSON_STRING,
-        CollectionSemantics.UNORDERED_SET,
-        identifier_family="openalex_author",
-    ),
-    PublicationStructuredFieldPolicy(
-        "openalex.publication",
-        "author_orcids",
-        FieldRepresentation.CANONICAL_JSON_STRING,
-        CollectionSemantics.UNORDERED_SET,
-        identifier_family="orcid",
-    ),
-    PublicationStructuredFieldPolicy(
-        "openalex.publication",
-        "institution_ids",
-        FieldRepresentation.CANONICAL_JSON_STRING,
-        CollectionSemantics.UNORDERED_SET,
-        identifier_family="openalex_institution",
-    ),
-    PublicationStructuredFieldPolicy(
-        "openalex.publication",
-        "ror_ids",
-        FieldRepresentation.CANONICAL_JSON_STRING,
-        CollectionSemantics.UNORDERED_SET,
-        identifier_family="ror",
-    ),
-    PublicationStructuredFieldPolicy(
-        "pubmed.publication",
-        "author_orcids",
-        FieldRepresentation.CANONICAL_JSON_STRING,
-        CollectionSemantics.UNORDERED_SET,
-        identifier_family="orcid",
-    ),
-    PublicationStructuredFieldPolicy(
-        "pubmed.publication",
-        "publication_type_list",
-        FieldRepresentation.CANONICAL_JSON_STRING,
-        CollectionSemantics.UNORDERED_SET,
-        raw_sidecar_field="publication_type",
-    ),
-    PublicationStructuredFieldPolicy(
-        "pubmed.publication",
-        "publication_types",
-        FieldRepresentation.CANONICAL_JSON_STRING,
-        CollectionSemantics.UNORDERED_SET,
-        raw_sidecar_field="publication_type",
-    ),
-    PublicationStructuredFieldPolicy(
-        "semanticscholar.publication",
-        "author_orcids",
-        FieldRepresentation.CANONICAL_JSON_STRING,
-        CollectionSemantics.UNORDERED_SET,
-        identifier_family="orcid",
-    ),
-    PublicationStructuredFieldPolicy(
-        "semanticscholar.publication",
-        "author_s2_ids",
-        FieldRepresentation.CANONICAL_JSON_STRING,
-        CollectionSemantics.UNORDERED_SET,
-        identifier_family="semantic_scholar_author",
-    ),
-    PublicationStructuredFieldPolicy(
-        "semanticscholar.publication",
-        "publication_types",
-        FieldRepresentation.CANONICAL_JSON_STRING,
-        CollectionSemantics.UNORDERED_SET,
-        raw_sidecar_field="publication_type",
-    ),
+        CollectionSemantics(collection_semantics),
+        identifier_family=identifier_family,
+        raw_sidecar_field=raw_sidecar_field,
+    )
+    for (
+        profile_name,
+        field_name,
+        collection_semantics,
+        identifier_family,
+        raw_sidecar_field,
+    ) in PUBLICATION_STRUCTURED_FIELD_POLICY_SPECS
 )
 
 _POLICY_BY_FIELD = {

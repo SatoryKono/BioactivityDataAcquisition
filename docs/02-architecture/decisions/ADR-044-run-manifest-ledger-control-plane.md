@@ -131,7 +131,8 @@ The stable ADR-level invariant is fail-closed governance on the enabled path:
 - manifest created before execution;
 - manifest immutable after persistence;
 - ledger append-only;
-- exact replay is not allowed to continue after compatibility drift.
+- exact replay compatibility drift is coerced to `hard_fail`; exact replay is
+  not allowed to continue after compatibility drift.
 
 ### 7. Governance is fail-closed on the enabled path
 

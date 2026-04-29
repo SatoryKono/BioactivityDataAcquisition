@@ -57,9 +57,12 @@ from scripts.memory.sync import (
 
 pytestmark = pytest.mark.memory
 LEGACY_REPORT_PATH = str(Path(tempfile.gettempdir()) / "neo4j-memory-audit.json")
+
+
 def _test_internal_http_uri(host: str, port: int) -> str:
     """Test-only helper for explicitly required unencrypted HTTP connections."""
     return f"http://{host}:{port}"  # NOSONAR # nosec B108
+
 
 LOCALHOST_HTTP_URI = _test_internal_http_uri("localhost", 7474)
 LOCALHOST_AUDIT_HTTP_URI = _test_internal_http_uri("localhost", 7475)
@@ -116,7 +119,9 @@ EXEC_DOCS_VERIFY = "uv run python -m scripts.docs verify"
 EXEC_SCHEMA_VALIDATE = "uv run python -m scripts.schema validate-configs"
 QUALITY_GATE_DIAGRAMS = "diagram quality gates"
 JOB_TEST_MATRIX = "tests::test-matrix"
-PATH_CHEMBL_ACTIVITY_PROFILE = "src/bioetl/domain/normalization/profiles/chembl_activity.py"
+PATH_CHEMBL_ACTIVITY_PROFILE = (
+    "src/bioetl/domain/normalization/profiles/chembl_activity.py"
+)
 GATE_CONFIG_VALIDATION = "config validation"
 ARTIFACT_RUN_LEDGER = "run_ledger::jsonl"
 STMT_RETURN_1 = "RETURN 1 AS ok"
@@ -124,7 +129,9 @@ NEO4J_HTTP_CLIENT_PATH = "scripts.memory.sync.Neo4jHttpClient"
 PATH_COMPOSITE_EXAMPLE = "src/bioetl/application/composite/example.py"
 CLASS_PKG_EXAMPLE = "pkg.Example"
 COMPLEXITY_PKG_EXAMPLE = "class_surface:pkg.Example"
-CONTEXT_COMPLEXITY_PREREQ = "complexity-layer targeted sync prerequisite anchor node check"
+CONTEXT_COMPLEXITY_PREREQ = (
+    "complexity-layer targeted sync prerequisite anchor node check"
+)
 PATH_PKG_EXAMPLE = "src/pkg/example.py"
 CONTEXT_FAST_AUDIT_LABEL = "fast audit label summary"
 PATH_SRC_A = "src/a.py"
@@ -2468,11 +2475,10 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_specific_an
             assert parameters is not None
             if context == "complexity-layer targeted sync prerequisite anchor check":
                 return [{"label": "class_surface", "count": 1}]
-            if (
-                context
-                == CONTEXT_COMPLEXITY_PREREQ
-            ):
-                return [{"label": "class_surface", "name": CLASS_PKG_EXAMPLE, "count": 0}]
+            if context == CONTEXT_COMPLEXITY_PREREQ:
+                return [
+                    {"label": "class_surface", "name": CLASS_PKG_EXAMPLE, "count": 0}
+                ]
             raise AssertionError(f"Unexpected context: {context}")
 
     try:
@@ -2717,9 +2723,7 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
                     },
                     {"label": "complexity_candidate", "count": 0, "samples": []},
                 ]
-            raise AssertionError(
-                f"Unexpected query context: {context}"
-            )
+            raise AssertionError(f"Unexpected query context: {context}")
 
     monkeypatch.setattr(NEO4J_HTTP_CLIENT_PATH, StubClient)
     root = _repo_root()
@@ -2806,9 +2810,7 @@ def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(
             "neo4j",
         ),
     )
-    monkeypatch.setattr(
-        NEO4J_HTTP_CLIENT_PATH, lambda *_args, **_kwargs: StubClient()
-    )
+    monkeypatch.setattr(NEO4J_HTTP_CLIENT_PATH, lambda *_args, **_kwargs: StubClient())
     monkeypatch.setattr("scripts.memory.sync._sync_run_id", lambda: "run-123")
 
     def _retry(*_args, **kwargs) -> None:
@@ -2848,9 +2850,7 @@ def test_main_skips_global_post_apply_fast_audit_for_targeted_sync(
     def _sync_snapshot(*_args, **_kwargs) -> None:
         called["sync_snapshot"] += 1
 
-    def _build_fast_analysis_audit_report(
-        *_args, **_kwargs
-    ) -> dict[str, object]:
+    def _build_fast_analysis_audit_report(*_args, **_kwargs) -> dict[str, object]:
         called["build_fast_analysis_audit_report"] += 1
         return {}
 

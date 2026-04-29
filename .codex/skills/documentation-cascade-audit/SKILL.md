@@ -14,7 +14,7 @@ Use this skill when a single-pass manual review is too large or error-prone.
 Read, in this order:
 
 1. `../../../docs/00-project/ai/memory/agent-memory.md`
-1. `../../../ai/claude/agents/ORCHESTRATION.md`
+1. `../../../.codex/agents/ORCHESTRATION.md`
 1. `../documentation-audit/SKILL.md`
 1. `../documentation-audit/references/audit-checklist.md`
 1. `../documentation-audit/references/report-template.md`

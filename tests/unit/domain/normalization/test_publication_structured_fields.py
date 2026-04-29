@@ -8,6 +8,30 @@ from bioetl.domain.normalization.publication_structured_fields import (
     publication_structured_field_policies,
     publication_structured_field_policy,
 )
+from bioetl.domain.normalization.reference_ids import reference_identifier_family
+from bioetl.domain.normalization.profiles import (
+    CROSSREF_PUBLICATION_PROFILE,
+    OPENALEX_PUBLICATION_PROFILE,
+    PUBMED_PUBLICATION_PROFILE,
+    SEMANTICSCHOLAR_PUBLICATION_PROFILE,
+)
+
+_PUBLICATION_PROFILES = (
+    CROSSREF_PUBLICATION_PROFILE,
+    OPENALEX_PUBLICATION_PROFILE,
+    PUBMED_PUBLICATION_PROFILE,
+    SEMANTICSCHOLAR_PUBLICATION_PROFILE,
+)
+
+
+def _profile_structured_fields() -> set[tuple[str, str]]:
+    structured_fields: set[tuple[str, str]] = set()
+    for profile in _PUBLICATION_PROFILES:
+        for field_name, rule in profile.field_rules.items():
+            notes = (rule.notes or "").casefold()
+            if rule.set_like or "json" in notes:
+                structured_fields.add((profile.profile_name, field_name))
+    return structured_fields
 
 
 def test_publication_structured_field_registry_declares_identifier_arrays() -> None:
@@ -39,3 +63,44 @@ def test_publication_structured_field_registry_has_unique_keys() -> None:
     keys = {(policy.profile_name, policy.field_name) for policy in policies}
 
     assert len(keys) == len(policies)
+
+
+def test_publication_structured_field_registry_covers_profile_structured_fields() -> (
+    None
+):
+    registry_keys = {
+        (policy.profile_name, policy.field_name)
+        for policy in publication_structured_field_policies()
+    }
+
+    assert _profile_structured_fields() <= registry_keys
+
+
+def test_publication_structured_field_registry_matches_profile_hash_ordering() -> None:
+    policies_by_key = {
+        (policy.profile_name, policy.field_name): policy
+        for policy in publication_structured_field_policies()
+    }
+
+    for profile in _PUBLICATION_PROFILES:
+        for field_name, rule in profile.field_rules.items():
+            policy = policies_by_key.get((profile.profile_name, field_name))
+            if policy is None:
+                continue
+
+            expected = (
+                CollectionSemantics.UNORDERED_SET
+                if rule.set_like
+                else CollectionSemantics.ORDERED_SEQUENCE
+            )
+            assert policy.collection_semantics is expected
+
+
+def test_publication_structured_field_identifier_families_are_registered() -> None:
+    for policy in publication_structured_field_policies():
+        if policy.identifier_family is None:
+            continue
+
+        assert reference_identifier_family(policy.identifier_family).name == (
+            policy.identifier_family
+        )

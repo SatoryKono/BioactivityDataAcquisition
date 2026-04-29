@@ -94,6 +94,7 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [temporary-diagnostic-ttl-wave-3-closeout-2026-04-29.md](temporary-diagnostic-ttl-wave-3-closeout-2026-04-29.md)
 - [temporary-diagnostic-program-closeout-2026-04-29.md](temporary-diagnostic-program-closeout-2026-04-29.md)
 - [scripts-normalization-program-closeout-2026-04-29.md](scripts-normalization-program-closeout-2026-04-29.md)
+- [claude-to-ai-runtime-migration-plan-2026-04-25.md](claude-to-ai-runtime-migration-plan-2026-04-25.md)
 - [testing-support-migration-plan-2026-04-25.md](testing-support-migration-plan-2026-04-25.md)
 
 Earlier operational context files such as
@@ -185,6 +186,12 @@ The MCP wrapper redesign prerequisites note was added on `2026-04-29` to turn
 that audit into an implementation gate: future wrapper simplification must
 start with an explicit metadata model in `setup_mcp.py`, not with ad-hoc stem
 renames or generic-wrapper collapse.
+
+The Claude runtime migration plan was refreshed on `2026-04-29` against the
+live `ai/claude/` snapshot. It now treats `ai/claude/` as a removable
+mirror/compatibility surface: Codex skill callers should be repointed to
+`.codex/*` first, stale missing-file references removed, and only then should
+the residual `ai/claude/` tree be deleted instead of migrated into `scripts/`.
 
 The testing-support migration plan was refreshed on `2026-04-29` against the
 live workspace snapshot. It now recommends a single-wave migration from the

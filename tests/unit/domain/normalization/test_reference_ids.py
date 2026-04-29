@@ -26,6 +26,7 @@ def test_reference_identifier_registry_covers_non_chembl_provider_families() -> 
         "pfam",
         "reactome",
         "ror",
+        "semantic_scholar_author",
         "semantic_scholar_corpus",
         "semantic_scholar_paper",
         "uniprot_accession",
@@ -42,7 +43,9 @@ def test_reference_identifier_registry_covers_non_chembl_provider_families() -> 
     )
 
 
-def test_semantic_scholar_corpus_id_registry_preserves_numeric_scalar_contract() -> None:
+def test_semantic_scholar_corpus_id_registry_preserves_numeric_scalar_contract() -> (
+    None
+):
     corpus = reference_identifier_family("semantic_scholar_corpus")
 
     assert corpus.storage_representation == "numeric_scalar"

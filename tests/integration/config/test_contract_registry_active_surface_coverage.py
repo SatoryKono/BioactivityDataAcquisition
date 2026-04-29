@@ -1,0 +1,78 @@
+"""Registry and DQ coverage for active standard pipeline contract surfaces."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import pytest
+
+from bioetl.infrastructure.config.dq_contract_config_loader import (
+    DQContractConfigLoader,
+)
+from bioetl.infrastructure.control_plane import FileContractRegistryStore
+
+_CONFIGS_ROOT = Path("configs")
+_ENTITY_CONFIGS_ROOT = _CONFIGS_ROOT / "entities"
+_REGISTRY_PATH = _CONFIGS_ROOT / "base" / "contract_registry.yaml"
+_GOLD_CONTRACTS_ROOT = Path("docs/04-reference/contracts/gold")
+_STANDARD_CONTRACT_PROVIDERS = {
+    "chembl",
+    "crossref",
+    "openalex",
+    "pubchem",
+    "pubmed",
+    "semanticscholar",
+    "uniprot",
+}
+
+
+def _active_standard_contract_refs() -> dict[str, str]:
+    """Return pipeline_name -> contract_ref for active non-composite surfaces."""
+    refs: dict[str, str] = {}
+    for config_path in sorted(_ENTITY_CONFIGS_ROOT.glob("*/*.yaml")):
+        provider = config_path.parent.name
+        if provider not in _STANDARD_CONTRACT_PROVIDERS:
+            continue
+        entity = config_path.stem
+        pipeline_name = f"{provider}_{entity}"
+        refs[pipeline_name] = f"{provider}.{entity}"
+    return refs
+
+
+@pytest.mark.integration
+def test_contract_registry_covers_active_standard_provider_surfaces() -> None:
+    """Every active standard provider/entity config must be registry-governed."""
+    registry = FileContractRegistryStore(_REGISTRY_PATH).load()
+    expected_refs = set(_active_standard_contract_refs().values())
+
+    assert expected_refs <= set(registry.entries), (
+        "Contract registry missing active provider surfaces: "
+        f"{sorted(expected_refs - set(registry.entries))}"
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    ("pipeline_name", "contract_ref"),
+    sorted(_active_standard_contract_refs().items()),
+)
+def test_active_standard_provider_surface_has_dq_config_and_published_artifact(
+    pipeline_name: str,
+    contract_ref: str,
+) -> None:
+    """Active provider surfaces must resolve DQ config and published Gold artifact."""
+    registry = FileContractRegistryStore(_REGISTRY_PATH).load()
+    entry = registry.entries[contract_ref]
+    expected_artifact = (
+        f"../../docs/04-reference/contracts/gold/{pipeline_name}_v1.0.json"
+    )
+
+    dq_config = DQContractConfigLoader(_CONFIGS_ROOT).load_dq_config_for_pipeline(
+        pipeline_name
+    )
+
+    assert dq_config.contract_ref == contract_ref
+    assert dq_config.contract_version == entry.identity.contract_version
+    assert dq_config.rule_bundle_version == entry.identity.rule_bundle_version
+    assert expected_artifact in entry.published_artifacts
+    assert (_GOLD_CONTRACTS_ROOT / f"{pipeline_name}_v1.0.json").exists()

@@ -24,6 +24,7 @@ from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_quarantine_port,
 )
 from bioetl.composition.bootstrap.cli.checkpoint import (
+    CLI_INSPECTION_RUN_ID,
     bootstrap_checkpoint_manager,
     bootstrap_checkpoint_service,
     bootstrap_observability_workflow_service,
@@ -216,8 +217,8 @@ class TestBootstrapCheckpointManager:
         # CheckpointManager uses _checkpoint attribute
         assert isinstance(result._checkpoint, LocalCheckpointAdapter)
 
-    def test_bootstrap_checkpoint_manager_generates_run_id(self):
-        """Test that bootstrap_checkpoint_manager generates a UUID run_id."""
+    def test_bootstrap_checkpoint_manager_uses_deterministic_inspection_run_id(self):
+        """Test that CLI inspection bootstrap avoids nondeterministic dummy run ids."""
         with patch(
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
@@ -225,6 +226,7 @@ class TestBootstrapCheckpointManager:
             result = bootstrap_checkpoint_manager("test_pipeline")
 
         assert isinstance(result._run_id, UUID)
+        assert result._run_id == CLI_INSPECTION_RUN_ID
 
     def test_bootstrap_checkpoint_manager_sets_resume_false(self):
         """Test that bootstrap_checkpoint_manager sets resume to False."""
