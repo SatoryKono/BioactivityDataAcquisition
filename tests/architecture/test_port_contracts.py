@@ -121,7 +121,7 @@ class TestAsyncPortLifecycle:
 
     ASYNC_IO_PORTS = [
         "DataSourcePort",
-        "StoragePort",
+        "StorageLifecyclePort",
         "LockPort",
         "CheckpointPort",
         "QuarantinePort",
@@ -166,10 +166,10 @@ class TestAsyncPortLifecycle:
             "DataSourcePort MUST define health_check() for HealthAggregator"
         )
 
-    def test_storage_port_has_health_check(self) -> None:
-        """StoragePort MUST have health_check for pre-flight validation."""
-        assert hasattr(ports.StoragePort, "health_check"), (
-            "StoragePort MUST define health_check() for HealthAggregator"
+    def test_storage_lifecycle_port_has_health_check(self) -> None:
+        """StorageLifecyclePort MUST have health_check for pre-flight validation."""
+        assert hasattr(ports.StorageLifecyclePort, "health_check"), (
+            "StorageLifecyclePort MUST define health_check() for HealthAggregator"
         )
 
 
@@ -242,7 +242,12 @@ class TestPortRuntimeCheckable:
         "FilterableDataSourcePort",
         "FallbackPolicyPort",
         "InputFilterPort",
-        "StoragePort",
+        "BronzeStoragePort",
+        "SilverStoragePort",
+        "GoldStoragePort",
+        "MergedStoragePort",
+        "StorageLifecyclePort",
+        "StorageMaintenancePort",
         "LockPort",
         "CheckpointPort",
         "QuarantinePort",
@@ -293,7 +298,12 @@ class TestPortExportsComplete:
             "FilterableDataSourcePort",
             "FallbackPolicyPort",
             "InputFilterPort",
-            "StoragePort",
+            "BronzeStoragePort",
+            "SilverStoragePort",
+            "GoldStoragePort",
+            "MergedStoragePort",
+            "StorageLifecyclePort",
+            "StorageMaintenancePort",
             "LockPort",
             "CheckpointPort",
             "ClockPort",
@@ -320,46 +330,57 @@ class TestPortExportsComplete:
 # ============================================================================
 
 
-class TestStoragePortContract:
-    """Tests for StoragePort specific contracts."""
+class TestNarrowStoragePortContracts:
+    """Tests for narrow storage port contracts."""
 
-    REQUIRED_WRITE_METHODS = ["write_bronze", "write_silver", "write_gold"]
-    REQUIRED_CLEAR_METHODS = ["clear_silver", "clear_gold", "clear_csv", "clear_delta"]
-    REQUIRED_MAINTENANCE_METHODS = ["vacuum", "archive"]
+    def test_layer_storage_ports_have_write_methods(self) -> None:
+        """Layer-specific ports expose only their Medallion write concerns."""
+        assert hasattr(ports.BronzeStoragePort, "write_bronze")
+        assert hasattr(ports.SilverStoragePort, "write_silver")
+        assert hasattr(ports.GoldStoragePort, "write_gold")
 
-    @pytest.mark.parametrize("method_name", REQUIRED_WRITE_METHODS)
-    def test_storage_port_has_write_methods(self, method_name: str) -> None:
-        """StoragePort MUST have all layer write methods."""
-        assert hasattr(ports.StoragePort, method_name), (
-            f"StoragePort MUST define {method_name}() for Medallion architecture"
+    @pytest.mark.parametrize(
+        ("port_name", "method_name"),
+        [
+            ("BronzeStoragePort", "cleanup_bronze"),
+            ("SilverStoragePort", "clear_silver"),
+            ("GoldStoragePort", "clear_gold"),
+            ("StorageMaintenancePort", "clear_csv"),
+            ("StorageMaintenancePort", "clear_delta"),
+        ],
+    )
+    def test_storage_ports_have_cleanup_methods(
+        self,
+        port_name: str,
+        method_name: str,
+    ) -> None:
+        """Cleanup contracts live on the narrow port that owns the concern."""
+        assert hasattr(getattr(ports, port_name), method_name), (
+            f"{port_name} MUST define {method_name}() for data cleanup"
         )
 
-    @pytest.mark.parametrize("method_name", REQUIRED_CLEAR_METHODS)
-    def test_storage_port_has_clear_methods(self, method_name: str) -> None:
-        """StoragePort MUST have clear methods for rebuild/backfill."""
-        assert hasattr(ports.StoragePort, method_name), (
-            f"StoragePort MUST define {method_name}() for data cleanup"
+    @pytest.mark.parametrize("method_name", ["vacuum", "archive"])
+    def test_storage_maintenance_port_has_maintenance_methods(
+        self,
+        method_name: str,
+    ) -> None:
+        """StorageMaintenancePort owns Delta Lake maintenance methods."""
+        assert hasattr(ports.StorageMaintenancePort, method_name), (
+            f"StorageMaintenancePort MUST define {method_name}()"
         )
 
-    @pytest.mark.parametrize("method_name", REQUIRED_MAINTENANCE_METHODS)
-    def test_storage_port_has_maintenance_methods(self, method_name: str) -> None:
-        """StoragePort MUST have vacuum and archive methods for Delta Lake maintenance."""
-        assert hasattr(ports.StoragePort, method_name), (
-            f"StoragePort MUST define {method_name}() for Delta Lake maintenance"
-        )
-
-    def test_storage_port_has_preview_cleanup(self) -> None:
-        """StoragePort MUST have preview_cleanup for CLI dry-run mode."""
-        assert hasattr(ports.StoragePort, "preview_cleanup"), (
-            "StoragePort MUST define preview_cleanup() for CLI dry-run. "
+    def test_storage_maintenance_port_has_preview_cleanup(self) -> None:
+        """StorageMaintenancePort MUST have preview_cleanup for CLI dry-run mode."""
+        assert hasattr(ports.StorageMaintenancePort, "preview_cleanup"), (
+            "StorageMaintenancePort MUST define preview_cleanup() for CLI dry-run. "
             "See architecture test: test_storage_port_has_preview_cleanup"
         )
 
-    def test_storage_port_vacuum_has_correct_signature(self) -> None:
-        """StoragePort.vacuum() MUST have table_name, retention_hours, dry_run params."""
+    def test_storage_maintenance_port_vacuum_has_correct_signature(self) -> None:
+        """vacuum() MUST have table_name, retention_hours, dry_run params."""
         import inspect
 
-        sig = inspect.signature(ports.StoragePort.vacuum)
+        sig = inspect.signature(ports.StorageMaintenancePort.vacuum)
         params = sig.parameters
 
         assert "table_name" in params, "vacuum() MUST have table_name parameter"
@@ -368,19 +389,19 @@ class TestStoragePortContract:
         )
         assert "dry_run" in params, "vacuum() MUST have dry_run parameter"
 
-    def test_storage_port_archive_has_correct_signature(self) -> None:
-        """StoragePort.archive() MUST have table_name, target_path, remove_source params."""
+    def test_storage_maintenance_port_archive_has_correct_signature(self) -> None:
+        """archive() MUST have table_name, target_path, remove_source params."""
         import inspect
 
-        sig = inspect.signature(ports.StoragePort.archive)
+        sig = inspect.signature(ports.StorageMaintenancePort.archive)
         params = sig.parameters
 
         assert "table_name" in params, "archive() MUST have table_name parameter"
         assert "target_path" in params, "archive() MUST have target_path parameter"
         assert "remove_source" in params, "archive() MUST have remove_source parameter"
 
-    def test_storage_port_write_gold_requires_schema(self) -> None:
-        """StoragePort.write_gold() MUST have required schema parameter.
+    def test_gold_storage_port_write_gold_requires_schema(self) -> None:
+        """GoldStoragePort.write_gold() MUST have required schema parameter.
 
         Gold layer writes MUST include schema for validation.
         This ensures data quality at the Gold layer boundary.
@@ -388,18 +409,18 @@ class TestStoragePortContract:
         """
         import inspect
 
-        sig = inspect.signature(ports.StoragePort.write_gold)
+        sig = inspect.signature(ports.GoldStoragePort.write_gold)
         params = sig.parameters
 
         assert "schema" in params, (
-            "StoragePort.write_gold() MUST have schema parameter. "
+            "GoldStoragePort.write_gold() MUST have schema parameter. "
             "Gold layer requires strict schema validation."
         )
 
         # Schema parameter MUST NOT have a default value (i.e., it's required)
         schema_param = params["schema"]
         assert schema_param.default is inspect.Parameter.empty, (
-            "StoragePort.write_gold() schema parameter MUST be required (no default). "
+            "GoldStoragePort.write_gold() schema parameter MUST be required. "
             "All Gold layer writes MUST provide a schema for validation."
         )
 

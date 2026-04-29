@@ -1120,14 +1120,23 @@ def test_reproducibility_contract_inventory_profiles_all_production_families() -
 
     assert set(profile_by_family) == set(_PUBLISHED_PRODUCTION_FAMILIES)
     assert profile_by_family["chembl.activity"]["strict_exact_replay_supported"] is True
+    assert profile_by_family["chembl.activity"]["strict_replay_runtime_verdict"] == (
+        "allowed_with_snapshot_backed_source_refs"
+    )
     assert (
         profile_by_family["openalex.publication"]["strict_exact_replay_supported"]
         is False
     )
+    assert profile_by_family["openalex.publication"][
+        "strict_replay_runtime_verdict"
+    ] == "blocked_outside_supported_boundary"
     assert (
         profile_by_family["composite.publication"]["exact_replay_support_boundary"]
         == "composite_snapshot_backed_input_envelope"
     )
+    assert profile_by_family["composite.publication"][
+        "strict_replay_runtime_verdict"
+    ] == "requires_full_composite_snapshot_envelope"
 
 
 def test_reproducibility_contract_silver_batch_dedup_is_order_insensitive() -> None:

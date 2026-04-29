@@ -12,17 +12,22 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 from types import TracebackType
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Protocol, Self, runtime_checkable
 
 from bioetl.domain.ports import (
+    BronzeStoragePort,
     CheckpointPort,
     DataSourcePort,
     DQMonitorPort,
+    GoldStoragePort,
     LockPort,
     LoggerPort,
+    MergedStoragePort,
     MetricsPort,
     QuarantinePort,
-    StoragePort,
+    SilverStoragePort,
+    StorageLifecyclePort,
+    StorageMaintenancePort,
     TracingPort,
 )
 
@@ -38,6 +43,24 @@ if TYPE_CHECKING:
     )
 
 
+@runtime_checkable
+class PipelineStoragePort(
+    BronzeStoragePort,
+    SilverStoragePort,
+    GoldStoragePort,
+    MergedStoragePort,
+    StorageMaintenancePort,
+    StorageLifecyclePort,
+    Protocol,
+):
+    """Application DI bundle for a full pipeline storage adapter.
+
+    Domain exposes only narrow storage ports. ``PipelineService`` carries the
+    concrete storage adapter across runner phases, so its field needs the union
+    of those narrow capabilities without reintroducing a public Domain aggregate.
+    """
+
+
 @dataclass(frozen=True)
 class PipelineService:
     """Injected dependencies for pipeline execution.
@@ -50,7 +73,7 @@ class PipelineService:
 
     Attributes:
         data_source: Port for fetching data from external sources.
-        storage: Port for writing to Bronze/Silver/Gold layers.
+        storage: Adapter implementing the narrow Bronze/Silver/Gold storage ports.
         lock: Port for runtime lock coordination.
         checkpoint: Port for pipeline state persistence.
         quarantine: Port for failed record isolation.
@@ -80,7 +103,7 @@ class PipelineService:
     """
 
     data_source: DataSourcePort
-    storage: StoragePort
+    storage: PipelineStoragePort
     lock: LockPort
     checkpoint: CheckpointPort
     quarantine: QuarantinePort
@@ -160,4 +183,4 @@ class PipelineService:
         self.logger.info("Pipeline services closed.", stage="cleanup")
 
 
-__all__ = ["PipelineService"]
+__all__ = ["PipelineService", "PipelineStoragePort"]

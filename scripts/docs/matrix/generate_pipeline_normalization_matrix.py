@@ -544,6 +544,28 @@ def _controlled_vocabulary_source(
     normalizer_name: str,
     notes: str,
 ) -> str:
+    registered_source = _registered_controlled_vocabulary_source(
+        provider=provider,
+        entity=entity,
+        field_name=field_name,
+    )
+    if registered_source is not None:
+        return registered_source
+
+    return _inferred_controlled_vocabulary_source(
+        provider=provider,
+        entity=entity,
+        normalizer_name=normalizer_name,
+        notes=notes,
+    )
+
+
+def _registered_controlled_vocabulary_source(
+    *,
+    provider: str,
+    entity: str,
+    field_name: str,
+) -> str | None:
     configured_source = ENUM_CONFIG_SOURCES.get((provider, entity, field_name))
     if configured_source is not None:
         return configured_source
@@ -562,7 +584,16 @@ def _controlled_vocabulary_source(
         policy_surface = chembl_policy_surface(entity, field_name)
         if policy_surface is not None:
             return policy_surface.registry_source
+    return None
 
+
+def _inferred_controlled_vocabulary_source(
+    *,
+    provider: str,
+    entity: str,
+    normalizer_name: str,
+    notes: str,
+) -> str:
     normalized_notes = notes.casefold()
     if "enum field" in normalized_notes or "allowed values" in normalized_notes:
         return f"profile:{provider}.{entity}"

@@ -20,12 +20,16 @@ from typing import Any, get_origin, get_type_hints
 import pytest
 
 from bioetl.domain.ports import (
+    BronzeStoragePort,
     CheckpointPort,
     DataSourcePort,
+    GoldStoragePort,
     LockPort,
+    SilverStoragePort,
     MetricsPort,
     QuarantinePort,
-    StoragePort,
+    StorageLifecyclePort,
+    StorageMaintenancePort,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -430,7 +434,11 @@ def _load_adapter_protocol_expectations() -> list[tuple[type[Any], type[Any]]]:
         (LocalCheckpointAdapter, CheckpointPort),
         (MemoryLock, LockPort),
         (UnifiedQuarantineAdapter, QuarantinePort),
-        (StorageAdapter, StoragePort),
+        (StorageAdapter, BronzeStoragePort),
+        (StorageAdapter, SilverStoragePort),
+        (StorageAdapter, GoldStoragePort),
+        (StorageAdapter, StorageMaintenancePort),
+        (StorageAdapter, StorageLifecyclePort),
         (PrometheusMetrics, MetricsPort),
         (NoOpMetrics, MetricsPort),
     ]
@@ -506,7 +514,9 @@ def _async_port_violations() -> list[str]:
     async_io_ports = [
         (DataSourcePort, ["fetch", "health_check", "__aenter__", "__aexit__"]),
         (LockPort, ["acquire", "release", "heartbeat"]),
-        (StoragePort, ["write_bronze", "write_silver", "write_gold"]),
+        (BronzeStoragePort, ["write_bronze"]),
+        (SilverStoragePort, ["write_silver"]),
+        (GoldStoragePort, ["write_gold"]),
         (CheckpointPort, ["save", "load"]),
     ]
     violations: list[str] = []

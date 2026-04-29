@@ -1,6 +1,6 @@
 """In-memory storage implementation for testing.
 
-Implements StoragePort interface without filesystem I/O.
+Implements the narrow storage port interfaces without filesystem I/O.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from bioetl.domain.ports.storage.silver_port import coerce_silver_write_request
 class InMemoryStorage:
     """In-memory storage for tests.
 
-    Implements StoragePort interface from domain/ports.py.
+    Implements the storage interfaces from ``domain.ports``.
     """
 
     def __init__(self) -> None:

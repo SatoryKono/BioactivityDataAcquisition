@@ -104,12 +104,13 @@ compatibility_debt_metrics:
       ratchet_policy: Ratchet downward only after a reviewed facade-removal or
         public-API consolidation PR updates the compatibility inventory.
     sunset_compat_count:
-      current_count: 10
+      current_count: 0
       owner: '@bioetl-architecture'
       linked_issue: '3354'
       sunset_date: '2026-06-30'
-      rationale: Temporary compatibility shims remain live debt until the sunset
-        test allows physical removal.
+      rationale: Temporary compatibility shims were removed early in the 2026-04-29
+        sunset wave; the active sunset inventory must stay empty unless a reviewed
+        policy exception adds a new item.
       ratchet_policy: May only decrease before the sunset; must reach zero after
         2026-06-30.
     expired_compat_count:

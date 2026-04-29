@@ -15,6 +15,7 @@ from typing import Any, get_args, get_origin
 import pytest
 
 from bioetl.domain.ports import (
+    BronzeStoragePort,
     BronzeDQAnalyzerPort,
     BronzeDQConfigPort,
     CheckpointPort,
@@ -33,6 +34,7 @@ from bioetl.domain.ports import (
     FilterableDataSourcePort,
     GoldDQAnalyzerPort,
     GoldDQConfigPort,
+    GoldStoragePort,
     HealthCheckPort,
     HealthMonitorPort,
     HealthStatePort,
@@ -40,6 +42,7 @@ from bioetl.domain.ports import (
     LockPort,
     LoggerPort,
     MemoryMonitorPort,
+    MergedStoragePort,
     MetricsExtractorPort,
     MetricsPort,
     QuarantinePort,
@@ -48,7 +51,9 @@ from bioetl.domain.ports import (
     RunnerFactoryPort,
     SilverDQAnalyzerPort,
     SilverDQConfigPort,
-    StoragePort,
+    SilverStoragePort,
+    StorageLifecyclePort,
+    StorageMaintenancePort,
     TracingPort,
 )
 
@@ -58,7 +63,12 @@ PROTOCOL_CLASSES = [
     MetricsPort,
     LoggerPort,
     DQMonitorPort,
-    StoragePort,
+    BronzeStoragePort,
+    SilverStoragePort,
+    GoldStoragePort,
+    MergedStoragePort,
+    StorageLifecyclePort,
+    StorageMaintenancePort,
     ExportCatalogPort,
     ExportWriterPort,
     QuarantinePort,

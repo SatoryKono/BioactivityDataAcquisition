@@ -27,17 +27,7 @@ LEGACY_SERVICE_PARENT_IMPORTS = {
         }
     )
 }
-ALLOWED_SRC_FILES = frozenset(
-    {
-        ROOT / "src" / "bioetl" / "domain" / "services" / "__init__.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "domain"
-        / "services"
-        / "data_normalization_service.py",
-    }
-)
+ALLOWED_SRC_FILES: frozenset[Path] = frozenset()
 
 
 def _iter_compat_import_violations(

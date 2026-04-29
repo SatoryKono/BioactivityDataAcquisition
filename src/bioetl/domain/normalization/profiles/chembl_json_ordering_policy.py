@@ -28,6 +28,14 @@ class ChemblJsonOrderingPolicy:
         return self.order_semantics == "set_like"
 
 
+REFERENCE_PAYLOADS_KEEP_PROVIDER_ORDER = (
+    "Reference payloads keep provider order pending a reviewed identifier-set model."
+)
+COMPONENT_PARALLEL_ARRAYS_KEEP_ALIGNMENT = (
+    "Component-derived parallel arrays must keep source alignment."
+)
+
+
 CHEMBL_JSON_ORDERING_POLICY: tuple[ChemblJsonOrderingPolicy, ...] = (
     ChemblJsonOrderingPolicy(
         pipeline_name="chembl_activity",
@@ -63,7 +71,7 @@ CHEMBL_JSON_ORDERING_POLICY: tuple[ChemblJsonOrderingPolicy, ...] = (
         pipeline_name="chembl_molecule",
         field_name="cross_references",
         order_semantics="order_sensitive",
-        rationale="Reference payloads keep provider order pending a reviewed identifier-set model.",
+        rationale=REFERENCE_PAYLOADS_KEEP_PROVIDER_ORDER,
     ),
     ChemblJsonOrderingPolicy(
         pipeline_name="chembl_molecule",
@@ -123,25 +131,25 @@ CHEMBL_JSON_ORDERING_POLICY: tuple[ChemblJsonOrderingPolicy, ...] = (
         pipeline_name="chembl_target",
         field_name="component_accessions",
         order_semantics="order_sensitive",
-        rationale="Component-derived parallel arrays must keep source alignment.",
+        rationale=COMPONENT_PARALLEL_ARRAYS_KEEP_ALIGNMENT,
     ),
     ChemblJsonOrderingPolicy(
         pipeline_name="chembl_target",
         field_name="component_descriptions",
         order_semantics="order_sensitive",
-        rationale="Component-derived parallel arrays must keep source alignment.",
+        rationale=COMPONENT_PARALLEL_ARRAYS_KEEP_ALIGNMENT,
     ),
     ChemblJsonOrderingPolicy(
         pipeline_name="chembl_target",
         field_name="component_ids",
         order_semantics="order_sensitive",
-        rationale="Component-derived parallel arrays must keep source alignment.",
+        rationale=COMPONENT_PARALLEL_ARRAYS_KEEP_ALIGNMENT,
     ),
     ChemblJsonOrderingPolicy(
         pipeline_name="chembl_target",
         field_name="cross_references",
         order_semantics="order_sensitive",
-        rationale="Reference payloads keep provider order pending a reviewed identifier-set model.",
+        rationale=REFERENCE_PAYLOADS_KEEP_PROVIDER_ORDER,
     ),
     ChemblJsonOrderingPolicy(
         pipeline_name="chembl_target",
@@ -153,7 +161,7 @@ CHEMBL_JSON_ORDERING_POLICY: tuple[ChemblJsonOrderingPolicy, ...] = (
         pipeline_name="chembl_target",
         field_name="target_component_synonyms",
         order_semantics="order_sensitive",
-        rationale="Component-derived parallel arrays must keep source alignment.",
+        rationale=COMPONENT_PARALLEL_ARRAYS_KEEP_ALIGNMENT,
     ),
     ChemblJsonOrderingPolicy(
         pipeline_name="chembl_target",
@@ -183,7 +191,7 @@ CHEMBL_JSON_ORDERING_POLICY: tuple[ChemblJsonOrderingPolicy, ...] = (
         pipeline_name="chembl_target_component",
         field_name="target_component_xrefs",
         order_semantics="order_sensitive",
-        rationale="Reference payloads keep provider order pending a reviewed identifier-set model.",
+        rationale=REFERENCE_PAYLOADS_KEEP_PROVIDER_ORDER,
     ),
 )
 

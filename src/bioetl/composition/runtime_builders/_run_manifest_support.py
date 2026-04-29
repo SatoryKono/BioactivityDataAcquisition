@@ -31,6 +31,10 @@ from bioetl.domain.control_plane import (
     RunSourceRef,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
+    normalize_required_persistence_profile,
+)
+from bioetl.domain.control_plane.reproducibility_policy import (
     resolve_replay_capability as _resolve_policy_replay_capability,
 )
 
@@ -63,6 +67,7 @@ def build_run_source_refs(
     settings: Settings,
     provider: str,
     entity: str,
+    required_persistence_profile: object = "degraded_observable",
 ) -> tuple[RunSourceRef, ...]:
     input_snapshots = _build_cached_bronze_snapshot_refs(
         cached_bronze=cached_bronze,
@@ -70,9 +75,18 @@ def build_run_source_refs(
         provider=provider,
         entity=entity,
     )
-    if getattr(ctx, "exact_replay", False) and not input_snapshots:
+    required_profile = normalize_required_persistence_profile(
+        required_persistence_profile
+    )
+    strict_snapshot_required = (
+        getattr(ctx, "exact_replay", False)
+        or required_profile in STRICT_PERSISTENCE_PROFILES
+    )
+    if strict_snapshot_required and not input_snapshots:
         raise RuntimeError(
-            "Exact replay requires immutable input snapshots; no snapshot-backed source refs were resolved for this run"
+            "Exact replay and strict persistence profiles require immutable "
+            "input snapshots; no snapshot-backed source refs were resolved "
+            f"for required persistence profile '{required_profile}'"
         )
     return (
         RunSourceRef(

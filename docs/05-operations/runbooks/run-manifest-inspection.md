@@ -266,6 +266,7 @@ Focus on:
 - `replay_family_contract.family`,
   `replay_family_contract.contract`,
   `replay_family_contract.strict_exact_replay_supported`,
+  `replay_family_contract.strict_replay_runtime_verdict`,
   `replay_family_contract.reason`;
 - `persistence_profile.attained_profile`, `persistence_profile.required_profile`,
   `persistence_profile.required_profile_satisfied`,

@@ -152,17 +152,29 @@ async def run_cached_fixture_pipeline(
     return context.run_id
 
 
-def build_tracked_fixture_exact_replay_matrix_payload(
-    *,
-    pipeline_name: str,
-    manifest_payload: dict[str, object],
-    effective_payload: dict[str, object],
-    occurrences: list[dict[str, str]],
-    case_name: str = "ordinary_supported_family_cached_bronze_exact_replay",
+def _required_mapping(
+    payload: dict[str, object],
+    key: str,
+    message: str,
 ) -> dict[str, object]:
-    code_provenance = manifest_payload.get("code_provenance")
-    if not isinstance(code_provenance, dict):
-        raise AssertionError("Manifest code_provenance payload must be a mapping")
+    value = payload.get(key)
+    if not isinstance(value, dict):
+        raise AssertionError(message)
+    return value
+
+
+def _required_string(
+    payload: dict[str, object],
+    key: str,
+    message: str,
+) -> str:
+    value = payload.get(key)
+    if not isinstance(value, str):
+        raise AssertionError(message)
+    return value
+
+
+def _input_snapshot_ids(manifest_payload: dict[str, object]) -> list[str]:
     source_refs = manifest_payload.get("source_refs")
     if not isinstance(source_refs, list) or not source_refs:
         raise AssertionError("Manifest must contain at least one source_ref")
@@ -172,51 +184,70 @@ def build_tracked_fixture_exact_replay_matrix_payload(
     snapshots = first_source_ref.get("input_snapshots")
     if not isinstance(snapshots, list) or not snapshots:
         raise AssertionError("Manifest source_ref must contain input snapshots")
-    semantic_artifact = effective_payload.get("semantic_artifact")
-    if not isinstance(semantic_artifact, dict):
-        raise AssertionError("Effective-config payload must contain semantic_artifact")
 
     snapshot_ids: list[str] = []
     for snapshot in snapshots:
         if not isinstance(snapshot, dict):
             raise AssertionError("Input snapshot payload must be a mapping")
-        snapshot_id = snapshot.get("snapshot_id")
-        if not isinstance(snapshot_id, str) or not snapshot_id:
-            raise AssertionError("Input snapshot must contain snapshot_id")
-        snapshot_ids.append(snapshot_id)
+        snapshot_ids.append(
+            _required_string(
+                snapshot,
+                "snapshot_id",
+                "Input snapshot must contain snapshot_id",
+            )
+        )
+    return snapshot_ids
 
-    replay_capability = manifest_payload.get("replay_capability")
-    if not isinstance(replay_capability, str):
-        raise AssertionError("Manifest replay_capability must be a string")
-    execution_fingerprint = manifest_payload.get("execution_fingerprint")
-    if not isinstance(execution_fingerprint, str):
-        raise AssertionError("Manifest execution_fingerprint must be a string")
-    effective_config_artifact_id = code_provenance.get("effective_config_artifact_id")
-    if not isinstance(effective_config_artifact_id, str):
-        raise AssertionError(
-            "Manifest code_provenance must contain effective_config_artifact_id"
-        )
-    effective_config_hash = semantic_artifact.get("effective_config_hash")
-    if not isinstance(effective_config_hash, str):
-        raise AssertionError(
-            "Effective-config semantic_artifact must contain effective_config_hash"
-        )
-    dq_hash = semantic_artifact.get("dq_contract_compatibility_hash")
-    if not isinstance(dq_hash, str):
-        raise AssertionError(
-            "Effective-config semantic_artifact must contain dq_contract_compatibility_hash"
-        )
+
+def build_tracked_fixture_exact_replay_matrix_payload(
+    *,
+    pipeline_name: str,
+    manifest_payload: dict[str, object],
+    effective_payload: dict[str, object],
+    occurrences: list[dict[str, str]],
+    case_name: str = "ordinary_supported_family_cached_bronze_exact_replay",
+) -> dict[str, object]:
+    code_provenance = _required_mapping(
+        manifest_payload,
+        "code_provenance",
+        "Manifest code_provenance payload must be a mapping",
+    )
+    semantic_artifact = _required_mapping(
+        effective_payload,
+        "semantic_artifact",
+        "Effective-config payload must contain semantic_artifact",
+    )
 
     return {
         "pipeline_name": pipeline_name,
         "case": case_name,
-        "replay_capability": replay_capability,
+        "replay_capability": _required_string(
+            manifest_payload,
+            "replay_capability",
+            "Manifest replay_capability must be a string",
+        ),
         "semantic_identity": {
-            "execution_fingerprint": execution_fingerprint,
-            "effective_config_artifact_id": effective_config_artifact_id,
-            "effective_config_hash": effective_config_hash,
-            "dq_contract_compatibility_hash": dq_hash,
-            "snapshot_ids": snapshot_ids,
+            "execution_fingerprint": _required_string(
+                manifest_payload,
+                "execution_fingerprint",
+                "Manifest execution_fingerprint must be a string",
+            ),
+            "effective_config_artifact_id": _required_string(
+                code_provenance,
+                "effective_config_artifact_id",
+                "Manifest code_provenance must contain effective_config_artifact_id",
+            ),
+            "effective_config_hash": _required_string(
+                semantic_artifact,
+                "effective_config_hash",
+                "Effective-config semantic_artifact must contain effective_config_hash",
+            ),
+            "dq_contract_compatibility_hash": _required_string(
+                semantic_artifact,
+                "dq_contract_compatibility_hash",
+                "Effective-config semantic_artifact must contain dq_contract_compatibility_hash",
+            ),
+            "snapshot_ids": _input_snapshot_ids(manifest_payload),
         },
         "occurrences": occurrences,
     }

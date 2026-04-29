@@ -1,10 +1,7 @@
-"""Guard test for StoragePort → narrow port migration progress.
+"""Guard test for retired StoragePort → narrow port migration.
 
-Tracks the number of files in ``application/`` that still use the broad
-``StoragePort`` aggregate instead of narrow ports (``BronzeStoragePort``,
-``SilverStoragePort``, ``StorageMaintenancePort``, etc.).
-
-Ratchet the budget down as more consumers are migrated.
+The broad Domain ``StoragePort`` aggregate has been removed. Application code
+must depend on narrow ports or application-owned DI bundle protocols instead.
 """
 
 from __future__ import annotations
@@ -18,13 +15,8 @@ _APPLICATION_ROOT = (
     Path(__file__).resolve().parents[2] / "src" / "bioetl" / "application"
 )
 
-# Maximum number of files that may still reference the broad StoragePort
-# in type annotations (field declarations or function parameters).
-# Ratchet this down as migrations proceed.
 _MAX_BROAD_STORAGE_PORT_FILES = 0
-_DI_BUNDLE_EXCEPTIONS = {
-    "core/pipeline_services.py",
-}
+_DI_BUNDLE_EXCEPTIONS: set[str] = set()
 
 
 def _to_posix(path: Path) -> str:
@@ -106,7 +98,7 @@ class TestNarrowPortMigration:
         )
 
     def test_di_bundle_exceptions_remain_explicit(self) -> None:
-        """Broad-port usage in application is allowed only for declared DI bundles."""
+        """Broad Domain StoragePort usage is no longer allowed in DI bundles."""
         files = _files_using_broad_storage_port()
         extras = sorted(
             file_path for file_path in files if file_path in _DI_BUNDLE_EXCEPTIONS

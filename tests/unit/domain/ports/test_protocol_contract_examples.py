@@ -13,8 +13,13 @@ from typing import Any, Literal
 import pytest
 
 from bioetl.domain.ports import (
+    BronzeStoragePort,
+    GoldStoragePort,
+    MergedStoragePort,
     QuarantinePort,
-    StoragePort,
+    SilverStoragePort,
+    StorageLifecyclePort,
+    StorageMaintenancePort,
 )
 from bioetl.domain.ports.storage.silver_port import (
     SilverWriteRequest,
@@ -29,18 +34,18 @@ async def _yield_once() -> None:
 
 
 @pytest.mark.unit
-class TestStoragePortProtocol:
-    """StoragePort warrants concrete examples because of its wide API surface."""
+class TestNarrowStoragePortProtocols:
+    """Narrow storage ports warrant concrete structural examples."""
 
     def test_write_silver_signature(self) -> None:
-        """StoragePort should require a specific write_silver signature."""
+        """Storage ports should accept a full adapter through narrow protocols."""
         from collections.abc import Iterator
 
         from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
         from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
         class ValidStorage:
-            def write_bronze(
+            async def write_bronze(
                 self,
                 records: Iterator[bytes],
                 provider: str,
@@ -52,6 +57,7 @@ class TestStoragePortProtocol:
                 ingestion_ts: Any,  # Required per ADR-014
                 source_metadata: Any = None,
             ) -> BronzeWriteResult:
+                await _yield_once()
                 return BronzeWriteResult(
                     path="bronze/test",
                     record_count=0,
@@ -96,11 +102,12 @@ class TestStoragePortProtocol:
                 del layer
                 return Path("test-output") / table_name
 
-            def read_silver(
+            async def read_silver(
                 self,
                 table_name: str,
                 columns: list[str] | None = None,
             ) -> list[dict[str, Any]]:
+                await _yield_once()
                 return []
 
             async def write_silver_merged(
@@ -129,40 +136,48 @@ class TestStoragePortProtocol:
                 await _yield_once()
                 del completed_at
 
-            def aclose(self) -> None:
+            async def aclose(self) -> None:
+                await _yield_once()
                 return None
 
-            def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
+            async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
+                await _yield_once()
                 return 0
 
-            def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
+            async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
+                await _yield_once()
                 return 0
 
-            def clear_csv(self, table_name: str | None = None) -> int:
+            async def clear_csv(self, table_name: str | None = None) -> int:
+                await _yield_once()
                 return 0
 
-            def clear_delta(self, table_name: str | None = None) -> int:
+            async def clear_delta(self, table_name: str | None = None) -> int:
+                await _yield_once()
                 return 0
 
-            def vacuum(
+            async def vacuum(
                 self,
                 table_name: str,
                 retention_hours: int = 168,
                 dry_run: bool = False,
             ) -> int:
+                await _yield_once()
                 return 0
 
-            def archive(
+            async def archive(
                 self,
                 table_name: str,
                 target_path: str,
                 remove_source: bool = False,
             ) -> int:
+                await _yield_once()
                 return 0
 
-            def health_check(self) -> Any:
+            async def health_check(self) -> Any:
                 from bioetl.domain.types import HealthStatus
 
+                await _yield_once()
                 return HealthStatus.HEALTHY
 
             def preview_cleanup(
@@ -188,18 +203,20 @@ class TestStoragePortProtocol:
                 del table_name, layer
                 return True
 
-            def cleanup_bronze(
+            async def cleanup_bronze(
                 self,
                 cutoff_date: Any,
                 dry_run: bool = False,
             ) -> dict[str, int]:
+                await _yield_once()
                 return {"files_removed": 0, "bytes_freed": 0, "directories_removed": 0}
 
-            def deduplicate_silver(
+            async def deduplicate_silver(
                 self,
                 table_name: str,
                 primary_keys: list[str],
             ) -> int:
+                await _yield_once()
                 return 0
 
             def get_table_version(
@@ -208,7 +225,13 @@ class TestStoragePortProtocol:
             ) -> int | None:
                 return None
 
-        assert isinstance(ValidStorage(), StoragePort)
+        valid_storage = ValidStorage()
+        assert isinstance(valid_storage, BronzeStoragePort)
+        assert isinstance(valid_storage, SilverStoragePort)
+        assert isinstance(valid_storage, GoldStoragePort)
+        assert isinstance(valid_storage, MergedStoragePort)
+        assert isinstance(valid_storage, StorageMaintenancePort)
+        assert isinstance(valid_storage, StorageLifecyclePort)
 
         # Note: @runtime_checkable protocols only check for method presence,
         # not signatures. Test missing methods instead.
@@ -225,7 +248,9 @@ class TestStoragePortProtocol:
             def aclose(self):
                 return None
 
-        assert not isinstance(InvalidStorage(), StoragePort)
+        invalid_storage = InvalidStorage()
+        assert not isinstance(invalid_storage, SilverStoragePort)
+        assert not isinstance(invalid_storage, StorageMaintenancePort)
 
 
 @pytest.mark.unit

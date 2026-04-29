@@ -930,28 +930,17 @@ def test_observability_ports_have_close_method(src_dir: Path) -> None:
     assert not missing, f"Observability ports missing close() method: {missing}"
 
 
-def test_storage_port_has_preview_cleanup(src_dir: Path) -> None:
-    """StoragePort MUST define preview_cleanup() for CLI dry-run.
+def test_storage_maintenance_port_has_preview_cleanup(src_dir: Path) -> None:
+    """StorageMaintenancePort MUST define preview_cleanup() for CLI dry-run.
 
     REQ-ARCH-022: CLI delegates all storage operations to port.
     """
-    storage_path = src_dir / "bioetl" / "domain" / "ports" / "storage"
-    if storage_path.is_dir():
-        storage_file = storage_path / "__init__.py"
-    else:
-        storage_file = src_dir / "bioetl" / "domain" / "ports" / "storage.py"
-    assert storage_file.exists(), "Domain ports storage file not found"
-
-    content = ""
-    if storage_path.is_dir():
-        for py_file in storage_path.rglob("*.py"):
-            content += py_file.read_text(encoding="utf-8") + "\n"
-    else:
-        with storage_file.open(encoding="utf-8") as f:
-            content = f.read()
+    storage_file = src_dir / "bioetl" / "domain" / "ports" / "storage_maintenance.py"
+    assert storage_file.exists(), "Domain storage maintenance port file not found"
+    content = storage_file.read_text(encoding="utf-8")
 
     assert "def preview_cleanup(" in content, (
-        "StoragePort must define preview_cleanup() method for CLI dry-run support"
+        "StorageMaintenancePort must define preview_cleanup() for CLI dry-run support"
     )
 
 

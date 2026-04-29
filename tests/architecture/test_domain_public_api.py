@@ -118,7 +118,11 @@ def test_domain_subfacade_ports_is_complete() -> None:
 
     essential_ports = {
         "DataSourcePort",
-        "StoragePort",
+        "BronzeStoragePort",
+        "SilverStoragePort",
+        "GoldStoragePort",
+        "StorageLifecyclePort",
+        "StorageMaintenancePort",
         "CheckpointPort",
         "MetricsPort",
         "LoggerPort",

@@ -5,7 +5,6 @@ from __future__ import annotations
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
 )
-from bioetl.application.core.lifecycle._checkpoint_legacy import CheckpointManager
 from bioetl.application.core.lifecycle._checkpoint_types import (
     CheckpointCompatibilityService,
 )
@@ -255,5 +254,7 @@ class CheckpointManagerService:
         """List all pipelines that currently have checkpoints."""
         return await self._checkpoint.list_all()
 
+
+CheckpointManager = CheckpointManagerService
 
 __all__ = ["CheckpointManager", "CheckpointManagerService"]

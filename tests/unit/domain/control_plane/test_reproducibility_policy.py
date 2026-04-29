@@ -15,6 +15,7 @@ from bioetl.domain.control_plane.reproducibility_policy import (
 )
 from bioetl.domain.control_plane.reproducibility_profiles import (
     build_replay_family_contract,
+    published_reproducibility_family_inventory,
 )
 
 
@@ -87,6 +88,42 @@ def test_supported_family_contract_publishes_replay_ready_default() -> None:
 
     assert contract["strict_exact_replay_supported"] is True
     assert contract["default_required_persistence_profile"] == "replay_ready"
+    assert (
+        contract["strict_replay_runtime_verdict"]
+        == "allowed_with_snapshot_backed_source_refs"
+    )
+
+
+def test_unsupported_family_contract_publishes_strict_profile_block() -> None:
+    contract = build_replay_family_contract(
+        provider="openalex",
+        entity="publication",
+        contract_ref="openalex.publication",
+        execution_context="source",
+    )
+
+    assert contract["strict_exact_replay_supported"] is False
+    assert contract["contract"] == "rebuild_only"
+    assert contract["default_required_persistence_profile"] == "degraded_observable"
+    assert (
+        contract["strict_replay_runtime_verdict"]
+        == "blocked_outside_supported_boundary"
+    )
+
+
+def test_published_reproducibility_inventory_declares_runtime_verdicts() -> None:
+    inventory = published_reproducibility_family_inventory()
+    valid_verdicts = {
+        "allowed_with_snapshot_backed_source_refs",
+        "requires_full_composite_snapshot_envelope",
+        "blocked_outside_supported_boundary",
+    }
+
+    assert inventory
+    assert {
+        str(item["strict_replay_runtime_verdict"]) for item in inventory
+    } <= valid_verdicts
+    assert all("strict_replay_runtime_verdict" in item for item in inventory)
 
 
 def test_exact_replay_launch_inherits_supported_family_default_profile() -> None:

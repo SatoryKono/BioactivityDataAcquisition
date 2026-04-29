@@ -76,6 +76,8 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/root-hygiene-cleanup-hardening-2026-04-29.md
       lifecycle: supporting_context
+    - path: docs/plans/root-hygiene-audit-issue-pack-2026-04-29.md
+      lifecycle: supporting_context
     - path: docs/plans/root-hygiene-review-lane-automation-2026-04-29.md
       lifecycle: supporting_context
     - path: docs/plans/scripts-supporting-retained-set-closeout-2026-04-29.md

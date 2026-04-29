@@ -8,6 +8,7 @@ run_router() {
   local python_bin="$1"
   shift
   "$python_bin" -m "$ROUTER_MODULE" "$ROUTER_COMMAND" "$@"
+  return $?
 }
 
 run_windows_router_via_cmd() {
@@ -23,6 +24,7 @@ run_windows_router_via_cmd() {
   done
 
   cmd.exe /c "cd /d \"$win_repo_root\" && .venv\\Scripts\\python.exe -m $ROUTER_MODULE $ROUTER_COMMAND ${escaped_args[*]}"
+  return $?
 }
 
 if command -v python >/dev/null 2>&1 && python -c "import mkdocs" >/dev/null 2>&1; then
