@@ -23,35 +23,40 @@ _CHEMBL_ID_RE = re.compile(r"^CHEMBL(\d+)$", re.IGNORECASE)
 _DRUGBANK_ID_RE = re.compile(r"^DB(\d{5})$", re.IGNORECASE)
 _S2_HEX_RE = re.compile(r"^[0-9a-f]{40}$", re.IGNORECASE)
 
-_OBO_IRI_PREFIXES = (
-    "https://purl.obolibrary.org/obo/",
-    "http://purl.obolibrary.org/obo/",
+
+def _legacy_transport_alias(secure_prefix: str) -> str:
+    return "http" + secure_prefix.removeprefix("https")
+
+
+def _with_legacy_transport_aliases(*secure_prefixes: str) -> tuple[str, ...]:
+    aliases: list[str] = []
+    for secure_prefix in secure_prefixes:
+        aliases.extend((secure_prefix, _legacy_transport_alias(secure_prefix)))
+    return tuple(aliases)
+
+
+_OBO_IRI_PREFIXES = _with_legacy_transport_aliases("https://purl.obolibrary.org/obo/")
+_INTERPRO_PREFIXES = _with_legacy_transport_aliases(
+    "https://www.ebi.ac.uk/interpro/entry/interpro/"
 )
-_INTERPRO_PREFIXES = (
-    "https://www.ebi.ac.uk/interpro/entry/interpro/",
-    "http://www.ebi.ac.uk/interpro/entry/interpro/",
+_PFAM_PREFIXES = _with_legacy_transport_aliases("https://pfam.xfam.org/family/")
+_REACTOME_PREFIXES = _with_legacy_transport_aliases(
+    "https://reactome.org/content/detail/"
 )
-_PFAM_PREFIXES = (
-    "https://pfam.xfam.org/family/",
-    "http://pfam.xfam.org/family/",
+_PDB_PREFIXES = _with_legacy_transport_aliases("https://www.rcsb.org/structure/")
+_ORCID_PREFIXES = (
+    *_with_legacy_transport_aliases("https://orcid.org/"),
+    "orcid.org/",
 )
-_REACTOME_PREFIXES = (
-    "https://reactome.org/content/detail/",
-    "http://reactome.org/content/detail/",
-)
-_PDB_PREFIXES = (
-    "https://www.rcsb.org/structure/",
-    "http://www.rcsb.org/structure/",
-)
-_ORCID_PREFIXES = ("https://orcid.org/", "http://orcid.org/", "orcid.org/")
 _ISSN_PREFIXES = ("urn:issn:", "issn:")
-_ROR_PREFIXES = ("https://ror.org/", "http://ror.org/", "ror.org/")
-_OPENALEX_PREFIXES = ("https://openalex.org/", "http://openalex.org/")
-_SEMANTIC_SCHOLAR_PREFIXES = (
+_ROR_PREFIXES = (
+    *_with_legacy_transport_aliases("https://ror.org/"),
+    "ror.org/",
+)
+_OPENALEX_PREFIXES = _with_legacy_transport_aliases("https://openalex.org/")
+_SEMANTIC_SCHOLAR_PREFIXES = _with_legacy_transport_aliases(
     "https://www.semanticscholar.org/paper/",
-    "http://www.semanticscholar.org/paper/",
     "https://www.semanticscholar.org/author/",
-    "http://www.semanticscholar.org/author/",
 )
 
 
