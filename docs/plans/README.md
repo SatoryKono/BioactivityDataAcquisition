@@ -86,6 +86,7 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [temporary-diagnostic-ttl-review-plan-2026-04-29.md](temporary-diagnostic-ttl-review-plan-2026-04-29.md)
 - [repo-governance-wrapper-closeout-2026-04-29.md](repo-governance-wrapper-closeout-2026-04-29.md)
 - [root-hygiene-cleanup-hardening-2026-04-29.md](root-hygiene-cleanup-hardening-2026-04-29.md)
+- [root-hygiene-audit-issue-pack-2026-04-29.md](root-hygiene-audit-issue-pack-2026-04-29.md)
 - [root-hygiene-review-lane-automation-2026-04-29.md](root-hygiene-review-lane-automation-2026-04-29.md)
 - [scripts-supporting-retained-set-closeout-2026-04-29.md](scripts-supporting-retained-set-closeout-2026-04-29.md)
 - [scripts-supporting-taxonomy-2026-04-29.md](scripts-supporting-taxonomy-2026-04-29.md)
@@ -214,6 +215,14 @@ The root hygiene cleanup hardening note was added on `2026-04-29` to record
 the bounded policy implementation step in `cleanup_repository.py`: exact local
 log/temp plus `.egg-info` and `.ipynb_checkpoints` discovery outside blocked
 cleanup zones, without broadening cleanup into governed report-like surfaces.
+
+The root hygiene audit issue pack was added on `2026-04-29` as a staging
+surface for converting the 2026-04-29 structure audit into bounded GitHub
+issues. It deliberately avoids reopening the already closed remediation issue
+set and instead focuses on the remaining hardening delta: blocked-zone cleanup
+proposal templates, machine-readable cleanup evidence export, regression guards
+against broad cleanup instructions, and owner/admin verification of live
+branch-protection state.
 
 The root hygiene review lane automation note was added on `2026-04-29` to
 record the follow-up evidence layer in `cleanup_repository.py`: dry-run review

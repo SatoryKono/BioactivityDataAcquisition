@@ -49,6 +49,11 @@ ReplayFamilyContractName = Literal[
     "composite_snapshot_backed_exact_replay",
     "rebuild_only",
 ]
+StrictReplayRuntimeVerdict = Literal[
+    "allowed_with_snapshot_backed_source_refs",
+    "requires_full_composite_snapshot_envelope",
+    "blocked_outside_supported_boundary",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,6 +64,7 @@ class ReproducibilityFamilyProfile:
     execution_context: ReproducibilityExecutionContext
     lineage_closure_supported: bool
     strict_exact_replay_supported: bool
+    strict_replay_runtime_verdict: StrictReplayRuntimeVerdict
     exact_replay_support_boundary: str
     replay_family_contract: ReplayFamilyContractName
     default_required_persistence_profile: str
@@ -147,6 +153,7 @@ def _build_composite_reproducibility_family_profile(
         execution_context=execution_context,
         lineage_closure_supported=False,
         strict_exact_replay_supported=True,
+        strict_replay_runtime_verdict="requires_full_composite_snapshot_envelope",
         exact_replay_support_boundary="composite_snapshot_backed_input_envelope",
         replay_family_contract="composite_snapshot_backed_exact_replay",
         default_required_persistence_profile="replay_ready",
@@ -167,6 +174,11 @@ def _build_source_reproducibility_family_profile(
         execution_context=execution_context,
         lineage_closure_supported=supported,
         strict_exact_replay_supported=supported,
+        strict_replay_runtime_verdict=(
+            "allowed_with_snapshot_backed_source_refs"
+            if supported
+            else "blocked_outside_supported_boundary"
+        ),
         exact_replay_support_boundary="snapshot_backed_source_runs_only",
         replay_family_contract=(
             "snapshot_backed_exact_replay" if supported else "rebuild_only"
@@ -251,6 +263,7 @@ def build_replay_family_contract(
             profile.default_required_persistence_profile
         ),
         "strict_exact_replay_supported": profile.strict_exact_replay_supported,
+        "strict_replay_runtime_verdict": profile.strict_replay_runtime_verdict,
         "exact_replay_support_boundary": profile.exact_replay_support_boundary,
         "support_scope": profile.support_scope,
         "reason": profile.reason,

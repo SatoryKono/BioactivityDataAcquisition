@@ -406,7 +406,7 @@ ______________________________________________________________________
 | Документ                                               | Описание                                 |
 | ------------------------------------------------------ | ---------------------------------------- |
 | `.codex/agents/py-*.md`                                | Спецификации субагентов для Codex CLI    |
-| `ai/claude/rules/agent-orchestration-rules.md`         | Claude runtime orchestration compatibility rules |
+| `.codex/agents/ORCHESTRATION.md`                       | Каноническая orchestration карта рантайма |
 | `docs/00-project/RULES.md`                             | Архитектурные правила проекта            |
 | `docs/02-architecture/decisions/`                      | ADR-001..ADR-043                         |
 | `docs/00-project/glossary.md`                          | Терминология                             |

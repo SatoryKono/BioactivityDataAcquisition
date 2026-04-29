@@ -182,6 +182,27 @@ def test_build_run_source_refs_fails_closed_for_exact_replay_without_snapshots()
 
 
 @pytest.mark.unit
+def test_build_run_source_refs_fails_closed_for_replay_ready_without_snapshots() -> (
+    None
+):
+    settings = _make_settings()
+    ctx = _make_run_context(query=None, exact_replay=False)
+
+    with pytest.raises(
+        RuntimeError,
+        match="required persistence profile 'replay_ready'",
+    ):
+        build_run_source_refs(
+            ctx=ctx,
+            cached_bronze=None,
+            settings=settings,
+            provider="chembl",
+            entity="activity",
+            required_persistence_profile="replay_ready",
+        )
+
+
+@pytest.mark.unit
 def test_resolve_replay_capability_requires_persisted_snapshots_for_exact_replay() -> (
     None
 ):

@@ -5,10 +5,8 @@ from __future__ import annotations
 from collections import defaultdict
 from pathlib import Path
 
-from bioetl.domain.ports import StoragePort
 
-
-class MemoryStorage(StoragePort):
+class MemoryStorage:
     def __init__(self):
         self.data = defaultdict(list)
         self.bronze_metadata = {}  # Store run metadata for verification

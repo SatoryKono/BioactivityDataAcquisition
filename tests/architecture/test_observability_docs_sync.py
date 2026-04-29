@@ -122,11 +122,13 @@ def test_docs_publish_dq_disposition_metric_contract() -> None:
     metrics_guide = METRICS_GUIDE_PATH.read_text(encoding="utf-8")
     observability_contract = OBSERVABILITY_CONTRACT_PATH.read_text(encoding="utf-8")
 
-    token = "bioetl_dq_dispositions_total"
+    expected_metric = "bioetl_dq_dispositions_total"
 
-    assert token in metrics_guide, (
-        f"metrics-monitoring.md is missing canonical observability token: {token}"
+    assert expected_metric in metrics_guide, (
+        "metrics-monitoring.md is missing canonical observability metric: "
+        f"{expected_metric}"
     )
-    assert token in observability_contract, (
-        f"observability.md is missing canonical observability token: {token}"
+    assert expected_metric in observability_contract, (
+        "observability.md is missing canonical observability metric: "
+        f"{expected_metric}"
     )

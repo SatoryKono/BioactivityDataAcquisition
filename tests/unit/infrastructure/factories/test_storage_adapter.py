@@ -11,7 +11,13 @@ from uuid import uuid4
 import pytest
 
 from bioetl.composition.factories.storage.adapter import StorageAdapter
-from bioetl.domain.ports import StoragePort
+from bioetl.domain.ports import (
+    BronzeStoragePort,
+    GoldStoragePort,
+    SilverStoragePort,
+    StorageLifecyclePort,
+    StorageMaintenancePort,
+)
 from bioetl.domain.types import RunType
 
 TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-storage-adapter-"))
@@ -95,9 +101,24 @@ class TestStorageAdapterInit:
         assert adapter.silver is mock_silver_writer
         assert adapter.gold is mock_gold_writer
 
-    def test_implements_storage_port(self, storage_adapter: StorageAdapter) -> None:
-        """Test that StorageAdapter implements StoragePort protocol."""
-        assert isinstance(storage_adapter, StoragePort)
+    @pytest.mark.parametrize(
+        "protocol",
+        [
+            BronzeStoragePort,
+            SilverStoragePort,
+            GoldStoragePort,
+            StorageMaintenancePort,
+            StorageLifecyclePort,
+        ],
+        ids=lambda protocol: protocol.__name__,
+    )
+    def test_implements_narrow_storage_ports(
+        self,
+        storage_adapter: StorageAdapter,
+        protocol: type[object],
+    ) -> None:
+        """StorageAdapter implements the narrow storage protocols."""
+        assert isinstance(storage_adapter, protocol)
 
     def test_requires_silver_schema_marker(
         self, storage_adapter: StorageAdapter

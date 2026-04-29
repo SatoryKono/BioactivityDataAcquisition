@@ -3,7 +3,7 @@
 Implements RULES.md §1.1 - Ports & Adapters architecture.
 
 This package contains all port definitions organized by domain:
-- storage: StoragePort for Medallion layer operations
+- storage: narrow Medallion layer storage ports
 - data_source: DataSourcePort, FilterableDataSourcePort for fetching
 - observability: TracingPort, MetricsPort, LoggerPort, DQMonitorPort
 - config: PipelineSettingsPort, SettingsPort, ConfigLoaderPort
@@ -148,7 +148,6 @@ from bioetl.domain.ports.storage import (
     SilverWriteRequest,
     StorageLifecyclePort,
     StorageMaintenancePort,
-    StoragePort,
     coerce_silver_write_request,
 )
 
@@ -257,7 +256,6 @@ __all__ = [
     "StageBreakpoint",
     "StorageLifecyclePort",
     "StorageMaintenancePort",
-    "StoragePort",
     "TracingPort",
     "coerce_silver_dq_analyze_request",
     "coerce_silver_write_request",

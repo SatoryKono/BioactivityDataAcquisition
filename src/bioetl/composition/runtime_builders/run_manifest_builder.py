@@ -86,25 +86,28 @@ def _build_manifest_create_request(
     provider = request_inputs.provider
     entity = request_inputs.entity
     yaml_config = inputs.yaml_config
-    source_refs = _manifest_support.build_run_source_refs(
-        ctx=ctx,
-        cached_bronze=inputs.cached_bronze,
-        settings=inputs.settings,
-        provider=provider,
-        entity=entity,
-    )
-    replay_of_run_id, replay_of_manifest_id = (
-        _manifest_support.resolve_replay_parentage(
-            ctx=ctx,
-            runtime_config=inputs.runtime_config,
-        )
-    )
     reproducibility_context = resolve_manifest_reproducibility_context(
         ctx=ctx,
         inputs=inputs,
         provider=provider,
         entity=entity,
         contract_ref=request_inputs.contract_ref,
+    )
+    source_refs = _manifest_support.build_run_source_refs(
+        ctx=ctx,
+        cached_bronze=inputs.cached_bronze,
+        settings=inputs.settings,
+        provider=provider,
+        entity=entity,
+        required_persistence_profile=(
+            reproducibility_context.required_persistence_profile
+        ),
+    )
+    replay_of_run_id, replay_of_manifest_id = (
+        _manifest_support.resolve_replay_parentage(
+            ctx=ctx,
+            runtime_config=inputs.runtime_config,
+        )
     )
     code_revision = resolve_code_revision_for_manifest(
         resolved_config_hash=request_inputs.resolved_config_hash,

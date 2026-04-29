@@ -158,7 +158,7 @@ from bioetl.infrastructure.observability.metrics_export_names import (
     METRICS_DEFINITION_EXPORT_NAMES,
 )
 
-__all__ = list(METRICS_DEFINITION_EXPORT_NAMES)
+__all__ = METRICS_DEFINITION_EXPORT_NAMES
 
 if set(__all__) != set(METRICS_DEFINITION_EXPORT_NAMES):
     raise RuntimeError("metrics_definitions.__all__ is out of sync with registry")

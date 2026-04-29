@@ -43,6 +43,10 @@ def _fake_atomic_write_text(
     del path, content, retry_policy, on_retry
 
 
+def _raise_boom_artifact_recorder(*_args: object, **_kwargs: object) -> None:
+    raise RuntimeError("boom")
+
+
 def _make_bronze_metadata() -> BronzeMetadata:
     return BronzeMetadata(
         version="1.1",
@@ -250,11 +254,7 @@ async def test_write_bronze_metadata_tracks_failed_publication_when_recorder_rai
     metrics = MagicMock()
     writer = MetadataWriter(logger=NoOpLogger(), metrics=metrics)
     metadata = _make_bronze_metadata()
-    writer.attach_artifact_recorder(
-        lambda layer, artifact_path, details=None: (_ for _ in ()).throw(
-            RuntimeError("boom")
-        )
-    )
+    writer.attach_artifact_recorder(_raise_boom_artifact_recorder)
 
     with patch(
         "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",

@@ -13,12 +13,7 @@ from collections.abc import Callable
 
 
 _NORMALIZATION_PACKAGE_PREFIX = "bioetl/domain/normalization/"
-_NORMALIZATION_COMPAT_MODULES = {
-    "bioetl/domain/normalization_authors.py",
-    "bioetl/domain/normalization_chembl.py",
-    "bioetl/domain/normalization_dates.py",
-    "bioetl/domain/normalization_pages.py",
-}
+_NORMALIZATION_COMPAT_MODULES: set[str] = set()
 
 _DISALLOWED_IMPORT_PREFIXES: dict[str, str] = {
     "bioetl.infrastructure": "normalization logic must not depend on infrastructure",

@@ -44,19 +44,18 @@ cp docs/00-project/ai/rules/cursor/*.mdc .cursor/rules/
 - Рефакторинге
 - Code review
 
-### B. Claude (Claude Code / Claude Desktop)
+### B. Codex / Claude-style CLI workflows
 
 **Настройка:**
 
-Правила уже установлены:
-```
-ai/claude/rules/bioetl-rules.md
-```
-
-Claude автоматически подгружает этот файл при работе с проектом.
+- Канонический источник правил: `docs/00-project/RULES.md`
+- Runtime orchestration guidance: `.codex/agents/ORCHESTRATION.md`
+- Legacy mirror under `ai/claude/rules/` may still exist temporarily during
+  runtime-surface cleanup, but it is not the preferred authoring or reference
+  path.
 
 **Ручное использование:** При новом чате упомяните:
-> "Следуй правилам из ai/claude/rules/bioetl-rules.md"
+> "Следуй правилам из docs/00-project/RULES.md и orchestration guidance из .codex/agents/ORCHESTRATION.md"
 
 ### C. Универсальные правила (любой AI)
 
@@ -116,9 +115,10 @@ interfaces/     → CLI
 При изменении `docs/00-project/RULES.md`:
 
 1. Обновить `bioetl-ai-rules.md` (краткая версия)
-2. Обновить `ai/claude/rules/bioetl-rules.md` (полная версия)
-3. Обновить `.cursor/rules/*.mdc` (если скопированы)
-4. Обновить `docs/00-project/ai/rules/cursor/*.mdc` (источник)
+2. Обновить `.cursor/rules/*.mdc` (если скопированы)
+3. Обновить `docs/00-project/ai/rules/cursor/*.mdc` (источник)
+4. Если legacy `ai/claude/rules/*` еще не удален, синхронизировать его как
+   временный compatibility mirror, а не как canonical source
 
 ## Команды верификации
 
@@ -145,9 +145,10 @@ pytest tests/e2e/ -v -m e2e
 
 ### Claude игнорирует правила
 
-- Убедитесь что файл `ai/claude/rules/bioetl-rules.md` существует
-- В новом чате явно упомяните: "Используй правила из ai/claude/rules/"
-- Для Claude Code: правила подгружаются автоматически
+- В новом чате явно упомяните: "Используй правила из docs/00-project/RULES.md"
+- При необходимости отдельно укажите orchestration guidance из
+  `.codex/agents/ORCHESTRATION.md`
+- Не полагайтесь на `ai/claude/rules/*` как на canonical source
 
 ### Конфликт версий правил
 

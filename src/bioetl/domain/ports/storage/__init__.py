@@ -1,4 +1,4 @@
-"""Storage port for Medallion layer operations.
+"""Storage ports for Medallion layer operations.
 
 This package defines narrow, layer-specific storage ports following the
 Interface Segregation Principle (ISP). Each port covers a single concern:
@@ -10,9 +10,6 @@ Interface Segregation Principle (ISP). Each port covers a single concern:
 - StorageMaintenancePort: Cross-layer maintenance (vacuum, optimize, archive, path)
 - StorageLifecyclePort: Resource lifecycle (aclose, health_check)
 
-StoragePort is an aggregate facade inheriting all narrow ports for backward
-compatibility. New consumers SHOULD depend on the narrowest port they need.
-
 Note:
     Lock validation is performed at Application layer (BatchWriter)
     per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O adapters.
@@ -20,7 +17,6 @@ Note:
 
 from __future__ import annotations
 
-from bioetl.domain.ports.storage.aggregate_port import StoragePort
 from bioetl.domain.ports.storage.bronze_port import BronzeStoragePort
 from bioetl.domain.ports.storage.gold_port import GoldStoragePort
 from bioetl.domain.ports.storage.lifecycle_port import StorageLifecyclePort
@@ -40,6 +36,5 @@ __all__ = [
     "SilverWriteRequest",
     "StorageLifecyclePort",
     "StorageMaintenancePort",
-    "StoragePort",
     "coerce_silver_write_request",
 ]

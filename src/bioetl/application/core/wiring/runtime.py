@@ -41,7 +41,7 @@ from bioetl.application.core.lifecycle import (
     ShutdownSignal,
 )
 from bioetl.application.core.lifecycle.batch_fsm import BatchExecutionFSM
-from bioetl.application.core.pipeline_services import PipelineService
+from bioetl.application.core.pipeline_services import PipelineService, PipelineStoragePort
 from bioetl.application.core.protocols import (
     GoldFilterCallback,
     GoldTransformCallback,
@@ -79,6 +79,7 @@ __all__ = [
     "GoldFilterCallback",
     "GoldTransformCallback",
     "PipelineService",
+    "PipelineStoragePort",
     "QuarantineManagerService",
     "RecordNormalizationProcessor",
     "RecordProcessor",

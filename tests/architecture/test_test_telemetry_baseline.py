@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -28,7 +29,7 @@ def test_test_telemetry_baseline_contract_is_present_and_scoped() -> None:
         payload["artifact_inputs"]["slowest_tests_json"]
         == "reports/test-telemetry/slowest-tests.json"
     )
-    assert payload["coverage"]["threshold_percent"] == 85.0
+    assert payload["coverage"]["threshold_percent"] == pytest.approx(85.0)
 
 
 def test_test_telemetry_baseline_doc_is_published_from_engineering_index() -> None:

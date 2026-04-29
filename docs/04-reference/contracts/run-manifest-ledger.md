@@ -482,6 +482,12 @@ provenance.
   - `composite_snapshot_backed_input_envelope` for composite execution when
     every seed, dependency, and enricher input is represented by immutable
     snapshot refs.
+- `replay_family_contract.strict_replay_runtime_verdict` is the operator-facing
+  preflight verdict for strict replay requests:
+  - `allowed_with_snapshot_backed_source_refs` for supported source families;
+  - `requires_full_composite_snapshot_envelope` for composite families;
+  - `blocked_outside_supported_boundary` for published source families that
+    remain rebuild-only.
 
 ### Input snapshot identity vs locator
 

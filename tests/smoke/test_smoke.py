@@ -164,11 +164,19 @@ class TestDomainConfig:
 class TestPortsExist:
     """Verify core ports are defined."""
 
-    def test_storage_port(self) -> None:
-        """StoragePort protocol exists."""
-        from bioetl.domain.ports import StoragePort
+    def test_storage_ports(self) -> None:
+        """Narrow storage protocols exist."""
+        from bioetl.domain.ports import (
+            BronzeStoragePort,
+            GoldStoragePort,
+            SilverStoragePort,
+            StorageMaintenancePort,
+        )
 
-        assert hasattr(StoragePort, "write_bronze")
+        assert hasattr(BronzeStoragePort, "write_bronze")
+        assert hasattr(SilverStoragePort, "write_silver")
+        assert hasattr(GoldStoragePort, "write_gold")
+        assert hasattr(StorageMaintenancePort, "preview_cleanup")
 
     def test_lock_port(self) -> None:
         """LockPort protocol exists."""

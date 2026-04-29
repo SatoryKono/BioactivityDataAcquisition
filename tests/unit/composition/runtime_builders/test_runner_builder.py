@@ -985,7 +985,7 @@ def test_build_pipeline_runner_requires_exact_replay_capability_for_replay_ready
 
     with pytest.raises(
         RuntimeError,
-        match="immutable input snapshots and exact replay capability are not available",
+        match="strict persistence profiles require immutable input snapshots",
     ):
         _call_build_pipeline_runner(
             _build_context(limit=25, exact_replay=False),

@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts.engineering.ci.update_test_telemetry_baseline import (
     _read_coverage_percent,
     _read_slowest_summary,
@@ -21,7 +23,7 @@ def test_read_coverage_percent_returns_percentage(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    assert _read_coverage_percent(coverage_xml) == 87.65
+    assert _read_coverage_percent(coverage_xml) == pytest.approx(87.65)
 
 
 def test_read_slowest_summary_returns_empty_shape_when_missing(tmp_path: Path) -> None:
@@ -63,7 +65,7 @@ def test_build_baseline_payload_captures_artifact_metrics(tmp_path: Path) -> Non
     )
 
     assert payload["refresh_status"] == "captured"
-    assert payload["coverage"]["actual_percent"] == 91.23
+    assert payload["coverage"]["actual_percent"] == pytest.approx(91.23)
     assert payload["coverage"]["threshold_satisfied"] is True
     assert payload["duration_telemetry"]["total_cases"] == 321
     assert payload["duration_telemetry"]["top_slowest"][0]["test"] == (
