@@ -1310,7 +1310,9 @@ def test_build_pipeline_runner_promoted_replay_ready_requires_ledger(
                 source_revision_state="clean",
             ),
         ),
-        pytest.raises(RuntimeError, match="required persistence profile 'replay_ready'"),
+        pytest.raises(
+            RuntimeError, match="required persistence profile 'replay_ready'"
+        ),
     ):
         _call_build_pipeline_runner(
             _build_context(limit=25, exact_replay=True),

@@ -56,16 +56,11 @@ ______________________________________________________________________
 | `adr`           | `adr.py`           | Управление ADR (Architecture Decisions)                                             |
 | `debug`         | `debug.py`         | Диагностические утилиты                                                             |
 
-**Вспомогательные модули в `commands/`:**
+**Вспомогательные реализации:**
 
-| Модуль                          | Назначение                                                                                              |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `health_rendering.py`           | Retained support seam; canonical implementation lives in `domains/health/rendering.py`                  |
-| `health_server_integration.py`  | Retained support seam; canonical implementation lives in `domains/health/server_integration.py`         |
-| `metrics_server_integration.py` | Retained support seam; canonical implementation lives in `domains/health/metrics_server_integration.py` |
-| `quarantine_execution.py`       | Retained support seam; canonical implementation lives in `domains/quarantine/execution.py`              |
-| `quarantine_rendering.py`       | Retained support seam; canonical implementation lives in `domains/quarantine/rendering.py`              |
-| `quarantine_support.py`         | Retained support seam; canonical implementation lives in `domains/quarantine/support.py`                |
+Support-only helpers are not published as top-level command seams. Import
+`domains/health/*` and `domains/quarantine/*` owner modules directly from inside
+the CLI package tests and command implementations.
 
 **Примеры использования:**
 

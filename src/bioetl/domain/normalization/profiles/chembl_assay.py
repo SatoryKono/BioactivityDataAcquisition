@@ -209,10 +209,11 @@ _SPECIAL_RULE_COMPONENTS = {
             lambda value: normalize_profile_governed_vocabulary(
                 value,
                 allowed_values=CONFIDENCE_DESCRIPTIONS,
-                preserve_unknown=False,
+                preserve_unknown=True,
             ),
             "Normalize confidence_description against the governed ChEMBL "
-            "controlled vocabulary registry and fail closed on unknown values.",
+            "controlled vocabulary registry, preserving canonical observed-value "
+            "casing while retaining unknown provider lexemes for downstream DQ review.",
         ),
     ),
     **{

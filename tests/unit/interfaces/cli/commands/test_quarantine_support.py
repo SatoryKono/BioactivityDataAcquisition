@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from bioetl.domain.exceptions import BioETLError
-from bioetl.interfaces.cli.commands.quarantine_support import (
+from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     _inspect_quarantine,
     _purge_quarantine,
     _replay_quarantine,
@@ -59,7 +59,7 @@ class TestInspectQuarantine:
         manager = _make_manager(records=[])
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine_support.echo_info"
+            "bioetl.interfaces.cli.commands.domains.quarantine.support.echo_info"
         ) as mock_echo:
             _inspect_quarantine(
                 manager,
@@ -77,7 +77,7 @@ class TestInspectQuarantine:
         manager = _make_manager(records=[record])
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine_support.echo_quarantine_record"
+            "bioetl.interfaces.cli.commands.domains.quarantine.support.echo_quarantine_record"
         ) as mock_echo:
             _inspect_quarantine(
                 manager,
@@ -118,7 +118,7 @@ class TestShowQuarantineStats:
         manager = _make_manager(stats=stats)
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine_support.click.echo"
+            "bioetl.interfaces.cli.commands.domains.quarantine.support.click.echo"
         ) as mock_echo:
             _show_quarantine_stats(
                 manager,
@@ -142,7 +142,7 @@ class TestShowQuarantineStats:
         manager = _make_manager(stats=stats)
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine_support.click.echo"
+            "bioetl.interfaces.cli.commands.domains.quarantine.support.click.echo"
         ) as mock_echo:
             _show_quarantine_stats(
                 manager,
@@ -178,7 +178,7 @@ class TestShowQuarantineStats:
         )
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine_support.click.echo"
+            "bioetl.interfaces.cli.commands.domains.quarantine.support.click.echo"
         ) as mock_echo:
             _show_quarantine_stats(
                 manager,
@@ -222,7 +222,7 @@ class TestReplayQuarantine:
         service = _make_service(replay_records=[])
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine_support.echo_info"
+            "bioetl.interfaces.cli.commands.domains.quarantine.support.echo_info"
         ) as mock_echo:
             _replay_quarantine(
                 service,
@@ -243,7 +243,9 @@ class TestReplayQuarantine:
         ]
         service = _make_service(replay_records=records)
 
-        with patch("bioetl.interfaces.cli.commands.quarantine_support.click.echo"):
+        with patch(
+            "bioetl.interfaces.cli.commands.domains.quarantine.support.click.echo"
+        ):
             _replay_quarantine(
                 service,
                 pipeline="chembl_activity",
@@ -261,7 +263,9 @@ class TestReplayQuarantine:
         ]
         service = _make_service(replay_records=records, mark_count=1)
 
-        with patch("bioetl.interfaces.cli.commands.quarantine_support.click.echo"):
+        with patch(
+            "bioetl.interfaces.cli.commands.domains.quarantine.support.click.echo"
+        ):
             _replay_quarantine(
                 service,
                 pipeline="chembl_activity",
@@ -282,7 +286,9 @@ class TestPurgeQuarantine:
         stats = {"total_count": 20}
         service = _make_service(stats=stats)
 
-        with patch("bioetl.interfaces.cli.commands.quarantine_support.click.echo"):
+        with patch(
+            "bioetl.interfaces.cli.commands.domains.quarantine.support.click.echo"
+        ):
             _purge_quarantine(
                 service,
                 pipeline="chembl_activity",
@@ -298,9 +304,11 @@ class TestPurgeQuarantine:
         service = _make_service(purge_count=5)
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine_support.click.confirm"
+            "bioetl.interfaces.cli.commands.domains.quarantine.support.click.confirm"
         ) as mock_confirm:
-            with patch("bioetl.interfaces.cli.commands.quarantine_support.click.echo"):
+            with patch(
+                "bioetl.interfaces.cli.commands.domains.quarantine.support.click.echo"
+            ):
                 _purge_quarantine(
                     service,
                     pipeline="chembl_activity",
@@ -341,7 +349,7 @@ class TestResolveQuarantineRecord:
         service = _make_service(update_result=True)
 
         with patch(
-            "bioetl.interfaces.cli.commands.quarantine_support.click.echo"
+            "bioetl.interfaces.cli.commands.domains.quarantine.support.click.echo"
         ) as mock_echo:
             _resolve_quarantine_record(
                 service,

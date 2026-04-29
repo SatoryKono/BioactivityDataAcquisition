@@ -284,7 +284,9 @@ class RunManifestInspectionService(
             "checkpoint_anchors": {
                 "compatible": checkpoint_compatible,
                 "matching_fields": [
-                    name for name, matches in checkpoint_anchor_matches.items() if matches
+                    name
+                    for name, matches in checkpoint_anchor_matches.items()
+                    if matches
                 ],
                 "mismatched_fields": [
                     name
@@ -332,9 +334,14 @@ class RunManifestInspectionService(
         )
 
     @staticmethod
-    def _planned_artifact_identity(manifest: RunManifest) -> tuple[tuple[str, str], ...]:
+    def _planned_artifact_identity(
+        manifest: RunManifest,
+    ) -> tuple[tuple[str, str], ...]:
         return tuple(
-            sorted((artifact.layer, artifact.path) for artifact in manifest.planned_artifacts)
+            sorted(
+                (artifact.layer, artifact.path)
+                for artifact in manifest.planned_artifacts
+            )
         )
 
     def _resolve_manifest(self, identifier: str) -> RunManifest:

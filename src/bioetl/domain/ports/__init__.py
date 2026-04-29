@@ -261,12 +261,3 @@ __all__ = [
     "coerce_silver_write_request",
     "resolve_metric_labels",
 ]
-
-_GENERIC_DISCOVERY_EXCLUDED_PORTS = frozenset({"RegistryAccessorPort"})
-
-
-def __dir__() -> list[str]:
-    """Keep generic facade discovery aligned with the tracked public port census."""
-    return sorted(
-        name for name in globals() if name not in _GENERIC_DISCOVERY_EXCLUDED_PORTS
-    )

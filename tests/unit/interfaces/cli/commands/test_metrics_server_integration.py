@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
-from bioetl.interfaces.cli.commands.metrics_server_integration import (
+from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
     metrics_server_context,
 )
 
@@ -14,7 +14,7 @@ from bioetl.interfaces.cli.commands.metrics_server_integration import (
 @pytest.mark.unit
 def test_metrics_server_context_yields_started_flag() -> None:
     with patch(
-        "bioetl.interfaces.cli.commands.metrics_server_integration.ensure_metrics_server_started"
+        "bioetl.interfaces.cli.commands.domains.health.metrics_server_integration.ensure_metrics_server_started"
     ) as mock_start:
         mock_start.return_value = True
 
@@ -27,7 +27,7 @@ def test_metrics_server_context_yields_started_flag() -> None:
 @pytest.mark.unit
 def test_metrics_server_context_propagates_disabled_state() -> None:
     with patch(
-        "bioetl.interfaces.cli.commands.metrics_server_integration.ensure_metrics_server_started"
+        "bioetl.interfaces.cli.commands.domains.health.metrics_server_integration.ensure_metrics_server_started"
     ) as mock_start:
         mock_start.return_value = False
 

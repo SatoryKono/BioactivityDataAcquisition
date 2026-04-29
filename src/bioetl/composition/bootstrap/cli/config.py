@@ -5,13 +5,12 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.services import ConfigService
-from bioetl.application.services.config_dq_service import ConfigDQService
 from bioetl.application.services.control_plane.effective_config_service import (
     create_effective_config_service,
 )
 from bioetl.composition import get_default_registry
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
+from bioetl.composition.bootstrap.cli.service_builders import build_cli_config_service
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.domain.ports import DomainConfigMapperPort, SettingsLoaderPort
 from bioetl.domain.types import JsonDict
@@ -25,6 +24,7 @@ from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_confi
 __all__ = ["bootstrap_config_service"]
 
 if TYPE_CHECKING:
+    from bioetl.application.services import ConfigService
     from bioetl.composition import PipelineRegistry
 
 
@@ -43,23 +43,15 @@ def bootstrap_config_service(
     registry: PipelineRegistry | None = None,
 ) -> ConfigService:
     """Assemble the CLI-facing ConfigService with default composition wiring."""
-    logger = create_noop_logger()
-    effective_registry = registry
-    if effective_registry is None:
-        register_all_pipelines()
-        effective_registry = get_default_registry()
-
-    dq_service = ConfigDQService(
-        logger=logger,
-        _pipeline_yaml_getter=_pipeline_yaml_for_dq,
-        _dq_config_loader=load_dq_config_for_pipeline,
-        _effective_config_service=create_effective_config_service(),
-    )
-    return ConfigService(
-        logger=logger,
-        _settings_loader=cast(SettingsLoaderPort, get_settings),
-        _pipeline_config_loader=load_pipeline_config,
-        _domain_config_mapper=cast(DomainConfigMapperPort, yaml_config_to_domain),
-        _registry_accessor=lambda: effective_registry,
-        _dq_service=dq_service,
+    return build_cli_config_service(
+        registry=registry,
+        logger_factory=create_noop_logger,
+        register_pipelines=register_all_pipelines,
+        default_registry_accessor=get_default_registry,
+        settings_loader=cast(SettingsLoaderPort, get_settings),
+        pipeline_config_loader=load_pipeline_config,
+        domain_config_mapper=cast(DomainConfigMapperPort, yaml_config_to_domain),
+        pipeline_yaml_getter=_pipeline_yaml_for_dq,
+        dq_config_loader=load_dq_config_for_pipeline,
+        effective_config_service_factory=create_effective_config_service,
     )

@@ -264,16 +264,24 @@ def _coerce_quasi_enum_numeric(value: object) -> float | None:
     if value is None or isinstance(value, bool):
         return None
     if isinstance(value, str):
-        cleaned = normalize_string(value)
-        if cleaned is None:
-            return None
-        try:
-            return float(cleaned)
-        except ValueError:
-            return None
+        return _coerce_quasi_enum_numeric_text(value)
     if isinstance(value, (int, float)):
         return float(value)
     return None
+
+
+def _coerce_quasi_enum_numeric_text(value: str) -> float | None:
+    cleaned = normalize_string(value)
+    if cleaned is None:
+        return None
+    return _float_or_none(cleaned)
+
+
+def _float_or_none(value: str) -> float | None:
+    try:
+        return float(value)
+    except ValueError:
+        return None
 
 
 def normalize_profile_assay_parameter_type(

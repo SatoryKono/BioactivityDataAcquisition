@@ -81,3 +81,24 @@ def test_retention_sensitive_runbook_points_to_replay_safe_inventory() -> None:
 
     assert "configs/quality/replay_safe_cleanup_inventory.yaml" in runbook
     assert "replay-impact checklist" in runbook
+
+
+@pytest.mark.architecture
+def test_control_plane_lifecycle_runbook_publishes_evidence_retention_matrix() -> None:
+    """Control-plane runbook must explain retain/delete rules per evidence surface."""
+    runbook = ROOT / "docs" / "05-operations" / "control-plane-lifecycle.md"
+    text = runbook.read_text(encoding="utf-8")
+    required_fragments = (
+        "## Replay Evidence Retention Matrix",
+        "`RUN_MANIFEST`",
+        "`RUN_LEDGER`",
+        "`EFFECTIVE_CONFIG`",
+        "`CHECKPOINT`",
+        "`LINEAGE`",
+        "`cached_bronze_snapshot`",
+        "strict_replay_evidence_protected",
+        "unprotected_replay_evidence_delete_candidate",
+    )
+    missing = [fragment for fragment in required_fragments if fragment not in text]
+
+    assert not missing

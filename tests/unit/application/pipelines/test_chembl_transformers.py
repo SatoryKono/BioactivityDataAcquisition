@@ -1436,6 +1436,21 @@ class TestPublicationTermTransformer:
         assert "content_hash" not in result.business_data
 
     @pytest.mark.asyncio
+    async def test_transform_pre_silver_returns_none_when_no_terms_are_extracted(
+        self, transformer, mock_context
+    ):
+        """No derived publication_term row should be staged for termless publications."""
+        record = {
+            "publication_id": "CHEMBL1135642",
+            "mesh_terms": [],
+            "keywords": [],
+        }
+
+        result = await transformer.transform_pre_silver(mock_context, record, index=0)
+
+        assert result is None
+
+    @pytest.mark.asyncio
     async def test_transform_matches_staged_finalization(
         self, transformer, mock_context
     ):
@@ -1462,6 +1477,21 @@ class TestPublicationTermTransformer:
         assert legacy_result["term_type"] == staged_result["term_type"] == "KEYWORD"
         assert legacy_result["entity_id"] == staged_result["entity_id"]
         assert legacy_result["content_hash"] == staged_result["content_hash"]
+
+    @pytest.mark.asyncio
+    async def test_transform_returns_none_when_no_terms_are_extracted(
+        self, transformer, mock_context
+    ):
+        """Legacy publication-term transform should skip publications without terms."""
+        record = {
+            "publication_id": "CHEMBL1135642",
+            "mesh_terms": [],
+            "keywords": [],
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is None
 
     @pytest.mark.asyncio
     async def test_transform_pre_extracted_empty_term_type_returns_none(

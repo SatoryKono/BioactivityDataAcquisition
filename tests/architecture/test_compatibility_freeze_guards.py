@@ -92,20 +92,8 @@ VACUUM_COMMAND_INTERNAL_MODULE = (
 TEST_FACING_RUN_HELPER_SEAM_MODULES = frozenset()
 TEST_FACING_RUN_ALL_HELPER_SEAM_MODULES = frozenset()
 TEST_FACING_RUN_COMPOSITE_HELPER_SEAM_MODULES = frozenset()
-TEST_FACING_QUARANTINE_HELPER_SEAM_MODULES = frozenset(
-    {
-        "bioetl.interfaces.cli.commands.quarantine_execution",
-        "bioetl.interfaces.cli.commands.quarantine_rendering",
-        "bioetl.interfaces.cli.commands.quarantine_support",
-    }
-)
-TEST_FACING_HEALTH_HELPER_SEAM_MODULES = frozenset(
-    {
-        "bioetl.interfaces.cli.commands.health_rendering",
-        "bioetl.interfaces.cli.commands.health_server_integration",
-        "bioetl.interfaces.cli.commands.metrics_server_integration",
-    }
-)
+TEST_FACING_QUARANTINE_HELPER_SEAM_MODULES = frozenset()
+TEST_FACING_HEALTH_HELPER_SEAM_MODULES = frozenset()
 TEST_FACING_SHARED_CLI_POLICY_SEAM_MODULES: frozenset[str] = frozenset()
 PIPELINE_RUNNER_SERVICE_MODULE = "bioetl.application.services.pipeline_runner_service"
 LEGACY_MERGE_SERVICE_KEYWORDS = frozenset(

@@ -54,6 +54,8 @@ class PublicationTermTransformer(BaseChemblTransformer):
             self._get_required_field(prepared_record, self.primary_id_field),
         )
         business_data = self._extract_business_data(prepared_record, primary_id)
+        if business_data is None:
+            return None
         entity_id = _resolve_publication_term_entity_id(
             self, prepared_record, business_data
         )
@@ -78,6 +80,8 @@ class PublicationTermTransformer(BaseChemblTransformer):
             self._get_required_field(prepared_record, self.primary_id_field),
         )
         business_data = self._extract_business_data(prepared_record, primary_id)
+        if business_data is None:
+            return None
         normalizer = RecordNormalizationProcessor(
             provider=self.provider,
             entity_type=self.entity_type,
@@ -113,7 +117,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
         self,
         record: BronzeRecord,
         primary_id: PrimaryId,
-    ) -> GoldRecord:
+    ) -> GoldRecord | None:
         """Extract one normalized publication-term payload from the input."""
         if "term" in record and "term_type" in record:
             raw_term = record.get("term")
@@ -136,13 +140,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
 
         terms = list(self.extract_terms_from_document(record, str(primary_id)))
         if not terms:
-            return {
-                "publication_id": str(primary_id),
-                "term": "",
-                "term_type": "",
-                "mesh_id": None,
-                "qualifier": None,
-            }
+            return None
         return terms[0]
 
     def extract_terms_from_document(

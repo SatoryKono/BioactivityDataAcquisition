@@ -19,7 +19,6 @@ from bioetl.domain.schemas.constants import (
     ASSAY_GROUPS,
     ASSAY_TEST_TYPES,
     ASSAY_TYPES,
-    CONFIDENCE_DESCRIPTIONS,
     DATA_VALIDITY_COMMENTS,
     MOLECULE_TYPES,
     RELATIONSHIP_TYPES,
@@ -70,11 +69,6 @@ _STRICT_CHEMBL_ENUM_POLICY = {
     ("assay", "assay_group"): (ASSAY_GROUPS, CHEMBL_ASSAY_PROFILE, "chembl_assay"),
     ("assay", "relationship_type"): (
         RELATIONSHIP_TYPES,
-        CHEMBL_ASSAY_PROFILE,
-        "chembl_assay",
-    ),
-    ("assay", "confidence_description"): (
-        CONFIDENCE_DESCRIPTIONS,
         CHEMBL_ASSAY_PROFILE,
         "chembl_assay",
     ),

@@ -1,0 +1,133 @@
+"""Unit tests for sanctioned CLI service-graph builders."""
+
+from __future__ import annotations
+
+from pathlib import Path
+from unittest.mock import MagicMock
+from uuid import UUID
+
+import pytest
+
+from bioetl.application.services import CheckpointService
+from bioetl.composition import PipelineRegistry
+from bioetl.composition.bootstrap.cli.service_builders import (
+    build_cli_checkpoint_manager,
+    build_cli_checkpoint_service,
+    build_cli_config_service,
+    build_cli_observability_workflow_service,
+)
+from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
+from bioetl.domain.types import RunID
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+
+@pytest.mark.unit
+def test_build_cli_config_service_owns_registration_and_dq_wiring() -> None:
+    registry = PipelineRegistry()
+    register_pipelines = MagicMock()
+    effective_config_service = MagicMock()
+    dq_config_loader = MagicMock()
+
+    service = build_cli_config_service(
+        registry=None,
+        logger_factory=NoOpLogger,
+        register_pipelines=register_pipelines,
+        default_registry_accessor=lambda: registry,
+        settings_loader=MagicMock(),
+        pipeline_config_loader=MagicMock(),
+        domain_config_mapper=MagicMock(),
+        pipeline_yaml_getter=MagicMock(),
+        dq_config_loader=dq_config_loader,
+        effective_config_service_factory=lambda: effective_config_service,
+    )
+
+    register_pipelines.assert_called_once_with()
+    assert service._registry_accessor() is registry
+    assert service._dq_service._dq_config_loader is dq_config_loader
+    assert service._dq_service._effective_config_service is effective_config_service
+
+
+@pytest.mark.unit
+def test_build_cli_checkpoint_manager_uses_injected_sentinel_and_compatibility() -> (
+    None
+):
+    checkpoint_port = MagicMock()
+    logger = NoOpLogger()
+    compatibility_service = MagicMock()
+    run_id = RunID(UUID("00000000-0000-0000-0000-000000003351"))
+
+    manager = build_cli_checkpoint_manager(
+        pipeline_name="chembl_activity",
+        run_id=run_id,
+        checkpoint_port_factory=MagicMock(return_value=checkpoint_port),
+        logger_factory=MagicMock(return_value=logger),
+        compatibility_service_factory=MagicMock(return_value=compatibility_service),
+    )
+
+    assert manager._checkpoint is checkpoint_port
+    assert manager._logger is logger
+    assert manager._run_id == run_id
+    assert manager._resume is False
+    assert manager._compatibility_service is compatibility_service
+
+
+@pytest.mark.unit
+def test_build_cli_checkpoint_service_resolves_observability_from_settings() -> None:
+    settings = MagicMock(checkpoint_path=Path("/tmp/bioetl/checkpoints"))
+    metrics = NoOpMetrics(warn_on_use=False)
+    tracer = NoOpTracing()
+    metrics_resolver = MagicMock(return_value=metrics)
+    tracing_resolver = MagicMock(return_value=tracer)
+
+    service = build_cli_checkpoint_service(
+        settings=settings,
+        logger_factory=NoOpLogger,
+        metrics_resolver=metrics_resolver,
+        tracing_resolver=tracing_resolver,
+    )
+
+    assert isinstance(service, CheckpointService)
+    assert service.checkpoint_port.pipeline_name == ""
+    assert service.checkpoint_port.base_path == settings.checkpoint_path
+    assert service.metrics is metrics
+    assert service.tracer is tracer
+    metrics_resolver.assert_called_once_with(metrics=None, settings=settings)
+    tracing_resolver.assert_called_once_with(
+        tracer=None,
+        settings=settings,
+        service_name="bioetl.checkpoint_admin",
+    )
+
+
+@pytest.mark.unit
+def test_build_cli_observability_workflow_service_uses_sanctioned_factories() -> None:
+    settings = MagicMock()
+    checkpoint_service = MagicMock(spec=CheckpointService)
+    audit_service = MagicMock()
+    run_manifest_service = MagicMock()
+    lineage_service = MagicMock()
+    quarantine_service = MagicMock()
+    tracer = NoOpTracing()
+    tracing_resolver = MagicMock(return_value=tracer)
+
+    service = build_cli_observability_workflow_service(
+        settings=settings,
+        checkpoint_service_factory=MagicMock(return_value=checkpoint_service),
+        audit_service_factory=MagicMock(return_value=audit_service),
+        run_manifest_service_factory=MagicMock(return_value=run_manifest_service),
+        lineage_service_factory=MagicMock(return_value=lineage_service),
+        quarantine_service_factory=MagicMock(return_value=quarantine_service),
+        tracing_resolver=tracing_resolver,
+    )
+
+    assert service.checkpoint_service is checkpoint_service
+    assert service.audit_service is audit_service
+    assert service.run_manifest_service is run_manifest_service
+    assert service.lineage_service is lineage_service
+    assert service.quarantine_service is quarantine_service
+    assert service.tracer is tracer
+    tracing_resolver.assert_called_once_with(
+        tracer=None,
+        settings=settings,
+        service_name="bioetl.diagnostics",
+    )

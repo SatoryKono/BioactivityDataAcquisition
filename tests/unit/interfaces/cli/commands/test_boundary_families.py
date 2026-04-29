@@ -132,7 +132,7 @@ COMMAND_DELEGATION_CASES: tuple[
         "identity",
     ),
     (
-        "bioetl.interfaces.cli.commands.metrics_server_integration",
+        "bioetl.interfaces.cli.commands.domains.health.metrics_server_integration",
         "ensure_metrics_server_started",
         "bioetl.composition.execution_api.ensure_metrics_server_started",
         _no_args,

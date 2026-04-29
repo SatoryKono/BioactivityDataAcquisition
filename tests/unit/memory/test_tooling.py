@@ -6,6 +6,7 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
+from memory.graph import sync as graph_sync
 from memory.tooling.prune import find_prunable_episodic_notes, prune_episodic_notes
 from memory.tooling.refresh_all import refresh_all
 
@@ -84,6 +85,38 @@ def test_refresh_all_can_import_expanded_graph_file_relations(tmp_path: Path) ->
     assert (output_root / "graph/indexes/file_relations.json").exists()
     assert (output_root / "graph/projections/module_references.jsonl").exists()
     assert (output_root / "graph/indexes/module_relations.json").exists()
+
+
+def test_refresh_all_graph_export_uses_direct_snapshot_writer(
+    tmp_path: Path, monkeypatch
+) -> None:
+    output_root = tmp_path / "memory-out"
+    called: dict[str, object] = {}
+
+    def _fake_build_snapshot(root: Path):
+        called["root"] = root
+        return graph_sync.GraphSnapshot()
+
+    def _fake_write_export(path: Path, snapshot: object) -> None:
+        called["path"] = path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}", encoding="utf-8")
+
+    monkeypatch.setattr(graph_sync, "build_snapshot", _fake_build_snapshot)
+    monkeypatch.setattr(graph_sync, "_write_export", _fake_write_export)
+
+    summary = refresh_all(
+        tmp_path,
+        output_root,
+        include_rag=False,
+        include_timeline=False,
+        include_graph_export=True,
+    )
+
+    assert summary["ok"] is True
+    assert summary["artifacts"][0]["kind"] == "graph"
+    assert (output_root / "graph/exports/repo_snapshot.json").exists()
+    assert called["root"] == tmp_path
 
 
 def test_find_prunable_episodic_notes_uses_metadata_ttl(tmp_path: Path) -> None:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from datetime import date, datetime
 from pathlib import Path
 
 from memory.rag.chunking import (
@@ -96,6 +97,23 @@ sources:
     sections = split_config_sections(text, Path("configs/example.yaml"))
     assert [section.title for section in sections] == ["version", "sources"]
     assert all(section.symbol_kind == "config_section" for section in sections)
+
+
+def test_split_config_sections_serializes_dates_deterministically() -> None:
+    payload = {
+        "release_date": date(2026, 4, 29),
+        "generated_at": datetime(2026, 4, 29, 12, 34, 56),
+    }
+    text = json.dumps(
+        {
+            "release_date": payload["release_date"].isoformat(),
+            "generated_at": payload["generated_at"].isoformat(),
+        }
+    )
+    sections = split_config_sections(text, Path("configs/example.json"))
+    assert [section.title for section in sections] == ["release_date", "generated_at"]
+    assert sections[0].content == json.dumps("2026-04-29", ensure_ascii=True)
+    assert sections[1].content == json.dumps("2026-04-29T12:34:56", ensure_ascii=True)
 
 
 def test_build_rag_manifests_indexes_docs_code_tests_and_configs(

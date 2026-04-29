@@ -1074,12 +1074,14 @@ def test_diff_reports_changed_top_level_fields() -> None:
     assert "runtime_config" in diff_fields
     assert "code_provenance" in diff_fields
     assert result.cross_surface_replay_diff["verdict"] == "semantic_drift"
-    assert result.cross_surface_replay_diff["effective_config"][
-        "semantic_equivalent"
-    ] is True
-    assert "execution_fingerprint" in result.cross_surface_replay_diff[
-        "checkpoint_anchors"
-    ]["mismatched_fields"]
+    assert (
+        result.cross_surface_replay_diff["effective_config"]["semantic_equivalent"]
+        is True
+    )
+    assert (
+        "execution_fingerprint"
+        in result.cross_surface_replay_diff["checkpoint_anchors"]["mismatched_fields"]
+    )
 
 
 def test_diff_classifies_occurrence_only_replay_runs() -> None:
@@ -1109,9 +1111,7 @@ def test_diff_classifies_occurrence_only_replay_runs() -> None:
     assert result.occurrence_difference_fields == ("manifest_id", "run_id")
     assert result.semantic_difference_fields == ()
     assert result.noncanonical_difference_fields == ()
-    assert (
-        result.cross_surface_replay_diff["verdict"] == "occurrence_only_replay"
-    )
+    assert result.cross_surface_replay_diff["verdict"] == "occurrence_only_replay"
     assert result.cross_surface_replay_diff["checkpoint_anchors"]["compatible"] is True
 
 
@@ -1156,10 +1156,7 @@ def test_diff_classifies_semantic_equivalent_noncanonical_differences() -> None:
     assert result.semantic_equivalent is True
     assert result.occurrence_only is False
     assert result.noncanonical_difference_fields == ("source_refs",)
-    assert (
-        result.cross_surface_replay_diff["verdict"]
-        == "semantic_equivalent_replay"
-    )
+    assert result.cross_surface_replay_diff["verdict"] == "semantic_equivalent_replay"
     assert result.cross_surface_replay_diff["manifest"][
         "noncanonical_difference_fields"
     ] == ["source_refs"]
