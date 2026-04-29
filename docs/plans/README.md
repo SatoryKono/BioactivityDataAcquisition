@@ -1,7 +1,7 @@
 # Plans Directory
 
 *Status: Working planning artifacts (non-normative)*
-*Last updated: 2026-04-28*
+*Last updated: 2026-04-29*
 
 This directory contains implementation plans, corrective roadmaps, migration
 plans, and supporting architecture assessment snapshots.
@@ -81,6 +81,7 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [mcp-wrapper-contract-audit-2026-04-28.md](mcp-wrapper-contract-audit-2026-04-28.md)
 - [build-docs-site-parity-audit-2026-04-29.md](build-docs-site-parity-audit-2026-04-29.md)
 - [mcp-wrapper-deep-audit-2026-04-29.md](mcp-wrapper-deep-audit-2026-04-29.md)
+- [temporary-diagnostic-ttl-review-plan-2026-04-29.md](temporary-diagnostic-ttl-review-plan-2026-04-29.md)
 
 Earlier operational context files such as
 `onboarding-checklist-day-1-2026-03-20.md` and
@@ -160,6 +161,12 @@ The MCP wrapper deep audit was added on `2026-04-29` to classify the retained
 `scripts/ai/mcp/` wrapper families by launch semantics, generated-config
 contract, and redesign prerequisites. It complements the earlier contract note
 with a body-level family map.
+
+The temporary diagnostic TTL review plan was added on `2026-04-29` to prevent
+`temporary_diagnostic` from becoming an unowned retention bucket. It groups the
+remaining bounded diagnostics by troubleshooting purpose, assigns explicit
+review horizons, and defines the only allowed outcomes for each file: promote,
+retain-with-review, or delete.
 
 ### Retained Historical Context With Live Evidence References
 
