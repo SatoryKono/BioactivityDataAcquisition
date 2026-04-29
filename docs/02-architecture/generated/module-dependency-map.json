@@ -29,7 +29,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 536,
+      "imports": 537,
       "allowed": true
     },
     {
@@ -47,7 +47,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1118,
+      "imports": 1117,
       "allowed": true
     },
     {

@@ -24,19 +24,19 @@
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded local Neo4j/MCP bootstrap helper while the Neo4j memory tooling remains an operator-maintained troubleshooting surface; either promote it into a canonical supported workflow or remove it once those setup docs are retired."
+      "next_step": "Retain only as a bounded diagnostic helper."
     },
     "scripts/ops/runtime/neo4j/start-neo4j-audit.ps1": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Windows-side Neo4j audit/bootstrap helper while the local graph-memory troubleshooting flow remains operator-maintained; either promote it into a documented supported workflow or remove it once the audit path is retired."
+      "next_step": "Retain only as a bounded diagnostic helper."
     },
     "scripts/ops/runtime/neo4j/start-neo4j-audit.sh": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded shell-side Neo4j audit/bootstrap helper while the local graph-memory troubleshooting flow remains operator-maintained; either promote it into a documented supported workflow or remove it once the audit path is retired."
+      "next_step": "Retain only as a bounded diagnostic helper."
     },
     "scripts/ops/launchers/codex/codex-wsl.bat": {
       "owner": "@bioetl-platform",
@@ -271,6 +271,12 @@
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded live Grafana tracing-mode smoke helper for manual observability diagnostics; remove it once tracing-on/off datasource validation is either automated through a governed CI lane or explicitly retired."
+    },
+    "scripts/ai/vibe/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded diagnostic helper."
     }
   }
 }
