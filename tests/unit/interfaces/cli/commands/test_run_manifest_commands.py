@@ -618,7 +618,9 @@ class TestRunManifestCommands:
         assert "reproducibility_diagnostics" in result.output
         assert "Reproducibility" in result.output
         assert "required_profile_satisfied: true" in result.output
-        assert "effective_config_semantic_anchor: effective_config_hash" in result.output
+        assert (
+            "effective_config_semantic_anchor: effective_config_hash" in result.output
+        )
         assert "effective_config_occurrence_fields" in result.output
         assert "checkpoint_identity_present: true" in result.output
         assert "checkpoint_matching_fields" in result.output

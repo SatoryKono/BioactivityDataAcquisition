@@ -19,9 +19,7 @@ def _string_set_literal(node: ast.AST) -> set[str] | None:
         return None
     values: set[str] = set()
     for element in node.elts:
-        if not isinstance(element, ast.Constant) or not isinstance(
-            element.value, str
-        ):
+        if not isinstance(element, ast.Constant) or not isinstance(element.value, str):
             return None
         values.add(element.value)
     return values

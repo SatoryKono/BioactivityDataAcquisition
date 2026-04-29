@@ -300,9 +300,8 @@ class SilverWriterFinalizationCompatibilityMixin:
     ) -> SilverWriteResult:
         """Fallback for legacy tests that inject a metadata writer directly."""
         from bioetl.domain.value_objects.silver_result import SilverWriteResult
-        from bioetl.infrastructure.storage.silver.operations.metadata_builders import (
-            _build_silver_metadata,
-            _SilverMetadataBuildRequest,
+        from bioetl.infrastructure.storage.silver.operations.metadata_finalization_support import (
+            _build_direct_legacy_silver_metadata,
         )
 
         completed_at = current_utc_time()
@@ -316,24 +315,16 @@ class SilverWriterFinalizationCompatibilityMixin:
             ).strip()
             or None
         )
-        metadata = _build_silver_metadata(
-            _SilverMetadataBuildRequest(
-                table_name=table_name,
-                table_path=table_path,
-                records=records,
-                dq_metrics=None,
-                mode="merge",
-                runtime_started_at=started_at,
-                runtime_completed_at=completed_at,
-                run_id=run_id or "legacy-direct-metadata-writer",
-                manifest_id=manifest_id,
-                run_type="incremental",
-                source_batch_id=None,
-                transform_version=getattr(self, "_transform_version", None),
-                transform_steps=getattr(self, "_transform_steps", ()),
-                bronze_refs=None,
-                version_after=None,
-            )
+        metadata = _build_direct_legacy_silver_metadata(
+            table_name=table_name,
+            table_path=table_path,
+            records=records,
+            started_at=started_at,
+            completed_at=completed_at,
+            run_id=run_id,
+            manifest_id=manifest_id,
+            transform_version=getattr(self, "_transform_version", None),
+            transform_steps=getattr(self, "_transform_steps", ()),
         )
         metadata_writer = self._metadata_writer
         if metadata_writer is None:

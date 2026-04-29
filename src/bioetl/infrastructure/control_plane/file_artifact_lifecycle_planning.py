@@ -12,7 +12,9 @@ from bioetl.domain.control_plane import (
     ControlPlaneArtifactRef,
     ControlPlaneArtifactSurface,
 )
-from bioetl.domain.control_plane.reproducibility_policy import STRICT_PERSISTENCE_PROFILES
+from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
+)
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_payloads import (
     _artifact_id,
     _effective_config_artifact_id,

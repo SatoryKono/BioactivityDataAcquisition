@@ -15,7 +15,6 @@ ALLOWED_ADAPTER_IMPORTERS = {
     "src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py",
     "src/bioetl/infrastructure/storage/silver/operations/metadata_operations.py",
     "src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_support.py",
-    "src/bioetl/infrastructure/storage/silver/finalization_pipeline_compatibility_mixin.py",
 }
 
 
@@ -47,7 +46,7 @@ def test_source_tree_does_not_reintroduce_silver_placeholder_identity() -> None:
 
 @pytest.mark.architecture
 def test_runtime_code_imports_silver_metadata_builder_only_through_adapters() -> None:
-    """Keep the legacy builder behind known adapters until it is removed."""
+    """Keep the legacy builder isolated inside operations-level adapters."""
     importers: set[str] = set()
     for path in sorted((ROOT / "src").rglob("*.py")):
         if path == TARGET:

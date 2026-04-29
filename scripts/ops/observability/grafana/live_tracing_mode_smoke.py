@@ -21,7 +21,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[4]
 BASE_COMPOSE_FILE = REPO_ROOT / "docker-compose.monitoring.yml"
 GRAFANA_USER = "admin"
-GRAFANA_PASSWORD = "bioetl-smoke-admin"
+DEFAULT_GRAFANA_ADMIN_SECRET = "bioetl-smoke-admin"
 
 
 def _find_free_port() -> int:
@@ -112,8 +112,12 @@ def _wait_for_grafana(port: int, *, timeout_s: float) -> None:
 
 
 def _grafana_auth_header() -> str:
-    raw = f"{GRAFANA_USER}:{GRAFANA_PASSWORD}".encode()
+    raw = f"{GRAFANA_USER}:{_grafana_admin_secret()}".encode()
     return "Basic " + base64.b64encode(raw).decode("ascii")
+
+
+def _grafana_admin_secret() -> str:
+    return os.getenv("BIOETL_GRAFANA_ADMIN_SECRET", DEFAULT_GRAFANA_ADMIN_SECRET)
 
 
 def _fetch_datasource_names(port: int) -> list[str]:
@@ -169,7 +173,7 @@ def _smoke_mode(mode: str, *, timeout_s: float) -> None:
         override_path = Path(handle.name)
 
     compose_env = os.environ.copy()
-    compose_env["GF_SECURITY_ADMIN_PASSWORD"] = GRAFANA_PASSWORD
+    compose_env["GF_SECURITY_ADMIN_PASSWORD"] = _grafana_admin_secret()
     compose_env["BIOETL_ENABLE_TRACING_DATASOURCES"] = (
         "true" if tracing_enabled else "false"
     )

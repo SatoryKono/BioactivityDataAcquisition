@@ -30,6 +30,8 @@ __all__ = [
     "show_command",
 ]
 
+RUN_MANIFEST_STORE_CORRUPTION = "Run manifest store corruption"
+
 
 def get_run_manifest_service() -> RunManifestInspectionService:
     """Load the run-manifest inspection service through composition on demand."""
@@ -60,7 +62,7 @@ def show_command(identifier: str, output_format: str) -> None:
     try:
         result = service.show(identifier)
     except RunManifestInspectionCorruptionError as exc:
-        echo_error("Run manifest store corruption", str(exc))
+        echo_error(RUN_MANIFEST_STORE_CORRUPTION, str(exc))
         return
     except ValueError as exc:
         echo_error("Run manifest not found", str(exc))
@@ -87,7 +89,7 @@ def score_command(identifier: str, output_format: str) -> None:
     try:
         result = service.show(identifier)
     except RunManifestInspectionCorruptionError as exc:
-        echo_error("Run manifest store corruption", str(exc))
+        echo_error(RUN_MANIFEST_STORE_CORRUPTION, str(exc))
         return
     except ValueError as exc:
         echo_error("Run manifest not found", str(exc))
@@ -128,7 +130,7 @@ def diff_command(
     try:
         result = service.diff(left_identifier, right_identifier)
     except RunManifestInspectionCorruptionError as exc:
-        echo_error("Run manifest store corruption", str(exc))
+        echo_error(RUN_MANIFEST_STORE_CORRUPTION, str(exc))
         return
     except ValueError as exc:
         echo_error("Run manifest diff failed", str(exc))

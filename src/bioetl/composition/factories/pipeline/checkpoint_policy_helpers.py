@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
-from bioetl.domain.control_plane.reproducibility_policy import STRICT_PERSISTENCE_PROFILES
+from bioetl.domain.control_plane.reproducibility_policy import (
+    STRICT_PERSISTENCE_PROFILES,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
