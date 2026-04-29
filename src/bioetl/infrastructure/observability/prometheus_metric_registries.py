@@ -29,6 +29,7 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
     counters={
         "bioetl_records_processed_total": _metrics.RECORDS_PROCESSED_TOTAL,
         "bioetl_record_flow_records_total": _metrics.RECORD_FLOW_RECORDS_TOTAL,
+        "bioetl_stage_records_total": _metrics.STAGE_RECORDS_TOTAL,
         "bioetl_errors_total": _metrics.ERRORS_TOTAL,
         "bioetl_filter_ids_loaded_total": _metrics.FILTER_IDS_LOADED_TOTAL,
         "bioetl_filter_ids_duplicates_total": _metrics.FILTER_IDS_DUPLICATES_TOTAL,
@@ -44,6 +45,7 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         ),
         "bioetl_control_plane_manifest_writes_total": _metrics.CONTROL_PLANE_MANIFEST_WRITES_TOTAL,
         "bioetl_control_plane_ledger_appends_total": _metrics.CONTROL_PLANE_LEDGER_APPENDS_TOTAL,
+        "bioetl_control_plane_terminal_events_total": _metrics.CONTROL_PLANE_TERMINAL_EVENTS_TOTAL,
         "bioetl_control_plane_reads_total": _metrics.CONTROL_PLANE_READS_TOTAL,
         "bioetl_control_plane_lifecycle_deleted_total": _metrics.CONTROL_PLANE_LIFECYCLE_DELETED_TOTAL,
         "bioetl_control_plane_lifecycle_apply_total": _metrics.CONTROL_PLANE_LIFECYCLE_APPLY_TOTAL,
@@ -58,10 +60,12 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_replay_reconstructability_events_total": (
             _metrics.REPLAY_RECONSTRUCTABILITY_EVENTS_TOTAL
         ),
+        "bioetl_metrics_publication_events_total": _metrics.METRICS_PUBLICATION_EVENTS_TOTAL,
     },
     gauges={
         "bioetl_memory_pressure_state": _metrics.MEMORY_PRESSURE_STATE,
         "bioetl_control_plane_lifecycle_delete_candidates": _metrics.CONTROL_PLANE_LIFECYCLE_DELETE_CANDIDATES,
+        "bioetl_observability_runtime_status": _metrics.OBSERVABILITY_RUNTIME_STATUS,
     },
     histograms={
         "bioetl_pipeline_duration_seconds": _metrics.PIPELINE_DURATION_SECONDS,
@@ -151,6 +155,7 @@ DQ_VALIDATION_REGISTRY = MetricRegistryFamily(
     family="dq_validation",
     counters={
         "bioetl_dq_context_build_failures_total": _metrics.DQ_CONTEXT_BUILD_FAILURES_TOTAL,
+        "bioetl_dq_dispositions_total": _metrics.DQ_DISPOSITIONS_TOTAL,
         "bioetl_dq_records_quarantined_total": _metrics.DQ_RECORDS_QUARANTINED_TOTAL,
         "bioetl_dq_anomaly_detected": _metrics.DQ_ANOMALY_DETECTED,
         "bioetl_dq_baseline_updated": _metrics.DQ_BASELINE_UPDATED,

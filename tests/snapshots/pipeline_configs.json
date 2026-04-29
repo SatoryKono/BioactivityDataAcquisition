@@ -1315,6 +1315,7 @@
       {
         "fields": [
           "publication_type",
+          "type_crossref",
           "publication_type_unified",
           "publication_subclass",
           "publication_class"

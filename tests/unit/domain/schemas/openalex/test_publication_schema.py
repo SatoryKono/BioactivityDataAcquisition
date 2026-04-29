@@ -49,6 +49,7 @@ def valid_record() -> dict:
         "publication_year": 2024,
         "publication_date": "2024-05-15",
         "publication_type": "article",  # Raw OpenAlex type (unified field name)
+        "type_crossref": "journal-article",
         "publication_type_unified": None,
         "publication_subclass": None,
         "publication_class": None,

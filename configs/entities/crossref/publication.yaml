@@ -172,14 +172,36 @@ quality:
   - field: publication_type
     type: enum
     allowed:
+    - peer-review
     - journal-article
-    - book-chapter
     - proceedings-article
     - posted-content
-    - book
-    - report
     - dataset
+    - database
+    - dissertation
+    - report
+    - report-component
+    - component
+    - book
+    - book-chapter
+    - book-section
+    - book-part
+    - book-track
+    - book-set
+    - book-series
+    - edited-book
+    - reference-book
+    - monograph
+    - reference-entry
     - standard
+    - journal
+    - journal-issue
+    - journal-volume
+    - proceedings
+    - proceedings-series
+    - report-series
+    - grant
+    - other
     nullable: true
   - field: citations_received
     type: range

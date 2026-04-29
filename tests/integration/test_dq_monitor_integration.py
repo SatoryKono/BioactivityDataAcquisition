@@ -357,6 +357,18 @@ class TestDataQualityServiceMetricsEmission:
         assert name == "bioetl_dq_soft_threshold_exceeded"
         assert value == 1
         assert labels == {"pipeline": "test_integration_pipeline"}
+        assert recording_metrics.get_counter_calls("bioetl_dq_dispositions_total") == [
+            (
+                "bioetl_dq_dispositions_total",
+                1,
+                {
+                    "pipeline": "test_integration_pipeline",
+                    "stage": "validation",
+                    "disposition": "warn",
+                    "terminal_status": "success",
+                },
+            )
+        ]
 
     @pytest.mark.asyncio
     async def test_check_duration_histogram_emitted_with_monitor(
@@ -460,6 +472,18 @@ class TestDataQualityServiceMetricsEmission:
                 "bioetl_data_freshness_seconds",
                 1_700_000_123.0,
                 {"pipeline": "test_integration_pipeline", "entity": "test_entity"},
+            )
+        ]
+        assert recording_metrics.get_counter_calls("bioetl_dq_dispositions_total") == [
+            (
+                "bioetl_dq_dispositions_total",
+                1,
+                {
+                    "pipeline": "test_integration_pipeline",
+                    "stage": "validation",
+                    "disposition": "pass",
+                    "terminal_status": "success",
+                },
             )
         ]
 

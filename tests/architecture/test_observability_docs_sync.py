@@ -29,8 +29,7 @@ def test_rules_metrics_section_uses_canonical_observability_tokens() -> None:
 
     for token in legacy_tokens:
         assert token not in text, (
-            "RULES.md reintroduced a legacy observability token: "
-            f"{token}"
+            f"RULES.md reintroduced a legacy observability token: {token}"
         )
 
     assert "`bioetl_pipeline_duration_seconds`" in text
@@ -55,8 +54,7 @@ def test_metrics_monitoring_guide_uses_canonical_log_schema_tokens() -> None:
 
     for token in legacy_tokens:
         assert token not in text, (
-            "metrics-monitoring.md reintroduced a legacy observability token: "
-            f"{token}"
+            f"metrics-monitoring.md reintroduced a legacy observability token: {token}"
         )
 
     assert "`timestamp`" in text

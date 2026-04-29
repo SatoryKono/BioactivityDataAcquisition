@@ -19,6 +19,7 @@ __all__ = [
     "CONTROL_PLANE_MANIFEST_WRITES_TOTAL",
     "CONTROL_PLANE_READS_TOTAL",
     "CONTROL_PLANE_READ_DURATION_SECONDS",
+    "CONTROL_PLANE_TERMINAL_EVENTS_TOTAL",
     "DQ_CONTEXT_BUILD_FAILURES_TOTAL",
     "DQ_REPORT_GENERATED_TOTAL",
     "DQ_REPORT_SKIPPED_TOTAL",
@@ -161,6 +162,12 @@ CONTROL_PLANE_LEDGER_APPENDS_TOTAL = Counter(
     "bioetl_control_plane_ledger_appends_total",
     "Total append attempts for run-ledger entries",
     ["pipeline", "event_type", "status"],
+)
+
+CONTROL_PLANE_TERMINAL_EVENTS_TOTAL = Counter(
+    "bioetl_control_plane_terminal_events_total",
+    "Total terminal run outcomes mirrored from persisted run-ledger entries",
+    ["pipeline", "terminal_status"],
 )
 
 CONTROL_PLANE_READS_TOTAL = Counter(

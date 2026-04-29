@@ -230,19 +230,67 @@ class TestTrackProcessedRecords:
             for call in mock_metrics.increment_counter.call_args_list
         )
 
+    def test_filtered_out_stage_projects_into_stage_model(
+        self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
+    ) -> None:
+        """Filtered-out counts should project into transform-stage accounting."""
+        recorder.track_processed_records(stage="filtered_out", count=3)
+
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_stage_records_total",
+            3,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "stage": "transform",
+                "outcome": "filtered_out",
+            },
+        )
+
     def test_track_records_fetched_uses_record_flow_counter(
         self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
     ) -> None:
         """Fetched counts should be emitted through the canonical flow family."""
         recorder.track_records_fetched(12)
 
-        mock_metrics.increment_counter.assert_called_once_with(
+        mock_metrics.increment_counter.assert_any_call(
             "bioetl_record_flow_records_total",
             12,
             {
                 "pipeline": "test_pipeline",
                 "run_type": "incremental",
                 "flow_stage": "fetched",
+            },
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_stage_records_total",
+            12,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "stage": "input",
+                "outcome": "fetched",
+            },
+        )
+
+    def test_track_stage_records_uses_stage_model_counter(
+        self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
+    ) -> None:
+        """Explicit stage-model outcomes should use the canonical counter."""
+        recorder.track_stage_records(
+            stage="storage",
+            outcome="silver_written",
+            count=7,
+        )
+
+        mock_metrics.increment_counter.assert_called_once_with(
+            "bioetl_stage_records_total",
+            7,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "stage": "storage",
+                "outcome": "silver_written",
             },
         )
 

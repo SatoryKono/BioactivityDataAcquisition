@@ -83,7 +83,7 @@ def test_metric_definition_exports_remain_stable() -> None:
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
     # This ratchet intentionally changes only when we add/remove public metrics.
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 122
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 127
 
 
 @pytest.mark.unit
@@ -116,6 +116,7 @@ def test_control_plane_and_lineage_metrics_are_registered() -> None:
     assert "bioetl_health_check_degraded_total" in COUNTERS
     assert "bioetl_control_plane_manifest_writes_total" in COUNTERS
     assert "bioetl_control_plane_ledger_appends_total" in COUNTERS
+    assert "bioetl_control_plane_terminal_events_total" in COUNTERS
     assert "bioetl_control_plane_reads_total" in COUNTERS
     assert "bioetl_traced_runs_total" in COUNTERS
     assert "bioetl_checkpoint_compatibility_events_total" in COUNTERS
@@ -182,6 +183,12 @@ def test_dq_and_circuit_breaker_diagnostic_metrics_use_bounded_labels() -> None:
             "check_type",
             "severity",
         },
+        "bioetl_dq_dispositions_total": {
+            "pipeline",
+            "stage",
+            "disposition",
+            "terminal_status",
+        },
         "bioetl_circuit_breaker_open_total": {"adapter"},
     }
 
@@ -203,6 +210,10 @@ def test_control_plane_and_lineage_metrics_avoid_high_cardinality_labels() -> No
             "pipeline",
             "event_type",
             "status",
+        },
+        "bioetl_control_plane_terminal_events_total": {
+            "pipeline",
+            "terminal_status",
         },
         "bioetl_checkpoint_compatibility_events_total": {
             "pipeline",
@@ -251,12 +262,22 @@ def test_adapter_metrics_use_bounded_label_names_only() -> None:
         "bioetl_filter_ids_duplicates_total": {"pipeline", "source_file"},
         "bioetl_filter_combinations_loaded_total": {"pipeline", "source_file"},
         "bioetl_record_flow_records_total": {"pipeline", "run_type", "flow_stage"},
+        "bioetl_stage_records_total": {"pipeline", "run_type", "stage", "outcome"},
+        "bioetl_metrics_publication_events_total": {
+            "pipeline",
+            "run_type",
+            "target",
+            "status",
+        },
     }
     expected_histogram_labels = {
         "bioetl_adapter_request_duration_seconds": {"provider", "endpoint"},
         "bioetl_adapter_batch_size": {"provider", "endpoint"},
         "bioetl_phase_duration_seconds": {"pipeline", "phase", "status"},
         "bioetl_postrun_phase_duration_seconds": {"pipeline", "phase", "status"},
+    }
+    expected_gauge_labels = {
+        "bioetl_observability_runtime_status": {"pipeline", "component", "mode"},
     }
     expected_gauge_labels = {
         "bioetl_adapter_request_p95_seconds": {"provider", "endpoint"},
@@ -270,6 +291,11 @@ def test_adapter_metrics_use_bounded_label_names_only() -> None:
 
     for metric_name, labels in expected_histogram_labels.items():
         actual_labels = set(HISTOGRAMS[metric_name]._labelnames)
+        assert actual_labels == labels
+        assert _FORBIDDEN_LABELS.isdisjoint(actual_labels)
+
+    for metric_name, labels in expected_gauge_labels.items():
+        actual_labels = set(GAUGES[metric_name]._labelnames)
         assert actual_labels == labels
         assert _FORBIDDEN_LABELS.isdisjoint(actual_labels)
 

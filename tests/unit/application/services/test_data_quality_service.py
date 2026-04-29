@@ -151,6 +151,16 @@ class TestDataQualityServiceThresholds:
                 "severity": "hard_fail",
             },
         )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_dq_dispositions_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "stage": "validation",
+                "disposition": "fail",
+                "terminal_status": "failed",
+            },
+        )
 
     @pytest.mark.asyncio
     async def test_hard_threshold_exactly_at_limit_raises_error(
@@ -234,6 +244,16 @@ class TestDataQualityServiceThresholds:
                 "severity": "soft_fail",
             },
         )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_dq_dispositions_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "stage": "validation",
+                "disposition": "warn",
+                "terminal_status": "success",
+            },
+        )
 
     @pytest.mark.asyncio
     async def test_soft_threshold_exactly_at_limit_logs_warning(
@@ -309,13 +329,21 @@ class TestDataQualityServiceThresholds:
         )
         mock_logger.error.assert_not_called()
         increment_counter_calls = mock_metrics.increment_counter.call_args_list
-        assert increment_counter_calls == [
-            call(
-                "bioetl_dq_monitor_disabled_total",
-                1,
-                {"pipeline": "test_pipeline", "entity": "test_entity"},
-            )
-        ]
+        assert call(
+            "bioetl_dq_monitor_disabled_total",
+            1,
+            {"pipeline": "test_pipeline", "entity": "test_entity"},
+        ) in increment_counter_calls
+        assert call(
+            "bioetl_dq_dispositions_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "stage": "validation",
+                "disposition": "pass",
+                "terminal_status": "success",
+            },
+        ) in increment_counter_calls
 
 
 @pytest.mark.unit

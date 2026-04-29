@@ -65,6 +65,7 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
     # Note: publication_type inherited from PublicationEntityBase
     # Stores raw OpenAlex type (e.g., "article", "preprint", "book-chapter")
+    type_crossref: str | None = None
 
     # Override: Default source for OpenAlex
     _source: str = "openalex"

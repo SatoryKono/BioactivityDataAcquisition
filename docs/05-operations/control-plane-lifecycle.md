@@ -79,7 +79,19 @@ bioetl maintenance control-plane-lifecycle \
   --apply
 ```
 
-Dry-run and JSON output expose evidence-floor retention as
+Dry-run text and JSON output include a `replay_impact` classification:
+
+- `strict_replay_evidence_protected` means the artifact is protected by a
+  `replay_ready` or `forensic_grade` evidence floor.
+- `recovery_evidence_protected` means the artifact is protected by an active
+  run/checkpoint/reference relationship.
+- `unprotected_replay_evidence_delete_candidate` means the artifact is selected
+  for deletion and may remove replay/resume/rebuild evidence that is no longer
+  protected by retention policy.
+- `no_replay_evidence` means the planner did not identify replay evidence for
+  the selected artifact.
+
+Evidence-floor retention is also exposed as
 `reason=reproducibility_evidence_floor` with `protected_by` values prefixed by
 `evidence_floor:`. Treat those entries as replay/forensic contract violations,
 not as ordinary retention-expired cleanup candidates.
@@ -106,3 +118,6 @@ It also emits bounded metrics:
 - `bioetl_control_plane_lifecycle_deleted_total`
 - `bioetl_control_plane_lifecycle_delete_candidates`
 - `bioetl_control_plane_lifecycle_apply_total`
+
+Deletion metrics include a bounded `replay_impact` label so alerting can
+separate ordinary retention cleanup from replay-evidence deletion candidates.

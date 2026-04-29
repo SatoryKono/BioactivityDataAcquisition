@@ -7,6 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/tmp" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/.coverage-sharded" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/testing_support" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/.ai/mcp" />
       <excludeFolder url="file://$MODULE_DIR$/.ai/reports" />
       <excludeFolder url="file://$MODULE_DIR$/.benchmarks" />
@@ -239,6 +240,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.agent-work/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/.agent-work" />
       <excludeFolder url="file://$MODULE_DIR$/.windsurf" />
+      <excludeFolder url="file://$MODULE_DIR$/.mypy_cache_win_tmp" />
       <excludeFolder url="file://$MODULE_DIR$/.mypy_cache_win_tmp/3.12" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.13 (BioactivityDataAcquisition2)" jdkType="Python SDK" />

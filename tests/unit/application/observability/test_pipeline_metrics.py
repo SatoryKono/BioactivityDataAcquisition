@@ -93,6 +93,53 @@ def test_record_record_flow_uses_generic_counter() -> None:
 
 
 @pytest.mark.unit
+def test_record_stage_records_uses_generic_counter() -> None:
+    metrics = MagicMock()
+    recorder = PipelineMetricsRecorder(metrics, "chembl_activity")
+
+    recorder.record_stage_records(
+        run_type="incremental",
+        stage="validation",
+        outcome="evaluated",
+        count=9,
+    )
+
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_stage_records_total",
+        9,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "stage": "validation",
+            "outcome": "evaluated",
+        },
+    )
+
+
+@pytest.mark.unit
+def test_record_dq_disposition_uses_generic_counter() -> None:
+    metrics = MagicMock()
+    recorder = PipelineMetricsRecorder(metrics, "chembl_activity")
+
+    recorder.record_dq_disposition(
+        stage="validation",
+        disposition="warn",
+        terminal_status="success",
+    )
+
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_dq_dispositions_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "stage": "validation",
+            "disposition": "warn",
+            "terminal_status": "success",
+        },
+    )
+
+
+@pytest.mark.unit
 def test_noop_when_metrics_missing() -> None:
     recorder = PipelineMetricsRecorder(None, "chembl_activity")
 
@@ -100,3 +147,13 @@ def test_noop_when_metrics_missing() -> None:
     recorder.record_dq_validation_failures(stage="threshold", severity="hard_fail")
     recorder.record_silver_filter_rejections(run_type="incremental")
     recorder.record_record_flow(run_type="incremental", flow_stage="fetched")
+    recorder.record_stage_records(
+        run_type="incremental",
+        stage="input",
+        outcome="fetched",
+    )
+    recorder.record_dq_disposition(
+        stage="validation",
+        disposition="pass",
+        terminal_status="success",
+    )

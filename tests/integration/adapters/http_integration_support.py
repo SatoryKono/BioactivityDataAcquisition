@@ -12,6 +12,7 @@ from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGu
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
+
 def build_mock_logger(*, bind_self: bool = False) -> MagicMock:
     """Create a mock logger with optional self-binding behavior."""
     logger = MagicMock()

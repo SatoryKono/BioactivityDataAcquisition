@@ -13,6 +13,7 @@ import zstandard as zstd
 
 from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 from bioetl.composition.factories import _observability_wiring
+from bioetl.composition.services.versioning import CodeRevisionProvenance
 from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.config import get_pipeline_config, get_settings
@@ -81,6 +82,18 @@ def _load_control_plane_payloads(*, data_dir: Path, run_id: RunID) -> tuple[dict
     return manifest_payload, effective_payload
 
 
+def _patch_clean_code_revision(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep replay evidence tests independent from the local dirty worktree."""
+    monkeypatch.setattr(
+        "bioetl.composition.runtime_builders._run_manifest_builder_policy.get_code_revision_provenance",
+        lambda: CodeRevisionProvenance(
+            git_commit="test-clean-replay",
+            source_revision_state="clean",
+        ),
+        raising=True,
+    )
+
+
 async def _run_cached_fixture_pipeline(*, cached_bronze_path: Path) -> RunID:
     run_id = RunID(uuid4())
     context = PipelineRunContext(
@@ -131,6 +144,7 @@ async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
     monkeypatch.setenv("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
     monkeypatch.setenv("BIOETL_TEST_RELAXED_DQ", "1")
     monkeypatch.setenv("BIOETL_PIPELINE__RELAXED_DQ", "1")
+    _patch_clean_code_revision(monkeypatch)
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()
 
@@ -152,6 +166,14 @@ async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
 
     code_provenance_first = manifest_first["code_provenance"]
     code_provenance_second = manifest_second["code_provenance"]
+    assert manifest_first["run_id"] != manifest_second["run_id"]
+    assert manifest_first["manifest_id"] != manifest_second["manifest_id"]
+    assert manifest_first["replay_capability"] == "exact_replay_supported"
+    assert manifest_second["replay_capability"] == "exact_replay_supported"
+    assert (
+        manifest_first["execution_fingerprint"]
+        == manifest_second["execution_fingerprint"]
+    )
     assert manifest_first["launch_context"]["exact_replay"] is True
     assert manifest_second["launch_context"]["exact_replay"] is True
     assert manifest_first["runtime_config"]["exact_replay"] is True
@@ -196,6 +218,50 @@ async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
         semantic_first["dq_contract_compatibility_hash"]
         == semantic_second["dq_contract_compatibility_hash"]
     )
+    evidence_dir = tmp_path / "reports" / "reproducibility"
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    evidence_path = evidence_dir / "tracked_fixture_exact_replay_matrix.json"
+    evidence_path.write_text(
+        json.dumps(
+            {
+                "pipeline_name": _PIPELINE_NAME,
+                "case": "ordinary_supported_family_cached_bronze_exact_replay",
+                "replay_capability": manifest_first["replay_capability"],
+                "semantic_identity": {
+                    "execution_fingerprint": manifest_first["execution_fingerprint"],
+                    "effective_config_artifact_id": code_provenance_first[
+                        "effective_config_artifact_id"
+                    ],
+                    "effective_config_hash": semantic_first["effective_config_hash"],
+                    "dq_contract_compatibility_hash": semantic_first[
+                        "dq_contract_compatibility_hash"
+                    ],
+                    "snapshot_ids": [
+                        snapshot["snapshot_id"] for snapshot in snapshots_first
+                    ],
+                },
+                "occurrences": [
+                    {
+                        "run_id": manifest_first["run_id"],
+                        "manifest_id": manifest_first["manifest_id"],
+                    },
+                    {
+                        "run_id": manifest_second["run_id"],
+                        "manifest_id": manifest_second["manifest_id"],
+                    },
+                ],
+            },
+            sort_keys=True,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    evidence_payload = json.loads(evidence_path.read_text(encoding="utf-8"))
+    assert evidence_payload["semantic_identity"]["snapshot_ids"] == [
+        snapshots_first[0]["snapshot_id"]
+    ]
+    assert len(evidence_payload["occurrences"]) == 2
 
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()
@@ -227,6 +293,7 @@ async def test_tracked_fixture_exact_replay_avoids_live_data_source_path(
     monkeypatch.setenv("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
     monkeypatch.setenv("BIOETL_TEST_RELAXED_DQ", "1")
     monkeypatch.setenv("BIOETL_PIPELINE__RELAXED_DQ", "1")
+    _patch_clean_code_revision(monkeypatch)
 
     def _raise_live_data_source(*args: object, **kwargs: object) -> object:
         raise AssertionError(
@@ -277,6 +344,7 @@ async def test_exact_replay_without_materialized_cached_bronze_batches_fails_clo
     monkeypatch.setenv("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
     monkeypatch.setenv("BIOETL_TEST_RELAXED_DQ", "1")
     monkeypatch.setenv("BIOETL_PIPELINE__RELAXED_DQ", "1")
+    _patch_clean_code_revision(monkeypatch)
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()
 

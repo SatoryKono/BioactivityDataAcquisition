@@ -11,7 +11,12 @@ from time import perf_counter
 from typing import TYPE_CHECKING
 
 from bioetl.domain.control_plane import RunLedgerEntry
-from bioetl.domain.control_plane.run_ledger import slice_ledger_entries_after
+from bioetl.domain.control_plane.run_ledger import (
+    RUN_FAILED_EVENT,
+    RUN_FINISHED_EVENT,
+    RUN_SHUTDOWN_EVENT,
+    slice_ledger_entries_after,
+)
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane._read_metrics import (
@@ -65,6 +70,33 @@ def _emit_ledger_append_metric(
             "pipeline": pipeline,
             "event_type": event_type,
             "status": status,
+        },
+    )
+
+
+def _emit_terminal_event_metric(
+    metrics: MetricsPort | None,
+    *,
+    pipeline: str,
+    event_type: str,
+) -> None:
+    """Mirror persisted terminal outcomes into one crash-safe aggregate family."""
+    if metrics is None:
+        return
+    if event_type == RUN_FINISHED_EVENT:
+        terminal_status = "success"
+    elif event_type == RUN_FAILED_EVENT:
+        terminal_status = "failed"
+    elif event_type == RUN_SHUTDOWN_EVENT:
+        terminal_status = "shutdown"
+    else:
+        return
+    metrics.increment_counter(
+        "bioetl_control_plane_terminal_events_total",
+        1,
+        {
+            "pipeline": pipeline,
+            "terminal_status": terminal_status,
         },
     )
 
@@ -188,6 +220,11 @@ class FileRunLedgerStore(RunLedgerPort):
             pipeline=pipeline,
             event_type=entry.event_type,
             status="success",
+        )
+        _emit_terminal_event_metric(
+            self.metrics,
+            pipeline=pipeline,
+            event_type=entry.event_type,
         )
 
     def list_entries(self, manifest_id: str) -> list[RunLedgerEntry]:

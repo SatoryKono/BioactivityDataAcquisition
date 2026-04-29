@@ -140,7 +140,8 @@ def control_plane_lifecycle_command(
         )
         click.echo(
             f"{marker} {artifact.surface.value} {artifact.artifact_id} "
-            f"{artifact.reason} {artifact.path}{protected_by}"
+            f"{artifact.reason} replay_impact={artifact.replay_impact.value} "
+            f"{artifact.path}{protected_by}"
         )
 
 
@@ -163,6 +164,7 @@ def _plan_payload(
                 "artifact_id": artifact.artifact_id,
                 "decision": artifact.decision.value,
                 "reason": artifact.reason,
+                "replay_impact": artifact.replay_impact.value,
                 "created_at": (
                     artifact.created_at.isoformat() if artifact.created_at else None
                 ),

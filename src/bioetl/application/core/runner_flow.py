@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointManagerService,
     )
+    from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.services.control_plane.run_ledger_service import (
         RunLedgerService,
     )
@@ -39,6 +40,7 @@ class _PipelineRunnerFlowHostProtocol(Protocol):
     _runtime: RuntimeConfig
     _executor: BatchExecutor
     _checkpoint_manager: CheckpointManagerService
+    _services: PipelineService
     _logger: LoggerPort
     _run_ledger_service: RunLedgerService | None
 
@@ -160,6 +162,7 @@ def record_stage_completed(
 
 def record_run_finished(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append successful completion ledger entry."""
+    _record_output_ready(host)
 
     def _record_finished(
         ledger_service: RunLedgerService,
@@ -176,6 +179,31 @@ def record_run_finished(host: _PipelineRunnerFlowHostProtocol) -> None:
         )
 
     _record_run_metrics_event(host, _record_finished)
+
+
+def _record_output_ready(host: _PipelineRunnerFlowHostProtocol) -> None:
+    """Project the terminal output-ready count into the canonical stage model."""
+    from bioetl.application.observability.pipeline_metrics import (
+        PipelineMetricsRecorder,
+    )
+
+    output_count = max(
+        0,
+        host.execution_metrics.get("records_gold", 0),
+        host.execution_metrics.get("records_silver", 0),
+        host.execution_metrics.get("records_bronze", 0),
+    )
+    if output_count <= 0:
+        return
+    PipelineMetricsRecorder(
+        host._services.metrics,
+        host._config.pipeline_name,
+    ).record_stage_records(
+        run_type=host._runtime.run_type.value,
+        stage="output",
+        outcome="ready",
+        count=output_count,
+    )
 
 
 def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:

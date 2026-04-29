@@ -88,7 +88,7 @@ class PipelineMetricsRecorder:
         count: int = 1,
     ) -> None:
         """Increment the canonical bounded record-flow projection counter."""
-        if self.metrics is None:
+        if self.metrics is None or count <= 0:
             return
         self.metrics.increment_counter(
             "bioetl_record_flow_records_total",
@@ -97,5 +97,49 @@ class PipelineMetricsRecorder:
                 "pipeline": self.pipeline,
                 "run_type": run_type,
                 "flow_stage": flow_stage,
+            },
+        )
+
+    def record_stage_records(
+        self,
+        *,
+        run_type: str,
+        stage: str,
+        outcome: str,
+        count: int = 1,
+    ) -> None:
+        """Increment the canonical stage-model projection counter."""
+        if self.metrics is None or count <= 0:
+            return
+        self.metrics.increment_counter(
+            "bioetl_stage_records_total",
+            count,
+            {
+                "pipeline": self.pipeline,
+                "run_type": run_type,
+                "stage": stage,
+                "outcome": outcome,
+            },
+        )
+
+    def record_dq_disposition(
+        self,
+        *,
+        stage: str,
+        disposition: str,
+        terminal_status: str,
+        count: int = 1,
+    ) -> None:
+        """Increment bounded DQ disposition events with terminal correlation."""
+        if self.metrics is None or count <= 0:
+            return
+        self.metrics.increment_counter(
+            "bioetl_dq_dispositions_total",
+            count,
+            {
+                "pipeline": self.pipeline,
+                "stage": stage,
+                "disposition": disposition,
+                "terminal_status": terminal_status,
             },
         )

@@ -92,6 +92,12 @@ class BatchMetricsRecorderService:
             flow_stage="fetched",
             count=count,
         )
+        self._pipeline_metrics.record_stage_records(
+            run_type=self._run_type_label,
+            stage="input",
+            outcome="fetched",
+            count=count,
+        )
 
     def track_processed_records(self, stage: str, count: int) -> None:
         """Record number of processed records at a specific stage.
@@ -118,6 +124,13 @@ class BatchMetricsRecorderService:
             self._pipeline_metrics.record_record_flow(
                 run_type=self._run_type_label,
                 flow_stage=stage,
+                count=count,
+            )
+        if stage == "filtered_out":
+            self._pipeline_metrics.record_stage_records(
+                run_type=self._run_type_label,
+                stage="transform",
+                outcome="filtered_out",
                 count=count,
             )
 
@@ -157,6 +170,23 @@ class BatchMetricsRecorderService:
         self._pipeline_metrics.record_dq_validation_failures(
             stage=stage,
             severity=severity,
+            count=count,
+        )
+
+    def track_stage_records(
+        self,
+        *,
+        stage: str,
+        outcome: str,
+        count: int,
+    ) -> None:
+        """Record one canonical stage-model outcome when the count is positive."""
+        if count <= 0:
+            return
+        self._pipeline_metrics.record_stage_records(
+            run_type=self._run_type_label,
+            stage=stage,
+            outcome=outcome,
             count=count,
         )
 

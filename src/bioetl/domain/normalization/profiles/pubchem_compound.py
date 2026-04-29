@@ -10,6 +10,10 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_isomeric_smiles,
 )
 from bioetl.domain.schemas.pubchem.compound import PubchemMoleculeSchema
+from bioetl.domain.services.chemical_standardization import (
+    CHEMICAL_STANDARDIZATION_POLICY_VERSION,
+    CHEMICAL_STANDARDIZATION_STATUSES,
+)
 
 __all__ = [
     "PUBCHEM_COMPOUND_PROFILE",
@@ -54,6 +58,12 @@ _FLOAT_FIELDS = frozenset(
         "z_steric_quadrupole_3d",
     }
 )
+_ENUM_FIELDS = {
+    "chemical_standardization_policy_version": frozenset(
+        {CHEMICAL_STANDARDIZATION_POLICY_VERSION}
+    ),
+    "chemical_standardization_status": frozenset(CHEMICAL_STANDARDIZATION_STATUSES),
+}
 
 _SPECIAL_RULES = {
     "canonical_smiles": (
@@ -72,6 +82,7 @@ PUBCHEM_COMPOUND_PROFILE = build_standard_profile(
     schema_fields=PUBCHEM_COMPOUND_SCHEMA_FIELDS,
     meta_fields=_META_FIELDS,
     float_fields=_FLOAT_FIELDS,
+    enum_fields=_ENUM_FIELDS,
     special_rules=_SPECIAL_RULES,
 )
 

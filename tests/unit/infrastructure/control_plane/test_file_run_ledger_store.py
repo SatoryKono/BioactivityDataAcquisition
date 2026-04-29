@@ -67,13 +67,21 @@ def test_file_store_emits_ledger_append_metric(tmp_path) -> None:
 
     store.append(entry)
 
-    metrics.increment_counter.assert_called_once_with(
+    assert metrics.increment_counter.call_args_list[0].args == (
         "bioetl_control_plane_ledger_appends_total",
         1,
         {
             "pipeline": "chembl_activity",
             "event_type": "run_finished",
             "status": "success",
+        },
+    )
+    assert metrics.increment_counter.call_args_list[1].args == (
+        "bioetl_control_plane_terminal_events_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "terminal_status": "success",
         },
     )
 

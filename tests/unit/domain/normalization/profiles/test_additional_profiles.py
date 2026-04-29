@@ -16,10 +16,17 @@ from bioetl.domain.normalization.profiles import (
     CHEMBL_TARGET_COMPONENT_PROFILE,
     CROSSREF_PUBLICATION_PROFILE,
     CROSSREF_PUBLICATION_SCHEMA_FIELDS,
+    OPENALEX_PUBLICATION_PROFILE,
+    OPENALEX_PUBLICATION_SCHEMA_FIELDS,
     PUBCHEM_COMPOUND_PROFILE,
     PUBCHEM_COMPOUND_SCHEMA_FIELDS,
     PUBMED_PUBLICATION_PROFILE,
     PUBMED_PUBLICATION_SCHEMA_FIELDS,
+    SEMANTICSCHOLAR_PUBLICATION_PROFILE,
+    UNIPROT_IDMAPPING_PROFILE,
+    UNIPROT_IDMAPPING_SCHEMA_FIELDS,
+    UNIPROT_PROTEIN_PROFILE,
+    UNIPROT_PROTEIN_SCHEMA_FIELDS,
 )
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
@@ -46,8 +53,22 @@ def test_pubmed_publication_profile_covers_schema_exactly() -> None:
     PUBMED_PUBLICATION_PROFILE.assert_covers_schema(PUBMED_PUBLICATION_SCHEMA_FIELDS)
 
 
+def test_openalex_publication_profile_covers_schema_exactly() -> None:
+    OPENALEX_PUBLICATION_PROFILE.assert_covers_schema(
+        OPENALEX_PUBLICATION_SCHEMA_FIELDS
+    )
+
+
 def test_pubchem_compound_profile_covers_schema_exactly() -> None:
     PUBCHEM_COMPOUND_PROFILE.assert_covers_schema(PUBCHEM_COMPOUND_SCHEMA_FIELDS)
+
+
+def test_uniprot_idmapping_profile_covers_schema_exactly() -> None:
+    UNIPROT_IDMAPPING_PROFILE.assert_covers_schema(UNIPROT_IDMAPPING_SCHEMA_FIELDS)
+
+
+def test_uniprot_protein_profile_covers_schema_exactly() -> None:
+    UNIPROT_PROTEIN_PROFILE.assert_covers_schema(UNIPROT_PROTEIN_SCHEMA_FIELDS)
 
 
 def test_meta_fields_are_excluded_from_hash_across_shipped_profiles() -> None:
@@ -64,6 +85,84 @@ def test_pubchem_smiles_rules_use_domain_smiles_normalization() -> None:
     assert canonical_rule.apply(" C ") == "C"
     assert isomeric_rule is not None
     assert isomeric_rule.apply(" C ") == "C"
+
+
+def test_pubchem_standardization_fields_are_profile_enums() -> None:
+    status_rule = PUBCHEM_COMPOUND_PROFILE.rule_for("chemical_standardization_status")
+    policy_rule = PUBCHEM_COMPOUND_PROFILE.rule_for(
+        "chemical_standardization_policy_version"
+    )
+
+    assert status_rule is not None
+    assert status_rule.apply(" Partial ") == "partial"
+    assert status_rule.apply("unknown") is None
+
+    assert policy_rule is not None
+    assert policy_rule.apply("PUBCHEM-BASIC-V1") == "pubchem-basic-v1"
+    assert policy_rule.apply("pubchem-basic-v2") is None
+
+
+def test_uniprot_idmapping_mapping_status_uses_profile_enum() -> None:
+    mapping_status_rule = UNIPROT_IDMAPPING_PROFILE.rule_for("mapping_status")
+
+    assert mapping_status_rule is not None
+    assert mapping_status_rule.apply(" MULTIPLE ") == "multiple"
+    assert mapping_status_rule.apply("found") == "found"
+    assert mapping_status_rule.apply("ambiguous") is None
+
+
+def test_non_chembl_publication_bool_fields_are_profile_normalized() -> None:
+    crossref_is_oa_rule = CROSSREF_PUBLICATION_PROFILE.rule_for("is_oa")
+    crossref_crossmark_rule = CROSSREF_PUBLICATION_PROFILE.rule_for(
+        "content_domain_crossmark_restriction"
+    )
+    is_oa_rule = OPENALEX_PUBLICATION_PROFILE.rule_for("is_oa")
+    is_retracted_rule = OPENALEX_PUBLICATION_PROFILE.rule_for("is_retracted")
+    abstract_structured_rule = PUBMED_PUBLICATION_PROFILE.rule_for(
+        "abstract_structured"
+    )
+    semanticscholar_is_oa_rule = SEMANTICSCHOLAR_PUBLICATION_PROFILE.rule_for("is_oa")
+
+    assert crossref_is_oa_rule is not None
+    assert crossref_is_oa_rule.apply("1") is True
+    assert crossref_crossmark_rule is not None
+    assert crossref_crossmark_rule.apply("false") is False
+
+    assert is_oa_rule is not None
+    assert is_oa_rule.apply("1") is True
+    assert is_oa_rule.apply("false") is False
+
+    assert is_retracted_rule is not None
+    assert is_retracted_rule.apply("true") is True
+    assert is_retracted_rule.apply("0") is False
+
+    assert abstract_structured_rule is not None
+    assert abstract_structured_rule.apply("yes") is True
+    assert abstract_structured_rule.apply("no") is False
+
+    assert semanticscholar_is_oa_rule is not None
+    assert semanticscholar_is_oa_rule.apply("true") is True
+    assert semanticscholar_is_oa_rule.apply("0") is False
+
+
+def test_uniprot_protein_json_array_fields_are_profile_canonicalized() -> None:
+    for field_name in (
+        "cellular_component",
+        "isoform_names",
+        "isoform_synonyms",
+        "molecular_function",
+        "reaction_ec_numbers",
+        "reactions",
+    ):
+        rule = UNIPROT_PROTEIN_PROFILE.rule_for(field_name)
+
+        assert rule is not None
+        assert rule.apply('["b", "a"]') == '["b","a"]'
+        assert rule.apply("not-json") == "not-json"
+
+    assert UNIPROT_PROTEIN_PROFILE.rule_for("molecular_function").set_like is True
+    assert UNIPROT_PROTEIN_PROFILE.rule_for("reaction_ec_numbers").set_like is True
+    assert UNIPROT_PROTEIN_PROFILE.rule_for("reactions").set_like is False
 
 
 def test_chembl_target_organism_display_normalization_is_profile_visible() -> None:

@@ -12,6 +12,7 @@ from unittest.mock import MagicMock
 from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecycleDecision,
     ControlPlaneArtifactLifecyclePolicy,
+    ControlPlaneArtifactReplayImpact,
 )
 from bioetl.infrastructure.control_plane import FileControlPlaneArtifactLifecycleStore
 
@@ -152,8 +153,14 @@ def test_lifecycle_plan_is_dry_run_and_retains_protected_references(
     assert by_path["manifest-live.json"].decision is (
         ControlPlaneArtifactLifecycleDecision.RETAIN
     )
+    assert by_path["manifest-live.json"].replay_impact is (
+        ControlPlaneArtifactReplayImpact.RECOVERY_EVIDENCE_PROTECTED
+    )
     assert by_path["manifest-stale.json"].decision is (
         ControlPlaneArtifactLifecycleDecision.DELETE
+    )
+    assert by_path["manifest-stale.json"].replay_impact is (
+        ControlPlaneArtifactReplayImpact.UNPROTECTED_REPLAY_EVIDENCE_DELETE_CANDIDATE
     )
     assert by_path["manifest-live.jsonl"].reason == "protected_reference"
     assert by_path["effective-config-live.json"].reason == "protected_reference"
@@ -285,12 +292,18 @@ def test_lifecycle_retains_stale_replay_ready_evidence_floor_refs(
     for name in retained_names:
         assert by_name[name].decision is ControlPlaneArtifactLifecycleDecision.RETAIN
         assert by_name[name].reason == "reproducibility_evidence_floor"
+        assert by_name[name].replay_impact is (
+            ControlPlaneArtifactReplayImpact.STRICT_REPLAY_EVIDENCE_PROTECTED
+        )
         assert any(
             reason.startswith("evidence_floor:")
             for reason in by_name[name].protected_by
         )
     assert by_name["manifest-unrelated.json"].decision is (
         ControlPlaneArtifactLifecycleDecision.DELETE
+    )
+    assert by_name["manifest-unrelated.json"].replay_impact is (
+        ControlPlaneArtifactReplayImpact.UNPROTECTED_REPLAY_EVIDENCE_DELETE_CANDIDATE
     )
 
 
@@ -375,11 +388,15 @@ def test_lifecycle_apply_deletes_only_expired_unprotected_files(tmp_path: Path) 
         artifact_id="manifest-stale",
         path=str(stale_manifest),
         reason="retention_expired",
+        replay_impact="unprotected_replay_evidence_delete_candidate",
     )
     metrics.increment_counter.assert_any_call(
         "bioetl_control_plane_lifecycle_deleted_total",
         1,
-        labels={"surface": "run_manifest"},
+        labels={
+            "surface": "run_manifest",
+            "replay_impact": "unprotected_replay_evidence_delete_candidate",
+        },
     )
     metrics.set_gauge.assert_called_once_with(
         "bioetl_control_plane_lifecycle_delete_candidates",
