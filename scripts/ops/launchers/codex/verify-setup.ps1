@@ -5,6 +5,11 @@ param(
     [switch]$Pause = $true
 )
 
-$Target = Join-Path $PSScriptRoot "..\..\..\ai\codex\verify_setup.ps1"
-& $Target -Pause:$Pause
-exit $LASTEXITCODE
+$Target = Join-Path $PSScriptRoot "..\..\..\ai\codex\run-codex.ps1"
+& $Target check
+$ExitCode = $LASTEXITCODE
+if ($Pause) {
+    Write-Host ""
+    Read-Host "Press Enter to continue"
+}
+exit $ExitCode

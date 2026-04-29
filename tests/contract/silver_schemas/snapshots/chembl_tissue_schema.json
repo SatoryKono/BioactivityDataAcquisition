@@ -91,6 +91,43 @@
     "required": false,
     "unique": false
   },
+  "bto_iri": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^https?://[^\\s]+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Persistent IRI for the BTO identifier.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "bto_mapping_status": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "BTO IRI mapping status.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "bto_ontology_version": {
+    "checks": [],
+    "coerce": false,
+    "description": "BTO ontology release/version used for IRI mapping.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "caloha_id": {
     "checks": [
       {
@@ -128,6 +165,43 @@
     ],
     "coerce": false,
     "description": "Experimental Factor Ontology identifier.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "efo_iri": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^https?://[^\\s]+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Persistent IRI for the EFO identifier.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "efo_mapping_status": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "EFO IRI mapping status.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "efo_ontology_version": {
+    "checks": [],
+    "coerce": false,
+    "description": "EFO ontology release/version used for IRI mapping.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -179,6 +253,43 @@
     ],
     "coerce": false,
     "description": "Uberon anatomy ontology identifier.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "uberon_iri": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^https?://[^\\s]+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Persistent IRI for the Uberon identifier.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "uberon_mapping_status": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Uberon IRI mapping status.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "uberon_ontology_version": {
+    "checks": [],
+    "coerce": false,
+    "description": "Uberon ontology release/version used for IRI mapping.",
     "dtype": "str",
     "nullable": true,
     "required": false,

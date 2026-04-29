@@ -208,8 +208,8 @@ quality:
     error_message: Publication must have paper_id and title
   entity_conditional_validations:
   - name: journal_article_requires_title
-    condition_field: publication_type
-    condition_value: journal-article
+    condition_field: publication_type_unified
+    condition_value: Journal Article
     condition_operator: eq
     then_validations:
     - field: title

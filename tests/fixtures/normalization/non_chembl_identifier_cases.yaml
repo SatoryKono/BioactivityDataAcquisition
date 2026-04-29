@@ -1,0 +1,20 @@
+publication_identifier_arrays:
+  author_orcids:
+    input: '["https://orcid.org/0000-0002-1825-0097","0000000218250097"]'
+    expected: '["0000-0002-1825-0097"]'
+  issn_list:
+    input: '["2049-3630","ISSN:1234567X"]'
+    expected: '["1234-567X","2049-3630"]'
+  openalex_author_ids:
+    input: '["https://openalex.org/A2","a10"]'
+    expected: '["A10","A2"]'
+uniprot_identifier_arrays:
+  all_mappings:
+    input: '["p00742","P00742","q9y6k9"]'
+    expected: '["P00742","Q9Y6K9"]'
+  chembl_ids:
+    input: '["chembl25","CHEMBL1"]'
+    expected: '["CHEMBL1","CHEMBL25"]'
+  drugbank_ids:
+    input: '["db00001","DB00002"]'
+    expected: '["DB00001","DB00002"]'

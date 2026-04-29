@@ -10,6 +10,10 @@ from bioetl.domain.normalization.profiles._publication_classification_rules impo
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_issn_id,
+    normalize_profile_orcid_ids,
+)
 from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
 
 __all__ = [
@@ -113,6 +117,17 @@ _JSON_STRING_FIELDS = frozenset(
         "publication_type_list",
     }
 )
+_SPECIAL_RULES = {
+    **publication_classification_rules(),
+    "author_orcids": (
+        normalize_profile_orcid_ids,
+        "Canonicalize ORCID identifiers inside a set-like canonical JSON array.",
+    ),
+    "issn": (
+        normalize_profile_issn_id,
+        "Canonicalize ISSN identifier to the shared publication identifier policy.",
+    ),
+}
 
 PUBMED_PUBLICATION_PROFILE = build_standard_profile(
     profile_name="pubmed.publication",
@@ -129,7 +144,7 @@ PUBMED_PUBLICATION_PROFILE = build_standard_profile(
     boolean_fields=_BOOLEAN_FIELDS,
     set_like_fields=_SET_LIKE_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
-    special_rules=publication_classification_rules(),
+    special_rules=_SPECIAL_RULES,
 )
 
 PUBMED_PUBLICATION_PROFILE.assert_covers_schema(PUBMED_PUBLICATION_SCHEMA_FIELDS)

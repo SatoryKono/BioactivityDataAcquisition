@@ -185,6 +185,19 @@ _ALLOWED_STAGE_MODEL_OUTCOME_LABELS = frozenset(
         "other",
     }
 )
+_ALLOWED_BATCH_LIFECYCLE_EVENT_LABELS = frozenset(
+    {"created", "written", "failed", "other"}
+)
+_ALLOWED_COMPOSITE_PHASE_RECORD_OUTCOME_LABELS = frozenset(
+    {"extracted", "silver", "input", "enriched", "merged", "fully_enriched", "other"}
+)
+_ALLOWED_COMPOSITE_PHASE_ERROR_KIND_LABELS = frozenset(
+    {"failed", "timeout", "record_error", "other"}
+)
+_ALLOWED_COMPOSITE_PHASE_LOSS_KIND_LABELS = frozenset(
+    {"unwritten", "not_found", "partially_enriched", "quarantined", "other"}
+)
+_ALLOWED_COMPOSITE_PHASE_RETRY_KIND_LABELS = frozenset({"resume", "other"})
 _ALLOWED_PHASE_LABELS = frozenset(
     {
         "startup",
@@ -396,6 +409,11 @@ def normalize_stage_model_outcome(outcome: str) -> str:
     return _normalize_bounded_label(outcome, _ALLOWED_STAGE_MODEL_OUTCOME_LABELS)
 
 
+def normalize_batch_lifecycle_event(event: str) -> str:
+    """Normalize bounded batch lifecycle event labels."""
+    return _normalize_bounded_label(event, _ALLOWED_BATCH_LIFECYCLE_EVENT_LABELS)
+
+
 def normalize_runtime_phase(phase: str) -> str:
     """Normalize lifecycle and composite phase labels to a bounded label set."""
     return _normalize_bounded_label(phase, _ALLOWED_PHASE_LABELS)
@@ -429,6 +447,34 @@ def normalize_publication_target(target: str) -> str:
 def normalize_publication_status(status: str) -> str:
     """Normalize metrics publication status labels."""
     return _normalize_bounded_label(status, _ALLOWED_PUBLICATION_STATUS_LABELS)
+
+
+def normalize_composite_phase_record_outcome(outcome: str) -> str:
+    """Normalize bounded composite phase record outcomes."""
+    return _normalize_bounded_label(
+        outcome, _ALLOWED_COMPOSITE_PHASE_RECORD_OUTCOME_LABELS
+    )
+
+
+def normalize_composite_phase_error_kind(error_kind: str) -> str:
+    """Normalize bounded composite phase error kinds."""
+    return _normalize_bounded_label(
+        error_kind, _ALLOWED_COMPOSITE_PHASE_ERROR_KIND_LABELS
+    )
+
+
+def normalize_composite_phase_loss_kind(loss_kind: str) -> str:
+    """Normalize bounded composite phase loss kinds."""
+    return _normalize_bounded_label(
+        loss_kind, _ALLOWED_COMPOSITE_PHASE_LOSS_KIND_LABELS
+    )
+
+
+def normalize_composite_phase_retry_kind(retry_kind: str) -> str:
+    """Normalize bounded composite phase retry kinds."""
+    return _normalize_bounded_label(
+        retry_kind, _ALLOWED_COMPOSITE_PHASE_RETRY_KIND_LABELS
+    )
 
 
 def normalize_observability_component(component: str) -> str:

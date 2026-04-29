@@ -238,6 +238,7 @@ _CHEMBL_ENUM_CONFIG = "configs/enums/chembl.yaml"
 _UNIPROT_ENUM_CONFIG = "configs/enums/uniprot.yaml"
 _PUBLICATION_CONTROLLED_CONFIG = "configs/vocab/publication_controlled.yaml"
 _REFERENCE_ID_SOURCE = "domain.normalization.reference_ids"
+_OA_STATUS_SOURCE = "domain.schemas.common.publication_base.OA_STATUS_VALUES"
 
 ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("chembl", "activity", "assay_type"): _CHEMBL_ENUM_CONFIG,
@@ -293,16 +294,37 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
 }
 
 REFERENCE_ID_SOURCES: dict[tuple[str, str, str], str] = {
+    ("crossref", "publication", "author_orcids"): _REFERENCE_ID_SOURCE,
+    ("crossref", "publication", "issn"): _REFERENCE_ID_SOURCE,
+    ("crossref", "publication", "issn_electronic"): _REFERENCE_ID_SOURCE,
+    ("crossref", "publication", "issn_list"): _REFERENCE_ID_SOURCE,
+    ("crossref", "publication", "issn_print"): _REFERENCE_ID_SOURCE,
+    ("openalex", "publication", "author_openalex_ids"): _REFERENCE_ID_SOURCE,
+    ("openalex", "publication", "author_orcids"): _REFERENCE_ID_SOURCE,
+    ("openalex", "publication", "institution_ids"): _REFERENCE_ID_SOURCE,
+    ("openalex", "publication", "issn"): _REFERENCE_ID_SOURCE,
+    ("openalex", "publication", "openalex_id"): _REFERENCE_ID_SOURCE,
     ("openalex", "publication", "primary_topic"): _REFERENCE_ID_SOURCE,
     ("openalex", "publication", "ror_ids"): _REFERENCE_ID_SOURCE,
     ("openalex", "publication", "subject_topics"): _REFERENCE_ID_SOURCE,
+    ("pubmed", "publication", "author_orcids"): _REFERENCE_ID_SOURCE,
+    ("pubmed", "publication", "issn"): _REFERENCE_ID_SOURCE,
+    ("semanticscholar", "publication", "author_orcids"): _REFERENCE_ID_SOURCE,
+    ("semanticscholar", "publication", "author_s2_ids"): _REFERENCE_ID_SOURCE,
+    ("semanticscholar", "publication", "paper_id"): _REFERENCE_ID_SOURCE,
+    ("uniprot", "idmapping", "all_mappings"): _REFERENCE_ID_SOURCE,
+    ("uniprot", "idmapping", "target_id"): _REFERENCE_ID_SOURCE,
+    ("uniprot", "idmapping", "uniprot_accession"): _REFERENCE_ID_SOURCE,
     ("uniprot", "protein", "cellular_component"): _REFERENCE_ID_SOURCE,
+    ("uniprot", "protein", "chembl_ids"): _REFERENCE_ID_SOURCE,
+    ("uniprot", "protein", "drugbank_ids"): _REFERENCE_ID_SOURCE,
     ("uniprot", "protein", "go_terms"): _REFERENCE_ID_SOURCE,
     ("uniprot", "protein", "interpro_xrefs"): _REFERENCE_ID_SOURCE,
     ("uniprot", "protein", "molecular_function"): _REFERENCE_ID_SOURCE,
     ("uniprot", "protein", "pdb_xrefs"): _REFERENCE_ID_SOURCE,
     ("uniprot", "protein", "pfam_xrefs"): _REFERENCE_ID_SOURCE,
     ("uniprot", "protein", "reactome_xrefs"): _REFERENCE_ID_SOURCE,
+    ("uniprot", "protein", "secondary_accessions"): _REFERENCE_ID_SOURCE,
 }
 
 ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
@@ -542,6 +564,8 @@ def _controlled_vocabulary_source(
         return "domain.normalization.ontology_id_prefixes"
     if "ontology id" in normalized_notes or "ontology_id" in normalizer_name:
         return "domain.normalization.ontology_id_prefixes"
+    if normalizer_name == "normalize_profile_oa_status":
+        return _OA_STATUS_SOURCE
     return ""
 
 
@@ -755,6 +779,8 @@ def _strictness(
         return "strict_json"
     if normalizer_name == "normalize_profile_boolean":
         return "strict_boolean"
+    if normalizer_name == "normalize_profile_oa_status":
+        return "strict_enum"
     return "normalization_only"
 
 

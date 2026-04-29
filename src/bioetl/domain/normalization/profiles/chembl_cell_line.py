@@ -20,8 +20,8 @@ from bioetl.domain.normalization.profiles.chembl_pseudo_nulls import (
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_cellosaurus_id,
 )
-from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 from bioetl.domain.schemas.chembl.cell_line import CellLineSchema
+from bioetl.domain.schemas.constants import ONTOLOGY_MAPPING_STATUSES
 
 from ._chembl_policy_registry import chembl_ontology_family_fields
 

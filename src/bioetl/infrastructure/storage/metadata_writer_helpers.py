@@ -247,6 +247,7 @@ def _finalize_metadata_write_operation(
 def _record_artifact_publication(
     *,
     recorder: ArtifactPublicationRecorder | None,
+    metrics: MetricsPort | None,
     layer: str,
     base_path: str | Path,
     metadata_path: str,
@@ -254,14 +255,44 @@ def _record_artifact_publication(
 ) -> None:
     """Emit the optional control-plane artifact publication callback."""
     if recorder is None:
+        if metrics is not None:
+            metrics.increment_counter(
+                "bioetl_output_artifact_publication_events_total",
+                1,
+                {
+                    "pipeline": metadata.pipeline.name,
+                    "stage": layer,
+                    "status": "disabled",
+                },
+            )
         return
     manifest_id = str(metadata.runtime.manifest_id or "").strip()
     if not manifest_id:
+        if metrics is not None:
+            metrics.increment_counter(
+                "bioetl_output_artifact_publication_events_total",
+                1,
+                {
+                    "pipeline": metadata.pipeline.name,
+                    "stage": layer,
+                    "status": "failed",
+                },
+            )
         raise RuntimeError(
             "Control-plane artifact publication requires metadata.runtime.manifest_id"
         )
     artifact_id = str(metadata.output.artifact_id or "").strip()
     if not artifact_id:
+        if metrics is not None:
+            metrics.increment_counter(
+                "bioetl_output_artifact_publication_events_total",
+                1,
+                {
+                    "pipeline": metadata.pipeline.name,
+                    "stage": layer,
+                    "status": "failed",
+                },
+            )
         raise RuntimeError(
             "Control-plane artifact publication requires metadata.output.artifact_id"
         )
@@ -294,7 +325,30 @@ def _record_artifact_publication(
         details["input_snapshot_content_hashes"] = [
             snapshot.content_hash for snapshot in input_snapshots
         ]
-    recorder(layer, str(Path(base_path).resolve()), details)
+    try:
+        recorder(layer, str(Path(base_path).resolve()), details)
+    except Exception:
+        if metrics is not None:
+            metrics.increment_counter(
+                "bioetl_output_artifact_publication_events_total",
+                1,
+                {
+                    "pipeline": metadata.pipeline.name,
+                    "stage": layer,
+                    "status": "failed",
+                },
+            )
+        raise
+    if metrics is not None:
+        metrics.increment_counter(
+            "bioetl_output_artifact_publication_events_total",
+            1,
+            {
+                "pipeline": metadata.pipeline.name,
+                "stage": layer,
+                "status": "success",
+            },
+        )
 
 
 async def _execute_prepared_metadata_write_operation(

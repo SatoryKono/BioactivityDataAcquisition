@@ -2,5 +2,5 @@
 REM Compatibility facade for the canonical Codex setup verification launcher
 
 setlocal EnableExtensions
-call "%~dp0..\..\..\ai\codex\verify_setup.bat" %*
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0verify-setup.ps1" %*
 exit /b %errorlevel%

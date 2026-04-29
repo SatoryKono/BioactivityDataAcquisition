@@ -27,6 +27,7 @@ service files, ADRs, and config fragments.
 | Document                                                | Purpose                                                                                                                                                        |
 | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [Normalization Plan P0–P6](normalization_plan_P0_P6.md) | Canonical engineering plan for RunManifest, RunLedger, runtime anchors, shipped normalization profiles, join-key normalization, and generated matrix artifacts |
+| [Test Telemetry Baseline](test-telemetry-baseline.md)   | Committed baseline surface for CI coverage and slow-test telemetry, with refresh procedure tied to main-branch artifacts                                      |
 
 ## Related published surfaces
 

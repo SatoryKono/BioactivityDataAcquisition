@@ -9,6 +9,7 @@ from bioetl.domain.mapping._publication_type_classification_support import (
     canonical_publication_type_key,
     classify_chembl_type,
     classify_provider_type,
+    classification_values,
     normalize_publication_classification_value,
     raw_publication_type,
 )
@@ -24,6 +25,7 @@ __all__ = [
     "initialize_classification",
     "is_initialized",
     "normalize_publication_classification_field",
+    "publication_classification_values",
 ]
 
 
@@ -223,6 +225,11 @@ def normalize_publication_classification_field(
         value=value,
         entries=_ENTRY_BY_SPECIFICITY,
     )
+
+
+def publication_classification_values(field_name: str) -> frozenset[str]:
+    """Return allowed values for one derived publication classification field."""
+    return classification_values(field_name, _ENTRY_BY_SPECIFICITY)
 
 
 def _get_lookup(provider: str) -> dict[str, PublicationTypeEntry] | None:

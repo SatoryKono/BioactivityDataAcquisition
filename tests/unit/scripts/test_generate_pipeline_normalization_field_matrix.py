@@ -516,6 +516,36 @@ def test_build_field_matrix_rows_exposes_non_chembl_governance_sources() -> None
         "domain.normalization.reference_ids"
     )
     assert openalex_ror_ids["semantic_category"] == "ontology_reference_identifier"
+    assert openalex_ror_ids["hash_ordering"] == "set_like"
+
+    openalex_author_ids = _row(rows, "openalex_publication", "author_openalex_ids")
+    assert (
+        openalex_author_ids["normalizer"]
+        == "normalize_profile_openalex_author_ids"
+    )
+    assert openalex_author_ids["controlled_vocabulary_source"] == (
+        "domain.normalization.reference_ids"
+    )
+    assert openalex_author_ids["hash_ordering"] == "set_like"
+
+    openalex_oa_status = _row(rows, "openalex_publication", "oa_status")
+    assert openalex_oa_status["normalizer"] == "normalize_profile_oa_status"
+    assert openalex_oa_status["controlled_vocabulary_source"] == (
+        "domain.schemas.common.publication_base.OA_STATUS_VALUES"
+    )
+    assert openalex_oa_status["strictness"] == "strict_enum"
+
+    semanticscholar_author_ids = _row(
+        rows,
+        "semanticscholar_publication",
+        "author_s2_ids",
+    )
+    assert semanticscholar_author_ids["normalizer"] == (
+        "normalize_profile_semantic_scholar_ids"
+    )
+    assert semanticscholar_author_ids["controlled_vocabulary_source"] == (
+        "domain.normalization.reference_ids"
+    )
 
     uniprot_go_terms = _row(rows, "uniprot_protein", "go_terms")
     assert uniprot_go_terms["normalizer"] == "normalize_profile_uniprot_go_references"
@@ -523,6 +553,13 @@ def test_build_field_matrix_rows_exposes_non_chembl_governance_sources() -> None
         "domain.normalization.reference_ids"
     )
     assert uniprot_go_terms["semantic_category"] == "ontology_reference_identifier"
+
+    uniprot_all_mappings = _row(rows, "uniprot_idmapping", "all_mappings")
+    assert (
+        uniprot_all_mappings["normalizer"]
+        == "normalize_profile_uniprot_accessions"
+    )
+    assert uniprot_all_mappings["hash_ordering"] == "set_like"
 
 
 def test_build_field_matrix_rows_keeps_chembl_cell_line_policy_fields_visible() -> None:

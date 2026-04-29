@@ -8,6 +8,12 @@ from bioetl.domain.normalization.profiles._publication_classification_rules impo
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_oa_status,
+    normalize_profile_orcid_ids,
+    normalize_profile_semantic_scholar_id,
+    normalize_profile_semantic_scholar_ids,
+)
 from bioetl.domain.schemas.semanticscholar.publication import (
     SemanticScholarPublicationSchema,
 )
@@ -89,6 +95,25 @@ _JSON_STRING_FIELDS = frozenset(
         "subject_fields",
     }
 )
+_SPECIAL_RULES = {
+    **publication_classification_rules(),
+    "author_orcids": (
+        normalize_profile_orcid_ids,
+        "Canonicalize ORCID identifiers inside a set-like canonical JSON array.",
+    ),
+    "author_s2_ids": (
+        normalize_profile_semantic_scholar_ids,
+        "Canonicalize Semantic Scholar author identifiers inside a set-like canonical JSON array.",
+    ),
+    "oa_status": (
+        normalize_profile_oa_status,
+        "Normalize OA status against the shared publication OA-status registry.",
+    ),
+    "paper_id": (
+        normalize_profile_semantic_scholar_id,
+        "Canonicalize Semantic Scholar paper identifier through the shared ID registry.",
+    ),
+}
 
 SEMANTICSCHOLAR_PUBLICATION_PROFILE = build_standard_profile(
     profile_name="semanticscholar.publication",
@@ -105,7 +130,7 @@ SEMANTICSCHOLAR_PUBLICATION_PROFILE = build_standard_profile(
     boolean_fields=_BOOLEAN_FIELDS,
     set_like_fields=_SET_LIKE_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
-    special_rules=publication_classification_rules(),
+    special_rules=_SPECIAL_RULES,
 )
 
 SEMANTICSCHOLAR_PUBLICATION_PROFILE.assert_covers_schema(

@@ -77,6 +77,7 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [repository-file-structure-remediation-plan-2026-04-28.md](repository-file-structure-remediation-plan-2026-04-28.md)
 - [scripts-cli-wrapper-caller-matrix-2026-04-28.md](scripts-cli-wrapper-caller-matrix-2026-04-28.md)
 - [codex-launcher-parity-review-2026-04-28.md](codex-launcher-parity-review-2026-04-28.md)
+- [codex-launcher-parity-refresh-2026-04-29.md](codex-launcher-parity-refresh-2026-04-29.md)
 - [docs-cli-wrapper-closeout-2026-04-28.md](docs-cli-wrapper-closeout-2026-04-28.md)
 - [mcp-wrapper-contract-audit-2026-04-28.md](mcp-wrapper-contract-audit-2026-04-28.md)
 - [build-docs-site-parity-audit-2026-04-29.md](build-docs-site-parity-audit-2026-04-29.md)
@@ -89,6 +90,8 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [temporary-diagnostic-ttl-wave-1-closeout-2026-04-29.md](temporary-diagnostic-ttl-wave-1-closeout-2026-04-29.md)
 - [temporary-diagnostic-ttl-wave-2-closeout-2026-04-29.md](temporary-diagnostic-ttl-wave-2-closeout-2026-04-29.md)
 - [temporary-diagnostic-ttl-wave-3-closeout-2026-04-29.md](temporary-diagnostic-ttl-wave-3-closeout-2026-04-29.md)
+- [temporary-diagnostic-program-closeout-2026-04-29.md](temporary-diagnostic-program-closeout-2026-04-29.md)
+- [scripts-normalization-program-closeout-2026-04-29.md](scripts-normalization-program-closeout-2026-04-29.md)
 
 Earlier operational context files such as
 `onboarding-checklist-day-1-2026-03-20.md` and
@@ -149,6 +152,12 @@ classification note for `scripts/ops/launchers/codex/*`. It distinguishes thin
 compatibility wrappers from retained bootstrap and transport adapters so the
 scripts cleanup wave does not treat the entire launcher cluster as removable by
 default.
+
+The Codex launcher parity refresh was added on `2026-04-29` after a live body
+review found Windows-facing compatibility drift to non-existent
+`launch.bat` / `verify_setup.*` targets. It records the bounded fix:
+preserving the retained launcher surface while re-pointing compatibility
+wrappers to existing canonical transport and verification paths.
 
 The docs CLI wrapper closeout note was added on `2026-04-28` as the bounded
 closeout artifact for the `scripts/docs` wrapper wave. It records the removal
@@ -213,6 +222,18 @@ record the third execution wave: a zero-reference duplicate WSL helper and a
 zero-reference Grafana tracing smoke script were removed, while
 `scripts/memory/mcp_smoke.py` was reclassified as a compatibility shim in the
 `supporting` bucket.
+
+The temporary diagnostic program closeout note was added on `2026-04-29` to
+record the final end state of the TTL effort: `temporary_diagnostic=0`, with
+the remaining documented operator commands promoted to `active`, helper/shim
+surfaces moved to `supporting`, and the last dead launcher removed.
+
+The scripts normalization program closeout note was added on `2026-04-29` as
+the top-level completion artifact for the entire scripts cleanup and
+reclassification program. It records the end state `scripts=354`,
+`active=325`, `supporting=29`, `temporary_diagnostic=0`, `orphan=0`,
+`unknown=0`, `legacy=0`, and marks future work as targeted parity/redesign or
+caller-audit maintenance rather than generic cleanup.
 
 ### Retained Historical Context With Live Evidence References
 

@@ -3,14 +3,30 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.contracts.gold._strict_gold_contract_schema import (
     StrictGoldContractSchema,
 )
+from bioetl.domain.mapping.publication_type_classification import (
+    publication_classification_values,
+)
 from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS
 from bioetl.domain.validation import DOI_REGEX_PATTERN
+
+
+def _check_classification_values(
+    series: Series[str],
+    *,
+    field_name: str,
+) -> Series[bool]:
+    allowed = publication_classification_values(field_name)
+    if not allowed:
+        return cast(Series[bool], series.isna() | series.notna())
+    return cast(Series[bool], series.isna() | series.isin(allowed))
 
 
 class PublicationGoldCommonSchema(StrictGoldContractSchema):
@@ -49,6 +65,24 @@ class PublicationGoldCommonSchema(StrictGoldContractSchema):
         isin=LOOKUP_METHODS,
     )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+
+    @pa.check("publication_type_unified", name="publication_type_unified_taxonomy")
+    def _check_publication_type_unified(cls, series: Series[str]) -> Series[bool]:
+        """Validate derived unified publication type against loaded taxonomy."""
+        return _check_classification_values(
+            series,
+            field_name="publication_type_unified",
+        )
+
+    @pa.check("publication_subclass", name="publication_subclass_taxonomy")
+    def _check_publication_subclass(cls, series: Series[str]) -> Series[bool]:
+        """Validate derived publication subclass against loaded taxonomy."""
+        return _check_classification_values(series, field_name="publication_subclass")
+
+    @pa.check("publication_class", name="publication_class_taxonomy")
+    def _check_publication_class(cls, series: Series[str]) -> Series[bool]:
+        """Validate derived publication class against loaded taxonomy."""
+        return _check_classification_values(series, field_name="publication_class")
 
 
 __all__ = ["PublicationGoldCommonSchema"]

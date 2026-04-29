@@ -269,10 +269,47 @@
     "required": true,
     "unique": false
   },
+  "bao_format_iri": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^https?://[^\\s]+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Persistent IRI for the BAO format ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "bao_format_mapping_status": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "BAO format IRI mapping status.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "bao_label": {
     "checks": [],
     "coerce": false,
     "description": "BAO label.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "bao_ontology_version": {
+    "checks": [],
+    "coerce": false,
+    "description": "BAO ontology release/version used for IRI mapping.",
     "dtype": "str",
     "nullable": true,
     "required": false,

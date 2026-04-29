@@ -433,7 +433,10 @@ def test_chembl_assay_bao_identifier_and_label_aliases_keep_hash_stable() -> Non
         {
             "assay_id": "CHEMBL123",
             "bao_format": " bao:0000357 ",
+            "bao_format_iri": None,
+            "bao_format_mapping_status": None,
             "bao_label": "  noisy label  ",
+            "bao_ontology_version": None,
             "assay_type": "B",
         }
     )
@@ -441,12 +444,18 @@ def test_chembl_assay_bao_identifier_and_label_aliases_keep_hash_stable() -> Non
         {
             "assay_id": "CHEMBL123",
             "bao_format": "BAO_0000357",
+            "bao_format_iri": "https://purl.obolibrary.org/obo/BAO_0000357",
+            "bao_format_mapping_status": "mapped",
             "bao_label": "single protein format",
+            "bao_ontology_version": "2.8.18a",
             "assay_type": "B",
         }
     )
 
     assert record_a["bao_format"] == "BAO_0000357"
+    assert record_a["bao_format_mapping_status"] == "mapped"
+    assert record_a["bao_format_iri"] == "https://purl.obolibrary.org/obo/BAO_0000357"
+    assert record_a["bao_ontology_version"] == "2.8.18a"
     assert record_a["bao_label"] == "single protein format"
     assert record_a == record_b
     assert processor.compute_content_hash(record_a) == processor.compute_content_hash(
@@ -504,6 +513,41 @@ def test_chembl_cell_line_cellosaurus_aliases_keep_hash_stable() -> None:
     )
 
     assert record_a["cellosaurus_id"] == "CVCL_0030"
+    assert record_a == record_b
+    assert processor.compute_content_hash(record_a) == processor.compute_content_hash(
+        record_b
+    )
+
+
+def test_chembl_tissue_obo_companion_aliases_keep_hash_stable() -> None:
+    """OBO companion fields must resolve from normalized sibling IDs."""
+    processor = RecordNormalizationProcessor(provider="chembl", entity_type="tissue")
+
+    record_a = processor.normalize_business_data(
+        {
+            "tissue_id": "CHEMBL1",
+            "pref_name": "Amniotic fluid",
+            "bto_id": " bto:0000068 ",
+            "bto_iri": None,
+            "bto_mapping_status": None,
+            "bto_ontology_version": None,
+        }
+    )
+    record_b = processor.normalize_business_data(
+        {
+            "tissue_id": "CHEMBL1",
+            "pref_name": "Amniotic fluid",
+            "bto_id": "BTO_0000068",
+            "bto_iri": "https://purl.obolibrary.org/obo/BTO_0000068",
+            "bto_mapping_status": "mapped",
+            "bto_ontology_version": "2026-01-16",
+        }
+    )
+
+    assert record_a["bto_id"] == "BTO_0000068"
+    assert record_a["bto_mapping_status"] == "mapped"
+    assert record_a["bto_iri"] == "https://purl.obolibrary.org/obo/BTO_0000068"
+    assert record_a["bto_ontology_version"] == "2026-01-16"
     assert record_a == record_b
     assert processor.compute_content_hash(record_a) == processor.compute_content_hash(
         record_b

@@ -91,9 +91,7 @@ def build_obo_companion_mapping_status_normalizer(
             return _normalize_mapping_status(value)
         return _resolve(record, spec=spec).status
 
-    _normalizer.__name__ = (
-        f"normalize_profile_{source_field}_companion_mapping_status"
-    )
+    _normalizer.__name__ = f"normalize_profile_{source_field}_companion_mapping_status"
     return _normalizer
 
 

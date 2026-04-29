@@ -9,9 +9,15 @@ from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_issn_id,
+    normalize_profile_oa_status,
+    normalize_profile_openalex_author_ids,
+    normalize_profile_openalex_institution_ids,
     normalize_profile_openalex_ror_ids,
     normalize_profile_openalex_topic,
     normalize_profile_openalex_topics,
+    normalize_profile_openalex_work_id,
+    normalize_profile_orcid_ids,
 )
 from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
 
@@ -90,6 +96,30 @@ _JSON_STRING_FIELDS = frozenset(
 )
 _SPECIAL_RULES = {
     **publication_classification_rules(),
+    "author_openalex_ids": (
+        normalize_profile_openalex_author_ids,
+        "Canonicalize OpenAlex author identifiers inside a set-like canonical JSON array.",
+    ),
+    "author_orcids": (
+        normalize_profile_orcid_ids,
+        "Canonicalize ORCID identifiers inside a set-like canonical JSON array.",
+    ),
+    "institution_ids": (
+        normalize_profile_openalex_institution_ids,
+        "Canonicalize OpenAlex institution identifiers inside a set-like canonical JSON array.",
+    ),
+    "issn": (
+        normalize_profile_issn_id,
+        "Canonicalize ISSN identifier to the shared publication identifier policy.",
+    ),
+    "oa_status": (
+        normalize_profile_oa_status,
+        "Normalize OA status against the shared publication OA-status registry.",
+    ),
+    "openalex_id": (
+        normalize_profile_openalex_work_id,
+        "Canonicalize OpenAlex work identifier through the shared ID registry.",
+    ),
     "primary_topic": (
         normalize_profile_openalex_topic,
         "Canonicalize OpenAlex primary-topic reference identifier inside a canonical JSON object.",

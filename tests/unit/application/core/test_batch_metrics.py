@@ -159,6 +159,95 @@ class TestTrackBatchSize:
         assert mock_metrics.observe_histogram.call_count == 3
 
 
+@pytest.mark.unit
+class TestTrackBatchLifecycle:
+    """Tests for bounded batch lifecycle projections."""
+
+    def test_track_batch_created_records_event_and_record_count(
+        self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
+    ) -> None:
+        recorder.track_batch_created(stage="bronze", count=10)
+
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_batch_lifecycle_events_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "event": "created",
+                "stage": "bronze",
+                "status": "success",
+            },
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_batch_lifecycle_records_total",
+            10,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "event": "created",
+                "stage": "bronze",
+                "status": "success",
+            },
+        )
+
+    def test_track_batch_written_records_event_and_record_count(
+        self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
+    ) -> None:
+        recorder.track_batch_written(stage="silver", count=7)
+
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_batch_lifecycle_events_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "event": "written",
+                "stage": "silver",
+                "status": "success",
+            },
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_batch_lifecycle_records_total",
+            7,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "event": "written",
+                "stage": "silver",
+                "status": "success",
+            },
+        )
+
+    def test_track_batch_failed_records_failed_lifecycle_projection(
+        self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
+    ) -> None:
+        recorder.track_batch_failed(stage="gold", count=3)
+
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_batch_lifecycle_events_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "event": "failed",
+                "stage": "gold",
+                "status": "failed",
+            },
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_batch_lifecycle_records_total",
+            3,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "event": "failed",
+                "stage": "gold",
+                "status": "failed",
+            },
+        )
+
+
 # ---------------------------------------------------------------------------
 # Tests: track_processed_records
 # ---------------------------------------------------------------------------

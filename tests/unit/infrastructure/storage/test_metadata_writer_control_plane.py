@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 import pytest
@@ -164,7 +164,8 @@ def _make_gold_metadata() -> GoldMetadata:
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_write_bronze_metadata_records_artifact_publication() -> None:
-    writer = MetadataWriter(logger=NoOpLogger())
+    metrics = MagicMock()
+    writer = MetadataWriter(logger=NoOpLogger(), metrics=metrics)
     captured: list[tuple[str, str, dict[str, object] | None]] = []
     metadata = _make_bronze_metadata()
     writer.attach_artifact_recorder(
@@ -199,6 +200,79 @@ async def test_write_bronze_metadata_records_artifact_publication() -> None:
     assert details["provider"] == "chembl"
     assert details["dataset_ref"] == "bronze_batch:batch-1"
     assert details["lineage_fragment_id"] == "bronze:fragment-1"
+    metrics.increment_counter.assert_any_call(
+        "bioetl_output_artifact_publication_events_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "stage": "bronze",
+            "status": "success",
+        },
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_bronze_metadata_tracks_disabled_publication_when_no_recorder() -> None:
+    metrics = MagicMock()
+    writer = MetadataWriter(logger=NoOpLogger(), metrics=metrics)
+    metadata = _make_bronze_metadata()
+
+    with patch(
+        "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+        side_effect=_fake_atomic_write_text,
+    ):
+        await writer.write_bronze_metadata(
+            base_path="/virtual/output/bronze/chembl/activity",
+            metadata=metadata,
+            provider="chembl",
+            entity="activity",
+        )
+
+    metrics.increment_counter.assert_any_call(
+        "bioetl_output_artifact_publication_events_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "stage": "bronze",
+            "status": "disabled",
+        },
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_write_bronze_metadata_tracks_failed_publication_when_recorder_raises() -> None:
+    metrics = MagicMock()
+    writer = MetadataWriter(logger=NoOpLogger(), metrics=metrics)
+    metadata = _make_bronze_metadata()
+    writer.attach_artifact_recorder(
+        lambda layer, artifact_path, details=None: (_ for _ in ()).throw(
+            RuntimeError("boom")
+        )
+    )
+
+    with patch(
+        "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
+        side_effect=_fake_atomic_write_text,
+    ):
+        with pytest.raises(RuntimeError, match="boom"):
+            await writer.write_bronze_metadata(
+                base_path="/virtual/output/bronze/chembl/activity",
+                metadata=metadata,
+                provider="chembl",
+                entity="activity",
+            )
+
+    metrics.increment_counter.assert_any_call(
+        "bioetl_output_artifact_publication_events_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "stage": "bronze",
+            "status": "failed",
+        },
+    )
 
 
 @pytest.mark.unit

@@ -53,6 +53,7 @@ def create_runner(
     runtime: CompositeRuntimeConfig | None = None,
     manifest_id: str | None = None,
     run_ledger_service: MagicMock | None = None,
+    metrics: MagicMock | None = None,
 ) -> CompositePipelineRunner:
     """Create a CompositePipelineRunner for testing."""
     if seed_runner is None:
@@ -80,6 +81,7 @@ def create_runner(
             run_id=run_id,
         ),
         manifest_id=manifest_id,
+        metrics=metrics,
         run_ledger_service=run_ledger_service,
     )
     return CompositePipelineRunner(
@@ -241,6 +243,46 @@ class TestFSMSeedStateTransitions:
                 "records_enriched": 0,
                 "records_fully_enriched": 0,
             }
+        )
+
+    @pytest.mark.asyncio
+    async def test_records_composite_phase_metric_families_for_successful_run(self):
+        """Composite runner emits bounded composite phase counters on success."""
+        checkpoint_manager = create_mock_checkpoint_manager()
+        metrics = MagicMock()
+        runner = create_runner(
+            checkpoint_manager=checkpoint_manager,
+            metrics=metrics,
+        )
+
+        await runner.run()
+
+        metrics.increment_counter.assert_any_call(
+            "bioetl_composite_phase_records_total",
+            100,
+            {
+                "pipeline": "composite:test_composite",
+                "phase": "seed",
+                "outcome": "extracted",
+            },
+        )
+        metrics.increment_counter.assert_any_call(
+            "bioetl_composite_phase_loss_total",
+            5,
+            {
+                "pipeline": "composite:test_composite",
+                "phase": "seed",
+                "loss_kind": "unwritten",
+            },
+        )
+        metrics.increment_counter.assert_any_call(
+            "bioetl_composite_phase_records_total",
+            100,
+            {
+                "pipeline": "composite:test_composite",
+                "phase": "merge",
+                "outcome": "merged",
+            },
         )
 
     @pytest.mark.asyncio

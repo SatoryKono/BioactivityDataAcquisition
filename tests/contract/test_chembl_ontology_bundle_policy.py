@@ -53,16 +53,12 @@ def test_non_activity_ontology_bundles_publish_mapping_status_and_bundle_rules(
     id_field: str,
 ) -> None:
     dq_config = DQConfigLoader(Path("configs")).load("chembl", entity)
-    status_field, iri_field, version_field = _EXPECTED_BUNDLE_RULES[
-        (entity, id_field)
-    ]
+    status_field, iri_field, version_field = _EXPECTED_BUNDLE_RULES[(entity, id_field)]
 
     cross_rule_name = f"{id_field}_requires_mapping_status"
     conditional_rule_name = f"mapped_{id_field}_requires_bundle"
     cross_rules = {rule.name: rule for rule in dq_config.cross_field_validations}
-    conditional_rules = {
-        rule.name: rule for rule in dq_config.conditional_validations
-    }
+    conditional_rules = {rule.name: rule for rule in dq_config.conditional_validations}
 
     assert cross_rule_name in cross_rules
     cross_rule = cross_rules[cross_rule_name]

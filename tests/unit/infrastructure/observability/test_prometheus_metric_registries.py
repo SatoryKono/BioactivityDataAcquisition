@@ -83,7 +83,7 @@ def test_metric_definition_exports_remain_stable() -> None:
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
     # This ratchet intentionally changes only when we add/remove public metrics.
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 130
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 137
 
 
 @pytest.mark.unit
@@ -190,6 +190,40 @@ def test_dq_and_circuit_breaker_diagnostic_metrics_use_bounded_labels() -> None:
             "terminal_status",
         },
         "bioetl_circuit_breaker_open_total": {"adapter"},
+    }
+
+    for metric_name, labels in expected_counter_labels.items():
+        actual_labels = set(COUNTERS[metric_name]._labelnames)
+        assert actual_labels == labels
+        assert _FORBIDDEN_LABELS.isdisjoint(actual_labels)
+
+
+@pytest.mark.unit
+def test_new_batch_artifact_and_composite_metrics_use_bounded_labels() -> None:
+    expected_counter_labels = {
+        "bioetl_batch_lifecycle_events_total": {
+            "pipeline",
+            "run_type",
+            "event",
+            "stage",
+            "status",
+        },
+        "bioetl_batch_lifecycle_records_total": {
+            "pipeline",
+            "run_type",
+            "event",
+            "stage",
+            "status",
+        },
+        "bioetl_output_artifact_publication_events_total": {
+            "pipeline",
+            "stage",
+            "status",
+        },
+        "bioetl_composite_phase_records_total": {"pipeline", "phase", "outcome"},
+        "bioetl_composite_phase_errors_total": {"pipeline", "phase", "error_kind"},
+        "bioetl_composite_phase_loss_total": {"pipeline", "phase", "loss_kind"},
+        "bioetl_composite_phase_retries_total": {"pipeline", "phase", "retry_kind"},
     }
 
     for metric_name, labels in expected_counter_labels.items():

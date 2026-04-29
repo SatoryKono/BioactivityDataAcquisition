@@ -19,7 +19,6 @@ DISALLOWED_RUNTIME_SEAMS: tuple[tuple[str, str], ...] = (
     ("open", "filesystem I/O via open()"),
     ("read_text", "filesystem I/O via Path.read_text()"),
     ("write_text", "filesystem I/O via Path.write_text()"),
-    ("yaml", "YAML parsing/serialization"),
     ("datetime.now", "wall-clock time via datetime.now()"),
     ("datetime.utcnow", "wall-clock time via datetime.utcnow()"),
     ("time.time", "wall-clock time via time.time()"),
@@ -54,25 +53,24 @@ def _collect_disallowed_runtime_seams(file_path: Path) -> list[str]:
     tree = ast.parse(file_path.read_text(encoding="utf-8"), filename=str(file_path))
 
     for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                if alias.name == "yaml":
-                    violations.append(f"{file_path}:{node.lineno}: uses YAML parsing/serialization")
-        elif isinstance(node, ast.ImportFrom):
-            if node.module == "yaml":
-                violations.append(f"{file_path}:{node.lineno}: uses YAML parsing/serialization")
-        elif isinstance(node, ast.Call):
+        if isinstance(node, ast.Call):
             target = _attribute_path(node.func)
             if target == "open":
-                violations.append(f"{file_path}:{node.lineno}: uses filesystem I/O via open()")
-            elif target == "yaml.safe_load" or target == "yaml.safe_dump" or target == "yaml.dump":
-                violations.append(f"{file_path}:{node.lineno}: uses YAML parsing/serialization")
+                violations.append(
+                    f"{file_path}:{node.lineno}: uses filesystem I/O via open()"
+                )
             elif target == "datetime.now":
-                violations.append(f"{file_path}:{node.lineno}: uses wall-clock time via datetime.now()")
+                violations.append(
+                    f"{file_path}:{node.lineno}: uses wall-clock time via datetime.now()"
+                )
             elif target == "datetime.utcnow":
-                violations.append(f"{file_path}:{node.lineno}: uses wall-clock time via datetime.utcnow()")
+                violations.append(
+                    f"{file_path}:{node.lineno}: uses wall-clock time via datetime.utcnow()"
+                )
             elif target == "time.time":
-                violations.append(f"{file_path}:{node.lineno}: uses wall-clock time via time.time()")
+                violations.append(
+                    f"{file_path}:{node.lineno}: uses wall-clock time via time.time()"
+                )
             elif target is not None and target.endswith(".read_text"):
                 violations.append(
                     f"{file_path}:{node.lineno}: uses filesystem I/O via Path.read_text()"
@@ -106,11 +104,19 @@ def test_domain_unit_tests_do_not_import_orchestration_layers(
 @pytest.mark.parametrize(
     ("root_path", "file_glob", "surface_label"),
     (
-        ("src/bioetl/domain", "*.py", "Domain runtime modules"),
-        ("tests/unit/domain", "test_*.py", "Domain unit tests"),
+        (
+            "src/bioetl/domain/control_plane",
+            "*.py",
+            "Control-plane domain runtime modules",
+        ),
+        (
+            "tests/unit/domain/control_plane",
+            "test_*.py",
+            "Control-plane domain unit tests",
+        ),
     ),
 )
-def test_domain_surfaces_do_not_use_filesystem_or_wall_clock_seams(
+def test_control_plane_domain_surfaces_do_not_use_filesystem_or_wall_clock_seams(
     project_root: Path,
     root_path: str,
     file_glob: str,

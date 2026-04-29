@@ -589,10 +589,12 @@ class TestCheckpointCompatibilityServiceEdgeCases:
 
         result = self.service.validate_checkpoint_compatibility(current, checkpoint)
 
-        # Should not crash but will consider versions different
-        assert result.compatible is False  # Different versions make it incompatible
+        assert result.compatible is False
         assert result.dq_compatible is True
         assert result.pipeline_compatible is False
+        assert result.execution_identity_compatible is False
+        assert result.identity_continuity_proven is True
+        assert any("Pipeline version mismatch" in msg for msg in result.messages)
 
     def test_none_values(self) -> None:
         """Test with None values in metadata."""

@@ -184,6 +184,8 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_stage_records_total`       | Counter   | pipeline, run_type, stage, outcome | Canonical stage-model projection для input/ingestion/transform/validation/storage/output |
 | `bioetl_stage_backlog_records`     | Gauge     | pipeline, run_type, stage         | Текущий bounded backlog по canonical stage |
 | `bioetl_stage_lag_seconds`         | Gauge     | pipeline, run_type, stage         | Текущий bounded lag для unresolved stage backlog |
+| `bioetl_batch_lifecycle_events_total` | Counter | pipeline, run_type, event, stage, status | Bounded batch lifecycle events for `created` / `written` / `failed` |
+| `bioetl_batch_lifecycle_records_total` | Counter | pipeline, run_type, event, stage, status | Record counts projected through the same bounded batch lifecycle labels |
 | `bioetl_errors_total`              | Counter   | pipeline, stage, error_code       | Количество ошибок       |
 | `bioetl_batch_size_records`        | Histogram | pipeline, stage                   | Размер батчей           |
 | `bioetl_pipeline_runs_total`       | Counter   | pipeline, run_type, status        | Количество запусков     |
@@ -263,9 +265,14 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_lineage_fragments_emitted_total`       | Counter   | pipeline, layer, status                  | Попытки публикации lineage fragments                                                                      |
 | `bioetl_lineage_refs_missing_total`            | Counter   | pipeline, layer, ref_type                | Missing upstream lineage references during persistence                                                    |
 | `bioetl_composite_source_selection_total`      | Counter   | pipeline, decision_type, selected_source | Low-cardinality composite source-selection decisions during composite persistence                         |
+| `bioetl_output_artifact_publication_events_total` | Counter | pipeline, stage, status                | Bounded output artifact publication outcomes for medallion metadata sidecars                             |
 | `bioetl_control_plane_reads_total`             | Counter   | store, operation, status                 | Срез успехов/промахов/провалов manifest/ledger/lineage lookup-путей                                       |
 | `bioetl_metrics_publication_events_total`      | Counter   | pipeline, run_type, target, status       | Best-effort metrics publication attempts for endpoint / Pushgateway and their bounded outcomes             |
 | `bioetl_observability_runtime_status`          | Gauge     | pipeline, component, mode                | Active runtime mode for `logger`, `metrics`, `tracing`, `audit`, and `dq_monitor` components              |
+| `bioetl_composite_phase_records_total`         | Counter   | pipeline, phase, outcome                 | Bounded composite-phase record counters for `seed`, `dependencies`, `enrichment`, `merge`                 |
+| `bioetl_composite_phase_errors_total`          | Counter   | pipeline, phase, error_kind              | Bounded composite-phase error counters (`failed`, `timeout`, `record_error`)                              |
+| `bioetl_composite_phase_loss_total`            | Counter   | pipeline, phase, loss_kind               | Bounded composite-phase loss counters (`unwritten`, `not_found`, `partially_enriched`, `quarantined`)     |
+| `bioetl_composite_phase_retries_total`         | Counter   | pipeline, phase, retry_kind              | Bounded composite-phase retry/resume counters                                                              |
 
 > Guardrail: для control-plane/traceability метрик нельзя использовать
 > `run_id`, `manifest_id`, paths и другие high-cardinality идентификаторы как

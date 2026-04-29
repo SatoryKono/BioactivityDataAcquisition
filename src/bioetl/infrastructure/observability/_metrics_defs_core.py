@@ -10,7 +10,13 @@ from bioetl.infrastructure.observability.circuit_breaker_mapping import (
 
 __all__ = sorted(
     [
+        "BATCH_LIFECYCLE_EVENTS_TOTAL",
+        "BATCH_LIFECYCLE_RECORDS_TOTAL",
         "BATCH_SIZE_RECORDS",
+        "COMPOSITE_PHASE_ERRORS_TOTAL",
+        "COMPOSITE_PHASE_LOSS_TOTAL",
+        "COMPOSITE_PHASE_RECORDS_TOTAL",
+        "COMPOSITE_PHASE_RETRIES_TOTAL",
         "CIRCUIT_BREAKER_FAILURE_TOTAL",
         "CIRCUIT_BREAKER_OPEN_TOTAL",
         "CIRCUIT_BREAKER_STATE",
@@ -34,6 +40,7 @@ __all__ = sorted(
         "FILTER_IDS_LOADED_TOTAL",
         "METRICS_PUBLICATION_EVENTS_TOTAL",
         "OBSERVABILITY_RUNTIME_STATUS",
+        "OUTPUT_ARTIFACT_PUBLICATION_EVENTS_TOTAL",
         "PIPELINE_DURATION_SECONDS",
         "QUARANTINE_OPERATOR_DURATION_SECONDS",
         "QUARANTINE_OPERATOR_OPERATIONS_TOTAL",
@@ -89,6 +96,48 @@ STAGE_LAG_SECONDS = Gauge(
     "bioetl_stage_lag_seconds",
     "Current bounded unresolved stage lag in seconds for canonical stage backlogs",
     ["pipeline", "run_type", "stage"],
+)
+
+BATCH_LIFECYCLE_EVENTS_TOTAL = Counter(
+    "bioetl_batch_lifecycle_events_total",
+    "Total bounded batch lifecycle events projected by layer stage and outcome status",
+    ["pipeline", "run_type", "event", "stage", "status"],
+)
+
+BATCH_LIFECYCLE_RECORDS_TOTAL = Counter(
+    "bioetl_batch_lifecycle_records_total",
+    "Total records associated with bounded batch lifecycle event projections",
+    ["pipeline", "run_type", "event", "stage", "status"],
+)
+
+OUTPUT_ARTIFACT_PUBLICATION_EVENTS_TOTAL = Counter(
+    "bioetl_output_artifact_publication_events_total",
+    "Total bounded output artifact publication outcomes by stage and status",
+    ["pipeline", "stage", "status"],
+)
+
+COMPOSITE_PHASE_RECORDS_TOTAL = Counter(
+    "bioetl_composite_phase_records_total",
+    "Total bounded record projections across canonical composite phases",
+    ["pipeline", "phase", "outcome"],
+)
+
+COMPOSITE_PHASE_ERRORS_TOTAL = Counter(
+    "bioetl_composite_phase_errors_total",
+    "Total bounded error projections across canonical composite phases",
+    ["pipeline", "phase", "error_kind"],
+)
+
+COMPOSITE_PHASE_LOSS_TOTAL = Counter(
+    "bioetl_composite_phase_loss_total",
+    "Total bounded loss projections across canonical composite phases",
+    ["pipeline", "phase", "loss_kind"],
+)
+
+COMPOSITE_PHASE_RETRIES_TOTAL = Counter(
+    "bioetl_composite_phase_retries_total",
+    "Total bounded retry or resume projections across canonical composite phases",
+    ["pipeline", "phase", "retry_kind"],
 )
 
 ERRORS_TOTAL = Counter(
