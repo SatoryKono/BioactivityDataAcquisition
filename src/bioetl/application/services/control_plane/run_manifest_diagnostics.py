@@ -61,6 +61,15 @@ class _BaseSummaryReplayContext:
     policy_assessment: ReproducibilityPolicyAssessment
 
 
+_EMPTY_RESUME_ANCHOR_COMPARISON = {
+    "checkpoint_identity_present": False,
+    "matching_fields": [],
+    "mismatched_fields": [],
+    "missing_current_fields": [],
+    "missing_checkpoint_fields": [],
+}
+
+
 def _resolve_base_summary_replay_context(
     manifest: RunManifest,
 ) -> _BaseSummaryReplayContext:
@@ -386,45 +395,30 @@ def _build_resume_anchor_comparison(
     """Compare current and checkpoint identities from persisted resume diagnostics."""
     resume_diagnostics = summary.get("resume_diagnostics")
     if not isinstance(resume_diagnostics, dict):
-        return {
-            "checkpoint_identity_present": False,
-            "matching_fields": [],
-            "mismatched_fields": [],
-            "missing_current_fields": [],
-            "missing_checkpoint_fields": [],
-        }
+        return dict(_EMPTY_RESUME_ANCHOR_COMPARISON)
     current_identity = resume_diagnostics.get("current_identity")
     checkpoint_identity = resume_diagnostics.get("checkpoint_identity")
     if not isinstance(current_identity, dict) or not isinstance(
         checkpoint_identity, dict
     ):
-        return {
-            "checkpoint_identity_present": False,
-            "matching_fields": [],
-            "mismatched_fields": [],
-            "missing_current_fields": [],
-            "missing_checkpoint_fields": [],
-        }
+        return dict(_EMPTY_RESUME_ANCHOR_COMPARISON)
 
     fields = sorted(set(current_identity) | set(checkpoint_identity))
-    matching_fields = [
-        field
-        for field in fields
-        if field in current_identity
-        and field in checkpoint_identity
-        and current_identity[field] == checkpoint_identity[field]
-    ]
-    mismatched_fields = [
-        field
-        for field in fields
-        if field in current_identity
-        and field in checkpoint_identity
-        and current_identity[field] != checkpoint_identity[field]
+    present_in_both = [
+        field for field in fields if field in current_identity and field in checkpoint_identity
     ]
     return {
         "checkpoint_identity_present": True,
-        "matching_fields": matching_fields,
-        "mismatched_fields": mismatched_fields,
+        "matching_fields": [
+            field
+            for field in present_in_both
+            if current_identity[field] == checkpoint_identity[field]
+        ],
+        "mismatched_fields": [
+            field
+            for field in present_in_both
+            if current_identity[field] != checkpoint_identity[field]
+        ],
         "missing_current_fields": [
             field for field in fields if field not in current_identity
         ],

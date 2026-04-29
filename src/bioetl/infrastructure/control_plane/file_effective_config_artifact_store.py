@@ -226,9 +226,7 @@ def _flatten_occurrence_payload(payload: dict[str, object] | None) -> dict[str, 
     if payload is None:
         return {}
     flattened = {
-        key: value
-        for key, value in payload.items()
-        if key != _OCCURRENCE_ENVELOPE_KEY
+        key: value for key, value in payload.items() if key != _OCCURRENCE_ENVELOPE_KEY
     }
     occurrence_envelope = payload.get(_OCCURRENCE_ENVELOPE_KEY)
     if isinstance(occurrence_envelope, dict):

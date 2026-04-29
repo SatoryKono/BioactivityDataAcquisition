@@ -186,13 +186,12 @@ def normalize_profile_mapping_status(
     if not isinstance(value, str):
         return None
     cleaned = normalize_string(value)
-    return (
-        None
-        if cleaned is None
-        else (
-            candidate if (candidate := cleaned.casefold()) in allowed_values else None
-        )
-    )
+    if cleaned is None:
+        return None
+    candidate = cleaned.casefold()
+    if candidate not in allowed_values:
+        return None
+    return candidate
 
 
 def normalize_profile_quasi_enum_numeric(

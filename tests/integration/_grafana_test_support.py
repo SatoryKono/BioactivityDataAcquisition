@@ -13,7 +13,7 @@ from typing import Any
 import yaml
 
 _PROMQL_METRIC_SELECTOR_RE = re.compile(r"([a-zA-Z_:][a-zA-Z0-9_:]*)\{([^{}]*)\}")
-_PROMQL_LABEL_MATCHER_RE = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)\s*(=~|=|!=|!~)\s*"')
+_PROMQL_LABEL_MATCHER_RE = re.compile(r'([a-zA-Z_]\w*)\s*(=~|=|!=|!~)\s*"')
 
 __all__ = [
     "_PROMQL_METRIC_SELECTOR_RE",

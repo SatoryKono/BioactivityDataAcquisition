@@ -108,7 +108,9 @@ def _build_pipeline_run_context() -> PipelineRunContext:
     )
 
 
-def test_execution_settings_snapshot_redacts_secret_values_and_hashes_surfaces() -> None:
+def test_execution_settings_snapshot_redacts_secret_values_and_hashes_surfaces() -> (
+    None
+):
     settings = Settings(
         data_dir=Path("data"),
         pubmed_api_key="pubmed-secret",
@@ -457,7 +459,9 @@ def test_create_and_persist_effective_config_artifact_promotes_prod_family_defau
         tracer=NoOpTracing(),
         audit=NoOpAudit(),
     )
-    inputs = _build_runner_inputs(Settings(env="prod", data_dir=Path("data")), observability)
+    inputs = _build_runner_inputs(
+        Settings(env="prod", data_dir=Path("data")), observability
+    )
 
     create_and_persist_effective_config_artifact(
         ctx=_build_pipeline_run_context(),

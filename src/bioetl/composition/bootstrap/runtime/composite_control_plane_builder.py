@@ -76,10 +76,6 @@ def resolve_composite_control_plane_flags(settings: object) -> tuple[bool, bool]
         "degraded_observable",
     )
     effective_required_profile = _resolve_composite_required_persistence_profile(
-        infra_context.settings,
-        configured_required_profile=required_profile,
-    )
-    effective_required_profile = _resolve_composite_required_persistence_profile(
         settings,
         configured_required_profile=required_profile,
     )
@@ -142,6 +138,10 @@ def build_composite_control_plane_bundle(
         control_plane,
         "required_persistence_profile",
         "degraded_observable",
+    )
+    effective_required_profile = _resolve_composite_required_persistence_profile(
+        infra_context.settings,
+        configured_required_profile=required_profile,
     )
     contract_ref = config.name
     contract_version = getattr(config, "version", "") or ""
@@ -283,9 +283,10 @@ def _resolve_composite_replay_capability(
         require_full_snapshot_envelope=True,
         replay_capability=replay_capability,
     )
-    if assessment.required_profile_satisfied:
-        return replay_capability
-    if "exact_replay_capability" in assessment.blocking_gaps:
+    if (
+        not assessment.required_profile_satisfied
+        and "exact_replay_capability" in assessment.blocking_gaps
+    ):
         raise RuntimeError(
             "Composite execution cannot satisfy required persistence profile "
             f"'{required_persistence_profile}' because the full cached-Bronze "

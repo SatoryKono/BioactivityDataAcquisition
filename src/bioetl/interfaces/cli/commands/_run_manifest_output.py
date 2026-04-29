@@ -426,9 +426,7 @@ def render_show_payload(payload: dict[str, object]) -> str:
     lines.extend(_render_ledger_section(ledger_entries))
 
     repro_lines = _render_reproducibility_compact_section(diagnostics)
-    if lines and (
-        repro_lines or (isinstance(ledger_entries, list) and ledger_entries)
-    ):
+    if lines and (repro_lines or (isinstance(ledger_entries, list) and ledger_entries)):
         lines.append("")
     lines.extend(repro_lines)
 

@@ -166,9 +166,7 @@ def test_file_store_diffs_occurrence_only_effective_config_records(
     assert diff["semantic_equivalent"] is True
     assert diff["occurrence_only"] is True
     fields = {
-        str(item["field"])
-        for item in diff["differences"]
-        if isinstance(item, dict)
+        str(item["field"]) for item in diff["differences"] if isinstance(item, dict)
     }
     assert "run_id" in fields
     assert "occurrence_envelope.created_at" in fields

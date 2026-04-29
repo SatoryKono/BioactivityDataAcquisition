@@ -80,6 +80,7 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [docs-cli-wrapper-closeout-2026-04-28.md](docs-cli-wrapper-closeout-2026-04-28.md)
 - [mcp-wrapper-contract-audit-2026-04-28.md](mcp-wrapper-contract-audit-2026-04-28.md)
 - [build-docs-site-parity-audit-2026-04-29.md](build-docs-site-parity-audit-2026-04-29.md)
+- [mcp-wrapper-deep-audit-2026-04-29.md](mcp-wrapper-deep-audit-2026-04-29.md)
 
 Earlier operational context files such as
 `onboarding-checklist-day-1-2026-03-20.md` and
@@ -154,6 +155,11 @@ The build-docs-site parity audit was added on `2026-04-29` to record the
 follow-up redesign decision for `build_docs_site.sh`: retain it only as a shell
 transport adapter while keeping all build semantics in
 `scripts.docs.build.mkdocs_build`.
+
+The MCP wrapper deep audit was added on `2026-04-29` to classify the retained
+`scripts/ai/mcp/` wrapper families by launch semantics, generated-config
+contract, and redesign prerequisites. It complements the earlier contract note
+with a body-level family map.
 
 ### Retained Historical Context With Live Evidence References
 

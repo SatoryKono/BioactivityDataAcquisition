@@ -5,32 +5,33 @@ from __future__ import annotations
 
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[4]
 CANONICAL_TARGET_RELATIVE_PATH = Path("testing_support/neo4j_memory_sync.py")
+CANONICAL_TARGET_FILE = (REPO_ROOT / CANONICAL_TARGET_RELATIVE_PATH).resolve(
+    strict=False
+)
 
-
-def _canonical_target_file(repo_root: Path) -> Path:
-    return repo_root / CANONICAL_TARGET_RELATIVE_PATH
-
-
-def _resolve_target_file() -> Path:
-    repo_root = Path(__file__).resolve().parents[4]
-    target_file = _canonical_target_file(repo_root).resolve(strict=False)
-    repo_root_resolved = repo_root.resolve()
-    if repo_root_resolved not in target_file.parents:
-        raise RuntimeError(f"Unexpected target file outside repository root: {target_file}")
-    if not target_file.is_file():
-        raise RuntimeError(f"Target file does not exist: {target_file}")
-    return target_file
+def _validated_target_file() -> Path:
+    repo_root_resolved = REPO_ROOT.resolve()
+    if repo_root_resolved not in CANONICAL_TARGET_FILE.parents:
+        raise RuntimeError(
+            f"Unexpected target file outside repository root: {CANONICAL_TARGET_FILE}"
+        )
+    if not CANONICAL_TARGET_FILE.is_file():
+        raise RuntimeError(f"Target file does not exist: {CANONICAL_TARGET_FILE}")
+    return CANONICAL_TARGET_FILE
 
 
 def _read_target_text() -> str:
-    target_file = _resolve_target_file()
-    return target_file.read_text(encoding="utf-8")
+    return _validated_target_file().read_text(encoding="utf-8")
 
 
-def _write_target_text(text: str) -> None:
-    target_file = _resolve_target_file()
-    target_file.write_text(text, encoding="utf-8")
+def _write_rewritten_target_text(rewritten_text: str) -> None:
+    target_file = _validated_target_file()
+    target_file.write_text(  # NOSONAR - target_file is a fixed validated repository path
+        rewritten_text,
+        encoding="utf-8",
+    )
 
 
 def main() -> int:
@@ -59,7 +60,7 @@ LOCALHOST_HTTP_URI = _test_internal_http_uri(\"localhost\", 7474)"""
         helper,
     )
 
-    _write_target_text(text)
+    _write_rewritten_target_text(text)
     return 0
 
 

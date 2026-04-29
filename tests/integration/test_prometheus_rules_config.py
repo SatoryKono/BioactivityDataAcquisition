@@ -15,7 +15,7 @@ MONITORING_COMPOSE_PATH = Path("docker-compose.monitoring.yml")
 pytestmark = pytest.mark.integration
 
 _PROMQL_METRIC_SELECTOR_RE = re.compile(r"([a-zA-Z_:][a-zA-Z0-9_:]*)\{([^{}]*)\}")
-_PROMQL_LABEL_MATCHER_RE = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)\s*(=~|=|!=|!~)\s*"')
+_PROMQL_LABEL_MATCHER_RE = re.compile(r'([a-zA-Z_]\w*)\s*(=~|=|!=|!~)\s*"')
 
 
 def _load_rules() -> dict:
@@ -110,6 +110,35 @@ def _build_metric_label_sets(payload: dict) -> dict[str, frozenset[str]]:
                 label_sets[record_name] = _infer_recording_rule_labels(expr)
 
     return label_sets
+
+
+def _collect_rule_expression_label_schema_errors(
+    payload: dict,
+    *,
+    label_sets: dict[str, frozenset[str]],
+) -> list[str]:
+    errors: list[str] = []
+    for group in payload.get("groups", []):
+        group_name = group.get("name", "<unknown>")
+        for rule in group.get("rules", []):
+            rule_name = rule.get("alert") or rule.get("record") or "<unnamed>"
+            expr = rule.get("expr")
+            if not isinstance(expr, str):
+                continue
+
+            for metric_name, selector_body in _PROMQL_METRIC_SELECTOR_RE.findall(expr):
+                expected_labels = label_sets.get(metric_name)
+                if expected_labels is None:
+                    continue
+                selector_labels = _extract_selector_labels(selector_body)
+                unknown_labels = sorted(selector_labels - expected_labels)
+                if unknown_labels:
+                    errors.append(
+                        f"group={group_name} rule={rule_name} metric={metric_name} "
+                        f"selector_labels={unknown_labels} allowed={sorted(expected_labels)} "
+                        f"expr={expr}"
+                    )
+    return errors
 
 
 def _iter_contract_alerts(contract: dict) -> list[tuple[str, dict, set[str]]]:
@@ -537,28 +566,10 @@ def test_rule_expressions_use_real_metric_label_schemas() -> None:
     """Repo-backed alert/record expressions must only use real metric labels."""
     payload = _load_rules()
     label_sets = _build_metric_label_sets(payload)
-    errors: list[str] = []
-
-    for group in payload.get("groups", []):
-        group_name = group.get("name", "<unknown>")
-        for rule in group.get("rules", []):
-            rule_name = rule.get("alert") or rule.get("record") or "<unnamed>"
-            expr = rule.get("expr")
-            if not isinstance(expr, str):
-                continue
-
-            for metric_name, selector_body in _PROMQL_METRIC_SELECTOR_RE.findall(expr):
-                expected_labels = label_sets.get(metric_name)
-                if expected_labels is None:
-                    continue
-                selector_labels = _extract_selector_labels(selector_body)
-                unknown_labels = sorted(selector_labels - expected_labels)
-                if unknown_labels:
-                    errors.append(
-                        f"group={group_name} rule={rule_name} metric={metric_name} "
-                        f"selector_labels={unknown_labels} allowed={sorted(expected_labels)} "
-                        f"expr={expr}"
-                    )
+    errors = _collect_rule_expression_label_schema_errors(
+        payload,
+        label_sets=label_sets,
+    )
 
     assert not errors, (
         "Prometheus rules use selectors with nonexistent labels:\n" + "\n".join(errors)

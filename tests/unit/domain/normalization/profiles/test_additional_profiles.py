@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.normalization.profiles import (
     CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_ASSAY_PARAMETERS_PROFILE,
@@ -106,7 +108,7 @@ def test_chembl_molecule_max_phase_preserves_quasi_enum_numeric_codes() -> None:
     max_phase_rule = CHEMBL_MOLECULE_PROFILE.rule_for("max_phase")
 
     assert max_phase_rule is not None
-    assert max_phase_rule.apply(" 0.5 ") == 0.5
+    assert max_phase_rule.apply(" 0.5 ") == pytest.approx(0.5)
     assert max_phase_rule.apply("4.0") == 4
     assert max_phase_rule.apply("5") is None
     assert "quasi-enum" in (max_phase_rule.notes or "")

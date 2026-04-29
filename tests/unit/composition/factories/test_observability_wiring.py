@@ -4,12 +4,16 @@ from __future__ import annotations
 
 from pathlib import Path
 from types import SimpleNamespace
+from typing import cast
 from unittest.mock import MagicMock
 
 from bioetl.composition.factories._observability_wiring import (
     _create_cached_bronze_data_source,
 )
 from bioetl.domain.context import CachedBronzeContext
+from bioetl.domain.ports import LoggerPort, MetricsPort
+from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 def test_cached_bronze_data_source_reuses_shared_metrics(
@@ -49,11 +53,14 @@ def test_cached_bronze_data_source_reuses_shared_metrics(
         _BronzeWriterSpy,
     )
 
-    shared_metrics = MagicMock(name="shared_metrics")
-    logger = MagicMock(name="logger")
+    shared_metrics = cast("MetricsPort", MagicMock(name="shared_metrics"))
+    logger = cast("LoggerPort", MagicMock(name="logger"))
     bronze_path = tmp_path / "bronze"
-    settings = SimpleNamespace(bronze_path=bronze_path)
-    pipeline_config = SimpleNamespace(provider="chembl", entity_type="activity")
+    settings = cast("Settings", SimpleNamespace(bronze_path=bronze_path))
+    pipeline_config = cast(
+        "PipelineYamlConfig",
+        SimpleNamespace(provider="chembl", entity_type="activity"),
+    )
     cached_bronze = CachedBronzeContext(
         enabled=True,
         bronze_path=None,

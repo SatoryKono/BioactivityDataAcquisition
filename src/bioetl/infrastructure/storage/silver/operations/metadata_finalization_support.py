@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable, Sequence
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Protocol
 
 from bioetl.domain.models import SilverMetadata
@@ -24,6 +24,7 @@ from bioetl.infrastructure.storage.silver.operations.metadata_builders import (
 
 __all__ = [
     "_PreparedSilverWriteFinalizationContext",
+    "_build_direct_legacy_silver_metadata",
     "_finalize_silver_write_result",
     "_prepare_silver_write_finalization_context",
 ]
@@ -57,6 +58,40 @@ class _MetadataFinalizationOps(Protocol):
         self,
         request: _SilverWriteFinalizationPreparationRequest,
     ) -> _PreparedSilverWriteFinalizationContext: ...
+
+
+def _build_direct_legacy_silver_metadata(
+    *,
+    table_name: str,
+    table_path: str,
+    records: list[BronzeRecord],
+    started_at: datetime,
+    completed_at: datetime,
+    run_id: str,
+    manifest_id: str | None,
+    transform_version: str | None,
+    transform_steps: tuple[str, ...] | None,
+) -> SilverMetadata:
+    """Build metadata for the isolated direct-writer compatibility fallback."""
+    return _build_silver_metadata(
+        _SilverMetadataBuildRequest(
+            table_name=table_name,
+            table_path=table_path,
+            records=records,
+            dq_metrics=None,
+            mode="merge",
+            runtime_started_at=started_at,
+            runtime_completed_at=completed_at,
+            run_id=run_id or "legacy-direct-metadata-writer",
+            manifest_id=manifest_id,
+            run_type="incremental",
+            source_batch_id=None,
+            transform_version=transform_version,
+            transform_steps=transform_steps,
+            bronze_refs=None,
+            version_after=None,
+        )
+    )
 
 
 async def _prepare_silver_write_finalization_context(
