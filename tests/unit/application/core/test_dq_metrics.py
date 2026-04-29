@@ -15,7 +15,7 @@ def test_batch_metrics_quarantined_tracking():
 
     recorder.track_quarantined_records(ErrorType.DATA_QUALITY, 5)
 
-    mock_metrics.increment_counter.assert_called_with(
+    mock_metrics.increment_counter.assert_any_call(
         "bioetl_quarantine_records_total",
         5,
         {

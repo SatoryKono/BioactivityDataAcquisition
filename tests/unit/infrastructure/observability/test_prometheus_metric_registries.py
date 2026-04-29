@@ -83,7 +83,7 @@ def test_metric_definition_exports_remain_stable() -> None:
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
     # This ratchet intentionally changes only when we add/remove public metrics.
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 121
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 122
 
 
 @pytest.mark.unit
@@ -250,6 +250,7 @@ def test_adapter_metrics_use_bounded_label_names_only() -> None:
         "bioetl_filter_ids_loaded_total": {"pipeline", "source_file"},
         "bioetl_filter_ids_duplicates_total": {"pipeline", "source_file"},
         "bioetl_filter_combinations_loaded_total": {"pipeline", "source_file"},
+        "bioetl_record_flow_records_total": {"pipeline", "run_type", "flow_stage"},
     }
     expected_histogram_labels = {
         "bioetl_adapter_request_duration_seconds": {"provider", "endpoint"},

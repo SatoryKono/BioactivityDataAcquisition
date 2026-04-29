@@ -152,6 +152,24 @@ class TestRecordProcessorMetrics:
             2,
             {"pipeline": pipeline_label, "stage": "bronze", "run_type": run_type_label},
         )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_record_flow_records_total",
+            2,
+            {
+                "pipeline": pipeline_label,
+                "run_type": run_type_label,
+                "flow_stage": "fetched",
+            },
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_record_flow_records_total",
+            2,
+            {
+                "pipeline": pipeline_label,
+                "run_type": run_type_label,
+                "flow_stage": "bronze",
+            },
+        )
 
         # Silver count
         mock_metrics.increment_counter.assert_any_call(
@@ -159,12 +177,30 @@ class TestRecordProcessorMetrics:
             2,
             {"pipeline": pipeline_label, "stage": "silver", "run_type": run_type_label},
         )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_record_flow_records_total",
+            2,
+            {
+                "pipeline": pipeline_label,
+                "run_type": run_type_label,
+                "flow_stage": "silver",
+            },
+        )
 
         # Gold count
         mock_metrics.increment_counter.assert_any_call(
             "bioetl_records_processed_total",
             2,
             {"pipeline": pipeline_label, "stage": "gold", "run_type": run_type_label},
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_record_flow_records_total",
+            2,
+            {
+                "pipeline": pipeline_label,
+                "run_type": run_type_label,
+                "flow_stage": "gold",
+            },
         )
 
     async def test_process_batch_records_quarantine_metrics(
@@ -220,6 +256,33 @@ class TestRecordProcessorMetrics:
                 "pipeline": pipeline_label,
                 "stage": "quarantined",
                 "run_type": run_type_label,
+            },
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_record_flow_records_total",
+            1,
+            {
+                "pipeline": pipeline_label,
+                "run_type": run_type_label,
+                "flow_stage": "fetched",
+            },
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_record_flow_records_total",
+            1,
+            {
+                "pipeline": pipeline_label,
+                "run_type": run_type_label,
+                "flow_stage": "bronze",
+            },
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_record_flow_records_total",
+            1,
+            {
+                "pipeline": pipeline_label,
+                "run_type": run_type_label,
+                "flow_stage": "quarantined",
             },
         )
 

@@ -17,9 +17,9 @@ from bioetl.infrastructure.storage.silver.metadata_request_models import (
     _SilverWriteFinalizationPreparationRequest,
     _SilverWriteResultFinalizationRequest,
 )
-from bioetl.infrastructure.storage.silver.operations.metadata_builders import (
-    _build_silver_metadata,
-    _SilverMetadataBuildRequest,
+from bioetl.infrastructure.storage.silver.operations.metadata_sidecar_adapter import (
+    _build_silver_sidecar_metadata,
+    _SilverMetadataSidecarRequest,
 )
 
 __all__ = [
@@ -73,8 +73,8 @@ def _build_direct_legacy_silver_metadata(
     transform_steps: tuple[str, ...] | None,
 ) -> SilverMetadata:
     """Build metadata for the isolated direct-writer compatibility fallback."""
-    return _build_silver_metadata(
-        _SilverMetadataBuildRequest(
+    return _build_silver_sidecar_metadata(
+        _SilverMetadataSidecarRequest(
             table_name=table_name,
             table_path=table_path,
             records=records,
@@ -145,8 +145,8 @@ async def _finalize_silver_write_result(
         if request.records and "_run_id" in request.records[0]
         else "test_run_id"
     )
-    metadata = _build_silver_metadata(
-        _SilverMetadataBuildRequest(
+    metadata = _build_silver_sidecar_metadata(
+        _SilverMetadataSidecarRequest(
             table_name=request.table_name,
             table_path=request.table_path,
             records=request.records,
