@@ -178,6 +178,19 @@ class _FakeWorkflowService:
                         ],
                     },
                 },
+                "compatibility": {
+                    "status": "compatible",
+                    "compatible": True,
+                    "taxonomy": "resume_only",
+                    "replay_capability": "resume_only",
+                    "matched_anchors": [
+                        "manifest_id",
+                        "execution_fingerprint",
+                        "effective_config_hash",
+                    ],
+                    "mismatched_anchors": [],
+                    "missing_anchors": ["input_snapshot_fingerprint"],
+                },
             }
         )
 

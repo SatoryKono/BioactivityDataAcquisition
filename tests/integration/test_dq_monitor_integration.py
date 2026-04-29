@@ -488,6 +488,65 @@ class TestDataQualityServiceMetricsEmission:
         ]
 
     @pytest.mark.asyncio
+    async def test_quarantined_count_emits_quarantine_flow_and_disposition_signals(
+        self,
+        recording_metrics: RecordingMetrics,
+        recording_logger: RecordingLogger,
+    ) -> None:
+        """Quarantined counts should project into flow, stage, and DQ disposition families."""
+        await asyncio.sleep(0)
+        from bioetl.application.services.data_quality_service import DataQualityService
+        from bioetl.domain.config import DQConfig
+
+        config = DQConfig(soft_fail_threshold=0.05, hard_fail_threshold=0.20)
+        service = DataQualityService(
+            dq_monitor=None,
+            config=config,
+            logger=recording_logger,  # type: ignore
+            metrics=recording_metrics,
+            pipeline_name="test_integration_pipeline",
+            entity_type="test_entity",
+        )
+
+        service.evaluate(
+            {
+                "error_rate": 0.02,
+                "record_count": 250.0,
+                "quarantined_count": 5.0,
+            }
+        )
+
+        assert (
+            "bioetl_record_flow_records_total",
+            5,
+            {
+                "pipeline": "test_integration_pipeline",
+                "run_type": "unknown",
+                "flow_stage": "quarantined",
+            },
+        ) in recording_metrics.get_counter_calls("bioetl_record_flow_records_total")
+        assert (
+            "bioetl_stage_records_total",
+            5,
+            {
+                "pipeline": "test_integration_pipeline",
+                "run_type": "unknown",
+                "stage": "validation",
+                "outcome": "quarantined",
+            },
+        ) in recording_metrics.get_counter_calls("bioetl_stage_records_total")
+        assert (
+            "bioetl_dq_dispositions_total",
+            5,
+            {
+                "pipeline": "test_integration_pipeline",
+                "stage": "validation",
+                "disposition": "quarantine",
+                "terminal_status": "success",
+            },
+        ) in recording_metrics.get_counter_calls("bioetl_dq_dispositions_total")
+
+    @pytest.mark.asyncio
     async def test_dq_service_performs_check_with_monitor(
         self,
         recording_metrics: RecordingMetrics,

@@ -454,6 +454,11 @@ class TestBootstrapObservabilityBundleImpl:
         metrics.set_gauge.assert_any_call(
             "bioetl_observability_runtime_status",
             1.0,
+            {"pipeline": "unknown", "component": "logger", "mode": "active"},
+        )
+        metrics.set_gauge.assert_any_call(
+            "bioetl_observability_runtime_status",
+            1.0,
             {"pipeline": "unknown", "component": "metrics", "mode": "active"},
         )
         metrics.set_gauge.assert_any_call(
@@ -470,4 +475,26 @@ class TestBootstrapObservabilityBundleImpl:
             "bioetl_observability_runtime_status",
             1.0,
             {"pipeline": "unknown", "component": "dq_monitor", "mode": "disabled"},
+        )
+
+    def test_emits_noop_logger_runtime_status_gauge(self) -> None:
+        from bioetl.composition.bootstrap.runtime.observability_bundle import (
+            _log_observability_initialized,
+        )
+
+        metrics = MagicMock()
+
+        _log_observability_initialized(
+            logger=NoOpLogger(),
+            metrics=metrics,
+            tracer=NoOpTracing(),
+            audit=NoOpAudit(),
+            dq_monitor=None,
+            control_plane=None,
+        )
+
+        metrics.set_gauge.assert_any_call(
+            "bioetl_observability_runtime_status",
+            1.0,
+            {"pipeline": "unknown", "component": "logger", "mode": "noop"},
         )

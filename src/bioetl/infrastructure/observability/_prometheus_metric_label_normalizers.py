@@ -156,6 +156,17 @@ _ALLOWED_FLOW_STAGE_LABELS = frozenset(
         "other",
     }
 )
+_ALLOWED_RECORD_FLOW_INVARIANT_LABELS = frozenset(
+    {
+        "fetched_equals_bronze",
+        "bronze_partitioned",
+        "silver_gold_monotonic",
+        "other",
+    }
+)
+_ALLOWED_RECORD_FLOW_INVARIANT_STATUS_LABELS = frozenset(
+    {"passed", "violated", "unknown", "other"}
+)
 _ALLOWED_STAGE_MODEL_STAGE_LABELS = frozenset(
     {"input", "ingestion", "transform", "validation", "storage", "output", "other"}
 )
@@ -216,7 +227,7 @@ _ALLOWED_PUBLICATION_STATUS_LABELS = frozenset(
     {"success", "failed", "skipped", "disabled", "other"}
 )
 _ALLOWED_OBSERVABILITY_COMPONENT_LABELS = frozenset(
-    {"metrics", "tracing", "audit", "dq_monitor", "other"}
+    {"logger", "metrics", "tracing", "audit", "dq_monitor", "other"}
 )
 _ALLOWED_OBSERVABILITY_MODE_LABELS = frozenset({"active", "noop", "disabled", "other"})
 _ALLOWED_DQ_CHECK_TYPE_LABELS = frozenset(
@@ -361,6 +372,18 @@ def normalize_runtime_stage(stage: str) -> str:
 def normalize_flow_stage(flow_stage: str) -> str:
     """Normalize record-flow stage labels to the canonical bounded set."""
     return _normalize_bounded_label(flow_stage, _ALLOWED_FLOW_STAGE_LABELS)
+
+
+def normalize_record_flow_invariant(invariant: str) -> str:
+    """Normalize record-flow invariant labels to the canonical bounded set."""
+    return _normalize_bounded_label(invariant, _ALLOWED_RECORD_FLOW_INVARIANT_LABELS)
+
+
+def normalize_record_flow_invariant_status(status: str) -> str:
+    """Normalize record-flow invariant status labels to the bounded set."""
+    return _normalize_bounded_label(
+        status, _ALLOWED_RECORD_FLOW_INVARIANT_STATUS_LABELS
+    )
 
 
 def normalize_stage_model_stage(stage: str) -> str:

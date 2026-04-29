@@ -20,6 +20,8 @@ from bioetl.infrastructure.observability._prometheus_metric_label_normalizers im
     normalize_publication_status,
     normalize_publication_target,
     normalize_quarantine_reason,
+    normalize_record_flow_invariant,
+    normalize_record_flow_invariant_status,
     normalize_runtime_phase,
     normalize_runtime_stage,
     normalize_silver_filter_field,
@@ -71,6 +73,7 @@ _STAGE_LABEL_METRICS = frozenset(
     }
 )
 _STAGE_MODEL_LABEL_METRICS = frozenset({"bioetl_stage_records_total"})
+_STAGE_BACKLOG_LABEL_METRICS = frozenset({"bioetl_stage_backlog_records"})
 _FLOW_STAGE_LABEL_METRICS = frozenset({"bioetl_record_flow_records_total"})
 _DQ_DISPOSITION_LABEL_METRICS = frozenset({"bioetl_dq_dispositions_total"})
 _METRICS_PUBLICATION_LABEL_METRICS = frozenset(
@@ -199,6 +202,16 @@ def _normalize_dq_metric_labels(
             "stage": normalize_dq_stage(str(labels.get("stage", "other"))),
             "severity": normalize_dq_severity(str(labels.get("severity", "other"))),
         }
+    if name == "bioetl_record_flow_invariants_total":
+        return {
+            **labels,
+            "invariant": normalize_record_flow_invariant(
+                str(labels.get("invariant", "other"))
+            ),
+            "status": normalize_record_flow_invariant_status(
+                str(labels.get("status", "other"))
+            ),
+        }
     if name == "bioetl_dq_check_failures_total":
         return {
             **labels,
@@ -266,6 +279,11 @@ def _normalize_publication_metric_labels(
             ),
             "mode": normalize_observability_mode(str(labels.get("mode", "other"))),
         }
+    if name in _STAGE_BACKLOG_LABEL_METRICS:
+        return {
+            **labels,
+            "stage": normalize_stage_model_stage(str(labels.get("stage", "other"))),
+        }
     if name in _STAGE_MODEL_LABEL_METRICS:
         return {
             **labels,
@@ -296,4 +314,3 @@ def normalize_metric_dispatch_labels(
         if normalized is not None:
             return normalized
     return labels
-

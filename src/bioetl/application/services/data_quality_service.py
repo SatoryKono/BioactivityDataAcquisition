@@ -40,7 +40,36 @@ class _DataQualityThresholdMixin:
     _pipeline_metrics: PipelineMetricsRecorder
     _run_type: str
 
-    def _check_hard_threshold(self, error_rate: float) -> None:
+    def _emit_quarantine_semantics(
+        self,
+        *,
+        quarantined_count: int,
+        terminal_status: str,
+    ) -> None:
+        """Emit bounded quarantine semantics when validation isolated records."""
+        if quarantined_count <= 0:
+            return
+        self._pipeline_metrics.record_stage_records(
+            run_type=self._run_type,
+            stage="validation",
+            outcome="quarantined",
+            count=quarantined_count,
+        )
+        self._pipeline_metrics.record_record_flow(
+            run_type=self._run_type,
+            flow_stage="quarantined",
+            count=quarantined_count,
+        )
+        self._pipeline_metrics.record_dq_disposition(
+            stage="validation",
+            disposition="quarantine",
+            terminal_status=terminal_status,
+            count=quarantined_count,
+        )
+
+    def _check_hard_threshold(
+        self, error_rate: float, quarantined_count: int = 0
+    ) -> None:
         """Check if error rate exceeds hard threshold."""
         if self._config.hard_fail_threshold > 1.0:
             return
@@ -50,6 +79,10 @@ class _DataQualityThresholdMixin:
                 error_rate=error_rate,
                 threshold=self._config.hard_fail_threshold,
                 pipeline=self._pipeline_name,
+            )
+            self._emit_quarantine_semantics(
+                quarantined_count=quarantined_count,
+                terminal_status="failed",
             )
             self._pipeline_metrics.record_dq_validation_failures(
                 stage="threshold",
@@ -179,7 +212,6 @@ class _DataQualityMetricsMixin:
         self,
         *,
         record_count: int,
-        quarantined_count: int,
     ) -> None:
         """Emit bounded validation-stage counts used for denominator semantics."""
         self._pipeline_metrics.record_stage_records(
@@ -188,13 +220,6 @@ class _DataQualityMetricsMixin:
             outcome="evaluated",
             count=record_count,
         )
-        if quarantined_count > 0:
-            self._pipeline_metrics.record_stage_records(
-                run_type=self._run_type,
-                stage="validation",
-                outcome="quarantined",
-                count=quarantined_count,
-            )
 
 
 class _DataQualityAnomalyMixin(_DataQualityMetricsMixin):
@@ -385,14 +410,17 @@ class DataQualityService(
                 )
         self._emit_validation_stage_metrics(
             record_count=record_count,
-            quarantined_count=quarantined_count,
         )
 
         # Check hard threshold first - raises if exceeded
-        self._check_hard_threshold(error_rate)
+        self._check_hard_threshold(error_rate, quarantined_count)
 
         # Determine status based on soft threshold
         status = self._determine_status(error_rate)
+        self._emit_quarantine_semantics(
+            quarantined_count=quarantined_count,
+            terminal_status="success",
+        )
 
         # Log warning and emit metric if soft threshold exceeded
         if status == DQEvaluationStatus.WARNING:

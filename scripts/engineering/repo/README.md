@@ -28,18 +28,23 @@ python -m scripts.engineering.repo cleanup-branch-candidates --help
 ## Shell Wrapper
 
 ```bash
-bash scripts/engineering/repo/split_testing_roadmap_issue.sh --help
-GITHUB_PERSONAL_ACCESS_TOKEN=... bash scripts/engineering/repo/split_testing_roadmap_issue.sh --apply --comment-parent
-bash scripts/engineering/repo/sync_docs_issues.sh --help
-GITHUB_PERSONAL_ACCESS_TOKEN=... bash scripts/engineering/repo/sync_docs_issues.sh --apply --skip-milestone
+python -m scripts.engineering.repo split-testing-roadmap --help
+python -m scripts.engineering.repo sync-docs-issues --help
+python -m scripts.engineering.repo cleanup-branch-candidates --help
+
 bash scripts/engineering/repo/cleanup_branch_candidates.sh
 bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply
 bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply --with-remote
 ```
 
-Use the shell wrapper when you want a copy-pasteable bash entrypoint for the
-testing-roadmap issue split workflow or the docs-sync issue metadata workflow.
-Both wrappers forward all arguments to their Python implementations.
+Prefer the `python -m scripts.engineering.repo ...` commands above as the
+canonical public surface.
+
+Use the shell wrappers only when you want a copy-pasteable bash transport for
+the same workflows from shell-centric runbooks or ad-hoc operator sessions.
+The split-testing-roadmap and sync-docs-issues shell wrappers are compatibility
+convenience paths and should not be used as the primary documented entrypoint.
+They forward all arguments to their Python implementations.
 Use `python -m scripts.engineering.repo cleanup-branch-candidates` as the
 canonical branch-cleanup entrypoint. Keep
 `cleanup_branch_candidates.sh` when you want the same workflow through a

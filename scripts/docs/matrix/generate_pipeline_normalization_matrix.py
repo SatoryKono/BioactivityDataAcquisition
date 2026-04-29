@@ -61,10 +61,10 @@ from bioetl.domain.normalization.profiles._chembl_policy_registry import (
 )
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_json_string,
-    normalize_profile_target_component_relationships,
-    normalize_profile_target_component_types,
     normalize_profile_json_string_strict,
     normalize_profile_passthrough,
+    normalize_profile_target_component_relationships,
+    normalize_profile_target_component_types,
 )
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
 from bioetl.domain.schemas.chembl.assay import AssaySchema

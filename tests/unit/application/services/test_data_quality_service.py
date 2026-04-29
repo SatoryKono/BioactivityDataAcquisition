@@ -351,6 +351,114 @@ class TestDataQualityServiceThresholds:
             in increment_counter_calls
         )
 
+    @pytest.mark.asyncio
+    async def test_quarantined_count_emits_quarantine_semantics_on_success(
+        self, mock_logger, mock_metrics, dq_config
+    ):
+        """Quarantined records should emit bounded validation/flow/disposition signals."""
+        await asyncio.sleep(0)
+        service = DataQualityService(
+            dq_monitor=None,
+            config=dq_config,
+            logger=mock_logger,
+            metrics=mock_metrics,
+            pipeline_name="test_pipeline",
+            entity_type="test_entity",
+        )
+
+        result = service.evaluate(
+            {
+                "record_count": 100.0,
+                "quarantined_count": 4.0,
+                "error_rate": 0.03,
+            }
+        )
+
+        assert result.status == DQEvaluationStatus.PASSED
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_stage_records_total",
+            4,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "unknown",
+                "stage": "validation",
+                "outcome": "quarantined",
+            },
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_record_flow_records_total",
+            4,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "unknown",
+                "flow_stage": "quarantined",
+            },
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_dq_dispositions_total",
+            4,
+            {
+                "pipeline": "test_pipeline",
+                "stage": "validation",
+                "disposition": "quarantine",
+                "terminal_status": "success",
+            },
+        )
+
+    @pytest.mark.asyncio
+    async def test_hard_threshold_with_quarantined_count_emits_failed_quarantine_semantics(
+        self, mock_logger, mock_metrics, dq_config
+    ):
+        """Hard-fail runs should correlate quarantined records with failed terminal status."""
+        await asyncio.sleep(0)
+        service = DataQualityService(
+            dq_monitor=None,
+            config=dq_config,
+            logger=mock_logger,
+            metrics=mock_metrics,
+            pipeline_name="test_pipeline",
+            entity_type="test_entity",
+        )
+
+        with pytest.raises(DataQualityThresholdError):
+            service.evaluate(
+                {
+                    "record_count": 100.0,
+                    "quarantined_count": 7.0,
+                    "error_rate": 0.25,
+                }
+            )
+
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_stage_records_total",
+            7,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "unknown",
+                "stage": "validation",
+                "outcome": "quarantined",
+            },
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_record_flow_records_total",
+            7,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "unknown",
+                "flow_stage": "quarantined",
+            },
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_dq_dispositions_total",
+            7,
+            {
+                "pipeline": "test_pipeline",
+                "stage": "validation",
+                "disposition": "quarantine",
+                "terminal_status": "failed",
+            },
+        )
+
 
 @pytest.mark.unit
 class TestDataQualityServiceGracefulDegradation:
