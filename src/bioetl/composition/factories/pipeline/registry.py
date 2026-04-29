@@ -7,6 +7,7 @@ from types import MappingProxyType
 from typing import cast
 
 from bioetl.application.core.wiring.registry import GenericPipeline
+from bioetl.composition import PipelineRegistry
 from bioetl.composition.factories.pipeline.assembler import (
     GenericPipelineFactory,
 )
@@ -14,7 +15,6 @@ from bioetl.composition.factories.pipeline.contract_validator import create_fact
 from bioetl.composition.factories.pipeline.registry_manifest import (
     PIPELINE_CONFIGS,
 )
-from bioetl.composition import PipelineRegistry
 from bioetl.composition.registry_default import get_default_registry
 from bioetl.domain.ports import PipelineFactoryPort
 
