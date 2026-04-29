@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1734,
-    "total_internal_imports": 6881,
+    "scanned_modules": 1737,
+    "total_internal_imports": 6889,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 310,
@@ -11,13 +11,13 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 1147,
+      "imports": 1149,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 1012,
+      "imports": 1014,
       "allowed": true
     },
     {
@@ -29,7 +29,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 542,
+      "imports": 543,
       "allowed": true
     },
     {
@@ -41,13 +41,13 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 302,
+      "imports": 303,
       "allowed": true
     },
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1138,
+      "imports": 1139,
       "allowed": true
     },
     {
@@ -71,7 +71,7 @@
     {
       "source": "interfaces",
       "target": "composition",
-      "imports": 62,
+      "imports": 63,
       "allowed": true
     },
     {
@@ -152,7 +152,7 @@
     {
       "source": "application.services",
       "target": "domain.ports",
-      "imports": 57
+      "imports": 58
     },
     {
       "source": "application.services",
@@ -295,6 +295,11 @@
       "imports": 17
     },
     {
+      "source": "application.services",
+      "target": "domain.exceptions",
+      "imports": 16
+    },
+    {
       "source": "composition.factories",
       "target": "domain.config",
       "imports": 16
@@ -305,9 +310,9 @@
       "imports": 16
     },
     {
-      "source": "application.services",
-      "target": "domain.exceptions",
-      "imports": 15
+      "source": "interfaces.observability",
+      "target": "composition.observability_api",
+      "imports": 16
     },
     {
       "source": "infrastructure.observability",
@@ -317,11 +322,6 @@
     {
       "source": "infrastructure.quality",
       "target": "domain.types",
-      "imports": 15
-    },
-    {
-      "source": "interfaces.observability",
-      "target": "composition.observability_api",
       "imports": 15
     },
     {

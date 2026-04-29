@@ -8,8 +8,16 @@ Use this file as a strict operating profile for code suggestions in this reposit
 - `docs/01-requirements/REQUIREMENTS.md` (functional/non-functional requirements)
 - ADRs in `docs/02-architecture/decisions/`
 - `AGENTS.md` (assistant workflow constraints)
+- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
 If guidance conflicts, prioritize canonical sources over this file.
+
+## AI Runtime Notes
+
+- `.codex/**` and `.gemini/**` are active runtime trees.
+- `docs/00-project/ai/**` is a mirror/guidance layer, not the runtime behavior source.
+- Do not rely on `.claude/**` as a canonical behavior source for Codex/Gemini work.
 
 ## Architecture Guardrails (MUST)
 

@@ -16,6 +16,9 @@
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
+- Curated rows requiring external breaking change process: `16`
+- Curated rows marked internal-callers-zero: `0`
+- First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`
 
 ## Tracked Docstring Prefixes
@@ -46,6 +49,25 @@
 - `src/bioetl/interfaces/cli/commands/run_all.py`
 - `src/bioetl/interfaces/cli/commands/run_composite.py`
 - `src/bioetl/interfaces/cli/commands/vacuum.py`
+
+## Curated Row Governance Metadata
+
+- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/interfaces/cli/commands/run_all.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/interfaces/cli/commands/run_composite.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/interfaces/cli/commands/health.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/interfaces/cli/commands/quarantine.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/interfaces/cli/commands/maintenance.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/interfaces/cli/commands/archive.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/interfaces/cli/commands/cleanup.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/interfaces/cli/commands/vacuum.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/composition/entrypoints.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/domain/composite/config.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/domain/value_objects/activity_values.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/domain/value_objects/publication_field_groups.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/application/composite/merger.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/infrastructure/adapters/pubmed/client.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/infrastructure/adapters/semanticscholar/client.py` — external breaking change required: `true`, internal callers zero: `false`
 
 ## Measured-Only Allowlist
 
@@ -96,5 +118,9 @@
 - None.
 
 ### First-Party Src Imports Of Measured-Only Modules
+
+- None.
+
+### First-Party Src Imports Of Internal-Callers-Zero Rows
 
 - None.

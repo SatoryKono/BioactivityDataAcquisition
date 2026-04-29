@@ -37,6 +37,11 @@ class UniProtProteinGoldSchema(StrictGoldContractSchema):
     # Core identifiers
     accession: Series[str] = pa.Field(nullable=False)
     entry_name: Series[str] = pa.Field(nullable=True)
+    entry_type: Series[str] = pa.Field(nullable=True)
+    secondary_accessions: Series[str] = pa.Field(nullable=True)
+    entry_created: Series[str] = pa.Field(nullable=True)
+    entry_modified: Series[str] = pa.Field(nullable=True)
+    entry_version: Series[float] = pa.Field(nullable=True, coerce=True)
 
     # Structural features (JSON)
     acetylation: Series[str] = pa.Field(nullable=True)  # PTM: acetylation sites
@@ -60,15 +65,22 @@ class UniProtProteinGoldSchema(StrictGoldContractSchema):
 
     # Functional annotations
     activity_regulation: Series[str] = pa.Field(nullable=True)
+    alternative_products: Series[str] = pa.Field(nullable=True)
+    biophysicochemical_properties: Series[str] = pa.Field(nullable=True)
+    caution: Series[str] = pa.Field(nullable=True)
     catalytic_activity: Series[str] = pa.Field(nullable=True)
     cellular_component: Series[str] = pa.Field(nullable=True)  # GO aspect C
+    cofactors: Series[str] = pa.Field(nullable=True)
     disease_involvement: Series[str] = pa.Field(nullable=True)
     function_comment: Series[str] = pa.Field(nullable=True)
+    induction: Series[str] = pa.Field(nullable=True)
     molecular_function: Series[str] = pa.Field(nullable=True)  # GO aspect F
     pathway: Series[str] = pa.Field(nullable=True)
+    pharmaceutical_use: Series[str] = pa.Field(nullable=True)
     reaction_ec_numbers: Series[str] = pa.Field(nullable=True)
     reactions: Series[str] = pa.Field(nullable=True)
     similarity_comment: Series[str] = pa.Field(nullable=True)
+    subunit: Series[str] = pa.Field(nullable=True)
     subcellular_location: Series[str] = pa.Field(nullable=True)
     tissue_specificity: Series[str] = pa.Field(nullable=True)
 
@@ -76,30 +88,50 @@ class UniProtProteinGoldSchema(StrictGoldContractSchema):
     chembl_ids: Series[str] = pa.Field(nullable=True)
     drugbank_ids: Series[str] = pa.Field(nullable=True)
     go_terms: Series[str] = pa.Field(nullable=True)
+    guidetopharmacology_ids: Series[str] = pa.Field(nullable=True)
     interpro_xrefs: Series[str] = pa.Field(nullable=True)
     pdb_xrefs: Series[str] = pa.Field(nullable=True)
     pfam_xrefs: Series[str] = pa.Field(nullable=True)
     reactome_xrefs: Series[str] = pa.Field(nullable=True)
 
     # Basic protein data
-    gene_names: Series[str] = pa.Field(nullable=True)  # list[str]
+    flag: Series[str] = pa.Field(nullable=True)
+    gene_orf_names: Series[str] = pa.Field(nullable=True)
+    gene_primary: Series[str] = pa.Field(nullable=True)
+    gene_synonyms: Series[str] = pa.Field(nullable=True)
     genus: Series[str] = pa.Field(nullable=True)  # Taxonomy: genus
     isoform_ids: Series[str] = pa.Field(nullable=True)
     isoform_names: Series[str] = pa.Field(nullable=True)
     isoform_synonyms: Series[str] = pa.Field(nullable=True)
-    organism_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 → float
+    keywords: Series[str] = pa.Field(nullable=True)
+    lineage: Series[str] = pa.Field(nullable=True)
+    organism_common: Series[str] = pa.Field(nullable=True)
+    organism_scientific: Series[str] = pa.Field(nullable=True)
     phylum: Series[str] = pa.Field(nullable=True)  # Taxonomy: phylum
+    protein_alternative_names: Series[str] = pa.Field(nullable=True)
+    protein_ec_numbers: Series[str] = pa.Field(nullable=True)
     protein_name: Series[str] = pa.Field(nullable=True)
+    protein_short_names: Series[str] = pa.Field(nullable=True)
+    sequence: Series[str] = pa.Field(nullable=True)
+    sequence_checksum: Series[str] = pa.Field(nullable=True)
     sequence_length: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int64 → float
+    sequence_mass: Series[float] = pa.Field(nullable=True, coerce=True)
+    sequence_modified: Series[str] = pa.Field(nullable=True)
     superkingdom: Series[str] = pa.Field(nullable=True)  # Taxonomy: superkingdom
+    taxonomy_id: Series[float] = pa.Field(nullable=True, coerce=True)
 
     # Quality metrics
     annotation_score: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int64 → float
+    cross_reference_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    feature_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    isoform_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    keyword_count: Series[float] = pa.Field(nullable=True, coerce=True)
     protein_existence: Series[str] = pa.Field(nullable=True)  # Evidence level string
+    publication_count: Series[float] = pa.Field(nullable=True, coerce=True)
     reviewed: Series[bool] = pa.Field(
         nullable=True, coerce=True
     )  # Swiss-Prot vs TrEMBL

@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.wiring.runtime import BasePipeline, ShutdownSignal
     from bioetl.application.observability.domain_event_emitter import (
-        DomainEventEmitterPort,
+        DomainEventEmitterProtocol,
     )
     from bioetl.domain.config import MemoryConfig
     from bioetl.domain.ports import (
@@ -52,4 +52,4 @@ class BatchExecutorBuildRequest:
     gold_output_path: str | None = None
     flat_structure: bool = False
     batch_id_factory: BatchIdGeneratorPort | None = None
-    domain_event_emitter: DomainEventEmitterPort | None = None
+    domain_event_emitter: DomainEventEmitterProtocol | None = None

@@ -12,6 +12,7 @@ Execute architecture validation checks and report blocking/non-blocking issues.
 
 - Canonical runtime entrypoint: this `SKILL.md`
 - Project rules: `../../../AGENTS.md`
+- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 
 ## Workflow
 

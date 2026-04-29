@@ -22,9 +22,9 @@ from bioetl.application.core.wiring.runtime import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.core.batch_writer import BatchWriteStoragePort
+    from bioetl.application.core.batch_writer import BatchWriteStorageProtocol
     from bioetl.application.observability.domain_event_emitter import (
-        DomainEventEmitterPort,
+        DomainEventEmitterProtocol,
     )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
@@ -42,7 +42,7 @@ def create_batch_processing_components(
     gold_transform_callback: GoldTransformCallback,
     gold_validator: GoldValidatorPort,
     tracer: TracingPort | None = None,
-    domain_event_emitter: DomainEventEmitterPort | None = None,
+    domain_event_emitter: DomainEventEmitterProtocol | None = None,
     lock_validator: Callable[[], Awaitable[bool]] | None = None,
 ) -> BatchProcessingComponents:
     """Create batch metrics, transformer, and writer via composition DI."""
@@ -87,7 +87,7 @@ def create_batch_processing_components(
         else None
     )
     writer = BatchWriter(
-        storage=cast("BatchWriteStoragePort", services.storage),
+        storage=cast("BatchWriteStorageProtocol", services.storage),
         context=context,
         config=config,
         gold_validator=gold_validator,

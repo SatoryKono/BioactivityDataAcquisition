@@ -1,4 +1,4 @@
-"""Composition-facing adapter for composite Polars join execution."""
+"""Composition-facing bridge for composite Polars join execution."""
 
 from __future__ import annotations
 
@@ -11,8 +11,8 @@ if TYPE_CHECKING:
     from polars._typing import JoinStrategy as JoinHow
 
 
-class PolarsJoinAdapter:
-    """Adapter wrapper for JoinExecutorService in composition layer.
+class PolarsJoinBridge:
+    """Bridge wrapper for JoinExecutorService in composition layer.
 
     This real adapter provides composition-specific interface and behavior
     while delegating to the underlying JoinExecutorService.
@@ -65,4 +65,9 @@ class PolarsJoinAdapter:
         )
 
 
-__all__ = ["PolarsJoinAdapter"]
+__all__ = ["PolarsJoinBridge"]
+
+
+# Backward-compatible alias retained while composition callers migrate to the
+# Bridge suffix. New code should use PolarsJoinBridge directly.
+PolarsJoinAdapter = PolarsJoinBridge

@@ -47,7 +47,7 @@ def mock_metadata_coordinator():
     from datetime import UTC, datetime
 
     from bioetl.application.services.lineage import (
-        MetadataLineageBundle,
+        MetadataLineageBundleResult,
     )
     from bioetl.domain.models.metadata import (
         BaseOutputMetadata,
@@ -118,7 +118,7 @@ def mock_metadata_coordinator():
 
     coordinator.create_silver_metadata = create_silver_metadata
     coordinator.create_silver_metadata_bundle = lambda input_data: (
-        MetadataLineageBundle(
+        MetadataLineageBundleResult(
             metadata=create_silver_metadata(input_data),
             lineage_fragment=make_produced_artifact_fragment(
                 fragment_id="silver:fixture-fragment",

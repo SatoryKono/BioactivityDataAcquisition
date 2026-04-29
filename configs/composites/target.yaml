@@ -343,7 +343,6 @@ composite:
       - uniprot.protein.sequence_checksum   # Technical field
       - uniprot.protein.sequence_modified   # Audit field
       - uniprot.protein.lineage             # Redundant with taxonomy_id
-      - uniprot.protein.gene_names          # Use gene_primary instead
       - uniprot.protein.gene_synonyms       # Too verbose
       - uniprot.protein.gene_orf_names      # Too verbose
       - uniprot.protein.protein_short_names  # Use protein_name instead

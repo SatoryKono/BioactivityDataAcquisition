@@ -13,6 +13,7 @@ if __package__ in {None, ""}:
         DEFAULT_REGISTRY_PATH,
         DEFAULT_SRC_ROOT,
         CompatibilityRegistry,
+        find_first_party_imports_of_internal_callers_zero_rows,
         find_first_party_imports_of_measured_only_modules,
         load_compatibility_registry,
         scan_docstring_tracked_modules,
@@ -158,6 +159,18 @@ def _render_measured_only_modules(registry: CompatibilityRegistry) -> list[str]:
     return lines
 
 
+def _render_curated_governance_metadata(registry: CompatibilityRegistry) -> list[str]:
+    if not registry.curated_rows:
+        return [_NONE_BULLET]
+
+    return [
+        f"- `{row.path}` — external breaking change required: "
+        f"`{str(row.external_breaking_change_required).lower()}`, "
+        f"internal callers zero: `{str(row.internal_callers_zero).lower()}`"
+        for row in registry.curated_rows
+    ]
+
+
 def _render_measured_only_ratchet(registry: CompatibilityRegistry) -> list[str]:
     lines = [
         f"- Max measured-only modules: `{registry.measured_only_ratchet.max_total_modules}`",
@@ -186,14 +199,14 @@ def _render_measured_only_review_workflow(registry: CompatibilityRegistry) -> li
 
 
 def _render_import_violations(
-    measured_only_import_violations: dict[str, tuple[str, ...]],
+    import_violations: dict[str, tuple[str, ...]],
 ) -> list[str]:
     """Render measured-only import violations as markdown bullets."""
-    if not measured_only_import_violations:
+    if not import_violations:
         return [_NONE_BULLET]
     return [
         f"- `{module}` imported by {', '.join(f'`{path}`' for path in importers)}"
-        for module, importers in sorted(measured_only_import_violations.items())
+        for module, importers in sorted(import_violations.items())
     ]
 
 
@@ -204,6 +217,7 @@ def _summary_section(
     unexpected_paths: list[str],
     missing_paths: list[str],
     measured_only_import_violations: dict[str, tuple[str, ...]],
+    internal_callers_zero_import_violations: dict[str, tuple[str, ...]],
     ratchet_violations: tuple[str, ...],
 ) -> list[str]:
     """Render snapshot summary section."""
@@ -234,6 +248,18 @@ def _summary_section(
             "- First-party src imports targeting measured-only modules: "
             f"`{len(measured_only_import_violations)}`"
         ),
+        (
+            "- Curated rows requiring external breaking change process: "
+            f"`{sum(1 for row in registry.curated_rows if row.external_breaking_change_required)}`"
+        ),
+        (
+            "- Curated rows marked internal-callers-zero: "
+            f"`{sum(1 for row in registry.curated_rows if row.internal_callers_zero)}`"
+        ),
+        (
+            "- First-party src imports targeting internal-callers-zero rows: "
+            f"`{len(internal_callers_zero_import_violations)}`"
+        ),
         f"- Ratchet violations: `{len(ratchet_violations)}`",
         "",
     ]
@@ -247,6 +273,10 @@ def _measured_only_section(
 ) -> list[str]:
     """Render measured-only allowlist, ratchet, and workflow sections."""
     return [
+        "## Curated Row Governance Metadata",
+        "",
+        *_render_curated_governance_metadata(registry),
+        "",
         "## Measured-Only Allowlist",
         "",
         *_render_measured_only_modules(registry),
@@ -280,6 +310,7 @@ def _docstring_validation_section(
     unexpected_paths: list[str],
     missing_paths: list[str],
     measured_only_import_violations: dict[str, tuple[str, ...]],
+    internal_callers_zero_import_violations: dict[str, tuple[str, ...]],
 ) -> list[str]:
     """Render live docstring tracking validation section."""
     return [
@@ -301,6 +332,10 @@ def _docstring_validation_section(
         "",
         *_render_import_violations(measured_only_import_violations),
         "",
+        "### First-Party Src Imports Of Internal-Callers-Zero Rows",
+        "",
+        *_render_import_violations(internal_callers_zero_import_violations),
+        "",
     ]
 
 
@@ -311,6 +346,7 @@ def render_snapshot(
     unexpected_docstring_modules: set[str],
     missing_measured_only_modules: set[str],
     measured_only_import_violations: dict[str, tuple[str, ...]],
+    internal_callers_zero_import_violations: dict[str, tuple[str, ...]],
     ratchet_violations: tuple[str, ...],
     scoped_ratchet_counts: dict[str, int],
 ) -> str:
@@ -329,6 +365,9 @@ def render_snapshot(
             unexpected_paths=unexpected_paths,
             missing_paths=missing_paths,
             measured_only_import_violations=measured_only_import_violations,
+            internal_callers_zero_import_violations=(
+                internal_callers_zero_import_violations
+            ),
             ratchet_violations=ratchet_violations,
         ),
         "## Tracked Docstring Prefixes",
@@ -349,6 +388,9 @@ def render_snapshot(
             unexpected_paths=unexpected_paths,
             missing_paths=missing_paths,
             measured_only_import_violations=measured_only_import_violations,
+            internal_callers_zero_import_violations=(
+                internal_callers_zero_import_violations
+            ),
         ),
     ]
     return "\n".join(sections)
@@ -369,11 +411,16 @@ def _validation_has_issues(
     unexpected: set[str],
     missing: set[str],
     measured_only_import_violations: dict[str, tuple[str, ...]],
+    internal_callers_zero_import_violations: dict[str, tuple[str, ...]],
     ratchet_violations: tuple[str, ...],
 ) -> bool:
     """Return True when live validation produced any actionable issue."""
     return bool(
-        unexpected or missing or measured_only_import_violations or ratchet_violations
+        unexpected
+        or missing
+        or measured_only_import_violations
+        or internal_callers_zero_import_violations
+        or ratchet_violations
     )
 
 
@@ -383,6 +430,7 @@ def _print_validation_issues(
     unexpected: set[str],
     missing: set[str],
     measured_only_import_violations: dict[str, tuple[str, ...]],
+    internal_callers_zero_import_violations: dict[str, tuple[str, ...]],
     ratchet_violations: tuple[str, ...],
 ) -> None:
     """Print drift/warn details for validation findings."""
@@ -397,6 +445,11 @@ def _print_validation_issues(
     if measured_only_import_violations:
         print(f"[{level}] first-party src imports measured-only modules:")
         for module, importers in sorted(measured_only_import_violations.items()):
+            joined = ", ".join(importers)
+            print(f"  - {module}: {joined}")
+    if internal_callers_zero_import_violations:
+        print(f"[{level}] first-party src imports internal-callers-zero rows:")
+        for module, importers in sorted(internal_callers_zero_import_violations.items()):
             joined = ", ".join(importers)
             print(f"  - {module}: {joined}")
     if ratchet_violations:
@@ -420,6 +473,12 @@ def main() -> int:
         registry,
         src_root=Path(args.src_root),
     )
+    internal_callers_zero_import_violations = (
+        find_first_party_imports_of_internal_callers_zero_rows(
+            registry,
+            src_root=Path(args.src_root),
+        )
+    )
     ratchet_violations, scoped_ratchet_counts = validate_measured_only_ratchet(registry)
     rendered = render_snapshot(
         registry,
@@ -427,6 +486,9 @@ def main() -> int:
         unexpected_docstring_modules=unexpected,
         missing_measured_only_modules=missing,
         measured_only_import_violations=measured_only_import_violations,
+        internal_callers_zero_import_violations=(
+            internal_callers_zero_import_violations
+        ),
         ratchet_violations=ratchet_violations,
         scoped_ratchet_counts=scoped_ratchet_counts,
     )
@@ -443,6 +505,9 @@ def main() -> int:
             unexpected=unexpected,
             missing=missing,
             measured_only_import_violations=measured_only_import_violations,
+            internal_callers_zero_import_violations=(
+                internal_callers_zero_import_violations
+            ),
             ratchet_violations=ratchet_violations,
         ):
             _print_validation_issues(
@@ -450,6 +515,9 @@ def main() -> int:
                 unexpected=unexpected,
                 missing=missing,
                 measured_only_import_violations=measured_only_import_violations,
+                internal_callers_zero_import_violations=(
+                    internal_callers_zero_import_violations
+                ),
                 ratchet_violations=ratchet_violations,
             )
             is_error = True
@@ -465,6 +533,9 @@ def main() -> int:
         unexpected=unexpected,
         missing=missing,
         measured_only_import_violations=measured_only_import_violations,
+        internal_callers_zero_import_violations=(
+            internal_callers_zero_import_violations
+        ),
         ratchet_violations=ratchet_violations,
     ):
         _print_validation_issues(
@@ -472,6 +543,9 @@ def main() -> int:
             unexpected=unexpected,
             missing=missing,
             measured_only_import_violations=measured_only_import_violations,
+            internal_callers_zero_import_violations=(
+                internal_callers_zero_import_violations
+            ),
             ratchet_violations=ratchet_violations,
         )
         return 1

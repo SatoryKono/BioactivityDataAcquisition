@@ -22,7 +22,7 @@ from bioetl.infrastructure.adapters.common.dependency_context import (
 )
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
     DefaultFallbackExecution,
-    FallbackExecutionPort,
+    FallbackExecutionProtocol,
     FallbackFetchOrchestratorService,
     FallbackFetchRequest,
 )
@@ -61,7 +61,7 @@ __all__ = [
     "ComposableFallbackDecorator",
     "DefaultFallbackExecution",
     "FallbackDecoratorConfig",
-    "FallbackExecutionPort",
+    "FallbackExecutionProtocol",
     "FallbackFetchOrchestratorService",
     "FallbackFetchRequest",
     "FallbackPolicyMixin",

@@ -5,6 +5,18 @@
 This file adapts BioETL's logical `py-*` agent profiles to the actual Codex runtime
 available in this repository.
 
+## Required Context
+
+Before invoking a logical profile:
+
+- use `AGENTS.md` as the root precedence contract
+- read `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- for write-capable work, follow
+  `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
+`docs/00-project/ai/**` remains a mirror/guidance layer and must not override
+runtime behavior defined in `.codex/**`.
+
 ## Key Rule
 
 `py-*` names in `.codex/agents/` are **logical project profiles**, not native

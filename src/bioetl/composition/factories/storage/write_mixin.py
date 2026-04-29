@@ -1,4 +1,4 @@
-"""Write operations mixin for StorageAdapter (Bronze/Silver/Gold)."""
+"""Write operations mixin for StorageBundle (Bronze/Silver/Gold)."""
 
 from __future__ import annotations
 
@@ -19,10 +19,10 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-__all__ = ["StorageAdapterWriteMixin"]
+__all__ = ["StorageBundleWriteMixin"]
 
 
-class StorageAdapterWriteMixin:
+class StorageBundleWriteMixin:
     """Mixin providing core write operations for Bronze, Silver, and Gold layers."""
 
     bronze: BronzeWriter

@@ -23,10 +23,12 @@ ______________________________________________________________________
 Перед изменениями/аудитом обязательно сверяться с:
 
 1. `docs/00-project/RULES.md` (источник требований RFC 2119),
+1. `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`,
+1. `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` — для write-capable задач,
 1. `docs/00-project/ai/agents/guides/AGENT.md`,
 1. `docs/00-project/ai/agents/guides/CLAUDE.md`,
 1. `docs/00-project/ai/agents/guides/GEMINI.md`,
-1. `docs/00-project/ai/agents/runtime/agent-memory.md`,
+1. `docs/00-project/ai/memory/agent-memory.md`,
 1. `docs/03-guides/dashboards/dashboard-extension-llm.md` — если задача затрагивает `grafana/dashboards/*.json`, dashboard links или Loki/Tempo drilldown,
 1. `docs/00-project/ai/agents/agents/ORCHESTRATION.md` (публикуемое Codex docs mirror для `.codex/agents/ORCHESTRATION.md`, для сложных задач).
 

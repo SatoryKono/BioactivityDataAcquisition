@@ -92,7 +92,7 @@ from bioetl.domain.ports.publication_strategy import (
 from bioetl.domain.ports.quality import (
     BronzeDQAnalyzerPort,
     BronzeDQConfigPort,
-    ContractPolicyPort,
+    ContractPolicyProtocol,
     DQReportWriterPort,
     ErrorClassifierPort,
     ErrorHandlerPort,
@@ -171,7 +171,7 @@ __all__ = [
     "CircuitBreakerPort",
     "ClockPort",
     "CompositeCheckpointPort",
-    "ContractPolicyPort",
+    "ContractPolicyProtocol",
     "DQMonitorPort",
     "DQReportWriterPort",
     "DataExtractorStrategy",

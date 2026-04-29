@@ -661,7 +661,7 @@ def test_openalex_publication_profile_makes_content_hash_invariant_for_set_like_
 
 
 @pytest.mark.unit
-def test_uniprot_protein_profile_makes_content_hash_invariant_for_gene_name_order() -> (
+def test_uniprot_protein_profile_makes_content_hash_invariant_for_gene_synonym_order() -> (
     None
 ):
     processor = RecordNormalizationProcessor(
@@ -674,8 +674,8 @@ def test_uniprot_protein_profile_makes_content_hash_invariant_for_gene_name_orde
         "accession": "P12345",
         "protein_name": " Example <b>protein</b> ",
         "annotation_score": "5",
-        "gene_names": ["GENE2", "GENE1"],
-        "organism_id": "9606",
+        "gene_synonyms": ["GENE2", "GENE1"],
+        "taxonomy_id": "9606",
         "_run_id": "run-a",
     }
     record_b = {
@@ -684,8 +684,8 @@ def test_uniprot_protein_profile_makes_content_hash_invariant_for_gene_name_orde
         "accession": "P12345",
         "protein_name": "Example protein",
         "annotation_score": 5,
-        "gene_names": ["GENE1", "GENE2"],
-        "organism_id": 9606.0,
+        "gene_synonyms": ["GENE1", "GENE2"],
+        "taxonomy_id": 9606.0,
         "_run_id": "run-b",
     }
     changed_record = {
@@ -694,8 +694,8 @@ def test_uniprot_protein_profile_makes_content_hash_invariant_for_gene_name_orde
         "accession": "P12345",
         "protein_name": "Example protein",
         "annotation_score": 5,
-        "gene_names": ["GENE1", "GENE3"],
-        "organism_id": 9606,
+        "gene_synonyms": ["GENE1", "GENE3"],
+        "taxonomy_id": 9606,
         "_run_id": "run-c",
     }
 
@@ -704,7 +704,7 @@ def test_uniprot_protein_profile_makes_content_hash_invariant_for_gene_name_orde
     normalized_changed = processor.normalize_record(changed_record)
 
     assert normalized_a["protein_name"] == "Example protein"
-    assert normalized_a["organism_id"] == 9606
+    assert normalized_a["taxonomy_id"] == 9606
     assert normalized_a["content_hash"] == normalized_b["content_hash"]
     assert normalized_changed["content_hash"] != normalized_a["content_hash"]
 

@@ -15,7 +15,7 @@ from __future__ import annotations
 
 __all__ = [
     "DelegatingFallbackMixin",
-    "FetchFilteredPort",
+    "FetchFilteredProtocol",
     "FilterableStubMixin",
     "NotSupportedMultiFilterMixin",
     "raising_async_iterator",
@@ -49,7 +49,7 @@ def raising_async_iterator(exc: BaseException) -> AsyncIterator[JsonDict]:
 
 
 @runtime_checkable
-class FetchFilteredPort(Protocol):
+class FetchFilteredProtocol(Protocol):
     """Protocol for adapters that implement fetch_filtered method."""
 
     def fetch_filtered(
@@ -143,7 +143,7 @@ class DelegatingFallbackMixin:
     """
 
     async def fetch_filtered_with_fallback(
-        self: FetchFilteredPort,
+        self: FetchFilteredProtocol,
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,

@@ -7,14 +7,14 @@ from typing import Protocol
 from bioetl.application.services.config_service import PipelineInfo
 
 __all__ = [
-    "ContractPolicyLoaderPort",
-    "ContractPolicyPort",
-    "PipelineInfoLoaderPort",
-    "RegistryEntriesLoaderPort",
+    "ContractPolicyLoaderProtocol",
+    "ContractPolicyProtocol",
+    "PipelineInfoLoaderProtocol",
+    "RegistryEntriesLoaderProtocol",
 ]
 
 
-class ContractPolicyPort(Protocol):
+class ContractPolicyProtocol(Protocol):
     """Minimal contract policy surface required by migration planning."""
 
     @property
@@ -48,7 +48,7 @@ class ContractPolicyPort(Protocol):
         ...
 
 
-class PipelineInfoLoaderPort(Protocol):
+class PipelineInfoLoaderProtocol(Protocol):
     """Callable contract for pipeline identity resolution."""
 
     def __call__(self, pipeline_name: str) -> PipelineInfo:
@@ -56,15 +56,15 @@ class PipelineInfoLoaderPort(Protocol):
         ...
 
 
-class ContractPolicyLoaderPort(Protocol):
+class ContractPolicyLoaderProtocol(Protocol):
     """Callable contract for loading contract policy by provider/entity."""
 
-    def __call__(self, provider: str, entity: str) -> ContractPolicyPort:
+    def __call__(self, provider: str, entity: str) -> ContractPolicyProtocol:
         """Load the typed contract policy."""
         ...
 
 
-class RegistryEntriesLoaderPort(Protocol):
+class RegistryEntriesLoaderProtocol(Protocol):
     """Callable contract for retrieving raw registry entries."""
 
     def __call__(self) -> dict[str, dict[str, object]]:

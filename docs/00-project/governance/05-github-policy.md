@@ -133,12 +133,23 @@ Repository policy requires `root-hygiene` as a blocking check for `main`.
 Repo-side evidence is the `root-hygiene` entry above plus
 `.github/workflows/root-hygiene.yml`.
 
-Live GitHub branch protection or ruleset state MUST be verified with
-owner/admin access before marking the policy as fully confirmed. The current
-verification lane is issue `#3380`; update this section with the verification
-date, actor, and evidence link after owner/admin confirmation. Repeat this
-verification at least quarterly and after any branch-protection/ruleset
-migration.
+Verified on `2026-04-29` with repository admin credentials via the GitHub REST
+API as part of issue `#3380`.
+
+Live GitHub enforcement state:
+
+- Active repository ruleset `root-hygiene-required-check` targets
+  `refs/heads/main`.
+- Required status check: `root-hygiene`.
+- Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
+
+The legacy repository ruleset `main`
+(`https://github.com/SatoryKono/BioactivityDataAcquisition/rules/13643213`)
+remains disabled and is not the authoritative required-check control for this
+policy.
+
+Repeat this verification at least quarterly and after any branch-protection or
+ruleset migration.
 
 ______________________________________________________________________
 

@@ -1,4 +1,4 @@
-"""Unit tests for the composition-facing PolarsJoinAdapter."""
+"""Unit tests for the composition-facing PolarsJoinBridge."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.join_execution import JoinExecutorService
-from bioetl.composition.factories.services.polars_join_adapter import PolarsJoinAdapter
+from bioetl.composition.factories.services.polars_join_adapter import PolarsJoinBridge
 
 
 @pytest.mark.unit
@@ -18,7 +18,7 @@ def test_polars_join_adapter_is_join_executor_service() -> None:
     mock_join_service = MagicMock(spec=JoinExecutorService)
     mock_join_service.get_polars_join_type.return_value = "left"
 
-    adapter = PolarsJoinAdapter(join_service=mock_join_service)
+    adapter = PolarsJoinBridge(join_service=mock_join_service)
 
     # Adapter is now a wrapper around JoinExecutorService, not an instance of it
     assert hasattr(adapter, "get_polars_join_type")
@@ -38,7 +38,7 @@ def test_polars_join_adapter_executes_inherited_join_logic() -> None:
     )
     mock_join_service.execute_polars_join.return_value = expected_result
 
-    adapter = PolarsJoinAdapter(join_service=mock_join_service)
+    adapter = PolarsJoinBridge(join_service=mock_join_service)
     left_df = pl.DataFrame({"seed_id": ["A"], "seed_value": [1]})
     right_df = pl.DataFrame({"dep_id": ["A"], "dep_value": [2]})
 

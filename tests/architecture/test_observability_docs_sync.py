@@ -11,6 +11,7 @@ RULES_PATH = Path("docs/00-project/RULES.md")
 METRICS_GUIDE_PATH = Path("docs/03-guides/metrics-monitoring.md")
 OBSERVABILITY_CONTRACT_PATH = Path("docs/04-reference/contracts/observability.md")
 GRAFANA_README_PATH = Path("grafana/README.md")
+MONITORING_INDEX_PATH = Path("docs/03-guides/dashboards/monitoring-index.md")
 
 
 @pytest.mark.architecture
@@ -149,8 +150,7 @@ def test_monitoring_docs_track_modular_observability_code_paths() -> None:
         "src/bioetl/infrastructure/observability/prometheus_metric_label_policies.py",
     ):
         assert required_token in grafana_readme, (
-            f"grafana/README.md is missing current observability path: "
-            f"{required_token}"
+            f"grafana/README.md is missing current observability path: {required_token}"
         )
 
     for text, doc_name in (
@@ -167,3 +167,52 @@ def test_monitoring_docs_track_modular_observability_code_paths() -> None:
         assert "manifest/ledger/CLI/explorer" in text, (
             f"{doc_name} must preserve Prometheus aggregate vs forensic boundary."
         )
+
+
+@pytest.mark.architecture
+def test_monitoring_index_is_concise_operator_entrypoint() -> None:
+    """Monitoring index must stay the short routing surface for incidents."""
+    text = MONITORING_INDEX_PATH.read_text(encoding="utf-8")
+
+    required_tokens = (
+        "Incident-Time Operator Index",
+        "Architecture Map",
+        "bioetl-overview-v2",
+        "bioetl-runtime",
+        "bioetl-provider-health-v2",
+        "bioetl-dq-v2",
+        "bioetl-control-plane-v1",
+        "bioetl-silver-reject-explorer",
+        "bioetl diagnostics guide",
+        "bioetl checkpoint inspect",
+        "report-observability-metric-inventory --json",
+        "manifest/ledger/CLI/explorer surfaces",
+    )
+    for token in required_tokens:
+        assert token in text, f"monitoring-index.md missing operator token: {token}"
+
+    assert len(text.splitlines()) <= 130, (
+        "monitoring-index.md must remain concise; move detailed setup/reference "
+        "content to grafana/README.md or contract docs."
+    )
+
+
+@pytest.mark.architecture
+def test_grafana_readme_does_not_republish_legacy_v1_as_active_dashboards() -> None:
+    """README may mention legacy v1 only as archive, not active operator rows."""
+    text = GRAFANA_README_PATH.read_text(encoding="utf-8")
+
+    forbidden_active_rows = (
+        "| BioETL Overview           | `bioetl-overview`",
+        "| BioETL Provider Health    | `bioetl-provider-health`",
+        "| BioETL Data Quality       | `bioetl-dq`",
+        "Почему v1 и v2 дашборды сосуществуют?",
+        "v1 дашборды оптимизированы",
+    )
+    for token in forbidden_active_rows:
+        assert token not in text, (
+            f"grafana/README.md reintroduced active legacy guidance: {token}"
+        )
+
+    assert "legacy v1 dashboard surfaces" in text
+    assert "Metric lifecycle reference boundary" in text

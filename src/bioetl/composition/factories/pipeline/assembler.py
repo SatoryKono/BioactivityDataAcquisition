@@ -41,7 +41,7 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
 from bioetl.domain.ports import (
-    ContractPolicyPort,
+    ContractPolicyProtocol,
     DataNormalizationPort,
     MetricsPort,
     PiiHasherPort,
@@ -142,7 +142,7 @@ def create_transformer[TPipeline: BasePipeline](
     identity_service: IdentityService | None = None,
     pii_hasher: PiiHasherPort | None = None,
     data_normalizer: DataNormalizationPort | None = None,
-    contract_policy: ContractPolicyPort | None = None,
+    contract_policy: ContractPolicyProtocol | None = None,
     dependencies: TransformerDependencyContext | None = None,
 ) -> BaseTransformer | None:
     """Public compatibility seam for direct transformer creation from a factory."""

@@ -842,6 +842,11 @@ persisted `RunManifest` storage schema.
 `exact_replay_anchors` is the semantic replay section. It intentionally excludes
 occurrence-only identifiers such as `manifest_id` and `run_id`; those values stay
 in the surrounding inspection payload and occurrence diagnostics.
+Runtime `BatchID`, quarantine `entry_id`, and domain-event `event_id` values are
+also occurrence-scoped correlation/idempotency identifiers. UUID4 generation for
+those values is allowed only when inventoried in
+`configs/quality/determinism_identity_policy.yaml`, and those identifiers must
+not enter `execution_fingerprint` or persisted dataset content hashes.
 
 `produced_artifact_trace` is rooted at the manifest lookup key and is resolved
 from run-ledger artifact publication events only. A run cannot claim

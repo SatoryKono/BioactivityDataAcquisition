@@ -369,14 +369,16 @@ class TestUniprotProteinSchema:
         for field_name in expected:
             assert field_name in UNIPROT_PROTEIN_SCHEMA.names
 
-    def test_gene_fields_are_canonical_json_strings(self):
-        """Verify gene structured fields use persisted JSON string semantics."""
-        for field_name in ("gene_names", "gene_synonyms", "gene_orf_names"):
+    def test_gene_fields_are_canonical_strings(self):
+        """Verify canonical gene fields are persisted without legacy aliases."""
+        assert "gene_names" not in UNIPROT_PROTEIN_SCHEMA.names
+        for field_name in ("gene_primary", "gene_synonyms", "gene_orf_names"):
             field = UNIPROT_PROTEIN_SCHEMA.field(field_name)
             assert field.type == pa.string()
 
     def test_taxonomy_id_is_int64(self):
         """Verify canonical taxonomy_id is int64."""
+        assert "organism_id" not in UNIPROT_PROTEIN_SCHEMA.names
         field = UNIPROT_PROTEIN_SCHEMA.field("taxonomy_id")
         assert field.type == pa.int64()
 
@@ -580,7 +582,8 @@ class TestSilverSchemaValidation:
             "accession": "P00533",
             "entry_name": "EGFR_HUMAN",
             "protein_name": "Epidermal growth factor receptor",
-            "gene_names": '["EGFR","ERBB1"]',
+            "gene_primary": "EGFR",
+            "gene_synonyms": '["ERBB1"]',
             "taxonomy_id": 9606,
             "sequence_length": 1210,
             "content_hash": "hash123",
@@ -621,14 +624,14 @@ class TestSilverSchemaValidation:
 
     def test_silver_schema_rejects_wrong_list_type(self):
         """Silver schema должна отклонять некорректный тип списка."""
-        # Invalid: gene_names should be list of strings, not list of ints
+        # Invalid: gene_synonyms should be a JSON string, not a Python list.
         invalid_record = {
             "entity_id": "P00533",
             "accession": "P00533",
             "entry_name": "EGFR_HUMAN",
             "protein_name": "Epidermal growth factor receptor",
-            "gene_names": [123, 456],  # Should be list of strings
-            "organism_id": 9606,
+            "gene_synonyms": [123, 456],
+            "taxonomy_id": 9606,
             "sequence_length": 1210,
             "content_hash": "hash123",
             "_run_id": "run_003",

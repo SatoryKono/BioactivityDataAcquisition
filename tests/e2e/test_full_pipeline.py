@@ -16,7 +16,7 @@ from unittest.mock import patch
 import pytest
 
 from bioetl.composition.bootstrap import bootstrap_pipeline_runner
-from bioetl.composition.factories.storage import StorageAdapter, StorageContext
+from bioetl.composition.factories.storage import StorageBundle, StorageContext
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -59,7 +59,7 @@ class TestChEMBLPipelineE2E:
             logger=logger,
         )
 
-        return StorageAdapter(
+        return StorageBundle(
             bronze_writer=bronze_writer,
             silver_writer=silver_writer,
             gold_writer=gold_writer,
@@ -159,7 +159,7 @@ async def test_pubchem_compound_pipeline(
         logger=logger,
     )
 
-    storage_adapter = StorageAdapter(
+    storage_adapter = StorageBundle(
         bronze_writer=bronze_writer,
         silver_writer=silver_writer,
         gold_writer=gold_writer,
@@ -239,7 +239,7 @@ async def test_pipeline_resume_after_failure(
         logger=logger,
     )
 
-    storage_adapter = StorageAdapter(
+    storage_adapter = StorageBundle(
         bronze_writer=bronze_writer,
         silver_writer=silver_writer,
         gold_writer=gold_writer,
@@ -330,7 +330,7 @@ async def test_pipeline_idempotency(
         logger=logger,
     )
 
-    storage_adapter = StorageAdapter(
+    storage_adapter = StorageBundle(
         bronze_writer=bronze_writer,
         silver_writer=silver_writer,
         gold_writer=gold_writer,

@@ -54,7 +54,9 @@ class PublicationTermTransformer(BaseChemblTransformer):
             self._get_required_field(prepared_record, self.primary_id_field),
         )
         business_data = self._extract_business_data(prepared_record, primary_id)
-        if business_data is None or not _has_extractable_publication_term(business_data):
+        if business_data is None or not _has_extractable_publication_term(
+            business_data
+        ):
             return None
         entity_id = _resolve_publication_term_entity_id(
             self, prepared_record, business_data
@@ -80,7 +82,9 @@ class PublicationTermTransformer(BaseChemblTransformer):
             self._get_required_field(prepared_record, self.primary_id_field),
         )
         business_data = self._extract_business_data(prepared_record, primary_id)
-        if business_data is None or not _has_extractable_publication_term(business_data):
+        if business_data is None or not _has_extractable_publication_term(
+            business_data
+        ):
             return None
         normalizer = RecordNormalizationProcessor(
             provider=self.provider,

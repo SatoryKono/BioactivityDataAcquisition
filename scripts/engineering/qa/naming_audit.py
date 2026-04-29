@@ -49,6 +49,7 @@ class ViolationType(StrEnum):
     UPPERCASE_MODULE = "UPPERCASE в имени модуля"
     HYPHEN_IN_MODULE = "дефис в имени Python-модуля"
     MISSING_SUFFIX = "отсутствует обязательный суффикс"
+    UNREGISTERED_ALIAS = "незарегистрированный публичный alias"
     UNDERSCORE_IN_DOC = "underscore в имени документации"
     UPPERCASE_DOC = "UPPER_SNAKE_CASE в документации"
 
@@ -94,6 +95,18 @@ class BackwardCompatibilitySurface:
 
 
 @dataclass(frozen=True)
+class PublicSymbolAlias:
+    """Registry entry for an explicitly retained public symbol alias."""
+
+    alias_name: str
+    canonical_name: str
+    defining_surface: str
+    export_surfaces: tuple[str, ...]
+    reason: str
+    remove_after: str | None = None
+
+
+@dataclass(frozen=True)
 class NamingRegistry:
     """Parsed naming exception registry."""
 
@@ -101,10 +114,13 @@ class NamingRegistry:
     root_file_exceptions: frozenset[str]
     class_suffix_exceptions: frozenset[str]
     function_prefix_exceptions: frozenset[str]
+    role_suffix_families: dict[str, tuple[str, ...]]
+    allowed_role_suffixes: frozenset[str]
     stable_pipeline_ids: tuple[StablePublicName, ...]
     stable_pipeline_classes: tuple[StablePublicName, ...]
     stable_transformers: tuple[StablePublicName, ...]
     stable_gold_schemas: tuple[StablePublicName, ...]
+    public_symbol_aliases: tuple[PublicSymbolAlias, ...]
     forbidden_domain_entity_aliases: tuple[ForbiddenAlias, ...]
     adr_024_derived_entities: tuple[StablePublicName, ...]
     adr_024_legacy_fields: tuple[StablePublicName, ...]
@@ -141,37 +157,6 @@ class AmbiguityGroup:
     rationale: str
 
 
-# Суффиксы для классов по ролям
-ROLE_SUFFIXES = {
-    "Factory": ["Factory"],
-    "Client": ["Client"],
-    "Facade": ["Facade"],
-    "Registry": ["Registry"],
-    "Adapter": ["Adapter"],
-    "Protocol": ["Protocol", "Port", "ABC"],
-    "Config": ["Config", "Model", "Params", "Settings"],
-    "Error": ["Error", "Exception"],
-    "Impl": ["Impl"],
-    "Service": ["Service"],
-    "Writer": ["Writer"],
-    "Manager": ["Manager"],
-    "Monitor": ["Monitor"],
-    "Tracker": ["Tracker"],
-    "Builder": ["Builder"],
-    "Validator": ["Validator"],
-    "Exporter": ["Exporter"],
-    "Transformer": ["Transformer"],
-    "Pipeline": ["Pipeline"],
-    "Observer": ["Observer"],
-    "Handler": ["Handler"],
-    "Processor": ["Processor"],
-    "Recorder": ["Recorder"],
-    "Aggregator": ["Aggregator"],
-    "Orchestrator": ["Orchestrator"],
-    "Collector": ["Collector"],
-    "Assembler": ["Assembler"],
-}
-
 # Directories excluded from doc naming audit (archives, plans, AI content)
 _DOC_EXCLUDED_DIRS = {
     "99-archive",
@@ -199,6 +184,7 @@ _GENERIC_FAMILY_TOKENS = frozenset(
         "record",
     }
 )
+_PUBLIC_ALIAS_SUFFIX_FAMILIES = ("Result", "Protocol", "Port")
 _CANDIDATE_LABEL_SUFFIX_TOKENS = frozenset(
     {
         "pipeline",
@@ -396,6 +382,81 @@ def _load_backward_compatibility_surfaces(
     return tuple(entries)
 
 
+def _load_role_suffix_families(raw: object) -> dict[str, tuple[str, ...]]:
+    """Parse the canonical role-suffix registry."""
+    if not isinstance(raw, dict):
+        raise ValueError("role_suffix_families must be a mapping")
+
+    families: dict[str, tuple[str, ...]] = {}
+    for family_name, suffixes_raw in raw.items():
+        if not isinstance(family_name, str) or not family_name.strip():
+            raise ValueError("role_suffix_families keys must be non-empty strings")
+        suffixes = tuple(
+            suffix.strip()
+            for suffix in _flatten_string_values(suffixes_raw)
+            if suffix.strip()
+        )
+        if not suffixes:
+            raise ValueError(
+                f"role_suffix_families.{family_name} must declare at least one suffix"
+            )
+        families[family_name.strip()] = suffixes
+    return families
+
+
+def _flatten_role_suffixes(
+    families: dict[str, tuple[str, ...]],
+) -> frozenset[str]:
+    """Flatten the role-suffix family registry into one suffix set."""
+    return frozenset(
+        suffix for suffixes in families.values() for suffix in suffixes if suffix
+    )
+
+
+def _load_public_symbol_aliases(raw: object) -> tuple[PublicSymbolAlias, ...]:
+    """Parse registry-backed public symbol aliases."""
+    if not isinstance(raw, list):
+        return ()
+
+    aliases: list[PublicSymbolAlias] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        alias_name = str(item.get("alias_name", "")).strip()
+        canonical_name = str(item.get("canonical_name", "")).strip()
+        defining_surface = str(item.get("defining_surface", "")).strip()
+        export_surfaces = tuple(
+            surface.strip()
+            for surface in _flatten_string_values(item.get("export_surfaces", []))
+            if surface.strip()
+        )
+        reason = str(item.get("reason", "")).strip()
+        remove_after_raw = item.get("remove_after")
+        remove_after = (
+            str(remove_after_raw).strip()
+            if isinstance(remove_after_raw, str) and remove_after_raw.strip()
+            else None
+        )
+        if (
+            alias_name
+            and canonical_name
+            and defining_surface
+            and export_surfaces
+            and reason
+        ):
+            aliases.append(
+                PublicSymbolAlias(
+                    alias_name=alias_name,
+                    canonical_name=canonical_name,
+                    defining_surface=defining_surface,
+                    export_surfaces=export_surfaces,
+                    reason=reason,
+                    remove_after=remove_after,
+                )
+            )
+    return tuple(aliases)
+
+
 def load_naming_registry(
     registry_path: Path = NAMING_EXCEPTIONS_PATH,
 ) -> NamingRegistry:
@@ -415,6 +476,9 @@ def load_naming_registry(
     adr_024_known_exceptions = payload.get("adr_024_known_exceptions", {})
     if not isinstance(adr_024_known_exceptions, dict):
         raise ValueError("adr_024_known_exceptions must be a mapping")
+    role_suffix_families = _load_role_suffix_families(
+        payload.get("role_suffix_families", {})
+    )
 
     return NamingRegistry(
         documentation_exceptions=frozenset(
@@ -429,6 +493,8 @@ def load_naming_registry(
         function_prefix_exceptions=frozenset(
             _flatten_string_values(payload.get("function_prefix_exceptions", []))
         ),
+        role_suffix_families=role_suffix_families,
+        allowed_role_suffixes=_flatten_role_suffixes(role_suffix_families),
         stable_pipeline_ids=_load_stable_names(
             stable_public_surface.get("pipeline_ids", [])
         ),
@@ -440,6 +506,9 @@ def load_naming_registry(
         ),
         stable_gold_schemas=_load_stable_names(
             stable_public_surface.get("gold_schemas", [])
+        ),
+        public_symbol_aliases=_load_public_symbol_aliases(
+            payload.get("public_symbol_aliases", [])
         ),
         forbidden_domain_entity_aliases=_load_forbidden_aliases(
             payload.get("forbidden_domain_entity_aliases", [])
@@ -522,12 +591,54 @@ def _validate_registry_backward_compatibility(
             )
 
 
+def _validate_registry_role_suffix_families(
+    registry: NamingRegistry, errors: list[str]
+) -> None:
+    if not registry.role_suffix_families:
+        errors.append("role_suffix_families must declare at least one family")
+        return
+
+    required_suffixes = {"Service", "Protocol", "Port", "Result", "Assembler"}
+    missing = sorted(required_suffixes - set(registry.allowed_role_suffixes))
+    if missing:
+        errors.append(
+            "role_suffix_families is missing required suffixes: " + ", ".join(missing)
+        )
+
+
+def _validate_registry_public_symbol_aliases(
+    registry: NamingRegistry, errors: list[str]
+) -> None:
+    seen_keys: set[tuple[str, str, str]] = set()
+    forbidden_alias_names = {
+        alias.legacy_name for alias in registry.forbidden_domain_entity_aliases
+    }
+
+    for entry in registry.public_symbol_aliases:
+        key = (entry.alias_name, entry.canonical_name, entry.defining_surface)
+        if key in seen_keys:
+            errors.append(
+                "Duplicate public_symbol_aliases entry for "
+                f"{entry.alias_name} -> {entry.canonical_name} "
+                f"at {entry.defining_surface}"
+            )
+            continue
+        seen_keys.add(key)
+        if entry.alias_name in forbidden_alias_names:
+            errors.append(
+                "public_symbol_aliases must not reintroduce forbidden domain alias "
+                f"{entry.alias_name}"
+            )
+
+
 def validate_naming_registry(registry: NamingRegistry) -> list[str]:
     """Return consistency errors for the loaded naming registry."""
     errors: list[str] = []
     _validate_registry_forbidden_alias_overlap(registry, errors)
     _validate_registry_required_pipeline_ids(registry, errors)
     _validate_registry_backward_compatibility(registry, errors)
+    _validate_registry_role_suffix_families(registry, errors)
+    _validate_registry_public_symbol_aliases(registry, errors)
     return errors
 
 
@@ -551,17 +662,16 @@ def is_prefixed_doc(name: str) -> bool:
     return bool(re.match(r"^\d{2}-", name))
 
 
-def has_valid_suffix(class_name: str, allowed_no_suffix: frozenset[str]) -> bool:
+def has_valid_suffix(
+    class_name: str,
+    allowed_no_suffix: frozenset[str],
+    allowed_suffixes: frozenset[str],
+) -> bool:
     """Check whether a class name has a valid suffix or registry-backed exception."""
     if class_name in allowed_no_suffix:
         return True
 
-    for suffixes in ROLE_SUFFIXES.values():
-        for suffix in suffixes:
-            if class_name.endswith(suffix):
-                return True
-
-    return False
+    return any(class_name.endswith(suffix) for suffix in allowed_suffixes)
 
 
 def _iter_python_files(base_path: Path) -> Iterator[Path]:
@@ -602,6 +712,36 @@ def _class_naming_violation(py_file: Path, node: ast.ClassDef) -> Violation | No
     )
 
 
+def _class_suffix_violation(
+    py_file: Path,
+    node: ast.ClassDef,
+    *,
+    registry: NamingRegistry,
+) -> Violation | None:
+    if "/application/" not in py_file.as_posix():
+        return None
+    class_name = node.name
+    if class_name.startswith("_"):
+        return None
+    if has_valid_suffix(
+        class_name,
+        registry.class_suffix_exceptions,
+        registry.allowed_role_suffixes,
+    ):
+        return None
+    return Violation(
+        category="class",
+        path=str(py_file),
+        line=node.lineno,
+        current_name=class_name,
+        issue=ViolationType.MISSING_SUFFIX,
+        recommendation=(
+            "Add an approved role suffix from role_suffix_families "
+            "or register an explicit class_suffix_exception"
+        ),
+    )
+
+
 def _exported_names_from_all_assign(node: ast.Assign) -> set[str]:
     """Return exported string names from a __all__ assignment."""
     if not isinstance(node.value, (ast.List, ast.Tuple)):
@@ -633,6 +773,71 @@ def _extract_all_exports(path: Path) -> set[str]:
         if _is_all_assignment(node):
             return _exported_names_from_all_assign(node)
     return set()
+
+
+def _repo_relative_path(path: Path) -> str:
+    """Return a stable repo-relative path when possible."""
+    try:
+        return path.relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _iter_public_alias_assignments(tree: ast.Module) -> Iterator[tuple[int, str, str]]:
+    """Yield top-level alias assignments of the form Alias = Canonical."""
+    for node in tree.body:
+        if not isinstance(node, ast.Assign):
+            continue
+        if len(node.targets) != 1 or not isinstance(node.targets[0], ast.Name):
+            continue
+        if not isinstance(node.value, ast.Name):
+            continue
+        alias_name = node.targets[0].id
+        canonical_name = node.value.id
+        if alias_name == canonical_name:
+            continue
+        if alias_name.startswith("_") or canonical_name.startswith("_"):
+            continue
+        if not (is_pascal_case(alias_name) and is_pascal_case(canonical_name)):
+            continue
+        yield node.lineno, alias_name, canonical_name
+
+
+def _public_symbol_alias_index(
+    registry: NamingRegistry,
+) -> dict[tuple[str, str, str], PublicSymbolAlias]:
+    """Index registry-backed public symbol aliases by defining surface/name."""
+    return {
+        (entry.defining_surface, entry.alias_name, entry.canonical_name): entry
+        for entry in registry.public_symbol_aliases
+    }
+
+
+def _stripped_public_alias_suffix(name: str) -> tuple[str, str] | None:
+    """Return (stem, suffix) for alias-governed public role suffixes only."""
+    for suffix in _PUBLIC_ALIAS_SUFFIX_FAMILIES:
+        if name.endswith(suffix) and len(name) > len(suffix):
+            return name.removesuffix(suffix), suffix
+    return None
+
+
+def _is_public_alias_governance_candidate(alias_name: str, canonical_name: str) -> bool:
+    """Limit alias enforcement to the current PR wave's suffix families."""
+    alias_suffix = _stripped_public_alias_suffix(alias_name)
+    canonical_suffix = _stripped_public_alias_suffix(canonical_name)
+
+    if alias_suffix is None and canonical_suffix is None:
+        return False
+    if alias_suffix is None:
+        canonical_stem, _ = canonical_suffix
+        return alias_name == canonical_stem
+    if canonical_suffix is None:
+        alias_stem, _ = alias_suffix
+        return canonical_name == alias_stem
+
+    alias_stem, _ = alias_suffix
+    canonical_stem, _ = canonical_suffix
+    return alias_stem == canonical_stem
 
 
 def _tokenize_symbol_name(name: str) -> list[str]:
@@ -696,13 +901,14 @@ def _is_valid_class_node(node: ast.AST) -> bool:
         return False
     return not _is_support_surface(node.name)
 
+
 def _build_symbol_surface(py_file: Path, node_name: str) -> SymbolSurface | None:
     kind = _class_surface_kind(py_file, node_name)
     if kind is None:
         return None
-    semantic_family = _resolve_semantic_family(
+    semantic_family = _resolve_semantic_family(node_name) or _lexical_semantic_family(
         node_name
-    ) or _lexical_semantic_family(node_name)
+    )
     if semantic_family is None:
         return None
     return SymbolSurface(
@@ -712,6 +918,7 @@ def _build_symbol_surface(py_file: Path, node_name: str) -> SymbolSurface | None
         semantic_family=semantic_family,
         source="code",
     )
+
 
 def _iter_class_symbol_surfaces(src_path: Path) -> Iterator[SymbolSurface]:
     """Discover relevant class surfaces from code."""
@@ -1067,7 +1274,7 @@ def check_python_modules(base_path: Path) -> Iterator[Violation]:
             )
 
 
-def check_classes(base_path: Path) -> Iterator[Violation]:
+def check_classes(base_path: Path, registry: NamingRegistry) -> Iterator[Violation]:
     """Проверяет naming conventions для классов."""
     for py_file in _iter_python_files(base_path):
         try:
@@ -1081,6 +1288,40 @@ def check_classes(base_path: Path) -> Iterator[Violation]:
                 continue
             if violation := _class_naming_violation(py_file, node):
                 yield violation
+            if violation := _class_suffix_violation(py_file, node, registry=registry):
+                yield violation
+
+
+def check_public_symbol_aliases(
+    base_path: Path,
+    registry: NamingRegistry,
+) -> Iterator[Violation]:
+    """Validate exported top-level aliases against the public alias registry."""
+    registered_aliases = _public_symbol_alias_index(registry)
+    for py_file, tree in _iter_python_modules_with_trees(base_path):
+        exports = _extract_all_exports(py_file)
+        if not exports:
+            continue
+        defining_surface = _repo_relative_path(py_file)
+        for lineno, alias_name, canonical_name in _iter_public_alias_assignments(tree):
+            if alias_name not in exports:
+                continue
+            if not _is_public_alias_governance_candidate(alias_name, canonical_name):
+                continue
+            registry_key = (defining_surface, alias_name, canonical_name)
+            if registry_key in registered_aliases:
+                continue
+            yield Violation(
+                category="alias",
+                path=str(py_file),
+                line=lineno,
+                current_name=alias_name,
+                issue=ViolationType.UNREGISTERED_ALIAS,
+                recommendation=(
+                    f"Register {alias_name} -> {canonical_name} in "
+                    "public_symbol_aliases or remove it from __all__"
+                ),
+            )
 
 
 def check_documentation(
@@ -1160,6 +1401,7 @@ def run_audit(
     results: dict[str, list[Violation]] = {
         "modules": [],
         "classes": [],
+        "aliases": [],
         "docs": [],
         "configs": [],
     }
@@ -1168,7 +1410,10 @@ def run_audit(
     results["modules"].extend(check_python_modules(src_path))
 
     # Проверка классов
-    results["classes"].extend(check_classes(src_path))
+    results["classes"].extend(check_classes(src_path, registry))
+
+    # Проверка публичных alias surfaces
+    results["aliases"].extend(check_public_symbol_aliases(src_path, registry))
 
     # Проверка документации
     if docs_path.exists():

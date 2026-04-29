@@ -77,10 +77,21 @@ def pre_task_workflow(
 ) -> dict[str, Any]:
     """Run the standard pre-task memory flow."""
     retrieval_query = query or title
-    resolved_chunks_path = chunks_path or DEFAULT_RAG_CHUNKS
-    resolved_events_dir = events_dir or DEFAULT_TIMELINE_DIR
     refresh_report: dict[str, Any] | None = None
     output_root: Path | None = refresh_output_root
+    if chunks_path is not None:
+        resolved_chunks_path = chunks_path
+    elif output_root is not None:
+        resolved_chunks_path = output_root / "rag" / "manifests" / "chunks.jsonl"
+    else:
+        resolved_chunks_path = DEFAULT_RAG_CHUNKS
+
+    if events_dir is not None:
+        resolved_events_dir = events_dir
+    elif output_root is not None:
+        resolved_events_dir = output_root / "timeline" / "events"
+    else:
+        resolved_events_dir = DEFAULT_TIMELINE_DIR
 
     if run_refresh_if_missing and (
         not resolved_chunks_path.exists() or not resolved_events_dir.exists()

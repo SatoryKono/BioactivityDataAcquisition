@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 __all__ = [
-    "ConfigDQServicePort",
+    "ConfigDQServiceProtocol",
     "ConfigService",
     "DomainConfigMapperPort",
     "PipelineConfigLoaderPort",
@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class ConfigDQServicePort(Protocol):
+class ConfigDQServiceProtocol(Protocol):
     """Port for DQ-focused config operations delegated by ConfigService."""
 
     def get_dq_config(self, pipeline_name: str) -> JsonDict:
@@ -105,9 +105,9 @@ class ConfigService:
     _pipeline_config_loader: PipelineConfigLoaderPort
     _domain_config_mapper: DomainConfigMapperPort
     _registry_accessor: RegistryAccessorPort
-    _dq_service: ConfigDQServicePort | None = None
+    _dq_service: ConfigDQServiceProtocol | None = None
 
-    def _require_dq_service(self) -> ConfigDQServicePort:
+    def _require_dq_service(self) -> ConfigDQServiceProtocol:
         if self._dq_service is None:
             raise ValueError("DQ config operations are not configured in composition")
         return self._dq_service

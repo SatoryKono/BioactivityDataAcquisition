@@ -1,4 +1,4 @@
-"""Unit tests for StorageAdapterMergedMixin."""
+"""Unit tests for StorageBundleMergedMixin."""
 
 from __future__ import annotations
 
@@ -10,13 +10,13 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.composition.factories.storage.merged_mixin import (
-    StorageAdapterMergedMixin,
+    StorageBundleMergedMixin,
 )
 
 
-def _make_mixin() -> StorageAdapterMergedMixin:
+def _make_mixin() -> StorageBundleMergedMixin:
     """Create a MergedMixin with stub writers."""
-    mixin = StorageAdapterMergedMixin.__new__(StorageAdapterMergedMixin)
+    mixin = StorageBundleMergedMixin.__new__(StorageBundleMergedMixin)
     mixin.silver = SimpleNamespace(
         get_table_path=MagicMock(return_value=Path("/silver/table")),
         read_silver=AsyncMock(return_value=[{"id": 1}]),

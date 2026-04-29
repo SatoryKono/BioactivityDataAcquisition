@@ -12,7 +12,7 @@ from uuid import uuid4
 import pyarrow as pa
 import pytest
 
-from bioetl.application.services.lineage import MetadataLineageBundle
+from bioetl.application.services.lineage import MetadataLineageBundleResult
 from bioetl.domain.models.metadata import (
     DeltaMetrics,
     EnvironmentMetadata,
@@ -88,9 +88,9 @@ class MockMetadataCoordinator:
 
     def create_silver_metadata_bundle(
         self, input_data: Any
-    ) -> MetadataLineageBundle[SilverMetadata]:
+    ) -> MetadataLineageBundleResult[SilverMetadata]:
         """Wrap Silver metadata in the canonical bundle contract."""
-        return MetadataLineageBundle(
+        return MetadataLineageBundleResult(
             metadata=self.create_silver_metadata(input_data),
             lineage_fragment=make_produced_artifact_fragment(
                 fragment_id="silver:integration-fragment",
@@ -101,9 +101,9 @@ class MockMetadataCoordinator:
 
     def create_gold_metadata_bundle(
         self, input_data: Any
-    ) -> MetadataLineageBundle[GoldMetadata]:
+    ) -> MetadataLineageBundleResult[GoldMetadata]:
         """Wrap Gold metadata in the canonical bundle contract."""
-        return MetadataLineageBundle(
+        return MetadataLineageBundleResult(
             metadata=self.create_gold_metadata(input_data),
             lineage_fragment=make_produced_artifact_fragment(
                 fragment_id="gold:integration-fragment",
@@ -283,7 +283,7 @@ def mock_metadata_coordinator_with_records(
     mock_silver_metadata.output.lineage_fragment_id = None
     mock.create_silver_metadata.return_value = mock_silver_metadata
     mock.create_silver_metadata_bundle = MagicMock(
-        side_effect=lambda input_data: MetadataLineageBundle(
+        side_effect=lambda input_data: MetadataLineageBundleResult(
             metadata=mock_silver_metadata,
             lineage_fragment=make_produced_artifact_fragment(
                 fragment_id="silver:integration-mock-fragment",
@@ -301,7 +301,7 @@ def mock_metadata_coordinator_with_records(
     mock_gold_metadata.delta.operation = "overwrite"
     mock.create_gold_metadata.return_value = mock_gold_metadata
     mock.create_gold_metadata_bundle = MagicMock(
-        side_effect=lambda input_data: MetadataLineageBundle(
+        side_effect=lambda input_data: MetadataLineageBundleResult(
             metadata=mock_gold_metadata,
             lineage_fragment=make_produced_artifact_fragment(
                 fragment_id="gold:integration-mock-fragment",

@@ -7,7 +7,7 @@ Contains entities for UniProt data:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Literal
 
 from bioetl.domain.entities.base import BaseEntity
@@ -133,7 +133,6 @@ class UniprotTarget(BaseEntity):
     flag: str | None = None  # Fragment/Precursor
 
     # Gene names
-    gene_names: list[str] = field(default_factory=list)
     gene_primary: str | None = None
     gene_synonyms: str | None = None  # JSON array
     gene_orf_names: str | None = None  # JSON array
@@ -141,7 +140,6 @@ class UniprotTarget(BaseEntity):
     # Organism
     organism_scientific: str | None = None
     organism_common: str | None = None
-    organism_id: int | None = None  # Legacy: same as taxonomy_id
     taxonomy_id: int | None = None
     lineage: str | None = None  # JSON array
 

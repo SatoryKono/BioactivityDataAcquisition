@@ -82,7 +82,7 @@ ______________________________________________________________________
 - Тесты: ~620 файлов в `tests/`
 - Конфигурации: ~38 YAML в `configs/`
 - Документация: ~600 файлов в `docs/`
-- Правила: `docs/00-project/RULES.md` (v5.23), `.claude/rules/ai-selfreview-rules.md`
+- Правила: `docs/00-project/RULES.md` (v5.23), `docs/00-project/ai/rules/bioetl-ai-rules.md`
 - ADR: 40 решений в `docs/02-architecture/decisions/`
 
 ## ПЛАН СЕКТОРОВ
@@ -137,8 +137,8 @@ ______________________________________________________________________
 
 ### 2A.1. Загрузи правила
 Прочитай эти файлы для понимания критериев:
-- `.claude/rules/ai-selfreview-rules.md` — правила ревью и scoring
-- `.claude/PROJECT_CONTEXT.md` — контекст проекта
+- `docs/00-project/ai/rules/bioetl-ai-rules.md` — runtime self-review rules and scoring guardrails
+- `docs/00-project/ai/memory/agent-memory.md` — project context entry point
 
 ### 2A.2. Проведи ревью по категориям
 Для каждого файла в scope проверь применимые правила:
@@ -245,7 +245,7 @@ ______________________________________________________________________
 - Glossary consistency: термины используются единообразно (Molecule=ChEMBL, Compound=PubChem)
 - Docstring coverage: все public функции/классы в src/ имеют docstrings?
 - Broken links: ссылки между документами валидны?
-- Version sync: `docs/00-project/RULES.md` version == `ai-selfreview-rules.md` version?
+- Version sync: `docs/00-project/RULES.md` version == `bioetl-ai-rules.md` version?
 
 ### 2A.3. УЧИТЫВАЙ ИСКЛЮЧЕНИЯ (EXC-001..015)
 **КРИТИЧЕСКИ ВАЖНО**: НЕ флагай как нарушение:
@@ -674,7 +674,7 @@ ______________________________________________________________________
 1. **MUST NOT** делегировать — всегда выполнять работу самостоятельно
 1. **MUST** создать отчёт в `reports/{LLM}/review_py-review-orchestrator_{YYYYMMDD}_{HHMM}_{SECTOR_ID}-*.md`
 1. **SHOULD** использовать `Grep` для системной проверки паттернов
-1. **MUST** проверить все применимые правила из ai-selfreview-rules.md
+1. **MUST** проверить все применимые правила из `bioetl-ai-rules.md`
 
 ______________________________________________________________________
 
@@ -729,9 +729,9 @@ ______________________________________________________________________
 ## 8. References
 
 - **RULES.md** — `docs/00-project/RULES.md` (v5.23)
-- **Self-review rules** — `.claude/rules/ai-selfreview-rules.md`
+- **Self-review rules** — `docs/00-project/ai/rules/bioetl-ai-rules.md`
 - **Orchestration** — `.codex/agents/ORCHESTRATION.md`
 - **ADR Index** — `docs/02-architecture/decisions/`
 - **Architecture tests** — `tests/architecture/`
 - **Audit bot** — `.codex/agents/py-audit-bot.md`
-- **Project context** — `.claude/PROJECT_CONTEXT.md`
+- **Project context** — `docs/00-project/ai/memory/agent-memory.md`

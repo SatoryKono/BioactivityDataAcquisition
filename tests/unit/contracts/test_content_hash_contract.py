@@ -45,6 +45,25 @@ def test_content_hash_excludes_meta_and_dq_prefix_contract() -> None:
     )
 
 
+def test_content_hash_excludes_occurrence_only_source_batch_id_contract() -> None:
+    """Occurrence-only BatchID lineage metadata MUST NOT alter semantic identity."""
+    service = IdentityService()
+
+    base = {"activity_id": "A1", "value": 10}
+    with_batch_a = {
+        **base,
+        "_source_batch_id": "11111111-1111-1111-1111-111111111111",
+    }
+    with_batch_b = {
+        **base,
+        "_source_batch_id": "22222222-2222-2222-2222-222222222222",
+    }
+
+    assert service.compute_content_hash(
+        "chembl", with_batch_a
+    ) == service.compute_content_hash("chembl", with_batch_b)
+
+
 def test_content_hash_service_matches_canonical_transform_contract() -> None:
     """IdentityService MUST delegate to the canonical transformation path."""
     service = IdentityService()

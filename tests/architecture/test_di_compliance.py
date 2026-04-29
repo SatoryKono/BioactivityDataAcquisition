@@ -36,7 +36,7 @@ FORBIDDEN_INSTANTIATION_CLASSES: set[str] = {
     "PubMedAdapter",
     "PubMedClient",
     # Storage adapters (infrastructure - injected via narrow storage ports)
-    "LocalStorageAdapter",
+    "LocalStorageBundle",
     "BronzeWriter",
     "SilverWriter",
     "GoldWriter",

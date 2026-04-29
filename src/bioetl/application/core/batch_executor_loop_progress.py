@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 __all__ = [
-    "_BatchCheckpointRecoveryPort",
-    "_BatchProgressReporterPort",
+    "_BatchCheckpointRecoveryProtocol",
+    "_BatchProgressReporterProtocol",
     "_BatchProgressSnapshot",
     "build_batch_progress_payload",
     "build_periodic_checkpoint_payload",
@@ -20,7 +20,7 @@ from typing import Protocol
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 
 
-class _BatchProgressReporterPort(Protocol):
+class _BatchProgressReporterProtocol(Protocol):
     """Minimal progress reporting contract required by extraction loop helpers."""
 
     def report_progress(
@@ -42,7 +42,7 @@ class _BatchProgressSnapshot(Protocol):
     records_filtered_out: int
 
 
-class _BatchCheckpointRecoveryPort(Protocol):
+class _BatchCheckpointRecoveryProtocol(Protocol):
     """Minimal checkpoint contract required by extraction loop helpers."""
 
     def save_checkpoint_now(
@@ -79,7 +79,7 @@ def build_batch_progress_payload(
 
 def report_batch_progress(
     *,
-    progress_service: _BatchProgressReporterPort,
+    progress_service: _BatchProgressReporterProtocol,
     state: _BatchProgressSnapshot,
 ) -> None:
     """Report the current extraction counters through the progress service."""
@@ -108,7 +108,7 @@ def build_shutdown_checkpoint_payload(
 async def ensure_extraction_not_shutdown(
     *,
     shutdown_requested: bool,
-    checkpoint_recovery_service: _BatchCheckpointRecoveryPort,
+    checkpoint_recovery_service: _BatchCheckpointRecoveryProtocol,
     records_fetched: int,
     resume_offset: int,
 ) -> None:
@@ -140,7 +140,7 @@ def build_periodic_checkpoint_payload(
 
 async def save_periodic_checkpoint_for_loop(
     *,
-    checkpoint_recovery_service: _BatchCheckpointRecoveryPort,
+    checkpoint_recovery_service: _BatchCheckpointRecoveryProtocol,
     records_fetched: int,
     resume_offset: int,
     checkpoint_interval: int,

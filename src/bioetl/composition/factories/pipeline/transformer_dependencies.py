@@ -16,7 +16,7 @@ from bioetl.composition.observability_resolution import (
     resolve_tracing_port,
 )
 from bioetl.domain.ports import (
-    ContractPolicyPort,
+    ContractPolicyProtocol,
     DataNormalizationPort,
     MetricsPort,
     PiiHasherPort,
@@ -29,7 +29,7 @@ from bioetl.domain.services import DataNormalizationService, IdentityService
 class ContractPolicyLoader(Protocol):
     """Callable contract for loading pipeline contract policy."""
 
-    def __call__(self, provider: str, entity: str) -> ContractPolicyPort:
+    def __call__(self, provider: str, entity: str) -> ContractPolicyProtocol:
         """Load contract policy for provider/entity."""
         ...
 
@@ -43,7 +43,7 @@ def build_transformer_dependencies(
     identity_service: IdentityService | None = None,
     pii_hasher: PiiHasherPort | None = None,
     data_normalizer: DataNormalizationPort | None = None,
-    contract_policy: ContractPolicyPort | None = None,
+    contract_policy: ContractPolicyProtocol | None = None,
     content_hash_include_fields: Collection[str] | None = None,
     content_hash_exclude_fields: Collection[str] | None = None,
     contract_policy_loader: ContractPolicyLoader | None = None,
@@ -94,7 +94,7 @@ def _load_contract_policy(
     provider: str,
     entity_type: str | None,
     contract_policy_loader: ContractPolicyLoader | None,
-) -> ContractPolicyPort:
+) -> ContractPolicyProtocol:
     """Load configured contract policy or degrade to the canonical fallback."""
 
     if entity_type is None or contract_policy_loader is None:

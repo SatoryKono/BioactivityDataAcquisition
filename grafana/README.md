@@ -15,7 +15,7 @@ ______________________________________________________________________
 1. [Конфигурация инфраструктуры](#4-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D1%83%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D0%B8%D0%BD%D1%84%D1%80%D0%B0%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%82%D1%83%D1%80%D1%8B)
 1. [Полный каталог метрик BioETL](#5-%D0%BF%D0%BE%D0%BB%D0%BD%D1%8B%D0%B9-%D0%BA%D0%B0%D1%82%D0%B0%D0%BB%D0%BE%D0%B3-%D0%BC%D0%B5%D1%82%D1%80%D0%B8%D0%BA-bioetl)
 1. [Переменные фильтрации (Template Variables)](#6-%D0%BF%D0%B5%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%BD%D1%8B%D0%B5-%D1%84%D0%B8%D0%BB%D1%8C%D1%82%D1%80%D0%B0%D1%86%D0%B8%D0%B8-template-variables)
-1. [Архив: Overview/Data Quality/Provider Health v1](#8-%D0%B0%D1%80%D1%85%D0%B8%D0%B2-overviewdata-qualityprovider-health-v1)
+1. [Архивная заметка: legacy v1 dashboard surfaces](#8-%D0%B0%D1%80%D1%85%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F-%D0%B7%D0%B0%D0%BC%D0%B5%D1%82%D0%BA%D0%B0-legacy-v1-dashboard-surfaces)
 1. [Дашборд: 1. Overview](#9-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-1-overview)
    13.1. [Дашборд: 2. Runtime](#131-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-2-runtime)
 1. [Дашборд: 3. Provider Health](#13-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4-3-provider-health)
@@ -34,7 +34,7 @@ ______________________________________________________________________
 1. [Alerting (Настройка оповещений)](#24-alerting-%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D0%BE%D0%BF%D0%BE%D0%B2%D0%B5%D1%89%D0%B5%D0%BD%D0%B8%D0%B9)
 1. [Глоссарий](#25-%D0%B3%D0%BB%D0%BE%D1%81%D1%81%D0%B0%D1%80%D0%B8%D0%B9)
 1. [Сводная таблица дашбордов](#26-%D1%81%D0%B2%D0%BE%D0%B4%D0%BD%D0%B0%D1%8F-%D1%82%D0%B0%D0%B1%D0%BB%D0%B8%D1%86%D0%B0-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4%D0%BE%D0%B2)
-1. [Жизненный цикл метрики: от кода до графика](#27-%D0%B6%D0%B8%D0%B7%D0%BD%D0%B5%D0%BD%D0%BD%D1%8B%D0%B9-%D1%86%D0%B8%D0%BA%D0%BB-%D0%BC%D0%B5%D1%82%D1%80%D0%B8%D0%BA%D0%B8-%D0%BE%D1%82-%D0%BA%D0%BE%D0%B4%D0%B0-%D0%B4%D0%BE-%D0%B3%D1%80%D0%B0%D1%84%D0%B8%D0%BA%D0%B0)
+1. [Metric lifecycle reference boundary](#27-metric-lifecycle-reference-boundary)
 1. [Безопасность и production-конфигурация](#28-%D0%B1%D0%B5%D0%B7%D0%BE%D0%BF%D0%B0%D1%81%D0%BD%D0%BE%D1%81%D1%82%D1%8C-%D0%B8-production-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D1%83%D1%80%D0%B0%D1%86%D0%B8%D1%8F)
 1. [Интеграция с CI/CD](#29-%D0%B8%D0%BD%D1%82%D0%B5%D0%B3%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D1%81-cicd)
 
@@ -687,21 +687,14 @@ ______________________________________________________________________
 - `bioetl_adapter_request_duration_seconds` — фильтруется по `provider`
 - `bioetl_http_request_errors_total` — фильтруется по `provider`
 
-## 8. Архив: Overview/Data Quality/Provider Health v1
+## 8. Архивная заметка: legacy v1 dashboard surfaces
 
 v1 dashboards (`bioetl-overview.json`, `bioetl-dq.json`, `bioetl-provider-health.json`)
 сохраняются только как historical reference для сравнения evolution surface и старых
 скриншотов/обсуждений. Они не считаются operator entrypoints и не входят в текущий
-shipped pack.
-
-Если нужно быстро понять старую структуру:
-
-- `bioetl-overview.json`: broad trend overview по throughput/errors/duration/freshness;
-- `bioetl-dq.json`: ранний DQ surface вокруг duration/rate/gold-vs-bronze/batch size;
-- `bioetl-provider-health.json`: legacy provider surface на pipeline counters, до перехода к dedicated health-check metrics.
-
-Для реальной эксплуатации используйте разделы `v2` ниже и quick-start цепочку из
-`docs/03-guides/dashboards/monitoring-index.md`.
+shipped pack. Active operator routing starts at
+`docs/03-guides/dashboards/monitoring-index.md`; JSON truth for shipped panels is
+`grafana/dashboards/*.json`.
 
 ______________________________________________________________________
 
@@ -1600,9 +1593,13 @@ curl -s http://localhost:8000/metrics | grep "^bioetl_" | awk '{print $1}' | sor
 поведение для тяжёлых запросов (`histogram_quantile`, `rate`, агрегаты по
 labels, Loki log-hygiene queries).
 
-### Почему v1 и v2 дашборды сосуществуют?
+### Где legacy v1 dashboards?
 
-v1 дашборды оптимизированы для исторического анализа (rate, percentiles, trends). v2 дашборды оптимизированы для мониторинга конкретного запуска (абсолютные значения, pie charts, info panels). Оба варианта полезны в разных сценариях: v1 — для команды SRE/DevOps, v2 — для data engineers и data scientists.
+Legacy v1 dashboards сохранены только как archived comparison surface. Они не
+являются operator entrypoints; текущая эксплуатация использует
+`bioetl-overview-v2`, `bioetl-runtime`, `bioetl-provider-health-v2`,
+`bioetl-dq-v2`, `bioetl-control-plane-v1` и
+`bioetl-silver-reject-explorer`.
 
 ### Как добавить новую метрику?
 
@@ -1803,129 +1800,26 @@ ______________________________________________________________________
 
 ## 26. Сводная таблица дашбордов
 
-| Дашборд                   | UID                             | Версия | Panels | Refresh | Time Range | Метрики                                                                                                                                              | Назначение                                                    |
-| ------------------------- | ------------------------------- | ------ | ------ | ------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| BioETL Overview           | `bioetl-overview`               | 1      | 8      | 30s     | 6h         | `records_processed_total`, `errors_total`, `pipeline_duration_seconds`, `batch_size_records`, `data_freshness_seconds`, `filter_ids_*`               | Полный обзор пайплайнов                                       |
-| 1. Overview               | `bioetl-overview-v2`            | 2      | 7      | 30s     | 12h        | `records_processed_total`, `data_freshness_seconds`                                                                                                  | Selected-range overview по pipeline/control-plane/lineage     |
-| 2. Runtime                | `bioetl-runtime`                | 1      | 9      | 30s     | 12h        | `control_plane_*`, `dq_*`, `health_check_*`, `data_source_retry_exhausted_total` + Loki log hygiene queries                                          | Runtime triage: warnings, unstructured logs, alert conditions |
-| BioETL Provider Health    | `bioetl-provider-health`        | 1      | 6      | 30s     | 6h         | `records_processed_total`, `batch_size_records`                                                                                                      | Пропускная способность по стадиям                             |
-| 3. Provider Health        | `bioetl-provider-health-v2`     | 2      | 5      | 30s     | 12h        | `health_check_latency_seconds`, `provider_health_status`, `health_check_success_total`, `health_check_degraded_total`, `health_check_failures_total` | Операционный health-check обзор по провайдерам                |
-| BioETL Data Quality       | `bioetl-dq`                     | 1      | 4      | 30s     | 6h         | `pipeline_duration_seconds`, `records_processed_total`, `batch_size_records`                                                                         | DQ мониторинг с перцентилями                                  |
-| 4. Data Quality           | `bioetl-dq-v2`                  | 2      | 7      | 30s     | 12h        | `records_processed_total`, `data_freshness_seconds`                                                                                                  | Selected-range DQ surface                                     |
-| 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1      | 8      | 30s     | 12h        | Quarantine Explorer API (`/ops/quarantine/filtered-*`)                                                                                               | Record-level browsing для Silver rejects                      |
+| Dashboard                 | UID                             | JSON version | Panels | Refresh | Time Range | Primary surface | Purpose |
+| ------------------------- | ------------------------------- | ------------ | ------ | ------- | ---------- | --------------- | ------- |
+| 1. Overview               | `bioetl-overview-v2`            | 5            | 18     | 30s     | 12h        | Prometheus      | Pipeline, control-plane, lineage overview |
+| 2. Runtime                | `bioetl-runtime`                | 2            | 31     | 30s     | 12h        | Prometheus + optional Loki/Tempo links | Runtime hygiene, warnings, alert conditions |
+| 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 17     | 30s     | 12h        | Prometheus      | Provider latency, health, retries, failure ratios |
+| 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 21     | 30s     | 12h        | Prometheus      | DQ score, quarantine, freshness, validation failures |
+| Control Plane v1          | `bioetl-control-plane-v1`       | 2            | 17     | 30s     | 6h         | Prometheus      | Manifest, ledger, checkpoint, lineage traceability |
+| 5. Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1000         | 9      | 1m      | 24h        | Quarantine Explorer API | Record-level browsing for Silver rejects |
 
 ______________________________________________________________________
 
-## 27. Жизненный цикл метрики: от кода до графика
+## 27. Metric lifecycle reference boundary
 
-### 27.1 Шаг 1: Определение метрики в коде
+The full metric lifecycle is described once in sections 2 and 5 of this
+document. The canonical implementation contract is
+`docs/04-reference/contracts/observability.md`; the concise operator route is
+`docs/03-guides/dashboards/monitoring-index.md`.
 
-Каждая metric family BioETL определяется в модульных файлах `src/bioetl/infrastructure/observability/_metrics_defs_*.py` как объект `prometheus_client`, затем входит в canonical registry inventory `src/bioetl/infrastructure/observability/prometheus_metric_registries.py`. `metrics.py` экспортирует готовые runtime objects, а application-код публикует значения только через MetricsPort/adapter dispatch. Повторная регистрация метрики с тем же именем вызывает исключение `ValueError`, поэтому runtime export surface импортируется через composition-controlled paths.
-
-```python
-# _metrics_defs_pipeline.py — определение метрики
-from prometheus_client import Counter
-
-RECORDS_PROCESSED_TOTAL = Counter(
-    "bioetl_records_processed_total",  # Имя метрики (prefix bioetl_)
-    "Total number of records processed",  # HELP-строка (описание)
-    ["pipeline", "stage", "run_type"],  # Labels (измерения)
-)
-```
-
-Имена метрик следуют конвенциям Prometheus: prefix `bioetl_` для namespace, snake_case, суффикс `_total` для Counter, суффикс `_seconds` для Histogram с длительностями, суффикс `_bytes` для Histogram с размерами.
-
-### 27.2 Шаг 2: Маппинг в PrometheusMetrics adapter
-
-Класс `PrometheusMetrics` реализует `MetricsPort` и содержит три словаря (`COUNTERS`, `HISTOGRAMS`, `GAUGES`), маппящие строковые имена на объекты метрик. Это позволяет application-коду обращаться к метрикам по строковому имени, не импортируя infrastructure-модули:
-
-```python
-# prometheus_metric_registries.py
-COUNTERS = {
-    "bioetl_records_processed_total": RECORDS_PROCESSED_TOTAL,
-    "bioetl_errors_total": ERRORS_TOTAL,
-    # ...
-}
-
-
-def increment_counter(self, name: str, value: int, labels: dict[str, str]) -> None:
-    counter = self.COUNTERS.get(name)
-    if counter:
-        counter.labels(**labels).inc(value)
-```
-
-Этот маппинг обеспечивает decoupling: application-код работает с абстрактным `MetricsPort`, а конкретная реализация (Prometheus, StatsD, NoOp) определяется в composition root при сборке зависимостей.
-
-### 27.3 Шаг 3: Инструментация в application-коде
-
-Application-код вызывает методы `MetricsPort` в ключевых точках пайплайна. Пример инструментации Bronze-стадии:
-
-```python
-# В PipelineRunner (application layer)
-async def _process_bronze(self, records: list[dict]) -> int:
-    count = len(records)
-    await self._bronze_writer.write(records)
-    self._metrics.increment_counter(
-        "records_processed_total",
-        value=count,
-        labels={
-            "pipeline": self._pipeline_name,
-            "stage": "bronze",
-            "run_type": self._run_type,
-        },
-    )
-    return count
-```
-
-Каждый вызов `increment_counter` увеличивает значение Counter на указанную величину для конкретной комбинации labels. Таким образом, одна метрика `records_processed_total` хранит независимые time series для каждого пайплайна, стадии и типа запуска.
-
-### 27.4 Шаг 4: HTTP-экспорт
-
-Метрический сервер (реализованный в `server.py`) запускает HTTP-сервер на порту 8000 в daemon-потоке. При получении GET-запроса на `/metrics` Prometheus client library автоматически сериализует все зарегистрированные метрики в текстовый формат exposition:
-
-```
-# HELP bioetl_records_processed_total Total number of records processed
-# TYPE bioetl_records_processed_total counter
-bioetl_records_processed_total{pipeline="chembl",stage="bronze",run_type="incremental"} 15420.0
-bioetl_records_processed_total{pipeline="chembl",stage="silver",run_type="incremental"} 15380.0
-bioetl_records_processed_total{pipeline="chembl",stage="gold",run_type="incremental"} 15102.0
-bioetl_records_processed_total{pipeline="chembl",stage="filtered_out",run_type="incremental"} 40.0
-bioetl_dq_records_quarantined_total{pipeline="chembl",error_type="schema_violation",run_type="incremental"} 278.0
-bioetl_records_processed_total_created{pipeline="chembl",stage="bronze",run_type="incremental"} 1.7087e+09
-```
-
-Сервер поддерживает idempotent startup: повторный вызов `start_metrics_server()` не запускает второй HTTP-сервер. При занятости порта выполняется retry с увеличением номера порта. При невозможности запуска (все порты заняты) применяется graceful degradation: пайплайн продолжает работу без экспорта метрик, если `fail_fast=false`.
-
-### 27.5 Шаг 5: Prometheus scraping
-
-Prometheus каждые 15 секунд (настраивается в `grafana/prometheus.yml` через `scrape_interval`) выполняет HTTP GET к BioETL metrics endpoint. Полученные данные парсятся и сохраняются в TSDB (Time Series Database) с текущим timestamp. Каждая уникальная комбинация метрики и labels образует отдельную time series.
-
-Prometheus использует pull-модель: приложение не знает о существовании Prometheus. Оно просто экспортирует текущее состояние метрик по HTTP. Prometheus сам приходит и забирает данные. Эта модель имеет несколько преимуществ перед push-моделью:
-
-- **Независимость:** Приложение работает даже если Prometheus недоступен. Метрики просто не собираются, но пайплайн не затрагивается.
-- **Обнаружение проблем:** Если target перестаёт отвечать, Prometheus автоматически помечает его как DOWN и может генерировать алерт.
-- **Контроль нагрузки:** Частота scrape контролируется на стороне Prometheus, а не приложения. Можно уменьшить `scrape_interval` без изменения кода приложения.
-
-### 27.6 Шаг 6: PromQL-запрос в Grafana
-
-Когда пользователь открывает дашборд, Grafana отправляет PromQL-запросы к Prometheus HTTP API. Prometheus выполняет запрос над сохранёнными time series и возвращает результат в JSON-формате. Grafana рендерит результат в виде графиков, stat-панелей, gauge, piechart и других визуализаций.
-
-Цепочка данных для одной панели выглядит так:
-
-```
-Application code → increment_counter("records_processed_total", ...) →
-→ In-memory Counter object → HTTP /metrics (text format) →
-→ Prometheus scrape (каждые 15 сек) → TSDB storage →
-→ Grafana PromQL query → HTTP API response (JSON) →
-→ Panel render (SVG/Canvas) → Browser display
-```
-
-Задержка от момента инструментации до отображения на дашборде складывается из:
-
-- Интервал scrape: до 15 секунд
-- Обработка Prometheus: \<1 секунда
-- Refresh дашборда: до 30 секунд
-- Итого: максимальная задержка ~50 секунд для shipped dashboards
+Do not add new active lifecycle walkthroughs here. Keep this README focused on
+stack setup, provisioning, dashboard inventory, and validation commands.
 
 ______________________________________________________________________
 

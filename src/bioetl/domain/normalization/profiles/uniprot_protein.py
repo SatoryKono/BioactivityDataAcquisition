@@ -28,14 +28,7 @@ __all__ = [
 ]
 
 _UNIPROT_PROTEIN_BASE_FIELDS = tuple(UniprotTargetSchema.to_schema().columns.keys())
-_UNIPROT_PROTEIN_COMPAT_FIELDS = tuple(
-    field
-    for field in ("gene_names", "organism_id")
-    if field not in _UNIPROT_PROTEIN_BASE_FIELDS
-)
-UNIPROT_PROTEIN_SCHEMA_FIELDS = (
-    _UNIPROT_PROTEIN_BASE_FIELDS + _UNIPROT_PROTEIN_COMPAT_FIELDS
-)
+UNIPROT_PROTEIN_SCHEMA_FIELDS = _UNIPROT_PROTEIN_BASE_FIELDS
 
 _META_FIELDS = frozenset(
     {
@@ -59,7 +52,6 @@ _INT_FIELDS = frozenset(
         "feature_count",
         "isoform_count",
         "keyword_count",
-        "organism_id",
         "publication_count",
         "sequence_length",
         "sequence_mass",
@@ -71,7 +63,6 @@ _SET_LIKE_FIELDS = frozenset(
         "cellular_component",
         "chembl_ids",
         "drugbank_ids",
-        "gene_names",
         "gene_orf_names",
         "gene_synonyms",
         "go_terms",

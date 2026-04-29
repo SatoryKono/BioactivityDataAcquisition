@@ -14,8 +14,8 @@ from bioetl.application.core.batch_execution import (
 )
 from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
 from bioetl.application.core.batch_executor_protocols import (
-    BatchStateCommitPort,
-    PipelineProcessingPort,
+    BatchStateCommitProtocol,
+    PipelineProcessingProtocol,
 )
 from bioetl.application.core.batch_executor_state_flow import (
     execute_batch_run,
@@ -56,8 +56,8 @@ class BatchExecutorDependencies:
     memory_manager: BatchMemoryManagerService
     execution_run_service: BatchExecutionRunService
     extraction_loop_service: BatchExtractionLoopService
-    execution_state_service: BatchStateCommitPort
-    processing_port: PipelineProcessingPort
+    execution_state_service: BatchStateCommitProtocol
+    processing_port: PipelineProcessingProtocol
     fsm: BatchExecutionFSM
 
 

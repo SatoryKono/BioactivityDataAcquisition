@@ -6,7 +6,7 @@ from __future__ import annotations
 import hashlib
 from pathlib import PurePath
 
-from bioetl.domain.lineage import LineageGraphFragment, MetadataLineageBundle
+from bioetl.domain.lineage import LineageGraphFragment, MetadataLineageBundleResult
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
     FileOutputMetadata,
@@ -34,9 +34,9 @@ def create_metadata_bundle[_MetadataT: (BronzeMetadata, SilverMetadata, GoldMeta
     *,
     metadata: _MetadataT,
     lineage_fragment: LineageGraphFragment,
-) -> MetadataLineageBundle[_MetadataT]:
+) -> MetadataLineageBundleResult[_MetadataT]:
     """Bundle sidecar metadata with its canonical lineage fragment."""
-    return MetadataLineageBundle(
+    return MetadataLineageBundleResult(
         metadata=metadata,
         lineage_fragment=lineage_fragment,
     )

@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 from bioetl.domain.normalization import normalize_doi
 from bioetl.infrastructure.adapters.common import FallbackDecoratorConfig
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
-    ExtractRecordIdPort,
-    NormalizeIdPort,
+    ExtractRecordIdProtocol,
+    NormalizeIdProtocol,
 )
 from bioetl.infrastructure.adapters.crossref._defaults import (
     CROSSREF_DEFAULT_FALLBACK_CONFIG as _CROSSREF_DEFAULT_FALLBACK_CONFIG,
@@ -35,11 +35,11 @@ class _CrossRefFallbackPolicyMixin:
         """Return CrossRef-specific default fallback config."""
         return _CROSSREF_DEFAULT_FALLBACK_CONFIG
 
-    def _get_normalize_id_hook(self) -> NormalizeIdPort:
+    def _get_normalize_id_hook(self) -> NormalizeIdProtocol:
         """Return DOI normalization hook."""
         return lambda value: normalize_doi(value)
 
-    def _get_extract_record_id_hook(self) -> ExtractRecordIdPort:
+    def _get_extract_record_id_hook(self) -> ExtractRecordIdProtocol:
         """Return hook extracting DOI from a CrossRef record."""
         return lambda rec: str(rec.get("DOI", ""))
 

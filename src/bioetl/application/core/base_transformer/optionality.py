@@ -180,7 +180,6 @@ __all__ = [
     "FRAMEWORK_MANAGED_FIELDS",
     "ConfigSurfaceOptionalityResolver",
     "OptionalitySource",
-    "ResolvedOptionality",
     "ResolvedOptionalityResult",
     "is_framework_managed_field",
 ]

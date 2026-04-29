@@ -2,6 +2,17 @@
 
 This file contains the core architectural constraints, governance rules, and development standards for the BioETL project. Gemini CLI will automatically load and respect these instructions during every session.
 
+## 0. Canonical Sources For AI Work
+
+- `docs/00-project/RULES.md`
+- `docs/01-requirements/REQUIREMENTS.md`
+- accepted ADRs in `docs/02-architecture/decisions/`
+- `AGENTS.md`
+- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
+When guidance conflicts, use the list above in that order.
+
 ## 1. Core Architecture (Hexagonal / Ports & Adapters)
 
 - **Strict Layer Isolation:** You MUST NOT import `infrastructure` modules into `domain` or `application` layers.
@@ -50,6 +61,14 @@ This file contains the core architectural constraints, governance rules, and dev
 - **YAML Configs:** `configs/` YAML files are the canonical source of truth for pipelines. NEVER add secrets or credentials to tracked YAML files.
 
 ## 7. AI Workflows
+
+- `.gemini/**` is the active Gemini runtime tree.
+- `docs/00-project/ai/**` is a docs mirror/guidance layer and must not override runtime behavior.
+- Before substantial work, read `docs/00-project/ai/memory/agent-memory.md`,
+  then the relevant `memory-py-*.md` file, and use the canonical workflow from
+  `src/memory/DAILY_WORKFLOW.md`.
+- For write-capable work, follow
+  `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`.
 
 - **make ai-review:** Run `py-review-orchestrator` to perform a code review on staged changes.
 - **make ai-test:** Run `py-test-swarm` to generate missing test coverage.

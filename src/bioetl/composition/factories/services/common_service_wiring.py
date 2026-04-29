@@ -6,7 +6,10 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.wiring.runtime import PipelineService, PipelineStoragePort
+from bioetl.application.core.wiring.runtime import (
+    PipelineService,
+    PipelineStorageProtocol,
+)
 from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.factories.services.port_factories import (
     create_checkpoint,
@@ -147,7 +150,7 @@ def assemble_pipeline_service(
     metadata_writer = MetadataWriter(logger=logger)
     return PipelineService(
         data_source=data_source,
-        storage=cast(PipelineStoragePort, common_ports.storage_ctx.adapter),
+        storage=cast(PipelineStorageProtocol, common_ports.storage_ctx.adapter),
         lock=common_ports.lock,
         checkpoint=common_ports.checkpoint,
         quarantine=common_ports.quarantine,

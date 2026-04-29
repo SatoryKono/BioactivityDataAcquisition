@@ -67,3 +67,20 @@ def test_technical_debt_surfaces_mark_rebaseline_status() -> None:
         assert "rebaseline" in text or "historical trigger evidence" in text, (
             f"{relative_path} is missing rebaseline guidance"
         )
+
+
+def test_project_test_health_summary_is_evidence_only_with_freshness_note() -> None:
+    text = _read("docs/reports/evidence/project-test-health/SUMMARY.md")
+    lower_text = text.lower()
+
+    assert "Freshness note" in text
+    assert "non-canonical" in lower_text
+    assert "repo-only evidence layer" in lower_text
+    for canonical_source in (
+        "configs/quality/test_matrix.yaml",
+        "configs/quality/test_health_reporting.yaml",
+        "configs/quality/fixture_governance_ledger.yaml",
+    ):
+        assert canonical_source in text
+    assert "backlog signal only" in lower_text
+    assert "fresh evidence-pack rebaseline" in lower_text

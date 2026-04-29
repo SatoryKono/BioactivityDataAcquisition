@@ -355,7 +355,6 @@ def _schema_field_aliases() -> dict[str, str]:
         "xlogp": "logp",
         "tpsa": "tpsa",
         "polar_surface_area": "tpsa",
-        "organism_id": "taxonomy_id",
         "reactions": "catalytic_activity",
         "reaction_ec_numbers": "protein_ec_numbers",
         "isoform_count": "alternative_products",
@@ -413,7 +412,7 @@ def _allowed_env_var_files(src_dir: Path) -> set[Path]:
 
 
 def _load_adapter_protocol_expectations() -> list[tuple[type[Any], type[Any]]]:
-    from bioetl.composition.factories.storage import StorageAdapter
+    from bioetl.composition.factories.storage import StorageBundle
     from bioetl.domain.ports.noop import NoOpMetrics
     from bioetl.infrastructure.adapters.chembl import ChemblAdapter
     from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
@@ -434,11 +433,11 @@ def _load_adapter_protocol_expectations() -> list[tuple[type[Any], type[Any]]]:
         (LocalCheckpointAdapter, CheckpointPort),
         (MemoryLock, LockPort),
         (UnifiedQuarantineAdapter, QuarantinePort),
-        (StorageAdapter, BronzeStoragePort),
-        (StorageAdapter, SilverStoragePort),
-        (StorageAdapter, GoldStoragePort),
-        (StorageAdapter, StorageMaintenancePort),
-        (StorageAdapter, StorageLifecyclePort),
+        (StorageBundle, BronzeStoragePort),
+        (StorageBundle, SilverStoragePort),
+        (StorageBundle, GoldStoragePort),
+        (StorageBundle, StorageMaintenancePort),
+        (StorageBundle, StorageLifecyclePort),
         (PrometheusMetrics, MetricsPort),
         (NoOpMetrics, MetricsPort),
     ]
@@ -710,6 +709,69 @@ def test_ports_are_protocols(src_dir: Path):
         assert "@runtime_checkable" in content, (
             f"{port_file.name} must use @runtime_checkable"
         )
+
+
+def _class_inherits_protocol(node: ast.ClassDef) -> bool:
+    for base in node.bases:
+        if isinstance(base, ast.Name) and base.id == "Protocol":
+            return True
+    return False
+
+
+def test_non_domain_local_protocols_do_not_use_port_suffix(src_dir: Path) -> None:
+    """Local Protocol contracts outside domain/ports must use *Protocol, not *Port."""
+    layer_roots = (
+        src_dir / "bioetl" / "application",
+        src_dir / "bioetl" / "infrastructure",
+        src_dir / "bioetl" / "composition",
+        src_dir / "bioetl" / "interfaces",
+    )
+    violations: list[str] = []
+    for layer_root in layer_roots:
+        for py_file in layer_root.rglob("*.py"):
+            if "__pycache__" in py_file.parts:
+                continue
+            tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.ClassDef):
+                    continue
+                if node.name.startswith("_"):
+                    continue
+                if not node.name.endswith("Port"):
+                    continue
+                if not _class_inherits_protocol(node):
+                    continue
+                relative = py_file.relative_to(src_dir)
+                violations.append(f"{relative}:{node.lineno}:{node.name}")
+    assert not violations, (
+        "Local Protocol contracts outside domain/ports must use *Protocol:\n"
+        + "\n".join(violations[:80])
+    )
+
+
+def test_non_infrastructure_classes_do_not_use_adapter_suffix(src_dir: Path) -> None:
+    """Classes outside infrastructure must not introduce new *Adapter names."""
+    layer_roots = (
+        src_dir / "bioetl" / "application",
+        src_dir / "bioetl" / "composition",
+        src_dir / "bioetl" / "interfaces",
+    )
+    violations: list[str] = []
+    for layer_root in layer_roots:
+        for py_file in layer_root.rglob("*.py"):
+            if "__pycache__" in py_file.parts:
+                continue
+            tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.ClassDef):
+                    continue
+                if node.name.endswith("Adapter"):
+                    relative = py_file.relative_to(src_dir)
+                    violations.append(f"{relative}:{node.lineno}:{node.name}")
+    assert not violations, (
+        "Only infrastructure may define classes with the *Adapter suffix:\n"
+        + "\n".join(violations[:80])
+    )
 
 
 def test_io_ports_are_async():

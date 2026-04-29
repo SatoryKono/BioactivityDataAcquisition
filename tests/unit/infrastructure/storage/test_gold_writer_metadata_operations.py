@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock, call
 
 import pytest
 
-from bioetl.application.services.lineage import MetadataLineageBundle
+from bioetl.application.services.lineage import MetadataLineageBundleResult
 from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.infrastructure.storage.gold.metadata_operations import (
     _GoldMergedMetadataWriteRequest,
@@ -33,7 +33,7 @@ GOLD_MERGED_PATH = str(TEST_ROOT / "gold" / "merged")
 
 
 def _make_bundle_safe_metadata(run_id: str = "test-run") -> MagicMock:
-    """Create metadata mocks compatible with MetadataLineageBundle identity checks."""
+    """Create metadata mocks compatible with MetadataLineageBundleResult identity checks."""
     metadata = MagicMock()
     metadata.runtime = SimpleNamespace(run_id=run_id, manifest_id=None)
     metadata.output = SimpleNamespace(lineage_fragment_id=None, artifact_id=None)
@@ -100,9 +100,9 @@ class TestPrepareGoldMetadataWrite:
             def create_gold_metadata_bundle(
                 self,
                 input_data: object,
-            ) -> MetadataLineageBundle:
+            ) -> MetadataLineageBundleResult:
                 _ = input_data
-                return MetadataLineageBundle(
+                return MetadataLineageBundleResult(
                     metadata=metadata,
                     lineage_fragment=make_produced_artifact_fragment(
                         fragment_id="gold:prepared-fragment",
@@ -165,9 +165,9 @@ class TestPrepareGoldMetadataWrite:
             def create_gold_metadata_bundle(
                 self,
                 input_data: object,
-            ) -> MetadataLineageBundle:
+            ) -> MetadataLineageBundleResult:
                 _ = input_data
-                return MetadataLineageBundle(
+                return MetadataLineageBundleResult(
                     metadata=metadata,
                     lineage_fragment=fragment,
                 )
@@ -424,9 +424,9 @@ class TestMaybePrepareGoldMergedMetadataWrite:
             def create_gold_metadata_bundle(
                 self,
                 input_data: object,
-            ) -> MetadataLineageBundle:
+            ) -> MetadataLineageBundleResult:
                 self.last_input = input_data
-                return MetadataLineageBundle(
+                return MetadataLineageBundleResult(
                     metadata=metadata,
                     lineage_fragment=make_produced_artifact_fragment(
                         fragment_id="gold:merged-fragment",

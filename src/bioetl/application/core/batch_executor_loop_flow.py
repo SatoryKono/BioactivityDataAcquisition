@@ -13,8 +13,8 @@ from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.batch_executor_loop_progress import (
-    _BatchCheckpointRecoveryPort,
-    _BatchProgressReporterPort,
+    _BatchCheckpointRecoveryProtocol,
+    _BatchProgressReporterProtocol,
     _BatchProgressSnapshot,
     ensure_extraction_not_shutdown,
     report_batch_progress,
@@ -42,12 +42,12 @@ class _BatchStateUpdater(Protocol):
 class _BatchFlushContextProtocol(Protocol):
     process_batch: _BatchStateUpdater
     memory_manager: BatchMemoryManagerService
-    progress_service: _BatchProgressReporterPort
+    progress_service: _BatchProgressReporterProtocol
     progress_state: _BatchProgressSnapshot
 
 
 class _BatchIterationContextProtocol(_BatchFlushContextProtocol, Protocol):
-    checkpoint_recovery_service: _BatchCheckpointRecoveryPort
+    checkpoint_recovery_service: _BatchCheckpointRecoveryProtocol
     resume_offset: int
     checkpoint_interval: int
 

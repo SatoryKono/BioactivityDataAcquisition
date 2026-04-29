@@ -41,7 +41,7 @@ if TYPE_CHECKING:
         ColumnPriorityOrderer,
     )
     from bioetl.application.composite.column_service import (
-        _ColumnPriorityOrderingAdapter,
+        _ColumnPriorityOrderingStrategy,
     )
     from bioetl.application.composite.cross_validator import (
         EnrichmentCrossValidator,
@@ -78,7 +78,7 @@ class MergeService(
     _parse_pipeline_name = staticmethod(parse_pipeline_name)
     _get_field_aliases = staticmethod(resolve_field_aliases_from_registry)
     _extract_base_column = staticmethod(extract_base_column)
-    _priority_orderer: ColumnPriorityOrderer | _ColumnPriorityOrderingAdapter | None
+    _priority_orderer: ColumnPriorityOrderer | _ColumnPriorityOrderingStrategy | None
 
     def __init__(
         self,

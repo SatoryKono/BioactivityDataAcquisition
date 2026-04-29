@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 from bioetl.domain.types import MetaDict
 
 
-class CleanupStoragePort(Protocol):
+class CleanupStorageProtocol(Protocol):
     """Minimal cleanup-focused storage contract for CleanupService."""
 
     def preview_cleanup(
@@ -106,7 +106,7 @@ class CleanupService:
     Dependencies are injected via constructor following clean architecture.
 
     Attributes:
-        _storage: CleanupStoragePort for data layer operations.
+        _storage: CleanupStorageProtocol for data layer operations.
         _logger: LoggerPort for structured logging.
 
     Example:
@@ -123,7 +123,7 @@ class CleanupService:
         150
     """
 
-    def __init__(self, storage: CleanupStoragePort, logger: LoggerPort) -> None:
+    def __init__(self, storage: CleanupStorageProtocol, logger: LoggerPort) -> None:
         """Initialize cleanup service.
 
         Args:

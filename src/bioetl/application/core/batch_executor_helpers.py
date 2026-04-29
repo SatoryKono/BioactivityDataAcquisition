@@ -7,8 +7,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.batch_execution.contracts import (
-    BatchExecutionStatePort,
-    BatchResultBuilderPort,
+    BatchExecutionStateProtocol,
+    BatchResultBuilderProtocol,
 )
 
 if TYPE_CHECKING:
@@ -91,7 +91,7 @@ def build_processed_batch_outcome(
 
 def apply_batch_execution_state_update(
     *,
-    state: BatchExecutionStatePort,
+    state: BatchExecutionStateProtocol,
     state_update: BatchExecutionStateOutcome,
 ) -> None:
     """Apply one batch of counter deltas to executor-level state."""
@@ -105,7 +105,7 @@ def apply_batch_execution_state_update(
 
 def apply_processed_batch_outcome(
     *,
-    state: BatchExecutionStatePort,
+    state: BatchExecutionStateProtocol,
     outcome: BatchProcessedOutcome,
 ) -> None:
     """Apply one processed-batch outcome to executor counters and DQ buffers."""
@@ -126,7 +126,7 @@ def apply_processed_batch_outcome(
 
 def build_batch_result_snapshot[_BatchResultT](
     *,
-    batch_result_type: BatchResultBuilderPort[_BatchResultT],
+    batch_result_type: BatchResultBuilderProtocol[_BatchResultT],
     records_bronze: int,
     records_silver: int,
     records_gold: int,

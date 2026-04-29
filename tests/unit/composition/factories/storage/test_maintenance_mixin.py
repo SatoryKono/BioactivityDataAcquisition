@@ -1,4 +1,4 @@
-"""Unit tests for StorageAdapterMaintenanceMixin."""
+"""Unit tests for StorageBundleMaintenanceMixin."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.composition.factories.storage.maintenance_mixin import (
-    StorageAdapterMaintenanceMixin,
+    StorageBundleMaintenanceMixin,
     _is_delta_table_dir,
 )
 
@@ -19,9 +19,9 @@ def _make_mixin(
     *,
     silver_get_table_path: Path | None = None,
     gold_get_table_path: Path | None = None,
-) -> StorageAdapterMaintenanceMixin:
+) -> StorageBundleMaintenanceMixin:
     """Create a MaintenanceMixin with stub writers."""
-    mixin = StorageAdapterMaintenanceMixin.__new__(StorageAdapterMaintenanceMixin)
+    mixin = StorageBundleMaintenanceMixin.__new__(StorageBundleMaintenanceMixin)
     mixin.bronze = SimpleNamespace(
         cleanup_old_files=AsyncMock(return_value={"removed": 3}),
     )  # type: ignore[assignment]
@@ -187,7 +187,7 @@ async def test_archive_silver_and_gold(tmp_path: Path) -> None:
 
     target = tmp_path / "archive"
 
-    mixin = StorageAdapterMaintenanceMixin.__new__(StorageAdapterMaintenanceMixin)
+    mixin = StorageBundleMaintenanceMixin.__new__(StorageBundleMaintenanceMixin)
     mixin.bronze = SimpleNamespace()  # type: ignore[assignment]
     mixin.silver = SimpleNamespace(
         get_table_path=MagicMock(return_value=silver_source),
@@ -214,7 +214,7 @@ async def test_archive_with_remove_source(tmp_path: Path) -> None:
 
     target = tmp_path / "archive"
 
-    mixin = StorageAdapterMaintenanceMixin.__new__(StorageAdapterMaintenanceMixin)
+    mixin = StorageBundleMaintenanceMixin.__new__(StorageBundleMaintenanceMixin)
     mixin.bronze = SimpleNamespace()  # type: ignore[assignment]
     mixin.silver = SimpleNamespace(
         get_table_path=MagicMock(return_value=silver_source),
@@ -232,7 +232,7 @@ async def test_archive_with_remove_source(tmp_path: Path) -> None:
 @pytest.mark.asyncio
 async def test_archive_nonexistent_returns_zero() -> None:
     """archive returns 0 when source paths don't exist."""
-    mixin = StorageAdapterMaintenanceMixin.__new__(StorageAdapterMaintenanceMixin)
+    mixin = StorageBundleMaintenanceMixin.__new__(StorageBundleMaintenanceMixin)
     mixin.bronze = SimpleNamespace()  # type: ignore[assignment]
     mixin.silver = SimpleNamespace(
         get_table_path=MagicMock(return_value=Path("/nonexistent/silver")),

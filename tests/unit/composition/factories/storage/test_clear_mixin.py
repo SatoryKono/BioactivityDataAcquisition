@@ -1,4 +1,4 @@
-"""Unit tests for StorageAdapterClearMixin."""
+"""Unit tests for StorageBundleClearMixin."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.composition.factories.storage.clear_mixin import (
-    StorageAdapterClearMixin,
+    StorageBundleClearMixin,
 )
 
 
@@ -18,7 +18,7 @@ def _make_mixin(
     gold_clear_return: int = 2,
     silver_csv_exporter: MagicMock | None = None,
     gold_csv_exporter: MagicMock | None = None,
-) -> StorageAdapterClearMixin:
+) -> StorageBundleClearMixin:
     """Create a ClearMixin instance with stub writers."""
     silver = SimpleNamespace(
         clear=MagicMock(return_value=silver_clear_return),
@@ -28,7 +28,7 @@ def _make_mixin(
         clear=MagicMock(return_value=gold_clear_return),
         csv_exporter=gold_csv_exporter,
     )
-    mixin = StorageAdapterClearMixin.__new__(StorageAdapterClearMixin)
+    mixin = StorageBundleClearMixin.__new__(StorageBundleClearMixin)
     mixin.silver = silver  # type: ignore[assignment]
     mixin.gold = gold  # type: ignore[assignment]
     return mixin

@@ -13,8 +13,8 @@ from bioetl.domain.types import BatchID, RunType
 
 
 @pytest.mark.unit
-class TestStorageAdapter:
-    """Tests for StorageAdapter class."""
+class TestStorageBundle:
+    """Tests for StorageBundle class."""
 
     @pytest.fixture
     def mock_bronze_writer(self):
@@ -39,10 +39,10 @@ class TestStorageAdapter:
 
     @pytest.fixture
     def storage_adapter(self, mock_bronze_writer, mock_silver_writer, mock_gold_writer):
-        """Create StorageAdapter instance."""
-        from bioetl.composition.factories.storage import StorageAdapter
+        """Create StorageBundle instance."""
+        from bioetl.composition.factories.storage import StorageBundle
 
-        return StorageAdapter(
+        return StorageBundle(
             bronze_writer=mock_bronze_writer,
             silver_writer=mock_silver_writer,
             gold_writer=mock_gold_writer,

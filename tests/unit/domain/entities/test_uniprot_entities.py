@@ -31,7 +31,7 @@ class TestUniprotTarget:
         assert t.accession == "P00742"
         assert t.entry_name == "FA10_HUMAN"
         assert t.reviewed is False
-        assert t.gene_names == []
+        assert t.gene_primary is None
 
     def test_valid_creation_full(self) -> None:
         t = UniprotTarget(

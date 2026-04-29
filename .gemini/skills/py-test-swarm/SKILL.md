@@ -16,11 +16,11 @@ Decompose work into L2/L3 agents, enforce constraints, aggregate evidence, and p
 
 - `../../../docs/00-project/ai/memory/agent-memory.md`
 - `../../../docs/00-project/ai/memory/memory-py-test-bot.md`
-- `../../../.claude/agents/ORCHESTRATION.md` (sections 2-7)
+- `../../../.gemini/agents/ORCHESTRATION.md` (sections 2-7)
 
 3. Read profile:
 
-- `../../../.claude/agents/py-test-swarm.md`
+- `../../../.gemini/agents/py-test-swarm.md`
 
 4. Confirm input contract:
 

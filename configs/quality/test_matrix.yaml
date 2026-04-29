@@ -425,6 +425,7 @@ mutation_testing:
   enabled: true
   workflow_present: true
   ci_gate_mode: partial  # Domain enforced in dedicated workflow; application target staged
+  governance_ledger_location: configs/quality/mutation_testing_rollout_ledger.yaml
   tool: mutmut
   targets:
     domain:

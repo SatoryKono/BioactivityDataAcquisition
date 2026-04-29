@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 from bioetl.application.core.batch_execution._contracts import (
-    BatchExecutionStatePort,
-    BatchResultBuilderPort,
+    BatchExecutionStateProtocol,
+    BatchResultBuilderProtocol,
 )
 
-__all__ = ["BatchExecutionStatePort", "BatchResultBuilderPort"]
+__all__ = ["BatchExecutionStateProtocol", "BatchResultBuilderProtocol"]

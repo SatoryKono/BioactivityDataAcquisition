@@ -13,7 +13,7 @@ from bioetl.composition.observability_resolution import (
     resolve_tracing_port,
 )
 from bioetl.domain.ports import (
-    ContractPolicyPort,
+    ContractPolicyProtocol,
     DataNormalizationPort,
     MetricsPort,
     PiiHasherPort,
@@ -32,7 +32,7 @@ def build_transformer_dependencies(
     identity_service: IdentityService | None = None,
     pii_hasher: PiiHasherPort | None = None,
     data_normalizer: DataNormalizationPort | None = None,
-    contract_policy: ContractPolicyPort | None = None,
+    contract_policy: ContractPolicyProtocol | None = None,
     structural_policy: StructuralPolicyProtocol | None = None,
 ) -> TransformerDependencyContext:
     """Build explicit transformer collaborators in the composition layer."""

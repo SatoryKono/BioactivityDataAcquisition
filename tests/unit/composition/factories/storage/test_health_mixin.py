@@ -1,4 +1,4 @@
-"""Unit tests for StorageAdapterHealthMixin."""
+"""Unit tests for StorageBundleHealthMixin."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.composition.factories.storage.health_mixin import (
-    StorageAdapterHealthMixin,
+    StorageBundleHealthMixin,
 )
 from bioetl.domain.types import HealthStatus
 
@@ -25,9 +25,9 @@ def _make_mixin(
     bronze_base: str = BRONZE_ROOT,
     silver_base: str = SILVER_ROOT,
     gold_base: str = GOLD_ROOT,
-) -> StorageAdapterHealthMixin:
+) -> StorageBundleHealthMixin:
     """Create a HealthMixin with stub writers."""
-    mixin = StorageAdapterHealthMixin.__new__(StorageAdapterHealthMixin)
+    mixin = StorageBundleHealthMixin.__new__(StorageBundleHealthMixin)
     mixin.bronze = SimpleNamespace(base_path=bronze_base)  # type: ignore[assignment]
     mixin.silver = SimpleNamespace(
         base_path=silver_base,
@@ -53,7 +53,7 @@ async def test_aclose_is_noop() -> None:
 async def test_aclose_closes_shared_audit_once() -> None:
     """Shared audit adapter should be closed once through adapter shutdown."""
     audit = SimpleNamespace(aclose=AsyncMock())
-    mixin = StorageAdapterHealthMixin.__new__(StorageAdapterHealthMixin)
+    mixin = StorageBundleHealthMixin.__new__(StorageBundleHealthMixin)
     mixin.bronze = SimpleNamespace(base_path=BRONZE_ROOT, _audit=audit)  # type: ignore[assignment]
     mixin.silver = SimpleNamespace(  # type: ignore[assignment]
         base_path=SILVER_ROOT,
@@ -122,7 +122,7 @@ async def test_health_check_degraded(tmp_path: Path) -> None:
 def test_check_directory_writable_creates_dir(tmp_path: Path) -> None:
     """_check_directory_writable creates directory if not exists."""
     target = tmp_path / "new_dir"
-    result = StorageAdapterHealthMixin._check_directory_writable(target)
+    result = StorageBundleHealthMixin._check_directory_writable(target)
     assert result is True
     assert target.exists()
 
@@ -130,7 +130,7 @@ def test_check_directory_writable_creates_dir(tmp_path: Path) -> None:
 @pytest.mark.unit
 def test_check_directory_writable_accepts_string(tmp_path: Path) -> None:
     """_check_directory_writable accepts string paths."""
-    result = StorageAdapterHealthMixin._check_directory_writable(str(tmp_path))
+    result = StorageBundleHealthMixin._check_directory_writable(str(tmp_path))
     assert result is True
 
 
@@ -161,7 +161,7 @@ def test_preview_cleanup_silver_only(tmp_path: Path) -> None:
     gold_writer = SimpleNamespace(
         get_table_path=MagicMock(return_value=tmp_path / "gold_table"),
     )
-    mixin = StorageAdapterHealthMixin.__new__(StorageAdapterHealthMixin)
+    mixin = StorageBundleHealthMixin.__new__(StorageBundleHealthMixin)
     mixin.bronze = SimpleNamespace(base_path=str(tmp_path))  # type: ignore[assignment]
     mixin.silver = silver_writer  # type: ignore[assignment]
     mixin.gold = gold_writer  # type: ignore[assignment]
@@ -190,7 +190,7 @@ def test_preview_cleanup_with_gold(tmp_path: Path) -> None:
     gold_writer = SimpleNamespace(
         get_table_path=MagicMock(return_value=gold_path),
     )
-    mixin = StorageAdapterHealthMixin.__new__(StorageAdapterHealthMixin)
+    mixin = StorageBundleHealthMixin.__new__(StorageBundleHealthMixin)
     mixin.bronze = SimpleNamespace(base_path=str(tmp_path))  # type: ignore[assignment]
     mixin.silver = silver_writer  # type: ignore[assignment]
     mixin.gold = gold_writer  # type: ignore[assignment]
@@ -206,7 +206,7 @@ def test_preview_layer_nonexistent_path(tmp_path: Path) -> None:
     """_preview_layer returns exists=False for nonexistent tables."""
     nonexistent = tmp_path / "does_not_exist"
     writer = SimpleNamespace(get_table_path=MagicMock(return_value=nonexistent))
-    mixin = StorageAdapterHealthMixin.__new__(StorageAdapterHealthMixin)
+    mixin = StorageBundleHealthMixin.__new__(StorageBundleHealthMixin)
 
     result = mixin._preview_layer(writer, "test.table")  # type: ignore[arg-type]
     assert result["exists"] is False
@@ -221,7 +221,7 @@ def test_preview_layer_with_preview_method(tmp_path: Path) -> None:
         preview_cleanup=MagicMock(return_value=expected),
         get_table_path=MagicMock(return_value=tmp_path),
     )
-    mixin = StorageAdapterHealthMixin.__new__(StorageAdapterHealthMixin)
+    mixin = StorageBundleHealthMixin.__new__(StorageBundleHealthMixin)
 
     result = mixin._preview_layer(writer, "test.table")  # type: ignore[arg-type]
     assert result == expected
@@ -234,7 +234,7 @@ def test_preview_layer_invalid_preview_payload_fallback(tmp_path: Path) -> None:
         preview_cleanup=MagicMock(return_value={"invalid": "payload"}),
         get_table_path=MagicMock(return_value=tmp_path),
     )
-    mixin = StorageAdapterHealthMixin.__new__(StorageAdapterHealthMixin)
+    mixin = StorageBundleHealthMixin.__new__(StorageBundleHealthMixin)
 
     result = mixin._preview_layer(writer, "test.table")  # type: ignore[arg-type]
     assert result["path"] == str(tmp_path)
@@ -245,23 +245,23 @@ def test_preview_layer_invalid_preview_payload_fallback(tmp_path: Path) -> None:
 def test_is_layer_preview_payload_valid() -> None:
     """_is_layer_preview_payload returns True for valid payloads."""
     valid = {"path": "/some/path", "file_count": 5, "exists": True}
-    assert StorageAdapterHealthMixin._is_layer_preview_payload(valid) is True
+    assert StorageBundleHealthMixin._is_layer_preview_payload(valid) is True
 
 
 @pytest.mark.unit
 def test_is_layer_preview_payload_invalid() -> None:
     """_is_layer_preview_payload returns False for non-dict."""
-    assert StorageAdapterHealthMixin._is_layer_preview_payload("not a dict") is False
+    assert StorageBundleHealthMixin._is_layer_preview_payload("not a dict") is False
 
 
 @pytest.mark.unit
 def test_is_layer_preview_payload_missing_keys() -> None:
     """_is_layer_preview_payload returns False when keys are missing."""
-    assert StorageAdapterHealthMixin._is_layer_preview_payload({"path": "x"}) is False
+    assert StorageBundleHealthMixin._is_layer_preview_payload({"path": "x"}) is False
 
 
 @pytest.mark.unit
 def test_is_layer_preview_payload_wrong_types() -> None:
     """_is_layer_preview_payload returns False for wrong value types."""
     payload = {"path": 123, "file_count": "not int", "exists": "not bool"}
-    assert StorageAdapterHealthMixin._is_layer_preview_payload(payload) is False
+    assert StorageBundleHealthMixin._is_layer_preview_payload(payload) is False

@@ -43,7 +43,7 @@ from bioetl.application.core.lifecycle import (
 from bioetl.application.core.lifecycle.batch_fsm import BatchExecutionFSM
 from bioetl.application.core.pipeline_services import (
     PipelineService,
-    PipelineStoragePort,
+    PipelineStorageProtocol,
 )
 from bioetl.application.core.protocols import (
     GoldFilterCallback,
@@ -82,7 +82,7 @@ __all__ = [
     "GoldFilterCallback",
     "GoldTransformCallback",
     "PipelineService",
-    "PipelineStoragePort",
+    "PipelineStorageProtocol",
     "QuarantineManagerService",
     "RecordNormalizationProcessor",
     "RecordProcessor",

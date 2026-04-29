@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from bioetl.domain.composite.lineage import CompositeLineageMetadata
 from bioetl.domain.lineage.metadata_bundle import (
-    MetadataLineageBundle,
     MetadataLineageBundleResult,
     MetadataT,
 )
@@ -27,7 +26,6 @@ __all__ = [
     "LineageGraphFragment",
     "LineageNodeRef",
     "LineageNodeType",
-    "MetadataLineageBundle",
     "MetadataLineageBundleResult",
     "MetadataT",
     "SchemaRef",

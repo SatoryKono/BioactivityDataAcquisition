@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.batch_writer import BatchWriter
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.observability.domain_event_emitter import (
-        DomainEventEmitterPort,
+        DomainEventEmitterProtocol,
     )
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
@@ -66,7 +66,7 @@ class BatchProcessingSupportService:
         tracing: BatchTracingManagerService,
         quarantine_manager: QuarantineManagerService,
         run_id: RunID | None = None,
-        domain_event_emitter: DomainEventEmitterPort | None = None,
+        domain_event_emitter: DomainEventEmitterProtocol | None = None,
     ) -> None:
         self._services = services
         self._logger = logger

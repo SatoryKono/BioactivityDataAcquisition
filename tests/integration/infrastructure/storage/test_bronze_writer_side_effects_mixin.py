@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.services.lineage import MetadataLineageBundle
+from bioetl.application.services.lineage import MetadataLineageBundleResult
 from bioetl.domain.lineage import (
     LineageEdge,
     LineageEdgeType,
@@ -132,9 +132,9 @@ class TestBronzeWriterSideEffectsMixin:
             def create_bronze_metadata_bundle(
                 self,
                 input_data: BronzeMetadataInput,
-            ) -> MetadataLineageBundle:
+            ) -> MetadataLineageBundleResult:
                 self.last_input = input_data
-                return MetadataLineageBundle(
+                return MetadataLineageBundleResult(
                     metadata=metadata,
                     lineage_fragment=fragment,
                 )

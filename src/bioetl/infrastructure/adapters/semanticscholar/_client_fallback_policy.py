@@ -6,8 +6,8 @@ from typing import Protocol, cast
 
 from bioetl.infrastructure.adapters.common import FallbackDecoratorConfig
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
-    ExtractRecordIdPort,
-    NormalizeIdPort,
+    ExtractRecordIdProtocol,
+    NormalizeIdProtocol,
 )
 from bioetl.infrastructure.adapters.semanticscholar.fallback import (
     SemanticScholarTitleFallbackHandler,
@@ -45,12 +45,12 @@ class _SemanticScholarFallbackPolicyMixin:
         """Return Semantic Scholar-specific default fallback config."""
         return _SEMANTICSCHOLAR_DEFAULT_FALLBACK_CONFIG
 
-    def _get_normalize_id_hook(self) -> NormalizeIdPort:
+    def _get_normalize_id_hook(self) -> NormalizeIdProtocol:
         """Return DOI normalization hook."""
         host = cast(_SupportsNormalizeDoi, self)
         return host._normalize_doi
 
-    def _get_extract_record_id_hook(self) -> ExtractRecordIdPort:
+    def _get_extract_record_id_hook(self) -> ExtractRecordIdProtocol:
         """Return hook extracting DOI from a Semantic Scholar record."""
         return lambda rec: str(rec.get("doi", ""))
 

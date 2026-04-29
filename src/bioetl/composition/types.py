@@ -6,7 +6,7 @@ that work with composition-layer constructs.
 
 For actual runtime imports, use the specific modules:
 - ObservabilityBundle: from bioetl.composition.observability
-- StorageAdapter: from bioetl.composition.factories.storage.storage_factory
+- StorageBundle: from bioetl.composition.factories.storage.storage_factory
 - PipelineRegistry: from bioetl.composition
 - create_registry: from bioetl.composition (isolated instance for tests)
 - get_default_registry: shared default-registry export from the package root
@@ -34,8 +34,10 @@ from bioetl.composition.bootstrap_contexts import (
     PipelineCallbacksContext,
     RateLimitContext,
 )
-from bioetl.composition.factories.storage import StorageAdapter
+from bioetl.composition.factories.storage import StorageBundle
 from bioetl.composition.observability import ObservabilityBundle
+
+StorageAdapter = StorageBundle
 
 __all__ = [
     "CircuitBreakerConfig",
@@ -46,7 +48,7 @@ __all__ = [
     "PipelineDefinition",
     "PipelineRegistry",
     "RateLimitContext",
-    "StorageAdapter",
+    "StorageBundle",
     "create_registry",
     "get_default_registry",
 ]

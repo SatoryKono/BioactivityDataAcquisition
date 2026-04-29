@@ -51,7 +51,7 @@ ______________________________________________________________________
 - Configs: `configs/entities/{provider}/{entity}.yaml`
 - ADR: `docs/02-architecture/decisions/`
 - RULES.md: `docs/00-project/RULES.md`
-- Self-review rules: `.claude/rules/ai-selfreview-rules.md`
+- Self-review rules: `docs/00-project/ai/rules/bioetl-ai-rules.md`
 
 ______________________________________________________________________
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.ports.quality.contract_policy import ContractPolicyPort
+from bioetl.domain.ports.quality.contract_policy import ContractPolicyProtocol
 from bioetl.domain.ports.quality.dq_config import (
     BronzeDQConfigPort,
     GoldDQConfigPort,
@@ -31,7 +31,7 @@ from bioetl.domain.ports.quality.validation import (
 __all__ = [
     "BronzeDQAnalyzerPort",
     "BronzeDQConfigPort",
-    "ContractPolicyPort",
+    "ContractPolicyProtocol",
     "DQReportWriterPort",
     "ErrorClassifierPort",
     "ErrorHandlerPort",

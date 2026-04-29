@@ -99,7 +99,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.lineage.lineage_inspection_service import (
         LineageFragmentInspectionResult,
         LineageInspectionService,
-        LineageNodeRelation,
+        LineageNodeRelationResult,
         LineageRunExplanationResult,
         LineageTraceResult,
     )
@@ -138,7 +138,7 @@ _LAZY_EXPORT_MODULES: dict[str, str] = {
     "HealthService": "bioetl.application.services.health_service",
     "LineageFragmentInspectionResult": _LINEAGE_INSPECTION_SERVICE_MODULE,
     "LineageInspectionService": _LINEAGE_INSPECTION_SERVICE_MODULE,
-    "LineageNodeRelation": _LINEAGE_INSPECTION_SERVICE_MODULE,
+    "LineageNodeRelationResult": _LINEAGE_INSPECTION_SERVICE_MODULE,
     "LineageRunExplanationResult": _LINEAGE_INSPECTION_SERVICE_MODULE,
     "LineageTraceResult": _LINEAGE_INSPECTION_SERVICE_MODULE,
     "MetricsService": "bioetl.application.services.metrics_service",
@@ -183,7 +183,7 @@ __all__ = [
     "HealthService",
     "LineageFragmentInspectionResult",
     "LineageInspectionService",
-    "LineageNodeRelation",
+    "LineageNodeRelationResult",
     "LineageRunExplanationResult",
     "LineageTraceResult",
     "MetricsService",

@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from bioetl.application.services.lineage import MetadataLineageBundle
+from bioetl.application.services.lineage import MetadataLineageBundleResult
 from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.infrastructure.storage.lineage_persistence import (
     emit_composite_source_selection_metrics,
@@ -27,9 +27,9 @@ class _CoordinatorWithBundle:
 
     def create_silver_metadata_bundle(
         self, input_data: object
-    ) -> MetadataLineageBundle:
+    ) -> MetadataLineageBundleResult:
         _ = input_data
-        return MetadataLineageBundle(
+        return MetadataLineageBundleResult(
             metadata=self._metadata,
             lineage_fragment=self._fragment,
         )

@@ -97,7 +97,6 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("features_json", pa.string()),  # All features combined (forensic)
         pa.field("flag", pa.string()),  # Protein description flag
         pa.field("function_comment", pa.string()),  # cc_function
-        pa.field("gene_names", pa.string()),  # Backward-compatible JSON gene alias
         pa.field("gene_orf_names", pa.string()),  # Gene ORF names (JSON array)
         pa.field("gene_primary", pa.string()),  # Primary gene name
         pa.field("gene_synonyms", pa.string()),  # Gene synonyms (JSON array)
@@ -119,7 +118,6 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("modified_residue", pa.string()),  # PTM: all modified residues
         pa.field("molecular_function", pa.string()),  # GO aspect F
         pa.field("organism_common", pa.string()),  # Common organism name
-        pa.field("organism_id", pa.int64()),  # Deprecated alias for taxonomy_id
         pa.field("organism_scientific", pa.string()),  # Scientific organism name
         pa.field("pathway", pa.string()),  # cc_pathway
         pa.field("pdb_xrefs", pa.string()),  # PDB structure IDs (JSON array)

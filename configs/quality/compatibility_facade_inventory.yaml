@@ -18,6 +18,8 @@ retained_entrypoints:
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.run` as the public
     seam; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/run/__init__.py`;
     `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.run`,
@@ -37,6 +39,8 @@ retained_entrypoints:
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.run_all` as the
     public seam; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/run_all/__init__.py`;
     `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.run_all`,
@@ -56,6 +60,8 @@ retained_entrypoints:
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.run_composite` as
     the public seam; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/composite/__init__.py`;
     `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.run_composite`,
@@ -75,6 +81,8 @@ retained_entrypoints:
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.health` as the public
     seam; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/health/__init__.py`;
     `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.health`,
@@ -94,6 +102,8 @@ retained_entrypoints:
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.quarantine` as the
     public seam; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/quarantine/__init__.py`;
     `tests`: patch/import coverage may target `bioetl.interfaces.cli.commands.quarantine`,
@@ -113,6 +123,8 @@ retained_entrypoints:
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.maintenance` as
     the public seam; direct internal-owner imports stay confined to `src/bioetl/interfaces/cli/commands/domains/maintenance/__init__.py`;
     `tests`: import coverage may target `bioetl.interfaces.cli.commands.maintenance`,
@@ -132,6 +144,8 @@ retained_entrypoints:
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.archive` only as
     the public seam for import/patch stability; direct internal-owner imports stay
     confined to `src/bioetl/interfaces/cli/commands/domains/maintenance/command.py`;
@@ -152,6 +166,8 @@ retained_entrypoints:
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.cleanup` only as
     the public seam for import/patch stability; direct internal-owner imports stay
     confined to `src/bioetl/interfaces/cli/commands/domains/maintenance/command.py`;
@@ -172,6 +188,8 @@ retained_entrypoints:
   owner: bioetl.interfaces.cli.commands
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: use `bioetl.interfaces.cli.commands.vacuum` only as
     the public seam for import/patch stability; direct internal-owner imports stay
     confined to `src/bioetl/interfaces/cli/commands/domains/maintenance/command.py`;
@@ -193,6 +211,8 @@ retained_entrypoints:
   owner: bioetl.composition
   introduced_in: 2026-03 entrypoint freeze
   review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: canonical entrypoint usage allowed; `tests`: public
     entrypoint imports may appear in interface/composition boundary coverage, but
     direct internal-module patch targets stay confined to `tests/unit/composition/test_entrypoints.py`,
@@ -212,6 +232,8 @@ retained_entrypoints:
   owner: bioetl.domain.composite
   introduced_in: legacy-pre-2026-03
   review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: canonical entrypoint usage allowed; internal split modules
     stay inside `src/bioetl/domain/composite/`; `tests`: direct split-internal coverage
     stays confined to `tests/unit/domain/composite/test_composite_config_facade.py`
@@ -231,6 +253,8 @@ retained_entrypoints:
   owner: bioetl.domain.value_objects
   introduced_in: legacy-pre-2026-03
   review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: canonical entrypoint usage allowed; internal split modules
     stay inside `src/bioetl/domain/value_objects/`; `tests`: direct split-internal
     coverage stays confined to `tests/unit/domain/value_objects/test_value_object_facade_reexports.py`,
@@ -249,6 +273,8 @@ retained_entrypoints:
   owner: bioetl.domain.value_objects
   introduced_in: legacy-pre-2026-03
   review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: canonical entrypoint usage allowed; private split modules
     stay inside `src/bioetl/domain/value_objects/`; `tests`: direct split-internal
     coverage stays confined to `tests/unit/domain/value_objects/test_value_object_facade_reexports.py`,
@@ -267,6 +293,8 @@ retained_entrypoints:
   owner: bioetl.application.composite
   introduced_in: 2026-03 merge collaborator migration
   review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: all wiring passes `collaborators=MergeCollaboratorGroup(...)`;
     `tests`: `tests/unit/application/composite/test_merger.py`, `tests/unit/application/composite/merge_test_support.py`,
     `tests/unit/composition/bootstrap/runtime/test_composite_support_services_factory.py`'
@@ -283,6 +311,8 @@ retained_entrypoints:
   owner: bioetl.infrastructure.adapters.pubmed
   introduced_in: 2026-03 pubmed entrypoint hardening
   review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: direct `bioetl.infrastructure.adapters.pubmed.client`
     imports stay confined to `src/bioetl/infrastructure/adapters/pubmed/__init__.py`;
     first-party code imports the provider package root; `tests`: `tests/unit/infrastructure/adapters/test_provider_entrypoints.py`,
@@ -303,6 +333,8 @@ retained_entrypoints:
   owner: bioetl.infrastructure.adapters.semanticscholar
   introduced_in: legacy-pre-2026-03
   review_date: '2026-09-30'
+  external_breaking_change_required: true
+  internal_callers_zero: false
   allowed_call_sites: '`src`: direct `bioetl.infrastructure.adapters.semanticscholar.client`
     imports stay confined to `src/bioetl/infrastructure/adapters/semanticscholar/__init__.py`;
     first-party code imports the provider package root; `tests`: `tests/unit/infrastructure/adapters/test_provider_entrypoints.py`,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol, TypeVar, runtime_checkable
 
-from bioetl.application.core.batch_execution.contracts import BatchResultBuilderPort
+from bioetl.application.core.batch_execution.contracts import BatchResultBuilderProtocol
 from bioetl.application.core.batch_processing_contracts import BatchProcessingOutcome
 from bioetl.domain.types import BronzeRecord
 
@@ -12,7 +12,7 @@ _BatchResultT = TypeVar("_BatchResultT", covariant=True)
 
 
 @runtime_checkable
-class PipelineProcessingPort(Protocol):
+class PipelineProcessingProtocol(Protocol):
     """Contract for end-to-end processing of one assembled batch."""
 
     async def process_batch(
@@ -34,7 +34,7 @@ class PipelineProcessingPort(Protocol):
         ...
 
 
-class BatchStateCommitPort(Protocol):
+class BatchStateCommitProtocol(Protocol):
     """Applies successful batch outcome to executor-owned cumulative state."""
 
     def commit_successful_batch(
@@ -51,7 +51,7 @@ class BatchStateCommitPort(Protocol):
         self,
         *,
         state: object,
-        batch_result_type: BatchResultBuilderPort[_BatchResultT],
+        batch_result_type: BatchResultBuilderProtocol[_BatchResultT],
     ) -> _BatchResultT:
         """Build the batch-scoped result payload from current state."""
         ...

@@ -47,7 +47,7 @@ from bioetl.domain.filtering import (
 )
 from bioetl.domain.ports import (
     AuditPort,
-    ContractPolicyPort,
+    ContractPolicyProtocol,
     DataNormalizationPort,
     DataSourcePort,
     DQMonitorPort,
@@ -134,7 +134,7 @@ class GenericPipelineFactory[TPipeline: "BasePipeline"]:
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: ContractPolicyPort | None = None,
+        contract_policy: ContractPolicyProtocol | None = None,
         dependencies: TransformerDependencyContext | None = None,
     ) -> BaseTransformer | None:
         return create_transformer_instance(

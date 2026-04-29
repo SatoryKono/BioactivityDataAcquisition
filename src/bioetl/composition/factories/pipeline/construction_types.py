@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Protocol
 
 from bioetl.domain.config import DQConfig, PipelineConfig
-from bioetl.domain.ports import ContractPolicyPort
+from bioetl.domain.ports import ContractPolicyProtocol
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
@@ -32,7 +32,7 @@ class DomainConfigMapper(Protocol):
 class ContractPolicyLoader(Protocol):
     """Callable contract for loading pipeline contract policy."""
 
-    def __call__(self, provider: str, entity: str) -> ContractPolicyPort:
+    def __call__(self, provider: str, entity: str) -> ContractPolicyProtocol:
         """Load contract policy for provider/entity."""
         ...
 

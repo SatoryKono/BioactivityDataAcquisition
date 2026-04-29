@@ -17,7 +17,6 @@ from bioetl.domain.types import RunID
 __all__ = [
     "LineageFragmentInspectionResult",
     "LineageInspectionService",
-    "LineageNodeRelation",
     "LineageNodeRelationResult",
     "LineageRunExplanationResult",
     "LineageTraceResult",

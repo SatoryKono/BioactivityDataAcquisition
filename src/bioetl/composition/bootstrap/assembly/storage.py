@@ -17,7 +17,7 @@ from uuid import uuid4
 
 from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.bootstrap.cli.noop import create_noop_observability_bundle
-from bioetl.composition.factories.storage import StorageAdapter
+from bioetl.composition.factories.storage import StorageBundle
 from bioetl.composition.factories.storage.resilience import (
     create_silver_atomic_retry_policy,
     create_silver_merge_resilience_policy,
@@ -94,16 +94,16 @@ def _create_csv_exporters(
     )
 
 
-def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdapter:
+def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageBundle:
     """Create a storage adapter for CLI and composite pipeline operations.
 
-    Creates a StorageAdapter suitable for preview operations and composite
+    Creates a StorageBundle suitable for preview operations and composite
     pipelines. CSV export is disabled by default for read-only inspection
     but can be enabled for composite pipelines that need CSV output.
 
     Uses NoOpLogger since this is for CLI preview operations without observability.
 
-    Layer: Returns infrastructure adapter (StorageAdapter) containing
+    Layer: Returns infrastructure adapter (StorageBundle) containing
     Bronze, Silver, and Gold writers.
 
     Note:
@@ -115,7 +115,7 @@ def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdap
             layers. Used by composite pipelines that need CSV output.
 
     Returns:
-        StorageAdapter configured for the current environment.
+        StorageBundle configured for the current environment.
     """
     settings = get_settings()
     noop_logger, noop_metrics, noop_tracing = create_noop_observability_bundle()
@@ -139,7 +139,7 @@ def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdap
         enable_csv_export=enable_csv_export,
     )
 
-    return StorageAdapter(
+    return StorageBundle(
         bronze_writer=BronzeWriter(
             base_path=output_dir / "bronze",  # data/output/bronze
             logger=noop_logger,
