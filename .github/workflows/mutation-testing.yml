@@ -9,7 +9,6 @@ on:
       - 'docs/**'
       - '*.md'
       - '.ai/**'
-      - 'ai/claude/**'
       - '.github/workflows/**'
       - 'LICENSE'
     branches:
@@ -20,7 +19,6 @@ on:
       - 'docs/**'
       - '*.md'
       - '.ai/**'
-      - 'ai/claude/**'
       - '.github/workflows/**'
       - 'LICENSE'
     paths:

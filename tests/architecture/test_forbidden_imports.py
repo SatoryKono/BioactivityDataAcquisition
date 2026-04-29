@@ -404,7 +404,7 @@ class TestPortImportFacade:
 
         assert not violations, (
             "Ports must be imported only from sanctioned facades.\n"
-            "Correct: from bioetl.domain.ports import StoragePort\n"
+            "Correct: from bioetl.domain.ports import SilverStoragePort\n"
             "Correct: from bioetl.domain.ports.noop import NoOpMetrics\n"
             "Wrong: from bioetl.domain.ports.runtime import ClockPort\n"
             "Wrong: import bioetl.domain.ports.storage as storage_ports\n\n"
@@ -477,7 +477,7 @@ class TestInterfacesFilesystemAccess:
     def test_interfaces_no_direct_filesystem_traversal(self, src_dir: Path) -> None:
         """Interfaces layer MUST NOT use direct filesystem traversal.
 
-        REQ-ARCH-023: CLI delegates to StoragePort, not Path.rglob.
+        REQ-ARCH-023: CLI delegates to storage ports, not Path.rglob.
         """
         interfaces_path = _interfaces_path(src_dir)
 
@@ -503,7 +503,7 @@ class TestInterfacesFilesystemAccess:
 
         assert not errors, (
             "Interfaces layer must not use direct filesystem traversal.\n"
-            "Delegate to StoragePort instead.\n"
+            "Delegate to storage ports instead.\n"
             "Violations:\n" + "\n".join(f"  - {e}" for e in errors)
         )
 

@@ -23,14 +23,11 @@ ______________________________________________________________________
 | Surface                 | Primary role                      | Source-of-truth status                | Editable for behavior                  | Expected content                                                                                |
 | ----------------------- | --------------------------------- | ------------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `.codex/**`             | Codex runtime surface             | Canonical for Codex runtime behavior  | Yes                                    | live agent registry, skills, Codex-specific orchestration, runtime settings                     |
-| `ai/claude/**`          | Legacy compatibility mirror       | Transitional, non-canonical           | Only during decommissioning cleanup    | residual Claude mirror docs pending repoint/delete                                              |
 | `docs/00-project/ai/**` | Published/internal mirror surface | Not canonical for runtime behavior    | Only for mirror/index/guidance updates | curated mirrors, navigation, contributor guidance, memory entrypoints, prompt and skill indexes |
 
 ## Source-of-Truth Rules
 
 1. `.codex/**` is the authoritative source for Codex runtime behavior.
-1. `ai/claude/**` is a temporary compatibility mirror and MUST NOT be treated as
-   the authoritative source for local runtime behavior.
 1. `docs/00-project/ai/**` is a repo-only or internal-published mirror layer for
    discoverability and contributor guidance; it MUST NOT redefine runtime
    behavior on its own.
@@ -59,8 +56,6 @@ This means:
 
 The following divergence is intentional and not a bug by itself:
 
-- `.codex/**` may diverge from residual compatibility mirrors while those
-  mirrors are being retired
 - runtime-specific commands, wrappers, and settings may differ between runtimes
 - docs mirrors may summarize or normalize runtime concepts for navigation
   purposes instead of reproducing every runtime file verbatim
@@ -76,8 +71,6 @@ The following divergence is not acceptable:
 
 - Change runtime behavior:
   edit `.codex/**` first for local runtime behavior.
-- Change or remove the residual Claude compatibility mirror:
-  edit `ai/claude/**` only as part of a tracked decommissioning wave.
 - Change published navigation or contributor guidance:
   edit `docs/00-project/ai/**`.
 - Change project-wide rules:
@@ -87,7 +80,6 @@ The following divergence is not acceptable:
 
 - Agent orchestration behavior for Codex -> `.codex/agents/**`
 - Skill trigger/runtime behavior for Codex -> `.codex/skills/**`
-- Legacy Claude mirror cleanup -> `ai/claude/**`
 - Human-readable indexes, mirrors, and onboarding pointers -> `docs/00-project/ai/**`
 
 ## Related Entry Points

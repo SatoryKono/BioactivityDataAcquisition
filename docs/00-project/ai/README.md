@@ -33,9 +33,9 @@ supporting internal artifacts.
 ## Ownership Contract
 
 - `.codex/**` is the runtime source of truth for Codex behavior.
-- `ai/claude/**` is a legacy compatibility mirror under active decommissioning;
-  it must not be treated as the primary runtime source for local workflow
-  behavior.
+- No active `ai/claude/**` runtime tree is retained in the local workflow
+  surface; historical Claude references should be read only as migration
+  context.
 - `docs/00-project/ai/**` is the published/internal mirror and contributor
   guidance surface; it does not redefine runtime behavior by itself.
 - Default sync direction is runtime tree first, docs mirror second.

@@ -97,7 +97,7 @@ class StorageAdapterMaintenanceMixin:
     ) -> int:
         """Vacuum Delta table via underlying writers.
 
-        Implements StoragePort.vacuum().
+        Implements StorageMaintenancePort.vacuum().
         Vacuums both Silver and Gold layers for the specified table.
 
         Args:
@@ -214,7 +214,7 @@ class StorageAdapterMaintenanceMixin:
     ) -> dict[str, int]:
         """Remove Bronze files older than cutoff date (RULES.md §2.1 retention).
 
-        Implements StoragePort.cleanup_bronze().
+        Implements BronzeStoragePort.cleanup_bronze().
         Delegates to BronzeWriter.cleanup_old_files().
 
         Args:

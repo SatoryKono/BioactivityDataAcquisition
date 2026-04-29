@@ -27,7 +27,7 @@ class StorageAdapterHealthMixin:
     async def aclose(self) -> None:
         """Close resources.
 
-        Implements aclose() required by StoragePort protocol.
+        Implements aclose() required by StorageLifecyclePort.
         """
         for audit in self._iter_unique_audit_ports():
             aclose = getattr(audit, "aclose", None)
@@ -81,7 +81,7 @@ class StorageAdapterHealthMixin:
     ) -> JsonDict:  # Any: factory wiring; concrete types resolved at runtime
         """Preview what would be cleared without actual deletion.
 
-        Implements StoragePort.preview_cleanup().
+        Implements StorageMaintenancePort.preview_cleanup().
         Used by CLI dry-run mode to show users what data would be affected.
 
         Args:

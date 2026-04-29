@@ -13,14 +13,12 @@ on:
       - 'docs/**'
       - '*.md'
       - '.ai/**'
-      - 'ai/claude/**'
       - 'LICENSE'
   pull_request:
     paths-ignore:
       - 'docs/**'
       - '*.md'
       - '.ai/**'
-      - 'ai/claude/**'
       - 'LICENSE'
   workflow_dispatch:
 

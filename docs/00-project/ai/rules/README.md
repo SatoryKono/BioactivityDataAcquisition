@@ -50,9 +50,8 @@ cp docs/00-project/ai/rules/cursor/*.mdc .cursor/rules/
 
 - Канонический источник правил: `docs/00-project/RULES.md`
 - Runtime orchestration guidance: `.codex/agents/ORCHESTRATION.md`
-- Legacy mirror under `ai/claude/rules/` may still exist temporarily during
-  runtime-surface cleanup, but it is not the preferred authoring or reference
-  path.
+- Legacy Claude mirror paths are retired and must not be used as active
+  reference paths.
 
 **Ручное использование:** При новом чате упомяните:
 > "Следуй правилам из docs/00-project/RULES.md и orchestration guidance из .codex/agents/ORCHESTRATION.md"
@@ -117,8 +116,6 @@ interfaces/     → CLI
 1. Обновить `bioetl-ai-rules.md` (краткая версия)
 2. Обновить `.cursor/rules/*.mdc` (если скопированы)
 3. Обновить `docs/00-project/ai/rules/cursor/*.mdc` (источник)
-4. Если legacy `ai/claude/rules/*` еще не удален, синхронизировать его как
-   временный compatibility mirror, а не как canonical source
 
 ## Команды верификации
 
@@ -148,7 +145,7 @@ pytest tests/e2e/ -v -m e2e
 - В новом чате явно упомяните: "Используй правила из docs/00-project/RULES.md"
 - При необходимости отдельно укажите orchestration guidance из
   `.codex/agents/ORCHESTRATION.md`
-- Не полагайтесь на `ai/claude/rules/*` как на canonical source
+- Не полагайтесь на legacy Claude mirror paths как на canonical source
 
 ### Конфликт версий правил
 

@@ -151,7 +151,7 @@ class CleanupService:
             CleanupPreview with information about affected layers.
         """
         await asyncio.sleep(0)
-        # Use sync preview_cleanup from StoragePort
+        # Use sync preview_cleanup from StorageMaintenancePort.
         preview_dict = self._storage.preview_cleanup(
             silver_table=silver_table,
             gold_table=gold_table,
