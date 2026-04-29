@@ -11,6 +11,9 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_text,
 )
 
+EXPECTED_BAO_ENDPOINT_IRI = "https://purl.obolibrary.org/obo/BAO_0000357"
+EXPECTED_QUDT_UNIT_IRI = "https://qudt.org/vocab/unit/MicroMOL-PER-L"
+
 
 def test_chembl_activity_profile_covers_schema_exactly() -> None:
     missing, extra = CHEMBL_ACTIVITY_PROFILE.coverage_gaps(
@@ -140,16 +143,10 @@ def test_chembl_activity_ontology_companion_rules_derive_from_bundle_context() -
     }
 
     assert endpoint_iri_rule is not None
-    assert (
-        endpoint_iri_rule.apply("ignored", record=record)
-        == "http://purl.obolibrary.org/obo/BAO_0000357"
-    )
+    assert endpoint_iri_rule.apply("ignored", record=record) == EXPECTED_BAO_ENDPOINT_IRI
     assert version_rule is not None
     assert version_rule.apply(None, record=record) == "2.8.18a"
     assert qudt_iri_rule is not None
-    assert (
-        qudt_iri_rule.apply(None, record=record)
-        == "http://qudt.org/vocab/unit/MicroMOL-PER-L"
-    )
+    assert qudt_iri_rule.apply(None, record=record) == EXPECTED_QUDT_UNIT_IRI
     assert qudt_status_rule is not None
     assert qudt_status_rule.apply("wrong", record=record) == "mapped"

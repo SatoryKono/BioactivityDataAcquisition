@@ -92,6 +92,9 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
     assert "### Input snapshot identity vs locator" in text
     assert "`snapshot_id` is content-addressed as `sha256:{content_hash}`" in text
     assert "`bronze://{relative_path_from_bronze_root}`" in text
+    assert "Supported production and debug-critical launches inherit" in text
+    assert "this effective default is `replay_ready`" in text
+    assert "The effective default is fail-closed" in text
     assert "## Reproducibility Scoring Rubric" in text
     assert "|   100 | `forensic_grade`" in text
     assert "| Evidence surface" in text

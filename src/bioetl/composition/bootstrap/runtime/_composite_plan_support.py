@@ -9,6 +9,9 @@ from typing import TYPE_CHECKING
 
 from pydantic import ValidationError
 
+from bioetl.composition.bootstrap.composite_infrastructure_context import (
+    CompositeInfrastructureContext,
+)
 from bioetl.composition.bootstrap.runtime._composite_config_runtime_compat import (
     load_runtime_composite_config as _load_runtime_composite_config_impl,
 )
@@ -27,9 +30,6 @@ if TYPE_CHECKING:
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
     from bioetl.application.services import RunOptions
     from bioetl.application.services.dq_report_service import DQReportService
-    from bioetl.composition.bootstrap.composite_infrastructure_context import (
-        CompositeInfrastructureContext,
-    )
     from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
         CompositeFilterExtractionService,
     )
@@ -55,9 +55,7 @@ if TYPE_CHECKING:
     type BootstrapRuntimeBasicsTuple = tuple[
         str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort
     ]
-    type BootstrapRuntimeBasicsResult = (
-        BootstrapRuntimeBasicsTuple | CompositeInfrastructureContext
-    )
+    type BootstrapRuntimeBasicsResult = BootstrapRuntimeBasicsTuple | CompositeInfrastructureContext
     type SeedRunnerFactory = Callable[[], PipelineRunner]
     type DataFrameRunnerFactory = Callable[[str, pl.DataFrame], PipelineRunner]
     type RunnerFactoryBundle = tuple[
@@ -99,15 +97,26 @@ def build_bootstrap_runtime_resources(
     bootstrap_runtime_basics_fn: Callable[..., BootstrapRuntimeBasicsResult],
     config: CompositeConfig,
     run_id: str | None,
-) -> BootstrapRuntimeResources | CompositeInfrastructureContext:
+) -> BootstrapRuntimeResources:
     """Resolve the canonical runtime-basics resource bundle."""
     resolved_bundle = bootstrap_runtime_basics_fn(
         config=config,
         run_id=run_id,
     )
-    if not isinstance(resolved_bundle, tuple):
-        return resolved_bundle
-    effective_run_id, settings, logger, metrics, tracer, storage, lock = resolved_bundle
+    if isinstance(resolved_bundle, CompositeInfrastructureContext):
+        return BootstrapRuntimeResources(
+            run_id=resolved_bundle.run_id,
+            settings=resolved_bundle.settings,
+            logger=resolved_bundle.logger,
+            metrics=resolved_bundle.metrics,
+            tracer=resolved_bundle.tracer,
+            storage=resolved_bundle.storage,
+            lock=resolved_bundle.lock,
+            clock=resolved_bundle.clock,
+        )
+    effective_run_id, settings, logger, metrics, tracer, storage, lock = (
+        resolved_bundle
+    )
     return BootstrapRuntimeResources(
         run_id=effective_run_id,
         settings=settings,

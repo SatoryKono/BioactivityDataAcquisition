@@ -33,6 +33,10 @@ from tests.unit.application.pipelines.activity_transformer_shared import (
 )
 
 LEGACY_QUDT_UNIT_URI = "http" + "://www.openphacts.org/units/Nanomolar"
+EXPECTED_BAO_ENDPOINT_IRI = "https://purl.obolibrary.org/obo/BAO_0000190"
+EXPECTED_BAO_FORMAT_IRI = "https://purl.obolibrary.org/obo/BAO_0000218"
+EXPECTED_UO_UNIT_IRI = "https://purl.obolibrary.org/obo/UO_0000065"
+EXPECTED_QUDT_UNIT_IRI = "https://qudt.org/vocab/unit/NanoMOL-PER-L"
 
 
 @pytest.mark.unit
@@ -60,14 +64,12 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
         assert result["bao_endpoint"] == "BAO_0000190"
         assert result["bao_format"] == "BAO_0000218"
         assert result["uo_units"] == "UO_0000065"
-        assert result["bao_endpoint_iri"] == (
-            "http://purl.obolibrary.org/obo/BAO_0000190"
-        )
+        assert result["bao_endpoint_iri"] == EXPECTED_BAO_ENDPOINT_IRI
         assert result["bao_endpoint_mapping_status"] == "mapped"
-        assert result["bao_format_iri"] == "http://purl.obolibrary.org/obo/BAO_0000218"
+        assert result["bao_format_iri"] == EXPECTED_BAO_FORMAT_IRI
         assert result["bao_format_mapping_status"] == "mapped"
         assert result["bao_ontology_version"] == "2.8.18a"
-        assert result["uo_unit_iri"] == "http://purl.obolibrary.org/obo/UO_0000065"
+        assert result["uo_unit_iri"] == EXPECTED_UO_UNIT_IRI
         assert result["uo_unit_mapping_status"] == "mapped"
         assert result["uo_ontology_version"] == "2026-01-16"
 
@@ -90,7 +92,7 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
         assert result["standard_units"] == "nM"
         assert result["units"] == "µM"
         assert result["qudt_units"] == LEGACY_QUDT_UNIT_URI
-        assert result["qudt_unit_iri"] == "http://qudt.org/vocab/unit/NanoMOL-PER-L"
+        assert result["qudt_unit_iri"] == EXPECTED_QUDT_UNIT_IRI
         assert result["qudt_unit_mapping_status"] == "mapped"
         assert result["qudt_ontology_version"] == "3.2.1"
 
@@ -119,12 +121,10 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
         assert result["uo_units"] == "UO_0000065"
         assert result["qudt_units"] == LEGACY_QUDT_UNIT_URI
         assert result["units"] == "raw-uM"
-        assert result["bao_endpoint_iri"] == (
-            "http://purl.obolibrary.org/obo/BAO_0000190"
-        )
-        assert result["bao_format_iri"] == "http://purl.obolibrary.org/obo/BAO_0000218"
-        assert result["uo_unit_iri"] == "http://purl.obolibrary.org/obo/UO_0000065"
-        assert result["qudt_unit_iri"] == "http://qudt.org/vocab/unit/NanoMOL-PER-L"
+        assert result["bao_endpoint_iri"] == EXPECTED_BAO_ENDPOINT_IRI
+        assert result["bao_format_iri"] == EXPECTED_BAO_FORMAT_IRI
+        assert result["uo_unit_iri"] == EXPECTED_UO_UNIT_IRI
+        assert result["qudt_unit_iri"] == EXPECTED_QUDT_UNIT_IRI
 
     @pytest.mark.asyncio
     async def test_transform_preserves_already_canonical_activity_fields(

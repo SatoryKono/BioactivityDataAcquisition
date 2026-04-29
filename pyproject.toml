@@ -264,6 +264,7 @@ precision = 2
 python_version = "3.12"
 strict = true
 incremental = false  # Work around unstable cache/build-graph crashes in compiled mypy on large graphs.
+sqlite_cache = false  # Avoid sqlite metastore corruption on synced/multi-host worktrees.
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

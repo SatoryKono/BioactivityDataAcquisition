@@ -150,6 +150,14 @@ Current rollout semantics:
 1. `run_manifest_enabled=false` disables both manifest creation and ledger attachment for new runs because runtime assembly coerces the effective flag set to `(False, False)`.
 1. `run_manifest_enabled=true`, `run_ledger_enabled=false` keeps manifest creation but suppresses ledger writes.
 1. `run_ledger_enabled=true` is only valid when `run_manifest_enabled=true`.
+1. Supported production and debug-critical launches inherit the published
+   family default when the configured profile remains
+   `degraded_observable`. For snapshot-backed supported source families and
+   composite launches this effective default is `replay_ready`.
+1. The effective default is fail-closed: a production/debug-critical supported
+   family launch that cannot prove immutable input snapshots, or a composite
+   launch without a full snapshot envelope, is blocked before it can be claimed
+   as replay-ready.
 1. `required_persistence_profile=replay_ready` requires
    `run_manifest_enabled=true` and an execution context inside the published
    strict exact-replay support boundary.

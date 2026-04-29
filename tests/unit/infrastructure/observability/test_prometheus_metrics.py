@@ -102,7 +102,7 @@ class TestPrometheusMetrics:
                 value=7,
                 labels={
                     "pipeline": "chembl_activity",
-                    "source_file": r"C:\tmp\filters\Activity IDs.csv",
+                    "source_file": r"filters\Activity IDs.csv",
                 },
             )
 
@@ -117,8 +117,8 @@ class TestPrometheusMetrics:
     @pytest.mark.parametrize(
         ("raw_value", "expected"),
         [
-            ("/var/tmp/filters/activity_ids.csv", "activity_ids.csv"),
-            (r"C:\tmp\filters\Activity IDs.csv", "activity_ids.csv"),
+            ("filters/activity_ids.csv", "activity_ids.csv"),
+            (r"filters\Activity IDs.csv", "activity_ids.csv"),
             ("", "unknown"),
             ("////", "unknown"),
         ],

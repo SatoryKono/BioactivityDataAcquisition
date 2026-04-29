@@ -42,7 +42,9 @@ from bioetl.composition.services.versioning import get_code_revision_provenance
 from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
 from bioetl.domain.control_plane.reproducibility_policy import (
     assess_reproducibility_policy,
+    is_critical_reproducibility_runtime,
     legacy_config_hash_from_resolved_config_hash,
+    resolve_effective_required_persistence_profile,
     resolve_replay_capability,
 )
 from bioetl.domain.types import RunID, RunType
@@ -73,6 +75,14 @@ def resolve_composite_control_plane_flags(settings: object) -> tuple[bool, bool]
         "required_persistence_profile",
         "degraded_observable",
     )
+    effective_required_profile = _resolve_composite_required_persistence_profile(
+        infra_context.settings,
+        configured_required_profile=required_profile,
+    )
+    effective_required_profile = _resolve_composite_required_persistence_profile(
+        settings,
+        configured_required_profile=required_profile,
+    )
     if not manifest_enabled:
         raise RuntimeError(
             "Composite execution requires run manifests; set "
@@ -81,7 +91,7 @@ def resolve_composite_control_plane_flags(settings: object) -> tuple[bool, bool]
     validate_required_persistence_profile(
         manifest_enabled=manifest_enabled,
         ledger_enabled=ledger_enabled,
-        required_profile=required_profile,
+        required_profile=effective_required_profile,
         execution_label="Composite execution",
         exact_replay_execution_context_supported=True,
     )
@@ -97,6 +107,22 @@ def bind_manifest_logger(logger: LoggerPort, manifest_id: str | None) -> LoggerP
         return logger
     rebound = bind(manifest_id=manifest_id)
     return cast("LoggerPort", rebound)
+
+
+def _resolve_composite_required_persistence_profile(
+    settings: object,
+    *,
+    configured_required_profile: object,
+) -> str:
+    """Resolve composite launches against the published replay-ready default."""
+    return resolve_effective_required_persistence_profile(
+        configured_required_profile=configured_required_profile,
+        family_default_profile="replay_ready",
+        critical_runtime=is_critical_reproducibility_runtime(
+            runtime_environment=getattr(settings, "env", None),
+            debug_mode=getattr(settings, "debug", False),
+        ),
+    )
 
 
 def build_composite_control_plane_bundle(
@@ -128,7 +154,7 @@ def build_composite_control_plane_bundle(
         pipeline_name=config.name,
         config=config,
         runtime_config=runtime,
-        required_persistence_profile=str(required_profile),
+        required_persistence_profile=effective_required_profile,
         settings=infra_context.settings,
         logger=infra_context.logger,
         run_id=_coerce_run_id(infra_context.run_id),
@@ -151,7 +177,7 @@ def build_composite_control_plane_bundle(
             effective_config_artifact_id=effective_config_artifact_id,
             contract_ref=contract_ref,
             contract_version=contract_version,
-            required_persistence_profile=str(required_profile),
+            required_persistence_profile=effective_required_profile,
         )
     )
     run_ledger_service = _build_run_ledger_service(

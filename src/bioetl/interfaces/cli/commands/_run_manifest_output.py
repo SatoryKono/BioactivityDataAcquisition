@@ -144,6 +144,94 @@ def _render_diagnostics_section(diagnostics: dict[str, object]) -> list[str]:
     return lines
 
 
+def _dict_value(payload: dict[str, object], key: str) -> dict[str, object]:
+    value = payload.get(key)
+    return value if isinstance(value, dict) else {}
+
+
+def _render_reproducibility_compact_section(
+    diagnostics: dict[str, object],
+) -> list[str]:
+    """Render high-signal reproducibility diagnostics before raw nested details."""
+    reproducibility = diagnostics.get("reproducibility_diagnostics")
+    if not isinstance(reproducibility, dict):
+        return []
+
+    policy = _dict_value(reproducibility, "policy")
+    policy_assessment = _dict_value(policy, "policy_assessment")
+    effective_config = _dict_value(reproducibility, "effective_config")
+    effective_semantic = _dict_value(effective_config, "semantic")
+    effective_diff_policy = _dict_value(effective_config, "diff_policy")
+    checkpoint_anchors = _dict_value(reproducibility, "checkpoint_anchors")
+    resume_anchor_comparison = _dict_value(
+        checkpoint_anchors,
+        "resume_anchor_comparison",
+    )
+
+    lines: list[str] = []
+    _append_section(
+        lines,
+        "Reproducibility",
+        (
+            (
+                "required_persistence_profile",
+                policy.get("required_persistence_profile"),
+            ),
+            ("attained_profile", policy.get("attained_profile")),
+            ("replay_capability", policy.get("replay_capability")),
+            (
+                "required_profile_satisfied",
+                policy.get(
+                    "required_profile_satisfied",
+                    policy_assessment.get("required_profile_satisfied"),
+                ),
+            ),
+            (
+                "blocking_gaps",
+                policy.get("exact_replay_blockers")
+                or policy_assessment.get("blocking_gaps"),
+            ),
+            (
+                "effective_config_artifact_id",
+                effective_semantic.get("effective_config_artifact_id"),
+            ),
+            (
+                "effective_config_hash",
+                effective_semantic.get("effective_config_hash"),
+            ),
+            (
+                "effective_config_semantic_anchor",
+                effective_diff_policy.get("semantic_anchor"),
+            ),
+            (
+                "effective_config_occurrence_fields",
+                effective_diff_policy.get("occurrence_fields"),
+            ),
+            (
+                "checkpoint_identity_present",
+                resume_anchor_comparison.get("checkpoint_identity_present"),
+            ),
+            (
+                "checkpoint_matching_fields",
+                resume_anchor_comparison.get("matching_fields"),
+            ),
+            (
+                "checkpoint_mismatched_fields",
+                resume_anchor_comparison.get("mismatched_fields"),
+            ),
+            (
+                "checkpoint_missing_current_fields",
+                resume_anchor_comparison.get("missing_current_fields"),
+            ),
+            (
+                "checkpoint_missing_checkpoint_fields",
+                resume_anchor_comparison.get("missing_checkpoint_fields"),
+            ),
+        ),
+    )
+    return lines
+
+
 def _diagnostics_section_items(
     diagnostics: dict[str, object],
 ) -> tuple[tuple[str, object], ...]:
@@ -337,7 +425,14 @@ def render_show_payload(payload: dict[str, object]) -> str:
         lines.append("")
     lines.extend(_render_ledger_section(ledger_entries))
 
-    if lines and isinstance(ledger_entries, list) and ledger_entries:
+    repro_lines = _render_reproducibility_compact_section(diagnostics)
+    if lines and (
+        repro_lines or (isinstance(ledger_entries, list) and ledger_entries)
+    ):
+        lines.append("")
+    lines.extend(repro_lines)
+
+    if lines and repro_lines:
         lines.append("")
     lines.extend(_render_diagnostics_section(diagnostics))
 

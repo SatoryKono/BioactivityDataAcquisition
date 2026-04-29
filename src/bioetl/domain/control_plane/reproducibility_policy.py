@@ -77,23 +77,35 @@ def resolve_effective_required_persistence_profile(
     configured_required_profile: object,
     family_default_profile: object,
     exact_replay_requested: bool = False,
+    critical_runtime: bool = False,
 ) -> str:
     """Resolve the effective policy profile for one run launch.
 
     Default/development launches remain degraded-observable unless explicitly
-    tightened. Exact-replay launches for supported families inherit the family
-    default so the pre-run gate cannot silently run below the published support
-    boundary.
+    tightened. Exact-replay and production/debug-critical launches for
+    supported families inherit the family default so the pre-run gate cannot
+    silently run below the published support boundary.
     """
     configured = normalize_required_persistence_profile(configured_required_profile)
     family_default = normalize_required_persistence_profile(family_default_profile)
     if (
-        exact_replay_requested
+        (exact_replay_requested or critical_runtime)
         and configured == DEFAULT_REQUIRED_PERSISTENCE_PROFILE
         and family_default in STRICT_PERSISTENCE_PROFILES
     ):
         return family_default
     return configured
+
+
+def is_critical_reproducibility_runtime(
+    *,
+    runtime_environment: object,
+    debug_mode: object = False,
+) -> bool:
+    """Return whether runtime should inherit published strict family defaults."""
+    return str(runtime_environment or "").strip().lower() == "prod" or bool(
+        debug_mode
+    )
 
 
 def legacy_config_hash_from_resolved_config_hash(
@@ -237,6 +249,7 @@ __all__ = [
     "SnapshotEnvelopeStatus",
     "assess_reproducibility_policy",
     "build_snapshot_envelope_status",
+    "is_critical_reproducibility_runtime",
     "legacy_config_hash_from_resolved_config_hash",
     "normalize_required_persistence_profile",
     "resolve_effective_required_persistence_profile",

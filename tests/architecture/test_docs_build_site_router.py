@@ -14,7 +14,11 @@ def test_build_site_router_targets_importable_backend() -> None:
     )
 
     assert '"build-site": "scripts.docs.build.mkdocs_build"' in router
-    assert 'BUILD_MODULE="scripts.docs.build.mkdocs_build"' in shell_wrapper
+    assert 'ROUTER_MODULE="scripts.docs"' in shell_wrapper
+    assert 'ROUTER_COMMAND="build-site"' in shell_wrapper
+    assert 'TMP_SITE_DIR=' not in shell_wrapper
+    assert 'OUT_SITE_DIR=' not in shell_wrapper
+    assert 'LEGACY_SITE_DIR=' not in shell_wrapper
 
     module = importlib.import_module("scripts.docs.build.mkdocs_build")
     assert hasattr(module, "main")
