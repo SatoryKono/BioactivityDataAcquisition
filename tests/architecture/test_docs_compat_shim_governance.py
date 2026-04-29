@@ -7,7 +7,6 @@ from pathlib import Path
 
 DOCS_SHIMS = (
     "scripts/docs/check_doc_drift.py",
-    "scripts/docs/check_doc_links.py",
     "scripts/docs/check_docstring_coverage.py",
     "scripts/docs/chembl_matrix_structural_contract.py",
     "scripts/docs/enrich_chembl_matrix_normalization_details.py",

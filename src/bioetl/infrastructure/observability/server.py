@@ -5,7 +5,7 @@ from __future__ import annotations
 import errno
 import time
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime
 from threading import Lock
 from typing import TYPE_CHECKING
 
@@ -114,6 +114,7 @@ def start_metrics_server(
     port: int = 8000,
     addr: str = "0.0.0.0",
     *,
+    started_at: datetime | None = None,
     fail_fast: bool = False,
     retry_count: int = 3,
     retry_delay: float = 1.0,
@@ -142,7 +143,7 @@ def start_metrics_server(
                 _SERVER_RUNTIME.started = True
                 _SERVER_RUNTIME.port = port
                 _SERVER_RUNTIME.addr = addr
-                _SERVER_RUNTIME.started_at = datetime.now(tz=UTC)
+                _SERVER_RUNTIME.started_at = started_at
                 logger.info(
                     "Prometheus metrics server started",
                     port=port,

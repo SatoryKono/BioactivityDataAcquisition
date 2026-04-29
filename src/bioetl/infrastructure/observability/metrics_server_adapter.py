@@ -9,6 +9,7 @@ from __future__ import annotations
 __all__ = ["MetricsServerAdapter"]
 
 
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.domain.ports import MetricsServerRuntimeStatus
@@ -51,6 +52,7 @@ class MetricsServerAdapter:
         port: int = 8000,
         addr: str = "0.0.0.0",
         *,
+        started_at: datetime | None = None,
         fail_fast: bool = False,
         retry_count: int = 3,
         retry_delay: float = 1.0,
@@ -69,6 +71,7 @@ class MetricsServerAdapter:
         return start_metrics_server(
             port=port,
             addr=addr,
+            started_at=started_at,
             fail_fast=fail_fast,
             retry_count=retry_count,
             retry_delay=retry_delay,

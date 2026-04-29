@@ -6,6 +6,7 @@ Verifies the MetricsServerAdapter implementation.
 from __future__ import annotations
 
 from collections.abc import Generator
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -14,6 +15,8 @@ from bioetl.domain.ports import MetricsServerRuntimeStatus
 from bioetl.infrastructure.observability.metrics_server_adapter import (
     MetricsServerAdapter,
 )
+
+_STARTED_AT = datetime(2026, 4, 28, 12, 0, tzinfo=UTC)
 
 
 @pytest.mark.unit
@@ -56,6 +59,7 @@ class TestMetricsServerAdapter:
             mock_start.assert_called_once_with(
                 port=9000,
                 addr="0.0.0.0",
+                started_at=None,
                 fail_fast=False,
                 retry_count=3,
                 retry_delay=1.0,
@@ -82,6 +86,7 @@ class TestMetricsServerAdapter:
             mock_start.assert_called_once_with(
                 port=8080,
                 addr="0.0.0.0",
+                started_at=None,
                 fail_fast=True,
                 retry_count=5,
                 retry_delay=2.0,
@@ -137,7 +142,7 @@ class TestMetricsServerAdapter:
 
         adapter = MetricsServerAdapter()
         with patch("bioetl.infrastructure.observability.server.start_http_server"):
-            obs_server.start_metrics_server(port=9999)
+            obs_server.start_metrics_server(port=9999, started_at=_STARTED_AT)
 
         assert adapter.is_running() is True
 
@@ -147,13 +152,17 @@ class TestMetricsServerAdapter:
 
         adapter = MetricsServerAdapter()
         with patch("bioetl.infrastructure.observability.server.start_http_server"):
-            obs_server.start_metrics_server(port=9999, addr="127.0.0.1")
+            obs_server.start_metrics_server(
+                port=9999,
+                addr="127.0.0.1",
+                started_at=_STARTED_AT,
+            )
 
         status = adapter.get_runtime_status()
         assert status.running is True
         assert status.port == 9999
         assert status.addr == "127.0.0.1"
-        assert status.started_at is not None
+        assert status.started_at == _STARTED_AT
 
     def test_reset_calls_reset_server_state(self) -> None:
         """Test reset method calls reset_server_state."""

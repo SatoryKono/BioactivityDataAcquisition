@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-28T18:17:33.366146+00:00",
+  "generated_at": "2026-04-28T18:25:36.215494+00:00",
   "summary": {
     "total_scripts": 393,
     "status_counts": {
@@ -4427,7 +4427,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 112,
+      "reference_count": 113,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -4488,11 +4488,26 @@
       "references": []
     },
     {
+      "path": "scripts/docs/build/mkdocs_build.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 42,
+          "source_group": "scripts",
+          "text": "| `build-site`                             | `scripts/docs/build/mkdocs_build.py`                            | Build the MkDocs site through the packaged Python entrypoint                             "
+        }
+      ]
+    },
+    {
       "path": "scripts/docs/build_docs_site.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/docs/README.md",
@@ -4502,15 +4517,27 @@
         },
         {
           "path": "scripts/docs/README.md",
-          "line": 148,
+          "line": 144,
           "source_group": "scripts",
           "text": "| `scripts/docs/build_docs_site.sh`  | Shell compatibility wrapper around the packaged MkDocs build entrypoint; prefer `python -m scripts.docs build-site` |"
         },
         {
           "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 97,
+          "line": 96,
           "source_group": "scripts",
           "text": "Candidate(\"scripts/docs/build_docs_site.sh\", \"shell transport adapter\"),"
+        },
+        {
+          "path": "tests/architecture/test_docs_build_site_router.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "shell_wrapper = (root / \"scripts\" / \"docs\" / \"build_docs_site.sh\").read_text("
+        },
+        {
+          "path": "tests/unit/scripts/repo/test_generate_scripts_wrapper_caller_matrix.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "assert \"`scripts/docs/build_docs_site.sh`\" in report"
         }
       ]
     },
@@ -4572,51 +4599,6 @@
       ]
     },
     {
-      "path": "scripts/docs/check_doc_links.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 6,
-      "references": [
-        {
-          "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 96,
-          "source_group": "scripts",
-          "text": "Candidate(\"scripts/docs/check_doc_links.py\", \"special-case legacy shim\"),"
-        },
-        {
-          "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 350,
-          "source_group": "scripts",
-          "text": "\"`scripts/docs/check_doc_links.py` stay retained until their \""
-        },
-        {
-          "path": "tests/architecture/test_check_doc_links_guardrails.py",
-          "line": 17,
-          "source_group": "tests",
-          "text": "module_path = repo_root / \"scripts\" / \"docs\" / \"check_doc_links.py\""
-        },
-        {
-          "path": "tests/architecture/test_check_doc_links_guardrails.py",
-          "line": 39,
-          "source_group": "tests",
-          "text": "\"python scripts/check_doc_links.py\","
-        },
-        {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 10,
-          "source_group": "tests",
-          "text": "\"scripts/docs/check_doc_links.py\","
-        },
-        {
-          "path": "tests/unit/scripts/repo/test_generate_scripts_wrapper_caller_matrix.py",
-          "line": 12,
-          "source_group": "tests",
-          "text": "assert \"`scripts/docs/check_doc_links.py`\" in report"
-        }
-      ]
-    },
-    {
       "path": "scripts/docs/check_docstring_coverage.py",
       "type": "py",
       "status": "active",
@@ -4655,7 +4637,7 @@
         },
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 11,
+          "line": 10,
           "source_group": "tests",
           "text": "\"scripts/docs/check_docstring_coverage.py\","
         }
@@ -4678,7 +4660,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 49,
+          "line": 45,
           "source_group": "scripts",
           "text": "| `check-docstrings`                       | `scripts/docs/checks/check_docstrings.py`                       | Check docstring coverage                                                                 "
         },
@@ -4699,7 +4681,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 48,
+          "line": 44,
           "source_group": "scripts",
           "text": "| `check-drift`                            | `scripts/docs/checks/check_drift.py`                            | Check documentation drift (ports, classes, runtime mirrors, freshness)                   "
         },
@@ -4777,7 +4759,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 50,
+          "line": 46,
           "source_group": "scripts",
           "text": "| `check-kpi`                              | `scripts/docs/checks/report_docs_kpi.py`                        | Report documentation KPI metrics                                                         "
         },
@@ -4798,7 +4780,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 45,
+          "line": 41,
           "source_group": "scripts",
           "text": "| `verify`                                 | `scripts/docs/checks/verify.py`                                 | Run the canonical docs verification chain (links, drift, docstrings, strict build)       "
         }
@@ -4813,7 +4795,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 12,
+          "line": 11,
           "source_group": "tests",
           "text": "\"scripts/docs/chembl_matrix_structural_contract.py\","
         }
@@ -4873,7 +4855,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 13,
+          "line": 12,
           "source_group": "tests",
           "text": "\"scripts/docs/enrich_chembl_matrix_normalization_details.py\","
         }
@@ -4888,7 +4870,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 14,
+          "line": 13,
           "source_group": "tests",
           "text": "\"scripts/docs/export_chembl_matrix_structural_contract.py\","
         }
@@ -4903,7 +4885,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 15,
+          "line": 14,
           "source_group": "tests",
           "text": "\"scripts/docs/filter_chembl_matrix_rows.py\","
         }
@@ -4918,7 +4900,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 16,
+          "line": 15,
           "source_group": "tests",
           "text": "\"scripts/docs/fix_doc_links_auto.py\","
         }
@@ -4933,7 +4915,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 17,
+          "line": 16,
           "source_group": "tests",
           "text": "\"scripts/docs/fix_doc_links_explicit.py\","
         }
@@ -4948,7 +4930,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 18,
+          "line": 17,
           "source_group": "tests",
           "text": "\"scripts/docs/fix_link_warnings.py\","
         }
@@ -4963,7 +4945,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 59,
+          "line": 55,
           "source_group": "scripts",
           "text": "| `fix-links-auto`                         | `scripts/docs/fixers/fix_links_auto.py`                         | Auto-fix broken documentation links                                                      "
         }
@@ -4978,7 +4960,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 60,
+          "line": 56,
           "source_group": "scripts",
           "text": "| `fix-links-explicit`                     | `scripts/docs/fixers/fix_links_explicit.py`                     | Fix documentation links with explicit rules                                              "
         }
@@ -4993,7 +4975,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 61,
+          "line": 57,
           "source_group": "scripts",
           "text": "| `fix-link-warnings`                      | `scripts/docs/fixers/link_warnings.py`                          | Fix link warnings in specified files                                                     "
         }
@@ -5008,7 +4990,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 63,
+          "line": 59,
           "source_group": "scripts",
           "text": "| `sync-repo-identity`                     | `scripts/docs/fixers/repo_identity.py`                          | Normalize active docs and workflow references to the canonical repo identity             "
         }
@@ -5023,7 +5005,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 62,
+          "line": 58,
           "source_group": "scripts",
           "text": "| `audit-sentence`                         | `scripts/docs/fixers/sentence_audit.py`                         | Sentence-level documentation audit                                                       "
         }
@@ -5038,7 +5020,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 19,
+          "line": 18,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_chembl_activity_field_matrix.py\","
         }
@@ -5053,7 +5035,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 20,
+          "line": 19,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_chembl_matrix_dictionaries.py\","
         }
@@ -5086,7 +5068,7 @@
         },
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 21,
+          "line": 20,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_pipeline_normalization_field_matrix.py\","
         },
@@ -5115,7 +5097,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 54,
+          "line": 50,
           "source_group": "scripts",
           "text": "| `build-matrix-dicts`                     | `scripts/docs/matrix/build_matrix_dicts.py`                     | Build inventory and dictionary artifacts for the canonical ChEMBL matrix workbook        "
         },
@@ -5136,7 +5118,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 55,
+          "line": 51,
           "source_group": "scripts",
           "text": "| `enrich-matrix-normalization-details`    | `scripts/docs/matrix/enrich_normalization_details.py`           | Populate exact per-row normalization details in the canonical ChEMBL matrix workbook     "
         },
@@ -5157,7 +5139,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 51,
+          "line": 47,
           "source_group": "scripts",
           "text": "| `export-matrix-structural-contract`      | `scripts/docs/matrix/export_structural_contract.py`             | Export the canonical runtime structural contract for ChEMBL workbook sync                "
         },
@@ -5178,7 +5160,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 56,
+          "line": 52,
           "source_group": "scripts",
           "text": "| `filter-matrix-rows`                     | `scripts/docs/matrix/filter_rows.py`                            | Remove rows from the canonical ChEMBL matrix workbook by column value                    "
         },
@@ -5199,7 +5181,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 52,
+          "line": 48,
           "source_group": "scripts",
           "text": "| `generate-field-matrix`                  | `scripts/docs/matrix/generate_field_matrix.py`                  | Generate deterministic ChemBL Activity field-matrix artifacts directly from code         "
         },
@@ -5232,7 +5214,7 @@
         },
         {
           "path": "scripts/docs/README.md",
-          "line": 53,
+          "line": 49,
           "source_group": "scripts",
           "text": "| `generate-pipeline-normalization-matrix` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | Generate deterministic normalization field-matrix artifacts for all entity and composite "
         },
@@ -5253,7 +5235,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 57,
+          "line": 53,
           "source_group": "scripts",
           "text": "| `normalize-matrix-values`                | `scripts/docs/matrix/normalize_values.py`                       | Normalize controlled vocabulary values in the canonical ChEMBL matrix workbook           "
         },
@@ -5289,7 +5271,7 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 58,
+          "line": 54,
           "source_group": "scripts",
           "text": "| `sync-matrix-structural-policy`          | `scripts/docs/matrix/sync_structural_policy.py`                 | Reconcile workbook policy columns with the current structural Silver policy semantics    "
         },
@@ -5310,7 +5292,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 22,
+          "line": 21,
           "source_group": "tests",
           "text": "\"scripts/docs/normalize_chembl_matrix_workbook.py\","
         }
@@ -5325,13 +5307,13 @@
       "references": [
         {
           "path": "scripts/docs/README.md",
-          "line": 50,
+          "line": 46,
           "source_group": "scripts",
           "text": "| `check-kpi`                              | `scripts/docs/checks/report_docs_kpi.py`                        | Report documentation KPI metrics                                                         "
         },
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 23,
+          "line": 22,
           "source_group": "tests",
           "text": "\"scripts/docs/report_docs_kpi.py\","
         }
@@ -5346,7 +5328,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 24,
+          "line": 23,
           "source_group": "tests",
           "text": "\"scripts/docs/sentence_doc_audit.py\","
         }
@@ -5361,7 +5343,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 25,
+          "line": 24,
           "source_group": "tests",
           "text": "\"scripts/docs/sync_chembl_matrix_structural_policy.py\","
         }
@@ -5376,7 +5358,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 26,
+          "line": 25,
           "source_group": "tests",
           "text": "\"scripts/docs/sync_repo_identity.py\","
         }
@@ -5391,7 +5373,7 @@
       "references": [
         {
           "path": "tests/architecture/test_docs_compat_shim_governance.py",
-          "line": 27,
+          "line": 26,
           "source_group": "tests",
           "text": "\"scripts/docs/verify_docs.py\","
         }

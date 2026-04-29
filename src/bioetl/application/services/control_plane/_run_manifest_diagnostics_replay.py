@@ -7,6 +7,13 @@ from collections.abc import Mapping
 from typing import Literal
 
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
+from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+    STRICT_PERSISTENCE_PROFILES,
+    ReproducibilityPolicyAssessment,
+    assess_reproducibility_policy,
+    normalize_required_persistence_profile,
+)
 from bioetl.domain.control_plane.reproducibility_profiles import (
     ReproducibilityFamilyProfile,
     build_replay_family_contract,
@@ -63,7 +70,7 @@ def _resolve_replay_capability_reason(
 def _resolve_exact_replay_blockers(
     *,
     manifest: RunManifest,
-    input_snapshots: list[dict[str, object]],
+    policy_assessment: ReproducibilityPolicyAssessment,
 ) -> list[str]:
     """Return explicit blockers preventing exact replay eligibility."""
     profile = _resolve_reproducibility_profile(manifest)
@@ -79,7 +86,14 @@ def _resolve_exact_replay_blockers(
         blockers.append("family_outside_supported_exact_replay_boundary")
     if append_mode_sinks:
         blockers.append("append_mode_semantic_outputs")
-    if not input_snapshots:
+    snapshot_envelope = policy_assessment.snapshot_envelope
+    if (
+        not snapshot_envelope.any_input_snapshots
+        or (
+            snapshot_envelope.require_full_snapshot_envelope
+            and not snapshot_envelope.full_snapshot_envelope
+        )
+    ):
         blockers.append("immutable_input_snapshots_missing")
     elif manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
         blockers.append("exact_replay_capability_unavailable")
@@ -145,6 +159,30 @@ def _resolve_replay_family_contract(manifest: RunManifest) -> dict[str, object]:
     )
 
 
+def _assess_manifest_reproducibility_policy(
+    *,
+    manifest: RunManifest,
+    requested_exact_replay: bool,
+    resume_requested: bool,
+    replay_family_contract: dict[str, object],
+) -> ReproducibilityPolicyAssessment:
+    """Return the central reproducibility policy verdict for one manifest."""
+    return assess_reproducibility_policy(
+        source_refs=manifest.source_refs,
+        required_persistence_profile=_resolve_required_persistence_profile(manifest),
+        strict_exact_replay_supported=bool(
+            replay_family_contract.get("strict_exact_replay_supported", False)
+        ),
+        exact_replay_requested=requested_exact_replay,
+        resume_requested=resume_requested,
+        require_full_snapshot_envelope=(
+            replay_family_contract.get("contract")
+            == "composite_snapshot_backed_exact_replay"
+        ),
+        replay_capability=manifest.replay_capability,
+    )
+
+
 def _is_composite_execution_context(manifest: RunManifest) -> bool:
     """Return whether the manifest represents composite execution."""
     execution_context = str(manifest.launch_context.get("execution_context") or "")
@@ -184,11 +222,12 @@ def _build_resume_contract(
     manifest: RunManifest,
     requested_exact_replay: bool,
     resume_requested: bool,
+    policy_assessment: ReproducibilityPolicyAssessment,
 ) -> dict[str, object]:
     """Return the published checkpoint/resume contract for one manifested run."""
     profile = _resolve_reproducibility_profile(manifest)
     requested_policy = _resolve_requested_checkpoint_compatibility_policy(manifest)
-    required_persistence_profile = _resolve_required_persistence_profile(manifest)
+    required_persistence_profile = policy_assessment.required_persistence_profile
     applied_policy = _resolve_applied_checkpoint_compatibility_policy(
         requested_exact_replay=requested_exact_replay,
         requested_policy=requested_policy,
@@ -196,11 +235,7 @@ def _build_resume_contract(
     )
     strict_replay_requested = (
         requested_exact_replay
-        or required_persistence_profile
-        in {
-            "replay_ready",
-            "forensic_grade",
-        }
+        or required_persistence_profile in STRICT_PERSISTENCE_PROFILES
     )
     is_composite = _is_composite_execution_context(manifest)
     execution_context = "composite" if is_composite else "ordinary"
@@ -250,10 +285,13 @@ def _resolve_required_persistence_profile(manifest: RunManifest) -> str:
     )
     for candidate in candidates:
         if isinstance(candidate, str):
-            normalized = candidate.strip().lower()
-            if normalized in {"degraded_observable", "replay_ready", "forensic_grade"}:
+            normalized = normalize_required_persistence_profile(candidate).lower()
+            if normalized in {
+                DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+                *STRICT_PERSISTENCE_PROFILES,
+            }:
                 return normalized
-    return "degraded_observable"
+    return DEFAULT_REQUIRED_PERSISTENCE_PROFILE
 
 
 def _resolve_applied_checkpoint_compatibility_policy(
@@ -265,7 +303,7 @@ def _resolve_applied_checkpoint_compatibility_policy(
     """Resolve the effective checkpoint policy shown in diagnostics."""
     if requested_exact_replay:
         return "hard_fail"
-    if required_persistence_profile in {"replay_ready", "forensic_grade"}:
+    if required_persistence_profile in STRICT_PERSISTENCE_PROFILES:
         if requested_policy in {"observe", "legacy_observe"}:
             return "soft_fail"
         return requested_policy or "soft_fail"

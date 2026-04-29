@@ -84,6 +84,31 @@ def test_run_manifest_contract_documents_lifecycle_snapshot_and_scoring_surfaces
 
 
 @pytest.mark.architecture
+def test_run_manifest_config_hash_legacy_alias_contract_is_documented_and_wired() -> (
+    None
+):
+    contract = _read("docs/04-reference/contracts/run-manifest-ledger.md")
+    runbook = _read("docs/05-operations/runbooks/run-manifest-inspection.md")
+    policy = _read("src/bioetl/domain/control_plane/reproducibility_policy.py")
+    builder = _read("src/bioetl/composition/runtime_builders/run_manifest_builder.py")
+    refs = _read("src/bioetl/composition/runtime_builders/_run_manifest_refs.py")
+
+    assert (
+        "`config_hash` is a legacy compatibility anchor retained for older manifest"
+        in contract
+    )
+    assert "Current write paths populate it from" in contract
+    assert "`resolved_config_hash`;" in contract
+    assert "must not treat" in contract
+    assert "`config_hash` as a synonym for `effective_config_hash`" in contract
+    assert "`config_hash`" in runbook
+    assert "legacy compatibility" in runbook
+    assert "legacy_config_hash_from_resolved_config_hash" in policy
+    assert "config_hash=legacy_config_hash_from_resolved_config_hash(" in builder
+    assert "config_hash=legacy_config_hash_from_resolved_config_hash(" in refs
+
+
+@pytest.mark.architecture
 def test_reproducibility_rubric_declares_repeatable_7x5_scoring_matrix() -> None:
     text = _read("docs/04-reference/contracts/reproducibility-scoring-rubric.md")
 

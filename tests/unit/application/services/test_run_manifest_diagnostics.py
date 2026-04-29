@@ -333,6 +333,18 @@ def _assert_provenance_only_policy(
         ]
         == manifest.execution_fingerprint
     )
+    effective_config_diag = summary["reproducibility_diagnostics"][
+        "effective_config"
+    ]
+    assert effective_config_diag["semantic"]["effective_config_hash"] == (
+        _VALID_EFFECTIVE_CONFIG_HASH
+    )
+    assert effective_config_diag["occurrence"]["run_id"] == str(manifest.run_id)
+    assert effective_config_diag["diff_policy"]["occurrence_fields"] == [
+        "run_id",
+        "manifest_id",
+        "manifest_created_at",
+    ]
 
 
 def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> None:
@@ -851,6 +863,14 @@ def test_build_diagnostics_summary_surfaces_persisted_resume_diagnostics() -> No
     assert (
         summary["identity_graph"]["resume_diagnostics"] == summary["resume_diagnostics"]
     )
+    checkpoint_diag = summary["reproducibility_diagnostics"]["checkpoint_anchors"]
+    assert checkpoint_diag["resume_anchor_comparison"] == {
+        "checkpoint_identity_present": True,
+        "matching_fields": ["execution_fingerprint"],
+        "mismatched_fields": ["composite_run_identity"],
+        "missing_current_fields": [],
+        "missing_checkpoint_fields": [],
+    }
 
 
 def test_build_diagnostics_summary_projects_composite_dossier_correlation() -> None:
