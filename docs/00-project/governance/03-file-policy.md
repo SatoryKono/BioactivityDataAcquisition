@@ -41,8 +41,6 @@ ______________________________________________________________________
 - Shared repo tooling surfaces such as `.codex/`, `.gemini/`, `.vibe/`,
   `.vscode/`, and `.cursor/` MAY оставаться tracked только если они
   поддерживаются как проектные runtime/editor integrations.
-- Transitional compatibility trees under `ai/` MAY оставаться tracked only for
-  bounded migration waves and MUST NOT be promoted as canonical runtime roots.
 - `.idea/` MAY содержать curated shared project metadata (например,
   run configurations, scopes, inspections, словарь), но local/plugin state
   files such as `workspace.xml`, `shelf/`, `dataSources*/`, `.ai/`,

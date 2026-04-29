@@ -625,7 +625,7 @@ Only approved top-level entries are allowed.
 - Build/configuration: `pyproject.toml`, `uv.lock`, `Makefile`, `.pre-commit-config.yaml`, `.github/`
 - Operational/project assets: `configs/`, `scripts/`, `assets/`, `data/`, `reports/`, `grafana/`
 - Shared AI/editor tooling surfaces approved by policy:
-  `.ai/`, `.aiassistant/`, `ai/` (transitional compatibility only),
+  `.ai/`, `.aiassistant/`, `ai/`,
   `.codex/`,
   `.cursor/`, `.gemini/`, `.idea/`, `.jules/`, `.junie/`, `.sonarlint/`,
   `.vibe/`, `.vscode/`

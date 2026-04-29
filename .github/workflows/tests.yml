@@ -8,7 +8,6 @@ on:
             - 'docs/**'
             - '*.md'
             - '.ai/**'
-            - 'ai/claude/**'
             - 'LICENSE'
     pull_request:
         branches: [ main, master, develop ]
@@ -16,7 +15,6 @@ on:
             - 'docs/**'
             - '*.md'
             - '.ai/**'
-            - 'ai/claude/**'
             - 'LICENSE'
 
 concurrency:

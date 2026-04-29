@@ -35,7 +35,7 @@ FORBIDDEN_INSTANTIATION_CLASSES: set[str] = {
     "UniProtClient",
     "PubMedAdapter",
     "PubMedClient",
-    # Storage adapters (infrastructure - injected via StoragePort)
+    # Storage adapters (infrastructure - injected via narrow storage ports)
     "LocalStorageAdapter",
     "BronzeWriter",
     "SilverWriter",

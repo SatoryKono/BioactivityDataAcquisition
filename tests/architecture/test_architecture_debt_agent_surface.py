@@ -7,8 +7,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 CODEX_SKILL = ROOT / ".codex" / "skills" / "py-architecture-debt-bot" / "SKILL.md"
-CLAUDE_AGENT = ROOT / "ai" / "claude" / "agents" / "py-architecture-debt-bot.md"
-SKILL_FILE = ROOT / "ai" / "claude" / "skills" / "py-architecture-debt-bot" / "SKILL.md"
 PROMPT_FILES = (
     ROOT
     / "docs"
@@ -27,8 +25,6 @@ PROMPT_FILES = (
 
 def test_architecture_debt_runtime_surfaces_exist() -> None:
     assert CODEX_SKILL.exists()
-    assert CLAUDE_AGENT.exists()
-    assert SKILL_FILE.exists()
     assert (
         ROOT / "scripts" / "engineering" / "qa" / "generate_architecture_debt_tasks.py"
     ).exists()
@@ -44,8 +40,8 @@ def test_architecture_debt_codex_skill_is_self_contained() -> None:
 
 
 def test_codex_agent_routes_config_writes_via_py_config_bot() -> None:
-    text = CLAUDE_AGENT.read_text(encoding="utf-8")
-    assert "configs/` меняет только `py-config-bot`" in text
+    text = CODEX_SKILL.read_text(encoding="utf-8")
+    assert "configs/` mutations delegated to `py-config-bot`" in text
     assert "py-config-bot" in text
     assert "generate-debt-tasks" in text
     assert "reduce-architecture-debt" in text

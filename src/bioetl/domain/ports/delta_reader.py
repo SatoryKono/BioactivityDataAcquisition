@@ -25,7 +25,7 @@ class DeltaReaderPort(Protocol):
     knowing the underlying storage implementation.
 
     Note:
-        This port is read-only. Write operations use StoragePort.
+        This port is read-only. Write operations use narrow storage ports.
     """
 
     async def read_table(

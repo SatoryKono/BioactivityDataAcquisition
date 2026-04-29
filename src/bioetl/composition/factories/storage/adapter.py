@@ -1,6 +1,6 @@
 """StorageAdapter - Unified storage adapter for Bronze/Silver/Gold layers.
 
-Implements StoragePort protocol from ``bioetl.domain.ports``.
+Implements the narrow storage protocols from ``bioetl.domain.ports``.
 
 This module was extracted from storage.py as part of the storage factory split
 to improve maintainability and reduce file size.
@@ -50,7 +50,7 @@ class StorageAdapter(
 ):
     """Unified storage adapter for Bronze/Silver/Gold.
 
-    Implements StoragePort protocol from ``bioetl.domain.ports``.
+    Implements the narrow storage protocols from ``bioetl.domain.ports``.
     Delegates to specialized writers for each layer.
     """
 

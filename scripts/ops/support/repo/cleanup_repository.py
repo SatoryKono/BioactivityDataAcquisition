@@ -514,6 +514,58 @@ def _review_status_for_evidence(
     return "present_unreviewed"
 
 
+def _review_evidence_from_candidate(
+    repo_root: Path,
+    tracked_paths: set[str],
+    *,
+    lane_id: str,
+    classification: str,
+    candidate: dict[str, object],
+) -> ReviewLaneEvidence | None:
+    raw_path = candidate.get("path")
+    if not isinstance(raw_path, str) or not raw_path:
+        return None
+
+    path = Path(raw_path)
+    canonical_raw = candidate.get("canonical_path")
+    canonical_path = (
+        Path(canonical_raw)
+        if isinstance(canonical_raw, str) and canonical_raw
+        else None
+    )
+    exists = (repo_root / path).exists()
+    tracked = path.as_posix() in tracked_paths
+    cmp_status = _cmp_status(repo_root, path, canonical_path) if exists else None
+    reference_hits = _count_reference_hits(repo_root, path) if exists else 0
+
+    return ReviewLaneEvidence(
+        lane_id=lane_id,
+        classification=classification,
+        path=path,
+        current_live_state=str(candidate.get("current_live_state", "")),
+        canonical_path=canonical_path,
+        action_if_reintroduced=(
+            str(candidate.get("action_if_reintroduced"))
+            if candidate.get("action_if_reintroduced") is not None
+            else None
+        ),
+        exists=exists,
+        tracked=tracked,
+        has_history=_git_path_has_history(repo_root, path),
+        canonical_exists=bool(canonical_path and (repo_root / canonical_path).exists()),
+        cmp_status=cmp_status,
+        reference_hits=reference_hits,
+        review_status=_review_status_for_evidence(
+            classification=classification,
+            current_live_state=str(candidate.get("current_live_state", "")),
+            exists=exists,
+            tracked=tracked,
+            cmp_status=cmp_status,
+            reference_hits=reference_hits,
+        ),
+    )
+
+
 def collect_root_review_evidence(repo_root: Path) -> list[ReviewLaneEvidence]:
     payload = _load_root_review_registry(repo_root)
     lanes = payload.get("review_lanes")
@@ -533,51 +585,15 @@ def collect_root_review_evidence(repo_root: Path) -> list[ReviewLaneEvidence]:
         for candidate in candidates:
             if not isinstance(candidate, dict):
                 continue
-            raw_path = candidate.get("path")
-            if not isinstance(raw_path, str) or not raw_path:
-                continue
-            path = Path(raw_path)
-            canonical_raw = candidate.get("canonical_path")
-            canonical_path = (
-                Path(canonical_raw)
-                if isinstance(canonical_raw, str) and canonical_raw
-                else None
-            )
-            exists = (repo_root / path).exists()
-            tracked = path.as_posix() in tracked_paths
-            cmp_status = _cmp_status(repo_root, path, canonical_path) if exists else None
-            reference_hits = _count_reference_hits(repo_root, path) if exists else 0
-            review_status = _review_status_for_evidence(
+            row = _review_evidence_from_candidate(
+                repo_root,
+                tracked_paths,
+                lane_id=lane_id,
                 classification=classification,
-                current_live_state=str(candidate.get("current_live_state", "")),
-                exists=exists,
-                tracked=tracked,
-                cmp_status=cmp_status,
-                reference_hits=reference_hits,
+                candidate=candidate,
             )
-            evidence.append(
-                ReviewLaneEvidence(
-                    lane_id=lane_id,
-                    classification=classification,
-                    path=path,
-                    current_live_state=str(candidate.get("current_live_state", "")),
-                    canonical_path=canonical_path,
-                    action_if_reintroduced=(
-                        str(candidate.get("action_if_reintroduced"))
-                        if candidate.get("action_if_reintroduced") is not None
-                        else None
-                    ),
-                    exists=exists,
-                    tracked=tracked,
-                    has_history=_git_path_has_history(repo_root, path),
-                    canonical_exists=(
-                        bool(canonical_path and (repo_root / canonical_path).exists())
-                    ),
-                    cmp_status=cmp_status,
-                    reference_hits=reference_hits,
-                    review_status=review_status,
-                )
-            )
+            if row is not None:
+                evidence.append(row)
     return sorted(evidence, key=lambda item: (item.lane_id, item.rel_path))
 
 
@@ -680,6 +696,13 @@ def _log_apply_summary(
     errors: list[str],
 ) -> None:
     logger.info("=" * 70)
+    logger.info("Deleted: %d", len(deleted))
+    logger.info("Manual review candidates left untouched: %d", len(skipped_review))
+    if errors:
+        logger.info("Errors: %d", len(errors))
+        for error in errors:
+            logger.info("  %s", error)
+    logger.info("=" * 70)
 
 
 def _log_review_lane_evidence(
@@ -718,13 +741,6 @@ def _log_review_lane_evidence(
         if hidden_count > 0:
             logger.info("  ... %d additional review row(s) omitted", hidden_count)
         logger.info("")
-    logger.info("Deleted: %d", len(deleted))
-    logger.info("Manual review candidates left untouched: %d", len(skipped_review))
-    if errors:
-        logger.info("Errors: %d", len(errors))
-        for error in errors:
-            logger.info("  %s", error)
-    logger.info("=" * 70)
 
 
 def parse_args() -> argparse.Namespace:

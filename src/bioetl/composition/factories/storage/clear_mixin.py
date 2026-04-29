@@ -21,7 +21,7 @@ class StorageAdapterClearMixin:
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Silver layer data for a specific table.
 
-        Implements StoragePort.clear_silver().
+        Implements SilverStoragePort.clear_silver().
         Clears both Delta tables and CSV exports (if configured).
 
         Args:
@@ -36,7 +36,7 @@ class StorageAdapterClearMixin:
     async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Gold layer data for a specific table.
 
-        Implements StoragePort.clear_gold().
+        Implements GoldStoragePort.clear_gold().
         Clears both Delta tables and CSV exports (if configured).
 
         Args:
@@ -70,7 +70,7 @@ class StorageAdapterClearMixin:
     async def clear_csv(self, table_name: str | None = None) -> int:
         """Clear CSV export files for Silver and Gold layers.
 
-        Implements StoragePort.clear_csv().
+        Implements StorageMaintenancePort.clear_csv().
 
         Args:
             table_name: Database table name.
@@ -100,7 +100,7 @@ class StorageAdapterClearMixin:
     async def clear_delta(self, table_name: str | None = None) -> int:
         """Clear Delta tables for Silver and Gold layers.
 
-        Implements StoragePort.clear_delta().
+        Implements StorageMaintenancePort.clear_delta().
 
         Args:
             table_name: If provided, only clear Delta table for this table.

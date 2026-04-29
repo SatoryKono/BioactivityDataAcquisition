@@ -215,7 +215,7 @@ class _MedallionRunLifecycleMixin(_MedallionClearMixin):
 
         Optimizes storage (Vacuum/Cleanup) if enabled:
         - Skipped if neither optimize_storage nor vacuum_after_run is True
-        - Uses StoragePort.optimize() for unified maintenance
+        - Uses StorageMaintenancePort.optimize() for unified maintenance
 
         Args:
             config: Pipeline configuration with table names.

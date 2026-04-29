@@ -114,8 +114,6 @@ consistency, а этот документ задаёт правила публи
 AI runtime ownership note:
 
 - `.codex/**` remains the canonical runtime-owned tree for local AI workflow.
-- Residual compatibility trees under `ai/**` are migration-owned surfaces and
-  are not promoted to canonical runtime ownership by docs publication policy.
 - `docs/00-project/ai/**` is the published/internal mirror surface for AI
   guidance and discoverability.
 - Runtime behavior MUST be authored in the runtime-owned trees first; mirrors in

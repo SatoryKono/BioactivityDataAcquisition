@@ -52,8 +52,8 @@ review_lanes:
     candidates:
       - path: .claude
         current_live_state: absent_from_root_baseline
-        canonical_path: ai/claude
-        action_if_reintroduced: migrate_to_ai_claude_then_remove_root_surface
+        canonical_path: .codex
+        action_if_reintroduced: migrate_to_codex_or_remove_root_surface
       - path: .codex_tmp
         current_live_state: absent_from_root_baseline
         canonical_path: null
