@@ -82,6 +82,8 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [build-docs-site-parity-audit-2026-04-29.md](build-docs-site-parity-audit-2026-04-29.md)
 - [mcp-wrapper-deep-audit-2026-04-29.md](mcp-wrapper-deep-audit-2026-04-29.md)
 - [temporary-diagnostic-ttl-review-plan-2026-04-29.md](temporary-diagnostic-ttl-review-plan-2026-04-29.md)
+- [repo-governance-wrapper-closeout-2026-04-29.md](repo-governance-wrapper-closeout-2026-04-29.md)
+- [root-hygiene-cleanup-hardening-2026-04-29.md](root-hygiene-cleanup-hardening-2026-04-29.md)
 
 Earlier operational context files such as
 `onboarding-checklist-day-1-2026-03-20.md` and
@@ -167,6 +169,16 @@ The temporary diagnostic TTL review plan was added on `2026-04-29` to prevent
 remaining bounded diagnostics by troubleshooting purpose, assigns explicit
 review horizons, and defines the only allowed outcomes for each file: promote,
 retain-with-review, or delete.
+
+The repo governance wrapper closeout note was added on `2026-04-29` to record
+the completed removal of `split_testing_roadmap_issue.sh` and
+`sync_docs_issues.sh`, plus the retained compatibility decision for
+`cleanup_branch_candidates.sh` after the canonical router command was added.
+
+The root hygiene cleanup hardening note was added on `2026-04-29` to record
+the bounded policy implementation step in `cleanup_repository.py`: exact local
+log/temp plus `.egg-info` and `.ipynb_checkpoints` discovery outside blocked
+cleanup zones, without broadening cleanup into governed report-like surfaces.
 
 ### Retained Historical Context With Live Evidence References
 

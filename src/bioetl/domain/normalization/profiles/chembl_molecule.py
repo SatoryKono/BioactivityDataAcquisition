@@ -25,6 +25,7 @@ from bioetl.domain.schemas.constants import (
 )
 
 from ._chembl_vocab import chembl_enum
+from .chembl_json_ordering_policy import chembl_json_fields
 
 __all__ = [
     "CHEMBL_MOLECULE_PROFILE",
@@ -76,16 +77,7 @@ _FLOAT_FIELDS = frozenset(
         "usan_year",
     }
 )
-_STRICT_JSON_FIELDS = frozenset(
-    {
-        "molecule_hierarchy",
-        "molecule_properties",
-        "molecule_structures",
-        "molecule_synonyms",
-        "cross_references",
-        "atc_classifications",
-    }
-)
+_STRICT_JSON_FIELDS = chembl_json_fields("chembl_molecule")
 _NULL_FIELDS = chembl_pseudo_null_fields("molecule")
 
 _SPECIAL_RULES = {

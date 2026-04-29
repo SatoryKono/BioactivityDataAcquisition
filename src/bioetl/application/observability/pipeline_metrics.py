@@ -122,6 +122,68 @@ class PipelineMetricsRecorder:
             },
         )
 
+    def record_flow_invariant(
+        self,
+        *,
+        run_type: str,
+        invariant: str,
+        status: str,
+        count: int = 1,
+    ) -> None:
+        """Increment bounded terminal invariant outcomes for record-flow accounting."""
+        if self.metrics is None or count <= 0:
+            return
+        self.metrics.increment_counter(
+            "bioetl_record_flow_invariants_total",
+            count,
+            {
+                "pipeline": self.pipeline,
+                "run_type": run_type,
+                "invariant": invariant,
+                "status": status,
+            },
+        )
+
+    def record_stage_backlog(
+        self,
+        *,
+        run_type: str,
+        stage: str,
+        count: int,
+    ) -> None:
+        """Set the bounded unresolved backlog gauge for one canonical stage."""
+        if self.metrics is None or count < 0:
+            return
+        self.metrics.set_gauge(
+            "bioetl_stage_backlog_records",
+            float(count),
+            {
+                "pipeline": self.pipeline,
+                "run_type": run_type,
+                "stage": stage,
+            },
+        )
+
+    def record_stage_lag_seconds(
+        self,
+        *,
+        run_type: str,
+        stage: str,
+        seconds: float,
+    ) -> None:
+        """Set the bounded unresolved stage lag gauge for one canonical stage."""
+        if self.metrics is None or seconds < 0:
+            return
+        self.metrics.set_gauge(
+            "bioetl_stage_lag_seconds",
+            seconds,
+            {
+                "pipeline": self.pipeline,
+                "run_type": run_type,
+                "stage": stage,
+            },
+        )
+
     def record_dq_disposition(
         self,
         *,

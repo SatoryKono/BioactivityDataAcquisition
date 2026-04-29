@@ -83,7 +83,7 @@ def test_metric_definition_exports_remain_stable() -> None:
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
     # This ratchet intentionally changes only when we add/remove public metrics.
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 127
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 130
 
 
 @pytest.mark.unit
@@ -262,6 +262,12 @@ def test_adapter_metrics_use_bounded_label_names_only() -> None:
         "bioetl_filter_ids_duplicates_total": {"pipeline", "source_file"},
         "bioetl_filter_combinations_loaded_total": {"pipeline", "source_file"},
         "bioetl_record_flow_records_total": {"pipeline", "run_type", "flow_stage"},
+        "bioetl_record_flow_invariants_total": {
+            "pipeline",
+            "run_type",
+            "invariant",
+            "status",
+        },
         "bioetl_stage_records_total": {"pipeline", "run_type", "stage", "outcome"},
         "bioetl_metrics_publication_events_total": {
             "pipeline",
@@ -278,8 +284,10 @@ def test_adapter_metrics_use_bounded_label_names_only() -> None:
     }
     expected_gauge_labels = {
         "bioetl_observability_runtime_status": {"pipeline", "component", "mode"},
+        "bioetl_stage_backlog_records": {"pipeline", "run_type", "stage"},
+        "bioetl_stage_lag_seconds": {"pipeline", "run_type", "stage"},
     }
-    expected_gauge_labels = {
+    expected_adapter_gauge_labels = {
         "bioetl_adapter_request_p95_seconds": {"provider", "endpoint"},
         "bioetl_adapter_fallback_hit_rate": {"provider", "operation"},
     }
@@ -299,7 +307,7 @@ def test_adapter_metrics_use_bounded_label_names_only() -> None:
         assert actual_labels == labels
         assert _FORBIDDEN_LABELS.isdisjoint(actual_labels)
 
-    for metric_name, labels in expected_gauge_labels.items():
+    for metric_name, labels in expected_adapter_gauge_labels.items():
         actual_labels = set(GAUGES[metric_name]._labelnames)
         assert actual_labels == labels
         assert _FORBIDDEN_LABELS.isdisjoint(actual_labels)

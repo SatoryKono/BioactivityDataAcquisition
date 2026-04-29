@@ -28,6 +28,8 @@ def test_normalization_plan_references_governed_evidence_surfaces() -> None:
     assert "pipeline_normalization_field_matrix.md" in plan_text
     assert "join_keys.py" in plan_text
     assert "join_key_normalization.py" in plan_text
+    assert "chembl_json_ordering_policy.py" in plan_text
+    assert "chembl_observed_values.yaml" in plan_text
     assert "explicit_profile_coverage_pct" in plan_text
     assert "composite_join_key_policy_coverage_pct" in plan_text
     assert "control_plane_normalization_coverage_pct" in plan_text
@@ -49,3 +51,5 @@ def test_normalization_plan_references_final_dq_schema_reconciliation() -> None:
     assert "test_chembl_enum_normalization_policy.py" in plan_text
     assert "test_chembl_activity_flag_policy.py" in plan_text
     assert "test_normalization_cross_layer_contracts.py" in plan_text
+    assert "test_normalization_surface_coverage_ratchet.py" in plan_text
+    assert "test_chembl_observed_value_fixtures.py" in plan_text

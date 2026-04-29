@@ -39,8 +39,11 @@ __all__ = sorted(
         "QUARANTINE_OPERATOR_OPERATIONS_TOTAL",
         "QUARANTINE_RECORDS_TOTAL",
         "RECORD_FLOW_RECORDS_TOTAL",
+        "RECORD_FLOW_INVARIANTS_TOTAL",
         "RECORDS_PROCESSED_TOTAL",
         "SILVER_FILTER_REJECTIONS_TOTAL",
+        "STAGE_BACKLOG_RECORDS",
+        "STAGE_LAG_SECONDS",
         "STAGE_RECORDS_TOTAL",
         "VACUUM_FILES_REMOVED_TOTAL",
     ]
@@ -64,10 +67,28 @@ RECORD_FLOW_RECORDS_TOTAL = Counter(
     ["pipeline", "run_type", "flow_stage"],
 )
 
+RECORD_FLOW_INVARIANTS_TOTAL = Counter(
+    "bioetl_record_flow_invariants_total",
+    "Terminal invariant outcomes derived from bounded record-flow projections",
+    ["pipeline", "run_type", "invariant", "status"],
+)
+
 STAGE_RECORDS_TOTAL = Counter(
     "bioetl_stage_records_total",
     "Total records observed in the canonical stage-model projection",
     ["pipeline", "run_type", "stage", "outcome"],
+)
+
+STAGE_BACKLOG_RECORDS = Gauge(
+    "bioetl_stage_backlog_records",
+    "Current bounded unresolved record backlog projected by canonical stage",
+    ["pipeline", "run_type", "stage"],
+)
+
+STAGE_LAG_SECONDS = Gauge(
+    "bioetl_stage_lag_seconds",
+    "Current bounded unresolved stage lag in seconds for canonical stage backlogs",
+    ["pipeline", "run_type", "stage"],
 )
 
 ERRORS_TOTAL = Counter(

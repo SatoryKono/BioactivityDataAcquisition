@@ -25,6 +25,7 @@ from ._chembl_policy_registry import (
     chembl_ontology_family_fields,
 )
 from ._chembl_vocab import chembl_enum
+from .chembl_json_ordering_policy import chembl_json_fields
 
 __all__ = [
     "ASSAY_CATEGORIES",
@@ -67,13 +68,7 @@ _INT_FIELDS = frozenset(
     {"assay_taxonomy_id", "confidence_score", "src_id", "variant_taxonomy_id"}
 )
 _FLOAT_FIELDS = frozenset({"score"})
-_STRICT_JSON_FIELDS = frozenset(
-    {
-        "assay_classifications",
-        "assay_parameters",
-        "variant_sequence_json",
-    }
-)
+_STRICT_JSON_FIELDS = chembl_json_fields("chembl_assay")
 _NULL_FIELDS = chembl_pseudo_null_fields("assay")
 _BAO_FIELDS = chembl_ontology_family_fields("bao", entity="assay")
 _CONTROLLED_FRACTION_FIELDS = chembl_controlled_family_fields(

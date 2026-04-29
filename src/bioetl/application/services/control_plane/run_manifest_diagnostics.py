@@ -292,8 +292,7 @@ def _build_unified_reproducibility_diagnostics(
 ) -> dict[str, object]:
     """Return a single operator-facing reproducibility diagnostics surface."""
     persistence_profile = cast(
-        "dict[str, object]",
-        summary.get("persistence_profile", {}),
+        "dict[str, object]", summary.get("persistence_profile", {})
     )
     produced_artifact_trace = cast(
         "dict[str, object]",
@@ -496,5 +495,6 @@ def build_diagnostics_summary(
         _build_unified_reproducibility_diagnostics(final_summary)
     )
     return final_summary
+
 
 __all__ = ["build_diagnostics_summary"]

@@ -21,6 +21,11 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
 from bioetl.domain.schemas.constants import PUBLICATION_TYPES
 
+from .chembl_json_ordering_policy import (
+    chembl_json_fields,
+    chembl_set_like_json_fields,
+)
+
 __all__ = [
     "CHEMBL_PUBLICATION_PROFILE",
     "CHEMBL_PUBLICATION_SCHEMA_FIELDS",
@@ -70,8 +75,8 @@ _DATE_FIELDS = frozenset({"publication_date", "creation_date"})
 _INT_FIELDS = frozenset(
     {"publication_year", "src_id", "citations_received", "citations_made"}
 )
-_SET_LIKE_FIELDS = frozenset({"affiliation_list", "author_orcids"})
-_STRICT_JSON_FIELDS = frozenset({"authors", "affiliation_list", "author_orcids"})
+_SET_LIKE_FIELDS = chembl_set_like_json_fields("chembl_publication")
+_STRICT_JSON_FIELDS = chembl_json_fields("chembl_publication")
 _BOOLEAN_FIELDS = chembl_boolean_family_fields("bool_like", entity="publication")
 
 

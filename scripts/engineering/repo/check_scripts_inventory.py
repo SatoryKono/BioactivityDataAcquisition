@@ -202,7 +202,6 @@ ACTIVE_EXPLICIT_SCRIPTS: Final[frozenset[str]] = frozenset(
         "scripts/ops/support/repo/cleanup_repository.py",
         "scripts/check_dq_dsl_parity.py",
         "scripts/engineering/ci/validate_control_plane_artifacts.py",
-        "scripts/ai/vibe/__main__.py",
         "scripts/ops/data/__main__.py",
         "scripts/ai/codex/helper/check-env.ps1",
         "scripts/ai/codex/helper/check-env.sh",

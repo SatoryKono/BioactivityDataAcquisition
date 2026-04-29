@@ -110,6 +110,7 @@ SEMANTIC_SCHOLAR_SPECIFIC = [
 
 OPENALEX_SPECIFIC = [
     "openalex_id",
+    "type_crossref",
     "issn",
     "publisher",
     "oa_status",

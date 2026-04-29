@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pydantic import ValidationError
 
@@ -219,11 +219,14 @@ def build_composite_bootstrap_plan_impl(
             logger=runtime_resources.logger,
         )
     )
-    support_services = build_bootstrap_support_services(
-        build_support_services_fn=build_support_services_fn,
-        config=config,
-        runtime=runtime,
-        resources=runtime_resources,
+    support_services = cast(
+        "CompositeSupportServices",
+        build_bootstrap_support_services(
+            build_support_services_fn=build_support_services_fn,
+            config=config,
+            runtime=runtime,
+            resources=runtime_resources,
+        ),
     )
     return CompositeBootstrapPlan(
         run_id=runtime_resources.run_id,
