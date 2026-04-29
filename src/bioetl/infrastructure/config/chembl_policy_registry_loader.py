@@ -50,6 +50,9 @@ class ChemblPolicyRegistryLoader:
                 ChemblOntologyPolicyFamily(
                     family_name=str(family_name),
                     fields=tuple(str(field_ref) for field_ref in payload["fields"]),
+                    companion_governance=str(
+                        payload.get("companion_governance", "full_companion_bundle")
+                    ),
                     code_label_fields=tuple(
                         str(field_ref)
                         for field_ref in payload.get("code_label_fields", ())

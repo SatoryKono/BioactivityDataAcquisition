@@ -13,6 +13,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import os
 import re
@@ -182,6 +183,17 @@ def _tracked_paths(repo_root: Path) -> list[str]:
 
 def _tracked_path_set(repo_root: Path) -> set[str]:
     return set(_tracked_paths(repo_root))
+
+
+def _path_is_tracked_or_has_tracked_descendants(
+    path: Path,
+    tracked_paths: set[str],
+) -> bool:
+    path_text = path.as_posix().rstrip("/")
+    if path_text in tracked_paths:
+        return True
+    descendant_prefix = f"{path_text}/"
+    return any(tracked_path.startswith(descendant_prefix) for tracked_path in tracked_paths)
 
 
 def _local_status_paths(repo_root: Path) -> list[str] | None:
@@ -534,7 +546,7 @@ def _review_evidence_from_candidate(
         else None
     )
     exists = (repo_root / path).exists()
-    tracked = path.as_posix() in tracked_paths
+    tracked = _path_is_tracked_or_has_tracked_descendants(path, tracked_paths)
     cmp_status = _cmp_status(repo_root, path, canonical_path) if exists else None
     reference_hits = _count_reference_hits(repo_root, path) if exists else 0
 
@@ -602,6 +614,95 @@ def _dedupe_candidates(candidates: list[CleanupCandidate]) -> list[CleanupCandid
     for candidate in candidates:
         deduped[(candidate.category, candidate.rel_path)] = candidate
     return sorted(deduped.values(), key=lambda candidate: (candidate.rel_path, candidate.category))
+
+
+def _candidate_classification(candidate: CleanupCandidate) -> str:
+    return "SAFE" if candidate.apply_allowed else "REVIEW_REQUIRED"
+
+
+def _review_evidence_classification(row: ReviewLaneEvidence) -> str:
+    if row.classification == "blocked_cleanup_zone":
+        return "BLOCKED"
+    return "REVIEW_REQUIRED"
+
+
+def _summarize_classifications(
+    *,
+    candidates: list[CleanupCandidate],
+    review_evidence: list[ReviewLaneEvidence],
+) -> dict[str, int]:
+    summary = {"SAFE": 0, "REVIEW_REQUIRED": 0, "BLOCKED": 0}
+    for candidate in candidates:
+        summary[_candidate_classification(candidate)] += 1
+    for row in review_evidence:
+        summary[_review_evidence_classification(row)] += 1
+    return summary
+
+
+def build_cleanup_classification_report(
+    repo_root: Path,
+    *,
+    candidates: list[CleanupCandidate],
+    review_evidence: list[ReviewLaneEvidence],
+) -> dict[str, object]:
+    """Build a deterministic machine-readable cleanup classification report."""
+    return {
+        "schema_version": 1,
+        "tool": "scripts/ops/support/repo/cleanup_repository.py",
+        "repository_root": repo_root.as_posix(),
+        "summary": _summarize_classifications(
+            candidates=candidates,
+            review_evidence=review_evidence,
+        ),
+        "cleanup_candidates": [
+            {
+                "path": candidate.rel_path,
+                "category": candidate.category,
+                "classification": _candidate_classification(candidate),
+                "tracked": candidate.tracked,
+                "apply_allowed": candidate.apply_allowed,
+                "reason": candidate.reason,
+            }
+            for candidate in candidates
+        ],
+        "root_review_evidence": [
+            {
+                "lane_id": row.lane_id,
+                "path": row.rel_path,
+                "classification": _review_evidence_classification(row),
+                "registry_classification": row.classification,
+                "current_live_state": row.current_live_state,
+                "review_status": row.review_status,
+                "exists": row.exists,
+                "tracked": row.tracked,
+                "has_history": row.has_history,
+                "canonical_path": (
+                    row.canonical_path.as_posix()
+                    if row.canonical_path is not None
+                    else None
+                ),
+                "canonical_exists": row.canonical_exists,
+                "cmp_status": row.cmp_status,
+                "reference_hits": row.reference_hits,
+                "action_if_reintroduced": row.action_if_reintroduced,
+            }
+            for row in review_evidence
+        ],
+    }
+
+
+def write_cleanup_classification_report(
+    repo_root: Path,
+    report_path: Path,
+    report: dict[str, object],
+) -> Path:
+    target = report_path if report_path.is_absolute() else repo_root / report_path
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return target
 
 
 def collect_cleanup_candidates(
@@ -788,6 +889,11 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_DETAIL_LIMIT,
         help="Maximum number of detailed entries to print per category",
     )
+    parser.add_argument(
+        "--report-json",
+        type=Path,
+        help="Write a machine-readable cleanup classification report to this path",
+    )
     return parser.parse_args()
 
 
@@ -805,11 +911,23 @@ def main() -> int:
         include_root_review=args.root,
     )
     _log_candidates(candidates, detail_limit=max(args.detail_limit, 0))
+    review_evidence = collect_root_review_evidence(repo_root) if args.root else []
     if args.root:
         _log_review_lane_evidence(
-            collect_root_review_evidence(repo_root),
+            review_evidence,
             detail_limit=max(args.detail_limit, 0),
         )
+    if args.report_json is not None:
+        report_path = write_cleanup_classification_report(
+            repo_root,
+            args.report_json,
+            build_cleanup_classification_report(
+                repo_root,
+                candidates=candidates,
+                review_evidence=review_evidence,
+            ),
+        )
+        logger.info("Wrote cleanup classification report: %s", report_path)
 
     if not args.apply:
         return 0

@@ -1,0 +1,21 @@
+version: 1
+owner: Engineering / Architecture
+last_verified: "2026-04-29"
+policy: broad_cleanup_instruction_guardrails
+allowed_broad_cleanup_examples:
+  - path: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+    reason: Explicitly marked disallowed examples in the retention-sensitive cleanup runbook.
+    patterns:
+      - "rm -rf data/"
+      - "rm -rf tests/fixtures/"
+      - "rm -rf docs/reports/"
+      - "rm -rf docs/99-archive/"
+      - "rm -rf reports/"
+  - path: docs/plans/root-hygiene-audit-issue-pack-2026-04-29.md
+    reason: Working plan text names the forbidden command family being guarded.
+    patterns:
+      - "git clean -fdx"
+  - path: docs/plans/repository-file-structure-remediation-plan-2026-04-28.md
+    reason: Historical remediation plan documents why broad cleanup is forbidden.
+    patterns:
+      - "git clean -fdx"

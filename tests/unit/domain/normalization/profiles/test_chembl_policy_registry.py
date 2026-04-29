@@ -128,6 +128,14 @@ def test_chembl_policy_registry_configs_cover_declared_policy_fields() -> None:
     assert "chembl_assay.bao_format_mapping_status" in ontology_companion_fields
     assert "chembl_tissue.bto_iri" in ontology_companion_fields
     assert "chembl_cell_line.clo_ontology_version" in ontology_companion_fields
+    assert (
+        ontology["families"]["caloha"]["companion_governance"]
+        == "identifier_only_no_companion_bundle"
+    )
+    assert (
+        ontology["families"]["cellosaurus"]["companion_governance"]
+        == "identifier_only_no_companion_bundle"
+    )
 
 
 def test_chembl_policy_registry_exposes_profile_authoring_field_sets() -> None:
@@ -160,6 +168,30 @@ def test_chembl_policy_registry_exposes_profile_authoring_field_sets() -> None:
 
 def test_chembl_policy_surface_returns_none_for_ungoverned_free_text_fields() -> None:
     assert chembl_policy_surface("target", "organism") is None
+
+
+def test_chembl_policy_registry_encodes_explicit_identifier_only_companion_governance() -> (
+    None
+):
+    caloha = next(
+        family
+        for family in DEFAULT_CHEMBL_POLICY_REGISTRY_DATA.ontology_families
+        if family.family_name == "caloha"
+    )
+    cellosaurus = next(
+        family
+        for family in DEFAULT_CHEMBL_POLICY_REGISTRY_DATA.ontology_families
+        if family.family_name == "cellosaurus"
+    )
+
+    assert caloha.companion_governance == "identifier_only_no_companion_bundle"
+    assert caloha.iri_fields == ()
+    assert caloha.mapping_status_fields == ()
+    assert caloha.version_fields == ()
+    assert cellosaurus.companion_governance == "identifier_only_no_companion_bundle"
+    assert cellosaurus.iri_fields == ()
+    assert cellosaurus.mapping_status_fields == ()
+    assert cellosaurus.version_fields == ()
 
 
 def test_chembl_policy_registry_can_be_reinitialized_from_in_memory_data() -> None:

@@ -10,7 +10,7 @@ from threading import Lock
 from typing import TYPE_CHECKING
 
 from prometheus_client import REGISTRY, start_http_server
-from prometheus_client.exposition import pushadd_to_gateway
+from prometheus_client.exposition import delete_from_gateway, push_to_gateway
 
 from bioetl.domain.exceptions import MetricsServerError
 from bioetl.domain.ports import MetricsServerRuntimeStatus
@@ -43,6 +43,7 @@ _PUSHGATEWAY_GROUPING_LABELS = ("pipeline", "run_type")
 
 # Re-export for backward compatibility
 __all__ = [
+    "delete_metrics_from_gateway",
     "MetricsServerError",
     "get_metrics_server_runtime_status",
     "is_metrics_server_running",
@@ -239,13 +240,16 @@ def push_metrics_to_gateway(
     grouping_key: dict[str, str] | None = None,
     job: str | None = None,
 ) -> bool:
-    """Push current metrics to Prometheus Pushgateway.
+    """Publish a bounded aggregate metrics snapshot to Prometheus Pushgateway.
 
-    Preserves metrics after batch pipeline exits so Grafana
-    dashboards continue to display data.
+    The publication uses replace-style Pushgateway semantics, so each push
+    replaces the previous snapshot for the same bounded grouping key. This
+    keeps short-lived batch telemetry visible after process exit without
+    accumulating stale metric families.
 
-    Uses grouping_key to isolate metrics per pipeline so that
-    successive pipeline runs don't overwrite each other's data.
+    The grouping key is intentionally sanitized to aggregate labels only:
+    ``pipeline`` and ``run_type``. Per-run or record-level anchors must stay in
+    manifest/ledger/CLI/explorer surfaces, not Prometheus.
 
     Args:
         gateway: Pushgateway URL (default: from BIOETL_PUSHGATEWAY_URL
@@ -269,7 +273,7 @@ def push_metrics_to_gateway(
     try:
         # Keep Pushgateway publication best-effort so CLI teardown does not stall
         # for tens of seconds when no local gateway is running.
-        pushadd_to_gateway(
+        push_to_gateway(
             gateway,
             job=effective_run_label,
             registry=REGISTRY,
@@ -297,6 +301,63 @@ def push_metrics_to_gateway(
     ) as e:
         logger.warning(
             "Failed to push metrics to gateway",
+            gateway=gateway,
+            error=str(e),
+        )
+        _emit_metrics_publication_event(
+            grouping_key=safe_grouping_key,
+            status="failed",
+        )
+        return False
+
+
+def delete_metrics_from_gateway(
+    gateway: str | None = None,
+    run_label: str = "bioetl",
+    logger: LoggerPort | None = None,
+    grouping_key: dict[str, str] | None = None,
+    job: str | None = None,
+) -> bool:
+    """Delete a bounded aggregate metrics snapshot from Prometheus Pushgateway.
+
+    Uses the same sanitized grouping key as ``push_metrics_to_gateway`` so
+    cleanup cannot target high-cardinality per-run or record-level groups.
+    """
+    if logger is None:
+        logger = NoOpLogger()
+
+    gateway = gateway or "localhost:9091"
+    effective_run_label = job if job is not None else run_label
+    safe_grouping_key = _sanitize_pushgateway_grouping_key(grouping_key)
+
+    try:
+        delete_from_gateway(
+            gateway,
+            job=effective_run_label,
+            grouping_key=safe_grouping_key,
+            timeout=1.0,
+        )
+        logger.info(
+            "Metrics deleted from gateway",
+            gateway=gateway,
+            run_label=effective_run_label,
+            grouping_key=safe_grouping_key,
+        )
+        _emit_metrics_publication_event(
+            grouping_key=safe_grouping_key,
+            status="success",
+        )
+        return True
+    except (
+        OSError,
+        ConnectionError,
+        TimeoutError,
+        RuntimeError,
+        ValueError,
+        TypeError,
+    ) as e:
+        logger.warning(
+            "Failed to delete metrics from gateway",
             gateway=gateway,
             error=str(e),
         )

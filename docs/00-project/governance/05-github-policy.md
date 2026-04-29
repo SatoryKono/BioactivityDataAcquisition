@@ -127,6 +127,19 @@ without pulling the full heavy test matrix into documentation-only changesets.
 | `no-pyc-check`     | compiled-artifacts-block.yml | No compiled artifacts         |
 | `docker-build`     | docker.yml                   | Container builds successfully |
 
+### Branch Protection Verification
+
+Repository policy requires `root-hygiene` as a blocking check for `main`.
+Repo-side evidence is the `root-hygiene` entry above plus
+`.github/workflows/root-hygiene.yml`.
+
+Live GitHub branch protection or ruleset state MUST be verified with
+owner/admin access before marking the policy as fully confirmed. The current
+verification lane is issue `#3380`; update this section with the verification
+date, actor, and evidence link after owner/admin confirmation. Repeat this
+verification at least quarterly and after any branch-protection/ruleset
+migration.
+
 ______________________________________________________________________
 
 ## 4. Code Review & CODEOWNERS

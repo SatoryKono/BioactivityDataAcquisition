@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, TypeAlias
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -12,6 +12,9 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering.input_config import (
         InputFilterConfig as DomainInputFilterConfig,
     )
+
+
+FilterScalar: TypeAlias = str | int | bool
 
 
 class BaseFilterColumnSchema(BaseModel):
@@ -144,7 +147,7 @@ class BaseGoldColumnFilterConfig(BaseModel):
     operator: Literal[
         "in", "not_in", "is_null", "is_not_null", "is_empty", "is_not_empty"
     ] = Field(default="in", description="Filter operator")
-    values: list[str] | None = Field(
+    values: list[FilterScalar] | None = Field(
         default=None,
         description="Allowed/excluded values (for in/not_in operators)",
     )
@@ -167,7 +170,7 @@ class BaseGoldFiltersConfig(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
-    columns: dict[str, list[str] | BaseGoldColumnFilterConfig] = Field(
+    columns: dict[str, list[FilterScalar] | BaseGoldColumnFilterConfig] = Field(
         default_factory=dict,
         description="Column value filters",
     )

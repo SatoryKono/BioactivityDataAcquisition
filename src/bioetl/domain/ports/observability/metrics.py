@@ -154,3 +154,13 @@ class MetricsPublisherPort(Protocol):
     ) -> bool:
         """Publish the current metrics snapshot to a gateway backend."""
         ...
+
+    def delete_from_gateway(
+        self,
+        *,
+        gateway: str,
+        run_label: str,
+        grouping_key: MetricLabels | None = None,
+    ) -> bool:
+        """Delete the current bounded metrics snapshot from a gateway backend."""
+        ...

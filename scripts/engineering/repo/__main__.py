@@ -12,6 +12,7 @@ Commands:
     check-catalog      Validate catalog governance policy
     check-versions     Check version consistency across project files
     check-cleanliness  Audit repository root layout allowlist
+    check-cleanup-governance  Block unsafe broad cleanup instructions
     check-root-review-registry  Validate root-hygiene review registry
     split-testing-roadmap  Create or preview #2511 child issues
     sync-docs-issues   Preview or apply docs-sync issue metadata
@@ -40,6 +41,7 @@ COMMANDS = {
     "check-catalog": "check_scripts_catalog.py",
     "check-versions": "check_version_consistency.py",
     "check-cleanliness": "audit_root_cleanliness.py",
+    "check-cleanup-governance": "check_cleanup_governance.py",
     "check-root-review-registry": "check_root_hygiene_review_registry.py",
     "preflight-cleanup": "preflight_cleanup.sh",
     "split-testing-roadmap": "split_testing_roadmap_issue.py",

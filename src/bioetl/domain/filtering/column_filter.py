@@ -13,11 +13,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
+from typing import TypeAlias
 
 __all__ = [
     "FilterOperator",
     "GoldColumnFilter",
 ]
+
+FilterScalar: TypeAlias = str | int | bool
 
 
 class FilterOperator(StrEnum):
@@ -52,7 +55,7 @@ class GoldColumnFilter:
 
     column: str
     operator: FilterOperator = FilterOperator.IN
-    values: frozenset[str] | None = None
+    values: frozenset[FilterScalar] | None = None
 
     def __post_init__(self) -> None:
         """Validate filter configuration."""

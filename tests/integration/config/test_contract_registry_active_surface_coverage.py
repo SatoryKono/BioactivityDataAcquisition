@@ -15,6 +15,7 @@ from bioetl.infrastructure.control_plane import FileContractRegistryStore
 _CONFIGS_ROOT = Path("configs")
 _ENTITY_CONFIGS_ROOT = _CONFIGS_ROOT / "entities"
 _REGISTRY_PATH = _CONFIGS_ROOT / "base" / "contract_registry.yaml"
+_FIXTURE_GAPS_PATH = _CONFIGS_ROOT / "base" / "bronze_fixture_gaps.yaml"
 _GOLD_CONTRACTS_ROOT = Path("docs/04-reference/contracts/gold")
 _STANDARD_CONTRACT_PROVIDERS = {
     "chembl",
@@ -56,6 +57,21 @@ def _gold_runtime_enabled(config_path: Path) -> bool:
         return True
     enabled = gold.get("enabled")
     return True if enabled is None else bool(enabled)
+
+
+def _de_scoped_fixture_contract_refs() -> set[str]:
+    payload = yaml.safe_load(_FIXTURE_GAPS_PATH.read_text(encoding="utf-8")) or {}
+    gaps = payload.get("gaps", {})
+    if not isinstance(gaps, dict):
+        return set()
+    refs = set()
+    for fixture_name, metadata in gaps.items():
+        if not isinstance(metadata, dict) or metadata.get("status") != "de_scoped":
+            continue
+        provider, entity = str(fixture_name).split("/", maxsplit=1)
+        if provider == "chembl":
+            refs.add(f"{provider}.{entity}")
+    return refs
 
 
 @pytest.mark.integration
@@ -107,3 +123,21 @@ def test_gold_disabled_standard_surface_can_stay_registry_published_but_not_acti
 
     assert _gold_runtime_enabled(activity_config) is False
     assert registry.entries["chembl.activity"].status.value == "deprecated"
+
+
+@pytest.mark.integration
+def test_de_scoped_chembl_fixture_gap_surfaces_are_not_active_contracts() -> None:
+    """De-scoped ChEMBL fixture gaps must not advertise active contract surfaces."""
+    registry = FileContractRegistryStore(_REGISTRY_PATH).load()
+
+    statuses = {
+        contract_ref: registry.entries[contract_ref].status.value
+        for contract_ref in sorted(_de_scoped_fixture_contract_refs())
+    }
+
+    assert statuses == {
+        "chembl.assay_parameters": "deprecated",
+        "chembl.publication_similarity": "deprecated",
+        "chembl.publication_term": "deprecated",
+        "chembl.subcellular_fraction": "deprecated",
+    }

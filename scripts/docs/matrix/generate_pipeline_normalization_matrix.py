@@ -240,6 +240,7 @@ ENTITY_DOMAIN_SCHEMA_REGISTRY: dict[str, Any] = {
 _CHEMBL_ENUM_CONFIG = "configs/enums/chembl.yaml"
 _UNIPROT_ENUM_CONFIG = "configs/enums/uniprot.yaml"
 _PUBLICATION_CONTROLLED_CONFIG = "configs/vocab/publication_controlled.yaml"
+_CHEMBL_REFERENCE_SOURCES_CONFIG = "configs/vocab/chembl_reference_sources.yaml"
 _REFERENCE_ID_SOURCE = "domain.normalization.reference_ids"
 _OA_STATUS_SOURCE = "domain.schemas.common.publication_base.OA_STATUS_VALUES"
 
@@ -274,6 +275,7 @@ ENUM_CONFIG_SOURCES: dict[tuple[str, str, str], str] = {
     ("chembl", "publication", "publication_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "publication_term", "term_type"): _CHEMBL_ENUM_CONFIG,
     ("chembl", "target", "target_type"): _CHEMBL_ENUM_CONFIG,
+    ("chembl", "target", "cross_references"): _CHEMBL_REFERENCE_SOURCES_CONFIG,
     ("chembl", "target_component", "component_type"): _CHEMBL_ENUM_CONFIG,
     ("crossref", "publication", "publication_type"): _PUBLICATION_CONTROLLED_CONFIG,
     ("openalex", "publication", "publication_type"): _PUBLICATION_CONTROLLED_CONFIG,
@@ -396,6 +398,11 @@ ENUM_REGISTRY_PATHS: dict[tuple[str, str, str], tuple[str, ...]] = {
     ("chembl", "publication", "publication_type"): ("publication", "types"),
     ("chembl", "publication_term", "term_type"): ("publication_term", "term_types"),
     ("chembl", "target", "target_type"): ("target", "types"),
+    (
+        "chembl",
+        "target",
+        "cross_references",
+    ): ("nested_reference_vocabularies", "target_component_xref_src_db", "values"),
     ("chembl", "target_component", "component_type"): (
         "target",
         "component_types",

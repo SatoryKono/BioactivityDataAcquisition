@@ -167,6 +167,12 @@ All whitelist patterns **MUST** be in `.gitignore`.
 first-line cleanup tool. Он используется как deterministic repo-hygiene review
 lane для exact candidate discovery, а не как blanket delete utility.
 
+Cleanup proposals touching retention-sensitive or blocked surfaces MUST use the
+dedicated GitHub template
+`.github/ISSUE_TEMPLATE/retention_sensitive_cleanup.yml` or include the same
+candidate inventory, classification table, dry-run evidence, reviewed apply
+list, verification output, and rollback note.
+
 ### 4.3. Delta Lake VACUUM (MUST)
 
 **VACUUM MUST** запускаться еженедельно для:
@@ -280,6 +286,9 @@ Enforcement:
   artifact regressions such as root coverage files, root Python helpers,
   non-canonical root text files, `src/tools/reports/`, and local runtime
   output trees.
+- CI **MUST** run cleanup governance checks that block broad cleanup guidance
+  from active docs/scripts and export deterministic cleanup classification
+  evidence for review.
 - GitHub branch protection for `main` **MUST** require the `root-hygiene`
   status check.
 - Any intentional new root-level tracked file **MUST** be added to `.github/root-allowlist.txt` in the same PR with justification.

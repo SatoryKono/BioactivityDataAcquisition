@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import yaml
@@ -303,3 +304,106 @@ def test_collect_root_review_evidence_marks_blocked_cleanup_retained(
     assert len(evidence) == 1
     assert evidence[0].review_status == "blocked_cleanup_retained"
     assert evidence[0].exists is True
+    assert evidence[0].tracked is True
+
+
+def test_collect_root_review_evidence_marks_directory_with_tracked_descendant(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _write_governance_files(tmp_path)
+    _write_review_registry(
+        tmp_path,
+        [
+            {
+                "lane_id": "root_tooling_transitions",
+                "classification": "owner_decision_required",
+                "verification": ["git ls-files .vibe"],
+                "candidates": [
+                    {
+                        "path": ".vibe",
+                        "current_live_state": "present_approved_root_surface",
+                        "canonical_path": ".vibe",
+                        "action_if_reintroduced": "keep_with_owner_decision",
+                    }
+                ],
+            }
+        ],
+    )
+    (tmp_path / ".vibe").mkdir()
+
+    monkeypatch.setattr(
+        module, "_tracked_paths", lambda repo_root: [".vibe/config.toml"]
+    )
+    monkeypatch.setattr(module, "_git_path_has_history", lambda repo_root, path: True)
+    monkeypatch.setattr(module, "_count_reference_hits", lambda repo_root, path: 1)
+
+    evidence = module.collect_root_review_evidence(tmp_path)
+
+    assert len(evidence) == 1
+    assert evidence[0].tracked is True
+    assert evidence[0].review_status == "present_owner_decision_required"
+
+
+def test_build_cleanup_classification_report_distinguishes_policy_classes(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _write_governance_files(tmp_path)
+    _write_review_registry(
+        tmp_path,
+        [
+            {
+                "lane_id": "retention_sensitive_boundaries",
+                "classification": "blocked_cleanup_zone",
+                "verification": ["git ls-files reports"],
+                "candidates": [
+                    {
+                        "path": "reports",
+                        "current_live_state": "present_blocked_cleanup_zone",
+                        "canonical_path": None,
+                        "action_if_reintroduced": "cleanup_only_via_retention_driven_procedure",
+                    }
+                ],
+            }
+        ],
+    )
+    (tmp_path / "reports").mkdir()
+    monkeypatch.setattr(
+        module, "_tracked_paths", lambda repo_root: ["reports/dummy.txt"]
+    )
+    monkeypatch.setattr(module, "_git_path_has_history", lambda repo_root, path: True)
+    monkeypatch.setattr(module, "_count_reference_hits", lambda repo_root, path: 1)
+
+    candidates = [
+        module.CleanupCandidate(
+            path=Path(".pytest_cache"),
+            category="local_cache_dir",
+            tracked=False,
+            apply_allowed=True,
+            reason="safe",
+        ),
+        module.CleanupCandidate(
+            path=Path(".python-user/site.py"),
+            category="tracked_policy_review",
+            tracked=True,
+            apply_allowed=False,
+            reason="review",
+        ),
+    ]
+    evidence = module.collect_root_review_evidence(tmp_path)
+    report = module.build_cleanup_classification_report(
+        tmp_path,
+        candidates=candidates,
+        review_evidence=evidence,
+    )
+    report_path = module.write_cleanup_classification_report(
+        tmp_path,
+        Path("reports/quality/cleanup.json"),
+        report,
+    )
+
+    loaded = json.loads(report_path.read_text(encoding="utf-8"))
+    assert loaded["summary"] == {"BLOCKED": 1, "REVIEW_REQUIRED": 1, "SAFE": 1}
+    assert loaded["cleanup_candidates"][0]["classification"] == "SAFE"
+    assert loaded["root_review_evidence"][0]["classification"] == "BLOCKED"

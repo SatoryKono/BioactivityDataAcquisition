@@ -9,6 +9,8 @@ Before cleaning retention-sensitive surfaces, use
 Blanket deletion is prohibited for `data/**`, control-plane artifacts,
 `tests/fixtures/**`, `tests/fixtures/vcr/**`, `docs/reports/**`, `reports/**`,
 and `docs/99-archive/**`.
+GitHub cleanup requests for those surfaces must use
+`.github/ISSUE_TEMPLATE/retention_sensitive_cleanup.yml`.
 
 ### 1. Deterministic Local Cleanup
 
@@ -31,7 +33,8 @@ Use the repo cleanup tool only as an exact candidate discovery lane:
 
 ```bash
 # Dry run (show exact review/apply candidates)
-python -m scripts.ops.support.repo.cleanup_repository --dry-run
+python -m scripts.ops.support.repo.cleanup_repository --dry-run \
+  --report-json reports/quality/root-hygiene-cleanup-classification.json
 
 # Apply only policy-approved local artifact candidates
 python -m scripts.ops.support.repo.cleanup_repository --apply
@@ -139,6 +142,7 @@ The repository includes pre-commit hooks that prevent cache files from being com
 ## 🎯 Best Practices
 
 1. **Always use dry-run first**: `python -m scripts.ops.support.repo.cleanup_repository --dry-run`
+1. **Attach machine-readable evidence**: add `--report-json reports/quality/root-hygiene-cleanup-classification.json`
 1. **Commit cleanup changes separately**: Makes reviews easier
 1. **Document exceptions**: If you need to keep a cache file, document why
 1. **Use Git LFS for large files**: Anything >1MB should use LFS

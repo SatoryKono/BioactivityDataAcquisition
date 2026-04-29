@@ -37,6 +37,7 @@ class ChemblOntologyPolicyFamily:
 
     family_name: str
     fields: tuple[str, ...]
+    companion_governance: str = "full_companion_bundle"
     code_label_fields: tuple[str, ...] = ()
     iri_fields: tuple[str, ...] = ()
     mapping_status_fields: tuple[str, ...] = ()
@@ -191,6 +192,7 @@ DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
         ChemblOntologyPolicyFamily(
             family_name="caloha",
             fields=("chembl_tissue.caloha_id",),
+            companion_governance="identifier_only_no_companion_bundle",
         ),
         ChemblOntologyPolicyFamily(
             family_name="efo",
@@ -228,6 +230,7 @@ DEFAULT_CHEMBL_POLICY_REGISTRY_DATA = ChemblPolicyRegistryData(
         ChemblOntologyPolicyFamily(
             family_name="cellosaurus",
             fields=("chembl_cell_line.cellosaurus_id",),
+            companion_governance="identifier_only_no_companion_bundle",
         ),
     ),
     publication_classification_fields=(

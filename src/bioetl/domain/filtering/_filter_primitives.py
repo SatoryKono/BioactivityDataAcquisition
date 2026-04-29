@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import TypeAlias
 
 from bioetl.domain.filtering.column_filter import FilterOperator, GoldColumnFilter
 from bioetl.domain.filtering.list_filters import (
@@ -11,6 +12,8 @@ from bioetl.domain.filtering.list_filters import (
 )
 from bioetl.domain.filtering.range_filter import GoldRangeFilter
 from bioetl.domain.types import JsonDict
+
+FilterScalar: TypeAlias = str | int | bool
 
 
 def check_required_fields(required_fields: tuple[str, ...], record: JsonDict) -> bool:
@@ -190,38 +193,52 @@ def check_max_bound(val: float, max_val: float | None, inclusive: bool) -> bool:
     return val <= max_val if inclusive else val < max_val
 
 
-def _check_op_in(val: object, values: frozenset[str] | None) -> bool:
+def _matches_filter_literal(value: object, values: frozenset[FilterScalar] | None) -> bool:
+    if values is None:
+        return False
+    if value in values:
+        return True
+    return str(value) in {str(candidate) for candidate in values}
+
+
+def _check_op_in(val: object, values: frozenset[FilterScalar] | None) -> bool:
     """Check the IN operator."""
-    return values is not None and str(val) in values
+    return _matches_filter_literal(val, values)
 
 
-def _check_op_not_in(val: object, values: frozenset[str] | None) -> bool:
+def _check_op_not_in(val: object, values: frozenset[FilterScalar] | None) -> bool:
     """Check the NOT_IN operator."""
-    return values is not None and str(val) not in values
+    return values is not None and not _matches_filter_literal(val, values)
 
 
-def _check_op_is_null(val: object, _values: frozenset[str] | None) -> bool:
+def _check_op_is_null(val: object, _values: frozenset[FilterScalar] | None) -> bool:
     """Check the IS_NULL operator."""
     return val is None or val == ""
 
 
-def _check_op_is_not_null(val: object, _values: frozenset[str] | None) -> bool:
+def _check_op_is_not_null(
+    val: object,
+    _values: frozenset[FilterScalar] | None,
+) -> bool:
     """Check the IS_NOT_NULL operator."""
     return val is not None and val != ""
 
 
-def _check_op_is_empty(val: object, _values: frozenset[str] | None) -> bool:
+def _check_op_is_empty(val: object, _values: frozenset[FilterScalar] | None) -> bool:
     """Check the IS_EMPTY operator."""
     return is_empty_value(val)
 
 
-def _check_op_is_not_empty(val: object, _values: frozenset[str] | None) -> bool:
+def _check_op_is_not_empty(
+    val: object,
+    _values: frozenset[FilterScalar] | None,
+) -> bool:
     """Check the IS_NOT_EMPTY operator."""
     return not is_empty_value(val)
 
 
 _OPERATOR_CHECKERS: dict[
-    FilterOperator, Callable[[object, frozenset[str] | None], bool]
+    FilterOperator, Callable[[object, frozenset[FilterScalar] | None], bool]
 ] = {
     FilterOperator.IN: _check_op_in,
     FilterOperator.NOT_IN: _check_op_not_in,
