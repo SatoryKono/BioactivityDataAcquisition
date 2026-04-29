@@ -209,6 +209,29 @@ def _emit_replay_reconstructability_metric(
     )
 
 
+def _create_manifest_store(inputs: RunnerInputs) -> FileRunManifestStore:
+    return FileRunManifestStore(
+        base_path=_manifest_support.control_plane_root(inputs.settings, "run_manifest"),
+        metrics=inputs.observability.metrics,
+    )
+
+
+def _create_manifest_record(
+    *,
+    manifest_store: FileRunManifestStore,
+    manifest_create_request: RunManifestCreateSpec,
+    ledger_service: RunLedgerService | None,
+) -> object:
+    manifest = RunManifestService(
+        manifest_port=manifest_store,
+        clock=SystemClock(),
+    ).create_manifest(manifest_create_request)
+    if ledger_service is not None:
+        ledger_service.manifest_id = manifest.manifest_id
+        ledger_service.record_manifest_created(manifest)
+    return manifest
+
+
 def create_run_manifest(
     *,
     ctx: PipelineRunContext,
@@ -257,10 +280,7 @@ def create_run_manifest(
         ),
         missing_artifact_lineage_layers=missing_artifact_lineage_layers,
     )
-    manifest_store = FileRunManifestStore(
-        base_path=_manifest_support.control_plane_root(inputs.settings, "run_manifest"),
-        metrics=inputs.observability.metrics,
-    )
+    manifest_store = _create_manifest_store(inputs)
     ledger_service: RunLedgerService | None = None
     if ledger_enabled:
         ledger_service = _create_ledger_service(inputs, ctx)
@@ -290,14 +310,11 @@ def create_run_manifest(
         ),
         metrics=inputs.observability.metrics,
     )
-
-    manifest = RunManifestService(
-        manifest_port=manifest_store,
-        clock=SystemClock(),
-    ).create_manifest(manifest_create_request)
-    if ledger_service is not None:
-        ledger_service.manifest_id = manifest.manifest_id
-        ledger_service.record_manifest_created(manifest)
+    manifest = _create_manifest_record(
+        manifest_store=manifest_store,
+        manifest_create_request=manifest_create_request,
+        ledger_service=ledger_service,
+    )
     control_plane_refs = _manifest_support.create_control_plane_refs(
         manifest.manifest_id,
         manifest.execution_fingerprint,

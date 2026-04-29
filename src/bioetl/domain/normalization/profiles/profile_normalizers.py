@@ -21,6 +21,9 @@ from bioetl.domain.normalization.profiles._profile_activity_ontology_normalizers
     normalize_profile_activity_uo_unit_iri,
     normalize_profile_activity_uo_unit_mapping_status,
 )
+from bioetl.domain.normalization.profiles._profile_numeric_normalizers import (
+    coerce_profile_quasi_enum_numeric,
+)
 from bioetl.domain.normalization.profiles._profile_reference_normalizers import (
     normalize_profile_chembl_id,
     normalize_profile_chembl_ids,
@@ -245,7 +248,7 @@ def normalize_profile_quasi_enum_numeric(
     value: object, *, allowed_values: tuple[float, ...]
 ) -> object:
     """Normalize numeric provider codes while preserving non-integer canonical values."""
-    numeric = _coerce_quasi_enum_numeric(value)
+    numeric = coerce_profile_quasi_enum_numeric(value)
     if numeric is None or numeric not in allowed_values:
         return None
     return int(numeric) if numeric.is_integer() else numeric
@@ -258,30 +261,6 @@ def normalize_profile_reviewed_flag_code(
 ) -> object:
     """Normalize reviewed flag-like provider codes with tri-state semantics."""
     return normalize_profile_quasi_enum_numeric(value, allowed_values=allowed_values)
-
-
-def _coerce_quasi_enum_numeric(value: object) -> float | None:
-    if value is None or isinstance(value, bool):
-        return None
-    if isinstance(value, str):
-        return _coerce_quasi_enum_numeric_text(value)
-    if isinstance(value, (int, float)):
-        return float(value)
-    return None
-
-
-def _coerce_quasi_enum_numeric_text(value: str) -> float | None:
-    cleaned = normalize_string(value)
-    if cleaned is None:
-        return None
-    return _float_or_none(cleaned)
-
-
-def _float_or_none(value: str) -> float | None:
-    try:
-        return float(value)
-    except ValueError:
-        return None
 
 
 def normalize_profile_assay_parameter_type(

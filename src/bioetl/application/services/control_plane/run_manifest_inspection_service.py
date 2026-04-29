@@ -107,6 +107,114 @@ class RunManifestDiffResult:
         }
 
 
+def _build_checkpoint_anchor_matches(
+    *,
+    left_manifest: RunManifest,
+    right_manifest: RunManifest,
+) -> dict[str, bool]:
+    return {
+        "execution_fingerprint": (
+            left_manifest.execution_fingerprint == right_manifest.execution_fingerprint
+        ),
+        "effective_config_hash": (
+            left_manifest.code_provenance.effective_config_hash
+            == right_manifest.code_provenance.effective_config_hash
+        ),
+        "effective_config_artifact_id": (
+            left_manifest.code_provenance.effective_config_artifact_id
+            == right_manifest.code_provenance.effective_config_artifact_id
+        ),
+        "contract_ref": (
+            left_manifest.code_provenance.contract_ref
+            == right_manifest.code_provenance.contract_ref
+        ),
+        "contract_version": (
+            left_manifest.code_provenance.contract_version
+            == right_manifest.code_provenance.contract_version
+        ),
+        "input_snapshot_ids": (
+            RunManifestInspectionService._manifest_snapshot_ids(left_manifest)
+            == RunManifestInspectionService._manifest_snapshot_ids(right_manifest)
+        ),
+    }
+
+
+def _build_manifest_diff_payload(
+    *,
+    classification: dict[str, object],
+    semantic_equivalent: bool,
+    occurrence_only: bool,
+) -> dict[str, object]:
+    return {
+        "classification": classification["classification"],
+        "semantic_equivalent": semantic_equivalent,
+        "occurrence_only": occurrence_only,
+        "semantic_difference_fields": list(
+            cast(tuple[str, ...], classification["semantic_difference_fields"])
+        ),
+        "occurrence_difference_fields": list(
+            cast(tuple[str, ...], classification["occurrence_difference_fields"])
+        ),
+        "noncanonical_difference_fields": list(
+            cast(tuple[str, ...], classification["noncanonical_difference_fields"])
+        ),
+    }
+
+
+def _build_effective_config_diff_payload(
+    *,
+    left_manifest: RunManifest,
+    right_manifest: RunManifest,
+    effective_config_match: bool,
+) -> dict[str, object]:
+    return {
+        "semantic_equivalent": effective_config_match,
+        "left_effective_config_hash": (
+            left_manifest.code_provenance.effective_config_hash
+        ),
+        "right_effective_config_hash": (
+            right_manifest.code_provenance.effective_config_hash
+        ),
+        "left_effective_config_artifact_id": (
+            left_manifest.code_provenance.effective_config_artifact_id
+        ),
+        "right_effective_config_artifact_id": (
+            right_manifest.code_provenance.effective_config_artifact_id
+        ),
+    }
+
+
+def _build_checkpoint_anchor_diff_payload(
+    *,
+    checkpoint_anchor_matches: dict[str, bool],
+    checkpoint_compatible: bool,
+) -> dict[str, object]:
+    return {
+        "compatible": checkpoint_compatible,
+        "matching_fields": [
+            name for name, matches in checkpoint_anchor_matches.items() if matches
+        ],
+        "mismatched_fields": [
+            name for name, matches in checkpoint_anchor_matches.items() if not matches
+        ],
+    }
+
+
+def _build_lineage_diff_payload(
+    *,
+    left_manifest: RunManifest,
+    right_manifest: RunManifest,
+) -> dict[str, object]:
+    return {
+        "planned_artifacts_match": (
+            RunManifestInspectionService._planned_artifact_identity(left_manifest)
+            == RunManifestInspectionService._planned_artifact_identity(right_manifest)
+        ),
+        "left_planned_artifact_count": len(left_manifest.planned_artifacts),
+        "right_planned_artifact_count": len(right_manifest.planned_artifacts),
+    }
+
+
 @dataclass(slots=True)
 class RunManifestInspectionService(
     RunManifestInspectionIdentityGraphMixin,
@@ -210,32 +318,10 @@ class RunManifestInspectionService(
             and left_manifest.code_provenance.effective_config_artifact_id
             == right_manifest.code_provenance.effective_config_artifact_id
         )
-        checkpoint_anchor_matches = {
-            "execution_fingerprint": (
-                left_manifest.execution_fingerprint
-                == right_manifest.execution_fingerprint
-            ),
-            "effective_config_hash": (
-                left_manifest.code_provenance.effective_config_hash
-                == right_manifest.code_provenance.effective_config_hash
-            ),
-            "effective_config_artifact_id": (
-                left_manifest.code_provenance.effective_config_artifact_id
-                == right_manifest.code_provenance.effective_config_artifact_id
-            ),
-            "contract_ref": (
-                left_manifest.code_provenance.contract_ref
-                == right_manifest.code_provenance.contract_ref
-            ),
-            "contract_version": (
-                left_manifest.code_provenance.contract_version
-                == right_manifest.code_provenance.contract_version
-            ),
-            "input_snapshot_ids": (
-                RunManifestInspectionService._manifest_snapshot_ids(left_manifest)
-                == RunManifestInspectionService._manifest_snapshot_ids(right_manifest)
-            ),
-        }
+        checkpoint_anchor_matches = _build_checkpoint_anchor_matches(
+            left_manifest=left_manifest,
+            right_manifest=right_manifest,
+        )
         checkpoint_compatible = all(checkpoint_anchor_matches.values())
         semantic_equivalent = bool(classification["semantic_equivalent"])
         occurrence_only = bool(classification["occurrence_only"])
@@ -246,66 +332,24 @@ class RunManifestInspectionService(
         )
         return {
             "verdict": verdict,
-            "manifest": {
-                "classification": classification["classification"],
-                "semantic_equivalent": semantic_equivalent,
-                "occurrence_only": occurrence_only,
-                "semantic_difference_fields": list(
-                    cast(tuple[str, ...], classification["semantic_difference_fields"])
-                ),
-                "occurrence_difference_fields": list(
-                    cast(
-                        tuple[str, ...],
-                        classification["occurrence_difference_fields"],
-                    )
-                ),
-                "noncanonical_difference_fields": list(
-                    cast(
-                        tuple[str, ...],
-                        classification["noncanonical_difference_fields"],
-                    )
-                ),
-            },
-            "effective_config": {
-                "semantic_equivalent": effective_config_match,
-                "left_effective_config_hash": (
-                    left_manifest.code_provenance.effective_config_hash
-                ),
-                "right_effective_config_hash": (
-                    right_manifest.code_provenance.effective_config_hash
-                ),
-                "left_effective_config_artifact_id": (
-                    left_manifest.code_provenance.effective_config_artifact_id
-                ),
-                "right_effective_config_artifact_id": (
-                    right_manifest.code_provenance.effective_config_artifact_id
-                ),
-            },
-            "checkpoint_anchors": {
-                "compatible": checkpoint_compatible,
-                "matching_fields": [
-                    name
-                    for name, matches in checkpoint_anchor_matches.items()
-                    if matches
-                ],
-                "mismatched_fields": [
-                    name
-                    for name, matches in checkpoint_anchor_matches.items()
-                    if not matches
-                ],
-            },
-            "lineage": {
-                "planned_artifacts_match": (
-                    RunManifestInspectionService._planned_artifact_identity(
-                        left_manifest
-                    )
-                    == RunManifestInspectionService._planned_artifact_identity(
-                        right_manifest
-                    )
-                ),
-                "left_planned_artifact_count": len(left_manifest.planned_artifacts),
-                "right_planned_artifact_count": len(right_manifest.planned_artifacts),
-            },
+            "manifest": _build_manifest_diff_payload(
+                classification=classification,
+                semantic_equivalent=semantic_equivalent,
+                occurrence_only=occurrence_only,
+            ),
+            "effective_config": _build_effective_config_diff_payload(
+                left_manifest=left_manifest,
+                right_manifest=right_manifest,
+                effective_config_match=effective_config_match,
+            ),
+            "checkpoint_anchors": _build_checkpoint_anchor_diff_payload(
+                checkpoint_anchor_matches=checkpoint_anchor_matches,
+                checkpoint_compatible=checkpoint_compatible,
+            ),
+            "lineage": _build_lineage_diff_payload(
+                left_manifest=left_manifest,
+                right_manifest=right_manifest,
+            ),
         }
 
     @staticmethod
