@@ -1,3 +1,16 @@
+---
+status: active-non-canonical
+last_verified: "2026-04-29"
+freshness_window_days: 90
+owner: quality
+canonical_sources:
+  - configs/quality/test_matrix.yaml
+  - configs/quality/test_health_reporting.yaml
+  - configs/quality/fixture_governance_ledger.yaml
+  - .github/workflows/tests.yml
+stale_action: refresh evidence pack or mark as historical non-normative before using for governance decisions
+---
+
 # Сбор evidence завершён: project-test-health
 
 Дата: 2026-03-23

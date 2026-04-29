@@ -88,6 +88,25 @@ def test_project_test_health_summary_is_evidence_only_with_freshness_note() -> N
     assert "fresh evidence-pack rebaseline" in lower_text
 
 
+def test_project_test_health_summary_declares_machine_readable_freshness_metadata() -> (
+    None
+):
+    text = _read("docs/reports/evidence/project-test-health/SUMMARY.md")
+    assert text.startswith("---\n")
+    metadata_text = text.split("\n---\n", maxsplit=2)[0].removeprefix("---\n")
+    metadata = yaml.safe_load(metadata_text)
+
+    assert metadata["status"] == "active-non-canonical"
+    assert metadata["last_verified"] == "2026-04-29"
+    assert metadata["freshness_window_days"] > 0
+    assert metadata["owner"] == "quality"
+    assert set(metadata["canonical_sources"]) >= {
+        "configs/quality/test_matrix.yaml",
+        "configs/quality/test_health_reporting.yaml",
+        "configs/quality/fixture_governance_ledger.yaml",
+    }
+
+
 def test_project_test_health_summary_has_machine_readable_metadata() -> None:
     metadata_path = (
         ROOT / "docs" / "reports" / "evidence" / "project-test-health" / "metadata.yaml"

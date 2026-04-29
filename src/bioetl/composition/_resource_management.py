@@ -24,8 +24,8 @@ from bioetl.composition.bootstrap.cli.storage import (
     bootstrap_cleanup_service,
     bootstrap_lifecycle_service,
 )
-from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable

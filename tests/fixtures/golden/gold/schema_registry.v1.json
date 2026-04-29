@@ -3496,6 +3496,11 @@
           "dtype": "str",
           "nullable": true
         },
+        "alternative_products": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "annotation_score": {
           "description": "",
           "dtype": "float64",
@@ -3506,7 +3511,17 @@
           "dtype": "str",
           "nullable": true
         },
+        "biophysicochemical_properties": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "catalytic_activity": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "caution": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -3521,10 +3536,20 @@
           "dtype": "str",
           "nullable": true
         },
+        "cofactors": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "content_hash": {
           "description": "",
           "dtype": "str",
           "nullable": false
+        },
+        "cross_reference_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
         },
         "disease_involvement": {
           "description": "",
@@ -3551,12 +3576,42 @@
           "dtype": "str",
           "nullable": false
         },
+        "entry_created": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entry_modified": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "entry_name": {
           "description": "",
           "dtype": "str",
           "nullable": true
         },
+        "entry_type": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "entry_version": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "feature_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
         "features_json": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "flag": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -3566,7 +3621,17 @@
           "dtype": "str",
           "nullable": true
         },
-        "gene_names": {
+        "gene_orf_names": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "gene_primary": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "gene_synonyms": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -3586,6 +3651,16 @@
           "dtype": "str",
           "nullable": true
         },
+        "guidetopharmacology_ids": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "induction": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "interpro_xrefs": {
           "description": "",
           "dtype": "str",
@@ -3594,6 +3669,11 @@
         "intramembrane": {
           "description": "",
           "dtype": "str",
+          "nullable": true
+        },
+        "isoform_count": {
+          "description": "",
+          "dtype": "float64",
           "nullable": true
         },
         "isoform_ids": {
@@ -3607,6 +3687,21 @@
           "nullable": true
         },
         "isoform_synonyms": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "keyword_count": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "keywords": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "lineage": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -3626,9 +3721,14 @@
           "dtype": "str",
           "nullable": true
         },
-        "organism_id": {
+        "organism_common": {
           "description": "",
-          "dtype": "float64",
+          "dtype": "str",
+          "nullable": true
+        },
+        "organism_scientific": {
+          "description": "",
+          "dtype": "str",
           "nullable": true
         },
         "pathway": {
@@ -3642,6 +3742,11 @@
           "nullable": true
         },
         "pfam_xrefs": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "pharmaceutical_use": {
           "description": "",
           "dtype": "str",
           "nullable": true
@@ -3661,6 +3766,16 @@
           "dtype": "str",
           "nullable": true
         },
+        "protein_alternative_names": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "protein_ec_numbers": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "protein_existence": {
           "description": "",
           "dtype": "str",
@@ -3669,6 +3784,16 @@
         "protein_name": {
           "description": "",
           "dtype": "str",
+          "nullable": true
+        },
+        "protein_short_names": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "publication_count": {
+          "description": "",
+          "dtype": "float64",
           "nullable": true
         },
         "reaction_ec_numbers": {
@@ -3691,9 +3816,34 @@
           "dtype": "bool",
           "nullable": true
         },
+        "secondary_accessions": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "sequence": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
+        "sequence_checksum": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "sequence_length": {
           "description": "",
           "dtype": "float64",
+          "nullable": true
+        },
+        "sequence_mass": {
+          "description": "",
+          "dtype": "float64",
+          "nullable": true
+        },
+        "sequence_modified": {
+          "description": "",
+          "dtype": "str",
           "nullable": true
         },
         "signal_peptide": {
@@ -3711,9 +3861,19 @@
           "dtype": "str",
           "nullable": true
         },
+        "subunit": {
+          "description": "",
+          "dtype": "str",
+          "nullable": true
+        },
         "superkingdom": {
           "description": "",
           "dtype": "str",
+          "nullable": true
+        },
+        "taxonomy_id": {
+          "description": "",
+          "dtype": "float64",
           "nullable": true
         },
         "tissue_specificity": {

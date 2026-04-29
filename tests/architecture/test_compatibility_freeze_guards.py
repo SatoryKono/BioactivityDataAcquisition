@@ -533,6 +533,7 @@ ALLOWED_COMPOSITION_DEFAULT_REGISTRY_SRC_FILES = frozenset(
 ALLOWED_COMPOSITION_REGISTRY_MODULE_SRC_FILES = frozenset(
     {
         ROOT / "src" / "bioetl" / "composition" / "__init__.py",
+        ROOT / "src" / "bioetl" / "composition" / "registry_api.py",
         ROOT / "src" / "bioetl" / "composition" / "registry_default.py",
     }
 )
@@ -836,14 +837,24 @@ def _literal_assignment_names(path: Path, assignment_name: str) -> frozenset[str
     """Return string keys/items assigned to a module-level literal."""
     tree = ast.parse(path.read_text(encoding="utf-8"))
     for node in tree.body:
-        if not isinstance(node, ast.Assign):
+        if isinstance(node, ast.Assign):
+            matching_assignment = any(
+                isinstance(target, ast.Name) and target.id == assignment_name
+                for target in node.targets
+            )
+            value = node.value
+        elif isinstance(node, ast.AnnAssign):
+            matching_assignment = (
+                isinstance(node.target, ast.Name)
+                and node.target.id == assignment_name
+                and node.value is not None
+            )
+            value = node.value
+        else:
+            matching_assignment = False
+            value = None
+        if not matching_assignment or value is None:
             continue
-        if not any(
-            isinstance(target, ast.Name) and target.id == assignment_name
-            for target in node.targets
-        ):
-            continue
-        value = node.value
         if isinstance(value, ast.Dict):
             return frozenset(
                 key.value
@@ -1255,3 +1266,63 @@ def test_imported_symbol_seams_are_confined(
         allowed_files=allowed_files,
     )
     _assert_no_violations(violations, failure_message)
+
+
+@pytest.mark.architecture
+def test_package_level_lazy_proxy_surfaces_stay_frozen() -> None:
+    """Package-level proxy exports must not grow without an explicit policy change."""
+    bioetl_text = BIOETL_PACKAGE_INIT_PATH.read_text(encoding="utf-8")
+    assert "__getattr__" not in bioetl_text
+    assert _literal_assignment_names(BIOETL_PACKAGE_INIT_PATH, "__all__") == {
+        "__version__"
+    }
+
+    assert _literal_assignment_names(
+        COMPOSITION_PACKAGE_INIT_PATH, "_LAZY_MODULE_EXPORTS"
+    ) == {
+        "composite_api",
+        "control_plane_api",
+        "entrypoints",
+        "execution_api",
+        "health_api",
+        "maintenance_api",
+        "observability_api",
+        "registry_api",
+        "resources_api",
+        "types",
+    }
+    assert _literal_assignment_names(
+        COMPOSITION_PACKAGE_INIT_PATH, "_LAZY_ATTR_EXPORTS"
+    ) == {
+        "PipelineDefinition",
+        "PipelineRegistry",
+        "create_registry",
+        "get_default_registry",
+    }
+
+    expected_bootstrap_exports = {
+        "bootstrap_composite_runner",
+        "bootstrap_dq_monitor_port",
+        "bootstrap_logger_port",
+        "bootstrap_metrics_port",
+        "bootstrap_observability_bundle",
+        "bootstrap_pipeline_runner",
+        "bootstrap_tracer_port",
+        "load_composite_config",
+        "load_pipeline_config",
+        "maybe_start_metrics_server",
+    }
+    assert (
+        _literal_assignment_names(COMPOSITION_BOOTSTRAP_INIT_PATH, "__all__")
+        == expected_bootstrap_exports
+    )
+    assert (
+        _literal_assignment_names(COMPOSITION_BOOTSTRAP_INIT_PATH, "_PUBLIC_EXPORTS")
+        == expected_bootstrap_exports
+    )
+
+
+@pytest.mark.architecture
+def test_service_bootstraps_compat_wrapper_file_stays_removed() -> None:
+    """The retired `_service_bootstraps` wrapper module must not be reintroduced."""
+    assert not SERVICE_BOOTSTRAPS_COMPAT_MODULE_PATH.exists()

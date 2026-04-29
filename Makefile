@@ -69,7 +69,7 @@ clean-preflight:
 
 clean-local-artifacts:
 	$(RUN) scripts.engineering.diagnostics cleanup $(CLEAN_APPLY_FLAG) --purge-logs
-	@if [ -n "$(PURGE_WORKTREES_CMD)" ]; then $(PURGE_WORKTREES_CMD); fi
+	@$(if $(PURGE_WORKTREES_CMD),$(PURGE_WORKTREES_CMD),:)
 
 test:
 	$(RUN) pytest

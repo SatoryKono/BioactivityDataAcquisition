@@ -54,7 +54,8 @@ def test_find_cleanup_targets_includes_forbidden_root_output_dirs_by_default(
     )
     rel_paths = {target.path.relative_to(tmp_path).as_posix() for target in targets}
     category_by_path = {
-        target.path.relative_to(tmp_path).as_posix(): target.category for target in targets
+        target.path.relative_to(tmp_path).as_posix(): target.category
+        for target in targets
     }
 
     assert ".coverage-sharded" in rel_paths

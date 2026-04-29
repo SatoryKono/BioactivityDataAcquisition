@@ -26,6 +26,17 @@ _STANDARD_CONTRACT_PROVIDERS = {
     "semanticscholar",
     "uniprot",
 }
+_REQUIRED_DE_SCOPED_FIXTURE_GAP_DECISION_FIELDS = {
+    "contract_ref",
+    "decision_status",
+    "decision_deadline",
+    "decision_owner",
+    "chosen_path",
+    "contract_or_projection_target",
+    "evidence_issue",
+    "de_scope_decision",
+    "resolution_plan",
+}
 
 
 def _active_standard_contract_refs() -> dict[str, str]:
@@ -72,6 +83,12 @@ def _de_scoped_fixture_contract_refs() -> set[str]:
         if provider == "chembl":
             refs.add(f"{provider}.{entity}")
     return refs
+
+
+def _fixture_gap_payload() -> dict[str, object]:
+    payload = yaml.safe_load(_FIXTURE_GAPS_PATH.read_text(encoding="utf-8")) or {}
+    assert isinstance(payload, dict)
+    return payload
 
 
 @pytest.mark.integration
@@ -141,3 +158,25 @@ def test_de_scoped_chembl_fixture_gap_surfaces_are_not_active_contracts() -> Non
         "chembl.publication_term": "deprecated",
         "chembl.subcellular_fraction": "deprecated",
     }
+
+
+@pytest.mark.integration
+def test_de_scoped_bronze_fixture_gaps_have_explicit_resolution_decisions() -> None:
+    """De-scoped Bronze fixture gaps must not remain open-ended exceptions."""
+    payload = _fixture_gap_payload()
+    gaps = payload.get("gaps", {})
+    assert isinstance(gaps, dict)
+
+    for fixture_name, metadata in gaps.items():
+        if not isinstance(metadata, dict) or metadata.get("status") != "de_scoped":
+            continue
+
+        missing = _REQUIRED_DE_SCOPED_FIXTURE_GAP_DECISION_FIELDS - metadata.keys()
+        assert not missing, f"{fixture_name}: missing decision fields {sorted(missing)}"
+        assert metadata["decision_status"] in {
+            "projection_required",
+            "source_required",
+            "keyed_recording_required",
+        }
+        assert str(metadata["decision_deadline"]) >= "2026-05-31"
+        assert str(metadata["evidence_issue"]).endswith("/issues/3406")
