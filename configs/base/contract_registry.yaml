@@ -28,7 +28,7 @@ entries:
       schema_hash: "324651bc17fbcdae6688f2aed5bb1e80f70e3b4bc00eee70d1ee86af0e818f36"
       dq_policy_ref: "chembl.dq.v1"
       rule_bundle_version: "dq-rules.v1.0"
-    status: "active"
+    status: "deprecated"
     source_path: "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py"
     published_artifacts:
       - "../../docs/04-reference/contracts/gold/chembl_activity_v1.0.json"

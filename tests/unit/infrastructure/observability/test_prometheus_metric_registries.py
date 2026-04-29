@@ -8,6 +8,11 @@ from bioetl.infrastructure.observability.metrics_definitions import __all__ as d
 from bioetl.infrastructure.observability.metrics_export_names import (
     METRICS_DEFINITION_EXPORT_NAMES,
 )
+from bioetl.infrastructure.observability.prometheus_metric_label_policies import (
+    APPROVED_ENDPOINT_LABEL_METRICS,
+    APPROVED_SOURCE_FILE_LABEL_METRICS,
+    FORBIDDEN_PROMETHEUS_LABEL_NAMES,
+)
 from bioetl.infrastructure.observability.prometheus_metric_registries import (
     COUNTERS,
     GAUGES,
@@ -17,20 +22,15 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (
     REGISTERED_PROMETHEUS_METRIC_NAMES,
 )
 
-_FORBIDDEN_LABELS = frozenset(
-    {
-        "run_id",
-        "manifest_id",
-        "lineage_fragment_id",
-        "record_id",
-        "content_hash",
-        "payload_hash",
-        "path",
-        "file_path",
-        "dataset_hash",
-        "source_batch_id",
-    }
-)
+_FORBIDDEN_LABELS = FORBIDDEN_PROMETHEUS_LABEL_NAMES
+
+
+def _iter_registered_metric_labels() -> list[tuple[str, set[str]]]:
+    return [
+        (name, set(metric._labelnames))
+        for registry in (COUNTERS, GAUGES, HISTOGRAMS)
+        for name, metric in registry.items()
+    ]
 
 
 @pytest.mark.unit
@@ -73,6 +73,59 @@ def test_metric_registry_inventory_matches_public_registries() -> None:
 
     assert inventory_names == REGISTERED_PROMETHEUS_METRIC_NAMES
     assert inventory_names == set(COUNTERS) | set(GAUGES) | set(HISTOGRAMS)
+
+
+@pytest.mark.unit
+def test_high_cardinality_label_denylist_covers_forensic_identifiers() -> None:
+    """Prometheus label policy must explicitly deny forensic/raw identifiers."""
+    required_forbidden = {
+        "run_id",
+        "manifest_id",
+        "lineage_fragment_id",
+        "record_id",
+        "content_hash",
+        "payload_hash",
+        "request_id",
+        "message",
+        "path",
+        "file_path",
+        "url",
+        "raw_url",
+        "query",
+        "source_batch_id",
+    }
+
+    assert required_forbidden.issubset(FORBIDDEN_PROMETHEUS_LABEL_NAMES)
+
+
+@pytest.mark.unit
+def test_no_registered_metric_declares_forbidden_high_cardinality_labels() -> None:
+    """Registry declarations must not introduce high-cardinality TSDB labels."""
+    offenders = {
+        name: sorted(labels & _FORBIDDEN_LABELS)
+        for name, labels in _iter_registered_metric_labels()
+        if labels & _FORBIDDEN_LABELS
+    }
+
+    assert offenders == {}
+
+
+@pytest.mark.unit
+def test_rawish_label_names_are_confined_to_normalized_metric_families() -> None:
+    """Endpoint/source_file labels are allowed only behind central normalizers."""
+    endpoint_metrics = {
+        name
+        for name, labels in _iter_registered_metric_labels()
+        if "endpoint" in labels
+    }
+    source_file_metrics = {
+        name
+        for name, labels in _iter_registered_metric_labels()
+        if "source_file" in labels
+    }
+
+    assert endpoint_metrics == APPROVED_ENDPOINT_LABEL_METRICS
+    assert source_file_metrics == APPROVED_SOURCE_FILE_LABEL_METRICS
 
 
 @pytest.mark.unit

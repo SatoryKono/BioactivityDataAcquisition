@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+import yaml
 
 from bioetl.infrastructure.config.dq_contract_config_loader import (
     DQContractConfigLoader,
@@ -110,6 +111,20 @@ def test_chembl_contract_registry_paths_are_filesystem_consistent() -> None:
         issue for issue in result.issues if issue.contract_ref.startswith("chembl.")
     ]
     assert chembl_issues == []
+
+
+@pytest.mark.integration
+def test_chembl_activity_contract_is_registry_published_but_not_active_when_gold_disabled() -> (
+    None
+):
+    """chembl.activity stays published in the registry but must not advertise an active Gold runtime."""
+    activity_config = _CONFIGS_ROOT / "entities" / "chembl" / "activity.yaml"
+    config = yaml.safe_load(activity_config.read_text(encoding="utf-8"))
+    store = FileContractRegistryStore(_REGISTRY_PATH)
+    registry = store.load()
+
+    assert config["pipeline"]["sink"]["gold"]["enabled"] is False
+    assert registry.entries["chembl.activity"].status.value == "deprecated"
 
 
 @pytest.mark.integration

@@ -41,6 +41,28 @@ from bioetl.infrastructure.observability._prometheus_metric_label_normalizers im
 )
 
 OBSERVABILITY_EVENTS_COUNTER_NAME = "bioetl_observability_events_total"
+FORBIDDEN_PROMETHEUS_LABEL_NAMES = frozenset(
+    {
+        "run_id",
+        "manifest_id",
+        "lineage_fragment_id",
+        "record_id",
+        "content_hash",
+        "payload_hash",
+        "request_id",
+        "message",
+        "raw_message",
+        "path",
+        "raw_path",
+        "file_path",
+        "url",
+        "raw_url",
+        "query",
+        "query_string",
+        "dataset_hash",
+        "source_batch_id",
+    }
+)
 _ADAPTER_ENDPOINT_LABEL_METRICS = frozenset(
     {
         "bioetl_adapter_request_duration_seconds",
@@ -49,6 +71,7 @@ _ADAPTER_ENDPOINT_LABEL_METRICS = frozenset(
         "bioetl_adapter_batch_size",
     }
 )
+APPROVED_ENDPOINT_LABEL_METRICS = _ADAPTER_ENDPOINT_LABEL_METRICS
 _ADAPTER_OPERATION_LABEL_METRICS = frozenset(
     {
         "bioetl_adapter_error_taxonomy_total",
@@ -66,6 +89,7 @@ _SOURCE_FILE_LABEL_METRICS = frozenset(
         "bioetl_filter_combinations_loaded_total",
     }
 )
+APPROVED_SOURCE_FILE_LABEL_METRICS = _SOURCE_FILE_LABEL_METRICS
 _STAGE_LABEL_METRICS = frozenset(
     {
         "bioetl_batch_size_records",
@@ -110,6 +134,27 @@ _POSTRUN_PHASE_LABEL_METRICS = frozenset(
 )
 
 type _StringLabelNormalizer = Callable[[str], str]
+
+
+def validate_metric_label_policy(name: str, labels: MetricLabels) -> None:
+    """Reject high-cardinality or raw labels before Prometheus dispatch."""
+    label_names = frozenset(labels)
+    forbidden = label_names & FORBIDDEN_PROMETHEUS_LABEL_NAMES
+    if forbidden:
+        formatted = ", ".join(sorted(forbidden))
+        raise ValueError(
+            f"Forbidden high-cardinality Prometheus label(s) for {name}: {formatted}"
+        )
+    if "endpoint" in label_names and name not in APPROVED_ENDPOINT_LABEL_METRICS:
+        raise ValueError(
+            f"Prometheus label 'endpoint' is only allowed for adapter endpoint "
+            f"metrics; got {name}"
+        )
+    if "source_file" in label_names and name not in APPROVED_SOURCE_FILE_LABEL_METRICS:
+        raise ValueError(
+            f"Prometheus label 'source_file' is only allowed for normalized filter "
+            f"source metrics; got {name}"
+        )
 
 
 def _normalize_single_metric_label(
@@ -369,6 +414,7 @@ def normalize_metric_dispatch_labels(
     labels: MetricLabels,
 ) -> MetricLabels:
     """Normalize metric labels for metrics with stricter label contracts."""
+    validate_metric_label_policy(name, labels)
     if name == OBSERVABILITY_EVENTS_COUNTER_NAME:
         return normalize_observability_metric_labels(labels)
     for normalizer in (

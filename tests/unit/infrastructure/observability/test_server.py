@@ -42,6 +42,26 @@ class TestStartMetricsServer:
             assert result is True
             mock_server.assert_called_once_with(9999, addr="0.0.0.0")
 
+    def test_successful_start_emits_metrics_server_publication_event(self):
+        """Server startup should publish bounded self-telemetry before runs exit."""
+        with (
+            patch("bioetl.infrastructure.observability.server.start_http_server"),
+            patch(
+                "bioetl.infrastructure.observability.server."
+                "METRICS_PUBLICATION_EVENTS_TOTAL"
+            ) as mock_metric,
+        ):
+            result = start_metrics_server(port=9999, started_at=_STARTED_AT)
+
+        assert result is True
+        mock_metric.labels.assert_called_once_with(
+            pipeline="unknown",
+            run_type="unknown",
+            target="metrics_server",
+            status="success",
+        )
+        mock_metric.labels().inc.assert_called_once_with()
+
     def test_idempotent_multiple_calls(self):
         """Test server is only started once."""
         with patch(
@@ -87,6 +107,36 @@ class TestStartMetricsServer:
             )
 
             assert result is False
+
+    def test_lenient_port_conflict_emits_metrics_server_failure_event(self):
+        """Fail-open server startup must be visible as failed publication telemetry."""
+        with (
+            patch(
+                "bioetl.infrastructure.observability.server.start_http_server"
+            ) as mock_server,
+            patch(
+                "bioetl.infrastructure.observability.server."
+                "METRICS_PUBLICATION_EVENTS_TOTAL"
+            ) as mock_metric,
+        ):
+            error = OSError()
+            error.errno = errno.EADDRINUSE
+            mock_server.side_effect = error
+
+            result = start_metrics_server(
+                port=8000,
+                started_at=_STARTED_AT,
+                fail_fast=False,
+            )
+
+        assert result is False
+        mock_metric.labels.assert_called_once_with(
+            pipeline="unknown",
+            run_type="unknown",
+            target="metrics_server",
+            status="failed",
+        )
+        mock_metric.labels().inc.assert_called_once_with()
 
     def test_fail_fast_raises_on_port_conflict(self):
         """Test fail_fast=True raises MetricsServerError on port conflict."""
@@ -360,6 +410,28 @@ class TestPushMetricsToGateway:
                 grouping_key={
                     "pipeline": "chembl_activity",
                     "run_type": "incremental",
+                },
+            )
+
+        call_kwargs = mock_push.call_args[1]
+        assert call_kwargs["grouping_key"] == {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+        }
+
+    def test_push_grouping_key_drops_forensic_high_cardinality_labels(self):
+        """Pushgateway bridge must use only bounded aggregate grouping labels."""
+        with patch(
+            "bioetl.infrastructure.observability.server.pushadd_to_gateway"
+        ) as mock_push:
+            push_metrics_to_gateway(
+                gateway="localhost:9091",
+                grouping_key={
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                    "run_id": "run-123",
+                    "request_id": "req-456",
+                    "payload_hash": "abcdef",
                 },
             )
 

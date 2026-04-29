@@ -308,6 +308,19 @@ _DYNAMIC_ENDPOINT_SEGMENT_PATTERNS = (
     ),
     re.compile(r"^[\da-f]{16,}$", re.IGNORECASE),
 )
+_SOURCE_FILE_CLASS_BY_SUFFIX = {
+    ".csv": "csv_file",
+    ".tsv": "tsv_file",
+    ".txt": "text_file",
+    ".json": "json_file",
+    ".jsonl": "jsonl_file",
+    ".yaml": "yaml_file",
+    ".yml": "yaml_file",
+    ".parquet": "parquet_file",
+    ".arrow": "arrow_file",
+    ".xlsx": "spreadsheet_file",
+    ".xls": "spreadsheet_file",
+}
 
 
 def normalize_adapter_endpoint_label(endpoint: str) -> str:
@@ -327,18 +340,18 @@ def normalize_adapter_endpoint_label(endpoint: str) -> str:
 
 
 def normalize_source_file_label(source_file: str) -> str:
-    """Normalize filter source file labels to basename-only bounded values."""
+    """Normalize filter source file labels to bounded source classes."""
     stripped = source_file.strip()
     if not stripped:
         return "unknown"
-    path_like = stripped.replace("\\", "/")
+    path_like = stripped.replace("\\", "/").split("?", 1)[0]
     basename = PurePath(path_like).name
-    candidate = basename or path_like
-    normalized = re.sub(r"[^a-zA-Z0-9._-]+", "_", candidate.lower())
-    collapsed = re.sub(r"_+", "_", normalized).strip("._-")
-    if not collapsed:
+    if not basename:
         return "unknown"
-    return collapsed[:64]
+    suffix = PurePath(basename).suffix.lower()
+    if suffix in _SOURCE_FILE_CLASS_BY_SUFFIX:
+        return _SOURCE_FILE_CLASS_BY_SUFFIX[suffix]
+    return "extensionless_file" if "." not in basename else "other_file"
 
 
 def normalize_adapter_operation_label(operation: str) -> str:

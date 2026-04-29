@@ -39,6 +39,7 @@ class _MetricsServerRuntimeState:
 
 
 _SERVER_RUNTIME = _MetricsServerRuntimeState()
+_PUSHGATEWAY_GROUPING_LABELS = ("pipeline", "run_type")
 
 # Re-export for backward compatibility
 __all__ = [
@@ -67,6 +68,19 @@ def _emit_metrics_publication_event(
     ).inc()
 
 
+def _sanitize_pushgateway_grouping_key(
+    grouping_key: dict[str, str] | None,
+) -> dict[str, str]:
+    """Keep Pushgateway grouping labels bounded to aggregate run classes."""
+    if not grouping_key:
+        return {}
+    return {
+        key: str(value)
+        for key in _PUSHGATEWAY_GROUPING_LABELS
+        if (value := grouping_key.get(key))
+    }
+
+
 def _handle_port_in_use(
     port: int, e: OSError, fail_fast: bool, logger: LoggerPort
 ) -> bool:
@@ -80,6 +94,11 @@ def _handle_port_in_use(
         port=port,
         errno=e.errno,
         action="metrics_disabled" if not fail_fast else "failing",
+    )
+    _emit_metrics_publication_event(
+        grouping_key=None,
+        target="metrics_server",
+        status="failed",
     )
     if fail_fast:
         raise MetricsServerError(
@@ -104,6 +123,11 @@ def _handle_os_error(
         errno=e.errno,
         attempts=retry_count,
     )
+    _emit_metrics_publication_event(
+        grouping_key=None,
+        target="metrics_server",
+        status="failed",
+    )
     if fail_fast:
         raise MetricsServerError(port=port, reason="os_error", original_error=e) from e
     return False
@@ -121,6 +145,11 @@ def _handle_unexpected_error(
         "Unexpected error starting metrics server",
         port=port,
         error_type=type(e).__name__,
+    )
+    _emit_metrics_publication_event(
+        grouping_key=None,
+        target="metrics_server",
+        status="failed",
     )
     if fail_fast:
         raise MetricsServerError(
@@ -168,6 +197,11 @@ def start_metrics_server(
                     port=port,
                     addr=addr,
                     attempt=attempt + 1,
+                )
+                _emit_metrics_publication_event(
+                    grouping_key=None,
+                    target="metrics_server",
+                    status="success",
                 )
                 return True
             except OSError as e:
@@ -230,6 +264,7 @@ def push_metrics_to_gateway(
 
     gateway = gateway or "localhost:9091"
     effective_run_label = job if job is not None else run_label
+    safe_grouping_key = _sanitize_pushgateway_grouping_key(grouping_key)
 
     try:
         # Keep Pushgateway publication best-effort so CLI teardown does not stall
@@ -238,17 +273,17 @@ def push_metrics_to_gateway(
             gateway,
             job=effective_run_label,
             registry=REGISTRY,
-            grouping_key=grouping_key or {},
+            grouping_key=safe_grouping_key,
             timeout=1.0,
         )
         logger.info(
             "Metrics pushed to gateway",
             gateway=gateway,
             run_label=effective_run_label,
-            grouping_key=grouping_key,
+            grouping_key=safe_grouping_key,
         )
         _emit_metrics_publication_event(
-            grouping_key=grouping_key,
+            grouping_key=safe_grouping_key,
             status="success",
         )
         return True
@@ -266,7 +301,7 @@ def push_metrics_to_gateway(
             error=str(e),
         )
         _emit_metrics_publication_event(
-            grouping_key=grouping_key,
+            grouping_key=safe_grouping_key,
             status="failed",
         )
         return False

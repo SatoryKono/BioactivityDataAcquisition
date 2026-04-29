@@ -596,6 +596,11 @@ def test_build_pipeline_runner_rejects_exact_replay_without_materialized_cached_
                 input_filter=SimpleNamespace(),
                 business_primary_keys=["activity_id"],
                 technical_primary_key="entity_id",
+                sink={
+                    "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                    "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                    "gold": SimpleNamespace(enabled=True, save_metadata=True),
+                },
             ),
             build_observability_bundle_fn=lambda **_: _namespace_observability(
                 SimpleNamespace(info=lambda *_, **__: None),

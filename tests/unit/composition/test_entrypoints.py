@@ -506,6 +506,45 @@ class TestRunPipelineIntegration:
         assert result.status == PipelineRunResult.SUCCESS
         mock_push.assert_called_once()
 
+    @pytest.mark.parametrize(
+        ("run_side_effect", "expected_status"),
+        [
+            (None, PipelineRunResult.SUCCESS),
+            (RuntimeError("short-lived failure"), PipelineRunResult.FAILED),
+        ],
+    )
+    @pytest.mark.asyncio
+    async def test_run_pipeline_publishes_terminal_metrics_for_short_lived_runs(
+        self,
+        mock_runner,
+        run_side_effect: Exception | None,
+        expected_status: PipelineRunResult,
+    ):
+        """Short-lived completion paths must still flush terminal metrics."""
+        from bioetl.composition.entrypoints import run_pipeline
+
+        if run_side_effect is not None:
+            mock_runner.run = AsyncMock(side_effect=run_side_effect)
+
+        with (
+            patch(
+                "bioetl.composition._pipeline_execution.create_pipeline_runner",
+                return_value=mock_runner,
+            ),
+            patch(
+                "bioetl.composition._pipeline_execution.push_metrics_to_gateway",
+                return_value=True,
+            ) as mock_push,
+        ):
+            result = await run_pipeline("test_pipeline", RunOptions(run_type="rebuild"))
+
+        assert result.status == expected_status
+        mock_push.assert_called_once_with(
+            run_label="bioetl",
+            pipeline_name="test_pipeline",
+            run_type="rebuild",
+        )
+
     @pytest.mark.asyncio
     async def test_run_pipeline_requires_metrics_readable_runner(self):
         """Test run_pipeline fails clearly for runners without metrics contract."""
