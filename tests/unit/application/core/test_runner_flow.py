@@ -241,3 +241,47 @@ def test_record_run_finished_emits_passed_record_flow_invariants(
     assert lag_values[0] == ("ingestion", 0.0)
     assert lag_values[1] == ("validation", 30.0)
     assert lag_values[2] == ("output", 30.0)
+
+
+def test_record_run_finished_emits_violated_record_flow_invariants_for_silent_loss(
+    monkeypatch,
+) -> None:
+    host = _Host(
+        diagnostics=None,
+        execution_metrics={
+            "records_fetched": 10,
+            "records_bronze": 8,
+            "records_silver": 7,
+            "records_gold": 9,
+            "records_quarantined": 0,
+            "records_filtered_out": 0,
+        },
+    )
+    monkeypatch.setattr(
+        runner_flow,
+        "current_utc_time",
+        lambda: datetime(2026, 4, 29, 12, 0, 30, tzinfo=UTC),
+    )
+
+    runner_flow.record_run_finished(host)
+
+    invariant_statuses = [
+        (call.args[2]["invariant"], call.args[2]["status"])
+        for call in host._services.metrics.increment_counter.call_args_list
+        if call.args[0] == "bioetl_record_flow_invariants_total"
+    ]
+    assert invariant_statuses == [
+        ("fetched_equals_bronze", "violated"),
+        ("bronze_partitioned", "violated"),
+        ("silver_gold_monotonic", "violated"),
+    ]
+    backlog_values = [
+        (call.args[2]["stage"], call.args[1])
+        for call in host._services.metrics.set_gauge.call_args_list
+        if call.args[0] == "bioetl_stage_backlog_records"
+    ]
+    assert backlog_values == [
+        ("ingestion", 2.0),
+        ("validation", 0.0),
+        ("output", 0.0),
+    ]

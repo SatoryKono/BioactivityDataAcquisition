@@ -12,10 +12,12 @@ RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
 SLO_ALERT_CONTRACT_PATH = Path("configs/quality/observability_slo_alert_contract.yaml")
 PROMETHEUS_CONFIG_PATH = Path("grafana/prometheus.yml")
 MONITORING_COMPOSE_PATH = Path("docker-compose.monitoring.yml")
+PUSHGATEWAY_RUNTIME_PATH = Path("src/bioetl/infrastructure/observability/server.py")
 pytestmark = pytest.mark.integration
 
 _PROMQL_METRIC_SELECTOR_RE = re.compile(r"([a-zA-Z_:][a-zA-Z0-9_:]*)\{([^{}]*)\}")
 _PROMQL_LABEL_MATCHER_RE = re.compile(r'([a-zA-Z_]\w*)\s*(=~|=|!=|!~)\s*"')
+_PROMQL_BIOETL_METRIC_TOKEN_RE = re.compile(r"\b(bioetl_[a-z0-9_]+)\b")
 
 
 def _load_rules() -> dict:
@@ -161,6 +163,22 @@ def _rule_expression_label_schema_error(
         f"selector_labels={unknown_labels} allowed={sorted(expected_labels)} "
         f"expr={expr}"
     )
+
+
+def _unknown_bioetl_metrics_for_expr(
+    expr: str,
+    *,
+    label_sets: dict[str, frozenset[str]],
+) -> list[str]:
+    """Return BioETL metric tokens not declared in registries or recording rules."""
+    unknown: set[str] = set()
+    for metric_name in _PROMQL_BIOETL_METRIC_TOKEN_RE.findall(expr):
+        if metric_name in label_sets:
+            continue
+        base_name = re.sub(r"(_total|_bucket|_sum|_count|_created)$", "", metric_name)
+        if base_name not in label_sets:
+            unknown.add(metric_name)
+    return sorted(unknown)
 
 
 def _iter_contract_alerts(contract: dict) -> list[tuple[str, dict, set[str]]]:
@@ -515,6 +533,31 @@ def test_monitoring_stack_scrape_jobs_and_grafana_metrics_are_enabled() -> None:
     )
 
 
+def test_pushgateway_default_target_has_bounded_replace_and_cleanup_lifecycle() -> None:
+    """Default Pushgateway must be backed by bounded replace/delete semantics."""
+    prometheus_config = _load_prometheus_config()
+    compose = _load_monitoring_compose()
+    server_source = PUSHGATEWAY_RUNTIME_PATH.read_text(encoding="utf-8")
+
+    pushgateway_jobs = [
+        job
+        for job in prometheus_config.get("scrape_configs", [])
+        if isinstance(job, dict) and job.get("job_name") == "pushgateway"
+    ]
+    assert pushgateway_jobs, "Default Prometheus config must scrape Pushgateway."
+    assert "pushgateway" in compose.get("services", {}), (
+        "Default monitoring compose stack must provision the Pushgateway service."
+    )
+    assert '_PUSHGATEWAY_GROUPING_LABELS = ("pipeline", "run_type")' in server_source
+    assert "pushadd_to_gateway" not in server_source, (
+        "Pushgateway publication must use replace-style push_to_gateway, not "
+        "additive pushadd_to_gateway."
+    )
+    assert "push_to_gateway(" in server_source
+    assert "delete_metrics_from_gateway" in server_source
+    assert "delete_from_gateway(" in server_source
+
+
 def test_slo_alert_contract_matches_shipped_prometheus_rules() -> None:
     """Every contracted SLO alert must match shipped rule metadata and metrics."""
     rules = _load_rules()
@@ -595,6 +638,34 @@ def test_rule_expressions_use_real_metric_label_schemas() -> None:
 
     assert not errors, (
         "Prometheus rules use selectors with nonexistent labels:\n" + "\n".join(errors)
+    )
+
+
+def test_rule_expressions_reference_declared_metrics_or_recording_rules() -> None:
+    """Every BioETL metric token in rules must be declared by registry or rules."""
+    payload = _load_rules()
+    label_sets = _build_metric_label_sets(payload)
+    errors: list[str] = []
+
+    for group in payload.get("groups", []):
+        group_name = group.get("name", "<unknown>")
+        for rule in group.get("rules", []):
+            rule_name = rule.get("alert") or rule.get("record") or "<unnamed>"
+            expr = rule.get("expr")
+            if not isinstance(expr, str):
+                continue
+            unknown_metrics = _unknown_bioetl_metrics_for_expr(
+                expr,
+                label_sets=label_sets,
+            )
+            if unknown_metrics:
+                errors.append(
+                    f"group={group_name} rule={rule_name} "
+                    f"unknown_metrics={unknown_metrics} expr={expr}"
+                )
+
+    assert not errors, (
+        "Prometheus rules reference undeclared metric names:\n" + "\n".join(errors)
     )
 
 
