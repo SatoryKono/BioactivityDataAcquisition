@@ -277,9 +277,13 @@ def test_non_chembl_identifier_arrays_are_profile_canonicalized_from_fixture() -
     crossref_orcids = CROSSREF_PUBLICATION_PROFILE.rule_for("author_orcids")
     crossref_issns = CROSSREF_PUBLICATION_PROFILE.rule_for("issn_list")
     openalex_authors = OPENALEX_PUBLICATION_PROFILE.rule_for("author_openalex_ids")
+    semanticscholar_authors = SEMANTICSCHOLAR_PUBLICATION_PROFILE.rule_for(
+        "author_s2_ids"
+    )
     assert crossref_orcids is not None
     assert crossref_issns is not None
     assert openalex_authors is not None
+    assert semanticscholar_authors is not None
 
     publication_cases = cases["publication_identifier_arrays"]
     assert (
@@ -293,6 +297,12 @@ def test_non_chembl_identifier_arrays_are_profile_canonicalized_from_fixture() -
     assert (
         openalex_authors.apply(publication_cases["openalex_author_ids"]["input"])
         == publication_cases["openalex_author_ids"]["expected"]
+    )
+    assert (
+        semanticscholar_authors.apply(
+            publication_cases["semanticscholar_author_ids"]["input"]
+        )
+        == publication_cases["semanticscholar_author_ids"]["expected"]
     )
 
     all_mappings = UNIPROT_IDMAPPING_PROFILE.rule_for("all_mappings")

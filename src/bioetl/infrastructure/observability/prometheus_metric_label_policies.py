@@ -101,9 +101,7 @@ _PHASE_LABEL_METRICS = frozenset({"bioetl_phase_duration_seconds"})
 _COMPOSITE_PHASE_RECORDS_METRICS = frozenset({"bioetl_composite_phase_records_total"})
 _COMPOSITE_PHASE_ERRORS_METRICS = frozenset({"bioetl_composite_phase_errors_total"})
 _COMPOSITE_PHASE_LOSS_METRICS = frozenset({"bioetl_composite_phase_loss_total"})
-_COMPOSITE_PHASE_RETRIES_METRICS = frozenset(
-    {"bioetl_composite_phase_retries_total"}
-)
+_COMPOSITE_PHASE_RETRIES_METRICS = frozenset({"bioetl_composite_phase_retries_total"})
 _POSTRUN_PHASE_LABEL_METRICS = frozenset(
     {
         "bioetl_postrun_phase_duration_seconds",

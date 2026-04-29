@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.1.1
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-02'
+  Last verified: '2026-04-29'
 
 ______________________________________________________________________
 
@@ -104,35 +104,34 @@ paths:
 This keeps the domain/application contracts stable while leaving room for a
 future SQLite or Delta projection.
 
-### 5. Inspection is part of the supported CLI
+### 5. Inspection is part of the published operator surface
 
-The control plane is inspectable via:
+The control plane is a supported inspection surface, not an internal-only
+diagnostic appendix. The published normative pack is intentionally split:
 
-- `bioetl run-manifest show <run-id|manifest-id>`
-- `bioetl run-manifest diff <left> <right>`
+- the **contract doc** owns storage layout, rollout-flag matrix, event
+  taxonomy, and execution-path semantics;
+- the **CLI reference** owns command and option inventory;
+- the **runbook** owns operator procedure and triage flow;
+- this **ADR** owns the decision boundary, rationale, and stable invariants.
 
-`show` resolves to one payload with `manifest`, `ledger_entries`, and
-operator-oriented `diagnostics`. `diff` compares top-level manifest fields
-after canonical JSON normalization.
+This split is intentional and follows
+[D-01](../../00-project/governance/01-documentation-governance-style-guide.md):
+the ADR must not become a mutable command catalog or runtime flag registry.
 
-This inspection surface is a published documentation surface, not an
-internal-only diagnostic appendix. The normative pack is ADR + contract + CLI +
-runbook, following [D-01](../../00-project/governance/01-documentation-governance-style-guide.md).
+### 6. Rollout semantics are governed through canonical owner docs
 
-### 6. Rollout is governed by explicit control-plane settings
+Runtime rollout remains governed by `settings.pipeline.control_plane`, but the
+current setting matrix and profile taxonomy are documented in the published
+contract and CLI surfaces rather than copied into the ADR.
 
-The supported rollout flags are:
+The stable ADR-level invariant is fail-closed governance on the enabled path:
 
-- `run_manifest_enabled=true`
-- `run_ledger_enabled=true`
-- `checkpoint_compatibility_policy=soft_fail`
-
-`run_ledger_enabled` depends on `run_manifest_enabled`, and checkpoint resume
-behavior is constrained to `observe | soft_fail | hard_fail`.
-
-When runtime executes an exact replay, checkpoint compatibility handling is
-intentionally coerced to `hard_fail` so a replay attempt cannot continue after
-any compatibility drift.
+- no manifest, no run;
+- manifest created before execution;
+- manifest immutable after persistence;
+- ledger append-only;
+- exact replay is not allowed to continue after compatibility drift.
 
 ### 7. Governance is fail-closed on the enabled path
 
@@ -163,22 +162,15 @@ The enabled control-plane path follows these invariants:
 
 ## Implementation Notes
 
-### Canonical code locations
+### Current implementation boundary
 
-- `src/bioetl/domain/control_plane/`
-- `src/bioetl/domain/ports/control_plane/`
-- `src/bioetl/application/services/run_manifest_service.py`
-- `src/bioetl/application/services/run_ledger_service.py`
-- `src/bioetl/application/services/run_manifest_diagnostics.py`
-- `src/bioetl/application/services/run_manifest_inspection_service.py`
-- `src/bioetl/application/core/lifecycle/checkpoint_runtime.py`
-- `src/bioetl/interfaces/cli/commands/run_manifest.py`
-- `src/bioetl/composition/bootstrap/cli/run_manifest.py`
-- `src/bioetl/composition/runtime_builders/run_manifest_builder.py`
-- `src/bioetl/composition/runtime_builders/runner_builder.py`
-- `src/bioetl/composition/factories/pipeline/checkpoint_policy_helpers.py`
-- `src/bioetl/infrastructure/config/_base.py`
-- `src/bioetl/infrastructure/control_plane/`
+The current implementation spans `domain/control_plane`, application
+control-plane services, composition/runtime builders, CLI inspection commands,
+and infrastructure control-plane persistence.
+
+This ADR intentionally does **not** own a mutable file-path inventory. Current
+source anchors belong in the published contract and package-level source maps so
+path refactors do not stale the decision record itself.
 
 ### Execution boundary
 

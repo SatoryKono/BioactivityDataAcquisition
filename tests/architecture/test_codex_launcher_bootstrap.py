@@ -74,7 +74,10 @@ def test_windows_compatibility_wrappers_delegate_to_existing_targets() -> None:
     assert 'call "%~dp0codex.bat" %*' in start_codex_bat
 
     assert "verify_setup.bat" not in verify_setup_bat
-    assert 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0verify-setup.ps1" %*' in verify_setup_bat
+    assert (
+        'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0verify-setup.ps1" %*'
+        in verify_setup_bat
+    )
 
     assert "verify_setup.ps1" not in verify_setup_ps1
     assert "run-codex.ps1" in verify_setup_ps1

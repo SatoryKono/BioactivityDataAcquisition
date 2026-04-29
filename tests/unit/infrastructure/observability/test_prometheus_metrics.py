@@ -267,7 +267,9 @@ class TestPrometheusMetrics:
                 },
             )
 
-            COUNTERS["bioetl_batch_lifecycle_events_total"].labels.assert_called_once_with(
+            COUNTERS[
+                "bioetl_batch_lifecycle_events_total"
+            ].labels.assert_called_once_with(
                 pipeline="chembl_activity",
                 run_type="incremental",
                 event="other",
@@ -275,9 +277,7 @@ class TestPrometheusMetrics:
                 status="other",
             )
 
-    def test_composite_phase_metrics_normalize_unknown_labels(
-        self, prometheus_metrics
-    ):
+    def test_composite_phase_metrics_normalize_unknown_labels(self, prometheus_metrics):
         """Composite phase counters must collapse unknown phase and outcome labels."""
         with patch.dict(
             COUNTERS,
@@ -293,7 +293,9 @@ class TestPrometheusMetrics:
                 },
             )
 
-            COUNTERS["bioetl_composite_phase_records_total"].labels.assert_called_once_with(
+            COUNTERS[
+                "bioetl_composite_phase_records_total"
+            ].labels.assert_called_once_with(
                 pipeline="composite:target",
                 phase="other",
                 outcome="other",

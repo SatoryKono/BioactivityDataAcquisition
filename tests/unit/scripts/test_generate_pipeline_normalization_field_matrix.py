@@ -519,10 +519,7 @@ def test_build_field_matrix_rows_exposes_non_chembl_governance_sources() -> None
     assert openalex_ror_ids["hash_ordering"] == "set_like"
 
     openalex_author_ids = _row(rows, "openalex_publication", "author_openalex_ids")
-    assert (
-        openalex_author_ids["normalizer"]
-        == "normalize_profile_openalex_author_ids"
-    )
+    assert openalex_author_ids["normalizer"] == "normalize_profile_openalex_author_ids"
     assert openalex_author_ids["controlled_vocabulary_source"] == (
         "domain.normalization.reference_ids"
     )
@@ -555,10 +552,7 @@ def test_build_field_matrix_rows_exposes_non_chembl_governance_sources() -> None
     assert uniprot_go_terms["semantic_category"] == "ontology_reference_identifier"
 
     uniprot_all_mappings = _row(rows, "uniprot_idmapping", "all_mappings")
-    assert (
-        uniprot_all_mappings["normalizer"]
-        == "normalize_profile_uniprot_accessions"
-    )
+    assert uniprot_all_mappings["normalizer"] == "normalize_profile_uniprot_accessions"
     assert uniprot_all_mappings["hash_ordering"] == "set_like"
 
 

@@ -270,10 +270,14 @@ class CompositeRunnerControlPlaneMixin:
             int(result.records_silver) for result in dependency_results.values()
         )
         failed = sum(
-            1 for result in dependency_results.values() if result.status.value == "failed"
+            1
+            for result in dependency_results.values()
+            if result.status.value == "failed"
         )
         timed_out = sum(
-            1 for result in dependency_results.values() if result.status.value == "timeout"
+            1
+            for result in dependency_results.values()
+            if result.status.value == "timeout"
         )
         resumed = sum(1 for result in dependency_results.values() if result.resumed)
         pipeline_metrics.record_composite_phase_records(
@@ -330,10 +334,14 @@ class CompositeRunnerControlPlaneMixin:
             int(result.records_errored) for result in enrichment_results.values()
         )
         failed = sum(
-            1 for result in enrichment_results.values() if result.status.value == "failed"
+            1
+            for result in enrichment_results.values()
+            if result.status.value == "failed"
         )
         timed_out = sum(
-            1 for result in enrichment_results.values() if result.status.value == "timeout"
+            1
+            for result in enrichment_results.values()
+            if result.status.value == "timeout"
         )
         pipeline_metrics.record_composite_phase_records(
             phase="enrichment",

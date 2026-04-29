@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from testing_support.neo4j_memory_sync import (  # noqa: F401
+from tests.testing_support.neo4j_memory_sync import (  # noqa: F401
     test_apply_normalization_evidence_only_executes_batched_statements,
     test_ensure_targeted_apply_prerequisites_raises_clear_error_when_anchor_graph_is_empty,
     test_ensure_targeted_apply_prerequisites_raises_clear_error_when_specific_anchor_nodes_are_missing,

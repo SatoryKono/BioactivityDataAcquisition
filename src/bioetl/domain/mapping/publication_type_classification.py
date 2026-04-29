@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.mapping._publication_type_classification_support import (
     canonical_publication_type_key,
+    classification_values,
     classify_chembl_type,
     classify_provider_type,
-    classification_values,
     normalize_publication_classification_value,
     raw_publication_type,
 )

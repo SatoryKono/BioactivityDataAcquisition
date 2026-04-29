@@ -175,16 +175,11 @@ def test_collect_structure_policy_violations_rejects_unapproved_src_root(
     ]
 
 
-def test_approved_root_directories_include_cataloged_test_support_root() -> None:
-    catalog = {
-        "test_support_roots": {
-            "approved_roots": [{"path": "testing_support"}],
-        }
-    }
+def test_approved_root_directories_include_tests_without_extra_catalog_root() -> None:
+    catalog = {}
 
     approved = module._approved_root_directories(catalog)
 
-    assert "testing_support" in approved
     assert "tests" in approved
 
 

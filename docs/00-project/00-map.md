@@ -1,22 +1,23 @@
 ______________________________________________________________________
 
-Version: 1.1.1
+Version: 1.1.2
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-24'
+  Last verified: '2026-04-29'
 
 ______________________________________________________________________
 
 # BioETL Project Navigator
 
-*Synced with RULES.md v6.1.2 | Last updated: 2026-04-09*
+*Synced with RULES.md v6.1.3 | Last updated: 2026-04-29*
 
-> **Documentation Update:** 2026-04-24
+> **Documentation Update:** 2026-04-29
 >
+> - 2026-04-29: navigator trimmed to navigation-only duties; manual document-status matrix removed to avoid freshness drift
 > - **Issue #3091 Resolution**: Fixed ADR status contradiction (ADR-001..043 → ADR-001..045)
 > - **Source-code map updated**: Added missing directories (`domain/lineage/`, `domain/control_plane/`, `domain/config/control_plane.py`, `domain/composite/checkpoint/`, `application/services/control_plane/`, `application/services/dq/`, `application/services/execution/`, `application/services/lineage/`, `composition/monitoring/`, `infrastructure/adr/`, `infrastructure/audit/`, `infrastructure/compat/`, `infrastructure/control_plane/`, `infrastructure/system/`)
 > - Compatibility inventory synced with the current measured CLI shim registry
@@ -566,24 +567,6 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## Document Status
-
-| Document                  | Last Updated | Status                         |
-| ------------------------- | ------------ | ------------------------------ |
-| RULES.md                  | 2026-04-09   | v6.1.2 (Latest)                |
-| REQUIREMENTS.md           | 2026-04-16   | v1.8.1 (rules sync refreshed)  |
-| glossary.md               | 2026-03-08   | v2.7 (Ubiquitous Language)     |
-| 00-map.md                 | 2026-03-24   | v8.3 Active navigator synced   |
-| rules-summary.md          | 2026-03-13   | v6.1 Synced                    |
-| TOOLS.md                  | 2026-03-13   | v3.0 Active tools hub          |
-| 03-guides/                | 2026-03-19   | Active guides index            |
-| 03-guides/development/    | 2026-01-26   | Config schema guidelines       |
-| adr-registry.md           | 2026-04-24   | Generated ADR status registry  |
-| 05-operations/runbooks/   | 2026-03-19   | Active Local-Only runbooks     |
-| 04-reference/schemas/     | 2026-03-19   | Active schema references       |
-| docs/reports/             | 2026-03-19   | Historical evidence and audits |
-| 02-architecture/diagrams/ | 2026-03-10   | Canonical diagram source tree  |
-
-______________________________________________________________________
-
-*Last updated: 2026-03-24. Source Code Map tracks stable entry points and avoids snapshot counts that drift quickly.*
+Navigator freshness is carried by the page header and per-document metadata.
+This page intentionally avoids a separate manual status table because it drifts
+faster than the canonical owner docs themselves.

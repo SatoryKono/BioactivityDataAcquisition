@@ -7,9 +7,14 @@ remaining non-active scripts in `configs/quality/scripts_inventory_manifest.json
 
 ## Current State
 
-The current inventory snapshot contains `26` scripts with status
+The current inventory snapshot contains `27` scripts with status
 `supporting`. This is no longer treated as a cleanup backlog. It is an
 intentional retained set with bounded reasons per cluster.
+
+The subtype of each retained script is governed by the `decision` field in
+`configs/quality/scripts_lifecycle_registry.json`. See
+`docs/plans/scripts-supporting-taxonomy-2026-04-29.md` for the retained
+subtype taxonomy.
 
 ## Retained Buckets
 
@@ -44,7 +49,7 @@ Trigger for future deletion:
 
 - only if the remaining docs routers stop consuming the helper/bootstrap layer
 
-### 3. Engineering support modules (`4`)
+### 3. Engineering support modules (`6`)
 
 These remain retained as shared helper surfaces:
 
@@ -52,36 +57,27 @@ These remain retained as shared helper surfaces:
 - `scripts/engineering/common/repo_paths.py`
 - `scripts/engineering/qa/py_review_orchestrator.py`
 - `scripts/engineering/repo/_root_governance.py`
+- `scripts/engineering/qa/hotspot_family_metrics.py`
+- `src/tools/neo4j_audit.py`
 
 Trigger for future redesign:
 
 - only if router dispatch, repo path loading, or root-governance helpers are
   consolidated into a different canonical shared module layout
 
-### 4. Windows Codex launchers (`2`)
-
-These batch files remain retained as Windows-side compatibility launchers for
-mixed WSL/Codex workflows:
-
-- `scripts/ops/launchers/codex/codex-wsl.bat`
-- `scripts/ops/launchers/codex/start-codex.bat`
-
-Trigger for future deletion:
-
-- only after caller evidence drops to zero and a separate launcher parity wave
-  confirms no remaining documented Windows workflow depends on them
-
-### 5. Direct Vibe module compatibility entry (`1`)
+### 4. Direct compatibility entries (`2`)
 
 - `scripts/ai/vibe/__main__.py`
+- `scripts/memory/mcp_smoke.py`
 
-This remains retained only as a module-level compatibility surface while the
-canonical public Python path is `python -m scripts.ai vibe`.
+These remain retained only as compatibility surfaces while canonical runtime
+behavior lives elsewhere.
 
 Trigger for future deletion:
 
 - caller audit proving no direct `python -m scripts.ai.vibe` usage remains, plus
   one compatibility window
+- removal of historical import/test references to `scripts.memory.mcp_smoke`
 
 ## Caller-Audit Refresh
 
@@ -106,9 +102,5 @@ The scripts cleanup program is past the low-risk delete phase:
 - `unknown=0`
 - `legacy=0`
 
-What remains is either:
-
-- explicit retained support surface, or
-- TTL-governed diagnostic surface
-
-and must be handled accordingly.
+What remains is explicit retained support surface governed by lifecycle
+subtypes, not a residual delete queue.

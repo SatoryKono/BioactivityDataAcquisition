@@ -37,9 +37,6 @@ def _write_governance_files(tmp_path: Path) -> None:
                         {"path": "src/memory"},
                     ]
                 },
-                "test_support_roots": {
-                    "approved_roots": [{"path": "testing_support"}],
-                },
                 "docs_code_zones": {
                     "approved_roots": [
                         {"path": "docs/plugins/link_checker"},
@@ -68,11 +65,13 @@ def _write_minimal_repo_tree(tmp_path: Path) -> None:
         (tmp_path / "src" / "bioetl" / layer).mkdir(parents=True, exist_ok=True)
 
 
-def test_run_audit_allows_cataloged_test_support(tmp_path: Path) -> None:
+def test_run_audit_allows_tests_tree_support_package(tmp_path: Path) -> None:
     _write_governance_files(tmp_path)
     _write_minimal_repo_tree(tmp_path)
-    (tmp_path / "testing_support").mkdir()
-    (tmp_path / "testing_support" / "__init__.py").write_text("", encoding="utf-8")
+    (tmp_path / "tests" / "testing_support").mkdir(parents=True)
+    (tmp_path / "tests" / "testing_support" / "__init__.py").write_text(
+        "", encoding="utf-8"
+    )
 
     result = module.run_audit(tmp_path)
 

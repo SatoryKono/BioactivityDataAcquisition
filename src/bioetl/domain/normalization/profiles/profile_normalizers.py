@@ -155,7 +155,6 @@ __all__ = [
     "normalize_profile_unit",
 ]
 
-
 def normalize_profile_null(value: object) -> object:
     """Convert profile pseudo-null values to ``None``."""
     return normalize_null(value)
@@ -164,7 +163,6 @@ def normalize_profile_null(value: object) -> object:
 def normalize_profile_passthrough(value: object) -> object:
     """Return one profile value unchanged."""
     return value
-
 
 def normalize_profile_case(
     value: object, *, allowed_values: frozenset[str] | None = None

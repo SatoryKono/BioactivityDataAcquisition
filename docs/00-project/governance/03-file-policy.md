@@ -36,7 +36,7 @@ ______________________________________________________________________
   project surfaces: `.ai`, `.aiassistant`, `ai`, `.codex`,
   `.cursor`, `.gemini`, `.github`, `.idea`, `.jules`, `.junie`, `.sonarlint`,
   `.vibe`, `.vscode`, `assets`, `configs`, `data`, `docs`, `grafana`,
-  `reports`, `scripts`, `src`, `testing_support`, and `tests`.
+  `reports`, `scripts`, `src`, and `tests`.
 - Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
 - Shared repo tooling surfaces such as `ai/claude/`, `.codex/`, `.gemini/`,
   `.vibe/`, `.vscode/`, and `.cursor/` MAY оставаться tracked только если они
@@ -91,7 +91,6 @@ Machine-readable каталог для structure hygiene хранится в
 - разрешённый живой состав `docs/plans/**` и правило `max_active_backlog = 1`;
 - допустимые sidecar roots под `src/`: `src/bioetl`, `src/tools`,
   `src/memory`;
-- разрешённый root-level test support family: `testing_support/`;
 - approved docs-resident code zones under `docs/00-project/ai/agents/**` and
   `docs/plugins/link_checker/**`;
 - tolerated local-only hidden root trees such as `.agent-work/`,
@@ -135,14 +134,13 @@ Machine-readable каталог для structure hygiene хранится в
 - Новые top-level пакеты под `src/` вне этих трёх roots MUST FAIL structure
   governance until they are explicitly ratified.
 
-### 0.4.1. Root-level test support family
+### 0.4.1. Shared test support under `tests/`
 
-- `testing_support/` разрешён как approved root-level test-support package для
-  shared helper modules, которые импортируются несколькими test suites.
-- Этот каталог не является runtime surface и MUST использоваться только для
-  test-only support code.
-- Новые root-level test support directories вне `testing_support/` запрещены,
-  пока не будут явно ратифицированы в structure catalog.
+- Shared test helper modules SHOULD жить под `tests/testing_support/`.
+- Такие helper-модули не являются runtime surface и MUST использоваться только
+  для test-only support code.
+- Новые root-level test support directories не допускаются; тестовая shared
+  support code должна оставаться внутри уже разрешённого дерева `tests/`.
 
 ### 0.4.2. Approved docs-resident code zones
 

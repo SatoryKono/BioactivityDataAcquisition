@@ -15,7 +15,7 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-from testing_support.bronze_writer import (
+from tests.testing_support.bronze_writer import (
     batch_id,
     ingestion_ts,
     noop_logger,
