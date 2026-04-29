@@ -254,6 +254,25 @@ class TestBaseApiConfig:
 
 
 @pytest.mark.unit
+class TestBaseGoldColumnFilterTypedValues:
+    """Typed literals in filter config must survive schema-to-domain conversion."""
+
+    def test_typed_scalar_values_are_preserved(self) -> None:
+        config = BaseGoldFiltersConfig(
+            columns={
+                "potential_duplicate": BaseGoldColumnFilterConfig(values=[0]),
+                "reviewed": BaseGoldColumnFilterConfig(values=[True]),
+            }
+        )
+
+        domain = config.to_domain()
+        by_column = {column_filter.column: column_filter for column_filter in domain.column_filters}
+
+        assert by_column["potential_duplicate"].values == frozenset([0])
+        assert by_column["reviewed"].values == frozenset([True])
+
+
+@pytest.mark.unit
 class TestBaseCsvExportConfig:
     """Test BaseCsvExportConfig configuration."""
 

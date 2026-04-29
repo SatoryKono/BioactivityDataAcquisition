@@ -443,7 +443,7 @@ filters:
                 - B
                 - F
             potential_duplicate:
-                - '0'
+                - 0
         ranges:
             activity_id:
                 min: 1
@@ -503,7 +503,7 @@ filters:
                 - B
                 - F
             potential_duplicate:
-                - '0'
+                - 0
         ranges:
             standard_value:
                 min: 0

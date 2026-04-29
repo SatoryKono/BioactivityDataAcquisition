@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.quarantine_service import QuarantineService
 
 __all__ = [
+    "delete_metrics_from_gateway",
     "MetricsOperatorProfile",
     "ObservabilityDiagnosticsBundle",
     "get_audit_service",
@@ -156,6 +157,38 @@ def push_metrics_to_gateway(
         log_level="INFO",
     )
     result = metrics_service.push_to_gateway(
+        gateway=gateway,
+        run_label=run_label,
+        grouping_key=grouping_key,
+    )
+    return bool(result.success)
+
+
+def delete_metrics_from_gateway(
+    run_label: str = "bioetl",
+    *,
+    pipeline_name: str | None = None,
+    run_type: str | None = None,
+    logger: LoggerPort | None = None,
+) -> bool:
+    """Delete metrics through the canonical composition-owned observability seam."""
+    from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
+    from bioetl.infrastructure.config import get_settings
+
+    settings = get_settings()
+    gateway = getattr(settings, "pushgateway_url", None) or "localhost:9091"
+    grouping_key: dict[str, str] = {}
+    if pipeline_name:
+        grouping_key["pipeline"] = pipeline_name
+    if run_type:
+        grouping_key["run_type"] = run_type
+    metrics_service = get_metrics_service()
+    metrics_service.logger = logger or bootstrap_logger_port(
+        pipeline=pipeline_name or "metrics_cleanup",
+        run_id=uuid4(),
+        log_level="INFO",
+    )
+    result = metrics_service.delete_from_gateway(
         gateway=gateway,
         run_label=run_label,
         grouping_key=grouping_key,

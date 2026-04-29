@@ -286,7 +286,7 @@ filters:
             structure_type:
                 - MOL
             inorganic_flag:
-                - '0'
+                - 0
         required_fields:
             - molecule_id
             - molecule_type
@@ -297,7 +297,7 @@ filters:
             structure_type:
                 - MOL
             inorganic_flag:
-                - '0'
+                - 0
         required_fields:
             - molecule_id
 contracts:

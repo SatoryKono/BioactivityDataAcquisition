@@ -108,14 +108,19 @@ def _run_isort_check() -> subprocess.CompletedProcess[str]:
     )
 
 
+def _require_ruff() -> None:
+    if not _ruff_available:
+        pytest.skip("ruff not installed")
+
+
 class TestCodeFormatting:
     @pytest.mark.slow
-    @pytest.mark.skipif(not _ruff_available, reason="ruff not installed")
     def test_ruff_formatting_src(self) -> None:
         """Source code MUST be formatted with ruff.
 
         Run `ruff format src` to fix formatting issues.
         """
+        _require_ruff()
         result = _run_format_check("src")
 
         assert result.returncode == 0, (
@@ -125,12 +130,12 @@ class TestCodeFormatting:
         )
 
     @pytest.mark.slow
-    @pytest.mark.skipif(not _ruff_available, reason="ruff not installed")
     def test_ruff_formatting_tests(self) -> None:
         """Test code MUST be formatted with ruff.
 
         Run `ruff format tests` to fix formatting issues.
         """
+        _require_ruff()
         result = _run_format_check("tests")
 
         assert result.returncode == 0, (
@@ -140,12 +145,12 @@ class TestCodeFormatting:
         )
 
     @pytest.mark.slow
-    @pytest.mark.skipif(not _ruff_available, reason="ruff not installed")
     def test_ruff_isort_check(self) -> None:
         """Imports MUST be sorted according to ruff isort rules.
 
         Run `ruff check --select I --fix src tests` to fix import ordering issues.
         """
+        _require_ruff()
         result = _run_isort_check()
 
         assert result.returncode == 0, (

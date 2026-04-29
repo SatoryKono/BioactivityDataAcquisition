@@ -300,6 +300,14 @@ class TestGoldFilterConfigShouldInclude:
         assert config.should_include({"score": 9}) is True
         assert config.should_include({"score": 7}) is False
 
+    def test_column_filters_accept_typed_scalars_without_string_literals(self):
+        """Typed filter literals should match typed normalized record values."""
+        filter_ = GoldColumnFilter(column="potential_duplicate", values=frozenset([0]))
+        config = GoldFilterConfig(column_filters=(filter_,))
+
+        assert config.should_include({"potential_duplicate": 0}) is True
+        assert config.should_include({"potential_duplicate": 1}) is False
+
     def test_all_filters_combined(self):
         """Test combination of all filter types."""
         filter_ = GoldColumnFilter(column="type", values=frozenset(["IC50"]))

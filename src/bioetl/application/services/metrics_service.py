@@ -31,6 +31,7 @@ if TYPE_CHECKING:
 
 # Re-export for backward compatibility
 __all__ = [
+    "DeleteResult",
     "MetricsPublisherPort",
     "MetricsServerError",
     "MetricsServerPort",
@@ -87,6 +88,17 @@ class StartResult:
 @dataclass(frozen=True, slots=True)
 class PushResult:
     """Result of publishing metrics to an external gateway."""
+
+    success: bool
+    gateway: str
+    run_label: str
+    grouping_key: dict[str, str]
+    error: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class DeleteResult:
+    """Result of deleting metrics from an external gateway."""
 
     success: bool
     gateway: str
@@ -449,6 +461,122 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
             error=error,
         )
         return PushResult(
+            success=False,
+            gateway=gateway,
+            run_label=run_label,
+            grouping_key=labels,
+            error=error,
+        )
+
+    def delete_from_gateway(
+        self,
+        *,
+        gateway: str,
+        run_label: str = "bioetl",
+        grouping_key: dict[str, str] | None = None,
+    ) -> DeleteResult:
+        """Delete current metrics snapshot through the explicit publisher port."""
+        labels = dict(grouping_key or {})
+        if self.tracer is None:
+            return self._delete_from_gateway_impl(
+                gateway=gateway,
+                run_label=run_label,
+                labels=labels,
+            )
+        with traced_operation(
+            self.tracer,
+            "metrics.delete_from_gateway",
+            self._build_span_attributes(
+                operation="delete_from_gateway",
+                **{
+                    "bioetl.run_label": run_label,
+                    "bioetl.grouping_key_count": len(labels),
+                },
+            ),
+            tracer_name=self.TRACER_NAME,
+        ) as span:
+            result = self._delete_from_gateway_impl(
+                gateway=gateway,
+                run_label=run_label,
+                labels=labels,
+            )
+            self._set_result_attributes(
+                span, success=result.success, error=result.error
+            )
+            return result
+
+    def _delete_from_gateway_impl(
+        self,
+        *,
+        gateway: str,
+        run_label: str,
+        labels: dict[str, str],
+    ) -> DeleteResult:
+        """Implement gateway cleanup without tracing concerns."""
+        if self._publisher is None:
+            error = "Metrics publisher is not configured"
+            self.logger.warning(
+                "Metrics gateway cleanup unavailable",
+                gateway=gateway,
+                run_label=run_label,
+                grouping_key=labels,
+                error=error,
+            )
+            return DeleteResult(
+                success=False,
+                gateway=gateway,
+                run_label=run_label,
+                grouping_key=labels,
+                error=error,
+            )
+
+        try:
+            success = self._publisher.delete_from_gateway(
+                gateway=gateway,
+                run_label=run_label,
+                grouping_key=labels,
+            )
+        except _METRICS_START_ERRORS as exc:
+            error = str(exc)
+            self.logger.warning(
+                "Metrics gateway cleanup failed",
+                gateway=gateway,
+                run_label=run_label,
+                grouping_key=labels,
+                error=error,
+                error_type=type(exc).__name__,
+            )
+            return DeleteResult(
+                success=False,
+                gateway=gateway,
+                run_label=run_label,
+                grouping_key=labels,
+                error=error,
+            )
+
+        if success:
+            self.logger.info(
+                "Metrics gateway cleanup completed",
+                gateway=gateway,
+                run_label=run_label,
+                grouping_key=labels,
+            )
+            return DeleteResult(
+                success=True,
+                gateway=gateway,
+                run_label=run_label,
+                grouping_key=labels,
+            )
+
+        error = "Publisher returned unsuccessful result"
+        self.logger.warning(
+            "Metrics gateway cleanup failed",
+            gateway=gateway,
+            run_label=run_label,
+            grouping_key=labels,
+            error=error,
+        )
+        return DeleteResult(
             success=False,
             gateway=gateway,
             run_label=run_label,

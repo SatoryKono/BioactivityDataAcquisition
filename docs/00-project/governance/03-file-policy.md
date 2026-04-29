@@ -176,6 +176,10 @@ Machine-readable каталог для structure hygiene хранится в
 
 Для этих зон допустим только bounded cleanup по специализированным процедурам.
 Blanket cleanup команды и broad deletion waves для них запрещены.
+GitHub cleanup proposals for these zones MUST use
+`.github/ISSUE_TEMPLATE/retention_sensitive_cleanup.yml` or provide the same
+evidence pack required by
+`docs/05-operations/runbooks/retention-sensitive-cleanup.md`.
 
 ______________________________________________________________________
 

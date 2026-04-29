@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from pathlib import Path
 from typing import Any
 
@@ -27,8 +28,12 @@ from bioetl.application.core.record_normalization_processor import (
 
 ROOT = Path(".")
 ENUM_PATH = ROOT / "configs" / "enums" / "chembl.yaml"
+REFERENCE_SOURCES_PATH = ROOT / "configs" / "vocab" / "chembl_reference_sources.yaml"
 FIXTURE_PATH = (
     ROOT / "tests" / "fixtures" / "normalization" / "chembl_observed_values.yaml"
+)
+TARGET_BRONZE_FIXTURE_PATH = (
+    ROOT / "tests" / "fixtures" / "bronze" / "chembl" / "target" / "sample_ci_2026-04-24.jsonl"
 )
 
 
@@ -227,6 +232,21 @@ def _registry_values(
     return frozenset(str(value) for value in current)
 
 
+def _nested_target_xref_source_values() -> frozenset[str]:
+    observed: set[str] = set()
+    for line in TARGET_BRONZE_FIXTURE_PATH.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        payload = json.loads(line)
+        for component in payload.get("target_components") or []:
+            if not isinstance(component, dict):
+                continue
+            for xref in component.get("target_component_xrefs") or []:
+                if isinstance(xref, dict) and xref.get("xref_src_db"):
+                    observed.add(str(xref["xref_src_db"]))
+    return frozenset(observed)
+
+
 @pytest.mark.integration
 @pytest.mark.parametrize(
     "policy",
@@ -247,6 +267,27 @@ def test_chembl_observed_values_are_ssot_subsets(
     assert values <= registry_values, (
         f"{policy.label} observed values outside registry "
         f"{'.'.join(policy.registry_path)}: {sorted(values - registry_values)}"
+    )
+
+
+@pytest.mark.integration
+def test_chembl_target_cross_reference_sources_are_registry_subsets() -> None:
+    """Tracked target Bronze xref_src_db values must stay inside the governed registry."""
+    payload = yaml.safe_load(REFERENCE_SOURCES_PATH.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    registry_values = frozenset(
+        str(value)
+        for value in payload["nested_reference_vocabularies"][
+            "target_component_xref_src_db"
+        ]["values"]
+    )
+    observed_values = _nested_target_xref_source_values()
+
+    assert observed_values
+    assert observed_values <= registry_values, (
+        "chembl.target cross-reference source values outside "
+        "configs/vocab/chembl_reference_sources.yaml: "
+        f"{sorted(observed_values - registry_values)}"
     )
 
 

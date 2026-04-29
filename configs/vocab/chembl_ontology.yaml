@@ -63,6 +63,7 @@ families:
       - chembl_tissue.bto_id
   caloha:
     canonical_prefix: TS-
+    companion_governance: identifier_only_no_companion_bundle
     accepted_inputs:
       - ts_code
       - caloha_prefixed_code
@@ -125,6 +126,7 @@ families:
       - chembl_tissue.uberon_id
   cellosaurus:
     canonical_prefix: CVCL_
+    companion_governance: identifier_only_no_companion_bundle
     accepted_inputs:
       - prefixed_id
       - colon_form

@@ -23,7 +23,10 @@ jobs:
           uv-extras: "dev"
 
       - name: Validate repository root allowlist
-        run: uv run python -m scripts.engineering.repo check-cleanliness --strict-untracked
+        run: uv run python -m scripts.engineering.repo check-cleanliness --strict-untracked --check-local-forbidden-outputs
+
+      - name: Validate cleanup governance guidance
+        run: uv run python -m scripts.engineering.repo check-cleanup-governance
 
       - name: Validate root-hygiene review registry
         run: uv run python -m scripts.engineering.repo check-root-review-registry
@@ -31,12 +34,28 @@ jobs:
       - name: Validate structure audit
         run: uv run python -m scripts.engineering.diagnostics audit-structure --path .
 
+      - name: Export cleanup classification evidence
+        run: >
+          mkdir -p reports/quality &&
+          uv run python scripts/ops/support/repo/cleanup_repository.py
+          --dry-run
+          --detail-limit 0
+          --report-json reports/quality/root-hygiene-cleanup-classification.json
+
+      - name: Upload cleanup classification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: root-hygiene-cleanup-classification
+          path: reports/quality/root-hygiene-cleanup-classification.json
+
       - name: Run root hygiene unit tests
         run: >
           uv run pytest
           tests/unit/scripts/repo/test_audit_root_cleanliness.py
+          tests/unit/scripts/repo/test_check_cleanup_governance.py
           tests/unit/scripts/repo/test_audit_structure.py
           tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py
+          tests/unit/scripts/repo/test_cleanup_repository.py
           tests/architecture/test_root_hygiene_workflow.py
           tests/architecture/test_root_hygiene_review_registry.py
           -q

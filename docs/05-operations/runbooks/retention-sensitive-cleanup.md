@@ -34,6 +34,10 @@ Do not use broad deletion commands against these paths. A cleanup is allowed
 only when it is bounded by ownership, retention reason, dry-run evidence, and
 post-cleanup verification.
 
+GitHub cleanup requests for these surfaces MUST use
+`.github/ISSUE_TEMPLATE/retention_sensitive_cleanup.yml` or provide the same
+evidence fields in a PR description.
+
 ## Safety Model
 
 Retention-sensitive cleanup is fail-closed:
@@ -208,3 +212,6 @@ Every retention-sensitive cleanup PR or issue MUST include:
 - reviewed apply/delete list;
 - verification command output;
 - rollback or restore note.
+
+The canonical GitHub issue form for this evidence pack is
+`.github/ISSUE_TEMPLATE/retention_sensitive_cleanup.yml`.

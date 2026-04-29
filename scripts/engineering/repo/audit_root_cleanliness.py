@@ -18,6 +18,7 @@ from scripts.engineering.repo import _root_governance as root_governance
 
 ALLOWLIST_FILE = root_governance.ALLOWLIST_FILE
 STRUCTURE_CATALOG_FILE = root_governance.STRUCTURE_CATALOG_FILE
+GENERATED_ARTIFACT_ROUTING_FILE = Path("configs/quality/generated_artifact_routing.yaml")
 CANONICAL_ROOT_TEXT_FILES: frozenset[str] = frozenset(
     {
         "AGENTS.md",
@@ -160,6 +161,21 @@ def _get_untracked_paths(repo_root: Path) -> list[str]:
     return [path for path in decoded.split("\0") if path]
 
 
+def _get_ignored_or_untracked_paths(repo_root: Path) -> list[str]:
+    """Return ignored/untracked paths for local generated-output preflight."""
+    completed = _run_git(
+        repo_root,
+        "ls-files",
+        "--others",
+        "--ignored",
+        "--exclude-standard",
+        "--directory",
+        "-z",
+    )
+    decoded = completed.stdout.decode("utf-8", errors="replace")
+    return [path for path in decoded.split("\0") if path]
+
+
 def _collect_untracked_root_files(paths: list[str]) -> set[str]:
     """Return only root-level untracked files."""
     return {path for path in paths if "/" not in path}
@@ -207,6 +223,69 @@ def _is_forbidden_tracked_artifact(path: str) -> bool:
     ):
         return True
     return "sonar-scanner" in path and path.endswith(".zip")
+
+
+def _load_generated_artifact_routing(repo_root: Path) -> dict[str, Any]:
+    routing_path = repo_root / GENERATED_ARTIFACT_ROUTING_FILE
+    with routing_path.open("r", encoding="utf-8") as handle:
+        payload = yaml.safe_load(handle) or {}
+    if not isinstance(payload, dict):
+        raise RuntimeError(
+            f"{GENERATED_ARTIFACT_ROUTING_FILE} must contain a YAML object"
+        )
+    return payload
+
+
+def _forbidden_output_roots(routing: dict[str, Any]) -> tuple[str, ...]:
+    roots = routing.get("forbidden_output_roots")
+    if not isinstance(roots, list) or not roots:
+        raise RuntimeError("generated artifact routing missing forbidden_output_roots")
+    normalized_roots: list[str] = []
+    for root in roots:
+        if not isinstance(root, str) or not root:
+            raise RuntimeError("forbidden_output_roots entries must be non-empty strings")
+        normalized_roots.append(root.rstrip("/"))
+    return tuple(normalized_roots)
+
+
+def _path_matches_root(path: str, root: str) -> bool:
+    normalized_path = path.rstrip("/")
+    normalized_root = root.rstrip("/")
+    return normalized_path == normalized_root or normalized_path.startswith(
+        f"{normalized_root}/"
+    )
+
+
+def _collect_forbidden_local_output_roots(
+    local_paths: list[str],
+    *,
+    forbidden_roots: tuple[str, ...],
+    blocked_cleanup_paths: frozenset[str],
+) -> list[str]:
+    """Return forbidden local output roots present outside blocked cleanup zones."""
+    violations: set[str] = set()
+    for raw_path in local_paths:
+        normalized = raw_path.rstrip("/")
+        if not normalized:
+            continue
+        if root_governance.is_within_blocked_cleanup_zone(
+            normalized,
+            blocked_cleanup_paths,
+        ):
+            continue
+        for forbidden_root in forbidden_roots:
+            if _path_matches_root(normalized, forbidden_root):
+                violations.add(forbidden_root)
+    return sorted(violations)
+
+
+def _report_forbidden_local_output_roots(violations: list[str]) -> int:
+    if not violations:
+        return 0
+    sys.stderr.write("ERROR: forbidden local generated output roots detected:\n")
+    for violation in violations:
+        sys.stderr.write(f"  - {violation}\n")
+    return 1
 
 
 def _collect_tracked_policy_violations(paths: list[str]) -> list[str]:
@@ -478,6 +557,14 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help="Fail when non-ignored untracked root files are present.",
     )
+    parser.add_argument(
+        "--check-local-forbidden-outputs",
+        action="store_true",
+        help=(
+            "Fail when ignored/local forbidden output roots from "
+            "generated_artifact_routing.yaml are present outside blocked zones."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -552,6 +639,24 @@ def main() -> int:
     )
     if args.strict_untracked and strict_untracked_violation:
         return 1
+
+    if args.check_local_forbidden_outputs:
+        try:
+            routing = _load_generated_artifact_routing(repo_root)
+            ignored_or_untracked_paths = _get_ignored_or_untracked_paths(repo_root)
+        except (OSError, RuntimeError, subprocess.CalledProcessError, yaml.YAMLError) as exc:
+            sys.stderr.write(f"ERROR: failed to query local generated outputs: {exc}\n")
+            return 2
+        forbidden_local_outputs = _collect_forbidden_local_output_roots(
+            ignored_or_untracked_paths,
+            forbidden_roots=_forbidden_output_roots(routing),
+            blocked_cleanup_paths=root_governance.blocked_cleanup_paths(structure_catalog),
+        )
+        forbidden_local_output_exit = _report_forbidden_local_output_roots(
+            forbidden_local_outputs
+        )
+        if forbidden_local_output_exit:
+            return forbidden_local_output_exit
 
     sys.stdout.write(
         "OK: root layout audit passed "

@@ -647,6 +647,18 @@ def test_build_field_matrix_rows_keeps_chembl_cell_line_policy_fields_visible() 
     assert efo_id["dq_coverage"] == "pattern:error"
 
 
+def test_build_field_matrix_rows_exposes_target_cross_reference_source_registry() -> (
+    None
+):
+    rows = build_field_matrix_rows()
+
+    cross_references = _row(rows, "chembl_target", "cross_references")
+    assert cross_references["controlled_vocabulary_source"] == (
+        "configs/vocab/chembl_reference_sources.yaml"
+    )
+    assert cross_references["strictness"] == "strict_json"
+
+
 def test_build_field_matrix_rows_explicitly_shows_no_governed_fields_for_audit_gap_pipelines() -> (
     None
 ):

@@ -14,6 +14,7 @@ from bioetl.infrastructure.control_plane import FileContractRegistryStore
 
 _REGISTRY_PATH = Path("configs/base/contract_registry.yaml")
 _CONFIGS_ROOT = Path("configs")
+_FIXTURE_GAPS_PATH = _CONFIGS_ROOT / "base" / "bronze_fixture_gaps.yaml"
 
 _EXPECTED_CHEMBL_CONTRACT_SURFACE: dict[str, dict[str, str]] = {
     "chembl.activity": {
@@ -125,6 +126,36 @@ def test_chembl_activity_contract_is_registry_published_but_not_active_when_gold
 
     assert config["pipeline"]["sink"]["gold"]["enabled"] is False
     assert registry.entries["chembl.activity"].status.value == "deprecated"
+
+
+@pytest.mark.integration
+def test_de_scoped_chembl_fixture_gap_surfaces_are_registry_published_but_not_active() -> (
+    None
+):
+    """De-scoped ChEMBL fixture-gap surfaces may stay published, but not active."""
+    gaps_payload = yaml.safe_load(_FIXTURE_GAPS_PATH.read_text(encoding="utf-8")) or {}
+    gaps = gaps_payload.get("gaps", {})
+    store = FileContractRegistryStore(_REGISTRY_PATH)
+    registry = store.load()
+
+    chembl_de_scoped = sorted(
+        f"chembl.{fixture_name.split('/', maxsplit=1)[1]}"
+        for fixture_name, metadata in gaps.items()
+        if fixture_name.startswith("chembl/")
+        and isinstance(metadata, dict)
+        and metadata.get("status") == "de_scoped"
+    )
+
+    assert chembl_de_scoped == [
+        "chembl.assay_parameters",
+        "chembl.publication_similarity",
+        "chembl.publication_term",
+        "chembl.subcellular_fraction",
+    ]
+    assert all(
+        registry.entries[contract_ref].status.value == "deprecated"
+        for contract_ref in chembl_de_scoped
+    )
 
 
 @pytest.mark.integration

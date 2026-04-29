@@ -68,6 +68,31 @@ def test_collect_tracked_policy_violations_rejects_generated_artifact_families()
     ]
 
 
+def test_collect_forbidden_local_output_roots_detects_ignored_root_outputs() -> None:
+    violations = module._collect_forbidden_local_output_roots(
+        [
+            "logs/",
+            "test-output/results.xml",
+            "reports/logs/bioetl.log",
+            "data/output/control/run_manifest/manifest.json",
+        ],
+        forbidden_roots=("logs", "test-output", "output"),
+        blocked_cleanup_paths=frozenset({"data", "reports"}),
+    )
+
+    assert violations == ["logs", "test-output"]
+
+
+def test_collect_forbidden_local_output_roots_allows_routed_reports_logs() -> None:
+    violations = module._collect_forbidden_local_output_roots(
+        ["reports/logs/bioetl.log"],
+        forbidden_roots=("logs", "test-output"),
+        blocked_cleanup_paths=frozenset({"reports"}),
+    )
+
+    assert violations == []
+
+
 def test_collect_tracked_policy_violations_allows_current_canonical_root_files() -> (
     None
 ):
