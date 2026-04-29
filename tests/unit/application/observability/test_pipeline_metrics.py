@@ -71,9 +71,32 @@ def test_record_silver_filter_rejections_uses_generic_counter() -> None:
 
 
 @pytest.mark.unit
+def test_record_record_flow_uses_generic_counter() -> None:
+    metrics = MagicMock()
+    recorder = PipelineMetricsRecorder(metrics, "chembl_activity")
+
+    recorder.record_record_flow(
+        run_type="incremental",
+        flow_stage="bronze",
+        count=4,
+    )
+
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_record_flow_records_total",
+        4,
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "flow_stage": "bronze",
+        },
+    )
+
+
+@pytest.mark.unit
 def test_noop_when_metrics_missing() -> None:
     recorder = PipelineMetricsRecorder(None, "chembl_activity")
 
     recorder.record_quarantine_records(reason="any")
     recorder.record_dq_validation_failures(stage="threshold", severity="hard_fail")
     recorder.record_silver_filter_rejections(run_type="incremental")
+    recorder.record_record_flow(run_type="incremental", flow_stage="fetched")

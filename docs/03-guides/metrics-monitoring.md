@@ -179,6 +179,7 @@ curl http://localhost:8000/metrics | grep bioetl_
 | ---------------------------------- | --------- | --------------------------------- | ----------------------- |
 | `bioetl_pipeline_duration_seconds` | Histogram | pipeline, stage, status, run_type | Длительность выполнения |
 | `bioetl_records_processed_total`   | Counter   | pipeline, stage, run_type         | Обработанные записи     |
+| `bioetl_record_flow_records_total` | Counter   | pipeline, run_type, flow_stage    | Bounded flow-проекция fetched/bronze/silver/gold/filtered_out/quarantined |
 | `bioetl_errors_total`              | Counter   | pipeline, stage, error_code       | Количество ошибок       |
 | `bioetl_batch_size_records`        | Histogram | pipeline, stage                   | Размер батчей           |
 | `bioetl_pipeline_runs_total`       | Counter   | pipeline, run_type, status        | Количество запусков     |
@@ -211,6 +212,9 @@ curl http://localhost:8000/metrics | grep bioetl_
   `bioetl_silver_filter_rejections_total{pipeline,run_type,reason_code,rule_type,field}`.
   Эта метрика не использует `message` и нормализует labels к reviewable bounded
   vocabulary; неизвестные значения схлопываются в `other`.
+- `bioetl_record_flow_records_total` даёт bounded flow-projection для
+  `fetched`, `bronze`, `silver`, `gold`, `filtered_out`, `quarantined`.
+  Это observability projection, а не замена control-plane или quarantine source of truth.
 - Record-level drilldown для Silver rejects остаётся задачей quarantine CLI:
   `bioetl quarantine stats --pipeline <name> --silver-filter-only`
   и `bioetl quarantine inspect --pipeline <name> --silver-filter-only`.

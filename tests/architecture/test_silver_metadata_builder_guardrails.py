@@ -1,4 +1,4 @@
-"""Architecture guardrails for legacy Silver metadata identity paths."""
+"""Architecture guardrails for Silver metadata sidecar identity paths."""
 
 from __future__ import annotations
 
@@ -8,9 +8,18 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 TARGET = (
+    ROOT
+    / "src/bioetl/infrastructure/storage/silver/operations/metadata_sidecar_adapter.py"
+)
+LEGACY_TARGET = (
     ROOT / "src/bioetl/infrastructure/storage/silver/operations/metadata_builders.py"
 )
-TARGET_MODULE = "bioetl.infrastructure.storage.silver.operations.metadata_builders"
+TARGET_MODULE = (
+    "bioetl.infrastructure.storage.silver.operations.metadata_sidecar_adapter"
+)
+LEGACY_TARGET_MODULE = (
+    "bioetl.infrastructure.storage.silver.operations.metadata_builders"
+)
 ALLOWED_ADAPTER_IMPORTERS = {
     "src/bioetl/infrastructure/storage/silver/operations/metadata_write_support.py",
     "src/bioetl/infrastructure/storage/silver/operations/metadata_operations.py",
@@ -19,7 +28,13 @@ ALLOWED_ADAPTER_IMPORTERS = {
 
 
 @pytest.mark.architecture
-def test_silver_metadata_builder_does_not_emit_placeholder_content_identity() -> None:
+def test_legacy_silver_metadata_builder_module_has_been_removed() -> None:
+    """The old metadata_builders module name must not return to runtime code."""
+    assert not LEGACY_TARGET.exists()
+
+
+@pytest.mark.architecture
+def test_silver_metadata_sidecar_adapter_does_not_emit_placeholder_identity() -> None:
     """Silver sidecars must not publish placeholder content or run-derived IDs."""
     source = TARGET.read_text(encoding="utf-8")
 
@@ -45,8 +60,8 @@ def test_source_tree_does_not_reintroduce_silver_placeholder_identity() -> None:
 
 
 @pytest.mark.architecture
-def test_runtime_code_imports_silver_metadata_builder_only_through_adapters() -> None:
-    """Keep the legacy builder isolated inside operations-level adapters."""
+def test_runtime_code_imports_silver_sidecar_adapter_only_through_adapters() -> None:
+    """Keep sidecar construction isolated inside operations-level adapters."""
     importers: set[str] = set()
     for path in sorted((ROOT / "src").rglob("*.py")):
         if path == TARGET:
@@ -56,3 +71,15 @@ def test_runtime_code_imports_silver_metadata_builder_only_through_adapters() ->
             importers.add(path.relative_to(ROOT).as_posix())
 
     assert importers <= ALLOWED_ADAPTER_IMPORTERS
+
+
+@pytest.mark.architecture
+def test_runtime_code_does_not_import_legacy_silver_metadata_builder() -> None:
+    """Runtime code must not import the removed metadata_builders module name."""
+    importers: list[str] = []
+    for path in sorted((ROOT / "src").rglob("*.py")):
+        source = path.read_text(encoding="utf-8")
+        if LEGACY_TARGET_MODULE in source:
+            importers.append(path.relative_to(ROOT).as_posix())
+
+    assert not importers

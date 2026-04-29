@@ -174,13 +174,22 @@ class TestTrackProcessedRecords:
         """Test that increment_counter is called with correct metric name."""
         recorder.track_processed_records(stage="bronze", count=200)
 
-        mock_metrics.increment_counter.assert_called_once_with(
+        mock_metrics.increment_counter.assert_any_call(
             "bioetl_records_processed_total",
             200,
             {
                 "pipeline": "test_pipeline",
                 "stage": "bronze",
                 "run_type": "incremental",
+            },
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_record_flow_records_total",
+            200,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "flow_stage": "bronze",
             },
         )
 
@@ -208,8 +217,34 @@ class TestTrackProcessedRecords:
         """Test tracking quarantined stage."""
         recorder.track_processed_records(stage="quarantined", count=3)
 
-        call_labels = mock_metrics.increment_counter.call_args[0][2]
+        legacy_calls = [
+            call
+            for call in mock_metrics.increment_counter.call_args_list
+            if call.args and call.args[0] == "bioetl_records_processed_total"
+        ]
+        assert legacy_calls
+        call_labels = legacy_calls[0].args[2]
         assert call_labels["stage"] == "quarantined"
+        assert not any(
+            call.args and call.args[0] == "bioetl_record_flow_records_total"
+            for call in mock_metrics.increment_counter.call_args_list
+        )
+
+    def test_track_records_fetched_uses_record_flow_counter(
+        self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
+    ) -> None:
+        """Fetched counts should be emitted through the canonical flow family."""
+        recorder.track_records_fetched(12)
+
+        mock_metrics.increment_counter.assert_called_once_with(
+            "bioetl_record_flow_records_total",
+            12,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "flow_stage": "fetched",
+            },
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -425,6 +460,15 @@ class TestTrackQuarantinedRecords:
             {
                 "pipeline": "test_pipeline",
                 "reason": ErrorType.INVALID_DATA.value,
+            },
+        )
+        mock_metrics.increment_counter.assert_any_call(
+            "bioetl_record_flow_records_total",
+            3,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "flow_stage": "quarantined",
             },
         )
 

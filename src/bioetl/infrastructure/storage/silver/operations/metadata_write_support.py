@@ -16,10 +16,10 @@ from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.metadata.builder_base import (
     _resolve_metadata_timestamp,
 )
-from bioetl.infrastructure.storage.silver.operations.metadata_builders import (
-    _build_silver_metadata,
-    _placeholder_table_path,
-    _SilverMetadataBuildRequest,
+from bioetl.infrastructure.storage.silver.operations.metadata_sidecar_adapter import (
+    _build_silver_sidecar_metadata,
+    _fallback_table_path,
+    _SilverMetadataSidecarRequest,
 )
 
 
@@ -191,9 +191,9 @@ async def _write_silver_metadata(
         explicit=request.ingestion_ts,
         records=request.records,
     )
-    table_path_placeholder = _placeholder_table_path(request.table_name)
-    metadata = _build_silver_metadata(
-        _SilverMetadataBuildRequest(
+    table_path_placeholder = _fallback_table_path(request.table_name)
+    metadata = _build_silver_sidecar_metadata(
+        _SilverMetadataSidecarRequest(
             table_name=request.table_name,
             table_path=table_path_placeholder,
             records=request.records,

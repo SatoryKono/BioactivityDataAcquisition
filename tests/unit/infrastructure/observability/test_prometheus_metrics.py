@@ -8,6 +8,7 @@ import pytest
 
 from bioetl.infrastructure.observability.prometheus_metric_label_policies import (
     normalize_adapter_operation_label,
+    normalize_flow_stage,
     normalize_postrun_phase,
     normalize_runtime_phase,
     normalize_runtime_stage,
@@ -265,6 +266,33 @@ class TestPrometheusMetrics:
                 1
             )
 
+    def test_record_flow_metrics_normalize_unknown_flow_stage_values(
+        self, prometheus_metrics
+    ):
+        """Record-flow metrics must stay within the canonical bounded vocabulary."""
+        with patch.dict(
+            COUNTERS,
+            {"bioetl_record_flow_records_total": MagicMock()},
+        ):
+            prometheus_metrics.increment_counter(
+                name="bioetl_record_flow_records_total",
+                value=8,
+                labels={
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                    "flow_stage": "experimental_projection",
+                },
+            )
+
+            COUNTERS["bioetl_record_flow_records_total"].labels.assert_called_once_with(
+                pipeline="chembl_activity",
+                run_type="incremental",
+                flow_stage="other",
+            )
+            COUNTERS["bioetl_record_flow_records_total"].labels().inc.assert_called_once_with(
+                8
+            )
+
     @pytest.mark.parametrize(
         ("raw_value", "expected"),
         [
@@ -301,6 +329,17 @@ class TestPrometheusMetrics:
     def test_normalize_runtime_stage(self, raw_value: str, expected: str) -> None:
         """Runtime stage labels should collapse unknown values to other."""
         assert normalize_runtime_stage(raw_value) == expected
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ("bronze", "bronze"),
+            ("custom_projection", "other"),
+        ],
+    )
+    def test_normalize_flow_stage(self, raw_value: str, expected: str) -> None:
+        """Record-flow stage labels should stay within the canonical set."""
+        assert normalize_flow_stage(raw_value) == expected
 
     @pytest.mark.parametrize(
         ("raw_value", "expected"),

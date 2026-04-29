@@ -33,13 +33,13 @@ from bioetl.infrastructure.storage.silver.metadata_request_models import (
     _SilverWriteFinalizationPreparationRequest,
     _SilverWriteResultFinalizationRequest,
 )
-from bioetl.infrastructure.storage.silver.operations.metadata_builders import (
-    _normalize_records_for_dq_metrics,
-)
 from bioetl.infrastructure.storage.silver.operations.metadata_finalization_support import (
     _finalize_silver_write_result,
     _prepare_silver_write_finalization_context,
     _PreparedSilverWriteFinalizationContext,
+)
+from bioetl.infrastructure.storage.silver.operations.metadata_sidecar_adapter import (
+    _normalize_records_for_dq_metrics,
 )
 from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
     _coerce_silver_metadata_audit_request,
