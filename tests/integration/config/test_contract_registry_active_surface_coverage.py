@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+import yaml
 
 from bioetl.infrastructure.config.dq_contract_config_loader import (
     DQContractConfigLoader,
@@ -33,10 +34,28 @@ def _active_standard_contract_refs() -> dict[str, str]:
         provider = config_path.parent.name
         if provider not in _STANDARD_CONTRACT_PROVIDERS:
             continue
+        if not _gold_runtime_enabled(config_path):
+            continue
         entity = config_path.stem
         pipeline_name = f"{provider}_{entity}"
         refs[pipeline_name] = f"{provider}.{entity}"
     return refs
+
+
+def _gold_runtime_enabled(config_path: Path) -> bool:
+    """Return True when an entity config publishes a live Gold runtime surface."""
+    config = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+    pipeline = config.get("pipeline")
+    if not isinstance(pipeline, dict):
+        return True
+    sink = pipeline.get("sink")
+    if not isinstance(sink, dict):
+        return True
+    gold = sink.get("gold")
+    if not isinstance(gold, dict):
+        return True
+    enabled = gold.get("enabled")
+    return True if enabled is None else bool(enabled)
 
 
 @pytest.mark.integration
@@ -76,3 +95,15 @@ def test_active_standard_provider_surface_has_dq_config_and_published_artifact(
     assert dq_config.rule_bundle_version == entry.identity.rule_bundle_version
     assert expected_artifact in entry.published_artifacts
     assert (_GOLD_CONTRACTS_ROOT / f"{pipeline_name}_v1.0.json").exists()
+
+
+@pytest.mark.integration
+def test_gold_disabled_standard_surface_can_stay_registry_published_but_not_active() -> (
+    None
+):
+    """Gold-disabled standard surfaces may keep published artifacts without active status."""
+    activity_config = _ENTITY_CONFIGS_ROOT / "chembl" / "activity.yaml"
+    registry = FileContractRegistryStore(_REGISTRY_PATH).load()
+
+    assert _gold_runtime_enabled(activity_config) is False
+    assert registry.entries["chembl.activity"].status.value == "deprecated"

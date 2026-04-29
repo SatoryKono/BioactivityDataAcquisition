@@ -129,7 +129,7 @@ class TestPrometheusMetrics:
 
             COUNTERS["bioetl_filter_ids_loaded_total"].labels.assert_called_once_with(
                 pipeline="chembl_activity",
-                source_file="activity_ids.csv",
+                source_file="csv_file",
             )
             COUNTERS[
                 "bioetl_filter_ids_loaded_total"
@@ -161,6 +161,44 @@ class TestPrometheusMetrics:
             HISTOGRAMS[
                 "bioetl_adapter_request_duration_seconds"
             ].labels().observe.assert_called_once_with(0.25)
+
+    def test_forbidden_high_cardinality_labels_fail_before_dispatch(
+        self, prometheus_metrics
+    ):
+        """Prometheus adapter must reject forensic labels before TSDB dispatch."""
+        with patch.dict(COUNTERS, {"bioetl_records_processed_total": MagicMock()}):
+            with pytest.raises(ValueError, match="run_id"):
+                prometheus_metrics.increment_counter(
+                    name="bioetl_records_processed_total",
+                    value=1,
+                    labels={
+                        "pipeline": "chembl_activity",
+                        "stage": "bronze",
+                        "run_type": "incremental",
+                        "run_id": "run-123",
+                    },
+                )
+
+            COUNTERS["bioetl_records_processed_total"].labels.assert_not_called()
+
+    def test_raw_endpoint_label_is_restricted_to_adapter_endpoint_metrics(
+        self, prometheus_metrics
+    ):
+        """Endpoint labels are only valid on centrally-normalized adapter metrics."""
+        with patch.dict(COUNTERS, {"bioetl_records_processed_total": MagicMock()}):
+            with pytest.raises(ValueError, match="endpoint"):
+                prometheus_metrics.increment_counter(
+                    name="bioetl_records_processed_total",
+                    value=1,
+                    labels={
+                        "pipeline": "chembl_activity",
+                        "stage": "bronze",
+                        "run_type": "incremental",
+                        "endpoint": "/works/123",
+                    },
+                )
+
+            COUNTERS["bioetl_records_processed_total"].labels.assert_not_called()
 
     def test_adapter_operation_metrics_normalize_unreviewed_operations(
         self, prometheus_metrics
@@ -528,14 +566,17 @@ class TestPrometheusMetrics:
     @pytest.mark.parametrize(
         ("raw_value", "expected"),
         [
-            ("filters/activity_ids.csv", "activity_ids.csv"),
-            (r"filters\Activity IDs.csv", "activity_ids.csv"),
+            ("filters/activity_ids.csv", "csv_file"),
+            (r"filters\Activity IDs.csv", "csv_file"),
+            ("configs/contracts/chembl/activity.yaml", "yaml_file"),
+            ("filters/activity_ids", "extensionless_file"),
+            ("filters/activity_ids.unknown", "other_file"),
             ("", "unknown"),
             ("////", "unknown"),
         ],
     )
     def test_normalize_source_file_label(self, raw_value: str, expected: str):
-        """Source file labels should collapse to bounded basename-only values."""
+        """Source file labels should collapse to bounded source classes."""
         assert normalize_source_file_label(raw_value) == expected
 
     @pytest.mark.parametrize(

@@ -2,7 +2,7 @@
 id: task-refresh
 title: Refresh before retrieval
 task_id: task-refresh
-created_at: '2026-04-29T11:51:07Z'
+created_at: '2026-04-29T14:34:06Z'
 ttl_days: 14
 confidence: episodic
 source_refs:
@@ -22,7 +22,7 @@ query: Refresh before retrieval
 
 - Catalog hits: 0
 - RAG hits: 1
-- Timeline hits: 1
+- Timeline hits: 0
 
 ## Working notes
 
